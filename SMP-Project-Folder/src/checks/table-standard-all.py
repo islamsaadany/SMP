@@ -15,7 +15,7 @@ import os as _os
 URL = "file://" + _os.path.abspath(_os.environ.get("SMP_BUILT") or
   _os.path.join(_os.path.dirname(__file__), "..",
                 "strategy-management-platform.html"))
-PAGES = [("people","People register"), ("mainbu","Official BU list"),
+PAGES = [("people","Client register"), ("mainbu","Official BU list"),
          ("units","Business units"), ("companies","Companies"),
          ("fns","Functions"), ("caps","Capabilities"), ("sets","Figure sets")]
 # Their row order IS the setting somebody arranged, so a sort would be

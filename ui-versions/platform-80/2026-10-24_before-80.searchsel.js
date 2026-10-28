@@ -1,0 +1,609 @@
+/* ══ A DROPDOWN YOU CAN TYPE INTO ═════════════════════════════════════
+   Islam, 2026-08-22: "for the figures setting make all the drop downs beyond
+   5 items searchable, this might apply to any selection list in the platform."
+
+   It does, so this is not a control the Figure sets page owns. It is an
+   ENHANCEMENT applied to every <select> in the platform once its list passes
+   five options, and it is written the way it is for one reason above all:
+
+   THE NATIVE <select> STAYS. It is not replaced, not moved, and not
+   reparented — it is hidden in place, and a button is inserted in front of it.
+   Everything that already exists keeps working untouched: `data-setowner`,
+   `data-prole-where`, `[data-coflag]`, every `addEventListener("change")` that
+   wire() attaches, and every `sel.value` read. Choosing a name from the list
+   sets the select and fires a real `change` on it, so the handler that saves
+   it never learns there was a search box. A component that replaced the
+   selects would have needed all of that rewired, and rewiring a control that
+   feeds the authorisation matrix to add a search box is not a trade worth
+   making.
+
+   FIVE IS THE THRESHOLD, NOT A GUESS. Direction (2), compile rule (3), who
+   picks a set's figures (2) are all answered by looking; a list of twenty-nine
+   people is not, and that is the one the SMO uses most. Below six options
+   nothing changes at all, which is why this can be applied to everything
+   without an inventory of what deserves it.
+
+   THREE RULES IT HAD TO OBEY, all of them already paid for elsewhere:
+
+   1. TYPING NEVER REPAINTS (§35). The filter hides rows in place. A repaint
+      would replace the input being typed into, which is the same family of
+      fault as §30.1.
+   2. THE DOM IS CLEANED UP BEFORE THE CHANGE FIRES (§30.1). Selecting an
+      option repaints the whole panel, so the popup is closed and unhooked
+      FIRST and nothing touches the DOM afterwards.
+   3. WHOEVER HIDES A FIELD HIDES ITS FURNITURE (§34). `sync.js` hides the
+      viewer switcher for anyone who is not the SMO by setting `hidden` on the
+      select itself; the button follows it, or a non-SMO would get a live
+      control in front of a hidden field.
+
+   The popup is position:fixed and closes on scroll. Not a preference: `.cfg`
+   is `overflow-x:auto`, which computes overflow-y to auto as well, so an
+   absolutely positioned popup inside a settings table is CLIPPED by its own
+   table. Fixed positioning is the only kind that escapes an overflow ancestor
+   without knowing there was one. */
+var SEARCHSEL = (function(){
+  var MIN = 6;             /* "beyond 5 items" */
+  var open = null;
+
+  /* ── WHAT THE CLOSED CONTROL SAYS (§304) ──────────────────────────
+     Islam, of nineteen subjects run together in the box: *"why is the drop
+     down contain all the names in the box itself?"*
+
+     Because that is this rule, AND IT IS RIGHT WHERE IT WAS WRITTEN. The only
+     multiple select in the product until now is a tactic's COLLABORATORS,
+     where the answer is two or three names and printing them IS the answer.
+     At nineteen it says nothing and truncates mid-word.
+
+     So the label is a decision PER CONTROL, never a change to the control:
+     `data-sslabel="count"` asks for "19 of 19 subjects" and everything else
+     goes on listing its names. `data-ssnoun` is the word, singular and plural
+     separated by a pipe, because "1 of 19 subjects" is not English. */
+  /* §536: one number per opening, so the list and its rows can be pointed at
+     by id. Never reused while a popup stands — close() runs before each open. */
+  var SSN = 0;
+  function countLabel(sel){
+    var noun = String(sel.dataset.ssnoun || "chosen|chosen").split("|");
+    var n = chosenTexts(sel).length, m = sel.options.length;
+    return n + " of " + m + " " + (m === 1 ? noun[0] : (noun[1] || noun[0]));
+  }
+  function textOf(sel){
+    if (sel.multiple && sel.dataset.sslabel === "count") return countLabel(sel);
+    if (sel.multiple) return chosenTexts(sel).join(", ");
+    var o = sel.options[sel.selectedIndex];
+    return o ? o.text : "";
+  }
+  /* In the select's OWN order, never the order they were ticked: the cell has
+     to read the same after a repaint as it did before one, and the ticking
+     order is not something the data keeps. */
+  function chosenTexts(sel){
+    var out = [];
+    Array.prototype.forEach.call(sel.options, function(op){
+      if (op.selected) out.push(op.text);
+    });
+    return out;
+  }
+
+  function close(){
+    if (!open) return;
+    var o = open;
+    open = null;
+    document.removeEventListener("mousedown", o.onDoc, true);
+    document.removeEventListener("keydown", o.onKey, true);
+    window.removeEventListener("scroll", o.onGone, true);
+    window.removeEventListener("resize", o.onGone, true);
+    if (o.pop.parentNode) o.pop.parentNode.removeChild(o.pop);
+    o.btn.setAttribute("aria-expanded", "false");
+  }
+
+  /* The popup is measured against the button and flipped above it when there
+     is no room below — a list that opens off the bottom of the window is a
+     list you cannot reach the end of. */
+  function place(btn, pop){
+    var r = btn.getBoundingClientRect();
+    var h = pop.offsetHeight, w = pop.offsetWidth;
+    var below = window.innerHeight - r.bottom - 8;
+    var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
+    var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+    pop.style.top = Math.max(8, top) + "px";
+    pop.style.left = left + "px";
+  }
+
+  function choose(sel, btn, value){
+    /* Cleanup FIRST. `change` repaints the panel, which destroys everything
+       below — including the popup this click is still inside (§30.1). */
+    close();
+    if (sel.value === value) return;
+    sel.value = value;
+    setLabel(sel, btn);
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /* ── TICKING IS NOT ANSWERING (§130.1) ──────────────────────────────
+     The single-select path above closes the popup BEFORE it fires `change`,
+     because picking one option answers the question and because `change`
+     repaints the panel the popup is standing in (§30.1). Neither is true of a
+     list you are ticking: the question is not answered until you stop, so the
+     popup STAYS OPEN and every tick commits on its own.
+
+     WHAT MAKES THAT SAFE IS THE HANDLER, and it is worth writing down because
+     the next person to add one will not know: every field this control is used
+     on goes through the shell's one `data-fld` listener, which writes the value
+     and saves and DOES NOT REPAINT (§71.2). Wire a multiple select to a handler
+     that calls paint() and the popup will vanish under the pointer on the first
+     tick — the same fault §30.1 records, arriving by the other road.
+
+     COMMITTED PER TICK RATHER THAN ON CLOSE, deliberately. Holding the change
+     until the popup shuts would mean firing it from close(), and close() is the
+     first thing wire() does at the end of every paint() — by which time FIELDS
+     has been rebuilt and this element's `data-fld` index points at somebody
+     else's setter (§96's registry, read one paint too late). */
+  function toggle(sel, btn, op, row){
+    op.selected = !op.selected;
+    row.classList.toggle("on", op.selected);
+    row.setAttribute("aria-selected", op.selected ? "true" : "false");
+    setLabel(sel, btn);
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /* ── THE LABEL MAY BE THE CALLER'S MARKUP (§372) ───────────────────
+     `data-sslabel="count"` above is a WORD chosen per control; this is the
+     same decision one step further — the register's Roles cell is a row of
+     chips, and the closed control has to be that cell rather than a comma
+     list of role names. The markup is supplied rather than composed here,
+     because what a chip looks like belongs to the register and this file must
+     not learn it (§53.5).
+
+     WRITTEN ON EVERY setLabel, NEVER ONCE AT WIRE TIME: a tick calls this to
+     refresh the label, and a caller whose label is a rendering of the data
+     hands over a fresh one by re-rendering — so the attribute is read, not
+     cached. `data-sstitle` carries the hover, because the markup's own text
+     would arrive with the chips' words run together. */
+  function setLabel(sel, btn){
+    var lb = btn.querySelector(".sslabel");
+    if (sel.dataset.sshtml != null) {
+      lb.innerHTML = sel.dataset.sshtml;
+      var said = sel.dataset.sstitle || "";
+      btn.title = said;
+      /* ── AND THE VALUE IS SAID ALOUD, NOT ONLY DRAWN (§372) ───────
+         `wire()` names the button from the select's own `aria-label`, and an
+         aria-label REPLACES the element's content as its accessible name — so
+         with the chips handed over as html a screen reader heard "Roles for
+         Ashraf Laithy" and never which roles, where every other control here
+         announces its value because the value IS its text. The name carries
+         both, which is what the hover already says. */
+      var base = (sel.getAttribute("aria-label") || "").split(" \u2014 ")[0];
+      if (base) btn.setAttribute("aria-label", base + (said ? " \u2014 " + said : ""));
+      return;
+    }
+    /* An em-dash for nothing chosen, which is the word the plan's own cells
+       already use for nobody (§15.1: absent, never zero). */
+    lb.textContent = textOf(sel) || "\u2014";
+    btn.title = textOf(sel) || "";
+  }
+
+  function openFor(sel, btn){
+    close();
+    var many = !!sel.multiple;
+    var pop = document.createElement("div");
+    pop.className = "sspop" + (many ? " ssmany" : "");
+    pop.setAttribute("role", "listbox");
+    /* §536: THE LIST NEEDS AN ID TO BE POINTED AT. One per opening, because
+       two of these never stand at once (close() runs first) but a stale id
+       left in the document would be pointed at by the next one. */
+    var popId = "sspop-" + (++SSN);
+    pop.id = popId;
+    if (many) pop.setAttribute("aria-multiselectable", "true");
+
+    var q = document.createElement("input");
+    q.type = "text";
+    q.className = "fld sssearch";
+    q.placeholder = "Search…";
+    q.autocomplete = "off";
+    q.setAttribute("aria-label", "Search this list");
+    /* §536: THE BOX BEING TYPED IN OWNS THE LIST. The rows are announced as
+       `option`s inside a `listbox`, which is a promise about arrow keys —
+       and the only key bound was Escape, with Enter taking the first row
+       still showing. Operable, because the rows are real buttons and tab
+       reaches them, but not what the markup told a screen reader to expect.
+
+       `aria-activedescendant` RATHER THAN MOVING FOCUS, because the whole
+       point of this control is typing three letters and then picking: focus
+       that walked into the list would make the next three letters go
+       nowhere. The box keeps focus and POINTS at the row. */
+    q.setAttribute("role", "combobox");
+    q.setAttribute("aria-expanded", "true");
+    q.setAttribute("aria-autocomplete", "list");
+    q.setAttribute("aria-controls", popId);
+
+    var list = document.createElement("div");
+    list.className = "sslist";
+    var none = document.createElement("div");
+    none.className = "ssempty";
+    none.textContent = "Nothing matches.";
+    none.hidden = true;
+
+    /* An <optgroup> is a heading over the options inside it, so the rows are
+       walked through the groups rather than off `sel.options` — otherwise the
+       People and Departments a plan picks from arrive as one undifferentiated
+       list of fifty. The heading is not a row: it filters with the group and
+       disappears when nothing under it matches, or a search for one name
+       leaves two empty headings standing over it. */
+    var rows = [], groups = [];
+    var addRow = function(op, into){
+      var on = many ? op.selected : (op.value === sel.value);
+      var r = document.createElement("button");
+      r.type = "button";
+      r.className = "ssrow" + (on ? " on" : "");
+      r.textContent = op.text || "—";
+      /* WHERE THIS ONE IS FROM, QUIETLY (§130.9). A hint on the option rides
+         into the row and nowhere else — the button's label and the value the
+         field stores are the option's TEXT, which is the name on its own. It
+         joins what is SEARCHED, so typing a unit's name finds the people in
+         it; a hint you can see and cannot search for is half a control. */
+      var hint = op.dataset && op.dataset.hint;
+      if (hint) {
+        var h = document.createElement("span");
+        h.className = "sshint";
+        h.textContent = hint;
+        r.appendChild(h);
+      }
+      r.setAttribute("role", "option");
+      r.id = popId + "-r" + rows.length;
+      r.setAttribute("aria-selected", on ? "true" : "false");
+      r._q = ((op.text || "") + " " + (hint || "")).toLowerCase();
+      r._op = op;
+      r.addEventListener("click", function(){
+        if (many) toggle(sel, btn, op, r); else choose(sel, btn, op.value);
+      });
+      rows.push(r);
+      into.appendChild(r);
+    };
+    Array.prototype.forEach.call(sel.children, function(node){
+      if (node.tagName === "OPTGROUP") {
+        var box = document.createElement("div");
+        box.className = "ssgrp";
+        var h = document.createElement("div");
+        h.className = "ssgrph";
+        h.textContent = node.label || "";
+        box.appendChild(h);
+        Array.prototype.forEach.call(node.children, function(op){ addRow(op, box); });
+        groups.push(box);
+        list.appendChild(box);
+      } else if (node.tagName === "OPTION") {
+        addRow(node, list);
+      }
+    });
+
+    /* ── §536: WHICH ROW THE ARROWS ARE ON ───────────────────────────────
+       Held as the ROW rather than an index, because the index would be into
+       a list whose visible members change under it on every keystroke. */
+    var active = null;
+    var shown = function(){ return rows.filter(function(r){ return !r.hidden; }); };
+    var mark = function(r){
+      if (active && active !== r) active.classList.remove("ssrow-at");
+      active = r || null;
+      if (!active) { q.removeAttribute("aria-activedescendant"); return; }
+      active.classList.add("ssrow-at");
+      q.setAttribute("aria-activedescendant", active.id);
+      /* The row has to be ON SCREEN to be the answer to "where am I" — the
+         lists this opens over run to a whole tenant. `block:"nearest"` so a
+         row already in view does not jolt the list. */
+      if (active.scrollIntoView) active.scrollIntoView({ block: "nearest" });
+    };
+    var step = function(by){
+      var vis = shown();
+      if (!vis.length) return;
+      var i = active ? vis.indexOf(active) : -1;
+      /* From nowhere, Down lands on the first and Up on the last. */
+      i = i < 0 ? (by > 0 ? 0 : vis.length - 1) : i + by;
+      if (i < 0) i = vis.length - 1;
+      if (i >= vis.length) i = 0;
+      mark(vis[i]);
+    };
+
+    /* Hides rows in place. Never re-renders the list, never touches the input
+       being typed into (§35). */
+    q.addEventListener("input", function(){
+      var s = q.value.trim().toLowerCase(), n = 0;
+      rows.forEach(function(r){
+        var hit = !s || r._q.indexOf(s) > -1;
+        r.hidden = !hit;
+        if (hit) n++;
+      });
+      groups.forEach(function(g){
+        g.hidden = !Array.prototype.some.call(g.querySelectorAll(".ssrow"),
+          function(r){ return !r.hidden; });
+      });
+      none.hidden = n > 0;
+      /* §536: a mark on a row the search has just hidden points at nothing.
+         Dropped rather than moved, so Enter falls back to "the first row
+         still showing" exactly as it did before any of this. */
+      if (active && active.hidden) mark(null);
+    });
+
+    /* ── SELECT ALL / NONE, OPT-IN (§304) ────────────────────────────
+       Asked for by the download picker, which holds a whole tenant. It is
+       `data-ssall` on the select rather than a rule for every ticking list:
+       a tactic's collaborators are two names off a register of thirty-three
+       and "select all" there is a control with no meaning (§53.5, rule 1b).
+
+       Each press goes through toggle() row by row, so the label, the stored
+       value and the row's own lit state are all written by the one function
+       that already does it — a second writer is how the three drift. */
+    if (many && sel.dataset.ssall) {
+      var allrow = document.createElement("div");
+      allrow.className = "ssall";
+      var mk = function(word, want){
+        var lb = document.createElement("button");
+        lb.type = "button"; lb.className = "linkbu"; lb.textContent = word;
+        lb.addEventListener("click", function(){
+          rows.forEach(function(r){
+            if (r.hidden) return;              /* a search narrows what "all" means */
+            if (!!r._op.selected !== want) toggle(sel, btn, r._op, r);
+          });
+        });
+        return lb;
+      };
+      allrow.appendChild(mk("Select all", true));
+      var dot = document.createElement("span");
+      dot.className = "sssep"; dot.textContent = "\u00b7";
+      allrow.appendChild(dot);
+      allrow.appendChild(mk("Select none", false));
+      pop.appendChild(q);
+      pop.appendChild(allrow);
+    } else {
+      pop.appendChild(q);
+    }
+    /* ── WHAT THE LIST CANNOT SET, NAMED ABOVE IT (§372) ─────────────
+       Supplied by the caller and drawn nowhere else. The register's Roles
+       list can grant what is held at this person's own place and nothing
+       more, so the roles held elsewhere and the ones that come from the plan
+       are stated at its head — they used to be the "…" the cell drew, which
+       is a CONTROL (a hover cannot be reached on a touch screen and cannot be
+       read aloud), and with one press opening the list the list is that
+       place. Below the search, because it is a statement and not a row to
+       find by typing. */
+    if (sel.dataset.sshead) {
+      var head = document.createElement("div");
+      head.className = "sshead";
+      head.innerHTML = sel.dataset.sshead;
+      pop.appendChild(head);
+    }
+    pop.appendChild(list);
+    pop.appendChild(none);
+    document.body.appendChild(pop);
+    pop.style.minWidth = Math.max(200, btn.offsetWidth) + "px";
+    place(btn, pop);
+    btn.setAttribute("aria-expanded", "true");
+
+    var onDoc = function(e){ if (!pop.contains(e.target) && e.target !== btn) close(); };
+    var onKey = function(e){
+      if (e.key === "Escape") { close(); btn.focus(); return; }
+      /* §536: THE KEYS THE MARKUP HAS ALWAYS PROMISED. Only while the search
+         box has focus — a row reached by Tab is a real button and the browser
+         already works it, and stealing its arrows there would be a second
+         answer to one question. */
+      if (document.activeElement === q &&
+          (e.key === "ArrowDown" || e.key === "ArrowUp" ||
+           e.key === "Home" || e.key === "End")) {
+        e.preventDefault();
+        if (e.key === "ArrowDown") step(1);
+        else if (e.key === "ArrowUp") step(-1);
+        else {
+          var vis = shown();
+          if (vis.length) mark(e.key === "Home" ? vis[0] : vis[vis.length - 1]);
+        }
+        return;
+      }
+      if (e.key !== "Enter") return;
+      /* Enter takes the row the arrows are on, and the first row still
+         showing when they are on none — which is what it did before the
+         arrows existed, and what typing three letters and pressing Enter
+         still has to do. */
+      var first = (active && !active.hidden) ? active
+                : rows.filter(function(r){ return !r.hidden; })[0];
+      if (first && document.activeElement === q) {
+        e.preventDefault();
+        first.click();
+        /* On a list you are TICKING, Enter has to leave the search box alone:
+           the whole point of typing three letters is to tick and type three
+           more. The single-select path has already closed by now. */
+        if (many) { q.select(); }
+      }
+    };
+    /* IT FOLLOWS THE BUTTON NOW, RATHER THAN CLOSING (§51.6, Islam: "the
+       where it goes list needs to be scrollable as on scrolling it closes").
+
+       It used to close on any scroll, and the note here argued that closing
+       was honest because the popup is `position:fixed` and would otherwise
+       hang beside nothing. That reasoning held while every list was short
+       enough to sit inside the viewport. A LIST LONG ENOUGH TO SCROLL BREAKS
+       IT: reaching for the twelfth entry scrolls the popup's own list, that
+       scroll bubbles to the window with capture on, and the control shuts
+       under the pointer. The list you cannot scroll is the list you cannot
+       use.
+
+       So a scroll INSIDE the popup is left alone, and a scroll anywhere else
+       REPOSITIONS rather than closes — the cost §28.3 warned about is one
+       getBoundingClientRect per scroll frame on an element that is already
+       fixed, which measures nothing and changes nobody's height (§28.3's real
+       rule was never size against a measured value; this only moves). It
+       still closes when the button it belongs to has left the screen, because
+       a popup pointing at nothing is worse than a closed one. */
+    /* AND A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§130.1).
+       Setting `selected` on a `<select multiple>` makes the browser scroll the
+       native list box to the option — and it fires a real `scroll` event doing
+       it, from an element that is 1px square, clipped and invisible (see
+       `.ss-native`). With capture on, that reached here as though somebody had
+       scrolled the window: every tick re-placed the popup, and a tick on a
+       control near the fold CLOSED it, because the button honestly is off
+       screen down there. Found by ticking, not by reading — the single-select
+       path never sets `selected` on anything, so nothing has ever fired it. */
+    var onGone = function(e){
+      if (e && e.target && e.target.nodeType === 1 &&
+          (pop.contains(e.target) ||
+           (e.target.classList && e.target.classList.contains("ss-native")))) return;
+      var r = btn.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) { close(); return; }
+      place(btn, pop);
+    };
+
+    document.addEventListener("mousedown", onDoc, true);
+    document.addEventListener("keydown", onKey, true);
+    window.addEventListener("scroll", onGone, true);
+    window.addEventListener("resize", onGone, true);
+
+    open = { native: sel, btn: btn, pop: pop, onDoc: onDoc, onKey: onKey, onGone: onGone };
+    q.focus();
+  }
+
+  /* ── THE BUTTON IS FOUND BY REFERENCE, NOT BY POSITION (§69.18) ─────
+     This was `sel.previousSibling`, and rule 3 above — "the button follows
+     [the select's hidden], or a non-SMO would get a live control in front of a
+     hidden field" — is EXACTLY what stopped happening. sync.js hides the
+     switcher for a non-SMO and then inserts their name with
+     `box.insertBefore(nm, sel)`: the name lands BETWEEN the button and the
+     select, `previousSibling` stops being the button, the sync is skipped, and
+     the button stays live and visible showing whoever it was built with.
+
+     Ashraf saw "Signed in as [Mohamed Essam ▾]" beside his own name — a live
+     viewer switcher, on a screen where it must never appear, offering the SMO
+     as the person signed in.
+
+     The comment beside the insertion even anticipated the shape of it:
+     "sync.js reaches for the viewer select by id and inserts a name beside it
+     — reparenting the select would break that." It guarded against
+     REPARENTING and not against INSERTING BETWEEN. A WeakMap cannot be broken
+     by either: the pairing is held by identity rather than by adjacency, and
+     nothing in the DOM has to stay next to anything. */
+  var BTN_OF = (typeof WeakMap === "function") ? new WeakMap() : null;
+  function buttonFor(sel){
+    var b = BTN_OF && BTN_OF.get(sel);
+    if (b && b.isConnected) return b;
+    /* A page old enough to have been wired before this existed, or a browser
+       with no WeakMap: fall back to the position, which is right whenever
+       nothing has been inserted between them. */
+    var prev = sel.previousSibling;
+    return (prev && prev.classList && prev.classList.contains("ssbtn")) ? prev : null;
+  }
+
+  function enhance(sel){
+    if (sel.disabled) return;
+    if (sel.dataset.nosearch === "1") return;
+    /* A MULTIPLE SELECT IS ALWAYS ENHANCED, whatever it holds (§130.1). The
+       five-option floor is about whether a short list is worth a search box;
+       the native multiple select is a scrolling list box that ctrl-clicks, and
+       it is not a control this product uses anywhere. Below the floor there is
+       still nothing to search — the box is there and matches nothing away. */
+    /* §547: the five-option floor is the right rule for a FORM FIELD and the
+       wrong one for the go-to list — a tenant with four places needs that
+       list more than one with forty, not less. One opt-in here rather than a
+       second popup over there (§53.5). */
+    if (!sel.multiple && sel.options.length < MIN && sel.dataset.ssAlways !== "1") return;
+    if (sel.dataset.ss === "1") {           /* already wrapped this paint */
+      var prev = buttonFor(sel);
+      if (prev) {
+        setLabel(sel, prev);
+        prev.hidden = sel.hidden;
+      }
+      return;
+    }
+    sel.dataset.ss = "1";
+    sel.classList.add("ss-native");
+    /* OUT OF THE TAB ORDER, AND OUT OF THE ACCESSIBILITY TREE. Hiding the
+       select in place left it TABBABLE — and the focus handler below bounces
+       its focus straight back to the button, so Tab went button → select →
+       button → button … and NOTHING ELSE ON THE PAGE WAS EVER REACHABLE by
+       keyboard. Every page carries at least one of these, so from v3.15 until
+       now the whole product was a keyboard trap on its first control.
+
+       The lesson is the one §34 already records from the other direction:
+       whoever hides a field hides its furniture. Visually hidden is not
+       hidden — `tabindex` and `aria-hidden` are what remove a control from the
+       two trees that are not the visual one. */
+    sel.tabIndex = -1;
+    sel.setAttribute("aria-hidden", "true");
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ssbtn" + (sel.className.indexOf("selbox") > -1 ? " selbox" : "");
+    btn.setAttribute("aria-haspopup", "listbox");
+    btn.setAttribute("aria-expanded", "false");
+    /* AN ELEMENT, NOT A TEXT NODE. The label was appended bare, so the rule
+       meant to truncate it — `.ssbtn > :first-child` — matched the CARET,
+       because :first-child selects the first ELEMENT child and a text node is
+       not one. The label therefore had no `white-space:nowrap` and the button
+       WRAPPED. Invisible until a name got long enough: "Mohamed Essam — Head
+       of the Strategy Management Office" in the 150px viewer switcher is what
+       finally showed it. */
+    var lab = document.createElement("span");
+    lab.className = "sslabel";
+    btn.appendChild(lab);
+    var car = document.createElement("span");
+    car.className = "sscar";
+    car.setAttribute("aria-hidden", "true");
+    car.textContent = "▾";
+    btn.appendChild(car);
+    /* ── THE NAME IS SET BEFORE THE LABEL, NOT AFTER IT (§372) ────────
+       The visible control inherits the hidden one's name, so a screen reader
+       is told what the control is FOR rather than only what it currently says
+       (§48.2). It was set AFTER `setLabel` and therefore overwrote what
+       `setLabel` had just composed — so the roles cell, the first control to
+       hand its chips over as html, announced the person and never the roles.
+       Found by asserting it, not by reading it. */
+    var lbl = sel.id && document.querySelector('label[for="' + sel.id + '"]');
+    var name = (lbl && lbl.textContent.trim()) || sel.getAttribute("aria-label");
+    if (name) btn.setAttribute("aria-label", name);
+    setLabel(sel, btn);
+    /* Inserted as a SIBLING, never as a parent. sync.js reaches for the
+       viewer select by id and inserts a name beside it — reparenting the
+       select would break that from a file this component has never heard of. */
+    sel.parentNode.insertBefore(btn, sel);
+    if (BTN_OF) BTN_OF.set(sel, btn);
+    btn.hidden = sel.hidden;
+
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      if (open && open.native === sel) close(); else openFor(sel, btn);
+    });
+    /* The label still points at the select, and something else may set the
+       value (the viewer switcher does, from sync.js). Both are answered here
+       rather than by asking every caller to know about this file.
+
+       The focus bounce stays for the LABEL's sake — clicking "Viewing as"
+       focuses the select it is `for`, and that should land on the button — but
+       it can no longer be reached by Tab, so it cannot loop. */
+    sel.addEventListener("focus", function(){ btn.focus(); });
+    sel.addEventListener("change", function(){ setLabel(sel, btn); });
+  }
+
+  return {
+    wire: function(){
+      close();
+      document.querySelectorAll("select").forEach(enhance);
+    },
+    close: close,
+    /* ── RE-OPENED AFTER A REPAINT, BY THE CALLER (§372) ─────────────
+       §130.1 commits a tick WITHOUT repainting, and says in its own words
+       what makes that safe: every field this control was used on goes through
+       the shell's one `data-fld` listener, which does not repaint. Granting a
+       ROLE is not one of those — it changes the chips, it can take the role
+       off whoever held it, and a seat has a question to ask — so that handler
+       must paint, and a paint at the top of `wire()` calls close().
+
+       So the register holds the open list as state (`PROLEPICK`) and asks for
+       it back at the end of the paint. The popup is rebuilt rather than
+       preserved: it is `position:fixed` on <body> and its contents are a
+       rendering of the select, so a fresh one is the same popup with the new
+       answer in it. Returns false when there is nothing to open, so a caller
+       can clear its own state rather than holding a key to a control that is
+       no longer drawn (§61). */
+    openOn: function(sel){
+      if (!sel) return false;
+      var btn = buttonFor(sel);
+      if (!btn) return false;
+      openFor(sel, btn);
+      return true;
+    }
+  };
+})();

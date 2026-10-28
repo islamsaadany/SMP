@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Copilot Start Options</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--top:#111417;--nav:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#A9B1BC;--warnbg:#FBF1DE;--goodbg:#E6F2EA;--good:#2E6B45;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--top:#0B0D10;--nav:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--top:#0B0D10;--nav:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1320px;margin:0 auto;padding:20px 16px 56px;display:flex;flex-direction:column;gap:16px}
+h1{font-size:24px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:80ch}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.ctl b{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.what{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--ink-2)}
+.what b{color:var(--ink)}
+.what .pc{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:4px 18px;margin-top:6px;font-size:13px}
+.what .pc span::before{content:"+ ";color:var(--good);font-weight:700}
+.what .pc span.m::before{content:"− ";color:#B4502E}
+
+/* the platform frame */
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.top{background:var(--top);color:var(--panel-quiet);display:flex;gap:16px;padding:9px 16px;font-size:13px;align-items:center}
+.top b{color:var(--panel-ink)}
+.tabs{display:flex;gap:20px;padding:8px 16px 0;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
+.tabs span{padding-bottom:7px}.tabs .on{color:var(--ink);font-weight:700;border-bottom:2px solid var(--goldfill)}
+.areas{display:flex;gap:4px;padding:7px 12px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.area{border:0;background:none;font-size:12.5px;padding:4px 10px;border-radius:5px;color:var(--ink-2);white-space:nowrap}
+.area[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.body{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:560px}
+@media (max-width:760px){.body{grid-template-columns:1fr}.rail{border-right:0;border-bottom:1px solid var(--line)}}
+.rail{border-right:1px solid var(--line);background:var(--surface-2);padding:12px;font-size:13px;position:relative}
+.rh{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px}
+.rh span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:700}
+.new{font:600 12px/1.2 var(--sans);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px}
+.new.hot{border-color:var(--gold);box-shadow:0 0 0 2px var(--warnbg)}
+.ri{padding:6px 8px;border-radius:5px;color:var(--ink-2);display:flex;flex-direction:column}
+.ri small{color:var(--ink-3);font-size:11.5px}
+.menu{position:absolute;left:12px;top:44px;width:250px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.12);padding:4px;z-index:2}
+.mi{display:block;width:100%;text-align:left;border:0;background:none;border-radius:6px;padding:8px 10px}
+.mi b{display:block;font-size:13.5px}.mi small{color:var(--ink-3);font-size:12.5px}
+.mi:hover{background:var(--surface-2)}
+.main{padding:28px 24px;display:flex;flex-direction:column;align-items:center;min-width:0}
+.col{width:100%;max-width:740px;display:flex;flex-direction:column;gap:14px}
+.empty{color:var(--ink-3);font-size:14px;padding-top:60px;text-align:center}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.hello{font-size:22px;font-weight:700;margin:24px 0 2px;text-align:center}
+.sub{color:var(--ink-3);text-align:center;margin:0 0 6px;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.card{display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 10px;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:12px 14px}
+.card:hover{border-color:var(--gold)}
+.card .ic{grid-row:1/3;width:28px;height:28px;border-radius:7px;background:var(--surface-2);display:grid;place-items:center;font-size:15px}
+.card b{font-size:14px}
+.card small{color:var(--ink-3);font-size:12.5px;line-height:1.4}
+.card.free{border-style:dashed}
+.card.free .ic{background:var(--warnbg)}
+.ask{border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px 16px;display:flex;flex-direction:column;gap:8px;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.ask .ph{color:var(--ink-3);font-size:15px;min-height:44px}
+.ask .row{display:flex;align-items:center;gap:8px;color:var(--ink-3);font-size:12px}
+.ask .send{margin-left:auto;width:30px;height:30px;border-radius:8px;background:var(--nav);color:var(--panel-ink);display:grid;place-items:center}
+.or{display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:12px;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;background:var(--surface);display:inline-flex;gap:6px;align-items:center}
+.chip:hover{border-color:var(--gold)}
+.note{font-size:12.5px;color:var(--ink-3);text-align:center}
+.reco{background:var(--goodbg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Where Free chat lives, in every Copilot area</h1>
+    <p class="lede">Islam: <i>"why isn't free chat one of the options inside the creation options like in the foundation asking questions or uploading something to be more consistent?"</i> Three ways to offer it. Pick an option, then click through the areas to see each one everywhere.</p>
+  </header>
+  <div class="ctl"><b>Option</b>
+    <span class="seg" id="opts"><button data-o="A" aria-pressed="false">A · Today: a menu</button><button data-o="B" aria-pressed="true">B · A start screen of cards</button><button data-o="C" aria-pressed="false">C · An ask box first</button></span>
+  </div>
+  <div class="what" id="what"></div>
+  <div class="frame">
+    <div class="top"><span>⌂</span><b>Strategy</b><span>Functions</span><span>HR</span><span>Finance</span></div>
+    <div class="tabs"><span>Plan</span><span>Performance</span><span>Focus</span><span class="on">Copilot</span></div>
+    <div class="areas" id="areas"></div>
+    <div class="body">
+      <nav class="rail" id="rail"></nav>
+      <main class="main"><div class="col" id="col"></div></main>
+    </div>
+  </div>
+  <div class="reco"><b>My recommendation: C.</b> It is B with the box on top: Free chat sits with the other ways to start — your consistency — but it is also the one that needs no choosing: start typing and you are in a free chat. The cards stay for when you want Forefront's method step by step. "+ New chat" always brings you back to this screen, so there is no menu to learn.</div>
+</div>
+<script>
+(function(){
+  var P = "Mobile";
+  var AREAS = [
+    { k:"foundation", w:"Foundation", wf:"Foundation workflow", ways:[["◎","Answer guided questions","I ask a few questions and draft your Foundation from your answers."],["⇪","Upload raw notes","Interview notes or a workshop export, turned into a Foundation."],["▤","Use a template","Download the interview template, fill it in, upload it back."],["⇩","Import a finished Foundation","Paste it and I structure it into the parts."]] },
+    { k:"analysis", w:"Analysis", wf:"SWOT workflow", ways:[["◎","SWOT, step by step","The internal, micro and macro analyses, then the SWOT."],["⇪","Upload notes","Interviews or an earlier analysis, read into the SWOT."],["▤","Use a template","Porter's Five Forces, DESTEP or the department S&W."],["⌕","Deep-research prompt","A prompt to research the market outside the platform."]] },
+    { k:"compete", w:"How we compete", wf:"Competitive Discipline workflow", ways:[["◎","Score the value disciplines","Market and internal factors, then the value proposition."]] },
+    { k:"directions", w:"Directions", wf:"Directions workflow", ways:[["◎","Suggest and score Directions","From the SWOT and the discipline, scored U × I × E."]] },
+    { k:"capabilities", w:"Capabilities", wf:"Capabilities workflow", ways:[["◎","Choose Capabilities","What the chosen Directions need, each with an owner."]] },
+    { k:"execution", w:"Execution", wf:"Execution workflow", ways:[["◎","Plan the period","Measures and tactics for each Direction, by quarter."]] },
+    { k:"advisory", w:"Advisory", wf:"Advisory workflow", ways:[["◎","Bring a decision","A few questions, then a decision brief."]] }
+  ];
+  var S = { o:"B", a:0, menu:true };
+  var WHAT = {
+    A:['<b>A · Today.</b> "+ New chat" opens a menu of two: the area\'s workflow, or Free chat. The ways to start (guided questions, upload, template, import) only appear after you pick the workflow.',
+       ['Already built; nothing to learn','One click more to reach anything'],['Free chat is hidden in a menu, apart from the other ways to start','Two places to choose how to begin (menu, then cards)']],
+    B:['<b>B · A start screen of cards.</b> "+ New chat" opens "How would you like to start?" in the main area: the area\'s ways to start as cards, and <b>Free chat always the last card</b>. The same screen in every area — only the cards change.',
+       ['One place to choose how to begin, the same in every area','Free chat sits beside upload, template and import — consistent'],['Areas with one way to start show only two cards']],
+    C:['<b>C · An ask box first.</b> Like Claude\'s new-chat page: a box to just ask (that IS a free chat — typing starts one), and under it the area\'s ways to start as cards. "+ New chat" always lands here.',
+       ['Free chat needs no choosing: type and go','The ways to start still sit together, the same in every area','The page is never empty: something to do the moment it opens'],['A little more on the screen than B']]
+  };
+  function draw(){
+    var a = AREAS[S.a];
+    document.querySelectorAll("#opts button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.o === S.o)); });
+    var w = WHAT[S.o];
+    document.getElementById("what").innerHTML = w[0] + '<div class="pc">' + w[1].map(function(x){ return "<span>" + x + "</span>"; }).join("") + w[2].map(function(x){ return '<span class="m">' + x + "</span>"; }).join("") + "</div>";
+    document.getElementById("areas").innerHTML = AREAS.map(function(x, i){ return '<button class="area" data-a="' + i + '" aria-pressed="' + (i === S.a) + '">' + x.w + "</button>"; }).join("");
+    document.getElementById("rail").innerHTML = '<div class="rh"><span>Chats</span><button class="new' + (S.o === "A" ? " hot" : "") + '" id="newb">+ New chat</button></div>' +
+      (S.o === "A" && S.menu ? '<div class="menu"><button class="mi"><b>' + a.wf + '</b><small>Step by step, Forefront\'s method</small></button><button class="mi"><b>Free chat</b><small>Ask anything about the plan</small></button></div>' : "") +
+      '<div class="ri">' + a.wf.replace(" workflow","") + ' — ' + P + '<small>Islam · 22 Oct · Guided</small></div><div class="ri">Free chat — ' + a.w + '<small>Islam · 20 Oct · Free chat</small></div>' +
+      '<div class="rh" style="margin-top:16px"><span>Deliverables</span></div><div class="ri">' + a.w + ' v2<small>saved 22 Oct</small></div>';
+    var free = ["✎","Free chat","Talk it through with the Copilot, using Forefront's method and " + P + "'s plan. It drafts only when you agree."];
+    var card = function(c, cls){ return '<button class="card ' + (cls || "") + '"><span class="ic">' + c[0] + "</span><b>" + c[1] + "</b><small>" + c[2] + "</small></button>"; };
+    var col = document.getElementById("col");
+    if (S.o === "A") col.innerHTML = '<div class="empty"><b>Start a chat, or open a deliverable.</b>A chat here is about ' + P + "'s " + a.w + '. Press <b style="display:inline;font-size:inherit">+ New chat</b> — the menu shows the two choices.</div>';
+    else if (S.o === "B") col.innerHTML = '<div class="hello">How would you like to start?</div><p class="sub">' + P + " · " + a.w + '</p><div class="cards">' + a.ways.map(function(c){ return card(c); }).join("") + card(free, "free") + "</div>" +
+      '<p class="note">Free chat is always the last card, in every area.</p>';
+    else col.innerHTML = '<div class="hello">What would you like to do with ' + P + "'s " + a.w + '?</div>' +
+      '<div class="ask"><div class="ph">Ask anything about ' + P + "'s " + a.w.toLowerCase() + '… (typing starts a free chat)</div><div class="row"><span>📎 Attach</span><span>· Enter to send</span><span class="send">↑</span></div></div>' +
+      '<div class="or">or start step by step</div><div class="cards">' + a.ways.map(function(c){ return card(c); }).join("") + "</div>";
+  }
+  document.addEventListener("click", function(e){
+    var t = e.target.closest("[data-o],[data-a],#newb"); if (!t) return;
+    if (t.dataset.o) { S.o = t.dataset.o; S.menu = true; }
+    else if (t.dataset.a) S.a = Number(t.dataset.a);
+    else if (t.id === "newb" && S.o === "A") S.menu = !S.menu;
+    draw();
+  });
+  draw();
+})();
+</script>
+</body>
+</html>

@@ -2733,7 +2733,7 @@ CHG.expPick = (el) => { const c = el.dataset.code, s = UI.f.exp; if (el.checked)
 ACT.expMove = (el) => { const s = UI.f.exp, i = s.indexOf(el.dataset.code), j = i + Number(el.dataset.d); if (j < 0 || j >= s.length) return; const t = s[i]; s[i] = s[j]; s[j] = t; UI.f.check = null; render(); };
 ACT.expPreview = () => go('export~preview');
 ACT.expSop = () => { UI.f.sopCodes = UI.f.exp.slice(); go('sop~pack'); };
-/* the live module's rule since §599 (ffp/lib/domain/pack-check.ts): the button says why it cannot run */
+/* the live module's rule since §656 (first numbered §599) (ffp/lib/domain/pack-check.ts): the button says why it cannot run */
 function checkWhy(n) { return n < 1 ? 'Tick at least one process to check' : n > 12 ? 'The check reads up to 12 processes at a time and ' + n + ' are ticked. Untick ' + (n - 12) + ' to run it.' : null; }
 ACT.expCheck = () => {
   const list = UI.f.exp.map(byCode);

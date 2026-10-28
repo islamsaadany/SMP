@@ -76,6 +76,27 @@ with sync_playwright() as p:
         pg.click('.setuprail [data-railgrp="%s"]' % g); pg.wait_for_timeout(70)
     pg.click('.setuprail [data-setupgo="people"]'); pg.wait_for_timeout(1000)
 
+    # §629, option B: the register is the CLIENT'S people. A minted consultant
+    # is off the table until somebody asks for the Forefront team; an adopted
+    # one is the client's own person and never leaves. Both ends (§113.8): a
+    # build that dropped consultants entirely passes "hidden" and fails
+    # "shown"; the build before this one fails "hidden".
+    print("\n2b · the register is the client's own people until asked (§629)")
+    ON = """(k) => !!document.querySelector('[data-pmenu="'+k+'"]')"""
+    SW = """() => { const b = document.querySelector('[data-regff]');
+        return b ? { text: b.textContent.trim(), pressed: b.getAttribute('aria-pressed') } : null; }"""
+    ck("a minted consultant is not on the table", ev(ON, MINT) is False, ev(ON, MINT))
+    ck("...an adopted one is (they are the client's own person)", ev(ON, ADOPT) is True)
+    ck("...and so is an ordinary person", ev(ON, OWN) is True)
+    sw = ev(SW) or {}
+    nmint = ev("() => PEOPLE.filter(p => SMPRules.isMintedRow(p)).length")
+    ck("the switch says how many are behind it",
+       sw.get("text") == "Show Forefront team (%s)" % nmint, sw)
+    ck("...and reads as not pressed", sw.get("pressed") == "false", sw)
+    pg.click('[data-regff]'); pg.wait_for_timeout(400)
+    ck("pressing it brings the consultant back", ev(ON, MINT) is True)
+    ck("...and it reads as pressed", (ev(SW) or {}).get("pressed") == "true", ev(SW))
+
     # THE ROLE PICKER IS NOT IN THE TABLE AND THAT IS §116's DOING: the
     # register stopped being a form, so the ROW draws `roleCell(p, false)` —
     # read-only for everybody — and the picker lives in the dialog behind
@@ -180,21 +201,16 @@ with sync_playwright() as p:
         rows.sort((a,b) => a-b);
         return { mint: h(ks[0]), adopt: h(ks[1]), own: h(ks[2]),
                  median: rows[Math.floor(rows.length/2)] }; }""", [MINT, ADOPT, OWN])
-    ck("a minted row is the height of its neighbours", hh.get("mint") == hh.get("median"), hh)
-    ck("...and so is an adopted one, mark and all", hh.get("adopt") == hh.get("median"), hh)
-    ck("...with an ordinary person as the control (§113.8)", hh.get("own") == hh.get("median"), hh)
+    # §631: WITHIN A PIXEL. The page is drawn at 80% on a computer and a row
+    # snaps to the screen's pixels (31 or 32); §116.4's fault was 51 against 39.
+    near = lambda k: abs((hh.get(k) or 0) - (hh.get("median") or 0)) <= 1
+    ck("a minted row is the height of its neighbours", near("mint"), hh)
+    ck("...and so is an adopted one, mark and all", near("adopt"), hh)
+    ck("...with an ordinary person as the control (§113.8)", near("own"), hh)
 
-    print("\n7 · the count says both, and only where there is a split (§3a)")
-    c = ev("""() => { const el = document.querySelector('.psplit');
-        const ff = PEOPLE.filter(p => SMPRules.isForefrontRow(p)).length;
-        return { text: el ? el.textContent.trim() : null, ff: ff,
-                 own: PEOPLE.length - ff, total: PEOPLE.length }; }""")
-    ck("the chip is drawn, there being two populations", bool(c.get("text")), c)
-    # AN AGREEMENT WITH THE DATA, never a typed number (§94.8) — and never the
-    # TOTAL, which is what §122 took off this header and this does not put back.
-    ck("...it names the client's own count", c.get("text","").startswith(str(c.get("own"))), c)
-    ck("...and the Forefront count beside it", ("· %d from Forefront" % c.get("ff")) in (c.get("text") or ""), c)
-    ck("...and never the total (§122 stands)", str(c.get("total")) not in (c.get("text") or ""), c)
+    print("\n7 · the old split line is gone; the switch took its place (§629)")
+    ck("no split line is drawn", ev("() => !document.querySelector('.psplit')") is True)
+    c = {"total": ev("() => PEOPLE.length")}
 
     print("\n8 · the search finds a consultant from the register's own box (§3a)")
     nm = ev("(k) => (PEOPLE.filter(p => p.key === k)[0] || {}).name || ''", MINT)
@@ -208,6 +224,12 @@ with sync_playwright() as p:
     ck("...and hides the rest, so it really searched (§113.8)",
        (seen.get("shown") or 0) < c.get("total", 99), seen)
     pg.fill('[data-tksearch="people"]', ""); pg.wait_for_timeout(200)
+
+    print("\n8b · the switch is remembered on this device, and goes off again (§629)")
+    ck("the choice is kept", ev("() => localStorage.getItem('smp.register.forefront')") == "1")
+    pg.click('[data-regff]'); pg.wait_for_timeout(400)
+    ck("pressing again takes the consultant off the table", ev(ON, MINT) is False)
+    ck("...and forgets the choice", ev("() => localStorage.getItem('smp.register.forefront')") is None)
 
     print("\n9 · Forefront team is a page of its own, above the register")
     rail = ev("""() => { const it = [].slice.call(document.querySelectorAll('.setuprail [data-setupgo]'))
@@ -230,6 +252,7 @@ with sync_playwright() as p:
         snap.forEach(s => { const p = PEOPLE.filter(x => x.key === s.k)[0]; if (!p) return;
           if (s.f) p.forefront = s.f; else delete p.forefront;
           if (s.r) p.ffrow = s.r; else delete p.ffrow; });
+        try { localStorage.removeItem('smp.register.forefront'); } catch (e) {}
         return PEOPLE.filter(p => p.forefront || p.ffrow).length; }""")
     ck("no row is left marked", back == 0, back)
 

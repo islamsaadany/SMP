@@ -29,6 +29,10 @@ import { signedReadFor } from "./blob-api.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function answer(status: number, body: unknown): Response {
+  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+}
+
 function plain(status: number, text: string): Response {
   return new Response(text, {
     status,
@@ -36,19 +40,35 @@ function plain(status: number, text: string): Response {
   });
 }
 
-export async function libraryFile(tenantId: string, kind: Kind, id: string, _url: string, viewer: Viewer): Promise<Response> {
+/* §651 — VIEW, BESIDE DOWNLOAD. Islam: *"can we have a view button before
+   the download where the user can have a quick view over the report?"*, and
+   that a view does NOT count as a download. Same address rules as the file
+   (the same viewer, so a report kept from somebody's list cannot be viewed
+   by its address either), with three differences, all asked for by `o`:
+     · `view` — no download is counted;
+     · `json` — the short-lived address is ANSWERED rather than followed, so
+       the page can put it in its own viewer (a frame following our 302 would
+       meet the site-wide X-Frame-Options on the redirect);
+     · `office` — whoever may publish may view a DRAFT's file, to check it
+       before it goes out (the office's read, forClient false). */
+export type FileAsk = { view?: boolean; json?: boolean; office?: boolean };
+
+export async function libraryFile(tenantId: string, kind: Kind, id: string, _url: string, viewer: Viewer, o: FileAsk = {}): Promise<Response> {
   /* An id that is not one never reaches the database: it is the same answer
      either way, and a malformed uuid would otherwise be a 500 rather than a
      404 (§316.2 — a refused statement that names a type sends somebody to
      look at everything). */
   if (!UUID.test(String(id))) return plain(404, "Not found");
 
-  const item = await withTenant(tenantId, (c) => oneItem(c, kind, id, true, viewer));
-  if (!item || !item.file_path) return plain(404, "Not found");
+  const item = await withTenant(tenantId, (c) => oneItem(c, kind, id, !(o.view && o.office), viewer));
+  if (!item || !item.file_path) return o.json ? answer(404, { ok: false, error: "Not found" }) : plain(404, "Not found");
 
-  await withTenant(tenantId, (c) => countDownload(c, id));
+  /* `view-counts` puts a view back into the download count; checks/insights-publish.mjs must go red (§94.5) */
+  if (!o.view || process.env.SMP_BREAK === "view-counts") await withTenant(tenantId, (c) => countDownload(c, id));
 
   const url = await signedReadFor(String(item.file_path));
+  if (o.json) return url ? answer(200, { ok: true, url, name: safeFileName(item.file_name) })
+    : answer(503, { ok: false, error: "This report cannot be shown just now. Nothing has been lost; try again in a few minutes." });
   if (!url) {
     return plain(503,
       "This report cannot be fetched just now.\n\n" +
@@ -62,7 +82,7 @@ export async function libraryFile(tenantId: string, kind: Kind, id: string, _url
       /* The name the person's browser saves it under is the one we stored,
          scrubbed AGAIN at the moment it goes into a header — the store's
          address is not ours to trust and this costs nothing (spec 053 §5). */
-      "content-disposition": 'attachment; filename="' + safeFileName(item.file_name) + '"',
+      "content-disposition": (o.view ? "inline" : "attachment") + '; filename="' + safeFileName(item.file_name) + '"',
       "cache-control": "no-store",
     },
   });

@@ -40,6 +40,7 @@
      SMP_BREAK=count-line     node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=tabs-reload    node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=keep-picks     node checks/tracker.mjs   # must go red (§567)
+     SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§623.3)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -265,6 +266,25 @@ check("...and nothing beyond the three weeks is in the view at all",
 check("the view holds exactly the rows the three weeks hold",
   rows.filter((a) => inView(a, "check", SUPER, TODAY)).map((a) => a.id).join("") === "abcdef", rows.filter((a) => inView(a, "check", SUPER, TODAY)).map((a) => a.id).join(""));
 check("...so last week's finished action is in it, and nothing older", inView(mk({ status: "done", doneDay: "2026-09-08" }), "check", SUPER, TODAY) && !inView(mk({ status: "done", doneDay: "2026-08-08" }), "check", SUPER, TODAY));
+/* FINISHED AT THE WEEKEND (§623.3). The day a thing is finished is stamped as
+   it happens, so it can be a Friday or a Saturday — and asked as "between
+   Sunday and Thursday" that day sat in no week: the row ticked Done on a
+   Saturday left This week under the hand that ticked it. §10 found it, but
+   only on a Friday or a Saturday, because §10 presses on the real day; these
+   are written on fixed days so they ask it every day of the week. Decision
+   8's answer is the week a Friday or a Saturday already belongs to: the
+   coming one. Both ends: Thursday's finish stays last week's. */
+const SAT = "2026-09-19", FRI = "2026-09-18", doneOn = (d) => mk({ status: "done", doneDay: d });
+check("a row finished on a Saturday is on This week that Saturday, and so is Friday's — it does not leave under the hand that ticked it",
+  inView(doneOn(SAT), "week", SUPER, SAT) && inView(doneOn(FRI), "week", SUPER, SAT),
+  inView(doneOn(SAT), "week", SUPER, SAT) + " " + inView(doneOn(FRI), "week", SUPER, SAT));
+check("...the strip counts it as done this week, and the check puts it under This week that day and Last week the next Sunday",
+  summary([doneOn(SAT)], SAT).doneWeek === 1 && checkWeek(doneOn(SAT), SAT) === "now" && checkWeek(doneOn(SAT), "2026-09-27") === "last",
+  summary([doneOn(SAT)], SAT).doneWeek + " " + checkWeek(doneOn(SAT), SAT) + " " + checkWeek(doneOn(SAT), "2026-09-27"));
+check("...last Saturday's finish is this week's, and last Thursday's is still last week's, never this one's",
+  inView(doneOn("2026-09-12"), "week", SUPER, TODAY) && cw({ status: "done", doneDay: "2026-09-12" }) === "now" &&
+  !inView(doneOn("2026-09-10"), "week", SUPER, TODAY) && cw({ status: "done", doneDay: "2026-09-10" }) === "last",
+  cw({ status: "done", doneDay: "2026-09-12" }) + " " + cw({ status: "done", doneDay: "2026-09-10" }));
 /* WHAT MAY BE CARRIED, both ends (§94.2). Only an open row under THIS week:
    a finished one has nothing to carry, and one already under next week is
    where it was going — pressing it there would push it a week further than
@@ -377,9 +397,9 @@ async function asTenant(tenantId, fn) {
 }
 
 let failed = false;
+const stamp = "trk" + Date.now().toString(36);
 try {
   await owner("SET search_path TO " + SCHEMA);
-  const stamp = "trk" + Date.now().toString(36);
   const [{ id: A }] = await owner("INSERT INTO tenants (key, name) VALUES ($1, $2) RETURNING id", [stamp + "-a", "Raya Trade"]);
   const [{ id: B }] = await owner("INSERT INTO tenants (key, name) VALUES ($1, $2) RETURNING id", [stamp + "-b", "RHI"]);
   /* THE REGISTER: two office rows and one of the client's own people on A;
@@ -730,11 +750,12 @@ try {
       await pg.reload(); await settle();
     }
     if (process.env.SMP_SHOT) await pg.screenshot({ path: process.env.SMP_SHOT, fullPage: true });
-    /* §499 — THE WHOLE MODULE IS FOREFRONT'S, NEVER THE CLIENT'S. The client
-       is given a tan band and the page asked again: the masthead and the
-       browser's theme colour must still be Forefront's navy. BOTH ENDS
-       (§94.2): the tan is asserted stored first, or "still navy" is true of a
-       client that never had a colour (§113.8). Put back afterwards. */
+    /* §646 (REVERSING §499) — THE BAND FOLLOWS THE CLIENT'S COLOUR. The client
+       is given a tan band and the page asked again: the band and the
+       browser's theme colour must both be the tan. BOTH ENDS (§94.2): the tan
+       is asserted stored first, or "the tan" could be a default (§113.8);
+       SMP_BREAK=fixed-bar puts §499's navy back and must redden these two.
+       Put back afterwards. */
     if (!process.env.SMP_SHOT_BAR) {
       const had = await owner("SELECT extra FROM org WHERE tenant_id=$1", [A]);
       if (had.length) await owner("UPDATE org SET extra = jsonb_set(coalesce(extra,'{}'::jsonb), '{branding}', jsonb_build_object('bar','#C8A27A')) WHERE tenant_id=$1", [A]);
@@ -743,8 +764,8 @@ try {
       check("the client really has a tan band stored", stored[0] && stored[0].b === "#C8A27A", JSON.stringify(stored));
       await pg.reload(); await settle();
       const look = await pg.evaluate("({mast:getComputedStyle(document.querySelector('.mast')).backgroundColor, theme:(document.querySelector('meta[name=theme-color]')||{}).content})");
-      check("the masthead keeps Forefront's navy over a client's tan band (§499)", look.mast === "rgb(22, 50, 92)", JSON.stringify(look));
-      check("and so does the browser's theme colour", String(look.theme).toUpperCase() === "#16325C", JSON.stringify(look));
+      check("the band wears the client's own tan (§646, reversing §499)", look.mast === "rgb(200, 162, 122)", JSON.stringify(look));
+      check("and so does the browser's theme colour", String(look.theme).toUpperCase() === "#C8A27A", JSON.stringify(look));
       if (had.length) await owner("UPDATE org SET extra = $2::jsonb WHERE tenant_id=$1", [A, JSON.stringify(had[0].extra)]);
       else await owner("DELETE FROM org WHERE tenant_id=$1", [A]);
       await pg.reload(); await settle();
@@ -760,11 +781,11 @@ try {
     const pinAt = await pg.evaluate(`(() => {
       const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
       const tb = r('.tb'), m = r('.mast'), add = r('.addrow'), pin = r('.pin'), first = r('.list .sec');
-      return { y: Math.round(scrollY), pin: !!document.querySelector('.pin > .mast + .tools .addrow'),
+      return { y: Math.round(scrollY), pin: !!document.querySelector('.pin > .mast + .card.ctop .chd .cats') && !!document.querySelector('.pin > .mast + .card.ctop .tools .addrow'),
         tb: tb && Math.round(tb.top), tbFoot: tb && Math.round(tb.bottom), mast: m && Math.round(m.top),
         add: add && Math.round(add.bottom), pinFoot: pin && Math.round(pin.bottom), first: first && Math.round(first.top) };
     })()`);
-    check("scrolled down, the band and the add line stay at the top, and the rows go under them (§565)",
+    check("scrolled down, the band, the card's header with its filters and the add line stay at the top, and the rows go under them (§565, §646)",
       pinAt.y >= 800 && pinAt.pin && pinAt.add > pinAt.mast && pinAt.add < 450 && pinAt.first < pinAt.pinFoot, JSON.stringify(pinAt));
     check("...with the platform's white top bar pinned above them and the band at its foot (§566)",
       pinAt.tb === 0 && pinAt.tbFoot > 30 && pinAt.mast >= pinAt.tbFoot && pinAt.mast <= pinAt.tbFoot + 24, JSON.stringify(pinAt));
@@ -906,7 +927,7 @@ try {
       (await pg.locator("#add").inputValue()) === "" && (await pg.evaluate("document.activeElement && document.activeElement.id")) === "add");
     const row = '.row[data-id="' + (born && born.id) + '"] ';
     check("...and the new row is on the page, under my own name, reading my first name and This week", (await pg.locator(row).count()) === 1 &&
-      (await pg.locator('.grp[data-key="noran"] h3').innerText()) === "Noran Essam" && (await pg.locator(row + ".who .wn").innerText()) === "Noran" &&
+      (await pg.locator('.grp[data-key="noran"] h3').textContent()).trim() === "Noran Essam" && (await pg.locator(row + ".who .wn").innerText()) === "Noran" &&
       (await pg.locator(row + ".when .wk").innerText()) === "This week" && (await pg.locator(".wk.now").count()) === 0);
     /* textContent, not innerText: the count is uppercased by CSS (§301.6). */
     check("...with the count moved in place", /^\d+ actions on this week$/.test(await pg.locator("#count").textContent()) && +(await pg.locator("#count").textContent()).split(" ")[0] === (await asTenant(A, (c) => listActions(c))).filter((r) => inView(r, "week", NORAN, real)).length, await pg.locator("#count").textContent());
@@ -931,7 +952,9 @@ try {
        The words cost its first column 54 → 86px and the popup 200 → 232, and
        it hangs off the right edge of a cell near the right edge of the page,
        so what is asserted is the BOX against the window at both ends. */
-    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect();return [Math.round(r.left),Math.round(r.right),Math.round(r.width),document.documentElement.clientWidth].join(' ')})()");
+    /* the edges against the window in the screen's pixels, the width in the
+       page's own: the page is zoomed to 0.8 on a computer (lib/topbar.ts) */
+    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect(),z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;return [Math.round(r.left),Math.round(r.right),Math.round(r.width/z),window.innerWidth].join(' ')})()");
     check("...and the wider picker is inside the window, both edges", !!pbox && (() => { const [l, r, w, vw] = pbox.split(" ").map(Number); return l >= 0 && r <= vw && w === 232; })(), pbox);
     /* THE BOLD STAYS IN THE PICKER and only there — the other end of the
        assertion above, which is that no ROW carries one (§94.2). */
@@ -972,7 +995,7 @@ try {
     const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".addrow .st");
     check("the status pill is one box whether it is a select or a span — and the add line draws none (§497)", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
       pillSel.slice(6) === pillSpan.slice(4) && /^SPAN 0 /.test(pillAdd), pillSel + " | " + pillSpan + " | " + pillAdd);
-    check("...in the page's own font, never the browser's control font", /Source Sans 3/.test(pillSel) && /11px/.test(pillSel), pillSel);
+    check("...in the page's own font, never the browser's control font (the main screens' since §646)", /system-ui/.test(pillSel) && /11px/.test(pillSel), pillSel);
     await pg.goto(base); await settle();
     await pg.evaluate("window.__stay = 1");
     /* THE TICK is Done; pressed again it is Not started — both ends. And a
@@ -1133,7 +1156,8 @@ try {
        browser (a cookie the page reads on the next visit). */
     await pg.locator("[data-act=settings]").click();
     await pg.locator('.setmenu [data-act=set-group][data-value="status"]').click(); await settle();
-    const heads = async () => pg.locator(".grp h3").allInnerTexts().then((a) => a.map((t) => t.trim()));
+    /* textContent, not innerText: the group label is uppercased by CSS (§646). */
+    const heads = async () => pg.locator(".grp h3").allTextContents().then((a) => a.map((t) => t.trim()));
     check("grouped by Status the headings are the three words, drawn in place", (await heads()).every((h) => Object.values(STATUS_WORD).includes(h)) && (await heads()).length >= 1 && await stayed(), (await heads()).join("|"));
     await pg.goto(base); await settle();
     await pg.locator("[data-act=settings]").click();
@@ -1160,14 +1184,21 @@ try {
     const teamFit = () => pg.evaluate("(function(){var t=document.querySelector('" + row.trim() + " .team');if(!t)return null;var c=getComputedStyle(t);"
       + "var w=Math.max(...[...t.querySelectorAll('button')].map(b=>b.scrollWidth));var bc=getComputedStyle(t.querySelector('button'));"
       + "var slack=parseFloat(c.paddingLeft)+parseFloat(c.paddingRight)+parseFloat(c.borderLeftWidth)+parseFloat(c.borderRightWidth);"
-      + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width),need:Math.round(w+slack),"
-      + "row:Math.round(t.querySelector('button').getBoundingClientRect().height),pad:bc.paddingTop};})()");
+      /* boxes the browser reports are in the screen's pixels and the page is
+         zoomed to 0.8 on a computer (lib/topbar.ts), so they are read back in
+         the page's own pixels, the ones the stylesheet and scrollWidth use */
+      + "var z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;"
+      + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width/z),need:Math.round(w+slack),"
+      + "row:Math.round(t.querySelector('button').getBoundingClientRect().height/z),pad:bc.paddingTop};})()");
     check("pressing my name opens the team, first names only and no heading", await team.isVisible() &&
       (await team.locator("button").allInnerTexts()).join("|") === "Islam|Noran|Omar" && (await pg.locator(row + ".who.pick").getAttribute("aria-expanded")) === "true",
       (await team.locator("button").allInnerTexts()).join("|"));
     const fit = await teamFit();
     check("...and the list is no wider than its longest name needs — the floor in the stylesheet is gone", !!fit &&
-      (fit.floor === "0px" || fit.floor === "auto") && fit.box === fit.need, JSON.stringify(fit));
+      /* within a pixel, the console's own allowance (§622): a zoomed box
+         snaps to the screen's pixels, so read back in the page's it can land
+         one short of the whole number its content asks for */
+      (fit.floor === "0px" || fit.floor === "auto") && Math.abs(fit.box - fit.need) <= 1, JSON.stringify(fit));
     check("...with rows short enough to be compact and tall enough to press", !!fit && fit.row <= 30 && fit.row >= 24, fit && fit.row);
     await pg.locator("h2.pt").click();
     check("a click elsewhere closes it and changes nothing", !(await team.isVisible()) && (await asTenant(A, (c) => oneAction(c, born.id))).ownerKey === "noran");
@@ -1195,13 +1226,17 @@ try {
     await browser.close();
   }
   srv.close();
-
-  await owner("DELETE FROM tenants WHERE id = ANY($1)", [[A, B]]);
-  await owner("DELETE FROM users WHERE email LIKE $1", [stamp + "-%"]);
 } catch (e) {
   failed = true;
   console.log("\n  DIED: " + (e && e.stack || e));
 } finally {
+  /* THE CLIENTS IT MADE GO WHETHER THE RUN FINISHED OR DIED (§623.4). This
+     sat at the end of the run itself, so every run that died left a "Raya
+     Trade" and an "RHI" in the shared database — and the Memory and console
+     checks, which read whichever client comes first, went red on correct
+     builds against clients this file had made. */
+  await owner("DELETE FROM tenants WHERE key LIKE $1", [stamp + "-%"]).catch((e) => console.log("  note: its clients were not removed — " + e.message));
+  await owner("DELETE FROM users WHERE email LIKE $1", [stamp + "-%"]).catch(() => {});
   await pool.end().catch(() => {});
   await appPool.end().catch(() => {});
 }

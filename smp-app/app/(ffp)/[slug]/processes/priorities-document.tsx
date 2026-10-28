@@ -1,5 +1,6 @@
 import type { PlanSnapshot } from "@/ffp/lib/data/priorities";
 import { DECISION_LABEL, goesDeep } from "@/ffp/lib/domain/priorities";
+import { byScoreDesc } from "@/ffp/lib/domain/priority-units";
 
 /**
  * The deep-dive priorities as one page for the client: how the choice was made, what is in each wave
@@ -21,8 +22,8 @@ export function PrioritiesDocument({
   approvedAt?: Date | null;
   sentBy?: string | null;
 }) {
-  const w1 = snapshot.rows.filter((r) => r.decision === "WAVE_1").sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
-  const w2 = snapshot.rows.filter((r) => r.decision === "WAVE_2").sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
+  const w1 = snapshot.rows.filter((r) => r.decision === "WAVE_1").sort(byScoreDesc);
+  const w2 = snapshot.rows.filter((r) => r.decision === "WAVE_2").sort(byScoreDesc);
   const rest = snapshot.rows.filter((r) => !goesDeep(r.decision));
   const deep = w1.length + w2.length;
 
@@ -34,8 +35,8 @@ export function PrioritiesDocument({
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className="border-t border-slate-200 align-top">
-                <td className="w-8 py-1.5 font-bold text-slate-900">{r.rank}</td>
-                <td className="py-1.5 pe-3 font-semibold text-slate-900">{r.name}</td>
+                <td className="w-8 py-1.5 font-bold text-slate-900">{r.rank ?? "·"}</td>
+                <td className="py-1.5 pe-3 font-semibold text-slate-900">{r.name}{r.inProcess && <span className="block text-xs font-normal text-slate-500">step of {r.inProcess}</span>}</td>
                 <td className="py-1.5 pe-3 text-slate-600">{r.department ?? ""}</td>
                 <td className="py-1.5 text-slate-700">{r.why ?? ""}</td>
               </tr>
@@ -54,7 +55,7 @@ export function PrioritiesDocument({
         </span>
       </div>
       <p className="mt-2 text-sm text-slate-700">
-        From {snapshot.total} high-level processes we propose to go deep on {deep}, in this order. They were chosen on three things, weighted as shown.
+        From {snapshot.total} high-level processes we propose to go deep on {deep}, best score first. They were chosen on three things, weighted as shown.
       </p>
       <dl className="mt-3 grid grid-cols-3 gap-3 text-center">
         {([["Importance", snapshot.weights.importance], ["Risk", snapshot.weights.risk], ["Complexity", snapshot.weights.complexity]] as const).map(([k, v]) => (
@@ -64,13 +65,13 @@ export function PrioritiesDocument({
           </div>
         ))}
       </dl>
-      <Wave title={`Wave 1 — ${snapshot.labels.WAVE_1}`} sub={`${w1.length} process${w1.length === 1 ? "" : "es"}`} rows={w1} />
-      <Wave title={`Wave 2 — ${snapshot.labels.WAVE_2}`} sub={`${w2.length} process${w2.length === 1 ? "" : "es"}`} rows={w2} />
+      <Wave title={`Wave 1 — ${snapshot.labels.WAVE_1}`} sub={`${w1.length} item${w1.length === 1 ? "" : "s"}`} rows={w1} />
+      <Wave title={`Wave 2 — ${snapshot.labels.WAVE_2}`} sub={`${w2.length} item${w2.length === 1 ? "" : "s"}`} rows={w2} />
       {rest.length > 0 && (
         <section className="mt-5">
           <h3 className="text-sm font-bold text-slate-900">Later, or stays high-level</h3>
           <p className="mt-1 text-sm text-slate-600">
-            {rest.map((r) => `${r.name}${r.decision ? ` (${DECISION_LABEL[r.decision]})` : ""}`).join(" · ")}
+            {rest.map((r) => `${r.name}${r.inProcess ? ` (step of ${r.inProcess})` : ""}${r.decision ? ` (${DECISION_LABEL[r.decision]})` : ""}`).join(" · ")}
           </p>
         </section>
       )}

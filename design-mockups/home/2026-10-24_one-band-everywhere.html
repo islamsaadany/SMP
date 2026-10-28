@@ -1,0 +1,350 @@
+<title>One Band Everywhere</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Islam, 2026-10-24: Settings at the far right of Home's clients; light
+   grey and white alternating rows (grey first) on Home's clients, Home's
+   tasks and My tasks; a Show done on My tasks (last week, and the last 30
+   days); Home's band, its size and place, on every tab; a better sentence
+   than "Your SMP Home."; and Case studies and Frameworks in this look.
+   Drawn in the live console's tokens and sizes (shown at 100% here). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--zebra:#F4F6F9;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-late:#FF9B8F;--ff-on:rgba(255,255,255,.13);--ff-label:#8FA3C9;--ff-rule:rgba(255,255,255,.12);
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--bad:#B23025;--bad-bg:#FBEDEB;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--title:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1E2430;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1E2430;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.doc{max-width:1400px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:92ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink)}
+.flag{display:inline-block;margin:12px 0 14px;font-size:12.5px;font-weight:600;color:var(--amber-tx);border:1px solid var(--amber-tx);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 0;font-size:13px}
+.toc a{color:var(--amber-tx);font-weight:600;text-decoration:none}
+section.part{margin-top:44px}
+.ph2{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px;flex-wrap:wrap}
+.ph2 .n{font:600 12px var(--mono);color:var(--amber-tx)}
+.ph2 h2{margin:0;font-size:19px;font-weight:600}
+.ph2 p{margin:0;color:var(--ink-3);font-size:13px}
+.lab{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:18px 0 8px}
+.lab.after{color:var(--good)}
+.lab::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.why{margin:10px 0 0;font-size:13px;color:var(--ink-2);max-width:96ch}
+.why b{color:var(--ink)}
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+
+/* the column */
+.app{display:flex}
+.side{width:224px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.sbhead{display:flex;align-items:center;gap:8px;min-height:58px;padding:12px 8px 12px 14px;border-bottom:1px solid var(--ff-rule)}
+.logo{width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--amber);color:#0F2C69}
+.logo svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.brand{display:flex;flex-direction:column;line-height:1.15}
+.brand b{font-size:12px;font-weight:700;color:var(--ff-ink);white-space:nowrap}
+.brand span{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+.nav{padding:10px;display:flex;flex-direction:column;gap:12px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;font-size:13.5px;padding:8px 10px;border-radius:8px;color:#C3CFE4;white-space:nowrap}
+.item.on{background:var(--ff-on);color:var(--ff-ink);font-weight:600}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.main{flex:1;min-width:0}
+.pg{padding:16px 20px 24px}
+
+/* THE ONE BAND: Home's size and place on every tab */
+.band{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:14px;padding:16px 22px 17px;margin:0 0 16px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;min-height:104px}
+.band::before{content:"";position:absolute;width:300px;height:300px;right:-90px;top:-120px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);pointer-events:none}
+.band::after{content:"";position:absolute;width:210px;height:210px;right:-20px;top:-70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);pointer-events:none}
+.band > *{position:relative}
+.band .eye{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.band h1{margin:0;font:400 27px/1.15 var(--title)}
+.band p{margin:4px 0 0;font-size:13.5px;color:var(--ff-quiet)}
+.band .sp{flex:1}
+.band .strip{display:flex;gap:20px}
+.band .strip div{text-align:right}
+.band .strip b{display:block;font-size:19px;line-height:1}
+.band .strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px}
+.band .strip .lt b{color:var(--ff-late)}
+.band .act{border:0;border-radius:9px;background:var(--amber);color:var(--amber-ink);font-size:13px;font-weight:700;padding:8px 14px}
+.band .ghost{border:1px solid rgba(255,255,255,.3);border-radius:9px;background:transparent;color:var(--ff-ink);font-size:13px;font-weight:600;padding:7px 13px}
+.band .acts{display:flex;gap:8px}
+/* the band as drawn today on the inner pages, for the before */
+.oldband{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:14px;padding:15px 22px 16px;margin:0 0 16px;display:flex;align-items:flex-end;gap:16px}
+.oldband .eye{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.oldband h1{margin:0;font-size:24px;font-weight:650;letter-spacing:-.01em}
+.oldband p{margin:3px 0 0;font-size:13px;color:var(--ff-quiet)}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;min-width:0;margin:0 0 16px}
+.chd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.cic{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--amber-tx)}
+.chd h2{margin:0;font:700 19px/1.15 var(--title);white-space:nowrap}
+.cnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.chd .sp{flex:1}
+.link{border:0;background:none;padding:0;font-size:13px;font-weight:600;color:var(--amber-tx);white-space:nowrap}
+.ctl{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);white-space:nowrap}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.sw span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;color:var(--ink-2)}
+.sw span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.pick{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.pick::after{content:"";border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--ink-3)}
+.search{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:5px 10px;font-size:12.5px;color:var(--ink-3);min-width:170px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.chip{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--ink-2);background:var(--surface)}
+.chip.on{background:var(--ff);border-color:var(--ff);color:var(--ff-ink)}
+.chip i{font-style:normal;margin-left:5px;opacity:.7;font-weight:500}
+
+/* ZEBRA: light grey first, then white */
+.z > .r:nth-child(odd), .z > .row:nth-child(odd){background:var(--zebra)}
+.zg .row:nth-of-type(odd){background:var(--zebra)}
+
+/* Home rows */
+.cl{display:grid;grid-template-columns:30px minmax(0,1fr) 30px;gap:10px;align-items:center;padding:9px 14px}
+.cm{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 10.5px/30px var(--mono);text-align:center}
+.cl b{display:block;font-size:14px;font-weight:600}
+.words{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12.5px;color:var(--ink-2)}
+.words span{border-bottom:1px solid var(--line)}
+.words i{font-style:normal;font-size:11px;font-weight:600;color:var(--amber-tx);margin-left:6px}
+.words i.al{color:var(--bad)}
+.cog{width:28px;height:28px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;color:var(--amber-tx);background:var(--surface)}
+.cog svg{width:15px;height:15px}
+.task{display:grid;grid-template-columns:17px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 14px}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);margin-top:1px}
+.late .tick{border-color:var(--bad)}
+.task .t{font-size:13.5px;line-height:1.4}
+.task .m{display:block;font-size:12px;color:var(--ink-3);margin-top:1px}
+.task .m b{font-weight:600;color:var(--ink-2)}
+.wh{font-size:12px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.late .wh{color:var(--bad)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.two .card{margin:0}
+
+/* My tasks rows */
+.grpl{display:flex;align-items:baseline;gap:8px;padding:14px 14px 7px;border-bottom:2px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.grpl.late{color:var(--bad)} .grpl.done{color:var(--good)}
+.grpl i{font-style:normal;font-size:11.5px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.mrow{display:grid;grid-template-columns:20px minmax(0,1fr) 120px 96px 120px;gap:12px;align-items:center;padding:8px 14px;font-size:14px}
+.pill{justify-self:end;font-size:12px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-soft);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:6px;vertical-align:1px}
+.when{font-size:13px;color:var(--ink-2)} .mrow.late .when{color:var(--bad);font-weight:600}
+.st{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}.st.p{color:var(--amber-tx)}.st.d{color:var(--good)}
+.mrow.done .tick{background:var(--good);border-color:var(--good);display:grid;place-items:center}
+.mrow.done .tick::after{content:"";width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.mrow.done .t{color:var(--ink-3)}
+.mrow.done .when{color:var(--good)}
+
+/* Case studies: covers */
+.shelf{padding:12px 14px 16px}
+.shh{display:flex;align-items:baseline;gap:8px;margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.shh i{font-style:normal;font-weight:600;letter-spacing:0;text-transform:none}
+.shh a{margin-left:auto;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--amber-tx);text-decoration:none}
+.books{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.cover{border:1px solid var(--line);border-radius:6px 10px 10px 6px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.cv{position:relative;background:linear-gradient(160deg,var(--ff),color-mix(in srgb,var(--ff) 78%,#000));color:var(--ff-ink);padding:12px 12px 13px 16px;min-height:118px;display:flex;flex-direction:column;gap:5px;box-shadow:inset 0 -3px 0 var(--amber)}
+.cv::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:rgba(0,0,0,.18)}
+.cv .lg{width:28px;height:28px;border-radius:7px;background:var(--surface);color:var(--ff);font:700 10px/28px var(--mono);text-align:center}
+.cv .ind{margin-top:auto;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet)}
+.cv .ti{font:700 15px/1.25 var(--title)}
+.cmeta{padding:8px 12px 10px 16px;font-size:12px;color:var(--ink-3)}
+.cmeta b{display:block;color:var(--ink);font-size:13px;font-weight:600}
+.desk .r{display:grid;grid-template-columns:minmax(0,1fr) 150px 200px 100px;gap:12px;align-items:center;padding:9px 14px;font-size:13.5px}
+.desk .r b{font-weight:600}
+.state{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-tx);white-space:nowrap}
+.muted{color:var(--ink-3)}
+
+/* Frameworks rows */
+.fw .r{display:grid;grid-template-columns:minmax(0,1fr) 150px 24px;gap:12px;align-items:center;padding:10px 14px}
+.fw .r b{display:block;font-size:14px;font-weight:600}
+.fw .r span.p{display:block;font-size:12.5px;color:var(--ink-3);margin-top:1px}
+.tag{justify-self:start;font-size:11.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.go{color:var(--ink-3)}
+
+/* before sketches */
+.ptitle{display:flex;align-items:center;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.ptitle h1{margin:0;font-size:19px;font-weight:600}
+.ptitle .right{margin-left:auto;display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.box{border:1px solid var(--line);border-radius:11px;background:var(--surface);padding:12px;box-shadow:var(--shadow)}
+.minis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px}
+.minis .band{margin:0}
+@container (max-width:900px){ .two{grid-template-columns:1fr} .desk .r{grid-template-columns:minmax(0,1fr) auto} .desk .r > :nth-child(2), .desk .r > :nth-child(3){display:none} }
+@container (max-width:700px){ .side{display:none} .mrow{grid-template-columns:20px minmax(0,1fr) auto} .mrow .pill,.mrow .st{display:none} .band .strip{gap:12px} .fw .r{grid-template-columns:minmax(0,1fr) 24px} .fw .r .tag{display:none} }
+</style>
+
+<div class="doc">
+  <h1>One band everywhere, striped rows, Show done, and Case studies and Frameworks in this look</h1>
+  <p class="lede">Drawn from your answers: Home's sentence becomes <b>"Here is what needs you today across your clients."</b>; <b>every console tab</b> gets Home's band at Home's size and place; <b>Show done</b> on My tasks offers <b>last week</b> (the one it opens on) and the last 30 days; Home's clients get the <b>sliders icon</b> for Settings at the far right. Rows alternate <b>light grey and white, grey first</b>.</p>
+  <span class="flag">A drawing · nothing is built · the clients, tasks and case studies are invented</span>
+  <div class="ctrl">Theme <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+  <nav class="toc"><a href="#p1">1 · Home</a><a href="#p2">2 · My tasks, with Show done</a><a href="#p3">3 · The band on every tab</a><a href="#p4">4 · Case studies</a><a href="#p5">5 · Frameworks</a></nav>
+
+  <section class="part" id="p1">
+    <div class="ph2"><span class="n">01</span><h2>Home</h2><p>the new sentence, Settings at the right, striped rows</p></div>
+    <p class="lab after">After</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="home"></aside><div class="main"><div class="pg" id="home"></div></div></div></div>
+    <p class="why"><b>The sentence</b> under the greeting says what the page is for. <b>Your clients</b>: each line ends in the <b>sliders icon</b>, which opens the client's own Setup (the word Settings shows on a hover); the lines alternate light grey and white, grey first. <b>Your tasks</b> alternate the same way.</p>
+  </section>
+
+  <section class="part" id="p2">
+    <div class="ph2"><span class="n">02</span><h2>My tasks: striped rows and Show done</h2></div>
+    <p class="lab after">After · Done: Last week</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="mywork"></aside><div class="main"><div class="pg" id="mt"></div></div></div></div>
+    <p class="why"><b>Done</b> joins the card's header as a three-way switch: <b>Hide</b> (as today), <b>Last week</b> and <b>30 days</b>. Choosing one adds a green <b>Done</b> group at the foot of the card, its rows ticked and greyed with the day each was finished, newest first; unticking one puts it back among the open ones. Last week is the choice it remembers once pressed. Rows in every group alternate light grey and white, grey first, restarting under each group's grey rule.</p>
+  </section>
+
+  <section class="part" id="p3">
+    <div class="ph2"><span class="n">03</span><h2>Home's band on every tab</h2><p>the same size and place; each tab's own words, counts and buttons</p></div>
+    <p class="lab">Before · today the inner pages have a slimmer band in a sans title</p>
+    <div class="frame" style="padding:16px"><div class="oldband"><div><p class="eye">1 active client</p><h1>Clients</h1><p>Every client the office works with, and the way into each module.</p></div></div></div>
+    <p class="lab after">After · one band, nine tabs</p>
+    <div class="frame" style="padding:16px"><div class="minis" id="bands"></div></div>
+    <p class="why"><b>Every band is Home's</b>: the same height, padding, circles and place at the top of the page. <b>The gold line</b> says what the page holds right now (the week, a count, a date); <b>the title</b> is the page's name in Georgia at the greeting's size; <b>the sentence</b> says what it is for; <b>the right side</b> carries the page's counts or its one or two buttons (amber for the main act). Home keeps "Good morning" as its title.</p>
+  </section>
+
+  <section class="part" id="p4">
+    <div class="ph2"><span class="n">04</span><h2>Case studies</h2></div>
+    <p class="lab">Before · live</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="memory"></aside><div class="main"><div class="pg" id="csBefore"></div></div></div></div>
+    <p class="lab after">After</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="memory"></aside><div class="main"><div class="pg" id="csAfter"></div></div></div></div>
+    <p class="why"><b>The band</b> carries the counts in its gold line and the two acts as buttons: <b>Open a piece of work</b> (amber, admins) and <b>Ask a question</b>. <b>The library</b> is one card whose header holds Case studies · Insights, the search and the industries; the shelves of covers stay inside it, each shelf labelled over a grey rule like My tasks' groups. <b>On the desk</b> (work running or being written) becomes its own card with striped rows: the work, its client, its state, its date. Insights, when chosen, is the same card with the insights as striped rows.</p>
+  </section>
+
+  <section class="part" id="p5">
+    <div class="ph2"><span class="n">05</span><h2>Frameworks</h2></div>
+    <p class="lab">Before · live</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="frameworks"></aside><div class="main"><div class="pg" id="fwBefore"></div></div></div></div>
+    <p class="lab after">After</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="frameworks"></aside><div class="main"><div class="pg" id="fwAfter"></div></div></div></div>
+    <p class="why"><b>The band</b> says how many frameworks and sections there are and carries <b>Add a framework</b> (admins). <b>One card</b> holds the library: its header has Search · Ask, the search box and the count; the section chips sit in a row under it; the frameworks are <b>striped rows</b> with the name, one line of what it is for, and its section as a pill. Pressing one opens it as today.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  var P = {
+    home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    memory:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    tasks:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/>',
+    go:'<path d="m9 6 6 6-6 6"/>',
+    cog:'<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5" transform="translate(2 2)"/><circle cx="15.6" cy="8.5" r="2.1"/><circle cx="10.6" cy="15.5" r="2.1"/>',
+    desk:'<path d="M3 10h18M5 10v9M19 10v9"/><path d="M8 10V6h8v4"/>'
+  };
+  var STAR = '<svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg>';
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  var G = [{h:"Work",items:[["home","Home"],["mywork","My tasks"],["clients","Clients"]]},{h:"Team",items:[["consultants","Consultants"],["access","Who sees what"]]},
+    {h:"Knowledge",items:[["memory","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]]},{items:[["history","History"]]}];
+  document.querySelectorAll(".side").forEach(function(s){
+    var on = s.getAttribute("data-on");
+    s.innerHTML = '<div class="sbhead"><span class="logo">' + STAR + '</span><span class="brand"><b>Strategy Management</b><span>Platform</span></span></div><nav class="nav">' +
+      G.map(function(g){ return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') + g.items.map(function(t){ return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>'; }).join("") + '</div>'; }).join("") + '</nav>';
+  });
+  function band(eye, title, sub, right){ return '<div class="band"><div><p class="eye">' + eye + '</p><h1>' + title + '</h1><p>' + sub + '</p></div><span class="sp"></span>' + (right || "") + '</div>'; }
+  function strip(items){ return '<div class="strip">' + items.map(function(x){ return '<div' + (x[2] ? ' class="lt"' : '') + '><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join("") + '</div>'; }
+  function head(icon, title, n, right){ return '<div class="chd"><span class="cic">' + ic(icon) + '</span><h2>' + title + '</h2>' + (n != null ? '<span class="cnt">' + n + '</span>' : '') + '<span class="sp"></span>' + (right || "") + '</div>'; }
+  function sw(word, opts, on){ return '<span class="ctl">' + word + ' <span class="sw">' + opts.map(function(o){ return '<span' + (o === on ? ' class="on"' : '') + '>' + o + '</span>'; }).join("") + '</span></span>'; }
+
+  /* 1 · Home */
+  var CL = [["RT","Raya Trade",'<span>Strategy</span><i>13 of 19</i><span>Insights</span><span>Internal Tracker</span><i class="al">4 open · 1 late</i>'],
+            ["EA","ElAbd",'<span>Strategy</span><span>Internal Tracker</span><i>2 open</i>'],
+            ["RHI","RHI",'<span>Strategy</span><span>Processes</span>'],
+            ["WD","Wander Development",'<span>Strategy</span><i class="al">No plan</i><span>Portfolio</span>']];
+  var cl = '<div class="z">' + CL.map(function(c){ return '<div class="r cl"><span class="cm">' + c[0] + '</span><span><b>' + c[1] + '</b><span class="words">' + c[2] + '</span></span><span class="cog" title="Settings">' + ic("cog") + '</span></div>'; }).join("") + '</div>';
+  var TK = [["Send the Q3 scorecard to the Head of Strategy","Raya Trade","In progress","Late 1 w",1],["Chase the plant managers' Q3 figures","ElAbd","Not started","Late 2 d",1],
+            ["Prepare the plant managers' scoring session","ElAbd","Not started","Thu 29 Oct"],["Review the unit heads' draft targets","Raya Trade","In progress","Fri 30 Oct"]];
+  var tk = '<div class="z">' + TK.map(function(t){ return '<div class="r task' + (t[4] ? ' late' : '') + '"><span class="tick"></span><span class="t">' + t[0] + '<span class="m"><b>' + t[1] + '</b> · ' + t[2] + '</span></span><span class="wh">' + t[3] + '</span></div>'; }).join("") + '</div>';
+  document.getElementById("home").innerHTML = band("Saturday, 24 Oct 2026", "Good morning, Islam", "Here is what needs you today across your clients.") +
+    '<div class="two"><div class="card">' + head("clients", "Your clients", 4, sw("Show", ["Mine","Demo"], "Mine") + '<button class="link">All clients →</button>') + cl + '</div>' +
+    '<div class="card">' + head("tasks", "Your tasks", 4, sw("Sort by", ["Date","Client"], "Date") + '<button class="link">All tasks →</button>') + tk + '</div></div>';
+
+  /* 2 · My tasks */
+  var M = {
+    late:[["Send the Q3 scorecard to the Head of Strategy","Raya Trade","Late 1 w","In progress",1],["Chase the plant managers' Q3 figures","ElAbd","Late 2 d","Not started",1]],
+    week:[["Prepare the plant managers' scoring session","ElAbd","Thu 29 Oct","Not started"],["Review the unit heads' draft targets","Raya Trade","Fri 30 Oct","In progress"],["Agree the cycle dates with the CFO","Wander Development","Fri 30 Oct","Not started"]],
+    later:[["Book the board offsite","RHI","W2 Nov","Not started"]],
+    done:[["Send the June figures to Finance","Raya Trade","Thu 22 Oct","Done"],["Confirm the H2 review dates","ElAbd","Tue 20 Oct","Done"],["Share the draft scorecard","Wander Development","Mon 19 Oct","Done"]]
+  };
+  function mrow(r, done){ return '<div class="row mrow' + (r[4] ? ' late' : '') + (done ? ' done' : '') + '"><span class="tick"></span><span class="t">' + r[0] + '</span><span class="pill">' + r[1] + '</span><span class="when">' + r[2] + '</span><span class="st' + (done ? ' d' : /progress/.test(r[3]) ? ' p' : '') + '">— ' + r[3] + '</span></div>'; }
+  function grp(cls, name, n, rows, done){ return '<div class="grpl ' + cls + '">' + name + ' <i>· ' + n + '</i></div><div class="z">' + rows.map(function(r){ return mrow(r, done); }).join("") + '</div>'; }
+  document.getElementById("mt").innerHTML = band("This week · 26 Oct – 30 Oct", "My tasks", "Your actions across every client's Internal Tracker.", strip([[6,"Open"],[2,"Late",1],[3,"This week"],[4,"Clients"]])) +
+    '<div class="card">' + head("tasks", "Open tasks", 6, '<span class="ctl">Show <span class="pick">Me</span></span>' + sw("Sort by", ["Date","Client"], "Date") + sw("Done", ["Hide","Last week","30 days"], "Last week") + '<span class="search">Search tasks</span>') +
+    grp("late", "Late", "2 open", M.late) + grp("", "This week", "3 open", M.week) + grp("", "Next week and later", "1 open", M.later) + grp("done", "Done last week", "3", M.done, true) + '</div>';
+
+  /* 3 · bands */
+  var B = [
+    band("Saturday, 24 Oct 2026", "Good morning, Islam", "Here is what needs you today across your clients."),
+    band("This week · 26 Oct – 30 Oct", "My tasks", "Your actions across every client's Internal Tracker.", strip([[6,"Open"],[2,"Late",1],[3,"This week"]])),
+    band("4 active · 1 ended · 1 demo", "Clients", "Every client the office works with, and the way into each module.", '<button class="act">+ Add a client</button>'),
+    band("12 consultants · 3 admins", "Consultants", "The office's people, their seats and what each may open.", '<button class="act">+ Add a consultant</button>'),
+    band("Who sees what", "Who sees what", "Which pages each seat may open, and who may change them.", strip([[5,"Seats"],[9,"Pages"]])),
+    band("6 on the shelves · 2 being written", "Case studies", "What we did for each client, and what we learned doing it.", '<span class="acts"><button class="ghost">Ask a question</button><button class="act">Open a piece of work</button></span>'),
+    band("80 frameworks · 9 sections", "Frameworks", "The strategy frameworks the office works with, to read or to ask.", '<button class="act">+ Add a framework</button>'),
+    band("The method · 5 parts", "Copilot", "How the Copilot thinks and what it may do, the same for every client."),
+    band("Last 30 days · 214 changes", "History", "What was done to the clients you can open, and by whom.")
+  ];
+  document.getElementById("bands").innerHTML = B.join("");
+
+  /* 4 · Case studies */
+  function cover(lg, ind, ti, cl, meta){ return '<div class="cover"><div class="cv"><span class="lg">' + lg + '</span><span class="ind">' + ind + '</span><span class="ti">' + ti + '</span></div><div class="cmeta"><b>' + cl + '</b>' + meta + '</div></div>'; }
+  var shelfNew = cover("RT","Retail & E-commerce","Reporting set-up 2025","Raya Trade","5 deliverables · 6 insights") + cover("WD","Real Estate","Strategy build 2025","Wander Development","6 deliverables · 4 insights") + cover("NL","Logistics","Operating model 2023","Nile Logistics","4 deliverables · 3 insights");
+  var shelfFood = cover("EA","Food & Beverage","Plant scorecards 2024","ElAbd","3 deliverables · 5 insights") + cover("EA","Food & Beverage","Cost review 2022","ElAbd","2 deliverables · 2 insights");
+  document.getElementById("csBefore").innerHTML = '<div class="ptitle"><h1>Case studies</h1><span class="muted" style="font-size:13px">6 case studies on the shelves</span><span class="right"><span class="sw"><span class="on">Case studies</span><span>Insights</span></span><button class="btn amber">Open a piece of work</button></span></div>' +
+    '<div class="box" style="margin-bottom:12px;color:var(--ink-3)">Search by client, industry, or what we did <span style="float:right;color:var(--amber-tx);font-weight:600">Ask a question instead</span></div>' +
+    '<div style="display:flex;gap:16px;font-size:13px;font-weight:600;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px"><span>All 6</span><span class="muted">Food &amp; Beverage 2</span><span class="muted">Retail 1</span></div>' +
+    '<p style="font-weight:600;margin:0 0 8px">Newest <span class="muted">3</span></p><div class="books">' + shelfNew + '</div>';
+  var desk = [["Strategy build 2026","Raya Trade","Being written · Islam","Due 30 Oct"],["Operating model 2026","ElAbd","Running","Started Mar"]];
+  document.getElementById("csAfter").innerHTML = band("6 on the shelves · 2 being written", "Case studies", "What we did for each client, and what we learned doing it.", '<span class="acts"><button class="ghost">Ask a question</button><button class="act">Open a piece of work</button></span>') +
+    '<div class="card">' + head("memory", "The library", 6, sw("Show", ["Case studies","Insights"], "Case studies") + '<span class="search" style="min-width:240px">Search by client, industry or what we did</span>') +
+    '<div class="chips"><span class="chip on">All<i>6</i></span><span class="chip">Food &amp; Beverage<i>2</i></span><span class="chip">Retail &amp; E-commerce<i>1</i></span><span class="chip">Real Estate<i>1</i></span><span class="chip">Logistics<i>1</i></span></div>' +
+    '<div class="shelf"><div class="shh">Newest <i>· 3</i></div><div class="books">' + shelfNew + '</div></div>' +
+    '<div class="shelf" style="border-top:1px solid var(--line-soft)"><div class="shh">Food &amp; Beverage <i>· 2</i><a href="#">See the shelf ›</a></div><div class="books">' + shelfFood + '</div></div></div>' +
+    '<div class="card">' + head("desk", "On the desk", 2) + '<div class="desk z">' + desk.map(function(d){ return '<div class="r"><span><b>' + d[0] + '</b></span><span class="muted">' + d[1] + '</span><span class="state">' + d[2] + '</span><span class="muted">' + d[3] + '</span></div>'; }).join("") + '</div></div>';
+
+  /* 5 · Frameworks */
+  var FW = [["Three Generic Strategies","Choose cost, differentiation or focus, and say why.","Competitive strategy"],["Balanced Scorecard","Four views of performance that keep each other honest.","Performance"],
+            ["Ansoff Matrix","Where growth comes from: markets and products, old and new.","Growth"],["PESTEL","The outside forces that shape the plan.","Environment"],["Value Chain","Where the firm adds value, step by step.","Operations"],["Blue Ocean","Make the competition irrelevant by moving the field.","Competitive strategy"]];
+  document.getElementById("fwBefore").innerHTML = '<div class="ptitle"><h1>Frameworks</h1><span class="right"><button class="btn">Add a framework</button></span></div>' +
+    '<div class="box" style="margin-bottom:12px"><span class="sw"><span class="on">Search</span><span>Ask</span></span><div style="margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;color:var(--ink-3)">Search the frameworks</div>' +
+    '<div class="chips" style="padding:10px 0 0;border:0"><span class="chip on">All</span><span class="chip">Competitive strategy</span><span class="chip">Performance</span><span class="chip">Growth</span></div></div>' +
+    '<p class="muted" style="font-size:13px;margin:0 0 8px">80 frameworks</p><div class="box" style="padding:0">' + FW.slice(0,4).map(function(f){ return '<div style="padding:12px 15px;border-bottom:1px solid var(--line-soft)"><b>' + f[0] + '</b> <span class="tag">' + f[2] + '</span><div class="muted" style="font-size:13px">' + f[1] + '</div></div>'; }).join("") + '</div>';
+  document.getElementById("fwAfter").innerHTML = band("80 frameworks · 9 sections", "Frameworks", "The strategy frameworks the office works with, to read or to ask.", '<button class="act">+ Add a framework</button>') +
+    '<div class="card">' + head("frameworks", "The library", 80, sw("Mode", ["Search","Ask"], "Search") + '<span class="search" style="min-width:240px">Search the frameworks</span>') +
+    '<div class="chips"><span class="chip on">All<i>80</i></span><span class="chip">Competitive strategy<i>14</i></span><span class="chip">Performance<i>11</i></span><span class="chip">Growth<i>9</i></span><span class="chip">Environment<i>8</i></span><span class="chip">Operations<i>10</i></span></div>' +
+    '<div class="fw z">' + FW.map(function(f){ return '<div class="r"><span><b>' + f[0] + '</b><span class="p">' + f[1] + '</span></span><span class="tag">' + f[2] + '</span><span class="go">' + ic("go") + '</span></div>'; }).join("") + '</div></div>';
+
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.addEventListener("click", function(){ document.documentElement.setAttribute("data-theme", b.getAttribute("data-v")); press(b.getAttribute("data-v")); }); });
+  press(document.documentElement.getAttribute("data-theme") === "dark" || (!document.documentElement.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+})();
+</script>

@@ -3,7 +3,7 @@ import { readerSeat } from "@/ffp/lib/auth/workspace";
 
 /* THE STAFF READER VIEW — the one part of Processes a client's own person may
    open (see ../layout.tsx). It asks readerSeat: the office, or somebody on the
-   client's People register. */
+   client's Client register. */
 export default async function ReadLayout(props: LayoutProps<"/[slug]/processes/read">) {
   const { slug } = await props.params;
   const seat = await readerSeat(slug);

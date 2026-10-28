@@ -25,6 +25,8 @@
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopBar } from "../../lib/topbar.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { barFor } from "../../lib/branding.ts";
+import { ledgerCss, sectionHead, LENS } from "../../lib/ledger.ts";
+import { CARD_LOOK_CSS, bandHtml, cardHead } from "../../lib/card-look.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import {
   type Note, type Who, type Minutes, type Named, type SendRow, type Register, type Person,
@@ -37,27 +39,17 @@ const esc = (s: unknown) =>
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 const plural = (n: number, one: string, many: string) => n + " " + (n === 1 ? one : many);
 
+/* THE LEDGER LOOK ON THE LIST (§605), from
+   design-mockups/modules-look/2026-10-23_one-look.html: the panel, the search
+   line, the numbered months and the status word are lib/ledger.ts's, shared
+   with Insights and Portfolio. One note's page keeps its own layout; what it
+   gains is the typeface, because every one of its controls was written with
+   a font line that ended in `inherit` and so drew in the browser's Arial. */
 const CSS = `
-*{box-sizing:border-box}
-:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-ink:#FFF;
-  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB}
-@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-ink:var(--ground);
-  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
-body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-[hidden]{display:none!important}
-.pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
-h2.pt{margin:0 0 14px;font-size:21px;font-weight:600;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
-.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
-.tools form{display:flex;gap:8px;flex:1 1 260px;min-width:0}
-.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
-.go{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 13px;font:600 13px/1.5 inherit;cursor:pointer;flex:none}
-.cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
-.btn{font:600 13px/1 inherit;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
-.btn:hover,.btn:focus-visible{background:var(--ground);outline:none}
+:root{--gold-ink:#FFF;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad-bg:#FBEDEB}
+@media (prefers-color-scheme:dark){:root{--gold-ink:var(--ground);--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad-bg:#33211F}}
 .btn.gold{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
 .btn.gold:hover{filter:brightness(1.06);background:var(--gold)}
-.btn[disabled],.btn[aria-disabled="true"]{opacity:.55;cursor:default}
 .btn.quiet{color:var(--ink-3)}
 .lab{font:600 10.5px/1.7 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 4px}
 .none{padding:40px 4px 10px;color:var(--ink-3);font-size:14px;max-width:60ch}
@@ -66,24 +58,24 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
 .said:empty{display:none}
 .said.good{border-color:var(--good);background:var(--good-bg);color:var(--good)}
 .unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
-/* ── the list ── */
-.list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
-.mrow{display:grid;grid-template-columns:104px 1fr auto auto;gap:14px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
-.mrow:hover,.mrow:focus-visible{background:var(--surface);outline:none}
-.mrow .d{font:400 12.5px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);white-space:nowrap}
-.mrow .t{min-width:0;font-size:15px}
-.mrow .t small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:1px}
-.mrow .n{font:600 12.5px/1.4 inherit;color:var(--ink-2);white-space:nowrap}
-.sent{font:600 11px/1 inherit;letter-spacing:.02em;padding:6px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);white-space:nowrap;min-width:96px;text-align:center}
-.sent.ok{border-color:var(--good);background:var(--good-bg);color:var(--good)}
-.sent.upd{border-color:var(--gold);color:var(--gold)}
-.grp{display:flex;align-items:center;gap:9px;padding:14px 2px 6px;font-size:13px;font-weight:600;color:var(--ink-2)}
-.grp .cnt{margin-left:0}
+/* ── the list: a month is a numbered section, a meeting a row. The row is
+   .nrow, never .mrow, which is the panel's own row in lib/ledger.ts. ── */
+/* IN MY TASKS' LOOK (§646): inside the card, striped grey and white, grey
+   first, restarting under each month's grey rule. */
+.nrow{display:grid;grid-template-columns:92px minmax(0,1fr) 54px 150px;gap:12px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line-2);text-decoration:none;color:inherit}
+.sec .nrow:nth-child(odd of .nrow){background:var(--zebra)}
+.sec .nrow:last-child{border-bottom:0}
+.nrow:hover,.nrow:focus-visible,.sec .nrow:hover{background:var(--surface-2);outline:none}
+.nrow .d{font:500 13.5px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.nrow .t{min-width:0;font:600 14.5px/1.35 var(--font)}
+.nrow .t small{display:block;font:400 13px/1.4 var(--font);color:var(--ink-3);margin-top:2px}
+.nrow .n{display:inline-flex;align-items:center;gap:5px;font:400 13px/1.4 var(--font);color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.nrow .n svg{width:13px;height:13px;flex:none}
 /* ── one note ── */
-.back{display:inline-block;font:600 12.5px/1 inherit;color:var(--ink-3);text-decoration:none;margin-bottom:10px}
+.back{display:inline-block;font:600 12.5px/1 var(--font);color:var(--ink-3);text-decoration:none;margin-bottom:10px}
 .back:hover,.back:focus-visible{color:var(--ink);outline:none}
 .head{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;margin-bottom:8px}
-.ttl{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:600 21px/1.3 inherit;padding:9px 11px;outline:none}
+.ttl{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:600 21px/1.3 var(--font);padding:9px 11px;outline:none}
 .ttl:focus{border-color:var(--gold)}
 /* THE KEY ABOVE IT IS WHY THE NUDGE GOES: the date carried margin-top:4px to
    sit level with a title that had no key over it. Both have one now.
@@ -104,18 +96,18 @@ input.date{cursor:auto}
    wears .date like every other field on this page. */
 .datenative{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0;margin:0;clip-path:inset(50%)}
 .att{display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:relative}
-.chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 inherit;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 10px}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 10px}
 .chip i{font-style:normal;font-weight:400;color:var(--ink-3)}
 .chip b{font-weight:400;color:var(--ink-3);cursor:pointer;background:none;border:0;padding:0 2px;font-size:13px}
 .chip b:hover,.chip b:focus-visible{color:var(--bad);outline:none}
 .chip.warn{border-color:var(--warn);color:var(--warn)}
 .chip.once{border-style:dashed}
-.addatt{font:600 12.5px/1 inherit;color:var(--gold);background:none;border:1px dashed var(--line);border-radius:999px;padding:6px 10px;cursor:pointer}
+.addatt{font:600 12.5px/1 var(--font);color:var(--gold);background:none;border:1px dashed var(--line);border-radius:999px;padding:6px 10px;cursor:pointer}
 .addatt:hover,.addatt:focus-visible{border-color:var(--gold);outline:none}
 .pick{position:absolute;top:34px;left:0;z-index:5;width:300px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:8px}
-.pick input{width:100%;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 13px/1.5 inherit;margin-bottom:6px}
+.pick input{width:100%;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 13px/1.5 var(--font);margin-bottom:6px}
 .pick .pl{max-height:190px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable}
-.pick .prow{display:flex;width:100%;align-items:center;gap:9px;padding:6px 7px;border:0;background:none;border-radius:7px;font:400 13.5px/1.4 inherit;color:var(--ink);cursor:pointer;text-align:left}
+.pick .prow{display:flex;width:100%;align-items:center;gap:9px;padding:6px 7px;border:0;background:none;border-radius:7px;font:400 13.5px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
 .pick .prow:hover,.pick .prow:focus-visible{background:var(--ground);outline:none}
 .pick .prow small{margin-left:auto;color:var(--ink-3);font-size:11.5px;white-space:nowrap}
 .pick .sq{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;background:var(--surface);color:var(--surface);flex:none}
@@ -128,7 +120,7 @@ input.date{cursor:auto}
 .pick .done .btn{flex:none;padding:6px 9px;font-size:12px}
 .pick .done span{font-size:12px;color:var(--ink-3)}
 .pick .nobody{padding:8px 7px;color:var(--ink-3);font-size:13px}
-.raw{width:100%;min-height:300px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:14px 16px;font:400 15px/1.6 inherit;resize:vertical;outline:none}
+.raw{width:100%;min-height:300px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:14px 16px;font:400 15px/1.6 var(--font);resize:vertical;outline:none}
 .raw:focus{border-color:var(--gold)}
 .raw::placeholder{color:var(--ink-3)}
 .foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
@@ -152,7 +144,7 @@ input.date{cursor:auto}
 .acts td.blank{color:var(--ink-3);font-style:italic}
 .side .raw{min-height:340px;font-size:14px}
 .side .lab{display:flex;align-items:center;gap:8px}
-.side .lab .btn{margin-left:auto;padding:5px 9px;font:600 11.5px/1 inherit;letter-spacing:0;text-transform:none}
+.side .lab .btn{margin-left:auto;padding:5px 9px;font:600 11.5px/1 var(--font);letter-spacing:0;text-transform:none}
 .hist{list-style:none;margin:0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable;color:var(--ink-2)}
 .hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
 .hist li:last-child{border-bottom:0}
@@ -162,8 +154,8 @@ input.date{cursor:auto}
 .sure .go.danger{color:var(--bad);border-color:var(--bad)}
 .rm{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--bad);cursor:pointer;text-decoration:underline}
 @media (max-width:760px){.two{grid-template-columns:1fr}
-  .mrow{grid-template-columns:1fr auto;grid-template-areas:"t s" "d n"}.mrow .t{grid-area:t}.mrow .sent{grid-area:s}.mrow .d{grid-area:d}.mrow .n{grid-area:n;text-align:right}
-  .head{grid-template-columns:1fr}.pick{width:min(300px,calc(100vw - 60px))}}
+  .nrow{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"d n s" "t t t";row-gap:4px;column-gap:10px}.nrow .t{grid-area:t}.nrow .word{grid-area:s}.nrow .d{grid-area:d}.nrow .n{grid-area:n}
+  .head{grid-template-columns:1fr}.pick{width:min(300px,calc(var(--winw) - 60px))}}
 `;
 
 
@@ -180,7 +172,7 @@ function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, at
     /* `title-as-heading` puts the reported look back — borderless, transparent,
        no key — which must turn checks/notes.mjs red (§94.5). Never set on a
        deployment (constitution XVI). */
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(ledgerCss(bar) + CARD_LOOK_CSS + CSS) +
       (BRK() === "title-as-heading" ? ".ttl{border:0!important;border-radius:0!important;background:transparent!important}.head .lab{display:none}" : "") +
       "</style>\n</head>\n" +
     "<body" + a + ">\n" +
@@ -215,6 +207,7 @@ export async function load(c: Q, noteId: string | null): Promise<Loaded> {
   return { notes, reg, office, short, note, sends: note ? await sendsOf(c, note.id) : [] };
 }
 
+const PERSON = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
 const TICK = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2l2.4 2.3 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const BRK = () => process.env.SMP_BREAK || "";
@@ -239,30 +232,44 @@ export function listBody(L: Loaded, p: PageArgs, today: string): string {
     const named = namedOf(n.attendees, L.reg, new Set(L.office.map((o) => o.key)));
     return named.map((a) => (a.key ? L.short.get(a.key) || a.name : a.name)).join(", ");
   };
-  let month = "";
-  const rows = shown.map((n) => {
+  /* A MONTH IS A NUMBERED SECTION (§605), its count beside its name; the
+     meetings in it are rows, newest first as they always were. */
+  const months: { m: string; notes: Note[] }[] = [];
+  for (const n of shown) {
     const m = monthLabel(n.metOn);
-    const head = m === month ? "" : ((month = m), '<div class="grp">' + esc(m) + ' <span class="cnt">' +
-      shown.filter((x) => monthLabel(x.metOn) === m).length + "</span></div>");
+    const last = months[months.length - 1];
+    if (last && last.m === m) last.notes.push(n); else months.push({ m, notes: [n] });
+  }
+  const row = (n: Note) => {
     const s = sentWord(n, today);
-    return head + '<a class="mrow" href="' + esc(here + "?note=" + encodeURIComponent(n.id)) + '" data-id="' + esc(n.id) + '">' +
+    return '<a class="nrow" href="' + esc(here + "?note=" + encodeURIComponent(n.id)) + '" data-id="' + esc(n.id) + '">' +
       '<span class="d">' + esc(readableDay(n.metOn, today)) + "</span>" +
       '<span class="t">' + esc(n.title || "Untitled meeting") +
       (nameOf(n) ? "<small>" + esc(nameOf(n)) + "</small>" : "") + "</span>" +
-      '<span class="n">' + n.attendees.length + "</span>" +
-      '<span class="sent ' + s.cls + '">' + esc(s.word) + "</span></a>";
-  }).join("");
-  const tools = '<div class="tools"><form method="get" action="' + esc(here) + '" role="search">' +
+      '<span class="n" title="' + esc(plural(n.attendees.length, "attendee", "attendees")) + '">' + PERSON + n.attendees.length + "</span>" +
+      /* SAID AS A WORD, NEVER DRAWN AS A BUTTON (§605): the pill read as a
+         control and pressing it only opened the meeting, as the whole row
+         does (§61). Grey, green when sent, gold when an update went out. */
+      '<span class="word sent ' + s.cls + '">' + esc(s.word) + "</span></a>";
+  };
+  const rows = months.map((g, i) =>
+    '<section class="sec">' + sectionHead(esc, i + 1, g.m, plural(g.notes.length, "meeting", "meetings")) +
+    g.notes.map(row).join("") + "</section>").join("");
+  /* THE BAND AND ONE CARD (§646): + New meeting is the band's amber button,
+     as Clients carries + Add a client; the search is the card's filter. */
+  const mast = bandHtml({ esc, eyebrow: p.tenantName, title: "Meetings", sentence: "Every meeting with " + p.tenantName + ", and its minutes.",
+    tiles: [{ n: shown.length, label: shown.length === 1 ? "Meeting" : "Meetings" }],
+    act: '<button class="act" type="button" data-act="new">+ New meeting</button>' });
+  const find = '<form class="find" method="get" action="' + esc(here) + '" role="search">' + LENS +
     '<input class="srch" type="search" name="q" value="' + esc(q) + '" placeholder="Search meetings" aria-label="Search meetings">' +
-    '<button class="go" type="submit">Search</button></form>' +
-    '<button class="btn gold" type="button" data-act="new">+ New meeting</button>' +
-    '<span class="cnt">' + esc(plural(shown.length, "meeting", "meetings")) + "</span></div>";
+    '<button class="go" type="submit">Search</button></form>';
   const none = !L.notes.length
     ? '<div class="none"><b>No meetings noted for ' + esc(p.tenantName) + " yet.</b>Start one and type as it runs; the assistant turns the notes into minutes, and the minutes go to the attendees.</div>"
     : !shown.length
       ? '<div class="none"><b>Nothing matches.</b>Try another word, or <a href="' + esc(here) + '">see them all</a>.</div>'
       : "";
-  return tools + (rows ? '<div class="list">' + rows + "</div>" : "") + none;
+  return mast + '<section class="card">' + cardHead({ esc, icon: "cal", title: "Meetings", count: shown.length, right: find }) +
+    (rows ? '<div class="list">' + rows + "</div>" : "") + none + "</section>";
 }
 
 /* THE ATTENDEES: a chip each, the register behind + Add attendee. A keyed
@@ -430,7 +437,7 @@ export async function notesDocument(p: PageArgs): Promise<string> {
   catch (e) { console.error("notes: reading " + p.slug + ":", (e as Error).message); }
   if (!L) {
     return skeleton(p.slug, p.tenantName, topOf(p), bar, null,
-      '<main class="pg"><h2 class="pt">Meetings</h2>' +
+      '<main class="pg">' + bandHtml({ esc, eyebrow: p.tenantName, title: "Meetings", sentence: "Every meeting with " + p.tenantName + ", and its minutes." }) +
       '<p class="unread">The meetings could not be read just now. Nothing has been lost &mdash; try again in a moment.</p></main>\n');
   }
   /* A note asked for and not found: said, with the way back (§35, §61). */
@@ -443,7 +450,7 @@ export async function notesDocument(p: PageArgs): Promise<string> {
     ? '<main class="pg"><a class="back" href="' + esc(here) + '">&larr; All meetings</a>' +
       '<p class="said" id="said" role="alert" aria-live="polite"></p>' +
       '<div id="body">' + noteBody(L, p, today) + "</div></main>\n"
-    : '<main class="pg"><h2 class="pt">Meetings <small>' + esc(p.tenantName) + "</small></h2>" +
+    : '<main class="pg">' +
       '<p class="said" id="said" role="alert" aria-live="polite"></p>' +
       '<div id="body">' + listBody(L, p, today) + "</div></main>\n";
   return skeleton(p.slug, p.tenantName, topOf(p), bar, attrs, body);

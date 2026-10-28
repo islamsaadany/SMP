@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Copilot Layout</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DA;--warnbg:#FBF1DE;--goodbg:#E6F2EA;--good:#2E6B45;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);margin:0;padding:24px 16px 64px}
+.wrap{max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1{font-size:26px;margin:0}
+.lede{color:var(--ink-2);max-width:75ch;margin:6px 0 0}
+h2.step{font-size:19px;margin:0 0 4px}
+h2.step span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.k{color:var(--ink-3);font-size:13.5px;margin:0 0 12px;max-width:85ch}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.bar{background:var(--panel);color:var(--panel-quiet);display:flex;gap:18px;padding:10px 16px;font-size:13.5px;flex-wrap:wrap}
+.bar b{color:var(--panel-ink);border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.secs{display:flex;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface-2);flex-wrap:wrap}
+.sec{font-size:12.5px;padding:3px 10px;border-radius:5px;color:var(--ink-2)}
+.sec.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.body{display:grid;min-height:430px}
+.b-today{grid-template-columns:44px minmax(0,1fr)}
+.b-talk{grid-template-columns:240px minmax(0,1fr)}
+.b-draft{grid-template-columns:240px minmax(0,1fr) 340px}
+.b-laptop{grid-template-columns:44px minmax(0,1fr)}
+.strip{border-right:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0;color:var(--ink-3);font-weight:700}
+.strip i{font-style:normal;width:26px;height:26px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;background:var(--surface);font-size:14px}
+.rail{border-right:1px solid var(--line);padding:12px;font-size:13px;background:var(--surface-2)}
+.rh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.rh span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:700}
+.new{font:600 12.5px/1.2 var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:4px 10px}
+.ri{padding:6px 8px;border-radius:5px;color:var(--ink-2);display:flex;flex-direction:column}
+.ri.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.ri small{font-weight:400;color:var(--ink-3);font-size:11.5px}
+.main{padding:16px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.col{width:100%;max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.wide .col{max-width:none}
+.who{font-size:11.5px;color:var(--ink-3);font-weight:600}
+.msg{border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;line-height:1.55}
+.msg.ai{border-left:3px solid var(--goldfill)}
+.msg.me{align-self:flex-end;background:var(--surface-2);max-width:75%}
+.wide .msg.ai{max-width:none}
+.raw{color:var(--ink-2)}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:12.5px;background:var(--surface)}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3);font-size:13.5px;display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.send{width:28px;height:28px;border-radius:7px;background:var(--panel);color:var(--panel-ink);display:grid;place-items:center;font-size:14px}
+.draft{border-left:1px solid var(--line);background:var(--surface-2);padding:14px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.dh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dh b{font-size:14.5px}
+.prog{font-size:11.5px;color:var(--good);background:var(--goodbg);border-radius:999px;padding:1px 8px;font-weight:700;white-space:nowrap}
+.kos{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ko{padding:8px 10px;border-bottom:1px solid var(--line);display:flex;gap:8px}
+.ko:last-child{border-bottom:0}
+.ko .st{flex:none;width:18px;font-weight:700}
+.ko.done .st{color:var(--good)}
+.ko.now{background:var(--warnbg)}
+.ko.todo{color:var(--ink-3)}
+.ko small{display:block;color:var(--ink-3);font-size:11.5px}
+.asm{font-size:12px;color:var(--ink-2);background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:7px 9px}
+.btns{display:flex;gap:8px;margin-top:auto}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 11px;font:600 12.5px/1.2 var(--sans)}
+.btn.pri{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.tab{align-self:flex-end;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font:600 12.5px/1.2 var(--sans);background:var(--surface);display:flex;gap:6px;align-items:center}
+.note{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.n{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--ink-2)}
+.n b{color:var(--ink);display:block;margin-bottom:2px}
+.flag{outline:2px dashed #C0563B;outline-offset:2px;border-radius:4px}
+@media (max-width:900px){.b-draft{grid-template-columns:minmax(0,1fr)}.b-draft .rail,.b-talk .rail{display:none}.b-talk{grid-template-columns:minmax(0,1fr)}.draft{border-left:0;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Copilot: a reading width, the chats open, the draft on the right</h1>
+  <p class="lede">Three changes to every Copilot area, plus a bug fix. Islam: <i>"in the ai chats like claude the chat window is always with a certain width … maybe as well we don't collapse the side bar with default and maybe use the right side for something like claude does."</i> The example is the Key Objectives free chat from 25 Oct.</p>
+</header>
+
+<section>
+  <h2 class="step"><span>Today</span>Lines run the full width, bold shows as stars, the chats are squeezed</h2>
+  <p class="k">A reply spans the whole main area (80% of it). On a wide screen that is 1,200px+ a line. The model's <code>**bold**</code> is drawn as text (dashed). The chat list sits behind the slim strip.</p>
+  <div class="frame">
+    <div class="bar"><b>Copilot</b><span>Plan</span><span>Setup</span></div>
+    <div class="secs"><span class="sec on">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body b-today">
+      <div class="strip"><i>☰</i><i>+</i></div>
+      <div class="main wide"><div class="col">
+        <div class="who">Copilot</div>
+        <div class="msg ai raw">Good, we'll go one at a time. 1 of 5: <span class="flag">**Students reached (cumulative)**</span>, currently set at ≥ 1,500,000.<br><br>Before we change the number, it helps to know where you stand. How many students has Educate Me reached so far, and as of when? For example, "620,000 as of end of 2024." With that, we can see whether 1.5 million is a stretch or too safe for a 2–3 year horizon, and then set the new target.</div>
+        <div class="box"><span>Message the Copilot…</span><span class="send">↑</span></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="step"><span>After · A</span>While you are only talking: one centred column, the chats open</h2>
+  <p class="k">The conversation and the message box share one column, at most <b>740px</b>, centred in the space left. Bold is bold. On a computer the chats rail is open by default; folding it is remembered for that person.</p>
+  <div class="frame">
+    <div class="bar"><b>Copilot</b><span>Plan</span><span>Setup</span></div>
+    <div class="secs"><span class="sec on">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body b-talk">
+      <div class="rail">
+        <div class="rh"><span>Chats</span><span class="new">+ New chat</span></div>
+        <div class="ri on">Free chat — Educate Me<small>Islam · now · Free chat</small></div>
+        <div class="ri">Foundation workflow<small>Islam · 22 Oct · Guided</small></div>
+        <div class="rh" style="margin-top:16px"><span>Deliverables</span></div>
+        <div class="ri">Foundation v3<small>saved 22 Oct</small></div>
+      </div>
+      <div class="main"><div class="col">
+        <div class="who">You</div>
+        <div class="msg me">I want to refine the key objectives with proper targets</div>
+        <div class="who">Copilot</div>
+        <div class="msg ai">You want each Key Objective to have a clear target. The plan holds 7 today; Forefront suggests 3–5. How should we go?</div>
+        <div class="opts"><span class="opt">One at a time</span><span class="opt">All together</span><span class="opt">First decide which stay</span></div>
+        <div class="who">You</div>
+        <div class="msg me">One at a time</div>
+        <div class="who">Copilot</div>
+        <div class="msg ai">Good. 1 of 5: <b>Students reached (cumulative)</b>, currently ≥ 1,500,000. How many students has Educate Me reached so far, and as of when?</div>
+        <div class="opts"><span class="opt">I'll give it</span><span class="opt">Assume for me</span><span class="opt">No baseline yet</span></div>
+        <div class="box"><span>Message the Copilot…</span><span class="send">↑</span></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="step"><span>After · B</span>Once there is a draft: it builds on the right, the chat keeps talking</h2>
+  <p class="k">The panel opens with the first draft and stays for the chat. Each agreed item ticks, the one under discussion is marked, assumptions are listed under it, and Save / Apply to plan live here — not under a chat bubble. The chat no longer repeats the draft; it says what changed in a line.</p>
+  <div class="frame">
+    <div class="bar"><b>Copilot</b><span>Plan</span><span>Setup</span></div>
+    <div class="secs"><span class="sec on">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body b-draft">
+      <div class="rail">
+        <div class="rh"><span>Chats</span><span class="new">+ New chat</span></div>
+        <div class="ri on">Free chat — Educate Me<small>Islam · now · Free chat</small></div>
+        <div class="ri">Foundation workflow<small>Islam · 22 Oct · Guided</small></div>
+        <div class="rh" style="margin-top:16px"><span>Deliverables</span></div>
+        <div class="ri">Foundation v3<small>saved 22 Oct</small></div>
+      </div>
+      <div class="main"><div class="col">
+        <div class="who">You</div>
+        <div class="msg me">620,000 as of end of 2024</div>
+        <div class="who">Copilot</div>
+        <div class="msg ai">That puts 1.5M at 2.4× in three years — a stretch, but in line with your growth since 2022. Keep <b>≥ 1,500,000 by 2028</b>?</div>
+        <div class="opts"><span class="opt">Keep it</span><span class="opt">Raise it</span><span class="opt">Lower it</span></div>
+        <div class="who">You</div>
+        <div class="msg me">Keep it</div>
+        <div class="who">Copilot</div>
+        <div class="msg ai">Agreed — it's in the draft on the right. 2 of 5: <b>Educators reached (cumulative)</b>, currently ≥ 150,000. Where does it stand today?</div>
+        <div class="opts"><span class="opt">I'll give it</span><span class="opt">Assume for me</span><span class="opt">No baseline yet</span></div>
+        <div class="box"><span>Message the Copilot…</span><span class="send">↑</span></div>
+      </div></div>
+      <aside class="draft">
+        <div class="dh"><b>Key Objectives · draft</b><span class="prog">1 of 5 agreed</span></div>
+        <div class="kos">
+          <div class="ko done"><span class="st">✓</span><div>Students reached: ≥ 1,500,000 by 2028<small>from 620,000, end 2024</small></div></div>
+          <div class="ko now"><span class="st">→</span><div>Educators reached: ≥ 150,000<small>under discussion</small></div></div>
+          <div class="ko todo"><span class="st">·</span><div>Beneficiary satisfaction: ≥ 90%</div></div>
+          <div class="ko todo"><span class="st">·</span><div>Team engagement: ≥ 90%</div></div>
+          <div class="ko todo"><span class="st">·</span><div>Positive cash flow: 12 months</div></div>
+        </div>
+        <div class="asm"><b>Assumed</b> none yet</div>
+        <div class="btns"><span class="btn">Save draft</span><span class="btn pri">Apply to plan</span></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="step"><span>After · C</span>A laptop or a narrow window: the conversation keeps its width</h2>
+  <p class="k">Below about 1,280px there is not room for three columns and a 740px conversation. The chats fold to the slim strip and the draft folds to a <b>View draft</b> tab over the chat; pressing it slides the panel in. On a phone, the draft opens as its own screen.</p>
+  <div class="frame" style="max-width:980px">
+    <div class="bar"><b>Copilot</b><span>Plan</span><span>Setup</span></div>
+    <div class="body b-laptop">
+      <div class="strip"><i>☰</i><i>+</i></div>
+      <div class="main"><div class="col">
+        <span class="tab">View draft <span class="prog">1 of 5</span></span>
+        <div class="who">Copilot</div>
+        <div class="msg ai">Agreed — it's in the draft. 2 of 5: <b>Educators reached (cumulative)</b>, currently ≥ 150,000. Where does it stand today?</div>
+        <div class="opts"><span class="opt">I'll give it</span><span class="opt">Assume for me</span><span class="opt">No baseline yet</span></div>
+        <div class="box"><span>Message the Copilot…</span><span class="send">↑</span></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="step"><span>What is decided and what is asked</span>For sign-off</h2>
+  <div class="note">
+    <div class="n"><b>1 · Reading width</b>Messages and the message box at most 740px, centred. Draft cards inside the chat (workflows) may go to 960px.</div>
+    <div class="n"><b>2 · Chats open by default</b>On a computer at 1,280px and wider. Folding is remembered per person.</div>
+    <div class="n"><b>3 · Draft panel on the right</b>Free chats first. The workflows already have a right-hand to-do; they keep theirs.</div>
+    <div class="n"><b>4 · Bold</b><code>**text**</code> in a reply draws as bold; nothing else of markdown is read.</div>
+    <div class="n"><b>Open question</b>Should the Save / Apply buttons move to the panel for free chats only, or also stay under the last draft bubble while people get used to it?</div>
+  </div>
+</section>
+</div>
+</body>
+</html>

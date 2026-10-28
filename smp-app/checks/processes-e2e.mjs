@@ -241,7 +241,7 @@ check(anon.status() >= 300 && anon.status() < 400 && /sign-in/.test(anon.headers
 const extra = [["P3.1", "Inventory & Stock Count"], ["P4.1", "Credit & Collections"], ["P5.1", "Hire to Retire"]];
 for (const [c, n] of extra) await proc(c, n);
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
-check(await A.page.isVisible("nav[aria-label='Steps']") && (await A.page.$$("tbody tr")).length === 5, "Priorities lists every high-level process");
+check(await A.page.isVisible("nav[aria-label='Steps']") && (await A.page.$$("tbody tr:has(.font-mono)")).length === 5, "Priorities lists every high-level process");
 const dot = (name, k, n) => A.page.click(`button[aria-label='${k} ${n} of 5 for ${name}']`);
 const scoreOf = async (name) => A.page.$$eval("tbody tr", (rows, nm) => { const r = rows.find((x) => x.textContent.includes(nm)); return r ? (r.querySelector("td.tabular-nums")?.textContent ?? "") : "?"; }, name);
 const waitScore = (name, v) => A.page.waitForFunction(([nm, val]) => { const r = [...document.querySelectorAll("tbody tr")].find((x) => x.textContent.includes(nm)); return r && r.querySelector("td.tabular-nums")?.textContent === val; }, [name, v], { timeout: 20000 });
@@ -272,13 +272,80 @@ const dec2 = Object.fromEntries((await q(ffp, 'select code, "deepDiveDecision" d
 check(dec2["P1.1"] === "WAVE_1" && dec2["P2.4"] === "WAVE_2", "suggesting waves never changes a decision somebody made");
 check(dec2["P4.1"] == null && dec2["P5.1"] == null, "…and leaves unscored processes undecided", JSON.stringify(dec2));
 
+/* Layout: nothing pushed off the right edge, and every row's "Open" is reachable. */
+await A.page.setViewportSize({ width: 1440, height: 900 });
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+check(await A.page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), "the Priorities page does not run off the right edge");
+const navBox = await A.page.locator("nav[aria-label='Steps']").boundingBox();
+const banner = await A.page.locator("h1").first().boundingBox();
+check(!!navBox && !!banner && navBox.x < banner.x - 100, "the banner steps aside for the logo but the working area below uses the full width", JSON.stringify([navBox?.x, banner?.x]));
+for (const w of [1440, 2200]) {
+  await A.page.setViewportSize({ width: w, height: 900 });
+  await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+  const nb = await A.page.locator("nav[aria-label='Steps']").boundingBox();
+  const sb = await A.page.locator("nav:has(a[href$='/processes/priorities'])").first().boundingBox();
+  check(!!nb && !!sb && nb.x - (sb.x + sb.width) < 60, `at ${w} pixels wide the working area starts right beside the side menu, with no empty band`, JSON.stringify([nb?.x, sb && sb.x + sb.width]));
+}
+await A.page.setViewportSize({ width: 1440, height: 900 });
+await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
+const openBox = await A.page.locator("a:text-is('Open →')").first().boundingBox();
+check(!!openBox && openBox.x + openBox.width <= 1440, "the process list's Open link is inside the window", JSON.stringify(openBox));
+await A.page.setViewportSize({ width: 1280, height: 720 });
+/* The picker: choose which processes the table shows; remembered; Select all brings them back. */
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+await A.page.click("button:has-text('Choose processes')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('None')");
+check(/No processes chosen/.test(await body(A.page)), "with none chosen the table says so");
+await A.page.click("[aria-label='Choose processes'] label:has-text('Order to cash') input");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Done')");
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 1 && /Order to cash/.test(await body(A.page)) && /1 \/ 5\s*shown/i.test(await body(A.page)), "the table shows only the chosen process, and the count says 1 / 5");
+await A.page.reload({ waitUntil: "networkidle" });
+await A.page.waitForFunction(() => document.querySelectorAll("tbody tr .font-mono").length === 1, null, { timeout: 10000 }).catch(() => {});
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 1, "the choice is remembered when the page is opened again");
+await A.page.click("button:has-text('Choose processes')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Select all')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Done')");
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 5, "Select all brings every process back");
+
+/* The list keeps its order while scoring; sub-processes sit under their main; "Clear entries" clears only what was picked. */
+const order = () => A.page.$$eval("tbody tr td:nth-child(2) .font-mono", (e) => e.map((x) => x.textContent.trim()));
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+const before = await order();
+await dot("Hire to Retire", "risk", 5); await dot("Hire to Retire", "importance", 5);
+await waitScore("Hire to Retire", "—").catch(() => {}); await A.page.waitForTimeout(1200);
+const afterOrder = await order();
+check(JSON.stringify(before) === JSON.stringify(afterOrder) && before.join() === [...before].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).join(), "scoring a process does not move any row", before.join() + " | " + afterOrder.join());
+await q(ffp, 'update processes set "parentProcessId"=(select id from processes where code=$2 and "workspaceId"=$1) where code=$3 and "workspaceId"=$1', [S, "P2.4", "P3.1"]);
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+const collapsed = await order();
+check(!collapsed.includes("P3.1") && (await A.page.$$("button[aria-label^='Show the sub-processes of']")).length === 1, "sub-processes start folded under their main, with a + that opens them", collapsed.join());
+await A.page.click("button[aria-label='Show the sub-processes of Supplier onboarding']");
+const tree = await order();
+check(tree.indexOf("P3.1") === tree.indexOf("P2.4") + 1 && /main/i.test(await body(A.page)) && (await A.page.$$("tbody td.ps-8:has(.font-mono)")).length === 1, "a sub-process sits directly under its main process, indented", tree.join());
+await q(ffp, 'update processes set "parentProcessId"=null where code=$2 and "workspaceId"=$1', [S, "P3.1"]);
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+await A.page.click("button:text-is('Clear entries…')");
+await A.page.click("[aria-label='Clear entries'] label:text-is('Risk') input");
+await A.page.click("button:text-is('Untick all')");
+await A.page.click("input[aria-label='Clear Hire to Retire']");
+A.page.once("dialog", (d) => d.accept());
+await A.page.click("button:text-is('Clear the selected')");
+await A.page.waitForSelector("[role=status]:has-text('Cleared 1')", { timeout: 20000 });
+const cl = Object.fromEntries((await q(ffp, 'select code, "priorityRisk" r, "priorityImportance" i from processes where "workspaceId"=$1', [S])).map((r) => [r.code, r]));
+check(cl["P5.1"].r == null && cl["P5.1"].i === 5 && cl["P1.1"].r === 5, "Clear entries empties only the kind picked, on only the processes ticked", JSON.stringify(cl["P5.1"]) + JSON.stringify(cl["P1.1"]));
+await q(ffp, 'update processes set "priorityImportance"=null where code=$2 and "workspaceId"=$1', [S, "P5.1"]);
+
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=rank", { waitUntil: "networkidle" });
-check((await A.page.$$("svg circle")).length === 3 && /Not scored yet/.test(await body(A.page)), "the chart plots the scored processes and names the rest");
+const nCirc = (await A.page.$$("svg[aria-label^='Importance against risk'] circle")).length; const bodyR = await body(A.page);
+check(nCirc === 2 && /Not scored yet/.test(bodyR), "the chart plots the scored processes and names the rest", nCirc + " | " + bodyR.slice(0, 300));
 await A.page.click("svg a >> nth=0"); await A.page.waitForURL(/sel=/, { timeout: 20000 });
 check(/selected/i.test(await body(A.page)), "a circle opens that process beside the chart");
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });
 const w1 = await A.page.$$eval("section[aria-label='Wave 1'] article", (a) => a.map((x) => x.textContent));
 check(w1.length === 1 && /Order to cash/.test(w1[0]) && /Deep dive \d of 6/.test(w1[0]), "the plan puts the process in its wave with its deep-dive progress", JSON.stringify(w1));
+await A.page.click("section[aria-label='Wave 1'] summary[aria-label='What the bars mean']");
+const info = await A.page.innerText("section[aria-label='Wave 1'] details");
+check(["Map", "RACI", "Authority", "Controls", "SOP", "Approved"].every((k) => info.includes(k)) && /at least 3 steps/.test(info) && /Green = done/.test(info), "the ! on a deep-dive card says what each bar is and what turns it green");
 check(/Team capacity: 4 deep dives at a time\. Wave 1 holds 1 — fits/.test(await body(A.page)), "…and says whether Wave 1 fits the team");
 
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
@@ -316,12 +383,92 @@ check(ap.status === "APPROVED" && !!ap.n && /Head of Finance/.test(ap.r) && ap.h
 const pr = await A.get("/" + S + "/processes/reports/priorities");
 const prt = await pr.text();
 check(pr.status() === 200 && /Approved by/.test(prt) && /Order to cash/.test(prt), "the one-page export shows the approval");
+const xl = await A.get("/api/ffp/export/priorities/" + S);
+const ExcelJS = (await import("exceljs")).default;
+const wbk = new ExcelJS.Workbook(); await wbk.xlsx.load(await xl.body());
+const sh = wbk.getWorksheet("Priorities");
+const hdr = sh.getRow(1).values.slice(1);
+const xr = []; sh.eachRow((r, n) => { if (n > 1) xr.push(r.values.slice(1)); });
+const oc = xr.find((r) => r[1] === "P1.1");
+check(xl.status() === 200 && hdr.includes("Why") && hdr.includes("Deep dive (of 6)") && xr.length === 5 && oc && oc[8] === 95 && oc[10] === "Wave 1", "the Excel download has one row per process with scores, decision and progress", JSON.stringify(oc));
+const xs = await T.get("/api/ffp/export/priorities/" + S);
+check(xs.status() === 403, "…and a client's own person cannot download it");
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=sign", { waitUntil: "networkidle" });
 await A.page.fill("input[aria-label='Why reopen']", "Client asked to add Credit & Collections");
 await A.page.click("button:text-is('Reopen')");
 await A.page.waitForFunction(() => document.querySelector("button")?.textContent !== undefined && !/Changing it from here needs a reason/.test(document.body.innerText), null, { timeout: 20000 });
 const ro = (await q(ffp, 'select status, history from priority_plans where "workspaceId"=$1', [S]))[0];
 check(ro.status === "DRAFT" && ro.history.some((h) => /Reopened/.test(h.what) && /Credit & Collections/.test(h.reason || "")), "reopening takes a reason and keeps it on record", JSON.stringify(ro.history.slice(-1)));
+
+/* ── steps inside a process: noticed, flagged, scored, made into a process ── */
+const decStep = (await q(ffp, 'insert into process_steps (id,"processId",type,label,"order","assignedRoleId") values (gen_random_uuid()::text,$1,\'DECISION\',$2,9,$3) returning id', [P1, "Approve the credit limit", rCc]))[0].id;
+await q(ffp, 'insert into process_controls (id,"processId","stepId",risk,"riskLevel",control) values (gen_random_uuid()::text,$1,$2,$3,\'high\',$4)', [P1, decStep, "Limit set too high", "Two people sign"]);
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+const orderRow = A.page.locator("tbody tr", { hasText: "Order to cash" }).first();
+await A.page.locator("button:has-text('Steps inside')").first().click();
+const stepRowTxt = await A.page.locator("tr", { hasText: "Step: Approve the credit limit" }).innerText();
+check(/Step: Raise the invoice/.test(await body(A.page)) && (await A.page.$$("button[aria-label='Flag step Raise the invoice']")).length === 1, "opening Steps inside lists every step, and any of them can be flagged");
+check(/High-risk control/i.test(stepRowTxt) && /Decision point/i.test(stepRowTxt) && /Not flagged/i.test(stepRowTxt), "a step with a high-risk control and a decision is noticed, and is not scored until flagged", stepRowTxt.replace(/\s+/g, " "));
+await A.page.click("button[aria-label='Flag step Approve the credit limit']");
+await A.page.waitForFunction(() => !!document.querySelector("button[aria-label='importance 5 of 5 for step Approve the credit limit']"), null, { timeout: 20000 });
+const fl = (await q(ffp, 'select "priorityFlagged" f, "priorityComplexity" c, "priorityRisk" r, "priorityImportance" i from process_steps where id=$1', [decStep]))[0];
+check(fl.f === true && fl.r === 4 && fl.c === 2 && fl.i == null, "flagging starts the scores from the map (risk 4 from one high control) and leaves importance to the office", JSON.stringify(fl));
+await A.page.click("button[aria-label='importance 5 of 5 for step Approve the credit limit']");
+await A.page.waitForFunction(() => /\b77\b/.test([...document.querySelectorAll("tr")].find((r) => r.textContent.includes("Step: Approve the credit limit"))?.querySelector("td.tabular-nums")?.textContent ?? ""), null, { timeout: 20000 }).catch(() => {});
+const stScore = await A.page.locator("tr", { hasText: "Step: Approve the credit limit" }).locator("td.tabular-nums").innerText();
+check(stScore.trim() === "77", "the step gets its own score (77)", stScore);
+check((await scoreOf("Order to cash")) === "95", "…and the process's own score is untouched");
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });
+const w1s = await A.page.$$eval("section[aria-label='Wave 1'] article", (x) => x.map((y) => y.textContent));
+check(w1s.length === 1 && /Approve the credit limit/.test(w1s[0]) && /Step of Order to cash/.test(w1s[0]) && !/Deep dive \d of 6/.test(w1s[0]), "the plan shows the flagged step, not its whole process", JSON.stringify(w1s));
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+await A.page.locator("button:has-text('Steps inside')").first().click();
+await A.page.selectOption("select[aria-label='Wave for step Approve the credit limit']", "WAVE_2");
+await A.page.waitForFunction(() => document.querySelector("select[aria-label='Wave for step Approve the credit limit']")?.value === "WAVE_2");
+await A.page.waitForTimeout(800);
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });
+const w2s = await A.page.$$eval("section[aria-label='Wave 2'] article", (x) => x.map((y) => y.textContent));
+check(w2s.some((t) => /Approve the credit limit/.test(t)), "a flagged step can go in its own wave", JSON.stringify(w2s));
+const fs_ = await A.get("/api/ffp/export/priorities/" + S + "/flagged-steps");
+const wb3 = new (await import("exceljs")).default.Workbook(); await wb3.xlsx.load(await fs_.body());
+const hs = wb3.getWorksheet("Steps").getRow(1).values.slice(1);
+const fsr = []; wb3.getWorksheet("Steps").eachRow((r, n) => { if (n > 1) fsr.push(r.values.slice(1)); });
+const ci = (h) => hs.indexOf(h);
+const flaggedRows = fsr.filter((r) => r[ci("Flagged")] === "Yes");
+check(fs_.status() === 200 && fsr.length >= 11 && flaggedRows.length === 1 && flaggedRows[0][ci("Step")] === "Approve the credit limit" && flaggedRows[0][ci("Role")] === "Credit Controller" && flaggedRows[0][ci("Wave")] === "Wave 2", "the steps download lists every step of every process, with a Flagged column, and the flagged one carries its scores and wave", JSON.stringify([fsr.length, flaggedRows[0]]));
+check(fsr.some((r) => r[ci("Step")] === "Raise the invoice" && r[ci("Flagged")] === "No") && new Set(fsr.map((r) => r[ci("Level")])).has("Main"), "…an unflagged step is in it too, marked No");
+check((await T.get("/api/ffp/export/priorities/" + S + "/flagged-steps")).status() === 403, "…and a client's own person cannot download it");
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+await A.page.locator("button:has-text('Steps inside')").first().click();
+A.page.once("dialog", (d) => d.accept("Approve the credit limit"));
+await A.page.click("button:text-is('Make it a process')");
+await A.page.waitForSelector("[role=status]:has-text('Made')", { timeout: 20000 });
+const np = (await q(ffp, 'select p.code, p."priorityImportance" i, p."priorityRisk" r, p."parentProcessId" pp, p."branchFromStepId" b, s."priorityFlagged" f from processes p join process_steps s on s.id=p."branchFromStepId" where p."workspaceId"=$1 and p."branchFromStepId"=$2', [S, decStep]))[0];
+check(!!np && np.pp === P1 && np.b === decStep && np.i === 5 && np.r === 4 && np.f === false, "making it a process creates a sub-process branching from the step, carries the scores, and keeps the step as the link", JSON.stringify(np));
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });
+const ex2 = await A.get("/api/ffp/export/priorities/" + S);
+const wb2 = new (await import("exceljs")).default.Workbook(); await wb2.xlsx.load(await ex2.body());
+check(!!wb2.getWorksheet("Flagged steps"), "the Excel file has a Flagged steps sheet");
+
+/* ── AI review: a finding can be added as a proposed step, shown on the map, and confirmed or deleted ── */
+const P6 = await proc("P6.1", "Month-end close");
+await q(ffp, `insert into review_findings (id,"processId",category,area,severity,title,description,recommendation,status,"updatedAt") values (gen_random_uuid()::text,$1,'RISK','PROCESS_MAP','HIGH',$2,$3,$4,'OPEN',now())`, [P6, "No second check on journal entries", "Journals are posted by one person.", "Add a review of journals before posting"]);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/review", { waitUntil: "networkidle" });
+check(/No second check on journal entries/.test(await body(A.page)) && (await A.page.$$("button:text-is('Add as a step')")).length === 1, "the AI review page lists a finding with Add as a step");
+await A.page.click("button:text-is('Add as a step')");
+await A.page.click("button:text-is('Add to process (proposed)')");
+await A.page.waitForSelector("text=Proposed · waiting on the map", { timeout: 20000 });
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+check(/Proposed · from AI review/i.test(await body(A.page)) && (await A.page.$$("button:text-is('Confirm')")).length === 1 && (await A.page.$$("button:text-is('Delete')")).length >= 1, "the proposed step is highlighted on the map with Confirm and Delete");
+const before6 = (await q(ffp, 'select count(*)::int n from process_steps where "processId"=$1', [P6]))[0].n;
+check(before6 === 2, "until it is confirmed it is not a step");
+await A.page.click("button:text-is('Confirm')");
+await A.page.waitForFunction(() => !/Proposed · from AI review/i.test(document.body.innerText), null, { timeout: 20000 });
+const after6 = (await q(ffp, 'select count(*)::int n from process_steps where "processId"=$1', [P6]))[0].n;
+check(after6 === 3, "Confirm creates the real step", String(after6));
+
+const sopHtml = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P1)).text();
+check(/Back to picker/.test(sopHtml) && /\/processes\/export/.test(sopHtml), "the SOP page has a Back to picker link");
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

@@ -1329,7 +1329,7 @@ var SYNC = (function () {
         " is signed in but is not on this register.";
       lost.appendChild(document.createTextNode(
         "Nothing is shown rather than somebody else\u2019s view. Ask the SMO to " +
-        "check the People register."));
+        "check the Client register."));
       var panel = document.getElementById("panel");
       if (panel) { panel.textContent = ""; panel.appendChild(lost); }
       box.hidden = true;
@@ -1807,7 +1807,7 @@ var SYNC = (function () {
        rule about one copy of a rule, on the chrome. */
     maySimulateSession: function () { return maySimulateSession(); },
     /* AND WHICH PEOPLE THAT SESSION MAY LOOK THROUGH (§554) — the shell's
-       switcher and the People register's row menu both fill their lists
+       switcher and the Client register's row menu both fill their lists
        from this, so neither offers a view the save would turn down (§61). */
     maySimulatePerson: function (p) { return maySimulatePerson(p); },
     /* The three password operations, all SMO-only and all checked again on

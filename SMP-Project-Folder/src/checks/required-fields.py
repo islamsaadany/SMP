@@ -221,9 +221,13 @@ with sync_playwright() as p:
        pg.evaluate("document.querySelectorAll('#modal-b [aria-invalid=\"true\"]').length") == 2)
     ring = pg.evaluate("""()=>{const f=document.querySelector('#modal-b .pdf.reqmiss');
       if(!f) return null; const s=getComputedStyle(f);
-      return {style:s.outlineStyle, w:parseFloat(s.outlineWidth)}}""")
+      return {style:s.outlineStyle, w:parseFloat(s.outlineWidth),
+              z:parseFloat(getComputedStyle(document.documentElement).zoom)||1}}""")
+    # §631: the 2px ring is drawn at 80% on a computer and snapped to the
+    # screen's pixels (measured 1.25), so it is asked in the page's own
+    # pixels with that snap allowed — still nothing a hairline could pass.
     ck("the ring is PAINTED, not just a class", bool(ring) and ring["style"] == "solid"
-       and ring["w"] >= 2, ring)
+       and ring["w"] / ring["z"] >= 1.5, ring)
     after = pg.evaluate("""(m)=>{const all=[].slice.call(document.querySelectorAll('#modal-b .pdlg > .pdf'));
       const top=t=>{const f=all.filter(f=>{const l=f.querySelector('.pdfl');
         return l&&l.firstChild&&l.firstChild.textContent.trim()===t;})[0];

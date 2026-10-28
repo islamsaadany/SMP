@@ -40,10 +40,11 @@
    splitter and an element's method misspelt, and the create piece reaching
    for the strategy page's GROUP; and on the console's PATHS, §467 itself
    (its guard taken out), the word lookup unguarded, a strategy name read as
-   the file loads, and the one declared doorway rewired. NOT caught, on either page: a misspelt
-   member of an object a page script builds itself (CLIENTSETUP.mountCreat)
-   — an object written in JavaScript is open, and only the library names
-   are declared closed.
+   the file loads, and the one declared doorway rewired. SINCE §599 THE OBJECTS THE PAGES BUILD ARE CLOSED TOO (closeObjects,
+   below): `CLIENTSETUP.mountCreat`, `SEARCHSEL.openOnn` and `MY_TAB.kk` are
+   findings, and --red asserts all three. Still open, on both pages: an
+   object holding only data, and anything reached by a computed name
+   (`ROWFIND[t]`), which no checker can spell-check.
 
      node checks/pages-types.mjs          # run from smp-app/
      node checks/pages-types.mjs --red    # every break must go red
@@ -77,6 +78,7 @@ const TSC = join(APP, "node_modules", "typescript", "bin", "tsc");
      `querySelector` as a bare Element, which has no `value` or `dataset`; the
      pages know what they looked up. Named one by one rather than opened with
      an index signature, so `el.datset` is still a finding (--red asserts it). */
+const CLOSER = `declare function __closed<T>(o: T): { [K in keyof T]: T[K] };\n`;
 const DOM = `interface Element {
   dataset: DOMStringMap; value: any; hidden: boolean | "until-found"; focus(options?: FocusOptions): void;
   style: any; click(): void; disabled: boolean; blur(): void; title: string; select(): void;
@@ -94,7 +96,7 @@ interface Event {
   pointerId: number; clientX: number; clientY: number; button: number;
 }
 `;
-const STRATEGY_GLOBALS = `type Closed<T> = { [K in keyof T]: T[K] };
+const STRATEGY_GLOBALS = CLOSER + `type Closed<T> = { [K in keyof T]: T[K] };
 declare var SMPRules: Closed<typeof import("./rules.js")>;
 declare var SMPDiff: Closed<typeof import("./graph-diff.js")>;
 declare var SMPAudience: Closed<typeof import("./audience.js")>;
@@ -115,8 +117,9 @@ interface Screen { isExtended: boolean; }
 /* The console loads the debrief splitter, a module to the checker for the
    library files' reason, and nothing else of the frozen product's but the
    set-up flow — whose strategy-page names it does NOT have (§594). */
-const CONSOLE_GLOBALS = `type Closed<T> = { [K in keyof T]: T[K] };
+const CONSOLE_GLOBALS = CLOSER + `type Closed<T> = { [K in keyof T]: T[K] };
 declare var MemorySplit: Closed<typeof import("./memory-split.js")>;
+declare var CaseSplit: Closed<typeof import("./case-split.js")>;
 ` + DOM;
 
 const STRATEGY_BREAKS = {
@@ -130,6 +133,16 @@ const STRATEGY_BREAKS = {
   "element-property-misspelt": ["shell-inline.js", "pop.dataset.ddpop", "pop.datset.ddpop"],
   "global-misspelt": ["present.js", 'var asp = aspOn ? String(GROUP.aspiration || "").trim() : ""',
                       'var asp = aspOn ? String(GRUOP.aspiration || "").trim() : ""'],
+  /* §599: a member of an object a page builds itself, misspelt */
+  "own-object-member-misspelt": ["shell-inline.js", "if (!SEARCHSEL.openOn(rsel)) PROLEPICK = null;", "if (!SEARCHSEL.openOnn(rsel)) PROLEPICK = null;"],
+  /* §602: a field of the described data, misspelt — the review's, then the plan's */
+  "review-field-misspelt": ["config-data.js", 'return !!((REVIEW.parked || {})[String(target || "")]);', 'return !!((REVIEW.parkd || {})[String(target || "")]);'],
+  "plan-field-misspelt": ["config-data.js", "if (p.by === fk) carried.push(UNITS[k].name", "if (p.byy === fk) carried.push(UNITS[k].name"],
+  /* §625: the company's own data, described (SMP.Group, SMP.Capability) */
+  "company-field-misspelt": ["config-data.js", "function chatCfg(){ return SMPRules.chatCfg(GROUP.chat); }", "function chatCfg(){ return SMPRules.chatCfg(GROUP.chatt); }"],
+  "capability-field-misspelt": ["config-data.js", "var head = personBy(c.head), cust = personBy(c.custodian);", "var head = personBy(c.head), cust = personBy(c.custodain);"],
+  /* §599: a plain object of behaviour — a `{ … }` holding functions — read wrongly */
+  "plain-object-member-misspelt": ["shell-inline.js", ': null, def.k === MY_TAB.k) : null;', ': null, def.k === MY_TAB.kk) : null;'],
 };
 
 const CONSOLE_BREAKS = {
@@ -140,11 +153,86 @@ const CONSOLE_BREAKS = {
   "splitter-misspelt": ["console-inline.js", "var out = window.MemorySplit.split(text);", "var out = window.MemorySplit.splitt(text);"],
   "element-method-misspelt": ["console-inline.js", 'document.getElementById("signout").addEventListener("click"',
                               'document.getElementById("signout").addEventListner("click"'],
+  /* §599: the set-up flow's own object, misspelt where the console calls it */
+  "setup-object-misspelt": ["console-inline.js", 'CLIENTSETUP.mountCreate(host, { door: "/" });', 'CLIENTSETUP.mountCreat(host, { door: "/" });'],
   /* §467's class: the set-up flow's CREATE piece, which the console mounts,
      reaching for a strategy-page name the console does not have. */
   "setup-reaches-strategy-name": ["client-setup.js", 'var draft = { name:"", industry:"", size:"", notes:"" };',
                                   'var draft = { name:"", industry:"", size:"", notes:"", group: GROUP };'],
 };
+
+/* CLOSE WHAT THE PAGES BUILD (§599). A page script that builds its own
+   object as it loads — `var SYNC = (function () { … return { … }; })();` —
+   hands the checker an object written in JavaScript, which is open, so
+   `CLIENTSETUP.mountCreat(…)` read as `any`. In the COPY the checker reads,
+   and nowhere else, each such load is wrapped `__closed(…)` — an identity
+   declared to return a mapped copy of the same keys, which is closed (the
+   library names' answer, §589). The wrap sits on the same lines, so every
+   finding keeps its line; the pages themselves are not touched, so nothing
+   a browser receives changes. Found by parsing (acorn), never by a list, so
+   an object a page gains tomorrow is closed without an edit here. */
+function closeObjects(dir, files) {
+  const closed = [];
+  for (const f of files) {
+    if (!f.endsWith(".js")) continue;
+    const p = join(dir, f);
+    let src = readFileSync(p, "utf8");
+    const ast = acorn.parse(src, { ecmaVersion: "latest", sourceType: "script" });
+    const at = [];
+    walk.simple(ast, { VariableDeclarator(d) {
+      if (d.id.type !== "Identifier" || !d.init) return;
+      const built = d.init.type === "CallExpression" && /Function/.test(d.init.callee.type);
+      /* a plain `{ … }` that holds functions is an object of behaviour too;
+         one holding only data stays open, because data gains keys as it runs */
+      const behaviour = d.init.type === "ObjectExpression" && d.init.properties.some((q) => q.value && /Function/.test(q.value.type));
+      if (built || behaviour) { at.push(d.init); closed.push(f + ":" + d.id.name); }
+    } });
+    /* each mark on its own, latest first, so an object built inside another
+       one cannot shift the marks still to be made (§599's first run broke
+       copilot.js doing them a pair at a time) */
+    const marks = at.flatMap((e) => [[e.start, "__closed("], [e.end, ")"]]).sort((x, y) => y[0] - x[0]);
+    for (const [pos, text] of marks) src = src.slice(0, pos) + text + src.slice(pos);
+    /* the copy must still parse — a wrap misplaced is this step's fault,
+       said in its own words rather than as the checker's syntax errors */
+    try { acorn.parse(src, { ecmaVersion: "latest", sourceType: "script" }); }
+    catch (e) { throw new Error("pages-types: closing the objects broke " + f + " — " + e.message); }
+    writeFileSync(p, src);
+  }
+  return closed;
+}
+
+/* THE PAGES' OWN DATA, LABELLED WITH ITS DESCRIPTION (§602). lib/state.d.ts
+   describes the data once; here, in the COPY the checker reads and nowhere
+   else, each page variable named below gets `/** @type {…} *\/` on its own
+   line, so a field the description does not name is a finding. Every name
+   must be found exactly once, or the label has silently missed. */
+const DESCRIBED = {
+  REVIEW: "SMP.Review",
+  UNITS: "{ [key: string]: SMP.Unit }",
+  GROUP: "SMP.Group",
+};
+function describeData(dir, files) {
+  copyFileSync(join(REPO, "lib", "state.d.ts"), join(dir, "state.d.ts"));
+  const found = {};
+  for (const f of files) {
+    if (!f.endsWith(".js")) continue;
+    const p = join(dir, f);
+    let src = readFileSync(p, "utf8");
+    const ast = acorn.parse(src, { ecmaVersion: "latest", sourceType: "script" });
+    const at = [];
+    for (const st of ast.body)
+      if (st.type === "VariableDeclaration" && st.declarations.length === 1 && DESCRIBED[st.declarations[0].id.name]) {
+        const name = st.declarations[0].id.name;
+        found[name] = (found[name] || 0) + 1;
+        at.push([st.start, "/** @type {" + DESCRIBED[name] + "} */ "]);
+      }
+    for (const [pos, text] of at.sort((x, y) => y[0] - x[0])) src = src.slice(0, pos) + text + src.slice(pos);
+    writeFileSync(p, src);
+  }
+  const missed = Object.keys(DESCRIBED).filter((n) => found[n] !== 1);
+  if (missed.length) throw new Error("pages-types: the description's labels did not each find one declaration: " + missed.join(", "));
+  return Object.keys(DESCRIBED);
+}
 
 /* The pages as the browser runs them, in a scratch directory. */
 function assembleStrategy() {
@@ -163,7 +251,9 @@ function assembleStrategy() {
   if (!m) throw new Error("pages-types: the shell's inline script was not found");
   writeFileSync(join(dir, "shell-inline.js"), m[1]);
   writeFileSync(join(dir, "globals.d.ts"), STRATEGY_GLOBALS);
-  return { dir, files: ["globals.d.ts", ...scripts, "theme.js", "shell-inline.js", "route.js"] };
+  const files = ["globals.d.ts", "state.d.ts", ...scripts, "theme.js", "shell-inline.js", "route.js"];
+  const described = describeData(dir, files);
+  return { dir, files, described, closed: closeObjects(dir, files) };
 }
 
 /* THE CONSOLE (platform.html, served unchanged by lib/shell.ts): its script
@@ -171,23 +261,32 @@ function assembleStrategy() {
    build-shell.mjs copies to that address — a script added to the page that
    this does not know is a refusal, never a page quietly checked without it —
    and its own inline script. */
-const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/client-setup.js": join(SRC, "client-setup.js") };
+/* §620: /navskel.js is KNOWN and left out of the page read: it is the
+   press drawing (lib/navskel.ts), one closed function that names nothing of
+   the console's and that the console names nothing of — the same script
+   every client page loads — so it is not part of the console's page. */
+const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/case-split.js": join(APP, "lib", "case-split.cjs"),
+                      "/client-setup.js": join(SRC, "client-setup.js"), "/navskel.js": null };
 function assembleConsole() {
   const dir = mkdtempSync(join(tmpdir(), "console-types-"));
   const page = readFileSync(join(REPO, "platform.html"), "utf8");
   const files = ["globals.d.ts"];
   for (const m of page.matchAll(/<script src="([^"]+)"><\/script>/g)) {
-    if (!CONSOLE_SRC[m[1]]) throw new Error("pages-types: platform.html loads " + m[1] + ", which this check does not know");
+    if (!(m[1] in CONSOLE_SRC)) throw new Error("pages-types: platform.html loads " + m[1] + ", which this check does not know");
+    if (CONSOLE_SRC[m[1]] === null) continue;
     const name = basename(m[1]);
     copyFileSync(CONSOLE_SRC[m[1]], join(dir, name));
-    if (name !== "memory-split.js") files.push(name);
+    /* case-split requires the memory's splitter by its .cjs name in node */
+    if (name === "memory-split.js") copyFileSync(CONSOLE_SRC[m[1]], join(dir, "memory-split.cjs"));
+    /* the two splitters are UMD modules, read as the globals they define */
+    if (name !== "memory-split.js" && name !== "case-split.js") files.push(name);
   }
   const m = /<script>\n([\s\S]*)<\/script>\s*<\/body>/.exec(page);
   if (!m) throw new Error("pages-types: platform.html's own script was not found");
   writeFileSync(join(dir, "console-inline.js"), m[1]);
   writeFileSync(join(dir, "globals.d.ts"), CONSOLE_GLOBALS);
   files.push("console-inline.js");
-  return { dir, files };
+  return { dir, files, closed: closeObjects(dir, files) };
 }
 
 /* ── THE CONSOLE'S PATHS INTO THE SET-UP FLOW (§596) ─────────────────────
@@ -339,13 +438,13 @@ const CONSOLE_PATH_BREAKS = {
   "the-467-crash": ["client-setup.js", '  if (typeof GROUP === "undefined") return { plans: 0, capabilities: 0, units: 0, functions: 0 };\n', ""],
   "word-lookup-unguarded": ["client-setup.js", 'return typeof labelWord === "function" ? labelWord(k, form === "one" ? "group" : "bu") : fb;',
                             'return labelWord(k, form === "one" ? "group" : "bu");'],
-  "read-as-the-file-loads": ["client-setup.js", "var CLIENTSETUP = (function () {", "var CS_AT_LOAD = UNITS;\nvar CLIENTSETUP = (function () {"],
+  "read-as-the-file-loads": ["client-setup.js", "function __smpHoldsNow() {", "var CS_AT_LOAD = UNITS;\nfunction __smpHoldsNow() {"],
   "doorway-rewired": ["client-setup.js", 'i.addEventListener("change", function () { if (!canShape()) redraw(); });',
                       'i.addEventListener("change", function () { if (!canShape()) HOST && render(); });'],
 };
 const SUBJECTS = {
   strategy: { title: "the strategy pages", known: join(here, "pages-types.known.json"),
-              note: "Read before recorded: none of these is a fault (§589). Rewrite with --write only after reading every new one.",
+              note: "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a fault (the Core-values handlers' door to a capability's throwaway view; no page walked through it, §603) went when the door was closed (§603). Since §625 the company's own object is described too (SMP.Group, SMP.Capability), so what remains is two habits of the pages, not missing fields: (1) a reader that hands back a shared frozen empty, or a writer that mints `{}` and fills it on the next line (comms, coFound, branding); (2) a list or a target that mixes real records with the unit-like views and holders built for a function, a capability or the company (topAsUnit, fnAsUnit, capAsUnit, a function's own holder), which are not described yet. Rewrite with --write only after reading every new one.",
               assemble: assembleStrategy, breaks: STRATEGY_BREAKS, minFiles: 30, own: "shell-inline.js" },
   console: { title: "the console page", known: join(here, "console-types.known.json"),
              note: "Read before recorded (§594). The console's own are noise. The rest are the set-up flow's STRATEGY-PAGE names, which the console page does not have: on its two entry points (Add a client, an archived client) each is behind a typeof guard or on a path the console never takes, and client-setup-outside.py drives both with no page error. A NEW one here is a name the console may reach and throw on (§467's fault): confirm it is guarded or unreachable from the console BEFORE recording it with --write.",
@@ -435,8 +534,11 @@ for (const sub of Object.values(SUBJECTS)) {
   try {
     const list = findings(asm), rec = known(sub.known), now = tally(list);
     const total = [...rec.values()].reduce((n, c) => n + c, 0);
-    check(sub.title + " read as one page: " + (asm.files.length - 1) + " scripts, its own among them",
-      asm.files.length - 1 >= sub.minFiles && asm.files.includes(sub.own));
+    const scripts = asm.files.filter((f) => !f.endsWith(".d.ts")).length;
+    check(sub.title + " read as one page: " + scripts + " scripts, its own among them",
+      scripts >= sub.minFiles && asm.files.includes(sub.own));
+    check(asm.closed.length + " objects the page builds itself, closed for the checker (§599)", asm.closed.length > 0,
+      "       none found — the closing step has stopped matching how the pages build their objects");
     const extra = beyond(list, rec);
     check("no finding beyond the " + total + " recorded ones, each read", !extra.length,
       extra.map((f) => "       " + f.file + ":" + f.line + "  " + f.code + "  " + f.message).join("\n"));

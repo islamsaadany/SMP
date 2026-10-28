@@ -1,0 +1,341 @@
+<title>Team And Copilot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Islam, 2026-10-24: "can we work on refining the design of the
+   consultants and who sees what and the copilot tabs with the same look
+   and feel?" Drawn in the live console's tokens and sizes (shown at 100%). */
+
+/* Islam, 2026-10-24: Settings at the far right of Home's clients; light
+   grey and white alternating rows (grey first) on Home's clients, Home's
+   tasks and My tasks; a Show done on My tasks (last week, and the last 30
+   days); Home's band, its size and place, on every tab; a better sentence
+   than "Your SMP Home."; and Case studies and Frameworks in this look.
+   Drawn in the live console's tokens and sizes (shown at 100% here). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--zebra:#F4F6F9;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-late:#FF9B8F;--ff-on:rgba(255,255,255,.13);--ff-label:#8FA3C9;--ff-rule:rgba(255,255,255,.12);
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--bad:#B23025;--bad-bg:#FBEDEB;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--title:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1E2430;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1E2430;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.doc{max-width:1400px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:92ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink)}
+.flag{display:inline-block;margin:12px 0 14px;font-size:12.5px;font-weight:600;color:var(--amber-tx);border:1px solid var(--amber-tx);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 0;font-size:13px}
+.toc a{color:var(--amber-tx);font-weight:600;text-decoration:none}
+section.part{margin-top:44px}
+.ph2{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px;flex-wrap:wrap}
+.ph2 .n{font:600 12px var(--mono);color:var(--amber-tx)}
+.ph2 h2{margin:0;font-size:19px;font-weight:600}
+.ph2 p{margin:0;color:var(--ink-3);font-size:13px}
+.lab{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:18px 0 8px}
+.lab.after{color:var(--good)}
+.lab::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.why{margin:10px 0 0;font-size:13px;color:var(--ink-2);max-width:96ch}
+.why b{color:var(--ink)}
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+
+/* the column */
+.app{display:flex}
+.side{width:224px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.sbhead{display:flex;align-items:center;gap:8px;min-height:58px;padding:12px 8px 12px 14px;border-bottom:1px solid var(--ff-rule)}
+.logo{width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--amber);color:#0F2C69}
+.logo svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.brand{display:flex;flex-direction:column;line-height:1.15}
+.brand b{font-size:12px;font-weight:700;color:var(--ff-ink);white-space:nowrap}
+.brand span{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+.nav{padding:10px;display:flex;flex-direction:column;gap:12px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;font-size:13.5px;padding:8px 10px;border-radius:8px;color:#C3CFE4;white-space:nowrap}
+.item.on{background:var(--ff-on);color:var(--ff-ink);font-weight:600}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.main{flex:1;min-width:0}
+.pg{padding:16px 20px 24px}
+
+/* THE ONE BAND: Home's size and place on every tab */
+.band{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:14px;padding:16px 22px 17px;margin:0 0 16px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;min-height:104px}
+.band::before{content:"";position:absolute;width:300px;height:300px;right:-90px;top:-120px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);pointer-events:none}
+.band::after{content:"";position:absolute;width:210px;height:210px;right:-20px;top:-70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);pointer-events:none}
+.band > *{position:relative}
+.band .eye{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.band h1{margin:0;font:400 27px/1.15 var(--title)}
+.band p{margin:4px 0 0;font-size:13.5px;color:var(--ff-quiet)}
+.band .sp{flex:1}
+.band .strip{display:flex;gap:20px}
+.band .strip div{text-align:right}
+.band .strip b{display:block;font-size:19px;line-height:1}
+.band .strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px}
+.band .strip .lt b{color:var(--ff-late)}
+.band .act{border:0;border-radius:9px;background:var(--amber);color:var(--amber-ink);font-size:13px;font-weight:700;padding:8px 14px}
+.band .ghost{border:1px solid rgba(255,255,255,.3);border-radius:9px;background:transparent;color:var(--ff-ink);font-size:13px;font-weight:600;padding:7px 13px}
+.band .acts{display:flex;gap:8px}
+/* cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;min-width:0;margin:0 0 16px}
+.chd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.cic{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--amber-tx)}
+.chd h2{margin:0;font:700 19px/1.15 var(--title);white-space:nowrap}
+.cnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.chd .sp{flex:1}
+.link{border:0;background:none;padding:0;font-size:13px;font-weight:600;color:var(--amber-tx);white-space:nowrap}
+.ctl{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);white-space:nowrap}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.sw span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;color:var(--ink-2)}
+.sw span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.pick{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.pick::after{content:"";border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--ink-3)}
+.search{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:5px 10px;font-size:12.5px;color:var(--ink-3);min-width:170px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.chip{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--ink-2);background:var(--surface)}
+.chip.on{background:var(--ff);border-color:var(--ff);color:var(--ff-ink)}
+.chip i{font-style:normal;margin-left:5px;opacity:.7;font-weight:500}
+
+
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.sw span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;color:var(--ink-2)}
+.sw span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.band .sw{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25)}
+.band .sw span{color:var(--ff-quiet)} .band .sw span.on{background:var(--surface);color:var(--ink)}
+.search{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:5px 10px;font-size:12.5px;color:var(--ink-3);min-width:190px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.chip{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--ink-2);background:var(--surface)}
+.chip.on{background:var(--ff);border-color:var(--ff);color:var(--ff-ink)}
+.z > .r:nth-child(odd){background:var(--zebra)}
+.grpl{display:flex;align-items:baseline;gap:8px;padding:14px 14px 7px;border-bottom:2px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.grpl i{font-style:normal;font-size:11.5px;font-weight:600;letter-spacing:0;text-transform:none}
+.muted{color:var(--ink-3)}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:5px 11px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.btn.q{border-color:transparent;background:transparent;color:var(--amber-tx);padding:5px 6px}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+/* before sketches (live today) */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{background:var(--ff);color:var(--ff-ink);font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:8px}
+.tbl td{padding:7px 8px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+.fake{display:block;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:5px 8px;font-size:12.5px}
+.mtag{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:2px 6px;background:var(--surface)}
+.mtag.am{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.cellsw{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.cellsw span{font:600 10px var(--mono);text-transform:uppercase;padding:4px 8px;color:var(--ink-3);border-right:1px solid var(--line);background:var(--surface)}
+.cellsw span:last-child{border-right:0} .cellsw span.on{background:var(--ff);color:var(--ff-ink)} .cellsw span.am{background:var(--amber);color:var(--amber-ink)}
+/* consultants */
+.pr{display:grid;grid-template-columns:34px minmax(0,1.3fr) 110px minmax(0,1.4fr) 90px auto;gap:12px;align-items:center;padding:9px 14px}
+.av{width:32px;height:32px;border-radius:50%;background:var(--ff);color:var(--amber);font:700 11px/32px var(--mono);text-align:center}
+.av.ret{background:var(--surface-2);color:var(--ink-3)}
+.pr b{display:block;font-size:14px;font-weight:600}
+.pr .em{display:block;font:12px var(--mono);color:var(--ink-3)}
+.role{justify-self:start;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--amber-wash);color:var(--amber-tx);white-space:nowrap}
+.role.no{background:transparent;color:var(--ink-3);border:1px dashed var(--line);font-weight:600}
+.seats{display:flex;flex-wrap:wrap;gap:4px}
+.seat{font-size:11.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.seat i{font-style:normal;font-weight:500;color:var(--ink-3)}
+.pw{font-size:12.5px;white-space:nowrap} .pw::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-right:6px;vertical-align:1px}
+.pw.not::before{background:var(--amber)}
+.acts2{display:flex;gap:2px;justify-content:flex-end}
+.addline{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line-soft);background:var(--surface)}
+.addline .av{background:var(--amber-wash);color:var(--amber-tx);font-size:16px;line-height:30px}
+.inp{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:6px 10px;font-size:13px;color:var(--ink-3)}
+.foot{padding:9px 14px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-3)}
+.heads{display:grid;grid-template-columns:34px minmax(0,1.3fr) 110px minmax(0,1.4fr) 90px auto;gap:12px;padding:8px 14px 6px;border-bottom:2px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+/* who sees what */
+.rule{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px 14px}
+.rule b{display:block;font-size:14px;font-weight:600}
+.rule span.p{display:block;font-size:12.5px;color:var(--ink-3);margin-top:2px;max-width:70ch}
+.sw.wide span{padding:4px 12px}
+.sw span.lit{background:var(--ff);color:var(--ff-ink)}
+.sw span.amb{background:var(--amber);color:var(--amber-ink)}
+.cl2{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 14px;font-size:13.5px}
+.cm{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 10.5px/30px var(--mono);text-align:center}
+.cog{width:28px;height:28px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;color:var(--amber-tx);background:var(--surface)}
+.cog svg{width:15px;height:15px}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+.two .card{margin:0}
+/* copilot */
+.doc2{padding:4px 22px 20px;max-width:78ch}
+.doc2 .sh{margin:16px -22px 10px;padding:12px 22px 7px;border-bottom:2px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.doc2 h4{margin:12px 0 4px;font-size:14px}
+.doc2 p,.doc2 li{font-size:13.5px;color:var(--ink-2);margin:0 0 6px}
+.doc2 ul{margin:0 0 8px;padding-left:18px}
+.lim{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lim div{border:1px solid var(--line-soft);border-radius:9px;padding:8px 10px;background:var(--zebra)}
+.lim b{display:block;font-size:16px} .lim span{font-size:12px;color:var(--ink-3)}
+.tabs{display:flex;gap:0;padding:0 14px;border-bottom:1px solid var(--line-soft)}
+.tabs span{font-size:13px;font-weight:600;color:var(--ink-3);padding:10px 12px 9px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs span.on{color:var(--ink);border-bottom-color:var(--amber)}
+.tabs span i{font-style:normal;font:600 10.5px var(--mono);color:var(--amber-tx);margin-right:6px}
+.split{display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;align-items:start}
+.split .card{margin:0}
+.part2{display:grid;grid-template-columns:26px minmax(0,1fr) 14px;gap:10px;align-items:center;padding:10px 14px;font-size:13.5px}
+.part2 .nn{width:24px;height:24px;border-radius:7px;background:var(--surface-2);color:var(--ink-2);font:700 11px/24px var(--mono);text-align:center}
+.part2.on{background:var(--amber-wash)!important;font-weight:600}
+.part2.on .nn{background:var(--amber);color:var(--amber-ink)}
+.part2 small{display:block;font-size:11.5px;color:var(--ink-3);font-weight:400}
+.same{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(255,255,255,.35);border-radius:4px;padding:2px 6px;color:var(--ff-ink);margin-left:8px;vertical-align:2px}
+@container (max-width:900px){ .two,.split{grid-template-columns:1fr} .pr,.heads{grid-template-columns:34px minmax(0,1fr) auto} .pr > :nth-child(4), .pr > :nth-child(5), .heads > :nth-child(4), .heads > :nth-child(5){display:none} .pr .acts2{grid-column:2 / -1;justify-content:flex-start} .heads{display:none} .lim{grid-template-columns:1fr 1fr} .rule{grid-template-columns:1fr} }
+@container (max-width:700px){ .side{display:none} .addline{grid-template-columns:1fr} .addline .av{display:none} .pr .role{grid-column:2} }
+</style>
+
+<div class="doc">
+  <h1>Consultants, Who sees what and Copilot in the same look</h1>
+  <p class="lede">The same pattern as Home, Clients, My tasks, Case studies and Frameworks: <b>the band</b> with the page's counts and its main act, then <b>cards with their header inside</b> (icon, Georgia title, count, the card's own filters on the right), <b>sentence-case switches</b> in place of the boxed capitals, and <b>striped rows, grey first</b>.</p>
+  <span class="flag">A drawing · nothing is built · the people are invented</span>
+  <div class="ctrl">Theme <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+  <nav class="toc"><a href="#p1">1 · Consultants</a><a href="#p2">2 · Who sees what</a><a href="#p3">3 · Copilot, option A</a><a href="#p4">4 · Copilot, option B</a></nav>
+
+  <section class="part" id="p1">
+    <div class="ph2"><span class="n">01</span><h2>Consultants</h2></div>
+    <p class="lab">Before · live</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="consultants"></aside><div class="main"><div class="pg" id="coBefore"></div></div></div></div>
+    <p class="lab after">After</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="consultants"></aside><div class="main"><div class="pg" id="coAfter"></div></div></div></div>
+    <p class="why"><b>The band</b> counts the team and the super users and carries <b>+ Add a consultant</b> (amber), which opens the add line at the foot of the card with the cursor in Name. <b>One card, "The team"</b>, with <b>Show: Active · Retired</b> and a search in its header. Each person is a striped row: <b>their initials, the name in bold with the email under it</b> (both still edited in place: they read as text and become a box when pressed), <b>Super user</b> as a pill, <b>their clients and seats</b> as quiet pills, the <b>password</b> as a dot (green set, amber not yet), and <b>Issue password · Retire</b> as quiet words at the far right. The sentence about where seats are set moves to the card's foot.</p>
+  </section>
+
+  <section class="part" id="p2">
+    <div class="ph2"><span class="n">02</span><h2>Who sees what</h2></div>
+    <p class="lab">Before · live</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="access"></aside><div class="main"><div class="pg" id="acBefore"></div></div></div></div>
+    <p class="lab after">After</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="access"></aside><div class="main"><div class="pg" id="acAfter"></div></div></div></div>
+    <p class="why">Today it is one wide row of four switches whose meaning sits in the column heads. <b>After, each rule is its own striped row</b>: what it is, one line of what each choice means, and the switch at the right in sentence case (<b>navy</b> for the choice in force, <b>amber</b> where it widens what people can do). <b>A second card, "Inside a client"</b>, says the seat rules live on each client and lists the clients with the sliders that open each one's People &amp; access. The band's gold line says who it applies to.</p>
+  </section>
+
+  <section class="part" id="p3">
+    <div class="ph2"><span class="n">03</span><h2>Copilot · option A, the five parts as tabs in the card</h2></div>
+    <p class="lab">Before · live</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="copilot"></aside><div class="main"><div class="pg" id="cpBefore"></div></div></div></div>
+    <p class="lab after">After · A</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="copilot"></aside><div class="main"><div class="pg" id="cpA"></div></div></div></div>
+    <p class="why"><b>The band</b> keeps <b>AI instructions · Templates</b> as a switch on the right and says "Same for every client" by its sentence. <b>One card</b> whose title is the part you are on, with <b>Edit</b> in its header and the five parts as <b>numbered tabs</b> under it. The text is set at a reading width, and its sections (<b>Limits, Instructions, Components</b>) are labelled over a grey rule like My tasks' groups; the limits become small tiles you can read at a glance.</p>
+  </section>
+
+  <section class="part" id="p4">
+    <div class="ph2"><span class="n">04</span><h2>Copilot · option B, the five parts as a list beside the text</h2></div>
+    <p class="lab after">After · B</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="copilot"></aside><div class="main"><div class="pg" id="cpB"></div></div></div></div>
+    <p class="why">The same text card, with the five parts in <b>a card of their own on the left</b>: each numbered, with one line of what it covers, the one you are on in amber. It reads like a table of contents and leaves the full width to the right for the text; on a phone the list sits above the text.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  var P = {
+    home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    memory:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    tasks:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/>',
+    go:'<path d="m9 6 6 6-6 6"/>',
+    cog:'<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5" transform="translate(2 2)"/><circle cx="15.6" cy="8.5" r="2.1"/><circle cx="10.6" cy="15.5" r="2.1"/>',
+    desk:'<path d="M3 10h18M5 10v9M19 10v9"/><path d="M8 10V6h8v4"/>'
+  };
+  var STAR = '<svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg>';
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  var G = [{h:"Work",items:[["home","Home"],["mywork","My tasks"],["clients","Clients"]]},{h:"Team",items:[["consultants","Consultants"],["access","Who sees what"]]},
+    {h:"Knowledge",items:[["memory","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]]},{items:[["history","History"]]}];
+  document.querySelectorAll(".side").forEach(function(s){
+    var on = s.getAttribute("data-on");
+    s.innerHTML = '<div class="sbhead"><span class="logo">' + STAR + '</span><span class="brand"><b>Strategy Management</b><span>Platform</span></span></div><nav class="nav">' +
+      G.map(function(g){ return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') + g.items.map(function(t){ return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>'; }).join("") + '</div>'; }).join("") + '</nav>';
+  });
+  function band(eye, title, sub, right){ return '<div class="band"><div><p class="eye">' + eye + '</p><h1>' + title + '</h1><p>' + sub + '</p></div><span class="sp"></span>' + (right || "") + '</div>'; }
+  function strip(items){ return '<div class="strip">' + items.map(function(x){ return '<div' + (x[2] ? ' class="lt"' : '') + '><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join("") + '</div>'; }
+  function head(icon, title, n, right){ return '<div class="chd"><span class="cic">' + ic(icon) + '</span><h2>' + title + '</h2>' + (n != null ? '<span class="cnt">' + n + '</span>' : '') + '<span class="sp"></span>' + (right || "") + '</div>'; }
+  function sw(word, opts, on){ return '<span class="ctl">' + word + ' <span class="sw">' + opts.map(function(o){ return '<span' + (o === on ? ' class="on"' : '') + '>' + o + '</span>'; }).join("") + '</span></span>'; }
+
+
+  P.retire = '<path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/>';
+  P.key = '<circle cx="8" cy="15" r="4"/><path d="m11 12 8-8M16 7l2 2"/>';
+  P.edit = '<path d="M4 20h4L19 9l-4-4L4 16z"/>';
+  function head(icon, title, n, right){ return '<div class="chd"><span class="cic">' + ic(icon) + '</span><h2>' + title + '</h2>' + (n != null ? '<span class="cnt">' + n + '</span>' : '') + '<span class="sp"></span>' + (right || "") + '</div>'; }
+  function sw(word, opts, on, cls){ return '<span class="ctl">' + word + ' <span class="sw' + (cls ? ' ' + cls : '') + '">' + opts.map(function(o){ var c = o === on ? "on" : ""; return '<span' + (c ? ' class="' + c + '"' : '') + '>' + o + '</span>'; }).join("") + '</span></span>'; }
+  function lit(opts, on, amber){ return '<span class="sw wide">' + opts.map(function(o){ return '<span' + (o === on ? ' class="' + (amber ? "amb" : "lit") + '"' : '') + '>' + o + '</span>'; }).join("") + '</span>'; }
+
+  /* 1 · Consultants */
+  var PEOPLE = [["IS","Islam Saadany","islam.saadany@forefront.consulting",1,[["Raya Trade","Super user"],["ElAbd","Lead"],["Wander","Lead"]],1],
+    ["MO","Mona Osman","mona.osman@forefront.consulting",0,[["Raya Trade","Consultant"],["ElAbd","Consultant"]],1],
+    ["KH","Karim Hassan","karim.hassan@forefront.consulting",0,[["RHI","Lead"]],1],
+    ["NJ","Nour Gamal","nour.gamal@forefront.consulting",0,[],0]];
+  document.getElementById("coBefore").innerHTML = '<div class="band"><div><p class="eye">4 consultants</p><h1>Consultants</h1><p>The office\'s people, their seats and what each may open.</p></div></div>' +
+    '<table class="tbl"><tr><th>Name</th><th>Email</th><th>Platform</th><th>Clients and seats</th><th>Password</th><th></th></tr>' +
+    PEOPLE.slice(0,2).map(function(p){ return '<tr><td><span class="fake">' + p[1] + '</span></td><td><span class="fake" style="font-family:var(--mono)">' + p[2] + '</span></td><td><span class="mtag' + (p[3] ? ' am' : '') + '">Super user</span></td><td>' + p[4].map(function(s){ return '<span class="mtag">' + s[0] + ' · ' + s[1] + '</span> '; }).join("") + '</td><td>Set</td><td><span class="btn">Issue password</span> <span class="btn">Retire</span></td></tr>'; }).join("") + '</table>' +
+    '<div style="display:flex;gap:8px;margin-top:10px"><span class="inp" style="flex:1">Name</span><span class="inp" style="flex:1">name@forefront.consulting</span><span class="btn amber">Add a consultant</span></div>';
+  var rows = PEOPLE.map(function(p){
+    return '<div class="r pr"><span class="av">' + p[0] + '</span><span><b>' + p[1] + '</b><span class="em">' + p[2] + '</span></span>' +
+      '<span class="role' + (p[3] ? '' : ' no') + '">' + (p[3] ? 'Super user' : 'Consultant') + '</span>' +
+      '<span class="seats">' + (p[4].length ? p[4].map(function(s){ return '<span class="seat">' + s[0] + ' <i>· ' + s[1] + '</i></span>'; }).join("") : '<span class="muted" style="font-size:12.5px">On no client yet</span>') + '</span>' +
+      '<span class="pw' + (p[5] ? '' : ' not') + '">' + (p[5] ? 'Set' : 'Not set') + '</span>' +
+      '<span class="acts2"><span class="btn q">Issue password</span><span class="btn q">Retire</span></span></div>'; }).join("");
+  document.getElementById("coAfter").innerHTML = band("4 consultants · 1 super user", "Consultants", "The office's people, their seats and what each may open.", '<button class="act">+ Add a consultant</button>') +
+    '<div class="card">' + head("consultants", "The team", 4, sw("Show", ["Active","Retired"], "Active") + '<span class="search">Search by name or email</span>') +
+    '<div class="heads"><span></span><span>Person</span><span>Platform</span><span>Clients and seats</span><span>Password</span><span></span></div>' +
+    '<div class="z">' + rows + '</div>' +
+    '<div class="addline"><span class="av">+</span><span class="inp">Name</span><span class="inp">name@forefront.consulting</span><span class="btn amber">Add</span></div>' +
+    '<div class="foot">Seats are read here and set on each client\'s own People &amp; access. Somebody on no client can sign in and has nothing to open yet, which is what a new joiner looks like.</div></div>';
+
+  /* 2 · Who sees what */
+  document.getElementById("acBefore").innerHTML = '<div class="band"><div><p class="eye">Seats and pages</p><h1>Who sees what</h1><p>Which pages each seat may open, and who may change them.</p></div></div>' +
+    '<p class="muted" style="font-size:12.5px;margin:0 0 6px">What somebody may do INSIDE a client is the seat they hold on it, set on that client\'s configuration. What is here is the rest — and it is asked of everybody who is not the platform\'s super user.</p>' +
+    '<table class="tbl"><tr><th>Everybody who is not the super user</th><th>Clients they hold no seat on</th><th>Consultants list</th><th>Add a client</th><th>Demo</th></tr>' +
+    '<tr><td>Every consultant, whatever seats they hold</td><td><span class="cellsw"><span>Hidden</span><span class="on">Listed</span><span>Open</span></span></td><td><span class="cellsw"><span class="on">View</span><span>Edit</span></span></td><td><span class="cellsw"><span class="on">None</span><span>Yes</span></span></td><td><span class="cellsw"><span>View</span><span class="am">Edit</span></span></td></tr></table>' +
+    '<p class="muted" style="font-size:12.5px">Nothing lit means nothing at all.</p>';
+  var RULES = [["Clients they hold no seat on","Hidden: not on their Clients page. Listed: they see the name and its modules but cannot open it. Open: they can open it to read.",["Hidden","Listed","Open"],"Listed"],
+    ["The consultants list","View: they see the team and its seats. Edit: they can add people, change names and issue passwords.",["None","View","Edit"],"View"],
+    ["Adding a client","Yes: they see + Add a client on Clients and can start one.",["No","Yes"],"No"],
+    ["The demo client","View: they can open the worked example. Edit: they can change it, which everyone shares.",["None","View","Edit"],"Edit",1]];
+  var rules = RULES.map(function(r){ return '<div class="r rule"><span><b>' + r[0] + '</b><span class="p">' + r[1] + '</span></span>' + lit(r[2], r[3], r[4]) + '</div>'; }).join("");
+  var CLS = [["RT","Raya Trade","6 seats"],["EA","ElAbd","4 seats"],["RHI","RHI","3 seats"],["WD","Wander Development","2 seats"]];
+  document.getElementById("acAfter").innerHTML = band("Everyone but the super user", "Who sees what", "Which pages each seat may open, and who may change them.", strip([[4,"Rules"],[4,"Clients"]])) +
+    '<div class="two"><div class="card">' + head("access", "Across the platform", 4) + '<div class="z">' + rules + '</div><div class="foot">Applies to every consultant, whatever seats they hold. The super user is never limited by these.</div></div>' +
+    '<div class="card">' + head("clients", "Inside a client", 4) + '<div class="z">' + CLS.map(function(c){ return '<div class="r cl2"><span class="cm">' + c[0] + '</span><span><b style="font-weight:600">' + c[1] + '</b> <span class="muted" style="font-size:12px">· ' + c[2] + '</span></span><span class="cog" title="People &amp; access">' + ic("cog") + '</span></div>'; }).join("") + '</div><div class="foot">What somebody may do inside a client is the seat they hold on it, set in that client\'s People &amp; access.</div></div></div>';
+
+  /* 3 · Copilot */
+  var bandCp = band('The method <span class="same">Same for every client</span>', "Copilot settings", "How the Copilot thinks and what it may do, the same for every client.", '<span class="sw"><span class="on">AI instructions</span><span>Templates</span></span>');
+  document.getElementById("cpBefore").innerHTML = '<div class="band"><div><p class="eye">The method</p><h1>Copilot settings</h1><p>How the Copilot thinks and what it may do, the same for every client. <span class="same">Same for every client</span></p></div></div>' +
+    '<div style="display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px;font-size:12.5px">' + ["Foundation","Analysis","Directions","Execution","Advisory"].map(function(t, i){ return '<span style="padding:6px 11px;border-right:1px solid var(--line);' + (i ? '' : 'background:var(--surface-2);font-weight:600') + '">' + t + '</span>'; }).join("") + '</div>' +
+    '<div class="card" style="padding:12px 16px"><div style="display:flex"><b>1 &nbsp; Foundation</b><span class="sp" style="flex:1"></span><span class="btn">Edit</span></div><p style="font-size:13px"><b>Foundation limits (counts and lengths every Foundation prompt states)</b></p><ul style="font-size:13px"><li><b>Who We Are Sentences:</b> 2-3</li><li><b>Purpose Sentences:</b> 1-2</li><li><b>Guiding Objectives:</b> 3-5</li></ul><p style="font-size:13px"><b>Foundation instructions</b></p><p style="font-size:13px;color:var(--ink-2)">Role &amp; Tone: You are an elite AI Strategy Consultant at Forefront Consulting…</p></div>';
+  var body = '<div class="doc2"><div class="sh">Limits · what every Foundation answer keeps to</div><div class="lim"><div><b>2–3</b><span>Who We Are sentences</span></div><div><b>1–2</b><span>Purpose sentences</span></div><div><b>1–2</b><span>Winning Aspiration sentences</span></div><div><b>3–5</b><span>Guiding Objectives</span></div><div><b>3–5</b><span>Values</span></div><div><b>3–5</b><span>Behaviours per value</span></div></div>' +
+    '<div class="sh">Instructions</div><h4>General</h4><p>Role &amp; Tone: You are an elite AI Strategy Consultant at Forefront Consulting. Your role is to refine and structure strategic planning content according to best practices in strategic management.</p><ul><li>Prioritise substance over style; avoid marketing "fluff".</li><li>Keep a 2–3 year strategic horizon.</li></ul><h4>Phase</h4><p>This phase establishes the fundamental identity, purpose and long-term trajectory of the organisation…</p>' +
+    '<div class="sh">Components</div><h4>Who We Are</h4><ul><li><b>Definition:</b> a raw, non-marketing statement of the company\'s identity and market boundaries.</li><li><b>What to avoid:</b> generic adjectives such as "world-class".</li><li><b>Format:</b> 2–3 sentences at most.</li></ul></div>';
+  var PARTS = [["Foundation","Who we are, purpose, values"],["Analysis","Where the company stands"],["Directions","Choices and capabilities"],["Execution","Objectives, measures, initiatives"],["Advisory","The rounds of questions"]];
+  document.getElementById("cpA").innerHTML = bandCp + '<div class="card">' + head("copilot", "Foundation", "Part 1 of 5", '<span class="btn">' + '✎ Edit</span>') +
+    '<div class="tabs">' + PARTS.map(function(p, i){ return '<span' + (i ? '' : ' class="on"') + '><i>' + (i + 1) + '</i>' + p[0] + '</span>'; }).join("") + '</div>' + body + '</div>';
+  document.getElementById("cpB").innerHTML = bandCp + '<div class="split"><div class="card">' + head("copilot", "The parts", 5) + '<div class="z">' + PARTS.map(function(p, i){ return '<div class="r part2' + (i ? '' : ' on') + '"><span class="nn">' + (i + 1) + '</span><span>' + p[0] + '<small>' + p[1] + '</small></span><span class="muted">›</span></div>'; }).join("") + '</div></div>' +
+    '<div class="card">' + head("copilot", "Foundation", null, '<span class="btn">✎ Edit</span>') + body + '</div></div>';
+
+  /* theme */
+  var root = document.documentElement, seg = document.querySelector('[data-ctl="theme"]');
+  function setT(v){ root.setAttribute("data-theme", v); seg.querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === v)); }); }
+  seg.addEventListener("click", function(e){ var b = e.target.closest("button"); if (b) setT(b.getAttribute("data-v")); });
+  setT(matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+})();
+</script>

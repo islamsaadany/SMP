@@ -28,17 +28,33 @@ const NOT_DIRS = "This is not a Directions or Capabilities chat.";
 /* The functions the page offers as owners, cut to shape. They are the
    tenant's own names, sent by the page that draws them; an owner the model
    names that is not on this list is dropped rather than guessed at. */
+const KEYED = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 function fnsOf(raw: unknown): Fn[] {
+  return (Array.isArray(raw) ? raw : []).map((x: any) => {
+    const head = String(x && x.head || "").trim();
+    return { key: String(x && x.key || "").trim(), name: oneLine(x && x.name).slice(0, 120), head: KEYED.test(head) ? head : "" };
+  }).filter((f) => KEYED.test(f.key) && f.name).slice(0, 60);
+}
+/* §626: the people a save names as Capability owners, so the record says a
+   name rather than a key. */
+function ownersOf(raw: unknown): { key: string; name: string }[] {
   return (Array.isArray(raw) ? raw : []).map((x: any) => ({ key: String(x && x.key || "").trim(), name: oneLine(x && x.name).slice(0, 120) }))
-    .filter((f) => /^[a-z0-9][a-z0-9_-]{0,63}$/.test(f.key) && f.name).slice(0, 60);
+    .filter((p) => KEYED.test(p.key) && p.name).slice(0, MAX_CAPS);
 }
 const titlesOf = (raw: unknown, n: number) => (Array.isArray(raw) ? raw : []).map((t) => oneLine(t).slice(0, 160)).filter(Boolean).slice(0, n);
 
+/* §654 A3 — the note the browser wrote once the plan's save landed. */
+async function appliedOf(c: any, id: string): Promise<{ n: number; at: string; by: string } | null> {
+  const r = await c.query("SELECT extra->'applied' AS a FROM copilot_deliverables WHERE id = $1", [id]);
+  const a = r.rows[0] && r.rows[0].a;
+  return a && typeof a === "object" && Number(a.n) > 0 ? { n: Number(a.n), at: String(a.at || ""), by: String(a.by || "") } : null;
+}
 export async function dirsView(c: any, chat: { id: string }) {
   const s = await dirsOf(c, chat.id);
   if (!s) return {};
   const todo = todoOf(s);
-  return { dirs: s, dirsTodo: todo, dirsDone: doneCount(todo), dirsScores: s.options.map(scoreOf),
+  const applied = s.saved && s.saved.deliverableId ? await appliedOf(c, s.saved.deliverableId) : null;
+  return { dirs: s, dirsApplied: applied, dirsTodo: todo, dirsDone: doneCount(todo), dirsScores: s.options.map(scoreOf),
     dirsWords: { max: SCORE_MAX, kinds: CAP_KINDS, kindWord: CAP_KIND_WORD, kindSays: CAP_KIND_SAYS }, dirsBlocker: finishBlocker(s) };
 }
 export async function dirsProgress(c: any, ids: string[]): Promise<Record<string, { done: number; of: number }>> {
@@ -80,7 +96,12 @@ export async function dirsAct(c: any, b: any, who: Who): Promise<Out> {
        as the plan's, keyed by the pillar they came from — so a save updates
        that pillar rather than adding a second one beside it (§48). */
     const existing = b.start === "plan" ? (Array.isArray(b.existing) ? b.existing : []).slice(0, MAX_OPTIONS)
-      .map((x: any) => ({ title: x && x.title, planId: x && x.id, mark: "plan", go: true })) : [];
+      /* §654 B5 — a row from the plan keeps the scores and owner the plan
+         holds; it starts ticked only when it is scored, so an unscored row
+         is scored (or left) before it goes ahead. */
+      .map((x: any) => { const n = (v: unknown) => { const k = Number(v); return k >= 1 && k <= 4 ? k : undefined; };
+        const sc = { urgency: n(x && x.urgency), importance: n(x && x.importance), ease: n(x && x.ease) };
+        return { title: x && x.title, planId: x && x.id, mark: "plan", ...sc, ownedBy: x && x.ownedBy, go: !!(sc.urgency && sc.importance && sc.ease) }; }) : [];
     const s = sanitizeDirs({ start: b.start, options: existing }, stored);
     await writeDirs(c, id, s);
     return out(200, { ok: true, ...(await dirsView(c, chat)) });
@@ -95,7 +116,9 @@ export async function dirsAct(c: any, b: any, who: Who): Promise<Out> {
     const placeWord = oneLine(b.placeWord).slice(0, 120) || chat.place;
     const fns = fnsOf(b.fns);
     const name = (k: string) => (fns.find((f) => f.key === k) || { name: k }).name;
-    const r = await saveDirs(c, chat, stored, placeWord, name, by);
+    const owners = ownersOf(b.owners);
+    const ownerName = (k: string) => (owners.find((p) => p.key === k) || { name: k }).name;
+    const r = await saveDirs(c, chat, stored, placeWord, name, by, ownerName);
     const s: Dirs = { ...stored, saved: { deliverableId: r.deliverableId, n: r.n, title: r.title } };
     await writeDirs(c, id, s);
     return out(200, { ok: true, saved: s.saved, ...(await dirsView(c, chat)) });

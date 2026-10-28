@@ -267,6 +267,29 @@
      reports a width of 0, so the check that finds this is the page HEIGHT
      crossing the viewport, not the shift itself. */
   html { scrollbar-gutter: stable; }
+  /* ── THE PAGE AT 80% ON A COMPUTER (§631) ───────────────────────────────
+     Islam, of a Setup table spilling across its columns: *"I believe the page
+     needs to be 80% smaller like what we did in the console page"*, then
+     *"proceed"*. The console's rule (§601): the whole page zoomed at 1000px
+     and up, so every size keeps its proportion; a phone keeps 100%, where 80%
+     would put the words under a readable size.
+
+     A DECK BEING SHOWN STAYS AT 100%: it fills the screen and scales its own
+     slides to it (present.js), and a projection drawn at 80% of the window
+     would be a smaller deck on the same wall.
+
+     AND THE WINDOW'S SIZE IS SAID IN THE PAGE'S PIXELS. Under a zoom, `100vh`
+     is 80% of the window (measured: a fixed 100vh box drew 720 of 900), so a
+     panel meant to reach the bottom stops short. Every length taken from the
+     window reads these three instead — `var(--winh)` for `100vh` — and they
+     carry the one correction. Lengths the script measures are converted the
+     same way, once (`pageZoom`, config-data.js). */
+  :root { --winw:100vw; --winh:100vh; --wind:100dvh; }
+  @media (min-width:1000px) {
+    html:not(:has(> body.presenting)) { zoom:.8; }
+    :root:not(:has(> body.presenting)) {
+      --winw:calc(100vw / .8); --winh:calc(100vh / .8); --wind:calc(100dvh / .8); }
+  }
   body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
          font-size:var(--fs-body); line-height:1.55; -webkit-font-smoothing:antialiased; }
   /* --focus, not --gold. The accent measures 2.40:1 on white and a focus ring
@@ -429,6 +452,64 @@
              padding:8px 13px; font-size:var(--fs-small); color:var(--ink-3);
              white-space:nowrap; letter-spacing:.01em;
              opacity:0; transition:opacity .22s ease; pointer-events:none; }
+  /* ── THE ASKING BOX (§621) ──────────────────────────────────────────
+     Floats beside what was pressed, SIZED TO WHAT IT SAYS (Islam: "make the
+     floating boxes fit the content, not too extended") — `max-content`,
+     capped so a long sentence wraps rather than running off the screen. The
+     gold edge is the platform's ask-first colour (.hist-confirm's); the
+     arrow is the box's own corner turned to point at the control. */
+  .askbox { position:absolute; z-index:70; box-sizing:border-box;
+            width:max-content; max-width:min(360px, calc(var(--winw) - 32px));
+            padding:12px 14px; border-radius:10px;
+            border:1px solid var(--attn); background:var(--surface); color:var(--ink);
+            box-shadow:0 12px 32px rgba(10,20,40,.18);
+            font-size:var(--fs-small); line-height:1.5; }
+  .askbox .askarrow { position:absolute; top:-8px; width:14px; height:14px; transform:rotate(45deg);
+                      background:var(--surface); border-left:1px solid var(--attn); border-top:1px solid var(--attn); }
+  .askbox.above .askarrow { top:auto; bottom:-8px; border:0;
+                            border-right:1px solid var(--attn); border-bottom:1px solid var(--attn); }
+  .askbox .asktitle { font-weight:700; color:var(--attn-tx); margin-bottom:2px; }
+  .askbox .askbody { margin-bottom:10px; }
+  .askbox .askacts { display:flex; flex-wrap:wrap; gap:8px; }
+  .askbox button { font:600 var(--fs-small)/1.3 var(--sans); padding:6px 14px; border-radius:7px; cursor:pointer; }
+  .askbox .askyes { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
+  .askbox .askno { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
+  .askbox button:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
+  /* ── A COLOUR AREA'S ROW, AND THE QUESTION ON THE WAY OUT (§621) ─────
+     Apply is the platform's solid control (the panel's own fill and ink, so
+     it follows a tenant's bar); Discard and Undo are its quiet neighbours.
+     The line says in amber what waits, in green that it was applied. The
+     strip is the same three buttons' family, pinned over the pane. */
+  .applyrow { display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px; margin-top:14px; }
+  .applyrow button { font:600 var(--fs-small)/1.3 var(--sans); padding:7px 16px; border-radius:7px; cursor:pointer; }
+  .applyrow .applybtn { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
+  .applyrow .applybtn:disabled { opacity:.45; cursor:default; }
+  .applyrow .applyno { background:var(--surface); border:1px solid var(--line); color:var(--ink); padding:7px 14px; }
+  .applyrow button:focus-visible, .leavestrip button:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
+  .applywait, .applydone { display:inline-flex; align-items:center; gap:7px; font-size:var(--fs-small); font-weight:600; }
+  .applywait { color:var(--attn-tx); }
+  .applydone { color:var(--good-tx); }
+  .applywait::before, .applydone::before { content:""; width:7px; height:7px; border-radius:50%; flex:none; }
+  .applywait::before { background:var(--attn); }
+  .applydone::before { background:var(--good); }
+  .leavestrip { position:fixed; z-index:65; left:max(16px, env(safe-area-inset-left, 0px)); right:96px;
+                bottom:max(18px, env(safe-area-inset-bottom, 0px));
+                display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px;
+                padding:12px 16px; border-radius:10px; border:1px solid var(--attn); background:var(--attn-bg);
+                color:var(--ink); box-shadow:0 6px 24px rgba(10,20,40,.14); font-size:var(--fs-small); line-height:1.45; }
+  @media (min-width: 900px) { .leavestrip { left:260px; } }
+  .leavestrip .lsay { flex:1 1 280px; min-width:0; }
+  .leavestrip .lsay b { color:var(--attn-tx); }
+  .leavestrip .lacts { display:flex; flex-wrap:wrap; gap:8px; }
+  .leavestrip button { font:600 var(--fs-small)/1.3 var(--sans); padding:7px 14px; border-radius:7px; cursor:pointer; }
+  .leavestrip .askyes { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
+  .leavestrip .askno { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
+  /* …and the answer, said on the control that was pressed. */
+  .asksaved { display:inline-flex; align-items:center; gap:5px; margin-left:6px; vertical-align:middle;
+              font-size:11px; font-weight:600; line-height:1; color:var(--good-tx); white-space:nowrap; }
+  .asksaved::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--good); }
+  .asksaved.bad { color:var(--bad-tx); }
+  .asksaved.bad::before { background:var(--bad); }
   .savetip[hidden] { display:none; }
   .savetip.show { opacity:1; pointer-events:auto; }
   body.presenting .savetip { display:none; }
@@ -656,7 +737,7 @@
      accent itself is chosen to work as a fill on the page, and on the panel it
      is 2.84:1 — the same pairing .banner strong already had to solve. */
   .pillar span { font-size:11px; letter-spacing:.12em; color:var(--panel-accent); font-weight:700; }
-  .pillar em { font-size:12px; font-style:normal; opacity:.8; }
+  .pillar em { font-size:12px; font-style:normal; opacity:.8; white-space:pre-line; }
   .stylobate { margin-top:16px; padding:16px 18px 18px; border:1px solid var(--line);
                border-top:3px solid var(--gold); background:var(--surface); }
   .base-head { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);

@@ -25,6 +25,15 @@ export async function deleteTenant(owner: Pool, tenantId: string): Promise<{ cou
       "deleteTenant: " + held + " insight" + (held === 1 ? "" : "s") +
       " in the consulting memory are about this client. The memory outlives the engagement — " +
       "retire the client instead, or remove those insights first.");
+    /* AND SO DOES ITS TRACK RECORD (spec 067, renamed by spec 069), for the
+       same reason and with the same named refusal rather than a raw
+       foreign-key error. */
+    const cases = (await c.query(
+      "SELECT count(*)::int AS n FROM case_studies WHERE about_tenant_id = $1", [tenantId])).rows[0].n as number;
+    if (cases > 0) throw new Error(
+      "deleteTenant: " + cases + " assignment" + (cases === 1 ? " is" : "s are") +
+      " in this client's Track Record. The Track Record outlives the engagement — " +
+      "retire the client instead, or remove those assignments first.");
     const del = await c.query("DELETE FROM tenants WHERE id = $1", [tenantId]);
     if (del.rowCount !== 1) throw new Error("deleteTenant: no such tenant " + tenantId);
     const counts: Record<string, number> = {};

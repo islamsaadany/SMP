@@ -8,6 +8,7 @@
    external script. No inline script anywhere, so the page carries
    `script-src 'self'` — §238's net without a hash to go stale. The rest of
    the policy is vercel.json's, word for word. */
+import { NAVSKEL_STAMP } from "./navskel.ts";
 import { barExtras, readingLink } from "./bar-extras.ts";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -179,16 +180,38 @@ export function shellDocument(tenantName: string, module: string | null = null, 
     '<link rel="manifest" href="/manifest.webmanifest">\n<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">\n' +
     '<meta name="theme-color" content="#16325C" media="(prefers-color-scheme: light)">\n' +
     '<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">\n' +
-    '<link rel="stylesheet" href="/platform.css">\n' +
-    '<script src="/theme.js"></script>\n' +
-    "</head>\n<body>\n" + shellBody() + '\n<script src="/shell.js"></script>\n</body>\n</html>\n';
+    '<link rel="stylesheet" href="' + versioned("/platform.css") + '">\n' +
+    '<script src="' + versioned("/theme.js") + '"></script>\n' +
+    '<script defer src="' + versioned("/navskel.js") + '"></script>\n' +
+    "</head>\n<body>\n" + shellBody() + '\n<script src="' + versioned("/shell.js") + '"></script>\n</body>\n</html>\n';
+}
+
+/* §620 — A FILE'S ADDRESS CARRIES WHAT IT HOLDS. The list is
+   shell/asset-stamps.json, written by scripts/build-sw.mjs from the files
+   themselves; an address with `?v=` is cached for good (next.config.ts), so
+   a page that arrives paints without asking the server about any of them
+   again, and a release that changes one changes its address. A file missing
+   from the list keeps its plain address — slower, never wrong.
+   SMP_BREAK=unversioned serves every plain address, so the check can be
+   proved able to fail. */
+let stamps: Record<string, string> | null = null;
+export function versioned(path: string): string {
+  if (stamps === null) {
+    try { stamps = JSON.parse(readFileSync(join(process.cwd(), "shell", "asset-stamps.json"), "utf8")) as Record<string, string>; }
+    catch { stamps = {}; }
+  }
+  const v = process.env.SMP_BREAK === "unversioned" ? undefined
+    : path === "/navskel.js" ? NAVSKEL_STAMP : stamps[path];
+  return v ? path + "?v=" + v : path;
 }
 
 /* vercel.json's policy with ONE change: script-src is 'self' alone. */
 export const SHELL_CSP =
   "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; " +
   "connect-src 'self'; worker-src 'self'; manifest-src 'self'; media-src 'self' blob: https://*.blob.vercel-storage.com; " +
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://*.sharepoint.com; " +
+  /* §651: the file store too, so Insights' View can show a report's PDF in
+     its own pop-up (the short-lived address the module answers) */
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://*.sharepoint.com https://*.blob.vercel-storage.com; " +
   "object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 
 export function shellHeaders(): Record<string, string> {
@@ -213,6 +236,8 @@ export function shellHeaders(): Record<string, string> {
 /* Forefront's own page (§313.3), served as it is. */
 let platformPage: string | null = null;
 export function platformDocument(): string {
-  if (platformPage === null) platformPage = readFileSync(join(process.cwd(), "shell", "platform.html"), "utf8");
+  /* its three scripts take their stamped addresses too (§620) */
+  if (platformPage === null) platformPage = readFileSync(join(process.cwd(), "shell", "platform.html"), "utf8")
+    .replace(/<script src="(\/[a-z-]+\.js)"><\/script>/g, (m, p: string) => '<script src="' + versioned(p) + '"></script>');
   return platformPage;
 }

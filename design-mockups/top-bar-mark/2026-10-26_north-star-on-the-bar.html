@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>North star on the bar</title>
+<style>
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(../../smp-app/public/fonts/Source_Sans_3.woff2) format('woff2')}
+/* the bar's own tokens, lib/topbar.ts */
+:root{--tb-surface:#FFFFFF;--tb-surface-2:#EFF2F6;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;--tb-gold:#C9A24D;
+  --page:#F4F6F9;--amber:#F5A623;--navy:#0F2C69;--note:#5B6472}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-gold:#D9B665;--page:#14161A;--note:#9AA3AF}}
+:root[data-theme="dark"]{--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-gold:#D9B665;--page:#14161A;--note:#9AA3AF}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--tb-ink);font-family:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:28px 16px 60px}
+main{max-width:1180px;margin:0 auto}
+h1{font-size:22px;margin:0 0 4px}
+.lede{color:var(--note);margin:0 0 26px;font-size:14.5px;max-width:760px;line-height:1.45}
+h2{font-size:15px;margin:30px 0 4px;display:flex;gap:8px;align-items:baseline}
+h2 .tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);background:var(--amber);border-radius:5px;padding:1px 7px}
+.why{color:var(--note);font-size:13.5px;margin:0 0 10px;max-width:820px;line-height:1.45}
+.frame{border:1px solid var(--tb-line);border-radius:10px;overflow:hidden;background:var(--page);overflow-x:auto}
+.frame .pagebody{height:54px;background:linear-gradient(var(--page),var(--page))}
+.band{height:46px;margin:14px 24px 0;border-radius:8px;background:linear-gradient(90deg,#334155,#4a5a78);opacity:.85}
+
+/* ── the bar, as lib/topbar.ts draws it ── */
+.tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);min-width:900px}
+.tbin{display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
+.tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;font-size:13.5px;white-space:nowrap}
+.tbff{color:var(--tb-ink-2);text-decoration:none;font-weight:600;letter-spacing:.04em;font-size:12px;text-transform:uppercase}
+.tbsep{color:var(--tb-ink-3);font-size:15px;line-height:1}
+.tbstep{display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border-radius:7px;color:var(--tb-ink);font-weight:600}
+.tbclient{color:var(--tb-ink-2)}
+.tbstep svg{width:10px;height:10px;color:var(--tb-ink-3)}
+.tbviewer{display:flex;align-items:center;gap:8px;padding-right:16px;border-right:1px solid var(--tb-line)}
+.tbviewer label{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-2)}
+.tbviewer .sel{font-size:12.5px;border:1px solid var(--tb-line);border-radius:5px;padding:2px 22px 2px 6px;color:var(--tb-ink)}
+.tbacts{display:flex;align-items:center;gap:10px}
+.tbtheme{width:26px;height:26px;border-radius:50%;border:1px solid var(--tb-line);display:grid;place-items:center;color:var(--tb-ink-3)}
+.tbtheme svg{width:14px;height:14px}
+.tbout{font-size:12.5px;font-weight:600;color:var(--tb-ink-2);border:1px solid var(--tb-line);border-radius:6px;padding:3px 10px}
+.tbbrand{font-weight:600;font-size:14px;color:var(--tb-ink)}
+.tborg{color:var(--tb-ink-3);font-size:13.5px;margin-right:auto}
+
+/* ── NEW: the mark, the console column's .sblogo at the bar's scale ── */
+.tbmark{flex:none;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--amber);color:var(--navy)}
+.tbmark svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tbhome{display:inline-flex;align-items:center;gap:9px;text-decoration:none}
+.tbname{font-weight:600;font-size:14px;color:var(--tb-ink);white-space:nowrap}
+.tbname small{font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--tb-ink-2);margin-left:2px}
+.vr{width:1px;height:18px;background:var(--tb-line);margin:0 6px 0 4px}
+
+.cost{font-size:12.5px;color:var(--note);margin:8px 2px 0}
+.theme{position:fixed;top:12px;right:14px;font:inherit;font-size:12.5px;border:1px solid var(--tb-line);background:var(--tb-surface);color:var(--tb-ink);border-radius:6px;padding:4px 10px;cursor:pointer}
+</style>
+</head>
+<body>
+<button class="theme" type="button" id="theme">Light / dark</button>
+<main>
+<h1>The north star on the Strategy bar</h1>
+<p class="lede">The bar at the top of every client module (Strategy, Insights, the Internal Tracker, Meeting Notes) shows no mark today, so the north star appears only in the browser tab. Each option below puts the console column's own mark at the far left, and pressing it goes to the console's Home. The bars are drawn at real size with the bar's real styles; the client is ElAbd, in Strategy.</p>
+
+<h2>Today</h2>
+<p class="why">The trail starts with the word PLATFORM. Nothing on the page shows the product's mark.</p>
+<div class="frame"><header class="tb"><div class="tbin">
+  <nav class="tbtrail"><a class="tbff" href="#">Platform</a><span class="tbsep">›</span><span class="tbstep tbclient">ElAbd<svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="tbsep">›</span><span class="tbstep">Strategy<svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></nav>
+  <div class="tbviewer"><label>Viewing as</label><span class="sel">Islam Saadany (you)</span></div>
+  <div class="tbacts"><span class="tbtheme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></span><span class="tbout">Sign out</span></div>
+</div></header><div class="band"></div><div class="pagebody"></div></div>
+
+<h2><span class="tag">A</span> The mark before the trail</h2>
+<p class="why">A 24px mark comes before PLATFORM and nothing else changes. Pressing it goes to the console's Home, as the console's own mark does, and the word still leads to the console too.</p>
+<div class="frame"><header class="tb"><div class="tbin">
+  <nav class="tbtrail"><a class="tbmark" href="#" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></a><a class="tbff" href="#" style="margin-left:4px">Platform</a><span class="tbsep">›</span><span class="tbstep tbclient">ElAbd<svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="tbsep">›</span><span class="tbstep">Strategy<svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></nav>
+  <div class="tbviewer"><label>Viewing as</label><span class="sel">Islam Saadany (you)</span></div>
+  <div class="tbacts"><span class="tbtheme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></span><span class="tbout">Sign out</span></div>
+</div></header><div class="band"></div><div class="pagebody"></div></div>
+<p class="cost">Cost: the trail moves 30px to the right. The smaller change of the two.</p>
+
+<h2><span class="tag">B</span> The mark and the product's name, then the trail</h2>
+<p class="why">The mark and "Strategy Management Platform" lead the bar, the way the console's column is headed, and a hairline separates them from the trail. The name takes the place of the word PLATFORM and does the same job: it leads to the console.</p>
+<div class="frame"><header class="tb"><div class="tbin">
+  <nav class="tbtrail"><a class="tbhome" href="#"><span class="tbmark"><svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span><span class="tbname">Strategy Management Platform</span></a><span class="vr"></span><span class="tbstep tbclient">ElAbd<svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="tbsep">›</span><span class="tbstep">Strategy<svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></nav>
+  <div class="tbviewer"><label>Viewing as</label><span class="sel">Islam Saadany (you)</span></div>
+  <div class="tbacts"><span class="tbtheme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></span><span class="tbout">Sign out</span></div>
+</div></header><div class="band"></div><div class="pagebody"></div></div>
+<p class="cost">Cost: the trail moves about 230px to the right. On a narrow window the client's name gets cut short sooner.</p>
+
+<h2 id="d"><span class="tag">D</span> The mark alone, a hairline, then the trail</h2>
+<p class="why">The word PLATFORM is gone. The mark is the way back to the console: pressing it goes to Home, and hovering shows a "Home" label, like the console's own mark.</p>
+<div class="frame"><header class="tb"><div class="tbin">
+  <nav class="tbtrail"><a class="tbmark" href="#" aria-label="Home" title="Home" style="outline:2px solid var(--tb-gold);outline-offset:2px"><svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></a><span class="vr"></span><span class="tbstep tbclient">ElAbd<svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="tbsep">›</span><span class="tbstep">Strategy<svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></nav>
+  <div class="tbviewer"><label>Viewing as</label><span class="sel">Islam Saadany (you)</span></div>
+  <div class="tbacts"><span class="tbtheme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></span><span class="tbout">Sign out</span></div>
+</div></header><div class="band"></div><div class="pagebody"></div></div>
+<p class="cost">The gold ring shows the hover state. The trail moves about 10px to the left of where it is today.</p>
+
+<h2><span class="tag">C</span> The same mark for a client's own people</h2>
+<p class="why">A client's own staff have no trail; their bar shows the product's name and the client's name. Whichever of A or B you pick, the mark goes before the name here too, so the client sees the same logo as Forefront's consultants.</p>
+<div class="frame"><header class="tb"><div class="tbin">
+  <a class="tbhome" href="#"><span class="tbmark"><svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span><span class="tbbrand">Strategy Management Platform</span></a>
+  <span class="tborg">ElAbd</span>
+  <div class="tbacts"><span class="tbtheme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg></span><span class="tbout">Sign out</span></div>
+</div></header><div class="band"></div><div class="pagebody"></div></div>
+</main>
+<script>
+document.getElementById("theme").onclick=function(){var r=document.documentElement,d=r.getAttribute("data-theme");
+  var dark=d?d==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.setAttribute("data-theme",dark?"light":"dark");};
+</script>
+</body>
+</html>

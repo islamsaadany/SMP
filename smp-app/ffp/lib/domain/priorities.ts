@@ -110,10 +110,19 @@ export type ProgressFacts = {
   lifecycleStatus: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "RETIRED";
 };
 
-export const ASPECTS = ["Map", "RACI", "Authority", "Controls", "SOP", "Approved"] as const;
+/** One list for every aspect, so a new one cannot be added without saying what turns it green. Order is the order of the bars and of `done` below. */
+export const ASPECT_DEFS = [
+  { label: "Map", help: "The process is drawn step by step: at least 3 steps on its map." },
+  { label: "RACI", help: "Who does, owns, is consulted and told at each step: the RACI is marked final." },
+  { label: "Authority", help: "Who may approve what: at least one approval authority is assigned on the process." },
+  { label: "Controls", help: "Risks and the controls that answer them: at least one control is logged." },
+  { label: "SOP", help: "The written procedure exists: the process has an SOP version." },
+  { label: "Approved", help: "The client's named approver has approved it (Approved or Published)." },
+] as const;
+export const ASPECTS = ASPECT_DEFS.map((a) => a.label);
 
 /** Six aspects, each done or not, read off what the process holds — nobody ticks them by hand. */
-export function deepDiveProgress(p: ProgressFacts): { done: number; total: number; aspects: { label: string; done: boolean }[] } {
+export function deepDiveProgress(p: ProgressFacts): { done: number; total: number; aspects: { label: string; help: string; done: boolean }[] } {
   const done = [
     p.steps >= 3,
     p.raciFinal,
@@ -122,7 +131,7 @@ export function deepDiveProgress(p: ProgressFacts): { done: number; total: numbe
     !!(p.sopVersion && p.sopVersion.trim()),
     p.lifecycleStatus === "APPROVED" || p.lifecycleStatus === "PUBLISHED",
   ];
-  return { done: done.filter(Boolean).length, total: ASPECTS.length, aspects: ASPECTS.map((label, i) => ({ label, done: done[i]! })) };
+  return { done: done.filter(Boolean).length, total: ASPECTS.length, aspects: ASPECT_DEFS.map((a, i) => ({ label: a.label, help: a.help, done: done[i]! })) };
 }
 
 /* ── the sign-off ── */
@@ -146,4 +155,70 @@ export function mayApprovePlan(args: {
   const norm = (x: string | null | undefined) => (x ?? "").trim().toLowerCase();
   if (norm(args.actorEmail) && norm(args.actorEmail) === norm(args.senderEmail)) return { ok: false, reason: "OWN_PLAN" };
   return { ok: true };
+}
+
+/** Main processes in code order, each followed by its own sub-processes; a sub whose main is not in the list stands as a main. */
+export function inTree<T extends { id: string; code: string; parentId: string | null }>(rows: T[]): { row: T; sub: boolean; hasSubs: boolean }[] {
+  const ids = new Set(rows.map((r) => r.id));
+  const byCode = (a: T, b: T) => a.code.localeCompare(b.code, undefined, { numeric: true });
+  const kids = new Map<string, T[]>();
+  for (const r of rows) if (r.parentId && ids.has(r.parentId)) (kids.get(r.parentId) ?? kids.set(r.parentId, []).get(r.parentId)!).push(r);
+  const out: { row: T; sub: boolean; hasSubs: boolean }[] = [];
+  for (const m of rows.filter((r) => !r.parentId || !ids.has(r.parentId)).sort(byCode)) {
+    const subs = (kids.get(m.id) ?? []).sort(byCode);
+    out.push({ row: m, sub: false, hasSubs: subs.length > 0 });
+    for (const c of subs) out.push({ row: c, sub: true, hasSubs: false });
+  }
+  return out;
+}
+
+/* ── steps inside a process: what makes a step worth a look, and a starting score from it ── */
+
+export type StepFacts = {
+  decision: boolean;
+  controlsHigh: number;
+  controlsMedium: number;
+  controlsLow: number;
+  /** Names of the other processes this step hands over to or links to. */
+  handoverTo: string[];
+  roles: number;
+  subtasks: number;
+  /** The step says what goes wrong if it is missed or done badly ("Risk if mishandled"). */
+  riskNoted: boolean;
+  /** Lines in the step's written procedure. */
+  instructions: number;
+};
+
+export type StepSignal = { key: string; label: string; tone: "bad" | "warn" | "info" | "plain" };
+
+const MANY_ROLES = 3;
+const MANY_SUBTASKS = 6;
+const LONG_PROCEDURE = 5;
+
+/** What the map already says about a step. Empty when nothing stands out; the office decides what to flag. */
+export function stepSignals(f: StepFacts): StepSignal[] {
+  const out: StepSignal[] = [];
+  if (f.controlsHigh > 0) out.push({ key: "high-risk", label: "High-risk control", tone: "bad" });
+  else if (f.controlsMedium > 0) out.push({ key: "medium-risk", label: "Medium-risk control", tone: "warn" });
+  if (f.riskNoted) out.push({ key: "risk-noted", label: "Risk noted on the step", tone: "warn" });
+  if (f.decision) out.push({ key: "decision", label: "Decision point", tone: "info" });
+  if (f.handoverTo.length) out.push({ key: "handover", label: `Hands over to ${f.handoverTo.slice(0, 2).join(", ")}${f.handoverTo.length > 2 ? "…" : ""}`, tone: "info" });
+  if (f.roles >= MANY_ROLES) out.push({ key: "roles", label: `${f.roles} roles`, tone: "plain" });
+  if (f.subtasks >= MANY_SUBTASKS) out.push({ key: "subtasks", label: `${f.subtasks} sub-tasks`, tone: "plain" });
+  if (f.instructions >= LONG_PROCEDURE) out.push({ key: "procedure", label: `Long procedure (${f.instructions} lines)`, tone: "plain" });
+  return out;
+}
+
+/** Complexity of one step from its decision, hand-overs, roles and sub-tasks. Null when none of those is there to go on. */
+export function suggestStepComplexity(f: StepFacts): { score: number; reason: string } | null {
+  const points = (f.decision ? 2 : 0) + 2 * f.handoverTo.length + f.roles + Math.floor(f.subtasks / 3);
+  if (points === 0) return null;
+  const score = points < 3 ? 1 : points < 5 ? 2 : points < 7 ? 3 : points < 10 ? 4 : 5;
+  const bits = [f.decision ? "decision" : "", f.handoverTo.length ? `${f.handoverTo.length} hand-over${f.handoverTo.length === 1 ? "" : "s"}` : "", f.roles ? `${f.roles} role${f.roles === 1 ? "" : "s"}` : "", f.subtasks ? `${f.subtasks} sub-task${f.subtasks === 1 ? "" : "s"}` : ""].filter(Boolean);
+  return { score, reason: bits.join(", ") };
+}
+
+/** Risk of one step from the risks logged against it; null when none is logged. */
+export function suggestStepRisk(f: StepFacts): { score: number; reason: string } | null {
+  return suggestRisk({ steps: 1, decisions: 0, crossProcess: 0, roles: 0, risksHigh: f.controlsHigh, risksMedium: f.controlsMedium, risksLow: f.controlsLow });
 }

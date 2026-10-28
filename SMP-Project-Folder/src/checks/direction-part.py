@@ -112,12 +112,14 @@ with sync_playwright() as p:
     ck("the legend explains it", "their part only" in leg, leg[:200])
 
     # ── 2. The press ─────────────────────────────────────────────────
-    try: pg.click(".acgrid [data-dirscope]"); pg.wait_for_timeout(300)
+    # §621: every press on Roles & access asks first; this file is about what
+    # the press does, so it answers Change it (ask-and-apply.py tests the box).
+    try: pg.click(".acgrid [data-dirscope]"); pg.wait_for_timeout(300); pg.click(".askbox .askyes"); pg.wait_for_timeout(300)
     except Exception: pass
     ck("pressing it writes their-part-only", safe(pg, "()=>GROUP[SMPRules.DIR_SCOPE]") == "part")
     c = cell(pg) or {}
     ck("…lights the half eye and shows the eye unlit", c.get("halfOn") is True and not c.get("eyeOn"), c)
-    try: pg.click(".acgrid tbody tr:has(td.ac [data-dirscope]) td.ac .stbtn >> nth=0"); pg.wait_for_timeout(300)
+    try: pg.click(".acgrid tbody tr:has(td.ac [data-dirscope]) td.ac .stbtn >> nth=0"); pg.wait_for_timeout(300); pg.click(".askbox .askyes"); pg.wait_for_timeout(300)
     except Exception: pass
     ck("pressing the eye gives them the full plan again (the key is DELETED)",
        safe(pg, "()=>(SMPRules.DIR_SCOPE in GROUP)", True) is False)

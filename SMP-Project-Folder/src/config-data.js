@@ -11,6 +11,34 @@
        at save time rather than discovered in a client demo.
    ──────────────────────────────────────────────────────────────────────── */
 
+/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§631) ───────────────────────
+   Islam, of a Setup table spilling across its columns: *"I believe the page
+   needs to be 80% smaller like what we did in the console page"* — and, of
+   the mockup that drew it, *"proceed"*. `html { zoom:.8 }` at 1000px and up
+   (`_shared.css`), the console's own rule (§601's 80%).
+
+   A ZOOMED PAGE HAS TWO KINDS OF PIXEL, measured in this Chromium rather than
+   assumed: what the browser REPORTS — a box's `getBoundingClientRect()`, the
+   window's `innerWidth`/`innerHeight`, the pointer, `scrollY` — is in the
+   window's pixels, 80% of the page's; what the page SETS — `left`, `top`,
+   `width`, a custom property, `offsetWidth` — is in the page's own. So
+   anything placed on screen from a measurement converts it once, here, and
+   never with a second copy of the 0.8 (§53.5). Scrolling needs nothing:
+   `scrollY` and a box's `top` are both the window's. */
+function pageZoom(){
+  var z = typeof document !== "undefined" ? parseFloat(getComputedStyle(document.documentElement).zoom) : 1;
+  return z > 0 ? z : 1;
+}
+/* A box's place and size in the page's own pixels. */
+function zRect(el){
+  var r = el.getBoundingClientRect(), z = pageZoom();
+  return { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z,
+           width: r.width / z, height: r.height / z };
+}
+/* The window's width and height in the page's own pixels. */
+function winW(){ return window.innerWidth / pageZoom(); }
+function winH(){ return window.innerHeight / pageZoom(); }
+
 var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",
@@ -158,6 +186,8 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+/* §621: whether a layer shows its End in Mind — the shape screen's tick, inside the aspiration. */
+function eimOn(target){ return SMPRules.endInMindOn(GROUP, target); }
 /* §479: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
    and Core Values are owed (Missing) only while Client set-up › Structure
    carries them for this unit; off, they are not drawn and not counted, and
@@ -351,6 +381,14 @@ var PROLEPICK = null;
    what commits it (§35) and Escape puts it back, which is the Tracker's shape
    one module over (spec 054). */
 var PCELL = null;
+/* ── AND THE SAME ON THE ORGANISATION TABLES (§630) ─────────────────────
+   Islam: *"why to edit row by row why the editing doesn't happen on the cell
+   level with a double click that opens the editable cells for editing?"*.
+   `{t, key, f}` — the table (`units`, `fns`, `companies`, `caps`), the row's
+   key and the column — or null. The register's rules exactly: one cell at a
+   time, leaving it or Enter keeps it, Escape puts it back. A person cell is
+   open while its picker is (`PICKING`), so choosing somebody shuts it. */
+var OCELL = null;
 /* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that
@@ -461,6 +499,8 @@ var FNMENU = null;
 var UMENU = null;
 /* AND FOR COMPANIES (§272). */
 var COMENU = null;
+/* AND FOR THE COMPANY'S CAPABILITIES, where they are pillars (§630). */
+var CPMENU = null;
 
 /* ── WHICH SETUP TABLE IS BEING ARRANGED (§272) ─────────────────────
    Islam: *"allow me in the setup to rearrange the business units table so they
@@ -901,6 +941,33 @@ function branding(){
   return b;
 }
 
+/* ══ A COLOUR WAITS FOR APPLY (§621) ════════════════════════════════════
+   Islam: *"the color shouldn't change before apply; the undo is just a temp
+   button that appears shortly after the application so the user can get
+   back, and reset can revert it back to shipped palette"* — and then *"make
+   this a general rule of colors elements"*.
+
+   A picked colour is held HERE, never in the graph, so nothing on the page
+   and nothing in a save can carry it before Apply: the boxes show it, the
+   page does not. A key PRESENT means it changed — a value is the new
+   colour, null is cleared (the palette's own). Apply writes it into the
+   graph and keeps what it replaced for UNDO_MS; Undo puts that back.
+
+   EACH COLOUR AREA IS ONE ENTRY IN APPLY_AREAS, so the row under it, the
+   leave question and the Undo window are written once for every area that
+   sets a colour — the tenant's two today, the scoring bands beside them,
+   and whatever colour control comes next (the rule, not a list of pages). */
+var UNDO_MS = 10000;
+var BRAND_PEND = {};
+var BRAND_UNDO = null;
+var APPLY_AREAS = {};
+function brandPendKeys(){ return Object.keys(BRAND_PEND); }
+var BRAND_WORD = { accent: "the accent", bar: "the navigation bar" };
+function brandWaiting(){
+  if ("reset" in BRAND_PEND) return ["the shipped palette"];
+  return brandPendKeys().map(function(k){ return BRAND_WORD[k] || k; });
+}
+
 /* ══ COMMUNICATION (§72) ═══════════════════════════════════════════
    What the tenant sets about the mail the platform sends: the display name it
    arrives under, where a reply goes, the kicker over the header and the small
@@ -1206,6 +1273,59 @@ function brandChecks(){
    relational meaning, and adding a real column to a table that already exists
    needs a pre-phase migration (§33.5) for nothing gained. */
 function personActive(p){ return SMPRules.personActive(p); }
+/* ── REPORTS TO (§655) ─────────────────────────────────────────────
+   `p.reportsTo` is the manager's register KEY (§48) and rides in `extra`
+   like `phone` and `active` above, for the same reason: no relational
+   meaning the server reads, so no column and no migration. Read through
+   here, so a key pointing at a row that has gone reads as nobody rather
+   than as a name the register no longer holds. */
+function reportsToOf(p){
+  var k = p && p.reportsTo;
+  return k ? (personBy(k) || null) : null;
+}
+/* Everybody who answers to this person, directly. */
+function reportsOf(key){
+  return PEOPLE.filter(function(p){ return p.reportsTo === key; });
+}
+/* Everybody under them, however far down — the set that may NOT become
+   their manager, or the chain would loop. Walked with a seen-set so a loop
+   that arrived by some other road (an old file, a merge) ends the walk
+   rather than the page. */
+function reportsUnder(key){
+  var out = {}, queue = [key];
+  while (queue.length) {
+    var k = queue.shift();
+    reportsOf(k).forEach(function(p){
+      if (out[p.key] || p.key === key) return;
+      out[p.key] = true; queue.push(p.key);
+    });
+  }
+  return out;
+}
+/* Who the picker offers: active people in the register's order, never the
+   person themselves, never anybody under them, never a row the Forefront
+   platform MINTED for a consultant (§629 — they are not the client's people).
+   The one they already point at is kept whatever its status, so opening the
+   field cannot silently read a retired manager as nobody (§54.4). */
+function reportsToChoices(p){
+  var under = reportsUnder(p.key);
+  return PEOPLE.filter(function(m){
+    if (m.key === p.key || under[m.key]) return false;
+    if (p.reportsTo === m.key) return true;
+    return personActive(m) && !SMPRules.isMintedRow(m);
+  });
+}
+/* The one door that writes it. Deleted when cleared rather than kept as "",
+   so absent and blank stay one word (the rule the file fields keep above).
+   Refuses the person themselves and anybody under them — the picker never
+   offers either, and this is the save answering alike (§42). */
+function setReportsTo(p, key){
+  if (!p) return false;
+  if (!key) { delete p.reportsTo; return true; }
+  if (key === p.key || !personBy(key) || reportsUnder(p.key)[key]) return false;
+  p.reportsTo = key;
+  return true;
+}
 /* The first few words of a name, for a column that has to be narrow (§69.21).
    NEVER stored and never written back — `p.name` keeps whatever the file
    brought, and this is only what the register's frozen first column shows.
@@ -2271,6 +2391,17 @@ function personDeleteBlockers(key){
     plural(claims.length, "open request") + " for a figure — answer them on the " +
     "cycle page first, so the request is not left pointing at nobody"));
 
+  /* §655: `p.reportsTo` is a KEY, so it is on this list by the list's own
+     rule. Retiring is not blocked — a retired manager is still who somebody
+     answered to — but a row that is deleted would leave them answering to
+     nobody at all. */
+  var reps = reportsOf(key);
+  if (reps.length) out.push(personBlock(
+    plural(reps.length, "person").replace("persons", "people") + " reporting to them",
+    plural(reps.length, "person").replace("persons", "people") + " still report to them (" +
+    reps.map(function(r){ return r.name; }).join(", ") +
+    ") — change their Reports to first"));
+
   return out;
 }
 
@@ -2412,6 +2543,18 @@ function personMergePlan(keepKey, dropKey){
     if (c.by === drop.key && c.state === "open")
       plan.owns.push({ kind:"claim", name:"an open request for a figure" });
   });
+  /* §655: the people who answer to the other row come across, named so the
+     panel can say it. The survivor is left out — a merge must not make
+     somebody report to themselves. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key !== keep.key) plan.owns.push({ kind:"reports", name:r.name + " reporting to them" });
+  });
+  /* And who the other row answered to, when the survivor answers to nobody —
+     a fill like the text fields' (§87.5: what is recorded wins), never a
+     move of a manager the survivor already has, and never the survivor. */
+  var dropMgr = reportsToOf(drop);
+  if (dropMgr && !reportsToOf(keep) && dropMgr.key !== keep.key)
+    plan.fills.push({ k:"reportsTo", label:"Reports to", value:dropMgr.name, key:dropMgr.key });
 
   /* Where the other row sat, offered only when the survivor sits nowhere —
      moving somebody who already has a unit is a real act and a merge must not
@@ -2429,7 +2572,11 @@ function mergePeople(keepKey, dropKey, picks){
   if (!plan) return { ok:false, why:"There is nothing to merge." };
   var keep = plan.keep, drop = plan.drop, took = picks || {};
 
-  plan.fills.forEach(function(f){ keep[f.k] = f.value; });
+  plan.fills.forEach(function(f){
+    /* §655: the Reports to fill is a key dressed as a name for the panel. */
+    if (f.k === "reportsTo") { setReportsTo(keep, f.key); return; }
+    keep[f.k] = f.value;
+  });
   plan.picks.forEach(function(f){ if (took[f.k]) keep[f.k] = f.drop; });
 
   /* THE ATTACHMENT BEFORE THE ROLES, and the survivor’s own kept
@@ -2456,6 +2603,13 @@ function mergePeople(keepKey, dropKey, picks){
     });
   });
   claimsList().forEach(function(c){ if (c.by === drop.key) c.by = keep.key; });
+  /* §655: everybody who answered to the other row answers to the survivor
+     now — through the setter, so the survivor is never made to report to
+     themselves; a row it refuses is left pointing at the other row, and the
+     delete below names it rather than losing it. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key === keep.key) delete r.reportsTo; else setReportsTo(r, keep.key);
+  });
 
   /* AND THE DELETE IS THE CHECK. Anything this function forgot to hand over is
      still pointing at the row, so the delete refuses and the merge reports it
@@ -2833,7 +2987,33 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    register's own vocabulary: the page shows both columns side by side, so the
    file it exports should carry both. */
 var PEOPLE_FILE_COLS = ["Emp ID", "Full Name", "Name", "Job title", "Email",
-                        "Mobile", "Official BU", "Unit", "Role", "Status"];
+                        "Mobile", "Official BU", "Unit", "Reports to", "Role", "Status"];
+/* ── REPORTS TO IN THE FILE (§655.1) ───────────────────────────────────
+   Written as the manager's NAME — the register's own short name, which
+   `displayNames()` has already made unique across the register (§81.1), so
+   the download is a picture of the page and the picture reads back to one
+   row. Read as any of: an employee number, an address, the short name or
+   the full name — matched against the register first, then against the
+   other rows of the same file, so a manager who arrives in the same upload
+   as their report still resolves. Two rows answering to one spelling is
+   REFUSED with both named (§61's rule for capabilities: never pick the
+   first), and a name nobody carries is a problem that says what to write. */
+function reportsToByText(text, dnames){
+  var want = fileTxt(text);
+  if (!want) return { person:null };
+  var low = want.toLowerCase();
+  var byId = personByEmpId(want);
+  if (byId) return { person:byId };
+  var byMail = peopleByEmail(want);
+  if (byMail.length === 1) return { person:byMail[0] };
+  if (byMail.length > 1) return { ambiguous:byMail.map(function(p){ return p.name; }) };
+  var hits = PEOPLE.filter(function(p){
+    return fileTxt(knownName(p, dnames)).toLowerCase() === low || fileTxt(p.name).toLowerCase() === low;
+  });
+  if (hits.length > 1) return { ambiguous:hits.map(function(p){ return p.name; }) };
+  if (hits.length === 1) return { person:hits[0] };
+  return { unknown:true };
+}
 /* ── THE FILE CARRIES BOTH, AND THE OLD ONE STILL READS (§93.8) ───────
    Every file downloaded before today has a "Name" column holding the FULL
    name, so the new pair cannot simply take those headers: read blindly, an old
@@ -3380,6 +3560,22 @@ function planPeopleFile(rows){
       } };
     });
   })();
+  /* ── WHAT THE FILE'S OWN ROWS ANSWER TO (§655.1) ───────────────────
+     A Reports to cell may name somebody who is in this very file and not
+     yet on the register, so each row's identifiers are indexed once: its
+     employee number, address, full name and short name, each lowercased,
+     pointing at the row's position. Two rows under one spelling leave the
+     spelling ambiguous, which the reader says rather than resolves. */
+  var fileIds = {};
+  (rows || []).forEach(function(r, i){
+    [fileTxt(r["Emp ID"]), addrOf(r), fileTxt(fileFullName(r)), fileTxt(fileKnownName(r))]
+      .forEach(function(v){
+        var k = String(v || "").toLowerCase();
+        if (!k) return;
+        (fileIds[k] = fileIds[k] || []).push(i);
+      });
+  });
+  var byFileIndex = {};   /* file position → the plan row it became, for the loop walk */
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -3393,6 +3589,7 @@ function planPeopleFile(rows){
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
     var status = fileTxt(r["Status"]);
+    var mgrCell = fileTxt(r["Reports to"]);
     var label  = name || id || email || "this row";
 
     /* ── THE LADDER, ROW BY ROW (§87.5) ────────────────────────────
@@ -3684,12 +3881,93 @@ function planPeopleFile(rows){
                 conflict:conflict, choice:null, picks:[] };
 
     row.action = conflict ? "conflict" : (existing ? "match" : "add");
+    /* ── WHO THIS ROW REPORTS TO (§655.1) ─────────────────────────────
+       The register answers first; failing that, another row of this file.
+       `row.reportsTo` is { key } for somebody on the register, { row:i } for
+       somebody arriving in this file, and `row.reportsToLabel` is the word
+       the review shows. A blank cell says nothing, as every cell does (§54).
+       Naming the row itself is refused here, where the sentence can say
+       which row — the setter would refuse it too, silently (§42). */
+    if (mgrCell) {
+      var mg = reportsToByText(mgrCell, dnames);
+      if (mg.ambiguous) {
+        plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" could be ' +
+          mg.ambiguous.join(" or ") + '. Write their Emp ID or email, so the row says which.' });
+        return;
+      }
+      if (mg.person) {
+        if (existing && mg.person.key === existing.key) {
+          plan.problems.push({ at:at, msg:'"' + label + '" is written as reporting to themselves.' });
+          return;
+        }
+        row.reportsTo = { key:mg.person.key };
+        row.reportsToLabel = knownName(mg.person, dnames);
+      } else {
+        var inFile = (fileIds[mgrCell.toLowerCase()] || []).filter(function(j){ return j !== i; });
+        if (inFile.length > 1) {
+          plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" is on ' +
+            inFile.map(function(j){ return "Row " + (j + 2); }).join(" and ") +
+            ' of this file. Write their Emp ID or email, so the row says which.' });
+          return;
+        }
+        if (!inFile.length) {
+          plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" is nobody on the register and ' +
+            'nobody in this file. Write the name as the download does, or their Emp ID or email, ' +
+            'or leave it blank to keep who they report to now.' });
+          return;
+        }
+        row.reportsTo = { row:inFile[0] };
+        row.reportsToLabel = fileTxt(fileKnownName(rows[inFile[0]])) || fileTxt(fileFullName(rows[inFile[0]])) || mgrCell;
+      }
+    }
     /* A conflict is matched to NOBODY until it is answered, so there is
        nothing to compare against and no picks to show. They are built by
        peopleRowChoose() the moment the reading is chosen. */
     peopleRowPicks(row, conflict ? null : existing, dnames);
+    byFileIndex[i] = row;
     plan.rows.push(row);
   });
+  /* ── NO LOOPS, SAID BEFORE ANYTHING LANDS (§655.1) ─────────────────
+     The chain as this file would leave it: the register's own pointers,
+     overwritten by the rows that say something, a row still arriving
+     standing in for the person it will be. Walked from every row that
+     names a manager; a walk that comes back to the row is a problem on
+     that row, naming the ring — the setter refuses a loop too, but at
+     apply time, where nothing can be said (§42, §96). A conflict row is
+     nobody until it is answered, so a ring through one is caught by the
+     setter and not here; that row's own Reports to is then left as it was. */
+  (function(){
+    var node = function(row){ return row.key || ("row:" + row.at); };
+    var next = {}, nameOf = {};
+    PEOPLE.forEach(function(p){ if (p.reportsTo) next[p.key] = p.reportsTo; nameOf[p.key] = knownName(p, dnames); });
+    var target = function(row){
+      if (!row.reportsTo) return null;
+      if (row.reportsTo.key) return row.reportsTo.key;
+      var other = byFileIndex[row.reportsTo.row];
+      return other ? node(other) : null;
+    };
+    plan.rows.forEach(function(row){
+      if (row.action === "conflict") return;
+      var t = target(row);
+      if (t) next[node(row)] = t;
+      nameOf[node(row)] = row.name || row.at;
+    });
+    plan.rows.forEach(function(row){
+      if (!row.reportsTo || row.action === "conflict") return;
+      var start = node(row), k = next[start], path = [nameOf[start]], seen = {};
+      while (k && !seen[k]) {
+        seen[k] = true; path.push(nameOf[k] || k);
+        if (k === start) {
+          plan.problems.push({ at:row.at, msg:'Reports to would make a loop: ' +
+            path.join(" \u2192 ") + '. Somebody in that ring must report to somebody outside it.' });
+          delete row.reportsTo; delete row.reportsToLabel;
+          row.picks = row.picks.filter(function(f){ return f.k !== "reportsTo"; });
+          return;
+        }
+        k = next[k];
+      }
+    });
+  })();
   return plan;
 }
 
@@ -3742,6 +4020,21 @@ function peopleRowPicks(row, existing, dnames){
        lose, so it is filled and not asked about. */
     row.picks.push({ k:f.k, label:f.label, was:was, now:now, take:!was });
   });
+  /* §655.1: Reports to is a key dressed as a name, so it is compared as a
+     key and shown as a name. A cell naming the manager already recorded is
+     not a difference; a manager arriving in this file is always one. */
+  if (row.reportsTo) {
+    /* A manager still arriving in this file has no key yet, so they can never
+       be the one recorded — found by the check: compared as "no key" against
+       "no manager" they read as the same, and the pick was never offered. */
+    var same = !!row.reportsTo.key && row.reportsTo.key === (existing.reportsTo || null);
+    if (!same) {
+      var mgrWas = reportsToOf(existing);
+      row.picks.push({ k:"reportsTo", label:"Reports to",
+        was: mgrWas ? fileTxt(knownName(mgrWas, dnames)) : "",
+        now: row.reportsToLabel, take: !mgrWas });
+    }
+  }
   return row;
 }
 /* WHAT THIS ROW WOULD ACTUALLY DO, read live. The picks are ticked after the
@@ -3843,6 +4136,7 @@ function applyPeopleFile(plan){
          equal the guess stores nothing rather than freezing it (§93.8). */
       row.picks.forEach(function(f){
         if (!f.take) return;
+        if (f.k === "reportsTo") return;   /* §655.1: below, once every row has a key */
         if (f.k === "known") setKnownName(p, f.now); else p[f.k] = f.now;
       });
       if (row.id) p.empId = row.id;
@@ -3863,6 +4157,23 @@ function applyPeopleFile(plan){
     if (row.wantActive === true && !personActive(p)) restorePerson(p.key, false);
     if (row.role) grantPersonRole(p.key, row.role, row.where);
     if (row.wantActive === false && personActive(p)) retirePerson(p.key);
+    row.made = p.key;
+  });
+  /* ── REPORTS TO, LAST (§655.1) ─────────────────────────────────────
+     After every row has become a person, because a manager may be a row
+     that was only just added. A new person takes it outright; a matched
+     one only where the review ticked it (§87.6). Through the setter, which
+     still refuses a loop a conflict row's answer closed — the one ring the
+     planner could not see — and leaves that person as they were. */
+  plan.rows.forEach(function(row){
+    if (!row.reportsTo || !row.made) return;
+    var eff = peopleRowEffective(row);
+    if (eff.mode === "match" && !row.picks.some(function(f){ return f.k === "reportsTo" && f.take; })) return;
+    var mgr = row.reportsTo.key || (function(){
+      var other = plan.rows.filter(function(x){ return x.at === "Row " + (row.reportsTo.row + 2); })[0];
+      return other && other.made;
+    })();
+    if (mgr) setReportsTo(personBy(row.made), mgr);
   });
 }
 
@@ -4991,7 +5302,7 @@ function fnDeleteBlockers(fk){
   if (here.length) out.push(fnBlock(
     plural(here.length, "person", "people") + " attached",
     plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People register"));
+    here.join(", ") + ") \u2014 move them on Setup \u2192 Client register"));
 
   var mb = (GROUP.mainbus || []).filter(function(b){
     return mainbuAts(b).indexOf("fn:" + fk) > -1;
@@ -5249,15 +5560,10 @@ function canReport(unitKey){
     if (CYCLE.locked && !inOffice()) return false;
     /* §447: with the units off each direction's owner reports their own
        direction here; canReportRow narrows them to it. */
-    return SMPRules.mayReportTop(world(), viewer()) ||
-           SMPRules.ownsTopPillar(world(), viewer()) ||
-           /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer()) ||
-           /* §520.6: and a capability's owner or custodian enters their own
-              capability's figures here, exactly as a direction's owner does —
-              the capability's rows ask `cap:<id>` for themselves, so this
-              opens the page and nothing else. */
-           SMPRules.ownsTopCapability(world(), viewer());
+    /* §595: whoever reports all of it, or holds a seat on any part of it —
+       a direction, a capability, or (planning in projects) a project. The
+       one rule the server asks; which rows they type on is each part's. */
+    return SMPRules.mayReportTopOrPart(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -7242,8 +7548,10 @@ var BAND_COLOURS = [
    starts at 0 by construction, so the new one goes immediately above it,
    halfway between 0 and the band above — which descends by arithmetic rather
    than by hoping somebody types a number in order. */
-function addBand(){
-  var b = BANDS.bands;
+/* §621: both act on the list they are handed — the bands being edited
+   (bandsEdit, below) on the Setup page, the stored ones by default. */
+function addBand(list){
+  var b = list || BANDS.bands;
   var above = b.length > 1 ? b[b.length - 2].floor : 100;
   var used = {};
   b.forEach(function(x){ used[x.key] = 1; });
@@ -7258,11 +7566,73 @@ function addBand(){
 /* AND REMOVING ONE PUTS THE FLOOR BACK. Every figure has to land somewhere, so
    whatever ends up last starts at 0 — take the bottom band away and the one
    above it inherits that, or a figure of 12 would belong to no band at all. */
-function removeBand(i){
-  var b = BANDS.bands;
+function removeBand(i, list){
+  var b = list || BANDS.bands;
   if (b.length <= 2) return;
   b.splice(i, 1);
   b[b.length - 1].floor = 0;
+}
+
+/* ══ THE BANDS ARE A COLOUR AREA (§621) ═══════════════════════════════════
+   Islam: *"for any colors adjustment like the bands as well let's use the
+   same concept of apply discard and undo"*. A band's key IS its colour
+   (§168), and its floor decides which colour every figure in the tenant
+   wears — so the whole table waits for Apply, not only the swatches: an
+   edit goes into BANDS_DRAFT, a copy, and BANDS is untouched until Apply.
+   Every pill, gauge and deck keeps today's bands meanwhile, because they
+   all read BANDS through bandOf(). */
+var BANDS_DRAFT = null;
+var BANDS_UNDO = null;
+function bandsEdit(){
+  if (!BANDS_DRAFT) BANDS_DRAFT = JSON.parse(JSON.stringify(BANDS.bands));
+  return BANDS_DRAFT;
+}
+/* What waits, in the page's words — one line per kind of change, named by
+   the level it is on as the table shows it. */
+function bandsWaiting(){
+  var d = BANDS_DRAFT, s = BANDS.bands, out = [];
+  if (!d) return out;
+  if (d.length > s.length) out.push(d.length - s.length === 1 ? "a level added" : (d.length - s.length) + " levels added");
+  if (d.length < s.length) out.push(s.length - d.length === 1 ? "a level removed" : (s.length - d.length) + " levels removed");
+  if (d.length === s.length) d.forEach(function(x, i){
+    var o = s[i], name = x.label || o.label;
+    if (x.key !== o.key) out.push("the colour for " + name);
+    if (x.floor !== o.floor) out.push("the floor for " + name);
+    if (x.label !== o.label) out.push("the name " + o.label);
+  });
+  return out;
+}
+function bandsOrdered(list){
+  for (var i = 1; i < list.length; i++) if (list[i].floor >= list[i-1].floor) return false;
+  return true;
+}
+/* WHAT A NEW SET OF BANDS WOULD MOVE: every scored measure on every unit and
+   function, read with the platform's own score (measureScore), and the band it
+   lands in now against the band it would land in. A count of things that
+   change colour with no figure having changed — the sentence the page used
+   to print in red, made exact and moved to the moment it is true. */
+function bandShift(next){
+  var of = 0, moved = 0;
+  var bandIn = function(v, list){
+    for (var i = 0; i < list.length; i++) if (v >= list[i].floor) return list[i].key + "|" + list[i].label;
+    var z = list[list.length - 1]; return z.key + "|" + z.label;
+  };
+  /* Only a measure WITH a score has a band to move; one with no data reads
+     "No data" under any floors, so it is not counted among the scored. */
+  var count = function(s){
+    ((s && s.items) || []).forEach(function(p){
+      scorableMeasures(p).forEach(function(m){
+        var v = measureScore(m);
+        if (v == null || isNaN(v)) return;
+        of++;
+        if (bandIn(v, BANDS.bands) !== bandIn(v, next)) moved++;
+      });
+    });
+  };
+  count(GROUP);
+  (UNIT_KEYS || []).forEach(function(k){ count(UNITS[k]); });
+  (FUNCTION_KEYS || []).forEach(function(k){ count(FUNCTIONS[k]); });
+  return { moved: moved, of: of };
 }
 
 function bandOf(v){
@@ -7338,9 +7708,20 @@ function reviewAsOf(){
      rather than deleted out from under a deployment that still holds one. */
   var y = cycleYear();
   if (y == null) return null;
+  return y * 12 + (cycleEndQuarter() * 3 - 1);   /* the LAST month of that quarter */
+}
+/* THE QUARTER THE CYCLE ENDS IN, where nothing better can be read: the stored
+   `endsQuarter` if it is a quarter, and Q4 if it is not. ONE ANSWER (§603).
+   Four readers used to ask the raw field each in their own way, and on a cycle
+   whose end cannot be read and which holds no quarter they split: the quarter
+   pips said all four quarters had passed while `tacticShare()` compared
+   against `undefined` and called every tactic 0% due, the failure its own
+   comment warns of. A cycle opened in the product cannot reach this -- the
+   form has asked for its end month since §307 -- so it is an older cycle
+   whose end was written in free text with no year anywhere. */
+function cycleEndQuarter(){
   var q = Number(REVIEW.endsQuarter);
-  if (!q || q < 1 || q > 4) q = 4;
-  return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
+  return (q >= 1 && q <= 4) ? q : 4;
 }
 /* Did the month come from the cycle's own end, or from one of the fallbacks
    above? The strip says which, because a review point nobody set is a guess
@@ -7446,7 +7827,7 @@ function elapsedMonths(){
    cannot be read, exactly as tacticPlanned() keeps it. */
 function quarterPast(i){
   var a = reviewAsOf(), y = reviewYear();
-  if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
+  if (a == null || y == null) return (i + 1) <= cycleEndQuarter();
   return y * 12 + i * 3 + 2 <= a;
 }
 /* §308: OVER THE PLAN'S OWN LENGTH, never a hard-coded twelve. On a tenant
@@ -8020,7 +8401,7 @@ function tacticShare(t){
     for (var j = 0; j < 4; j++) {
       if (!q[j]) continue;
       tot++;
-      if (j + 1 <= REVIEW.endsQuarter) el++;
+      if (j + 1 <= cycleEndQuarter()) el++;
     }
     return tot ? el / tot : null;
   }
@@ -8142,7 +8523,7 @@ function tacticFirstQuarterOver(t){
   var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
-    if (y == null || a == null) return i + 1 <= REVIEW.endsQuarter;
+    if (y == null || a == null) return i + 1 <= cycleEndQuarter();
     return y * 12 + i * 3 + 2 <= a;
   }
   return false;
@@ -9423,7 +9804,9 @@ function competeHolder(target){
      rules says the same thing from the other end). §531: an EMPTY target
      shares the top layer's kind but has never answered GROUP here — the
      literal above is still the test — and falls through to UNITS[""]. */
-  if (k === "fn" || k === "cap" || k === "mid") return null;
+  /* §608: a function carries its own, once the office offers it. */
+  if (k === "fn") return FUNCTIONS[boxRef(t).key] || null;
+  if (k === "cap" || k === "mid") return null;
   return UNITS[t] || null;
 }
 function competeOf(target){
@@ -10779,6 +11162,83 @@ function applyFoundationParts(target, parts){
   return true;
 }
 
+/* ── THE SWOT AS AN ARCHIVE OF ITS OWN (§641) ────────────────────────────
+   The Copilot's Apply to plan for a SWOT replaces the four letters and
+   nothing else, so — as the Foundation (§524) — what stood is archived as
+   its own kind, restorable whole from Import & storage › Archived plans,
+   and never by the plan's archive. Read and written through swotWritable,
+   the same view the SWOT page and the Copilot write. */
+function archiveSwot(target, why){
+  var w = swotWritable(target);
+  if (!w) return null;
+  var snap = { s:clone(w.s || []), w:clone(w.w || []), o:clone(w.o || []), t:clone(w.t || []) };
+  var lines = snap.s.length + snap.w.length + snap.o.length + snap.t.length;
+  if (!lines) return null;
+  var a = { id:archiveId(), kind:"swot", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ lines:lines }, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
+/* ── DIRECTIONS AND EXECUTION AS ARCHIVES OF THEIR OWN (§654 A2) ───────
+   The Copilot's Apply to plan for Directions (§645) took a `unit` archive —
+   the Foundation, the SWOT and the pillars together — so restoring it would
+   have put back far more than the apply changed. Each apply now archives
+   the part it touches: `directions` holds the pillars and the Capabilities
+   it updates (name, kind, what they serve, owner); `execution` holds the
+   pillars' measures and tactics, the Capabilities' objectives and projects,
+   and the plan period. Restoring puts that part back and nothing else. */
+function planPeriodNow(){
+  var R = typeof SMPRules !== "undefined" ? SMPRules : null, g = typeof GROUP !== "undefined" ? GROUP : {};
+  return { from: g[(R && R.PLAN_FROM) || "planFrom"] || "", to: g[(R && R.PLAN_TO) || "planTo"] || "" };
+}
+function capsById(ids){
+  var all = typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
+  return (ids || []).map(function(id){ return all.filter(function(c){ return c && String(c.id) === String(id); })[0]; }).filter(Boolean);
+}
+function archiveDirections(target, capIds, why){
+  var u = unitLikeWritable(target);
+  if (!u) return null;
+  var items = clone(Array.isArray(u.items) ? u.items : []);
+  var caps = capsById(capIds).map(function(c){ return { id:c.id, name:c.name || "", capKind:c.capKind || "", serves:clone(c.serves || []), head:c.head || "" }; });
+  var pillars = items.filter(function(p){ return p && String(p.name || "").trim(); }).length;
+  if (!pillars && !caps.length) return null;
+  var a = { id:archiveId(), kind:"directions", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ pillars:pillars, capabilities:caps.length }, plan:{ items:items, caps:caps } };
+  ARCHIVES.unshift(a);
+  return a;
+}
+function archiveExecution(target, capIds, why){
+  var u = unitLikeWritable(target);
+  if (!u) return null;
+  var items = clone(Array.isArray(u.items) ? u.items : []);
+  var caps = capsById(capIds).map(function(c){ return { id:c.id, keyObjectives:clone(c.keyObjectives || []), projects:clone(c.projects || []) }; });
+  var measures = 0, tactics = 0;
+  items.forEach(function(p){ if (!p) return; measures += (p.measures || []).length; tactics += (p.tactics || []).length; });
+  caps.forEach(function(c){ measures += c.keyObjectives.length; tactics += c.projects.length; });
+  var period = planPeriodNow();
+  if (!measures && !tactics && !period.from && !period.to) return null;
+  var a = { id:archiveId(), kind:"execution", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ measures:measures, tactics:tactics, capabilities:caps.length }, plan:{ items:items, caps:caps, period:period } };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
+/* ── COMPETITIVE DISCIPLINE AS AN ARCHIVE OF ITS OWN (§654 B1) ──────────
+   The Copilot's Apply to plan for Competitive Discipline archives the
+   discipline and the value table the plan holds, and restoring puts them
+   back and nothing else. */
+function archiveCompete(target, why){
+  var w = competeWritable(target);
+  if (!w) return null;
+  var snap = { discipline: w.discipline || "", values: clone(w.values || []) };
+  if (!snap.discipline && !snap.values.length) return null;
+  var a = { id:archiveId(), kind:"compete", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ values:snap.values.length }, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -10809,6 +11269,49 @@ function restoreArchive(id){
     renumberUnit(u);
     var restFk = fnKeyOfTarget(a.key);
     if (restFk) fnWriteBack(restFk, u);
+  }
+  else if (a.kind === "swot") {
+    /* §641: the four letters, put back whole; what stands is archived first. */
+    var sw = swotWritable(a.key);
+    if (!sw) return false;
+    archiveSwot(a.key, "replaced by restoring the " + a.at + " archive");
+    ["s","w","o","t"].forEach(function(q){ sw[q] = clone((a.plan || {})[q] || []); });
+  }
+  else if (a.kind === "compete") {
+    /* §654 B1: the discipline and the value table, put back; what stands is
+       archived first so the restore can itself be undone. */
+    var cw = competeWritable(a.key);
+    if (!cw) return false;
+    archiveCompete(a.key, "replaced by restoring the " + a.at + " archive");
+    cw.discipline = a.plan.discipline || "";
+    cw.values = clone(a.plan.values || []);
+    if (typeof competeTidy === "function") competeTidy(a.key);
+  }
+  else if (a.kind === "directions" || a.kind === "execution") {
+    /* §654 A2: the part applied, put back; what stands is archived first as
+       the same kind, so the restore can itself be undone. */
+    var ud = unitLikeWritable(a.key);
+    if (!ud) return false;
+    var ids = (a.plan.caps || []).map(function(c){ return c.id; });
+    if (a.kind === "directions") archiveDirections(a.key, ids, "replaced by restoring the " + a.at + " archive");
+    else archiveExecution(a.key, ids, "replaced by restoring the " + a.at + " archive");
+    ud.items = clone(a.plan.items || []);
+    capsById(ids).forEach(function(c){
+      var sc = (a.plan.caps || []).filter(function(x){ return String(x.id) === String(c.id); })[0]; if (!sc) return;
+      if (a.kind === "directions") {
+        c.name = sc.name;
+        if (sc.capKind) c.capKind = sc.capKind; else delete c.capKind;
+        if (sc.serves && sc.serves.length) c.serves = clone(sc.serves); else delete c.serves;
+        if (sc.head) c.head = sc.head; else delete c.head;
+      } else { c.keyObjectives = clone(sc.keyObjectives || []); c.projects = clone(sc.projects || []); }
+    });
+    if (a.kind === "execution" && a.plan.period && typeof GROUP !== "undefined") {
+      var Rp = typeof SMPRules !== "undefined" ? SMPRules : null;
+      GROUP[(Rp && Rp.PLAN_FROM) || "planFrom"] = a.plan.period.from; GROUP[(Rp && Rp.PLAN_TO) || "planTo"] = a.plan.period.to;
+    }
+    if (ud.ukey && a.key !== "group") renumberUnit(ud);
+    var dFk = fnKeyOfTarget(a.key);
+    if (dFk) fnWriteBack(dFk, ud);
   }
   else if (a.kind === "foundation") {
     /* §524: six parts, put back whole; what stands is archived first so the

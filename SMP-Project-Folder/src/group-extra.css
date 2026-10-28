@@ -255,7 +255,7 @@
     left:auto; right:0; transform:none; }
   /* The cell before it can overflow too once the pane is narrow, and that one
      has room on both sides — so it is capped rather than re-anchored. */
-  .hasnote::after { max-width:min(255px, 60vw); }
+  .hasnote::after { max-width:min(255px, calc(var(--winw) * 0.6)); }
   .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */
@@ -294,6 +294,16 @@
   details.valcard summary:hover { background:var(--surface-2); }
   details.valcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .valcard-body { padding:0 15px 14px; font-size:13.5px; color:var(--ink-2); }
+
+  /* ── Themes box on the top layer's Foundation (§611.1) ─── */
+  .themeband { margin-top:20px; }
+  .themegrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+  .themecard { display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0;
+               border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:12px 15px; }
+  .themecard b { font-family:var(--serif); font-size:16px; font-weight:600; }
+  .themecard .themenote { font-size:13.5px; color:var(--ink-2); white-space:pre-line; }
+  .themeband input.themecode { width:5.5em; text-align:center; }
+  .themeband .why { display:inline; margin:0; }
 
   /* ── Temple entablature, fixed grid ───────────────────── */
   .entablature { grid-template-columns:repeat(3,1fr); gap:16px 26px; align-items:start; }
@@ -404,7 +414,7 @@
   .overlay { visibility:hidden; transition:opacity .12s ease, visibility 0s linear .12s; }
   .overlay.on { transition:opacity .12s ease, visibility 0s; }
   .modal { background:var(--surface); border:1px solid var(--line); border-radius:3px;
-           width:min(940px,100%); max-height:88vh; display:flex; flex-direction:column;
+           width:min(940px,100%); max-height:calc(var(--winh) * 0.88); display:flex; flex-direction:column;
            box-shadow:0 24px 60px rgba(0,0,0,.28); }
   .modal-h { display:flex; align-items:flex-start; gap:16px; padding:20px 24px 16px;
              border-bottom:1px solid var(--line); }
@@ -456,7 +466,7 @@
     .ks-k { text-align:left; }
     .ks-v { margin-bottom:7px; }
   }
-  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
+  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:var(--winh); border-radius:0; } }
 
   /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
      The dialog carries the weight the quiet words in the head do not: what
@@ -1315,8 +1325,29 @@
      rather than assumed. */
   @media (max-width:1200px){
     .split:not(.setupsplit) { grid-template-columns:1fr; }
-    /* Stacked, the rail is not sticky and there is no gap above it to fill. */
-    .rail:not(.setuprail) { position:static; display:flex; overflow-x:auto; }
+    /* ── THE STRIP STAYS AND THE TITLE GOES (§609) ──────────────────────
+       Islam, of the Plan page on a squeezed window: *"the directions are not
+       freezed, they might be squeezed a bit but stay"*; then, of the title
+       pinned under them, *"is it a repetition?"* It is. Stacked, this rule
+       said `position:static`, so the strip scrolled away with the plan and
+       only the open direction's band stayed: switching meant scrolling back
+       up, and at 900 the fourth direction ran off the end as well.
+
+       NOW THE STRIP PINS, at the offset it already sits at — `.rail`'s own
+       `top`, no longer overridden here, so the flow position and the pin
+       are one number (§29.4) — and the band and the editing head that
+       replaces it scroll with the plan (below). The strip's open item names
+       the direction, and Done editing lives in the chrome's section row.
+       Measured at 1100x760: the rows start at y=254 under the strip against
+       263.7 under the pinned band, so pinning the strip costs nothing. Above
+       1200 the vertical rail and its pinned band are untouched.
+
+       `overflow` is the SORTABLE's now, not the rail's: a scroll box clips
+       its positioned descendants, and the rail's ground filler and corner
+       fill are exactly that. z-index 6 because the pane's corner acts sit at
+       5 and come later in the document, so at 5 the pen would paint over the
+       strip it slides under. */
+    .rail:not(.setuprail) { display:flex; overflow:visible; min-width:0; z-index:6; }
     /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§162). The line
        above has said `display:flex` since the stacked rail was written, and
        for a long time it did nothing: reordering later wrapped every row in a
@@ -1329,13 +1360,155 @@
        `display:flex` on the wrapper rather than `display:contents`, which also
        works and would remove the wrapper's BOX — and `makeSortable` measures
        that box to decide where a dragged row lands. */
-    .rail:not(.setuprail) .sortable { display:flex; gap:2px; flex:0 0 auto; }
-    .split:not(.setupsplit) .rail::before { display:none; }
+    .rail:not(.setuprail) .sortable { display:flex; gap:2px; flex:1 1 auto; min-width:0;
+      overflow-x:auto; }
+    /* §53.7's ground above the pinned strip, across the full width now that
+       there is no gutter beside it to reach over — and ENDING ON THE BORDER'S
+       OUTER EDGE (§618). `bottom:100%` is measured from the padding box, so
+       the filler ran one pixel down over the strip's own top border and the
+       line was missing along the whole top: Islam, of the outlined strip, *"the
+       outer line is not around the whole thing is it broken?"* It was, and it
+       had been since §609 in the grey too. */
+    .split:not(.setupsplit) .rail::before { right:-1px; bottom:calc(100% + 1px); }
+    /* ── THE STRIP IS ITS OWN CARD (§618) ─────────────────────────────────
+       Islam: *"make the rail when it's in the top to be separate as if in a
+       separate card from the direction or capability data, just to be
+       appearing separately like the rail on the left"*; of five drawn
+       (design-mockups/strip-card/), *"go with D"*: an outer line in the open
+       item's own navy, and the gutter the side rail keeps kept UNDER the
+       strip while it is pinned, so the plan slides away into page ground
+       rather than up against the strip. The gutter is the corner layer below
+       reaching one `--split-gap` further down; at rest that band is the
+       split's own gap, already ground, so nothing at rest moves.
+
+       THE LINE IS THE OPEN ITEM'S OWN COLOUR — WHICH IS NOW THE DARK GREY
+       (§627), see the open item below. `--stone` was navy in the navy
+       palette and the Branding page never rewrites it, so under a tenant's
+       green chrome the strip stayed navy. */
+    .rail:not(.setuprail) { border-color:var(--ink-2); }
+    /* ITS FOUR ROUNDED CORNERS TAKE THE PAGE'S GROUND (§130.3's fill, on the
+       strip). Pinned, the plan's rows slide past behind them. At rest the
+       strip stands on that same ground — unlike the band, which sits in the
+       white card (§130.6) — so painting them always changes nothing at rest
+       and needs no observer. Each tile is the border box's own radius, so the
+       circle is the strip's own outer arc; and it is what rounds the open
+       item's fill at either end. */
+    .split:not(.setupsplit) .rail:not(.setuprail)::after {
+      content:""; position:absolute; inset:-1px; pointer-events:none;
+      bottom:calc(-1px - var(--split-gap, 16px));
+      background:
+        radial-gradient(circle at 100% 100%, transparent calc(var(--r) - .5px),
+          var(--ground) var(--r)) left top / var(--r) var(--r) no-repeat,
+        radial-gradient(circle at 0 100%, transparent calc(var(--r) - .5px),
+          var(--ground) var(--r)) right top / var(--r) var(--r) no-repeat,
+        radial-gradient(circle at 100% 0, transparent calc(var(--r) - .5px),
+          var(--ground) var(--r)) left 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
+        radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px),
+          var(--ground) var(--r)) right 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
+        linear-gradient(var(--ground), var(--ground)) left bottom / 100% var(--split-gap, 16px) no-repeat; }
     .rail:not(.setuprail) .rhead, .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
-    .rail:not(.setuprail) button.ritem { border-bottom:3px solid transparent; border-left:0; white-space:nowrap;
-      grid-template-columns:auto auto; }
-    .rail:not(.setuprail) button.ritem.on { border-left-color:transparent; border-bottom-color:var(--gold); }
+    /* ONE ROW, AND THE NAMES WRAP RATHER THAN RUN OFF THE END (§609). Islam:
+       *"the text needs to wrap"*. A flex row of the item's own parts in their
+       own order — handle, code, name, years, Missing, score — so every rail
+       that draws one (a unit's plan, its performance and its report, a
+       function's projects, the routes to market, the capabilities) lays out
+       the same way. The NAME is the only part that gives: it wraps, up to
+       three lines, and `overflow-wrap:anywhere` makes its smallest size a
+       letter rather than its longest word, so the strip shares the room in
+       proportion to the names and no direction leaves the strip. Measured on
+       Mobile's four: one line at 1100, two at 900 and 760; ten directions
+       still fit at 760. Past three lines a name ends in an ellipsis and the
+       whole of it is the name's `title`. */
+    .rail:not(.setuprail) button.ritem { display:flex; align-items:center; gap:8px;
+      flex:1 1 auto; width:auto; min-height:42px; padding:7px 14px 4px;
+      border-bottom:3px solid transparent; border-left:0; }
+    .rail:not(.setuprail) .ritem > * { flex:none; }
+    .rail:not(.setuprail) .ritem .rcode { margin:0; white-space:nowrap; }
+    .rail:not(.setuprail) .ritem b { flex:0 1 auto; min-width:0; line-height:1.3;
+      overflow-wrap:anywhere; display:-webkit-box; -webkit-box-orient:vertical;
+      -webkit-line-clamp:3; overflow:hidden; }
+    .rail:not(.setuprail) .ritem .rgap, .rail:not(.setuprail) .ritem .yrtag { margin-left:0; }
+    /* A STRIP THAT CARRIES NUMBERS GIVES THE NAME ITS OWN LINE. Performance's
+       scores, a report's tallies and a plan's Missing counts are 40–65px
+       each that do not shrink, and beside the code they left a name at 760px
+       about 40px — measured, words broken mid-way ("Portfoli / o &"). So in
+       such a strip the code and the numbers share the first line, the
+       numbers at its right, and the name takes the item's whole width
+       beneath them. Asked of the STRIP, not the item, so a strip never mixes
+       the two shapes; the plan strip, which has no numbers, keeps its one
+       line. */
+    .rail:not(.setuprail):has(.ritem > .rnum, .ritem > .rgap) button.ritem {
+      flex-wrap:wrap; column-gap:6px; row-gap:3px; align-content:center; }
+    .rail:not(.setuprail):has(.ritem > .rnum, .ritem > .rgap) .ritem .rcode { margin-right:auto; }
+    .rail:not(.setuprail):has(.ritem > .rnum, .ritem > .rgap) .ritem b { order:1; flex:1 1 100%; }
+    .rail:not(.setuprail) .railadd { flex:none; align-self:center; padding:0 14px;
+      white-space:nowrap; }
     .rail:not(.setuprail) .ritem .rsub { display:none; }
+    /* THE OPEN ONE WEARS THE SECTION SWITCH'S "SELECTED" (§609): the same
+       fill and `--surface` type as Plan in Foundation | SWOT | Plan, over the
+       gold edge it always had. The others step back to `--ink-3` and come up
+       to `--ink` under the pointer. Islam: *"the highlighting needs to be more
+       clear and the other directions titles to be dimmed"*.
+
+       AND THAT FILL IS THE DARK GREY, NOT THE PALETTE'S NAVY (§627). It was
+       `--stone`, which the navy palette sets to the house navy and which the
+       Branding page never rewrites — so a tenant whose bar is green got a
+       green chrome and a navy strip. Of the fills drawn (the tenant's bar
+       colour, a dark grey, a light grey, type only, the accent;
+       design-mockups/brand-strip/ and the live one beside it), Islam: *"the
+       actual color of the client might be too much"*, then *"dark grey with
+       the accent line beneath"*. `--ink-2` is the palette's second ink — body
+       text's own grey — so the fill is neutral under any tenant's colour and
+       the tenant shows where it already does: the chrome above and the accent
+       edge under the open item. In the dark palettes the second ink is light
+       and `--surface` dark, so the fill inverts with the theme as the switch's
+       does. The switch takes the same grey (arrange.css, `.secseg`).
+
+       §41 took a solid fill OFF this row once, so that a score keeps its
+       scoring colour — and it still does: on the filled item the score, the
+       Missing count and the years tag sit on a `--surface` ground of their
+       own, so their colours read exactly as they do on every other row. A
+       report's tally already is a chip and is left alone. The vertical rail
+       keeps §41's quiet ground; only the strip fills. */
+    .rail:not(.setuprail) button.ritem.on,
+    .rail:not(.setuprail) button.ritem.on:hover { background:var(--ink-2);
+      border-bottom-color:var(--gold); }
+    .rail:not(.setuprail) .ritem.on .rcode,
+    .rail:not(.setuprail) .ritem.on b { color:var(--surface); }
+    .rail:not(.setuprail) .ritem.on .grip i { background:var(--surface); }
+    .rail:not(.setuprail) .ritem.on .rnum:not(:has(.rtally)),
+    .rail:not(.setuprail) .ritem.on .rgap { background:var(--surface); border-radius:999px;
+      padding:2px 7px; }
+    .rail:not(.setuprail) .ritem.on .yrtag { background:var(--surface); }
+    .rail:not(.setuprail) .ritem:not(.on) .rcode,
+    .rail:not(.setuprail) .ritem:not(.on) b { color:var(--ink-3); }
+    .rail:not(.setuprail) .ritem:not(.on):hover .rcode,
+    .rail:not(.setuprail) .ritem:not(.on):hover b { color:var(--ink); }
+    /* WHERE ONE CLOSED DIRECTION ENDS AND THE NEXT BEGINS (§627). Islam:
+       *"an enhanced design to show somehow a separator between the
+       directions, maybe we have them in separate cards or a light grey
+       separator"*; of the four drawn (none, a full-height hairline, an inset
+       hairline, separate cards), *"separation hairline inset"*. A 1px hairline
+       in `--line`, stopped 9px short of the strip's top and bottom, before
+       every item but the first — drawn as the item's own ::before so the
+       items' 2px gap closes to nothing and the hairline is the only thing
+       between them. None beside the open item, on either side: its fill is
+       its edge. Separate cards were drawn and not taken: their gaps and
+       borders cost each name about 30px, so at 1100 every name wrapped and
+       the pinned strip grew from 46px to 80px. */
+    .rail:not(.setuprail) .sortable { gap:0; }
+    .rail:not(.setuprail) .sortable > button.ritem:not(:first-child)::before { content:"";
+      position:absolute; left:0; top:9px; bottom:9px; width:1px; background:var(--line); }
+    .rail:not(.setuprail) .sortable > button.ritem.on::before,
+    .rail:not(.setuprail) .sortable > button.ritem.on + button.ritem::before { display:none; }
+    /* AND THE TITLE UNDER IT SCROLLS WITH THE PLAN (§609), reading or
+       editing — the band §53.7 pinned and the head §194 pinned in its place.
+       Not sticky means it never leaves its flow position, so `pinWatch()`
+       never marks it and its corner fill (§130.6) never paints. */
+    .split:not(.setupsplit) > .pane > .pband,
+    .split:not(.setupsplit) > .pane > .ptitle.edhead { position:relative; top:auto; }
+    .split:not(.setupsplit) > .pane > .pband::before,
+    .split:not(.setupsplit) > .pane > .ptitle.edhead::before { display:none; }
   }
 
   /* The Report section in the third row. Gold while a cycle is asking for

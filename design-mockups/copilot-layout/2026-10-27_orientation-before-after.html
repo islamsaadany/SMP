@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Copilot Orientation Pass</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--accent:#D9773A;--nav:#16325C;--panel-ink:#FFFFFF;--warn:#8A5A12;--good:#2E6B45;--goodbg:#E6F2EA;--me:#E9EEF5;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warn:#E3B868;--good:#8FCBA4;--goodbg:#1C2E23;--me:#26303D;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warn:#E3B868;--good:#8FCBA4;--goodbg:#1C2E23;--me:#26303D;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1460px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:24px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:100ch}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.ctl b{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.seg button:focus-visible,.btn:focus-visible,.card:focus-visible,.fold:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.say{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:9px 14px;font-size:14px;color:var(--ink-2)}
+.say b{color:var(--ink)}
+/* ── the frame: strip · rail · main ── */
+.frame{border:1px solid var(--line);border-radius:10px;background:var(--ground);padding:8px;height:760px;display:grid;grid-template-columns:24px 200px minmax(0,1fr);gap:8px}
+.frame.railshut{grid-template-columns:24px minmax(0,1fr)}
+.strip{display:flex;flex-direction:column;gap:6px}
+.ib{width:24px;height:26px;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center;background:var(--surface);font-size:12px;color:var(--ink-3)}
+.rail{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;font-size:12.5px}
+.rh{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:4px 2px}
+.rs{border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow:hidden}
+.ri{padding:7px 10px;border-top:1px solid var(--line)}
+.ri:first-child{border-top:0}
+.ri.on{background:var(--surface-2);border-left:3px solid var(--goldfill)}
+.ri b{display:block;font-size:13px}
+.ri small{color:var(--ink-3)}
+.main{min-width:0;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px;display:grid;gap:0}
+.main.work{grid-template-columns:minmax(0,1fr) 12px minmax(0,1fr) 208px}
+.main.start{grid-template-columns:minmax(0,1fr)}
+.grip{position:relative}.grip::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line)}
+.chat{min-width:0;min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);padding:0 12px 12px;overflow:hidden}
+.after .chat{background:var(--surface)}
+.fh{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.fh b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fh small{color:var(--ink-3);font-weight:400}
+.pill{font-size:11.5px;border:1px solid var(--line);border-radius:6px;padding:2px 8px;color:var(--ink-2);background:var(--surface)}
+.bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);padding:6px 0}
+.bar i{flex:1;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--p),var(--line) var(--p))}
+.msgs{flex:1 1 auto;min-height:0;overflow:auto;padding:6px 0 8px}
+.col{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.who{font-size:11.5px;color:var(--ink-3);margin-bottom:-6px}.who.r{text-align:right}
+.ai{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:8px 12px;max-width:92%}
+.after .ai{background:none;border:0;border-left:3px solid var(--accent);border-radius:0;padding:2px 12px;color:var(--ink)}
+.me{align-self:flex-end;background:var(--me);border:1px solid var(--line);border-radius:10px;padding:7px 12px;max-width:80%}
+.after .me{border:0}
+.sep{display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:12px}
+.sep::before,.sep::after{content:"";flex:1;height:1px;background:var(--line)}
+.part{border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.fold{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;text-align:left;padding:8px 12px;font-size:14px;border-radius:8px}
+.fold small{color:var(--ink-3);font-size:12.5px;flex:1}
+.st{font-size:11.5px;font-weight:600;color:var(--ink-3);white-space:nowrap}
+.st.ok{color:var(--good)}.st.now{color:var(--warn)}
+.prop{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:8px 12px}
+.after .prop{border:0;border-left:3px solid var(--accent);border-radius:0;padding:2px 12px}
+.prop h6{margin:0 0 4px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.prop .txt{background:var(--surface-2);border-radius:6px;padding:8px 10px}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px;font:600 12.5px/1.2 var(--sans)}
+.btn.go{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+.box{max-width:720px;width:100%;margin:8px auto 0;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 12px;color:var(--ink-3);font-size:14px;display:flex;justify-content:space-between}
+.hint{max-width:720px;margin:4px auto 0;font-size:11px;color:var(--ink-3);text-align:right;width:100%}
+/* pane */
+.pane{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding:0 4px 0 10px;overflow:hidden}
+.ph{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3);padding-top:6px}.ph b{color:var(--ink);font-size:13.5px}
+.ph .x{margin-left:auto;width:24px;height:22px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;background:var(--surface);color:var(--ink-3)}
+.pbody{flex:1 1 auto;min-height:0;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start}
+.pbody .wide{grid-column:1/-1}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.card h4{margin:0 0 4px;font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card h4 .st{font-size:11.5px}
+.card p{margin:0;font-size:13px;color:var(--ink-2)}
+.card ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+.foot{border-top:1px solid var(--line);padding-top:8px;font-size:12.5px;color:var(--ink-3)}
+.foot .state{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.foot .state i{font-style:normal;color:var(--line)}
+.foot .state b{color:var(--ink);font-weight:600}
+.foot .state .on{color:var(--good);font-weight:600}
+/* to-do */
+.todo{margin-left:8px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12.5px;overflow:auto;min-height:0}
+.todo h5{margin:0;font-size:13.5px;display:flex;justify-content:space-between}.todo h5 small{color:var(--ink-3);font-weight:600}
+.todo .t{height:3px;border-radius:2px;margin:6px 0 8px;background:linear-gradient(90deg,var(--accent) var(--p),var(--line) var(--p))}
+.tg{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:8px 0 2px}
+.ti{display:flex;align-items:center;gap:6px;padding:2px 0}
+.ti i{width:9px;height:9px;border-radius:50%;flex:none;border:1.5px solid var(--ink-3)}
+.ti.done i{background:var(--good);border-color:var(--good)}
+.ti.now i{border-color:var(--accent)}
+.ti span{flex:1}
+.ti em{font-style:normal;font-size:10.5px;color:var(--ink-3)}
+.ti.done em{color:var(--good)}
+/* start screen */
+.startc{max-width:760px;margin:40px auto 0;display:flex;flex-direction:column;gap:14px;width:100%}
+.startc h3{margin:0;text-align:center;font-size:20px}
+.startc p.l{margin:0;text-align:center;color:var(--ink-3)}
+.ask{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px;color:var(--ink-3);min-height:88px;display:flex;flex-direction:column;justify-content:space-between}
+.ask .row{display:flex;justify-content:space-between;font-size:12px}
+.ways{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.way{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px;position:relative}
+.way b{font-size:14px}
+.way span{font-size:12.5px;color:var(--ink-2)}
+.way.plan{border-color:var(--goldfill);box-shadow:0 0 0 1px var(--goldfill) inset;background:color-mix(in srgb,var(--goldfill) 7%,var(--surface))}
+.way.plan .tag{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.way.plan .meta{font-size:12px;color:var(--ink-3);margin-top:auto;padding-top:4px}
+.mark{outline:2px dashed #C2452E;outline-offset:3px;border-radius:6px}
+.note{display:none;font-size:11.5px;color:#C2452E;font-weight:600}
+.before .note{display:inline}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.n{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13.5px;color:var(--ink-2)}
+.n b{display:block;color:var(--ink)}
+.n s{color:var(--ink-3)}
+@media (max-width:1100px){.frame,.frame.railshut{grid-template-columns:minmax(0,1fr);height:auto}.strip,.rail{display:none}.main.work{grid-template-columns:minmax(0,1fr)}.grip,.todo{display:none}.msgs,.pbody{max-height:520px}.pbody{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The Copilot, oriented: before and after</h1>
+    <p class="lede">Two screens of Foundation — Online. <b>Working</b>: the rail stays open, each header has one job, one counter, four status words, lighter messages, the result path in one line. <b>Starting</b>: the ways to start, with <i>Start from the plan</i> first — only because Online's plan already holds a Foundation.</p>
+  </header>
+  <div class="ctl">
+    <b>Screen</b><span class="seg" id="scr"><button data-s="work">Working on a part</button><button data-s="start">Starting a new chat</button></span>
+    <b>View</b><span class="seg" id="view"><button data-v="before">Before (today)</button><button data-v="after">After</button></span>
+  </div>
+  <div class="say" id="say"></div>
+  <div id="frame"></div>
+  <div class="notes" id="notes"></div>
+</div>
+<script>
+(function(){
+  var S = { s:"work", v:"after" };
+  var E = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+  var WHO = "We are Raya Shop, Raya Trade's B2C e-commerce platform (website and app) in Egypt, selling mobiles, IT, TVs and home appliances first-party, plus a third-party marketplace…";
+  var ASP = "To be one of Egypt's top-choice online destinations for electronics and home appliances, recognised for genuine products, easy instalments, and in-store pick-up and returns.";
+  var EIM = "To be the online home Egyptian households turn to for the technology and appliances they rely on…";
+  var OBJ = ["Total GMV: EGP 1 billion a year","Delivery SLA in Cairo and Giza: 48 hours or less","Same-day PFS & HDFS: 100% of eligible orders","Order cancellation ratio: 30% or less","Customer satisfaction: 85% or higher"];
+  function strip(){ return '<div class="strip"><span class="ib">▮</span><span class="ib">+</span></div>'; }
+  function rail(){
+    return '<aside class="rail"><div class="rh"><span>Chats</span><span>+ New</span></div><div class="rs">' +
+      '<div class="ri on"><b>Foundation — Online</b><small>Mohamed Essam · 26 Oct · Guided</small></div>' +
+      '<div class="ri"><b>Foundation — Online</b><small>Mohamed Essam · 22 Oct · Guided</small></div>' +
+      '<div class="ri"><b>Free chat</b><small>Islam Saadany · 19 Oct</small></div></div>' +
+      '<div class="rh"><span>Deliverables</span><span>▾</span></div><div class="rs"><div class="ri"><b>Foundation — Online</b><small>v1 · on the plan · 26 Oct</small></div></div></aside>';
+  }
+  function todo(after){
+    var items = [["Starting point",1],["Plan years 2026–2027",1],["Who we are",1],["Winning Aspiration",0],["End in Mind",1],["Key Objectives",1],["Consistency check",0],["Save as Foundation",0]];
+    return '<aside class="todo"><h5>To-do <small>5/8</small></h5><div class="t" style="--p:62%"></div>' +
+      '<div class="tg">Start</div>' + items.slice(0,2).map(ti).join("") + '<div class="tg">The parts</div>' + items.slice(2,6).map(ti).join("") + '<div class="tg">Then</div>' + items.slice(6).map(ti).join("") + '</aside>';
+    function ti(x, i){ var now = x[0] === "Winning Aspiration"; return '<div class="ti' + (x[1] ? " done" : now ? " now" : "") + '"><i></i><span>' + E(x[0]) + '</span><em>' + (x[1] ? (after ? "Agreed" : (i < 2 ? "Done" : "Agreed")) : now ? (after ? "In progress" : "Answering") : (x[0] === "Consistency check" ? (after ? "" : "Optional") : (after ? "" : "To do"))) + '</em></div>'; }
+  }
+  function chatHead(after){
+    return after
+      ? '<div class="fh"><b>Foundation — Online <small>· Winning Aspiration</small></b><span class="pill">A− A+</span></div>'
+      : '<div class="fh"><b class="mark">Copilot · Winning Aspiration</b><span class="pill">Draft</span><span class="pill">A− A+</span></div><div class="bar mark">3 of 4 parts agreed <i style="--p:75%"></i></div>';
+  }
+  function msgs(after){
+    var st = function(a){ return after ? '<span class="st ok">Agreed</span>' : '<span class="st ok">Agreed</span>'; };
+    return '<div class="msgs"><div class="col">' +
+      '<div class="who">Copilot</div><div class="ai">Good. We\'ll build the parts in order, starting with <b>Who we are</b> (7 short questions).</div>' +
+      '<div class="part"><button type="button" class="fold"><span style="color:var(--ink-3)">▸</span><b>Who we are</b><small>7 answers · 1 draft</small>' + st() + '</button></div>' +
+      '<div class="part"><button type="button" class="fold"><span style="color:var(--ink-3)">▸</span><b>Winning Aspiration</b><small>4 answers</small><span class="st now">' + (after ? "In progress" : "Drafting") + '</span></button></div>' +
+      '<div class="who">Copilot</div><div class="prop"><h6>Winning Aspiration · Proposal 1</h6><div class="txt">' + E(ASP) + '</div>' +
+        (after ? '' : 'Refine it, or type what to change in the box below.') +
+        '<div class="btns"><span class="btn">Make concise</span><span class="btn">More professional</span><span class="btn">Simplify</span></div>' +
+        '<div class="btns"><span class="btn go">Save to the card</span><span class="btn">Keep as it was</span></div></div>' +
+      '</div></div>' +
+      '<div class="box"><span>Say what to change in this draft…</span></div><div class="hint">Enter sends · Shift + Enter for a new line</div>';
+  }
+  function pane(after){
+    var h = after
+      ? '<div class="ph"><b>v2 in progress</b><span>· v1 on the plan</span><span class="x">×</span></div>'
+      : '<div class="ph mark"><b>Foundation — Online v2</b><span>· in progress · 3 of 4 done · 2026 to the end of 2027</span><span class="x">×</span></div>';
+    var A = after ? "Agreed" : "Done";
+    var cards = '<div class="card wide"><h4>Who we are <span class="st ok">' + A + '</span></h4><p>' + E(WHO) + '</p></div>' +
+      '<div class="card wide"><h4>Winning Aspiration <span class="st now">' + (after ? "In progress" : "Being written in the chat") + '</span></h4><p><i>' + (after ? "Proposal in the chat — nothing agreed yet." : "Nothing agreed yet. The proposal is in the chat.") + '</i></p></div>' +
+      '<div class="card"><h4>End in Mind <span class="st ok">' + A + '</span></h4><p>' + E(EIM) + '</p></div>' +
+      '<div class="card"><h4>Key Objectives <span class="st ok">' + A + '</span></h4><ul>' + OBJ.map(function(o){ return '<li>' + E(o) + '</li>'; }).join("") + '</ul></div>';
+    var foot = after
+      ? '<div class="foot"><div class="state"><b>v2</b> in progress <i>·</i> <b>v1</b> saved 26 Oct <i>·</i> <span class="on">v1 on the plan</span></div><div class="btns"><span class="btn" aria-disabled="true">Run the check</span><span class="btn go">Save as v2</span><span class="btn">Apply to plan</span></div></div>'
+      : '<div class="foot mark"><div>v2 in progress · 3 of 4 parts agreed · v1 is on the plan</div><div class="btns"><span class="btn" aria-disabled="true">Run the check</span><span class="btn go">Save as Foundation — Online v2</span><span class="btn">Apply to plan</span></div></div>';
+    return '<section class="pane">' + h + '<div class="pbody">' + cards + '</div>' + foot + '</section>';
+  }
+  function work(after){
+    return '<div class="main work"><section class="chat">' + chatHead(after) + msgs(after) + '</section><div class="grip"></div>' + pane(after) + todo(after) + '</div>';
+  }
+  function start(after){
+    var ways = [["Answer guided questions","I ask you a few questions and draft your Foundation from your answers."],["Use a template","Download an interview template, fill it in, and upload it back."]];
+    var planCard = after ? '<button type="button" class="way plan"><span class="tag">On the plan today</span><b>Start from the existing plan</b><span>Load what is on the plan onto the cards and change any part. The plan moves only on Apply.</span><span class="meta">4 parts · changed 12 Oct by Islam Saadany</span></button>' : '';
+    var inChat = after ? '' : '<div class="n" style="margin-top:8px"><b>Today the plan question is asked later, inside the chat</b>Pick <i>Answer guided questions</i> and the first thing the Copilot says is "Online already has a Foundation. Do you want to start from what\'s there, or start fresh?" — a start decision, one step too late, and asked in its own words again in the SWOT and in Directions.<span class="note"> ← the inconsistency</span></div>';
+    return '<div class="main start"><div class="startc"><h3>What would you like to do with Online\'s Foundation?</h3>' +
+      '<div class="ask"><span>Ask anything, attach your notes, or paste a finished Foundation…</span><div class="row"><span>📎 Attach notes &nbsp;·&nbsp; Word, PDF or Excel · or paste · Enter sends</span><span>↵</span></div></div>' +
+      '<p class="l" style="font-size:12.5px">Typing, attaching or pasting here starts a free chat.</p>' +
+      '<div class="sep" style="font-size:10.5px;letter-spacing:.07em;text-transform:uppercase">or start step by step</div>' +
+      '<div class="ways">' + planCard + ways.map(function(w){ return '<button type="button" class="way"><b>' + E(w[0]) + '</b><span>' + E(w[1]) + '</span></button>'; }).join("") + '</div>' + inChat + '</div></div>';
+  }
+  var SAY = {
+    work: { before: '<b>Before (as on main today).</b> The rail folds whenever a pane is open — until you reopen it, which is forgotten on the next visit — so nothing on screen names the chat you are in. Two headers (dashed red): the chat\'s says the area and the step, the pane\'s says the version — neither says the chat. "3 of 4" is counted in three places. Ten status words. Boxes inside boxes.',
+            after: '<b>After.</b> The rail stays open while there is room, so the chat and its versions are always in view. The chat\'s head is the chat\'s name and the step; the pane\'s head is the version and its standing. One counter: the to-do. Four status words: Not started · In progress · Agreed · On the plan. Copilot lines lose their box; the pane\'s foot reads the whole path in one line.' },
+    start: { before: '<b>Before (as on main today).</b> The box to ask, attach or paste, then two ways to start step by step — the same two whether Online\'s plan is empty or already holds a Foundation. The "start from it?" question comes one step later, inside the chat.',
+             after: '<b>After.</b> <i>Start from the existing plan</i> is the first card — shown only because Online\'s plan holds a Foundation, and saying what it holds. One decision, in the one place every start decision is made. The in-chat question goes.' } };
+  var NOTES = {
+    work: ['<div class="n"><b>1 · Rail open with room</b>Folded only when the Copilot itself is tight (the §642 width rules), and your choice remembered across visits. <s>Folds whenever a pane is open; reopening it is forgotten next visit.</s></div>',
+           '<div class="n"><b>2 · One job per header</b>Chat: <i>Foundation — Online · Winning Aspiration</i>. Pane: <i>v2 in progress · v1 on the plan</i>. <s>"Copilot · Winning Aspiration · Draft" and "Foundation — Online v2 · in progress · 3 of 4 done · 2026…"</s></div>',
+           '<div class="n"><b>3 · One counter</b>The to-do already counts everything, so the two progress bars go. <s>Bars in both heads, a count at the foot, and the to-do.</s></div>',
+           '<div class="n"><b>4 · Four status words</b>Not started · In progress · Agreed · On the plan, everywhere. <s>Done, Agreed, Drafting, Being written in the chat, Answering, Now, Optional, To do…</s></div>',
+           '<div class="n"><b>5 · Lighter chat</b>Copilot lines keep the orange stripe and lose the box; your lines stay bubbles; borders only on fold rows and cards. Same content, half the lines.</div>',
+           '<div class="n"><b>6 · The path in one line</b>At the pane\'s foot, always: <i>v2 in progress · v1 saved 26 Oct · v1 on the plan</i>. The Copilot stops narrating mechanics ("press Apply on the save bar…").</div>'],
+    start: ['<div class="n"><b>The box and the two cards stay</b>Everything §639–§640 built is kept: the box starts a free chat from a question, notes or a paste; the two cards start step by step. The plan card simply joins them.</div>',
+            '<div class="n"><b>Only when it means something</b>The card appears when the plan holds that thing: a Foundation with parts, a SWOT with lines, Directions with pillars, measures for Execution. An empty plan shows the usual cards only.</div>',
+            '<div class="n"><b>It says what it starts from</b>"Online\'s Foundation · 4 parts · last changed 12 Oct by Islam" — so you are not guessing what will land on the cards.</div>',
+            '<div class="n"><b>First, and marked — one card of three</b>After the first session most work is revision, so it leads. Picking it loads the parts, each agreed and marked as the plan\'s; any other card starts fresh.</div>',
+            '<div class="n"><b>Same card in every area</b>Foundation, SWOT, Directions, Execution: one card, one wording, replacing the three different in-chat questions they ask today.</div>'] };
+  function draw(){
+    document.querySelectorAll("#scr button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.s === S.s)); });
+    document.querySelectorAll("#view button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.v === S.v)); });
+    var after = S.v === "after";
+    document.getElementById("say").innerHTML = SAY[S.s][S.v];
+    document.getElementById("notes").innerHTML = NOTES[S.s].join("");
+    var f = document.getElementById("frame");
+    f.className = "frame " + S.v + (S.s === "work" && !after ? " railshut" : "");
+    f.innerHTML = strip() + (S.s === "work" && !after ? "" : rail()) + (S.s === "work" ? work(after) : start(after));
+  }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-s],[data-v]"); if (!b) return;
+    if (b.dataset.s) S.s = b.dataset.s; else S.v = b.dataset.v;
+    draw();
+  });
+  draw();
+})();
+</script>
+</body>
+</html>

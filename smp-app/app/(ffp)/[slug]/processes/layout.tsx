@@ -28,7 +28,7 @@ import { doorPool } from "@/lib/auth.ts";
 import { resolveTenant } from "@/lib/door.ts";
 import { modulesFor, clientHref, DEFAULT_MODULE } from "@/lib/modules.ts";
 import { openableModules } from "@/lib/access.ts";
-import { topBarHtml, TOPBAR_CSS } from "@/lib/topbar.ts";
+import { topBarHtml, TOPBAR_CSS, TOPBAR_SRC } from "@/lib/topbar.ts";
 import { getLocale } from "@/ffp/lib/i18n/server";
 import { dirFor } from "@/ffp/lib/i18n/locale";
 import { LocaleProvider } from "@/ffp/lib/i18n/client";
@@ -74,13 +74,13 @@ export default async function ProcessesFrame(props: LayoutProps<"/[slug]/process
     <>
       <style dangerouslySetInnerHTML={{ __html: TOPBAR_CSS + "@media print{.tb{display:none}}" }} />
       {/* eslint-disable-next-line @next/next/no-sync-scripts -- the shared bar's one script (§444) */}
-      <script src="/topbar.js" />
+      <script src={TOPBAR_SRC} />
       <div dangerouslySetInnerHTML={{ __html: bar }} />
       <div
         data-ffp=""
         lang={locale}
         dir={dirFor(locale)}
-        className={`${geistSans.variable} ${geistMono.variable} ${plexArabic.variable} flex min-h-[calc(100vh-41px)] flex-col bg-slate-50 font-sans text-slate-900 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${plexArabic.variable} flex min-h-[calc(var(--winh)-41px)] flex-col bg-slate-50 font-sans text-slate-900 antialiased`}
       >
         <LocaleProvider locale={locale}>
           {props.children}

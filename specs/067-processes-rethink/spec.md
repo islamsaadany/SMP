@@ -153,7 +153,7 @@ held is set in SMP's client settings (round 2, §4.4).
 - **Landscape** has three views: Value chain, Hand-overs and Milestones. It replaces today's separate Value chain and Helicopter pages.
 - **Priorities** has four steps: 1 Score, 2 Rank, 3 Plan, 4 Sign-off. As main built it (its §601–§610): on Score, **Choose processes** picks which show, a strip says where things stand, sub-processes fold under a +, and each process opens its **steps inside**. A step can be flagged, scored, given its own wave, or made a process of its own. The Plan holds a process with flagged steps as those steps. Download flagged steps gives one row per flagged step.
 - **Governance** has six views: Needs attention, Assessment, Risks, Policies, Controls and Activity.
-- **Export** builds the pack. Tick processes and pack sections, then Preview report, SOP, or Check end to end. The check reads at most 12 processes and says how many to untick (§599).
+- **Export** builds the pack. Tick processes and pack sections, then Preview report, SOP, or Check end to end. The check reads at most 12 processes and says how many to untick (§656, first numbered §599).
 
 **Today's Dashboard goes**, because All processes and the band's tiles do its job.
 
@@ -268,4 +268,4 @@ screens.
 - **The reading side** grows from `read/` into §3: My processes, To do, Map, and a process page with Flow, Steps and Summary.
 - **"Waiting on you" and To do** need one source for what is waiting on a person: approvals, reviews due, unread versions they have a step in, and answers to their suggestions. The row buttons and the To do tab both read it, which is what keeps them in step.
 - **Suggestions** are a new record: who, which process, which step, the words, the office's answer, and the draft they started. The office's To handle reads them.
-- Rules carried over: §599 (a button asks the same rule its save asks; export check at most 12) and §278.3 (no row hover).
+- Rules carried over: §656, first numbered §599 (a button asks the same rule its save asks; export check at most 12) and §278.3 (no row hover).

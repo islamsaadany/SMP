@@ -52,7 +52,7 @@ export function PlanActions({
           <label className="block text-sm">
             <span className="mb-1 block font-semibold text-slate-700">Who signs for the client</span>
             <select value={approver} onChange={(e) => setApprover(e.target.value)} className="min-w-64 rounded-md border border-slate-300 px-2 py-1.5 text-sm" aria-label="Who signs for the client">
-              <option value="" disabled>Choose from the People register…</option>
+              <option value="" disabled>Choose from the Client register…</option>
               {people.map((x) => {
                 const missing = !x.email ? "no email" : !x.role ? "no role" : !x.key ? "not on the register" : null;
                 return <option key={x.id} value={x.id} disabled={!!missing}>{label(x)}{missing ? ` (${missing})` : ""}</option>;

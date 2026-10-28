@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Easier Priorities page</title>
+<style>
+:root{--bg:#F3F5F9;--surf:#fff;--surf2:#EFF2F6;--ink:#1B2430;--ink2:#414A58;--ink3:#5F6B7C;--line:#D6DCE5;--navy:#16325C;--navy-ink:#fff;--gold:#B7791F;--gold-bg:#FDF3DC;--good:#17623A;--good-bg:#DDF3E5;--warn:#8A5A00;--warn-bg:#FFF0CC;--bad:#9B1C2E;--bad-bg:#FBE1E5;--info:#1F4FA3;--info-bg:#E1EAF9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161D;--surf:#1A2029;--surf2:#222A36;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#97A2B3;--line:#333A45;--navy:#0F2547;--gold:#E0A83F;--gold-bg:#3A2F14;--good:#7FD9A0;--good-bg:#173626;--warn:#F0C66B;--warn-bg:#3A2F14;--bad:#F29AA7;--bad-bg:#401A22;--info:#8FB4F0;--info-bg:#1B2A44}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",sans-serif;font-size:14.5px;line-height:1.45;padding:16px}
+.app{max-width:1150px;margin:0 auto}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}h3{font-size:14px;margin:0 0 6px}.sub{color:var(--ink3);margin:0 0 14px}
+.nav{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:14px}
+.nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--ink2);font:inherit;font-weight:600;padding:8px 14px;cursor:pointer}.nav button.on{color:var(--ink);border-bottom-color:var(--gold)}
+.view{display:none}.view.on{display:block}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.idea{background:var(--info-bg);border-radius:8px;padding:10px 12px;margin-bottom:12px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.btn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surf);color:var(--ink);padding:6px 12px;border-radius:8px;cursor:pointer}
+.btn.dark{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;margin:1px 3px 1px 0;white-space:nowrap;cursor:pointer;border:1px solid var(--line);background:var(--surf);color:var(--ink2)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.good{background:var(--good-bg);color:var(--good);border-color:transparent}.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}.info{background:var(--info-bg);color:var(--info);border-color:transparent}.plain{background:var(--surf2);color:var(--ink2);border-color:transparent}
+.dd{position:relative;display:inline-block}.panel{position:absolute;z-index:5;top:38px;left:0;width:360px;background:var(--surf);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:10px}
+.panel input[type=search]{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surf);color:var(--ink);font:inherit;margin-bottom:6px}
+.panel .row{display:flex;gap:8px;align-items:center;padding:4px 2px}.panel .row.sub2{padding-left:24px}.panel .grp{font-weight:700}
+.panel .foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:720px}
+th{background:var(--navy);color:var(--navy-ink);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.dots{display:inline-flex;gap:3px}.dots i{width:11px;height:11px;border-radius:50%;border:1px solid var(--line);background:var(--surf2)}
+.dots.i i.on{background:#2D3A8C}.dots.c i.on{background:#E08A00}.dots.r i.on{background:#D6264A}
+.split{display:grid;grid-template-columns:300px 1fr;gap:12px}@media(max-width:800px){.split{grid-template-columns:1fr}}
+.list .item{padding:8px 10px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;gap:8px}.list .item.sel{background:var(--gold-bg);font-weight:700}
+.note{color:var(--ink3);font-size:12.5px}.rec{border:2px solid var(--gold);background:var(--gold-bg)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:10px}.kpi div{background:var(--surf2);border-radius:8px;padding:8px 10px}.kpi b{font-size:20px;display:block}
+</style>
+<body><div class="app">
+<h1>An easier, nicer Priorities page</h1>
+<p class="sub">Three ideas for the same problem: 24 processes on one long table. Click the tabs; the buttons and the drop-down work. Made-up data.</p>
+<div class="nav" id="nav"><button class="on" data-v="a">A · Pick what shows</button><button data-v="b">B · One at a time</button><button data-v="c">C · Views and filters</button><button data-v="r">Compare</button></div>
+
+<div class="view on" id="a">
+<div class="idea"><b>Idea:</b> a drop-down lists every process (mains with their subs, searchable). You tick the ones you want and the table shows only those. Your choice is remembered, so you can work on a handful at a time.</div>
+<div class="card">
+<div class="bar">
+<div class="dd"><button class="btn dark" id="ddBtn">Choose processes · 4 of 24 ▾</button>
+<div class="panel" id="ddPanel" hidden>
+<input type="search" placeholder="Search a process or code…">
+<div class="row grp"><input type="checkbox" checked> Finance - End2End <span class="note">FIN100 · 4 subs</span></div>
+<div class="row sub2"><input type="checkbox"> Accounts Payable - AP <span class="note">FIN102</span></div>
+<div class="row sub2"><input type="checkbox"> Accounts Receivable - AR <span class="note">FIN103</span></div>
+<div class="row grp"><input type="checkbox" checked> RHI End2End - high-level <span class="note">ETE100</span></div>
+<div class="row grp"><input type="checkbox" checked> HR - End2End <span class="note">HRX100 · 5 subs</span></div>
+<div class="row sub2"><input type="checkbox" checked> HR - Resignation <span class="note">HRX104</span></div>
+<div class="row grp"><input type="checkbox"> IT - E2E <span class="note">ITX100 · 4 subs</span></div>
+<div class="foot"><span><a href="#">Select all</a> · <a href="#">None</a> · <a href="#">Only unscored</a></span><button class="btn dark">Show 4</button></div>
+</div></div>
+<span class="chip on">Showing 4</span><span class="chip" title="Also show a process's subs">+ include subs</span>
+<span style="flex:1"></span><button class="btn">Download as Excel</button>
+</div>
+<div class="kpi"><div><b>4 / 24</b>shown</div><div><b>2</b>scored</div><div><b>7</b>steps flagged</div><div><b>Wave 1: 3 / 4</b>capacity</div></div>
+<div class="tw"><table><thead><tr><th>Process</th><th>Importance</th><th>Complexity</th><th>Risk</th><th>Score</th><th>Wave</th></tr></thead><tbody>
+<tr><td><b>Finance - End2End</b> <span class="chip plain">MAIN</span><div class="note">FIN100 · ▸ 4 subs</div></td><td><span class="dots i"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></td><td><span class="dots r"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td><b>82</b></td><td><span class="chip info">Wave 1</span></td></tr>
+<tr><td><b>RHI End2End - high-level</b><div class="note">ETE100 · ▸ 24 steps, 7 flagged</div></td><td><span class="dots i"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td><span class="dots c"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="dots r"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><b>74</b></td><td><span class="chip info">Wave 1</span></td></tr>
+<tr><td><b>HR - End2End</b> <span class="chip plain">MAIN</span><div class="note">HRX100 · ▸ 5 subs</div></td><td colspan="4" class="note">Not scored yet</td><td><span class="chip">Not decided</span></td></tr>
+<tr><td style="padding-left:28px">↳ HR - Resignation<div class="note">HRX104</div></td><td colspan="4" class="note">Not scored yet</td><td><span class="chip">Not decided</span></td></tr>
+</tbody></table></div>
+<p class="note">Everything else stays as it is: scoring dots, steps inside, flags, Clear entries.</p>
+</div></div>
+
+<div class="view" id="b">
+<div class="idea"><b>Idea:</b> a list of processes on the left, and the one you click opens on the right with big, easy scoring and its steps. Nothing else on screen to distract. Good for scoring one process properly.</div>
+<div class="split">
+<div class="card list" style="padding:0"><div class="item sel">Finance - End2End <span class="chip good">82</span></div><div class="item">↳ Accounts Payable <span class="chip">—</span></div><div class="item">RHI End2End <span class="chip good">74</span></div><div class="item">HR - End2End <span class="chip">—</span></div><div class="item">IT - E2E <span class="chip">—</span></div></div>
+<div class="card"><h2>Finance - End2End <span class="chip plain">FIN100</span></h2>
+<div class="kpi"><div><b>5 of 5</b>Risk</div><div><b>4 of 5</b>Importance</div><div><b>2 of 5</b>Complexity</div><div><b>82</b>Score</div></div>
+<div class="bar"><span>Wave</span><span class="chip on">Wave 1</span><span class="chip">Wave 2</span><span class="chip">Later</span><span class="chip">Stays high-level</span></div>
+<h3>Steps (4)</h3><div class="tw"><table style="min-width:520px"><tbody><tr><td>1 · Vendor Coding</td><td><span class="chip">⚑ flag</span></td></tr><tr><td>2 · AP</td><td><span class="chip warn">⚑ flagged · 68</span></td></tr><tr><td>3 · AR</td><td><span class="chip">⚑ flag</span></td></tr><tr><td>4 · Controls and Auditing</td><td><span class="chip">⚑ flag</span></td></tr></tbody></table></div></div></div></div>
+
+<div class="view" id="c">
+<div class="idea"><b>Idea:</b> keep the table, but add a bar of one-click views on top, plus search. No big picker; you slice the list with chips.</div>
+<div class="card"><div class="bar"><input type="search" placeholder="Search a process…" style="padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surf);color:var(--ink);font:inherit;width:240px">
+<span class="chip on">All 24</span><span class="chip">Not scored 20</span><span class="chip">Scored 4</span><span class="chip">Has flagged steps 3</span><span class="chip">Wave 1</span><span class="chip">Wave 2</span><span class="chip">Mains only</span>
+<span style="flex:1"></span><span class="chip" title="Group by department">Group: Department ▾</span></div>
+<p class="note">Group by department gives folded sections: IT (4) · HR (5) · Finance (4) · Business Development (1)…</p></div>
+</div>
+
+<div class="view" id="r">
+<div class="card tw"><table style="min-width:560px"><thead><tr><th></th><th>A · Pick what shows</th><th>B · One at a time</th><th>C · Views and filters</th></tr></thead><tbody>
+<tr><td><b>Fits what you asked</b></td><td>Yes, exactly</td><td>Partly</td><td>Partly</td></tr>
+<tr><td><b>Best for</b></td><td>Working on a few processes</td><td>Scoring in depth</td><td>Finding things fast</td></tr>
+<tr><td><b>Effort to build</b></td><td>Small</td><td>Larger (new layout)</td><td>Small</td></tr></tbody></table></div>
+<div class="card rec"><h3>Recommendation: A, with the chips from C on top</h3><p style="margin:0">A is the picker you described. Adding C's quick chips (Not scored, Has flagged steps, Wave 1…) means you can also fill the picker in one click. B can come later if scoring one process at a time is what you want most.</p></div></div>
+</div>
+<script>
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id===b.dataset.v))});
+const bt=document.getElementById('ddBtn'),pn=document.getElementById('ddPanel');bt.onclick=()=>{pn.hidden=!pn.hidden};
+document.querySelectorAll('.chip').forEach(c=>{if(!c.classList.contains('plain')&&!c.classList.contains('good')&&!c.classList.contains('info')&&!c.classList.contains('warn'))c.onclick=()=>c.classList.toggle('on')});
+</script></body></html>

@@ -1,6 +1,18 @@
 {
- "note": "Read before recorded: none of these is a fault (§589). Rewrite with --write only after reading every new one.",
+ "note": "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a fault (the Core-values handlers' door to a capability's throwaway view; no page walked through it, §603) went when the door was closed (§603). Since §625 the company's own object is described too (SMP.Group, SMP.Capability), so what remains is two habits of the pages, not missing fields: (1) a reader that hands back a shared frozen empty, or a writer that mints `{}` and fills it on the next line (comms, coFound, branding); (2) a list or a target that mixes real records with the unit-like views and holders built for a function, a capability or the company (topAsUnit, fnAsUnit, capAsUnit, a function's own holder), which are not described yet. Rewrite with --write only after reading every new one.",
  "findings": [
+  {
+   "file": "chat.js",
+   "code": "TS2339",
+   "message": "Property 'fromName' does not exist on type 'Readonly<{}>'.",
+   "count": 2
+  },
+  {
+   "file": "chat.js",
+   "code": "TS2339",
+   "message": "Property 'replyTo' does not exist on type 'Readonly<{}>'.",
+   "count": 2
+  },
   {
    "file": "chat.js",
    "code": "TS2345",
@@ -20,6 +32,18 @@
    "count": 1
   },
   {
+   "file": "client-setup.js",
+   "code": "TS2741",
+   "message": "Property 'name' is missing in type '{}' but required in type 'Unit'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'actions' does not exist on type 'Unit | { ukey: string; topLayer: boolean; name: any; navName: any; codePrefix: string; pillarPrefix: string; pillarCapPrefix: string; items: readonly any[]; keyObjectives: readonly any[]; aspiration: string; ... 6 more ...; active: boolean; }'.",
+   "count": 2
+  },
+  {
    "file": "config-data.js",
    "code": "TS2339",
    "message": "Property 'custodian' does not exist on type '{}'.",
@@ -28,7 +52,25 @@
   {
    "file": "config-data.js",
    "code": "TS2339",
-   "message": "Property 'fn' does not exist on type '{ name: string; def: string; keyObjectives: { name: string; dir: string; target: string; compile: string; actual: string; progress: number; weight: number; }[]; projects: ({ name: string; owner: string; ... 7 more ...; milestones: ({ ...; } | { ...; })[]; } | { ...; })[]; } | ... 4 more ... | {}'.",
+   "message": "Property 'eyebrow' does not exist on type 'Readonly<{}>'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'fn' does not exist on type 'Capability | { id: string; fn: any; own: boolean; name: any; def: any; keyObjectives: any; actions: any; projects: any; } | { id: string; unit: any; own: boolean; name: any; def: string; keyObjectives: readonly any[]; actions: any; projects: readonly any[]; }'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'footer' does not exist on type 'Readonly<{}>'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'fromName' does not exist on type 'Readonly<{}>'.",
    "count": 1
   },
   {
@@ -40,8 +82,32 @@
   {
    "file": "config-data.js",
    "code": "TS2339",
+   "message": "Property 'headerName' does not exist on type 'Readonly<{}>'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'mission' does not exist on type 'CompanyFoundation | Group | Unit | { ukey: string; fnKey: any; name: any; navName: any; codePrefix: any; items: any; keyObjectives: any; aspiration: any; endInMind: any; clauses: any; swot: any; active: boolean; } | { ...; } | { ...; }'.",
+   "count": 2
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'replyTo' does not exist on type 'Readonly<{}>'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
    "message": "Property 'trim' does not exist on type 'unknown'.",
    "count": 3
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'values' does not exist on type 'CompanyFoundation | Group | Unit | { ukey: string; fnKey: any; name: any; navName: any; codePrefix: any; items: any; keyObjectives: any; aspiration: any; endInMind: any; clauses: any; swot: any; active: boolean; } | { ...; } | { ...; }'.",
+   "count": 5
   },
   {
    "file": "config-data.js",
@@ -57,21 +123,21 @@
   },
   {
    "file": "config-data.js",
-   "code": "TS2739",
-   "message": "Type '{ key: any; unit: string; why: string; }' is missing the following properties from type '{ key: string; unit: string; rev: number; prof: number; imp: number; growth: number; why: string; }': rev, prof, imp, growth",
+   "code": "TS2540",
+   "message": "Cannot assign to 'length' because it is a read-only property.",
    "count": 1
   },
   {
    "file": "config-data.js",
    "code": "TS2739",
-   "message": "Type '{}' is missing the following properties from type '{ mobile: string; retailstores: string; care: string; }': mobile, retailstores, care",
-   "count": 2
+   "message": "Type '{}' is missing the following properties from type '{ palette: any; font: any; accent: any; bar: any; }': palette, font, accent, bar",
+   "count": 1
   },
   {
    "file": "config-data.js",
    "code": "TS2740",
-   "message": "Type '{}' is missing the following properties from type '{ retailstores: boolean; care: boolean; corporate: boolean; it: boolean; logistics: boolean; onlineshop: boolean; }': retailstores, care, corporate, it, and 2 more.",
-   "count": 1
+   "message": "Type '{}' is missing the following properties from type 'CompanyFoundation': clauses, mission, aspiration, endInMind, and 2 more.",
+   "count": 2
   },
   {
    "file": "config-data.js",
@@ -124,13 +190,19 @@
   {
    "file": "history.js",
    "code": "TS2345",
-   "message": "Argument of type '{ name: string; def: string; keyObjectives: { name: string; dir: string; target: string; compile: string; actual: string; progress: number; weight: number; }[]; projects: ({ name: string; owner: string; ... 7 more ...; milestones: ({ ...; } | { ...; })[]; } | { ...; })[]; } | ... 4 more ... | { ...; }' is not assignable to parameter of type '({ id: string; fn: any; own: boolean; name: any; def: any; keyObjectives: any; actions: any; projects: any; } | { id: string; unit: any; own: boolean; name: any; def: string; keyObjectives: any; actions: any; projects: any; }) & ({ ...; } | ... 3 more ... | { ...; })'.",
+   "message": "Argument of type 'Capability' is not assignable to parameter of type 'never'.",
    "count": 2
   },
   {
    "file": "present.js",
    "code": "TS2322",
    "message": "Type 'number' is not assignable to type 'string'.",
+   "count": 2
+  },
+  {
+   "file": "present.js",
+   "code": "TS2339",
+   "message": "Property 'cv' does not exist on type '(t: any, words: any, out: any, scale: any) => void'.",
    "count": 2
   },
   {
@@ -208,7 +280,19 @@
   {
    "file": "shell-inline.js",
    "code": "TS2339",
+   "message": "Property 'capKey' does not exist on type 'Unit | { ukey: string; fnKey: any; name: any; navName: any; codePrefix: any; items: any; keyObjectives: any; aspiration: any; endInMind: any; clauses: any; swot: any; active: boolean; } | { ukey: string; ... 15 more ...; active: boolean; } | { ...; }'.",
+   "count": 3
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2339",
    "message": "Property 'classList' does not exist on type 'ChildNode'.",
+   "count": 2
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2339",
+   "message": "Property 'fn' does not exist on type 'Capability | { id: string; fn: any; own: boolean; name: any; def: any; keyObjectives: any; actions: any; projects: any; } | { id: string; unit: any; own: boolean; name: any; def: string; keyObjectives: readonly any[]; actions: any; projects: readonly any[]; }'.",
    "count": 2
   },
   {
@@ -219,8 +303,32 @@
   },
   {
    "file": "shell-inline.js",
+   "code": "TS2339",
+   "message": "Property 'items' does not exist on type '{}'.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2339",
+   "message": "Property 'keyObjectives' does not exist on type '{}'.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2339",
+   "message": "Property 'unit' does not exist on type 'Capability | { id: string; fn: any; own: boolean; name: any; def: any; keyObjectives: any; actions: any; projects: any; } | { id: string; unit: any; own: boolean; name: any; def: string; keyObjectives: readonly any[]; actions: any; projects: readonly any[]; }'.",
+   "count": 2
+  },
+  {
+   "file": "shell-inline.js",
    "code": "TS2345",
    "message": "Argument of type '{ name: string; group: number; units: {}; }' is not assignable to parameter of type '{ name: string; group: number; units: { mobile: number; retailstores: number; b2becomm: number; consumerelectronics: number; onlineshop: number; corporate: number; care: number; it: number; logistics: number; nigeria: number; }; }'.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2345",
+   "message": "Argument of type 'Capability | { id: string; fn: any; own: boolean; name: any; def: any; keyObjectives: any; actions: any; projects: any; } | { id: string; unit: any; own: boolean; name: any; def: string; keyObjectives: readonly any[]; actions: any; projects: readonly any[]; }' is not assignable to parameter of type 'Capability'.",
    "count": 1
   },
   {
@@ -238,13 +346,7 @@
   {
    "file": "shell-inline.js",
    "code": "TS2739",
-   "message": "Type '{}' is missing the following properties from type '{ mobile: string; retailstores: string; care: string; }': mobile, retailstores, care",
-   "count": 1
-  },
-  {
-   "file": "shell-inline.js",
-   "code": "TS2740",
-   "message": "Type '{}' is missing the following properties from type '{ retailstores: boolean; care: boolean; corporate: boolean; it: boolean; logistics: boolean; onlineshop: boolean; }': retailstores, care, corporate, it, and 2 more.",
+   "message": "Type '{}' is missing the following properties from type '{ palette: any; font: any; accent: any; bar: any; }': palette, font, accent, bar",
    "count": 1
   },
   {

@@ -421,6 +421,7 @@ var PILLAR_RANGE = "Pillars!$A$2:$A$400";
    rows in it puts blank entries in the dropdown. */
 function LISTS_UNIT_RANGE(n){ return "Lists!$A$2:$A$" + (n + 1); }
 function LISTS_BU_RANGE(n){ return "Lists!$B$2:$B$" + (n + 1); }
+function LISTS_PEOPLE_RANGE(n){ return "Lists!$C$2:$C$" + (n + 1); }   /* §655.1 */
 var PROJECT_RANGE = "Projects!$A$2:$A$100";
 
 /* ── THE REGISTER, FOR THE WORKBOOK'S FIVE OWNER COLUMNS (§551) ────────
@@ -2001,7 +2002,7 @@ function peopleReadme(){
   var lines = [
     ["People workbook", ""],
     ["", ""],
-    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
+    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → Client register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
     ["Adding somebody", "The columns marked * are essential: Full Name, Job title and Email. A new person missing any of the three stops the upload, and the review names the row and what it lacks. Everything else is optional. For somebody already on the register, a blank cell keeps what is recorded. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
@@ -2009,11 +2010,12 @@ function peopleReadme(){
     ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
     ["Unit", "Where they actually sit here — the business unit, supporting function or company that decides what they can open. Choose it from the dropdown. Fill it and it is used; leave it blank and their Official BU decides, where that name points at exactly one place; leave both and they are left where they are. This is the column to fill if you already know: nobody then has to be asked at sign-in."],
+    ["Reports to", "Who they answer to, written as the person's Name exactly as this file writes it — pick it from the dropdown. Their Emp ID or email is read too, and so is somebody added further down this same file. It decides nothing about what anybody can open. Blank keeps who they report to now; a name on two rows, a name nobody carries, or a chain that would loop back on itself stops the row and says so."],
     ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Employee and Contributor are not offered: they are what somebody attached to a part of the business and holding nothing else already is — Contributor where a plan names them, Employee where it does not."],
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
     ["", ""],
-    ["When you are done", "Save as .xlsx and upload it on Setup → People register."]
+    ["When you are done", "Save as .xlsx and upload it on Setup → Client register."]
   ];
   return { name:"Read me", widths:[22, 96],
            rows:lines.map(function(l){ return [l[0], l[1]]; }) };
@@ -2082,6 +2084,17 @@ function peopleWorkbook(){
      carry the same value the register shows, or a download-edit-upload round
      trip would report the two people it separated as a change. */
   var dnames = displayNames();
+  /* §655.1: the register's names, for the Reports to dropdown — the short
+     names the column is written in, active people only, in the register's
+     order. From the Lists sheet, for §67.5's reason (an inline list over
+     255 characters is silently empty). Soft, like Official BU's: a manager
+     who is in the same file and not yet on the register is typed, and the
+     reader resolves them. */
+  var mgrNames = PEOPLE.filter(function(p){ return personActive(p) && !SMPRules.isMintedRow(p); })
+                       .map(function(p){ return knownName(p, dnames); });
+  if (mgrNames.length) {
+    vals.push({ range:range("Reports to"), from:LISTS_PEOPLE_RANGE(mgrNames.length), soft:true });
+  }
   var rows = PEOPLE.map(function(p){
     var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
     return [
@@ -2096,6 +2109,9 @@ function peopleWorkbook(){
          which is a real state, and writing a guess into it would be the file
          answering a question only the SMO can. */
       roleWhereLabel2(personAt(p)),
+      /* §655.1: the manager's short name, as the register shows it — unique
+         across the register (§81.1), so it reads back to one row. */
+      (function(){ var m = reportsToOf(p); return m ? knownName(m, dnames) : ""; })(),
       held.length ? roleName(held[0].role) : "",
       personActive(p) ? "Active" : "Retired",
       /* Everything after the first, WITH where it is held — the one column
@@ -2112,16 +2128,19 @@ function peopleWorkbook(){
      deletes, and a validation whose range has gone is a dropdown that is empty
      again, which is the bug this exists to fix. */
   var listRows = [];
-  for (var i = 0; i < Math.max(places.length, names.length); i++) {
-    listRows.push([places[i] || "", names[i] || ""]);
+  for (var i = 0; i < Math.max(places.length, names.length, mgrNames.length); i++) {
+    listRows.push([places[i] || "", names[i] || "", mgrNames[i] || ""]);
   }
 
   return [
     peopleReadme(),
-    { name:"Lists", widths:[38, 30],
-      head:["Unit, function or company", "Official BU"],
+    { name:"Lists", widths:[38, 30, 30],
+      head:["Unit, function or company", "Official BU", "People"],
       rows:listRows },
-    { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
+    /* §655.1: ONE WIDTH PER HEADING, "Also holds" included — the list had
+       been one short since the Name split (§93.8), so every column from
+       Name on wore its neighbour's width and the last one wore Excel's. */
+    { name:"People", widths:[12, 30, 22, 32, 30, 16, 22, 26, 24, 20, 11, 34],
       /* THE ESSENTIALS WEAR AN ASTERISK (§390.1). Written on the header only,
          never on PEOPLE_FILE_COLS: the validation ranges above look a column
          up by its bare name, and the reader matches headings ignoring
@@ -2132,7 +2151,12 @@ function peopleWorkbook(){
       }),
       /* "Also holds" is written and never read, so it is locked — and its
          index moved with the new column (§65). */
-      lockedCols:[9],
+      /* §655.1: DERIVED, like the validation ranges above. Written as a
+         position it had drifted — [9] since §65 — and the two columns added
+         since (§93.8, §655.1) each moved "Also holds" a place along, so the
+         grey style was sitting on Status. The platform's own column is the
+         one after the last of PEOPLE_FILE_COLS, by construction. */
+      lockedCols:[PEOPLE_FILE_COLS.length],
       validations:vals,
       rows:rows }
   ];
@@ -2159,7 +2183,9 @@ var PEOPLE_HEAD_ALIASES = {
   mail:"Email", emailaddress:"Email", email:"Email", workemail:"Email",
   employeename:"Name", employee:"Name",
   employeeid:"Emp ID", employeenumber:"Emp ID", empno:"Emp ID", staffid:"Emp ID",
-  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile"
+  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile",
+  manager:"Reports to", linemanager:"Reports to", managername:"Reports to",
+  supervisor:"Reports to", reportingto:"Reports to", reportingmanager:"Reports to"
 };
 var PEOPLE_ESSENTIALS = ["Name", "Job title", "Email"];
 /* What the downloaded template marks with an asterisk: the same three, with

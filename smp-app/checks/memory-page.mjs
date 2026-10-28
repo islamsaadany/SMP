@@ -1,4 +1,6 @@
-/* The Memory tab, driven in a real browser against the built app (spec 045).
+/* The memory's learnings, driven in a real browser against the built app
+ * (spec 045; since spec 069 they live in the Track Record, each tied to one of
+ * a client's assignments, and are listed on its front by kind).
  *
  * WHAT IT IS FOR, beyond "the page renders": a page wired to nothing looks
  * identical to one that works (§96), so every press here is read back THROUGH
@@ -42,6 +44,12 @@ await owner.query("DELETE FROM users WHERE email = 'second@forefront.example'");
 await owner.query(
   "INSERT INTO users (email, name, kind, is_admin, must_change, password_hash) VALUES ($1,$2,'office',false,false,$3)",
   ["second@forefront.example", "Second Consultant", hashPassword(DEV_PASSWORD)]);
+/* EVERY LEARNING BELONGS TO AN ASSIGNMENT (spec 069), so the client has one */
+const secondId = (await owner.query("SELECT id FROM users WHERE email = 'second@forefront.example'")).rows[0].id;
+const asgId = (await owner.query(
+  "INSERT INTO case_studies (about_tenant_id, name, kind, started, ended, state, opened_by, lead_id, our_team) " +
+  "SELECT id, 'Strategy build', 'planning', '2025-01', '2025-06', 'running', $1, $1, '[]'::jsonb FROM tenants WHERE key = 'raya-trade' RETURNING id",
+  [secondId])).rows[0].id;
 
 /* A CHECK MUST NOT TALK TO A SERVER IT DID NOT START (§105.6, §54.5).
    `next start` on a taken port fails quietly, the wait below then succeeds
@@ -104,14 +112,24 @@ await pg_.waitForSelector(".nav button", { timeout: 15000 });
 const api = (body) => pg_.evaluate((b) =>
   fetch("/api/memory", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }).then((r) => r.json()), body);
 const rows = async () => (await owner.query("SELECT count(*)::int n FROM memory_entries")).rows[0].n;
+/* THE LEARNINGS ARE LISTED ON THE TRACK RECORD'S FRONT (spec 069): the tab
+   opens on the client cards, and picking a kind of learning lists those
+   learnings in their place. Rewritten for the move, not loosened (§218). */
 const openMemory = async () => {
   await pg_.click('.nav button[data-tab="memory"]');
-  await pg_.waitForTimeout(600);
+  await pg_.waitForTimeout(900);
+};
+const openList = async () => {
+  await openMemory();
+  if (!(await pg_.$('.trchips button[data-kind="hiccup"][aria-pressed="true"]'))) {
+    await pg_.click('.trchips button[data-kind="hiccup"]');
+    await pg_.waitForTimeout(900);
+  }
 };
 
 await section("1 · the tab a consultant with no admin flag can reach", async () => {
   const tabs = await pg_.$$eval(".nav button", (bs) => bs.map((b) => b.textContent.trim()));
-  check(tabs.includes("Memory"), "Memory is in the navigation — decision 1: no gate", JSON.stringify(tabs));
+  check(tabs.includes("Track Record"), "the memory's tab, Track Record since spec 069, is in the navigation — decision 1: no gate", JSON.stringify(tabs));
   /* THE CONTROL IS THE TAB THAT IS ACTUALLY GATED. Written first as "neither
      Consultants nor Who sees what", which was the CHECK being wrong rather
      than the product: any office account may read the consultants list, so
@@ -123,16 +141,23 @@ await section("1 · the tab a consultant with no admin flag can reach", async ()
 
 await section("2 · nothing yet", async () => {
   await openMemory();
-  const txt = await pg_.textContent(".wrap");
-  check(/Nothing here yet/.test(txt), "an empty memory says so", txt.slice(0, 120));
-  check(/names the client it came from and the person who wrote it/.test(txt),
-    "…and the one sentence on the page is a FACT, not a description of the page (rule 1b-ii)", "");
-  check((await pg_.$$(".filters")).length === 0, "…and no filters over nothing to filter (§61)", "filters drawn over an empty memory");
+  const txt = await pg_.textContent('.trcard[data-client="raya-trade"]').catch(() => "");
+  check(/No learnings yet/.test(txt), "a client with no learnings says so on its card", txt.slice(0, 120));
+  check((await pg_.$$(".trlr")).length === 0, "…and no list of learnings is drawn over nothing (§61)", "");
   if (shots) await pg_.screenshot({ path: join(shots, "empty.png"), fullPage: true });
 });
 
 await section("3 · writing one through the form, read back from the DATA", async () => {
-  await pg_.click('.ptitle .right button:has-text("Add one insight")');
+  await pg_.click('.pgband button:has-text("+ Add to Track Record")');
+  await pg_.click('.tramenu button[data-add="learn"]');
+  await pg_.waitForSelector("#tr-p-client", { timeout: 10000 });
+  /* THE CLIENT IS PICKED, not left to whichever sorts first: the shared
+     database can hold other checks' clients beside the dev tenant's, and one
+     named RHI was the first option on a correct build (§623.4). Picked by its
+     key, so a second client that is also called Raya Trade cannot pass for it. */
+  await pg_.selectOption("#tr-p-client", "raya-trade");
+  await pg_.selectOption("#tr-p-asg", asgId);
+  await pg_.click('.trhow button[data-how="type"]');
   await pg_.waitForSelector("#m-title", { timeout: 10000 });
   await pg_.selectOption("#m-kind", "hiccup");
   await pg_.fill("#m-title", "The workshop ran twice");
@@ -143,32 +168,33 @@ await section("3 · writing one through the form, read back from the DATA", asyn
   await pg_.waitForTimeout(1200);
   const after = await rows();
   check(after === before + 1, "the press writes a row", before + " → " + after);
-  const stored = (await owner.query("SELECT kind, title, occurred, happened, did FROM memory_entries ORDER BY created_at DESC LIMIT 1")).rows[0];
+  const stored = (await owner.query("SELECT e.kind, e.title, e.occurred, e.happened, e.did, e.case_id, t.key AS client FROM memory_entries e " +
+    "LEFT JOIN tenants t ON t.id = e.about_tenant_id ORDER BY e.created_at DESC LIMIT 1")).rows[0];
   check(stored && stored.title === "The workshop ran twice" && stored.kind === "hiccup" && stored.occurred === "August 2026"
-        && stored.happened === "ran it without the CEO in the room",
+        && stored.happened === "ran it without the CEO in the room" && stored.client === "raya-trade" && stored.case_id === asgId,
     "…and every field reaches the STORED row, not just the screen (§96)", JSON.stringify(stored));
   check(stored && stored.did === "", "…with the three unanswered questions stored empty rather than invented", JSON.stringify(stored && stored.did));
 });
 
 await section("4 · the list, and a one-answer insight looking finished (§245)", async () => {
-  await openMemory();
-  const rowsOn = await pg_.$$(".erow");
+  await openList();
+  const rowsOn = await pg_.$$(".trlr");
   check(rowsOn.length === 1, "the insight is on the list", rowsOn.length);
-  const t = await pg_.textContent(".erow");
+  const t = await pg_.textContent(".trlr");
   check(/HICCUP/i.test(t) && /The workshop ran twice/.test(t), "…wearing its kind and its title", t.replace(/\s+/g, " ").slice(0, 100));
   check(/Second Consultant/.test(t), "…and its AUTHOR, which is what a reader acts on (decision 3)", t.replace(/\s+/g, " ").slice(0, 140));
   check(/Raya Trade/.test(t), "…and the client it came from", "");
-  const snip = await pg_.$(".erow .snip");
+  const snip = await pg_.$(".trlr .tx small");
   check(!!snip, "a one-answer insight still draws a snippet — a quick one must look finished, not broken", "no snippet");
-  const h = await pg_.$eval(".erow", (e) => e.getBoundingClientRect().height);
-  check(h > 60 && h < 200, "…and the row is an ordinary row, not a collapsed one", h);
+  const h = await pg_.$eval(".trlr", (e) => e.getBoundingClientRect().height);
+  check(h > 40 && h < 200, "…and the row is an ordinary row, not a collapsed one", h);
   if (shots) await pg_.screenshot({ path: join(shots, "list.png"), fullPage: true });
 });
 
 await section("5 · reading one — the author is a block, and nobody is watched", async () => {
   const beforeRows = await rows();
   const beforeLog = (await owner.query("SELECT count(*)::int n FROM tenant_log")).rows[0].n;
-  await pg_.click(".erow");
+  await pg_.click(".trlr");
   await pg_.waitForSelector(".ecard", { timeout: 10000 });
   const card = await pg_.textContent(".ecard");
   check(/What happened/.test(card), "the answered question is a heading", card.replace(/\s+/g, " ").slice(0, 120));
@@ -186,8 +212,8 @@ await section("6 · somebody else's insight offers no pen", async () => {
   const id = (await owner.query("SELECT id FROM memory_entries LIMIT 1")).rows[0].id;
   const otherAuthor = (await owner.query("SELECT id FROM users WHERE email = 'office@forefront.example'")).rows[0].id;
   await owner.query("UPDATE memory_entries SET author_id = $2 WHERE id = $1", [id, otherAuthor]);
-  await openMemory();
-  await pg_.click(".erow");
+  await openList();
+  await pg_.click(".trlr");
   await pg_.waitForSelector(".ecard", { timeout: 10000 });
   const btns = await pg_.$$eval(".byline .sp .btn", (bs) => bs.map((b) => b.textContent.trim()));
   check(!btns.some((b) => /Edit|Remove/.test(b)), "no Edit and no Remove on somebody else's", JSON.stringify(btns));
@@ -196,8 +222,8 @@ await section("6 · somebody else's insight offers no pen", async () => {
      build that drew none for anybody (§94.2). */
   const mineAuthor = (await owner.query("SELECT id FROM users WHERE email = 'second@forefront.example'")).rows[0].id;
   await owner.query("UPDATE memory_entries SET author_id = $2 WHERE id = $1", [id, mineAuthor]);
-  await openMemory();
-  await pg_.click(".erow");
+  await openList();
+  await pg_.click(".trlr");
   await pg_.waitForSelector(".ecard", { timeout: 10000 });
   const mineBtns = await pg_.$$eval(".byline .sp .btn", (bs) => bs.map((b) => b.textContent.trim()));
   check(mineBtns.some((b) => b === "Edit"), "CONTROL — the author's own DOES offer Edit", JSON.stringify(mineBtns));
@@ -222,14 +248,17 @@ await section("8 · a period debrief, end to end", async () => {
   const loaded = await pg_.evaluate(() => ({ t: typeof window.MemorySplit, n: document.scripts.length,
     srcs: Array.from(document.scripts).map((s) => s.getAttribute("src")) }));
   check(loaded.t === "object", "the splitter the page loads is THERE (spec 045: its own file, so node and the browser run the same bytes)", JSON.stringify(loaded));
-  await pg_.click('.ptitle .right button:has-text("Write up a period")');
+  await pg_.click('.pgband button:has-text("+ Add to Track Record")');
+  await pg_.click('.tramenu button[data-add="learn"]');
   await pg_.waitForSelector("#d-paste", { timeout: 10000 });
+  await pg_.selectOption("#tr-p-client", "raya-trade");   /* picked, as in §3 above (§623.4) */
+  await pg_.selectOption("#tr-p-asg", asgId);
   await pg_.fill("#d-from", "1 August 2026");
   await pg_.fill("#d-to", "11 September 2026");
   await pg_.waitForTimeout(200);
   const prompt = await pg_.textContent(".prompt");
-  check(/Raya Trade/.test(prompt) && /1 August 2026 to 11 September 2026/.test(prompt),
-    "the prompt carries the client and the period the page was given", prompt.slice(0, 90));
+  check(/Raya Trade/.test(prompt) && /Strategy build \(Planning/.test(prompt) && /1 August 2026 to 11 September 2026/.test(prompt),
+    "the prompt carries the client, the assignment and the period the page was given", prompt.slice(0, 260));
   check(/ONE question at a time/.test(prompt), "…and asks for one question at a time, which is what makes it a debrief", "");
   check(/Use my words, not yours/.test(prompt), "…and forbids invention, which is why the drafts screen exists", "");
 
@@ -245,7 +274,7 @@ WHAT HAPPENED: Nothing exposes a half-filled plan like presenting it.
 Also worth saying, finance moved faster with a named contact.
 ===`);
   const before = await rows();
-  await pg_.click('button:has-text("Read what came back")');
+  await pg_.click('button:has-text("Read the learnings")');
   /* DEGRADES RATHER THAN DYING (§215): if the split produced nothing the rest
      of this section still reports, instead of one timeout hiding ten
      assertions — which is how the stale server above read as one fault. */
@@ -261,20 +290,22 @@ Also worth saying, finance moved faster with a named contact.
   const raw = await pg_.$eval(".dcard.raw textarea", (t) => t.value);
   check(/finance moved faster/.test(raw), "…with its own words still in it, ready to be given a title", JSON.stringify(raw).slice(0, 120));
   const found = await pg_.textContent(".found");
-  check(/2 insights read/.test(found) && /1 block it could not/.test(found),
+  check(/2 learnings read/.test(found) && /1 block it could not/.test(found),
     "the count says what was read AND what was not (§108.1)", found.replace(/\s+/g, " "));
 
   /* A DROP CHANGES THE COUNT ABOVE IT, or the strip and the rows disagree */
   await pg_.click('.dcard.raw button:has-text("Drop")');
   await pg_.waitForTimeout(400);
   check((await pg_.$$(".dcard")).length === 2, "dropping one takes it out", (await pg_.$$(".dcard")).length);
-  check(/2 insights read/.test(await pg_.textContent(".found")) && !/could not/.test(await pg_.textContent(".found")),
+  check(/2 learnings read/.test(await pg_.textContent(".found")) && !/could not/.test(await pg_.textContent(".found")),
     "…and the count above follows it", (await pg_.textContent(".found")).replace(/\s+/g, " "));
 
   await pg_.click('.ptitle .right button:has-text("Save all")');
   await pg_.waitForTimeout(1500);
   check((await rows()) === before + 2, "…and Save all lands both, together", before + " → " + (await rows()));
   const kinds = (await owner.query("SELECT kind FROM memory_entries ORDER BY created_at DESC LIMIT 2")).rows.map((r) => r.kind).sort();
+  const tied = (await owner.query("SELECT count(*)::int n FROM memory_entries WHERE case_id = $1", [asgId])).rows[0].n;
+  check(tied === 2, "…both tied to the assignment picked (the one typed in was removed above)", tied);
   check(kinds.join(",") === "hiccup,practice", "…each under the kind the block named", JSON.stringify(kinds));
   if (shots) await pg_.screenshot({ path: join(shots, "drafts.png"), fullPage: true });
 });
@@ -296,8 +327,8 @@ await section("9 · it can be read, in both palettes", async () => {
 
   for (const theme of ["light", "dark"]) {
     await pg_.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
-    await openMemory();
-    await pg_.waitForSelector(".erow", { timeout: 8000 }).catch(() => {});
+    await openList();
+    await pg_.waitForSelector(".trlr", { timeout: 8000 }).catch(() => {});
     const worst = await pg_.evaluate(() => {
       const out = [];
       const grounds = (el) => {
@@ -309,7 +340,7 @@ await section("9 · it can be read, in both palettes", async () => {
         }
         return bg || getComputedStyle(document.body).backgroundColor;
       };
-      document.querySelectorAll(".erow h3, .erow .snip, .erow .facts, .erow .tag, .count, .askrow .fld, .filters .fld, .cell button, .found, .dcard .lab")
+      document.querySelectorAll(".trlr .tx b, .trlr .tx small, .trlr .wh, .ktag, .ttag, .trchips button, .trchips .lbl, .hocnt, #cs-q, .found, .dcard .lab")
         .forEach((el) => {
           const t = (el.textContent || "").trim();
           if (!t) return;
@@ -340,6 +371,7 @@ await section("10 · nothing threw", async () => {
 await browser.close();
 putSplitBack();
 await owner.query("DELETE FROM memory_entries");
+await owner.query("DELETE FROM case_studies WHERE id = $1", [asgId]);
 await owner.end();
 await stopServer(server);
 console.log((fails ? "RED  " : "GREEN  ") + oks + " ok, " + fails + " failed");

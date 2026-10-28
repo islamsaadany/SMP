@@ -41,12 +41,19 @@ def ck(w, ok, x=""):
 def go_group(pg):
     el = pg.query_selector('#units [data-u="group"]')
     if el and el.is_visible():
-        el.click(); pg.wait_for_timeout(450); return
-    sm = pg.query_selector("#topsel > summary")
-    if sm:
-        sm.click(); pg.wait_for_timeout(220)
-        g = pg.query_selector('#topsel [data-u="group"]')
-        if g: g.click(); pg.wait_for_timeout(450)
+        el.click(); pg.wait_for_timeout(450)
+    else:
+        sm = pg.query_selector("#topsel > summary")
+        if sm:
+            sm.click(); pg.wait_for_timeout(220)
+            g = pg.query_selector('#topsel [data-u="group"]')
+            if g: g.click(); pg.wait_for_timeout(450)
+    # §428: the group's row now LEADS WITH STRATEGY, so the landing strip and
+    # the score cards this file reads are one tab along, on Performance —
+    # pressed, as a reader would (rewritten, never loosened: §218).
+    pf = pg.query_selector('#subtabs button[data-s="performance"]')
+    if pf:
+        pf.click(); pg.wait_for_timeout(450)
 
 
 def section(pg, word):
@@ -180,7 +187,11 @@ with sync_playwright() as p:
        rank.get("none") or rank.get("rankInk") != rank.get("pillInk"), rank)
 
     print("— 3 · the caption explainer —")
-    pg.query_selector('#units [data-u="mobile"]').click()
+    # §410 turned a unit plan's grey clause into a count beside the heading
+    # ("Key measures 4"), so the captions that still carry an explainer are a
+    # projects plan's: "Milestones — the timeline as planned". §155's rule is
+    # asked there, on Finance's own projects (rewritten, never loosened: §218).
+    pg.evaluate("()=>{ leaveModes && leaveModes(); current='fn:finance'; currentSub='fnstrat'; CURSEC.fnstrat='proj'; paint(); }")
     pg.wait_for_timeout(500)
     caps = pg.evaluate("""() => {
       var out = [];
@@ -229,6 +240,9 @@ with sync_playwright() as p:
         el = pg.query_selector(sel)
         if el and el.is_visible():
             el.click(); pg.wait_for_timeout(600); break
+    # §624: the colours are on Profile's Brand tab.
+    tab = pg.query_selector('.csetup [data-cstab="brand"]')
+    if tab: tab.click(); pg.wait_for_timeout(500)
     sw = pg.evaluate("""() => {
       function hex(v){ v=v.trim(); if(v[0]==='#') return v.toLowerCase();
         var m=v.match(/\\d+/g);
@@ -246,7 +260,7 @@ with sync_playwright() as p:
        all(s["want"] is None or s["val"] == s["want"] for s in sw), sw)
 
     print("— 5 · one name column by default —")
-    setup_page(pg, "people register")
+    setup_page(pg, "client register")
     cols = pg.evaluate("""() => [...document.querySelectorAll('.peoplecfg thead th')]
       .map(function(t){ return (t.textContent||'').trim(); })""")
     ck("the register is on screen", len(cols) > 4, cols[:4])

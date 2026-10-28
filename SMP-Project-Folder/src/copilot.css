@@ -18,7 +18,7 @@
           color:var(--ink); background:var(--surface); border:1px solid var(--line);
           border-radius:var(--r-sm, 6px); padding:4px 10px; cursor:pointer; }
 .copnew:hover, .copnew:focus-visible { border-color:var(--gold); outline:none; }
-.coplist { display:flex; flex-direction:column; max-height:42vh; overflow-y:auto; }
+.coplist { display:flex; flex-direction:column; max-height:calc(var(--winh) * 0.42); overflow-y:auto; }
 .copitem { display:flex; flex-direction:column; gap:2px; text-align:left; width:100%;
            background:transparent; border:0; border-bottom:1px solid var(--line);
            padding:9px 12px; cursor:pointer; font:inherit; color:var(--ink); }
@@ -48,7 +48,7 @@
 .copask { background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm, 6px);
           padding:10px 12px; margin-bottom:10px; font-size:var(--fs-note, 13.5px); color:var(--ink);
           display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:52vh; overflow-y:auto;
+.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:calc(var(--winh) * 0.52); overflow-y:auto;
            padding:4px 2px 10px; }
 /* §470: the conversation's text size. CSS zoom on a wrapper INSIDE the
    scrolling box, so the box keeps its own height and only what is in it
@@ -152,7 +152,7 @@
      that already fitted — the window moved and the chat did not. A page sized
      to the window takes the small foot, as Setup's does (§167). */
   .wrap:has(.coppane) { padding-bottom:var(--pane-foot, 20px); }
-  .coppane { height:calc(100dvh - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
+  .coppane { height:calc(var(--wind) - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
   .coprails { min-height:0; }
   .coprail { display:flex; flex-direction:column; min-height:0; }
   .coprail.copchats { flex:1 1 auto; }
@@ -189,6 +189,8 @@
                   color:var(--ink); padding:6px 10px; border-radius:5px; cursor:pointer; }
 .copmenu button:hover, .copmenu button:focus-visible { background:var(--surface-2); outline:none; }
 .copmenu .danger { color:var(--bad-tx); }
+/* §639: "+ New chat" goes to the start screen; §633's menu of two is gone. */
+.coprh { position:relative; }
 .coprow .copren { flex:1 1 auto; min-width:0; margin:6px 10px; font-weight:600; }
 .coprow.ask { flex-wrap:wrap; gap:6px; padding:8px 12px; }
 .coprow.ask .copt { flex:1 1 100%; min-width:0; }
@@ -310,7 +312,9 @@ button.copcard.pick { font:inherit; text-align:left; cursor:pointer; width:100%;
 button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--surface-2); outline:none; border-color:var(--gold); }
 .copcard ul { margin:0; padding-left:16px; font-size:13px; color:var(--ink-2); display:flex; flex-direction:column; gap:2px; }
 .copcard li { overflow-wrap:anywhere; }
-.copcard li.copmore { list-style:none; margin-left:-16px; color:var(--ink-3); font-style:italic; }
+ul:not(.open) > li.copmorel { display:none; }
+.copmore { display:inline-block; margin-top:2px; color:var(--gold); font-size:var(--fs-small, 12.5px); font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+.copmore:hover, .copmore:focus-visible { color:var(--ink); outline:none; }
 .copcard.empty p { color:var(--ink-3); font-style:italic; }
 /* §513 — a card with text carries a pen and "Edit with AI", shown when the
    card is hovered or anything in it has the keyboard; on a touch screen,
@@ -580,7 +584,9 @@ span.copsw-lb { cursor:default; }
    is flush with that corner it keeps clear of the button. */
 @media (min-width:821px) {
   :root[data-cop-page] .copcompose { margin-bottom:-8px; }
-  :root[data-cop-page] .copmain:not(:has(.copflow)):not(:has(.copsw)) .copcompose { padding-right:64px; }
+  /* §638, §642: not beside a draft once the Copilot has room for it — the corner is the draft's foot then (.copoutf). */
+  :root[data-cop-page] .copmain:not(:has(.copflow)):not(:has(.copsw)):not(:has(.copsplit)) .copcompose { padding-right:64px; }
+
 }
 /* ── §493 HOW WE COMPETE IN THE COPILOT (spec 064 §3.2–§3.5, from
    design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
@@ -742,3 +748,204 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
    directions — column with the cards open, row with them shut. */
 .copsavebar .copfdone { margin:0; flex:0 0 100%; }
 @media (max-width:760px){ .copfcards { grid-template-columns:minmax(0, 1fr); } }
+
+/* ── §638 THE LAYOUT CONCEPT (Islam, 25 Oct 2026, from the signed-off
+   design-mockups/copilot-layout/2026-10-25_copilot-concept.html): a chat
+   reads at 740px however wide the screen; the chat comes first and what it
+   builds stands to its right behind a handle; a guided chat's to-do keeps
+   its 200px at the far right. From 1280px the three stand side by side —
+   the chat's default gives way first, so the work keeps 400px — and below
+   it the work and the to-do open over the chat from the head's buttons.
+   Later in the file on purpose: it settles the rules above. Tokens only. ── */
+.copchat > :not(.copmsgs), .copchat > .copmsgs > .copzoom { width:100%; max-width:var(--cop-read, 740px); margin-left:auto; margin-right:auto; box-sizing:border-box; }
+/* §642: the parts-agreed line reads over the chat's column, not the whole pane (Islam, 26 Oct 2026) */
+.copfchat > .copfbar { width:100%; max-width:var(--cop-read, 740px); margin-left:auto; margin-right:auto; box-sizing:border-box; }
+.copgrip { display:none; position:relative; cursor:col-resize; touch-action:none; min-height:0; }
+.copgrip::after { content:""; position:absolute; top:0; bottom:0; left:50%; width:1px; transform:translateX(-50%); background:var(--line); }
+.copgrip:hover::after, .copgrip.on::after, .copgrip:focus-visible::after { width:3px; background:var(--gold); }
+.copgrip:focus-visible { outline:none; }
+.copshade, .copsheetb, .copsheetx { display:none; }
+.copdraftline { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:6px; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.copdraftline b { color:var(--ink); }
+.copsplit { display:flex; flex-direction:column; gap:8px; min-height:0; position:relative; }
+.copout { display:flex; flex-direction:column; min-width:0; min-height:0; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm, 6px); overflow:hidden; }
+.copouth { display:flex; align-items:baseline; gap:8px; padding:9px 12px; border-bottom:1px solid var(--line); background:var(--surface); }
+.copouth b { font-size:var(--fs-body, 14px); color:var(--ink); }
+.copouth .copsheetx { margin-left:auto; align-self:center; }
+.copoutb { flex:1 1 auto; min-height:0; overflow-y:auto; padding:10px 12px; }
+.copoutb .copdraft { margin-top:0; }
+.copoutf { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:9px 12px; border-top:1px solid var(--line); background:var(--surface); }
+@media (min-width:821px){
+  .copmain > .copsplit { flex:1 1 auto; }
+  .copsplit > .copchat { flex:1 1 auto; display:flex; flex-direction:column; min-height:0; min-width:0; }
+}
+/* §642 — THE ROOM THE COPILOT HAS, NOT THE WINDOW (Islam's screenshot: the
+   Foundation's cards over the chat on a full-size screen). §638 switched at
+   a 1280px WINDOW, and browser zoom or display scaling makes a laptop's
+   window narrower than that to the page, so the work fell into its overlay
+   on an ordinary screen. The switch now reads the Copilot's own width
+   (a container query on .copmain) and holds the three side by side while
+   there is room for a 420px chat, 360px of work and the 200px to-do;
+   without a to-do (a chat with a draft), 420 + 360. The chat's default
+   gives way first, never below 420. */
+.copmain { container:copmain / inline-size; }
+@container copmain (min-width:1000px){
+  .copsplit > .copgrip, .copflow > .copgrip { display:block; }
+  .copflow { gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 580px))) 12px minmax(0,1fr) 208px; }
+  .copflow > .copftodo { margin-left:8px; }
+  .copflow.nocards { gap:8px; grid-template-columns:minmax(0,1fr) 200px; }
+  .copflow.nocards > .copftodo { margin-left:0; }
+}
+@container copmain (min-width:800px){
+  .copsplit { display:grid; gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 372px))) 12px minmax(0,1fr); }
+  .copsplit > .copgrip { display:block; }
+  /* The office chat button floats over the window's corner (§490.2): with
+     the draft beside the chat, the corner is the draft's foot, not the box. */
+  .copoutf { padding-right:64px; }
+}
+@container copmain (max-width:999px){
+  .copflow, .copflow.nocards { grid-template-columns:minmax(0,1fr); position:relative; }
+  .copflow > .copleft, .copflow > .copftodo { display:none; }
+  .copflow .copsheetb, .copflow .copsheetx { display:inline-flex; }
+  .copleft .copcardx { display:none; }
+  .copflow.sheet-cards > .copleft, .copflow.sheet-todo > .copftodo {
+    display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(720px, calc(100% - 48px));
+    background:var(--surface); box-shadow:var(--shadow-md); padding:8px; overflow-y:auto; }
+  .copflow.sheet-todo > .copftodo { width:min(300px, 100%); }
+  .copflow.sheet > .copshade { display:block; position:absolute; inset:0; z-index:5; background:color-mix(in srgb, var(--ink) 22%, transparent); }
+}
+@container copmain (max-width:799px){
+  .copsplit > .copout { display:none; }
+  .copsplit .copsheetb, .copsplit .copsheetx { display:inline-flex; }
+  .copsplit.sheet > .copout { display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(720px, calc(100% - 48px));
+    background:var(--surface); box-shadow:var(--shadow-md); padding:0; overflow:hidden; }
+  .copsplit.sheet > .copshade { display:block; position:absolute; inset:0; z-index:5; background:color-mix(in srgb, var(--ink) 22%, transparent); }
+  :root[data-cop-page] .copmain .copsplit .copcompose { padding-right:64px; }
+}
+
+/* ── §639 THE START SCREEN (option C of the signed-off
+   design-mockups/copilot-start/2026-10-25_free-chat-entry.html): the box
+   to just ask at the reading width, then the area's ways to start. ── */
+.copstart { width:100%; max-width:var(--cop-read, 740px); margin:clamp(16px, 8vh, 72px) auto 24px; display:flex; flex-direction:column; gap:12px; }
+.copstarth { margin:0 0 4px; text-align:center; font:700 20px/1.3 var(--sans); color:var(--ink); }
+.copstartbox textarea { min-height:72px; }
+.copstartk { margin:-4px 0 0; text-align:center; font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+.copor { display:flex; align-items:center; gap:10px; margin-top:8px; font:700 var(--fs-micro, 11px)/1.3 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+.copor::before, .copor::after { content:""; flex:1 1 auto; height:1px; background:var(--line); }
+.copstartcards { grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); margin-top:0; }
+/* §640: the start box carries its own paperclip, labelled, under it. */
+.copstartunder { justify-content:flex-start; gap:8px; }
+.copstartclip { display:inline-flex; align-items:center; width:auto; height:26px; padding:0 9px; gap:5px; border:1px solid var(--line); border-radius:7px; font:600 var(--fs-small, 12.5px)/1 var(--sans); color:var(--ink-2); }
+.copstartclip:hover, .copstartclip:focus-visible { border-color:var(--gold); color:var(--ink); outline:none; }
+.copstartunder .cophint { margin-left:0; }
+
+/* ── §641 THE SWOT, SPLIT (design-mockups/copilot-swot-split/, signed
+   off): the conversation in the chat, the SWOT building in the pane, each
+   item a title that opens on a press (the Titles / Details switch opens
+   them all), Save and Apply to plan at the pane's foot. The frame is the
+   Foundation's (.copflow, §638). ── */
+.copswpane { overflow:hidden; gap:0; padding:0; border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface-2); }
+.copswph { padding:8px 10px; border-bottom:1px solid var(--line); background:var(--surface); flex-wrap:wrap; }
+.copswph .copvline { flex:1 1 auto; min-width:0; }
+.copswdens { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; flex:none; }
+.copswdens button { border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-2); padding:2px 9px; font:600 var(--fs-micro, 11px)/1.6 var(--sans); cursor:pointer; }
+.copswdens button:last-child { border-right:0; }
+.copswdens button[aria-pressed="true"] { background:var(--surface-2); color:var(--ink); }
+.copswdens button:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:-2px; }
+.copswpb { flex:1 1 auto; min-height:0; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px; }
+.copswpb > .copsw-card { margin:0; }
+.copswfoot { flex:none; }
+ol.copswol, ul.copswol { list-style:none; padding-left:0; gap:2px; }
+.copswi { margin:0; }
+.copswrow { display:flex; align-items:baseline; gap:6px; width:100%; padding:2px 0; border:0; background:none; text-align:left; font:inherit; color:inherit; }
+button.copswrow { cursor:pointer; }
+.copswrow b { display:inline !important; color:var(--ink); }
+button.copswrow:hover b, button.copswrow:focus-visible b { color:var(--gold-deep, var(--gold)); }
+button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:1px; border-radius:3px; }
+.copswchev { flex:none; width:10px; font-size:10px; color:var(--ink-3); transition:transform .12s; }
+.copswrow[aria-expanded="true"] .copswchev { transform:rotate(90deg); }
+.copswdet { padding:2px 0 6px 16px; display:flex; flex-direction:column; gap:2px; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.copswi:not(:has(button.copswrow)) .copswdet { padding-left:0; }
+.copswiss { margin:6px 0 0; padding-left:18px; color:var(--bad-tx); }
+.copswchat .copsw-gridwrap { margin-top:8px; }
+.copswchat .copsw-qn, .copswchat .copsw-qt { display:block; }
+.copswchat .copsw-lh { margin:6px 0 0; }
+
+/* ── §643 THE CHAT KEEPS EVERYTHING; THE CARD KEEPS WHAT IS AGREED (Islam,
+   26 Oct 2026, from design-mockups/copilot-layout/2026-10-26_chat-keeps-everything.html):
+   a finished part folds to one row and opens in place; the proposals a part
+   went through stay, the replaced ones faded; Your answers on a card. ── */
+.coppf { border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+.coppfh { display:flex; align-items:center; gap:8px; width:100%; border:0; background:none; text-align:left; padding:8px 12px; font:inherit; font-size:var(--fs-note, 13.5px); color:var(--ink); cursor:pointer; border-radius:8px; }
+.coppfh:hover { background:var(--surface-2); }
+.coppfh:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+.coppfh b { font-weight:700; }
+.coppfh small { flex:1 1 auto; min-width:0; color:var(--ink-3); font-size:var(--fs-small, 12.5px); }
+.copchev { width:14px; color:var(--ink-3); transition:transform .15s; }
+.coppf.open .copchev { transform:rotate(90deg); }
+.coppfb { border-top:1px solid var(--line); padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
+.copqa { display:flex; flex-direction:column; gap:2px; font-size:var(--fs-note, 13.5px); }
+.copq { color:var(--ink-3); }
+.copa { align-self:flex-end; max-width:85%; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:4px 10px; color:var(--ink); white-space:pre-wrap; }
+.copqp { background:var(--surface-2); border-radius:6px; padding:6px 10px; color:var(--ink-2); white-space:pre-wrap; }
+.copqp.agreed { border-left:3px solid var(--good, #2E6B45); color:var(--ink); }
+.copfnote { font-size:var(--fs-small, 12.5px); color:var(--ink-3); text-align:center; }
+.copmsg.copold { opacity:.62; }
+.copmsg.copold .copfdraft { text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--ink-3) 60%, transparent); }
+/* §644 — after the guided pass the chat goes on as plain chat, marked once. */
+.copsep { display:flex; align-items:center; gap:10px; color:var(--ink-3); font-size:var(--fs-small, 12.5px); margin:4px 0; }
+.copsep::before, .copsep::after { content:""; flex:1; height:1px; background:var(--line); }
+.coppf.flash { animation:copflash 1.2s ease; }
+@keyframes copflash { 0% { box-shadow:0 0 0 3px var(--gold); } 100% { box-shadow:0 0 0 0 transparent; } }
+@media (prefers-reduced-motion:reduce){ .copchev { transition:none; } .coppf.flash { animation:none; } }
+
+/* ── §649 A HELD BUTTON SAYS WHY (Islam, 26 Oct 2026: "for any disabled
+   button we need to have a tooltip explaining why"). §538's held button for
+   every Copilot control: dimmed like `disabled`, still reachable by a
+   pointer, Tab and a tap, and its reason in the platform's dark bubble
+   (#coptip, below); the press itself is stopped in copilot.js before any
+   handler. ── */
+:is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick, .copcact button)[aria-disabled="true"] { opacity:.55; cursor:not-allowed; filter:none; }
+/* §649.1 — the bubble is one element at page level (#coptip), placed from
+   the button and kept inside the window, so the pane and the chat box —
+   which clip what crosses their edges — never cut it (Islam's screenshots of
+   Run the check and Send, each note sliced at the left). */
+#coptip { display:none; position:fixed; z-index:2147483000; pointer-events:none;
+  background:var(--ink); color:var(--ground); font:400 12px/1.4 var(--sans); letter-spacing:0; text-transform:none; text-align:left;
+  padding:8px 11px; border-radius:3px; width:max-content; max-width:min(280px, calc(100vw - 16px)); white-space:normal; box-shadow:0 2px 8px rgba(0,0,0,.18); }
+:is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick)[aria-disabled="true"][data-tip]:is(:hover, :focus-visible) { opacity:.75; }
+.copsend[hidden] { display:none !important; }
+
+/* ── §653 THE COPILOT, ORIENTED (Islam, 27 Oct 2026, from the signed-off
+   design-mockups/copilot-layout/2026-10-27_orientation-before-after.html):
+   the rail stays open while there is room (copilot.js); each header has one
+   job — the chat's head is the chat's name and the step; one counter, the
+   to-do's; four status words; the Copilot's lines lose their box; the path
+   in one line at the pane's foot; Start from the existing plan on the start
+   screen. ── */
+.copfhead .copfname { font-weight:700; }
+.copfhead small { font-weight:400; color:var(--ink-3); font-size:var(--fs-small, 12.5px); }
+/* The chat is lighter: the Copilot's lines keep the stripe and lose the box;
+   the person's stay bubbles; the draft inside a proposal keeps its own box. */
+.copmsg.ai .copbody { background:none; border:0; border-left:3px solid var(--gold); border-radius:0; padding:2px 11px; }
+.copmsg.ai.copold .copbody { opacity:1; }
+.copfchat { background:var(--surface); }
+/* The one-line path at the pane's foot. */
+.copsvst b { color:var(--ink); font-weight:600; }
+.copsvst i { font-style:normal; color:var(--line); margin:0 2px; }
+.copsvst .on { color:var(--good-tx); font-weight:600; }
+/* A to-do pill with nothing to say is not drawn. */
+.copsw-pill:empty { display:none; }
+/* Start from the existing plan: first, and marked. */
+.coppcard.copplan { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; background:color-mix(in srgb, var(--goldfill) 7%, var(--surface)); }
+.coppcard.copplan .coptag { display:block; font:700 10.5px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--gold-deep, var(--gold)); }
+.coppcard.copplan .copmeta { grid-column:2; font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+
+/* §654 B2 — a saved version drawn as its type, on its own page. */
+.copdtyped { display:flex; flex-direction:column; gap:8px; margin:6px 0 10px; }
+.copdtyped h5 { margin:6px 0 0; font:700 var(--fs-small, 12.5px)/1.4 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); }
+.copdline { margin:0; font-size:var(--fs-note, 13.5px); }
+.copdul { margin:0; padding-left:18px; font-size:var(--fs-note, 13.5px); color:var(--ink); display:flex; flex-direction:column; gap:3px; }
+.copdswot { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+@media (max-width:760px){ .copdswot { grid-template-columns:1fr; } }
+.copdstay { display:block; width:100%; margin-top:6px; }

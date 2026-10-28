@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { pageZoom } from "@/ffp/lib/client/page-zoom";
 
 /**
  * Print / save as PDF. By default the SOPs print as ONE continuous page (no cut
@@ -22,7 +23,7 @@ export function PrintButton() {
       el.dataset.prevWidth = el.style.width;
       el.style.width = "210mm";
       el.style.maxWidth = "none";
-      const heightMm = Math.ceil((el.getBoundingClientRect().height * 25.4) / 96) + 3;
+      const heightMm = Math.ceil((el.getBoundingClientRect().height / pageZoom() * 25.4) / 96) + 3;
       if (heightMm > MAX_MM) {
         el.style.width = el.dataset.prevWidth ?? "";
         el.style.maxWidth = "";

@@ -512,9 +512,13 @@ with sync_playwright() as p:
             ck("%d: %s opens its list, in its own cell" % (w, what),
                o.get("open") == 1 and o.get("btn") and o.get("list")
                and o.get("fits"), o)
+            # §631: WITHIN A PIXEL. The page is drawn at 80% on a computer and a
+            # zoomed row snaps to the screen's pixels, so rows of one height
+            # read 31 or 32; a row that GREW is a line taller, far past that.
+            oth = o.get("others") or []
             ck("%d: ...with no arrow, and the row has not grown" % (w, ),
-               o.get("cars") == 0 and len(o.get("others") or []) == 1
-               and o["h"] == o["others"][0], o)
+               o.get("cars") == 0 and len(oth) >= 1 and max(oth) - min(oth) <= 1
+               and abs(o.get("h", 0) - max(oth)) <= 1, o)
             pg.keyboard.press("Escape")
             pg.wait_for_timeout(250)
             pg.keyboard.press("Escape")
@@ -566,7 +570,8 @@ with sync_playwright() as p:
            pg.evaluate("""()=>{const hs={};
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
                const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});
-             return Object.keys(hs).length===1;}"""),
+             /* §631: within a pixel — a zoomed row snaps to the screen's pixels */
+             const k=Object.keys(hs).map(Number); return Math.max(...k)-Math.min(...k)<=1;}"""),
            pg.evaluate("""()=>{const hs={};
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
                const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});

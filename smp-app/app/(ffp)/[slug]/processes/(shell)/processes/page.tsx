@@ -150,8 +150,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
 
       <FoldProvider enabled={folding} parentIds={[...directSubs.keys()]}>
       <FoldAllControls any={directSubs.size > 0} />
-      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <table className="w-full text-sm [&_td]:px-2 [&_th]:px-2">
           <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
             <tr>
               <th className="px-4 py-2">Code</th>
@@ -256,6 +256,12 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                 </td>
                 <td className="px-4 py-2 text-end">
                   <div className="flex items-center justify-end gap-3">
+                    <Link
+                      href={`/${workspaceId}/processes/processes/${p.id}`}
+                      className="text-xs font-semibold text-slate-700 hover:text-slate-900"
+                    >
+                      Open →
+                    </Link>
                     <EditProcessButton
                       workspaceId={workspaceId}
                       process={{
@@ -279,12 +285,6 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                       processes={processOptions}
                     />
                     <ArchiveProcessButton workspaceId={workspaceId} processId={p.id} />
-                    <Link
-                      href={`/${workspaceId}/processes/processes/${p.id}`}
-                      className="text-xs font-semibold text-slate-700 hover:text-slate-900"
-                    >
-                      Open →
-                    </Link>
                   </div>
                 </td>
               </FoldRow>

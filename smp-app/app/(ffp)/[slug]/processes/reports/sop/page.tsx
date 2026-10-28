@@ -33,5 +33,5 @@ export default async function SopPage(props: {
   if (!data) nextNotFound();
 
   const sops = data.processes.map((p) => compileSop(p));
-  return <SopDocument companyName={data.companyName} firmName={data.firmName} sops={sops} />;
+  return <SopDocument workspaceId={workspaceId} companyName={data.companyName} firmName={data.firmName} sops={sops} />;
 }

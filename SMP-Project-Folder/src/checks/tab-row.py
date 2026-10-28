@@ -28,6 +28,14 @@ function R(a,b){a=L(a);b=L(b);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)}"""
 def page(b, scheme, scale=2):
     pg = b.new_page(viewport={"width": 1440, "height": 800}, color_scheme=scheme, device_scale_factor=scale)
     pg.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1')}catch(e){}")
+    # §631: AT FULL SIZE. This reads the word's ink to the pixel, and at 80%
+    # the browser draws 14px type about 2px low in its box (measured at 1×, 2×
+    # and 4× pixel density) — a property of the zoom, not of this row's CSS,
+    # which is what this guards; checks/platform-80.py holds the scaling.
+    pg.add_init_script(("new MutationObserver(function(m, o){ var d = document.documentElement; if (!d) return; "
+            "d.style.setProperty('zoom','1'); d.style.setProperty('--winw','100vw'); "
+            "d.style.setProperty('--winh','100vh'); d.style.setProperty('--wind','100dvh'); "
+            "o.disconnect(); }).observe(document, { childList: true });"))
     pg.goto(URL); pg.wait_for_timeout(700)
     pg.evaluate("document.querySelector('.units button[data-u=\"mobile\"]').click()")
     pg.wait_for_timeout(600)
@@ -91,14 +99,23 @@ for scheme in ["light", "dark"]:
         js(pg, "document.querySelectorAll('#subtabs .tabdot').forEach(d=>d.style.display='none')")
         bb = js(pg, "(()=>{var r=document.querySelector('#subtabs > button.cta').getBoundingClientRect();return [r.x,r.y,r.width,r.height]})()")
         if not bb: ck(False, f"{state}: Reporting box found"); continue
+        # §631: one pixel in on every side. At 80% the box's edges fall
+        # between pixels, so the first row captured was the page behind it;
+        # the inset is the same on both sides, so centring is still fair.
+        bb = [bb[0] + 1, bb[1] + 1, bb[2] - 2, bb[3] - 2]
         im = Image.open(io.BytesIO(pg.screenshot(clip={"x": bb[0], "y": bb[1], "width": bb[2], "height": bb[3]}))).convert("RGB")
-        W, H = im.size; bg = im.getpixel((W // 2, 4))
+        # §631: 8 device pixels in (2px at 4×), not 4 — at 80% the 1px border
+        # is 3.2 of them, so 4 sampled the border's blend and every row read as ink.
+        W, H = im.size; bg = im.getpixel((W // 2, 8))
         diff = lambda px: sum(abs(a - c) for a, c in zip(px, bg)) > 150
         rows = [y for y in range(H) if any(diff(im.getpixel((x, y))) for x in range(28, W - 28))]
         cols_ = [x for x in range(28, W - 28) if any(diff(im.getpixel((x, y))) for y in range(28, H - 28))]
         if not rows or not cols_: ck(False, f"{state}: word ink found"); continue
-        up, down = rows[0] / 4, bb[3] - rows[-1] / 4 - 0.25
-        lf, rt = cols_[0] / 4, bb[2] - cols_[-1] / 4 - 0.25
+        # §631: both sides measured off the IMAGE, whose size is whole device
+        # pixels — the box's own height is fractional at 80%, and mixing the
+        # two put a rounding into one side only.
+        up, down = rows[0] / 4, H / 4 - rows[-1] / 4 - 0.25
+        lf, rt = cols_[0] / 4, W / 4 - cols_[-1] / 4 - 0.25
         ck(abs(up - down) <= 1.0, f"{state}: word centred top to bottom (within 1px)", (up, round(down, 2)))
         ck(abs(lf - rt) <= 1.0, f"{state}: word centred left to right (within 1px)", (lf, round(rt, 2)))
         js(pg, "document.querySelectorAll('#subtabs .tabdot').forEach(d=>d.style.display='')")

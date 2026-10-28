@@ -45,10 +45,13 @@ const mayEdit = (me: SessionUser, authorId: string): boolean =>
 
 const ROW =
   "e.id, e.about_tenant_id, e.author_id, e.kind, e.title, e.happened, e.did, e.came_of_it, " +
-  "e.next_person, e.occurred, e.created_at, e.updated_at, " +
+  "e.next_person, e.occurred, e.created_at, e.updated_at, e.case_id, cs.name AS case_name, cs.kind AS case_kind, " +
   "t.key AS client_key, t.name AS client_name, t.industry, u.name AS author_name, u.email AS author_email";
+/* THE PIECE OF WORK IT CAME FROM (spec 067 §5) rides on every row, or null
+   for one not yet placed — a LEFT JOIN, because most have none yet. */
 const FROM =
-  "FROM memory_entries e JOIN tenants t ON t.id = e.about_tenant_id JOIN users u ON u.id = e.author_id";
+  "FROM memory_entries e JOIN tenants t ON t.id = e.about_tenant_id JOIN users u ON u.id = e.author_id " +
+  "LEFT JOIN case_studies cs ON cs.id = e.case_id";
 
 function shape(r: Record<string, any>, me: SessionUser) {
   return {
@@ -57,6 +60,7 @@ function shape(r: Record<string, any>, me: SessionUser) {
     occurred: r.occurred, when: r.created_at,
     client: r.client_key, clientName: r.client_name, industry: r.industry,
     author: r.author_name, authorEmail: r.author_email,
+    caseId: r.case_id || null, caseName: r.case_name || "", caseKind: r.case_kind || "",
     mine: mayEdit(me, r.author_id),
   };
 }
@@ -71,7 +75,7 @@ async function tenantIdFor(c: Q, key: unknown): Promise<string | null> {
    refusing (the splitter already guesses it), the title is one line and must
    not be blank — which is the database's own CHECK said early, so the person
    is told which row rather than meeting a constraint error (§184). */
-function draftOf(d: any) {
+export function draftOf(d: any) {
   return {
     kind: kindOf(d?.kind),
     title: oneLine(d?.title),
@@ -83,13 +87,17 @@ function draftOf(d: any) {
   };
 }
 
-async function insert(c: Q, d: ReturnType<typeof draftOf>, tenantId: string, authorId: string) {
+/* Exported for the case studies' interview (lib/case-api.ts), which saves the
+   insights it drew out into the piece of work they came from — one insert,
+   not a second copy of it (§53.5). */
+export async function insertEntry(c: Q, d: ReturnType<typeof draftOf>, tenantId: string, authorId: string, caseId: string | null = null) {
   const r = await c.query(
-    "INSERT INTO memory_entries (about_tenant_id, author_id, kind, title, happened, did, came_of_it, next_person, occurred) " +
-    "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id",
-    [tenantId, authorId, d.kind, d.title, d.happened, d.did, d.came_of_it, d.next_person, d.occurred]);
+    "INSERT INTO memory_entries (about_tenant_id, author_id, kind, title, happened, did, came_of_it, next_person, occurred, case_id) " +
+    "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id",
+    [tenantId, authorId, d.kind, d.title, d.happened, d.did, d.came_of_it, d.next_person, d.occurred, caseId]);
   return r.rows[0].id as string;
 }
+const insert = insertEntry;
 
 export async function memoryAction(pool: Pool, me: SessionUser, body: any): Promise<Answer> {
   /* A CLIENT'S OWN STAFF NEVER REACH THIS. They sign in to the same door and
@@ -105,6 +113,12 @@ export async function memoryAction(pool: Pool, me: SessionUser, body: any): Prom
     if (body.client) { args.push(String(body.client)); where.push("t.key = $" + args.length); }
     if (body.industry) { args.push(String(body.industry)); where.push("t.industry = $" + args.length); }
     if (body.kind) { args.push(kindOf(body.kind)); where.push("e.kind = $" + args.length); }
+    /* "none" is the insights still waiting to be placed (spec 067 §5) */
+    if (body.case === "none") where.push("e.case_id IS NULL");
+    /* the assignment's type (spec 069): "every hiccup on a Retainer" */
+    else if (body.case) { args.push(String(body.case)); where.push("e.case_id::text = $" + args.length); }
+    /* the assignment's type (spec 069): "every hiccup on a Retainer" */
+    if (body.type) { args.push(str(body.type)); where.push("cs.kind = $" + args.length); }
     if (str(body.q).trim()) {
       /* ILIKE over a few hundred rows is the right amount of machinery for a
          few hundred rows; full text is recorded in plan.md, not built. The
@@ -148,13 +162,30 @@ export async function memoryAction(pool: Pool, me: SessionUser, body: any): Prom
         [str(body.id), d.kind, d.title, d.happened, d.did, d.came_of_it, d.next_person, d.occurred]);
       return ok({ id: str(body.id) });
     }
+    /* ADDED FROM INSIDE A CASE STUDY (spec 067 §5): the piece of work names
+       its client, so the client is taken from it and never from the body —
+       an insight cannot be filed under one client and placed in another's
+       work. Otherwise the client is the one named, as before. */
+    if (body.caseId) {
+      const cs = await pool.query("SELECT id, about_tenant_id FROM case_studies WHERE id::text = $1", [str(body.caseId)]);
+      if (!cs.rowCount) return no(404, "That assignment is no longer here.");
+      return ok({ id: await insert(pool, d, cs.rows[0].about_tenant_id, me.id, cs.rows[0].id) });
+    }
     const tenantId = await tenantIdFor(pool, body.client);
     if (!tenantId) return no(400, "Say which client it came from.");
     return ok({ id: await insert(pool, d, tenantId, me.id) });
   }
 
   if (action === "saveMany") {
-    const tenantId = await tenantIdFor(pool, body.client);
+    /* FROM AN ASSIGNMENT (spec 069): its client is taken from it, never from
+       the body, so a learning cannot be filed under one client and tied to
+       another's assignment — the single save's own rule, below. */
+    let tenantId: string | null = null, caseId: string | null = null;
+    if (body.caseId) {
+      const cs = await pool.query("SELECT id, about_tenant_id FROM case_studies WHERE id::text = $1", [str(body.caseId)]);
+      if (!cs.rowCount) return no(404, "That assignment is no longer here.");
+      tenantId = cs.rows[0].about_tenant_id; caseId = cs.rows[0].id;
+    } else tenantId = await tenantIdFor(pool, body.client);
     if (!tenantId) return no(400, "Say which client it came from.");
     const drafts = Array.isArray(body.entries) ? body.entries.map(draftOf) : [];
     if (!drafts.length) return no(400, "There is nothing here to save.");
@@ -170,7 +201,7 @@ export async function memoryAction(pool: Pool, me: SessionUser, body: any): Prom
          the outcome nobody can tell from a bug. */
       if (process.env.SMP_BREAK !== "partial-save") await c.query("BEGIN");
       const ids: string[] = [];
-      for (const d of drafts) ids.push(await insert(c, d, tenantId, me.id));
+      for (const d of drafts) ids.push(await insert(c, d, tenantId, me.id, caseId));
       if (process.env.SMP_BREAK !== "partial-save") await c.query("COMMIT");
       return ok({ ids, saved: ids.length });
     } catch (e) {

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Copilot Live Layout</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DA;--warnbg:#FBF1DE;--goodbg:#E6F2EA;--good:#2E6B45;--shade:rgba(10,20,40,.28);--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;--shade:rgba(0,0,0,.5);color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;--shade:rgba(0,0,0,.5);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+
+/* ── the mockup's own controls (not part of the design) ── */
+.ctl{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px}
+.ctl b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:4px 10px;font-size:12.5px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--panel-ink)}
+.ctl .say{color:var(--ink-3);flex:1 1 260px}
+.ctl .reset{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 10px;font-size:12.5px}
+.viewport{padding:16px;display:flex;justify-content:center}
+.scaler{transform-origin:top left}
+.stage{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:0 2px 14px rgba(0,0,0,.06)}
+.full .viewport{padding:0;display:block}.full .scaler{width:100%}.full .stage{border:0;border-radius:0;box-shadow:none}
+
+/* ── the platform ── */
+.app{container-type:inline-size;display:flex;flex-direction:column;height:760px;position:relative}
+.full .app{height:var(--apph, calc(100vh - 49px))}
+.bar{background:var(--panel);color:var(--panel-quiet);display:flex;gap:18px;padding:10px 16px;font-size:13.5px;flex:none;align-items:center}
+.bar b{color:var(--panel-ink);border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.bar .sp{margin-left:auto;font-size:12.5px}
+.secs{display:flex;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface-2);overflow-x:auto;flex:none;scrollbar-width:none}
+.sec{font-size:12.5px;padding:3px 10px;border-radius:5px;color:var(--ink-2);white-space:nowrap}
+.sec.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.body{flex:1 1 auto;min-height:0;display:flex}
+
+/* chats rail: open, or folded to the strip */
+.rail{flex:none;width:248px;border-right:1px solid var(--line);background:var(--surface-2);padding:12px;font-size:13px;overflow:auto}
+.strip{flex:none;width:48px;border-right:1px solid var(--line);background:var(--surface-2);display:none;flex-direction:column;align-items:center;gap:10px;padding:12px 0}
+.ib{width:30px;height:30px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;background:var(--surface);font-size:15px;line-height:1}
+.app.railfold .rail{display:none}.app.railfold .strip{display:flex}
+.rh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.rh span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:700}
+.rh .fold{border:0;background:none;color:var(--ink-3);font-size:15px;padding:0 4px}
+.new{font:600 12px/1.2 var(--sans);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 9px;text-transform:uppercase;letter-spacing:.04em}
+.ri{padding:6px 8px;border-radius:5px;color:var(--ink-2);display:flex;flex-direction:column}
+.ri.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.ri small{font-weight:400;color:var(--ink-3);font-size:11.5px}
+
+/* conversation: one column, at most 740px, centred in what is left */
+.main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+.feed{flex:1 1 auto;overflow-y:auto;padding:18px 20px 8px}
+.col{max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.who{font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:4px}
+.who.me{align-self:flex-end}
+.msg{border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14.5px;line-height:1.6}
+.msg.ai{border-left:3px solid var(--goldfill)}
+.msg.me{align-self:flex-end;background:var(--surface-2);max-width:80%}
+.msg .as{display:block;margin-top:6px;font-size:12.5px;color:var(--ink-3)}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;background:var(--surface)}
+.opt:hover{border-color:var(--gold)}
+.opts.used .opt{opacity:.45;pointer-events:none}
+.compose{flex:none;padding:8px 20px 16px}
+.box{max-width:740px;margin:0 auto;border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 14px;display:flex;align-items:center;gap:8px;background:var(--surface)}
+.box input{flex:1 1 auto;border:0;outline:0;background:transparent;font:14.5px var(--sans);color:var(--ink);min-width:0}
+.send{flex:none;width:30px;height:30px;border:0;border-radius:8px;background:var(--panel);color:var(--panel-ink);display:grid;place-items:center}
+.dtab{display:none;align-self:flex-end;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font:600 12.5px/1.2 var(--sans);background:var(--surface);gap:6px;align-items:center;margin:10px 20px 0 auto;flex:none}
+
+/* the draft: a column beside the chat, or a sheet over it */
+.draft{flex:none;width:360px;border-left:1px solid var(--line);background:var(--surface-2);padding:14px;display:none;flex-direction:column;gap:10px;font-size:13px;overflow:auto}
+.app.hasdraft .draft{display:flex}
+.dh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dh b{font-size:15px}
+.dh > span{display:inline-flex;align-items:center;gap:6px}
+.x{border:0;background:none;font-size:18px;line-height:1;color:var(--ink-3);display:none;padding:2px 6px}
+.prog{font-size:11.5px;color:var(--good);background:var(--goodbg);border-radius:999px;padding:1px 8px;font-weight:700;white-space:nowrap}
+.kos{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ko{padding:9px 10px;border-bottom:1px solid var(--line);display:flex;gap:8px;transition:background .3s}
+.ko:last-child{border-bottom:0}
+.ko .st{flex:none;width:18px;font-weight:700}
+.ko.done .st{color:var(--good)}
+.ko.now{background:var(--warnbg)}
+.ko.todo{color:var(--ink-3)}
+.ko small{display:block;color:var(--ink-3);font-size:11.5px}
+.asm{font-size:12.5px;color:var(--ink-2);background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.asm ul{margin:4px 0 0;padding-left:18px}
+.btns{display:flex;gap:8px;margin-top:auto;padding-top:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;font:600 13px/1.2 var(--sans)}
+.btn.pri{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.shade{display:none;position:absolute;inset:0;background:var(--shade);z-index:5}
+
+/* RULES BY WIDTH (container queries: they follow the simulated width).
+   1280+: chats open, chat ≤740, draft 360 beside it.
+   1024–1279: a draft folds the chats to the strip (as Claude does); the chat
+   keeps its 740 cap and gives up width only to the draft.
+   700–1023: the draft is a "View draft" tab; pressing it slides a sheet in.
+   under 700 (phone): chats behind ☰, the draft opens full screen. */
+@container (max-width:1279px){ .app.hasdraft .rail{display:none} .app.hasdraft .strip{display:flex} .draft{width:340px} }
+@container (max-width:1023px){
+  .rail{display:none}.strip{display:flex}
+  .app.hasdraft .dtab{display:inline-flex}
+  .app.hasdraft .draft{display:none}
+  .app.hasdraft.sheet .draft{display:flex;position:absolute;top:0;right:0;bottom:0;z-index:6;width:min(400px,90cqw);box-shadow:-8px 0 24px rgba(0,0,0,.18)}
+  .app.sheet .shade{display:block}
+  .x{display:block}
+}
+@container (max-width:699px){
+  .strip{display:none!important}
+  .bar .sp{display:none}
+  .feed{padding:14px 14px 6px}.compose{padding:8px 14px 14px}
+  .msg.me{max-width:88%}
+  .app.hasdraft.sheet .draft{width:100%;box-shadow:none}
+  .dtab{margin-right:14px}
+}
+.app.railopen-phone .rail{display:block!important;position:absolute;top:0;left:0;bottom:0;z-index:6;box-shadow:8px 0 24px rgba(0,0,0,.18)}
+.app.railopen-phone .shade{display:block}
+.menu{display:none}
+@container (max-width:699px){.menu{display:inline-grid;border:0;background:none;color:var(--panel-ink);font-size:18px;padding:0}}
+</style>
+</head>
+<body>
+<div class="ctl" role="toolbar" aria-label="Mockup controls">
+  <b>Mockup</b>
+  <span class="seg" id="widths" aria-label="Window width">
+    <button data-w="0" aria-pressed="true">Your window</button>
+    <button data-w="1440">Desktop 1440</button>
+    <button data-w="1280">1280</button>
+    <button data-w="1100">Laptop 1100</button>
+    <button data-w="900">Tablet 900</button>
+    <button data-w="390">Phone 390</button>
+  </span>
+  <button class="reset" id="reset">Start over</button>
+  <span class="say" id="say">Click the answers in the chat to go through the Key Objectives.</span>
+</div>
+<div class="viewport" id="vp"><div class="scaler" id="scaler"><div class="stage" id="stage">
+  <div class="app" id="app">
+    <div class="bar"><button class="menu" id="menu" aria-label="Chats">☰</button><b>Copilot</b><span>Plan</span><span>Setup</span><span class="sp">Educate Me · Islam</span></div>
+    <div class="secs"><span class="sec on">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body">
+      <nav class="rail" aria-label="Chats">
+        <div class="rh"><span>Chats</span><span><button class="new">+ New chat</button> <button class="fold" id="fold" title="Fold the chats" aria-label="Fold the chats">«</button></span></div>
+        <div class="ri on">Free chat — Educate Me<small>Islam · now · Free chat</small></div>
+        <div class="ri">Foundation workflow<small>Islam · 22 Oct · Guided</small></div>
+        <div class="ri">SWOT workflow<small>Noran · 18 Oct · 4 of 4 done</small></div>
+        <div class="rh" style="margin-top:16px"><span>Deliverables</span></div>
+        <div class="ri">Foundation v3<small>saved 22 Oct</small></div>
+      </nav>
+      <div class="strip"><button class="ib" id="unfold" title="Open the chats" aria-label="Open the chats">»</button><span class="ib">+</span></div>
+      <main class="main">
+        <button class="dtab" id="dtab">View draft <span class="prog" id="tabprog">0 of 5</span></button>
+        <div class="feed" id="feed"><div class="col" id="col"></div></div>
+        <div class="compose"><form class="box" id="form"><input id="inp" placeholder="Message the Copilot…" aria-label="Message"><button class="send" aria-label="Send">↑</button></form></div>
+      </main>
+      <aside class="draft" aria-label="Draft">
+        <div class="dh"><b>Key Objectives · draft</b><span><span class="prog" id="prog">0 of 5 agreed</span><button class="x" id="close" aria-label="Close the draft">×</button></span></div>
+        <div class="kos" id="kos"></div>
+        <div class="asm" id="asm"></div>
+        <div class="btns"><button class="btn">Save draft</button><button class="btn pri">Apply to plan</button></div>
+      </aside>
+    </div>
+    <div class="shade" id="shade"></div>
+  </div>
+</div></div></div>
+
+<script>
+(function(){
+  var app = document.getElementById("app"), col = document.getElementById("col"), feed = document.getElementById("feed");
+  var KO = [
+    { name:"Students reached (cumulative)", now:"≥ 1,500,000", unit:"students", base:"620,000", assume:"600,000", target:"≥ 1,500,000 by 2028", note:"That puts 1.5M at about 2.4× in three years — a stretch, but in line with growth since 2022." },
+    { name:"Educators reached (cumulative)", now:"≥ 150,000", unit:"educators", base:"58,000", assume:"60,000", target:"≥ 150,000 by 2028", note:"150,000 is 2.5× — the same pace as students, which keeps the two consistent." },
+    { name:"Beneficiary satisfaction", now:"≥ 90%", unit:"%", base:"86%", assume:"85%", target:"Average score ≥ 90%, each year", note:"Four points up is achievable if the survey method stays the same." },
+    { name:"Team engagement", now:"≥ 90%", unit:"%", base:"78%", assume:"80%", target:"Engagement score ≥ 90% by 2027", note:"Twelve points is a big move; your SWOT flags burnout and pay, so this one carries real work." },
+    { name:"Financial stability", now:"12 months positive cash flow", unit:"months", base:"7 months", assume:"6 months", target:"12 consecutive months of positive operating cash flow by end 2026", note:"I've read it as operating cash flow, month after month — not 12 months of reserves." }
+  ];
+  var S;
+  function reset(){
+    S = { i:-1, status: KO.map(function(){ return "todo"; }), base: KO.map(function(){ return ""; }), assumed: [] };
+    col.innerHTML = ""; app.classList.remove("hasdraft","sheet");
+    me("I want to refine the key objectives with proper targets");
+    ai("You want each Key Objective to have a clear target. The plan holds 7 today; Forefront suggests 3–5, and I'd keep these five: students, educators, satisfaction, engagement and cash flow. How should we go?",
+      ["One at a time","All together","First decide which stay"], function(o){ me(o); if (o !== "One at a time") ai("In this mockup, only <b>One at a time</b> is played through.", ["One at a time"], function(x){ me(x); next(); }); else next(); });
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function me(t){ add('<div class="who me">You</div><div class="msg me">' + esc(t) + '</div>'); }
+  function ai(html, opts, on){
+    var h = '<div class="who">Copilot</div><div class="msg ai">' + html + '</div>';
+    var wrap = document.createElement("div"); wrap.style.display = "contents"; wrap.innerHTML = h;
+    if (opts){ var o = document.createElement("div"); o.className = "opts";
+      opts.forEach(function(x){ var b = document.createElement("button"); b.className = "opt"; b.textContent = x;
+        b.onclick = function(){ o.classList.add("used"); on(x); }; o.appendChild(b); });
+      wrap.appendChild(o); }
+    col.appendChild(wrap); feed.scrollTop = feed.scrollHeight;
+  }
+  function add(h){ var d = document.createElement("div"); d.style.display = "contents"; d.innerHTML = h; col.appendChild(d); feed.scrollTop = feed.scrollHeight; }
+  function next(){
+    S.i++;
+    if (S.i >= KO.length){ draw(); ai("All five are agreed. The draft on the right is ready — <b>Save draft</b> keeps it under Deliverables, <b>Apply to plan</b> puts it on the plan."); return; }
+    var k = KO[S.i]; S.status[S.i] = "now"; draw();
+    ai((S.i ? "Agreed — it's in the draft. " : "Good. ") + (S.i + 1) + " of " + KO.length + ": <b>" + esc(k.name) + "</b>, currently " + esc(k.now) + ". Where does it stand today, and as of when?",
+      ["I'll give it","Assume for me","No baseline yet"], function(o){
+        if (o === "I'll give it"){ me(k.base + " as of end of 2024"); S.base[S.i] = "from " + k.base + ", end 2024"; propose(k, ""); }
+        else if (o === "Assume for me"){ me("Assume for me"); S.base[S.i] = "from " + k.assume + " (assumed)"; S.assumed.push(k.name + ": " + k.assume + " at end 2024 — a plausible figure for the plan's size; check it."); propose(k, '<span class="as">Assumed: ' + esc(k.assume) + ' at end 2024, marked in the draft.</span>'); }
+        else { me("No baseline yet"); S.base[S.i] = "no baseline yet"; propose(k, '<span class="as">Noted: no baseline yet.</span>'); }
+      });
+  }
+  function propose(k, extra){
+    ai(esc(k.note) + " Keep <b>" + esc(k.target) + "</b>?" + extra, ["Keep it","Raise it","Lower it"], function(o){
+      me(o); S.status[S.i] = "done"; if (o !== "Keep it") S.base[S.i] += " · " + o.toLowerCase().replace(" it","d") + " in the real chat";
+      app.classList.add("hasdraft"); next(); });
+  }
+  function draw(){
+    var n = S.status.filter(function(s){ return s === "done"; }).length;
+    document.getElementById("kos").innerHTML = KO.map(function(k, i){
+      var st = S.status[i];
+      return '<div class="ko ' + st + '"><span class="st">' + (st === "done" ? "✓" : st === "now" ? "→" : "·") + '</span><div>' +
+        esc(k.name.replace(" (cumulative)","")) + ": " + esc(st === "done" ? k.target : k.now) +
+        '<small>' + esc(st === "done" ? S.base[i] : st === "now" ? "under discussion" : "next") + '</small></div></div>';
+    }).join("");
+    document.getElementById("asm").innerHTML = "<b>Assumed</b> " + (S.assumed.length ? "<ul>" + S.assumed.map(function(a){ return "<li>" + esc(a) + "</li>"; }).join("") + "</ul>" : "none yet");
+    document.getElementById("prog").textContent = n + " of 5 agreed";
+    document.getElementById("tabprog").textContent = n + " of 5";
+  }
+  document.getElementById("form").onsubmit = function(e){ e.preventDefault(); var v = document.getElementById("inp").value.trim(); if (!v) return;
+    document.getElementById("inp").value = ""; me(v); ai("In this mockup the Copilot answers only through the buttons above."); };
+  document.getElementById("fold").onclick = function(){ app.classList.add("railfold"); };
+  document.getElementById("unfold").onclick = function(){ app.classList.remove("railfold"); };
+  document.getElementById("dtab").onclick = function(){ app.classList.add("sheet"); };
+  document.getElementById("close").onclick = function(){ app.classList.remove("sheet"); };
+  document.getElementById("menu").onclick = function(){ app.classList.add("railopen-phone"); };
+  document.getElementById("shade").onclick = function(){ app.classList.remove("sheet","railopen-phone"); };
+  document.getElementById("reset").onclick = reset;
+
+  /* Simulated width: the stage is drawn at the chosen width and scaled down
+     to fit the window, so the page never scrolls sideways. */
+  var W = 0;
+  function fit(){
+    var stage = document.getElementById("stage"), sc = document.getElementById("scaler"), vp = document.getElementById("vp");
+    document.body.classList.toggle("full", !W);
+    document.documentElement.style.setProperty("--apph", Math.max(480, window.innerHeight - document.querySelector(".ctl").offsetHeight) + "px");
+    if (!W){ stage.style.width = ""; sc.style.transform = ""; sc.style.width = ""; sc.style.height = ""; vp.style.height = ""; return; }
+    var room = document.documentElement.clientWidth - 32, s = Math.min(1, room / W);
+    stage.style.width = W + "px"; sc.style.transform = "scale(" + s + ")"; sc.style.width = W + "px";
+    vp.style.height = (stage.offsetHeight * s + 32) + "px";
+    var say = document.getElementById("say");
+    say.textContent = (s < 1 ? "Shown at " + Math.round(s * 100) + "% to fit your window. " : "") +
+      (W >= 1280 ? "Chats open, chat ≤ 740px, draft beside it." : W >= 1024 ? "A draft folds the chats to the strip; the chat keeps its 740px cap." : W >= 700 ? "The draft becomes a View draft tab that slides in over the chat." : "Phone: chats behind ☰, the draft opens full screen.");
+  }
+  document.querySelectorAll("#widths button").forEach(function(b){ b.onclick = function(){
+    document.querySelectorAll("#widths button").forEach(function(x){ x.setAttribute("aria-pressed", String(x === b)); });
+    W = Number(b.dataset.w); app.classList.remove("sheet","railopen-phone"); fit(); }; });
+  window.addEventListener("resize", fit);
+  reset(); fit();
+})();
+</script>
+</body>
+</html>

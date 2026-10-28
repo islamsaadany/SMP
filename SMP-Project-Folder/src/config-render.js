@@ -120,32 +120,15 @@ function sitsInWord(){
   });
 }
 
-/* ── Terminology ─────────────────────────────────────────────────────── */
-function renderLabels(){
-  var editable = grant("c_labels") === "edit";
-
-  var rows = LABELS.entries.map(function(e, i){
-    var d = labelDefault(e.key) || { one:e.internal, many:e.internal };
-    var one = labelWord(e.key, "group"), many = labelWord(e.key, "bu");
-    var box = function(which, val, what){
-      return editable
-        ? '<input class="lbl" data-lbl="' + i + '" data-scope="' + which + '" value="' + esc(val) +
-          '" aria-label="' + esc(d.one) + ': ' + what + '" />'
-        : '<span>' + esc(val) + '</span>';
-    };
-    var differs = one !== d.one || many !== d.many;
-    var reset = editable && differs
-      ? '<button type="button" class="linkbu lblreset" data-lblreset="' + i + '">Reset</button>' : '';
-    return '<tr><td class="lbldesc">' + esc(e.note || "") + '</td>' +
-      '<td class="lbldef">' + esc(d.one) + '<br>' + esc(d.many) + '</td>' +
-      '<td>' + box("group", one, "the word for one") + '</td>' +
-      '<td><div class="lblmany">' + box("bu", many, "the word for many") + reset + '</div></td></tr>';
-  }).join("");
-
-  /* Two things sharing one word would render two different objects under one
-     name on the same screen. Caught here, not in a client demo. Asked of
-     each form separately: "Project" as one thing's single word and another's
-     plural is not a collision anybody reads. */
+/* ── TWO THINGS SHARING ONE WORD (§392 → §621) ──────────────────────────
+   Two different objects rendered under one name on the same screen. It was
+   Terminology's warning, and it went to the shape screen with the words
+   (§621): `labelClashes()` answers, client-setup.js draws it while there is
+   one. Asked of each form separately: "Project" as one thing's single word
+   and another's plural is not a collision anybody reads. In Setup the word
+   asked is the stored one — a layer's own name is not consulted there
+   (layerOverride), which is what the page always compared. */
+function labelClashes(){
   var seen = {}, clashes = [];
   LABELS.entries.forEach(function(e){
     [["group","one"],["bu","many"]].forEach(function(s){
@@ -154,23 +137,7 @@ function renderLabels(){
       seen[s[1] + "|" + v] = true;
     });
   });
-
-  var warn = clashes.length
-    ? '<div class="note bad-note"><b>Two things share a word.</b> <span class="mono">' + esc(clashes[0]) +
-      '</span> is used for two different things. Change one of them &mdash; ' +
-      'two different objects under one word on the same screen cannot be told apart by the reader.</div>'
-    /* The old wording said saving is blocked, and nothing ever blocked it
-       (§104.8's family: a sentence nothing compares with the code). It now
-       says what is true. */
-    : '';
-
-  return section("", "Terminology", null,
-      '<div class="cfg"><table class="lbltable"><thead><tr>' +
-      '<th style="width:38%">What it is</th>' +
-      '<th style="width:18%">Default</th>' +
-      '<th style="width:20%">Your word &middot; one</th>' +
-      '<th style="width:24%">Your word &middot; many</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn);
+  return clashes;
 }
 
 /* MONOCHROME, AND INSIDE THE BOX (Islam, 2026-08-22: "make the icons of view
@@ -281,6 +248,12 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      the whole plan, or their part. Pressing the eye or the pen turns it off
      (`data-dirclear`), so the three stay one choice to the person pressing. */
   var half = opt.half || null, halfOn = !!(half && half.on && v !== "none");
+  /* §621: what the asking box needs to say what this press would do — who
+     the row is, what the column reaches, what the cell holds now. */
+  var askAttr = opt.ask
+    ? ' data-askwho="' + esc(opt.ask.who) + '" data-askwhat="' + esc(opt.ask.what) +
+      '" data-askfrom="' + (opt.mixed ? "mixed" : halfOn ? "part" : esc(v)) + '"'
+    : '';
   var opts = states.map(function(o){
     var on = o === v && !(halfOn && o === "view");
     /* `st-view`, NOT `view` (§65). A class name is one global namespace, and
@@ -295,7 +268,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
       (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
       (on ? "Turn off — leaves no access" : opt.mixed ? WORD[o] + " — all of them" : WORD[o]) +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '"' +
-      (halfOn ? ' data-dirclear="1"' : '') + '>' +
+      (halfOn ? ' data-dirclear="1"' : '') + askAttr + '>' +
       ICON[o] + '</button>';
   }).join("");
   /* Placed straight after the FIRST button, which is the eye (`states` always
@@ -305,7 +278,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
       'data-dirscope="' + (halfOn ? "full" : "part") + '" title="' +
       (halfOn ? "Show them the full plan again" : "May read their part only — a direction owner sees their own directions and the Foundation") +
       '" aria-label="' + (halfOn ? "turn off their part only" : "their part only") +
-      '" aria-pressed="' + halfOn + '">' + ICON_HALFEYE + '</button>';
+      '" aria-pressed="' + halfOn + '"' + askAttr + '>' + ICON_HALFEYE + '</button>';
   });
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
@@ -344,10 +317,11 @@ function accessRowName(r){
   var w = String(labelWord(r.word, "group") || "").trim();
   return w ? w + r.suffix : r.name;
 }
-function matrixRoleCell(r){
-  /* §516: a merged row counts everybody holding ANY of the roles under it,
-     once each — a person who is both a BU owner and a function head is one
-     Owner, not two. */
+/* §516: a merged row counts everybody holding ANY of the roles under it,
+   once each — a person who is both a BU owner and a function head is one
+   Owner, not two. §621: lifted out of the cell so the asking box names the
+   same number the row does. */
+function matrixRoleHeads(r){
   var of = r.of || [r.key];
   var n = r.floor
     ? PEOPLE.filter(function(p){
@@ -355,14 +329,39 @@ function matrixRoleCell(r){
     : PEOPLE.filter(function(p){
         var ks = personRoleKeys(p);
         return of.some(function(k){ return ks.indexOf(k) > -1; }); }).length;
+  return n ? plural(n, "person").replace("persons", "people") : "nobody yet";
+}
+function matrixRoleCell(r){
   /* Two lines, never more. The role's description is a sentence, and a
      sentence in a 19% column wraps to eight lines and makes every row of a
      49-cell table a hundred pixels tall — the exact fault this page was
      rebuilt to remove. It is on hover instead. */
   return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(accessRowName(r)) + '</b>' +
-    '<span class="why">' +
-    (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
-    '</span></td>';
+    '<span class="why">' + matrixRoleHeads(r) + '</span></td>';
+}
+/* ── WHAT A PRESS WOULD DO, IN WORDS (§621) ────────────────────────────
+   Islam: *"giving more or less needs the confirmation … with the impact of
+   the change"*. A cell carries who it is for (`who`), what it reaches
+   (`what`) and what it holds now; the press carries what it would hold. The
+   sentence is built from those four and nothing else, so it says exactly
+   what the write will do. Escaped here: the asking box prints it as HTML. */
+var ACC_WHAT = { top: "the group's and the divisions' own pages", plan: "their own plan",
+  rep: "their own reporting", other: "other units' and functions' pages",
+  cycle: "the reporting cycle pages", setup: "the Setup pages" };
+var ACC_RANK = { none: 0, view: 1, fill: 2, edit: 3 };
+var ACC_CAN = { view: "read", fill: "fill what’s empty in", edit: "read and change" };
+function accessImpact(from, to, what){
+  var w = esc(what), b = function(s){ return '<b>' + esc(s) + '</b>'; };
+  if (to === "none") return "Will no longer see " + w + ".";
+  if (!(from in ACC_RANK) || from === "none")
+    return "Will be able to " + b(ACC_CAN[to] || to) + " " + w + ".";
+  if (ACC_RANK[to] > ACC_RANK[from])
+    return "Will be able to " + b(ACC_CAN[to]) + " " + w + ", not only " +
+      (from === "view" ? "read it" : "fill what’s empty") + ".";
+  if (to === "view")
+    return "Will only be able to " + b("read") + " " + w + ", and no longer " +
+      (from === "edit" ? "change it" : "fill what’s empty") + ".";
+  return "Will only be able to " + b("fill what’s empty") + " in " + w + ", and no longer change the rest.";
 }
 
 /* ── A MODULE'S OWN ACCESS TABLE (§359.5, spec 056 §4.4, spec 046 §4.4) ──
@@ -412,7 +411,8 @@ function renderModuleAccess(){
         return stateCell(r.key, a.key, editable, null, {
           value: moduleGrantFor(r.key, a),
           states: (a.states || ["view"]).filter(function(x){ return x !== "none"; }),
-          attr: "data-mac", shipped: a.shipped || "none" });
+          attr: "data-mac", shipped: a.shipped || "none",
+          ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: a.label || a.key } });
       }).join("") + '</tr>';
   }).join("");
   return head + '<div class="cfg acgrid macgrid" data-macmod="' + esc(landingModule()) + '"><table><thead>' + th +
@@ -628,7 +628,8 @@ function renderAccess(){
         var m = accessMerged(r, c);
         if (!m.pairs.length) return stateCell(r.of[0], c.areas[0], editable, m.why || "Cannot come up for this role.");
         var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
-        var opt = { attr: "data-acm", target: target, value: m.value };
+        var opt = { attr: "data-acm", target: target, value: m.value,
+                    ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: ACC_WHAT[c.key] || c.label } };
         if (c.key === "plan") opt.states = ["view", "fill", "edit"];
         if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
         if (m.mixed) {
@@ -644,7 +645,8 @@ function renderAccess(){
       (COPA ? (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])
         ? stateCell(r.of[0], COPA.key, editable, null, {
             value: moduleGrantFor(r.of[0], COPA), states: ["view", "edit"],
-            attr: "data-mac", shipped: COPA.shipped || "none" })
+            attr: "data-mac", shipped: COPA.shipped || "none",
+            ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: COPA.label || COPA.key } })
         : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
   }).join("");
 
@@ -756,8 +758,12 @@ function renderFactorEditor(){
    legend, the colours and the status words can never drift apart. ── */
 function renderBands(){
   var can = grant("c_bands") === "edit";
-  var editable = can && EDITING.bands;
-  var b = BANDS.bands;
+  /* §621: an edit waiting for Apply keeps the table open, whatever cleared
+     the mode on the way past (leaveModes on a navigation the leave question
+     then held back). */
+  var editable = can && (EDITING.bands || !!BANDS_DRAFT);
+  var b = BANDS_DRAFT || BANDS.bands;
+  var waiting = bandsWaiting();
 
   /* THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL (§168). A band's `key`
      is read as a CSS token (`var(--good)`, `.pill.good`) AND by `needsNote()`,
@@ -788,7 +794,11 @@ function renderBands(){
         ? '<input class="bfloor" data-b="' + i + '" value="' + x.floor + '" aria-label="Floor for ' + esc(x.label) + '" />'
         : '<span class="mono">' + x.floor + '</span>') + '</td>' +
       '<td class="cc"><span class="mono">' + x.floor + '% ' + top + '</span></td>' +
-      '<td><span class="pill ' + x.key + '">' + esc(x.label) + '</span></td>' +
+      /* §621: HOW A FIGURE APPEARS TODAY, until Apply — the stored level in
+         this seat while the levels are the same ones. Once one is added or
+         removed the seats no longer pair, and the pill shows the new table. */
+      (function(a){ return '<td><span class="pill ' + a.key + '">' + esc(a.label) + '</span></td>'; })(
+        BANDS_DRAFT && BANDS_DRAFT.length === BANDS.bands.length ? BANDS.bands[i] : x) +
       (editable
         ? '<td class="cc">' + (b.length > 2
             ? '<button class="xbtn" data-bdel="' + i + '" type="button" title="Remove this level" ' +
@@ -801,14 +811,15 @@ function renderBands(){
   }).join("");
 
   /* Floors must descend, or a figure falls into two bands at once. */
-  var ok = true;
-  for (var i = 1; i < b.length; i++) if (b[i].floor >= b[i-1].floor) ok = false;
+  var ok = bandsOrdered(b);
 
   return section("", "Scoring bands",
       null,
       '<div class="cfg-bar plain"><span class="cfg-lab">' + b.length + ' bands</span>' +
-        (can
-          ? '<button class="editbtn" data-edit="bands">' + (EDITING.bands ? "Done" : "Edit") + '</button>'
+        /* §621: while something waits, Apply and Discard below take Done's
+           place — two ways out of one edit would be two answers to it. */
+        (can && !waiting.length
+          ? '<button class="editbtn" data-edit="bands">' + (editable ? "Done" : "Edit") + '</button>'
           : '') + '</div>' +
       '<div class="cfg"><table class="bandtbl"><thead><tr><th style="width:34%">Band</th>' +
         '<th class="cc" style="width:16%">Floor</th><th class="cc" style="width:26%">Range</th>' +
@@ -819,8 +830,13 @@ function renderBands(){
         ? '<div class="cfg-bar plain"><button class="addbtn" data-badd="1" type="button">' +
           '+ Add a level</button></div>'
         : '') +
-      (ok ? '' : '<div class="note bad-note"><b>Floors must descend.</b> Two bands overlap, so a figure would fall into both. Saving is blocked until the order is fixed.</div>') +
-      '<div class="note bad-note"><b>Changing a threshold rewrites history.</b> A quarter reported as on track becomes needs attention with no data having changed. Bands are per tenant and change rarely; the warning is what makes a change visible rather than silent.</div>');
+      (can ? applyRow("bands", waiting, BANDS_UNDO && BANDS_UNDO.until,
+                      ok ? null : "Floors must descend before this can be applied") : '') +
+      /* A status, kept: it says why Apply will not take the table (1b-ii). */
+      (ok ? '' : '<div class="note bad-note"><b>Floors must descend.</b> Two bands overlap, so a figure would fall into both. Apply is held until the order is fixed.</div>'));
+  /* §621: "Changing a threshold rewrites history" is not on the page any more.
+     It was true only of some edits and said on every visit; the asking box
+     says it at Apply, with the number of measures it moves (bandShift). */
 }
 
 /* ── Business units ─────────────────────────────────────────────────
@@ -1353,6 +1369,65 @@ function unitFormatSelect(k, u){
       return '<option value="' + v + '"' + (f === v ? " selected" : "") + '>' +
         esc(unitPlanWord(v)) + '</option>'; }).join("") + '</select>';
 }
+/* ══ ONE CELL, OPENED WHERE IT IS READ — THE ORGANISATION TABLES (§630) ══
+   Islam: *"why to edit row by row why the editing doesn't happen on the cell
+   level with a double click that opens the editable cells for editing?"* —
+   then, of the mockup that drew it, *"go ahead with the mockup, build it"*.
+
+   THE CLIENT REGISTER'S RULES, NOT A SECOND SET (§372): a double-click opens
+   the cell, leaving it or Enter keeps it, Escape puts it back, one cell at a
+   time (`OCELL`). And the CONTROL IS THE DIALOG'S: an open cell draws the
+   very field Edit details draws — `data-uname`, `data-ucomp`, the picker —
+   so the handlers that already write those fields write these, and a cell
+   cannot save differently from the form beside it (§53.5, §116).
+
+   A PERSON CELL IS OPEN WHILE ITS PICKER IS. The picker's own state
+   (`PICKING`) is what closes it — choosing, Unassign, Cancel — so the cell
+   needs no second answer to "is it still open". Its list floats under the
+   cell (`.ocellpop`, placed by the shell off the cell's own rect), because
+   these tables sit in a box that scrolls sideways and would clip it. */
+function ocellIs(t, key, f){
+  return !!(OCELL && OCELL.t === t && OCELL.key === key && OCELL.f === f);
+}
+function ocell(t, key, f, may, inner, open, cls, pick){
+  var c = cls || "";
+  if (may && ocellIs(t, key, f) && (!pick || PICKING === pick))
+    return '<td class="' + (c ? c + " " : "") + 'ocellopen">' + open() + '</td>';
+  return '<td' + (c ? ' class="' + c + '"' : '') +
+    (may ? ' data-ocell="' + esc(t + "|" + key + "|" + f) + '"' +
+           (pick ? ' data-ocellpick="' + esc(pick) + '"' : '') : '') +
+    '>' + inner + '</td>';
+}
+function ocellBox(attr, key, value, o){
+  o = o || {};
+  return '<input class="fld' + (o.mono ? ' mono' : '') + '" value="' + esc(value || "") + '" ' +
+    attr + '="' + esc(key) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') +
+    (o.label ? ' aria-label="' + esc(o.label) + '"' : '') + '>';
+}
+/* The closed button stands where the name was, ringed, and pressing it is
+   Cancel — the list under it is the dialog's own picker, unchanged. */
+function ocellPerson(where, role, current){
+  var held = personName(current);
+  return '<button type="button" class="pickbtn ocellbtn' + (held ? '' : ' empty') +
+      '" data-pick-cancel="1">' + (held ? esc(held) : 'unassigned') + '</button>' +
+    '<div class="ocellpop">' + assignPicker(where, role, current, true) + '</div>';
+}
+/* Which company a unit is in — the dialog's control and the cell's, one
+   builder (§53.5). A retired company is nowhere a unit can be MOVED to, but
+   a unit already in one still shows it — hiding it would silently read as
+   "its own company" (§49.3). */
+function unitCompanySelect(k, u){
+  return '<select class="fld" data-ucomp="' + esc(k) + '" aria-label="Which ' +
+      esc(L1("division").toLowerCase()) + ' ' + esc(u.name) + ' is in">' +
+    COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
+      .map(function(ck){
+        return '<option value="' + esc(ck) + '"' + (u.company === ck ? " selected" : "") +
+          '>' + esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
+      }).join("") +
+    '<option value=""' + (u.company ? "" : " selected") + '>— its own company —</option>' +
+  '</select>';
+}
+
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -1365,30 +1440,42 @@ function renderUnits(){
     var u = UNITS[k];
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
+    /* §630: every cell below that the dialog can change opens on a
+       double-click; none does while the rows are being arranged, for the
+       menu's own reason (§261) — one act at a time. */
+    var may = mayEdit && !arranging;
     return '<tr data-oi="' + i + '" data-tkrow="' + (u.active ? "active" : "retired") + '"' +
       (u.active ? '' : ' class="retired"') + '>' +
       setArrangeIdx("units", i, u.name) +
-      '<td><b>' + esc(u.name) + '</b>' +
-        '<span class="why mono">key ' + esc(k) + '</span></td>' +
+      ocell("units", k, "name", may,
+        '<b>' + esc(u.name) + '</b>' + '<span class="why mono">key ' + esc(k) + '</span>',
+        function(){ return ocellBox("data-uname", k, u.name, { label: "Name" }); }) +
       /* Short name for the navigation only — everywhere else keeps the full
          one. Empty means "use the full name", so nothing has to be filled in. */
-      '<td>' + (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
-                          : '<span class="why" style="margin:0">' + esc(u.name) + '</span>') + '</td>' +
-      '<td class="cc"><span class="mono">' + esc(u.codePrefix) + '</span></td>' +
+      ocell("units", k, "nav", may,
+        (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
+                   : '<span class="why" style="margin:0">' + esc(u.name) + '</span>'),
+        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "Shown in the nav" }); }) +
+      ocell("units", k, "code", may, '<span class="mono">' + esc(u.codePrefix) + '</span>',
+        function(){ return ocellBox("data-upx", k, u.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") +
       /* §405: WHAT THE UNIT PLANS IN, AND HOW MANY OF THEM — the column that
          counted pillars now says which way the unit plans (his *"Plans in"*),
-         with the count of that way's rows beside it. Chosen in the dialog. */
-      '<td class="cc">' + unitPlansInCell(k, u) + '</td>' +
+         with the count of that way's rows beside it. */
+      ocell("units", k, "plans", may, unitPlansInCell(k, u),
+        function(){ return unitFormatSelect(k, u); }, "cc plansin") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
       /* A unit belongs to a company or is its own — never neither. "Its own"
          is an explicit choice rather than an empty cell, because an empty cell
          reads as somebody having forgotten and standing alone is a decision. */
-      '<td>' + (u.company && COMPANIES[u.company]
+      ocell("units", k, "division", may, (u.company && COMPANIES[u.company]
         ? '<span class="val">' + esc(COMPANIES[u.company].name) + '</span>'
-        : '<span class="why" style="margin:0">its own company</span>') + '</td>' +
-      '<td class="cc">' + assignPicker(k, "owner", roles.head, false) + '</td>' +
-      '<td class="cc">' + assignPicker(k, "custodian", roles.custodian, false) + '</td>' +
+        : '<span class="why" style="margin:0">its own company</span>'),
+        function(){ return unitCompanySelect(k, u); }) +
+      ocell("units", k, "head", may, assignPicker(k, "owner", roles.head, false),
+        function(){ return ocellPerson(k, "owner", roles.head); }, "cc", k + "|owner") +
+      ocell("units", k, "custodian", may, assignPicker(k, "custodian", roles.custodian, false),
+        function(){ return ocellPerson(k, "custodian", roles.custodian); }, "cc", k + "|custodian") +
       /* STATUS HOLDS A STATUS (§93.14's rule, reaching the page it was written
          about). This column was headed Status and showed four controls. */
       '<td class="cc"><span class="pill ' + (u.active ? "good" : "none") + '">' +
@@ -1422,9 +1509,13 @@ function renderUnits(){
       '<table class="unitcfg" data-tktable="units"><thead><tr>' +
         '<th class="idx" style="width:' + (arranging ? 54 : 38) + 'px">#</th>' +
         '<th style="width:18%">Unit</th>' +
-        '<th style="width:14%">Shown in the nav</th>' +
+        /* §631: Plans in holds "Objectives & actions" and a count, and spilled
+           30px into its neighbour at 1440 (46px at 1280) while Key Objectives'
+           heading ran into Weight — measured. The short name gives up the
+           room: it holds a short name. */
+        '<th style="width:11%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:11%">Plans in</th><th class="cc" style="width:9%">' + L("keyobj") + '</th>' +
+        '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
@@ -1526,18 +1617,7 @@ var ROWDLG_SPECS = {
         (unitFormat(u) === "pillars"
           ? pdField(L("pillar","bu") + " show as", pillarSplitSelect(k, u)) : "") +
         pdSect("Where it sits, and who runs it") +
-        pdField(L1("division"),
-          '<select class="fld" data-ucomp="' + esc(k) + '">' +
-            /* A retired company is nowhere a unit can be MOVED to, but a unit
-               already in one still shows it — hiding it would silently read as
-               "its own company" (§49.3). */
-            COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
-              .map(function(ck){
-                return '<option value="' + esc(ck) + '"' + (u.company === ck ? " selected" : "") +
-                  '>' + esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
-              }).join("") +
-            '<option value=""' + (u.company ? "" : " selected") + '>— its own company —</option>' +
-          '</select>') +
+        pdField(L1("division"), unitCompanySelect(k, u)) +
         pdField("BU head", assignPicker(k, "owner", roles.head, true)) +
         pdField("Strategy custodian", assignPicker(k, "custodian", roles.custodian, true)) +
         pdSect("The unit’s mark") +
@@ -1599,11 +1679,7 @@ var ROWDLG_SPECS = {
       return [plural(unitsOfCompany(k).length, L1("unitword"), L("unitword")), esc("key " + k)].join(" · ");
     },
     body:  function(c, k){
-      var flag = function(field, val){
-        return '<select class="fld" data-coflag="' + esc(k + "|" + field) + '">' +
-          '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
-          '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
-      };
+      var flag = function(field, val){ return coFlagSelect(k, field, val); };
       return pdSect("What it is") +
         pdField("Name", '<input class="fld tk-firstfield" value="' + esc(c.name) +
                         '" data-coname="' + esc(k) + '">') +
@@ -1759,7 +1835,9 @@ function brandingBody(){
   var set = !!(b.accent || b.bar || b.palette || b.font);
 
   function swatch(key, label, value, note){
-    var shown = value || "";
+    /* §621: a picked colour waits in BRAND_PEND until Apply, so the boxes
+       show it and nothing else on the page does. */
+    var shown = (key in BRAND_PEND ? BRAND_PEND[key] : value) || "";
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
       '<td class="cc">' + (mayEdit
         ? '<span class="brandpick">' +
@@ -1823,31 +1901,49 @@ function brandingBody(){
      §313.36) and worn by the decks through groupLogo(). Deleted rather than
      hidden (§24); a stored GROUP.logo is left where it is and simply no
      longer read on a served page. */
+  /* §621: THE TWO NOTES UNDER THIS PAGE ARE GONE (Islam, of the Setup
+     pages: *"as we go we need to clean the setup pages from unnecessary
+     paragraphs"*). "Typeface" was a note to ourselves (§38.7) with nothing
+     on it to set, so its section went with it; "Branding is the tenant's"
+     carried one fact the page does not otherwise state, and it is the
+     heading's hover now (1b-ii). */
   return "" +
     section("", "The tenant’s colours",
       null,
       '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +
       '<th class="cc">Colour</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (mayEdit ? applyRow("brand", brandWaiting(), BRAND_UNDO && BRAND_UNDO.until) : '') +
       (mayEdit && set ? '<div style="margin-top:12px"><button class="linkbu" data-brandreset="1">' +
-                        'Reset to the shipped palette</button></div>' : '')) +
+                        'Reset to the shipped palette</button></div>' : ''),
+      "Everyone in this client sees these colours once they are applied. Light and dark stay each person’s own.") +
 
     (derived ? section("", "What follows from them", null, derived) : "") +
 
     (checkRows ? section("", "Is it readable?",
       null,
-      checkRows) : "") +
-
-    section("", "Typeface", null,
-      '<div class="note"><b>The tenant’s face is set with the switch in the top bar for now</b> ' +
-      '(§38.7). Four are embedded so they can be compared in the real product; once one is ' +
-      'settled it moves here and the rest leave the file.</div>') +
-
-    section("", null, null,
-      '<div class="note"><b>Branding is the tenant’s, not the screen’s.</b> It is saved with ' +
-      'everything else and is what everyone here sees on opening. Light and dark stay personal — ' +
-      'that is about the room somebody is sitting in, not about the brand — and anyone who ' +
-      'prefers a different palette on their own screen may still pick one, without changing ' +
-      'what anybody else sees.</div>');
+      checkRows) : "");
+}
+/* ── THE ROW UNDER A COLOUR AREA (§621) ─────────────────────────────────
+   One drawing for every area in APPLY_AREAS. Something waiting: Apply,
+   Discard and an amber line naming what waits. Just applied: Apply greyed,
+   a green Applied and Undo, for UNDO_MS. Otherwise nothing at all — a row
+   with nothing to say is furniture (1b-ii). */
+function applyRow(kind, waiting, undoUntil, heldWhy){
+  var n = waiting.length;
+  /* `heldWhy`: the area cannot take what waits (bands out of order). Apply is
+     drawn greyed with the reason on it, beside the note that says it, rather
+     than pressed and silently refused (§42). */
+  if (n) return '<div class="applyrow" data-applyrow="' + kind + '">' +
+    '<button type="button" class="applybtn" data-applygo="' + kind + '"' +
+      (heldWhy ? ' disabled title="' + esc(heldWhy) + '"' : '') + '>Apply</button>' +
+    '<button type="button" class="applyno" data-applydrop="' + kind + '">Discard</button>' +
+    '<span class="applywait">' + n + (n === 1 ? ' change' : ' changes') + ' not applied yet: ' +
+      esc(waiting.join(", ")) + '</span></div>';
+  if (undoUntil && undoUntil > Date.now()) return '<div class="applyrow" data-applyrow="' + kind + '">' +
+    '<button type="button" class="applybtn" disabled>Apply</button>' +
+    '<span class="applydone">Applied</span>' +
+    '<button type="button" class="applyno" data-applyundo="' + kind + '">Undo</button></div>';
+  return '';
 }
 
 /* ── The register (§35) ─────────────────────────────────────────────
@@ -2052,6 +2148,16 @@ var PEOPLE_COLS = [
      and it earns its place only when somebody is looking for the people who
      belong to a company and no unit. */
   { k:"company",  label:"Company", off:true },
+  /* ── WHO THEY ANSWER TO (§655) ──────────────────────────────────
+     Islam: "add a column to identify the manager of the person". "Reports
+     to", and not "Manager": the Org Directory already says it in those words,
+     Portfolio reads "Project Manager" as the Lead (spec 060 §5.1a), and
+     "Senior Manager" is a job title on this very register — a column headed
+     Manager would collide with both. It holds a register KEY and never a
+     typed name (§48), so a rename reaches it, and it GRANTS NOTHING (§56):
+     who somebody answers to is a fact about them, not a right. Shown by
+     default, because it was asked for as a column of the register. */
+  { k:"reportsto", label:"Reports to" },
   /* TWO COLUMNS, NOT ONE (Islam, 2026-08-24: "the contact in the People
      register table needs to split the email from the contact number").
      §54 put them together as "one answer to one question" — how you reach
@@ -2131,6 +2237,11 @@ function dupeMark(dupes){
   return out;
 }
 
+/* §629: whether the register shows Forefront's consultants — kept on this
+   device, the way the register's columns are (§47.1). Off unless asked. */
+var REGFF_KEY = "smp.register.forefront";
+function regShowsFf(){ try { return localStorage.getItem(REGFF_KEY) === "1"; } catch (e) { return false; } }
+function setRegShowsFf(on){ try { if (on) localStorage.setItem(REGFF_KEY, "1"); else localStorage.removeItem(REGFF_KEY); } catch (e) {} }
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
   /* ── A ROW IS EDITED ON THE ROW (§79.2, spec 012 §2.1) ─────────────
@@ -2639,6 +2750,22 @@ function renderPeople(){
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
         '" placeholder="Job title">', true);
+    /* ── REPORTS TO (§655): A PICK FROM THE REGISTER, NEVER A TYPED NAME ──
+       The list is reportsToChoices(): everybody active, minus this person and
+       minus anybody who already answers to them, however far down — so a
+       loop cannot be chosen and no refusal has to be drawn. Somebody they
+       already point at stays in the list whatever their status, or opening
+       the dialog would silently read a retired manager as nobody (§54.4).
+       WIDE, like Job title above it: a fourth narrow field would put the
+       three places on a row of three and a row of one, §122's empty cell. */
+    var mgr = reportsToOf(p);
+    F("Reports to", '<select class="fld" data-preports="' + esc(p.key) + '">' +
+        '<option value="">&mdash; nobody &mdash;</option>' +
+        reportsToChoices(p).map(function(m){
+          return '<option value="' + esc(m.key) + '"' +
+            (mgr && mgr.key === m.key ? " selected" : "") + '>' +
+            esc(knownName(m, DNAMES)) + (personActive(m) ? "" : " (retired)") + '</option>';
+        }).join("") + '</select>', true);
     /* WIDE, SO THE THREE PLACES SIT TOGETHER (§135.6). Adding Company left the
        second block at four fields in a three-column grid — a row of three and
        a row of one, which is the empty cell §122 spent a redesign removing.
@@ -3248,7 +3375,15 @@ function renderPeople(){
       ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
   }
 
-  var rows = PEOPLE.map(function(p, i){
+  /* §629: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
+     option B: the register lists the client's people; *Show Forefront team*
+     brings the consultants back). Only the MINTED rows hide — a consultant
+     the platform wrote a row for so they can sign in and hold a seat
+     (§362.2). An ADOPTED row is the client's own person who is also on the
+     account team, so it stays. Nothing about anybody's access moves: the
+     rows are there underneath, and every count above the table still reads
+     them all. */
+  var rows = PEOPLE.filter(function(p){ return regShowsFf() || !SMPRules.isMintedRow(p); }).map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
     /* THE FILTERS READ ATTRIBUTES, NOT THE RENDERED TEXT. "Active" is a fact
@@ -3332,6 +3467,17 @@ function renderPeople(){
           return ck
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
+        })()) : '') +
+      /* ── REPORTS TO (§655): THE REGISTER'S NAME, READ AT DRAW TIME ────
+         The row holds a key; what it prints is whatever the register calls
+         that person today (§48, §130.9). A manager who has retired is still
+         named — the fact did not stop being true — and the hover says so,
+         the way every other mark in this table speaks (§116.4). */
+      (showCol("reportsto") ? pcell(p, "Reports to", (function(){
+          var m = reportsToOf(p);
+          if (!m) return '<span class="why" style="margin:0">&mdash;</span>';
+          return '<span class="val" title="' + esc(m.name) +
+            (personActive(m) ? '' : ' \u00b7 retired') + '">' + esc(knownName(m, DNAMES)) + '</span>';
         })()) : '') +
       /* ── AN ADDRESS IS TAKEN WHOLE (§378) ──────────────────────────
          Islam: "can you make a right click on the email to highlight the
@@ -3803,20 +3949,19 @@ function renderPeople(){
      lists at once and the sentence must not pretend otherwise — they are
      counted with Forefront and the hover says they are the client's own
      person too (§3a.1). */
-  var ffRows = PEOPLE.filter(function(p){ return SMPRules.isForefrontRow(p); });
-  var ffAdopted = ffRows.filter(function(p){ return !SMPRules.isMintedRow(p); });
-  var splitChip = !ffRows.length ? "" :
-    '<span class="psplit" title="' +
-      esc("Forefront team is where a consultant is added, given a seat or removed \u2014 " +
-          "this table reads from it, so everybody who can touch this client is on one screen." +
-          (ffAdopted.length
-            ? "\n\n" + plural(ffAdopted.length, "of them is", "of them are") +
-              " also the client\u2019s own person, matched by their address, and stay editable here: " +
-              ffAdopted.map(function(p){ return p.name; }).join(", ") + "."
-            : "")) + '">' +
-      plural(PEOPLE.length - ffRows.length, "of the client\u2019s own people",
-             "of the client\u2019s own people") +
-      ' \u00b7 ' + ffRows.length + ' from Forefront</span>';
+  /* §629: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
+     people · 2 from Forefront" (§3a.1); with the consultants off the table
+     by default, the one thing left to say about them is how many are behind
+     the switch, and the switch says it. Drawn only where there is somebody
+     to show (§61). */
+  var ffMinted = PEOPLE.filter(function(p){ return SMPRules.isMintedRow(p); }).length;
+  var splitChip = !ffMinted ? "" :
+    '<button type="button" class="regff' + (regShowsFf() ? " on" : "") + '" data-regff="1" aria-pressed="' +
+      (regShowsFf() ? "true" : "false") + '" title="' +
+      esc("Forefront's consultants on this client. They are here so they can sign in and hold their seat; " +
+          "they are added, given a seat or removed on Forefront team.") + '">' +
+      '<span class="box" aria-hidden="true">' + (regShowsFf() ? "\u2713" : "") + '</span>' +
+      'Show Forefront team (' + ffMinted + ')</button>';
 
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
@@ -3832,7 +3977,7 @@ function renderPeople(){
      not a removal: with nothing between the row and the table, `section("")`
      is what puts the table there, and the header's own 14px bottom margin is
      the whole of the gap. */
-  return cfgHead("People register",
+  return cfgHead("Client register",
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
@@ -3878,6 +4023,8 @@ function renderPeople(){
         (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
         (showCol("bu")       ? th(esc(sitsInWord()), "wcol") : '') +
         (showCol("company")  ? th("Company")             : '') +
+        /* A select when the cell is open, so it takes §93.10's floor too. */
+        (showCol("reportsto") ? th("Reports to", "wcol") : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
@@ -4550,6 +4697,13 @@ function coKebab(ck, co, on, mayEdit){
     'data-comenu="' + esc(ck) + '"', CLEARING === "co|" + ck);
 }
 
+/* What a division's CEO sees, as a control — the dialog's and the cell's
+   (§630), one builder. */
+function coFlagSelect(ck, field, val){
+  return '<select class="fld" data-coflag="' + esc(ck + "|" + field) + '">' +
+    '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
+    '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
+}
 function renderCompanies(){
   /* §85's pen per row became a dialog per row (§261): what a company is called
      and what its CEO sees are three fields, and they are opened from the row's
@@ -4564,7 +4718,9 @@ function renderCompanies(){
          this is the table it was written for. It still sorts and still carries
          the retired filter, because both are one attribute each and a client
          with fifteen companies gets them for free. */
-      tkBar("companies", { placeholder:"Search the companies\u2026" }) +
+      /* §630: the page's own word, which the box had kept from before §391
+         called these divisions. */
+      tkBar("companies", { placeholder:"Search the " + L("division").toLowerCase() + "\u2026" }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
         (function(){ var h = tkHead("companies");
           return h("#", "idx", false) + h(L1("division")) + h("Units", "cc") +
@@ -4580,11 +4736,15 @@ function renderCompanies(){
         return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
           (on ? '' : ' class="retired"') +
           '><td class="idx">' + (i+1) + '</td>' +
-          '<td><b>' + esc(co.name) + '</b>' +
-            '<span class="why mono">key ' + esc(ck) + '</span></td>' +
+          /* §630: the three things the dialog changes open where they are. */
+          ocell("companies", ck, "name", mayEdit,
+            '<b>' + esc(co.name) + '</b>' + '<span class="why mono">key ' + esc(ck) + '</span>',
+            function(){ return ocellBox("data-coname", ck, co.name, { label: "Name" }); }) +
           '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
-          '<td class="cc">' + flag(co.seeOthers) + '</td>' +
-          '<td class="cc">' + flag(co.seeGroup) + '</td>' +
+          ocell("companies", ck, "seeOthers", mayEdit, flag(co.seeOthers),
+            function(){ return coFlagSelect(ck, "seeOthers", co.seeOthers); }, "cc") +
+          ocell("companies", ck, "seeGroup", mayEdit, flag(co.seeGroup),
+            function(){ return coFlagSelect(ck, "seeGroup", co.seeGroup); }, "cc") +
           /* STATUS HOLDS A STATUS HERE TOO (§261). It held a pen and, beside
              it, a dotted chip reading "holds 3 units" — which is not a fact
              about the company at all but the REFUSAL that stands in for the
@@ -5135,6 +5295,12 @@ function renderKB(){
            'already attributed to them stays true. Deleting takes the row, the password and ' +
            'the open sessions, and is <b>refused while anything still points at the ' +
            'person</b> \u2014 the refusal names what. Deleting is the Super user\u2019s.' },
+      { h: "Reports to says who somebody answers to, and decides nothing",
+        p: '<b>Reports to</b> names the person\u2019s manager, picked from the register ' +
+           'rather than typed, so renaming the manager renames them here too. It grants ' +
+           'nothing \u2014 what somebody may open is their roles, not who they answer to. ' +
+           'Nobody can be made to report to themselves or to somebody under them, and a ' +
+           'row cannot be deleted while anybody still reports to it.' },
       { h: "Two rows that are one person are merged, never guessed",
         p: 'Who a row <i>is</i> is decided by <b>Emp ID, then email</b> \u2014 never by the ' +
            'name, because two people really can share one. A row with neither is marked, ' +
@@ -5150,12 +5316,12 @@ function renderKB(){
       { h: "One label, two places",
         p: 'A level can read differently at group and at business unit — what the group ' +
            'calls a ' + plW + ' a unit may call something else — and both ' +
-           'are set on the Labels page.' },
+           'are named on Setup › The shape, layer by layer.' },
       { h: "No collisions",
         p: 'Every display label at each level is unique, so no two entities can render ' +
-           'under the same word. A collision blocks saving until one of them changes: two ' +
-           'different objects under one word on the same screen is not something the ' +
-           'reader can recover from.' },
+           'under the same word. A collision is named on the shape screen until one of them ' +
+           'changes: two different objects under one word on the same screen is not something ' +
+           'the reader can recover from.' },
       { h: "Per tenant, not per strategy cycle",
         p: 'A cycle-scoped label would let 2026 and 2027 use different words for the same ' +
            'object, and no report spanning both could be read without a glossary.' },
@@ -5404,7 +5570,11 @@ function renderBandsExtra(){
   var can = grant("c_bands") === "edit";
   var rows =
     '<div class="cfg"><table><tbody>' +
-      '<tr><td style="width:46%">Reward begins at</td><td>' +
+      /* §621: the paragraph that sat under this table is this row's hover. */
+      '<tr><td style="width:46%">Reward begins at' + tip("At 100%, delivering the commitment earns. Set it " +
+        "higher and a measure can meet its target without clearing the reward line: a fourth standing, met " +
+        "but not earning, appears between short and earning. Either way the measure is scored against its own " +
+        "target exactly as before, so focus changes no score.") + '</td><td>' +
         (can && EDITING.bands
           ? inputOr2(CYCLE.rewardAt + "%", "Reward threshold", function(v){
               var n = parseFloat(String(v).replace(/[^0-9.]/g, ""));
@@ -5418,11 +5588,7 @@ function renderBandsExtra(){
             (CYCLE.locked ? "Locked" : "Open") + '</button>'
           : '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
             (CYCLE.locked ? "Locked" : "Open for marking") + '</span>') + '</td></tr>' +
-    '</tbody></table></div>' +
-    '<div class="note">At <b>100%</b> delivering the commitment earns. Set it higher and a ' +
-      'measure can meet its target without clearing the reward line \u2014 a fourth standing, ' +
-      '<i>met, not earning</i>, appears between short and earning. Either way the measure is ' +
-      'scored against its own target exactly as before: <b>focus changes no score</b>.</div>';
+    '</tbody></table></div>';
   return section("", "Focus and reward", null, rows);
 }
 
@@ -6665,7 +6831,7 @@ function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
     /* §524: a Foundation archive is keyed by its place already. */
-    var v = a.kind === "unit" || a.kind === "foundation" ? a.key : "cap:" + a.key;
+    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" || a.kind === "directions" || a.kind === "execution" || a.kind === "compete" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -7040,6 +7206,14 @@ function archiveHeld(a){
        plural(c.units || 0, "submitted unit")].join(" &middot; ")
     : a.kind === "foundation"
     ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+    : a.kind === "swot"
+    ? plural(c.lines || 0, "SWOT line")
+    : a.kind === "compete"
+    ? plural(c.values || 0, "value")
+    : a.kind === "directions"
+    ? [plural(c.pillars || 0, L1("pillar"), L("pillar")), plural(c.capabilities || 0, "capability", "capabilities")].join(" &middot; ")
+    : a.kind === "execution"
+    ? [plural(c.measures || 0, L1("measure"), L("measure")), plural(c.tactics || 0, L1("tactic"), L("tactic")), plural(c.capabilities || 0, "capability", "capabilities")].join(" &middot; ")
     : a.kind === "unit"
     ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")),
        plural(c.tactics, L1("tactic"), L("tactic")),
@@ -7062,6 +7236,14 @@ function renderArchives(){
       /* §524: the six parts of a Foundation, replaced from the Copilot. */
       (a.kind === "foundation"
         ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
+        : a.kind === "swot"
+        ? '<span class="why">SWOT only &mdash; the plan beneath it is untouched</span>'
+        : a.kind === "compete"
+        ? '<span class="why">Competitive Discipline only &mdash; the plan beneath it is untouched</span>'
+        : a.kind === "directions"
+        ? '<span class="why">' + L("pillar") + ' and the capabilities they touch &mdash; the Foundation and the SWOT are untouched</span>'
+        : a.kind === "execution"
+        ? '<span class="why">Measures, tactics and the plan period &mdash; the rest of the plan is untouched</span>'
         : '');
     /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
@@ -7069,7 +7251,9 @@ function renderArchives(){
        restore itself. */
     var live = a.kind === "figures" ? true
              : a.kind === "foundation" ? !!foundationRecord(a.key)
-             : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
+             : a.kind === "swot" ? !!swotWritable(a.key)
+             : a.kind === "compete" ? !!competeHolder(a.key)
+             : a.kind === "unit" || a.kind === "directions" || a.kind === "execution" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'
@@ -7175,7 +7359,7 @@ var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per
    was built to prevent, in the one place nobody would ever see it disagree.
 
    SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
-   at the People register — custodians, passwords, declarations — and "7 things
+   at the Client register — custodians, passwords, declarations — and "7 things
    waiting on the register" is exactly what somebody wants from a rail badge.
    Nothing new is counted here, which is the whole point.
 
@@ -8259,7 +8443,16 @@ function setFnCol(k, on){
   fnCols()[k] = on;
   try { localStorage.setItem(FNCOLS_KEY, JSON.stringify(FNCOLS)); } catch (e) {}
 }
-function fnShowCol(k){ return fnCols()[k] !== false; }
+/* §624: THE CAPS COLUMN ONLY WHERE A FUNCTION HOLDS ONE. It counts the
+   capabilities filed under a function, and since §544.13 nothing files one
+   there — a capability is the company's — so on every live client it was a
+   column of zeros. It stays where an old record still sits under a function
+   (the worked example's Marketing), and leaves the chooser with it. */
+function fnCapsHeld(){
+  return (FUNCTION_KEYS || []).some(function(fk){ return capsOfFunction(fk).length > 0; });
+}
+function fnColOffered(k){ return k !== "caps" || fnCapsHeld(); }
+function fnShowCol(k){ return fnColOffered(k) && fnCols()[k] !== false; }
 
 /* ── THE ROW'S ACTIONS, IN ONE MENU (§93.14) ──────────────────────────
    The register's kebab, on the table §69.22's argument had not reached. The
@@ -8396,6 +8589,10 @@ function renderFunctions(){
        "renders nothing at all, edit field included", so Plans in and Under
        could not be reached with that column turned off. */
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
+    /* §630: a cell the dialog can change opens on a double-click — the
+       dialog's own field, so a hidden column still has its door in Edit
+       details, and nothing opens while the rows are being arranged. */
+    var may = mayEdit && !arranging;
     return '<tr data-oi="' + i + '" data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
       (f.active === false ? ' class="retired"' : '') + '>' +
       setArrangeIdx("fns", i, f.name) +
@@ -8409,13 +8606,16 @@ function renderFunctions(){
          column renders nothing at all, edit field included" was true while the
          fields were on the row, and it is why Nav name and Code had to stay
          visible. They are drawn in the dialog now, whatever this menu says. */
-      '<td class="fnamecell"><b>' + esc(f.name) + '</b></td>' +
+      ocell("fns", fk, "name", may, '<b>' + esc(f.name) + '</b>',
+        function(){ return ocellBox("data-fname", fk, f.name, { label: "Name" }); }, "fnamecell") +
       (fnShowCol("key") ? '<td><span class="mono">' + esc(fk) + '</span></td>' : '') +
-      (fnShowCol("nav") ? '<td>' + (f.navName
+      (fnShowCol("nav") ? ocell("fns", fk, "nav", may, (f.navName
         ? '<span class="val">' + esc(f.navName) + '</span>'
-        : '<span class="why" style="margin:0">' + esc(f.name) + '</span>') + '</td>' : '') +
-      (fnShowCol("code") ? '<td class="cc"><span class="mono">' +
-        esc(f.codePrefix || "\u2014") + '</span></td>' : '') +
+        : '<span class="why" style="margin:0">' + esc(f.name) + '</span>'),
+        function(){ return ocellBox("data-fnav", fk, f.navName, { ph: f.name, label: "Nav name" }); }) : '') +
+      (fnShowCol("code") ? ocell("fns", fk, "code", may, '<span class="mono">' +
+        esc(f.codePrefix || "\u2014") + '</span>',
+        function(){ return ocellBox("data-fpx", fk, f.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") : '') +
       /* ── PLANS IN, AND UNDER (§59) ─────────────────────────────────
          Spec 010 built both and gave neither a control: `format` and `under`
          could only be set by editing the source, so a second Merchandising was
@@ -8425,11 +8625,15 @@ function renderFunctions(){
          what is in the way rather than hiding a plan that still exists — the
          same contract as retiring a company that still holds units (§49.3).
          The control is in the dialog; this cell reads it. */
-      (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("company") ? '<td class="cc">' + fnCompanyCell(fk, f, false) + '</td>' : '') +
+      (fnShowCol("plansin") ? ocell("fns", fk, "plans", may, planCell(fk, f, false),
+        function(){ return planCell(fk, f, true); }, "cc") : '') +
+      (fnShowCol("company") ? ocell("fns", fk, "division", may, fnCompanyCell(fk, f, false),
+        function(){ return fnCompanyCell(fk, f, true); }, "cc") : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
-      (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
-      (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
+      (fnShowCol("head") ? ocell("fns", fk, "head", may, pick("head", f.head, fk, false),
+        function(){ return ocellPerson("fn:" + fk, "fnhead", f.head); }, "cc", "fn:" + fk + "|fnhead") : '') +
+      (fnShowCol("cust") ? ocell("fns", fk, "custodian", may, pick("custodian", f.custodian, fk, false),
+        function(){ return ocellPerson("fn:" + fk, "custodian", f.custodian); }, "cc", "fn:" + fk + "|custodian") : '') +
       /* ── STATUS HOLDS A STATUS, AND THE ACTS HOLD A MENU (§93.14) ────
          Islam, on rows measuring 155px beside the register's 39: "learn from
          what we have done in the people table."
@@ -8466,7 +8670,7 @@ function renderFunctions(){
             '<div class="hmenu-h"><span>Show columns</span>' +
               '<span><button class="linkbu" data-fncolall="1">All</button> &middot; ' +
               '<button class="linkbu" data-fncolnone="1">None</button></span></div>' +
-            FN_COLS.map(function(c){
+            FN_COLS.filter(function(c){ return fnColOffered(c.k); }).map(function(c){
               return '<label class="colrow"><input type="checkbox" data-fncol="' + c.k + '"' +
                 (fnShowCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
             }).join("") +
@@ -8551,13 +8755,88 @@ function capsAsPillars(){
   });
   return out;
 }
+/* ══ THE COMPANY'S CAPABILITIES, WHERE THEY ARE PILLARS (§630) ═════════
+   Islam, asked whether this page should go once El Abd's capabilities had
+   become pillars of the company's plan: *"the capabilities exist why to
+   remove it?"*, and then the mockup that made it a table: *"go ahead with
+   the mockup, build it"*.
+
+   §542 drew this page read-only on purpose — "a second place to type them is
+   a second answer to who owns this" (§53.5). That holds for a COPY, and this
+   is not one: every cell writes the company plan's own pillar, the row the
+   Capabilities tab draws, so there is one record and two ways to reach it,
+   as a unit's name is one answer on The shape and on Business units.
+
+   WHO MAY CHANGE IT is asked of both doors: this page's own grant AND the
+   company plan's (`mayAuthor("u_plan", "group")`, the question the plan's
+   pen and the server's authoriser ask), because a write the page allowed and
+   the save refused would be §42's fault from the page's side.
+
+   THE SEATS ARE THE PLAN'S OWN LIST. A pillar's owner holds a NAME (§33, and
+   the move wrote names, §544), so the control is `ownerChoices` — the same
+   list the plan's pen draws — and a value it does not know is kept, marked,
+   rather than dropped. Removing one stays in the plan, where its measures and
+   tactics are, behind the plan's own question. */
+function capPillarById(id){
+  return (topAsUnit().items || []).filter(function(p){
+    return p && p.id === id && SMPRules.pillarIsCap(p); })[0] || null;
+}
+function mayEditCapPillars(){
+  return grant("c_caps") === "edit" && mayAuthor("u_plan", "group");
+}
+function capSeat(v){
+  var n = v ? personName(v) : "";
+  return n || String(v || "");
+}
+function capSeatSelect(id, seat, v){
+  return '<select class="fld" data-cpseat="' + esc(id + "|" + seat) + '" aria-label="' +
+      (seat === "owner" ? "Owner" : "Custodian") + '">' +
+    optionsHtml(ownerChoices(v, true), function(x){ return String(v == null ? "" : v) === x; }) +
+  '</select>';
+}
+function renderCapPillars(){
+  var u = topAsUnit();
+  var may = mayEditCapPillars();
+  var list = [];
+  (u.items || []).forEach(function(p, i){ if (SMPRules.pillarIsCap(p)) list.push({ p:p, i:i }); });
+  var none = '<span class="why" style="margin:0">unassigned</span>';
+  var rows = list.map(function(x, n){
+    var p = x.p, id = p.id, code = pillarCode(u, x.i);
+    return '<tr data-tkrow="' + (p.owner ? "assigned" : "unassigned") + '">' +
+      '<td class="idx">' + (n + 1) + '</td>' +
+      '<td><span class="mono">' + esc(code) + '</span></td>' +
+      ocell("caps", id, "name", may,
+        p.name ? '<b>' + esc(p.name) + '</b>' : '<span class="why" style="margin:0">no name yet</span>',
+        function(){ return ocellBox("data-cpname", id, p.name, { label: "Name" }); }) +
+      ocell("caps", id, "owner", may, p.owner ? esc(capSeat(p.owner)) : none,
+        function(){ return capSeatSelect(id, "owner", p.owner); }) +
+      ocell("caps", id, "custodian", may, p.custodian ? esc(capSeat(p.custodian)) : none,
+        function(){ return capSeatSelect(id, "custodian", p.custodian); }) +
+      '<td class="cc"><span class="mono">' + (p.measures || []).length + '</span></td>' +
+      '<td class="cc"><span class="mono">' + (p.tactics || []).length + '</span></td>' +
+      kebabCell(CPMENU === id, ['<button data-cpopen="' + esc(id) + '">Open in the plan</button>'],
+        "", p.name || code, 'data-cpmenu="' + esc(id) + '"') +
+    '</tr>';
+  }).join("");
+  return cfgHead(L("capability"), [], null, false) +
+    section("", L("capability"), null,
+      tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
+      '<div class="cfg"><table class="cappcfg" data-tktable="caps"><thead><tr>' +
+        (function(){ var h = tkHead("caps");
+          return h("#", "idx", false) + h("Code") + h(L1("capability")) + h("Owner") + h("Custodian") +
+                 h(L("measure","bu"), "cc") + h(L("tactic","bu"), "cc") + h("", "cc kebcell", false); })() +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (may ? '<div class="addrow"><button class="editbtn" id="addcappillar">+ Add a ' +
+        L1("capability") + '</button></div>' : ''));
+}
 function renderCaps(){
+  /* §630: where the capabilities are the company's own pillars, the page is
+     their table — the record type below is a different thing (§542). */
+  if (!GROUP.capabilities.length && capsAsPillars().length > 0) return renderCapPillars();
   /* §85. This page had NO pen at all — it was editable for the SMO the whole
      time, which is how §84.3's silent sort bug hid: every name cell was an
      input. A row now opens deliberately, like the other six. */
   var mayEdit = grant("c_caps") === "edit";
-  /* §542: this client's capabilities are pillars, not records. */
-  var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
     var editable = mayEdit && rowEditIs("caps", String(i));
     return '<tr data-tkrow="' + (c.head ? "assigned" : "unassigned") + '"' +
@@ -8632,36 +8911,14 @@ function renderCaps(){
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
-      (mayEdit && !capsAreP
+      (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
           'a function to hold it is optional.</span></div>'
         : '') +
-      /* ── §542 · WHERE THEY WENT, WHEN THEY ARE PILLARS NOW ───────────────
-         A client whose capabilities have become internal pillars of the
-         company's plan (stage 3b) opened this page on an EMPTY table with an
-         Add button that would mint the very record type the move removed.
-         §61's fault twice over: a page saying nothing about the thing it is
-         named after, and the only control on it being the wrong one.
+      /* §542's read-only note for a client whose capabilities are pillars
+         is gone (§630): that client gets `renderCapPillars()`, its table. */
 
-         SO IT NAMES THEM AND POINTS AT THE DOOR. Read-only on purpose: a
-         pillar's name, owner and custodian are edited on the plan with the
-         pen, like every other pillar's, and a second place to type them is a
-         second answer to who owns this (§53.5). The Add button goes with
-         them — there is nothing on this page left to add. */
-      (capsAreP
-        ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
-            L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
-            'They are named, owned and planned on ' + (buExists() ? '' : topNavWord() + ' \u203a ') +
-            topStrategyWord() + ' \u203a ' + L("capability","bu") +
-            ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
-            ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
-            capsAsPillars().map(function(r){
-              return '<li><span class="mono">' + esc(r.code) + '</span> ' + esc(r.name) +
-                ' <span class="why" style="margin:0">' +
-                (r.owner ? esc(r.owner) : 'no owner yet') + '</span></li>'; }).join("") +
-          '</ul></div>'
-        : '') +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
         'one number at the top and others are a portfolio of unrelated work: where there are none ' +

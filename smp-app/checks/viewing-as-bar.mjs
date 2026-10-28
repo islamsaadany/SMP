@@ -309,8 +309,12 @@ if (browser) {
     check("trail · " + label + " · every step quietens to --ink-3 while a view is on",
       on.ff === q && on.client === q && on.mod === q,
       JSON.stringify({ want: q, ff: on.ff, client: on.client, mod: on.mod }));
+    /* OPTION D (2026-10-26) REWRITTEN, NEVER LOOSENED (§218): the trail's
+       first step is the platform's mark now, not the word, and at full
+       weight it draws in the mark's own navy (#0F2C69 on amber) — the same
+       in every theme, as the console's mark is — and never the quiet ink. */
     check("trail · " + label + " · and comes back to full weight on switching back (§94.2)",
-      off.mod === (await rgbOf(off.ink)) && off.ff === (await rgbOf(off.ink2)) && off.ff !== q,
+      off.mod === (await rgbOf(off.ink)) && off.ff === "rgb(15, 44, 105)" && off.ff !== q,
       JSON.stringify({ ff: off.ff, mod: off.mod, ink: off.ink, ink2: off.ink2 }));
     /* THE ONE STATED DEPARTURE FROM THE DRAWING, asserted so it cannot drift
        back: --line on the bar's surface is 1.38:1 light and 1.43 dark, which

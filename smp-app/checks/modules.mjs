@@ -701,7 +701,10 @@ for (const k of OWN_PAGE) {
      the switch would be drawn and dead (§96). */
   check("it wears the shared top bar, trail and all — " + k,
     /<header class="tb">/.test(doc) && /class="tbtrail"/.test(doc) && /href="\/platform"/.test(doc) &&
-    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) && doc.includes('<script src="/topbar.js"></script>'));
+    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) &&
+    /* §620: REWRITTEN, NEVER LOOSENED (§218) — the bar's script by its
+       stamped address, which is what lets the page paint without asking */
+    /<script src="\/topbar\.js\?v=[0-9a-f]{12}"><\/script>/.test(doc));
   check("...and the navy module bar it replaces is gone — " + k,
     !/class="bar"|class="msw"|class="mmenu"/.test(doc));
   check("...and the page's dark colours answer the switch, not only the device — " + k,
@@ -769,10 +772,18 @@ const CS = "function clientStep(";
 check("the set-up flow still has a step about the client itself to hang it on", cs.includes(CS));
 const step = cs.slice(cs.indexOf(CS), cs.indexOf("function modulesBlock("));
 check("the modules band is drawn on that step", /box\.appendChild\(modulesBlock\(\)\)/.test(step));
-check("...after the client's own fields and before the ending block",
-  step.indexOf("The client's name") < step.indexOf("modulesBlock()")
-  && step.indexOf("modulesBlock()") < step.indexOf("archiveBlock()"),
-  "name at " + step.indexOf("The client's name") + ", band at " + step.indexOf("modulesBlock()")
+/* REWRITTEN TO THE DECISION (§218, §624): the client step is Profile now, in
+   three tabs, and the band is the Modules tab's whole body — Islam took the
+   mockup's tabs (*"go with your recommendations"*). What the order asserted
+   was that the band belongs to the client's own page and not its
+   organisation's; asserted as: the band is drawn on the Modules tab, and
+   the client's own fields and the archive block are drawn on Details. */
+const modTab = step.indexOf('S.tab === "modules"');
+check("...on Profile's Modules tab, apart from the client's own fields and the archive block",
+  modTab > -1 && step.indexOf("modulesBlock()") > modTab
+  && step.indexOf("The client's name") > step.indexOf("modulesBlock()")
+  && step.indexOf("archiveBlock()") > step.indexOf("The client's name"),
+  "modules tab at " + modTab + ", band at " + step.indexOf("modulesBlock()") + ", name at " + step.indexOf("The client's name")
   + ", end at " + step.indexOf("archiveBlock()"));
 check("and drawn ONCE — a band on two steps is two places to set one thing",
   (cs.match(/appendChild\(modulesBlock\(\)\)/g) || []).length === 1,
@@ -881,10 +892,16 @@ if (browser) {
   check("it is the first thing in the row",
     (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("trail"));
   const tr = await page.evaluate(`(() => { const n = document.querySelector('nav.trail');
-      return { text: n.innerText.replace(/\\s+/g, ' ').trim(), ff: (n.querySelector('a.trff') || {}).getAttribute ? n.querySelector('a.trff').getAttribute('href') : '',
+      const ffa = n.querySelector('a.trff');
+      return { text: n.innerText.replace(/\\s+/g, ' ').trim(), ff: ffa ? ffa.getAttribute('href') : '', first: n.firstElementChild === ffa,
+               mark: !!(ffa && ffa.querySelector('svg')), name: ffa ? ffa.getAttribute('aria-label') : '',
                where: ((n.querySelector('details.trstep:not(.trclient) > summary span') || {}).textContent || '').trim() }; })()`);
-  check("it reads Platform › the client › the module you are in",
-    tr.ff === "/platform" && /^platform\b/i.test(tr.text) && /Raya Trade/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
+  /* OPTION D (2026-10-26) REWRITTEN, NEVER LOOSENED (§218): the word
+     Platform gave way to the platform's mark, which is still the first thing
+     in the trail and still the way to /platform — named "Home", with no word
+     before the client. */
+  check("it reads the platform's mark (Home, to the console) | the client › the module you are in",
+    tr.ff === "/platform" && tr.first && tr.mark && tr.name === "Home" && /^Raya Trade\b/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
   check("the chevrons are DRAWN and not a font character (§52)", (await page.locator("nav.trail summary svg").count()) >= 2);
   /* §401: THE TWO MENUS SWAP JOBS. Islam — the client step lists "the other
      clients", the module step "the other modules and then the separator and

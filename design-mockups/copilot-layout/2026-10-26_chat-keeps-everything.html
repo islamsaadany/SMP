@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Chat Keeps Everything</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--accent:#D9773A;--nav:#16325C;--panel-ink:#FFFFFF;--warnbg:#FBF1DE;--warn:#8A5A12;--good:#2E6B45;--goodbg:#E6F2EA;--me:#E9EEF5;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warnbg:#2E2717;--warn:#E3B868;--good:#8FCBA4;--goodbg:#1C2E23;--me:#26303D;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warnbg:#2E2717;--warn:#E3B868;--good:#8FCBA4;--goodbg:#1C2E23;--me:#26303D;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1360px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:24px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:95ch}
+.try{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:9px 14px;font-size:14px;color:var(--ink-2)}
+.try b{color:var(--ink)}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 12px minmax(0,460px);grid-template-rows:minmax(0,1fr);border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px;height:760px}
+.grip{position:relative}.grip::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line)}
+.chat{min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:0 12px 12px}
+.fh{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.fh b{flex:1}
+.bar{max-width:720px;width:100%;margin:0 auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);padding:6px 0}
+.bar i{flex:1;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--p),var(--line) var(--p))}
+.msgs{flex:1 1 auto;min-height:0;overflow:auto;padding:4px 0 8px}
+.col{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.who{font-size:11.5px;color:var(--ink-3);margin-bottom:-4px}
+.who.r{text-align:right}
+.ai{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:8px 12px;max-width:92%}
+.me{align-self:flex-end;background:var(--me);border:1px solid var(--line);border-radius:10px;padding:7px 12px;max-width:80%}
+.prop{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:8px 12px}
+.prop h6{margin:0 0 4px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.prop .txt{background:var(--surface-2);border-radius:6px;padding:8px 10px}
+.prop.old{opacity:.62}
+.prop.old .txt{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--ink-3) 60%,transparent)}
+.tag{display:inline-block;font-size:11.5px;font-weight:600;border-radius:999px;padding:0 8px;margin-left:6px;border:1px solid var(--line);color:var(--ink-3)}
+.tag.ok{border-color:var(--good);color:var(--good)}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px;font:600 12.5px/1.2 var(--sans)}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn.go{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:focus-visible,.fold:focus-visible,.cardlink:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* a finished part, folded to one row */
+.part{border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.fold{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;text-align:left;padding:8px 12px;font-size:14px}
+.fold .chev{width:16px;color:var(--ink-3);transition:transform .15s}
+.part.open .fold .chev{transform:rotate(90deg)}
+.fold b{font-weight:700}
+.fold small{color:var(--ink-3);font-size:12.5px;flex:1}
+.fold .tag{margin:0}
+.inner{display:none;border-top:1px solid var(--line);padding:10px 12px;flex-direction:column;gap:8px;background:color-mix(in srgb,var(--surface-2) 55%,var(--surface))}
+.part.open .inner{display:flex}
+.qa{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;font-size:13.5px}
+.qa .q{color:var(--ink-3)}
+.qa .a{background:var(--me);border-radius:8px;padding:5px 10px;justify-self:end;max-width:85%}
+.flash{animation:fl 1.2s ease}
+@keyframes fl{0%{box-shadow:0 0 0 3px var(--goldfill)}100%{box-shadow:0 0 0 0 transparent}}
+.box{max-width:720px;width:100%;margin:8px auto 0;display:flex;gap:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 10px}
+.box input{flex:1;border:0;background:none;font:inherit;color:var(--ink);outline:none}
+/* the pane */
+.pane{min-width:0;display:flex;flex-direction:column;gap:8px;overflow:auto;padding:4px 2px}
+.ph{font-size:12.5px;color:var(--ink-3)}.ph b{color:var(--ink)}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);transition:background .3s}
+.card.busy{border-style:dashed}
+.card h4{margin:0 0 4px;font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card h4 small{font-size:11.5px;color:var(--good);white-space:nowrap}
+.card.busy h4 small{color:var(--warn)}
+.card p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.cardlink{border:0;background:none;padding:4px 0 0;color:var(--gold);font:600 12.5px/1.4 var(--sans);text-decoration:underline;text-underline-offset:2px}
+.foot{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;font-size:12.5px;color:var(--ink-3)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.n{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13.5px;color:var(--ink-2)}
+.n b{display:block;color:var(--ink)}
+@media (max-width:900px){.app{grid-template-columns:minmax(0,1fr);height:auto}.grip{display:none}.msgs{max-height:620px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The chat keeps everything; the card keeps what's agreed</h1>
+    <p class="lede">Your Foundation — Online, mid-way: three parts agreed, Winning Aspiration being worked on. Guided answers fold once a part is agreed and open again on a press. Anything you type stays in the chat where you said it.</p>
+  </header>
+  <div class="try" id="try"><b>Try:</b> open <b>Who we are ▸</b> to see your seven answers · press <b>Make concise</b> or type a change and send · then <b>Save to the card</b> or <b>Keep as it was</b> · press <b>Your answers</b> on a card on the right.</div>
+  <div class="app">
+    <section class="chat">
+      <div class="fh"><b>Copilot · Foundation — Online</b><span class="btn" style="font-weight:600">A− A+</span></div>
+      <div class="bar" id="bar"></div>
+      <div class="msgs" id="msgs"><div class="col" id="col"></div></div>
+      <form class="box" id="box"><input id="in" placeholder="Say what to change in this draft…" autocomplete="off"><button class="btn go" type="submit">Send</button></form>
+    </section>
+    <div class="grip"></div>
+    <aside class="pane" id="pane"></aside>
+  </div>
+  <div class="notes">
+    <div class="n"><b>1 · Only the guided questions fold</b>Once a part is agreed, its question-and-answer block folds to one row: <i>Who we are — 7 answers · agreed ▸</i>. Press it to read every question and your answer, and the wording you agreed. It's never deleted.</div>
+    <div class="n"><b>2 · What you type is never folded</b>A change you ask for, a comment or a question stays in the chat as you wrote it, followed by the Copilot's reply, the way any chat works. It's stored on the chat, so it's there when you come back next week.</div>
+    <div class="n"><b>3 · Proposals live in the chat</b>Make concise, a typed change or Edit with AI gives a new proposal in the chat. The one it replaces stays, struck through, so you can see what changed. The card keeps the agreed wording, tagged <i>Being changed in the chat</i>.</div>
+    <div class="n"><b>4 · The card changes on your word</b><i>Save to the card</i> puts the wording on the card and marks the part agreed. <i>Keep as it was</i> drops it. Each card has <i>Your answers</i>, which takes you to that part in the chat, opened.</div>
+    <div class="n"><b>5 · The chat saves to the cards; the pane acts</b>The chat's only action is <i>Save to the card</i>. <i>Run the check</i>, <i>Save as Foundation</i> and <i>Apply to plan</i> are the pane's foot. The check's findings come back into the chat to talk through, with <i>Go back to</i> a part.</div>
+  </div>
+</div>
+<script>
+(function(){
+  var PARTS = [
+    { k:"who", t:"Who we are", agreed:"We are Raya Shop, Raya Trade's B2C e-commerce platform (website and app) in Egypt, selling mobiles, IT, TVs and home appliances first-party, plus a third-party marketplace. We fulfil from stock and stores, deliver through 3PL partners focused on Cairo and Giza, and accept cash on delivery, digital and instalment payments.",
+      qa:[["What does Raya Shop sell, and to whom?","Mobiles, IT, TVs and home appliances to online shoppers in Egypt, plus a marketplace for other sellers."],["Through which channels?","Website and app, Raya stores, the call centre and our Jumia store."],["How do you fulfil orders?","From our stock and from stores, with 3PL partners in Cairo and Giza."],["How do customers pay?","Cash on delivery, cards and wallets, and Takseety instalments."],["What makes you different?","Genuine products from authorised brands, backed by Egypt's largest electronics distributor."],["What else do you offer?","Web and app assets rented to brands; refurbished mobile and IT; kitchen and home décor."],["Anything else we should know?","Online orders can be picked up or returned in store."]],
+      talk:[["me","Add that we're the single digital front door to the Raya Group."],["ai","Added to the last sentence. Saved to the card."]] },
+    { k:"eim", t:"End in Mind", agreed:"To be the online home Egyptian households turn to for the technology and appliances they rely on, where every product is genuine, payment fits their budget, and a Raya store or delivery is never far away.",
+      qa:[["Picture the end of 2027. What do customers say about Raya Shop?","That it's the one place they trust for electronics online."],["What has changed for the Group?","Online and stores work as one; every BU sells through us."],["What would make you proud?","Households choosing us first, not after comparing."]], talk:[] },
+    { k:"obj", t:"Key Objectives", agreed:"Total GMV EGP 1 billion a year · 48-hour delivery in Cairo and Giza · 100% same-day PFS & HDFS · CSAT 90% or more · 25% of online sales on Takseety",
+      qa:[["What is the one number that says you're winning?","Total GMV, EGP 1 billion a year."],["What's your delivery promise?","48 hours inside Cairo and Giza."],["What about store pick-up?","Same day, every eligible order."],["How will you know customers are happy?","CSAT on online orders, 90% or more."],["Anything about payments?","A quarter of online sales on Takseety instalments."]], talk:[] }
+  ];
+  var ASP0 = "To be Egypt's most trusted, first-choice online destination for electronics and home appliances, recognised for genuine products, easy instalments, same-day delivery and in-store pick-up and returns. To run as a profitable platform that serves as the Raya Group's single digital front door.";
+  var CONCISE = "Egypt's most trusted first choice online for electronics and appliances: genuine products, easy instalments, same-day delivery, pick-up and returns in store — and a profitable, single digital front door for the Raya Group.";
+  var S = { open:{}, aspAgreed:"", props:[ASP0], aspTalk:[], decided:null };
+  var E = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+  function partHtml(p){
+    var open = !!S.open[p.k], n = p.qa.length, c = p.talk.length ? " · " + (p.talk.length / 2) + " change" + (p.talk.length > 2 ? "s" : "") : "";
+    return '<div class="part' + (open ? " open" : "") + '" id="part-' + p.k + '"><button class="fold" type="button" data-fold="' + p.k + '" aria-expanded="' + open + '"><span class="chev">▸</span><b>' + E(p.t) + '</b><small>' + n + ' answers' + c + '</small><span class="tag ok">Agreed</span></button>' +
+      '<div class="inner">' + p.qa.map(function(x){ return '<div class="qa"><span class="q">' + E(x[0]) + '</span><span class="a">' + E(x[1]) + '</span></div>'; }).join("") +
+      p.talk.map(function(x){ return x[0] === "me" ? '<div class="qa"><span class="a">' + E(x[1]) + '</span></div>' : '<div class="qa"><span class="q">Copilot: ' + E(x[1]) + '</span></div>'; }).join("") +
+      '<div class="prop"><h6>Agreed wording</h6><div class="txt">' + E(p.agreed) + '</div></div></div></div>';
+  }
+  function chat(){
+    var h = '<div class="who">Copilot</div><div class="ai">Good. We\'ll build the parts in order, starting with <b>Who we are</b> (7 short questions).</div>';
+    h += PARTS.map(partHtml).join("");
+    h += '<div class="who">Copilot</div><div class="ai">Let\'s work on <b>Winning Aspiration</b>. Here\'s a draft from your answers.</div>';
+    S.props.forEach(function(t, i){
+      var last = i === S.props.length - 1;
+      if (i > 0) { var ask = S.aspTalk[i - 1]; h += '<div class="who r">Mohamed Essam</div><div class="me">' + E(ask) + '</div><div class="who">Copilot</div>'; }
+      h += '<div class="prop' + (last ? "" : " old") + '"><h6>Proposal ' + (i + 1) + ' · Winning Aspiration' + (last ? "" : " · replaced") + '</h6><div class="txt">' + E(t) + '</div>' +
+        (last && !S.decided ? '<div class="btns"><button class="btn" data-refine="concise">Make concise</button><button class="btn" data-refine="pro">More professional</button><button class="btn" data-refine="simple">Simplify</button></div>' +
+          '<div class="btns"><button class="btn go" data-save>Save to the card</button>' + (S.aspAgreed || S.props.length > 1 ? '<button class="btn" data-keep>Keep as it was</button>' : '') + '</div>' : '') + '</div>';
+    });
+    if (S.decided === "saved") h += '<div class="who">Copilot</div><div class="ai">Winning Aspiration agreed and on the card. All four parts are agreed; run the check from the pane when you\'re ready.</div>';
+    if (S.decided === "kept") h += '<div class="who">Copilot</div><div class="ai">Kept as it was. The card hasn\'t changed; the proposals stay above if you want them later.</div>';
+    document.getElementById("col").innerHTML = h;
+    var agreed = 3 + (S.aspAgreed ? 1 : 0);
+    document.getElementById("bar").innerHTML = agreed + ' of 4 parts agreed <i style="--p:' + (agreed * 25) + '%"></i>';
+  }
+  function pane(){
+    var asp = S.aspAgreed, busy = !S.decided;
+    var cards = [PARTS[0], { k:"asp", t:"Winning Aspiration" }, PARTS[1], PARTS[2]].map(function(p){
+      if (p.k === "asp") return '<div class="card' + (busy ? " busy" : "") + '"><h4>Winning Aspiration <small>' + (busy ? (asp ? "Being changed in the chat" : "Being written in the chat") : "Agreed") + '</small></h4><p>' + (asp ? E(asp) : '<i>Nothing agreed yet. The proposal is in the chat.</i>') + '</p></div>';
+      return '<div class="card"><h4>' + E(p.t) + ' <small>Agreed</small></h4><p>' + E(p.agreed) + '</p><button class="cardlink" type="button" data-goto="' + p.k + '">Your answers</button></div>';
+    }).join("");
+    document.getElementById("pane").innerHTML = '<div class="ph"><b>Foundation — Online v2</b> · in progress · 2026 to the end of 2027</div>' + cards + '<div class="foot">' + (S.decided === "saved" ? "4 of 4 parts agreed" : "3 of 4 parts agreed · Winning Aspiration is being worked on in the chat") + '<div class="btns"><button class="btn' + (S.decided === "saved" ? " go" : "") + '" type="button"' + (S.decided === "saved" ? "" : " disabled") + '>Run the check</button><button class="btn" type="button" disabled>Save as Foundation — Online v2</button><button class="btn" type="button" disabled>Apply to plan</button></div></div>';
+  }
+  function draw(){ chat(); pane(); }
+  function propose(ask, text){ S.aspTalk.push(ask); S.props.push(text); draw(); var m = document.getElementById("msgs"); m.scrollTop = m.scrollHeight; }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-fold],[data-refine],[data-save],[data-keep],[data-goto]"); if (!b) return;
+    if (b.dataset.fold) { S.open[b.dataset.fold] = !S.open[b.dataset.fold]; draw(); return; }
+    if (b.dataset.refine) {
+      var r = b.dataset.refine, cur = S.props[S.props.length - 1];
+      propose(r === "concise" ? "Make concise" : r === "pro" ? "More professional" : "Simplify",
+        r === "concise" ? CONCISE : r === "pro" ? "To be Egypt's most trusted and preferred online destination for consumer electronics and home appliances — distinguished by authentic products, accessible instalments, same-day fulfilment and integrated in-store services — operating profitably as the Raya Group's single digital front door." :
+        "Be the place Egyptians trust most to buy electronics online: real products, easy instalments, same-day delivery, and stores close by. Make money doing it, and be the Raya Group's one front door online.");
+      return; }
+    if (b.hasAttribute("data-save")) { S.aspAgreed = S.props[S.props.length - 1]; S.decided = "saved"; draw(); return; }
+    if (b.hasAttribute("data-keep")) { S.decided = "kept"; draw(); return; }
+    if (b.dataset.goto) { S.open[b.dataset.goto] = true; draw(); var el = document.getElementById("part-" + b.dataset.goto); var m = document.getElementById("msgs"); m.scrollTo({ top: el.offsetTop - m.offsetTop - 8, behavior:"smooth" }); el.classList.add("flash"); }
+  });
+  document.getElementById("box").addEventListener("submit", function(e){
+    e.preventDefault(); var v = document.getElementById("in").value.trim(); if (!v || S.decided) return;
+    document.getElementById("in").value = "";
+    propose(v, CONCISE.replace("Egypt's most trusted", "Egypt's most trusted, profitable"));
+  });
+  draw();
+})();
+</script>
+</body>
+</html>

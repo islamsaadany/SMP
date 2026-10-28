@@ -105,6 +105,13 @@ export const ar: Messages = {
       rolesOpen: "طابقها",
     },
     page: {
+      draftOf: (v: number | null) => `مسودة الإصدار ${v ?? "?"}`,
+      sendVersion: (v: number | null) => `أرسل الإصدار ${v ?? "?"} للاعتماد`,
+      inForceLabel: "سارية",
+      inForceLine: (v: number | null) => `لدى القرّاء الإصدار ${v ?? "?"}. أي تغيير تجريه هنا يبدأ المسودة التالية؛ ويبقون على الإصدار ${v ?? "?"} حتى تُعتمد وتُنشر.`,
+      draftLabel: "مسودة",
+      draftLine: (v: number | null, next: number | null, n: number) =>
+        `مسودة الإصدار ${next ?? "?"}${n ? `: تغيرت ${n} خطوة منذ الإصدار ${v ?? "?"}` : ""}. يبقى القرّاء على الإصدار ${v ?? "?"} حتى يُعتمد الإصدار ${next ?? "?"} ويُنشر.`,
       owner: "المالك",
       noOwner: "لا مالك بعد",
       fromSuggestion: (who: string, step: string | null) => (step ? `من اقتراح ${who} بشأن ${step}` : `من اقتراح ${who}`),
@@ -227,6 +234,8 @@ export const ar: Messages = {
       drawing: "قيد الرسم",
     },
     flags: {
+      draftOpen: (v: number | null) => (v ? `مسودة الإصدار ${v} لدى المكتب` : "مسودة جديدة لدى المكتب"),
+      draftWith: (v: number | null, who: string | null) => `الإصدار ${v ?? "?"} لدى ${who || "المعتمِد"} للاعتماد`,
       noControl: (n: number) => `${n} ${n === 1 ? "خطر" : "مخاطر"} بلا ضوابط`,
       read: (a: number, r: number) => `قرأها ${a} من ${r}`,
       reviewLate: "المراجعة متأخرة",
@@ -240,6 +249,7 @@ export const ar: Messages = {
     },
     act: { approve: "افتح واعتمد", read: "اقرأها", plan: "افتح الخطة", review: (date: string) => `راجعها قبل ${date}`, reply: "رد" },
     todo: {
+      readChanged: (steps: string[]) => `تغيرت خطوتك: ${steps.join("، ")}`,
       approve: "للاعتماد",
       read: "للقراءة",
       approveWhat: (v: number | null) => `الإصدار ${v ?? "?"} جاهز لاعتمادك`,
@@ -296,6 +306,10 @@ export const ar: Messages = {
       sendReply: "أرسل الرد",
     },
     page: {
+      changed: "تغيّر",
+      changedIn: (v: number | null) => `تغيّر في الإصدار ${v ?? "?"}`,
+      draftNote: (status: string, v: number | null, who: string | null) =>
+        status === "IN_REVIEW" ? `مسودة الإصدار ${v ?? "?"} لدى ${who || "المعتمِد"} للاعتماد` : status === "APPROVED" ? `اعتُمد الإصدار ${v ?? "?"}؛ ينشره المكتب تالياً` : `مسودة الإصدار ${v ?? "?"} لدى المكتب`,
       owner: "المالك",
       youOwn: "أنت مالكها",
       suggest: "اقترح تغييراً",

@@ -104,6 +104,13 @@ export const en = {
       rolesOpen: "Match them",
     },
     page: {
+      draftOf: (v: number | null) => `Draft v${v ?? "?"}`,
+      sendVersion: (v: number | null) => `Send v${v ?? "?"} for approval`,
+      inForceLabel: "In force",
+      inForceLine: (v: number | null) => `Readers have v${v ?? "?"}. Any change you make here starts the next draft; they keep v${v ?? "?"} until it is approved and published.`,
+      draftLabel: "Draft",
+      draftLine: (v: number | null, next: number | null, n: number) =>
+        `Draft v${next ?? "?"}${n ? `: ${n} step${n === 1 ? "" : "s"} changed since v${v ?? "?"}` : ""}. Readers keep v${v ?? "?"} until v${next ?? "?"} is approved and published.`,
       owner: "Owner",
       noOwner: "no owner yet",
       fromSuggestion: (who: string, step: string | null) => (step ? `From ${who}'s suggestion on ${step}` : `From ${who}'s suggestion`),
@@ -226,6 +233,8 @@ export const en = {
       drawing: "Being drawn",
     },
     flags: {
+      draftOpen: (v: number | null) => (v ? `Draft v${v} with the office` : "A new draft with the office"),
+      draftWith: (v: number | null, who: string | null) => `v${v ?? "?"} with ${who || "the approver"} for approval`,
       noControl: (n: number) => `${n} risk${n === 1 ? "" : "s"} with no control`,
       read: (a: number, r: number) => `${a} of ${r} have read it`,
       reviewLate: "Review late",
@@ -239,6 +248,7 @@ export const en = {
     },
     act: { approve: "Open and approve", read: "Read it", plan: "Open the plan", review: (date: string) => `Review by ${date}`, reply: "Reply" },
     todo: {
+      readChanged: (steps: string[]) => `Your step changed: ${steps.join(", ")}`,
       approve: "To approve",
       read: "To read",
       approveWhat: (v: number | null) => `Version ${v ?? "?"} is ready for your approval`,
@@ -295,6 +305,10 @@ export const en = {
       sendReply: "Send reply",
     },
     page: {
+      changed: "Changed",
+      changedIn: (v: number | null) => `Changed in v${v ?? "?"}`,
+      draftNote: (status: string, v: number | null, who: string | null) =>
+        status === "IN_REVIEW" ? `draft v${v ?? "?"} with ${who || "the approver"} for approval` : status === "APPROVED" ? `v${v ?? "?"} approved; the office publishes it next` : `draft v${v ?? "?"} with the office`,
       owner: "Owner",
       youOwn: "You own this",
       suggest: "Suggest a change",

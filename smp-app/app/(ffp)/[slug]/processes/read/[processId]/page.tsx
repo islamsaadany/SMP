@@ -45,6 +45,8 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   const here = `${base}/${processId}`;
   const q = preview ? "&preview=1" : "";
   const r = p.row;
+  /* the version on the page: the one in force, or the one sent for approval */
+  const v = p.mode === "live" ? r.version : (r.draftVersion ?? r.version);
 
   const asked = typeof sp.tab === "string" ? sp.tab : "";
   const tab = asked === "steps" || asked === "summary" ? asked : "flow";
@@ -61,7 +63,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   /* Is it in good shape? (spec 067 §3.2): the next version, the RACI, risks with no control, who has not read it, the SOP, the review */
   const health: { k: "ok" | "warn" | "bad"; text: string; small?: string; act?: React.ReactNode }[] = [];
   if (p.mode === "live") health.push({ k: "ok", text: all.reading.todo.readWhat(r.version, date(r.since)), small: p.versionNote ?? undefined });
-  if (p.mode === "approve") health.push({ k: "warn", text: m.withApprover(r.version, r.approverName), small: r.submittedAt ? m.sentOn(date(r.submittedAt)!) : undefined });
+  if (p.mode === "approve") health.push({ k: "warn", text: m.withApprover(v, r.approverName), small: r.submittedAt ? m.sentOn(date(r.submittedAt)!) : undefined });
   if (p.mode === "notyet")
     health.push(r.status === "IN_REVIEW" ? { k: "warn", text: m.withApprover(r.version, r.approverName) } : { k: "ok", text: m.isApproved(r.version), small: m.isApprovedSmall });
   const stepById = new Map(p.steps.map((s) => [s.id, s]));
@@ -90,9 +92,9 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
     p.mode === "preview" ? (
       <Pill tone="attn">{all.builder.page.previewStrip}</Pill>
     ) : p.mode === "approve" ? (
-      <Pill tone="attn">{m.forApproval(r.version)}</Pill>
+      <Pill tone="attn">{m.forApproval(v)}</Pill>
     ) : p.mode === "notyet" ? (
-      <Pill tone="attn">{r.status === "IN_REVIEW" ? all.reading.state.inReview : m.approved(r.version)}</Pill>
+      <Pill tone="attn">{r.status === "IN_REVIEW" ? all.reading.state.inReview : m.approved(v)}</Pill>
     ) : (
       <Pill tone="good">{m.inForce(r.version)}</Pill>
     );
@@ -107,6 +109,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
           {s.type === "DECISION" && <Chip>{m.decision}</Chip>}
           {s.controls.some((c) => !c.control) && <Chip tone="bad">{m.noControlChip}</Chip>}
           {s.mine && <Chip tone="navy">{m.yourStep}</Chip>}
+          {s.changed && <Chip tone="gold">{m.changedIn(r.version)}</Chip>}
         </h3>
         <p className="text-[12.5px] text-[#636C79]">{m.doneByLine(s.role ?? m.noRole)}</p>
         {s.acts.length > 0 && (
@@ -349,6 +352,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
           <>
             {purpose ? `${purpose} · ` : ""}
             {m.owner} <b>{r.ownerName ?? "—"}</b> · {m.approver} <b>{r.approverName ?? "—"}</b>
+            {p.mode === "live" && (r.owns || r.approves) && r.status !== "PUBLISHED" && r.status !== "RETIRED" ? ` · ${m.draftNote(r.status, r.draftVersion, r.approverName)}` : ""}
           </>
         }
         wait={
@@ -405,8 +409,8 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
         <ApproveStrip
           workspaceId={slug}
           processId={processId}
-          version={r.version}
-          line={[m.approveLine(r.version, r.submittedByName, date(r.submittedAt)), p.versionNote].filter(Boolean).join(" ")}
+          version={v}
+          line={[m.approveLine(v, r.submittedByName, date(r.submittedAt)), p.versionNote].filter(Boolean).join(" ")}
         />
       )}
       {p.mode === "preview" && (
@@ -421,7 +425,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
       {p.mode === "notyet" && (
         <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[#16325C] bg-white px-3 py-2.5 text-[13.5px]">
           <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[#16325C]">{m.notYet}</b>
-          <span>{r.status === "IN_REVIEW" ? m.notYetReview(r.version, r.approverName) : m.notYetLine(r.version)}</span>
+          <span>{r.status === "IN_REVIEW" ? m.notYetReview(v, r.approverName) : m.notYetLine(v)}</span>
         </div>
       )}
       <TabRow

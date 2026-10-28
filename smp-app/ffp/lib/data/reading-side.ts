@@ -4,9 +4,7 @@ import type { ProcessLifecycleStatus } from "@/ffp/lib/domain/process-lifecycle"
 import { prisma } from "@/ffp/lib/db/client";
 import type { Prisma } from "@/ffp/generated/prisma/client";
 import { expectedAcknowledgers } from "@/ffp/lib/domain/process-reader";
-import { describeAuthorityRule } from "@/ffp/lib/domain/authority-table";
-import { deriveGapsByStep } from "@/ffp/lib/domain/step-readiness";
-import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/lib/data/authority-assignments";
+import { asContent, changedSteps, inForce, liveContent, type Content, type ContentStep } from "@/ffp/lib/data/process-content";
 
 /**
  * WHAT THE READING SIDE READS (spec 067 §3, stage 2). A client's own person
@@ -17,8 +15,14 @@ import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/l
  *
  * Their part comes from the client register: they APPROVE a process when it
  * names them as its approver; they HAVE A STEP in it when a job title they hold
- * does one of its steps (job titles are roles, §658). Owners join in stage 4.
- * Cached per request: the layout and the page under it both ask.
+ * does one of its steps (job titles are roles, §658); they OWN it when it names
+ * them as its owner (stage 4). Cached per request: the layout and the page under
+ * it both ask.
+ *
+ * What a reader reads is the version in force (stage 5): what was approved,
+ * kept on the version (process-content.ts), not the process the office is
+ * drafting. A process stays in force while its next version is drawn, sent and
+ * approved, until that one is published.
  */
 
 export type Reader = { personId: string | null; key: string | null; name: string; title: string | null; roleIds: string[] };
@@ -44,9 +48,14 @@ export type ReadRow = {
   code: string;
   name: string;
   department: string | null;
+  /** Where the process itself is: its draft, while a version is in force. */
   status: ProcessLifecycleStatus;
-  /** The version in force, or for one in review, the version being approved. */
+  /** Whether a version is in force, and which one: what readers read. */
+  inForce: boolean;
+  /** The version a reader reads: the one in force, or before there is one, the one being drawn. */
   version: number | null;
+  /** The version being drawn, sent or approved, when there is one. */
+  draftVersion: number | null;
   since: Date | null;
   approverId: string | null;
   approverName: string | null;
@@ -60,6 +69,8 @@ export type ReadRow = {
   owns: boolean;
   approves: boolean;
   mySteps: string[];
+  /** Their steps the version in force changed, against the version before it. */
+  myChanged: string[];
   /** Who is asked to read the version in force (everyone with a step), and how many have. */
   readers: number;
   readBy: number;
@@ -67,17 +78,18 @@ export type ReadRow = {
   noControl: number;
 };
 
-const live = (r: Pick<ReadRow, "status">) => r.status === "PUBLISHED";
+const live = (r: Pick<ReadRow, "inForce">) => r.inForce;
 
 /**
- * Every process the reader may hear about: what is in force, and what names
- * them as its owner or its approver in any state but retired.
+ * Every process the reader may hear about: what is in force (its next version
+ * may be in the drawing), and what names them as its owner or its approver in
+ * any state but retired.
  */
 export const readingRows = cache(
   async (slug: string, reader: Reader): Promise<ReadRow[]> =>
     rowsWhere(slug, reader, {
       OR: [
-        { lifecycleStatus: "PUBLISHED" },
+        { lifecycleStatus: { not: "RETIRED" as const }, versions: { some: { publishedAt: { not: null } } } },
         ...(reader.personId
           ? [
               { approverPersonId: reader.personId, lifecycleStatus: { not: "RETIRED" as const } },
@@ -99,7 +111,7 @@ async function rowsWhere(slug: string, reader: Reader, where: Prisma.ProcessWher
       category: { select: { name: true } },
       steps: { where: { type: { in: ["TASK", "DECISION"] } }, orderBy: { order: "asc" }, select: { label: true, assignedRoleId: true } },
       controls: { select: { control: true } },
-      versions: { orderBy: { number: "desc" }, select: { number: true, publishedAt: true } },
+      versions: { orderBy: { number: "desc" }, select: { number: true, publishedAt: true, snapshot: true } },
     },
   });
   if (!processes.length) return [];
@@ -115,19 +127,37 @@ async function rowsWhere(slug: string, reader: Reader, where: Prisma.ProcessWher
     select: { processId: true, versionNumber: true, personKey: true },
   });
   const mine = new Set(reader.roleIds);
-  return processes.map((p) => {
-    const inForce = p.versions.find((v) => v.publishedAt);
-    const version = p.lifecycleStatus === "PUBLISHED" ? inForce?.number ?? null : p.lifecycleStatus === "IN_REVIEW" ? (p.versions[0]?.number ?? 0) + 1 : p.versions[0]?.number ?? null;
-    const expected = p.lifecycleStatus === "PUBLISHED" ? expectedAcknowledgers({ stepRoleIds: p.steps.map((s) => s.assignedRoleId), people }) : [];
+  const rows: ReadRow[] = [];
+  for (const p of processes) {
+    /* the version in force and what it holds: kept on the version, or taken now for one published before stage 5 */
+    const published = p.versions.filter((v) => v.publishedAt);
+    let content: Content | null = null;
+    let before: Content | null = null;
+    if (published.length && p.lifecycleStatus !== "RETIRED") {
+      content = asContent(published[0].snapshot);
+      before = published[1] ? asContent(published[1].snapshot) : null;
+      if (!content && p.lifecycleStatus === "PUBLISHED") content = (await inForce(p.id))?.content ?? null;
+    }
+    const top = p.versions[0]?.number ?? 0;
+    const draftVersion = p.lifecycleStatus === "APPROVED" ? top || null : p.lifecycleStatus === "DRAFT" || p.lifecycleStatus === "IN_REVIEW" ? top + 1 : null;
+    const version = content ? published[0].number : draftVersion;
+    const counted = content
+      ? content.steps.filter((s) => s.n).map((s) => ({ id: s.id, label: s.label, roleId: s.roleId }))
+      : p.steps.map((s) => ({ id: "", label: s.label, roleId: s.assignedRoleId }));
+    const expected = content ? expectedAcknowledgers({ stepRoleIds: counted.map((s) => s.roleId), people }) : [];
     const read = new Set(acks.filter((a) => a.processId === p.id && a.versionNumber === version).map((a) => a.personKey));
-    return {
+    const changed = content ? changedSteps(before, content) : new Set<string>();
+    const isMine = (s: { roleId: string | null }) => !!s.roleId && mine.has(s.roleId);
+    rows.push({
       id: p.id,
       code: p.code,
       name: p.name,
       department: p.category?.name ?? null,
       status: p.lifecycleStatus,
+      inForce: !!content,
       version,
-      since: inForce?.publishedAt ?? p.publishedAt,
+      draftVersion,
+      since: content ? published[0].publishedAt : p.publishedAt,
       approverId: p.approverPersonId,
       approverName: p.approverName,
       submittedByName: p.submittedByName,
@@ -138,13 +168,17 @@ async function rowsWhere(slug: string, reader: Reader, where: Prisma.ProcessWher
       ownerName: p.owner?.name ?? null,
       owns: !!reader.personId && p.ownerPersonId === reader.personId,
       approves: !!reader.personId && p.approverPersonId === reader.personId,
-      mySteps: p.steps.filter((s) => s.assignedRoleId && mine.has(s.assignedRoleId)).map((s) => s.label),
+      mySteps: counted.filter(isMine).map((s) => s.label),
+      myChanged: counted.filter((s) => isMine(s) && changed.has(s.id)).map((s) => s.label),
       readers: expected.length,
       readBy: expected.filter((e) => read.has(e.personKey)).length,
       iRead: !!reader.key && read.has(reader.key),
-      noControl: p.controls.filter((c) => !c.control?.trim()).length,
-    };
-  });
+      noControl: content
+        ? content.steps.reduce((n, s) => n + s.controls.filter((c) => !c.control).length, 0) + content.looseNoControl.length
+        : p.controls.filter((c) => !c.control?.trim()).length,
+    });
+  }
+  return rows;
 }
 
 /** The three filters of the Processes tab (spec 067 §3.1): all in force, theirs (owned or approved), and the ones they have a step in. */
@@ -260,129 +294,51 @@ export async function doneLately(slug: string, reader: Reader, take = 6): Promis
     .slice(0, take);
 }
 
-export type ReadStep = {
-  id: string;
-  type: "START" | "TASK" | "DECISION" | "END";
-  /** The step's number among the steps a reader counts (tasks and decisions); null for Start and End. */
-  n: number | null;
-  label: string;
-  lane: string;
-  role: string | null;
-  acts: string[];
-  approval: string[];
-  time: string[];
-  controls: { risk: string; control: string | null }[];
+export type ReadStep = ContentStep & {
   mine: boolean;
+  /** Changed or added by the version in force, against the version before it. */
+  changed: boolean;
 };
 
-export type ReadProcess = {
+export type ReadProcess = Omit<Content, "steps"> & {
   row: ReadRow;
-  /** preview: the office reading the current draft as a reader will once it is published (Preview as manager, spec 067 §4.1). */
+  /**
+   * live: the version in force. approve: the version sent to this approver.
+   * notyet: the first version, with the approver or approved, read by its owner
+   * or approver. preview: the office reading the draft as a reader will once it
+   * is published (Preview as manager, spec 067 §4.1).
+   */
   mode: "live" | "approve" | "notyet" | "preview";
-  purpose: string | null;
-  inScope: string[];
-  outScope: string[];
-  kpis: { metric: string; target: string; frequency: string }[];
-  sopVersion: string | null;
-  sopEffectiveDate: string | null;
   versionNote: string | null;
   steps: ReadStep[];
-  lanes: { key: string; name: string | null }[];
-  connections: { from: string; to: string; label: string | null }[];
-  gaps: { stepId: string; kind: "ACCOUNTABLE" | "TOO_MANY_ACCOUNTABLE" | "RESPONSIBLE" }[];
-  looseNoControl: string[];
   stillToRead: string[];
 };
 
 /**
  * One process as the reader may read it: the version in force; or, for its
- * approver, the version sent to them (and once they approved it, the same
- * version until the office publishes it). Anything else is not theirs to read:
- * null, and the page answers 404.
+ * approver, the version sent to them; or, before any version is in force, the
+ * first one, to its owner or approver while it is with the approver or
+ * approved. Anything else is not theirs to read: null, and the page answers 404.
  */
 export const readProcess = cache(async (slug: string, processId: string, reader: Reader, preview = false): Promise<ReadProcess | null> => {
   const row = preview ? (await rowsWhere(slug, reader, { id: processId }))[0] : (await readingRows(slug, reader)).find((r) => r.id === processId);
   if (!row) return null;
-  /* the owner, like the approver, can read what is with the approver or approved, before it is in force */
   const mode = preview
     ? "preview"
-    : row.status === "PUBLISHED"
-      ? "live"
-      : row.approves && row.status === "IN_REVIEW"
-        ? "approve"
+    : row.approves && row.status === "IN_REVIEW"
+      ? "approve"
+      : row.inForce
+        ? "live"
         : (row.approves || row.owns) && (row.status === "APPROVED" || row.status === "IN_REVIEW")
           ? "notyet"
           : null;
   if (!mode) return null;
-  const p = await prisma.process.findUnique({
-    where: { id: processId },
-    select: {
-      processPurpose: true, inScope: true, outOfScope: true, kpis: true, sopVersion: true, sopEffectiveDate: true,
-      steps: { orderBy: { order: "asc" }, select: { id: true, type: true, label: true, detailedAction: true, raciSkipped: true, assignedRoleId: true, assignedRole: { select: { name: true } } } },
-      controls: { orderBy: { order: "asc" }, select: { stepId: true, risk: true, control: true } },
-      activities: { orderBy: { order: "asc" }, select: { id: true, name: true, relatedStepId: true, order: true, raciAssignments: { select: { roleId: true, code: true } } } },
-      authorityAssignments: { include: AUTHORITY_ASSIGNMENT_INCLUDE },
-      versions: { where: { number: row.version ?? -1 }, select: { changeNote: true } },
-    },
-  });
-  if (!p) return null;
-  const connections = await prisma.stepConnection.findMany({ where: { processId }, select: { fromStepId: true, toStepId: true, label: true } });
-
-  /* who a rule lands on, by name */
-  const roleIds = new Set<string>(), personIds = new Set<string>();
-  for (const a of p.authorityAssignments) for (const r of a.rules) { if (r.whoRoleId) roleIds.add(r.whoRoleId); if (r.whoPersonId) personIds.add(r.whoPersonId); }
-  const [roles, people] = await Promise.all([
-    prisma.role.findMany({ where: { id: { in: [...roleIds] } }, select: { id: true, name: true } }),
-    prisma.person.findMany({ where: { id: { in: [...personIds] } }, select: { id: true, name: true } }),
-  ]);
-  const who = new Map([...roles, ...people].map((x) => [x.id, x.name]));
-  const stepOfActivity = new Map(p.activities.map((a) => [a.id, a.relatedStepId]));
-  const rulesByStep = new Map<string, ReturnType<typeof toAuthorityAssignmentData>["rules"]>();
-  for (const a of p.authorityAssignments) {
-    if (a.skipped) continue;
-    const sid = a.stepId ?? (a.activityId ? stepOfActivity.get(a.activityId) : null);
-    if (sid) rulesByStep.set(sid, [...(rulesByStep.get(sid) ?? []), ...toAuthorityAssignmentData(a).rules]);
-  }
-
-  /* lanes are job titles, in the order they first do a step; Start and End sit with the step beside them */
-  const counted = p.steps.filter((s) => s.type === "TASK" || s.type === "DECISION");
-  const laneOf = (s: (typeof p.steps)[number]) =>
-    s.assignedRoleId ?? (s.type === "START" ? counted[0]?.assignedRoleId : s.type === "END" ? counted.at(-1)?.assignedRoleId : null) ?? "none";
-  const lanes: ReadProcess["lanes"] = [];
-  for (const s of p.steps) {
-    const k = laneOf(s);
-    if (!lanes.some((l) => l.key === k)) lanes.push({ key: k, name: k === "none" ? null : (p.steps.find((x) => x.assignedRoleId === k)?.assignedRole?.name ?? null) });
-  }
+  const held = mode === "live" ? await inForce(processId) : null;
+  const content = held ? held.content : await liveContent(processId);
+  if (!content) return null;
+  const changed = held ? changedSteps(held.before, held.content) : new Set<string>();
   const mine = new Set(reader.roleIds);
-  const steps: ReadStep[] = p.steps.map((s) => {
-    const rules = rulesByStep.get(s.id) ?? [];
-    const say = (measure: string) => rules.filter((r) => r.measure === measure).map((r) => describeAuthorityRule(r, (r.whoPersonId && who.get(r.whoPersonId)) || (r.whoRoleId && who.get(r.whoRoleId)) || null));
-    const i = counted.findIndex((c) => c.id === s.id);
-    return {
-      id: s.id,
-      type: s.type,
-      n: i >= 0 ? i + 1 : null,
-      label: s.label,
-      lane: laneOf(s),
-      role: s.assignedRole?.name ?? null,
-      acts: s.detailedAction,
-      approval: say("MONEY"),
-      time: say("TIME"),
-      controls: p.controls.filter((c) => c.stepId === s.id).map((c) => ({ risk: c.risk, control: c.control?.trim() || null })),
-      mine: !!s.assignedRoleId && mine.has(s.assignedRoleId),
-    };
-  });
-
-  /* the RACI's gaps, as the map and the RACI flag them (step-readiness.ts) */
-  const byStep = deriveGapsByStep({
-    steps: p.steps.map((s) => ({ id: s.id, type: s.type, label: s.label, raciSkipped: s.raciSkipped })),
-    activities: p.activities.map((a) => ({ id: a.id, name: a.name, relatedStepId: a.relatedStepId, order: a.order, assignments: a.raciAssignments })),
-    authorityAssignments: p.authorityAssignments.map(toAuthorityAssignmentData),
-    incomingStepIds: new Set(connections.map((c) => c.toStepId)),
-  });
-  const gaps: ReadProcess["gaps"] = [];
-  for (const s of counted)
-    for (const k of byStep.get(s.id) ?? []) if (k === "ACCOUNTABLE" || k === "TOO_MANY_ACCOUNTABLE" || k === "RESPONSIBLE") gaps.push({ stepId: s.id, kind: k });
+  const counted = content.steps.filter((s) => s.n);
 
   /* who is still to read the version in force */
   let stillToRead: string[] = [];
@@ -396,27 +352,17 @@ export const readProcess = cache(async (slug: string, processId: string, reader:
     const read = new Set(
       (await prisma.processAcknowledgement.findMany({ where: { processId, versionNumber: row.version ?? -1 }, select: { personKey: true } })).map((a) => a.personKey)
     );
-    stillToRead = expectedAcknowledgers({ stepRoleIds: counted.map((s) => s.assignedRoleId), people: reg })
+    stillToRead = expectedAcknowledgers({ stepRoleIds: counted.map((s) => s.roleId), people: reg })
       .filter((e) => !read.has(e.personKey))
       .map((e) => e.name);
   }
 
-  const kpis = Array.isArray(p.kpis) ? (p.kpis as { metric?: unknown; target?: unknown; frequency?: unknown }[]) : [];
   return {
+    ...content,
     row,
     mode,
-    purpose: p.processPurpose,
-    inScope: p.inScope,
-    outScope: p.outOfScope,
-    kpis: kpis.map((k) => ({ metric: String(k.metric ?? ""), target: String(k.target ?? ""), frequency: String(k.frequency ?? "") })).filter((k) => k.metric),
-    sopVersion: p.sopVersion,
-    sopEffectiveDate: p.sopEffectiveDate,
-    versionNote: mode === "live" ? p.versions[0]?.changeNote || null : row.changeNote,
-    steps,
-    lanes,
-    connections: connections.map((c) => ({ from: c.fromStepId, to: c.toStepId, label: c.label })),
-    gaps,
-    looseNoControl: p.controls.filter((c) => !c.stepId && !c.control?.trim()).map((c) => c.risk),
+    versionNote: held ? held.changeNote || null : row.changeNote,
+    steps: content.steps.map((s) => ({ ...s, mine: !!s.roleId && mine.has(s.roleId), changed: changed.has(s.id) })),
     stillToRead,
   };
 });

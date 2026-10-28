@@ -7,6 +7,7 @@ import { auth } from "@/ffp/lib/auth/config";
 import { readerSeat, requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { ok, notFound, unauthorized, validationError, type ActionResult } from "@/ffp/lib/actions/errors";
 import { readProcess, readerOf } from "@/ffp/lib/data/reading-side";
+import { inForce } from "@/ffp/lib/data/process-content";
 import { addMonths } from "@/ffp/lib/domain/process-lifecycle";
 
 /* OWNERS, REVIEWS AND SUGGESTIONS (spec 067 §3, §4.2; stage 4).
@@ -109,7 +110,7 @@ export async function confirmStillRight(input: z.infer<typeof processSchema>): P
   const me = await asReader(d.workspaceId);
   if (!me.ok) return me.res;
   const p = await prisma.process.findUnique({ where: { id: d.processId }, select: { workspaceId: true, archivedAt: true, lifecycleStatus: true, ownerPersonId: true, reviewIntervalMonths: true } });
-  if (!p || p.workspaceId !== d.workspaceId || p.archivedAt || p.lifecycleStatus !== "PUBLISHED") return notFound();
+  if (!p || p.workspaceId !== d.workspaceId || p.archivedAt || !(await inForce(d.processId))) return notFound();
   if (p.ownerPersonId !== me.reader.personId) return refuse("Only the process's owner can confirm its review");
   const now = new Date();
   const next = addMonths(now, p.reviewIntervalMonths);

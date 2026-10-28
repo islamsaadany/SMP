@@ -3,6 +3,7 @@ import { isOverdueForReview, STATUS_LABEL } from "@/ffp/lib/domain/process-lifec
 import { registerReady } from "@/ffp/lib/register-sync";
 import Link from "next/link";
 import { prisma } from "@/ffp/lib/db/client";
+import { Prisma } from "@/ffp/generated/prisma/client";
 import { CreateProcessForm, CloneProcessButton, EditProcessButton, ArchiveProcessButton } from "./process-forms";
 import { GenerateTemplateForm } from "./template-form";
 import { ImportPanel } from "./import-panel";
@@ -59,6 +60,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
         parentProcess: true,
         category: true,
         owner: { select: { name: true } },
+        /* the version in force while the next is drafted: published, and kept (stage 5, process-content.ts inForce) */
+        versions: { where: { publishedAt: { not: null }, snapshot: { not: Prisma.DbNull } }, orderBy: { number: "desc" }, take: 1, select: { number: true } },
         // Steps feed the "Branches from → starts at step" picker; the branch
         // origin feeds the sub-line under a branching process's name.
         steps: { select: { id: true, label: true }, orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
@@ -114,8 +117,10 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
     });
     const overdue = isOverdueForReview(p.lifecycleStatus, p.nextReviewDue, now);
     const sentBack = p.lifecycleStatus === "DRAFT" && !!p.returnReason;
+    /* while its next version is drawn, a process keeps the one in force (stage 5) */
+    const held = p.lifecycleStatus !== "PUBLISHED" && p.lifecycleStatus !== "RETIRED" && p.versions[0] ? ` · v${p.versions[0].number} in force` : "";
     /* "Where it is" sorts by what needs the office first */
-    const state = sentBack
+    const state0 = sentBack
       ? { label: "Sent back", tone: "bad", rank: 0 }
       : overdue
         ? { label: "Review overdue", tone: "bad", rank: 1 }
@@ -126,6 +131,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
             : p.lifecycleStatus === "DRAFT"
               ? { label: "Draft", tone: "q", rank: 4 }
               : { label: STATUS_LABEL[p.lifecycleStatus], tone: p.lifecycleStatus === "PUBLISHED" ? "good" : "q", rank: p.lifecycleStatus === "PUBLISHED" ? 5 : 6 };
+    const state = { ...state0, label: state0.label + held };
     return { marks, ready: Object.values(marks).filter(Boolean).length, gaps: d?.gaps ?? 0, state };
   };
   const factsById = new Map(processes.map((p) => [p.id, facts(p)]));

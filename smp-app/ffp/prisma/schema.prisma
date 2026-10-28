@@ -677,6 +677,8 @@ model ProcessVersion {
   approvedRole  String?
   approvedAt    DateTime  @default(now())
   publishedAt   DateTime?
+  /// Stage 5: what was approved, as readers read it (process-content.ts), so a draft can sit beside the version in force.
+  snapshot      Json?
 
   process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
 

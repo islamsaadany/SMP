@@ -12,8 +12,8 @@ export async function planAwaitingApprovalBy(workspaceId: string, personKey: str
 }
 
 /**
- * For one person on a client's People register: how many processes are
- * published, how many versions in force they have a step in and have not read,
+ * For one person on a client's People register: how many processes have a
+ * version in force, how many versions in force they have a step in and have not read,
  * and how many things wait for their approval. Read from the same list as the
  * reading side's To do (reading-side.ts todoOf), so the top bar and the page
  * never disagree. Never throws: a client whose Processes tables are not there
@@ -26,7 +26,7 @@ export async function readingFor(workspaceId: string, personKey: string): Promis
     const rows = await readingRows(workspaceId, reader);
     const todo = await todoOf(workspaceId, reader);
     return {
-      published: rows.filter((r) => r.status === "PUBLISHED").length,
+      published: rows.filter((r) => r.inForce).length,
       waiting: todo.filter((t) => t.kind === "read").length,
       /* the bar names two things: versions to read and things to approve (the plan included); reviews and answers wait on To do */
       approvals: todo.filter((t) => t.kind === "approve" || t.kind === "plan").length,

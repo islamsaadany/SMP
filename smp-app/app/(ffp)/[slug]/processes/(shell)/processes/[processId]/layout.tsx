@@ -13,6 +13,7 @@ import { getLocale, getMessages } from "@/ffp/lib/i18n/server";
 import { barVars } from "@/lib/branding.ts";
 import { BuilderFrame, type Dot, type SectionKey } from "./builder-frame";
 import { officeSuggestions, stepName } from "@/ffp/lib/data/office-suggestions";
+import { changedSteps, inForce as heldVersion, liveContent, sameContent } from "@/ffp/lib/data/process-content";
 
 /**
  * THE BUILDER PAGE (spec 067 §4.3, stage 3). Every page of one process (the
@@ -33,7 +34,6 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
       sopVersion: true, sopEffectiveDate: true, kpis: true, publishedAt: true, deepDiveDecision: true,
       category: { select: { name: true } },
       versions: { orderBy: { number: "desc" }, select: { number: true, publishedAt: true, approvedBy: true } },
-      steps: { select: { assignedRoleId: true } },
     },
   });
   if (!process || process.workspaceId !== workspaceId) notFound();
@@ -51,24 +51,31 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
   const m = all.builder.page;
   const g = gaps.get(processId) ?? { gaps: 0, kinds: new Set(), steps: 0, controls: 0, controlsMissing: 0 };
   const status = process.lifecycleStatus;
-  const inForce = process.versions.find((v) => v.publishedAt);
   const latest = process.versions[0];
   const sentBack = status === "DRAFT" && !!process.returnReason;
+  /* the version in force, kept beside the draft the office edits here (stage 5): readers keep it until the next is published */
+  const held = await heldVersion(processId);
+  const inForce = held ? { number: held.number, publishedAt: held.publishedAt } : null;
+  const now = held ? await liveContent(processId) : null;
+  const differs = !!held && !!now && !sameContent(held.content, now);
+  const changedCount = held && now ? changedSteps(held.content, now).size : 0;
+  const draftOpen = !!held && (status !== "PUBLISHED" || differs);
+  const draftVersion = status === "APPROVED" ? latest?.number ?? null : (latest?.number ?? 0) + 1;
   const date = (d: Date | null) => (d ? formatDate(d, locale) : null);
 
   const stateOf = (s: { lifecycleStatus: string; returnReason: string | null; approverName: string | null }, v: number | null) =>
     s.lifecycleStatus === "PUBLISHED" ? m.state.inForce(v) : s.lifecycleStatus === "IN_REVIEW" ? m.state.withApprover(s.approverName) : s.lifecycleStatus === "APPROVED" ? m.state.approved(v) : s.lifecycleStatus === "RETIRED" ? m.state.retired : s.returnReason ? m.state.sentBack : m.state.draft;
   const tone = status === "PUBLISHED" ? "bg-[#E4F0EA] text-[#1F6248]" : sentBack ? "bg-[#F7E3E0] text-[#8C3327]" : status === "IN_REVIEW" || status === "APPROVED" ? "bg-[#F7EFD6] text-[#7A5D1C]" : "bg-[#EFF2F6] text-[#414A58]";
-  const version = status === "PUBLISHED" ? inForce?.number ?? null : latest?.number ?? null;
+  const version = status === "PUBLISHED" ? inForce?.number ?? null : status === "APPROVED" ? latest?.number ?? null : draftVersion;
 
   const marks = readinessMarks({ steps: g.steps, kinds: g.kinds, controls: g.controls, controlsMissing: g.controlsMissing, sopVersion: process.sopVersion, sopEffectiveDate: process.sopEffectiveDate, lifecycleStatus: status });
   const ready = Object.values(marks).filter(Boolean).length;
 
   /* who has read the version in force: everyone whose job title does a step (process-reader.ts) */
   let read: { done: number; total: number } | null = null;
-  if (status === "PUBLISHED" && inForce) {
+  if (held && inForce) {
     const people = await prisma.person.findMany({ where: { workspaceId, archivedAt: null, smpKey: { not: null } }, select: { smpKey: true, name: true, personRoles: { select: { roleId: true } } } });
-    const expected = expectedAcknowledgers({ stepRoleIds: process.steps.map((s) => s.assignedRoleId), people: people.map((p) => ({ personKey: p.smpKey, name: p.name, roleIds: p.personRoles.map((r) => r.roleId) })) });
+    const expected = expectedAcknowledgers({ stepRoleIds: held.content.steps.filter((s) => s.n).map((s) => s.roleId), people: people.map((p) => ({ personKey: p.smpKey, name: p.name, roleIds: p.personRoles.map((r) => r.roleId) })) });
     const acked = new Set((await prisma.processAcknowledgement.findMany({ where: { processId, versionNumber: inForce.number }, select: { personKey: true } })).map((a) => a.personKey));
     read = { done: expected.filter((e) => acked.has(e.personKey)).length, total: expected.length };
   }
@@ -83,7 +90,7 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
     authority: !drawn ? "q" : has("APPROVER", "INCOMPLETE_RULE") ? "bad" : "ok",
     risks: !g.controls ? "q" : g.controlsMissing ? "bad" : "ok",
     quality: ncs.some((n) => n.status !== "closed") ? "bad" : kpis || ncs.length ? "ok" : "q",
-    lifecycle: sentBack ? "bad" : status === "PUBLISHED" ? "ok" : "q",
+    lifecycle: sentBack ? "bad" : held ? "ok" : "q",
     people: "q",
     compliance: "q",
     connections: "q",
@@ -103,6 +110,12 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
               ? m.strip.withApproverLine(process.approverName, date(process.submittedAt))
               : m.strip.approvedLine(latest?.approvedBy || process.approverName)}
         </span>
+      </div>
+    ) : held ? (
+      /* in force, with or without the next version being drawn */
+      <div className={`mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border px-3 py-2.5 text-[13.5px] ${draftOpen ? "border-[#C9A24D] bg-[#FBF6E9]" : "border-[#16325C] bg-white"}`}>
+        <b className={`text-[11px] font-extrabold uppercase tracking-[.1em] ${draftOpen ? "text-[#8A6B22]" : "text-[#16325C]"}`}>{draftOpen ? m.draftLabel : m.inForceLabel}</b>
+        <span>{draftOpen ? m.draftLine(held.number, draftVersion, changedCount) : m.inForceLine(held.number)}</span>
       </div>
     ) : null;
 
@@ -135,18 +148,38 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
       name={process.name}
       pill={
         <>
-          <span className={`inline-flex whitespace-nowrap rounded-full px-[9px] py-px text-[11.5px] font-semibold ${tone}`}>{stateOf(process, version)}</span>
+          {held && status !== "PUBLISHED" && status !== "RETIRED" && (
+            <span className="inline-flex whitespace-nowrap rounded-full bg-[#E4F0EA] px-[9px] py-px text-[11.5px] font-semibold text-[#1F6248]">{m.state.inForce(held.number)}</span>
+          )}
+          <span className={`inline-flex whitespace-nowrap rounded-full px-[9px] py-px text-[11.5px] font-semibold ${tone}`}>
+            {held && status === "DRAFT" && !sentBack ? m.draftOf(draftVersion) : stateOf(process, version)}
+          </span>
+          {held && status === "PUBLISHED" && differs && (
+            <span className="inline-flex whitespace-nowrap rounded-full bg-[#EFF2F6] px-[9px] py-px text-[11.5px] font-semibold text-[#414A58]">{m.draftOf(draftVersion)}</span>
+          )}
           {deepDive}
         </>
       }
       sub={
         <>
-          {status === "PUBLISHED" && (inForce?.publishedAt ?? process.publishedAt) ? `${m.since(version, date(inForce?.publishedAt ?? process.publishedAt)!)} · ` : ""}
+          {inForce ? `${m.since(inForce.number, date(inForce.publishedAt)!)} · ` : ""}
           {drafting[0] ? `${m.fromSuggestion(drafting[0].byName, stepName(drafting[0], all.reading.page.step))} · ` : ""}
           {m.owner} <b>{process.owner?.name ?? m.noOwner}</b> · {m.subApprover} <b>{process.approverName ?? m.noApprover}</b>
         </>
       }
-      next={status === "DRAFT" ? (sentBack ? m.next.sendAgain : m.next.send) : status === "APPROVED" ? m.next.publish(latest?.number ?? null) : null}
+      next={
+        status === "DRAFT"
+          ? sentBack
+            ? m.next.sendAgain
+            : held
+              ? m.sendVersion(draftVersion)
+              : m.next.send
+          : status === "PUBLISHED" && differs
+            ? m.sendVersion(draftVersion)
+            : status === "APPROVED"
+              ? m.next.publish(latest?.number ?? null)
+              : null
+      }
       canPreview={drawn}
       tiles={[
         { n: g.steps, label: m.tiles.steps },

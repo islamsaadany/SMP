@@ -32,6 +32,10 @@ export type PanelProps = {
   reviewIntervalMonths: number;
   /** Server-decided: this signed-in person is the approver or the sender. */
   canReturnFromReview: boolean;
+  /** Stage 5: the version in force, if any; whether the process has changed since it; the number the next version will carry. */
+  inForce: number | null;
+  changed: boolean;
+  nextVersion: number;
 };
 
 export function LifecyclePanel(p: PanelProps) {
@@ -97,7 +101,7 @@ export function LifecyclePanel(p: PanelProps) {
         </p>
       )}
 
-      {p.status === "DRAFT" && (
+      {(p.status === "DRAFT" || (p.status === "PUBLISHED" && p.changed)) && (
         <form onSubmit={submit} className="space-y-3">
           {p.returnReason && (
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
@@ -105,7 +109,9 @@ export function LifecyclePanel(p: PanelProps) {
             </p>
           )}
           <p className="text-sm text-slate-600">
-            This is a draft. Pick who approves it and say what changed, then send it for review.
+            {p.inForce
+              ? `This is draft v${p.nextVersion}. Readers keep v${p.inForce} until it is approved and published. Pick who approves it and say what changed, then send it for review.`
+              : "This is a draft. Pick who approves it and say what changed, then send it for review."}
           </p>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold text-slate-700">Approver</span>
@@ -171,7 +177,7 @@ export function LifecyclePanel(p: PanelProps) {
         </form>
       )}
 
-      {p.status !== "DRAFT" && (
+      {p.status !== "DRAFT" && !(p.status === "PUBLISHED" && p.changed) && (
         <dl className="mb-3 grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1 text-sm">
           <dt className="text-slate-500">Approver</dt>
           <dd>{p.approver ? label(p.approver) : "Not recorded"}</dd>

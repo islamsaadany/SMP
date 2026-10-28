@@ -31,11 +31,11 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
       x.kind === "plan"
         ? { key: "plan", code: null, name: t.planName, what: t.planWhat, meta: t.planMeta, why: t.planWhy, act: m.act.plan, href: `${base}/priorities` }
         : x.kind === "approve"
-          ? { key: x.row.id, code: x.row.code, name: x.row.name, what: t.approveWhat(x.row.version), meta: t.approveMeta(x.row.submittedByName, date(x.row.submittedAt)), why: t.approveWhy, act: m.act.approve, href: `${base}/${x.row.id}` }
+          ? { key: x.row.id, code: x.row.code, name: x.row.name, what: t.approveWhat(x.row.draftVersion), meta: t.approveMeta(x.row.submittedByName, date(x.row.submittedAt)), why: t.approveWhy, act: m.act.approve, href: `${base}/${x.row.id}` }
           : x.kind === "review"
             ? { key: `v${x.row.id}`, code: x.row.code, name: x.row.name, what: t.reviewWhat(daysUntil(x.row.nextReviewDue!) < 0, date(x.row.nextReviewDue)!), meta: t.reviewMeta, why: t.reviewWhy, act: m.act.review(date(x.row.nextReviewDue)!), href: `${base}/${x.row.id}?tab=summary` }
             : x.kind === "read"
-              ? { key: x.row.id, code: x.row.code, name: x.row.name, what: t.readWhat(x.row.version, date(x.row.since)), meta: t.readMeta(x.row.mySteps), why: t.readWhy, act: m.act.read, href: `${base}/${x.row.id}?tab=steps` }
+              ? { key: x.row.id, code: x.row.code, name: x.row.name, what: t.readWhat(x.row.version, date(x.row.since)), meta: x.row.myChanged.length ? t.readChanged(x.row.myChanged) : t.readMeta(x.row.mySteps), why: t.readWhy, act: m.act.read, href: `${base}/${x.row.id}?tab=steps` }
               : { key: x.s.id, code: null, name: x.s.processName ?? x.s.text.split(":")[0], what: t.answerWhat(step(x.s.stepId, x.s.stepLabel)), meta: t.answerMeta(x.s.answerBy, date(x.s.answeredAt)), why: t.answerWhy, act: m.act.reply, href: null };
     return (
       <div key={c.key} className="mt-1.5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 gap-y-1.5 rounded-lg border border-s-4 border-[#D6DCE5] border-s-[#C9A24D] bg-white px-4 py-3.5 max-sm:grid-cols-1">

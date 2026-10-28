@@ -271,6 +271,50 @@ const rv = (await q(ffp, 'select "nextReviewDue" d, "reviewConfirmedByKey" k fro
 const away = (new Date(rv.d) - Date.now()) / 86400000;
 check(rv.k === "fn_fin" && away > 360 && away < 370, "It is still right puts the next review a year away, recorded against the owner", JSON.stringify(rv));
 
+/* ── 2c · the next version is drafted beside the one in force (stage 5, spec 067 §1) ── */
+const steps2 = async (pg) => { await pg.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=steps", { waitUntil: "networkidle" }); return body(pg); };
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P2 + "/map", { waitUntil: "networkidle" });
+await A.page.click("button:text-is('☰ Steps List')");
+await A.page.click("button[aria-label='Edit Raise the invoice']");
+const stepForm = A.page.locator("div.border-indigo-200", { has: A.page.getByLabel("Step name") });
+await stepForm.getByLabel("Step name").fill("Raise the invoice the same day");
+await stepForm.locator("button:text-is('Save')").click();
+await A.page.waitForSelector("button[aria-label='Edit Raise the invoice the same day']", { timeout: 20000 });
+check((await st(P2)).s === "DRAFT", "the office edits a step of the version in force: the process is a draft again");
+let s2 = await steps2(T.page);
+check(/Raise the invoice/.test(s2) && !/the same day/.test(s2) && /In force · v1/i.test(s2), "staff keep reading version 1 while version 2 is drafted", (s2.match(/Raise the invoice.{0,40}/) || [""])[0]);
+await T.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
+check(!!(await T.page.$("a:text-is('Supplier onboarding')")), "…and it stays in their list, open to read");
+await A.page.goto(L(P2), { waitUntil: "networkidle" });
+const b2 = await body(A.page);
+check(/In force · v1/i.test(b2) && /Draft v2: 1 step changed since v1/.test(b2) && /This is draft v2\. Readers keep v1/.test(b2), "the builder shows version 1 in force beside draft v2, with what changed", (b2.match(/Draft v2[^.]*\./) || [""])[0]);
+await A.page.selectOption("select[name=approver]", people.fn_fin);
+await A.page.fill("textarea[name=changeNote]", "Invoices go out the day the goods do");
+await A.page.click("button:text-is('Send for review')");
+await A.page.waitForFunction(() => /Waiting for/.test(document.body.innerText), null, { timeout: 20000 });
+s2 = await steps2(T.page);
+check((await st(P2)).s === "IN_REVIEW" && !/the same day/.test(s2), "sent for review: staff still read version 1");
+await B.page.goto(BASE + "/" + S + "/processes/read/" + P2, { waitUntil: "networkidle" });
+await waitFor(B.page, "button:text-is('Approve v2')", "the approver's Approve v2 button");
+check(/the same day/.test(await body(B.page)), "the approver reads draft v2, not the version in force");
+await B.page.click("button:text-is('Approve v2')");
+await B.page.waitForFunction(() => /\/processes\/read$/.test(location.pathname), null, { timeout: 20000 });
+s2 = await steps2(T.page);
+check((await st(P2)).s === "APPROVED" && !/the same day/.test(s2), "approved: staff still read version 1 until the office publishes");
+await A.page.goto(L(P2), { waitUntil: "networkidle" });
+await waitFor(A.page, "button:text-is('Publish')", "Publish v2 after approval");
+await A.page.click("button:text-is('Publish')");
+await waitFor(A.page, "button:text-is('Retire')", "Retire after publishing v2");
+r = await st(P2);
+s2 = await steps2(T.page);
+check(r.s === "PUBLISHED" && r.v === "v2" && /Raise the invoice the same day/.test(s2) && /Changed in v2/i.test(s2), "published: staff read version 2, its changed step marked", JSON.stringify(r));
+const todo2 = await body((await T.page.goto(BASE + "/" + S + "/processes/read/todo", { waitUntil: "networkidle" }), T.page));
+check(/Your step changed: Raise the invoice the same day/i.test(todo2) && /1 to read/.test((await T.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "having read version 1, they are asked to read version 2, told their step changed", (todo2.match(/To read.{0,120}/i) || [""])[0]);
+const sg2 = await q(ffp, 'select state from process_suggestions where "processId"=$1', [P2]);
+check(sg2.length === 1 && sg2[0].state === "CLOSED", "the suggestion worked into version 2 closes when it is published", JSON.stringify(sg2));
+await A.page.goto(L(P2), { waitUntil: "networkidle" });
+check(!(await A.page.$("select[name=approver]")), "with nothing changed since version 2, there is nothing to send");
+
 /* ── 3 · the gate: a client's own person opens nothing else of Processes ── */
 const office = ["processes/priorities", "processes/reports/priorities", "processes", "processes/processes", "processes/processes/" + P2, "processes/processes/" + P2 + "/map", "processes/processes/" + P2 + "/raci", "processes/processes/" + P2 + "/review", "processes/governance", "processes/reports", "processes/reports/sop", "processes/export", "processes/handle", "processes/roles", "processes/value-chain", "processes/helicopter"];
 for (const p of office) {

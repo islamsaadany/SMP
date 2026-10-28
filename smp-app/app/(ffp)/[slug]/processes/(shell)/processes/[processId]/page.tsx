@@ -12,6 +12,7 @@ import { LifecyclePanel } from "./lifecycle-panel";
 import { AddControlForm, DeleteControlButton, AddNonConformanceForm, NonConformanceStatus } from "./quality-forms";
 import { getMessages } from "@/ffp/lib/i18n/server";
 import { OwnerPicker } from "./owner-picker";
+import { inForce as heldVersion, liveContent, sameContent } from "@/ffp/lib/data/process-content";
 
 /* The process page's own sections in the builder's menu (builder-frame.tsx); the Map, RACI, Authority and Check with AI are pages of their own. */
 const TABS = ["lifecycle", "risks", "quality", "people", "compliance", "connections"] as const;
@@ -77,14 +78,14 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
   });
   // Who is expected to have read the version in force, and who has: people
   // holding a role one of the steps is given to, against the acknowledgements.
-  const inForce = versions.find((v) => v.publishedAt);
-  const ackRows =
-    process.lifecycleStatus === "PUBLISHED" && inForce
-      ? await prisma.processAcknowledgement.findMany({ where: { processId, versionNumber: inForce.number }, select: { personKey: true } })
-      : [];
+  // The version in force stays in force while the next is drawn (stage 5): its steps say who reads it.
+  const held = tab === "lifecycle" ? await heldVersion(processId) : null;
+  const inForce = held ? { number: held.number } : null;
+  const changed = held ? !sameContent(held.content, (await liveContent(processId))!) : false;
+  const ackRows = inForce ? await prisma.processAcknowledgement.findMany({ where: { processId, versionNumber: inForce.number }, select: { personKey: true } }) : [];
   const progress = acknowledgementProgress(
     expectedAcknowledgers({
-      stepRoleIds: stepList.map((s) => s.assignedRoleId),
+      stepRoleIds: held ? held.content.steps.filter((s) => s.n).map((s) => s.roleId) : [],
       people: registerPeople.map((x) => ({ personKey: x.smpKey, name: x.name, roleIds: x.personRoles.map((r) => r.roleId) })),
     }),
     new Set(ackRows.map((a) => a.personKey))
@@ -128,8 +129,11 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
               returnReason={process.returnReason}
               reviewIntervalMonths={process.reviewIntervalMonths}
               canReturnFromReview={canReturnFromReview}
+              inForce={inForce?.number ?? null}
+              changed={changed}
+              nextVersion={(versions[0]?.number ?? 0) + 1}
             />
-            {process.lifecycleStatus === "PUBLISHED" && process.nextReviewDue && (
+            {inForce && process.nextReviewDue && (
               <Card title="Next review">
                 <p className={`text-sm ${overdue ? "font-semibold text-rose-700" : "text-slate-700"}`}>
                   {String(process.nextReviewDue.toISOString()).slice(0, 10)} ·{" "}
@@ -139,7 +143,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
                 </p>
               </Card>
             )}
-            {process.lifecycleStatus === "PUBLISHED" && (
+            {inForce && (
               <Card title="Link for staff">
                 <StaffLink label="Send this to the people who should read it" path={`/${workspaceId}/processes/read/${processId}`} />
                 <p className="mt-2 text-xs text-slate-500">
@@ -147,7 +151,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
                 </p>
               </Card>
             )}
-            {process.lifecycleStatus === "PUBLISHED" && inForce && (
+            {inForce && (
               <Card title={`Read and acknowledged · v${inForce.number}`}>
                 {progress.total === 0 ? (
                   <p className="text-sm text-slate-500">

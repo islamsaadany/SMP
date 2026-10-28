@@ -161,6 +161,9 @@ export function ReadingFlow({ steps, lanes, connections, toSteps, suggest }: Pic
                   className={`relative z-[2] w-[108px] self-center justify-self-center rounded-lg border-[1.5px] bg-white px-[9px] py-1.5 text-left ${s.type === "DECISION" ? "border-dashed border-[#16325C]" : "border-[#78899F]"} ${s.id === sel ? "shadow-[0_0_0_3px_#C9A24D]" : ""}`}
                 >
                   {inner}
+                  {s.changed && (
+                    <span className="absolute -left-1.5 -top-[9px] rounded-[3px] bg-[#C9A24D] px-1 text-[9px] font-extrabold tracking-[.05em] text-[#16325C]">{m.changed.toUpperCase()}</span>
+                  )}
                   {s.controls.some((c) => !c.control) && (
                     <span title={m.noControlChip} className="absolute -right-[7px] -top-[9px] grid h-[18px] w-[18px] place-items-center rounded-full bg-[#B04434] text-[11px] font-extrabold text-white">
                       !

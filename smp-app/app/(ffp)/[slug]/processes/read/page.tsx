@@ -54,7 +54,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
           </Btn>
         )
       );
-  const openable = (r: ReadRow) => r.status === "PUBLISHED" || ((r.approves || r.owns) && (r.status === "IN_REVIEW" || r.status === "APPROVED"));
+  const openable = (r: ReadRow) => r.inForce || ((r.approves || r.owns) && (r.status === "IN_REVIEW" || r.status === "APPROVED"));
   const name = (r: ReadRow) => (
     <>
       <Code>{r.code}</Code>{" "}
@@ -68,7 +68,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
     </>
   );
   const where = (r: ReadRow): [Tone, string] =>
-    r.status === "PUBLISHED"
+    r.inForce
       ? ["good", m.state.inForce(r.version)]
       : r.status === "IN_REVIEW"
         ? ["attn", m.state.inReview]
@@ -83,16 +83,17 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
     const flags = (r: ReadRow): Flag[] => {
       const out: Flag[] = [];
       if (r.noControl) out.push(["bad", m.flags.noControl(r.noControl)]);
-      if (r.status === "PUBLISHED") {
+      if (r.inForce) {
         out.push([r.readBy < r.readers ? "warn" : "", m.flags.read(r.readBy, r.readers)]);
         if (r.nextReviewDue) {
           const d = daysUntil(r.nextReviewDue);
           out.push(d < 0 ? ["bad", m.flags.reviewLate] : d <= 30 ? ["warn", m.flags.reviewIn(d)] : ["", m.flags.reviewOn(date(r.nextReviewDue))]);
         }
       }
-      if (r.status === "IN_REVIEW") out.push(["warn", r.approves ? m.flags.yourApproval : m.state.inReview]);
-      if (r.status === "APPROVED") out.push(["good", m.flags.approved(r.version)]);
+      if (r.status === "IN_REVIEW") out.push(["warn", r.approves ? m.flags.yourApproval : r.inForce ? m.flags.draftWith(r.draftVersion, r.approverName) : m.state.inReview]);
+      if (r.status === "APPROVED") out.push(["good", m.flags.approved(r.draftVersion)]);
       if (r.status === "DRAFT" && r.returnReason) out.push(["warn", m.flags.sentBack]);
+      else if (r.status === "DRAFT" && r.inForce) out.push(["", m.flags.draftOpen(r.draftVersion)]);
       return out;
     };
     body = (

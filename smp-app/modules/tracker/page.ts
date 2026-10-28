@@ -394,14 +394,14 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
    page writes at the top — one renderer, one behaviour (§53.5) — with its
    topic fixed by the card it stands in and its week already Next week. */
 .addrow.chk{grid-template-columns:20px minmax(0,1fr) auto auto auto 0 26px;padding:7px 14px;gap:10px}
-.addrow.chk .when,.addrow.chk .who,.addrow.chk .more{visibility:visible}
+.addrow.chk .tpk,.addrow.chk .when,.addrow.chk .who,.addrow.chk .more{visibility:visible}
 .addrow.chk .ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:4px 6px;white-space:nowrap}
 .blk .quiet{padding:10px 14px;font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic}
 .sec .asleep{font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic;padding:10px 0 0}
 @media (max-width:760px){.strip{gap:14px}.open{grid-template-columns:1fr;padding-left:4px}
   .row.chk{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t t more" ". when st more" ". carry carry carry"}
   .row.chk .tick{grid-area:tick}.row.chk .tn2{grid-area:t}.row.chk .st{grid-area:st}.row.chk .when{grid-area:when}.row.chk .who{display:none}.row.chk .carry{grid-area:carry}.row.chk .more{grid-area:more}
-  .addrow.chk{grid-template-columns:20px minmax(0,1fr) 26px}.addrow.chk .when,.addrow.chk .who,.addrow.chk .ent{display:none}
+  .addrow.chk{grid-template-columns:20px minmax(0,1fr) 26px}.addrow.chk .tpk,.addrow.chk .when,.addrow.chk .who,.addrow.chk .ent{display:none}
   .tpanel{width:min(380px,calc(var(--winw) - 32px))}
   .addrow{grid-template-columns:20px minmax(0,1fr) 26px}.addrow .tpk,.addrow .when,.addrow .who,.addrow .st{display:none}
   .row{grid-template-columns:20px minmax(0,1fr) auto auto 26px;grid-template-areas:"tick t t st more" ". when tcol who more"}.row .tick{grid-area:tick}.row .tn2{grid-area:t}.row .tcol{grid-area:tcol;justify-self:start}.row .st{grid-area:st}.row .when{grid-area:when}.row .who{grid-area:who}.row .more{grid-area:more}
@@ -728,21 +728,59 @@ function grouped(shown: Action[], L: Loaded, group: Group, today: string, dates:
    answered, because at a check they always have the same answer. The TOPIC
    is the card it stands in, so it is not asked for; the WEEK is Next week,
    because that is what the meeting is writing. Both are still changeable:
-   the week opens the same picker every other line opens. */
-function writeLine(t: Topic | null, L: Loaded, me: string, meShort: string, today: string, dates: Format): string {
-  const nx = nextWeekDay(today);
-  const label = t ? "Write next week's action for " + t.name : "Write next week's action";
-  return '<div class="addrow chk" data-due="' + esc(nx) + '" data-owner="' + esc(me) + '"' + (t ? ' data-topic="' + esc(t.id) + '"' : "") + ">" +
+   the week opens the same picker every other line opens.
+
+   AND THE LIST'S OWN SECTIONS WRITE ON IT TOO (§656). Islam: an action added
+   under a person or a topic *"should appear in the same place rather than
+   adding from the top task entry"*. So the same line stands inside every
+   section the list is grouped by — a topic's, with the topic fixed as on
+   the check; a person's, with the OWNER fixed, drawn as a name and not a
+   pick, because a line under Noran that could hand the action to Omar
+   would land it elsewhere with nothing on the screen saying so (§96). Due
+   this week, as the page's own line is. It is drawn `hidden` and the
+   section's "+ Add to …" / "+ Add for …" opens it where the press was made,
+   so the row lands under the heading the hand is already on. The page's
+   own line at the top stays for an action under nobody and nothing in
+   particular. One line, named by what it writes into: `data-line` is
+   "t:<topic>" or "o:<owner>", and the script knows no other way to tell. */
+type Line = { key: string; topic: Topic | null; owner: string | null; due: string; label: string; hidden?: boolean };
+function writeLine(f: Line, L: Loaded, me: string, meShort: string, today: string, dates: Format): string {
+  const owner = f.owner || me;
+  const ownerShort = f.owner ? L.short.get(f.owner) || L.names.get(f.owner) || f.owner : meShort;
+  return '<div class="addrow chk" data-due="' + esc(f.due) + '" data-owner="' + esc(owner) + '"' + (f.topic ? ' data-topic="' + esc(f.topic.id) + '"' : "") +
+    ' data-line="' + esc(f.key) + '"' + (f.hidden ? " hidden" : "") + ">" +
     '<span class="plus">' + PEN + "</span>" +
-    '<div class="tn"><input class="new" data-act="add" placeholder="' + esc(label) + '" aria-label="' + esc(label) + '" maxlength="200">' +
+    '<div class="tn"><input class="new" data-act="add" placeholder="' + esc(f.label) + '" aria-label="' + esc(f.label) + '" maxlength="200">' +
     '<input class="nt" placeholder="A note, if the line needs one" aria-label="Note for the new action" maxlength="5000" hidden></div>' +
+    /* the topic is picked where the line does not already stand in one */
+    (f.topic ? "" : topicPick(L)) +
     (dates === "weeks"
-      ? '<span class="when pick" role="button" tabindex="0" data-act="due" data-due="' + esc(nx) + '" aria-haspopup="listbox" aria-expanded="false" title="Which week"><span class="wk">' + esc(weekWord(nx, today)) + "</span>" + weeksList(today, nx) + "</span>"
-      : '<button class="when pick" type="button" data-act="due" data-due="' + esc(nx) + '" title="Which day">' + esc(readableDay(nx, today)) + "</button>") +
-    '<span class="who pick" role="button" tabindex="0" data-act="who" aria-haspopup="listbox" aria-expanded="false" title="Whose it is"><span class="wn">' + esc(meShort) + "</span>" + teamList(L, me) + "</span>" +
-    '<span class="ent" aria-hidden="true">Enter</span><span class="st"></span>' +
+      ? '<span class="when pick" role="button" tabindex="0" data-act="due" data-due="' + esc(f.due) + '" aria-haspopup="listbox" aria-expanded="false" title="Which week"><span class="wk">' + esc(weekWord(f.due, today)) + "</span>" + weeksList(today, f.due) + "</span>"
+      : '<button class="when pick" type="button" data-act="due" data-due="' + esc(f.due) + '" title="Which day">' + esc(readableDay(f.due, today)) + "</button>") +
+    (f.owner
+      ? '<span class="who" title="Whose it is"><span class="wn">' + esc(ownerShort) + "</span></span>"
+      : '<span class="who pick" role="button" tabindex="0" data-act="who" aria-haspopup="listbox" aria-expanded="false" title="Whose it is"><span class="wn">' + esc(ownerShort) + "</span>" + teamList(L, owner) + "</span>") +
+    /* the Enter badge stands where the topic pick would, so the line keeps
+       its seven cells whichever of the two it carries */
+    (f.topic ? '<span class="ent" aria-hidden="true">Enter</span>' : "") + '<span class="st"></span>' +
     '<button class="more" type="button" data-act="add-note" aria-expanded="false" aria-label="Add a note" title="Add a note">' + ARROW + "</button>" +
     "</div>";
+}
+/* The check's own line (§532): next week, inside its topic. */
+function checkLine(t: Topic, L: Loaded, me: string, meShort: string, today: string, dates: Format): string {
+  return writeLine({ key: "t:" + t.id, topic: t, owner: null, due: nextWeekDay(today), label: "Write next week's action for " + t.name }, L, me, meShort, today, dates);
+}
+
+/* THE ADD LINE'S TOPIC (§497): the open topics, No topic, and a new one
+   named in the box under them — the one list the page's line and a
+   person's section line both open. */
+function topicPick(L: Loaded): string {
+  const openTopics = L.topics.filter((t) => !t.closed);
+  return '<span class="tpk" role="button" tabindex="0" data-act="tpk" aria-haspopup="listbox" aria-expanded="false" title="Which topic"><span class="tw">Topic</span>' +
+    '<span class="topics" role="listbox" aria-label="Topic" hidden>' +
+    openTopics.map((t) => '<button type="button" role="option" data-act="pick-topic" data-topic="' + esc(t.id) + '">' + esc(t.name) + "</button>").join("") +
+    '<button type="button" role="option" data-act="pick-topic" data-topic="">No topic</button>' +
+    '<input class="tnew" placeholder="New topic…" aria-label="New topic" maxlength="120"></span></span>';
 }
 
 /* ONE WEEK'S CARD. Drawn only where there is something in it — a card over
@@ -798,7 +836,7 @@ function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { 
     const asleep = t && !rows.length
       ? '<div class="asleep">Nothing on this topic in these three weeks. Write the next action, or close the topic from its &middot;&middot;&middot;</div>'
       : "";
-    const line = me && t && !t.closed ? writeLine(t, L, me, meShort, today, dates) : "";
+    const line = me && t && !t.closed ? checkLine(t, L, me, meShort, today, dates) : "";
     const body = weekCard("last", draw("last"), today) + weekCard("now", draw("now"), today) +
       (t ? weekCard("next", draw("next"), today, line) : weekCard("next", draw("next"), today));
     return '<div class="sec" data-key="' + esc(t ? t.id : "none") + '">' + head + asleep + body + "</div>";
@@ -956,9 +994,11 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
 
   /* THE SECTIONS (§497): a numbered heading, its open and late counts, its
      rows with the done ones folded under "N done ›", and — for a topic — how
-     much of it is done, a thin bar, its menu and "+ Add to <topic>". A topic
-     with no rows in this view is not drawn: a heading never stands over
-     nothing. Grouped by nothing, one section and no heading. */
+     much of it is done, a thin bar, its menu and "+ Add to <topic>"; for a
+     person, "+ Add for <name>". Either opens the section's own write line
+     (§656), so the action lands under the heading it was written under. A
+     topic with no rows in this view is not drawn: a heading never stands
+     over nothing. Grouped by nothing, one section and no heading. */
   /* THE WEEKLY CHECK IS NOT THE LIST WITH A FILTER ON IT (§532). It is read
      by topic, three weeks deep, and it carries no add line or search at the
      top: the writing happens inside the topic the meeting is on, which is
@@ -976,6 +1016,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
   }
 
   const groups = grouped(shown, L, group, today, dates);
+  const thu = thursdayOf(today);
   let ix = 0;
   const secs = groups.map((g) => {
     const open = g.rows.filter((a) => a.status !== "done");
@@ -995,9 +1036,24 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
         '<span class="end">' + (t ? (t.closed ? '<span class="shut">Closed</span>' : "") + allDone + " of " + all4.length + " done" + topicMenu(t) : "") + "</span></div>" +
         (t ? '<div class="meter"><i style="width:' + (all4.length ? Math.round(allDone * 100 / all4.length) : 0) + '%"></i></div>' : "");
     }
+    /* THE SECTION'S OWN LINE (§656): under a topic's rows with the topic
+       fixed, under a person's with the owner fixed; hidden until the foot's
+       "+ Add …" opens it, so the action is written where it will land. The
+       break puts §497's way back — the press fills the line at the TOP and
+       scrolls there — which must turn checks/tracker.mjs red (§94.5). */
+    const atTop = brk() === "add-at-top";
+    const who4 = group === "owner" && me && !atTop ? g.key : "";
+    const who4Name = who4 ? L.short.get(who4) || L.names.get(who4) || who4 : "";
+    const line = t && !t.closed && me && !atTop
+      ? writeLine({ key: "t:" + t.id, topic: t, owner: null, due: thu, label: "Write the next action for " + t.name, hidden: true }, L, me, meShort, today, dates)
+      : who4 && me
+        ? writeLine({ key: "o:" + who4, topic: null, owner: who4, due: thu, label: "Write the next action for " + who4Name, hidden: true }, L, me, meShort, today, dates)
+        : "";
+    const addWord = t ? "Add to " + esc(t.name) : who4 ? "Add for " + esc(who4Name) : "";
     const foot = (done ? '<button type="button" data-act="show-done">' + done + " done &rsaquo;</button>" : "") +
-      (t && !t.closed && me ? '<button type="button" data-act="add-to-topic" data-topic="' + esc(t.id) + '" data-name="' + esc(t.name) + '"><b>+</b> Add to ' + esc(t.name) + "</button>" : "");
-    return '<div class="sec" data-key="' + esc(g.key) + '">' + head + rows + (foot ? '<div class="foot">' + foot + "</div>" : "") + "</div>";
+      (line ? '<button type="button" data-act="add-here" data-line="' + esc(t ? "t:" + t.id : "o:" + who4) + '"><b>+</b> ' + addWord + "</button>"
+        : t && !t.closed && me ? '<button type="button" data-act="add-to-topic" data-topic="' + esc(t.id) + '" data-name="' + esc(t.name) + '"><b>+</b> Add to ' + esc(t.name) + "</button>" : "");
+    return '<div class="sec" data-key="' + esc(g.key) + '">' + head + rows + line + (foot ? '<div class="foot">' + foot + "</div>" : "") + "</div>";
   }).join("");
 
   /* THE NEXT ACTION is written at the top, under a gold rule (§497). It takes
@@ -1006,13 +1062,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
      details arrive with the first letter (§356.16). Nothing is posted until
      Enter; the picks ride on the line as data- attributes. Somebody the
      register has not placed yet (§313.32) is told so (§61). */
-  const thu = thursdayOf(today);
-  const openTopics = L.topics.filter((t) => !t.closed);
-  const tpk = '<span class="tpk" role="button" tabindex="0" data-act="tpk" aria-haspopup="listbox" aria-expanded="false" title="Which topic"><span class="tw">Topic</span>' +
-    '<span class="topics" role="listbox" aria-label="Topic" hidden>' +
-    openTopics.map((t) => '<button type="button" role="option" data-act="pick-topic" data-topic="' + esc(t.id) + '">' + esc(t.name) + "</button>").join("") +
-    '<button type="button" role="option" data-act="pick-topic" data-topic="">No topic</button>' +
-    '<input class="tnew" placeholder="New topic…" aria-label="New topic" maxlength="120"></span></span>';
+  const tpk = topicPick(L);
   const addrow = me
     ? '<div class="addrow" data-due="' + thu + '" data-owner="' + esc(me) + '"><span class="plus">' + PEN + "</span>" +
       '<div class="tn"><input id="add" class="new" data-act="add" placeholder="' + (all.length ? "Write the next action and press Enter" : "Write the first action for " + esc(p.tenantName) + " and press Enter") + '" aria-label="New action" maxlength="200">' +

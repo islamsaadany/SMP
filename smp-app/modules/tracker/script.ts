@@ -63,13 +63,17 @@ export const APP_JS = `(function () {
     try { document.cookie = name + "=" + encodeURIComponent(value) + "; path=" + location.pathname + "; max-age=31536000; samesite=lax"; } catch (x) {}
   }
   /* THERE IS MORE THAN ONE LINE TO WRITE ON NOW (§532): the page's own at the
-     top, and one inside every topic's next-week card on the weekly check.
-     They are the SAME line — same markup, same controls, same act — so every
-     function here takes the line it is working on rather than reaching for
-     the one with the id (§53.5). A line is named by what it writes into:
-     "main" for the page's own, "t:<topic>" for a topic's. */
+     top, one inside every topic's next-week card on the weekly check, and
+     (§656) one inside every section the list is grouped by — a topic's or a
+     person's — opened by the section's own "+ Add …". They are the SAME line
+     — same markup, same controls, same act — so every function here takes
+     the line it is working on rather than reaching for the one with the id
+     (§53.5). A line is named by what it writes into, on data-line: "main"
+     for the page's own, "t:<topic>" for a topic's, "o:<owner>" for a
+     person's. A topic's line has its topic fixed; a person's its owner. */
   function lines() { return Array.prototype.slice.call(document.querySelectorAll(".addrow")); }
-  function lineKey(ar) { return !ar ? "" : ar.classList.contains("chk") ? "t:" + (ar.getAttribute("data-topic") || "") : "main"; }
+  function lineKey(ar) { return !ar ? "" : ar.getAttribute("data-line") || "main"; }
+  function topicFixed(ar) { return lineKey(ar).indexOf("t:") === 0; }
   function lineOf(key) {
     var all = lines();
     for (var i = 0; i < all.length; i++) if (lineKey(all[i]) === key) return all[i];
@@ -91,10 +95,10 @@ export const APP_JS = `(function () {
       var b = boxOf(r), nt = noteOf(r);
       k.lines.push({ key: lineKey(r), add: b ? b.value : "", note: nt ? nt.value : "",
         noteOpen: !!(nt && !nt.hidden), due: r.getAttribute("data-due"), owner: r.getAttribute("data-owner"),
-        /* the topic is user state on the page's own line and structure on a
-           topic's own, so only the first is carried back */
-        ptopic: r.classList.contains("chk") ? null : r.getAttribute("data-topic"),
-        topicName: r.classList.contains("chk") ? null : r.getAttribute("data-topicname"),
+        /* the topic is user state on the page's own line and on a person's,
+           and structure on a topic's own, so only the first two carry it */
+        ptopic: topicFixed(r) ? null : r.getAttribute("data-topic"),
+        topicName: topicFixed(r) ? null : r.getAttribute("data-topicname"),
         picked: r.hasAttribute("data-picked") });
     });
     var ar = lineAt(a);
@@ -117,10 +121,13 @@ export const APP_JS = `(function () {
       if (st.picked) { if (st.due != null) setAddDue(r, st.due); if (st.owner) setAddOwner(r, st.owner); }
       if (st.ptopic || st.topicName) setAddTopic(r, st.ptopic || "", st.topicName || "");
     });
-    /* the sections opened to show their done rows, and the rows just ticked,
-       stay as they were across the swap */
+    /* the sections opened to show their done rows, the rows just ticked,
+       and the sections' own write lines opened by their "+ Add …" (§656),
+       stay as they were across the swap — so a run of actions can be
+       written into one section without reopening its line for each */
     document.querySelectorAll(".sec").forEach(function (sec) { if (shown.has(sec.getAttribute("data-key"))) sec.classList.add("showdone"); });
     fresh.forEach(function (id) { var r = document.querySelector('.row[data-id="' + id + '"]'); if (r) r.classList.add("fresh"); });
+    opened.forEach(function (key) { var r = lineOf(key); if (r) r.hidden = false; });
     if (s && k && k.srch) s.value = k.srch;
     if (k && k.panel) showPanel(true);
     if (k && k.focus) {
@@ -132,7 +139,7 @@ export const APP_JS = `(function () {
     }
     typingAll();
   }
-  var shown = new Set(), fresh = new Set();
+  var shown = new Set(), fresh = new Set(), opened = new Set();
   var chain = Promise.resolve();
   function request(method, url, body, k, then) {
     say("");
@@ -278,8 +285,16 @@ export const APP_JS = `(function () {
     if (!t || !t.classList || !(t.classList.contains("new") || t.classList.contains("nt"))) return;
     var ar = lineAt(t); if (!ar) return;
     if (e.key === "Escape") {
-      var box = boxOf(ar), nt2 = noteOf(ar);
-      if (box) box.value = ""; if (nt2) nt2.value = ""; drawNote(ar, false); typing(ar); return;
+      var box = boxOf(ar), nt2 = noteOf(ar), empty = !(box && box.value) && !(nt2 && nt2.value), key2 = lineKey(ar);
+      if (box) box.value = ""; if (nt2) nt2.value = ""; drawNote(ar, false); typing(ar);
+      /* ON A SECTION'S OWN LINE, ALREADY EMPTY, Escape is the way back
+         (§61, §656): the line folds and the "+ Add …" that opened it takes
+         the focus. The check's lines always stand, so they are not folded. */
+      if (empty && opened.has(key2)) {
+        ar.hidden = true; opened.delete(key2);
+        var back2 = document.querySelector('[data-act=add-here][data-line="' + key2 + '"]'); if (back2) back2.focus();
+      }
+      return;
     }
     /* TAB FROM THE ACTION OPENS THE NOTE, so a line that needs one is one
        key away and the arrow is not the only door (§61). Only forward, only
@@ -475,7 +490,20 @@ export const APP_JS = `(function () {
     } else if (act === "show-done") {
       var sec = b.closest(".sec"), key = sec ? sec.getAttribute("data-key") : null;
       if (sec) { var on2 = !sec.classList.contains("showdone"); sec.classList.toggle("showdone", on2); if (on2) shown.add(key); else shown.delete(key); }
+    } else if (act === "add-here") {
+      /* THE SECTION'S OWN LINE (§656): opened where the press was made and
+         kept open across the swaps that follow, so the action is written —
+         and lands — under the heading the hand is on. Scrolled only where
+         it is out of sight, measured before the focus (§565's reason). */
+      var key5 = b.getAttribute("data-line") || "", ar5 = lineOf(key5);
+      if (ar5) {
+        ar5.hidden = false; opened.add(key5);
+        var add5 = boxOf(ar5);
+        if (add5) { var bx5 = add5.getBoundingClientRect(), off5 = bx5.top < 0 || bx5.bottom > window.innerHeight; add5.focus(); if (off5) add5.scrollIntoView({ block: "center" }); }
+      }
     } else if (act === "add-to-topic") {
+      /* §497's way, kept for the add-at-top break alone: the page's own line
+         filled and focused instead of the section's. */
       var ar2 = lineOf("main");
       /* PINNED, THE LINE IS ALREADY ON SCREEN (§565), and scrolling it to the
          middle would carry the page away from the topic just pressed — so

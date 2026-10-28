@@ -41,6 +41,7 @@
      SMP_BREAK=tabs-reload    node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=keep-picks     node checks/tracker.mjs   # must go red (§567)
      SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§623.3)
+     SMP_BREAK=add-at-top     node checks/tracker.mjs   # must go red (§656)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -366,6 +367,41 @@ check("...and every line carries the SAME three words the heading's own ⋯ carr
   count(wkBody, /data-act="topic-rename"/g) >= 3 && count(wkBody, /data-act="topic-close"/g) >= 2 && count(wkBody, /data-act="topic-reopen"/g) >= 1 && count(wkBody, /data-act="topic-delete-ask"/g) >= 3);
 check("the grouping is not offered on the check, where it cannot be changed (§96)",
   !/data-act="set-group"/.test(chk) && /data-act="set-group"/.test(wkBody) && /data-act="set-dates"/.test(chk));
+
+/* ══ §2d · THE SECTION'S OWN WRITE LINE (§656), drawn ═══════════════════
+   Islam: an action added under a person or a topic *"should appear in the
+   same place rather than adding from the top task entry"*. So every section
+   the list is grouped by carries the page's own line, hidden, with the thing
+   the section is about FIXED — the topic on a topic's, the owner on a
+   person's (as a name, not a pick: a line under Noran that could hand the
+   action on would land it elsewhere, §96) — and its foot's "+ Add …" opens
+   it there. Due this week, as the page's line is. The page's own line stays
+   at the top for an action under nobody and nothing. The add-at-top break
+   puts §497's way back — the top line filled and scrolled to — and must
+   redden these. */
+section("§2d · the section's own write line, drawn");
+const drawG = (view, group) => listBody(dLoaded, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
+  ask: { view, q: "", open: null, group, dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
+const byTopicAll = drawG("all", "topic"), byOwnerAll = drawG("all", "owner");
+const secOf = (html, key) => (new RegExp('class="sec" data-key="' + key + '">([\\s\\S]*?)(?=<div class="sec" |$)').exec(html) || [])[1] || "";
+const t1sec = secOf(byTopicAll, "t1"), t3sec = secOf(byTopicAll, "t3"), meSec = secOf(byOwnerAll, "islam");
+check("grouped by Topic, Budget's section carries ONE write line, hidden, this week's Thursday, the topic fixed, named t:t1",
+  count(t1sec, /class="addrow chk"/g) === 1 && /class="addrow chk" data-due="2026-09-17" data-owner="islam" data-topic="t1" data-line="t:t1" hidden>/.test(t1sec),
+  (t1sec.match(/class="addrow chk"[^>]*/g) || []).join(" | "));
+check("...drawn under the rows and above the foot, and with no topic pick on it — the topic is the section's",
+  /data-id="r"[\s\S]*?class="addrow chk"[\s\S]*?class="foot"/.test(t1sec) && !/data-line="t:t1"[\s\S]*?class="tpk"[\s\S]*?class="foot"/.test(t1sec));
+check("...its foot's + Add to Budget opens THAT line, and nothing on the page fills the top one any more",
+  /data-act="add-here" data-line="t:t1"><b>\+<\/b> Add to Budget</.test(t1sec) && !/data-act="add-to-topic"/.test(byTopicAll));
+check("...the closed topic has no line and no + Add", !/class="addrow/.test(t3sec) && !/data-act="add-here"/.test(t3sec) && t3sec.length > 0);
+check("grouped by Owner, Islam's section carries its line, hidden, the OWNER fixed as a plain name and the topic a pick",
+  count(meSec, /class="addrow chk"/g) === 1 && /class="addrow chk" data-due="2026-09-17" data-owner="islam" data-line="o:islam" hidden>/.test(meSec) &&
+  /data-line="o:islam" hidden>[\s\S]*?class="tpk"[\s\S]*?class="who" title="Whose it is"><span class="wn">Islam<\/span><\/span>/.test(meSec) && !/data-line="o:islam"[\s\S]*?class="who pick"[\s\S]*?class="foot"/.test(meSec),
+  (meSec.match(/class="addrow chk"[^>]*/g) || []).join(" | "));
+check("...and its foot says + Add for Islam", /data-act="add-here" data-line="o:islam"><b>\+<\/b> Add for Islam</.test(meSec));
+check("the page's own line at the top still stands, once, on both groupings — for an action under nobody and nothing in particular",
+  count(byTopicAll, /id="add"/g) === 1 && count(byOwnerAll, /id="add"/g) === 1);
+check("the weekly check's lines are untouched: next week, standing, the topic fixed, named the same way",
+  count(chk, /class="addrow chk" data-due="2026-09-24" data-owner="islam" data-topic="t1" data-line="t:t1">/g) === 1 && !/data-line="t:t1" hidden/.test(chk));
 
 /* ══ the database ═════════════════════════════════════════════════════ */
 const URL_ = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL || "";
@@ -1166,6 +1202,33 @@ try {
     check("...and back to Owner", /Noran Essam/.test((await heads()).join("|")));
     if (full) await asTenant(A, (c) => deleteAction(c, full.id));   /* §215: a break that never made it must not kill the rest */
     await pg.evaluate("window.__stay = 1");
+    /* THE SECTION'S OWN LINE, PRESSED (§656): "+ Add for Noran" opens a line
+       INSIDE her section with the owner fixed; Enter lands the row under her
+       heading, read back from Postgres, with the page's own line at the top
+       never touched; the line stays open and empty for the next one, and
+       Escape on it empty folds it. §2d drew it; this presses it. The
+       add-at-top break puts §497's way back — the top line filled and
+       focused — and the second assertion must redden on it. */
+    const myFoot = pg.locator('.sec[data-key="noran"] [data-act=add-here][data-line="o:noran"]');
+    const myLine = pg.locator('.sec[data-key="noran"] .addrow[data-line="o:noran"]');
+    check("grouped by Owner, my section's foot offers + Add for Noran, its line drawn hidden with me fixed as a name",
+      (await myFoot.count()) === 1 && (await myLine.count()) === 1 && !(await myLine.isVisible()) && (await myLine.locator(".who.pick").count()) === 0 && (await myLine.getAttribute("data-owner")) === "noran");
+    const lineUnderCursor = () => pg.evaluate("(function(){var a=document.activeElement,r=a&&a.closest?a.closest('.addrow'):null;return r?(r.getAttribute('data-line')||'main'):''})()");
+    if ((await myFoot.count()) !== 1) check("pressing + Add for Noran — but the foot does not offer it", false);
+    else {
+      await myFoot.click(); await settle();
+      check("pressing it opens the line inside the section and puts the cursor THERE, not on the top line", await myLine.isVisible() && (await lineUnderCursor()) === "o:noran", await lineUnderCursor());
+      await pg.keyboard.type("Written under my own name"); await pg.keyboard.press("Enter"); await settle();
+      const under = (await asTenant(A, (c) => listActions(c))).find((x) => x.title === "Written under my own name");
+      check("Enter adds it owned by me, due this week, and the row lands under my heading without a reload",
+        !!under && under.ownerKey === "noran" && under.due === realThu && (await pg.locator('.sec[data-key="noran"] .row .t', { hasText: "Written under my own name" }).count()) === 1 && await stayed(), JSON.stringify(under));
+      check("...the line is still open, empty and under the cursor for the next one, and the top line was never touched",
+        await myLine.isVisible() && (await myLine.locator("input.new").inputValue()) === "" && (await lineUnderCursor()) === "o:noran" && (await pg.locator("#add").inputValue()) === "");
+      await pg.keyboard.press("Escape");
+      check("Escape on the empty line folds it, and the + Add for Noran that opened it takes the focus",
+        !(await myLine.isVisible()) && (await pg.evaluate("document.activeElement && document.activeElement.getAttribute('data-line')")) === "o:noran");
+      if (under) await asTenant(A, (c) => deleteAction(c, under.id));
+    }
     /* THE OWNER'S NAME opens the office on this client, first names only;
        picking one hands the action on — and then the old owner has no
        control left on that row (both ends, §61). */

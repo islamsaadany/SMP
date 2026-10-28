@@ -1533,6 +1533,9 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
          are two columns. */
       /* Widths are layout pixels (what the rule reads), so the window is set
          and the columns measured through the page's zoom. */
+      /* A rail pressed open earlier in this section is kept open for the
+         visit (§653), so the widths are read on a fresh visit of the chat. */
+      await open("/raya-trade/strategy/mobile/copilot/foundation"); await page.click("[data-cop-chats] [data-cop-chat]"); await page.waitForSelector(".copleft", { timeout: 10000 });
       const z668 = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
       const lay = async (w) => { await page.setViewportSize({ width: Math.round(w * z668), height: 900 }); await page.waitForTimeout(300);
         return page.evaluate((z) => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"), t = document.querySelector(".copftodo"), r = document.querySelector(".coprails");
@@ -2145,7 +2148,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     const zGrid = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
     await page.setViewportSize({ width: Math.round(1100 * zGrid), height: 900 }); await page.waitForTimeout(300);
     const grid = await page.evaluate(() => { const rh = Array.from(document.querySelectorAll(".copsw-grid th[scope=row]")), ch = Array.from(document.querySelectorAll(".copsw-grid thead th"));
-      const lines = (t) => { const cs = getComputedStyle(t), lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.3; return Math.round((t.getBoundingClientRect().height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) / lh); };
+      const lines = (t) => { const r = document.createRange(); r.selectNodeContents(t); const ys = new Set(Array.from(r.getClientRects()).map((b) => Math.round(b.top))); return ys.size || 1; };
       return { rowLines: rh.map(lines), colLines: ch.map(lines),
         ticks: document.querySelectorAll(".copsw-grid [data-cop-sw-m]").length, wrapW: Math.round(document.querySelector(".copsw-gridwrap").getBoundingClientRect().width), tableW: Math.round(document.querySelector(".copsw-grid").getBoundingClientRect().width) }; });
     await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(300);

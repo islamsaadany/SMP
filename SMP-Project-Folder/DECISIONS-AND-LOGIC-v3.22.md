@@ -70257,6 +70257,8 @@ Islam: *"yes fix the tracker check"*. Found at §658–§666's merge: `npm run c
 
 Three columns need 420 + 12 + 480 + 208 = 1120px; the levels are 1120 and 900. The same rule serves every split area — the Foundation, the SWOT, Competitive Discipline — and the Directions, Execution and Advisory splits inherit it.
 
+**THE AREAS' NAMES.** *Micro* and *Macro*, without the added words (Islam: *"make the naming Micro & Macro without the additional words"*; they read *Micro · competition* and *Macro · market* since §490). `AREA_WORD` in `lib/copilot-swot.ts`; the to-do, the methods grid and the chat's lines all read it.
+
 **THE GRID.** Row names never wrap; column names may take two lines (*Guided / questions*), centred in their cell both ways (Islam, at the mockup); a tick cell is at least 64px; the grid is at least 440px wide and scrolls inside the chat only when there is truly no room.
 
 **CHECKED.** `checks/shell.mjs`, the Foundation flow (§642's check rewritten, not loosened, §218; the window set and the columns measured through the page's zoom, since the section runs at 80% and the rule reads layout pixels): at 1440 the three stand together with the rail open; at 1300 the rail has folded first, the three columns still stand and the chat has yielded with the cards keeping at least 480px; at 1100 the to-do has folded to its button and the cards are still beside the chat; the button opens the to-do over the chat and a press beside closes it; at 760 (§642, unchanged) both wait behind two buttons. The SWOT (3j): at 1100 the methods grid keeps its shape — row names on one line, column names on two at most, eleven ticks. Results below.

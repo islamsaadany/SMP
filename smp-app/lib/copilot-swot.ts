@@ -36,7 +36,7 @@ export const OFFERED: Record<Area, Method[]> = {
   micro: ["guided", "template", "report", "research"],
   macro: ["guided", "template", "report", "research"],
 };
-export const AREA_WORD: Record<Area, string> = { internal: "Internal", micro: "Micro · competition", macro: "Macro · market" };
+export const AREA_WORD: Record<Area, string> = { internal: "Internal", micro: "Micro", macro: "Macro" };
 export const METHOD_WORD: Record<Method, string> = { guided: "Guided questions", template: "Template", report: "Ready reports", research: "Deep research" };
 /* The Copilot settings template each area downloads (lib/copilot-settings.ts). */
 export const TEMPLATE_OF: Record<Area, string> = { internal: "t2", micro: "t3", macro: "t4" };

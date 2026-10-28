@@ -33,6 +33,7 @@ import {
   type Who, type Group, type Format, isView, isGroup, isFormat, isStatus, isOffice, calendarDay, oneLine, GROUP_COOKIE, FORMAT_COOKIE,
   oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange, thursdayOf, todayIn,
   oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic, mayCarry, nextWeekDay, ONLY_CHANGE,
+  oneProgress, addProgress, editProgress, deleteProgress, mayChangeProgress, ONLY_WRITER, trimmed,
 } from "../../lib/tracker.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
@@ -188,6 +189,28 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, topicId: t.id });
   }
 
+  /* PROGRESS (§657): anybody past the gate writes an entry on any action;
+     an entry is then its WRITER'S — edited or deleted by them alone, judged
+     against the stored entry (§42). A body with nothing in it writes nothing. */
+  if (kind === "progress-add") {
+    if (!by) return refused(400, "You are not on this client's register yet, so nothing can be written under your name here.");
+    const target = await oneAction(c, String(b.id || ""));
+    if (!target) return refused(404, "That action is not on this client's list any more.");
+    if (!trimmed(b.body)) return refused(400, "A progress entry needs a few words.");
+    const p = await addProgress(c, target.id, String(b.body), by);
+    return out(200, { ok: true, id: target.id, progressId: p.id });
+  }
+  if (kind === "progress-edit" || kind === "progress-delete") {
+    const p = await oneProgress(c, String(b.progressId || ""));
+    if (!p) return refused(404, "That entry is not on this action any more.");
+    if (!mayChangeProgress(p, who)) return refused(403, ONLY_WRITER);
+    if (kind === "progress-edit") {
+      if (!trimmed(b.body)) return refused(400, "A progress entry needs a few words.");
+      await editProgress(c, p.id, String(b.body));
+    } else await deleteProgress(c, p.id);
+    return out(200, { ok: true, id: p.actionId, progressId: p.id });
+  }
+
   const id = String(b.id || "");
   if (!id) return refused(400, "Which action?");
   const cur = await oneAction(c, id);
@@ -201,16 +224,16 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
   } else if (kind === "due") {
     const due = b.due == null || b.due === "" ? null : calendarDay(b.due);
     if (b.due && !due) return refused(400, "That is not a date this list can read.");
-    await setFields(c, id, { due });
+    await setFields(c, id, { due }, by);
   } else if (kind === "notes") {
     await setFields(c, id, { description: String(b.description || "") });
   } else if (kind === "rename") {
     if (!oneLine(b.title)) return refused(400, "An action needs a few words.");
-    await setFields(c, id, { title: String(b.title) });
+    await setFields(c, id, { title: String(b.title) }, by);
   } else if (kind === "owner") {
     const ownerKey = String(b.ownerKey || "");
     if (!ownerKey || !(await isOfficeRow(c, ownerKey))) return refused(400, "An action is owned by somebody on the office's seats.");
-    await setFields(c, id, { ownerKey });
+    await setFields(c, id, { ownerKey }, by);
   } else if (kind === "topic") {
     /* One topic or none (§497): an id already on the list, a name to make or
        find, or nothing to take it off. A closed topic is not offered, but one
@@ -221,7 +244,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       if (!t) return refused(400, "That topic is not on this client's list any more.");
       topicId = t.id;
     } else if (oneLine(b.topicName)) topicId = (await addTopic(c, String(b.topicName), by)).id;
-    await setFields(c, id, { topicId });
+    await setFields(c, id, { topicId }, by);
   } else if (kind === "carry") {
     /* CARRY IT TO NEXT WEEK (§532, Islam's choice of the four put to him):
        the SAME action moved a week on — never a second line for one piece of
@@ -239,7 +262,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       return refused(400, cur.status === "done"
         ? "A finished action has nothing to carry."
         : "Only an action on this week can be carried to next week.");
-    await setFields(c, id, { due: nextWeekDay(today) });
+    await setFields(c, id, { due: nextWeekDay(today) }, by);
   } else if (kind === "delete") {
     await deleteAction(c, id);
   }

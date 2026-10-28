@@ -1,10 +1,10 @@
 /* HOW MANY PROCESSES THE PACK CHECK READS — the rule a save asks is the rule its
-   button asks (§656). Pure rules, plus the source of the places that must read
+   button asks (§658). Pure rules, plus the source of the places that must read
    them rather than a copy of them. --red makes each break in a copy and expects
    this check to fail on it.
-   The other half of §656, who may change a workspace's profile and branding,
+   The other half of §658, who may change a workspace's profile and branding,
    went with the two cards it guarded: Processes' own profile, logo and colours
-   left for SMP's client settings by decision (§658, spec 067 §4.4), so there is
+   left for SMP's client settings by decision (§660, spec 067 §4.4), so there is
    no Edit left to offer or refuse. */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";

@@ -15,7 +15,7 @@ import { asContent, changedSteps, inForce, liveContent, type Content, type Conte
  *
  * Their part comes from the client register: they APPROVE a process when it
  * names them as its approver; they HAVE A STEP in it when a job title they hold
- * does one of its steps (job titles are roles, §658); they OWN it when it names
+ * does one of its steps (job titles are roles, §660); they OWN it when it names
  * them as its owner (stage 4). Cached per request: the layout and the page under
  * it both ask.
  *

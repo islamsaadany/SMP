@@ -70091,3 +70091,83 @@ Islam, on the questions left open by §662: *"1 keep automatic, 2 yes redraw the
 - **The fix** (`app/(ffp)/[slug]/processes/top-bar.tsx`): React draws the bar once and leaves it to the bar's script. When a refresh brings a new bar, only the reading link (*Processes · 1 to read*) is swapped; it is a plain link the script never touches. The shared script and every other module are untouched.
 
 **Checked**: `tsc --noEmit` clean; `next build` clean; `npm run test:processes` all passing; `npm run check:processes` **150 / 0**, with **one new line**: after "I have read it" refreshes the page, the bar's theme button keeps its icon and still switches. It was measured red before the fix by the same steps in a script, not by breaking the build. In the dev server the red "1 Issue" badge is gone. The one console line left there (`eval()` under the page's content policy) is the dev server's own and does not appear in a production build.
+
+## §664 — Processes: the Map, redrawn as the prototype draws it (2026-10-28)
+
+Islam: *"2 yes redraw the map"*. On what the prototype leaves out of today's Map: *"1 yes, 2 yes, 3 yes"*. So dragging goes, the Steps List view goes, and Undo is left out for now (a step is removed only after asking). Design: the approved prototype's Map (spec 067 §4.3; `design-mockups/processes-redesign/2026-10-27_processes-prototype-v3.html`).
+
+**The drawing** is the one readers see, now shared: `app/(ffp)/[slug]/processes/lane-drawing.tsx`, used by readers' Flow and by the Map. It has one lane per job title and one column per step, with arrows measured from the boxes. On the Map it also marks:
+- each step's gaps with a red mark (hover says which);
+- the steps changed since the version in force, while a draft is open;
+- the AI review's proposals, dashed in gold after the step they belong after, offering Confirm or Delete when picked.
+
+Start and End can be picked there too.
+
+**The toolbar:**
+- **+ Step** and **+ Decision** go after the picked step, in its lane, and into its line: the arrow that left it now runs through the new step.
+- **Connect two steps**, with a label.
+- **Arrange by flow**.
+- **Download picture**, a PNG of the drawing.
+- **Export PDF**.
+- A status line that says *Saving…* until the drawing shows the change.
+
+**The step form** beside the drawing saves as you type: a field when you leave it, a choice or a letter at once. It holds:
+- the step's name;
+- who does it (choosing moves it to that lane);
+- what they do;
+- who is involved, as RACI letters: click to go R, A, C, I, or add a role. These are the same records the RACI page edits. A step with several RACI activities points to the RACI page instead.
+- approval and time limit: add an approval at or above an amount, a time limit before it moves up, or *no approval needed*; remove any. These are the same rules the Authority page edits, read in its words.
+- risks and controls: add a risk, and say how it is held.
+- **Remove this step**, which asks first. The steps either side are joined, and its RACI rows and their rules go with it, as in the prototype. Its risks stay on the process, unpinned, so their treatment history is kept.
+
+**Under More:**
+- type and milestone;
+- the arrows in and out (remove; Connect), and *waits for every arrow coming in*;
+- hand-overs from steps in other processes (add, remove) and to them (shown);
+- the processes that pick up from this step;
+- linked processes;
+- the SOP fields: inputs, expected output, common errors, risk if mishandled;
+- move earlier or later;
+- the AI review's note.
+
+Above the drawing, where the process picks up from another process. Below it, as before: steps from a pasted list, Process documentation, SOP document control. The Map's own wording is in English and Arabic (`builder.map`); the drawing reads left to right in both, as readers' does.
+
+**Gone, by Islam's answers:**
+- dragging steps, and drawing arrows by dragging. Steps are placed by their order and who does them, as readers see them.
+- the Steps List view.
+- the old Add step form; the toolbar does it.
+- the "4a/4b" numbering of parallel steps on the Map. Steps are numbered as readers number them.
+
+Undo is not built.
+
+**Server:**
+- `addProcessStep` takes `intoLine`.
+- `deleteProcessStep` takes `fromMap` (keeps the line; takes the step's RACI rows).
+- New `updateProcessControl` saves a control's words on a recorded risk.
+- `ffp/lib/data/step-place.ts` keeps each step's stored left-to-right place in step with its order whenever the Map adds, moves, arranges, confirms or removes. The printed map reads that place when it does not wrap, and without dragging nothing else could fix it.
+
+**Fixed on the way (B2, my own, all before any of it was pushed):**
+- A control's box ignored typing for a risk added after the step was picked.
+- Choices (who does it, type, milestone, links) showed only after the page refreshed.
+- The status said *Saved* before the drawing changed.
+- The approver gap read "A rule has no approver" when no rule existed. It now reads "No approver named yet".
+- *Remove* first said the RACI letters go while the server kept them. The Map's Remove now takes them, as the prototype does.
+- My first placement call in the AI review action repeated the very text `checks/review-propose-step.mjs` looks for, so its *no-shift* break stopped turning red. Caught by running its `--red`; the call no longer repeats it, and all nine breaks are red again.
+
+**Rewritten tests (§218, same purpose, not loosened):**
+- In `checks/processes-e2e.mjs`, §2c's office edit of a step in force now goes through the Map's step form, since the Steps List is gone.
+- The AI review line "the proposed step is highlighted on the map with Confirm and Delete" now finds the proposal in the drawing and its Confirm and Delete in the form.
+
+**Checked**: `tsc --noEmit` clean; `next build` clean; `npm run test:processes` all passing; `checks/review-propose-step.mjs` 19 / 0 with all nine breaks red; `npm run check:upkeep` 8 / 0. `npm run check:processes` **160 / 0**, with **ten new lines** (written, not rewritten):
+1. the Map draws lanes by job title with gaps marked;
+2. Connect two steps draws an arrow;
+3. + Step goes after the picked step and into its line;
+4. the new step is picked and naming it saves;
+5. a RACI letter is the step's RACI;
+6. a rule reads as the Authority page says it;
+7. a risk with no control is a gap, and saying how it is held saves it;
+8. Download picture gives a PNG;
+9. removing a step joins the steps either side and takes its RACI row;
+10. an AI review proposal shows after its step and Confirm makes it a step there.
+
+Driven by hand in Chromium against the sample data: every toolbar action and form part saved and checked in the database, a proposal confirmed, readers' Flow unchanged, Arabic at 1300px and the Map at 390px (the drawing scrolls sideways, and the form sits under it).

@@ -17,8 +17,9 @@ import {
   summariseDeleteImpact,
   type ProcessDeleteImpact,
 } from "@/ffp/lib/domain/process-delete-impact";
-import { assignSwimlanes, laneY, nextStepX, STEP_X_SPACING } from "@/ffp/lib/domain/process-layout";
+import { assignSwimlanes, laneY, nextStepX, FIRST_STEP_X, STEP_X_SPACING } from "@/ffp/lib/domain/process-layout";
 import { arrangeByFlow, insertPositionAfter, moveStepInOrder } from "@/ffp/lib/domain/step-order";
+import { placeByOrder } from "@/ffp/lib/data/step-place";
 import { ok, notFound, validationError, type ActionResult, type ActionError } from "@/ffp/lib/actions/errors";
 
 /** Verifies processId actually belongs to workspaceId, not just that the caller can access workspaceId. */
@@ -678,6 +679,8 @@ const addStepSchema = z.object({
   connectionLabel: z.string().trim().max(60).optional().or(z.literal("")),
   /** Put the new step straight after this one; omit to append to the end. */
   insertAfterStepId: z.string().min(1).optional().or(z.literal("")),
+  /** Into the line (the Map's + Step, spec 067 §4.3): when fromStep has one arrow out, the new step takes it over, so it sits between the two. */
+  intoLine: z.boolean().optional(),
 });
 
 /**
@@ -693,7 +696,7 @@ export async function addProcessStep(
   const access = await requireWorkspaceAccess(parsed.data.workspaceId, "EDITOR");
   if (!access.ok) return access;
 
-  const { processId, step, fromStepId, connectionLabel, insertAfterStepId } = parsed.data;
+  const { processId, step, fromStepId, connectionLabel, insertAfterStepId, intoLine } = parsed.data;
 
   const process = await loadProcessInWorkspace(parsed.data.workspaceId, processId);
   if (!process) return notFound();
@@ -760,11 +763,17 @@ export async function addProcessStep(
       );
       if (issues.length > 0) throw new Error("CROSS_PROCESS_CONNECTION");
 
+      if (intoLine) {
+        const outs = await tx.stepConnection.findMany({ where: { processId, fromStepId }, select: { id: true } });
+        if (outs.length === 1) await tx.stepConnection.update({ where: { id: outs[0].id }, data: { fromStepId: newStep.id } });
+      }
+
       await tx.stepConnection.create({
         data: { processId, fromStepId, toStepId: newStep.id, label: connectionLabel || undefined },
       });
     }
 
+    if (position < orderedIds.length) await placeByOrder(tx, processId);
     return newStep;
   });
 
@@ -987,6 +996,13 @@ const deleteStepSchema = z.object({
   workspaceId: z.string().min(1),
   processId: z.string().min(1),
   stepId: z.string().min(1),
+  /**
+   * The Map's Remove (spec 067 §4.3, the approved prototype): a step with one
+   * arrow in and one out leaves the two steps either side joined, and its RACI
+   * rows go with it (their letters and rules cascade). Its risks stay on the
+   * process, unpinned, as they do for every removal.
+   */
+  fromMap: z.boolean().optional(),
 });
 
 /**
@@ -1009,7 +1025,19 @@ export async function deleteProcessStep(
   const step = await prisma.processStep.findUnique({ where: { id: parsed.data.stepId } });
   if (!step || step.processId !== parsed.data.processId) return notFound();
 
-  await prisma.processStep.delete({ where: { id: parsed.data.stepId } });
+  await prisma.$transaction(async (tx) => {
+    if (parsed.data.fromMap) {
+      const ins = await tx.stepConnection.findMany({ where: { toStepId: step.id } });
+      const outs = await tx.stepConnection.findMany({ where: { fromStepId: step.id } });
+      if (ins.length === 1 && outs.length === 1 && ins[0].fromStepId !== outs[0].toStepId) {
+        const there = await tx.stepConnection.findFirst({ where: { fromStepId: ins[0].fromStepId, toStepId: outs[0].toStepId } });
+        if (!there) await tx.stepConnection.create({ data: { processId: step.processId, fromStepId: ins[0].fromStepId, toStepId: outs[0].toStepId, label: ins[0].label } });
+      }
+      await tx.activity.deleteMany({ where: { relatedStepId: step.id } });
+    }
+    await tx.processStep.delete({ where: { id: step.id } });
+    if (parsed.data.fromMap) await placeByOrder(tx, step.processId);
+  });
 
   await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
@@ -1174,7 +1202,8 @@ async function writeStepOrder(
   orderedStepIds: string[]
 ): Promise<void> {
   for (const [index, id] of orderedStepIds.entries()) {
-    await tx.processStep.update({ where: { id, processId }, data: { order: index } });
+    // the stored left-to-right place follows the order too (step-place.ts placeByOrder)
+    await tx.processStep.update({ where: { id, processId }, data: { order: index, positionX: FIRST_STEP_X + index * STEP_X_SPACING } });
   }
 }
 

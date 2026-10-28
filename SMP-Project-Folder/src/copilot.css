@@ -481,9 +481,12 @@ span.copsw-lb { cursor:default; }
 .copsw-ci span { font-size:var(--fs-micro, 11px); color:var(--ink-2); }
 .copsw-ci.none span { color:var(--ink-3); }
 .copsw-gridwrap { overflow-x:auto; margin-bottom:10px; }
-.copsw-grid { border-collapse:collapse; min-width:0; width:100%; }
+.copsw-grid { border-collapse:collapse; min-width:440px; width:100%; }
 .copsw-grid th, .copsw-grid td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:center; font-size:var(--fs-small, 12.5px); }
-.copsw-grid th[scope=row] { text-align:left; color:var(--ink); }
+/* §668 — squeezed, the column names take two lines and the row names never break: the ticks keep their columns */
+.copsw-grid thead th { white-space:normal; line-height:1.2; padding:6px 4px; vertical-align:bottom; }
+.copsw-grid td { min-width:64px; }
+.copsw-grid th[scope=row] { text-align:left; color:var(--ink); white-space:nowrap; }
 .copsw-grid td.na { color:var(--ink-3); }
 .copsw-tick { width:24px; height:24px; border:1px solid var(--line); border-radius:4px; background:var(--surface); color:var(--surface); font:700 13px/1 var(--sans); cursor:pointer; }
 .copsw-tick.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink, var(--surface)); }
@@ -789,21 +792,38 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
    without a to-do (a chat with a draft), 420 + 360. The chat's default
    gives way first, never below 420. */
 .copmain { container:copmain / inline-size; }
-@container copmain (min-width:1000px){
+/* §668 — WHAT GIVES WAY, IN ORDER (Islam's squeezed SWOT: "nothing was
+   collapsed as we agreed"). The chat's default yields first — it shrinks
+   from 760 toward 420 before the work beside it goes under 480 — and then
+   the columns leave one at a time, the least needed first: the to-do folds
+   to its button (two columns, from 900px of Copilot), then the rail (the
+   script's rule, at 1130px of pane), then the work pane becomes a sheet
+   (under 900px). Three columns need 420 + 12 + 480 + 208 = 1120px. */
+@container copmain (min-width:1120px){
   .copsplit > .copgrip, .copflow > .copgrip { display:block; }
-  .copflow { gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 580px))) 12px minmax(0,1fr) 208px; }
+  .copflow { gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 700px))) 12px minmax(0,1fr) 208px; }
   .copflow > .copftodo { margin-left:8px; }
   .copflow.nocards { gap:8px; grid-template-columns:minmax(0,1fr) 200px; }
   .copflow.nocards > .copftodo { margin-left:0; }
 }
+@container copmain (min-width:900px) and (max-width:1119px){
+  .copflow > .copgrip { display:block; }
+  .copflow { gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 492px))) 12px minmax(0,1fr); position:relative; }
+  .copflow > .copftodo { display:none; }
+  .copflow .copsheetb-todo { display:inline-flex; }
+  .copflow.nocards { gap:0; grid-template-columns:minmax(0,1fr); }
+  .copflow.sheet-todo > .copftodo { display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(300px, 100%);
+    background:var(--surface); box-shadow:var(--shadow-md); padding:8px; overflow-y:auto; }
+  .copflow.sheet-todo > .copshade { display:block; position:absolute; inset:0; z-index:5; background:color-mix(in srgb, var(--ink) 22%, transparent); }
+}
 @container copmain (min-width:800px){
-  .copsplit { display:grid; gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 372px))) 12px minmax(0,1fr); }
+  .copsplit { display:grid; gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 492px))) 12px minmax(0,1fr); }
   .copsplit > .copgrip { display:block; }
   /* The office chat button floats over the window's corner (§490.2): with
      the draft beside the chat, the corner is the draft's foot, not the box. */
   .copoutf { padding-right:64px; }
 }
-@container copmain (max-width:999px){
+@container copmain (max-width:899px){
   .copflow, .copflow.nocards { grid-template-columns:minmax(0,1fr); position:relative; }
   .copflow > .copleft, .copflow > .copftodo { display:none; }
   .copflow .copsheetb, .copflow .copsheetx { display:inline-flex; }

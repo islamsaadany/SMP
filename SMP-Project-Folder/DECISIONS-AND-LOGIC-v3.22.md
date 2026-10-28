@@ -70242,3 +70242,20 @@ Islam: *"yes fix the tracker check"*. Found at §658–§666's merge: `npm run c
 **Checked**: `npm run check:tracker` **343 / 0**, to the end (before: 248 and died). `npm run check:tracker:red`: all **32** breaks red, none not red.
 
 **§667 MERGED TO `main`, 2026-10-28, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §658–§666 went in. Only a check file and the two records changed, so Vercel's build serves the same app, the release stamp does not move (§397), there are no migrations, and nobody is signed out.
+
+## §668 — The Copilot squeezed: what gives way, in order (2026-10-28)
+
+**THE FINDING** (Islam's screenshot of a SWOT at a squeezed window: *"the table is damaged, and nothing was collapsed as we agreed earlier … didn't we have a rule for that?"*). There was a rule (§642, §653) and it measured "enough room": the rail folded only under 1240px of pane, the to-do and the work pane went behind buttons only under 1000px of Copilot, and the window sat just above both. Within that room the chat kept its 760px default while the work beside it was allowed down to 360px — so the SWOT pane got half its width and the chat more than it needed. Inside the chat the methods grid broke on its own: four one-line capital column names refused to wrap, so the row-name column was the one that gave, down to about 40px, and *Internal* fell apart letter by letter.
+
+**THE ORDER.** The chat's default yields first: from 760 toward 420 before the work beside it goes under 480 (the grid formula is `max(420px, 100% − 700px)`; with a draft and no to-do, `100% − 492px`). Then the columns leave one at a time, the least needed first:
+
+1. **The to-do** folds to its button in the chat's head (*To-do 2/5*), opening as a sheet — from 900px to 1119px of Copilot (`@container copmain`), two columns: chat and work.
+2. **The rail** folds to its 24px strip — under 1130px of pane (`tight()`: two columns, the 200px rail, its 8px gap and the Copilot's 16px of padding). It goes second so the chat's name stays in view as long as it can (§653). The rail's fold yields 176px, less than the gap between the levels, so nothing comes back as something else leaves: each step down shows less, never more.
+3. **The work pane** becomes a sheet behind *View the SWOT* / *View the table* / *View Foundation* — under 900px of Copilot, as §642 had it under 1000.
+
+Three columns need 420 + 12 + 480 + 208 = 1120px; the levels are 1120 and 900. The same rule serves every split area — the Foundation, the SWOT, Competitive Discipline — and the Directions, Execution and Advisory splits inherit it.
+
+**THE GRID.** Row names never wrap; column names may take two lines (*Guided / questions*); a tick cell is at least 64px; the grid is at least 440px wide and scrolls inside the chat only when there is truly no room.
+
+**CHECKED.** `checks/shell.mjs`, the Foundation flow (§642's check rewritten, not loosened, §218): at 1440 the three stand together with the rail open; at 1300 the chat has yielded, the to-do has folded to its button, the cards keep at least 480px, the rail stays open; at 1100 the rail has folded and the cards are still beside the chat; the button opens the to-do over the chat and a press beside closes it; at 760 (§642, unchanged) both wait behind two buttons. The SWOT (3j): at 1100 the methods grid keeps its shape — row names on one line, column names on two at most, eleven ticks. Results below.
+

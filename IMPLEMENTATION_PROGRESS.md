@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-28 — The Copilot squeezed: what gives way, in order (§668).** The chat's default yields before the work beside it goes under 480px; then the to-do folds to its button, then the rail, then the work pane becomes a sheet; the SWOT's methods grid keeps its shape at any width. Shell `smp-shell-v7.34-order`.
+
 **2026-10-27 — The Copilot swept; batch 3, the split and the SWOT's change (§654).** Competitive Discipline laid out as the SWOT is — the chat in the order it happened, the scores and the table on the right, Save and Apply at the pane's foot, the to-do beside, a change asked for in the chat's own box; the SWOT takes "say what to change" — a proposal in the chat with what differs, used or kept by a press. Shell `smp-shell-v7.33-sweep-3`.
 **2026-10-28 — The Internal Tracker's own check runs to its end again (§667), merged to `main` on Islam's word.** Since §656 put a write line in every section, the check could no longer tell which add line it meant and died partway, on `main` too, so most of its lines and every one of its break runs proved nothing. It now names the page's own line; the Tracker itself is unchanged. Checked: the Tracker check 343/0 to the end (it died at 248 before), and all 32 of its break runs red.
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState, useTransition } from "react";
+import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   acceptSuggestedScores,
@@ -14,6 +14,8 @@ import {
   setPlanSettings,
   setProcessPriority,
 } from "@/ffp/lib/actions/priorities";
+import { ProcessPicker } from "./process-picker";
+import { planUnits } from "@/ffp/lib/domain/priority-units";
 import { DECISIONS, DECISION_LABEL, inTree, type Decision, type Weights } from "@/ffp/lib/domain/priorities";
 import type { PriorityRow, StepRow } from "@/ffp/lib/data/priorities";
 
@@ -65,11 +67,35 @@ export function ScoreTable({
   const tree = useMemo(() => inTree(rows), [rows]);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const [subsOpen, setSubsOpen] = useState<ReadonlySet<string>>(new Set());
+  // Which processes the table shows. Null is all of them; the choice is remembered in this browser.
+  const [shown, setShown] = useState<ReadonlySet<string> | null>(null);
+  const storeKey = `priorities.shown.${workspaceId}`;
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storeKey);
+      if (!raw) return;
+      const ids = new Set((JSON.parse(raw) as string[]).filter((id) => rows.some((r) => r.id === id)));
+      if (ids.size < rows.length) setShown(ids);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read once on arrival
+  }, [storeKey]);
+  function choose(next: ReadonlySet<string> | null) {
+    setShown(next);
+    try {
+      if (next) localStorage.setItem(storeKey, JSON.stringify([...next]));
+      else localStorage.removeItem(storeKey);
+    } catch {}
+  }
+  const isShown = (id: string) => shown == null || shown.has(id);
+  const visibleTree = tree.filter(({ row: r, sub }) => isShown(r.id) && (!sub || subsOpen.has(r.parentId!) || !isShown(r.parentId!)));
+  const visibleIds = tree.filter((t) => isShown(t.row.id)).map((t) => t.row.id);
+  const units = useMemo(() => planUnits(rows), [rows]);
+  const wave1 = units.filter((u) => u.decision === "WAVE_1").length;
   const mains = rows.filter((r) => tree.some((t) => t.sub && t.row.parentId === r.id)).map((r) => r.id);
 
   function openClear() {
     setKinds(new Set());
-    setPicked(new Set(rows.map((r) => r.id)));
+    setPicked(new Set(visibleIds));
     setClearing(true);
   }
   function toggle<T>(set: ReadonlySet<T>, v: T, on: boolean): Set<T> {
@@ -182,7 +208,7 @@ export function ScoreTable({
               ))}
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <button type="button" className="underline" onClick={() => setPicked(new Set(rows.map((r) => r.id)))}>Tick all</button>
+              <button type="button" className="underline" onClick={() => setPicked(new Set(visibleIds))}>Tick all</button>
               <button type="button" className="underline" onClick={() => setPicked(new Set())}>Untick all</button>
               <button
                 type="button"
@@ -205,6 +231,24 @@ export function ScoreTable({
         {note && <p role="status" className="mt-2 text-xs text-emerald-700">{note}</p>}
       </section>
 
+      <div className="flex flex-wrap items-center gap-3">
+        <ProcessPicker
+          items={tree.map((t) => ({ id: t.row.id, code: t.row.code, name: t.row.name, parentId: t.row.parentId, sub: t.sub, scored: t.row.score != null, flaggedSteps: t.row.steps.filter((x) => x.flagged).length }))}
+          shown={shown}
+          onChange={choose}
+        />
+        {shown != null && <button type="button" onClick={() => choose(null)} className="text-xs font-semibold text-indigo-700 hover:underline">Show all {rows.length}</button>}
+      </div>
+      <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4" aria-label="Where things stand">
+        {[
+          [`${visibleIds.length} / ${rows.length}`, "shown"],
+          [String(rows.filter((r) => r.score != null).length), "scored"],
+          [String(rows.reduce((n, r) => n + r.steps.filter((x) => x.flagged).length, 0)), "steps flagged"],
+          [`${wave1} / ${cap}`, "in Wave 1 (capacity)"],
+        ].map(([v, l]) => (
+          <div key={l} className="rounded-lg bg-slate-100 px-3 py-2"><dt className="sr-only">{l}</dt><dd className="text-lg font-bold text-slate-900">{v}</dd><div className="text-xs text-slate-600">{l}</div></div>
+        ))}
+      </dl>
       {mains.length > 0 && (
         <p className="-mb-2 text-end text-xs font-semibold text-slate-600">
           <button type="button" className="hover:underline" onClick={() => setSubsOpen(new Set(mains))}>Open all</button>
@@ -232,7 +276,10 @@ export function ScoreTable({
             {rows.length === 0 && (
               <tr><td colSpan={clearing ? 10 : 9} className="px-3 py-6 text-center text-slate-400">No processes yet. Map the high-level processes first.</td></tr>
             )}
-            {tree.filter(({ row: r, sub }) => !sub || subsOpen.has(r.parentId!)).map(({ row: r, sub, hasSubs }) => (
+            {rows.length > 0 && visibleTree.length === 0 && (
+              <tr><td colSpan={clearing ? 10 : 9} className="px-3 py-6 text-center text-slate-500">No processes chosen. Use “Choose processes” above to pick the ones to show.</td></tr>
+            )}
+            {visibleTree.map(({ row: r, sub, hasSubs }) => (
               <Fragment key={r.id}>
               <tr className={`border-t border-slate-100 align-top ${sub ? "" : "bg-slate-50/40"}`}>
                 {clearing && (

@@ -12,7 +12,6 @@ import {
   getProcessDeleteImpact,
 } from "@/ffp/lib/actions/process";
 import type { ProcessDeleteImpact } from "@/ffp/lib/domain/process-delete-impact";
-import { createProcessCategory } from "@/ffp/lib/actions/process-category";
 
 type StepOption = { id: string; label: string };
 type ProcessOption = { id: string; code: string; name: string; steps?: StepOption[] };
@@ -82,21 +81,24 @@ export function CreateProcessForm({
   workspaceId,
   processes,
   categories,
+  people,
+  prefill,
 }: {
   workspaceId: string;
   processes: ProcessOption[];
   categories: CategoryOption[];
+  /** Who can own it: the client register (stage 4). */
+  people: { id: string; name: string }[];
+  /** A request for a new process from To handle's Create it: its name, and the request it closes. */
+  prefill: { name: string; fromSuggestionId: string } | null;
 }) {
   const canEdit = useCanEdit();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(prefill?.name ?? "");
+  const [ownerPersonId, setOwnerPersonId] = useState("");
+  const [fromSuggestionId, setFromSuggestionId] = useState(prefill?.fromSuggestionId ?? "");
   const [parentProcessId, setParentProcessId] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [branch, setBranch] = useState({ sourceProcessId: "", stepId: "" });
-  const [categoryOptions, setCategoryOptions] = useState(categories);
-  const [newCategoryOpen, setNewCategoryOpen] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [categoryError, setCategoryError] = useState<string | null>(null);
-  const [categoryPending, startCategoryTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [lastCreatedCode, setLastCreatedCode] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -105,25 +107,6 @@ export function CreateProcessForm({
   // Nothing here but a way to change something, so a Viewer is shown none
   // of it rather than controls the server would refuse.
   if (!canEdit) return null;
-
-  function addCategory() {
-    if (!newCategoryName.trim()) return;
-    setCategoryError(null);
-    startCategoryTransition(async () => {
-      const result = await createProcessCategory({ workspaceId, name: newCategoryName });
-      if (!result.ok) {
-        setCategoryError(result.error === "VALIDATION_ERROR" ? (result.message ?? "Invalid category") : result.error);
-        return;
-      }
-      setCategoryOptions((prev) =>
-        prev.some((c) => c.id === result.data.id) ? prev : [...prev, result.data].sort((a, b) => a.name.localeCompare(b.name))
-      );
-      setCategoryId(result.data.id);
-      setNewCategoryName("");
-      setNewCategoryOpen(false);
-      router.refresh();
-    });
-  }
 
   return (
     <form
@@ -139,12 +122,16 @@ export function CreateProcessForm({
             parentProcessId: parentProcessId || undefined,
             categoryId: categoryId || undefined,
             branchFromStepId: branch.stepId || undefined,
+            ownerPersonId: ownerPersonId || undefined,
+            fromSuggestionId: fromSuggestionId || undefined,
           });
           if (!result.ok) {
             setError(result.error === "VALIDATION_ERROR" ? result.message ?? "Invalid input" : result.error);
             return;
           }
           setName("");
+          setOwnerPersonId("");
+          setFromSuggestionId("");
           setParentProcessId("");
           setBranch({ sourceProcessId: "", stepId: "" });
           setLastCreatedCode(result.data.code);
@@ -163,16 +150,31 @@ export function CreateProcessForm({
         />
       </label>
       <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-        Category
+        Department
         <select
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
         >
           <option value="">— none —</option>
-          {categoryOptions.map((c) => (
+          {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+        Owner
+        <select
+          value={ownerPersonId}
+          onChange={(e) => setOwnerPersonId(e.target.value)}
+          className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+        >
+          <option value="">— no owner yet —</option>
+          {people.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
             </option>
           ))}
         </select>
@@ -206,51 +208,9 @@ export function CreateProcessForm({
         + New Process
       </button>
 
-      {newCategoryOpen ? (
-        <div className="flex items-end gap-1.5">
-          <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-            New category name
-            <input
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              placeholder="e.g. HR"
-              autoFocus
-              className="w-32 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={addCategory}
-            disabled={categoryPending}
-            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-          >
-            {categoryPending ? "Adding…" : "Add"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setNewCategoryOpen(false);
-              setNewCategoryName("");
-              setCategoryError(null);
-            }}
-            className="rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100"
-          >
-            Cancel
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setNewCategoryOpen(true)}
-          className="rounded-lg border border-dashed border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-        >
-          + New category
-        </button>
-      )}
-
-      <span className="self-center text-xs text-slate-500">Codes are assigned automatically.</span>
+      <span className="self-center text-xs text-slate-500">Codes are assigned automatically. Departments are the client's Official BU list and owners its register, both set in client settings.</span>
+      {fromSuggestionId && <span className="w-full text-xs text-[#8A6B22]">Creating it closes the request for this process on To handle.</span>}
       {error && <span className="w-full text-xs text-red-600">{error}</span>}
-      {categoryError && <span className="w-full text-xs text-red-600">{categoryError}</span>}
       {lastCreatedCode && (
         <span className="w-full text-xs text-emerald-700">
           Created as <span className="font-mono font-semibold">{lastCreatedCode}</span>.
@@ -519,7 +479,7 @@ export function EditProcessButton({
           />
         </label>
         <label className="mt-3 flex flex-col gap-1 text-xs font-medium text-slate-600">
-          Category
+          Department
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}

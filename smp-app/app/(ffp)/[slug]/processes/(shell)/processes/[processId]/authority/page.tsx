@@ -3,9 +3,7 @@ import { registerReady } from "@/ffp/lib/register-sync";
 import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import { buildAuthorityTableRows, validateAuthorityTable } from "@/ffp/lib/domain/authority-table";
-import { getProcessStepperCounts } from "@/ffp/lib/data/process-stepper-data";
 import { AuthorityTable } from "./authority-table";
-import { ProcessStepper } from "../process-stepper";
 import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/lib/data/authority-assignments";
 
 export default async function AuthorityMatrixPage(
@@ -19,7 +17,7 @@ export default async function AuthorityMatrixPage(
   const process = await prisma.process.findUnique({ where: { id: processId } });
   if (!process || process.workspaceId !== workspaceId) notFound();
 
-  const [roles, people, activities, steps, assignments, stepperCounts] = await Promise.all([
+  const [roles, people, activities, steps, assignments] = await Promise.all([
     prisma.role.findMany({ where: { workspaceId, archivedAt: null }, orderBy: { name: "asc" } }),
     prisma.person.findMany({ where: { workspaceId, archivedAt: null }, orderBy: { name: "asc" } }),
     prisma.activity.findMany({ where: { processId }, orderBy: { order: "asc" } }),
@@ -29,7 +27,6 @@ export default async function AuthorityMatrixPage(
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     }),
     prisma.authorityAssignment.findMany({ where: { processId }, include: AUTHORITY_ASSIGNMENT_INCLUDE }),
-    getProcessStepperCounts(processId),
   ]);
 
   const rows = buildAuthorityTableRows(
@@ -41,11 +38,8 @@ export default async function AuthorityMatrixPage(
   const issues = validateAuthorityTable(rows);
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <div className="mb-1 flex items-center justify-between gap-3">
-        <div className="text-xs text-slate-500">
-          {process.code} · {process.name}
-        </div>
+    <main className="w-full">
+      <div className="mb-2 flex items-center justify-end gap-3">
         <div className="flex gap-2">
           <a
             href={`/api/ffp/export/authority/${processId}?format=pdf`}
@@ -59,21 +53,12 @@ export default async function AuthorityMatrixPage(
           >
             Export Excel
           </a>
-          <a
-            href={`/${workspaceId}/processes/processes/${processId}/review`}
-            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            AI Review →
-          </a>
         </div>
       </div>
-      <h1 className="text-xl font-semibold text-slate-900">Authority Matrix</h1>
       <p className="mt-1 mb-4 text-sm text-slate-500">
         Each task carries as many rules as it needs. A rule turns on an amount of money or an elapsed time, and says
         what happens then — the task needs approval, or it escalates.
       </p>
-
-      <ProcessStepper workspaceId={workspaceId} processId={processId} {...stepperCounts} />
 
       <AuthorityTable
         workspaceId={workspaceId}

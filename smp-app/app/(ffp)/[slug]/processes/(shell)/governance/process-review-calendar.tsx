@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { StaffLink } from "../staff-link";
 import { prisma } from "@/ffp/lib/db/client";
+import { Prisma } from "@/ffp/generated/prisma/client";
 import { reviewBucket, type ReviewBucket } from "@/ffp/lib/domain/process-lifecycle";
 
 const GROUPS: { key: ReviewBucket; title: string; tone: string }[] = [
@@ -10,10 +11,19 @@ const GROUPS: { key: ReviewBucket; title: string; tone: string }[] = [
   { key: "later", title: "Later", tone: "text-slate-500" },
 ];
 
-/** When each Published process is next due for review, grouped by how soon. Read-only. */
+/**
+ * When each process in force is next due for review, grouped by how soon.
+ * Read-only. A process stays in force while its next version is drawn (stage
+ * 5): Published, or with a version published and kept (process-content.ts).
+ */
 export async function ProcessReviewCalendar({ workspaceId }: { workspaceId: string }) {
   const rows = await prisma.process.findMany({
-    where: { workspaceId, archivedAt: null, lifecycleStatus: "PUBLISHED", nextReviewDue: { not: null } },
+    where: {
+      workspaceId,
+      archivedAt: null,
+      nextReviewDue: { not: null },
+      OR: [{ lifecycleStatus: "PUBLISHED" }, { lifecycleStatus: { not: "RETIRED" }, versions: { some: { publishedAt: { not: null }, snapshot: { not: Prisma.DbNull } } } }],
+    },
     orderBy: { nextReviewDue: "asc" },
     select: { id: true, code: true, name: true, sopVersion: true, approverName: true, approverRole: true, nextReviewDue: true },
   });

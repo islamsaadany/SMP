@@ -182,6 +182,7 @@ model Workspace {
   roles                 Role[]
   people                Person[]
   processes             Process[]
+  processSuggestions    ProcessSuggestion[]
   priorityPlan          PriorityPlan?
   phases                Phase[]
   governanceAspects     GovernanceAspect[]
@@ -267,6 +268,8 @@ model Person {
   policyAcknowledgements GovernancePolicyAcknowledgement[]
   checklistItemsOwned    GovernanceChecklistItem[]         @relation("ChecklistItemOwnerPerson")
   treatmentActionsOwned  GovernanceRiskTreatmentAction[]   @relation("TreatmentActionOwnerPerson")
+  processesOwned         Process[]                         @relation("ProcessOwner")
+  suggestions            ProcessSuggestion[]
 
   createdAt DateTime @default(now())
 
@@ -345,6 +348,13 @@ model Process {
   reviewIntervalMonths Int                    @default(12)
   nextReviewDue        DateTime?
   approverPersonId     String?
+  /// Stage 4 (spec 067 §3): the process's owner, a person on the client register.
+  ownerPersonId        String?
+  owner                Person?                @relation("ProcessOwner", fields: [ownerPersonId], references: [id], onDelete: SetNull)
+  /// When the owner last said, on their yearly review, that it is still right, and who (their register key).
+  reviewConfirmedAt    DateTime?
+  reviewConfirmedByKey String?
+  suggestions          ProcessSuggestion[]
   approverName         String?
   approverRole         String?
   /// { personId, name, role }[]
@@ -548,6 +558,7 @@ model ProcessStep {
   controls            ProcessControl[]
   authorityAssignment AuthorityAssignment?
   branchedProcesses   Process[]            @relation("ProcessBranchOrigin")
+  suggestions         ProcessSuggestion[]
 
   /// Priorities inside a process: a step the office flagged as worth a closer look, and its own three
   /// 1–5 scores (importance, complexity, risk). Only a flagged step is scored; a step's score never
@@ -666,6 +677,8 @@ model ProcessVersion {
   approvedRole  String?
   approvedAt    DateTime  @default(now())
   publishedAt   DateTime?
+  /// Stage 5: what was approved, as readers read it (process-content.ts), so a draft can sit beside the version in force.
+  snapshot      Json?
 
   process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
 
@@ -1315,4 +1328,39 @@ model GovernanceActivityLogEntry {
 
   @@index([workspaceId, createdAt])
   @@map("governance_activity_log_entries")
+}
+
+/// Stage 4 (spec 067 §3.2, §4.2): a change a client's person suggests, sent
+/// to the Strategy Office, pinned to a step or to the whole process, or a new
+/// process asked for (no process). The office answers or starts a draft from
+/// it; the person replies to an answer. state: NEW · ANSWERED · REPLIED ·
+/// IN_DRAFT · CLOSED.
+model ProcessSuggestion {
+  id          String    @id @default(uuid())
+  workspaceId String
+  processId   String?
+  stepId      String?
+  byPersonId  String
+  byName      String
+  text        String
+  why         String?
+  state       String    @default("NEW")
+  answerText  String?
+  answerBy    String?
+  answeredAt  DateTime?
+  replyText   String?
+  repliedAt   DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  process   Process?     @relation(fields: [processId], references: [id], onDelete: Cascade)
+  step      ProcessStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+  by        Person       @relation(fields: [byPersonId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, state])
+  @@index([processId])
+  @@index([byPersonId])
+  @@map("process_suggestions")
 }

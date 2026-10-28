@@ -93,6 +93,8 @@ their own weekly alignment about that client. The client's staff never see it.
 | 12 | The way back | **Above the page's title**, the client's own name with a chevron, to the client's platform (Strategy). Not in the top bar (his correction). |
 | 13 | The cards on top | **Fixed at the taller size, and they say no count of their own** (Islam, §356.16). The due card read *Due this week · N not started*, that tail took a second line, and `.strip` is a grid — so all four cards grew and the page below them shifted every time a status changed. The tail goes (his: *"no need for the naming on the card due is enough"*) **and** the cards carry a floor at the taller size, because a label that wraps at some untried window would bring the jump straight back. |
 | 14 | The names list | **No wider than its longest name needs** (Islam, §356.16, *"wide for no reason"*). The width was a floor in the stylesheet (140px) rather than anything the names asked for; the floor is gone and the rows are tighter, stopping short of the size that would go under every other small control on the page. |
+| 15 | Adding under a heading | **Written inside the section** (Islam, 2026-10-28, §656: *"the added title should appear in the same place rather than adding from the top task entry"*). The foot of a topic's section (*+ Add to <topic>*) and of a person's (*+ Add for <name>*) opens the page's own add line inside that section, the topic or the owner fixed — the owner as a plain name, never a pick — due this week; the row lands under the heading it was written under, the line stays open for the next one, and Escape on it empty folds it. The line at the top of the page stays for an action under nobody and nothing in particular. One line (`writeLine`), the Weekly check's included, named by `data-line`. |
+| 16 | The task's details | **Description, Progress, and the history behind a link** (Islam, 2026-10-28, §657, aligned and drawn first). *Notes* is *Description*: the same text, in a box that fits what is written and never scrolls. A one-line **Progress** box per task — Enter adds what happened, stamped with who and the week (*This week*, *Last week*, *W1 Sep*; the day and hour on hover) — and the entries under it newest first, scrolling inside their own box; **the writer alone** edits (stamped *edited*) or deletes (asked first) their entry. The latest entry reads as one quiet line under the task's name; on the Weekly check every open task of This week carries the box under it. Writing progress changes no status. The automatic history — now every movement: created, status, carried, handed on, renamed, moved to a topic — is behind one small *History* link that unfolds in place. |
 
 ---
 
@@ -156,7 +158,7 @@ switcher entry, the row on the client's card, the on/off drawer, the door,
 
 ## 5 · What it stores
 
-Two tenant-owned tables. **`tenant_id` is the whole of what isolation
+Three tenant-owned tables. **`tenant_id` is the whole of what isolation
 costs**: `db/schema.sql`'s loop enables and forces row-level security on every
 table not on the platform's own list, so both are covered on the next apply,
 and `lib/schema-check.ts`'s `PLATFORM_TABLES` must **not** gain them (§331).
@@ -178,7 +180,16 @@ and `lib/schema-check.ts`'s `PLATFORM_TABLES` must **not** gain them (§331).
 
 **`action_events`** — one row per status change, plus one on creation:
 `action_id`, `from`, `to`, `by_key`, `at`. Appended, never edited; a log a
-save could rewrite is not a log (§42).
+save could rewrite is not a log (§42). **Since §657 one row per movement
+too**: kinds `due`, `owner`, `title`, `topic`, with what it was and what it
+became in `detail jsonb`; the creation row's `detail` remembers the owner,
+the due day and the topic it was born with (migration 035).
+
+**`tracker_progress`** (§657) — what somebody WROTE about an action at a
+review: `action_id`, `body`, `by_key`, `at`, `edited_at`. Its writer may
+edit or delete it, which is why it is not an event; it goes with its action
+(`ON DELETE CASCADE`). Fenced like the others; migration 035 on a database
+already up.
 
 **No migration and no schema change beyond the two tables** — and one after
 them: migration 013 drops the `collaborators` column the first build carried

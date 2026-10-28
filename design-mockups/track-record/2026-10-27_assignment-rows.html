@@ -1,0 +1,148 @@
+<title>Assignment Rows</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the Clients list view as it is today, then the proposed
+   assignment lines: the + beside the last assignment instead of its own
+   line, Lead: and Team: as labels with the names bold, and where it stands
+   as a coloured pill. Tokens are the console's own (shell/platform.html). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--zebra:#F4F6F9;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--ff:#0F2C69;--ff-ink:#FFFFFF;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;
+  --plan:#2F57A8;--plan-bg:#E8EEFA;--ret:#6B3FA0;--ret-bg:#F1EAF9;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1F2531;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--ff:#0D2350;--ff-ink:#F0F4FB;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;
+  --plan:#8FB0F0;--plan-bg:#1E2A44;--ret:#C3A2EC;--ret-bg:#2A2238;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1F2531;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--ff:#0D2350;--ff-ink:#F0F4FB;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;
+  --plan:#8FB0F0;--plan-bg:#1E2A44;--ret:#C3A2EC;--ret-bg:#2A2238;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+.doc{max-width:1240px;margin:0 auto;padding-block:26px 64px;display:flex;flex-direction:column;gap:12px}
+h1{font-size:23px;margin:0;font-weight:650}
+.lede{margin:0;color:var(--ink-2);max-width:78ch}
+.cap{display:flex;gap:10px;align-items:baseline;margin-top:20px}
+.cap .n{font-size:12px;font-weight:700;color:var(--amber-tx);letter-spacing:.06em;text-transform:uppercase}
+.cap h2{margin:0;font-size:17px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px}
+.tw{overflow-x:auto;border-radius:10px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:13.5px}
+th{background:var(--ff);color:#A9BAD8;font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;text-align:left;padding:14px 14px}
+td{padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tr.crow td{background:var(--surface)}
+tr.crow:nth-of-type(4n+3) td{background:var(--zebra)}
+.who{display:flex;gap:10px;align-items:center;font-weight:650;font-size:14.5px}
+.mk{width:28px;height:28px;border-radius:7px;background:var(--ff);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700}
+.muted{color:var(--ink-3)}
+.mod{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-weight:600;font-size:12.5px;margin-right:6px;background:var(--surface)}
+.cog{width:28px;height:28px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;color:var(--amber-tx);margin-left:auto}
+.ttag{display:inline-block;font-size:11px;font-weight:650;border-radius:5px;padding:2px 8px;white-space:nowrap}
+.ttag.ret{background:var(--ret-bg);color:var(--ret)}.ttag.plan{background:var(--plan-bg);color:var(--plan)}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:4px 12px;font-weight:600;font-size:12.5px;cursor:pointer}
+/* today */
+.old{display:flex;gap:14px;align-items:center;padding-left:56px;color:var(--ink-2)}
+.old b{color:var(--ink)}
+.old .sp{flex:1}
+.old .st{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.old .st.late{color:var(--bad)}
+tr.oldadd td{padding:8px 14px 12px 70px;background:var(--surface-2)}
+/* proposed */
+tr.asg td{padding:9px 14px}
+.line{display:grid;grid-template-columns:28px auto minmax(0,1fr) auto auto;gap:6px 14px;align-items:center;padding-left:28px}
+.plus{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink-3);font-size:15px;font-weight:500;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
+.plus:hover{color:var(--ink);border-color:var(--ink-3)}
+.plus:focus-visible,.btn:focus-visible{outline:2px solid var(--amber-tx);outline-offset:2px}
+.nm{display:flex;gap:10px;align-items:center;white-space:nowrap}
+.nm b{font-size:13.5px}
+.facts{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--ink-2);font-size:13px;min-width:0}
+.facts b{color:var(--ink);font-weight:650}
+.facts .mo{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap;justify-self:end}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.run{color:var(--good)}
+.pill.late{color:var(--bad)}
+.pill.dr{color:var(--warn)}
+.pill.pub{color:var(--plan)}
+tr.none td{padding:9px 14px}
+.firstadd{display:flex;gap:10px;align-items:center;padding-left:56px;color:var(--ink-3);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:var(--ink-2);font-size:13px}
+ul{margin:0;padding-left:20px;color:var(--ink-2);display:flex;flex-direction:column;gap:5px;max-width:84ch}
+ul b{color:var(--ink)}
+</style>
+
+<div class="doc">
+  <h1>The assignment lines on Clients</h1>
+  <p class="lede">The list view of Clients, with each client's assignments under it. Today first, then the proposal: the + sits beside the last assignment instead of taking its own line, Lead and Team are labelled with the names in bold, and where each one stands is a coloured pill.</p>
+
+  <div class="cap"><span class="n">Today</span><h2>As it is now</h2></div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Client</th><th>Industry</th><th>Your seat</th><th>Units</th><th>Open</th><th></th></tr></thead>
+    <tbody>
+      <tr class="crow"><td><span class="who"><span class="mk">EA</span>ElAbd</span></td><td class="muted">Food &amp; Beverage</td><td>Super user</td><td>5</td><td><span class="mod">Strategy</span><span class="mod">Insights</span></td><td><span class="cog">≡</span></td></tr>
+      <tr><td colspan="6"><div class="old"><span class="ttag ret">Retainer</span><b>ElAbd-RET-2601-2612</b><span>Jan – Dec 2026</span><span>Lead Islam Saadany</span><span>Team Ahmed Galal, Momen Zaki, Aley Mahmoud, Noran Esam</span><span class="sp"></span><span class="st">Running</span><button class="btn">Edit</button></div></td></tr>
+      <tr class="oldadd"><td colspan="6"><button class="btn">+ Add an assignment</button></td></tr>
+      <tr class="crow"><td><span class="who"><span class="mk">WD</span>Wander Development</span></td><td class="muted">Real Estate &amp; Property</td><td>Super user</td><td>3</td><td><span class="mod">Strategy</span></td><td><span class="cog">≡</span></td></tr>
+      <tr><td colspan="6"><div class="old"><span class="ttag ret">Retainer</span><b>Wander-RET-2601-2612</b><span>Jan – Aug 2026</span><span>Lead Ahmed Galal</span><span>Team Islam Saadany</span><span class="sp"></span><span class="st late">Not written</span><button class="btn">Edit</button></div></td></tr>
+      <tr class="oldadd"><td colspan="6"><button class="btn">+ Add an assignment</button></td></tr>
+    </tbody>
+  </table></div></div>
+
+  <div class="cap"><span class="n">Proposed · second round</span><h2>Lead: and Team: in bold, the names plain, a quiet +</h2></div>
+  <div class="card"><div class="tw"><table>
+    <thead><tr><th>Client</th><th>Industry</th><th>Your seat</th><th>Units</th><th>Open</th><th></th></tr></thead>
+    <tbody>
+      <tr class="crow"><td><span class="who"><span class="mk">EA</span>ElAbd</span></td><td class="muted">Food &amp; Beverage</td><td>Super user</td><td>5</td><td><span class="mod">Strategy</span><span class="mod">Insights</span></td><td><span class="cog">≡</span></td></tr>
+      <tr class="asg"><td colspan="6"><div class="line">
+        <button class="plus" title="Add an assignment to ElAbd" aria-label="Add an assignment to ElAbd">+</button>
+        <span class="nm"><span class="ttag ret">Retainer</span><b>ElAbd-RET-2601-2612</b></span>
+        <span class="facts"><span class="mo">Jan – Dec 2026</span><span><b>Lead:</b> Islam Saadany</span><span><b>Team:</b> Ahmed Galal, Momen Zaki, Aley Mahmoud, Noran Esam</span></span>
+        <span class="pill run">Running</span><button class="btn">Edit</button></div></td></tr>
+
+      <tr class="crow"><td><span class="who"><span class="mk">RT</span>Raya Trade</span></td><td class="muted">Retail &amp; E-commerce</td><td>Super user</td><td>10</td><td><span class="mod">Strategy</span><span class="mod">Internal Tracker</span></td><td><span class="cog">≡</span></td></tr>
+      <tr class="asg"><td colspan="6"><div class="line">
+        <span></span>
+        <span class="nm"><span class="ttag plan">Planning</span><b>Raya Trade-PLN-2501-2506</b></span>
+        <span class="facts"><span class="mo">Jan – Jun 2025</span><span><b>Lead:</b> Islam Saadany</span><span><b>Team:</b> Omar Alaa</span></span>
+        <span class="pill pub">Written up</span><button class="btn">Edit</button></div></td></tr>
+      <tr class="asg"><td colspan="6"><div class="line">
+        <button class="plus" title="Add an assignment to Raya Trade" aria-label="Add an assignment to Raya Trade">+</button>
+        <span class="nm"><span class="ttag ret">Retainer</span><b>Raya Trade-RET-2607-2706</b></span>
+        <span class="facts"><span class="mo">Jul 2026 – Jun 2027</span><span><b>Lead:</b> Islam Saadany</span><span><b>Team:</b> Omar Alaa, Mohamed Essam</span></span>
+        <span class="pill run">Running</span><button class="btn">Edit</button></div></td></tr>
+
+      <tr class="crow"><td><span class="who"><span class="mk">WD</span>Wander Development</span></td><td class="muted">Real Estate &amp; Property</td><td>Super user</td><td>3</td><td><span class="mod">Strategy</span></td><td><span class="cog">≡</span></td></tr>
+      <tr class="asg"><td colspan="6"><div class="line">
+        <button class="plus" title="Add an assignment to Wander Development" aria-label="Add an assignment to Wander Development">+</button>
+        <span class="nm"><span class="ttag ret">Retainer</span><b>Wander-RET-2601-2612</b></span>
+        <span class="facts"><span class="mo">Jan – Aug 2026</span><span><b>Lead:</b> Ahmed Galal</span><span><b>Team:</b> Islam Saadany</span></span>
+        <span class="pill late">Not written</span><button class="btn">Edit</button></div></td></tr>
+
+      <tr class="crow"><td><span class="who"><span class="mk">FC</span>Forefront Consulting</span></td><td class="muted">Professional Services</td><td>Super user</td><td>3</td><td><span class="mod">Strategy</span></td><td><span class="cog">≡</span></td></tr>
+      <tr class="none"><td colspan="6"><div class="firstadd"><button class="btn">+ Add an assignment</button><span>No assignments yet</span></div></td></tr>
+    </tbody>
+  </table></div></div>
+
+  <div class="legend"><span class="pill run">Running</span><span class="pill late">Not written</span>ended, no write-up yet<span class="pill dr">Draft</span>being written<span class="pill pub">Written up</span>published</div>
+
+  <ul>
+    <li><b>The +</b> is a small plain square, grey, beside the client's last assignment, so adding never takes a line of its own. A hover says "Add an assignment to …".</li>
+    <li><b>A client with no assignment yet</b> keeps one line: <b>+ Add an assignment</b>, with "No assignments yet" beside it.</li>
+    <li>The words <b>Lead:</b> and <b>Team:</b> are bold; the names stay plain. The lead is no longer repeated in the team.</li>
+    <li><b>Where it stands</b> is a small dot and the word in its colour, no box: Running green, Not written red, Draft amber, Written up blue.</li>
+    <li>Only the super user sees the + and Edit. Everyone else sees the same lines without them.</li>
+  </ul>
+</div>

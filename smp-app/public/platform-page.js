@@ -1048,9 +1048,10 @@
     var b = csButton("+ Add to Track Record", "amber", function (e) {
       e.stopPropagation();
       if (!menu.hidden) { shut(); return; }
+      var z = parseFloat(getComputedStyle(ROOT).zoom) || 1;   /* tipShow's reason */
       var r = b.getBoundingClientRect();
-      menu.style.top = Math.round(r.bottom + 6) + "px";
-      menu.style.right = Math.max(8, Math.round(window.innerWidth - r.right)) + "px";
+      menu.style.top = Math.round((r.bottom + 6) / z) + "px";
+      menu.style.right = Math.max(8, Math.round((window.innerWidth - r.right) / z)) + "px";
       menu.hidden = false;
       document.addEventListener("click", shut);
       window.addEventListener("scroll", shut, { passive: true });
@@ -3293,14 +3294,21 @@
       var clients = j.cards.filter(function (c) { return c.kind !== "demo"; });
       var demos = j.cards.filter(function (c) { return c.kind === "demo"; });
       var archived = j.archived || [], past = j.past || [];
+      /* A CLIENT WHOSE ASSIGNMENTS HAVE ALL ENDED is drawn under Ended
+         (spec 069, choice (a)); it is still a live client with its door open */
+      var over = {};
+      (j.workEnded || []).forEach(function (k) { over[k] = true; });
+      var finished = clients.filter(function (c) { return over[c.key]; });
+      finished.forEach(function (c) { c.workEnded = true; });
+      clients = clients.filter(function (c) { return !over[c.key]; });
       /* AND THE COUNT IS A COUNT OF CLIENTS (it read j.cards.length once,
          which counted the demo — §61's trap by another road). */
-      if (!clients.length) {
+      if (!clients.length && !finished.length) {
         say(j.canAdd
           ? "No clients yet. Add the first one — it is created with its own name and nothing else."
           : "No client has been given to this account yet. Ask the platform's super user.");
       }
-      eye.textContent = [nOf(clients.length, "active client"), archived.length + past.length ? (archived.length + past.length) + " ended" : "",
+      eye.textContent = [nOf(clients.length, "active client"), archived.length + past.length + finished.length ? (archived.length + past.length + finished.length) + " ended" : "",
         demos.length ? nOf(demos.length, "demo") : ""].filter(Boolean).join(" · ");
       if (j.canAdd) {
         var add = el("button", "btn amber pgadd", "+ Add a client");
@@ -3308,7 +3316,7 @@
         add.addEventListener("click", function () { drawNewClient(); });
         band.appendChild(add);
       }
-      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, canAdd: j.canAdd, canAddPast: j.canAddPast, search: search });
+      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, finished: finished, canAdd: j.canAdd, canAddPast: j.canAddPast, search: search });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       grid.textContent = ""; say("Could not reach the server.", true);
@@ -3363,19 +3371,19 @@
     var draw = function () {
       CLREG.redraw = draw;
       var act = mineOf(d.clients, seat), dem = mineOf(d.demos, seat);
-      var end = CL.mine ? d.archived.filter(function (c) { return c.mine; }) : d.archived.concat(d.past);
+      var end = CL.mine ? d.finished.filter(seat).concat(d.archived.filter(function (c) { return c.mine; })) : d.finished.concat(d.archived, d.past);
       bar.textContent = ""; body.textContent = "";
       /* A CHOICE WITH NOTHING BEHIND IT IS NOT OFFERED, and one that has
          just emptied (the last archived client deleted) falls back to
          Active rather than leaving the page on a choice it no longer draws. */
-      if (CL.which === "ended" && !d.archived.length && !d.past.length && !d.canAddPast) CL.which = "active";
+      if (CL.which === "ended" && !d.archived.length && !d.past.length && !d.finished.length && !d.canAddPast) CL.which = "active";
       if (CL.which === "demo" && !d.demos.length) CL.which = "active";
       var which = el("span", "clwhich");
       which.setAttribute("role", "group");
       which.setAttribute("aria-label", "Which clients");
       [["active", "Active", act.length], ["ended", "Ended", end.length], ["demo", "Demo", dem.length]].forEach(function (w) {
         if (w[0] === "demo" && !d.demos.length) return;
-        if (w[0] === "ended" && !d.archived.length && !d.past.length && !d.canAddPast) return;
+        if (w[0] === "ended" && !d.archived.length && !d.past.length && !d.finished.length && !d.canAddPast) return;
         var b = el("button", null, w[1]);
         b.type = "button";
         b.setAttribute("data-which", w[0]);
@@ -3446,19 +3454,30 @@
       if (CLREG.redraw && CL.view === "list") CLREG.redraw();
     }).catch(function () { /* the clients stand without their assignments */ });
   }
+  /* THE CLIENT'S ASSIGNMENTS, one clean line each (Islam, 2026-10-27, on
+     design-mockups/track-record/2026-10-27_assignment-rows.html): the + sits
+     beside the last one instead of taking a line of its own; a client with
+     none keeps one line, + Add an assignment. */
   function clAsgRows(tb, c, cols) {
     var reg = CLREG.data;
     if (!reg) return;
-    reg.assignments.filter(function (a) { return a.client.key === c.key; }).forEach(function (a) {
-      tb.appendChild(CLREG.open === a.id ? clAsgForm(c, a, cols) : clAsgRow(c, a, cols, reg.canOpen));
+    var mine = reg.assignments.filter(function (a) { return a.client.key === c.key; });
+    var adding = CLREG.open === "new:" + c.key;
+    mine.forEach(function (a, i) {
+      tb.appendChild(CLREG.open === a.id ? clAsgForm(c, a, cols)
+        : clAsgRow(c, a, cols, reg.canOpen, reg.canOpen && !adding && i === mine.length - 1));
     });
     if (!reg.canOpen) return;
-    if (CLREG.open === "new:" + c.key) { tb.appendChild(clAsgForm(c, null, cols)); return; }
+    if (adding) { tb.appendChild(clAsgForm(c, null, cols)); return; }
+    if (mine.length) return;
     var tr = el("tr", "asgadd");
     var td = el("td"); td.colSpan = cols;
+    var line = el("div", "asgfirst");
     var b = csButton("+ Add an assignment", "sm", function () { clAsgOpen("new:" + c.key); });
     b.setAttribute("data-add-assignment", c.key);
-    td.appendChild(b);
+    line.appendChild(b);
+    line.appendChild(el("span", null, "No assignments yet"));
+    td.appendChild(line);
     tr.appendChild(td);
     tb.appendChild(tr);
   }
@@ -3470,26 +3489,46 @@
       if (CLREG.redraw) CLREG.redraw();
     });
   }
-  function clAsgRow(c, a, cols, canEdit) {
+  /* The + is drawn, not typed, so it sits in the middle of its square:
+     a "+" in a font rides above the centre by the font's own metrics. */
+  var ASG_PLUS = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  function clAsgRow(c, a, cols, canEdit, plus) {
     var tr = el("tr", "asgrow");
     tr.setAttribute("data-case", a.id);
     tr.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();   /* it goes with its client */
     var td = el("td"); td.colSpan = cols;
     var line = el("div", "asgline");
-    line.appendChild(typeTag(a.kind));
+    if (plus) {
+      var p = el("button", "asgplus");
+      p.type = "button";
+      p.innerHTML = ASG_PLUS;
+      p.title = "Add an assignment to " + c.name;
+      p.setAttribute("aria-label", "Add an assignment to " + c.name);
+      p.setAttribute("data-add-assignment", c.key);
+      p.addEventListener("click", function () { clAsgOpen("new:" + c.key); });
+      line.appendChild(p);
+    } else line.appendChild(el("span"));
+    var nmw = el("span", "nm");
+    nmw.appendChild(typeTag(a.kind));
     var nm = el("button", "textlink", a.name);
     nm.type = "button";
     nm.title = "Open in Track Record";
     nm.addEventListener("click", function () { CS.jump = { view: "client", client: c.key, id: a.id }; go("memory"); });
-    line.appendChild(nm);
-    line.appendChild(el("span", "mo", spanWord(a.started, a.ended) + (a.ended ? "" : " · running")));
-    if (a.lead) line.appendChild(el("span", "ld", "Lead " + a.lead.name));
-    var team = (a.team || []).filter(function (p) { return !a.lead || p.id !== a.lead.id; }).map(function (p) { return p.name; });
-    if (team.length) line.appendChild(el("span", "tm", "Team " + team.join(", ")));
-    line.appendChild(el("span", "sp"));
+    nmw.appendChild(nm);
+    line.appendChild(nmw);
+    /* the labels are bold and the names plain (Islam: "make the Lead and the
+       Team words bold but the names itself to stay not bold") */
+    var facts = el("span", "facts");
+    facts.appendChild(el("span", "mo", spanWord(a.started, a.ended)));
+    var fact = function (label, value) { var x = el("span"); x.appendChild(el("b", null, label)); x.appendChild(document.createTextNode(" " + value)); facts.appendChild(x); };
+    if (a.lead) fact("Lead:", a.lead.name);
+    var team = (a.team || []).filter(function (p2) { return !a.lead || p2.id !== a.lead.id; }).map(function (p2) { return p2.name; });
+    if (team.length) fact("Team:", team.join(", "));
+    line.appendChild(facts);
     var st = asgState(a);
-    line.appendChild(el("span", "st " + st[1], st[0]));
+    line.appendChild(el("span", "asgst " + st[1], st[0]));
     if (canEdit) line.appendChild(csButton("Edit", "sm", function () { clAsgOpen(a.id); }));
+    else line.appendChild(el("span"));
     td.appendChild(line);
     tr.appendChild(td);
     return tr;
@@ -3507,8 +3546,8 @@
     var ty = box("asg-type", "Type", el("select", "fld"));
     [["planning", "Planning"], ["retainer", "Retainer"]].forEach(function (t) { var op = el("option", null, t[1]); op.value = t[0]; ty.appendChild(op); });
     ty.value = a ? a.kind : "planning";
-    var st = box("asg-start", "Start", el("input", "fld")); st.type = "month"; st.value = a ? a.started : "";
-    var en = box("asg-end", "End (empty while running)", el("input", "fld")); en.type = "month"; en.value = a ? a.ended : "";
+    var st = box("asg-start", "Start", monthPick(a ? a.started : "", "Pick the month"));
+    var en = box("asg-end", "End", monthPick(a ? a.ended : "", "Still running"));
     var ld = box("asg-lead", "Lead", el("select", "fld"));
     var pick0 = el("option", null, "Pick the lead"); pick0.value = ""; ld.appendChild(pick0);
     o.consultants.forEach(function (p) { var op = el("option", null, p.name || p.email); op.value = p.id; ld.appendChild(op); });
@@ -3575,6 +3614,87 @@
     td.appendChild(said);
     tr.appendChild(td);
     return tr;
+  }
+
+  /* A MONTH PICKER OF OUR OWN (Islam, 2026-10-27, of the browser's month box:
+     "the year doesn't have the right and left arrows"). The browser's own
+     month picker scrolls a list of years and looks different in every
+     browser, so this draws the one in the drawing everywhere: ‹ year ›, the
+     twelve months, then Clear and This month. It is a button whose `value`
+     is 'YYYY-MM' ('' when empty), so a form reads it like the box it
+     replaces. The panel is placed on the screen, because the table it sits
+     in clips what overflows it. */
+  function monthPick(value, empty) {
+    var b = el("button", "fld mpick");
+    b.type = "button";
+    var cur = /^\d{4}-\d{2}$/.test(value || "") ? value : "";
+    var word = el("span"), ico = el("span", "mpico");
+    ico.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+    b.appendChild(word); b.appendChild(ico);
+    var show = function () { word.textContent = cur ? MONTHS[+cur.slice(5) - 1] + " " + cur.slice(0, 4) : empty; word.className = cur ? "" : "mpnone"; };
+    Object.defineProperty(b, "value", { get: function () { return cur; }, set: function (v) { cur = /^\d{4}-\d{2}$/.test(v || "") ? v : ""; show(); } });
+    show();
+    var panel = null, year = 0;
+    var shut = function () {
+      if (panel) { panel.remove(); panel = null; }
+      document.removeEventListener("mousedown", away, true); window.removeEventListener("scroll", shut, true); document.removeEventListener("keydown", esc);
+      b.setAttribute("aria-expanded", "false");
+    };
+    var away = function (e) { if (panel && !panel.contains(e.target) && e.target !== b && !b.contains(e.target)) shut(); };
+    var esc = function (e) { if (e.key === "Escape") { shut(); b.focus(); } };
+    var pick = function (v) { cur = v; show(); shut(); b.focus(); b.dispatchEvent(new Event("change", { bubbles: true })); };
+    var draw = function () {
+      panel.textContent = "";
+      var top = el("div", "mptop");
+      var prev = el("button", "mpnav", "‹"); prev.type = "button"; prev.setAttribute("aria-label", "Previous year");
+      var next = el("button", "mpnav", "›"); next.type = "button"; next.setAttribute("aria-label", "Next year");
+      prev.addEventListener("click", function () { year--; draw(); });
+      next.addEventListener("click", function () { year++; draw(); });
+      top.appendChild(prev); top.appendChild(el("b", "mpyear", String(year))); top.appendChild(next);
+      panel.appendChild(top);
+      var grid = el("div", "mpgrid");
+      var today = thisMonth();
+      MONTHS.forEach(function (m, i) {
+        var v = year + "-" + (i < 9 ? "0" : "") + (i + 1);
+        var x = el("button", (v === cur ? "on" : "") + (v === today ? " now" : ""), m);
+        x.type = "button";
+        x.setAttribute("data-m", v.slice(5));
+        x.setAttribute("aria-label", MONTHS_LONG[i] + " " + year);
+        x.addEventListener("click", function () { pick(v); });
+        grid.appendChild(x);
+      });
+      panel.appendChild(grid);
+      var foot = el("div", "mpfoot");
+      var clr = el("button", "mplink", "Clear"); clr.type = "button";
+      clr.addEventListener("click", function () { pick(""); });
+      var tm = el("button", "mplink", "This month"); tm.type = "button";
+      tm.addEventListener("click", function () { pick(thisMonth()); });
+      foot.appendChild(clr); foot.appendChild(tm);
+      panel.appendChild(foot);
+    };
+    b.setAttribute("aria-haspopup", "dialog");
+    b.setAttribute("aria-expanded", "false");
+    b.addEventListener("click", function () {
+      if (panel) { shut(); return; }
+      year = +(cur || thisMonth()).slice(0, 4);
+      panel = el("div", "mppanel");
+      panel.setAttribute("role", "dialog");
+      panel.setAttribute("aria-label", "Pick a month");
+      draw();
+      document.body.appendChild(panel);
+      /* the box is in the window's pixels, the place is set in the page's,
+         and the console is zoomed on a computer (tipShow's reason) */
+      var z = parseFloat(getComputedStyle(ROOT).zoom) || 1;
+      var r = b.getBoundingClientRect(), w = panel.offsetWidth, h = panel.offsetHeight;
+      var L = r.left / z, T = r.top / z, B = r.bottom / z, W = window.innerWidth / z, H = window.innerHeight / z;
+      panel.style.left = Math.round(Math.max(8, Math.min(L, W - w - 8))) + "px";
+      panel.style.top = Math.round(B + 6 + h > H && T - 6 - h > 0 ? T - 6 - h : B + 6) + "px";
+      b.setAttribute("aria-expanded", "true");
+      document.addEventListener("mousedown", away, true); window.addEventListener("scroll", shut, true); document.addEventListener("keydown", esc);
+      var on = panel.querySelector(".mpgrid .on") || panel.querySelector(".mpgrid .now") || panel.querySelector(".mpgrid button");
+      if (on) on.focus();
+    });
+    return b;
   }
 
   /* + ADD A PAST CLIENT, on Ended (spec 067 §7, kept): its name, industry and
@@ -3710,7 +3830,7 @@
       var g = el("div", "cards");
       g.dataset.grid = "archived";
       list.forEach(function (c) {
-        var card = c.cases != null ? pastCardFor(c, casesOf) : archCardFor(c);
+        var card = c.workEnded ? cardFor(c) : c.cases != null ? pastCardFor(c, casesOf) : archCardFor(c);
         card.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
         g.appendChild(card);
       });
@@ -3737,14 +3857,32 @@
       r.dataset.client = c.key;
       r.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
       var who = el("td"), w = el("span", "clwho");
-      w.appendChild(el("span", "cmark arch", initials(c.name)));
+      if (c.workEnded && c.mark) { var im = el("img", "cmark solo"); im.src = c.mark; im.alt = ""; w.appendChild(im); }
+      else w.appendChild(el("span", "cmark" + (c.workEnded ? "" : " arch"), initials(c.name)));
       w.appendChild(el("b", null, c.name));
       who.appendChild(w); r.appendChild(who);
       r.appendChild(el("td", "muted", c.industry || ""));
       var when = archDate(c.at);
-      r.appendChild(el("td", null, c.cases != null ? "Past client" : (when ? "Archived " + when : "Archived") + (c.by ? " · " + c.by : "")));
+      r.appendChild(el("td", null, c.workEnded ? "Assignments ended" : c.cases != null ? "Past client" : (when ? "Archived " + when : "Archived") + (c.by ? " · " + c.by : "")));
       var acts = el("td", "clgo");
-      if (c.cases != null) {
+      if (c.workEnded) {
+        /* still a live client: its modules and its settings, as on Active */
+        if (c.canOpen && c.modules) c.modules.forEach(function (m) {
+          var mb = el("button", "clmod", m.label);
+          mb.type = "button";
+          mb.dataset.module = m.key;
+          mb.addEventListener("click", function () { moduleGo(c, m); });
+          acts.appendChild(mb);
+        });
+        if (c.canConfig) {
+          var chip = settingsChip(c.name);
+          chip.setAttribute("role", "button"); chip.tabIndex = 0;
+          var go2 = function (e) { e.preventDefault(); location.assign("/" + c.key + "/setup"); };
+          chip.addEventListener("click", go2);
+          chip.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") go2(e); });
+          acts.appendChild(chip);
+        }
+      } else if (c.cases != null) {
         var cb = el("button", "clmod", "Track Record");
         cb.type = "button";
         cb.appendChild(el("i", null, String(c.cases)));

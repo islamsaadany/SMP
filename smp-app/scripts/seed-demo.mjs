@@ -124,7 +124,7 @@ export async function seedDemo({ url, replace = false, brk = null, log = (s) => 
    statement to the demo, and the explicit `tenant_id` below says it again,
    because a superuser connection bypasses the policy and "every row" would
    then mean every client's. */
-const MODULE_TABLES = ["tracker_events", "tracker_actions", "note_sends", "notes"];
+const MODULE_TABLES = ["tracker_progress", "tracker_events", "tracker_actions", "note_sends", "notes"];
 async function replaceContent(c, tenantId, graph) {
   const members = (await c.query(
     "SELECT person_key, seat FROM tenant_users WHERE tenant_id = $1", [tenantId])).rows;

@@ -12,7 +12,8 @@
        sure the person got through the door. tests/processes-gate.mjs fails if
        a page is left without one of the two;
      · SMP's white top bar (lib/topbar.ts, §444), the same on every module,
-       in place of FFProcess's own header.
+       in place of FFProcess's own header. React draws it once and leaves it
+       to the bar's own script (top-bar.tsx); a refresh only moves its count.
 
    FFProcess's root layout set the language on <html>; SMP's root layout owns
    <html>, so the language and direction ride a wrapper element instead —
@@ -32,6 +33,7 @@ import { topBarHtml, TOPBAR_CSS, TOPBAR_SRC } from "@/lib/topbar.ts";
 import { getLocale } from "@/ffp/lib/i18n/server";
 import { dirFor } from "@/ffp/lib/i18n/locale";
 import { LocaleProvider } from "@/ffp/lib/i18n/client";
+import { TopBar } from "./top-bar";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -75,7 +77,7 @@ export default async function ProcessesFrame(props: LayoutProps<"/[slug]/process
       <style dangerouslySetInnerHTML={{ __html: TOPBAR_CSS + "@media print{.tb{display:none}}" }} />
       {/* eslint-disable-next-line @next/next/no-sync-scripts -- the shared bar's one script (§444) */}
       <script src={TOPBAR_SRC} />
-      <div dangerouslySetInnerHTML={{ __html: bar }} />
+      <TopBar html={bar} />
       <div
         data-ffp=""
         lang={locale}

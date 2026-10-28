@@ -47,3 +47,9 @@ body {
 [data-ffp][lang="ar"] {
   font-family: var(--font-arabic), Arial, Helvetica, sans-serif;
 }
+
+/* THE BUILDER'S TABLES (spec 067 §4.2, Q8): white then light grey, starting
+   with white under the darker header. Counted over the rows a reader can see,
+   so a folded main process never leaves two greys together. No row hover
+   (§278.3). */
+.ffp-zebra > tr:nth-child(even of :not([hidden])) > td { background: #F5F7FA; }

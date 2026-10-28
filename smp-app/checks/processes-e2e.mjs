@@ -126,16 +126,16 @@ check(/Waiting for/.test(await body(O2.page)) && !(await O2.page.$("button:text-
 
 /* the named approver is a CLIENT person on the register, and approves from their own reading page */
 const B = await as(APPROVER);
-const bl = await B.get("/" + S + "/processes/read");
+const bl = await B.get("/" + S + "/processes/read/todo");
 const blText = await bl.text();
-check(bl.status() === 200 && /Waiting for your approval/.test(blText) && /Supplier onboarding/.test(blText), "the approver's reading list says it is waiting for their approval", bl.status());
+check(bl.status() === 200 && /To approve/.test(blText) && /Supplier onboarding/.test(blText) && /Version 1 is ready for your approval/.test(blText), "the approver's To do says it is waiting for their approval", bl.status());
 await B.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
 check(/1 to approve/.test((await B.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "the top bar says 1 to approve");
 await B.page.goto(BASE + "/" + S + "/processes/read/" + P2, { waitUntil: "networkidle" });
-await waitFor(B.page, "button:text-is('Approve')", "the approver's Approve button on the reading page");
+await waitFor(B.page, "button:text-is('Approve v1')", "the approver's Approve button on the reading page");
 const bt = await body(B.page);
-check(/For your approval/.test(bt) && /credit check/.test(bt) && /Check the customer's credit/.test(bt), "they see what changed and the steps before approving");
-await B.page.click("button:text-is('Approve')");
+check(/for your approval/i.test(bt) && /credit check/.test(bt) && /Check the customer's credit/.test(bt), "they see what changed and the steps before approving");
+await B.page.click("button:text-is('Approve v1')");
 await B.page.waitForFunction(() => /\/processes\/read$/.test(location.pathname), null, { timeout: 20000 });
 r = await st(P2);
 const v = (await q(ffp, 'select number, "approvedBy" b, "approvedRole" ro, "changeNote" n from process_versions where "processId"=$1', [P2]))[0];
@@ -166,29 +166,99 @@ check(/Review Cycle Every 12 months · next \d{4}-\d{2}-\d{2}/.test(rp), "…and
 const rd1 = await report(P1);
 check(/Status Draft/.test(rd1) && /Version —/.test(rd1) && /Approved By —/.test(rd1), "a draft says Draft and shows dashes, not an invented version", (rd1.match(/Document ID.{0,260}/) || [rd1.slice(0, 200)])[0]);
 
-/* ── 1b · moving in and out of every part of a process ── */
-const nav = async (pg, path) => { await pg.goto(BASE + "/" + S + "/processes/processes/" + P2 + path, { waitUntil: "networkidle" }); return pg.$$eval("nav[aria-label='Process sections'] a", (a) => a.map((x) => x.textContent)); };
+/* ── 1b · moving in and out of every part of a process: the builder page's menu of sections (spec 067 §4.3) ── */
+const nav = async (pg, path) => { await pg.goto(BASE + "/" + S + "/processes/processes/" + P2 + path, { waitUntil: "networkidle" }); return pg.$$eval("nav[aria-label='Process sections'] a", (a) => a.map((x) => x.textContent.trim())); };
+const current = (pg) => pg.$$eval("nav[aria-label='Process sections'] a[aria-current=page]", (a) => a.map((x) => x.textContent.trim()));
 const onMap = await nav(A.page, "/map");
-check(onMap.length === 7 && onMap[0] === "Overview" && onMap.includes("Risks & controls") && onMap.includes("People"), "the Process Map page shows the process's own tabs", JSON.stringify(onMap));
-for (const pth of ["/raci", "/authority", "/review"]) check((await nav(A.page, pth)).length === 0, "…and " + pth.slice(1) + " does not", pth);
-const stepHref = await A.page.$eval("a[aria-label^='Process —']", (a) => a.getAttribute("href")).catch(() => null);
-check(stepHref === "/" + S + "/processes/processes/" + P2, "the strip's Process button goes to this process's own page, not the list", stepHref);
+check(onMap.length === 10 && onMap[0] === "Map" && onMap.includes("Risks & controls") && onMap.includes("People") && /^Check with AI/.test(onMap[9]), "the Process Map page shows the builder's menu of the process's ten sections", JSON.stringify(onMap));
+for (const [pth, label] of [["/raci", "RACI"], ["/authority", "Authority"], ["/review", "Check with AI"]]) {
+  const items = await nav(A.page, pth), on = await current(A.page);
+  check(items.length === 10 && on.length === 1 && on[0].startsWith(label), "…and " + pth.slice(1) + " carries the same menu, with " + label + " marked", JSON.stringify(on));
+}
+const mapHref = await A.page.$eval("nav[aria-label='Process sections'] a:has-text('Map')", (a) => a.getAttribute("href")).catch(() => null);
+check(mapHref === "/" + S + "/processes/processes/" + P2 + "/map", "the menu's Map goes to this process's own map, not the list", mapHref);
 const onPage = await nav(A.page, "");
-check(onPage.length === 7 && !!(await A.page.$("a[aria-label^='Process Map']")), "the process page carries the same strip as the others");
+check(new URL(A.page.url()).pathname.endsWith("/" + P2 + "/map") && onPage.length === 10, "the process's own address opens the builder on its Map", A.page.url());
 await nav(A.page, "/map");
 await A.page.click("nav[aria-label='Process sections'] >> text=Risks & controls");
 await A.page.waitForURL(/tab=risks/, { timeout: 20000 });
 check(/Risks & controls/.test(await body(A.page)), "from the map into Risks & controls");
-await A.page.click("a[aria-label^='Process Map']");
+await A.page.click("nav[aria-label='Process sections'] a:has-text('Map')");
 await A.page.waitForURL(/\/map$/, { timeout: 20000 });
-check(true, "…and back to the map from the strip");
+check(true, "…and back to the map from the menu");
+
+/* ── 1c · the Map, redrawn (spec 067 §4.3; Islam: dragging, the Steps List and Undo go) ── */
+{
+const MAP = BASE + "/" + S + "/processes/processes/" + P1 + "/map";
+const panel = A.page.locator("aside[aria-live]"), dlg = A.page.locator("[data-ffp-dialog]");
+const quiet = () => A.page.waitForFunction(() => /Saved as you type/.test(document.querySelector("[role=status]")?.textContent || ""), null, { timeout: 20000 });
+const poll = async (sql, args, ok) => { for (let i = 0; i < 40; i++) { const r = await q(ffp, sql, args); if (ok(r)) return r; await new Promise((z) => setTimeout(z, 500)); } return await q(ffp, sql, args); };
+const sid = async (label) => (await q(ffp, 'select id from process_steps where "processId"=$1 and label=$2', [P1, label]))[0]?.id;
+await A.page.goto(MAP, { waitUntil: "networkidle" });
+const boxes = await A.page.$$eval("[data-lane-grid] button[data-step]", (b) => b.map((x) => x.textContent));
+check(boxes.length === 2 && /Credit Controller/i.test(await A.page.locator("[data-lane-grid]").innerText()) && (await A.page.$$("[data-lane-grid] [title]")).length === 2, "the Map draws the process in lanes by job title, its gaps marked in red", JSON.stringify(boxes));
+const s1 = await sid("Check the customer's credit"), s2 = await sid("Raise the invoice");
+await A.page.click("button:text-is('Connect two steps')");
+await dlg.locator("select").nth(0).selectOption(s1);
+await dlg.locator("select").nth(1).selectOption(s2);
+await dlg.locator("button:text-is('Connect')").click();
+let line1 = await poll('select 1 from step_connections where "fromStepId"=$1 and "toStepId"=$2', [s1, s2], (r) => r.length);
+check(line1.length === 1, "Connect two steps draws an arrow between them");
+await quiet();
+await A.page.locator("[data-lane-grid] button[data-step]", { hasText: "Check the customer's credit" }).click();
+await A.page.click("button:text-is('+ Step')");
+const added = await poll('select id, "order" o from process_steps where "processId"=$1 and label=$2', [P1, "New step"], (r) => r.length);
+const through = added.length ? await q(ffp, 'select 1 from step_connections where ("fromStepId"=$1 and "toStepId"=$2) or ("fromStepId"=$2 and "toStepId"=$3)', [s1, added[0].id, s2]) : [];
+check(added.length === 1 && added[0].o === 1 && through.length === 2, "+ Step goes after the picked step and into its line: credit check → new step → invoice", JSON.stringify({ added, through: through.length }));
+await quiet();
+await panel.getByLabel("Step", { exact: true }).fill("Confirm the order");
+await panel.getByLabel("Step", { exact: true }).press("Enter");
+check((await poll('select 1 from process_steps where id=$1 and label=$2', [added[0]?.id, "Confirm the order"], (r) => r.length)).length === 1, "the new step is picked, and naming it saves as you type");
+await quiet();
+await panel.locator("button[aria-label^='Credit Controller:']").first().click();
+const letter = await poll('select r.code from raci_assignments r join activities a on a.id=r."activityId" where a."relatedStepId"=$1 and r."roleId"=$2', [added[0]?.id, rCc], (r) => r.length);
+check(letter[0]?.code === "RESPONSIBLE", "a RACI letter clicked in the step form is the step's RACI", JSON.stringify(letter));
+await quiet();
+await panel.locator("button:text-is('+ Add a rule')").click();
+await dlg.getByLabel("Amount, or number of days").fill("5000");
+await dlg.locator("button:text-is('Add the rule')").click();
+await dlg.waitFor({ state: "detached", timeout: 20000 });
+await quiet();
+check(/At or above \$5,000 needs approval from/.test(await panel.innerText()), "a rule added from the step form reads as the Authority page says it", (await panel.innerText()).match(/Approval and time limit[^]{0,120}/)?.[0]);
+await panel.locator("button:text-is('+ Add a control')").click();
+await dlg.getByLabel("What could go wrong").fill("Order entered twice");
+await dlg.locator("button:text-is('Add')").click();
+await dlg.waitFor({ state: "detached", timeout: 20000 });
+await quiet();
+const flagged = /A risk has no control/.test(await panel.innerText());
+await panel.getByLabel("Control for Order entered twice").fill("The ERP refuses a second order number");
+await panel.getByLabel("Control for Order entered twice").blur();
+const held = await poll('select control from process_controls where "stepId"=$1', [added[0]?.id], (r) => r[0]?.control);
+check(flagged && held[0]?.control === "The ERP refuses a second order number", "a risk with no control is a gap, and saying how it is held saves it", JSON.stringify({ flagged, held }));
+await quiet();
+const [shot] = await Promise.all([A.page.waitForEvent("download", { timeout: 30000 }), A.page.click("button:text-is('Download picture')")]);
+check(/process-map\.png$/.test(shot.suggestedFilename()), "Download picture gives the drawing as a picture", shot.suggestedFilename());
+await panel.locator("button:text-is('Remove this step')").click();
+await panel.locator("button:text-is('Remove')").click();
+const gone = await poll('select 1 from process_steps where id=$1', [added[0]?.id], (r) => !r.length);
+line1 = await q(ffp, 'select 1 from step_connections where "fromStepId"=$1 and "toStepId"=$2', [s1, s2]);
+const rows = await q(ffp, 'select 1 from activities where "processId"=$1 and name=$2', [P1, "Confirm the order"]);
+check(!gone.length && line1.length === 1 && !rows.length, "removing a step joins the steps either side again, and its RACI row goes with it", JSON.stringify({ gone: gone.length, line: line1.length, rows: rows.length }));
+await q(ffp, `insert into review_findings (id,"processId",category,area,severity,title,description,recommendation,"updatedAt","proposedLabel","proposedAfterStepId") values (gen_random_uuid()::text,$1,'GAP','PROCESS_MAP','MEDIUM','No credit hold','No step','Add one',now(),'Put the order on credit hold',$2)`, [P1, s1]);
+await A.page.goto(MAP, { waitUntil: "networkidle" });
+const order1 = await A.page.$$eval("[data-lane-grid] [data-step]", (e) => e.map((x) => x.textContent));
+await A.page.locator("[data-lane-grid] button", { hasText: "Put the order on credit hold" }).click();
+await panel.locator("button:text-is('Confirm')").click();
+const made = await poll('select s."order" o from process_steps s where s."processId"=$1 and s.label=$2', [P1, "Put the order on credit hold"], (r) => r.length);
+check(/PROPOSED/i.test(order1[1] || "") && made[0]?.o === 1, "a step the AI review proposed shows after its step, and Confirm makes it a step there", JSON.stringify({ order1, made }));
+}
 
 /* ── 2 · staff: read and acknowledge ── */
 const list = await T.get("/" + S + "/processes/read");
 const listText = await list.text();
 check(list.status() === 200 && /Supplier onboarding/.test(listText) && !/Order to cash/.test(listText), "staff see the published process and not the draft", list.status());
 await T.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
-check(/Needs your acknowledgement/.test(await body(T.page)), "it asks for their acknowledgement");
+check(/To read/.test(await (await T.get("/" + S + "/processes/read/todo")).text()) && /Supplier onboarding/.test(await (await T.get("/" + S + "/processes/read/todo")).text()), "their To do asks them to read it");
 check(/1 to read/.test((await T.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "the shared top bar says 1 to read on the reading pages");
 const strat = await (await T.get("/" + S + "/strategy")).text();
 check(/data-processes-read='[^']*1 to read/.test(strat), "Strategy's page is stamped with the count");
@@ -201,25 +271,123 @@ const notes = await T.get("/" + S + "/notes");
 const notesHtml = notes.status() === 200 ? await notes.text() : "";
 check(notes.status() !== 200 || /class="tbread"/.test(notesHtml), "a module page drawn by the shared bar carries it too", notes.status());
 
-await T.page.goto(BASE + "/" + S + "/processes/read/" + P2, { waitUntil: "networkidle" });
+await T.page.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=summary", { waitUntil: "networkidle" });
+const rdSum = await body(T.page);
+await T.page.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=steps", { waitUntil: "networkidle" });
 const rd = await body(T.page);
-check(/What changed in this version/.test(rd) && /credit check/.test(rd) && /Check the customer's credit/.test(rd) && /Done by: Credit Controller/.test(rd), "the reading page shows what changed and the steps with who does them");
-check(!/Risks|Non-conform|Approver|Reviewer|Lifecycle/i.test(rd), "…and none of the office's working material");
-await T.page.click("button:text-is('I have read this')");
-await T.page.waitForFunction(() => /You have read version 1/.test(document.body.innerText), null, { timeout: 20000 });
+check(/Version 1 is in force/.test(rdSum) && /credit check/.test(rdSum) && /Check the customer's credit/.test(rd) && /Done by: Credit Controller/.test(rd), "the reading page shows what changed and the steps with who does them");
+check(!/Risks & controls|Non-conform|Reviewer|Lifecycle|Send for review/i.test(rd + rdSum), "…and none of the office's working material");
+await T.page.click("header button:text-is('I have read it')");
+await T.page.waitForFunction(() => !/Waiting on you/.test(document.querySelector("[data-ffp] header")?.innerText || "Waiting on you"), null, { timeout: 20000 });
+/* the refresh moved the bar's count: the bar must still be the one its script wired (top-bar.tsx) */
+const theme = () => T.page.evaluate(() => document.documentElement.getAttribute("data-theme"));
+const t0 = await theme(), drawn = await T.page.$eval("#tbtheme", (t) => t.innerHTML.includes("<svg")).catch(() => false);
+await T.page.click("#tbtheme");
+const t1 = await theme();
+await T.page.click("#tbtheme");
+check(drawn && t0 !== t1, "the top bar keeps working after the page refreshes: its theme button keeps its icon and still switches", JSON.stringify({ drawn, t0, t1 }));
 const ack = await q(ffp, 'select "personKey" k, "versionNumber" n, "personName" nm from process_acknowledgements where "processId"=$1', [P2]);
 check(ack.length === 1 && ack[0].k === "mobhead" && ack[0].n === 1, "the acknowledgement is recorded against the person and the version", JSON.stringify(ack));
 const strat2 = await (await T.get("/" + S + "/strategy")).text();
 check(/data-processes-read='[^']*&quot;count&quot;:null/.test(strat2), "the count falls to none once they have read it");
 
 /* a second person is unaffected, and the office sees the tally */
-check(/Needs your acknowledgement/.test(await (await B.get("/" + S + "/processes/read")).text()), "another person still has it to read");
+check(/To read/.test(await (await B.get("/" + S + "/processes/read/todo")).text()), "another person still has it to read");
 await A.page.goto(L(P2), { waitUntil: "networkidle" });
 const tally = await body(A.page);
 check(/1 of 2 have confirmed/.test(tally) && /Still to read:/.test(tally), "the office sees 1 of 2 have confirmed, and who is outstanding", (tally.match(/Read and acknowledged.{0,120}/) || [""])[0]);
 
+/* ── 2b · owners, the yearly review and suggestions (stage 4, spec 067 §3, §4.2) ── */
+await A.page.goto(L(P2), { waitUntil: "networkidle" });
+await A.page.selectOption("select[aria-label='Owner']", people.fn_fin);
+await A.page.click("button:text-is('Save')");
+await A.page.waitForSelector("text=Saved", { timeout: 20000 });
+const own = (await q(ffp, 'select "ownerPersonId" o from processes where id=$1', [P2]))[0];
+check(own.o === people.fn_fin, "the office picks the owner from the client register", JSON.stringify(own));
+const yours = await (await B.get("/" + S + "/processes/read?f=yours")).text();
+check(/Owner/.test(yours) && /Supplier onboarding/.test(yours), "the owner finds it under Yours");
+/* a member of staff suggests a change to step 1 */
+await T.page.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=steps", { waitUntil: "networkidle" });
+await T.page.locator("button", { hasText: "Suggest a change to this step" }).first().click();
+await T.page.fill("[data-ffp-dialog] textarea >> nth=0", "Ask for two trade references, not one.");
+await T.page.click("[data-ffp-dialog] button:text-is('Send to the Strategy Office')");
+await T.page.waitForSelector("[data-ffp-dialog]", { state: "detached", timeout: 20000 });
+let sg = (await q(ffp, 'select id, state, "stepId" st, "byName" b from process_suggestions where "processId"=$1', [P2]))[0];
+check(sg && sg.state === "NEW" && !!sg.st, "a suggestion is recorded, pinned to the step, from the person signed in", JSON.stringify(sg));
+await A.page.goto(BASE + "/" + S + "/processes/handle", { waitUntil: "networkidle" });
+check(/Suggestion/.test(await body(A.page)) && /suggested a change to step 1/.test(await body(A.page)), "the office sees it on To handle, with its step");
+await A.page.click("button:text-is('Answer')");
+await A.page.fill("[data-ffp-dialog] textarea", "Two from the same sector, or any two?");
+await A.page.click("[data-ffp-dialog] button:text-is('Send answer')");
+await A.page.waitForSelector("[data-ffp-dialog]", { state: "detached", timeout: 20000 });
+await T.page.goto(BASE + "/" + S + "/processes/read/todo", { waitUntil: "networkidle" });
+check(/Answers to your suggestions/i.test(await body(T.page)), "the answer lands in the person's To do");
+await T.page.click("button:text-is('Reply')");
+await T.page.fill("[data-ffp-dialog] textarea", "Any two.");
+await T.page.click("[data-ffp-dialog] button:text-is('Send reply')");
+await T.page.waitForSelector("[data-ffp-dialog]", { state: "detached", timeout: 20000 });
+sg = (await q(ffp, 'select state, "replyText" r from process_suggestions where id=$1', [sg.id]))[0];
+check(sg.state === "REPLIED" && sg.r === "Any two.", "their reply goes back to the office", JSON.stringify(sg));
+await A.page.goto(BASE + "/" + S + "/processes/handle", { waitUntil: "networkidle" });
+await A.page.click("button:text-is('Start a draft from this')");
+await A.page.waitForURL(/\/map$/, { timeout: 30000 });
+await A.page.waitForSelector("nav[aria-label='Process sections']", { timeout: 30000 });
+check(/suggestion on step 1/.test(await body(A.page)) && /Any two\./.test(await body(A.page)), "a draft started from it opens the builder with the person's words on the Map");
+/* the owner's yearly review, once it is a month away */
+await q(ffp, `update processes set "nextReviewDue" = now() + interval '10 days' where id=$1`, [P2]);
+await B.page.goto(BASE + "/" + S + "/processes/read/todo", { waitUntil: "networkidle" });
+check(/To review/i.test(await body(B.page)), "the owner is asked to review it in their To do");
+await B.page.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=summary", { waitUntil: "networkidle" });
+await B.page.click("button:text-is('It is still right')");
+await B.page.waitForFunction(() => !/It is still right|Saving/.test(document.body.innerText), null, { timeout: 20000 });
+const rv = (await q(ffp, 'select "nextReviewDue" d, "reviewConfirmedByKey" k from processes where id=$1', [P2]))[0];
+const away = (new Date(rv.d) - Date.now()) / 86400000;
+check(rv.k === "fn_fin" && away > 360 && away < 370, "It is still right puts the next review a year away, recorded against the owner", JSON.stringify(rv));
+
+/* ── 2c · the next version is drafted beside the one in force (stage 5, spec 067 §1) ── */
+const steps2 = async (pg) => { await pg.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=steps", { waitUntil: "networkidle" }); return body(pg); };
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P2 + "/map", { waitUntil: "networkidle" });
+await A.page.locator("[data-lane-grid] button[data-step]", { hasText: "Raise the invoice" }).click();
+await A.page.locator("aside[aria-live]").getByLabel("Step", { exact: true }).fill("Raise the invoice the same day");
+await A.page.locator("aside[aria-live]").getByLabel("Step", { exact: true }).press("Enter");
+await A.page.waitForSelector("[data-lane-grid] button[data-step]:has-text('Raise the invoice the same day')", { timeout: 20000 });
+check((await st(P2)).s === "DRAFT", "the office edits a step of the version in force: the process is a draft again");
+let s2 = await steps2(T.page);
+check(/Raise the invoice/.test(s2) && !/the same day/.test(s2) && /In force · v1/i.test(s2), "staff keep reading version 1 while version 2 is drafted", (s2.match(/Raise the invoice.{0,40}/) || [""])[0]);
+await T.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
+check(!!(await T.page.$("a:text-is('Supplier onboarding')")), "…and it stays in their list, open to read");
+await A.page.goto(L(P2), { waitUntil: "networkidle" });
+const b2 = await body(A.page);
+check(/In force · v1/i.test(b2) && /Draft v2: 1 step changed since v1/.test(b2) && /This is draft v2\. Readers keep v1/.test(b2), "the builder shows version 1 in force beside draft v2, with what changed", (b2.match(/Draft v2[^.]*\./) || [""])[0]);
+await A.page.selectOption("select[name=approver]", people.fn_fin);
+await A.page.fill("textarea[name=changeNote]", "Invoices go out the day the goods do");
+await A.page.click("button:text-is('Send for review')");
+await A.page.waitForFunction(() => /Waiting for/.test(document.body.innerText), null, { timeout: 20000 });
+s2 = await steps2(T.page);
+check((await st(P2)).s === "IN_REVIEW" && !/the same day/.test(s2), "sent for review: staff still read version 1");
+await B.page.goto(BASE + "/" + S + "/processes/read/" + P2, { waitUntil: "networkidle" });
+await waitFor(B.page, "button:text-is('Approve v2')", "the approver's Approve v2 button");
+check(/the same day/.test(await body(B.page)), "the approver reads draft v2, not the version in force");
+await B.page.click("button:text-is('Approve v2')");
+await B.page.waitForFunction(() => /\/processes\/read$/.test(location.pathname), null, { timeout: 20000 });
+s2 = await steps2(T.page);
+check((await st(P2)).s === "APPROVED" && !/the same day/.test(s2), "approved: staff still read version 1 until the office publishes");
+await A.page.goto(L(P2), { waitUntil: "networkidle" });
+await waitFor(A.page, "button:text-is('Publish')", "Publish v2 after approval");
+await A.page.click("button:text-is('Publish')");
+await waitFor(A.page, "button:text-is('Retire')", "Retire after publishing v2");
+r = await st(P2);
+s2 = await steps2(T.page);
+check(r.s === "PUBLISHED" && r.v === "v2" && /Raise the invoice the same day/.test(s2) && /Changed in v2/i.test(s2), "published: staff read version 2, its changed step marked", JSON.stringify(r));
+const todo2 = await body((await T.page.goto(BASE + "/" + S + "/processes/read/todo", { waitUntil: "networkidle" }), T.page));
+check(/Your step changed: Raise the invoice the same day/i.test(todo2) && /1 to read/.test((await T.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "having read version 1, they are asked to read version 2, told their step changed", (todo2.match(/To read.{0,120}/i) || [""])[0]);
+const sg2 = await q(ffp, 'select state from process_suggestions where "processId"=$1', [P2]);
+check(sg2.length === 1 && sg2[0].state === "CLOSED", "the suggestion worked into version 2 closes when it is published", JSON.stringify(sg2));
+await A.page.goto(L(P2), { waitUntil: "networkidle" });
+check(!(await A.page.$("select[name=approver]")), "with nothing changed since version 2, there is nothing to send");
+
 /* ── 3 · the gate: a client's own person opens nothing else of Processes ── */
-const office = ["processes/priorities", "processes/reports/priorities", "processes", "processes/processes", "processes/processes/" + P2, "processes/processes/" + P2 + "/map", "processes/processes/" + P2 + "/raci", "processes/processes/" + P2 + "/review", "processes/governance", "processes/reports", "processes/reports/sop", "processes/export", "processes/org", "processes/value-chain", "processes/helicopter"];
+const office = ["processes/priorities", "processes/reports/priorities", "processes", "processes/processes", "processes/processes/" + P2, "processes/processes/" + P2 + "/map", "processes/processes/" + P2 + "/raci", "processes/processes/" + P2 + "/review", "processes/governance", "processes/reports", "processes/reports/sop", "processes/export", "processes/handle", "processes/roles", "processes/value-chain", "processes/helicopter"];
 for (const p of office) {
   const res = await T.get("/" + S + "/" + p);
   const t = await res.text();
@@ -276,21 +444,43 @@ check(dec2["P4.1"] == null && dec2["P5.1"] == null, "…and leaves unscored proc
 await A.page.setViewportSize({ width: 1440, height: 900 });
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
 check(await A.page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), "the Priorities page does not run off the right edge");
+/* REWRITTEN (§218), not loosened: the page's own banner, which stepped aside for the client's logo in the
+   margin, went by decision (spec 067 §4.2): the builder's band names every section and the logo left the margin.
+   What the line was FOR is kept: the working area is not squeezed, it is exactly as wide as the band over it. */
 const navBox = await A.page.locator("nav[aria-label='Steps']").boundingBox();
-const banner = await A.page.locator("h1").first().boundingBox();
-check(!!navBox && !!banner && navBox.x < banner.x - 100, "the banner steps aside for the logo but the working area below uses the full width", JSON.stringify([navBox?.x, banner?.x]));
+const band = await A.page.locator("header", { hasText: "Process builder" }).first().boundingBox();
+check(!!navBox && !!band && Math.abs(navBox.x - band.x) <= 2 && navBox.width >= band.width - 2, "the Priorities page sits under the builder's band and uses its full width", JSON.stringify([navBox?.x, navBox?.width, band?.x, band?.width]));
 for (const w of [1440, 2200]) {
   await A.page.setViewportSize({ width: w, height: 900 });
   await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
   const nb = await A.page.locator("nav[aria-label='Steps']").boundingBox();
-  const sb = await A.page.locator("nav:has(a[href$='/processes/priorities'])").first().boundingBox();
-  check(!!nb && !!sb && nb.x - (sb.x + sb.width) < 60, `at ${w} pixels wide the working area starts right beside the side menu, with no empty band`, JSON.stringify([nb?.x, sb && sb.x + sb.width]));
+  /* REWRITTEN (§218): the side menu went by decision (spec 067 §4.2), and the old line went on passing by finding
+     the tab bar instead. What it was FOR is kept: the working area starts where the builder's tabs start, with no
+     empty band beside it, on a wide screen as on a laptop. */
+  const sb = await A.page.locator("nav[aria-label='Builder sections']").first().boundingBox();
+  check(!!nb && !!sb && Math.abs(nb.x - sb.x) <= 2, `at ${w} pixels wide the working area lines up under the builder's tabs, with no empty band`, JSON.stringify([nb?.x, sb?.x]));
 }
 await A.page.setViewportSize({ width: 1440, height: 900 });
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
-const openBox = await A.page.locator("a:text-is('Open →')").first().boundingBox();
+const openBox = await A.page.locator("tbody a:text-is('Open')").first().boundingBox();
 check(!!openBox && openBox.x + openBox.width <= 1440, "the process list's Open link is inside the window", JSON.stringify(openBox));
 await A.page.setViewportSize({ width: 1280, height: 720 });
+/* The picker: choose which processes the table shows; remembered; Select all brings them back. */
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+await A.page.click("button:has-text('Choose processes')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('None')");
+check(/No processes chosen/.test(await body(A.page)), "with none chosen the table says so");
+await A.page.click("[aria-label='Choose processes'] label:has-text('Order to cash') input");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Done')");
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 1 && /Order to cash/.test(await body(A.page)) && /1 \/ 5\s*shown/i.test(await body(A.page)), "the table shows only the chosen process, and the count says 1 / 5");
+await A.page.reload({ waitUntil: "networkidle" });
+await A.page.waitForFunction(() => document.querySelectorAll("tbody tr .font-mono").length === 1, null, { timeout: 10000 }).catch(() => {});
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 1, "the choice is remembered when the page is opened again");
+await A.page.click("button:has-text('Choose processes')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Select all')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Done')");
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 5, "Select all brings every process back");
+
 /* The list keeps its order while scoring; sub-processes sit under their main; "Clear entries" clears only what was picked. */
 const order = () => A.page.$$eval("tbody tr td:nth-child(2) .font-mono", (e) => e.map((x) => x.textContent.trim()));
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
@@ -320,7 +510,8 @@ check(cl["P5.1"].r == null && cl["P5.1"].i === 5 && cl["P1.1"].r === 5, "Clear e
 await q(ffp, 'update processes set "priorityImportance"=null where code=$2 and "workspaceId"=$1', [S, "P5.1"]);
 
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=rank", { waitUntil: "networkidle" });
-check((await A.page.$$("svg circle")).length === 3 && /Not scored yet/.test(await body(A.page)), "the chart plots the scored processes and names the rest");
+const nCirc = (await A.page.$$("svg[aria-label^='Importance against risk'] circle")).length; const bodyR = await body(A.page);
+check(nCirc === 2 && /Not scored yet/.test(bodyR), "the chart plots the scored processes and names the rest", nCirc + " | " + bodyR.slice(0, 300));
 await A.page.click("svg a >> nth=0"); await A.page.waitForURL(/sel=/, { timeout: 20000 });
 check(/selected/i.test(await body(A.page)), "a circle opens that process beside the chart");
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });
@@ -333,7 +524,10 @@ check(/Team capacity: 4 deep dives at a time\. Wave 1 holds 1 — fits/.test(awa
 
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
 const lst = await body(A.page);
-check(/Order to cash.*Deep dive.*Wave 1 · rank 1/.test(lst) && /High-level/.test(lst), "the process list shows Depth and Priority");
+/* REWRITTEN (§218): Depth and Priority left the list by decision (Islam, 2026-10-28: "1 A", spec 067 §4.2); the
+   process page and Priorities still say both (the next line). The list now says where each process is, how ready it
+   is and how many gaps it has. */
+check(/Where it is/i.test(lst) && /Ready/i.test(lst) && /Gaps/i.test(lst) && !/High-level/.test(lst) && (await A.page.locator("tbody span[aria-label$='of 6 ready']").count()) > 0, "the process list shows where each process is, its six ready marks and its gaps, and no longer Depth and Priority");
 await A.page.goto(BASE + "/" + S + "/processes/processes/" + P1, { waitUntil: "networkidle" });
 check(/Wave 1 · rank 1 · deep dive \d of 6/.test(await body(A.page)), "the process page says why it is being worked on and how far it has got");
 await A.page.goto(BASE + "/" + S + "/processes/helicopter", { waitUntil: "networkidle" });
@@ -351,8 +545,8 @@ check(pl.status === "SENT" && !!pl.a && /Head of Finance/.test(pl.r) && pl.snaps
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=score", { waitUntil: "networkidle" });
 check((await A.page.isDisabled("button[aria-label='importance 3 of 5 for Order to cash']")) && /with the client/.test(await body(A.page)), "once sent, scores and decisions are locked");
 
-await B.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
-check(/Deep-dive priorities/.test(await body(B.page)) && /Waiting for your approval/.test(await body(B.page)), "the named approver is told, on their reading list");
+await B.page.goto(BASE + "/" + S + "/processes/read/todo", { waitUntil: "networkidle" });
+check(/Deep-dive plan/.test(await body(B.page)) && /To approve/i.test(await body(B.page)), "the named approver is told, on their To do");
 check(/1 to approve/.test((await B.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "…and on the top bar");
 await B.page.goto(BASE + "/" + S + "/processes/read/priorities", { waitUntil: "networkidle" });
 await waitFor(B.page, "button:text-is('Approve')", "the approver's Approve button on the plan");
@@ -432,6 +626,31 @@ await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUnti
 const ex2 = await A.get("/api/ffp/export/priorities/" + S);
 const wb2 = new (await import("exceljs")).default.Workbook(); await wb2.xlsx.load(await ex2.body());
 check(!!wb2.getWorksheet("Flagged steps"), "the Excel file has a Flagged steps sheet");
+
+/* ── AI review: a finding can be added as a proposed step, shown on the map, and confirmed or deleted ── */
+const P6 = await proc("P6.1", "Month-end close");
+await q(ffp, `insert into review_findings (id,"processId",category,area,severity,title,description,recommendation,status,"updatedAt") values (gen_random_uuid()::text,$1,'RISK','PROCESS_MAP','HIGH',$2,$3,$4,'OPEN',now())`, [P6, "No second check on journal entries", "Journals are posted by one person.", "Add a review of journals before posting"]);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/review", { waitUntil: "networkidle" });
+check(/No second check on journal entries/.test(await body(A.page)) && (await A.page.$$("button:text-is('Add as a step')")).length === 1, "the AI review page lists a finding with Add as a step");
+await A.page.click("button:text-is('Add as a step')");
+await A.page.click("button:text-is('Add to process (proposed)')");
+await A.page.waitForSelector("text=Proposed · waiting on the map", { timeout: 20000 });
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+/* the redrawn Map (§218, same purpose): the proposal is drawn dashed after its step; picking it offers Confirm and Delete */
+const prop6 = (await q(ffp, 'select "proposedLabel" l from review_findings where "processId"=$1', [P6]))[0].l;
+const drawn6 = A.page.locator("[data-lane-grid] button[data-step]", { hasText: prop6 });
+const marked6 = /PROPOSED/i.test((await drawn6.innerText().catch(() => "")) || "");
+await drawn6.click();
+check(marked6 && /Proposed · from AI review/i.test(await A.page.locator("aside[aria-live]").innerText()) && (await A.page.$$("button:text-is('Confirm')")).length === 1 && (await A.page.$$("button:text-is('Delete')")).length >= 1, "the proposed step is highlighted on the map with Confirm and Delete", prop6);
+const before6 = (await q(ffp, 'select count(*)::int n from process_steps where "processId"=$1', [P6]))[0].n;
+check(before6 === 2, "until it is confirmed it is not a step");
+await A.page.click("button:text-is('Confirm')");
+await A.page.waitForFunction(() => !/Proposed · from AI review/i.test(document.body.innerText), null, { timeout: 20000 });
+const after6 = (await q(ffp, 'select count(*)::int n from process_steps where "processId"=$1', [P6]))[0].n;
+check(after6 === 3, "Confirm creates the real step", String(after6));
+
+const sopHtml = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P1)).text();
+check(/Back to picker/.test(sopHtml) && /\/processes\/export/.test(sopHtml), "the SOP page has a Back to picker link");
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

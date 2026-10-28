@@ -75,6 +75,24 @@ export async function createProcessControl(
   return ok(row);
 }
 
+const controlTextSchema = z.object({ workspaceId: z.string().min(1), processId: z.string().min(1), id: z.string().min(1), control: text(300) });
+
+/** Say how a risk is held: the control's words on a risk already recorded (the Map's step form, spec 067 §4.3). */
+export async function updateProcessControl(input: z.infer<typeof controlTextSchema>): Promise<ActionResult<null>> {
+  const parsed = controlTextSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid control", parsed.error.issues);
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const d = parsed.data;
+  const res = await prisma.processControl.updateMany({
+    where: { id: d.id, processId: d.processId, process: { workspaceId: d.workspaceId } },
+    data: { control: orNull(d.control) },
+  });
+  if (res.count === 0) return notFound();
+  refresh(d.workspaceId, d.processId);
+  return ok(null);
+}
+
 export async function deleteProcessControl(input: { workspaceId: string; processId: string; id: string }): Promise<ActionResult<null>> {
   const access = await requireWorkspaceAccess(input.workspaceId, "EDITOR");
   if (!access.ok) return access;

@@ -1100,8 +1100,11 @@ CREATE TABLE tracker_actions (
 CREATE INDEX tracker_actions_week ON tracker_actions (tenant_id, status, due);
 CREATE INDEX tracker_actions_topic_ix ON tracker_actions (tenant_id, topic_id);
 
--- One row per status change, plus one on creation. Appended, never edited:
--- a log a save could rewrite is not a log (§42).
+-- One row per movement, plus one on creation: a status change (the two
+-- status columns), and since §657 a carry to another week, a hand-over, a
+-- rename and a move to another topic, with what it was and what it became
+-- in `detail`. Appended, never edited: a log a save could rewrite is not a
+-- log (§42). Migration 035 on a database already up.
 CREATE TABLE tracker_events (
   tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id bigserial,
@@ -1111,11 +1114,30 @@ CREATE TABLE tracker_events (
   to_status text,
   by_key text NOT NULL DEFAULT '',
   at timestamptz NOT NULL DEFAULT now(),
+  detail jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (tenant_id, id),
   FOREIGN KEY (tenant_id, action_id) REFERENCES tracker_actions (tenant_id, id) ON DELETE CASCADE,
-  CONSTRAINT tracker_event_kind CHECK (kind IN ('created','status'))
+  CONSTRAINT tracker_event_kind CHECK (kind IN ('created','status','due','owner','title','topic'))
 );
 CREATE INDEX tracker_events_action ON tracker_events (tenant_id, action_id, at);
+
+-- PROGRESS (§657): what a person WROTE about an action at a weekly review,
+-- one row per entry. Not an event, because its writer may edit or delete it
+-- (edited_at says it was) while the events are a log. Goes with its action.
+-- Migration 035 on a database already up.
+CREATE TABLE tracker_progress (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  action_id uuid NOT NULL,
+  body text NOT NULL,
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  edited_at timestamptz,
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, action_id) REFERENCES tracker_actions (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT tracker_progress_body CHECK (btrim(body) <> '')
+);
+CREATE INDEX tracker_progress_action ON tracker_progress (tenant_id, action_id, at);
 
 -- ── MEETING NOTES (spec 055) ─────────────────────────────────────────────
 -- One meeting, one note, kept in the client's own room: the note, and one row

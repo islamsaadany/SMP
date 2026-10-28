@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { AccessLevel } from "@/ffp/lib/domain/access-control";
+import { type AccessLevel } from "@/ffp/lib/domain/access-control";
 
 /**
  * The current viewer's rights over this workspace, shared with every client

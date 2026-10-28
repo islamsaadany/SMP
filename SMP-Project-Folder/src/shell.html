@@ -8465,6 +8465,21 @@
         paint();
       });
     });
+    /* ── REPORTS TO (§655) ────────────────────────────────────────────
+       Through setReportsTo(), the one door that writes it, and the same
+       grant every other field of the register asks. It refuses the person
+       themselves and anybody under them — the picker never offers either,
+       so a refusal here is a stale list, and the repaint draws the right
+       one. Nothing about roles: who somebody answers to grants nothing. */
+    R.querySelectorAll("[data-preports]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        if (grant("c_people") !== "edit") return;
+        var p = personBy(sel.dataset.preports);
+        if (!p) return;
+        setReportsTo(p, sel.value || null);
+        paint();
+      });
+    });
     R.querySelectorAll("[data-pat]").forEach(function(sel){
       sel.addEventListener("change", function(){
         if (grant("c_people") !== "edit") return;
@@ -12121,6 +12136,10 @@
        to their full name (§93.8). Written through setKnownName so it is deleted
        rather than stored when it matches the guess (§50.6). */
     if (NEWDRAFT.known) setKnownName(made, NEWDRAFT.known);
+    /* And who they answer to (§655), through the one setter — the draft held
+       a key the picker offered, and a pick the Add press dropped would be
+       §96's inert editor on the one form that cannot be reopened. */
+    if (NEWDRAFT.reportsTo) setReportsTo(made, NEWDRAFT.reportsTo);
     newPersonReset();
     newDraftEnd();
     PDLG = null;

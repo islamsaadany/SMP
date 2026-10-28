@@ -41,6 +41,8 @@
      SMP_BREAK=tabs-reload    node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=keep-picks     node checks/tracker.mjs   # must go red (§567)
      SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§623.3)
+     SMP_BREAK=add-at-top     node checks/tracker.mjs   # must go red (§656)
+     SMP_BREAK=progress-anyone node checks/tracker.mjs  # must go red (§657)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -71,6 +73,7 @@ import {
   lateWord, readableDay, weekLabel, inView, summary, mayChange, shape, oneLine, shortNames, todayIn, thursdayOf, weekNumber, weekWord, weekOptions, weekDays, sameWeek,
   CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay,
   officeRows, listActions, oneAction, addAction, addTopic, listTopics, deleteTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
+  progressOf, addProgress, latestProgress, mayChangeProgress,
 } from "../lib/tracker.ts";
 import { registerNames } from "../lib/people.ts";
 
@@ -319,7 +322,7 @@ const dRows = [
 ].map((a, i) => ({ ...a, topicId: i === 3 ? "t3" : "t1" }));
 const dLoaded = {
   office: [{ key: "islam", name: "Islam Saadany" }], names: new Map([["islam", "Islam Saadany"]]),
-  short: new Map([["islam", "Islam"]]), actions: dRows, events: [], open: null, topics: dTopics,
+  short: new Map([["islam", "Islam"]]), actions: dRows, events: [], open: null, topics: dTopics, progress: [], latest: new Map(),
 };
 const draw = (view) => listBody(dLoaded, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
   ask: { view, q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY);
@@ -366,6 +369,91 @@ check("...and every line carries the SAME three words the heading's own ⋯ carr
   count(wkBody, /data-act="topic-rename"/g) >= 3 && count(wkBody, /data-act="topic-close"/g) >= 2 && count(wkBody, /data-act="topic-reopen"/g) >= 1 && count(wkBody, /data-act="topic-delete-ask"/g) >= 3);
 check("the grouping is not offered on the check, where it cannot be changed (§96)",
   !/data-act="set-group"/.test(chk) && /data-act="set-group"/.test(wkBody) && /data-act="set-dates"/.test(chk));
+
+/* ══ §2d · THE SECTION'S OWN WRITE LINE (§656), drawn ═══════════════════
+   Islam: an action added under a person or a topic *"should appear in the
+   same place rather than adding from the top task entry"*. So every section
+   the list is grouped by carries the page's own line, hidden, with the thing
+   the section is about FIXED — the topic on a topic's, the owner on a
+   person's (as a name, not a pick: a line under Noran that could hand the
+   action on would land it elsewhere, §96) — and its foot's "+ Add …" opens
+   it there. Due this week, as the page's line is. The page's own line stays
+   at the top for an action under nobody and nothing. The add-at-top break
+   puts §497's way back — the top line filled and scrolled to — and must
+   redden these. */
+section("§2d · the section's own write line, drawn");
+const drawG = (view, group) => listBody(dLoaded, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
+  ask: { view, q: "", open: null, group, dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
+const byTopicAll = drawG("all", "topic"), byOwnerAll = drawG("all", "owner");
+const secOf = (html, key) => (new RegExp('class="sec" data-key="' + key + '">([\\s\\S]*?)(?=<div class="sec" |$)').exec(html) || [])[1] || "";
+const t1sec = secOf(byTopicAll, "t1"), t3sec = secOf(byTopicAll, "t3"), meSec = secOf(byOwnerAll, "islam");
+check("grouped by Topic, Budget's section carries ONE write line, hidden, this week's Thursday, the topic fixed, named t:t1",
+  count(t1sec, /class="addrow chk"/g) === 1 && /class="addrow chk" data-due="2026-09-17" data-owner="islam" data-topic="t1" data-line="t:t1" hidden>/.test(t1sec),
+  (t1sec.match(/class="addrow chk"[^>]*/g) || []).join(" | "));
+check("...drawn under the rows and above the foot, and with no topic pick on it — the topic is the section's",
+  /data-id="r"[\s\S]*?class="addrow chk"[\s\S]*?class="foot"/.test(t1sec) && !/data-line="t:t1"[\s\S]*?class="tpk"[\s\S]*?class="foot"/.test(t1sec));
+check("...its foot's + Add to Budget opens THAT line, and nothing on the page fills the top one any more",
+  /data-act="add-here" data-line="t:t1"><b>\+<\/b> Add to Budget</.test(t1sec) && !/data-act="add-to-topic"/.test(byTopicAll));
+check("...the closed topic has no line and no + Add", !/class="addrow/.test(t3sec) && !/data-act="add-here"/.test(t3sec) && t3sec.length > 0);
+check("grouped by Owner, Islam's section carries its line, hidden, the OWNER fixed as a plain name and the topic a pick",
+  count(meSec, /class="addrow chk"/g) === 1 && /class="addrow chk" data-due="2026-09-17" data-owner="islam" data-line="o:islam" hidden>/.test(meSec) &&
+  /data-line="o:islam" hidden>[\s\S]*?class="tpk"[\s\S]*?class="who" title="Whose it is"><span class="wn">Islam<\/span><\/span>/.test(meSec) && !/data-line="o:islam"[\s\S]*?class="who pick"[\s\S]*?class="foot"/.test(meSec),
+  (meSec.match(/class="addrow chk"[^>]*/g) || []).join(" | "));
+check("...and its foot says + Add for Islam", /data-act="add-here" data-line="o:islam"><b>\+<\/b> Add for Islam</.test(meSec));
+check("the page's own line at the top still stands, once, on both groupings — for an action under nobody and nothing in particular",
+  count(byTopicAll, /id="add"/g) === 1 && count(byOwnerAll, /id="add"/g) === 1);
+check("the weekly check's lines are untouched: next week, standing, the topic fixed, named the same way",
+  count(chk, /class="addrow chk" data-due="2026-09-24" data-owner="islam" data-topic="t1" data-line="t:t1">/g) === 1 && !/data-line="t:t1" hidden/.test(chk));
+
+/* ══ §2e · DESCRIPTION, PROGRESS AND THE HISTORY BEHIND A LINK (§657), drawn
+   Islam: "the notes needs to be a description, and we need to have a progress
+   input box per task so we input what happened in this task on weekly basis",
+   the history "opened in a different way". Drawn with no database from one
+   Loaded that holds two entries on row p — one Islam's, one Noran's — and is
+   opened on p, looked at as Islam: his entry carries Edit and Delete, hers
+   does not; the latest line reads under the row; the check's this-week rows
+   carry the box and last week's do not. The progress-anyone break hands
+   every entry to anybody and must redden the Edit/Delete assertion. */
+section("§2e · the task's details — Description, Progress, the history behind a link");
+const pEntries = [
+  { id: "e2", actionId: "p", body: "Finance sent four of six cost centres.", by: "noran", at: "2026-09-14T12:05:00Z", editedAt: null },
+  { id: "e1", actionId: "p", body: "Template agreed with Ahmed.", by: "islam", at: "2026-09-07T09:00:00Z", editedAt: "2026-09-08T09:00:00Z" },
+];
+const pLoaded = { ...dLoaded, names: new Map([["islam", "Islam Saadany"], ["noran", "Noran Essam"]]), short: new Map([["islam", "Islam"], ["noran", "Noran"]]),
+  open: "p", progress: pEntries, latest: new Map([["p", pEntries[0]]]),
+  events: [
+    { kind: "due", from: null, to: null, by: "islam", at: "2026-09-10T10:00:00Z", detail: { from: "2026-09-10", to: "2026-09-17" } },
+    { kind: "owner", from: null, to: null, by: "islam", at: "2026-09-09T10:00:00Z", detail: { from: "noran", to: "islam" } },
+    { kind: "created", from: null, to: "not_started", by: "noran", at: "2026-09-01T10:00:00Z", detail: { owner: "noran", due: "2026-09-10", topic: "t1" } },
+  ] };
+const pDraw = (view) => listBody(pLoaded, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
+  ask: { view, q: "", open: "p", group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
+const pOpen = pDraw("all"), pChk = pDraw("check");
+const openPart = (pOpen.match(/<div class="open" data-id="p">[\s\S]*?<\/ul><\/div><\/div>/) || [""])[0];
+check("the opened row says Description where Notes was, the same stored text in a box that fits it, and the word Notes is gone",
+  /<p class="lab">Description<\/p><textarea class="desc" data-act="notes" aria-label="Description"/.test(openPart) && !/>Notes</.test(openPart) && /Grows with what you write/.test(openPart));
+check("...and carries ONE progress box with Enter, on the action, above the entries",
+  count(openPart, /class="pnew" data-act="progress-new"/g) === 1 && /class="pbox">[\s\S]*?<ul class="prog">/.test(openPart));
+check("the entries read newest first, the week in front — This week in the alarm's colour, then Last week — the writer's name under each, and the edited one says so",
+  /<li class="pe" data-pid="e2"><span class="wk now" title="[^"]*">This week<\/span>[\s\S]*?Finance sent[\s\S]*?<span>Noran<\/span>[\s\S]*?<li class="pe" data-pid="e1"><span class="wk" title="[^"]*">Last week<\/span>[\s\S]*?Template agreed[\s\S]*?<span>Islam<\/span><span class="ed">edited<\/span>/.test(openPart),
+  (openPart.match(/<li class="pe"[\s\S]*?<\/li>/g) || []).join("\n").slice(0, 600));
+const mineE = (openPart.match(/data-pid="e1">[\s\S]*?<\/li>/) || [""])[0], hersE = (openPart.match(/data-pid="e2">[\s\S]*?<\/li>/) || [""])[0];
+check("Edit and Delete stand on the writer's own entry alone — Islam's carries them, Noran's does not (both ends, §94.2)",
+  /data-act="progress-edit"/.test(mineE) && /data-act="progress-delete-ask"/.test(mineE) && /data-act="progress-delete"/.test(mineE) &&
+  !/data-act="progress-edit"/.test(hersE) && !/data-act="progress-delete/.test(hersE));
+check("the history is behind one link and hidden until it is pressed, and it says the movements — carried to a week, handed to somebody — with what each was before",
+  /<button type="button" class="histlink" data-act="hist" aria-expanded="false">[\s\S]*?History<\/button><ul class="hist" hidden>/.test(openPart) &&
+  /carried to This week \(was W2 Sep\)/.test(openPart) && /handed to Islam Saadany \(was Noran Essam\)/.test(openPart) && /created it, owner Noran Essam, due W2 Sep/.test(openPart),
+  (openPart.match(/<ul class="hist"[\s\S]*?<\/ul>/) || [""])[0].slice(0, 500));
+check("the latest entry reads under the row's name as one quiet line, the week in front, and a row with no progress has no second line",
+  /data-id="p"[\s\S]*?<div class="last" title="[^"]*"><b>This week<\/b> &middot; Finance sent four of six cost centres\.<\/div>/.test(pOpen) && count(pOpen, /class="last"/g) === 1);
+const chk2 = listBody({ ...pLoaded, open: null, progress: [], events: [] }, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
+  ask: { view: "check", q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
+check("...closed again: the box sits under row p (open, this week), none under q (done, last week) nor r (next week)",
+  count(chk2, /<div class="pline" data-id="p">/g) === 1 && !/<div class="pline" data-id="q">/.test(chk2) && !/<div class="pline" data-id="r">/.test(chk2) &&
+  /data-id="p"[\s\S]*?<div class="pline" data-id="p"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened this week\?"/.test(chk2),
+  (chk2.match(/<div class="pline"[^>]*>/g) || []).join(" | "));
+check("...and the opened row on the check has the panel's box and not a second one under it", count(pChk, /class="pnew"/g) === 1 && !/<div class="pline" data-id="p">/.test(pChk));
 
 /* ══ the database ═════════════════════════════════════════════════════ */
 const URL_ = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL || "";
@@ -525,6 +613,21 @@ try {
   const gone = await asTenant(B, (c) => deleteAction(c, b1.id));
   check("an action deletes", gone && (await asTenant(B, (c) => oneAction(c, b1.id))) === null);
   check("...and its history goes with it, never orphaned", (await asTenant(B, (c) => eventsOf(c, b1.id))).length === 0);
+  /* §657: an action's progress goes with it too, and a movement is written
+     into the history with what it was and what it became — only where it
+     moved, and never when a field is set to what it already is. */
+  const b3 = await asTenant(B, (c) => addAction(c, { title: "progress host", ownerKey: "omar", by: "omar", due: "2026-09-17" }));
+  await asTenant(B, (c) => addProgress(c, b3.id, "First entry.", "omar"));
+  await asTenant(B, (c) => setFields(c, b3.id, { due: "2026-09-24" }, "omar"));
+  await asTenant(B, (c) => setFields(c, b3.id, { due: "2026-09-24", title: "progress host" }, "omar"));
+  const b3ev = await asTenant(B, (c) => eventsOf(c, b3.id));
+  check("a carry writes ONE due event with what it was and what it became, and setting the same again writes nothing",
+    b3ev.filter((e) => e.kind === "due").length === 1 && b3ev[0].kind === "due" && b3ev[0].detail.from === "2026-09-17" && b3ev[0].detail.to === "2026-09-24" && b3ev.filter((e) => e.kind === "title").length === 0,
+    JSON.stringify(b3ev));
+  check("...and the creation event remembers the owner and the week it was born with", b3ev[b3ev.length - 1].kind === "created" && b3ev[b3ev.length - 1].detail.owner === "omar" && b3ev[b3ev.length - 1].detail.due === "2026-09-17");
+  check("the latest entry per action is read in one query", (await asTenant(B, (c) => latestProgress(c))).get(b3.id)?.body === "First entry.");
+  await asTenant(B, (c) => deleteAction(c, b3.id));
+  check("deleting the action takes its progress with it", (await asTenant(B, (c) => progressOf(c, b3.id))).length === 0);
 
   /* ══ §8 · the server: the gate, and every act at both ends ══════════ */
   section("§8 · the module's own server — the office in, a client's person out");
@@ -558,6 +661,24 @@ try {
   const tNew = await call(A, NORAN, ["api"], { act: "topic-new", name: "Check topic" });
   check("the SMO team makes a topic, not only the Super user", tNew.status === 200 && !!(tNew.j && tNew.j.topicId), tNew.status + " " + tNew.text.slice(0, 120));
   check("...and deletes it again", tNew.j && (await call(A, NORAN, ["api"], { act: "topic-delete", topicId: tNew.j.topicId })).status === 200);
+  /* PROGRESS IS THE WRITER'S (§657), both ends (§94.2): Noran writes an entry
+     on Islam's action; Islam cannot edit or delete it and is told so; Noran
+     can, and an edit stamps it edited. The progress-anyone break lets Islam
+     through and must redden the refusals. */
+  const host = await asTenant(A, (c) => addAction(c, { title: "progress host", ownerKey: "islam", by: "islam", due: thursdayOf(todayIn()) }));
+  const pAdd = await call(A, NORAN, ["api"], { act: "progress-add", id: host.id, body: "  Finance sent four of six.  " });
+  check("anybody in the office writes progress on anybody's action, and the answer is the list drawn again", pAdd.status === 200 && !!(pAdd.j && pAdd.j.progressId) && /class="pe" data-pid="/.test(pAdd.j.body) === false || (pAdd.status === 200 && typeof pAdd.j.body === "string"), pAdd.status + " " + pAdd.text.slice(0, 160));
+  const pid = pAdd.j && pAdd.j.progressId;
+  check("...stored trimmed, under her name", pid && (await asTenant(A, (c) => progressOf(c, host.id)))[0].body === "Finance sent four of six." && (await asTenant(A, (c) => progressOf(c, host.id)))[0].by === "noran");
+  check("an empty entry is refused in words and writes nothing", (await call(A, NORAN, ["api"], { act: "progress-add", id: host.id, body: "   " })).status === 400 && (await asTenant(A, (c) => progressOf(c, host.id))).length === 1);
+  const pEditOther = await call(A, ISLAM, ["api"], { act: "progress-edit", progressId: pid, body: "rewritten by Islam" });
+  check("Islam — the action's owner and the Super user — cannot edit Noran's entry, and is told whose it is", pEditOther.status === 403 && /wrote a progress entry/.test(pEditOther.text) && (await asTenant(A, (c) => progressOf(c, host.id)))[0].body === "Finance sent four of six.", pEditOther.status + " " + pEditOther.text.slice(0, 120));
+  check("...nor delete it", (await call(A, ISLAM, ["api"], { act: "progress-delete", progressId: pid })).status === 403 && (await asTenant(A, (c) => progressOf(c, host.id))).length === 1);
+  const pEdit = await call(A, NORAN, ["api"], { act: "progress-edit", progressId: pid, body: "Finance sent four of six; Ops' two by Thursday." });
+  check("Noran edits her own, and it is stamped edited", pEdit.status === 200 && (await asTenant(A, (c) => progressOf(c, host.id)))[0].body === "Finance sent four of six; Ops' two by Thursday." && !!(await asTenant(A, (c) => progressOf(c, host.id)))[0].editedAt);
+  check("...and deletes it", (await call(A, NORAN, ["api"], { act: "progress-delete", progressId: pid })).status === 200 && (await asTenant(A, (c) => progressOf(c, host.id))).length === 0);
+  check("an entry no longer there is a 404 in words", (await call(A, NORAN, ["api"], { act: "progress-delete", progressId: pid })).status === 404);
+  await asTenant(A, (c) => deleteAction(c, host.id));
   check("...while a client's own person is refused a topic", (await call(A, HEND, ["api"], { act: "topic-new", name: "sneak" })).status === 403);
   check("somebody with no membership at all is turned away", (await call(A, { personKey: null, seat: null }, [], null)).status === 403);
   const js = await call(A, NORAN, ["app.js"], null);
@@ -682,13 +803,13 @@ try {
   check("a list that could not be read says so, and is not drawn as empty (§35)", /could not be read/.test(noDb) && !/Nothing on the list/.test(noDb) && !/id="add"/.test(noDb));
 
   /* ══ §9 · the catalogue ══════════════════════════════════════════════ */
-  section("§9 · both tables fenced, and not the platform's");
+  section("§9 · the three tables fenced, and not the platform's");
   const cat = await owner(
     "SELECT c.relname, c.relrowsecurity AS rls, c.relforcerowsecurity AS force, pg_get_expr(p.polqual, p.polrelid) AS q " +
     "FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace LEFT JOIN pg_policy p ON p.polrelid = c.oid AND p.polname = 'tenant_rows' " +
-    "WHERE n.nspname = $1 AND c.relname IN ('tracker_actions','tracker_events','library_items')", [SCHEMA]);
+    "WHERE n.nspname = $1 AND c.relname IN ('tracker_actions','tracker_events','tracker_progress','library_items')", [SCHEMA]);
   const by = Object.fromEntries(cat.map((r) => [r.relname, r]));
-  for (const t of ["tracker_actions", "tracker_events"]) {
+  for (const t of ["tracker_actions", "tracker_events", "tracker_progress"]) {
     check(t + " has row-level security switched on and FORCED", by[t] && by[t].rls && by[t].force, JSON.stringify(by[t]));
     check(t + "'s policy is IDENTICAL to library_items' (§94.8)", by[t] && by.library_items && by[t].q === by.library_items.q, by[t] && by[t].q);
     check(t + " is not on the platform's own list (§331)", !PLATFORM_TABLES.includes(t));
@@ -697,6 +818,10 @@ try {
   check("the action row holds exactly what spec 054 §5 says and no more — the collaborators column is GONE (migration 013)",
     cols.map((c) => c.column_name).join(",") === "tenant_id,id,title,description,owner_key,due,first_due,status,done_at,created_by,created_at,updated_at,extra,topic_id",
     cols.map((c) => c.column_name).join(","));
+  const evCols = await owner("SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'tracker_events' ORDER BY ordinal_position", [SCHEMA]);
+  check("the history row carries `detail` for the movements (§657, migration 035)", evCols.map((c) => c.column_name).includes("detail"), evCols.map((c) => c.column_name).join(","));
+  const evKinds = await owner("SELECT pg_get_constraintdef(oid) AS d FROM pg_constraint WHERE conname = 'tracker_event_kind' AND connamespace = (SELECT oid FROM pg_namespace WHERE nspname = $1)", [SCHEMA]);
+  check("...and admits the four movements beside created and status", evKinds.length === 1 && ["due", "owner", "title", "topic"].every((k) => evKinds[0].d.includes("'" + k + "'")), JSON.stringify(evKinds));
 
   /* ══ §10 · the script, driven ═══════════════════════════════════════
      §8 proved the SERVER; nothing above has ever RUN app.js. A script wired
@@ -780,7 +905,7 @@ try {
     await pg.evaluate("window.scrollTo(0, 900)");
     const pinAt = await pg.evaluate(`(() => {
       const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
-      const tb = r('.tb'), m = r('.mast'), add = r('.addrow'), pin = r('.pin'), first = r('.list .sec');
+      const tb = r('.tb'), m = r('.mast'), add = r('.write .addrow'), pin = r('.pin'), first = r('.list .sec');
       return { y: Math.round(scrollY), pin: !!document.querySelector('.pin > .mast + .card.ctop .chd .cats') && !!document.querySelector('.pin > .mast + .card.ctop .tools .addrow'),
         tb: tb && Math.round(tb.top), tbFoot: tb && Math.round(tb.bottom), mast: m && Math.round(m.top),
         add: add && Math.round(add.bottom), pinFoot: pin && Math.round(pin.bottom), first: first && Math.round(first.top) };
@@ -856,21 +981,25 @@ try {
        Both are asserted — invisible, and the box measured before and after the
        first letter — because visibility alone is satisfied by a build that
        removed them, which is the other option and the one he did not pick. */
+    /* THE PAGE'S OWN LINE is the one in the write strip at the top (`.write`):
+       since §656 every section carries its own `.addrow` too, drawn hidden
+       until its "+ Add to …" opens it (§2d), so a bare `.addrow` no longer
+       names one line. */
     const addBox = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();return Math.round(r.left)+','+Math.round(r.width)})()");
-    const restBox = await addBox(".addrow .tn");
-    check("the add line holds its details back until something is typed", !(await pg.locator(".addrow .when").isVisible()) &&
-      !(await pg.locator(".addrow .who").isVisible()) &&
-      !(await pg.locator(".addrow [data-act=add-note]").isVisible()));
-    check("...and they are still drawn, so their place is held", (await pg.locator(".addrow .when").count()) === 1 &&
-      (await pg.evaluate("document.querySelector('.addrow .when').getBoundingClientRect().width")) > 0);
+    const restBox = await addBox(".write .addrow .tn");
+    check("the add line holds its details back until something is typed", !(await pg.locator(".write .addrow .when").isVisible()) &&
+      !(await pg.locator(".write .addrow .who").isVisible()) &&
+      !(await pg.locator(".write .addrow [data-act=add-note]").isVisible()));
+    check("...and they are still drawn, so their place is held", (await pg.locator(".write .addrow .when").count()) === 1 &&
+      (await pg.evaluate("document.querySelector('.write .addrow .when').getBoundingClientRect().width")) > 0);
     await pg.locator("#add").fill("x");
-    check("...the first letter brings them back, and nothing moved to make room — the status never shows there, a new line is Not started (§497)", (await pg.locator(".addrow .when").isVisible()) &&
-      (await pg.locator(".addrow .who").isVisible()) && !(await pg.locator(".addrow .st").isVisible()) &&
-      (await pg.locator(".addrow [data-act=add-note]").isVisible()) && (await addBox(".addrow .tn")) === restBox,
-      restBox + " -> " + (await addBox(".addrow .tn")));
-    check("the add line opens on This week in words, owned by me", (await pg.locator(".addrow .when .wk").innerText()) === "This week" &&
+    check("...the first letter brings them back, and nothing moved to make room — the status never shows there, a new line is Not started (§497)", (await pg.locator(".write .addrow .when").isVisible()) &&
+      (await pg.locator(".write .addrow .who").isVisible()) && !(await pg.locator(".write .addrow .st").isVisible()) &&
+      (await pg.locator(".write .addrow [data-act=add-note]").isVisible()) && (await addBox(".write .addrow .tn")) === restBox,
+      restBox + " -> " + (await addBox(".write .addrow .tn")));
+    check("the add line opens on This week in words, owned by me", (await pg.locator(".write .addrow .when .wk").innerText()) === "This week" &&
       weekWord(real, real) === "This week" &&
-      (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran");
+      (await pg.locator(".write .addrow").getAttribute("data-due")) === thu && (await pg.locator(".write .addrow").getAttribute("data-owner")) === "noran");
     /* THE BOLD WENT WITH THE WORDS (§356.15) — asserted over the WHOLE page,
        because a mark left on one row of one view is exactly what a check
        scoped to one selector would walk past. Its other end is the picker,
@@ -880,21 +1009,21 @@ try {
        arrow opens it, and BOTH ENDS are asserted — shut at rest, open on the
        press — or a build that simply deleted the note passes the first half. */
     check("no note box stands on the add line, and the arrow that opens one does", !(await pg.locator("#addnote").isVisible()) &&
-      (await pg.locator(".addrow [data-act=add-note]").count()) === 1 &&
-      (await pg.locator(".addrow [data-act=add-note]").getAttribute("aria-expanded")) === "false");
-    await pg.locator(".addrow [data-act=add-note]").click();
+      (await pg.locator(".write .addrow [data-act=add-note]").count()) === 1 &&
+      (await pg.locator(".write .addrow [data-act=add-note]").getAttribute("aria-expanded")) === "false");
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     check("...the arrow opens it, lights, and puts the cursor in it", (await pg.locator("#addnote").isVisible()) &&
       (await pg.evaluate("document.activeElement && document.activeElement.id")) === "addnote" &&
-      (await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")) &&
-      (await pg.locator(".addrow [data-act=add-note]").getAttribute("aria-expanded")) === "true");
+      (await pg.evaluate("document.querySelector('.write .addrow [data-act=add-note]').classList.contains('on')")) &&
+      (await pg.locator(".write .addrow [data-act=add-note]").getAttribute("aria-expanded")) === "true");
     /* FOLDING EMPTIES IT, and that is the whole rule: a note folded away with
        words still in it would be posted by the next Enter with nothing on the
        screen saying so (§96). */
     await probe("the note box can be typed into once it is open", () => pg.locator("#addnote").fill("something I changed my mind about", { timeout: 4000 }));
-    await pg.locator(".addrow [data-act=add-note]").click();
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     check("...pressed again it folds AND empties, so nothing unseen can be posted", !(await pg.locator("#addnote").isVisible()) &&
       (await pg.evaluate("document.getElementById('addnote').value")) === "" &&
-      !(await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")));
+      !(await pg.evaluate("document.querySelector('.write .addrow [data-act=add-note]').classList.contains('on')")));
     /* TAB FROM THE ACTION IS THE OTHER DOOR (§61) — and only once the line
        has a name on it, or it would be the one detail the line did not hold
        back (§356.16). */
@@ -913,11 +1042,11 @@ try {
        fold above: focusout fires before the click, so without the guard the
        arrow would find a shut note and open it again — reading as a control
        that does nothing on the one press where it plainly did (§96). */
-    await pg.locator(".addrow [data-act=add-note]").click();
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     check("...and the arrow opens it once more", await pg.locator("#addnote").isVisible());
-    await pg.locator(".addrow [data-act=add-note]").click();
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     check("...and closes it again, though it is empty and the focus left it first", !(await pg.locator("#addnote").isVisible()) &&
-      !(await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")));
+      !(await pg.evaluate("document.querySelector('.write .addrow [data-act=add-note]').classList.contains('on')")));
     await pg.locator("#add").fill("Book the room for Thursday");
     await pg.locator("#add").press("Enter"); await settle();
     const born = (await asTenant(A, (c) => listActions(c))).find((r) => r.title === "Book the room for Thursday");
@@ -937,11 +1066,11 @@ try {
        the row lands under Islam reading "Next week" (§356.15). */
     const nextThu = addDays(thu, 7);
     await pg.locator("#add").fill("Send the outcome to the managers");
-    await pg.locator(".addrow [data-act=add-note]").click();
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     await probe("the note opens for the line that takes everything", () => pg.locator("#addnote").fill("Ahmed's list first. Copy Noran.", { timeout: 4000 }));
-    check("typing lights the line", await pg.evaluate("document.querySelector('.addrow').classList.contains('typing')"));
-    await pg.locator(".addrow .when.pick").click();
-    const addWeeks = pg.locator(".addrow .weeks");
+    check("typing lights the line", await pg.evaluate("document.querySelector('.write .addrow').classList.contains('typing')"));
+    await pg.locator(".write .addrow .when.pick").click();
+    const addWeeks = pg.locator(".write .addrow .weeks");
     check("the week pressed on the line opens the picker — a header, this week marked and bold, No date and a day of my own at the foot", await addWeeks.isVisible() &&
       (await addWeeks.locator(".wh span").allTextContents()).join("|") === "Week|Sun – Thu" &&
       (await addWeeks.locator("button.now.on b").innerText()) === "This week" && (await addWeeks.locator("button:nth-of-type(2) b").innerText()) === "Next week" &&
@@ -954,19 +1083,19 @@ try {
        so what is asserted is the BOX against the window at both ends. */
     /* the edges against the window in the screen's pixels, the width in the
        page's own: the page is zoomed to 0.8 on a computer (lib/topbar.ts) */
-    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect(),z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;return [Math.round(r.left),Math.round(r.right),Math.round(r.width/z),window.innerWidth].join(' ')})()");
+    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.write .addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect(),z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;return [Math.round(r.left),Math.round(r.right),Math.round(r.width/z),window.innerWidth].join(' ')})()");
     check("...and the wider picker is inside the window, both edges", !!pbox && (() => { const [l, r, w, vw] = pbox.split(" ").map(Number); return l >= 0 && r <= vw && w === 232; })(), pbox);
     /* THE BOLD STAYS IN THE PICKER and only there — the other end of the
        assertion above, which is that no ROW carries one (§94.2). */
-    check("...the word is bold on this week's row only, both ends", (await pg.evaluate("getComputedStyle(document.querySelector('.addrow .weeks button.now b')).fontWeight")) === "700" &&
-      (await pg.evaluate("getComputedStyle(document.querySelector('.addrow .weeks button:not(.now) b')).fontWeight")) === "400");
+    check("...the word is bold on this week's row only, both ends", (await pg.evaluate("getComputedStyle(document.querySelector('.write .addrow .weeks button.now b')).fontWeight")) === "700" &&
+      (await pg.evaluate("getComputedStyle(document.querySelector('.write .addrow .weeks button:not(.now) b')).fontWeight")) === "400");
     await addWeeks.locator('[data-day="' + nextThu + '"]').click();
-    check("picking next week on the line posts nothing yet and the line reads Next week, in the picker's own words", (await pg.locator(".addrow").getAttribute("data-due")) === nextThu &&
-      (await pg.locator(".addrow .when .wk").innerText()) === "Next week" && weekWord(nextThu, real) === "Next week" && (await pg.locator(".wk.now").count()) === 0 &&
+    check("picking next week on the line posts nothing yet and the line reads Next week, in the picker's own words", (await pg.locator(".write .addrow").getAttribute("data-due")) === nextThu &&
+      (await pg.locator(".write .addrow .when .wk").innerText()) === "Next week" && weekWord(nextThu, real) === "Next week" && (await pg.locator(".wk.now").count()) === 0 &&
       !(await asTenant(A, (c) => listActions(c))).some((r) => r.title === "Send the outcome to the managers"));
-    await pg.locator(".addrow .who.pick").click();
-    await pg.locator(".addrow .team [data-key=islam]").click();
-    check("...picking Islam on the line reads Islam, still nothing posted", (await pg.locator(".addrow").getAttribute("data-owner")) === "islam" && (await pg.locator(".addrow .who .wn").innerText()) === "Islam");
+    await pg.locator(".write .addrow .who.pick").click();
+    await pg.locator(".write .addrow .team [data-key=islam]").click();
+    check("...picking Islam on the line reads Islam, still nothing posted", (await pg.locator(".write .addrow").getAttribute("data-owner")) === "islam" && (await pg.locator(".write .addrow .who .wn").innerText()) === "Islam");
     await probe("Enter posts from the note box too", () => pg.locator("#addnote").press("Enter", { timeout: 4000 })); await settle();
     const full = (await asTenant(A, (c) => listActions(c))).find((r) => r.title === "Send the outcome to the managers");
     check("Enter from the note adds it all — next week's Thursday, Islam's, the note kept", !!full && full.due === nextThu && full.firstDue === nextThu && full.ownerKey === "islam" && full.description === "Ahmed's list first. Copy Noran." && await stayed(), JSON.stringify(full));
@@ -977,9 +1106,9 @@ try {
        typed there is deliberately nothing on the screen to read (§356.16). */
     check("...the line is cleared back to This week and me, with the note and the details held back again", (await pg.locator("#add").inputValue()) === "" &&
       (await pg.evaluate("document.getElementById('addnote').value")) === "" && !(await pg.locator("#addnote").isVisible()) &&
-      !(await pg.locator(".addrow .when").isVisible()) && !(await pg.locator(".addrow [data-act=add-note]").isVisible()) &&
-      (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran" &&
-      (await pg.evaluate("document.querySelector('.addrow .when .wk').textContent")) === "This week");
+      !(await pg.locator(".write .addrow .when").isVisible()) && !(await pg.locator(".write .addrow [data-act=add-note]").isVisible()) &&
+      (await pg.locator(".write .addrow").getAttribute("data-due")) === thu && (await pg.locator(".write .addrow").getAttribute("data-owner")) === "noran" &&
+      (await pg.evaluate("document.querySelector('.write .addrow .when .wk').textContent")) === "This week");
     /* Due NEXT week it is not on This week (inView), so it is read under All. */
     check("...and, due next week, it is not on This week", (await pg.locator(frow).count()) === 0);
     await pg.goto(base + "?view=all"); await settle();
@@ -992,7 +1121,7 @@ try {
     /* NOT THERE reads as "" rather than throwing (§215): a falsification that
        stops a row being made must leave this REPORTING, not dying. */
     const box = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();var c=getComputedStyle(e);return [e.tagName,Math.round(r.width),Math.round(r.height),c.fontSize,c.fontFamily.split(',')[0]].join(' ')})()");
-    const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".addrow .st");
+    const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".write .addrow .st");
     check("the status pill is one box whether it is a select or a span — and the add line draws none (§497)", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
       pillSel.slice(6) === pillSpan.slice(4) && /^SPAN 0 /.test(pillAdd), pillSel + " | " + pillSpan + " | " + pillAdd);
     check("...in the page's own font, never the browser's control font (the main screens' since §646)", /system-ui/.test(pillSel) && /11px/.test(pillSel), pillSel);
@@ -1150,6 +1279,29 @@ try {
     await pg.locator("#add").focus(); await settle();
     check("leaving the notes box writes the notes", (await asTenant(A, (c) => oneAction(c, born.id))).description === "Ask Facilities first.");
     check("...and the row is still open afterwards, the notes still in the box", (await pg.locator(".open textarea[data-act=notes]").inputValue()) === "Ask Facilities first.");
+    /* PROGRESS, PRESSED (§657): the box on the opened row takes an entry on
+       Enter, read back from Postgres, drawn at the top of the entries with
+       This week in front and under the row's name; the box is empty and under
+       the cursor again; Edit turns it into a box and Enter saves; the history
+       is folded until its link is pressed. */
+    check("the opened row says Description, in a box that does not scroll, and carries the progress box", (await pg.locator(".open .lab").first().innerText()) !== "" && (await pg.locator(".open textarea.desc").count()) === 1 &&
+      (await pg.locator(".open textarea.desc").evaluate((t) => getComputedStyle(t).overflowY)) === "hidden" && (await pg.locator(".open .pnew").count()) === 1 && (await pg.locator(".open .hist").isHidden()));
+    await pg.locator(".open .pnew").fill("Facilities answered; the room is free on Thursday."); await pg.locator(".open .pnew").press("Enter"); await settle();
+    const entries = await asTenant(A, (c) => progressOf(c, born.id));
+    check("Enter writes the entry under my name, and the list draws it first with This week in front, without a reload", entries.length === 1 && entries[0].by === "noran" && entries[0].body === "Facilities answered; the room is free on Thursday." &&
+      (await pg.locator(".open .prog .pe").count()) === 1 && (await pg.locator(".open .prog .pe .wk").innerText()).trim().toUpperCase() === "THIS WEEK" && await stayed(), JSON.stringify(entries));
+    check("...the box is empty and under the cursor for the next one", (await pg.locator(".open .pnew").inputValue()) === "" && (await pg.evaluate("document.activeElement && document.activeElement.className")) === "pnew");
+    check("...and the row's name carries the latest line under it", (await pg.locator(row + ".last").count()) === 1 && /Facilities answered/.test(await pg.locator(row + ".last").innerText()));
+    await pg.locator(".open .pe [data-act=progress-edit]").click();
+    await pg.locator(".open .pe textarea").fill("Facilities answered; the big room is free on Thursday."); await pg.locator(".open .pe textarea").press("Enter"); await settle();
+    const edited = await asTenant(A, (c) => progressOf(c, born.id));
+    check("Edit turns my entry into a box in place; Enter saves it and it reads edited", edited[0] && edited[0].body === "Facilities answered; the big room is free on Thursday." && !!edited[0].editedAt && (await pg.locator(".open .pe .ed").count()) === 1 && await stayed(), JSON.stringify(edited));
+    await pg.locator(".open [data-act=hist]").click();
+    check("the History link unfolds the automatic record in place, the creation at its foot", (await pg.locator(".open .hist").isVisible()) && /created it/.test(await pg.locator(".open .hist li").last().innerText()));
+    await pg.locator(".open .pe [data-act=progress-delete-ask]").click();
+    check("Delete on my entry asks first", await pg.locator(".open .pe .sure").isVisible() && (await asTenant(A, (c) => progressOf(c, born.id))).length === 1);
+    await pg.locator(".open .pe [data-act=progress-delete]").click(); await settle();
+    check("...and Yes removes it, the line under the name with it", (await asTenant(A, (c) => progressOf(c, born.id))).length === 0 && (await pg.locator(row + ".last").count()) === 0 && await stayed());
     await pg.locator(row + "[data-act=more]").click(); await settle();
     check("the arrow again folds it, and the address forgets it", (await pg.locator(".open").count()) === 0 && !pg.url().includes("open=") && await stayed(), pg.url());
     /* GROUP BY, from the dots: drawn again in place, remembered by this
@@ -1166,6 +1318,33 @@ try {
     check("...and back to Owner", /Noran Essam/.test((await heads()).join("|")));
     if (full) await asTenant(A, (c) => deleteAction(c, full.id));   /* §215: a break that never made it must not kill the rest */
     await pg.evaluate("window.__stay = 1");
+    /* THE SECTION'S OWN LINE, PRESSED (§656): "+ Add for Noran" opens a line
+       INSIDE her section with the owner fixed; Enter lands the row under her
+       heading, read back from Postgres, with the page's own line at the top
+       never touched; the line stays open and empty for the next one, and
+       Escape on it empty folds it. §2d drew it; this presses it. The
+       add-at-top break puts §497's way back — the top line filled and
+       focused — and the second assertion must redden on it. */
+    const myFoot = pg.locator('.sec[data-key="noran"] [data-act=add-here][data-line="o:noran"]');
+    const myLine = pg.locator('.sec[data-key="noran"] .addrow[data-line="o:noran"]');
+    check("grouped by Owner, my section's foot offers + Add for Noran, its line drawn hidden with me fixed as a name",
+      (await myFoot.count()) === 1 && (await myLine.count()) === 1 && !(await myLine.isVisible()) && (await myLine.locator(".who.pick").count()) === 0 && (await myLine.getAttribute("data-owner")) === "noran");
+    const lineUnderCursor = () => pg.evaluate("(function(){var a=document.activeElement,r=a&&a.closest?a.closest('.addrow'):null;return r?(r.getAttribute('data-line')||'main'):''})()");
+    if ((await myFoot.count()) !== 1) check("pressing + Add for Noran — but the foot does not offer it", false);
+    else {
+      await myFoot.click(); await settle();
+      check("pressing it opens the line inside the section and puts the cursor THERE, not on the top line", await myLine.isVisible() && (await lineUnderCursor()) === "o:noran", await lineUnderCursor());
+      await pg.keyboard.type("Written under my own name"); await pg.keyboard.press("Enter"); await settle();
+      const under = (await asTenant(A, (c) => listActions(c))).find((x) => x.title === "Written under my own name");
+      check("Enter adds it owned by me, due this week, and the row lands under my heading without a reload",
+        !!under && under.ownerKey === "noran" && under.due === realThu && (await pg.locator('.sec[data-key="noran"] .row .t', { hasText: "Written under my own name" }).count()) === 1 && await stayed(), JSON.stringify(under));
+      check("...the line is still open, empty and under the cursor for the next one, and the top line was never touched",
+        await myLine.isVisible() && (await myLine.locator("input.new").inputValue()) === "" && (await lineUnderCursor()) === "o:noran" && (await pg.locator("#add").inputValue()) === "");
+      await pg.keyboard.press("Escape");
+      check("Escape on the empty line folds it, and the + Add for Noran that opened it takes the focus",
+        !(await myLine.isVisible()) && (await pg.evaluate("document.activeElement && document.activeElement.getAttribute('data-line')")) === "o:noran");
+      if (under) await asTenant(A, (c) => deleteAction(c, under.id));
+    }
     /* THE OWNER'S NAME opens the office on this client, first names only;
        picking one hands the action on — and then the old owner has no
        control left on that row (both ends, §61). */

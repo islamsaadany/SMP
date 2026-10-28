@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import type { ProcessLifecycleStatus } from "@/ffp/lib/domain/process-lifecycle";
 import { prisma } from "@/ffp/lib/db/client";
+import type { Prisma } from "@/ffp/generated/prisma/client";
 import { expectedAcknowledgers } from "@/ffp/lib/domain/process-reader";
 import { describeAuthorityRule } from "@/ffp/lib/domain/authority-table";
 import { deriveGapsByStep } from "@/ffp/lib/domain/step-readiness";
@@ -70,13 +71,16 @@ const live = (r: Pick<ReadRow, "status">) => r.status === "PUBLISHED";
  * Every process the reader may hear about: what is in force, and what names
  * them as its approver in any state but retired.
  */
-export const readingRows = cache(async (slug: string, reader: Reader): Promise<ReadRow[]> => {
-  const processes = await prisma.process.findMany({
-    where: {
-      workspaceId: slug,
-      archivedAt: null,
+export const readingRows = cache(
+  async (slug: string, reader: Reader): Promise<ReadRow[]> =>
+    rowsWhere(slug, reader, {
       OR: [{ lifecycleStatus: "PUBLISHED" }, ...(reader.personId ? [{ approverPersonId: reader.personId, lifecycleStatus: { not: "RETIRED" as const } }] : [])],
-    },
+    })
+);
+
+async function rowsWhere(slug: string, reader: Reader, where: Prisma.ProcessWhereInput): Promise<ReadRow[]> {
+  const processes = await prisma.process.findMany({
+    where: { workspaceId: slug, archivedAt: null, ...where },
     orderBy: { code: "asc" },
     select: {
       id: true, code: true, name: true, lifecycleStatus: true, approverPersonId: true, approverName: true, submittedByName: true,
@@ -128,7 +132,7 @@ export const readingRows = cache(async (slug: string, reader: Reader): Promise<R
       noControl: p.controls.filter((c) => !c.control?.trim()).length,
     };
   });
-});
+}
 
 /** The three filters of the Processes tab (spec 067 §3.1): all in force, theirs, and the ones they have a step in. */
 export function filterRows(rows: ReadRow[]) {
@@ -201,7 +205,8 @@ export type ReadStep = {
 
 export type ReadProcess = {
   row: ReadRow;
-  mode: "live" | "approve" | "notyet";
+  /** preview: the office reading the current draft as a reader will once it is published (Preview as manager, spec 067 §4.1). */
+  mode: "live" | "approve" | "notyet" | "preview";
   purpose: string | null;
   inScope: string[];
   outScope: string[];
@@ -223,10 +228,10 @@ export type ReadProcess = {
  * version until the office publishes it). Anything else is not theirs to read:
  * null, and the page answers 404.
  */
-export const readProcess = cache(async (slug: string, processId: string, reader: Reader): Promise<ReadProcess | null> => {
-  const row = (await readingRows(slug, reader)).find((r) => r.id === processId);
+export const readProcess = cache(async (slug: string, processId: string, reader: Reader, preview = false): Promise<ReadProcess | null> => {
+  const row = preview ? (await rowsWhere(slug, reader, { id: processId }))[0] : (await readingRows(slug, reader)).find((r) => r.id === processId);
   if (!row) return null;
-  const mode = row.status === "PUBLISHED" ? "live" : row.approves && row.status === "IN_REVIEW" ? "approve" : row.approves && row.status === "APPROVED" ? "notyet" : null;
+  const mode = preview ? "preview" : row.status === "PUBLISHED" ? "live" : row.approves && row.status === "IN_REVIEW" ? "approve" : row.approves && row.status === "APPROVED" ? "notyet" : null;
   if (!mode) return null;
   const p = await prisma.process.findUnique({
     where: { id: processId },

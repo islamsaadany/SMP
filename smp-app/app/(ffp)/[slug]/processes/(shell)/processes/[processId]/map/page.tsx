@@ -4,12 +4,9 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import { deriveGapsByStep } from "@/ffp/lib/domain/step-readiness";
 import { buildStepAuthoritySummary } from "@/ffp/lib/domain/step-authority-summary";
-import { getProcessStepperCounts } from "@/ffp/lib/data/process-stepper-data";
 import { AddStepForm, BulkAddStepsForm } from "./step-form";
 import { MapView } from "./map-view";
 import { GenerateTemplateForm } from "../../template-form";
-import { ProcessStepper } from "../process-stepper";
-import { ProcessTabs } from "../process-tabs";
 import { ProcessDocumentation } from "./process-documentation";
 import { SopDocumentControl } from "./sop-document-control";
 import type { Revision } from "@/ffp/lib/domain/sop";
@@ -45,14 +42,13 @@ export default async function ProcessMapPage(
   });
   if (!process || process.workspaceId !== workspaceId) notFound();
 
-  const [roles, otherProcesses, connections, stepperCounts, activities, authorityAssignments] = await Promise.all([
+  const [roles, otherProcesses, connections, activities, authorityAssignments] = await Promise.all([
     prisma.role.findMany({ where: { workspaceId, archivedAt: null }, orderBy: { name: "asc" } }),
     prisma.process.findMany({
       where: { workspaceId, archivedAt: null, id: { not: processId } },
       orderBy: { code: "asc" },
     }),
     prisma.stepConnection.findMany({ where: { processId } }),
-    getProcessStepperCounts(processId),
     // Enough of the RACI and Authority matrices to say what each step is still
     // missing, so the Steps List can show it without anyone opening either.
     prisma.activity.findMany({
@@ -187,67 +183,13 @@ export default async function ProcessMapPage(
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1600px] px-6 py-8">
-      {/* The page is as wide as the window because the Process Map is a
-          spatial drawing and was being fitted to 11% zoom inside a reading
-          column. Everything that is prose or a form keeps the reading width;
-          only the map takes the whole page. */}
-      <div className="mx-auto w-full max-w-4xl">
-      {process.parentProcess && (
-        <div className="mb-1 text-xs text-slate-500">
-          {process.parentProcess.code} · {process.parentProcess.name} <span className="mx-1">/</span>
-        </div>
-      )}
-      <div className="flex items-center gap-2">
-        <h1 className="text-xl font-semibold text-slate-900">{process.name}</h1>
-        <span className="rounded-md bg-indigo-50 px-2 py-0.5 font-mono text-xs font-bold text-indigo-700">
-          {process.code}
-        </span>
-      </div>
-      <p className="mt-1 mb-2 text-sm text-slate-500">
-        {process.steps.length} step(s) ·{" "}
-        <a href={`/${workspaceId}/processes/processes/${processId}/raci`} className="font-semibold text-slate-700 hover:text-slate-900">
-          Build RACI →
-        </a>{" "}
-        ·{" "}
-        <a href={`/${workspaceId}/processes/processes/${processId}/review`} className="font-semibold text-slate-700 hover:text-slate-900">
-          AI Review →
-        </a>
-      </p>
-
-      <ProcessStepper workspaceId={workspaceId} processId={processId} {...stepperCounts} />
-      {/* The way into the rest of this process (Lifecycle, Risks & controls, Quality, People...) from the map. */}
-      <ProcessTabs workspaceId={workspaceId} processId={processId} active={null} />
-
-      <ProcessDocumentation
-        workspaceId={workspaceId}
-        processId={processId}
-        processPurpose={process.processPurpose}
-        inScope={process.inScope}
-        outOfScope={process.outOfScope}
-        externalEntities={externalEntities}
-      />
-
-      <SopDocumentControl
-        workspaceId={workspaceId}
-        processId={processId}
-        sopVersion={process.sopVersion}
-        sopOwner={process.sopOwner}
-        sopEffectiveDate={process.sopEffectiveDate}
-        sopApprovedBy={process.sopApprovedBy}
-        revisions={process.sopRevisions as unknown as Revision[]}
-      />
-
-      </div>
-
+    <main className="w-full">
+      {/* The flow first (spec 067 §4.3), then adding steps, then what the process is for and its document control. */}
       {process.steps.length === 0 && (
-        <div className="mx-auto mt-5 w-full max-w-4xl">
+        <div className="mb-4 w-full">
           <GenerateTemplateForm workspaceId={workspaceId} intoProcess={{ id: processId, name: process.name }} />
         </div>
       )}
-
-      <div className="mt-5" />
-
       <MapView
         workspaceId={workspaceId}
         processId={processId}
@@ -269,8 +211,7 @@ export default async function ProcessMapPage(
         otherProcesses={otherProcesses.map((p) => ({ id: p.id, code: p.code, name: p.name }))}
         proposals={proposals}
       />
-
-      <div className="mx-auto mt-5 flex w-full max-w-4xl flex-col gap-3">
+      <div className="mt-4 flex w-full flex-col gap-3">
         <AddStepForm
           workspaceId={workspaceId}
           processId={processId}
@@ -279,6 +220,25 @@ export default async function ProcessMapPage(
           otherProcesses={otherProcesses.map((p) => ({ id: p.id, code: p.code, name: p.name }))}
         />
         <BulkAddStepsForm workspaceId={workspaceId} processId={processId} />
+      </div>
+      <div className="mt-6 w-full">
+      <ProcessDocumentation
+        workspaceId={workspaceId}
+        processId={processId}
+        processPurpose={process.processPurpose}
+        inScope={process.inScope}
+        outOfScope={process.outOfScope}
+        externalEntities={externalEntities}
+      />
+      <SopDocumentControl
+        workspaceId={workspaceId}
+        processId={processId}
+        sopVersion={process.sopVersion}
+        sopOwner={process.sopOwner}
+        sopEffectiveDate={process.sopEffectiveDate}
+        sopApprovedBy={process.sopApprovedBy}
+        revisions={process.sopRevisions as unknown as Revision[]}
+      />
       </div>
     </main>
   );

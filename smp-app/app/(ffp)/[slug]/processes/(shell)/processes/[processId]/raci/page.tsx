@@ -4,10 +4,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import { validateRaciMatrix } from "@/ffp/lib/domain/raci-validation";
 import { buildRaciTableRows, computeVisibleRoleIds, type StepOwners } from "@/ffp/lib/domain/raci-table";
-import { getProcessStepperCounts } from "@/ffp/lib/data/process-stepper-data";
 import { RaciIntro, RaciTable } from "./raci-table";
 import { AddActivityForm } from "./activity-form";
-import { ProcessStepper } from "../process-stepper";
 
 export default async function RaciMatrixPage(
   props: PageProps<"/[slug]/processes/processes/[processId]/raci">
@@ -20,7 +18,7 @@ export default async function RaciMatrixPage(
   const process = await prisma.process.findUnique({ where: { id: processId } });
   if (!process || process.workspaceId !== workspaceId) notFound();
 
-  const [roles, activities, matrixStatus, steps, stepperCounts, people] = await Promise.all([
+  const [roles, activities, matrixStatus, steps, people] = await Promise.all([
     prisma.role.findMany({ where: { workspaceId, archivedAt: null }, orderBy: { name: "asc" } }),
     prisma.activity.findMany({
       where: { processId },
@@ -41,7 +39,6 @@ export default async function RaciMatrixPage(
       },
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     }),
-    getProcessStepperCounts(processId),
     prisma.person.findMany({
       where: { workspaceId, archivedAt: null },
       select: { id: true, managerId: true, personRoles: { select: { roleId: true } } },
@@ -121,11 +118,8 @@ export default async function RaciMatrixPage(
   const visibleRoles = roles.filter((r) => visibleRoleIds.includes(r.id));
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <div className="mb-1 flex items-center justify-between gap-3">
-        <div className="text-xs text-slate-500">
-          {process.code} · {process.name}
-        </div>
+    <main className="w-full">
+      <div className="mb-2 flex items-center justify-end gap-3">
         <div className="flex gap-2">
           <a
             href={`/api/ffp/export/raci/${processId}?format=pdf`}
@@ -139,18 +133,9 @@ export default async function RaciMatrixPage(
           >
             Export Excel
           </a>
-          <a
-            href={`/${workspaceId}/processes/processes/${processId}/review`}
-            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            AI Review →
-          </a>
         </div>
       </div>
-      <h1 className="text-xl font-semibold text-slate-900">RACI Matrix</h1>
       <RaciIntro />
-
-      <ProcessStepper workspaceId={workspaceId} processId={processId} {...stepperCounts} />
 
       <RaciTable
         workspaceId={workspaceId}

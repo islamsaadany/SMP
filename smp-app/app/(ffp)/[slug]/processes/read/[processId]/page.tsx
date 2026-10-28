@@ -25,7 +25,9 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   const sp = await props.searchParams;
   const seat = await readerSeat(slug);
   const reader = await readerOf(slug, seat.ok ? seat.personKey : null);
-  const p = await readProcess(slug, processId, reader);
+  /* Preview as manager (spec 067 §4.1): the office reads the current draft as a reader will once it is published */
+  const preview = sp.preview === "1" && seat.ok && seat.office;
+  const p = await readProcess(slug, processId, reader, preview);
   if (!p) notFound();
   const todo = (await todoOf(slug, reader)).filter((t) => t.kind !== "plan" && t.row.id === processId);
   const toRead = todo.some((t) => t.kind === "read");
@@ -36,6 +38,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   const client = (await clientSettings(slug))?.name || (seat.ok ? seat.tenantName : slug);
   const base = `/${slug}/processes/read`;
   const here = `${base}/${processId}`;
+  const q = preview ? "&preview=1" : "";
   const r = p.row;
 
   const asked = typeof sp.tab === "string" ? sp.tab : "";
@@ -59,15 +62,23 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   if (!p.gaps.length && counted.length) health.push({ k: "ok", text: m.allClear });
   for (const s of p.steps) for (const c of s.controls) if (!c.control) health.push({ k: "bad", text: m.riskNoControl(s.n, s.label, c.risk) });
   for (const risk of p.looseNoControl) health.push({ k: "bad", text: m.riskNoControl(null, null, risk) });
+  if (p.mode === "live") health.push({ k: r.readBy < r.readers ? "warn" : "ok", text: m.readCount(r.readBy, r.readers, r.version), small: p.stillToRead.length ? m.stillToRead(p.stillToRead) : undefined });
+  if ((p.mode === "live" || p.mode === "preview") && (!p.sopVersion || !p.sopEffectiveDate)) health.push({ k: "warn", text: m.noSop });
   if (p.mode === "live") {
-    health.push({ k: r.readBy < r.readers ? "warn" : "ok", text: m.readCount(r.readBy, r.readers, r.version), small: p.stillToRead.length ? m.stillToRead(p.stillToRead) : undefined });
-    if (!p.sopVersion || !p.sopEffectiveDate) health.push({ k: "warn", text: m.noSop });
     if (review !== null && review < 0) health.push({ k: "bad", text: m.reviewDue(date(r.nextReviewDue)!) });
   }
   const toLook = health.filter((h) => h.k !== "ok").length;
 
   const pill =
-    p.mode === "approve" ? <Pill tone="attn">{m.forApproval(r.version)}</Pill> : p.mode === "notyet" ? <Pill tone="attn">{m.approved(r.version)}</Pill> : <Pill tone="good">{m.inForce(r.version)}</Pill>;
+    p.mode === "preview" ? (
+      <Pill tone="attn">{all.builder.page.previewStrip}</Pill>
+    ) : p.mode === "approve" ? (
+      <Pill tone="attn">{m.forApproval(r.version)}</Pill>
+    ) : p.mode === "notyet" ? (
+      <Pill tone="attn">{m.approved(r.version)}</Pill>
+    ) : (
+      <Pill tone="good">{m.inForce(r.version)}</Pill>
+    );
   const purpose = p.purpose?.split(/(?<=\.)\s/)[0];
 
   const stepCard = (s: ReadStep, id: string) => (
@@ -115,7 +126,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
 
   let body: React.ReactNode;
   if (tab === "flow") {
-    body = <ReadingFlow steps={p.steps} lanes={p.lanes} connections={p.connections} toSteps={asked ? null : `${here}?tab=steps`} />;
+    body = <ReadingFlow steps={p.steps} lanes={p.lanes} connections={p.connections} toSteps={asked ? null : `${here}?tab=steps${q}`} />;
   } else if (tab === "steps") {
     body = !counted.length ? (
       <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">{m.noSteps}</div>
@@ -208,7 +219,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
         <div className={`${panel} mb-3.5 px-4 py-3.5`}>
           <div className="mb-1 flex flex-wrap items-baseline gap-2">
             <span className={lbl}>{m.glance}</span>
-            <Link href={`${here}?tab=flow`} className="ms-auto text-[13px] font-semibold text-[#16325C] underline underline-offset-2">
+            <Link href={`${here}?tab=flow${q}`} className="ms-auto text-[13px] font-semibold text-[#16325C] underline underline-offset-2">
               {m.fullFlow}
             </Link>
           </div>
@@ -221,7 +232,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
                   </span>
                 )}
                 <Link
-                  href={`${here}?tab=steps#sc-${s.id}`}
+                  href={`${here}?tab=steps${q}#sc-${s.id}`}
                   className={`relative grid w-32 shrink-0 gap-0.5 rounded-lg border bg-white px-2.5 py-2 text-[12.5px] ${s.type === "DECISION" ? "border-dashed border-[#16325C]" : "border-[#D6DCE5]"}`}
                 >
                   <span className="font-mono text-xs font-bold text-[#16325C]">{s.n}</span>
@@ -295,8 +306,8 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
         actions={
           <>
             <PrintButton />
-            {seat.ok && seat.office && (
-              <Link href={`/${slug}/processes/processes/${processId}`} className={bandGold}>
+            {seat.ok && seat.office && !preview && (
+              <Link href={`/${slug}/processes/processes/${processId}/map?from=read`} className={bandGold}>
                 {m.openInBuilder}
               </Link>
             )}
@@ -318,6 +329,15 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
           line={[m.approveLine(r.version, r.submittedByName, date(r.submittedAt)), p.versionNote].filter(Boolean).join(" ")}
         />
       )}
+      {p.mode === "preview" && (
+        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[#C9A24D] bg-[#FBF6E9] px-3 py-2.5 text-[13.5px] print:hidden">
+          <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[#8A6B22]">{all.builder.page.previewStrip}</b>
+          <span className="min-w-0 flex-1">{all.builder.page.previewLine}</span>
+          <Link href={`/${slug}/processes/processes/${processId}/map`} className="rounded-md border border-[#C9A24D] bg-[#C9A24D] px-3 py-1.5 text-[13px] font-semibold text-[#16325C]">
+            {all.builder.page.backToBuilder}
+          </Link>
+        </div>
+      )}
       {p.mode === "notyet" && (
         <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[#16325C] bg-white px-3 py-2.5 text-[13.5px]">
           <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[#16325C]">{m.notYet}</b>
@@ -327,9 +347,9 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
       <TabRow
         label={m.views}
         tabs={[
-          { key: "flow", label: m.tabs.flow, href: `${here}?tab=flow`, on: tab === "flow" },
-          { key: "steps", label: m.tabs.steps, href: `${here}?tab=steps`, on: tab === "steps", count: counted.length || undefined },
-          { key: "summary", label: m.tabs.summary, href: `${here}?tab=summary`, on: tab === "summary", count: toLook ? m.toLookAt(toLook) : undefined },
+          { key: "flow", label: m.tabs.flow, href: `${here}?tab=flow${q}`, on: tab === "flow" },
+          { key: "steps", label: m.tabs.steps, href: `${here}?tab=steps${q}`, on: tab === "steps", count: counted.length || undefined },
+          { key: "summary", label: m.tabs.summary, href: `${here}?tab=summary${q}`, on: tab === "summary", count: toLook ? m.toLookAt(toLook) : undefined },
         ]}
       />
       {body}

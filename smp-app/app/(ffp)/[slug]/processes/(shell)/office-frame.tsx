@@ -12,11 +12,12 @@ import { usePathname } from "next/navigation";
 import { useMessages } from "@/ffp/lib/i18n/client";
 import { Band, Sheet, TabRow, bandGold, bandQuiet } from "../band";
 
-type Section = "all" | "handle" | "landscape" | "priorities" | "governance" | "export" | "roles" | "other";
+type Section = "all" | "handle" | "landscape" | "priorities" | "governance" | "export" | "roles" | "other" | "builder";
 
-/** Which tab a path under /[slug]/processes belongs to. A process's own pages sit under All processes. */
+/** Which tab a path under /[slug]/processes belongs to. A process's own pages are the builder page, which draws its own band. */
 function sectionOf(rest: string): Section {
-  const first = rest.split("/")[1] ?? "";
+  const [, first = "", second = ""] = rest.split("/");
+  if (first === "processes" && second && second !== "deleted") return "builder";
   if (first === "" || first === "processes") return "all";
   if (first === "handle") return "handle";
   if (first === "value-chain" || first === "helicopter") return "landscape";
@@ -46,7 +47,9 @@ export function OfficeFrame({
   const pathname = usePathname() ?? "";
   const base = `/${workspaceId}/processes`;
   const sec = sectionOf(pathname.startsWith(base) ? pathname.slice(base.length) : "");
-  const tabs: { key: Exclude<Section, "other" | "roles">; href: string; count?: number; hot?: boolean }[] = [
+  /* one process at a time: the builder page (processes/[processId]/layout.tsx) has its own band and menu */
+  if (sec === "builder") return <>{children}</>;
+  const tabs: { key: Exclude<Section, "other" | "roles" | "builder">; href: string; count?: number; hot?: boolean }[] = [
     { key: "all", href: `${base}/processes`, count: counts.total },
     { key: "handle", href: `${base}/handle`, count: counts.toHandle, hot: true },
     { key: "landscape", href: `${base}/value-chain` },

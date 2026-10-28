@@ -1,28 +1,29 @@
-import { loadPlan, loadPriorityRows } from "@/ffp/lib/data/priorities";
-import { DECISION_LABEL, goesDeep, type Decision } from "@/ffp/lib/domain/priorities";
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import Link from "next/link";
 import { registerReady } from "@/ffp/lib/register-sync";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import type { Revision } from "@/ffp/lib/domain/sop";
-import { ProcessTabs, parseTab } from "./process-tabs";
-import { ProcessStepper } from "./process-stepper";
-import { getProcessStepperCounts } from "@/ffp/lib/data/process-stepper-data";
 import { auth } from "@/ffp/lib/auth/config";
-import { daysToReview, isOverdueForReview, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
+import { daysToReview, isOverdueForReview } from "@/ffp/lib/domain/process-lifecycle";
 import { acknowledgementProgress, expectedAcknowledgers } from "@/ffp/lib/domain/process-reader";
 import { StaffLink } from "../../staff-link";
 import { LifecyclePanel } from "./lifecycle-panel";
 import { AddControlForm, DeleteControlButton, AddNonConformanceForm, NonConformanceStatus } from "./quality-forms";
+import { getMessages } from "@/ffp/lib/i18n/server";
+
+/* The process page's own sections in the builder's menu (builder-frame.tsx); the Map, RACI, Authority and Check with AI are pages of their own. */
+const TABS = ["lifecycle", "risks", "quality", "people", "compliance", "connections"] as const;
+type Tab = (typeof TABS)[number];
 
 type Kpi = { metric: string; target: string; frequency: string };
 
-function Empty({ children }: { children: React.ReactNode }) {
+function Empty({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+    <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">
+      <b className="mb-1 block text-[15px] text-[#171B22]">{title}</b>
       {children}
-    </p>
+    </div>
   );
 }
 
@@ -35,31 +36,23 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function List({ items }: { items: string[] }) {
-  if (items.length === 0) return <p className="text-sm text-slate-500">None recorded.</p>;
-  return (
-    <ul className="list-disc ps-5 text-sm text-slate-700">
-      {items.map((s, i) => (
-        <li key={i}>{s}</li>
-      ))}
-    </ul>
-  );
-}
-
 export default async function ProcessPage(props: PageProps<"/[slug]/processes/processes/[processId]">) {
   const { slug: workspaceId, processId } = await props.params;
   // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
   await requireOffice(workspaceId);
-  const tab = parseTab((await props.searchParams).tab);
+  const want = (await props.searchParams).tab;
+  const tab = TABS.find((t) => t === want) as Tab | undefined;
+  // The builder opens a process on its Map (spec 067 §4.3).
+  if (!tab) redirect(`/${workspaceId}/processes/processes/${processId}/map`);
   await registerReady(workspaceId);
 
   const process = await prisma.process.findUnique({
     where: { id: processId },
-    include: { parentProcess: true, _count: { select: { steps: true } } },
+    
   });
   if (!process || process.workspaceId !== workspaceId) notFound();
 
-  const [controls, ncs, stepList, registerPeople, versions, session, stepperCounts] = await Promise.all([
+  const [controls, ncs, stepList, registerPeople, versions, session, msgs] = await Promise.all([
     prisma.processControl.findMany({
       where: { processId },
       include: { step: true },
@@ -74,8 +67,9 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
     }),
     prisma.processVersion.findMany({ where: { processId }, orderBy: { number: "desc" } }),
     auth(),
-    getProcessStepperCounts(processId),
+    getMessages(),
   ]);
+  const bp = msgs.builder.page;
   const people = registerPeople.map((x) => {
     const roles = x.personRoles.filter((r) => !r.role.archivedAt).map((r) => r.role.name);
     return { id: x.id, name: x.name, email: x.email, role: roles.length ? roles.join(", ") : null };
@@ -98,14 +92,6 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
   const me = (session?.user.email ?? "").trim().toLowerCase();
   const canReturnFromReview =
     !!me && (me === (approverRow?.email ?? "").trim().toLowerCase() || me === (process.submittedByEmail ?? "").trim().toLowerCase());
-  // Chosen for a deep dive? Then say so, with where it ranks and how far it has got (Priorities).
-  const deepDive = goesDeep(process.deepDiveDecision)
-    ? await (async () => {
-        const plan = await loadPlan(workspaceId);
-        const row = (await loadPriorityRows(workspaceId, plan.weights)).find((r) => r.id === processId);
-        return row ? { decision: process.deepDiveDecision as Decision, rank: row.rank, done: row.progress.done, total: row.progress.total } : null;
-      })()
-    : null;
   const today = new Date();
   const overdue = isOverdueForReview(process.lifecycleStatus, process.nextReviewDue, today);
   const covered = new Set(controls.filter((c) => c.control && c.stepId).map((c) => c.stepId));
@@ -116,93 +102,8 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
   const revisions = (process.sopRevisions as unknown as Revision[]) ?? [];
 
   return (
-    <main className="mx-auto w-full max-w-[1600px] px-6 py-8">
-      <div className="mx-auto w-full max-w-4xl">
-        {process.parentProcess && (
-          <div className="mb-1 text-xs text-slate-500">
-            {process.parentProcess.code} · {process.parentProcess.name} <span className="mx-1">/</span>
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-semibold text-slate-900">{process.name}</h1>
-          <span className="rounded-md bg-indigo-50 px-2 py-0.5 font-mono text-xs font-bold text-indigo-700">
-            {process.code}
-          </span>
-          <span
-            className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
-              overdue ? "bg-rose-50 text-rose-700" : "bg-slate-100 text-slate-700"
-            }`}
-          >
-            {overdue ? "Review overdue" : STATUS_LABEL[process.lifecycleStatus]}
-          </span>
-          {deepDive && (
-            <Link
-              href={`/${workspaceId}/processes/priorities?step=plan`}
-              title="Why this process is being taken deep, and how far it has got"
-              className="rounded-md border border-amber-500 bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-800 hover:bg-amber-100"
-            >
-              {DECISION_LABEL[deepDive.decision]}
-              {deepDive.rank ? ` · rank ${deepDive.rank}` : ""} · deep dive {deepDive.done} of {deepDive.total}
-            </Link>
-          )}
-        </div>
-        <p className="mt-1 mb-4 text-sm text-slate-500">
-          {process._count.steps} step(s) ·{" "}
-          <Link href={`${base}/map`} className="font-semibold text-slate-700 hover:text-slate-900">
-            Open process map →
-          </Link>{" "}
-          ·{" "}
-          <Link href={`${base}/raci`} className="font-semibold text-slate-700 hover:text-slate-900">
-            RACI →
-          </Link>{" "}
-          ·{" "}
-          <Link href={`${base}/review`} className="font-semibold text-slate-700 hover:text-slate-900">
-            AI review →
-          </Link>
-        </p>
-
-        <ProcessStepper workspaceId={workspaceId} processId={processId} {...stepperCounts} />
-        <ProcessTabs workspaceId={workspaceId} processId={processId} active={tab} />
-
-        {tab === "overview" && (
-          <>
-            <Card title="Purpose">
-              <p className="text-sm text-slate-700">{process.processPurpose || "No purpose recorded yet."}</p>
-            </Card>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Card title="In scope">
-                <List items={process.inScope} />
-              </Card>
-              <Card title="Out of scope">
-                <List items={process.outOfScope} />
-              </Card>
-            </div>
-            <Card title="Measures">
-              {kpis.length === 0 ? (
-                <p className="text-sm text-slate-500">No measures recorded yet.</p>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead className="text-start text-xs text-slate-500">
-                    <tr>
-                      <th className="py-1 text-start">Metric</th>
-                      <th className="py-1 text-start">Target</th>
-                      <th className="py-1 text-start">Frequency</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {kpis.map((k, i) => (
-                      <tr key={i} className="border-t border-slate-100">
-                        <td className="py-1">{k.metric}</td>
-                        <td className="py-1">{k.target}</td>
-                        <td className="py-1">{k.frequency}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </Card>
-          </>
-        )}
+    <main className="w-full">
+      <div className="w-full">
 
         {tab === "lifecycle" && (
           <>
@@ -389,6 +290,30 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
         )}
         {tab === "quality" && (
           <>
+            <Card title="Measures">
+              {kpis.length === 0 ? (
+                <p className="text-sm text-slate-500">No measures recorded yet.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="text-start text-xs text-slate-500">
+                    <tr>
+                      <th className="py-1 text-start">Metric</th>
+                      <th className="py-1 text-start">Target</th>
+                      <th className="py-1 text-start">Frequency</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {kpis.map((k, i) => (
+                      <tr key={i} className="border-t border-slate-100">
+                        <td className="py-1">{k.metric}</td>
+                        <td className="py-1">{k.target}</td>
+                        <td className="py-1">{k.frequency}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </Card>
             <div className="mb-4 grid grid-cols-3 gap-3 text-sm">
               <div className="rounded-xl border border-slate-200 bg-white p-3">
                 <div className="text-xs text-slate-500">Open non-conformances</div>
@@ -430,16 +355,9 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
             </Card>
           </>
         )}
-        {tab === "people" && <Empty>Who reads and acknowledges this process is not recorded yet.</Empty>}
-        {tab === "compliance" && <Empty>Compliance coverage is not recorded yet for this process.</Empty>}
-        {tab === "connections" && (
-          <Empty>
-            Connections to pillars, Tracker actions and systems are not recorded yet. The step-level hand-overs
-            live on the{" "}
-            <Link href={`${base}/map`} className="font-semibold underline">
-              process map
-            </Link>
-            .
+        {(tab === "people" || tab === "compliance" || tab === "connections") && (
+          <Empty title={bp.nothingTitle}>
+            {bp.desc[tab]} {bp.nothingNote}
           </Empty>
         )}
       </div>

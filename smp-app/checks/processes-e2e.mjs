@@ -166,22 +166,26 @@ check(/Review Cycle Every 12 months · next \d{4}-\d{2}-\d{2}/.test(rp), "…and
 const rd1 = await report(P1);
 check(/Status Draft/.test(rd1) && /Version —/.test(rd1) && /Approved By —/.test(rd1), "a draft says Draft and shows dashes, not an invented version", (rd1.match(/Document ID.{0,260}/) || [rd1.slice(0, 200)])[0]);
 
-/* ── 1b · moving in and out of every part of a process ── */
-const nav = async (pg, path) => { await pg.goto(BASE + "/" + S + "/processes/processes/" + P2 + path, { waitUntil: "networkidle" }); return pg.$$eval("nav[aria-label='Process sections'] a", (a) => a.map((x) => x.textContent)); };
+/* ── 1b · moving in and out of every part of a process: the builder page's menu of sections (spec 067 §4.3) ── */
+const nav = async (pg, path) => { await pg.goto(BASE + "/" + S + "/processes/processes/" + P2 + path, { waitUntil: "networkidle" }); return pg.$$eval("nav[aria-label='Process sections'] a", (a) => a.map((x) => x.textContent.trim())); };
+const current = (pg) => pg.$$eval("nav[aria-label='Process sections'] a[aria-current=page]", (a) => a.map((x) => x.textContent.trim()));
 const onMap = await nav(A.page, "/map");
-check(onMap.length === 7 && onMap[0] === "Overview" && onMap.includes("Risks & controls") && onMap.includes("People"), "the Process Map page shows the process's own tabs", JSON.stringify(onMap));
-for (const pth of ["/raci", "/authority", "/review"]) check((await nav(A.page, pth)).length === 0, "…and " + pth.slice(1) + " does not", pth);
-const stepHref = await A.page.$eval("a[aria-label^='Process —']", (a) => a.getAttribute("href")).catch(() => null);
-check(stepHref === "/" + S + "/processes/processes/" + P2, "the strip's Process button goes to this process's own page, not the list", stepHref);
+check(onMap.length === 10 && onMap[0] === "Map" && onMap.includes("Risks & controls") && onMap.includes("People") && /^Check with AI/.test(onMap[9]), "the Process Map page shows the builder's menu of the process's ten sections", JSON.stringify(onMap));
+for (const [pth, label] of [["/raci", "RACI"], ["/authority", "Authority"], ["/review", "Check with AI"]]) {
+  const items = await nav(A.page, pth), on = await current(A.page);
+  check(items.length === 10 && on.length === 1 && on[0].startsWith(label), "…and " + pth.slice(1) + " carries the same menu, with " + label + " marked", JSON.stringify(on));
+}
+const mapHref = await A.page.$eval("nav[aria-label='Process sections'] a:has-text('Map')", (a) => a.getAttribute("href")).catch(() => null);
+check(mapHref === "/" + S + "/processes/processes/" + P2 + "/map", "the menu's Map goes to this process's own map, not the list", mapHref);
 const onPage = await nav(A.page, "");
-check(onPage.length === 7 && !!(await A.page.$("a[aria-label^='Process Map']")), "the process page carries the same strip as the others");
+check(new URL(A.page.url()).pathname.endsWith("/" + P2 + "/map") && onPage.length === 10, "the process's own address opens the builder on its Map", A.page.url());
 await nav(A.page, "/map");
 await A.page.click("nav[aria-label='Process sections'] >> text=Risks & controls");
 await A.page.waitForURL(/tab=risks/, { timeout: 20000 });
 check(/Risks & controls/.test(await body(A.page)), "from the map into Risks & controls");
-await A.page.click("a[aria-label^='Process Map']");
+await A.page.click("nav[aria-label='Process sections'] a:has-text('Map')");
 await A.page.waitForURL(/\/map$/, { timeout: 20000 });
-check(true, "…and back to the map from the strip");
+check(true, "…and back to the map from the menu");
 
 /* ── 2 · staff: read and acknowledge ── */
 const list = await T.get("/" + S + "/processes/read");

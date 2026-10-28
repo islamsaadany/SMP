@@ -40,6 +40,7 @@
    trusted, because a module marked built with nothing to draw is precisely the
    door onto the wrong room that flag exists to stop (§61). */
 import type { ModuleKey } from "../lib/modules.ts";
+import type { Category } from "../lib/library.ts";
 import { serve as strategy } from "./strategy/index.ts";
 import { serve as portfolio } from "./portfolio/index.ts";
 import { serve as insights } from "./insights/index.ts";
@@ -62,6 +63,13 @@ export type ServeArgs = {
      what a switcher may list — a module shut to somebody by its address is
      not offered to them either (spec 056 §6.4). */
   have: ModuleKey[];
+  /* THE INSIGHTS TAB'S CATEGORIES, READ BY THE ROUTE (§668) in the one
+     transaction it opens per document (lib/library-viewer.ts libraryStampOn,
+     the same rule libraryStampFor answers). A module that draws the tab
+     takes this rather than asking a second time; `undefined` means the
+     route did not read it (the checks drive a module on its own), and the
+     module asks as it did. */
+  library?: Category[] | null;
   /* The path INSIDE the module, the module's word already taken off. */
   rest: string[];
   /* WHO IS LOOKING, as the door answered it. `personKey` is their row on THIS

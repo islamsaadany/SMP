@@ -19,7 +19,7 @@ import crypto from "node:crypto";
 import type { SessionUser } from "./auth.ts";
 import { hashPassword } from "./auth.ts";
 import { resolveTenant, seatAt, type Tenant, type Membership } from "./door.ts";
-import { withTenant } from "./tenant.ts";
+import { withTenant, mapLimit } from "./tenant.ts";
 import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
 import * as LIB from "./library.ts";
@@ -127,7 +127,14 @@ async function logAct(c: Q, who: Account, on: ClientRow | Tenant | null, what: s
   } catch (e) { console.error("[platform] recording " + what + ":", (e as Error).message); }
 }
 
-/* What a card says — every number read, never stored (constitution V). */
+/* What a card says — every number read, never stored (constitution V).
+   ONE TRANSACTION PER CLIENT (§668): this opened three — the counts, then
+   the graph for the module marks, then the library rows — one after the
+   other, for every client on the page, and the page waited for them all in
+   turn. The same reads, on one connection, in the same order; and the
+   console asks a few clients at once (mapLimit, below) rather than one at a
+   time. What a card says did not change. */
+const CLIENTS_AT_ONCE = 4;
 async function factsFor(t: ClientRow) {
   try {
     return await withTenant(t.id, async (c) => {
@@ -141,8 +148,7 @@ async function factsFor(t: ClientRow) {
       const top = process.env.SMP_BREAK === "company-plan-unseen" ? 0 : Number((await c.query(
         "SELECT CASE WHEN jsonb_typeof(extra->'items') = 'array' THEN jsonb_array_length(extra->'items') ELSE 0 END AS n FROM org")).rows[0]?.n || 0);
       const cyc = (await c.query("SELECT name, locked FROM cycle")).rows[0] || null;
-      return { units, planned: pillars + top > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
-    }).then(async (f) => {
+      const f = { units, planned: pillars + top > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
       /* the facts a module's MARK is made of (§368) — read through the ONE
          reader that also serves the Landing line page's preview, as somebody
          who sees everything, which the console is.
@@ -151,7 +157,7 @@ async function factsFor(t: ClientRow) {
          reader is the quietest kind of fault (§294.2). `landingFactsFor`
          still returns them for its other caller, the Setup page's stamp. */
       const have = modulesFor(t.modules);
-      const { facts } = await landingFactsFor(t.id, have, { place: null, seesAll: true });
+      const { facts } = await landingFactsFor(t.id, have, { place: null, seesAll: true }, await readState(c), c);
       return { ...f, landing: facts };
     });
   } catch (e) {
@@ -187,9 +193,9 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const cards = [];
     /* the Tracker row's mark is YOUR open actions there (§400) — read once
        for every client through the same reader My work uses */
-    const work = await myWork(shown, world.mine, account.email);
-    for (const row of shown) {
-      const facts = await factsFor(row);
+    const [work, factsAll] = await Promise.all([myWork(shown, world.mine, account.email), mapLimit(shown, CLIENTS_AT_ONCE, factsFor)]);
+    for (let i = 0; i < shown.length; i++) {
+      const row = shown[i], facts = factsAll[i];
       /* `square` is what Home's small square draws (§629): the client's own
          icon, else its mark if the mark is not wide, else nothing — and
          nothing means initials. Worked out here, by the same rule the Brand

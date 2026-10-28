@@ -70242,3 +70242,38 @@ Islam: *"yes fix the tracker check"*. Found at §658–§666's merge: `npm run c
 **Checked**: `npm run check:tracker` **343 / 0**, to the end (before: 248 and died). `npm run check:tracker:red`: all **32** breaks red, none not red.
 
 **§667 MERGED TO `main`, 2026-10-28, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §658–§666 went in. Only a check file and the two records changed, so Vercel's build serves the same app, the release stamp does not move (§397), there are no migrations, and nobody is signed out.
+
+## §668 — A page reads its client once; the console reads a few clients at once (2026-10-28)
+
+Islam: *"The platform pages are taking too long to load while we already applied multiple tactics to ensure smooth movement across the platform … please do a thorough check if anything was added that slowed down that transitions"*, then *"ok check the regions first then do 1 and 2"*.
+
+**WHAT THE SWEEP FOUND, before anything was proposed.** Nothing merged since §620 (24 Oct) slowed the pages: the only change on a page's own path since then is §650.1's one `workEnded` query on the Clients list, which is one indexed read. The top bars (option D), the 80% zoom, the Track Record and the Copilot rounds touch nothing a page waits on. §620's practice — the press drawing, the saved copy, the stamped addresses — makes the PRESS instant and `checks/instant-nav.mjs` asserts exactly that (something within 150ms), never when the real page lands; so the check stays green while the real page gets slower. The time is structural and was there before:
+
+- **Every document (a module, a client, Setup) ran a chain of serial transactions before any HTML left**: the gate (`mayOpenModule`, the whole graph for a client's own person), the switcher (`openableModules`, the whole graph AGAIN for the same person; the copilot grant for the office), on a Setup document the landing stamp (the graph a third time, then the library rows) and the library stamp (the place, then the categories). Each `withTenant` is connect · BEGIN · set_config · the reads · COMMIT. Counted from the code: the office opened Strategy through 2–3 transactions, a client's own person through 4–5, with the graph read twice.
+- **The console walked every client one at a time**: for each, `myWork` (a transaction), `factsFor` (a transaction of four counts) then `landingFactsFor` (a transaction reading the whole graph for the card's module marks, §368, then a transaction for the library rows) — four transactions per client, serially, and Home runs the My work walk a second time beside it. §620's 1.9 s to the console's latest was measured with ONE client; every client added the same again.
+- **The regions are not the problem.** The functions answer from `iad1` (Washington, read off `x-vercel-id` on the live site); a page that does one database read answers in 190–230 ms against 160–200 ms for one that does none, so a round trip to the database is about 20–40 ms warm — close by. What costs is how many are made in a row.
+- **Each release re-stamps the 5.3 MB script** (1.8 MB compressed) and the 0.9 MB stylesheet, so the first visit after each of the ~10 releases in the last three days downloaded them again. Recorded, not changed here (§620 already said so).
+
+**WHAT CHANGED (options 1 and 2 of four put to Islam, with the drawbacks of each; the regions checked first at his word).**
+
+1. **A document reads its tenant ONCE** (`app/(platform)/[slug]/[...rest]/route.ts`). One `withTenant` per document; `lib/access.ts onTenant(c)` is that connection with the graph read at most once on it and shared — `mayOpenModuleOn`, `openableModulesOn`, `landingStampFor(…, on)` (`lib/landing.ts`, which hands the graph and the connection on to `landingFactsFor`) and `libraryStampOn` (`lib/library-viewer.ts`, with `viewerOn`) all read on it. The library's categories are asked LAST, because that read is caught (`[]`) and a statement that fails inside a transaction fails what follows it. The route hands the categories to the module through `ServeArgs.library` (`modules/registry.ts`); Strategy takes them rather than asking again (`modules/strategy/index.ts`), and asks as before when the checks drive it alone (`undefined`). **The rules did not move**: the same functions decide, handed a connection instead of a tenant id; `mayOpenModule` and `openableModules` keep their old shape through `offTenant` (each read its own transaction) for the client's bare address and the console. `checks/modules.mjs` §4's text check learns the gate's new spelling (`mayOpenModuleOn`), the property it asserts unchanged.
+2. **The console reads each client in ONE transaction and a few clients at once** (`lib/platform-api.ts factsFor`: the counts, the graph and the library rows on one connection, in the same order; `lib/tenant.ts mapLimit`, four at a time, answers in the clients' order, each client's failure caught as before). `myWork` walks the same way (`lib/my-work.ts`, four at a time, rows in order), and the cards' two walks run beside each other. **What a card says did not change** — the marks are the same reads of the same rows.
+
+**NOT DONE, said so**: `/api/state`'s own read (the office row's transaction, then the graph's) is still two transactions per page boot; `/api/platform` *clients* is still asked by every document for the trail; the pollers (§588's peek, the chat, the version check) still repeat the sign-in lookups. Each is smaller than what this removes and each is its own decision.
+
+**Screen and reads only**: nothing stored changes, no migration, no rule about who may open or save what changes (the same functions answer), so no forced sign-out (spec 029). Server code only: the built files and the release stamp do not move, and the reload banner rightly stays quiet (§397's one case).
+
+**MEASURED, on the built app against a local database with the worked example holding all seven modules, statements and transactions read off the database's own log (`log_statement=all`, sentinel queries around each request), median of five.** Before (main's own build at 706ec67):
+
+| request | statements | transactions |
+|---|---|---|
+| the office opens Strategy | 12 | 2 |
+| the office opens the Internal Tracker | 21 | 3 |
+| the office opens the client's Setup | 20 | 4 |
+| a client's own person opens Strategy | 34 | 3 |
+| the console's cards (two clients) | 46 | 8 |
+| the console's My work (two clients) | 16 | 2 |
+
+The whole-graph read is ONE line in that log (its 33 selects go as one statement), so "statements" understates it. The after figures are taken on the changed build and recorded in the next commit, with the shell check re-run on main's own build for the ten reds below.
+
+**CHECKED** on this tree: `npm run typecheck` reports only main's own three (`PageProps`/`LayoutProps` on the Processes report pages, Next's generated types, identical before the change); `npm run build` clean; `checks/modules.mjs` **234 / 0**; `checks/memory-api.mjs` **36 / 0**; `checks/instant-nav.mjs` **19 / 0** (the press still shows the next page's shape within 150 ms everywhere); `checks/door-landing.mjs` **136 / 5**, main's own five (the owner row's Insights eye, recorded as main's at §622 and since); `checks/shell.mjs` **503 / 10** — *the client's settings draw the Copilot row with its switch* is main's (proved at §622.2), the other nine are the Copilot chat's layout measurements (the box's line height, the rail strip, the to-do column's scroll), which this change draws nothing of; their run on main's own build is in progress and is recorded in the next commit rather than assumed (§303).

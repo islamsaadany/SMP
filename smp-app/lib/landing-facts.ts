@@ -11,6 +11,7 @@
    number. The console reads as somebody who sees everything, which is what
    the console is. A half that cannot be read is null, never nought (§35). */
 import { createRequire } from "node:module";
+import type { PoolClient } from "pg";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import { listItems, type Viewer } from "./library.ts";
@@ -30,15 +31,21 @@ export function picksOf(graph: any): Record<string, string> {
   return out;
 }
 
-export async function landingFactsFor(tenantId: string, have: readonly ModuleKey[], viewer: Viewer, graph?: any): Promise<{ facts: LandingFacts; picks: Record<string, string> }> {
-  const g = graph === undefined ? await withTenant(tenantId, (c) => readState(c)) : graph;
+/* `on` (§668): a connection the caller already holds inside its own
+   transaction — the graph (when none is handed in) and the library rows are
+   read on it rather than each opening a transaction. Without it, as before.
+   The library read is the last statement either way, so a failure there
+   (caught, a null half) fails nothing the caller asks after it. */
+export async function landingFactsFor(tenantId: string, have: readonly ModuleKey[], viewer: Viewer, graph?: any, on?: PoolClient): Promise<{ facts: LandingFacts; picks: Record<string, string> }> {
+  const g = graph !== undefined ? graph : on ? await readState(on) : await withTenant(tenantId, (c) => readState(c));
   const facts: LandingFacts = { ...NO_FACTS };
   if (g) {
     try { Object.assign(facts, frozen.landingFacts(g)); } catch (e) { console.error("landing facts:", (e as Error).message); }
   }
   if (have.includes("insights")) {
     try {
-      const rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, viewer }));
+      const ask = { kind: "insights" as const, forClient: true, viewer };
+      const rows = on ? await listItems(on, ask) : await withTenant(tenantId, (c) => listItems(c, ask));
       const now = new Date(), y = now.getUTCFullYear(), m = now.getUTCMonth();
       const dated = rows.filter((r) => r.publishedAt);
       facts.newReports = dated.filter((r) => { const d = new Date(r.publishedAt); return d.getUTCFullYear() === y && d.getUTCMonth() === m; }).length;

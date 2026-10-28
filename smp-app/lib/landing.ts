@@ -11,7 +11,8 @@
    a door's address (doorHref), which the checks read. */
 import { clientHref, DEFAULT_MODULE, MODULE_DEF, modulesFor, isModule, type ModuleKey } from "./modules.ts";
 import { landingFactsFor } from "./landing-facts.ts";
-import { viewerFor } from "./library-viewer.ts";
+import { viewerFor, viewerOn } from "./library-viewer.ts";
+import type { OnTenant } from "./access.ts";
 
 export type Door = { target?: string; tab?: string; report?: boolean; setup?: string };
 
@@ -23,9 +24,15 @@ export type Door = { target?: string; tab?: string; report?: boolean; setup?: st
    sentence's TEXT is computed by the one reader on the server, so the page's
    preview is that reader's answer and never a second one (§53.5). */
 export type LandingStamp = { module: ModuleKey; pick: string; lines: { key: string; label: string; example: string; text: string }[] };
-export async function landingStampFor(tenantId: string, module: string, seat: string | null | undefined, personKey: string | null | undefined, stored: unknown): Promise<LandingStamp | null> {
+export async function landingStampFor(tenantId: string, module: string, seat: string | null | undefined, personKey: string | null | undefined, stored: unknown,
+                                      /* the route's own connection and graph (§668), so a Setup
+                                         document reads its tenant once; absent, as before */
+                                      on?: OnTenant): Promise<LandingStamp | null> {
   if (!isModule(module)) return null;
-  const { facts, picks } = await landingFactsFor(tenantId, modulesFor(stored), await viewerFor(tenantId, seat, personKey));
+  const viewer = on && on.c ? await viewerOn(on.c, seat, personKey) : await viewerFor(tenantId, seat, personKey);
+  const { facts, picks } = on && on.c
+    ? await landingFactsFor(tenantId, modulesFor(stored), viewer, await on.graph(), on.c)
+    : await landingFactsFor(tenantId, modulesFor(stored), viewer);
   return {
     module,
     pick: picks[module] || "",

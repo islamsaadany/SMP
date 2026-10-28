@@ -54,16 +54,18 @@ h2{font-size:18px;margin:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:760px){.grid2{grid-template-columns:1fr}}
 table{border-collapse:collapse;width:100%;table-layout:fixed}
-th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:center;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:center;vertical-align:middle;font-size:12.5px}
 thead th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;background:var(--nav);color:var(--navink)}
 th[scope=row]{text-align:left;color:var(--ink)}
 .tick{display:inline-block;width:16px;height:16px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
 .gridwrap{width:300px;max-width:100%;margin:10px 14px;overflow:hidden;border:1px solid var(--line)}
 .g-before thead th{white-space:nowrap}
 .g-before th[scope=row]{width:36px;word-break:break-all;letter-spacing:.2em;line-height:1.25}
-.g-after thead th{white-space:normal;line-height:1.2;vertical-align:bottom;padding:5px 3px}
-.g-after th[scope=row]{white-space:nowrap;width:70px}
-.g-after td{min-width:44px}
+.g-after{table-layout:auto}
+.g-after thead th{white-space:normal;line-height:1.2;vertical-align:middle;text-align:center;padding:5px 4px}
+.g-after th[scope=row]{white-space:nowrap}
+.g-after td{min-width:48px}
+.gridwrap.wide{width:380px}
 .foot{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;max-width:80ch}
 @media (prefers-reduced-motion:no-preference){.col{transition:width .25s}}
 </style>
@@ -75,8 +77,8 @@ th[scope=row]{text-align:left;color:var(--ink)}
 
   <div class="rules">
     <div class="rule"><b>First the chat yields</b>It shrinks from its 760px default toward 420px before the work beside it goes under 480px. Today the work goes down to 360px while the chat keeps 760.</div>
-    <div class="rule"><b><span class="k">1</span>The to-do folds</b>to its button in the chat's head (<i>To-do 2/5</i>) and opens as a sheet. Smallest and least needed while working.</div>
-    <div class="rule"><b><span class="k">2</span>The rail folds</b>to its 24px strip, as the button does today. Second, so the chat's name stays in view as long as it can (§653).</div>
+    <div class="rule"><b><span class="k">1</span>The rail folds</b>to its 24px strip, as its button does today, the moment three columns no longer fit beside it. First, as you asked.</div>
+    <div class="rule"><b><span class="k">2</span>The to-do folds</b>to its button in the chat's head (<i>To-do 2/5</i>) and opens as a sheet. Smallest and least needed while working.</div>
     <div class="rule"><b><span class="k">3</span>The work pane</b>becomes a sheet behind <i>View the SWOT</i> (§642, unchanged), only when two columns no longer fit.</div>
   </div>
 
@@ -99,10 +101,10 @@ th[scope=row]{text-align:left;color:var(--ink)}
         <tr><th scope="row">Micro · competition</th><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td></tr></tbody></table></div>
       <div class="note">The four column names refuse to wrap, so the row-name column is the one that gives: 36px, and <b>Internal</b> falls apart letter by letter.</div></div>
     <div class="frame"><div class="fh"><b>After</b><span class="tag after">§668</span></div>
-      <div class="gridwrap"><table class="g-after"><thead><tr><th></th><th>Guided questions</th><th>Template</th><th>Ready reports</th><th>Deep research</th></tr></thead>
+      <div class="gridwrap wide"><table class="g-after"><thead><tr><th></th><th>Guided questions</th><th>Template</th><th>Ready reports</th><th>Deep research</th></tr></thead>
         <tbody><tr><th scope="row">Internal</th><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td><td>—</td></tr>
         <tr><th scope="row">Micro · competition</th><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td></tr></tbody></table></div>
-      <div class="note">Row names never break; column names take two lines at most; a tick cell keeps 64px. The grid has a floor of 440px and scrolls inside the chat only when there is truly no room.</div></div>
+      <div class="note">Row names never break; column names take two lines at most, centred in their cell both ways; a tick cell keeps 64px. The grid has a floor of 440px and scrolls inside the chat only when there is truly no room.</div></div>
   </div>
 
   <div class="foot"><b>What stays the same.</b> The rail's own button still folds and keeps your choice across visits. Below 760px nothing changes from §642: both the work and the to-do wait behind two buttons. The chat never goes under 420px and can still be dragged wider with the grip. The same rule serves the Foundation, the SWOT and Competitive Discipline, and the Directions, Execution and Advisory splits will inherit it.</div>
@@ -115,7 +117,7 @@ th[scope=row]{text-align:left;color:var(--ink)}
     return W >= 1120 ? 3 : W >= 900 ? 2 : 1;
   }
   function calc(before, win){
-    var pane = win, railShut = pane < (before ? 1240 : 1130), rail = railShut ? 24 : RAIL;
+    var pane = win, railShut = pane < (before ? 1240 : 1344), rail = railShut ? 24 : RAIL;
     var W = pane - rail - GAP - PAD, lv = level(before, W), chat, work = 0, todo = 0;
     if (lv === 3) { chat = Math.min(CHATW, Math.max(420, W - (before ? 580 : 700))); todo = TODO; work = W - chat - GRIP - todo; }
     else if (lv === 2) { chat = Math.min(CHATW, Math.max(420, W - 492)); work = W - chat - GRIP; }
@@ -144,8 +146,8 @@ th[scope=row]{text-align:left;color:var(--ink)}
       var note;
       if (x[1]) note = c.lv === 3 && c.work < 480 ? 'The chat keeps <b>' + c.chat + 'px</b> and the work pane is squeezed to <b>' + c.work + 'px</b>: the SWOT letters in a 2 × 2 grid at half their width, the methods grid broken. Nothing folded, because 1240 and 1000 were not crossed.'
         : c.lv === 1 ? 'Both the work and the to-do go behind buttons at once, under 1000px of Copilot.' : 'Room enough: three columns, the chat at its default.';
-      else note = c.lv === 3 ? (c.chat < CHATW ? 'The chat has yielded to <b>' + c.chat + 'px</b> so the work keeps <b>' + c.work + 'px</b>; the to-do still stands.' : 'Room enough: three columns, the chat at its default.')
-        : c.lv === 2 ? 'The to-do has folded to its button; the chat <b>' + c.chat + 'px</b>, the work <b>' + c.work + 'px</b>' + (c.railShut ? '; the rail has folded too, after the to-do.' : '; the rail stays open, the chat’s name in view.')
+      else note = c.lv === 3 ? (c.railShut ? 'The rail has folded first; the three columns still stand, the chat yielded to <b>' + c.chat + 'px</b>, the work <b>' + c.work + 'px</b>.' : c.chat < CHATW ? 'The chat has yielded to <b>' + c.chat + 'px</b> so the work keeps <b>' + c.work + 'px</b>; the to-do still stands.' : 'Room enough: three columns, the chat at its default.')
+        : c.lv === 2 ? 'The rail folded first; now the to-do has folded to its button too; the chat <b>' + c.chat + 'px</b>, the work <b>' + c.work + 'px</b>.'
         : 'Under 900px of Copilot the work pane becomes a sheet, as §642 had it under 1000.';
       document.getElementById(x[0] + 'note').innerHTML = note;
     });

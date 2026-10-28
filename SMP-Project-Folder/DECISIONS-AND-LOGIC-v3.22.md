@@ -70243,6 +70243,8 @@ Islam: *"yes fix the tracker check"*. Found at §658–§666's merge: `npm run c
 
 **§667 MERGED TO `main`, 2026-10-28, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §658–§666 went in. Only a check file and the two records changed, so Vercel's build serves the same app, the release stamp does not move (§397), there are no migrations, and nobody is signed out.
 
+**§654 BATCH 3 MERGED TO `main`** 2026-10-28, Islam: *"merge first then go"*. `main` had taken §655–§667 (the Processes rethink, Reports to) meanwhile; merged in first, the records joined, the builds rebuilt on the merged tree and both suites run there — **346 passed, 0 failed**; **503 ok, 10 failed**, the known ten — then `0e2f01d..706ec67`.
+
 ## §668 — The Copilot squeezed: what gives way, in order (2026-10-28)
 
 **THE FINDING** (Islam's screenshot of a SWOT at a squeezed window: *"the table is damaged, and nothing was collapsed as we agreed earlier … didn't we have a rule for that?"*). There was a rule (§642, §653) and it measured "enough room": the rail folded only under 1240px of pane, the to-do and the work pane went behind buttons only under 1000px of Copilot, and the window sat just above both. Within that room the chat kept its 760px default while the work beside it was allowed down to 360px — so the SWOT pane got half its width and the chat more than it needed. Inside the chat the methods grid broke on its own: four one-line capital column names refused to wrap, so the row-name column was the one that gave, down to about 40px, and *Internal* fell apart letter by letter.

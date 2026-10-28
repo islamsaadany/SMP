@@ -42,6 +42,7 @@
      SMP_BREAK=keep-picks     node checks/tracker.mjs   # must go red (§567)
      SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§623.3)
      SMP_BREAK=add-at-top     node checks/tracker.mjs   # must go red (§656)
+     SMP_BREAK=progress-anyone node checks/tracker.mjs  # must go red (§657)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -72,6 +73,7 @@ import {
   lateWord, readableDay, weekLabel, inView, summary, mayChange, shape, oneLine, shortNames, todayIn, thursdayOf, weekNumber, weekWord, weekOptions, weekDays, sameWeek,
   CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay,
   officeRows, listActions, oneAction, addAction, addTopic, listTopics, deleteTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
+  progressOf, addProgress, latestProgress, mayChangeProgress,
 } from "../lib/tracker.ts";
 import { registerNames } from "../lib/people.ts";
 
@@ -320,7 +322,7 @@ const dRows = [
 ].map((a, i) => ({ ...a, topicId: i === 3 ? "t3" : "t1" }));
 const dLoaded = {
   office: [{ key: "islam", name: "Islam Saadany" }], names: new Map([["islam", "Islam Saadany"]]),
-  short: new Map([["islam", "Islam"]]), actions: dRows, events: [], open: null, topics: dTopics,
+  short: new Map([["islam", "Islam"]]), actions: dRows, events: [], open: null, topics: dTopics, progress: [], latest: new Map(),
 };
 const draw = (view) => listBody(dLoaded, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
   ask: { view, q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY);
@@ -402,6 +404,56 @@ check("the page's own line at the top still stands, once, on both groupings — 
   count(byTopicAll, /id="add"/g) === 1 && count(byOwnerAll, /id="add"/g) === 1);
 check("the weekly check's lines are untouched: next week, standing, the topic fixed, named the same way",
   count(chk, /class="addrow chk" data-due="2026-09-24" data-owner="islam" data-topic="t1" data-line="t:t1">/g) === 1 && !/data-line="t:t1" hidden/.test(chk));
+
+/* ══ §2e · DESCRIPTION, PROGRESS AND THE HISTORY BEHIND A LINK (§657), drawn
+   Islam: "the notes needs to be a description, and we need to have a progress
+   input box per task so we input what happened in this task on weekly basis",
+   the history "opened in a different way". Drawn with no database from one
+   Loaded that holds two entries on row p — one Islam's, one Noran's — and is
+   opened on p, looked at as Islam: his entry carries Edit and Delete, hers
+   does not; the latest line reads under the row; the check's this-week rows
+   carry the box and last week's do not. The progress-anyone break hands
+   every entry to anybody and must redden the Edit/Delete assertion. */
+section("§2e · the task's details — Description, Progress, the history behind a link");
+const pEntries = [
+  { id: "e2", actionId: "p", body: "Finance sent four of six cost centres.", by: "noran", at: "2026-09-14T12:05:00Z", editedAt: null },
+  { id: "e1", actionId: "p", body: "Template agreed with Ahmed.", by: "islam", at: "2026-09-07T09:00:00Z", editedAt: "2026-09-08T09:00:00Z" },
+];
+const pLoaded = { ...dLoaded, names: new Map([["islam", "Islam Saadany"], ["noran", "Noran Essam"]]), short: new Map([["islam", "Islam"], ["noran", "Noran"]]),
+  open: "p", progress: pEntries, latest: new Map([["p", pEntries[0]]]),
+  events: [
+    { kind: "due", from: null, to: null, by: "islam", at: "2026-09-10T10:00:00Z", detail: { from: "2026-09-10", to: "2026-09-17" } },
+    { kind: "owner", from: null, to: null, by: "islam", at: "2026-09-09T10:00:00Z", detail: { from: "noran", to: "islam" } },
+    { kind: "created", from: null, to: "not_started", by: "noran", at: "2026-09-01T10:00:00Z", detail: { owner: "noran", due: "2026-09-10", topic: "t1" } },
+  ] };
+const pDraw = (view) => listBody(pLoaded, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
+  ask: { view, q: "", open: "p", group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
+const pOpen = pDraw("all"), pChk = pDraw("check");
+const openPart = (pOpen.match(/<div class="open" data-id="p">[\s\S]*?<\/ul><\/div><\/div>/) || [""])[0];
+check("the opened row says Description where Notes was, the same stored text in a box that fits it, and the word Notes is gone",
+  /<p class="lab">Description<\/p><textarea class="desc" data-act="notes" aria-label="Description"/.test(openPart) && !/>Notes</.test(openPart) && /Grows with what you write/.test(openPart));
+check("...and carries ONE progress box with Enter, on the action, above the entries",
+  count(openPart, /class="pnew" data-act="progress-new"/g) === 1 && /class="pbox">[\s\S]*?<ul class="prog">/.test(openPart));
+check("the entries read newest first, the week in front — This week in the alarm's colour, then Last week — the writer's name under each, and the edited one says so",
+  /<li class="pe" data-pid="e2"><span class="wk now" title="[^"]*">This week<\/span>[\s\S]*?Finance sent[\s\S]*?<span>Noran<\/span>[\s\S]*?<li class="pe" data-pid="e1"><span class="wk" title="[^"]*">Last week<\/span>[\s\S]*?Template agreed[\s\S]*?<span>Islam<\/span><span class="ed">edited<\/span>/.test(openPart),
+  (openPart.match(/<li class="pe"[\s\S]*?<\/li>/g) || []).join("\n").slice(0, 600));
+const mineE = (openPart.match(/data-pid="e1">[\s\S]*?<\/li>/) || [""])[0], hersE = (openPart.match(/data-pid="e2">[\s\S]*?<\/li>/) || [""])[0];
+check("Edit and Delete stand on the writer's own entry alone — Islam's carries them, Noran's does not (both ends, §94.2)",
+  /data-act="progress-edit"/.test(mineE) && /data-act="progress-delete-ask"/.test(mineE) && /data-act="progress-delete"/.test(mineE) &&
+  !/data-act="progress-edit"/.test(hersE) && !/data-act="progress-delete/.test(hersE));
+check("the history is behind one link and hidden until it is pressed, and it says the movements — carried to a week, handed to somebody — with what each was before",
+  /<button type="button" class="histlink" data-act="hist" aria-expanded="false">[\s\S]*?History<\/button><ul class="hist" hidden>/.test(openPart) &&
+  /carried to This week \(was W2 Sep\)/.test(openPart) && /handed to Islam Saadany \(was Noran Essam\)/.test(openPart) && /created it, owner Noran Essam, due W2 Sep/.test(openPart),
+  (openPart.match(/<ul class="hist"[\s\S]*?<\/ul>/) || [""])[0].slice(0, 500));
+check("the latest entry reads under the row's name as one quiet line, the week in front, and a row with no progress has no second line",
+  /data-id="p"[\s\S]*?<div class="last" title="[^"]*"><b>This week<\/b> &middot; Finance sent four of six cost centres\.<\/div>/.test(pOpen) && count(pOpen, /class="last"/g) === 1);
+const chk2 = listBody({ ...pLoaded, open: null, progress: [], events: [] }, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
+  ask: { view: "check", q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
+check("...closed again: the box sits under row p (open, this week), none under q (done, last week) nor r (next week)",
+  count(chk2, /<div class="pline" data-id="p">/g) === 1 && !/<div class="pline" data-id="q">/.test(chk2) && !/<div class="pline" data-id="r">/.test(chk2) &&
+  /data-id="p"[\s\S]*?<div class="pline" data-id="p"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened this week\?"/.test(chk2),
+  (chk2.match(/<div class="pline"[^>]*>/g) || []).join(" | "));
+check("...and the opened row on the check has the panel's box and not a second one under it", count(pChk, /class="pnew"/g) === 1 && !/<div class="pline" data-id="p">/.test(pChk));
 
 /* ══ the database ═════════════════════════════════════════════════════ */
 const URL_ = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL || "";
@@ -561,6 +613,21 @@ try {
   const gone = await asTenant(B, (c) => deleteAction(c, b1.id));
   check("an action deletes", gone && (await asTenant(B, (c) => oneAction(c, b1.id))) === null);
   check("...and its history goes with it, never orphaned", (await asTenant(B, (c) => eventsOf(c, b1.id))).length === 0);
+  /* §657: an action's progress goes with it too, and a movement is written
+     into the history with what it was and what it became — only where it
+     moved, and never when a field is set to what it already is. */
+  const b3 = await asTenant(B, (c) => addAction(c, { title: "progress host", ownerKey: "omar", by: "omar", due: "2026-09-17" }));
+  await asTenant(B, (c) => addProgress(c, b3.id, "First entry.", "omar"));
+  await asTenant(B, (c) => setFields(c, b3.id, { due: "2026-09-24" }, "omar"));
+  await asTenant(B, (c) => setFields(c, b3.id, { due: "2026-09-24", title: "progress host" }, "omar"));
+  const b3ev = await asTenant(B, (c) => eventsOf(c, b3.id));
+  check("a carry writes ONE due event with what it was and what it became, and setting the same again writes nothing",
+    b3ev.filter((e) => e.kind === "due").length === 1 && b3ev[0].kind === "due" && b3ev[0].detail.from === "2026-09-17" && b3ev[0].detail.to === "2026-09-24" && b3ev.filter((e) => e.kind === "title").length === 0,
+    JSON.stringify(b3ev));
+  check("...and the creation event remembers the owner and the week it was born with", b3ev[b3ev.length - 1].kind === "created" && b3ev[b3ev.length - 1].detail.owner === "omar" && b3ev[b3ev.length - 1].detail.due === "2026-09-17");
+  check("the latest entry per action is read in one query", (await asTenant(B, (c) => latestProgress(c))).get(b3.id)?.body === "First entry.");
+  await asTenant(B, (c) => deleteAction(c, b3.id));
+  check("deleting the action takes its progress with it", (await asTenant(B, (c) => progressOf(c, b3.id))).length === 0);
 
   /* ══ §8 · the server: the gate, and every act at both ends ══════════ */
   section("§8 · the module's own server — the office in, a client's person out");
@@ -594,6 +661,24 @@ try {
   const tNew = await call(A, NORAN, ["api"], { act: "topic-new", name: "Check topic" });
   check("the SMO team makes a topic, not only the Super user", tNew.status === 200 && !!(tNew.j && tNew.j.topicId), tNew.status + " " + tNew.text.slice(0, 120));
   check("...and deletes it again", tNew.j && (await call(A, NORAN, ["api"], { act: "topic-delete", topicId: tNew.j.topicId })).status === 200);
+  /* PROGRESS IS THE WRITER'S (§657), both ends (§94.2): Noran writes an entry
+     on Islam's action; Islam cannot edit or delete it and is told so; Noran
+     can, and an edit stamps it edited. The progress-anyone break lets Islam
+     through and must redden the refusals. */
+  const host = await asTenant(A, (c) => addAction(c, { title: "progress host", ownerKey: "islam", by: "islam", due: thursdayOf(todayIn()) }));
+  const pAdd = await call(A, NORAN, ["api"], { act: "progress-add", id: host.id, body: "  Finance sent four of six.  " });
+  check("anybody in the office writes progress on anybody's action, and the answer is the list drawn again", pAdd.status === 200 && !!(pAdd.j && pAdd.j.progressId) && /class="pe" data-pid="/.test(pAdd.j.body) === false || (pAdd.status === 200 && typeof pAdd.j.body === "string"), pAdd.status + " " + pAdd.text.slice(0, 160));
+  const pid = pAdd.j && pAdd.j.progressId;
+  check("...stored trimmed, under her name", pid && (await asTenant(A, (c) => progressOf(c, host.id)))[0].body === "Finance sent four of six." && (await asTenant(A, (c) => progressOf(c, host.id)))[0].by === "noran");
+  check("an empty entry is refused in words and writes nothing", (await call(A, NORAN, ["api"], { act: "progress-add", id: host.id, body: "   " })).status === 400 && (await asTenant(A, (c) => progressOf(c, host.id))).length === 1);
+  const pEditOther = await call(A, ISLAM, ["api"], { act: "progress-edit", progressId: pid, body: "rewritten by Islam" });
+  check("Islam — the action's owner and the Super user — cannot edit Noran's entry, and is told whose it is", pEditOther.status === 403 && /wrote a progress entry/.test(pEditOther.text) && (await asTenant(A, (c) => progressOf(c, host.id)))[0].body === "Finance sent four of six.", pEditOther.status + " " + pEditOther.text.slice(0, 120));
+  check("...nor delete it", (await call(A, ISLAM, ["api"], { act: "progress-delete", progressId: pid })).status === 403 && (await asTenant(A, (c) => progressOf(c, host.id))).length === 1);
+  const pEdit = await call(A, NORAN, ["api"], { act: "progress-edit", progressId: pid, body: "Finance sent four of six; Ops' two by Thursday." });
+  check("Noran edits her own, and it is stamped edited", pEdit.status === 200 && (await asTenant(A, (c) => progressOf(c, host.id)))[0].body === "Finance sent four of six; Ops' two by Thursday." && !!(await asTenant(A, (c) => progressOf(c, host.id)))[0].editedAt);
+  check("...and deletes it", (await call(A, NORAN, ["api"], { act: "progress-delete", progressId: pid })).status === 200 && (await asTenant(A, (c) => progressOf(c, host.id))).length === 0);
+  check("an entry no longer there is a 404 in words", (await call(A, NORAN, ["api"], { act: "progress-delete", progressId: pid })).status === 404);
+  await asTenant(A, (c) => deleteAction(c, host.id));
   check("...while a client's own person is refused a topic", (await call(A, HEND, ["api"], { act: "topic-new", name: "sneak" })).status === 403);
   check("somebody with no membership at all is turned away", (await call(A, { personKey: null, seat: null }, [], null)).status === 403);
   const js = await call(A, NORAN, ["app.js"], null);
@@ -718,13 +803,13 @@ try {
   check("a list that could not be read says so, and is not drawn as empty (§35)", /could not be read/.test(noDb) && !/Nothing on the list/.test(noDb) && !/id="add"/.test(noDb));
 
   /* ══ §9 · the catalogue ══════════════════════════════════════════════ */
-  section("§9 · both tables fenced, and not the platform's");
+  section("§9 · the three tables fenced, and not the platform's");
   const cat = await owner(
     "SELECT c.relname, c.relrowsecurity AS rls, c.relforcerowsecurity AS force, pg_get_expr(p.polqual, p.polrelid) AS q " +
     "FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace LEFT JOIN pg_policy p ON p.polrelid = c.oid AND p.polname = 'tenant_rows' " +
-    "WHERE n.nspname = $1 AND c.relname IN ('tracker_actions','tracker_events','library_items')", [SCHEMA]);
+    "WHERE n.nspname = $1 AND c.relname IN ('tracker_actions','tracker_events','tracker_progress','library_items')", [SCHEMA]);
   const by = Object.fromEntries(cat.map((r) => [r.relname, r]));
-  for (const t of ["tracker_actions", "tracker_events"]) {
+  for (const t of ["tracker_actions", "tracker_events", "tracker_progress"]) {
     check(t + " has row-level security switched on and FORCED", by[t] && by[t].rls && by[t].force, JSON.stringify(by[t]));
     check(t + "'s policy is IDENTICAL to library_items' (§94.8)", by[t] && by.library_items && by[t].q === by.library_items.q, by[t] && by[t].q);
     check(t + " is not on the platform's own list (§331)", !PLATFORM_TABLES.includes(t));
@@ -733,6 +818,10 @@ try {
   check("the action row holds exactly what spec 054 §5 says and no more — the collaborators column is GONE (migration 013)",
     cols.map((c) => c.column_name).join(",") === "tenant_id,id,title,description,owner_key,due,first_due,status,done_at,created_by,created_at,updated_at,extra,topic_id",
     cols.map((c) => c.column_name).join(","));
+  const evCols = await owner("SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'tracker_events' ORDER BY ordinal_position", [SCHEMA]);
+  check("the history row carries `detail` for the movements (§657, migration 035)", evCols.map((c) => c.column_name).includes("detail"), evCols.map((c) => c.column_name).join(","));
+  const evKinds = await owner("SELECT pg_get_constraintdef(oid) AS d FROM pg_constraint WHERE conname = 'tracker_event_kind' AND connamespace = (SELECT oid FROM pg_namespace WHERE nspname = $1)", [SCHEMA]);
+  check("...and admits the four movements beside created and status", evKinds.length === 1 && ["due", "owner", "title", "topic"].every((k) => evKinds[0].d.includes("'" + k + "'")), JSON.stringify(evKinds));
 
   /* ══ §10 · the script, driven ═══════════════════════════════════════
      §8 proved the SERVER; nothing above has ever RUN app.js. A script wired
@@ -1186,6 +1275,29 @@ try {
     await pg.locator("#add").focus(); await settle();
     check("leaving the notes box writes the notes", (await asTenant(A, (c) => oneAction(c, born.id))).description === "Ask Facilities first.");
     check("...and the row is still open afterwards, the notes still in the box", (await pg.locator(".open textarea[data-act=notes]").inputValue()) === "Ask Facilities first.");
+    /* PROGRESS, PRESSED (§657): the box on the opened row takes an entry on
+       Enter, read back from Postgres, drawn at the top of the entries with
+       This week in front and under the row's name; the box is empty and under
+       the cursor again; Edit turns it into a box and Enter saves; the history
+       is folded until its link is pressed. */
+    check("the opened row says Description, in a box that does not scroll, and carries the progress box", (await pg.locator(".open .lab").first().innerText()) !== "" && (await pg.locator(".open textarea.desc").count()) === 1 &&
+      (await pg.locator(".open textarea.desc").evaluate((t) => getComputedStyle(t).overflowY)) === "hidden" && (await pg.locator(".open .pnew").count()) === 1 && (await pg.locator(".open .hist").isHidden()));
+    await pg.locator(".open .pnew").fill("Facilities answered; the room is free on Thursday."); await pg.locator(".open .pnew").press("Enter"); await settle();
+    const entries = await asTenant(A, (c) => progressOf(c, born.id));
+    check("Enter writes the entry under my name, and the list draws it first with This week in front, without a reload", entries.length === 1 && entries[0].by === "noran" && entries[0].body === "Facilities answered; the room is free on Thursday." &&
+      (await pg.locator(".open .prog .pe").count()) === 1 && (await pg.locator(".open .prog .pe .wk").innerText()).trim().toUpperCase() === "THIS WEEK" && await stayed(), JSON.stringify(entries));
+    check("...the box is empty and under the cursor for the next one", (await pg.locator(".open .pnew").inputValue()) === "" && (await pg.evaluate("document.activeElement && document.activeElement.className")) === "pnew");
+    check("...and the row's name carries the latest line under it", (await pg.locator(row + ".last").count()) === 1 && /Facilities answered/.test(await pg.locator(row + ".last").innerText()));
+    await pg.locator(".open .pe [data-act=progress-edit]").click();
+    await pg.locator(".open .pe textarea").fill("Facilities answered; the big room is free on Thursday."); await pg.locator(".open .pe textarea").press("Enter"); await settle();
+    const edited = await asTenant(A, (c) => progressOf(c, born.id));
+    check("Edit turns my entry into a box in place; Enter saves it and it reads edited", edited[0] && edited[0].body === "Facilities answered; the big room is free on Thursday." && !!edited[0].editedAt && (await pg.locator(".open .pe .ed").count()) === 1 && await stayed(), JSON.stringify(edited));
+    await pg.locator(".open [data-act=hist]").click();
+    check("the History link unfolds the automatic record in place, the creation at its foot", (await pg.locator(".open .hist").isVisible()) && /created it/.test(await pg.locator(".open .hist li").last().innerText()));
+    await pg.locator(".open .pe [data-act=progress-delete-ask]").click();
+    check("Delete on my entry asks first", await pg.locator(".open .pe .sure").isVisible() && (await asTenant(A, (c) => progressOf(c, born.id))).length === 1);
+    await pg.locator(".open .pe [data-act=progress-delete]").click(); await settle();
+    check("...and Yes removes it, the line under the name with it", (await asTenant(A, (c) => progressOf(c, born.id))).length === 0 && (await pg.locator(row + ".last").count()) === 0 && await stayed());
     await pg.locator(row + "[data-act=more]").click(); await settle();
     check("the arrow again folds it, and the address forgets it", (await pg.locator(".open").count()) === 0 && !pg.url().includes("open=") && await stayed(), pg.url());
     /* GROUP BY, from the dots: drawn again in place, remembered by this

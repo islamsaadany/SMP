@@ -64,7 +64,8 @@ input,textarea,button{font:inherit;color:inherit}
 .open{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;padding:12px 14px 12px 46px;border-bottom:1px solid var(--line-2);background:var(--surface)}
 .open .lab{font:600 10.5px/1.7 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:10px 0 4px}
 .open .lab:first-child{margin-top:0}
-.open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:72px;resize:vertical;display:block}
+/* ── ROUND 2: the Description fits what is written, never scrolls ── */
+.open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:44px;resize:none;overflow:hidden;display:block;field-sizing:content}
 .open select{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 14px/1.4 var(--font);max-width:100%}
 .open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
 .open .acts{display:flex;gap:14px;padding-top:12px;font-size:13px;align-items:center}
@@ -77,13 +78,16 @@ input,textarea,button{font:inherit;color:inherit}
 .pbox input::placeholder{color:var(--ink-3)}
 .pbox .ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:4px 6px;white-space:nowrap}
 .pbox.filled{border-color:var(--gold)}
-.prog{list-style:none;margin:8px 0 0;padding:0}
+/* ── ROUND 2: the entries scroll inside their own box once there are many ── */
+.prog{list-style:none;margin:8px 0 0;padding:0 8px 0 0;max-height:236px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable}
 .prog li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1px solid var(--line-2);font-size:13.5px;line-height:1.45;color:var(--ink)}
 .prog li:last-child{border-bottom:0}
 .prog .wk{font:600 11px/1.6 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;padding-top:2px;cursor:default;border-bottom:1px dotted transparent}
 .prog .wk.now{color:var(--gold)}
 .prog .by{font:600 12px/1.4 var(--font);color:var(--ink-2);margin-top:1px}
 .prog .by .x{font-weight:400;color:var(--ink-3);text-decoration:underline;margin-left:10px}
+.prog .ed{font-weight:400;color:var(--ink-3);margin-left:6px;font-style:italic}
+.prog textarea{border:1px solid var(--gold);border-radius:7px;background:var(--surface);color:var(--ink);padding:5px 9px;font:400 13.5px/1.45 var(--font);width:100%;resize:none;overflow:hidden;display:block;field-sizing:content}
 .prog .asked{display:inline-flex;gap:8px;align-items:center;margin-left:10px;font-weight:400;color:var(--ink-2)}
 .prog .asked .go{border:1px solid var(--line);border-radius:6px;padding:2px 8px;background:none;font:400 12px/1.4 var(--font)}
 .prog .asked .go.danger{color:var(--bad);border-color:var(--bad)}
@@ -141,17 +145,19 @@ input,textarea,button{font:inherit;color:inherit}
       <p class="lab">Topic</p>
       <select aria-label="Topic"><option>Budget</option><option>Office move</option><option>No topic</option></select>
       <p class="lab">Description</p>
-      <textarea aria-label="Description">The Q3 actuals, by cost centre, in the agreed template. Needed before the budget meeting on the 12th so the variances can be read against the plan.</textarea>
-      <div class="hint">What the task is. Saved when you leave the box.</div>
+      <textarea aria-label="Description" rows="3">The Q3 actuals, by cost centre, in the agreed template. Needed before the budget meeting on the 12th so the variances can be read against the plan.</textarea>
+      <div class="hint">What the task is. Grows with what you write; saved when you leave the box.</div>
       <div class="acts"><button type="button" class="danger">Delete</button></div>
     </div>
     <div>
       <p class="lab">Progress</p>
       <div class="pbox"><input id="p1" placeholder="What happened on this task this week?" aria-label="Progress"><span class="ent">Enter</span></div>
       <ul class="prog">
-        <li><span class="wk now tip">This week<span class="bub">Tue 28 Oct 2026 · 14:05</span></span><div>Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again.<div class="by">Noran <span class="x">Delete</span></div></div></li>
-        <li><span class="wk">Last week</span><div>Nothing arrived. Finance say the close ran late; promised for Sunday.<div class="by">Noran</div></div></li>
+        <li><span class="wk now tip">This week<span class="bub">Tue 28 Oct 2026 · 14:05</span></span><div>Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again.<div class="by">Noran <span class="x">Edit</span><span class="x">Delete</span></div></div></li>
+        <li><span class="wk">Last week</span><div>Nothing arrived. Finance say the close ran late; promised for Sunday.<div class="by">Noran <span class="ed">edited</span> <span class="x">Edit</span><span class="x">Delete</span></div></div></li>
         <li><span class="wk">W42</span><div>Template agreed with Ahmed; sent to Finance with the deadline.<div class="by">Islam</div></div></li>
+        <li><span class="wk">W41</span><div>Asked Finance which template they can fill; waiting on their answer.<div class="by">Islam</div></div></li>
+        <li><span class="wk">W40</span><div>Task opened at the budget kick-off.<div class="by">Islam</div></div></li>
       </ul>
       <button type="button" class="histlink"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 1l4 4-4 4"/></svg>History</button>
     </div>
@@ -159,9 +165,10 @@ input,textarea,button{font:inherit;color:inherit}
 </div></div>
 <div class="note"><b>What changed, and what did not.</b>
 <ul>
-<li><b>Notes is now Description.</b> Same box, same stored text, a new word and a line saying what it is for. The note typed on the add line lands here, as it does today.</li>
+<li><b>Notes is now Description.</b> Same stored text, a new word and a line saying what it is for. <b>The box fits what is written</b>: it grows as you type and never scrolls inside itself (round 2). The note typed on the add line lands here, as it does today.</li>
 <li><b>Progress is a one-line box</b> with Enter, like the add line. An entry is stamped with who wrote it and the week it was written in (<b>This week</b>, <b>Last week</b>, <b>W42</b>); the exact day and time are on hover, as drawn on the first entry. Newest first.</li>
-<li><b>Entries are written, not edited.</b> What was said at a review stands. The writer alone sees a quiet <b>Delete</b> on their own entry, and it asks first (frame 1b). Nobody else can touch it.</li>
+<li><b>The entries scroll inside their own box</b> once there are more than about five (round 2), so a task with a long record does not push the page down. Newest at the top, so what matters is never behind the scroll.</li>
+<li><b>Your own entry can be edited or deleted; nobody else's.</b> The writer alone sees a quiet <b>Edit</b> and <b>Delete</b> on their own entry (round 2). Edit turns the entry into a box in place, Enter saves and Escape puts it back, and the entry then says <i>edited</i> beside the name (frame 1d). Delete asks first (frame 1b).</li>
 <li><b>Writing progress changes nothing else.</b> The status stays what somebody set.</li>
 <li><b>History is behind one small link</b> under the progress, where it unfolds in place (frame 1c). It is the automatic record — created, moved, handed on, status changed — and is read far less often than what people wrote.</li>
 </ul></div>
@@ -173,6 +180,17 @@ input,textarea,button{font:inherit;color:inherit}
     <ul class="prog" style="margin-top:0">
       <li><span class="wk now">This week</span><div>Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again.<div class="by">Noran <span class="asked">Delete this entry? <button type="button" class="go danger">Yes, delete it</button><button type="button" class="go">Keep it</button></span></div></div></li>
       <li><span class="wk">Last week</span><div>Nothing arrived. Finance say the close ran late; promised for Sunday.<div class="by">Noran</div></div></li>
+    </ul>
+  </div>
+</div></div>
+
+<p class="cap">1d · Editing your own entry <span>— in place, Enter saves, Escape puts it back</span></p>
+<div class="frame"><div class="open" style="padding-left:14px;grid-template-columns:1fr;max-width:460px">
+  <div>
+    <p class="lab">Progress</p>
+    <ul class="prog" style="margin-top:0">
+      <li><span class="wk now">This week</span><div><textarea aria-label="Edit the entry" rows="2">Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again; he promised them by Thursday.</textarea><div class="by">Noran <span class="asked" style="color:var(--ink-3)">Enter saves · Escape puts it back</span></div></div></li>
+      <li><span class="wk">Last week</span><div>Nothing arrived. Finance say the close ran late; promised for Sunday.<div class="by">Noran <span class="ed">edited</span></div></div></li>
     </ul>
   </div>
 </div></div>

@@ -38,6 +38,7 @@ import {
   thursdayOf, weekWord, sameWeek, weekOptions, weekDays, weekInMonth,
   type CheckWeek, CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay, topicShown,
   officeRows, namesOf, shortNames, listActions, eventsOf, listTopics, type Topic,
+  type Progress, progressOf, latestProgress, mayChangeProgress, PROGRESS_MAX, addDays, oneLine,
 } from "../../lib/tracker.ts";
 
 const esc = (s: unknown) =>
@@ -345,6 +346,46 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 .open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:72px;resize:vertical}
 .open select.tsel{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 14px/1.4 var(--font);max-width:100%}
 .open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
+/* THE DESCRIPTION FITS WHAT IS WRITTEN (§657, Islam: "fit the content not
+   with a scrolling"): the box grows with its text and never scrolls inside
+   itself; the script sizes it where the browser cannot (field-sizing). */
+.open textarea.desc{min-height:44px;resize:none;overflow:hidden;field-sizing:content}
+/* PROGRESS (§657): the box with Enter, and the entries under it — newest
+   first, the week in front, who wrote it, Edit and Delete for the writer.
+   The entries scroll inside their own box once there are many. */
+.pbox{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;background:var(--surface)}
+.pbox:focus-within{border-color:var(--gold)}
+.pbox input{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 14px/1.5 var(--font);padding:0;color:var(--ink)}
+.pbox input::placeholder{color:var(--ink-3)}
+.pbox .ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:4px 6px;white-space:nowrap}
+.prog{list-style:none;margin:8px 0 0;padding:0 8px 0 0;max-height:236px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable}
+.prog li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1px solid var(--line-2);font-size:13.5px;line-height:1.45;color:var(--ink)}
+.prog li:last-child{border-bottom:0}
+.prog .wk{font:600 11px/1.6 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;padding-top:2px;cursor:default}
+.prog .wk.now{color:var(--gold)}
+.prog .pb{min-width:0}
+.prog .ptxt{white-space:pre-wrap;overflow-wrap:anywhere}
+.prog .by{font:600 12px/1.4 var(--font);color:var(--ink-2);margin-top:1px;display:flex;flex-wrap:wrap;gap:0 10px;align-items:center}
+.prog .by .ed{font-weight:400;color:var(--ink-3);font-style:italic}
+.prog .by button{background:none;border:0;padding:0;font:400 12px/1.4 var(--font);color:var(--ink-3);cursor:pointer;text-decoration:underline}
+.prog .by button.danger{color:var(--bad)}
+.prog .by .sure{display:flex;gap:8px;align-items:center;font-weight:400;color:var(--ink-2)}
+.prog .by .sure .go{border:1px solid var(--line);border-radius:6px;padding:2px 8px;text-decoration:none;color:var(--ink)}
+.prog .by .sure .go.danger{color:var(--bad);border-color:var(--bad)}
+.prog textarea{border:1px solid var(--gold);border-radius:7px;background:var(--surface);color:var(--ink);padding:5px 9px;font:400 13.5px/1.45 var(--font);width:100%;resize:none;overflow:hidden;display:block;field-sizing:content}
+.pnone{font-size:13px;color:var(--ink-3);margin-top:8px}
+/* the automatic history, behind one link */
+.histlink{display:inline-flex;align-items:center;gap:5px;margin-top:12px;background:none;border:0;padding:0;font:500 12.5px/1.4 var(--font);color:var(--ink-3);cursor:pointer}
+.histlink svg{width:10px;height:10px}
+.histlink.on svg{transform:rotate(90deg)}
+.hist{margin-top:6px}
+/* the latest entry under a row's name, one line, cut at the edge */
+.last{font:400 12.5px/1.4 var(--font);color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.last b{font-weight:600;color:var(--ink-2)}
+/* on the Weekly check, the box under every open row of this week */
+.pline{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;padding:0 14px 10px;border-bottom:1px solid var(--line-soft)}
+.pline .pbox{grid-column:2;border-color:var(--line-2);background:var(--ground)}
+.row.chk:has(+ .pline){border-bottom:0}
 .open .ro{font-size:14px;color:var(--ink-2)}
 .hist{list-style:none;margin:0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable;color:var(--ink-2)}
 .hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line-2)}
@@ -399,6 +440,7 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 .blk .quiet{padding:10px 14px;font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic}
 .sec .asleep{font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic;padding:10px 0 0}
 @media (max-width:760px){.strip{gap:14px}.open{grid-template-columns:1fr;padding-left:4px}
+  .pline{grid-template-columns:1fr}.pline .pbox{grid-column:1}
   .row.chk{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t t more" ". when st more" ". carry carry carry"}
   .row.chk .tick{grid-area:tick}.row.chk .tn2{grid-area:t}.row.chk .st{grid-area:st}.row.chk .when{grid-area:when}.row.chk .who{display:none}.row.chk .carry{grid-area:carry}.row.chk .more{grid-area:more}
   .addrow.chk{grid-template-columns:20px minmax(0,1fr) 26px}.addrow.chk .tpk,.addrow.chk .when,.addrow.chk .who,.addrow.chk .ent{display:none}
@@ -494,7 +536,9 @@ export type PageArgs = {
 };
 
 type Q = Parameters<typeof officeRows>[0];
-export type Loaded = { office: Person[]; names: Map<string, string>; short: Map<string, string>; actions: Action[]; events: Event[]; open: string | null; topics: Topic[] };
+export type Loaded = { office: Person[]; names: Map<string, string>; short: Map<string, string>; actions: Action[]; events: Event[]; open: string | null; topics: Topic[];
+  /* §657: the opened row's progress entries, and the latest entry of every row */
+  progress: Progress[]; latest: Map<string, Progress> };
 
 /* ONE READ FOR THE PAGE AND FOR A PRESS. An opened row that is no longer on
    the list (deleted, or another client's id on a pasted link) is read as
@@ -507,7 +551,8 @@ export async function load(c: Q, openId: string | null): Promise<Loaded> {
   for (const a of actions) if (!named.has(a.ownerKey)) named.set(a.ownerKey, names.get(a.ownerKey) || a.ownerKey);
   const short = shortNames(Array.from(named, ([key, name]) => ({ key, name })));
   const open = openId && actions.some((a) => a.id === openId) ? openId : null;
-  return { office, names, short, actions, events: open ? await eventsOf(c, open) : [], open, topics: await listTopics(c) };
+  return { office, names, short, actions, events: open ? await eventsOf(c, open) : [], open, topics: await listTopics(c),
+    progress: open ? await progressOf(c, open) : [], latest: await latestProgress(c) };
 }
 
 const statusPill = (a: Action, live: boolean): string => {
@@ -600,7 +645,7 @@ function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opene
   return '<div class="row' + (chk ? " chk" : "") + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
     '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
     (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
-    '<div class="tn2"><div class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</div></div>" +
+    '<div class="tn2"><div class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</div>" + lastLine(a, L, today) + "</div>" +
     (chk ? "" : topicCell(a, L, live, group)) +
     (chk ? checkWhenCell(a, today, dates, live) : whenCell(a, today, dates, live)) +
     whoCell(a, L, live) +
@@ -658,15 +703,73 @@ function topicCell(a: Action, L: Loaded, live: boolean, group: Group): string {
    history in a box that scrolls. The topic is a plain choice here, the open
    topics and the one the row already holds (a closed topic stays on the row
    that carries it, §497). */
+/* WHEN AN ENTRY WAS WRITTEN, as the list reads time (§657): the week in words
+   — This week, Last week, Next week, then W4 Oct — with the day and the hour
+   on hover. Last week is this file's own word: weekWord has no need of it on
+   a due date, and the history reads backwards. */
+function entryWeek(at: string, today: string): { word: string; now: boolean; full: string } {
+  const d = at ? new Date(at) : null;
+  const day = d ? todayIn(d) : today;
+  const hm = d ? new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Cairo", hour: "2-digit", minute: "2-digit", hour12: false }).format(d) : "";
+  const word = sameWeek(day, today) ? "This week" : sameWeek(day, addDays(weekOf(today).from, -7)) ? "Last week" : weekWord(day, today);
+  return { word, now: sameWeek(day, today), full: readableDay(day, today) + " · " + hm };
+}
+/* THE LATEST ENTRY UNDER THE NAME (§657): one quiet line, the week in front,
+   cut at the row's edge so a row is never taller than two lines; a row with
+   no progress yet has no second line. */
+function lastLine(a: Action, L: Loaded, today: string): string {
+  const p = L.latest.get(a.id);
+  if (!p) return "";
+  const w = entryWeek(p.at, today);
+  return '<div class="last" title="' + esc(w.full) + '"><b>' + esc(w.word) + "</b> &middot; " + esc(oneLine(p.body)) + "</div>";
+}
+/* THE PROGRESS BOX (§657): one line and Enter, on the opened row and under
+   every open row of this week on the check — one box, two places (§53.5). */
+function progressBox(a: Action, label: string): string {
+  return '<div class="pbox"><input class="pnew" data-act="progress-new" placeholder="' + esc(label) + '" aria-label="Progress on ' + esc(a.title) + '" maxlength="' + PROGRESS_MAX + '"><span class="ent" aria-hidden="true">Enter</span></div>';
+}
+/* THE ENTRIES, newest first: the week, the words, who — and for the writer
+   alone, Edit and Delete (behind a question). An edited one says so. */
+function progressList(L: Loaded, who: Who, today: string): string {
+  const name = (k: string) => L.short.get(k) || L.names.get(k) || k;
+  if (!L.progress.length) return '<div class="pnone">Nothing written yet. The first line goes in at the next review.</div>';
+  return '<ul class="prog">' + L.progress.map((p) => {
+    const w = entryWeek(p.at, today);
+    const mine = mayChangeProgress(p, who);
+    return '<li class="pe" data-pid="' + esc(p.id) + '"><span class="wk' + (w.now ? " now" : "") + '" title="' + esc(w.full) + '">' + esc(w.word) + "</span>" +
+      '<div class="pb"><div class="ptxt">' + esc(p.body) + "</div>" +
+      '<div class="by"><span>' + esc(name(p.by)) + "</span>" + (p.editedAt ? '<span class="ed">edited</span>' : "") +
+      (mine ? '<button type="button" data-act="progress-edit">Edit</button><button type="button" class="danger" data-act="progress-delete-ask">Delete</button>' +
+        '<span class="sure" hidden>Delete this entry? <button type="button" class="go danger" data-act="progress-delete">Yes, delete it</button>' +
+        '<button type="button" class="go" data-act="progress-delete-no">Keep it</button></span>' : "") +
+      "</div></div></li>";
+  }).join("") + "</ul>";
+}
+const RIGHT_SM = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* The opened row (§657, from §356.11): the topic, the DESCRIPTION where Notes
+   was — same stored text, the box fitting it — and Delete behind a question
+   on the left; on the right the PROGRESS box and its entries, and under them
+   the automatic history behind one small link, unfolding in place. The
+   history now says every movement (§657): a status change, a carry to another
+   week, a hand-over, a rename, a move to another topic — the day, who, what,
+   and what it was before. */
 function openPanel(a: Action, L: Loaded, who: Who, today: string): string {
   const live = mayChange(a, who);
   const name = (k: string) => L.names.get(k) || k;
+  const wk = (d: string | null | undefined) => d ? weekWord(d, today) : "no date";
+  const topicName = (id: string | null | undefined) => id ? (L.topics.find((t) => t.id === id)?.name || "a topic since deleted") : "No topic";
   const hist = L.events.map((e) => {
     const at = e.at ? new Date(e.at) : null;
     const day = at ? todayIn(at) : "";
     const hm = at ? new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Cairo", hour: "2-digit", minute: "2-digit", hour12: false }).format(at) : "";
+    const d = e.detail || {};
     const what = e.kind === "created"
-      ? "created it, owner " + esc(name(a.ownerKey))
+      ? "created it, owner " + esc(name(d.owner || a.ownerKey)) + (d.due !== undefined ? ", due " + esc(wk(d.due)) : "")
+      : e.kind === "due" ? "carried to " + esc(wk(d.to)) + " (was " + esc(wk(d.from)) + ")"
+      : e.kind === "owner" ? "handed to " + esc(name(d.to || "")) + " (was " + esc(name(d.from || "")) + ")"
+      : e.kind === "title" ? "renamed to &ldquo;" + esc(d.to || "") + "&rdquo; (was &ldquo;" + esc(d.from || "") + "&rdquo;)"
+      : e.kind === "topic" ? "moved to " + esc(topicName(d.to)) + " (was " + esc(topicName(d.from)) + ")"
       : esc(STATUS_WORD[e.from || "not_started"]) + " → " + esc(STATUS_WORD[e.to || "not_started"]);
     return "<li><time>" + esc(readableDay(day, today)) + " " + esc(hm) + "</time><span><b>" + esc(name(e.by)) + "</b> · " + what + "</span></li>";
   }).join("");
@@ -679,14 +782,18 @@ function openPanel(a: Action, L: Loaded, who: Who, today: string): string {
       "</select>"
     : '<p class="lab">Topic</p><div class="ro">' + (cur ? esc(cur.name) : "&mdash;") + "</div>";
   const left = live
-    ? topic + '<p class="lab">Notes</p><textarea data-act="notes" aria-label="Notes" maxlength="5000">' + esc(a.description) + "</textarea>" +
-      '<div class="hint">Saved when you leave the box.</div>' +
+    ? topic + '<p class="lab">Description</p><textarea class="desc" data-act="notes" aria-label="Description" maxlength="5000" rows="2">' + esc(a.description) + "</textarea>" +
+      '<div class="hint">What the task is. Grows with what you write; saved when you leave the box.</div>' +
       '<div class="acts"><button type="button" class="danger" data-act="delete-ask">Delete</button>' +
       '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
       '<button type="button" class="go" data-act="delete-no">Keep it</button></span></div>'
-    : topic + '<p class="lab">Notes</p><div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>";
-  return '<div class="open" data-id="' + esc(a.id) + '"><div>' + left + "</div>" +
-    '<div><p class="lab">History</p><ul class="hist">' + hist + "</ul></div></div>";
+    : topic + '<p class="lab">Description</p><div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>";
+  /* anybody past the gate writes progress (§657); somebody the register has
+     not placed yet has no name to write it under (§313.32) */
+  const right = '<p class="lab">Progress</p>' + (who.personKey ? progressBox(a, "What happened on this task this week?") : "") + progressList(L, who, today) +
+    '<button type="button" class="histlink" data-act="hist" aria-expanded="false">' + RIGHT_SM + "History</button>" +
+    '<ul class="hist" hidden>' + hist + "</ul>";
+  return '<div class="open" data-id="' + esc(a.id) + '"><div>' + left + "</div><div>" + right + "</div></div>";
 }
 
 /* HOW THE ROWS ARE GROUPED: by owner in the register's own order (decision
@@ -817,8 +924,13 @@ function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { 
     const open = rows.filter((a) => a.status !== "done");
     const late = open.filter((a) => isLate(a.due, today)).length;
     const nowRows = byWeek("now");
+    /* THE PROGRESS BOX UNDER EVERY OPEN ROW OF THIS WEEK (§657): the entry is
+       typed while the task is being talked about. Last week's and next week's
+       rows show their latest line and no box — progress is written on the
+       week being reviewed. */
     const draw = (k: CheckWeek) =>
-      byWeek(k).map((a) => row(a, L, p.who, today, dates, a.id === L.open, "topic", true) + (a.id === L.open ? openPanel(a, L, p.who, today) : "")).join("");
+      byWeek(k).map((a) => row(a, L, p.who, today, dates, a.id === L.open, "topic", true) + (a.id === L.open ? openPanel(a, L, p.who, today) : "") +
+        (k === "now" && a.status !== "done" && me && a.id !== L.open ? '<div class="pline" data-id="' + esc(a.id) + '">' + progressBox(a, "What happened this week?") + "</div>" : "")).join("");
     const mine = t ? all.filter((a) => a.topicId === t.id) : all.filter((a) => !a.topicId);
     const done = mine.filter((a) => a.status === "done").length;
     const head = t

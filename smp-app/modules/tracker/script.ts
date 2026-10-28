@@ -101,11 +101,17 @@ export const APP_JS = `(function () {
         topicName: topicFixed(r) ? null : r.getAttribute("data-topicname"),
         picked: r.hasAttribute("data-picked") });
     });
+    /* the progress boxes (§657), by the action each is on, and which one
+       the hand is in */
+    k.prog = [];
+    document.querySelectorAll(".pnew").forEach(function (b) { if (b.value) k.prog.push({ id: rowOf(b), val: b.value }); });
     var ar = lineAt(a);
     if (ar) k.focus = { line: lineKey(ar), note: !!(a.classList && a.classList.contains("nt")) };
     else if (a && a.classList && a.classList.contains("srch")) k.focus = { srch: true };
+    else if (a && a.classList && a.classList.contains("pnew")) k.focus = { prog: rowOf(a) };
     return k;
   }
+  function progBox(id) { return id ? document.querySelector('[data-id="' + id + '"] .pnew') : null; }
   function swap(j, k) {
     var body = document.getElementById("body");
     if (!body || !j || typeof j.body !== "string") return;
@@ -128,10 +134,16 @@ export const APP_JS = `(function () {
     document.querySelectorAll(".sec").forEach(function (sec) { if (shown.has(sec.getAttribute("data-key"))) sec.classList.add("showdone"); });
     fresh.forEach(function (id) { var r = document.querySelector('.row[data-id="' + id + '"]'); if (r) r.classList.add("fresh"); });
     opened.forEach(function (key) { var r = lineOf(key); if (r) r.hidden = false; });
+    /* the progress boxes keep their half-typed words, and the history stays
+       unfolded where it was unfolded (§657) */
+    if (k && k.prog) k.prog.forEach(function (st) { var b = progBox(st.id); if (b) b.value = st.val; });
+    histOpen.forEach(function (id) { var o = document.querySelector('.open[data-id="' + id + '"]'); if (o) drawHist(o, true); });
+    sizeAll();
     if (s && k && k.srch) s.value = k.srch;
     if (k && k.panel) showPanel(true);
     if (k && k.focus) {
       if (k.focus.srch) { if (s) s.focus(); }
+      else if (k.focus.prog) { var pb = progBox(k.focus.prog); if (pb) pb.focus(); }
       else {
         var r2 = lineOf(k.focus.line), el = r2 ? (k.focus.note ? noteOf(r2) : boxOf(r2)) : null;
         if (el) el.focus();
@@ -139,7 +151,17 @@ export const APP_JS = `(function () {
     }
     typingAll();
   }
-  var shown = new Set(), fresh = new Set(), opened = new Set();
+  var shown = new Set(), fresh = new Set(), opened = new Set(), histOpen = new Set();
+  /* THE BOXES THAT FIT THEIR TEXT (§657): the stylesheet's field-sizing does
+     it where the browser knows the word; elsewhere the height is set from
+     the text, on every keystroke and after every swap. */
+  var sizes = !(window.CSS && CSS.supports && CSS.supports("field-sizing", "content"));
+  function size(t) { if (!sizes || !t) return; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }
+  function sizeAll() { document.querySelectorAll("textarea.desc, .prog textarea").forEach(size); }
+  function drawHist(o, on) {
+    var b = o.querySelector("[data-act=hist]"), h = o.querySelector(".hist"); if (!b || !h) return;
+    h.hidden = !on; b.classList.toggle("on", !!on); b.setAttribute("aria-expanded", String(!!on));
+  }
   var chain = Promise.resolve();
   function request(method, url, body, k, then) {
     say("");
@@ -164,7 +186,8 @@ export const APP_JS = `(function () {
     request("GET", LIST + "?view=" + encodeURIComponent(a.view) + "&q=" + encodeURIComponent(a.q) +
       "&group=" + encodeURIComponent(a.group) + "&dates=" + encodeURIComponent(a.dates) + (a.open ? "&open=" + encodeURIComponent(a.open) : ""), null, k || keep());
   }
-  function rowOf(el) { var r = el.closest(".row, .open"); return r ? r.getAttribute("data-id") : null; }
+  function rowOf(el) { var r = el.closest(".row, .open, .pline"); return r ? r.getAttribute("data-id") : null; }
+  function entryOf(el) { var e = el.closest(".pe"); return e ? e.getAttribute("data-pid") : null; }
   function inAdd(el) { return el.closest(".addrow"); }
 
   /* THE ADD LINE: its week and owner are set on the line, drawn at once,
@@ -310,6 +333,28 @@ export const APP_JS = `(function () {
     if (e.key !== "Enter") return;
     e.preventDefault();
     submitAdd(ar);
+  });
+  /* THE PROGRESS BOX (§657): Enter writes the entry on the action the box
+     is under — the opened row's, or a row's on the check — and the list is
+     drawn again with it at the top, the box empty and still under the
+     cursor for the next one. Escape clears it. */
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains("pnew")) return;
+    if (e.key === "Escape") { t.value = ""; return; }
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    var v = t.value.replace(/\\s+/g, " ").trim(), id = rowOf(t);
+    if (!v || !id) return;
+    var k = keep();
+    k.prog = k.prog.filter(function (st) { return st.id !== id; });
+    k.focus = { prog: id };
+    t.disabled = true;
+    post({ act: "progress-add", id: id, body: v }, k, function (j) { if (!j) { t.disabled = false; t.focus(); } });
+  });
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t && t.tagName === "TEXTAREA" && (t.classList.contains("desc") || t.closest(".prog"))) size(t);
   });
   document.addEventListener("keydown", function (e) {
     var t = e.target;
@@ -560,6 +605,38 @@ export const APP_JS = `(function () {
       b.hidden = true; var s3 = b.parentNode.querySelector(".sure"); if (s3) s3.hidden = false;
     } else if (act === "topic-delete-no") {
       var s4 = b.closest(".sure"); if (s4) { s4.hidden = true; var d4 = s4.parentNode.querySelector("[data-act=topic-delete-ask]"); if (d4) d4.hidden = false; }
+    } else if (act === "hist") {
+      /* THE HISTORY UNFOLDS IN PLACE (§657), and stays unfolded across the
+         swaps that follow while the row is open. */
+      var o = b.closest(".open"), on3 = !b.classList.contains("on");
+      if (o) { drawHist(o, on3); if (on3) histOpen.add(id); else histOpen.delete(id); }
+    } else if (act === "progress-edit") {
+      /* EDITED IN PLACE (§657): the words become a box; Enter or leaving it
+         saves, Escape puts them back. The server stamps it edited. */
+      var li = b.closest(".pe"), txt = li ? li.querySelector(".ptxt") : null, pid = entryOf(b);
+      if (!li || !txt || li.querySelector("textarea")) return;
+      var was3 = txt.textContent, ta = document.createElement("textarea");
+      ta.value = was3; ta.maxLength = 2000; ta.setAttribute("aria-label", "Edit the entry"); ta.rows = 2;
+      txt.hidden = true; txt.parentNode.insertBefore(ta, txt);
+      ta.focus(); size(ta);
+      var settled3 = false, back3 = function () { if (settled3) return; settled3 = true; ta.remove(); txt.hidden = false; };
+      ta.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); back3(); }
+        else if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); ta.blur(); }
+      });
+      ta.addEventListener("blur", function () {
+        if (settled3) return;
+        var v3 = ta.value.replace(/[ \\t]+\\n/g, "\\n").trim();
+        if (!v3 || v3 === was3) { back3(); return; }
+        settled3 = true; ta.remove(); txt.hidden = false; txt.textContent = v3;
+        post({ act: "progress-edit", progressId: pid, body: v3 });
+      });
+    } else if (act === "progress-delete-ask") {
+      b.hidden = true; var s5 = b.parentNode.querySelector(".sure"); if (s5) s5.hidden = false;
+    } else if (act === "progress-delete-no") {
+      var s6 = b.closest(".sure"); if (s6) { s6.hidden = true; var d6 = s6.parentNode.querySelector("[data-act=progress-delete-ask]"); if (d6) d6.hidden = false; }
+    } else if (act === "progress-delete") {
+      post({ act: "progress-delete", progressId: entryOf(b) });
     } else if (act === "add-note") {
       if (noteIsOpen(ar)) foldNote(ar); else openNote(ar);
     } else if (act === "more") {
@@ -596,6 +673,7 @@ export const APP_JS = `(function () {
   /* THE BAND PINS AT THE TOP BAR'S FOOT (§566), measured rather than assumed:
      the bar is every module's and its height is its own business, so the
      offset is read off it now and again whenever it changes. */
+  sizeAll();
   var tb = document.querySelector(".tb");
   function barFoot() { if (tb) document.documentElement.style.setProperty("--tbh", tb.offsetHeight + "px"); }
   barFoot();

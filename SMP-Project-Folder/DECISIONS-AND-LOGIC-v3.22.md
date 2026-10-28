@@ -70226,3 +70226,5 @@ Islam: *"yes fix the tracker check"*. Found at §658–§666's merge: `npm run c
 **What the death was hiding.** Every `check:tracker:red` break was "red" before this only because the whole run died at §10 whatever the break was. A run that dies proves nothing about the thing broken (§215). Now each break fails on its own assertion.
 
 **Checked**: `npm run check:tracker` **343 / 0**, to the end (before: 248 and died). `npm run check:tracker:red`: all **32** breaks red, none not red.
+
+**§667 MERGED TO `main`, 2026-10-28, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §658–§666 went in. Only a check file and the two records changed, so Vercel's build serves the same app, the release stamp does not move (§397), there are no migrations, and nobody is signed out.

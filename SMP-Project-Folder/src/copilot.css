@@ -484,7 +484,8 @@ span.copsw-lb { cursor:default; }
 .copsw-grid { border-collapse:collapse; min-width:440px; width:100%; }
 .copsw-grid th, .copsw-grid td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:center; font-size:var(--fs-small, 12.5px); }
 /* §668 — squeezed, the column names take two lines and the row names never break: the ticks keep their columns */
-.copsw-grid thead th { white-space:normal; line-height:1.2; padding:6px 4px; vertical-align:bottom; }
+.copsw-grid thead th { white-space:normal; line-height:1.2; padding:6px 4px; vertical-align:middle; text-align:center; }
+.copsw-grid td { vertical-align:middle; }
 .copsw-grid td { min-width:64px; }
 .copsw-grid th[scope=row] { text-align:left; color:var(--ink); white-space:nowrap; }
 .copsw-grid td.na { color:var(--ink-3); }
@@ -795,9 +796,9 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
 /* §668 — WHAT GIVES WAY, IN ORDER (Islam's squeezed SWOT: "nothing was
    collapsed as we agreed"). The chat's default yields first — it shrinks
    from 760 toward 420 before the work beside it goes under 480 — and then
-   the columns leave one at a time, the least needed first: the to-do folds
-   to its button (two columns, from 900px of Copilot), then the rail (the
-   script's rule, at 1130px of pane), then the work pane becomes a sheet
+   the columns leave one at a time: the rail folds to its strip first (the
+   script's rule, under 1344px of pane), then the to-do folds to its button
+   (two columns, from 900px of Copilot), then the work pane becomes a sheet
    (under 900px). Three columns need 420 + 12 + 480 + 208 = 1120px. */
 @container copmain (min-width:1120px){
   .copsplit > .copgrip, .copflow > .copgrip { display:block; }

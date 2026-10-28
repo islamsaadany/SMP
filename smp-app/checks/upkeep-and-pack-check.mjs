@@ -1,7 +1,11 @@
-/* WHO MAY KEEP UP A WORKSPACE, AND HOW MANY PROCESSES THE PACK CHECK READS —
-   the rule a save asks is the rule its button asks. Pure rules, plus the source
-   of the places that must read them rather than a copy of them. --red makes
-   each break in a copy and expects this check to fail on it. */
+/* HOW MANY PROCESSES THE PACK CHECK READS — the rule a save asks is the rule its
+   button asks (§656). Pure rules, plus the source of the places that must read
+   them rather than a copy of them. --red makes each break in a copy and expects
+   this check to fail on it.
+   The other half of §656, who may change a workspace's profile and branding,
+   went with the two cards it guarded: Processes' own profile, logo and colours
+   left for SMP's client settings by decision (§658, spec 067 §4.4), so there is
+   no Edit left to offer or refuse. */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -9,22 +13,12 @@ import { dirname, join } from "node:path";
 const here = dirname(fileURLToPath(import.meta.url));
 const shell = "../app/(ffp)/[slug]/processes/(shell)/";
 const FILES = {
-  access: "../ffp/lib/domain/access-control.ts",
   pack: "../ffp/lib/domain/pack-check.ts",
-  org: "../ffp/lib/actions/organization.ts",
   action: "../ffp/lib/actions/pack-check.ts",
-  hook: shell + "workspace-access.tsx",
-  profile: shell + "workspace-profile.tsx",
-  branding: shell + "workspace-branding.tsx",
   picker: shell + "export/export-picker-form.tsx",
 };
 const pathOf = (k) => process.env["UP_" + k.toUpperCase()] || join(here, FILES[k]);
 const BREAKS = {
-  "editor-may": ["access", 'WORKSPACE_UPKEEP_LEVEL: AccessLevel = "ADMIN"', 'WORKSPACE_UPKEEP_LEVEL: AccessLevel = "EDITOR"'],
-  "card-asks-edit": ["profile", "const canKeepUp = useCanKeepUpWorkspace();", "const canKeepUp = useCanEdit();"],
-  "branding-asks-edit": ["branding", "const canKeepUp = useCanKeepUpWorkspace();", "const canKeepUp = useCanEdit();"],
-  "hook-own-rule": ["hook", "mayKeepUpWorkspace(access.accessLevel)", 'access.accessLevel === "ADMIN"'],
-  "save-own-level": ["org", "requireWorkspaceAccess(parsed.data.workspaceId, WORKSPACE_UPKEEP_LEVEL);", 'requireWorkspaceAccess(parsed.data.workspaceId, "ADMIN");'],
   "no-ceiling": ["pack", "if (ticked > PACK_CHECK_MAX) {", "if (false) {"],
   "button-ignores": ["picker", "disabled={checking || checkBlocked !== null}", "disabled={checking || picked.size === 0}"],
   "action-own-max": ["action", ".max(PACK_CHECK_MAX)", ".max(12)"],
@@ -45,21 +39,6 @@ if (process.argv.includes("--red")) {
 let ok = 0; const fails = [];
 const check = (w, g) => { if (g) { ok++; console.log("  ok   " + w); } else { fails.push(w); console.log("  FAIL " + w); } };
 const src = (k) => readFileSync(pathOf(k), "utf8");
-
-const A = await import(pathToFileURL(pathOf("access")).href);
-check("an Admin may change the profile and branding", A.mayKeepUpWorkspace("ADMIN") === true);
-check("an Editor may not", A.mayKeepUpWorkspace("EDITOR") === false);
-check("a Viewer may not", A.mayKeepUpWorkspace("VIEWER") === false);
-
-const org = src("org");
-const fn = (name) => (org.match(new RegExp("export async function " + name + "\\b[\\s\\S]*?\\n}\\n")) || [""])[0];
-check("the profile save asks the shared level", /requireWorkspaceAccess\([^)]*WORKSPACE_UPKEEP_LEVEL\)/.test(fn("updateWorkspaceProfile")));
-check("the branding save asks the shared level", /requireWorkspaceAccess\([^)]*WORKSPACE_UPKEEP_LEVEL\)/.test(fn("updateWorkspaceBranding")));
-check("the hook asks the shared rule", src("hook").includes("mayKeepUpWorkspace(access.accessLevel)"));
-for (const k of ["profile", "branding"]) {
-  const s = src(k);
-  check("the " + k + " card asks the upkeep hook, not the edit hook", s.includes("useCanKeepUpWorkspace()") && !/useCanEdit\(/.test(s));
-}
 
 const P = await import(pathToFileURL(pathOf("pack")).href);
 check("the check reads up to 12 at a time", P.PACK_CHECK_MAX === 12);

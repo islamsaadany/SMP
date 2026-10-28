@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { mayKeepUpWorkspace, type AccessLevel } from "@/ffp/lib/domain/access-control";
+import { type AccessLevel } from "@/ffp/lib/domain/access-control";
 
 /**
  * The current viewer's rights over this workspace, shared with every client
@@ -63,18 +63,6 @@ export function useCanEdit(): boolean {
  */
 export function useCanManageMembers(): boolean {
   return useContext(WorkspaceAccessContext)?.canManageMembers ?? false;
-}
-
-/**
- * Whether the current viewer may change this workspace's profile and branding
- * (industry, notes, logo, colours). Asked of the same rule the two saves ask
- * (mayKeepUpWorkspace), so the Edit buttons and the saves cannot disagree.
- *
- * Same fail-closed default as useCanEdit.
- */
-export function useCanKeepUpWorkspace(): boolean {
-  const access = useContext(WorkspaceAccessContext);
-  return access ? mayKeepUpWorkspace(access.accessLevel) : false;
 }
 
 /** The viewer's full access level, for the rarer cases that need to distinguish Admin. */

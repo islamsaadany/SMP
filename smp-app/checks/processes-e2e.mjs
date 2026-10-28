@@ -219,7 +219,7 @@ const tally = await body(A.page);
 check(/1 of 2 have confirmed/.test(tally) && /Still to read:/.test(tally), "the office sees 1 of 2 have confirmed, and who is outstanding", (tally.match(/Read and acknowledged.{0,120}/) || [""])[0]);
 
 /* ── 3 · the gate: a client's own person opens nothing else of Processes ── */
-const office = ["processes/priorities", "processes/reports/priorities", "processes", "processes/processes", "processes/processes/" + P2, "processes/processes/" + P2 + "/map", "processes/processes/" + P2 + "/raci", "processes/processes/" + P2 + "/review", "processes/governance", "processes/reports", "processes/reports/sop", "processes/export", "processes/org", "processes/value-chain", "processes/helicopter"];
+const office = ["processes/priorities", "processes/reports/priorities", "processes", "processes/processes", "processes/processes/" + P2, "processes/processes/" + P2 + "/map", "processes/processes/" + P2 + "/raci", "processes/processes/" + P2 + "/review", "processes/governance", "processes/reports", "processes/reports/sop", "processes/export", "processes/handle", "processes/roles", "processes/value-chain", "processes/helicopter"];
 for (const p of office) {
   const res = await T.get("/" + S + "/" + p);
   const t = await res.text();
@@ -286,12 +286,15 @@ for (const w of [1440, 2200]) {
   await A.page.setViewportSize({ width: w, height: 900 });
   await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
   const nb = await A.page.locator("nav[aria-label='Steps']").boundingBox();
-  const sb = await A.page.locator("nav:has(a[href$='/processes/priorities'])").first().boundingBox();
-  check(!!nb && !!sb && nb.x - (sb.x + sb.width) < 60, `at ${w} pixels wide the working area starts right beside the side menu, with no empty band`, JSON.stringify([nb?.x, sb && sb.x + sb.width]));
+  /* REWRITTEN (§218): the side menu went by decision (spec 067 §4.2), and the old line went on passing by finding
+     the tab bar instead. What it was FOR is kept: the working area starts where the builder's tabs start, with no
+     empty band beside it, on a wide screen as on a laptop. */
+  const sb = await A.page.locator("nav[aria-label='Builder sections']").first().boundingBox();
+  check(!!nb && !!sb && Math.abs(nb.x - sb.x) <= 2, `at ${w} pixels wide the working area lines up under the builder's tabs, with no empty band`, JSON.stringify([nb?.x, sb?.x]));
 }
 await A.page.setViewportSize({ width: 1440, height: 900 });
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
-const openBox = await A.page.locator("a:text-is('Open →')").first().boundingBox();
+const openBox = await A.page.locator("tbody a:text-is('Open')").first().boundingBox();
 check(!!openBox && openBox.x + openBox.width <= 1440, "the process list's Open link is inside the window", JSON.stringify(openBox));
 await A.page.setViewportSize({ width: 1280, height: 720 });
 /* The picker: choose which processes the table shows; remembered; Select all brings them back. */
@@ -353,7 +356,10 @@ check(/Team capacity: 4 deep dives at a time\. Wave 1 holds 1 — fits/.test(awa
 
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
 const lst = await body(A.page);
-check(/Order to cash.*Deep dive.*Wave 1 · rank 1/.test(lst) && /High-level/.test(lst), "the process list shows Depth and Priority");
+/* REWRITTEN (§218): Depth and Priority left the list by decision (Islam, 2026-10-28: "1 A", spec 067 §4.2); the
+   process page and Priorities still say both (the next line). The list now says where each process is, how ready it
+   is and how many gaps it has. */
+check(/Where it is/i.test(lst) && /Ready/i.test(lst) && /Gaps/i.test(lst) && !/High-level/.test(lst) && (await A.page.locator("tbody span[aria-label$='of 6 ready']").count()) > 0, "the process list shows where each process is, its six ready marks and its gaps, and no longer Depth and Priority");
 await A.page.goto(BASE + "/" + S + "/processes/processes/" + P1, { waitUntil: "networkidle" });
 check(/Wave 1 · rank 1 · deep dive \d of 6/.test(await body(A.page)), "the process page says why it is being worked on and how far it has got");
 await A.page.goto(BASE + "/" + S + "/processes/helicopter", { waitUntil: "networkidle" });

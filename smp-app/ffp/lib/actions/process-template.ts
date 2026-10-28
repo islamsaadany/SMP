@@ -10,6 +10,7 @@ import { runProcessTemplateGeneration, type ProcessTemplateResult } from "@/ffp/
 import { getActionLocale } from "@/ffp/lib/i18n/server";
 import { withAnswerLanguage } from "@/ffp/lib/i18n/locale";
 import { ok, notFound, validationError, aiUnavailable, type ActionResult } from "@/ffp/lib/actions/errors";
+import { clientSettings, profileAndBrand } from "@/ffp/lib/data/client-settings";
 
 const generateSchema = z.object({
   workspaceId: z.string().min(1),
@@ -41,6 +42,8 @@ export async function generateProcessTemplateDraft(
   if (!access.ok) return access;
 
   const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: parsed.data.workspaceId } });
+  /* the client's name, industry and notes from SMP's client settings (stage 1b, spec 067 §4.4) */
+  const client = profileAndBrand(await clientSettings(parsed.data.workspaceId), workspace);
 
   const orgRoles = (
     await prisma.role.findMany({
@@ -52,9 +55,9 @@ export async function generateProcessTemplateDraft(
 
   const promptLines = [
     `Draft a process named or about: "${parsed.data.processName}".`,
-    `Client: ${workspace.name}`,
-    workspace.industry ? `Industry / sector: ${workspace.industry}` : "Industry / sector: not specified.",
-    workspace.description ? `Background: ${workspace.description}` : "No further background provided.",
+    `Client: ${client.name}`,
+    client.industry ? `Industry / sector: ${client.industry}` : "Industry / sector: not specified.",
+    client.about ? `Background: ${client.about}` : "No further background provided.",
   ];
   if (parsed.data.notes) {
     promptLines.push(`How this works today (the consultant's notes — follow them over generic practice):\n${parsed.data.notes}`);

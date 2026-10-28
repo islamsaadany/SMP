@@ -1,4 +1,5 @@
 import { requireOffice } from "@/ffp/lib/auth/require-office";
+import { clientSettings } from "@/ffp/lib/data/client-settings";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
@@ -47,7 +48,7 @@ export default async function ProcessReviewPage(
       <ReviewPanel
         workspaceId={workspaceId}
         processId={processId}
-        workspaceIndustry={process.workspace.industry}
+        workspaceIndustry={(await clientSettings(workspaceId))?.industry || process.workspace.industry}
         initialFindings={initialFindings}
         steps={steps}
       />

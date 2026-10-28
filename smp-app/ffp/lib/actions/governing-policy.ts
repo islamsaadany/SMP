@@ -10,6 +10,7 @@ import { findTemplate, fillTemplate } from "@/ffp/lib/domain/policy-templates";
 import { getActionLocale } from "@/ffp/lib/i18n/server";
 import { withAnswerLanguage } from "@/ffp/lib/i18n/locale";
 import { ok, notFound, validationError, aiUnavailable, type ActionResult } from "@/ffp/lib/actions/errors";
+import { clientSettings, profileAndBrand } from "@/ffp/lib/data/client-settings";
 
 /**
  * Each aspect's governing policy (spec 029): an ordinary Policy Library
@@ -213,14 +214,16 @@ export async function draftGoverningPolicyWithAi(input: z.infer<typeof draftSche
   if (!workspace || !aspect) return notFound();
   if (aspect.governingPolicy) return alreadyGoverned(aspect.name, aspect.governingPolicy.title);
 
-  if (!workspace.industry?.trim() || !workspace.governanceCompanySize?.trim() || !workspace.governanceJurisdiction?.trim()) {
+  /* the client's name and industry from SMP's client settings (stage 1b, spec 067 §4.4) */
+  const client = profileAndBrand(await clientSettings(workspaceId), workspace);
+  if (!client.industry?.trim() || !workspace.governanceCompanySize?.trim() || !workspace.governanceJurisdiction?.trim()) {
     return validationError("Set this workspace's company size, industry, and jurisdiction before drafting a policy with AI.");
   }
 
   const promptText = [
-    `Company: ${workspace.name}`,
+    `Company: ${client.name}`,
     `Company size: ${workspace.governanceCompanySize}`,
-    `Industry/sector: ${workspace.industry}`,
+    `Industry/sector: ${client.industry}`,
     `Jurisdiction: ${workspace.governanceJurisdiction}`,
     `Governance area to draft the governing policy for: ${aspect.name}`,
   ].join("\n");

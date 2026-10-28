@@ -15,7 +15,6 @@ import {
   finalizeRaciMatrix,
   reopenRaciMatrix,
 } from "@/ffp/lib/actions/raci";
-import { createRole } from "@/ffp/lib/actions/org";
 import type { RaciIssue } from "@/ffp/lib/domain/raci-validation";
 import { planOwnerFill, planSuggestions, type RaciTableRow, type StepOwners } from "@/ffp/lib/domain/raci-table";
 
@@ -95,8 +94,6 @@ export function RaciTable({
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
   const [addingTitle, setAddingTitle] = useState(false);
   const [pickRoleId, setPickRoleId] = useState("");
-  const [newTitleName, setNewTitleName] = useState("");
-  const [addTitleError, setAddTitleError] = useState<string | null>(null);
   const router = useRouter();
   const cellRefs = useRef(new Map<string, HTMLButtonElement>());
 
@@ -322,25 +319,6 @@ export function RaciTable({
     });
   }
 
-  function addNewTitle() {
-    const name = newTitleName.trim();
-    if (!name) return;
-    setAddTitleError(null);
-    startTransition(async () => {
-      const created = await createRole({ workspaceId, name });
-      if (!created.ok) {
-        setAddTitleError(created.error === "VALIDATION_ERROR" ? (created.message ?? "Invalid title") : created.error);
-        return;
-      }
-      const role = { id: created.data.id, name };
-      await pinRaciRole({ workspaceId, processId, roleId: role.id });
-      setVisibleRoles((prev) => [...prev, role]);
-      setNewTitleName("");
-      setAddingTitle(false);
-      router.refresh();
-    });
-  }
-
   const flaggedRowIds = new Set(issues.map((i) => i.activityId));
 
   return (
@@ -443,36 +421,23 @@ export function RaciTable({
                   >
                     Add
                   </button>
-                  <span className="text-xs text-slate-500">or</span>
                 </>
               )}
-              <input
-                value={newTitleName}
-                onChange={(e) => setNewTitleName(e.target.value)}
-                placeholder="New title name"
-                className="w-32 rounded-lg border border-slate-300 px-2 py-1 text-xs"
-              />
-              <button
-                type="button"
-                onClick={addNewTitle}
-                disabled={!newTitleName.trim() || pending}
-                className="rounded-lg bg-slate-900 px-2 py-1 text-xs font-semibold text-white disabled:opacity-50"
-              >
-                Create
-              </button>
+              {/* Job titles come from the client register (stage 1b, spec 067 §4.4): a title is
+                  added there, not made here. */}
+              <span className="text-xs text-slate-500">
+                {hiddenRoles.length > 0 ? "A title missing here" : "Every title is shown. Another"} is added on the client register (Client settings › People & access › Client register).
+              </span>
               <button
                 type="button"
                 onClick={() => {
                   setAddingTitle(false);
-                  setAddTitleError(null);
                   setPickRoleId("");
-                  setNewTitleName("");
                 }}
                 className="rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100"
               >
                 Cancel
               </button>
-              {addTitleError && <span className="w-full text-xs text-red-600">{addTitleError}</span>}
             </div>
           ) : (
             <button

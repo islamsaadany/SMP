@@ -10,6 +10,7 @@ import { FoldProvider, FoldRow, FoldToggle, FoldAllControls } from "./process-fo
 import { foldChains } from "./fold-chains";
 import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { processGaps } from "@/ffp/lib/data/process-gaps";
+import { clientSettings } from "@/ffp/lib/data/client-settings";
 import { READINESS_MARKS, READINESS_RULES, readinessMarks } from "@/ffp/lib/domain/process-readiness";
 import { hasSufficientAccess } from "@/ffp/lib/domain/access-control";
 import { orderProcessTree } from "@/ffp/lib/domain/process-hierarchy";
@@ -34,7 +35,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   const access = await requireWorkspaceAccess(workspaceId, "VIEWER");
   const canEdit = access.ok && hasSufficientAccess(access.data.accessLevel, "EDITOR");
 
-  const [processes, categories, deletedCount] = await Promise.all([
+  const [processes, allCategories, deletedCount] = await Promise.all([
     prisma.process.findMany({
       where: {
         workspaceId,
@@ -63,9 +64,18 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
       },
       orderBy: { code: "asc" },
     }),
-    prisma.processCategory.findMany({ where: { firmId: workspace.firmId }, orderBy: { name: "asc" } }),
+    prisma.processCategory.findMany({ where: { firmId: workspace.firmId } }),
     prisma.process.count({ where: { workspaceId, archivedAt: { not: null } } }),
   ]);
+
+  /* A process's department is one of the client's Official BU names (stage 1b, spec 067 §4.4), in the
+     list's own order; a department a process already files under stays offered, so editing it keeps it. */
+  const departments = (await clientSettings(workspaceId))?.departments ?? [];
+  const usedIds = new Set(processes.map((p) => p.categoryId).filter(Boolean));
+  const categories = [
+    ...departments.map((n) => allCategories.find((c) => c.name === n)).filter((c): c is (typeof allCategories)[number] => !!c),
+    ...allCategories.filter((c) => usedIds.has(c.id) && !departments.includes(c.name)).sort((a, b) => a.name.localeCompare(b.name)),
+  ];
 
   const processOptions = processes.map((proc) => ({
     id: proc.id,
@@ -158,7 +168,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
           type="search"
           name="q"
           defaultValue={q}
-          placeholder="Search by name, code, category, or task…"
+          placeholder="Search by name, code, department, or task…"
           aria-label="Search processes"
           className="w-full max-w-sm rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
         />

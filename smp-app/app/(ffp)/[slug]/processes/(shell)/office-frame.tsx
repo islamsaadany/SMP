@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMessages } from "@/ffp/lib/i18n/client";
 import { LanguageSwitcher } from "@/ffp/language-switcher";
 
-type Section = "all" | "handle" | "landscape" | "priorities" | "governance" | "export" | "other";
+type Section = "all" | "handle" | "landscape" | "priorities" | "governance" | "export" | "roles" | "other";
 
 /** Which tab a path under /[slug]/processes belongs to. A process's own pages sit under All processes. */
 function sectionOf(rest: string): Section {
@@ -22,7 +22,7 @@ function sectionOf(rest: string): Section {
   if (first === "" || first === "processes") return "all";
   if (first === "handle") return "handle";
   if (first === "value-chain" || first === "helicopter") return "landscape";
-  if (first === "priorities" || first === "governance" || first === "export") return first;
+  if (first === "priorities" || first === "governance" || first === "export" || first === "roles") return first;
   return "other";
 }
 
@@ -48,7 +48,7 @@ export function OfficeFrame({
   const pathname = usePathname() ?? "";
   const base = `/${workspaceId}/processes`;
   const sec = sectionOf(pathname.startsWith(base) ? pathname.slice(base.length) : "");
-  const tabs: { key: Exclude<Section, "other">; href: string; count?: number; hot?: boolean }[] = [
+  const tabs: { key: Exclude<Section, "other" | "roles">; href: string; count?: number; hot?: boolean }[] = [
     { key: "all", href: `${base}/processes`, count: counts.total },
     { key: "handle", href: `${base}/handle`, count: counts.toHandle, hot: true },
     { key: "landscape", href: `${base}/value-chain` },
@@ -90,7 +90,7 @@ export function OfficeFrame({
           <div className="min-w-0">
             <p className="mb-[7px] text-[11px] font-semibold uppercase tracking-[.14em] text-[var(--bar-accent)]">
               {clientName} · {b.eyebrow}
-              {sec !== "all" && sec !== "other" ? ` › ${b.tabs[sec]}` : ""}
+              {sec !== "all" && sec !== "other" && sec !== "roles" ? ` › ${b.tabs[sec]}` : sec === "roles" ? ` › ${b.handle.roles}` : ""}
             </p>
             <h1 className="text-2xl font-semibold leading-tight">
               {b.title}

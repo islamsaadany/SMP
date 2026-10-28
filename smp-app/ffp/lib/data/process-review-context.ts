@@ -10,6 +10,7 @@ import {
 } from "@/ffp/lib/domain/authority-table";
 import { findStructuralGaps, type ProcessReviewContext } from "@/ffp/lib/domain/process-review";
 import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/lib/data/authority-assignments";
+import { clientSettings } from "@/ffp/lib/data/client-settings";
 
 /**
  * Gathers one process's Map, RACI and Authority data into the context the AI
@@ -58,9 +59,11 @@ export async function loadProcessReviewContext(
   );
   const authorityIssues = validateAuthorityTable(authorityRows);
 
+  /* the client's name and industry from SMP's client settings (stage 1b, spec 067 §4.4) */
+  const settings = await clientSettings(workspace.id);
   return {
-    workspaceName: workspace.name,
-    workspaceIndustry: workspace.industry,
+    workspaceName: settings?.name || workspace.name,
+    workspaceIndustry: settings?.industry || workspace.industry,
     processCode: process.code,
     processName: process.name,
     processDescription: process.description,

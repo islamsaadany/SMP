@@ -22,6 +22,7 @@ import type {
 } from "@/ffp/generated/prisma/client";
 import { getActionLocale } from "@/ffp/lib/i18n/server";
 import { withAnswerLanguage } from "@/ffp/lib/i18n/locale";
+import { clientSettings, profileAndBrand } from "@/ffp/lib/data/client-settings";
 
 const titleCase = (value: string) => value.charAt(0) + value.slice(1).toLowerCase().replace(/_/g, " ");
 
@@ -98,8 +99,10 @@ export async function generateGovernanceAssessment(
   if (!workspace) return notFound();
   if (!aspect) return notFound();
 
+  /* the industry is the client's, from SMP's client settings (stage 1b, spec 067 §4.4) */
+  const industry = profileAndBrand(await clientSettings(workspaceId), workspace).industry;
   // FR-003: refuse rather than generate a generic, industry-blind result.
-  if (!workspace.industry?.trim() || !workspace.governanceCompanySize?.trim() || !workspace.governanceJurisdiction?.trim()) {
+  if (!industry?.trim() || !workspace.governanceCompanySize?.trim() || !workspace.governanceJurisdiction?.trim()) {
     return validationError(
       "Set this workspace's company size, industry, and jurisdiction before generating a governance assessment."
     );
@@ -125,7 +128,7 @@ export async function generateGovernanceAssessment(
 
   const promptText = buildGovernancePrompt({
     companySize: workspace.governanceCompanySize,
-    industry: workspace.industry,
+    industry,
     jurisdiction: workspace.governanceJurisdiction,
     focusAreaLabel: aspect.name,
     alreadyTrackedChecklistTitles: [...trackedChecklistTitles],

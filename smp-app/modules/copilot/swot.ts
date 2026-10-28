@@ -16,7 +16,7 @@ import {
   AREAS, OFFERED, METHOD_WORD, AREA_WORD, TEMPLATE_OF, QUESTIONS, LETTERS, LETTER_WORD, MAX_ANSWER, isArea, isMethod,
   type Swot, type Area, newSwot, storedSwot, sanitizeSwot, swotOf, writeSwot, todoOf, doneCount, coverageOf, gatherDone, externalOn, analysesAgreed,
   swotCorpus, pdfPartsOf, swotInstruction, ANALYSIS_SCHEMA, DRAFT_SCHEMA, CHECK_SCHEMA, ANSWER_SCHEMA,
-  analysisQuestion, draftQuestion, checkQuestion, answerForQuestion, cleanAnalysis, saveSwot, nextSwotVersion,
+  analysisQuestion, draftQuestion, checkQuestion, answerForQuestion, cleanAnalysis, saveSwot, nextSwotVersion, CHANGE_SCHEMA, changeQuestion, MAX_SW_LOG,
 } from "../../lib/copilot-swot.ts";
 import {
   isSourceKind, SOURCE_WORD, MAX_SOURCE_TEXT, sourcesFor, oneSource, addSource, retagSource, mayDeleteSource, deleteSource,
@@ -83,8 +83,8 @@ export async function sourceFile(tenantId: string, id: string): Promise<Response
 }
 
 /* ── THE WRITES THAT NEED NO MODEL ────────────────────────────────────── */
-export const SWOT_ACTS = ["newSwot", "swotSave", "swotLink", "swotUnlink", "swotPrompt", "swotFinish", "addSource", "deleteSource", "retagSource"];
-export const SWOT_ASKS = ["swotAnswer", "swotAnalysis", "swotDraft", "swotCheck"];
+export const SWOT_ACTS = ["newSwot", "swotSave", "swotLink", "swotUnlink", "swotPrompt", "swotFinish", "swotProposal", "addSource", "deleteSource", "retagSource"];
+export const SWOT_ASKS = ["swotAnswer", "swotAnalysis", "swotDraft", "swotCheck", "swotChange"];
 
 export async function swotAct(c: any, b: any, who: Who): Promise<Out> {
   const kind = String(b.act || "");
@@ -173,6 +173,17 @@ export async function swotAct(c: any, b: any, who: Who): Promise<Out> {
       ...(await swotView(c, chat, pw)) });
   }
 
+  /* §654 C2 — the proposal is used or kept, by a press; either way it is
+     said in the chat's record, and the draft moves only on Use it. */
+  if (kind === "swotProposal") {
+    if (!stored.proposal) return refused(400, "There is no proposed change to decide on.");
+    const use = b.use === true || b.use === "true";
+    const note = use ? "Used — " + stored.proposal.reply : "Kept as it was.";
+    const s: Swot = { ...stored, proposal: null, log: [...stored.log, { w: "note" as const, t: note }].slice(-MAX_SW_LOG),
+      ...(use ? { draft: stored.proposal.draft, check: null, phase: "draft" as const } : {}) };
+    await writeSwot(c, id, s);
+    return out(200, { ok: true, ...(await swotView(c, chat, oneLine(b.placeWord))) });
+  }
   if (kind === "swotFinish") {
     /* Saved only when there is a draft and every analysis in the run is
        agreed, asked of the STORED state (§42), never of the page. */
@@ -244,6 +255,7 @@ export async function swotAsk(tenantId: string, b: any, who: Who): Promise<Out> 
   const kind = String(b.act);
   const placeWord = oneLine(b.placeWord).slice(0, 120);
   const context = String(b.context ?? "").slice(0, MAX_CONTEXT);
+  const ask = oneLine(b.ask).slice(0, 1000);
   const area = b.area;
   if (kind === "swotAnswer" && !(isArea(area) && Number.isInteger(Number(b.i)) && Number(b.i) >= 0 && Number(b.i) < QUESTIONS[area as Area].length))
     return refused(400, "Which question?");
@@ -261,6 +273,8 @@ export async function swotAsk(tenantId: string, b: any, who: Who): Promise<Out> 
     if (kind === "swotAnalysis" && !gatherDone(s) && brk() !== "swot-any-gather") return refused(400, "Finish the lines of the to-do list first.");
     if (kind === "swotDraft" && !analysesAgreed(s)) return refused(400, "Agree the micro and macro analyses first.");
     if (kind === "swotCheck" && !s.draft) return refused(400, "There is no draft to check yet.");
+    if (kind === "swotChange" && !s.draft) return refused(400, "Draft the SWOT first — then say what to change.");
+    if (kind === "swotChange" && !ask) return refused(400, "Say what to change.");
     if (b.swot) await writeSwot(c, id, s);
     const areas: Area[] = kind === "swotAnswer" || kind === "swotAnalysis" ? [area as Area] : kind === "swotDraft" ? AREAS.filter((a) => s.methods[a].length) : [];
     const want = s.links.filter((l) => areas.includes(l.area));
@@ -273,8 +287,8 @@ export async function swotAsk(tenantId: string, b: any, who: Who): Promise<Out> 
 
   const method = await partText(kind === "swotAnalysis" ? [area === "micro" ? "part3" : "part4"] : ["part2"]);
   const question = kind === "swotAnswer" ? answerForQuestion(area, Number(b.i))
-    : kind === "swotAnalysis" ? analysisQuestion(area) : kind === "swotDraft" ? draftQuestion(s) : checkQuestion(s);
-  const schema = kind === "swotAnswer" ? ANSWER_SCHEMA : kind === "swotAnalysis" ? ANALYSIS_SCHEMA(area) : kind === "swotDraft" ? DRAFT_SCHEMA : CHECK_SCHEMA;
+    : kind === "swotAnalysis" ? analysisQuestion(area) : kind === "swotDraft" ? draftQuestion(s) : kind === "swotChange" ? changeQuestion(s, ask) : checkQuestion(s);
+  const schema = kind === "swotAnswer" ? ANSWER_SCHEMA : kind === "swotAnalysis" ? ANALYSIS_SCHEMA(area) : kind === "swotDraft" ? DRAFT_SCHEMA : kind === "swotChange" ? CHANGE_SCHEMA : CHECK_SCHEMA;
   const r = await askFlowJson({ instruction: swotInstruction(method), corpus: swotCorpus(s, placeWord || chat.place, context, areas, material),
     corpusName: "THIS SWOT'S MATERIAL", parts: pdfPartsOf(material), question, schema, maxOutput: kind === "swotAnswer" ? 1024 : 8192 });
   if (!r.ok) {
@@ -303,6 +317,11 @@ export async function swotAsk(tenantId: string, b: any, who: Who): Promise<Out> 
       const d = sanitizeSwot({ draft: j }, now).draft;
       if (!d) return refused(503, failedLine("the answer had nothing in it"));
       g = { ...now, phase: "draft", draft: d, check: null };
+    } else if (kind === "swotChange") {
+      const d = sanitizeSwot({ draft: j }, now).draft;
+      if (!d) return refused(503, failedLine("the answer had nothing in it"));
+      const reply = oneLine(j.reply).slice(0, 1200) || "Here is the SWOT with that change.";
+      g = { ...now, proposal: { ask, reply, draft: d }, log: [...now.log, { w: "me" as const, t: ask }, { w: "ai" as const, t: reply }].slice(-MAX_SW_LOG) };
     } else {
       const agree = (Array.isArray(j.agree) ? j.agree : []).map((x: unknown) => oneLine(x).slice(0, 400)).filter(Boolean).slice(0, 8);
       const issues = (Array.isArray(j.issues) ? j.issues : []).map((x: any) => ({ letter: (LETTERS as readonly string[]).includes(String(x && x.letter)) ? String(x.letter) : "", text: oneLine(x && x.text).slice(0, 400) }))

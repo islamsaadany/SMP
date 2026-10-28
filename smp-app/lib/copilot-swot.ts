@@ -114,8 +114,15 @@ export type Swot = {
   micro: Analysis | null; macro: Analysis | null;
   draft: Record<Letter, Item[]> | null;
   check: { agree: string[]; issues: { letter: string; text: string }[] } | null;
+  /* §654 C2 — "say what to change": a change asked for in the chat comes
+     back as a PROPOSAL beside the draft, never written into it until the
+     person says Use it (§643); `log` keeps the asks, the answers and the
+     decisions in the order they happened (§644). */
+  proposal: { ask: string; reply: string; draft: Record<Letter, Item[]> } | null;
+  log: { w: "me" | "ai" | "note"; t: string }[];
   saved: { deliverableId: string; n: number; title: string } | null;
 };
+export const MAX_SW_LOG = 200;
 
 export const MAX_ANSWER = 2000;
 export const MAX_TEXT = 600;
@@ -136,7 +143,7 @@ export function newSwot(fromPlan: Partial<Record<Letter, unknown>> | null): Swot
     methods: { internal: [], micro: [], macro: [] },
     ans: { internal: QUESTIONS.internal.map(() => ""), micro: QUESTIONS.micro.map(() => ""), macro: QUESTIONS.macro.map(() => "") },
     q: { area: "internal", i: 0 }, links: [], promptAt: { micro: null, macro: null },
-    micro: null, macro: null, draft: null, check: null, saved: null,
+    micro: null, macro: null, draft: null, check: null, proposal: null, log: [], saved: null,
   };
 }
 
@@ -218,6 +225,10 @@ export function storedSwot(raw: unknown): Swot | null {
   fromPage.micro = s.micro && fromPage.micro ? { ...fromPage.micro, items: fromPage.micro.items.map((x, k) => ({ ...x, from: s.micro!.items[k].from })) } : fromPage.micro;
   fromPage.macro = s.macro && fromPage.macro ? { ...fromPage.macro, items: fromPage.macro.items.map((x, k) => ({ ...x, from: s.macro!.items[k].from })) } : fromPage.macro;
   fromPage.check = s.check; fromPage.saved = s.saved;
+  /* §654 C2 — the proposal and the log are the stored row's own, never the page's */
+  const pd = j.proposal && typeof j.proposal === "object" ? cleanDraft(j.proposal.draft) : null;
+  fromPage.proposal = pd ? { ask: oneLine(j.proposal.ask).slice(0, 1000), reply: String(j.proposal.reply ?? "").slice(0, 1200), draft: pd } : null;
+  fromPage.log = (Array.isArray(j.log) ? j.log : []).map((x: any) => ({ w: x && (x.w === "ai" || x.w === "note") ? x.w : "me", t: String((x && x.t) ?? "").slice(0, 1200) })).filter((x: any) => x.t).slice(-MAX_SW_LOG) as Swot["log"];
   if (s.saved && j.phase === "saved") fromPage.phase = "saved";
   return fromPage;
 }
@@ -330,6 +341,14 @@ export function draftQuestion(s: Swot): string {
   return "Draft the SWOT. Strengths and weaknesses come from the internal input; opportunities and threats from the micro and macro analyses." +
     " " + MIN_ITEMS + " to " + MAX_ITEMS + " items per letter where the material supports it — never pad. Each item: a short title, a one-sentence description, and the evidence." +
     (ext ? "\n\n" + ext : "");
+}
+/* §654 C2 — a change asked for in words: the whole SWOT comes back, changed
+   only where asked, with one sentence saying what changed. */
+export const CHANGE_SCHEMA = { type: "OBJECT", properties: { ...DRAFT_SCHEMA.properties, reply: { type: "STRING" } }, required: ["s", "w", "o", "t", "reply"] };
+export function changeQuestion(s: Swot, ask: string): string {
+  return "The client asks for this change to the SWOT: \"" + ask + "\". Return the WHOLE SWOT with only that change made — every other item exactly as it is, in the same order, same titles, descriptions and evidence." +
+    " Move an item between letters, drop one, reword one or add one only as asked; never pad or trim elsewhere. In `reply`, one sentence saying what you changed (or why nothing could be).\n\nTHE SWOT NOW:\n" +
+    LETTERS.map((L) => LETTER_WORD[L].toUpperCase() + ":\n" + (s.draft ? s.draft[L] : []).map((x) => "- " + x.title + ": " + x.description + (x.evidence ? " [" + x.evidence + "]" : "")).join("\n")).join("\n\n");
 }
 export function checkQuestion(s: Swot): string {
   return "Check this SWOT. In `agree` say what holds together; in `issues` name what does not (an item in the wrong letter, a weakness that is really a threat, an item with no evidence, a duplicate), with its letter. At most three of each. Short sentences.\n\n" +

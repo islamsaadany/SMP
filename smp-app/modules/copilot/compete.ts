@@ -11,7 +11,7 @@ import { doorPool } from "../../lib/auth.ts";
 import {
   DISCS, DISC_WORD, DISC_SUB, MARKET, INTERNAL, CLARITY_WORD, MAX_VALUES, isDisc, resultOf, cleanScores, cleanValue,
   type Compete, newCompete, sanitizeCompete, storedCompete, competeOf, writeCompete, todoOf, doneCount,
-  competeInstruction, SCORE_SCHEMA, VALUES_SCHEMA, REFINE_SCHEMA, scoreQuestion, valuesQuestion, refineQuestion, saveCompete,
+  competeInstruction, SCORE_SCHEMA, VALUES_SCHEMA, REFINE_SCHEMA, scoreQuestion, valuesQuestion, refineQuestion, saveCompete, nextCompeteVersion, MAX_CP_LOG,
 } from "../../lib/copilot-compete.ts";
 
 type Out = { status: number; body: Record<string, unknown> };
@@ -32,13 +32,14 @@ async function appliedOf(c: any, id: string): Promise<{ n: number; at: string; b
   const a = r.rows[0] && r.rows[0].a;
   return a && typeof a === "object" && Number(a.n) > 0 ? { n: Number(a.n), at: String(a.at || ""), by: String(a.by || "") } : null;
 }
-export async function competeView(c: any, chat: { id: string }) {
+export async function competeView(c: any, chat: { id: string; place?: string; section?: string }, pw?: string) {
   const s = await competeOf(c, chat.id);
   if (!s) return {};
   const todo = todoOf(s);
   const applied = s.saved && s.saved.deliverableId ? await appliedOf(c, s.saved.deliverableId) : null;
   const market = resultOf("market", s.market), internal = resultOf("internal", s.internal);
   return { compete: s, competeApplied: applied, competeTodo: todo, competeDone: doneCount(todo),
+    competeNextVersion: await nextCompeteVersion(c, chat as any, pw || chat.place || ""),
     competeFactors: { market: MARKET, internal: INTERNAL },
     competeResult: { market, internal, recommended: market.complete ? market.leader : "", aligned: market.complete && internal.complete && market.leader === internal.leader },
     competeWords: { disc: DISC_WORD, sub: DISC_SUB, clarity: CLARITY_WORD, discs: DISCS } };
@@ -64,7 +65,7 @@ export async function competeAct(c: any, b: any, who: Who): Promise<Out> {
     const chat = await newChat(c, { place, section: "compete", title: oneLine(b.title).slice(0, MAX_TITLE) || "Competitive Discipline", by });
     const s = newCompete();
     await writeCompete(c, chat.id, s);
-    return out(200, { ok: true, chat: { ...chat, compete: true }, ...(await competeView(c, chat)) });
+    return out(200, { ok: true, chat: { ...chat, compete: true }, ...(await competeView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   const id = String(b.id || "");
   if (!UUID.test(id)) return refused(400, "Which chat?");
@@ -77,7 +78,7 @@ export async function competeAct(c: any, b: any, who: Who): Promise<Out> {
 
   if (kind === "competeSave") {
     await writeCompete(c, id, sanitizeCompete(b.compete, stored));
-    return out(200, { ok: true, ...(await competeView(c, chat)) });
+    return out(200, { ok: true, ...(await competeView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   if (kind === "competeFinish") {
     /* Saved only when the STORED chat holds a table (§42), never the page. */
@@ -86,7 +87,7 @@ export async function competeAct(c: any, b: any, who: Who): Promise<Out> {
     const r = await saveCompete(c, chat, stored, placeWord, by);
     const s: Compete = { ...stored, phase: "saved", saved: { deliverableId: r.deliverableId, n: r.n, title: r.title } };
     await writeCompete(c, id, s);
-    return out(200, { ok: true, saved: s.saved, ...(await competeView(c, chat)) });
+    return out(200, { ok: true, saved: s.saved, ...(await competeView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   return refused(400, "Not something the Copilot does.");
 }
@@ -153,10 +154,12 @@ export async function competeAsk(tenantId: string, b: any, _who: Who): Promise<O
       g = sanitizeCompete({ table: { discipline: now.table.discipline, values: vals }, phase: "table" }, now);
       g.alts = (Array.isArray(j.alternatives) ? j.alternatives : []).map((x: unknown) => oneLine(x).slice(0, 160)).filter(Boolean).slice(0, 4);
       g.reply = String(j.reply ?? "").trim().slice(0, 1200);
+      /* §654 C1 — the ask and its answer kept in order, so the chat reads as it happened. */
+      g.log = now.log.concat([{ w: "me", t: ask }], g.reply ? [{ w: "ai", t: g.reply }] : []).slice(-MAX_CP_LOG);
     }
     if (kind !== "competeRefine") { g.alts = []; g.reply = ""; }
     await writeCompete(c, id, g);
-    return out(200, { ok: true, ...(await competeView(c, chat)) });
+    return out(200, { ok: true, ...(await competeView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   });
 }
 export { isDisc };

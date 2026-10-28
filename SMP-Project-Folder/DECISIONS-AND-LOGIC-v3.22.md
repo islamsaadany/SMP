@@ -70274,6 +70274,17 @@ Islam: *"The platform pages are taking too long to load while we already applied
 | the console's cards (two clients) | 46 | 8 |
 | the console's My work (two clients) | 16 | 2 |
 
-The whole-graph read is ONE line in that log (its 33 selects go as one statement), so "statements" understates it. The after figures are taken on the changed build and recorded in the next commit, with the shell check re-run on main's own build for the ten reds below.
+After (this build, the same clients, the same way):
 
-**CHECKED** on this tree: `npm run typecheck` reports only main's own three (`PageProps`/`LayoutProps` on the Processes report pages, Next's generated types, identical before the change); `npm run build` clean; `checks/modules.mjs` **234 / 0**; `checks/memory-api.mjs` **36 / 0**; `checks/instant-nav.mjs` **19 / 0** (the press still shows the next page's shape within 150 ms everywhere); `checks/door-landing.mjs` **136 / 5**, main's own five (the owner row's Insights eye, recorded as main's at §622 and since); `checks/shell.mjs` **503 / 10** — *the client's settings draw the Copilot row with its switch* is main's (proved at §622.2), the other nine are the Copilot chat's layout measurements (the box's line height, the rail strip, the to-do column's scroll), which this change draws nothing of; their run on main's own build is in progress and is recorded in the next commit rather than assumed (§303).
+| request | statements | transactions |
+|---|---|---|
+| the office opens Strategy | 9 | 1 |
+| the office opens the Internal Tracker | 22 | 3 |
+| the office opens the client's Setup | 11 | 1 |
+| a client's own person opens Strategy | 28 | 1 |
+| the console's cards (two clients) | 34 | 4 |
+| the console's My work (two clients) | 16 | 2 |
+
+The whole-graph read is ONE line in that log (its 33 selects go as one statement), so "statements" understates what the client's own person no longer pays: that graph was read twice and is read once. The Tracker document reads one statement MORE (the route now asks the library's categories for every module document, one indexed read on the connection it already holds) and its own three transactions are the module's own, not the route's. My work's reads are the same reads, four clients at a time rather than one after another, which this count cannot show. **The times above are local** (a round trip to this database is a fraction of a millisecond), so they are the same before and after; on the live site each transaction is connect · BEGIN · set_config · the reads · COMMIT against a database 20–40 ms away, and that is what each one removed takes off the press.
+
+**CHECKED** on this tree: `npm run typecheck` reports only main's own three (`PageProps`/`LayoutProps` on the Processes report pages, Next's generated types, identical before the change); `npm run build` clean; `checks/modules.mjs` **234 / 0**; `checks/memory-api.mjs` **36 / 0**; `checks/instant-nav.mjs` **19 / 0** (the press still shows the next page's shape within 150 ms everywhere); `checks/door-landing.mjs` **136 / 5**, main's own five (the owner row's Insights eye, recorded as main's at §622 and since); `checks/shell.mjs` **503 / 10** — *the client's settings draw the Copilot row with its switch* is main's (proved at §622.2), the other nine are the Copilot chat's layout measurements (the box's line height, the rail strip, the to-do column's scroll), which this change draws nothing of. **PROVED MAIN'S, NOT ASSUMED (§303)**: `checks/shell.mjs` on main's own build (706ec67, its own fresh `npm run build`, the same database) reads **502 / 11** — the same ten lines red, and one more of main's own (*the card fills the cards from the plan, each marked On the plan, and stores it*, §653) that passed on this tree.

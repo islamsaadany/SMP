@@ -80,6 +80,9 @@ const createProcessSchema = z.object({
   parentProcessId: z.string().min(1).optional().or(z.literal("")),
   categoryId: z.string().min(1).optional().or(z.literal("")),
   branchFromStepId: z.string().min(1).optional().or(z.literal("")),
+  /** Stage 4: its owner, from the client register; and the request for a new process it answers, closed once it exists. */
+  ownerPersonId: z.string().min(1).optional().or(z.literal("")),
+  fromSuggestionId: z.string().min(1).optional().or(z.literal("")),
 });
 
 const MAX_CODE_GENERATION_ATTEMPTS = 5;
@@ -112,6 +115,12 @@ export async function createProcess(
     if (!category || category.firmId !== workspace.firmId) return notFound();
   }
 
+  const ownerPersonId = parsed.data.ownerPersonId || undefined;
+  if (ownerPersonId) {
+    const owner = await prisma.person.findFirst({ where: { id: ownerPersonId, workspaceId: parsed.data.workspaceId, archivedAt: null, smpKey: { not: null } }, select: { id: true } });
+    if (!owner) return validationError("The owner is picked from the client register");
+  }
+
   // No cycle check on create: the process doesn't exist yet, so it can't be
   // anywhere in a branch chain.
   const branchFromStepId = parsed.data.branchFromStepId || undefined;
@@ -142,9 +151,15 @@ export async function createProcess(
           parentProcessId,
           categoryId,
           branchFromStepId,
+          ownerPersonId,
         },
       });
-      revalidatePath(`/${parsed.data.workspaceId}/processes/processes`);
+      if (parsed.data.fromSuggestionId)
+        await prisma.processSuggestion.updateMany({
+          where: { id: parsed.data.fromSuggestionId, workspaceId: parsed.data.workspaceId, processId: null },
+          data: { processId: process.id, state: "CLOSED", closedAt: new Date() },
+        });
+      revalidatePath(`/${parsed.data.workspaceId}/processes`, "layout");
       return ok({ id: process.id, code: process.code });
     } catch (error) {
       const isUniqueConflict =

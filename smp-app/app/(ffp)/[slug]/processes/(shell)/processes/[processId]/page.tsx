@@ -11,6 +11,7 @@ import { StaffLink } from "../../staff-link";
 import { LifecyclePanel } from "./lifecycle-panel";
 import { AddControlForm, DeleteControlButton, AddNonConformanceForm, NonConformanceStatus } from "./quality-forms";
 import { getMessages } from "@/ffp/lib/i18n/server";
+import { OwnerPicker } from "./owner-picker";
 
 /* The process page's own sections in the builder's menu (builder-frame.tsx); the Map, RACI, Authority and Check with AI are pages of their own. */
 const TABS = ["lifecycle", "risks", "quality", "people", "compliance", "connections"] as const;
@@ -107,6 +108,14 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
 
         {tab === "lifecycle" && (
           <>
+            <Card title={bp.ownerPick}>
+              <OwnerPicker
+                workspaceId={workspaceId}
+                processId={processId}
+                ownerId={process.ownerPersonId}
+                people={registerPeople.filter((x) => x.smpKey).map((x) => ({ id: x.id, name: x.name, role: people.find((y) => y.id === x.id)?.role ?? null }))}
+              />
+            </Card>
             <LifecyclePanel
               workspaceId={workspaceId}
               processId={processId}

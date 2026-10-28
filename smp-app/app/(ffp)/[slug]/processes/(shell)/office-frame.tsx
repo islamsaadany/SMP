@@ -25,7 +25,7 @@ function sectionOf(rest: string): Section {
   return "other";
 }
 
-export type OfficeCounts = { total: number; drafts: number; sentBack: number; gaps: number; toHandle: number };
+export type OfficeCounts = { total: number; drafts: number; sentBack: number; gaps: number; suggestions: number; toHandle: number };
 
 export function OfficeFrame({
   workspaceId,
@@ -66,6 +66,7 @@ export function OfficeFrame({
       : null;
   const desc = sec === "all" ? b.desc.all(counts.total, counts.drafts) : b.desc[sec];
   const tiles = [
+    { n: counts.suggestions, label: b.tiles.suggestions, hot: counts.suggestions > 0 },
     { n: counts.sentBack, label: b.tiles.sentBack, late: counts.sentBack > 0 },
     { n: counts.drafts, label: b.tiles.drafts },
     { n: counts.gaps, label: b.tiles.gaps, late: counts.gaps > 0 },

@@ -28,7 +28,8 @@ export async function readingFor(workspaceId: string, personKey: string): Promis
     return {
       published: rows.filter((r) => r.status === "PUBLISHED").length,
       waiting: todo.filter((t) => t.kind === "read").length,
-      approvals: todo.filter((t) => t.kind !== "read").length,
+      /* the bar names two things: versions to read and things to approve (the plan included); reviews and answers wait on To do */
+      approvals: todo.filter((t) => t.kind === "approve" || t.kind === "plan").length,
     };
   } catch {
     return null;

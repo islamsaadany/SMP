@@ -25,7 +25,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   const q = (typeof qRaw === "string" ? qRaw : "").trim();
   /* Every heading sorts (spec 067 §4.2, Q8); a sorted list is flat, like a searched one. */
   const sortRaw = typeof searchParams["sort"] === "string" ? searchParams["sort"] : "";
-  const sort = (["name", "state", "ready", "gaps"] as const).find((k) => k === sortRaw) ?? null;
+  const sort = (["name", "owner", "state", "ready", "gaps"] as const).find((k) => k === sortRaw) ?? null;
   const desc = searchParams["dir"] === "desc";
 
   const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: workspaceId } });
@@ -35,7 +35,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   const access = await requireWorkspaceAccess(workspaceId, "VIEWER");
   const canEdit = access.ok && hasSufficientAccess(access.data.accessLevel, "EDITOR");
 
-  const [processes, allCategories, deletedCount] = await Promise.all([
+  const [processes, allCategories, deletedCount, registerPeople] = await Promise.all([
     prisma.process.findMany({
       where: {
         workspaceId,
@@ -46,6 +46,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                 { name: { contains: q, mode: "insensitive" } },
                 { code: { contains: q, mode: "insensitive" } },
                 { category: { name: { contains: q, mode: "insensitive" } } },
+                { owner: { name: { contains: q, mode: "insensitive" } } },
                 { steps: { some: { label: { contains: q, mode: "insensitive" } } } },
                 { activities: { some: { name: { contains: q, mode: "insensitive" } } } },
               ],
@@ -57,6 +58,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
         raciMatrixStatus: true,
         parentProcess: true,
         category: true,
+        owner: { select: { name: true } },
         // Steps feed the "Branches from → starts at step" picker; the branch
         // origin feeds the sub-line under a branching process's name.
         steps: { select: { id: true, label: true }, orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
@@ -66,6 +68,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
     }),
     prisma.processCategory.findMany({ where: { firmId: workspace.firmId } }),
     prisma.process.count({ where: { workspaceId, archivedAt: { not: null } } }),
+    /* who can own a process: the client register (stage 4, Islam: "all names from register") */
+    prisma.person.findMany({ where: { workspaceId, archivedAt: null, smpKey: { not: null } }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
 
   /* A process's department is one of the client's Official BU names (stage 1b, spec 067 §4.4), in the
@@ -127,6 +131,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   const factsById = new Map(processes.map((p) => [p.id, facts(p)]));
   const KEY = {
     name: (p: (typeof processes)[number]) => p.name.toLowerCase(),
+    owner: (p: (typeof processes)[number]) => (p.owner?.name ?? "\uffff").toLowerCase(),
     state: (p: (typeof processes)[number]) => factsById.get(p.id)!.state.rank,
     ready: (p: (typeof processes)[number]) => factsById.get(p.id)!.ready,
     gaps: (p: (typeof processes)[number]) => factsById.get(p.id)!.gaps,
@@ -168,7 +173,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
           type="search"
           name="q"
           defaultValue={q}
-          placeholder="Search by name, code, department, or task…"
+          placeholder="Search by name, code, owner, department, or task…"
           aria-label="Search processes"
           className="w-full max-w-sm rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
         />
@@ -213,6 +218,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
               {(
                 [
                   ["name", "Process"],
+                  ["owner", "Owner"],
                   ["state", "Where it is"],
                   ["ready", "Ready"],
                   ["gaps", "Gaps"],
@@ -281,6 +287,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                     </div>
                   </div>
                 </td>
+                <td className="border-s border-[#E6EAF0] px-3 py-2.5">{p.owner?.name ?? <span className="text-[#636C79]">—</span>}</td>
                 <td className="border-s border-[#E6EAF0] px-3 py-2.5">
                   <span className={`inline-flex whitespace-nowrap rounded-full px-[9px] py-px text-[11.5px] font-semibold ${TONE[f.state.tone]}`}>{f.state.label}</span>
                 </td>
@@ -336,7 +343,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
             })}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
                   {q ? `No processes match "${q}".` : "No processes yet — create one below."}
                 </td>
               </tr>
@@ -352,6 +359,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
           workspaceId={workspaceId}
           processes={processOptions}
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          people={registerPeople}
+          prefill={typeof searchParams["new"] === "string" ? { name: searchParams["new"], fromSuggestionId: typeof searchParams["from"] === "string" ? searchParams["from"] : "" } : null}
         />
         <GenerateTemplateForm workspaceId={workspaceId} />
         {canEdit && <ImportPanel workspaceId={workspaceId} />}

@@ -12,6 +12,9 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMessages } from "@/ffp/lib/i18n/client";
 import type { ReadProcess, ReadStep } from "@/ffp/lib/data/reading-side";
+import { SuggestButton } from "../dialogs";
+
+type Suggest = { workspaceId: string; processId: string; steps: { id: string; n: number; label: string }[] } | null;
 
 type Edge = { d: string; lx: number; ly: number; label: string | null };
 
@@ -63,7 +66,7 @@ export function StepDetail({ step }: { step: ReadStep | undefined }) {
   );
 }
 
-export function ReadingFlow({ steps, lanes, connections, toSteps }: Pick<ReadProcess, "steps" | "lanes" | "connections"> & { toSteps: string | null }) {
+export function ReadingFlow({ steps, lanes, connections, toSteps, suggest }: Pick<ReadProcess, "steps" | "lanes" | "connections"> & { toSteps: string | null; suggest: Suggest }) {
   const m = useMessages().reading.page;
   const router = useRouter();
   const arrow = useId().replace(/:/g, "");
@@ -191,6 +194,16 @@ export function ReadingFlow({ steps, lanes, connections, toSteps }: Pick<ReadPro
         </div>
         <aside className="grid gap-2.5 rounded-lg border border-[#D6DCE5] bg-white px-3.5 py-3" aria-live="polite">
           <StepDetail step={steps.find((s) => s.id === sel)} />
+          {suggest && sel && (
+            <div>
+              <SuggestButton
+                {...suggest}
+                stepId={sel}
+                label={m.suggestStep}
+                className="rounded-md border border-[#D6DCE5] bg-white px-2.5 py-1 text-[12.5px] font-semibold text-[#171B22] hover:border-[#C9A24D]"
+              />
+            </div>
+          )}
         </aside>
       </div>
     </>

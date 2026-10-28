@@ -11,8 +11,9 @@ import { Btn, Chip, Code, Flags, Head, Pill, TableBox, daysUntil, td, type Flag,
  * PROCESSES, ON THE READING SIDE (spec 067 §3.1; Islam: "the default one is the
  * all processes as is and then people see the other tables they should see as
  * filters", then "A": the tab is Processes, its first filter All). One page,
- * three filters: All, what is in force, searchable and sortable, with the
- * person's part; Yours, what they approve, in any state; You have a step in.
+ * three filters: All, what is in force, searchable and sortable, with its
+ * owner and the person's part; Yours, what they own or approve, in any state;
+ * You have a step in.
  * A filter shows only when it has rows. In Yours and You have a step in each
  * row carries its own button, read from the same list as To do.
  */
@@ -37,11 +38,15 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
   /* the buttons a row carries: whatever waits on this person for this process */
   const acts = (id: string) =>
     todo
-      .filter((t): t is Extract<TodoItem, { row: ReadRow }> => t.kind !== "plan" && t.row.id === id)
+      .filter((t): t is Extract<TodoItem, { row: ReadRow }> => "row" in t && t.row.id === id)
       .map((t) =>
         t.kind === "approve" ? (
           <Btn key="a" href={`${base}/${id}`} gold>
             {m.act.approve}
+          </Btn>
+        ) : t.kind === "review" ? (
+          <Btn key="v" href={`${base}/${id}?tab=summary`} gold>
+            {m.act.review(date(t.row.nextReviewDue))}
           </Btn>
         ) : (
           <Btn key="r" href={`${base}/${id}?tab=steps`}>
@@ -49,7 +54,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
           </Btn>
         )
       );
-  const openable = (r: ReadRow) => r.status === "PUBLISHED" || (r.approves && (r.status === "IN_REVIEW" || r.status === "APPROVED"));
+  const openable = (r: ReadRow) => r.status === "PUBLISHED" || ((r.approves || r.owns) && (r.status === "IN_REVIEW" || r.status === "APPROVED"));
   const name = (r: ReadRow) => (
     <>
       <Code>{r.code}</Code>{" "}
@@ -85,7 +90,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
           out.push(d < 0 ? ["bad", m.flags.reviewLate] : d <= 30 ? ["warn", m.flags.reviewIn(d)] : ["", m.flags.reviewOn(date(r.nextReviewDue))]);
         }
       }
-      if (r.status === "IN_REVIEW") out.push(["warn", m.flags.yourApproval]);
+      if (r.status === "IN_REVIEW") out.push(["warn", r.approves ? m.flags.yourApproval : m.state.inReview]);
       if (r.status === "APPROVED") out.push(["good", m.flags.approved(r.version)]);
       if (r.status === "DRAFT" && r.returnReason) out.push(["warn", m.flags.sentBack]);
       return out;
@@ -105,7 +110,10 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
                     {r.department && <span className="block text-xs text-[#636C79]">{r.department}</span>}
                   </td>
                   <td className={td}>
-                    <Chip tone="navy">{m.part.approver}</Chip>
+                    <span className="flex flex-wrap gap-1">
+                      {r.owns && <Chip tone="gold">{m.part.owner}</Chip>}
+                      {r.approves && <Chip tone="navy">{m.part.approver}</Chip>}
+                    </span>
                   </td>
                   <td className={td}>
                     <Pill tone={tone}>{label}</Pill>
@@ -135,7 +143,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
                 <tr key={r.id}>
                   <td className={td}>
                     {name(r)}
-                    {r.department && <span className="block text-xs text-[#636C79]">{r.department}</span>}
+                    {(r.ownerName || r.department) && <span className="block text-xs text-[#636C79]">{r.ownerName ? m.ownerLine(r.ownerName) : r.department}</span>}
                   </td>
                   <td className={td}>{r.mySteps.join(", ")}</td>
                   <td className={td}>
@@ -156,12 +164,12 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
   } else {
     /* All: what is in force, searchable and sortable, with the person's part */
     const q = one("q").trim();
-    const sort = (["name", "since", "part"] as const).find((k) => k === one("sort")) ?? "name";
+    const sort = (["name", "owner", "since", "part"] as const).find((k) => k === one("sort")) ?? "name";
     const desc = one("dir") === "desc";
-    const part = (r: ReadRow) => (r.approves ? m.part.approver : r.mySteps.length ? m.part.step : "");
-    const key = { name: (r: ReadRow) => r.name, since: (r: ReadRow) => (r.since ? r.since.toISOString() : ""), part: (r: ReadRow) => part(r) || "￿" }[sort];
+    const part = (r: ReadRow) => (r.owns ? m.part.owner : r.approves ? m.part.approver : r.mySteps.length ? m.part.step : "");
+    const key = { name: (r: ReadRow) => r.name, owner: (r: ReadRow) => r.ownerName ?? "\uffff", since: (r: ReadRow) => (r.since ? r.since.toISOString() : ""), part: (r: ReadRow) => part(r) || "￿" }[sort];
     const shown = f.all
-      .filter((r) => !q || `${r.code} ${r.name}`.toLowerCase().includes(q.toLowerCase()))
+      .filter((r) => !q || `${r.code} ${r.name} ${r.ownerName ?? ""}`.toLowerCase().includes(q.toLowerCase()))
       .sort((a, b) => key(a).localeCompare(key(b)) * (desc ? -1 : 1) || a.name.localeCompare(b.name));
     const sortHref = (k: typeof sort) => {
       const p = new URLSearchParams();
@@ -193,13 +201,14 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
           <span className="text-[12.5px] text-[#636C79]">{q ? m.matchNote(shown.length, f.all.length) : m.inForceNote(f.all.length)}</span>
         </form>
         <TableBox>
-          <Head cols={[col("name", m.head.process), col("since", m.head.since), col("part", m.head.part), <span key="o" className="sr-only">{m.head.open}</span>]} />
+          <Head cols={[col("name", m.head.process), col("owner", m.head.owner), col("since", m.head.since), col("part", m.head.part), <span key="o" className="sr-only">{m.head.open}</span>]} />
           <tbody className="ffp-zebra">
             {shown.map((r) => (
               <tr key={r.id}>
                 <td className={td}>{name(r)}</td>
+                <td className={td}>{r.ownerName ?? <span className="text-[#636C79]">—</span>}</td>
                 <td className={`${td} whitespace-nowrap`}>{m.since(r.version, date(r.since))}</td>
-                <td className={td}>{part(r) ? <Chip tone={r.approves ? "gold" : "navy"}>{part(r)}</Chip> : <span className="text-[#636C79]">—</span>}</td>
+                <td className={td}>{part(r) ? <Chip tone={r.owns || r.approves ? "gold" : "navy"}>{part(r)}</Chip> : <span className="text-[#636C79]">—</span>}</td>
                 <td className={`${td} text-end`}>
                   <Btn href={`${base}/${r.id}`}>{m.open}</Btn>
                 </td>

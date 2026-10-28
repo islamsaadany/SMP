@@ -1,4 +1,7 @@
 import { requireOffice } from "@/ffp/lib/auth/require-office";
+import { officeSuggestions, stepName } from "@/ffp/lib/data/office-suggestions";
+import { getLocale, getMessages } from "@/ffp/lib/i18n/server";
+import { formatDate } from "@/ffp/lib/i18n/locale";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
@@ -182,8 +185,25 @@ export default async function ProcessMapPage(
     };
   }
 
+  /* a draft started from a suggestion: the person's words sit at the top (spec 067 §4.3) */
+  const [drafting, msgs, locale] = await Promise.all([officeSuggestions(workspaceId, ["IN_DRAFT"], processId), getMessages(), getLocale()]);
+  const bp = msgs.builder.page;
+
   return (
     <main className="w-full">
+      {drafting.length > 0 && (
+        <div className="mb-3 grid gap-1.5">
+          {drafting.map((x) => (
+            <div key={x.id} className="rounded-lg border border-[#C9A24D] bg-[#FBF6E9] px-3 py-2.5 text-[13.5px] text-[#171B22]">
+              <b>{bp.fromSuggestion(x.byName, stepName(x, msgs.reading.page.step))}</b> · {formatDate(x.createdAt, locale)}
+              <span className="block">“{x.text}”</span>
+              {x.why && <span className="block text-[12.5px] text-[#636C79]">{x.why}</span>}
+              {x.answerText && <span className="block text-[12.5px] text-[#636C79]">{bp.officeAsked(x.answerText)}</span>}
+              {x.replyText && <span className="block text-[12.5px]">{bp.theyReplied(x.byName, x.replyText)}</span>}
+            </div>
+          ))}
+        </div>
+      )}
       {/* The flow first (spec 067 §4.3), then adding steps, then what the process is for and its document control. */}
       {process.steps.length === 0 && (
         <div className="mb-4 w-full">

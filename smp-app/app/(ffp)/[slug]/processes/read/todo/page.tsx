@@ -4,14 +4,15 @@ import { formatDate } from "@/ffp/lib/i18n/locale";
 import { getLocale, getMessages } from "@/ffp/lib/i18n/server";
 import { Sheet } from "../../band";
 import { HomeHead } from "../home-head";
-import { Btn, Code, lbl, note, panel } from "../ui";
+import { Btn, Code, daysUntil, lbl, note, panel } from "../ui";
+import { ReplyButton } from "../dialogs";
 
 /**
  * TO DO (spec 067 §3.1): what waits on the person, grouped: to approve, to
- * read. Each item has its button, and a short "Done lately" sits beside it.
- * Acting here or on a Processes row clears it in both, because both read the
- * one list (reading-side.ts todoOf). Reviews and answers to suggestions join
- * in stage 4, with owners and suggestions.
+ * review (the yearly review of what they own), to read, and the office's
+ * answers to their suggestions. Each item has its button, and a short "Done
+ * lately" sits beside it. Acting here or on a Processes row clears it in both,
+ * because both read the one list (reading-side.ts todoOf).
  */
 export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo">) {
   const { slug } = await props.params;
@@ -25,12 +26,17 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
   const base = `/${slug}/processes/read`;
 
   const card = (x: TodoItem) => {
+    const step = (id: string | null, label: string | null) => (id && label ? label : null);
     const c =
       x.kind === "plan"
         ? { key: "plan", code: null, name: t.planName, what: t.planWhat, meta: t.planMeta, why: t.planWhy, act: m.act.plan, href: `${base}/priorities` }
         : x.kind === "approve"
           ? { key: x.row.id, code: x.row.code, name: x.row.name, what: t.approveWhat(x.row.version), meta: t.approveMeta(x.row.submittedByName, date(x.row.submittedAt)), why: t.approveWhy, act: m.act.approve, href: `${base}/${x.row.id}` }
-          : { key: x.row.id, code: x.row.code, name: x.row.name, what: t.readWhat(x.row.version, date(x.row.since)), meta: t.readMeta(x.row.mySteps), why: t.readWhy, act: m.act.read, href: `${base}/${x.row.id}?tab=steps` };
+          : x.kind === "review"
+            ? { key: `v${x.row.id}`, code: x.row.code, name: x.row.name, what: t.reviewWhat(daysUntil(x.row.nextReviewDue!) < 0, date(x.row.nextReviewDue)!), meta: t.reviewMeta, why: t.reviewWhy, act: m.act.review(date(x.row.nextReviewDue)!), href: `${base}/${x.row.id}?tab=summary` }
+            : x.kind === "read"
+              ? { key: x.row.id, code: x.row.code, name: x.row.name, what: t.readWhat(x.row.version, date(x.row.since)), meta: t.readMeta(x.row.mySteps), why: t.readWhy, act: m.act.read, href: `${base}/${x.row.id}?tab=steps` }
+              : { key: x.s.id, code: null, name: x.s.processName ?? x.s.text.split(":")[0], what: t.answerWhat(step(x.s.stepId, x.s.stepLabel)), meta: t.answerMeta(x.s.answerBy, date(x.s.answeredAt)), why: t.answerWhy, act: m.act.reply, href: null };
     return (
       <div key={c.key} className="mt-1.5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 gap-y-1.5 rounded-lg border border-s-4 border-[#D6DCE5] border-s-[#C9A24D] bg-white px-4 py-3.5 max-sm:grid-cols-1">
         <div>
@@ -42,11 +48,26 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
           <p className={note}>
             {c.meta} · {c.why}
           </p>
+          {x.kind === "answer" && (
+            <blockquote className="mt-1.5 border-s-[3px] border-[#D6DCE5] bg-[#F5F7FA] px-2.5 py-1.5 text-[13px] text-[#414A58]">{x.s.answerText}</blockquote>
+          )}
         </div>
         <div className="flex flex-wrap justify-end gap-1.5 max-sm:justify-start">
-          <Btn href={c.href} gold>
-            {c.act}
-          </Btn>
+          {x.kind === "answer" ? (
+            <ReplyButton
+              workspaceId={slug}
+              suggestionId={x.s.id}
+              suggestion={x.s.text}
+              answer={x.s.answerText ?? ""}
+              answerBy={t.answerMeta(x.s.answerBy, date(x.s.answeredAt))}
+              label={c.act}
+              className="inline-flex whitespace-nowrap rounded-md border border-[#C9A24D] bg-[#C9A24D] px-2.5 py-1 text-[12.5px] font-semibold text-[#16325C]"
+            />
+          ) : (
+            <Btn href={c.href!} gold>
+              {c.act}
+            </Btn>
+          )}
         </div>
       </div>
     );
@@ -69,8 +90,10 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
         <div>
           {todo.length ? (
             <>
-              {group(t.approve, todo.filter((x) => x.kind !== "read"))}
+              {group(t.approve, todo.filter((x) => x.kind === "approve" || x.kind === "plan"))}
+              {group(t.review, todo.filter((x) => x.kind === "review"))}
               {group(t.read, todo.filter((x) => x.kind === "read"))}
+              {group(t.answers, todo.filter((x) => x.kind === "answer"))}
             </>
           ) : (
             <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">
@@ -85,7 +108,18 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
             <ul className="mt-1.5">
               {done.map((d, i) => (
                 <li key={i} className="border-t border-[#E6EAF0] py-[5px] text-[13px] text-[#636C79] first:border-t-0">
-                  {d.kind === "read" ? t.doneRead(d.name, d.version) : t.doneApproved(d.name, d.version)} · {date(d.at)}
+                  {d.kind === "read"
+                    ? t.doneRead(d.name, d.version)
+                    : d.kind === "approved"
+                      ? t.doneApproved(d.name, d.version)
+                      : d.kind === "confirmed"
+                        ? t.doneConfirmed(d.name)
+                        : d.kind === "suggested"
+                          ? t.doneSuggested(d.name)
+                          : d.kind === "asked"
+                            ? t.doneAsked(d.name)
+                            : t.doneReplied(d.name)}{" "}
+                  · {date(d.at)}
                 </li>
               ))}
             </ul>

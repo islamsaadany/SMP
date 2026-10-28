@@ -43,17 +43,18 @@ export default async function WorkspaceLayout(
   /* The band's counts (spec 067 §4.2): drafts, those the approver sent back,
      and the gaps the map, RACI and Authority pages flag. To handle counts the
      same things its page lists. */
-  const [statuses, gaps, toMatch] = await Promise.all([
+  const [statuses, gaps, toMatch, suggestions] = await Promise.all([
     prisma.process.findMany({ where: { workspaceId, archivedAt: null }, select: { id: true, lifecycleStatus: true, returnReason: true } }),
     gapsByProcess(workspaceId),
     unmatchedRoles(workspaceId),
+    prisma.processSuggestion.count({ where: { workspaceId, state: { in: ["NEW", "REPLIED"] } } }),
   ]);
   const drafts = statuses.filter((p) => p.lifecycleStatus === "DRAFT");
   const sentBack = drafts.filter((p) => p.returnReason).length;
   const approved = statuses.filter((p) => p.lifecycleStatus === "APPROVED").length;
   const gapTotal = [...gaps.values()].reduce((a, n) => a + n, 0);
   const drawnWithGaps = statuses.filter((p) => p.lifecycleStatus !== "PUBLISHED" && (gaps.get(p.id) ?? 0) > 0).length;
-  const counts = { total: statuses.length, drafts: drafts.length, sentBack, gaps: gapTotal, toHandle: sentBack + approved + (drawnWithGaps ? 1 : 0) + (toMatch.length ? 1 : 0) };
+  const counts = { total: statuses.length, drafts: drafts.length, sentBack, gaps: gapTotal, suggestions, toHandle: suggestions + sentBack + approved + (drawnWithGaps ? 1 : 0) + (toMatch.length ? 1 : 0) };
   /* The client's name and brand as SMP's client settings hold them now (stage 1b, spec 067 §4.4): the
      workspace row keeps the name it was made with, and its own logo and colours only until client settings
      hold some. */

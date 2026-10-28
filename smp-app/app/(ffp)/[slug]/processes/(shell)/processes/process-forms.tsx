@@ -81,13 +81,21 @@ export function CreateProcessForm({
   workspaceId,
   processes,
   categories,
+  people,
+  prefill,
 }: {
   workspaceId: string;
   processes: ProcessOption[];
   categories: CategoryOption[];
+  /** Who can own it: the client register (stage 4). */
+  people: { id: string; name: string }[];
+  /** A request for a new process from To handle's Create it: its name, and the request it closes. */
+  prefill: { name: string; fromSuggestionId: string } | null;
 }) {
   const canEdit = useCanEdit();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(prefill?.name ?? "");
+  const [ownerPersonId, setOwnerPersonId] = useState("");
+  const [fromSuggestionId, setFromSuggestionId] = useState(prefill?.fromSuggestionId ?? "");
   const [parentProcessId, setParentProcessId] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [branch, setBranch] = useState({ sourceProcessId: "", stepId: "" });
@@ -114,12 +122,16 @@ export function CreateProcessForm({
             parentProcessId: parentProcessId || undefined,
             categoryId: categoryId || undefined,
             branchFromStepId: branch.stepId || undefined,
+            ownerPersonId: ownerPersonId || undefined,
+            fromSuggestionId: fromSuggestionId || undefined,
           });
           if (!result.ok) {
             setError(result.error === "VALIDATION_ERROR" ? result.message ?? "Invalid input" : result.error);
             return;
           }
           setName("");
+          setOwnerPersonId("");
+          setFromSuggestionId("");
           setParentProcessId("");
           setBranch({ sourceProcessId: "", stepId: "" });
           setLastCreatedCode(result.data.code);
@@ -153,6 +165,21 @@ export function CreateProcessForm({
         </select>
       </label>
       <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+        Owner
+        <select
+          value={ownerPersonId}
+          onChange={(e) => setOwnerPersonId(e.target.value)}
+          className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+        >
+          <option value="">— no owner yet —</option>
+          {people.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
         Parent process
         <select
           value={parentProcessId}
@@ -181,7 +208,8 @@ export function CreateProcessForm({
         + New Process
       </button>
 
-      <span className="self-center text-xs text-slate-500">Codes are assigned automatically. Departments are the client's Official BU list, set in client settings.</span>
+      <span className="self-center text-xs text-slate-500">Codes are assigned automatically. Departments are the client's Official BU list and owners its register, both set in client settings.</span>
+      {fromSuggestionId && <span className="w-full text-xs text-[#8A6B22]">Creating it closes the request for this process on To handle.</span>}
       {error && <span className="w-full text-xs text-red-600">{error}</span>}
       {lastCreatedCode && (
         <span className="w-full text-xs text-emerald-700">

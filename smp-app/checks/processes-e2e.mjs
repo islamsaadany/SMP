@@ -224,6 +224,53 @@ await A.page.goto(L(P2), { waitUntil: "networkidle" });
 const tally = await body(A.page);
 check(/1 of 2 have confirmed/.test(tally) && /Still to read:/.test(tally), "the office sees 1 of 2 have confirmed, and who is outstanding", (tally.match(/Read and acknowledged.{0,120}/) || [""])[0]);
 
+/* ── 2b · owners, the yearly review and suggestions (stage 4, spec 067 §3, §4.2) ── */
+await A.page.goto(L(P2), { waitUntil: "networkidle" });
+await A.page.selectOption("select[aria-label='Owner']", people.fn_fin);
+await A.page.click("button:text-is('Save')");
+await A.page.waitForSelector("text=Saved", { timeout: 20000 });
+const own = (await q(ffp, 'select "ownerPersonId" o from processes where id=$1', [P2]))[0];
+check(own.o === people.fn_fin, "the office picks the owner from the client register", JSON.stringify(own));
+const yours = await (await B.get("/" + S + "/processes/read?f=yours")).text();
+check(/Owner/.test(yours) && /Supplier onboarding/.test(yours), "the owner finds it under Yours");
+/* a member of staff suggests a change to step 1 */
+await T.page.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=steps", { waitUntil: "networkidle" });
+await T.page.locator("button", { hasText: "Suggest a change to this step" }).first().click();
+await T.page.fill("[data-ffp-dialog] textarea >> nth=0", "Ask for two trade references, not one.");
+await T.page.click("[data-ffp-dialog] button:text-is('Send to the Strategy Office')");
+await T.page.waitForSelector("[data-ffp-dialog]", { state: "detached", timeout: 20000 });
+let sg = (await q(ffp, 'select id, state, "stepId" st, "byName" b from process_suggestions where "processId"=$1', [P2]))[0];
+check(sg && sg.state === "NEW" && !!sg.st, "a suggestion is recorded, pinned to the step, from the person signed in", JSON.stringify(sg));
+await A.page.goto(BASE + "/" + S + "/processes/handle", { waitUntil: "networkidle" });
+check(/Suggestion/.test(await body(A.page)) && /suggested a change to step 1/.test(await body(A.page)), "the office sees it on To handle, with its step");
+await A.page.click("button:text-is('Answer')");
+await A.page.fill("[data-ffp-dialog] textarea", "Two from the same sector, or any two?");
+await A.page.click("[data-ffp-dialog] button:text-is('Send answer')");
+await A.page.waitForSelector("[data-ffp-dialog]", { state: "detached", timeout: 20000 });
+await T.page.goto(BASE + "/" + S + "/processes/read/todo", { waitUntil: "networkidle" });
+check(/Answers to your suggestions/i.test(await body(T.page)), "the answer lands in the person's To do");
+await T.page.click("button:text-is('Reply')");
+await T.page.fill("[data-ffp-dialog] textarea", "Any two.");
+await T.page.click("[data-ffp-dialog] button:text-is('Send reply')");
+await T.page.waitForSelector("[data-ffp-dialog]", { state: "detached", timeout: 20000 });
+sg = (await q(ffp, 'select state, "replyText" r from process_suggestions where id=$1', [sg.id]))[0];
+check(sg.state === "REPLIED" && sg.r === "Any two.", "their reply goes back to the office", JSON.stringify(sg));
+await A.page.goto(BASE + "/" + S + "/processes/handle", { waitUntil: "networkidle" });
+await A.page.click("button:text-is('Start a draft from this')");
+await A.page.waitForURL(/\/map$/, { timeout: 30000 });
+await A.page.waitForSelector("nav[aria-label='Process sections']", { timeout: 30000 });
+check(/suggestion on step 1/.test(await body(A.page)) && /Any two\./.test(await body(A.page)), "a draft started from it opens the builder with the person's words on the Map");
+/* the owner's yearly review, once it is a month away */
+await q(ffp, `update processes set "nextReviewDue" = now() + interval '10 days' where id=$1`, [P2]);
+await B.page.goto(BASE + "/" + S + "/processes/read/todo", { waitUntil: "networkidle" });
+check(/To review/i.test(await body(B.page)), "the owner is asked to review it in their To do");
+await B.page.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=summary", { waitUntil: "networkidle" });
+await B.page.click("button:text-is('It is still right')");
+await B.page.waitForFunction(() => !/It is still right|Saving/.test(document.body.innerText), null, { timeout: 20000 });
+const rv = (await q(ffp, 'select "nextReviewDue" d, "reviewConfirmedByKey" k from processes where id=$1', [P2]))[0];
+const away = (new Date(rv.d) - Date.now()) / 86400000;
+check(rv.k === "fn_fin" && away > 360 && away < 370, "It is still right puts the next review a year away, recorded against the owner", JSON.stringify(rv));
+
 /* ── 3 · the gate: a client's own person opens nothing else of Processes ── */
 const office = ["processes/priorities", "processes/reports/priorities", "processes", "processes/processes", "processes/processes/" + P2, "processes/processes/" + P2 + "/map", "processes/processes/" + P2 + "/raci", "processes/processes/" + P2 + "/review", "processes/governance", "processes/reports", "processes/reports/sop", "processes/export", "processes/handle", "processes/roles", "processes/value-chain", "processes/helicopter"];
 for (const p of office) {

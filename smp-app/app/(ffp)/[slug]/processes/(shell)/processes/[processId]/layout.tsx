@@ -12,6 +12,7 @@ import { formatDate } from "@/ffp/lib/i18n/locale";
 import { getLocale, getMessages } from "@/ffp/lib/i18n/server";
 import { barVars } from "@/lib/branding.ts";
 import { BuilderFrame, type Dot, type SectionKey } from "./builder-frame";
+import { officeSuggestions, stepName } from "@/ffp/lib/data/office-suggestions";
 
 /**
  * THE BUILDER PAGE (spec 067 §4.3, stage 3). Every page of one process (the
@@ -28,6 +29,7 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
     where: { id: processId },
     select: {
       workspaceId: true, code: true, name: true, lifecycleStatus: true, approverName: true, returnReason: true, submittedAt: true,
+      owner: { select: { name: true } },
       sopVersion: true, sopEffectiveDate: true, kpis: true, publishedAt: true, deepDiveDecision: true,
       category: { select: { name: true } },
       versions: { orderBy: { number: "desc" }, select: { number: true, publishedAt: true, approvedBy: true } },
@@ -36,7 +38,7 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
   });
   if (!process || process.workspaceId !== workspaceId) notFound();
 
-  const [gaps, picker, findings, ncs, settings, locale, all] = await Promise.all([
+  const [gaps, picker, findings, ncs, settings, locale, all, drafting] = await Promise.all([
     processGaps(workspaceId),
     prisma.process.findMany({ where: { workspaceId, archivedAt: null }, orderBy: { code: "asc" }, select: { id: true, code: true, name: true, lifecycleStatus: true, returnReason: true, approverName: true } }),
     prisma.reviewFinding.count({ where: { processId, status: { in: ["OPEN", "EDITED"] } } }),
@@ -44,6 +46,7 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
     clientSettings(workspaceId),
     getLocale(),
     getMessages(),
+    officeSuggestions(workspaceId, ["IN_DRAFT"], processId),
   ]);
   const m = all.builder.page;
   const g = gaps.get(processId) ?? { gaps: 0, kinds: new Set(), steps: 0, controls: 0, controlsMissing: 0 };
@@ -139,7 +142,8 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
       sub={
         <>
           {status === "PUBLISHED" && (inForce?.publishedAt ?? process.publishedAt) ? `${m.since(version, date(inForce?.publishedAt ?? process.publishedAt)!)} · ` : ""}
-          {m.subApprover} <b>{process.approverName ?? m.noApprover}</b>
+          {drafting[0] ? `${m.fromSuggestion(drafting[0].byName, stepName(drafting[0], all.reading.page.step))} · ` : ""}
+          {m.owner} <b>{process.owner?.name ?? m.noOwner}</b> · {m.subApprover} <b>{process.approverName ?? m.noApprover}</b>
         </>
       }
       next={status === "DRAFT" ? (sentBack ? m.next.sendAgain : m.next.send) : status === "APPROVED" ? m.next.publish(latest?.number ?? null) : null}

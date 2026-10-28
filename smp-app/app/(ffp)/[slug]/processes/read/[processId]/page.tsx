@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { readerSeat } from "@/ffp/lib/auth/workspace";
 import { clientSettings } from "@/ffp/lib/data/client-settings";
-import { readProcess, readerOf, todoOf, type ReadStep } from "@/ffp/lib/data/reading-side";
+import { mySuggestions, readProcess, readerOf, todoOf, type ReadStep } from "@/ffp/lib/data/reading-side";
 import { formatDate } from "@/ffp/lib/i18n/locale";
 import { getLocale, getMessages } from "@/ffp/lib/i18n/server";
 import { Band, Sheet, TabRow, WaitLabel, bandGold } from "../../band";
@@ -10,6 +10,7 @@ import { barStyle } from "../home-head";
 import { Chip, Pill, daysUntil, lbl, note, panel } from "../ui";
 import { ReadingFlow } from "./flow";
 import { ApproveStrip, PrintButton, ReadButton } from "./reader-actions";
+import { ReplyButton, StillRightButton, SuggestButton } from "../dialogs";
 
 /**
  * A PROCESS, ON THE READING SIDE (spec 067 §3.2; Islam: "flow first and the
@@ -18,7 +19,8 @@ import { ApproveStrip, PrintButton, ReadButton } from "./reader-actions";
  * have read it, risks with no control and days to the review. The tabs are
  * Flow · Steps · Summary, and it opens on Flow. Readers see the version in
  * force; the approver also reads the version sent to them, under a gold strip
- * to approve it or send it back. Suggest a change joins in stage 4.
+ * to approve it or send it back. Suggest a change works on every tab and can
+ * be pinned to a step; the owner does the yearly review from the Summary.
  */
 export default async function ReadProcessPage(props: PageProps<"/[slug]/processes/read/[processId]">) {
   const { slug, processId } = await props.params;
@@ -29,8 +31,11 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   const preview = sp.preview === "1" && seat.ok && seat.office;
   const p = await readProcess(slug, processId, reader, preview);
   if (!p) notFound();
-  const todo = (await todoOf(slug, reader)).filter((t) => t.kind !== "plan" && t.row.id === processId);
+  const todo = (await todoOf(slug, reader)).filter((t) => ("row" in t ? t.row.id === processId : t.kind === "answer" && t.s.processId === processId));
   const toRead = todo.some((t) => t.kind === "read");
+  const toReview = todo.some((t) => t.kind === "review");
+  const answer = todo.find((t) => t.kind === "answer");
+  const mine = (await mySuggestions(slug, reader)).filter((s) => s.processId === processId);
   const locale = await getLocale();
   const all = await getMessages();
   const m = all.reading.page;
@@ -47,20 +52,32 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   const roles = new Set(counted.map((s) => s.role).filter(Boolean)).size;
   const noControl = p.steps.reduce((n, s) => n + s.controls.filter((c) => !c.control).length, 0) + p.looseNoControl.length;
   const review = p.mode === "live" && r.nextReviewDue ? daysUntil(r.nextReviewDue) : null;
-  const part = r.approves ? m.youApprove : r.mySteps.length ? m.yourStep : null;
+  const part = r.owns ? m.youOwn : r.approves ? m.youApprove : r.mySteps.length ? m.yourStep : null;
+  /* anyone reading what is in force, or the owner reading what is on its way, can suggest a change; the approver approves or sends back instead */
+  const canSuggest = !!reader.personId && (p.mode === "live" || p.mode === "notyet");
+  const pick = counted.map((s) => ({ id: s.id, n: s.n!, label: s.label }));
+  const suggestLink = "text-[12.5px] font-semibold text-[#16325C] underline underline-offset-2";
 
   /* Is it in good shape? (spec 067 §3.2): the next version, the RACI, risks with no control, who has not read it, the SOP, the review */
-  const health: { k: "ok" | "warn" | "bad"; text: string; small?: string }[] = [];
+  const health: { k: "ok" | "warn" | "bad"; text: string; small?: string; act?: React.ReactNode }[] = [];
   if (p.mode === "live") health.push({ k: "ok", text: all.reading.todo.readWhat(r.version, date(r.since)), small: p.versionNote ?? undefined });
   if (p.mode === "approve") health.push({ k: "warn", text: m.withApprover(r.version, r.approverName), small: r.submittedAt ? m.sentOn(date(r.submittedAt)!) : undefined });
-  if (p.mode === "notyet") health.push({ k: "ok", text: m.isApproved(r.version), small: m.isApprovedSmall });
+  if (p.mode === "notyet")
+    health.push(r.status === "IN_REVIEW" ? { k: "warn", text: m.withApprover(r.version, r.approverName) } : { k: "ok", text: m.isApproved(r.version), small: m.isApprovedSmall });
   const stepById = new Map(p.steps.map((s) => [s.id, s]));
   for (const g of p.gaps) {
     const s = stepById.get(g.stepId)!;
     health.push({ k: "bad", text: m.gapLine(s.n ?? 0, s.label, m.gaps[g.kind]) });
   }
   if (!p.gaps.length && counted.length) health.push({ k: "ok", text: m.allClear });
-  for (const s of p.steps) for (const c of s.controls) if (!c.control) health.push({ k: "bad", text: m.riskNoControl(s.n, s.label, c.risk) });
+  for (const s of p.steps)
+    for (const c of s.controls)
+      if (!c.control)
+        health.push({
+          k: "bad",
+          text: m.riskNoControl(s.n, s.label, c.risk),
+          act: canSuggest ? <SuggestButton workspaceId={slug} processId={processId} steps={pick} stepId={s.n ? s.id : undefined} label={m.suggestOne} className={suggestLink} /> : undefined,
+        });
   for (const risk of p.looseNoControl) health.push({ k: "bad", text: m.riskNoControl(null, null, risk) });
   if (p.mode === "live") health.push({ k: r.readBy < r.readers ? "warn" : "ok", text: m.readCount(r.readBy, r.readers, r.version), small: p.stillToRead.length ? m.stillToRead(p.stillToRead) : undefined });
   if ((p.mode === "live" || p.mode === "preview") && (!p.sopVersion || !p.sopEffectiveDate)) health.push({ k: "warn", text: m.noSop });
@@ -75,7 +92,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
     ) : p.mode === "approve" ? (
       <Pill tone="attn">{m.forApproval(r.version)}</Pill>
     ) : p.mode === "notyet" ? (
-      <Pill tone="attn">{m.approved(r.version)}</Pill>
+      <Pill tone="attn">{r.status === "IN_REVIEW" ? all.reading.state.inReview : m.approved(r.version)}</Pill>
     ) : (
       <Pill tone="good">{m.inForce(r.version)}</Pill>
     );
@@ -120,13 +137,26 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
             {m.riskLine(c.risk, c.control)}
           </p>
         ))}
+        {canSuggest && (
+          <div className="mt-1.5">
+            <SuggestButton workspaceId={slug} processId={processId} steps={pick} stepId={s.id} label={m.suggestStep} className={suggestLink} />
+          </div>
+        )}
       </div>
     </div>
   );
 
   let body: React.ReactNode;
   if (tab === "flow") {
-    body = <ReadingFlow steps={p.steps} lanes={p.lanes} connections={p.connections} toSteps={asked ? null : `${here}?tab=steps${q}`} />;
+    body = (
+      <ReadingFlow
+        steps={p.steps}
+        lanes={p.lanes}
+        connections={p.connections}
+        toSteps={asked ? null : `${here}?tab=steps${q}`}
+        suggest={canSuggest ? { workspaceId: slug, processId, steps: pick } : null}
+      />
+    );
   } else if (tab === "steps") {
     body = !counted.length ? (
       <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">{m.noSteps}</div>
@@ -192,7 +222,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
             <span className={lbl}>{m.shape}</span>
             <div className="mt-2 grid gap-[7px]">
               {health.map((h, i) => (
-                <div key={i} className="grid grid-cols-[20px_minmax(0,1fr)] items-start gap-2 text-[13.5px]">
+                <div key={i} className="grid grid-cols-[20px_minmax(0,1fr)_auto] items-start gap-2 text-[13.5px]">
                   <i
                     className={`mt-0.5 grid h-[18px] w-[18px] place-items-center rounded-full text-[11px] font-extrabold not-italic ${h.k === "ok" ? "bg-[#E4F0EA] text-[#1F6248]" : h.k === "warn" ? "bg-[#F7EFD6] text-[#7A5D1C]" : "bg-[#F7E3E0] text-[#8C3327]"}`}
                   >
@@ -202,10 +232,26 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
                     {h.text}
                     {h.small && <small className="block text-xs text-[#636C79]">{h.small}</small>}
                   </span>
+                  <span>{h.act}</span>
                 </div>
               ))}
             </div>
-            {toRead && (
+            {toReview && (
+              <div className="mt-3 rounded-lg border border-[#C9A24D] bg-[#FBF6E9] px-3 py-2.5">
+                <b className="text-[13.5px]">{m.reviewWait((review ?? 0) < 0, date(r.nextReviewDue)!)}</b>
+                <p className={`${note} mt-0.5`}>{m.reviewHint}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <StillRightButton
+                    workspaceId={slug}
+                    processId={processId}
+                    label={m.stillRight}
+                    className="rounded-md border border-[#C9A24D] bg-[#C9A24D] px-2.5 py-1 text-[12.5px] font-semibold text-[#16325C] disabled:opacity-60"
+                  />
+                  <SuggestButton workspaceId={slug} processId={processId} steps={pick} label={m.suggest} className="rounded-md border border-[#D6DCE5] bg-white px-2.5 py-1 text-[12.5px] font-semibold" />
+                </div>
+              </div>
+            )}
+            {!toReview && toRead && (
               <div className="mt-3 rounded-lg border border-[#C9A24D] bg-[#FBF6E9] px-3 py-2.5">
                 <b className="text-[13.5px]">{m.waitRead(r.version)}</b>
                 <p className={`${note} mt-0.5`}>{all.reading.todo.readMeta(r.mySteps)}</p>
@@ -213,6 +259,17 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
                   <ReadButton workspaceId={slug} processId={processId} />
                 </div>
               </div>
+            )}
+            {mine.length > 0 && (
+              <>
+                <span className={`${lbl} mt-3.5 block`}>{m.yourSuggestions}</span>
+                {mine.map((x) => (
+                  <div key={x.id} className="mt-1.5">
+                    <p className="text-[13px]">“{x.text}”</p>
+                    <p className={note}>{m.sugState[x.state]}</p>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>
@@ -291,21 +348,44 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
         desc={
           <>
             {purpose ? `${purpose} · ` : ""}
-            {m.approver} <b>{r.approverName ?? "—"}</b>
+            {m.owner} <b>{r.ownerName ?? "—"}</b> · {m.approver} <b>{r.approverName ?? "—"}</b>
           </>
         }
         wait={
-          toRead ? (
+          toReview ? (
+            <>
+              <WaitLabel>{all.reading.waitingOnYou}</WaitLabel>
+              <span>{m.reviewLine((review ?? 0) < 0, date(r.nextReviewDue)!)}</span>
+              <Link href={`${here}?tab=summary`} className="font-semibold underline underline-offset-2">
+                {m.openSummary}
+              </Link>
+            </>
+          ) : toRead ? (
             <>
               <WaitLabel>{all.reading.waitingOnYou}</WaitLabel>
               <span>{m.readVersion(r.version)}</span>
               <ReadButton workspaceId={slug} processId={processId} quiet />
+            </>
+          ) : answer?.kind === "answer" ? (
+            <>
+              <WaitLabel>{all.reading.waitingOnYou}</WaitLabel>
+              <span>{m.answered}</span>
+              <ReplyButton
+                workspaceId={slug}
+                suggestionId={answer.s.id}
+                suggestion={answer.s.text}
+                answer={answer.s.answerText ?? ""}
+                answerBy={all.reading.todo.answerMeta(answer.s.answerBy, date(answer.s.answeredAt))}
+                label={m.reply}
+                className="font-semibold underline underline-offset-2"
+              />
             </>
           ) : undefined
         }
         actions={
           <>
             <PrintButton />
+            {canSuggest && <SuggestButton workspaceId={slug} processId={processId} steps={pick} label={m.suggest} className={bandGold} />}
             {seat.ok && seat.office && !preview && (
               <Link href={`/${slug}/processes/processes/${processId}/map?from=read`} className={bandGold}>
                 {m.openInBuilder}
@@ -341,7 +421,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
       {p.mode === "notyet" && (
         <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[#16325C] bg-white px-3 py-2.5 text-[13.5px]">
           <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[#16325C]">{m.notYet}</b>
-          <span>{m.notYetLine(r.version)}</span>
+          <span>{r.status === "IN_REVIEW" ? m.notYetReview(r.version, r.approverName) : m.notYetLine(r.version)}</span>
         </div>
       )}
       <TabRow

@@ -244,6 +244,8 @@ export async function publishProcess(input: z.infer<typeof base>): Promise<Actio
   if (!moved) return { ok: false, error: "CONFLICT" };
   await prisma.processVersion.update({ where: { id: version.id }, data: { publishedAt: now } });
   revalidatePath(`/${d.workspaceId}/processes/reports/sop`);
+  // Suggestions worked into this version are done (stage 4, spec 067 §3.2).
+  await prisma.processSuggestion.updateMany({ where: { processId: d.processId, state: "IN_DRAFT" }, data: { state: "CLOSED", closedAt: new Date() } });
   refresh(d.workspaceId, d.processId);
   return ok(null);
 }

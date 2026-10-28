@@ -213,6 +213,13 @@ check(/Version 1 is in force/.test(rdSum) && /credit check/.test(rdSum) && /Chec
 check(!/Risks & controls|Non-conform|Reviewer|Lifecycle|Send for review/i.test(rd + rdSum), "…and none of the office's working material");
 await T.page.click("header button:text-is('I have read it')");
 await T.page.waitForFunction(() => !/Waiting on you/.test(document.querySelector("[data-ffp] header")?.innerText || "Waiting on you"), null, { timeout: 20000 });
+/* the refresh moved the bar's count: the bar must still be the one its script wired (top-bar.tsx) */
+const theme = () => T.page.evaluate(() => document.documentElement.getAttribute("data-theme"));
+const t0 = await theme(), drawn = await T.page.$eval("#tbtheme", (t) => t.innerHTML.includes("<svg")).catch(() => false);
+await T.page.click("#tbtheme");
+const t1 = await theme();
+await T.page.click("#tbtheme");
+check(drawn && t0 !== t1, "the top bar keeps working after the page refreshes: its theme button keeps its icon and still switches", JSON.stringify({ drawn, t0, t1 }));
 const ack = await q(ffp, 'select "personKey" k, "versionNumber" n, "personName" nm from process_acknowledgements where "processId"=$1', [P2]);
 check(ack.length === 1 && ack[0].k === "mobhead" && ack[0].n === 1, "the acknowledgement is recorded against the person and the version", JSON.stringify(ack));
 const strat2 = await (await T.get("/" + S + "/strategy")).text();

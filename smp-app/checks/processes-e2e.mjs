@@ -126,16 +126,16 @@ check(/Waiting for/.test(await body(O2.page)) && !(await O2.page.$("button:text-
 
 /* the named approver is a CLIENT person on the register, and approves from their own reading page */
 const B = await as(APPROVER);
-const bl = await B.get("/" + S + "/processes/read");
+const bl = await B.get("/" + S + "/processes/read/todo");
 const blText = await bl.text();
-check(bl.status() === 200 && /Waiting for your approval/.test(blText) && /Supplier onboarding/.test(blText), "the approver's reading list says it is waiting for their approval", bl.status());
+check(bl.status() === 200 && /To approve/.test(blText) && /Supplier onboarding/.test(blText) && /Version 1 is ready for your approval/.test(blText), "the approver's To do says it is waiting for their approval", bl.status());
 await B.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
 check(/1 to approve/.test((await B.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "the top bar says 1 to approve");
 await B.page.goto(BASE + "/" + S + "/processes/read/" + P2, { waitUntil: "networkidle" });
-await waitFor(B.page, "button:text-is('Approve')", "the approver's Approve button on the reading page");
+await waitFor(B.page, "button:text-is('Approve v1')", "the approver's Approve button on the reading page");
 const bt = await body(B.page);
-check(/For your approval/.test(bt) && /credit check/.test(bt) && /Check the customer's credit/.test(bt), "they see what changed and the steps before approving");
-await B.page.click("button:text-is('Approve')");
+check(/for your approval/i.test(bt) && /credit check/.test(bt) && /Check the customer's credit/.test(bt), "they see what changed and the steps before approving");
+await B.page.click("button:text-is('Approve v1')");
 await B.page.waitForFunction(() => /\/processes\/read$/.test(location.pathname), null, { timeout: 20000 });
 r = await st(P2);
 const v = (await q(ffp, 'select number, "approvedBy" b, "approvedRole" ro, "changeNote" n from process_versions where "processId"=$1', [P2]))[0];
@@ -188,7 +188,7 @@ const list = await T.get("/" + S + "/processes/read");
 const listText = await list.text();
 check(list.status() === 200 && /Supplier onboarding/.test(listText) && !/Order to cash/.test(listText), "staff see the published process and not the draft", list.status());
 await T.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
-check(/Needs your acknowledgement/.test(await body(T.page)), "it asks for their acknowledgement");
+check(/To read/.test(await (await T.get("/" + S + "/processes/read/todo")).text()) && /Supplier onboarding/.test(await (await T.get("/" + S + "/processes/read/todo")).text()), "their To do asks them to read it");
 check(/1 to read/.test((await T.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "the shared top bar says 1 to read on the reading pages");
 const strat = await (await T.get("/" + S + "/strategy")).text();
 check(/data-processes-read='[^']*1 to read/.test(strat), "Strategy's page is stamped with the count");
@@ -201,19 +201,21 @@ const notes = await T.get("/" + S + "/notes");
 const notesHtml = notes.status() === 200 ? await notes.text() : "";
 check(notes.status() !== 200 || /class="tbread"/.test(notesHtml), "a module page drawn by the shared bar carries it too", notes.status());
 
-await T.page.goto(BASE + "/" + S + "/processes/read/" + P2, { waitUntil: "networkidle" });
+await T.page.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=summary", { waitUntil: "networkidle" });
+const rdSum = await body(T.page);
+await T.page.goto(BASE + "/" + S + "/processes/read/" + P2 + "?tab=steps", { waitUntil: "networkidle" });
 const rd = await body(T.page);
-check(/What changed in this version/.test(rd) && /credit check/.test(rd) && /Check the customer's credit/.test(rd) && /Done by: Credit Controller/.test(rd), "the reading page shows what changed and the steps with who does them");
-check(!/Risks|Non-conform|Approver|Reviewer|Lifecycle/i.test(rd), "…and none of the office's working material");
-await T.page.click("button:text-is('I have read this')");
-await T.page.waitForFunction(() => /You have read version 1/.test(document.body.innerText), null, { timeout: 20000 });
+check(/Version 1 is in force/.test(rdSum) && /credit check/.test(rdSum) && /Check the customer's credit/.test(rd) && /Done by: Credit Controller/.test(rd), "the reading page shows what changed and the steps with who does them");
+check(!/Risks & controls|Non-conform|Reviewer|Lifecycle|Send for review/i.test(rd + rdSum), "…and none of the office's working material");
+await T.page.click("header button:text-is('I have read it')");
+await T.page.waitForFunction(() => !/Waiting on you/.test(document.querySelector("[data-ffp] header")?.innerText || "Waiting on you"), null, { timeout: 20000 });
 const ack = await q(ffp, 'select "personKey" k, "versionNumber" n, "personName" nm from process_acknowledgements where "processId"=$1', [P2]);
 check(ack.length === 1 && ack[0].k === "mobhead" && ack[0].n === 1, "the acknowledgement is recorded against the person and the version", JSON.stringify(ack));
 const strat2 = await (await T.get("/" + S + "/strategy")).text();
 check(/data-processes-read='[^']*&quot;count&quot;:null/.test(strat2), "the count falls to none once they have read it");
 
 /* a second person is unaffected, and the office sees the tally */
-check(/Needs your acknowledgement/.test(await (await B.get("/" + S + "/processes/read")).text()), "another person still has it to read");
+check(/To read/.test(await (await B.get("/" + S + "/processes/read/todo")).text()), "another person still has it to read");
 await A.page.goto(L(P2), { waitUntil: "networkidle" });
 const tally = await body(A.page);
 check(/1 of 2 have confirmed/.test(tally) && /Still to read:/.test(tally), "the office sees 1 of 2 have confirmed, and who is outstanding", (tally.match(/Read and acknowledged.{0,120}/) || [""])[0]);
@@ -377,8 +379,8 @@ check(pl.status === "SENT" && !!pl.a && /Head of Finance/.test(pl.r) && pl.snaps
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=score", { waitUntil: "networkidle" });
 check((await A.page.isDisabled("button[aria-label='importance 3 of 5 for Order to cash']")) && /with the client/.test(await body(A.page)), "once sent, scores and decisions are locked");
 
-await B.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
-check(/Deep-dive priorities/.test(await body(B.page)) && /Waiting for your approval/.test(await body(B.page)), "the named approver is told, on their reading list");
+await B.page.goto(BASE + "/" + S + "/processes/read/todo", { waitUntil: "networkidle" });
+check(/Deep-dive plan/.test(await body(B.page)) && /To approve/i.test(await body(B.page)), "the named approver is told, on their To do");
 check(/1 to approve/.test((await B.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "…and on the top bar");
 await B.page.goto(BASE + "/" + S + "/processes/read/priorities", { waitUntil: "networkidle" });
 await waitFor(B.page, "button:text-is('Approve')", "the approver's Approve button on the plan");

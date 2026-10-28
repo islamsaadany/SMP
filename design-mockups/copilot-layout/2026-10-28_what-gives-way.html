@@ -83,8 +83,8 @@ th[scope=row]{text-align:left;color:var(--ink)}
   </div>
 
   <div class="ctl"><span class="seg" id="w" role="group" aria-label="Window width">
-    <button data-w="1440" aria-pressed="true">1440 · desktop</button><button data-w="1300">1300 · your screenshot</button><button data-w="1180">1180</button><button data-w="1100">1100 · laptop</button><button data-w="760">760 · narrow</button></span>
-    <span>Widths in CSS pixels, after browser zoom. The frames are drawn to scale.</span></div>
+    <button data-w="1440" aria-pressed="true">1440 · desktop</button><button data-w="1300">1300 · your screenshot</button><button data-w="1180">1180</button><button data-w="980">980 · laptop</button><button data-w="760">760 · narrow</button></span>
+    <span>Widths in layout pixels, what the rule reads: the page itself is at 80% from a 1000px window up, so a 1040px window is 1300 here. The frames are drawn to scale.</span></div>
 
   <div class="pair">
     <div class="frame"><div class="fh"><b>Before</b><span class="tag before">today's rule</span><small id="bsum"></small></div>
@@ -114,7 +114,7 @@ th[scope=row]{text-align:left;color:var(--ink)}
   var RAIL = 200, GAP = 8, PAD = 16, GRIP = 12, TODO = 208, CHATW = 760;
   function level(before, W){
     if (before) return W >= 1000 ? 3 : 1;
-    return W >= 1120 ? 3 : W >= 900 ? 2 : 1;
+    return W >= 1120 ? 3 : W >= 820 ? 2 : 1;
   }
   function calc(before, win){
     var pane = win, railShut = pane < (before ? 1240 : 1344), rail = railShut ? 24 : RAIL;
@@ -148,7 +148,7 @@ th[scope=row]{text-align:left;color:var(--ink)}
         : c.lv === 1 ? 'Both the work and the to-do go behind buttons at once, under 1000px of Copilot.' : 'Room enough: three columns, the chat at its default.';
       else note = c.lv === 3 ? (c.railShut ? 'The rail has folded first; the three columns still stand, the chat yielded to <b>' + c.chat + 'px</b>, the work <b>' + c.work + 'px</b>.' : c.chat < CHATW ? 'The chat has yielded to <b>' + c.chat + 'px</b> so the work keeps <b>' + c.work + 'px</b>; the to-do still stands.' : 'Room enough: three columns, the chat at its default.')
         : c.lv === 2 ? 'The rail folded first; now the to-do has folded to its button too; the chat <b>' + c.chat + 'px</b>, the work <b>' + c.work + 'px</b>.'
-        : 'Under 900px of Copilot the work pane becomes a sheet, as §642 had it under 1000.';
+        : 'Under 820px of Copilot the work pane becomes a sheet, where §642 had it under 1000.';
       document.getElementById(x[0] + 'note').innerHTML = note;
     });
   }

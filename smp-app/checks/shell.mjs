@@ -1536,18 +1536,22 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       /* A rail pressed open earlier in this section is kept open for the
          visit (§653), so the widths are read on a fresh visit of the chat. */
       await open("/raya-trade/strategy/mobile/copilot/foundation"); await page.click("[data-cop-chats] [data-cop-chat]"); await page.waitForSelector(".copleft", { timeout: 10000 });
-      const z668 = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
-      const lay = async (w) => { await page.setViewportSize({ width: Math.round(w * z668), height: 900 }); await page.waitForTimeout(300);
+      /* Real window widths; the page is at 80% from 1000px of window up
+         (_shared.css) and at 100% under it, and the rule reads layout pixels,
+         so the columns are measured through whatever zoom applies after the
+         resize. A 1040px window is 1300 layout pixels; 980 is 980. */
+      const lay = async (w) => { await page.setViewportSize({ width: w, height: 900 }); await page.waitForTimeout(350);
+        const z = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
         return page.evaluate((z) => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"), t = document.querySelector(".copftodo"), r = document.querySelector(".coprails");
           const bt = document.querySelector('.copfhead [data-cop-sheet="todo"]'), px = (el) => Math.round(el.getBoundingClientRect().width / z);
           return { cards: getComputedStyle(l).display, todo: getComputedStyle(t).display, beside: l.getBoundingClientRect().left >= c.getBoundingClientRect().right - 1,
-            chat: px(c), work: px(l), rail: r ? px(r) : 0, todoBtn: !!(bt && bt.offsetParent) }; }, z668); };
-      const L1440 = await lay(1440), L1300 = await lay(1300), L1100 = await lay(1100);
+            chat: px(c), work: px(l), rail: r ? px(r) : 0, todoBtn: !!(bt && bt.offsetParent) }; }, z); };
+      const L1440 = await lay(1440), L1300 = await lay(1040), L1100 = await lay(980);
       check(L1440.cards !== "none" && L1440.todo !== "none" && L1440.beside && L1440.rail > 0 && !L1440.todoBtn, "§668 at 1440 the cards and the to-do stand beside the chat and the rail is open", JSON.stringify(L1440));
-      check(L1300.cards !== "none" && L1300.todo !== "none" && L1300.beside && L1300.rail === 0 && !L1300.todoBtn && L1300.work >= 480 && L1300.chat < L1440.chat,
-        "§668 at 1300 the rail has folded first, the three columns still stand, the chat has yielded and the cards keep at least 480px beside it", JSON.stringify(L1300));
-      check(L1100.cards !== "none" && L1100.todo === "none" && L1100.beside && L1100.rail === 0 && L1100.todoBtn && L1100.work >= 480,
-        "§668 at 1100 the to-do has folded to its button too, and the cards are still beside the chat", JSON.stringify(L1100));
+      check(L1300.cards !== "none" && L1300.todo !== "none" && L1300.beside && L1300.rail === 0 && !L1300.todoBtn && L1300.work >= 480 && L1300.chat < 740,
+        "§668 at a 1040px window (1300 layout) the rail has folded first, the three columns still stand, the chat has yielded and the cards keep at least 480px beside it", JSON.stringify(L1300));
+      check(L1100.cards !== "none" && L1100.todo === "none" && L1100.beside && L1100.rail === 0 && L1100.todoBtn && L1100.work >= 388,
+        "§668 at a 980px window the to-do has folded to its button too, and the cards are still beside the chat", JSON.stringify(L1100));
       await page.click('.copfhead [data-cop-sheet="todo"]'); await page.waitForTimeout(150);
       const tb = await page.evaluate(() => { const t = document.querySelector(".copftodo"), f = document.querySelector(".copflow"), l = document.querySelector(".copleft"); const a = t.getBoundingClientRect(), b = f.getBoundingClientRect(), w = l.getBoundingClientRect();
         return { todo: getComputedStyle(t).display, over: Math.abs(a.right - b.right) <= 2 && a.left < w.right && a.right > w.left, shade: getComputedStyle(document.querySelector(".copflow > .copshade")).display }; });

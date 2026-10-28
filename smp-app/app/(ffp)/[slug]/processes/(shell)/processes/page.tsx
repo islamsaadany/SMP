@@ -5,7 +5,6 @@ import { isOverdueForReview, STATUS_LABEL } from "@/ffp/lib/domain/process-lifec
 import { registerReady } from "@/ffp/lib/register-sync";
 import Link from "next/link";
 import { prisma } from "@/ffp/lib/db/client";
-import { WorkspacePageHeader } from "../workspace-page-header";
 import { CreateProcessForm, CloneProcessButton, EditProcessButton, ArchiveProcessButton } from "./process-forms";
 import { GenerateTemplateForm } from "./template-form";
 import { ImportPanel } from "./import-panel";
@@ -104,11 +103,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   const folding = !q;
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <WorkspacePageHeader
-        title="Processes"
-        subtitle="Every process has a unique code and can nest under a main process."
-      />
+    <main className="w-full">
 
       <form method="GET" className="mt-4 flex items-center gap-2" role="search">
         <input
@@ -150,7 +145,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
 
       <FoldProvider enabled={folding} parentIds={[...directSubs.keys()]}>
       <FoldAllControls any={directSubs.size > 0} />
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="relative mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm [&_td]:px-2 [&_th]:px-2">
           <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
             <tr>
@@ -301,7 +296,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
       </div>
       </FoldProvider>
 
-      <div className="mt-4 flex flex-col gap-3">
+      {/* the band's New process lands here */}
+      <div id="new-process" className="mt-4 flex scroll-mt-24 flex-col gap-3">
         <CreateProcessForm
           workspaceId={workspaceId}
           processes={processOptions}

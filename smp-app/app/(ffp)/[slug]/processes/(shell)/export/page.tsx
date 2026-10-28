@@ -1,7 +1,6 @@
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
-import { WorkspacePageHeader } from "../workspace-page-header";
 import { ExportPickerForm } from "./export-picker-form";
 import { resolveArrangement, BLOCKS, isBlockEmpty } from "@/ffp/lib/domain/report-arrangement";
 import { loadReportData } from "@/ffp/lib/reports/load-report-data";
@@ -31,11 +30,7 @@ export default async function ExportPickerPage(props: PageProps<"/[slug]/process
   ).map((block) => block.id);
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <WorkspacePageHeader
-        title="Export Report"
-        subtitle="Pick which processes to include. The report opens as a clean, printable document — company name, a summary, the org structure, then each process's documentation. Its content comes from each process's Process Map page; anything not filled in there is shown as not yet recorded."
-      />
+    <main className="w-full">
 
       {processes.length === 0 ? (
         <p className="rounded-xl border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-400">

@@ -276,9 +276,12 @@ check(dec2["P4.1"] == null && dec2["P5.1"] == null, "…and leaves unscored proc
 await A.page.setViewportSize({ width: 1440, height: 900 });
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
 check(await A.page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), "the Priorities page does not run off the right edge");
+/* REWRITTEN (§218), not loosened: the page's own banner, which stepped aside for the client's logo in the
+   margin, went by decision (spec 067 §4.2): the builder's band names every section and the logo left the margin.
+   What the line was FOR is kept: the working area is not squeezed, it is exactly as wide as the band over it. */
 const navBox = await A.page.locator("nav[aria-label='Steps']").boundingBox();
-const banner = await A.page.locator("h1").first().boundingBox();
-check(!!navBox && !!banner && navBox.x < banner.x - 100, "the banner steps aside for the logo but the working area below uses the full width", JSON.stringify([navBox?.x, banner?.x]));
+const band = await A.page.locator("header", { hasText: "Process builder" }).first().boundingBox();
+check(!!navBox && !!band && Math.abs(navBox.x - band.x) <= 2 && navBox.width >= band.width - 2, "the Priorities page sits under the builder's band and uses its full width", JSON.stringify([navBox?.x, navBox?.width, band?.x, band?.width]));
 for (const w of [1440, 2200]) {
   await A.page.setViewportSize({ width: w, height: 900 });
   await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });

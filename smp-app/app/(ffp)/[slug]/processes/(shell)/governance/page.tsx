@@ -1,7 +1,6 @@
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
-import { WorkspacePageHeader } from "../workspace-page-header";
 import { buildRaciTableRows } from "@/ffp/lib/domain/raci-table";
 import { buildAuthorityTableRows } from "@/ffp/lib/domain/authority-table";
 import { buildCombinedMatrixRows, deriveControlPoints } from "@/ffp/lib/domain/process-report";
@@ -298,11 +297,7 @@ export default async function GovernancePage(props: PageProps<"/[slug]/processes
   );
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <WorkspacePageHeader
-        title={m.governance.page.title}
-        subtitle={m.governance.page.subtitle}
-      />
+    <main className="w-full">
 
       <div className="mb-4">
         <GovernanceDashboard

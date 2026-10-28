@@ -5,7 +5,12 @@ import { hasSufficientAccess } from "@/ffp/lib/domain/access-control";
 import { mixHex, readableInkOn } from "@/ffp/lib/domain/color-contrast";
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { WorkspaceAccessProvider } from "./workspace-access";
-import { WorkspaceSidebar } from "./workspace-sidebar";
+import { OfficeFrame } from "./office-frame";
+import { gapsByProcess } from "@/ffp/lib/data/process-gaps";
+import { barVars } from "@/lib/branding.ts";
+import { resolveTenant } from "@/lib/door.ts";
+import { doorPool } from "@/lib/auth.ts";
+import { currentUser } from "@/lib/session.ts";
 
 const DEFAULT_ACCENT = "#334155"; // slate-700 — a workspace with no logo/accent set yet
 const DEFAULT_ACCENT_SECONDARY = "#4338ca"; // indigo-700 — matches this app's existing accent look
@@ -36,6 +41,26 @@ export default async function WorkspaceLayout(
   // so it gets its own answer rather than riding on canEdit.
   const canManageMembers = hasSufficientAccess(access.data.accessLevel, "ADMIN");
 
+  /* The band's counts (spec 067 §4.2): drafts, those the approver sent back,
+     and the gaps the map, RACI and Authority pages flag. To handle counts the
+     same things its page lists. */
+  const [statuses, gaps] = await Promise.all([
+    prisma.process.findMany({ where: { workspaceId, archivedAt: null }, select: { id: true, lifecycleStatus: true, returnReason: true } }),
+    gapsByProcess(workspaceId),
+  ]);
+  const drafts = statuses.filter((p) => p.lifecycleStatus === "DRAFT");
+  const sentBack = drafts.filter((p) => p.returnReason).length;
+  const approved = statuses.filter((p) => p.lifecycleStatus === "APPROVED").length;
+  const gapTotal = [...gaps.values()].reduce((a, n) => a + n, 0);
+  const drawnWithGaps = statuses.filter((p) => p.lifecycleStatus !== "PUBLISHED" && (gaps.get(p.id) ?? 0) > 0).length;
+  const counts = { total: statuses.length, drafts: drafts.length, sentBack, gaps: gapTotal, toHandle: sentBack + approved + (drawnWithGaps ? 1 : 0) };
+  /* The client's name as SMP's door has it now (the workspace row keeps the name it was made with). */
+  const user = await currentUser();
+  const door = user ? await resolveTenant(doorPool(), user, workspaceId) : null;
+  const clientName = door && door.ok ? door.tenant.name : workspace.name;
+  /* Forefront's navy, with the inks the shared panel works out for it (lib/branding.ts). */
+  const barStyle = Object.fromEntries(barVars("#16325C").split(";").map((d) => d.split(":") as [string, string])) as React.CSSProperties;
+
   const primary = workspace.accentColor ?? DEFAULT_ACCENT;
   const tertiary = workspace.accentColorTertiary ?? DEFAULT_ACCENT_TERTIARY;
 
@@ -56,30 +81,11 @@ export default async function WorkspaceLayout(
         } as React.CSSProperties
       }
     >
-      <WorkspaceSidebar
-        workspaceId={workspaceId}
-        workspaceName={workspace.name}
-        logoDataUrl={workspace.logoDataUrl}
-        isFirmOwnerAccess={access.data.accessVia === "OWNER_CARVEOUT"}
-        canEdit={canEdit}
-      />
       <div className="relative min-w-0 flex-1">
-        {workspace.logoDataUrl && (
-          // Sits in the margin beside every page's centered content — every
-          // workspace page shares the same "mx-auto max-w-4xl" wrapper (896px),
-          // so this gutter exists everywhere. Its width is whatever is left
-          // over, so the logo is sized to the gutter rather than to a fixed
-          // number: it grows to 240px on a wide screen and shrinks to fit on a
-          // narrow one, and can never reach the content it sits next to.
-          // eslint-disable-next-line @next/next/no-img-element -- user-uploaded data: URL, not an optimizable static asset
-          <img
-            src={workspace.logoDataUrl}
-            alt=""
-            className="pointer-events-none absolute start-5 top-8 hidden h-auto w-[min(240px,calc((100%-896px)/2-28px))] object-contain xl:block"
-          />
-        )}
         <WorkspaceAccessProvider value={{ accessLevel: access.data.accessLevel, canEdit, canManageMembers }}>
-          {props.children}
+          <OfficeFrame workspaceId={workspaceId} clientName={clientName} counts={counts} canEdit={canEdit} barStyle={barStyle}>
+            {props.children}
+          </OfficeFrame>
         </WorkspaceAccessProvider>
       </div>
     </div>

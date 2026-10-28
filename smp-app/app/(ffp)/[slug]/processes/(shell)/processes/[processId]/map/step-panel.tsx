@@ -23,14 +23,14 @@ type Kind = "money" | "time" | "none";
 const CYCLE: Letter[] = ["", "R", "A", "C", "I"];
 const CODE = { R: "RESPONSIBLE", A: "ACCOUNTABLE", C: "CONSULTED", I: "INFORMED" } as const;
 const LETTER_STYLE: Record<Letter, string> = {
-  "": "border-[#D6DCE5] bg-white text-[#9AA3B0]",
-  R: "border-[#16325C] bg-[#16325C] text-white",
-  A: "border-[#C9A24D] bg-[#C9A24D] text-[#16325C]",
-  C: "border-[#78899F] bg-[#EFF2F6] text-[#171B22]",
-  I: "border-[#D6DCE5] bg-white text-[#414A58]",
+  "": "border-[var(--line)] bg-white text-[var(--ink-4)]",
+  R: "border-[var(--panel)] bg-[var(--panel)] text-[var(--panel-ink)]",
+  A: "border-[var(--gold)] bg-[var(--gold)] text-[var(--on-accent)]",
+  C: "border-[var(--field-line)] bg-[var(--surface-2)] text-[var(--ink)]",
+  I: "border-[var(--line)] bg-white text-[var(--ink-2)]",
 };
-const sub = "text-[11px] font-extrabold uppercase tracking-[.08em] text-[#636C79]";
-const xdel = "grid h-6 w-6 shrink-0 place-items-center rounded text-[15px] text-[#8C3327] hover:bg-[#F7E3E0]";
+const sub = "text-[11px] font-extrabold uppercase tracking-[.08em] text-[var(--ink-3)]";
+const xdel = "grid h-6 w-6 shrink-0 place-items-center rounded text-[15px] text-[var(--bad-tx)] hover:bg-[var(--bad-bg)]";
 
 export function StepPanel({
   workspaceId,
@@ -140,16 +140,16 @@ export function StepPanel({
   return (
     <>
       <div>
-        <span className="font-mono text-[12px] font-bold text-[#636C79]">
+        <span className="font-mono text-[12px] font-bold text-[var(--ink-3)]">
           {head.toUpperCase()}
           {type === "DECISION" ? ` · ${m.types.DECISION.toUpperCase()}` : ""}
         </span>
         {step.gaps.map((g) => (
-          <p key={g} className="mt-1 text-[12.5px] font-semibold text-[#8C3327]">
+          <p key={g} className="mt-1 text-[12.5px] font-semibold text-[var(--bad-tx)]">
             {m.gap[g]}
           </p>
         ))}
-        {step.reviewNote && <p className="mt-1 rounded-md bg-[#FBF6E9] px-2 py-1 text-[12.5px] text-[#414A58]">{m.reviewNote(step.reviewNote)}</p>}
+        {step.reviewNote && <p className="mt-1 rounded-md bg-[var(--over-bg)] px-2 py-1 text-[12.5px] text-[var(--ink-2)]">{m.reviewNote(step.reviewNote)}</p>}
       </div>
 
       <label className={lbl}>
@@ -193,7 +193,7 @@ export function StepPanel({
           <div className="grid gap-1.5">
             <span className={lbl}>{m.involved}</span>
             {step.raci.activities > 1 ? (
-              <p className="text-[12.5px] text-[#414A58]">
+              <p className="text-[12.5px] text-[var(--ink-2)]">
                 {m.manyActivities(step.raci.activities)}{" "}
                 <Link className="font-semibold underline" href={`/${workspaceId}/processes/processes/${processId}/raci`}>
                   {m.openRaci}
@@ -252,7 +252,7 @@ export function StepPanel({
                     </div>
                   ))
                 ) : (
-                  <span className="text-[12.5px] text-[#636C79]">{m.none}</span>
+                  <span className="text-[12.5px] text-[var(--ink-3)]">{m.none}</span>
                 )}
                 {!ro && (
                   <div>
@@ -263,7 +263,7 @@ export function StepPanel({
                 )}
               </>
             ) : (
-              <p className="text-[12.5px] text-[#414A58]">
+              <p className="text-[12.5px] text-[var(--ink-2)]">
                 {m.manyRules}{" "}
                 <Link className="font-semibold underline" href={`/${workspaceId}/processes/processes/${processId}/authority`}>
                   {m.openAuthority}
@@ -276,7 +276,7 @@ export function StepPanel({
             <span className={lbl}>{m.risks}</span>
             {step.controls.length ? (
               step.controls.map((c) => (
-                <div key={c.id} className={`grid gap-1 rounded-md border px-2 py-1.5 ${c.control ? "border-[#D6DCE5]" : "border-[#B04434] bg-[#FBF1EF]"}`}>
+                <div key={c.id} className={`grid gap-1 rounded-md border px-2 py-1.5 ${c.control ? "border-[var(--line)]" : "border-[var(--bad)] bg-[var(--bad-bg)]"}`}>
                   <span className="text-[12.5px]">{m.risk(c.risk)}</span>
                   <input
                     className={field}
@@ -294,7 +294,7 @@ export function StepPanel({
                 </div>
               ))
             ) : (
-              <span className="text-[12.5px] text-[#636C79]">{m.noRisk}</span>
+              <span className="text-[12.5px] text-[var(--ink-3)]">{m.noRisk}</span>
             )}
             {!ro && (
               <div>
@@ -307,8 +307,8 @@ export function StepPanel({
         </>
       )}
 
-      <details className="rounded-md border border-[#E6EAF0] px-2.5 py-2">
-        <summary className="cursor-pointer text-[12.5px] font-semibold text-[#16325C]">{m.more}</summary>
+      <details className="rounded-md border border-[var(--line-soft)] px-2.5 py-2">
+        <summary className="cursor-pointer text-[12.5px] font-semibold text-[var(--stone)]">{m.more}</summary>
         <div className="mt-2.5 grid gap-3">
           <label className={lbl}>
             {m.type}
@@ -353,7 +353,7 @@ export function StepPanel({
                   <div key={a.id} className="flex items-center gap-1.5 text-[12.5px]">
                     <span className="flex-1">
                       {nameOf((other as (a: MapArrow) => string)(a))}
-                      {a.label && <span className="ms-1 rounded bg-[#EFF2F6] px-1 text-[11.5px] font-semibold">{a.label}</span>}
+                      {a.label && <span className="ms-1 rounded bg-[var(--surface-2)] px-1 text-[11.5px] font-semibold">{a.label}</span>}
                     </span>
                     {!ro && (
                       <button type="button" className={xdel} aria-label={m.removeArrow} onClick={() => void run(() => deleteStepConnection({ workspaceId, processId, connectionId: a.id }))}>
@@ -363,7 +363,7 @@ export function StepPanel({
                   </div>
                 ))
               ) : (
-                <span className="text-[12.5px] text-[#636C79]">{m.noArrows}</span>
+                <span className="text-[12.5px] text-[var(--ink-3)]">{m.noArrows}</span>
               )}
             </div>
           ))}
@@ -395,7 +395,7 @@ export function StepPanel({
               <div key={h.id} className="flex items-center gap-1.5 text-[12.5px]">
                 <span className="flex-1">
                   {h.otherProcessCode} · {all.reading.page.step(h.otherStepNumber)}, {h.otherStepLabel}
-                  {h.label && <span className="ms-1 rounded bg-[#EFF2F6] px-1 text-[11.5px] font-semibold">{h.label}</span>}
+                  {h.label && <span className="ms-1 rounded bg-[var(--surface-2)] px-1 text-[11.5px] font-semibold">{h.label}</span>}
                 </span>
                 {!ro && (
                   <button type="button" className={xdel} aria-label={m.removeHand} onClick={() => void run(() => deleteStepHandoff({ workspaceId, processId, handoffId: h.id }))}>
@@ -443,7 +443,7 @@ export function StepPanel({
                   {h.otherProcessCode} · {all.reading.page.step(h.otherStepNumber)}, {h.otherStepLabel}
                 </span>
               ))}
-              <span className="text-[11.5px] text-[#636C79]">{m.handOutNote}</span>
+              <span className="text-[11.5px] text-[var(--ink-3)]">{m.handOutNote}</span>
             </div>
           )}
 
@@ -451,7 +451,7 @@ export function StepPanel({
             <div className="grid gap-1">
               <span className={sub}>{m.branchesHere}</span>
               {step.branches.map((p) => (
-                <Link key={p.id} className="text-[12.5px] font-semibold text-[#16325C] underline" href={`/${workspaceId}/processes/processes/${p.id}/map`}>
+                <Link key={p.id} className="text-[12.5px] font-semibold text-[var(--stone)] underline" href={`/${workspaceId}/processes/processes/${p.id}/map`}>
                   {p.code} · {p.name}
                 </Link>
               ))}
@@ -513,12 +513,12 @@ export function StepPanel({
 
       {!ro &&
         (removing ? (
-          <div className="grid gap-2 rounded-md border border-[#B04434] bg-[#FBF1EF] px-2.5 py-2 text-[12.5px]">
+          <div className="grid gap-2 rounded-md border border-[var(--bad)] bg-[var(--bad-bg)] px-2.5 py-2 text-[12.5px]">
             <span>{m.removeAsk(step.label)}</span>
             <div className="flex gap-1.5">
               <button
                 type="button"
-                className="rounded-md border border-[#B04434] bg-[#B04434] px-2.5 py-1 text-[12.5px] font-bold text-white"
+                className="rounded-md border border-[var(--bad)] bg-[var(--bad)] px-2.5 py-1 text-[12.5px] font-bold text-white"
                 onClick={() => void run(() => deleteProcessStep({ ...base, fromMap: true })).then((r) => r.ok && onGone())}
               >
                 {m.removeYes}
@@ -530,7 +530,7 @@ export function StepPanel({
           </div>
         ) : (
           <div>
-            <button type="button" className="text-[12.5px] font-semibold text-[#8C3327] underline" onClick={() => setRemoving(true)}>
+            <button type="button" className="text-[12.5px] font-semibold text-[var(--bad-tx)] underline" onClick={() => setRemoving(true)}>
               {m.remove}
             </button>
           </div>
@@ -627,7 +627,7 @@ function RuleDialog({ roles, defaultRole, onClose, onAdd }: { roles: { id: strin
         </>
       )}
       {!okN && (
-        <p role="alert" className="text-[13px] font-semibold text-[#8C3327]">
+        <p role="alert" className="text-[13px] font-semibold text-[var(--bad-tx)]">
           {m.ruleNeedN}
         </p>
       )}

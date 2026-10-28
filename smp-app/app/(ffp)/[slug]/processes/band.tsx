@@ -26,7 +26,7 @@ export type Tile = { n: React.ReactNode; label: string; late?: boolean; hot?: bo
 /** A quiet action on the band (Print, Open the staff view). */
 export const bandQuiet = "rounded-md px-2.5 py-1.5 text-[13px] font-medium text-[var(--bar-quiet)] hover:bg-[var(--bar-hover)] hover:text-[var(--bar-ink)]";
 /** The band's one gold action. */
-export const bandGold = "rounded-md bg-[var(--bar-accent)] px-3 py-1.5 text-[13px] font-bold text-[#16325C] disabled:opacity-60";
+export const bandGold = "rounded-md bg-[var(--bar-accent)] px-3 py-1.5 text-[13px] font-bold text-[var(--on-accent)] disabled:opacity-60";
 
 export function Band({
   barStyle,
@@ -99,24 +99,24 @@ export function TabRow({ label, tabs, views }: { label: string; tabs: Tab[]; vie
   return (
     <div
       ref={bar}
-      className={`sticky top-0 z-20 -mx-4 mb-3.5 bg-[#F7F8FA] px-4 py-1.5 transition-shadow sm:-mx-6 sm:px-6 print:hidden ${stuck ? "shadow-[0_1px_0_#D6DCE5,0_8px_12px_-10px_rgba(15,23,42,.35)]" : ""}`}
+      className={`sticky top-0 z-20 -mx-4 mb-3.5 bg-[var(--ground)] px-4 py-1.5 transition-shadow sm:-mx-6 sm:px-6 print:hidden ${stuck ? "shadow-[0_1px_0_var(--line),0_8px_12px_-10px_rgba(15,23,42,.35)]" : ""}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <nav aria-label={label} className="inline-flex max-w-full flex-wrap items-center gap-0.5 rounded-[10px] border border-[#D6DCE5] bg-white p-1">
+        <nav aria-label={label} className="inline-flex max-w-full flex-wrap items-center gap-0.5 rounded-[10px] border border-[var(--line)] bg-white p-1">
           {tabs.map((t) => (
             <Link
               key={t.key}
               href={t.href}
               aria-current={t.on ? "page" : undefined}
-              className={`inline-flex items-baseline gap-[7px] whitespace-nowrap rounded-[7px] px-4 py-2 text-[14.5px] font-semibold max-sm:px-3 max-sm:text-sm ${t.on ? "bg-[#16325C] text-white" : "text-[#414A58] hover:text-[#171B22]"}`}
+              className={`inline-flex items-baseline gap-[7px] whitespace-nowrap rounded-[7px] px-4 py-2 text-[14.5px] font-semibold max-sm:px-3 max-sm:text-sm ${t.on ? "bg-[var(--panel)] text-[var(--panel-ink)]" : "text-[var(--ink-2)] hover:text-[var(--ink)]"}`}
             >
               {t.label}
               {t.count ? (
                 <span
                   className={
                     t.hot
-                      ? "rounded-full bg-[#E8A33A] px-[7px] text-xs font-bold leading-[18px] text-[#16325C]"
-                      : `text-xs font-semibold ${t.on ? "text-[#B9C2CE]" : "text-[#636C79]"}`
+                      ? "rounded-full bg-[#E8A33A] px-[7px] text-xs font-bold leading-[18px] text-[var(--on-accent)]"
+                      : `text-xs font-semibold ${t.on ? "text-[var(--panel-quiet)]" : "text-[var(--ink-3)]"}`
                   }
                 >
                   {t.count}

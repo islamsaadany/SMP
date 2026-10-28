@@ -38,18 +38,18 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
               ? { key: x.row.id, code: x.row.code, name: x.row.name, what: t.readWhat(x.row.version, date(x.row.since)), meta: x.row.myChanged.length ? t.readChanged(x.row.myChanged) : t.readMeta(x.row.mySteps), why: t.readWhy, act: m.act.read, href: `${base}/${x.row.id}?tab=steps` }
               : { key: x.s.id, code: null, name: x.s.processName ?? x.s.text.split(":")[0], what: t.answerWhat(step(x.s.stepId, x.s.stepLabel)), meta: t.answerMeta(x.s.answerBy, date(x.s.answeredAt)), why: t.answerWhy, act: m.act.reply, href: null };
     return (
-      <div key={c.key} className="mt-1.5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 gap-y-1.5 rounded-lg border border-s-4 border-[#D6DCE5] border-s-[#C9A24D] bg-white px-4 py-3.5 max-sm:grid-cols-1">
+      <div key={c.key} className="mt-1.5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3.5 gap-y-1.5 rounded-lg border border-s-4 border-[var(--line)] border-s-[var(--gold)] bg-white px-4 py-3.5 max-sm:grid-cols-1">
         <div>
-          <h3 className="flex flex-wrap items-baseline gap-1.5 text-[15.5px] font-semibold text-[#171B22]">
+          <h3 className="flex flex-wrap items-baseline gap-1.5 text-[15.5px] font-semibold text-[var(--ink)]">
             {c.code && <Code>{c.code}</Code>}
             {c.name}
           </h3>
-          <p className="mt-0.5 text-[13.5px] text-[#414A58]">{c.what}</p>
+          <p className="mt-0.5 text-[13.5px] text-[var(--ink-2)]">{c.what}</p>
           <p className={note}>
             {c.meta} · {c.why}
           </p>
           {x.kind === "answer" && (
-            <blockquote className="mt-1.5 border-s-[3px] border-[#D6DCE5] bg-[#F5F7FA] px-2.5 py-1.5 text-[13px] text-[#414A58]">{x.s.answerText}</blockquote>
+            <blockquote className="mt-1.5 border-s-[3px] border-[var(--line)] bg-[var(--zebra)] px-2.5 py-1.5 text-[13px] text-[var(--ink-2)]">{x.s.answerText}</blockquote>
           )}
         </div>
         <div className="flex flex-wrap justify-end gap-1.5 max-sm:justify-start">
@@ -61,7 +61,7 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
               answer={x.s.answerText ?? ""}
               answerBy={t.answerMeta(x.s.answerBy, date(x.s.answeredAt))}
               label={c.act}
-              className="inline-flex whitespace-nowrap rounded-md border border-[#C9A24D] bg-[#C9A24D] px-2.5 py-1 text-[12.5px] font-semibold text-[#16325C]"
+              className="inline-flex whitespace-nowrap rounded-md border border-[var(--gold)] bg-[var(--gold)] px-2.5 py-1 text-[12.5px] font-semibold text-[var(--on-accent)]"
             />
           ) : (
             <Btn href={c.href!} gold>
@@ -96,8 +96,8 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
               {group(t.answers, todo.filter((x) => x.kind === "answer"))}
             </>
           ) : (
-            <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">
-              <b className="mb-1 block text-[15px] text-[#171B22]">{t.emptyTitle}</b>
+            <div className="rounded-lg border border-dashed border-[var(--line)] bg-white px-[18px] py-[22px] text-[13.5px] text-[var(--ink-2)]">
+              <b className="mb-1 block text-[15px] text-[var(--ink)]">{t.emptyTitle}</b>
               {reader.personId ? t.emptyBody : t.officeBody}
             </div>
           )}
@@ -107,7 +107,7 @@ export default async function ToDo(props: PageProps<"/[slug]/processes/read/todo
           {done.length ? (
             <ul className="mt-1.5">
               {done.map((d, i) => (
-                <li key={i} className="border-t border-[#E6EAF0] py-[5px] text-[13px] text-[#636C79] first:border-t-0">
+                <li key={i} className="border-t border-[var(--line-soft)] py-[5px] text-[13px] text-[var(--ink-3)] first:border-t-0">
                   {d.kind === "read"
                     ? t.doneRead(d.name, d.version)
                     : d.kind === "approved"

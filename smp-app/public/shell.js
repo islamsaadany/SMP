@@ -65844,7 +65844,7 @@ var COPILOT = (function(){
   function chatW(){ try { var v = Number(localStorage.getItem(GRIPKEY)); return v >= 420 && v <= 1400 ? v : 0; } catch (e) { return 0; } }
   function splitStyle(){ var w = chatW(); return w ? ' style="--cop-chatw:' + w + 'px"' : ''; }
   var GRIP = '<div class="copgrip" data-cop-grip role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the chat" title="Drag to resize · double-click for the default width"></div>';
-  function sheetBtn(k, label){ return '<button type="button" class="copbtn quiet copsheetb" data-cop-sheet="' + k + '" aria-expanded="' + (SHEET === k) + '">' + label + '</button>'; }
+  function sheetBtn(k, label){ return '<button type="button" class="copbtn quiet copsheetb copsheetb-' + k + '" data-cop-sheet="' + k + '" aria-expanded="' + (SHEET === k) + '">' + label + '</button>'; }
   function chatHtml(){
     var c = PANE.chat;
     var head = '<h3 class="coph">' + E(c.title) + '</h3>' + (c.archived ? '<span class="copchip">Archived</span>' : '');
@@ -66853,13 +66853,16 @@ var COPILOT = (function(){
   /* §653 — THE RAIL STAYS OPEN WHILE THERE IS ROOM (Islam: "collapsing the
      side banner by default … doesn't give the user the ability to know that
      he is on the right chat"). It folds by itself only when the Copilot is
-     tight — §642's rule: the work beside the chat needs 1000px, the rail
-     about 240 more — and a fold made with the button is kept across visits.
+     tight — §668's order: the to-do folds first, then the rail, once two
+     columns (900px) no longer fit beside it — and a fold made with the
+     button is kept across visits.
      Reverses §490.2's "a running chat folds the rails". */
   function tight(){
     if (!resultOpen()) return false;
     var p = document.querySelector("[data-cop-pane]"); if (!p) return false;
-    return p.getBoundingClientRect().width / (typeof pageZoom === "function" ? pageZoom() : 1) < 1240;
+    /* §668 — the rail folds only once the to-do has already gone: two columns
+       (900px) with the rail (200 + 8) and the Copilot's own padding (16). */
+    return p.getBoundingClientRect().width / (typeof pageZoom === "function" ? pageZoom() : 1) < 1130;
   }
   function railFolded(){ return railShut() || (tight() && !RAILKEPT); }
   function syncRail(){

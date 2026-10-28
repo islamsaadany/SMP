@@ -59,6 +59,7 @@ function brkCss(): string {
   if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
   if (b === "narrow-rename") return ".tn2.editing .t{flex:0 1 auto}";                       /* §565 put back: the box sized by an input's default */
   if (b === "bar-scrolls") return ".tb{position:relative}.pin{top:0}";                        /* §566 put back: the top bar scrolls away */
+  if (b === "no-busy-mark") return ".busy{opacity:1!important;cursor:auto!important}.busy [data-act]{pointer-events:auto!important}"; /* §668 put back: a press shows nothing until the answer */
   return "";
 }
 
@@ -401,6 +402,12 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 .open .acts .sure .go,.tmenu .sure .go{border:1px solid var(--line);border-radius:7px;padding:5px 10px;text-decoration:none;color:var(--ink)}
 .open .acts .sure .go.danger,.tmenu .sure .go.danger{color:var(--bad);border-color:var(--bad)}
 .row.on{background:var(--surface);border-bottom-color:transparent}
+/* A PRESS SHOWS AT ONCE (§668, rule 1d): the row under the hand dims — the
+   same .55 a tick nobody may press already wears — and takes no second press
+   until the server's answer redraws it. The script marks it at the press and
+   the swap carries the mark away; a refusal takes it off by hand. */
+.row.busy,.open.busy,.pline.busy,.trow.busy,.sh.busy{opacity:.55;cursor:progress}
+.busy [data-act]{pointer-events:none}
 .said{margin:0 0 12px;padding:9px 13px;border:1px solid var(--bad);border-radius:8px;background:var(--bad-bg);color:var(--bad);font-size:13.5px}
 .said:empty{display:none}
 .unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}

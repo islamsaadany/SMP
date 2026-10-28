@@ -43,6 +43,9 @@
      SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§623.3)
      SMP_BREAK=add-at-top     node checks/tracker.mjs   # must go red (§656)
      SMP_BREAK=progress-anyone node checks/tracker.mjs  # must go red (§657)
+     SMP_BREAK=no-busy-mark   node checks/tracker.mjs   # must go red (§668)
+     SMP_BREAK=keep-refused   node checks/tracker.mjs   # must go red (§668)
+     SMP_BREAK=no-keepalive   node checks/tracker.mjs   # must go red (§668)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -72,7 +75,7 @@ import {
   STATUSES, STATUS_WORD, VIEWS, VIEW_WORD, GROUPS, GROUP_WORD, FORMATS, FORMAT_WORD, isFormat, isStatus, isView, isGroup, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
   lateWord, readableDay, weekLabel, inView, summary, mayChange, shape, oneLine, shortNames, todayIn, thursdayOf, weekNumber, weekWord, weekOptions, weekDays, sameWeek,
   CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay,
-  officeRows, listActions, oneAction, addAction, addTopic, listTopics, deleteTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
+  officeRows, listActions, oneAction, addAction, addTopic, oneTopic, listTopics, deleteTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
   progressOf, addProgress, latestProgress, mayChangeProgress,
 } from "../lib/tracker.ts";
 import { registerNames } from "../lib/people.ts";
@@ -836,10 +839,16 @@ try {
      the page's one script answers with this server's 404 and every press
      below reports a page error that is the harness's, not the product's. */
   const { TOPBAR_SCRIPT } = await import("../lib/topbar.ts");
+  /* THE SERVER CAN BE HELD (§668): a press's answer kept back for `hold`
+     milliseconds, so what the page shows BEFORE the answer can be read —
+     production's round trip is 600ms (§369) and this harness answers in a
+     few. Zero, as it is for every other press here. */
+  let hold = 0;
   const srv = createServer(async (rq, rs) => {
     try {
       if (String(rq.url).split("?")[0] === "/topbar.js") { rs.writeHead(200, { "Content-Type": "application/javascript" }); rs.end(TOPBAR_SCRIPT); return; }
       const chunks = []; for await (const ch of rq) chunks.push(ch);
+      if (hold && rq.method === "POST") await new Promise((r) => setTimeout(r, hold));
       const url = "http://smp.test" + rq.url;
       const rest = String(rq.url).split("?")[0].split("/").filter(Boolean).slice(2);
       const req = new Request(url, { method: rq.method, headers: { "Content-Type": rq.headers["content-type"] || "", cookie: rq.headers.cookie || "" },
@@ -866,6 +875,10 @@ try {
        back after an add and must go red on the mark (§94.5, §113.8). */
     const settle = () => pg.waitForTimeout(350).then(() => pg.waitForLoadState("load"));
     const stayed = () => pg.evaluate("window.__stay === 1");
+    /* EVERY REQUEST THE PAGE MAKES IS NOTED with whether it was asked to
+       outlive the page (§668): keepalive is not a thing a wire shows, so it
+       is read off the call itself. */
+    await pg.addInitScript(() => { window.__ka = []; const f = window.fetch; window.fetch = function (u, i) { window.__ka.push(!!(i && i.keepalive)); return f.apply(this, arguments); }; });
     await pg.goto(base); await settle();
     /* SMP_SHOT_BAR paints the client's band another colour for the picture
        alone (§498): the band is the client's, so a check made on the navy
@@ -1136,7 +1149,21 @@ try {
       (await pg.locator("#add").inputValue()) === "half a line");
     check("...and a Done pill keeps its arrow (the ground is a colour, not the shorthand)", /svg/.test(await pg.evaluate("getComputedStyle(document.querySelector('" + row.trim() + " select.st')).backgroundImage")));
     await pg.locator("#add").fill("");
-    await pg.locator(row + "[data-act=tick]").click(); await settle();
+    /* A PRESS SHOWS AT ONCE (§668, rule 1d): the server is held for 700ms —
+       more than production's round trip — and the row is read 150ms after
+       the press, before any answer can have come: it must already be dimmed
+       and marked busy, or the tick sat unticked and the finger presses again.
+       Measured as PAINT (§94.8). Then the answer lands, the row is redrawn,
+       and the mark is gone with it — both ends, the press still did its
+       work. SMP_BREAK=no-busy-mark must redden the first. */
+    const rowLook = () => pg.evaluate((r) => { const e = document.querySelector(r); return e ? { op: getComputedStyle(e).opacity, busy: e.getAttribute("aria-busy") } : null; }, row.trim());
+    hold = 700;
+    await pg.locator(row + "[data-act=tick]").click(); await pg.waitForTimeout(150);
+    const mid = await rowLook();
+    check("a pressed row shows it at once — dimmed and marked busy before the server has answered (§668)", !!mid && parseFloat(mid.op) < 0.9 && mid.busy === "true", JSON.stringify(mid));
+    await pg.waitForTimeout(900); await settle(); hold = 0;
+    const after = await rowLook();
+    check("...and the mark goes with the answer, the row drawn again plain", !!after && parseFloat(after.op) === 1 && after.busy === null, JSON.stringify(after));
     check("the tick again puts it back to Not started", (await asTenant(A, (c) => oneAction(c, born.id))).status === "not_started");
     /* THE STATUS SELECT, on change — and the cards are measured on EITHER SIDE
        OF THIS PRESS, not at two far-apart moments that happen to agree: the
@@ -1228,6 +1255,37 @@ try {
     await pg.locator(row + "input.ttl").press("Escape");
     check("Escape puts the name back and writes nothing", (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday" &&
       (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday");
+    /* A REFUSED CHANGE IS DRAWN AGAIN FROM THE SERVER (§668): a rename writes
+       the new words on screen before the answer, so a refusal used to leave
+       the refused name standing under a message saying it was refused. A
+       topic renamed to a name another topic holds is the refusal the server
+       really makes (both ends: the stored name is read back unchanged). The
+       panel row must read the STORED name after, and the message say why.
+       SMP_BREAK=keep-refused must redden the row's words. */
+    const sibling = await asTenant(A, (c) => addTopic(c, "Logistics", "islam"));
+    await pg.goto(base + "?view=all"); await settle();
+    await pg.evaluate("window.__stay = 1");
+    await pg.locator(".dots > button[data-act=settings]").click();
+    await pg.locator("[data-act=topics]").click(); await pg.waitForTimeout(120);
+    const ptrow = '.tpanel .trow[data-topic="' + roomTopic.id + '"] ';
+    if ((await pg.locator(ptrow + ".nm").count()) !== 1) check("the topics panel lists Facilities to rename — but it is not there", false);
+    else {
+      await pg.locator(ptrow + ".nm").click();
+      await pg.locator(ptrow + "input").fill("Logistics");
+      await pg.locator(ptrow + "input").press("Enter"); await settle(); await settle();
+      const kept = await asTenant(A, (c) => oneTopic(c, roomTopic.id));
+      check("a topic renamed to a name another holds is refused, the stored name unchanged", !!kept && kept.name === "Facilities", JSON.stringify(kept));
+      check("...and the page SAYS so, in the server's words", /already has that name/.test(await pg.locator("#said").innerText()), await pg.locator("#said").innerText());
+      check("...and the row reads the stored name again, not the refused one (§668)", (await pg.locator(ptrow + ".who2").count()) === 1 &&
+        (await pg.locator(ptrow + ".who2").innerText()) === "Facilities" && await stayed(), await pg.locator(ptrow + ".who2").innerText().catch(() => "(no row)"));
+      /* The refusal is a 400 the browser logs on its console as a failed
+         load; it was asked for, so it is not a page error of the product's. */
+      const refusedLog = errs.findIndex((x) => /status of 400/.test(x)); if (refusedLog >= 0) errs.splice(refusedLog, 1);
+      await pg.keyboard.press("Escape");
+    }
+    await asTenant(A, (c) => deleteTopic(c, sibling.id));
+    await pg.goto(base + "?view=all"); await settle();
+    await pg.evaluate("window.__stay = 1");
     /* THE TOPIC HAS ITS OWN COLUMN (§503), immediately before the week: a
        row with none says "+ Add a topic", the press opens the same list the
        add line offers, and a pick or a new name is written at once — read
@@ -1278,6 +1336,7 @@ try {
     await pg.locator(".open textarea[data-act=notes]").fill("Ask Facilities first.");
     await pg.locator("#add").focus(); await settle();
     check("leaving the notes box writes the notes", (await asTenant(A, (c) => oneAction(c, born.id))).description === "Ask Facilities first.");
+    check("...sent so it outlives the page, for the press that leaves the box and the page together (§668)", (await pg.evaluate("window.__ka.slice(-1)[0]")) === true, JSON.stringify(await pg.evaluate("window.__ka.slice(-3)")));
     check("...and the row is still open afterwards, the notes still in the box", (await pg.locator(".open textarea[data-act=notes]").inputValue()) === "Ask Facilities first.");
     /* PROGRESS, PRESSED (§657): the box on the opened row takes an entry on
        Enter, read back from Postgres, drawn at the top of the entries with

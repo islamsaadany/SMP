@@ -44,9 +44,12 @@ export async function serve(a: ServeArgs): Promise<Response> {
        opened for them, so the word is swapped for a box and the calendar is
        behind the icon inside it — two presses, and the day reformats into
        whatever spelling the browser's locale chose. */
+    /* `no-keepalive` (§668) sends every save the plain way, so a save made by
+       the press that leaves the page is the browser's to drop. */
     return new Response(APP_JS
       .replace("/*%BRK%*/", brk() === "close-on-tick" ? "return false;" : "")
-      .replace("/*%DATEBRK%*/", brk() === "date-two-presses" ? "throw 0;" : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
+      .replace("/*%DATEBRK%*/", brk() === "date-two-presses" ? "throw 0;" : "")
+      .replace("/*%KA%*/", brk() === "no-keepalive" ? "false && " : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which
      must turn checks/notes.mjs red (§94.5). Never set on a deployment. */

@@ -86,6 +86,7 @@ build:
 | 9 | Where the assistant lives | **The one the platform already has** (`smp-app/lib/assistant.cjs`, the deployment's `GEMINI_API_KEY`), asked with `askJson` under this module's own fixed shape and `needsCorpus:false` — a draft answers from the notes, not from the knowledge base. No second key, no second link. |
 | 10 | Where the email lives | **The platform's own email shell** (`lib/mail-html.cjs`, the same builder the strategy module's sends use), sent through `lib/mailer.cjs` from the platform's address with the sender's NAME on it and replies going to the sender, and **a copy to the sender**. Its own design inside that shell (§3), not a second builder. |
 | 11 | The word | **Meeting Notes**, key `notes` — mine, and Islam's to change: two words, the first says what a note is of. Recorded here as proposed, not settled. |
+| 12 | Sending asks first | **One press used to email the client's people, and *again* too, while Delete on the same page asked** (the UX Lens review, 2026-10-28, §668 — heuristic 5, severity 3). The gold button now gives way to a question in place, in Delete's own words: *Email the minutes to 3 people now? Yes, send · Not yet*. Only Yes posts; Not yet puts the button back. A send that cannot go stays the held button that says why. Break `send-unasked`. |
 
 ---
 
@@ -199,7 +200,12 @@ test copy is (§146), so the platform's record of what it sent stays whole.
   up or answers in a shape the module cannot read.
 - **Send** needs at least one attendee with an address and at least one
   non-empty part; otherwise it says which is missing (§221, aria-disabled
-  with the reason).
+  with the reason). **It asks first** (§668): the press shows *Email the
+  minutes to N people now? Yes, send · Not yet* in place, and only Yes sends.
+- **A save sent by the press that leaves the page** — the title, the notes
+  or the minutes left for "← All meetings" or a top-bar link — is asked to
+  outlive the page (`keepalive`, §668) when its body is under 60 KB; measured
+  in Chromium it landed without that, Safari is the browser it is for.
 
 ---
 

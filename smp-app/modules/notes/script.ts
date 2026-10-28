@@ -141,14 +141,26 @@ export const APP_JS = `(function () {
     restore(k);
   }
   var chain = Promise.resolve(), busy = false;
+  /* A SAVE OUTLIVES THE PAGE IT WAS SENT FROM (§668): the title, the notes
+     and the minutes save when their box is LEFT, and the box is often left by
+     the press that leaves the page too — "← All meetings", a link on the top
+     bar. Measured in Chromium the save still lands (the page unloads only
+     once the next one arrives); Safari is known to cut a request the moment
+     a move begins, and the iPad is where the meeting is typed. So a small
+     body is sent keepalive, which the browser carries to its end whatever the
+     page does. Only a small one: the browser refuses a keepalive body past
+     64 KB outright, so a long notes box goes the plain way it always did. The
+     break no-keepalive sends every body the plain way (checks/notes.mjs). */
+  function small(s) { return new Blob([s]).size <= 60000; }
   function post(act, opts) {
     opts = opts || {};
     var k = opts.keep === false ? null : keep();
     say("");
     chain = chain.then(function () {
       act.note = noteId();
-      return fetch(API, { method: "POST", credentials: "same-origin",
-          headers: { "Content-Type": "application/json" }, body: JSON.stringify(act) })
+      var body = JSON.stringify(act);
+      return fetch(API, { method: "POST", credentials: "same-origin", keepalive: /*%KA%*/small(body),
+          headers: { "Content-Type": "application/json" }, body: body })
         .then(function (r) { return r.json().catch(function () { return { ok: false, why: "The server did not answer." }; }); })
         .then(function (j) {
           if (!j || !j.ok) { say((j && j.why) || "That did not save. Try again."); if (opts.then) opts.then(null); return; }
@@ -217,6 +229,14 @@ export const APP_JS = `(function () {
         if (again) { again.textContent = word; again.removeAttribute("aria-disabled"); }
         markMinutes();
       } });
+    } else if (act === "send-ask") {
+      /* SEND ASKS FIRST (§668): the button gives way to the question beside
+         it, and Yes is what posts. Not yet puts the button back. */
+      b.hidden = true;
+      var sq = b.parentNode.querySelector(".sure"); if (sq) { sq.hidden = false; var yes = sq.querySelector("[data-act=send]"); if (yes) yes.focus(); }
+    } else if (act === "send-no") {
+      var sq2 = b.closest(".sure");
+      if (sq2) { sq2.hidden = true; var ask = sq2.parentNode.querySelector("[data-act=send-ask]"); if (ask) { ask.hidden = false; ask.focus(); } }
     } else if (act === "send") {
       if (b.getAttribute("aria-disabled") === "true") { say(b.getAttribute("data-why") || ""); return; }
       if (busy) return;

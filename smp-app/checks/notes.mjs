@@ -34,7 +34,9 @@
      SMP_BREAK=no-copy-to-sender  node checks/notes.mjs   # must go red
      SMP_BREAK=close-on-tick      node checks/notes.mjs   # must go red
      SMP_BREAK=title-as-heading   node checks/notes.mjs   # must go red
-     SMP_BREAK=date-two-presses   node checks/notes.mjs   # must go red      */
+     SMP_BREAK=date-two-presses   node checks/notes.mjs   # must go red
+     SMP_BREAK=send-unasked       node checks/notes.mjs   # must go red (§668)
+     SMP_BREAK=no-keepalive       node checks/notes.mjs   # must go red (§668) */
 import pg from "pg";
 import { createServer } from "node:http";
 
@@ -517,6 +519,10 @@ try {
        with the page drawn again and swapped in — a reload would satisfy every
        other assertion here (§113.8, §356.12). */
     const stayed = () => pgp.evaluate("window.__stay === 1");
+    /* EVERY REQUEST THE PAGE MAKES IS NOTED with whether it was asked to
+       outlive the page (§668): keepalive is not a thing a wire shows, so it
+       is read off the call itself. */
+    await pgp.addInitScript(() => { window.__ka = []; const f = window.fetch; window.fetch = function (u, i) { window.__ka.push(!!(i && i.keepalive)); return f.apply(this, arguments); }; });
     await pgp.goto(base); await settle();
     await probe("a note is started", async () => {
       await pgp.locator("[data-act=new]").click();
@@ -535,6 +541,22 @@ try {
     await pgp.locator("[data-act=title]").click(); await settle();
     check("...and so are the notes", (await asTenant(A, (c) => N.oneNote(c, nid2))).raw.startsWith("ramy: figures"));
     check("...and the page says so", /Saved just now/.test(await pgp.locator("[data-saved]").innerText()));
+    /* A SAVE OUTLIVES THE PAGE IT WAS SENT FROM (§668). The notes box is left
+       by the press that leaves the page — "← All meetings" — and the words
+       typed a moment before must be in the database once the list has
+       loaded. Measured in Chromium that was already so; what the break
+       reddens is the call itself: the save must be asked to outlive the page
+       (keepalive), which is what carries it in a browser that cuts requests
+       the moment a move begins. The note is opened again after, and the mark
+       planted anew, because the leave was real. */
+    check("the notes save was asked to outlive the page (§668)", (await pgp.evaluate("window.__ka.slice(-1)[0]")) === true, JSON.stringify(await pgp.evaluate("window.__ka.slice(-3)")));
+    await pgp.locator("[data-act=raw]").fill("ramy: figures by the 20th\nagreed: drafts by 22 sep\nleft the page at once");
+    await pgp.locator("a.back").click();
+    await pgp.waitForURL((u) => !u.searchParams.get("note"), { timeout: 5000 }); await settle();
+    check("...and words typed and left by the press that leaves the page are in the database", /left the page at once$/.test((await asTenant(A, (c) => N.oneNote(c, nid2))).raw),
+      (await asTenant(A, (c) => N.oneNote(c, nid2))).raw);
+    await pgp.goto(base + "?note=" + encodeURIComponent(nid2)); await settle();
+    await pgp.evaluate("window.__stay = 1");
     /* THE DATE IS A WORD, AND THE PRESS DOES NOT TAKE THE WORD AWAY (§357.4).
        A raw date box prints whatever spelling the browser's locale chose,
        which the platform uses nowhere — so what is asserted is that the word
@@ -694,8 +716,22 @@ try {
     check("...and it survives a second Refine, which ADDS (decision 6)",
       /Seasonality explained\./.test(eRow2.minutes.discussed[0]) && eRow2.minutes.discussed.length === 2 && eRow2.minutes.summary === "Preparing the Q3 review.",
       JSON.stringify(eRow2.minutes.discussed));
-    /* THE SEND. */
+    /* THE SEND ASKS FIRST (§668): the gold button gives way to a question in
+       place, nothing has left; Not yet puts it back, nothing has left; Yes
+       sends. Both ends, and the press on the question is what every line
+       after this measures. SMP_BREAK=send-unasked draws the old button, which
+       sends on the first press and has no question to find. The pass
+       recovers (§215): with no question drawn, the old button is pressed, so
+       the lines below still report. */
     mailSeen = [];
+    const askBtn = pgp.locator("[data-act=send-ask]");
+    const asks = (await askBtn.count()) === 1;
+    if (asks) { await askBtn.click(); await pgp.waitForTimeout(120); }
+    check("Send asks first, in the page — and nothing has gone out", asks && (await pgp.locator(".foot .sure:has([data-act=send])").isVisible()) && mailSeen.length === 0 &&
+      /Email the minutes to 3 people now\?/.test(await pgp.locator(".foot .sure:has([data-act=send])").innerText()), asks ? await pgp.locator(".foot .sure:has([data-act=send])").innerText() : "no send-ask button");
+    if (asks) { await pgp.locator("[data-act=send-no]").click(); await pgp.waitForTimeout(120); }
+    check("...Not yet puts the button back, and still nothing has gone out", asks && !(await pgp.locator(".foot .sure:has([data-act=send])").isVisible()) && (await askBtn.isVisible()) && mailSeen.length === 0);
+    if (asks) { await askBtn.click(); await pgp.waitForTimeout(120); }
     await pgp.locator("[data-act=send]").click(); await settle();
     check("Send emails the minutes to the attendees with an address, and a copy to the sender",
       mailSeen.length === 3 && mailSeen.map((m) => m.to[0]).sort().join(",") === "karim@partner.test,noran@forefront.test,ramy@raya.test",
@@ -704,9 +740,9 @@ try {
     check("...with the send kept and the page drawn again saying so", (await asTenant(A, (c) => N.sendsOf(c, nid2))).length === 1 && /last went out/.test(await pgp.locator("#body").innerText()) && await stayed());
     /* THE WAY BACK, AND DELETE. */
     await pgp.locator("[data-act=delete-ask]").click(); await pgp.waitForTimeout(120);
-    check("Delete asks in the page, never a browser dialog (§95)", await pgp.locator(".sure").isVisible());
+    check("Delete asks in the page, never a browser dialog (§95)", await pgp.locator(".sure:has([data-act=delete])").isVisible());
     await pgp.locator("[data-act=delete-no]").click(); await pgp.waitForTimeout(120);
-    check("...Keep it keeps it", (await asTenant(A, (c) => N.oneNote(c, nid2))) !== null && !(await pgp.locator(".sure").isVisible()));
+    check("...Keep it keeps it", (await asTenant(A, (c) => N.oneNote(c, nid2))) !== null && !(await pgp.locator(".sure:has([data-act=delete])").isVisible()));
     await pgp.locator("[data-act=delete-ask]").click(); await pgp.waitForTimeout(120);
     await pgp.locator("[data-act=delete]").click();
     await pgp.waitForURL((u) => !u.searchParams.get("note"), { timeout: 5000 });

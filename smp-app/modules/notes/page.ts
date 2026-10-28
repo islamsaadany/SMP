@@ -401,9 +401,22 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
   const notes = '<p class="lab">Notes</p><textarea class="raw" data-act="raw" aria-label="Notes" maxlength="60000" placeholder="Type as the meeting runs. Saved when you leave the box.">' + esc(n.raw) + "</textarea>";
   const refine = '<button class="btn gold" type="button" data-act="refine">' + (empty ? "Refine into minutes" : "Refine again") + "</button>";
   const sendWord = "Send to " + plural(withMail, "attendee", "attendees") + (n.sends ? " again" : "");
-  const send = '<button class="btn' + (sendable ? " gold" : "") + '" type="button" data-act="send"' +
-    (sendable ? "" : ' aria-disabled="true" data-why="' + esc(empty ? "The minutes are empty — refine the notes, or write them, before sending." : "Nobody on this meeting has an email address.") + '"') +
-    ">" + esc(sendWord) + "</button>";
+  /* SEND ASKS FIRST (§668, the UX Lens review's first fix): one press used to
+     email the client's people, and "again" too, while Delete on the same
+     page asked. So the gold button asks in place, in the words Delete uses —
+     "Email the minutes to 3 people now? Yes, send · Not yet" — and only Yes
+     posts. A send that cannot go stays the held button that says why. The
+     break `send-unasked` draws the old button, which must turn checks/notes.mjs
+     red (§94.5). */
+  const sendAsk = '<span class="sure" hidden>' + esc("Email the minutes to " + plural(withMail, "person", "people") + (n.sends ? " again" : "") + " now?") +
+    ' <button type="button" class="go btn gold" data-act="send">Yes, send</button>' +
+    '<button type="button" class="btn" data-act="send-no">Not yet</button></span>';
+  const send = !sendable
+    ? '<button class="btn" type="button" data-act="send" aria-disabled="true" data-why="' +
+      esc(empty ? "The minutes are empty — refine the notes, or write them, before sending." : "Nobody on this meeting has an email address.") + '">' + esc(sendWord) + "</button>"
+    : BRK() === "send-unasked"
+      ? '<button class="btn gold" type="button" data-act="send">' + esc(sendWord) + "</button>"
+      : '<button class="btn gold" type="button" data-act="send-ask">' + esc(sendWord) + "</button>" + sendAsk;
   const hint = noMail.length ? '<span class="hint">' + esc(noMail.join(", ")) + (noMail.length === 1 ? " has" : " have") + " no email and will not receive them.</span>" : "";
   const del = '<span class="sure" hidden>Delete this note and everything about it? ' +
     '<button type="button" class="go btn danger" data-act="delete">Yes, delete it</button>' +

@@ -661,7 +661,7 @@ function renderAccess(){
       '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
     : '';
 
-  /* WHERE A READER'S SEAT LANDS (§684; Islam's A of the round-4 mockup):
+  /* WHERE A READER'S SEAT LANDS (§687; Islam's A of the round-4 mockup):
      the line above the matrix, because the matrix under it is exactly what
      the rule reads to decide who is a reader — not the office, holding no
      piece, granted edit or fill nowhere (reading.js readerSeat). Pressed by

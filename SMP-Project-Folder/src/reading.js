@@ -159,7 +159,7 @@ var READING = (function () {
     return '<div class="rfig"><b style="color:' + bandInk(v) + '">' + pct(v) + '</b><span>' + what + ' — ' + sub + '</span>' +
       (v == null || isNaN(v) ? '' : '<i class="rband ' + band(v) + '">' + esc(bandWord(v)) + '</i>') + '</div>';
   }
-  /* OVERALL PERFORMANCE (§683). Islam, of El Abd's company: *"why the
+  /* OVERALL PERFORMANCE (§686). Islam, of El Abd's company: *"why the
      overall performance is not showing while it is showing in the
      performance tab for directions performance and execution"*. §676 scored
      a top layer by its units alone; El Abd has none, and its plan is the top
@@ -268,7 +268,7 @@ var READING = (function () {
     }, true);
   }
 
-  /* ── A SEAT THAT EDITS NOTHING OPENS IN THE WINDOW (§684) ──────────────
+  /* ── A SEAT THAT EDITS NOTHING OPENS IN THE WINDOW (§687) ──────────────
      Islam: *"build it yes"*, of the mockup's first position. A reader's seat
      — a CEO's, a peer's, anybody's that the access matrix lets look and never
      write — lands in the window, with the workbench a press of Exit away;

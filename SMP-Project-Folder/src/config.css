@@ -3204,7 +3204,7 @@
   .planblk-pen { border-top:1px solid var(--line); padding:12px 18px 14px; }
   .planblk-pen > .cyc2-r.planper:first-child { border-top:0; margin-top:0; padding-top:0; }
 
-/* §684: where a reader's seat lands — the line above the Roles & access matrix */
+/* §687: where a reader's seat lands — the line above the Roles & access matrix */
 .acreaders { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; padding:10px 14px;
   background:var(--surface); border:1px solid var(--line); border-radius:10px; font-size:13.5px; }
 .acreaders b { font-weight:600; white-space:nowrap; }

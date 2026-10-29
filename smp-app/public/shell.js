@@ -5346,7 +5346,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), t = s && s.top, b = t && t.plan;
     return !!(b && b.split === true);
   }
-  /* §684: WHERE A READER'S SEAT LANDS — in the reading window (the default,
+  /* §687: WHERE A READER'S SEAT LANDS — in the reading window (the default,
      Islam: "build it yes") or on the workbench. A switch per client, on the
      Structure step; kept on the structure as `readers: "workbench"`, and an
      ABSENCE for the window (§50.6), so a client that never touched the
@@ -40041,7 +40041,7 @@ function renderAccess(){
       '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
     : '';
 
-  /* WHERE A READER'S SEAT LANDS (§684; Islam's A of the round-4 mockup):
+  /* WHERE A READER'S SEAT LANDS (§687; Islam's A of the round-4 mockup):
      the line above the matrix, because the matrix under it is exactly what
      the rule reads to decide who is a reader — not the office, holding no
      piece, granted edit or fill nowhere (reading.js readerSeat). Pressed by
@@ -56069,7 +56069,7 @@ var READING = (function () {
     return '<div class="rfig"><b style="color:' + bandInk(v) + '">' + pct(v) + '</b><span>' + what + ' — ' + sub + '</span>' +
       (v == null || isNaN(v) ? '' : '<i class="rband ' + band(v) + '">' + esc(bandWord(v)) + '</i>') + '</div>';
   }
-  /* OVERALL PERFORMANCE (§683). Islam, of El Abd's company: *"why the
+  /* OVERALL PERFORMANCE (§686). Islam, of El Abd's company: *"why the
      overall performance is not showing while it is showing in the
      performance tab for directions performance and execution"*. §676 scored
      a top layer by its units alone; El Abd has none, and its plan is the top
@@ -56178,7 +56178,7 @@ var READING = (function () {
     }, true);
   }
 
-  /* ── A SEAT THAT EDITS NOTHING OPENS IN THE WINDOW (§684) ──────────────
+  /* ── A SEAT THAT EDITS NOTHING OPENS IN THE WINDOW (§687) ──────────────
      Islam: *"build it yes"*, of the mockup's first position. A reader's seat
      — a CEO's, a peer's, anybody's that the access matrix lets look and never
      write — lands in the window, with the workbench a press of Exit away;
@@ -76642,7 +76642,7 @@ var SYNC = (function () {
                the tour's own offer, made visibly instead of automatically.
                TOUR.offer's memory is untouched, so with the welcome already
                seen this session the tour offers itself exactly as before. */
-            /* §684: A READER'S SEAT LANDS IN THE READING WINDOW, and is
+            /* §687: A READER'S SEAT LANDS IN THE READING WINDOW, and is
                neither greeted nor toured over it — the window is the whole
                of the platform for them, and the welcome's doors lead to
                pages they came here not to work. */
@@ -83901,7 +83901,7 @@ var SYNC = (function () {
         setDriversOn(this.dataset.drvswitch === "1"); paint();
       });
     });
-    /* §684: where a reader's seat lands (Roles & access). The window is the
+    /* §687: where a reader's seat lands (Roles & access). The window is the
        absence; the workbench is written on the client's structure (§50.6). */
     document.querySelectorAll("[data-readers]").forEach(function(b){
       b.addEventListener("click", function(){

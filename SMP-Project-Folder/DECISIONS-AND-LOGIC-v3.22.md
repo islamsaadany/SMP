@@ -70494,7 +70494,7 @@ Islam, of an opened direction at El Abd: *"the tables columns are too far away w
 
 **§682 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §681. No migrations, nobody signed out.
 
-## §683 — The reading window's Overall performance reads a top layer by its own plan, and execution by the ratio (2026-10-29)
+## §686 — The reading window's Overall performance reads a top layer by its own plan, and execution by the ratio (2026-10-29; §683 on the branch, renumbered at the merge: main took §683–§685, §264.3)
 
 Islam, of El Abd's company in the window: *"why the overall performance is not showing while it showing in the performance tab for directions performance and execution"*.
 
@@ -70502,7 +70502,7 @@ Islam, of El Abd's company in the window: *"why the overall performance is not s
 
 **Checked**: the frozen shell built whole on the worked example — Mobile's three figures read as the Performance page computes them; Raya's group reads its measures and, with no weights set on its units, a dash for the other two, as the group page does. **Not checked**: El Abd itself, whose record this session does not hold; the condition is the group page's own.
 
-## §684 — A seat that edits nothing lands in the reading window (2026-10-29)
+## §687 — A seat that edits nothing lands in the reading window (2026-10-29; §684 on the branch, renumbered at the merge: main took §683–§685, §264.3)
 
 Islam: *"build it yes"*, of the mockup's first position (design-mockups/strategy-reading-view): a seat that owns nothing opens in the window, with the workbench a press away.
 

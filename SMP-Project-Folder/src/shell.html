@@ -7507,6 +7507,18 @@
         setDriversOn(this.dataset.drvswitch === "1"); paint();
       });
     });
+    /* §684: where a reader's seat lands (Roles & access). The window is the
+       absence; the workbench is written on the client's structure (§50.6). */
+    document.querySelectorAll("[data-readers]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (this.dataset.readers === "workbench") structWritable().readers = "workbench";
+        else {
+          var st = GROUP[SMPRules.STRUCTURE];
+          if (st && typeof st === "object") { delete st.readers; if (!Object.keys(st).length) delete GROUP[SMPRules.STRUCTURE]; }
+        }
+        fieldSaved(); paint();
+      });
+    });
     var as = document.getElementById("addseason");
     if (as) as.addEventListener("click", function(){
       if (!Array.isArray(GROUP[SMPRules.SEASONS])) GROUP[SMPRules.SEASONS] = [];

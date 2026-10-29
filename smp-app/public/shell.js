@@ -40041,9 +40041,26 @@ function renderAccess(){
       '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
     : '';
 
+  /* WHERE A READER'S SEAT LANDS (§684; Islam's A of the round-4 mockup):
+     the line above the matrix, because the matrix under it is exactly what
+     the rule reads to decide who is a reader — not the office, holding no
+     piece, granted edit or fill nowhere (reading.js readerSeat). Pressed by
+     whoever edits the matrix; kept on the client's structure as an absence
+     for the window (SMPRules.readersOpen). */
+  var rdOn = SMPRules.readersOpen(GROUP);
+  var readersLine = '<div class="acreaders"><b>Readers land in</b>' +
+    (editable
+      ? '<span class="segsw" role="group" aria-label="Where a reader\u2019s seat lands at sign-in">' +
+          '<button type="button" class="seg' + (rdOn ? ' on' : '') + '" data-readers="window" aria-pressed="' + rdOn + '">the reading window</button>' +
+          '<button type="button" class="seg' + (rdOn ? '' : ' on') + '" data-readers="workbench" aria-pressed="' + (!rdOn) + '">the workbench</button>' +
+        '</span>'
+      : '<span class="acrdnow">' + (rdOn ? 'the reading window' : 'the workbench') + '</span>') +
+    '<span class="acrdwhy">A reader: no unit, function, capability, project or direction of their own, and nothing to edit. ' +
+      (rdOn ? 'They open in the window on sign-in, with the workbench a press of Exit away.' : 'Everybody opens on the workbench; Read on the bar still opens the window.') + '</span></div>';
+
   return section("", "Roles & access",
       null,
-      differLine +
+      readersLine + differLine +
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
@@ -72815,28 +72832,6 @@ var CLIENTSETUP = (function () {
     /* §621: the note that closed this box is the hover on the step's own
        question now (render(), SHAPE_TIP) — and it no longer sends anybody to
        Terminology, which left Setup. */
-    /* §684: WHERE A READER'S SEAT LANDS. Islam: *"make a switch for it per
-       client"*. A reader — not the office, holding nothing, granted edit or
-       fill nowhere (reading.js readerSeat) — opens in the reading window on
-       sign-in while this is On, and on the workbench while it is Off. On is
-       the absence (§50.6), so a client that never pressed it reads as the
-       window was built to read; Off is written as `readers: "workbench"` on
-       the structure, where the rest of the client's shape is kept and the
-       office alone may write (SMPRules.readersOpen). */
-    if (!only || only === "reading") {
-      var rd = card("Reading window", box);
-      rd.setAttribute("data-stcard", "reading");
-      var rdOn = SMPRules.readersOpen(GROUP);
-      hd(rd, onOff(rdOn, function (v) {
-        var nx = structNow();
-        if (v) delete nx.readers; else nx.readers = "workbench";
-        structWrite(nx);
-      }));
-      rd.appendChild(el("p", "sthid", rdOn
-        ? "On: a person who may only read the strategy \u2014 no unit, function, capability, project or direction of their own, and nothing to edit \u2014 opens in the reading window on sign-in, with the workbench a press of Exit away."
-        : "Off: everybody opens on the workbench; Read on the bar still opens the window."));
-      if (ro) dummy(rd.querySelector(".stonoff"));
-    }
     return box;
   }
 
@@ -83904,6 +83899,18 @@ var SYNC = (function () {
     document.querySelectorAll("[data-drvswitch]").forEach(function(b){
       b.addEventListener("click", function(){
         setDriversOn(this.dataset.drvswitch === "1"); paint();
+      });
+    });
+    /* §684: where a reader's seat lands (Roles & access). The window is the
+       absence; the workbench is written on the client's structure (§50.6). */
+    document.querySelectorAll("[data-readers]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (this.dataset.readers === "workbench") structWritable().readers = "workbench";
+        else {
+          var st = GROUP[SMPRules.STRUCTURE];
+          if (st && typeof st === "object") { delete st.readers; if (!Object.keys(st).length) delete GROUP[SMPRules.STRUCTURE]; }
+        }
+        fieldSaved(); paint();
       });
     });
     var as = document.getElementById("addseason");

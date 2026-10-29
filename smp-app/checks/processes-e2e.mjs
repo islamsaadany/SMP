@@ -281,7 +281,7 @@ await T.page.click("header button:text-is('I have read it')");
 await T.page.waitForFunction(() => !/Waiting on you/.test(document.querySelector("[data-ffp] header")?.innerText || "Waiting on you"), null, { timeout: 20000 });
 /* the refresh moved the bar's count: the bar must still be the one its script wired (top-bar.tsx) */
 const theme = () => T.page.evaluate(() => document.documentElement.getAttribute("data-theme"));
-/* three states since §673 (Light, Dark, Auto): a press moves the sign every time, and the attribute unless Auto lands on what was chosen */
+/* three states since §674 (Light, Dark, Auto): a press moves the sign every time, and the attribute unless Auto lands on what was chosen */
 const sign = () => T.page.$eval("#tbtheme", (t) => t.getAttribute("data-tip"));
 const t0 = await theme(), s0 = await sign(), drawn = await T.page.$eval("#tbtheme", (t) => t.innerHTML.includes("<svg")).catch(() => false);
 await T.page.click("#tbtheme");

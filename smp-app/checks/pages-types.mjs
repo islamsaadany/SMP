@@ -117,7 +117,7 @@ interface Screen { isExtended: boolean; }
 /* The console loads the debrief splitter, a module to the checker for the
    library files' reason, and nothing else of the frozen product's but the
    set-up flow — whose strategy-page names it does NOT have (§594) — and
-   theme.js (§669), read as the script it is, so THEME is a name of the page. */
+   theme.js (§673), read as the script it is, so THEME is a name of the page. */
 const CONSOLE_GLOBALS = CLOSER + `type Closed<T> = { [K in keyof T]: T[K] };
 declare var MemorySplit: Closed<typeof import("./memory-split.js")>;
 declare var CaseSplit: Closed<typeof import("./case-split.js")>;

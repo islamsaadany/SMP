@@ -4,7 +4,7 @@
    missing was a way to choose it. The product followed the laptop silently
    and a person who wanted the other one had nowhere to say so.
 
-   Three states. Light, Dark and Auto (§673, 2026-10-29). Auto was here at
+   Three states. Light, Dark and Auto (§674, 2026-10-29). Auto was here at
    the start, went for being "a third state whose whole job is to be
    invisible", and is back on Islam's word, with the sign on hover as what
    makes it visible: the mark shows the auto mark and the sign says which

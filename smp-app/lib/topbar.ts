@@ -285,7 +285,7 @@ export function themedCss(css: string): string {
 
 export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/topbar.ts). */
 (function () {
-  /* Light, Dark and Auto (§673), the same three states theme.js keeps for
+  /* Light, Dark and Auto (§674), the same three states theme.js keeps for
      Strategy, under the same key: a stored light or dark is a choice, and no
      key is Auto, which follows the device now and as it changes. */
   var KEY = "smp.theme";

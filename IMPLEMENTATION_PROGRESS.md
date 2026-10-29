@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-29 — The reading window gives capabilities a tab of their own (§678), on the branch.** Islam, of El Abd: "where is the capabilities tab?" Where a layer keeps directions and capabilities apart, the window now has a Capabilities tab between Directions and Overall performance, as the workbench does; elsewhere four tabs as before. A measure without a target or a figure shows a dash. Checked on the worked example both ways; not on El Abd itself.
+**2026-10-29 — The reading window gives capabilities a tab of their own (§679), on the branch.** Islam, of El Abd: "where is the capabilities tab?" Where a layer keeps directions and capabilities apart, the window now has a Capabilities tab between Directions and Overall performance, as the workbench does; elsewhere four tabs as before. A measure without a target or a figure shows a dash. Checked on the worked example both ways; not on El Abd itself.
 
 **2026-10-29 — The reading window keeps directions and capabilities apart where the box does (§677), merged to `main` on Islam's word.** Where a layer keeps its directions and capabilities apart, as El Abd's top layer does, the window's Directions tab now draws them as two lists under two headings, by the box's own setting; elsewhere one list as before. Checked on the worked example with the setting answered both ways; not on El Abd itself.
 

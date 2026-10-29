@@ -55924,7 +55924,7 @@ var READING = (function () {
       why: "Where things stand going in: what it is good at, what holds it back, what the market offers, and what could hurt. The reasoning behind the directions." },
     { k: "dir", label: function () { return "Directions"; },
       why: "What is being pushed on this year: each direction with the measures that say what done looks like and where they stand at the review point, and the tactics that deliver it — who owns each, the quarters it runs, whether it is on its way." },
-    /* CAPABILITIES, A TAB OF THEIR OWN WHERE THE BOX KEEPS THEM APART (§678).
+    /* CAPABILITIES, A TAB OF THEIR OWN WHERE THE BOX KEEPS THEM APART (§679).
        Islam, of El Abd: *"where is the capabilities tab?"* — §677 had put them
        under Directions as a second list; the workbench gives a split box a
        Capabilities tab (§560), and so does the window. Offered only where the
@@ -56002,7 +56002,7 @@ var READING = (function () {
   }
 
   /* DIRECTIONS AND CAPABILITIES APART WHERE THE BOX KEEPS THEM APART (§677,
-     §678). The question is the workbench's own, `boxSplit(u)`
+     §679). The question is the workbench's own, `boxSplit(u)`
      (SMPRules.pillarsSplit): where it answers yes, Directions holds the
      directions alone and the capabilities have the tab above; where it
      answers no, one list, as the box itself is. */

@@ -70440,7 +70440,7 @@ The Directions tab asked one list of every subject. El Abd's top layer keeps its
 
 **§677 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §676 went in. The reading window's script, its stylesheet and the built files changed; there are no migrations and nobody is signed out.
 
-## §678 — The reading window gives capabilities a tab of their own, as the workbench does (2026-10-29)
+## §679 — The reading window gives capabilities a tab of their own, as the workbench does (2026-10-29; §678 on the branch, renumbered at the merge: main took §678, §264.3)
 
 Islam, of El Abd in the window: *"where is the capabilities tab?"*. §677 had put a split box's capabilities under Directions as a second list; the workbench gives such a box a Capabilities tab (§560), and a reader who knows the workbench looks for it there.
 

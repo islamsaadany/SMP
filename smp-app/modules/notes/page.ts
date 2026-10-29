@@ -153,7 +153,7 @@ input.date{cursor:auto}
 .sure{display:inline-flex;gap:10px;align-items:center;color:var(--ink-2);font-size:13px}
 .sure .go.danger{color:var(--bad);border-color:var(--bad)}
 .rm{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--bad);cursor:pointer;text-decoration:underline}
-/* ── WHAT THE PAGE SHOWS WHILE IT WAITS (§669, rule 1d), from
+/* ── WHAT THE PAGE SHOWS WHILE IT WAITS (§672, rule 1d), from
    design-mockups/meeting-notes/2026-10-29_refine-loading.html. Refine takes
    seconds and the page stood still for them. Now the minutes' own shape
    stands where the minutes will land, in the platform's skeleton bars
@@ -337,7 +337,7 @@ function attendeeBlock(n: Note, L: Loaded): string {
     "<span>Each tick is already saved.</span></div></div></div>";
 }
 
-/* THE SHAPE OF WHAT IS COMING (§669): the minutes as grey bars — a summary,
+/* THE SHAPE OF WHAT IS COMING (§672): the minutes as grey bars — a summary,
    three discussed, two agreed, an actions table of two rows, one open, the
    next meeting — drawn HERE, by the server, and carried in the page in a
    template the script shows at the press, so the page never writes a part of
@@ -443,7 +443,7 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
   const notes = '<p class="lab">Notes</p><textarea class="raw" data-act="raw" aria-label="Notes" maxlength="60000" placeholder="Type as the meeting runs. Saved when you leave the box.">' + esc(n.raw) + "</textarea>";
   const refine = '<button class="btn gold" type="button" data-act="refine">' + (empty ? "Refine into minutes" : "Refine again") + "</button>";
   const sendWord = "Send to " + plural(withMail, "attendee", "attendees") + (n.sends ? " again" : "");
-  /* SEND ASKS FIRST (§668, the UX Lens review's first fix): one press used to
+  /* SEND ASKS FIRST (§671, the UX Lens review's first fix): one press used to
      email the client's people, and "again" too, while Delete on the same
      page asked. So the gold button asks in place, in the words Delete uses —
      "Email the minutes to 3 people now? Yes, send · Not yet" — and only Yes
@@ -453,7 +453,7 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
   const sendAsk = '<span class="sure" hidden>' + esc("Email the minutes to " + plural(withMail, "person", "people") + (n.sends ? " again" : "") + " now?") +
     ' <button type="button" class="go btn gold" data-act="send">Yes, send</button>' +
     '<button type="button" class="btn" data-act="send-no">Not yet</button></span>' +
-    /* and the line Yes gives way to, while the emails go (§669) */
+    /* and the line Yes gives way to, while the emails go (§672) */
     '<span class="working" data-sending hidden><span class="spin"></span>' + esc("Sending the minutes to " + plural(withMail, "person", "people")) + "&hellip;</span>";
   const send = !sendable
     ? '<button class="btn" type="button" data-act="send" aria-disabled="true" data-why="' +

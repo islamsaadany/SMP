@@ -44,13 +44,13 @@ export async function serve(a: ServeArgs): Promise<Response> {
        opened for them, so the word is swapped for a box and the calendar is
        behind the icon inside it — two presses, and the day reformats into
        whatever spelling the browser's locale chose. */
-    /* `no-keepalive` (§668) sends every save the plain way, so a save made by
+    /* `no-keepalive` (§671) sends every save the plain way, so a save made by
        the press that leaves the page is the browser's to drop. */
     return new Response(APP_JS
       .replace("/*%BRK%*/", brk() === "close-on-tick" ? "return false;" : "")
       .replace("/*%DATEBRK%*/", brk() === "date-two-presses" ? "throw 0;" : "")
       .replace("/*%KA%*/", brk() === "no-keepalive" ? "false && " : "")
-      /* `no-wait-shape` (§669): no shape while Refine works, no line while
+      /* `no-wait-shape` (§672): no shape while Refine works, no line while
          the minutes go — the page stands still again. */
       .replace("/*%WAIT%*/", brk() === "no-wait-shape" ? "return false;" : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 

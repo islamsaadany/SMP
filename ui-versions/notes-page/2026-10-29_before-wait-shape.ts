@@ -401,7 +401,7 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
   const notes = '<p class="lab">Notes</p><textarea class="raw" data-act="raw" aria-label="Notes" maxlength="60000" placeholder="Type as the meeting runs. Saved when you leave the box.">' + esc(n.raw) + "</textarea>";
   const refine = '<button class="btn gold" type="button" data-act="refine">' + (empty ? "Refine into minutes" : "Refine again") + "</button>";
   const sendWord = "Send to " + plural(withMail, "attendee", "attendees") + (n.sends ? " again" : "");
-  /* SEND ASKS FIRST (§668, the UX Lens review's first fix): one press used to
+  /* SEND ASKS FIRST (§671, the UX Lens review's first fix): one press used to
      email the client's people, and "again" too, while Delete on the same
      page asked. So the gold button asks in place, in the words Delete uses —
      "Email the minutes to 3 people now? Yes, send · Not yet" — and only Yes

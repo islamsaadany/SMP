@@ -54,7 +54,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
       .replace("/*%TABS%*/", brk() === "tabs-reload" ? "return;" : "")
       /* §567: the add line's picks carried past the add again. */
       .replace("st.picked = false; /*%PICKS%*/", brk() === "keep-picks" ? "" : "st.picked = false;")
-      /* §668: a refused change left standing on screen; a save sent the plain
+      /* §671: a refused change left standing on screen; a save sent the plain
          way, for the browser to drop when the page leaves. */
       .replace("/*%REFUSED%*/", brk() === "keep-refused" ? "return;" : "")
       .replace("/*%KA%*/", brk() === "no-keepalive" ? "false && " : ""),

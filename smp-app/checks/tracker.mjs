@@ -43,9 +43,9 @@
      SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§623.3)
      SMP_BREAK=add-at-top     node checks/tracker.mjs   # must go red (§656)
      SMP_BREAK=progress-anyone node checks/tracker.mjs  # must go red (§657)
-     SMP_BREAK=no-busy-mark   node checks/tracker.mjs   # must go red (§668)
-     SMP_BREAK=keep-refused   node checks/tracker.mjs   # must go red (§668)
-     SMP_BREAK=no-keepalive   node checks/tracker.mjs   # must go red (§668)
+     SMP_BREAK=no-busy-mark   node checks/tracker.mjs   # must go red (§671)
+     SMP_BREAK=keep-refused   node checks/tracker.mjs   # must go red (§671)
+     SMP_BREAK=no-keepalive   node checks/tracker.mjs   # must go red (§671)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -839,7 +839,7 @@ try {
      the page's one script answers with this server's 404 and every press
      below reports a page error that is the harness's, not the product's. */
   const { TOPBAR_SCRIPT } = await import("../lib/topbar.ts");
-  /* THE SERVER CAN BE HELD (§668): a press's answer kept back for `hold`
+  /* THE SERVER CAN BE HELD (§671): a press's answer kept back for `hold`
      milliseconds, so what the page shows BEFORE the answer can be read —
      production's round trip is 600ms (§369) and this harness answers in a
      few. Zero, as it is for every other press here. */
@@ -876,7 +876,7 @@ try {
     const settle = () => pg.waitForTimeout(350).then(() => pg.waitForLoadState("load"));
     const stayed = () => pg.evaluate("window.__stay === 1");
     /* EVERY REQUEST THE PAGE MAKES IS NOTED with whether it was asked to
-       outlive the page (§668): keepalive is not a thing a wire shows, so it
+       outlive the page (§671): keepalive is not a thing a wire shows, so it
        is read off the call itself. */
     await pg.addInitScript(() => { window.__ka = []; const f = window.fetch; window.fetch = function (u, i) { window.__ka.push(!!(i && i.keepalive)); return f.apply(this, arguments); }; });
     await pg.goto(base); await settle();
@@ -1149,7 +1149,7 @@ try {
       (await pg.locator("#add").inputValue()) === "half a line");
     check("...and a Done pill keeps its arrow (the ground is a colour, not the shorthand)", /svg/.test(await pg.evaluate("getComputedStyle(document.querySelector('" + row.trim() + " select.st')).backgroundImage")));
     await pg.locator("#add").fill("");
-    /* A PRESS SHOWS AT ONCE (§668, rule 1d): the server is held for 700ms —
+    /* A PRESS SHOWS AT ONCE (§671, rule 1d): the server is held for 700ms —
        more than production's round trip — and the row is read 150ms after
        the press, before any answer can have come: it must already be dimmed
        and marked busy, or the tick sat unticked and the finger presses again.
@@ -1160,7 +1160,7 @@ try {
     hold = 700;
     await pg.locator(row + "[data-act=tick]").click(); await pg.waitForTimeout(150);
     const mid = await rowLook();
-    check("a pressed row shows it at once — dimmed and marked busy before the server has answered (§668)", !!mid && parseFloat(mid.op) < 0.9 && mid.busy === "true", JSON.stringify(mid));
+    check("a pressed row shows it at once — dimmed and marked busy before the server has answered (§671)", !!mid && parseFloat(mid.op) < 0.9 && mid.busy === "true", JSON.stringify(mid));
     await pg.waitForTimeout(900); await settle(); hold = 0;
     const after = await rowLook();
     check("...and the mark goes with the answer, the row drawn again plain", !!after && parseFloat(after.op) === 1 && after.busy === null, JSON.stringify(after));
@@ -1255,7 +1255,7 @@ try {
     await pg.locator(row + "input.ttl").press("Escape");
     check("Escape puts the name back and writes nothing", (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday" &&
       (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday");
-    /* A REFUSED CHANGE IS DRAWN AGAIN FROM THE SERVER (§668): a rename writes
+    /* A REFUSED CHANGE IS DRAWN AGAIN FROM THE SERVER (§671): a rename writes
        the new words on screen before the answer, so a refusal used to leave
        the refused name standing under a message saying it was refused. A
        topic renamed to a name another topic holds is the refusal the server
@@ -1276,7 +1276,7 @@ try {
       const kept = await asTenant(A, (c) => oneTopic(c, roomTopic.id));
       check("a topic renamed to a name another holds is refused, the stored name unchanged", !!kept && kept.name === "Facilities", JSON.stringify(kept));
       check("...and the page SAYS so, in the server's words", /already has that name/.test(await pg.locator("#said").innerText()), await pg.locator("#said").innerText());
-      check("...and the row reads the stored name again, not the refused one (§668)", (await pg.locator(ptrow + ".who2").count()) === 1 &&
+      check("...and the row reads the stored name again, not the refused one (§671)", (await pg.locator(ptrow + ".who2").count()) === 1 &&
         (await pg.locator(ptrow + ".who2").innerText()) === "Facilities" && await stayed(), await pg.locator(ptrow + ".who2").innerText().catch(() => "(no row)"));
       /* The refusal is a 400 the browser logs on its console as a failed
          load; it was asked for, so it is not a page error of the product's. */
@@ -1336,7 +1336,7 @@ try {
     await pg.locator(".open textarea[data-act=notes]").fill("Ask Facilities first.");
     await pg.locator("#add").focus(); await settle();
     check("leaving the notes box writes the notes", (await asTenant(A, (c) => oneAction(c, born.id))).description === "Ask Facilities first.");
-    check("...sent so it outlives the page, for the press that leaves the box and the page together (§668)", (await pg.evaluate("window.__ka.slice(-1)[0]")) === true, JSON.stringify(await pg.evaluate("window.__ka.slice(-3)")));
+    check("...sent so it outlives the page, for the press that leaves the box and the page together (§671)", (await pg.evaluate("window.__ka.slice(-1)[0]")) === true, JSON.stringify(await pg.evaluate("window.__ka.slice(-3)")));
     check("...and the row is still open afterwards, the notes still in the box", (await pg.locator(".open textarea[data-act=notes]").inputValue()) === "Ask Facilities first.");
     /* PROGRESS, PRESSED (§657): the box on the opened row takes an entry on
        Enter, read back from Postgres, drawn at the top of the entries with

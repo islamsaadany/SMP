@@ -162,7 +162,7 @@ export const APP_JS = `(function () {
     var b = o.querySelector("[data-act=hist]"), h = o.querySelector(".hist"); if (!b || !h) return;
     h.hidden = !on; b.classList.toggle("on", !!on); b.setAttribute("aria-expanded", String(!!on));
   }
-  /* A PRESS SHOWS AT ONCE (§668, rule 1d). Every handler below notes the
+  /* A PRESS SHOWS AT ONCE (§671, rule 1d). Every handler below notes the
      control under the hand in "pressed", and a request made from it marks
      the row, panel or line that control sits in busy — dimmed, and taking no
      second press — until the answer's swap carries the mark away. A refusal
@@ -176,7 +176,7 @@ export const APP_JS = `(function () {
     return r;
   }
   function unmark(r) { if (r && r.isConnected) { r.classList.remove("busy"); r.removeAttribute("aria-busy"); } }
-  /* A SAVE OUTLIVES THE PAGE IT WAS SENT FROM (§668): the description saves
+  /* A SAVE OUTLIVES THE PAGE IT WAS SENT FROM (§671): the description saves
      when its box is left, and the box is often left by the press that leaves
      the page. A small body is sent keepalive (the browser refuses a keepalive
      body past 64 KB, so a long one goes the plain way). */
@@ -193,7 +193,7 @@ export const APP_JS = `(function () {
         .then(function (j) {
           if (!j || !j.ok) {
             say((j && j.why) || "That did not save. Try again."); unmark(busy); if (then) then(null);
-            /* A REFUSED CHANGE IS DRAWN AGAIN FROM THE SERVER (§668): a rename,
+            /* A REFUSED CHANGE IS DRAWN AGAIN FROM THE SERVER (§671): a rename,
                an edited entry or a picked status was written on screen before
                the answer, so on a refusal the screen would keep the refused
                words beside a message saying they were refused. The list is

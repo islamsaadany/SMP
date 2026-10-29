@@ -141,7 +141,7 @@ export const APP_JS = `(function () {
     restore(k);
   }
   var chain = Promise.resolve(), busy = false;
-  /* A SAVE OUTLIVES THE PAGE IT WAS SENT FROM (§668): the title, the notes
+  /* A SAVE OUTLIVES THE PAGE IT WAS SENT FROM (§671): the title, the notes
      and the minutes save when their box is LEFT, and the box is often left by
      the press that leaves the page too — "← All meetings", a link on the top
      bar. Measured in Chromium the save still lands (the page unloads only
@@ -181,12 +181,12 @@ export const APP_JS = `(function () {
   }
   function saved() { footSay("Saved just now", ""); }
   /* The foot's own slot, where Send's answer lands — where the press was
-     made, never at the top of the page (§669). */
+     made, never at the top of the page (§672). */
   function footSay(t, cls) {
     var s = document.querySelector("[data-saved]");
     if (s) { s.textContent = t || ""; s.className = "saved" + (cls ? " " + cls : ""); }
   }
-  /* WHAT THE PAGE SHOWS WHILE IT WAITS (§669, rule 1d). The break
+  /* WHAT THE PAGE SHOWS WHILE IT WAITS (§672, rule 1d). The break
      no-wait-shape (modules/notes/index.ts) switches both shapes off, which
      must turn checks/notes.mjs red. */
   function waiting() { /*%WAIT%*/ return true; }
@@ -276,7 +276,7 @@ export const APP_JS = `(function () {
         markMinutes();
       } });
     } else if (act === "send-ask") {
-      /* SEND ASKS FIRST (§668): the button gives way to the question beside
+      /* SEND ASKS FIRST (§671): the button gives way to the question beside
          it, and Yes is what posts. Not yet puts the button back. */
       b.hidden = true;
       var sq = b.parentNode.querySelector(".sure"); if (sq) { sq.hidden = false; var yes = sq.querySelector("[data-act=send]"); if (yes) yes.focus(); }
@@ -289,7 +289,7 @@ export const APP_JS = `(function () {
       busy = true;
       var w = b.textContent;
       b.textContent = "Sending…"; b.setAttribute("aria-disabled", "true");
-      /* THE FOOT SAYS IT IS SENDING (§669): the question gives way to the
+      /* THE FOOT SAYS IT IS SENDING (§672): the question gives way to the
          line beside it, where the press was made; the answer lands in the
          foot's own slot, good or refused, and a refusal puts the button back. */
       var sure = b.closest(".sure"), sending = sure && waiting() ? sure.parentNode.querySelector("[data-sending]") : null;

@@ -55,27 +55,34 @@ var READING = (function () {
     var w = Math.max(0, Math.min(100, Math.round(v)));
     return '<span class="rbar ' + band(v) + '"><b style="width:' + w + '%"></b></span>';
   }
+  /* THE TWO TABLES (§682). Islam, of an opened direction: *"the tables
+     columns are too far away … no frame or grid is confusing and the tables
+     are titled measures and then the table start with measures and then
+     tactics … confusing as well"*. So: a real table with a frame and a line
+     under every row, its header the only title — no label over it saying
+     the same word — and the columns kept to the width the figures need
+     rather than spread to the card's edge. */
   function measureRows(list) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No measures yet.</p>';
-    return '<div class="robj"><span class="rh">Measure</span><span class="rh num">Target</span><span class="rh num">Actual</span><span class="rh">Standing</span>' +
+    return '<table class="rtable rmeas"><thead><tr><th>Measure</th><th class="num">Target</th><th class="num">Actual</th><th>Standing</th></tr></thead><tbody>' +
       rows.map(function (m) {
         var sc = measureScore(m);
         /* a measure not yet given a target or a figure shows a dash, never a bare direction sign over nothing (El Abd, 2026-10-29) */
         var tgt = String(m.target == null ? "" : m.target).trim(), fig = String(figShown(m) || "").trim();
-        return '<span class="rnm">' + esc(m.name || "") + '</span><span class="rn">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</span>' +
-          '<span class="rn">' + (fig ? fig : '\u2014') + '</span><span class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></span>';
-      }).join("") + '</div>';
+        return '<tr><td>' + esc(m.name || "") + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
+          '<td class="num">' + (fig ? fig : '\u2014') + '</td><td class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></td></tr>';
+      }).join("") + '</tbody></table>';
   }
   function tacticRows(list) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No tactics yet.</p>';
-    return '<div class="rtac"><span class="rh">Tactic</span><span class="rh">Owner</span><span class="rh">Quarters</span><span class="rh">Status</span>' +
+    return '<table class="rtable rtacs"><thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Status</th></tr></thead><tbody>' +
       rows.map(function (t) {
-        return '<span>' + esc(t.name || "") + '</span><span class="row">' + esc(t.owner || "—") + '</span>' +
-          '<span class="rq">' + [t.q1, t.q2, t.q3, t.q4].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span>' +
-          '<span class="rsts">' + esc(t.status || "—") + '</span>';
-      }).join("") + '</div>';
+        return '<tr><td>' + esc(t.name || "") + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
+          '<td><span class="rq">' + [t.q1, t.q2, t.q3, t.q4].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span></td>' +
+          '<td><span class="rsts">' + esc(t.status || "\u2014") + '</span></td></tr>';
+      }).join("") + '</tbody></table>';
   }
 
   /* FOUNDATION, AS ISLAM READS IT (§680): who we are on the left; on the
@@ -144,7 +151,7 @@ var READING = (function () {
           '<span class="rsum"><b>' + ms + '</b> measure' + (ms === 1 ? "" : "s") + ' · <b>' + ts + '</b> tactic' + (ts === 1 ? "" : "s") +
           ' · <b style="color:' + bandInk(sc) + '">' + pct(sc) + '</b></span>' + stand(sc) +
           '<span class="rchev" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></span></div>' +
-          '<div class="rmore"><p class="rk">Measures</p>' + measureRows(it.measures) + '<p class="rk">Tactics</p>' + tacticRows(it.tactics) + '</div></div>';
+          '<div class="rmore">' + measureRows(it.measures) + tacticRows(it.tactics) + '</div></div>';
       }).join("") + '</div>';
   }
 

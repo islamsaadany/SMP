@@ -70483,3 +70483,11 @@ Islam, of El Abd's Foundation in the window: *"why isn't the moto appearing on i
 **Checked**: the frozen shell built whole on the worked example — Mobile's Foundation shows Winning aspiration, End in mind and Mission as three cards; the group's, which has no end in mind, two; no error.
 
 **§681 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge then work on the following"*).** A fast-forward: `main` had not moved since §680. No migrations, nobody signed out.
+
+## §682 — The reading window's tables: framed, lined, one title, the columns close (2026-10-29)
+
+Islam, of an opened direction at El Abd: *"the tables columns are too far away why is that and no frame or grid is confusing and the tables are titled measures and then the table start with measures and then tactics and the tables starts with tactics is confusing as well"*.
+
+**Why the columns were far apart.** §676 drew the measures and the tactics as grids whose first column took whatever width the card left, so the target and the actual sat at the card's far edge however short the names were. **Now a real table**, which also answers the frame: the platform's own table style (a header band, a line under every row, the figures in the figure face), so the window's tables read as the workbench's do; the first column takes its own width and the figure columns sit beside it. **One title.** The label over each table said the same word as the table's own header; the label is gone and the header is the title — *Measure · Target · Actual · Standing*, *Tactic · Owner · Quarters · Status*. The same tables serve Foundation's key objectives and Overall performance's headline measures. At a phone's width the quarters column steps aside.
+
+**Checked**: the frozen shell built whole on the worked example — an opened direction, Foundation and Overall performance all draw the tables so; no error.

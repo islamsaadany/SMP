@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-29 — Directions, split three ways (§671).** The Directions chat laid out as the SWOT and Competitive Discipline are: the chat in the order it happened, the two tables on the right with Go ahead under the first, Save and Apply to plan at the pane's foot, the to-do beside; asks for more through the chat's own box, kept in order. Shell `smp-shell-v7.35-directions-split`.
+
 **2026-10-28 — The Copilot squeezed: what gives way, in order (§670).** The chat's default yields before the work beside it goes under 480px; then the to-do folds to its button, then the rail, then the work pane becomes a sheet; the SWOT's methods grid keeps its shape at any width. Shell `smp-shell-v7.34-order`.
 **2026-10-28 — Processes: the module answers the theme switch, and the Map's arrows keep to the gutters (§668), merged to `main` on Islam's word.** The Processes pages named their colours as hex literals and Tailwind scales and ignored the top bar's theme switch; the house colours now read through platform.css's tokens and Tailwind's scales get a dark reading in one block, so every page of the module follows the switch, while the printed reports stay on white paper. The Map's arrows turn in the gutters between columns and run along the channels between lanes, so a long arrow no longer passes through a box and a loop no longer grazes the lane under it. Checked: typecheck 0, the gate tests, the drawing rendered on its own in both themes. Not checked in the real app (no database here).
 

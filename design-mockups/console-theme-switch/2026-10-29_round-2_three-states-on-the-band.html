@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The theme switch, round 2: on the band, three states, a sign on hover</title>
+<!-- Round 2 — Islam, 2026-10-29, of round 1: "C and it needs to be either
+     dark or light or auto to match the device and this approach applies to
+     the strategy module as well in functionality and it needs a sign on hover
+     to show what state are we on .. show me the auto icon as well".
+     Round 1 (same folder) — Islam, of the console in the dark: "the main console page and
+     the modules has no switch to dark mode or light mode" … "I found that it
+     matches the device. but the strategy module has a switch. how can we
+     unify this behavior?" … "the console already had no switch. that needed
+     a mockup". Three places for the one switch, drawn on the console's own
+     column and band at real size. The page's own Light / Dark control (top
+     right) shows each in both themes. -->
+<style>
+:root{
+  --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EFF2F6; --line:#D6DCE5; --zebra:#F4F6F9;
+  --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+  --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-rule:rgba(255,255,255,.12);
+  --sb:#FFFFFF; --sb-ink:#0F2C69; --sb-text:#465268; --sb-quiet:#5E6E85; --sb-label:#5E6E85;
+  --sb-wash:#F0F3F8; --sb-on:#E9EEF7; --sb-rule:#E3E8F0; --sb-mark:#9C5D08; --sb-edge:#E3E8F0;
+  --amber:#F5A623; --amber-tx:#9C5D08; --gold:#9C5D08;
+  --sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --serif:'Source Serif 4',Georgia,serif;
+}
+:root[data-theme="dark"]{
+  --ground:#12151C; --surface:#1A1F29; --surface-2:#222834; --line:#333B4A; --zebra:#1F2531;
+  --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+  --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC;
+  --sb:#1A1F29; --sb-ink:#E7EBF2; --sb-text:#AAB4C6; --sb-quiet:#8590A3; --sb-label:#8590A3;
+  --sb-wash:#222834; --sb-on:#28303E; --sb-rule:#333B4A; --sb-mark:#F5A623; --sb-edge:#333B4A;
+  --amber:#F5A623; --amber-tx:#F5A623; --gold:#F5A623; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;display:grid;gap:30px}
+.head{display:flex;align-items:flex-start;gap:16px}
+.head > div{flex:1}
+h1{margin:0;font-size:22px;font-weight:700;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:72ch}
+.rules{display:grid;gap:6px;margin:10px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
+.rules b{color:var(--ink);font-weight:600}
+.pgtheme{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--ink-2);font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.pgtheme svg{width:14px;height:14px}
+section{display:grid;gap:10px}
+.ph2{display:flex;align-items:baseline;gap:10px}
+.ph2 .n{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold);letter-spacing:.1em}
+h2{margin:0;font-size:16px;font-weight:700}
+.ph2 p{margin:0;color:var(--ink-3);font-size:13.5px}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.cap{font-size:13.5px;color:var(--ink-2);margin:0;max-width:78ch}
+.cap b{color:var(--ink);font-weight:600}
+.flag{outline:2px dashed var(--gold);outline-offset:4px;border-radius:8px}
+
+/* ── the console, as it is (platform.html's column and band) ── */
+.shell{display:flex;align-items:stretch;height:420px}
+.side{flex:none;width:232px;display:flex;flex-direction:column;background:var(--sb);color:var(--sb-quiet);border-right:1px solid var(--sb-edge)}
+.sbhead{display:flex;align-items:center;gap:8px;min-height:58px;padding:12px 12px 12px 18px;border-bottom:1px solid var(--sb-rule)}
+.sblogo{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--amber);color:#0F2C69}
+.sblogo svg{width:20px;height:20px}
+.sbname{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.sbname b{font-size:12px;font-weight:700;color:var(--sb-ink);white-space:nowrap}
+.sbname span{margin-top:2px;font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--sb-quiet)}
+.sbbtn{flex:none;width:30px;height:30px;display:grid;place-items:center;margin-left:auto;padding:0;border:0;border-radius:7px;background:transparent;color:var(--sb-quiet);cursor:pointer}
+.sbbtn + .sbbtn{margin-left:0}
+.sbbtn:hover{background:var(--sb-wash);color:var(--sb-ink)}
+.sbbtn svg{width:16px;height:16px}
+.nav{flex:1;display:flex;flex-direction:column;gap:14px;padding:10px 10px 12px}
+.sbgrp{display:flex;flex-direction:column;gap:2px}
+.sbgl{font:600 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--sb-label);padding:6px 10px}
+.nav .t{position:relative;display:flex;align-items:center;gap:11px;padding:10px;border-radius:8px;color:var(--sb-text);font-size:14px;font-weight:600;line-height:1;white-space:nowrap}
+.nav .t svg{width:18px;height:18px;flex:none}
+.nav .t.on{background:var(--sb-on);color:var(--sb-ink)}
+.nav .t.on svg{color:var(--sb-mark)}
+.nav .t.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.sbfoot{display:flex;align-items:center;gap:10px;padding:12px 12px 14px 14px;border-top:1px solid var(--sb-rule)}
+.sbav{flex:none;width:28px;height:28px;border-radius:50%;background:var(--sb-on);color:var(--sb-ink);display:grid;place-items:center;font:700 11px/1 var(--sans)}
+#who, .who{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.who b{font-size:13px;color:var(--sb-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who span{font-size:11px;color:var(--sb-quiet)}
+.main{flex:1;min-width:0;padding:16px 18px}
+.band{display:flex;align-items:flex-start;gap:16px;background:var(--ff);color:var(--ff-ink);border-radius:12px;padding:18px 22px 20px;min-height:92px;position:relative;overflow:hidden}
+.band .eye{margin:0 0 6px;font:600 10.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.band h1{margin:0;font:400 26px/1.1 var(--serif);color:var(--ff-ink)}
+.band p.sub{margin:6px 0 0;font-size:13px;color:var(--ff-quiet)}
+.band .sp{flex:1}
+.band::after{content:"";position:absolute;right:-60px;top:-80px;width:220px;height:220px;border-radius:50%;border:1px solid var(--ff-rule);box-shadow:0 0 0 40px rgba(255,255,255,.03)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-height:120px}
+.card b{font:700 15px/1 var(--serif);color:var(--ink)}
+.card .ph{height:9px;border-radius:5px;background:var(--surface-2);margin-top:12px;width:70%}
+.card .ph.s{width:45%}
+/* the round mark Strategy's bar wears (arrange.css .themebtn), for option C */
+.ring{width:26px;height:26px;border-radius:50%;border:1px solid var(--ff-rule);display:grid;place-items:center;color:var(--ff-quiet);background:rgba(255,255,255,.06)}
+.ring svg{width:14px;height:14px}
+.ring:hover{background:rgba(255,255,255,.12);color:var(--ff-ink)}
+/* option D: a labelled row in the column's foot group */
+.nav .t.sw{justify-content:space-between}
+.pill{width:30px;height:16px;border-radius:999px;background:var(--sb-on);border:1px solid var(--sb-rule);position:relative;flex:none}
+.pill::after{content:"";position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:var(--sb-quiet)}
+:root[data-theme="dark"] .pill::after{left:16px;background:var(--amber)}
+
+/* ── the modules' shared bar, byte for byte from lib/topbar.ts (TOPBAR_CSS) ── */
+
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Sans_3.woff2) format('woff2')}
+:root{--tb-surface:#FFFFFF;--tb-surface-2:#EFF2F6;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;--tb-soft:#24487A;--tb-gold:#C9A24D}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}}
+:root[data-theme="dark"]{--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}
+/* THE MODULE PAGES AT 80% ON A COMPUTER (2026-10-26, Islam's option 1 of
+   two): the console (§601) and Strategy (§631) already are, so a bar and the
+   page under it were 80% in two places and 100% in the rest. Every module
+   page loads this stylesheet, so the rule is said once, here, in their
+   words: zoomed from 1000px, a phone kept at 100%. The window's size is said
+   in the page's own pixels (--winw, --winh), as _shared.css does for
+   Strategy, because under a zoom 100vh is 80% of the window. */
+:root{--winw:100vw;--winh:100vh}
+@media (min-width:1000px){html{zoom:.8}:root{--winw:calc(100vw / .8);--winh:calc(100vh / .8)}}
+.tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink);font-family:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;position:relative;z-index:30}
+.tbin{display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
+.tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;font-size:13.5px;white-space:nowrap}
+.tbmark{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#F5A623;color:#0F2C69;text-decoration:none}
+.tbmark svg{width:17px;height:17px;display:block}
+a.tbmark:hover{box-shadow:0 0 0 2px var(--tb-surface),0 0 0 4px var(--tb-gold);filter:brightness(1.04)}
+a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
+.tbbar{flex:none;width:1px;height:18px;background:var(--tb-line);margin:0 6px 0 4px}
+.tbsep{color:var(--tb-ink-3);font-size:15px;line-height:1}
+.tbstep{position:relative}
+.tbstep>summary{list-style:none;display:inline-flex;align-items:center;cursor:pointer;gap:6px;padding:3px 7px;border-radius:7px;color:var(--tb-ink);font-weight:600}
+.tbstep>summary::-webkit-details-marker{display:none}
+.tbclient>summary{color:var(--tb-ink-2)}
+.tbstep>summary:hover,.tbstep[open]>summary{background:var(--tb-surface-2);color:var(--tb-ink)}
+.tbstep>summary>span{overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.tbstep>summary>svg{width:10px;height:10px;flex:none;color:var(--tb-ink-3)}
+/* §519: quieter while a view is on — the resting weight is what reads as
+   the viewed person's own access, so the ground still answers the pointer
+   (the control plainly works) and only the ink stands down. Islam's A of two
+   drawn; B, which also held the menus, is refused in arrange.css's own note. */
+.tbviewing .tbff{background:var(--tb-surface-2);color:var(--tb-ink-3)}
+.tbviewing .tbstep>summary,.tbviewing .tbclient>summary,.tbviewing .tbstep>summary:hover,.tbviewing .tbstep[open]>summary{color:var(--tb-ink-3)}
+.tbviewing .tbstep>summary>svg{color:var(--tb-ink-3)}
+.tbviewing .tbsep{color:var(--tb-line)}
+.tbmenu{position:absolute;z-index:40;top:calc(100% + 6px);left:0;min-width:290px;background:var(--tb-surface);border:1px solid var(--tb-line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:4px 0;white-space:normal}
+.tbmenu a{display:block;text-decoration:none;font-size:13.5px;color:var(--tb-ink);padding:9px 14px}
+.tbmenu a:hover{background:var(--tb-surface-2)}
+.tbmenu a[aria-current="true"]{font-weight:700}
+.tbsub{display:block;font-size:11.5px;color:var(--tb-ink-2);margin-top:2px;font-weight:400}
+.tbquiet{padding:9px 14px;font-size:13.5px;color:var(--tb-ink-2);font-style:italic}
+.tbrule{height:1px;background:var(--tb-line);margin:4px 0}
+.tbbrand{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:14px;color:var(--tb-ink);text-decoration:none}
+.tbbrand:hover{text-decoration:underline}
+.tborg{color:var(--tb-ink-3);font-size:13.5px;margin-right:auto}
+.tbread{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--tb-ink);text-decoration:none;padding:3px 8px;border-radius:7px}
+.tbread:hover,.tbread[aria-current="page"]{background:var(--tb-surface-2)}
+.tbn{font-size:11.5px;font-weight:700;color:var(--tb-ink);background:color-mix(in srgb,var(--tb-gold) 22%,var(--tb-surface));border:1px solid var(--tb-gold);border-radius:99px;padding:0 7px;line-height:18px}
+.tbviewer{display:flex;align-items:center;gap:8px;padding-right:16px;border-right:1px solid var(--tb-line);min-width:0}
+.tbviewer label{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-2);white-space:nowrap}
+.tbviewer select{font-family:inherit;font-size:12.5px;max-width:260px;border:1px solid var(--tb-line);border-radius:5px;padding:2px 6px;background:var(--tb-surface);color:var(--tb-ink)}
+.tbnote{font-size:12.5px;color:var(--tb-ink-3);white-space:nowrap}
+.tbacts{display:flex;align-items:center;gap:10px}
+.tbtheme{width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--tb-line);background:none;color:var(--tb-ink-3);display:grid;place-items:center;cursor:pointer}
+.tbtheme svg{width:14px;height:14px}
+.tbout{font-family:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);background:none;border:1px solid var(--tb-line);border-radius:99px;padding:5px 14px;cursor:pointer}
+.tbtheme:hover,.tbout:hover{border-color:var(--tb-soft);color:var(--tb-ink)}
+.tb a:focus-visible,.tb button:focus-visible,.tb summary:focus-visible,.tb select:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
+@media (max-width:760px){.tbin{flex-wrap:wrap;padding:6px 16px;gap:8px}.tbviewer{border-right:0;padding-right:0}}
+
+.tb .tbtheme svg{width:14px;height:14px}
+/* Strategy's white bar (arrange.css §410), drawn near enough to place its mark */
+.stop{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 20px;min-height:40px;font-size:13.5px}
+.stop .trff{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--ink-2)}
+.stop .sep{color:var(--ink-3)}
+.stop .st{font-weight:600;color:var(--ink)}
+.stop .st.q{color:var(--ink-2)}
+.stop .sp{flex:1}
+.stop .vw{display:flex;align-items:center;gap:8px;padding-right:14px;border-right:1px solid var(--line);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;color:var(--ink-2)}
+.stop .vw span{font-size:12.5px;letter-spacing:0;text-transform:none;font-weight:400;border:1px solid var(--line);border-radius:5px;padding:2px 22px 2px 8px;color:var(--ink)}
+.stop .acts{display:flex;align-items:center;gap:8px}
+.stop .themebtn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-2)}
+.stop .themebtn svg{width:12px;height:12px}
+.stop .key{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font:600 11px/1 var(--sans);color:var(--ink-2)}
+.stop .out{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+
+/* ── round 2: the three marks, large, and the sign on hover ── */
+.trio{display:flex;gap:18px;flex-wrap:wrap}
+.state{flex:1;min-width:220px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:16px;display:grid;gap:10px}
+.state .big{width:64px;height:64px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);background:var(--surface-2)}
+.state .big svg{width:34px;height:34px}
+.state b{font-size:14px;color:var(--ink)}
+.state p{margin:0;font-size:13px;color:var(--ink-2)}
+.cands{display:flex;gap:14px;flex-wrap:wrap}
+.cand{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px 16px;display:grid;gap:8px;justify-items:center;min-width:150px}
+.cand .row{display:flex;gap:10px;align-items:center}
+.cand .r26{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+.cand .r26 svg{width:14px;height:14px}
+.cand .r20{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+.cand .r20 svg{width:12px;height:12px}
+.cand .big{width:56px;height:56px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);background:var(--surface-2)}
+.cand .big svg{width:30px;height:30px}
+.cand b{font-size:13px;color:var(--ink)}
+.cand p{margin:0;font-size:12px;color:var(--ink-3);text-align:center;max-width:22ch}
+.cand.pick{outline:2px dashed var(--gold);outline-offset:3px}
+.tipwrap{position:relative;display:inline-grid}
+.tip{position:absolute;top:calc(100% + 8px);right:0;white-space:nowrap;background:#141C2B;color:#F2F5FA;font:600 11.5px/1 var(--sans);letter-spacing:.02em;padding:7px 9px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:5}
+.tip::before{content:"";position:absolute;top:-4px;right:9px;width:8px;height:8px;background:#141C2B;transform:rotate(45deg)}
+:root[data-theme="dark"] .tip{background:#F2F5FA;color:#141C2B}
+:root[data-theme="dark"] .tip::before{background:#F2F5FA}
+.tip i{font-style:normal;opacity:.7;font-weight:500}
+.frame.tall{overflow:visible}
+.shell.short{height:320px}
+.shell.short .nav{min-height:0;overflow:hidden}
+.shell.short .side{overflow:hidden}
+.band .ring.on{background:rgba(255,255,255,.14);color:var(--ff-ink)}
+.tb .tbtheme.on, .stop .themebtn.on{background:var(--surface-2);color:var(--ink)}
+.kbd{font:600 11px/1 ui-monospace,Menlo,monospace;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>The theme switch, round 2: on the band, three states, and a sign on hover</h1>
+      <p class="lede">From round 1 you picked <b>C</b>, the ring at the right end of the console's band. This round adds what you asked for: the switch has <b>three states — Light, Dark, Auto</b> — on the console, on Strategy and on every module's bar alike, one key in the browser as now; and a <b>sign on hover</b> that says which state you are in and what the press will do. Pick the auto mark below; the control at the right shows everything in the other theme.</p>
+      <ul class="rules">
+        <li><b>One cycle everywhere.</b> Light → Dark → Auto → Light. Auto follows the device, now and as it changes during the day, and is where a browser that has never chosen starts.</li>
+        <li><b>The mark shows the state you are IN.</b> In Auto the mark is the auto mark, not the sun or moon the device happens to give — the hover sign says which the device is giving.</li>
+        <li><b>One mark, one size.</b> 26px ring on all three bars (Strategy's is 20px today), the same three glyphs, the same words.</li>
+        <li><b>A note from the record (§27):</b> Auto was in the product for one version and was taken out as "a third state whose whole job is to be invisible". It comes back on your word, with the hover sign as the thing that makes it visible.</li>
+      </ul>
+    </div>
+    <button class="pgtheme" id="pgtheme" type="button"></button>
+  </div>
+
+  <section>
+    <div class="ph2"><span class="n">01</span><h2>The three states</h2><p>what the mark shows, and what the hover sign says</p></div>
+    <div class="trio" id="trio"></div>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">02</span><h2>The auto mark: three candidates</h2><p>each at the sizes it will be worn at, and large</p></div>
+    <div class="cands" id="cands"></div>
+    <p class="cap"><b>Recommended: 1, the half circle</b> — the sign most people already read as "automatic / follows the system" (it is what phones use), and it is the only one that is clearly neither the sun nor the moon at 14px. 2 reads well large and muddles at 14px. 3 is literal but says "screen", not "follows the device", and is a third shape where the other two are round.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">03</span><h2>On the console: C, with the pointer on it</h2><p>the ring at the band's right end, the hover sign under it</p></div>
+    <div class="frame tall" id="optC"></div>
+    <p class="cap">The ring is on every tab's band (§647, one band everywhere), always at the right end, 26px, with the state's mark. The sign appears on hover and on keyboard focus, in the console's own label style, and reads: <b>Theme: Auto · dark, from your device — click for Light</b>. A screen reader gets the same words.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">04</span><h2>On Strategy and on every module's bar: the same three states, the same sign</h2><p>Strategy's ring grows to 26px to match; the modules' bar keeps its place by Sign out</p></div>
+    <div class="frame tall" id="barS"></div>
+    <div class="frame tall" style="margin-top:14px" id="barM"></div>
+    <p class="cap">Strategy's switch (theme.js) and the modules' switch (lib/topbar.ts) each turn from a two-way press into the three-way cycle, reading and writing the same key; <b>Auto</b> is stored as the absence of a choice, which is what the gate and the console already understand. The hover sign is the same words in each bar's own label style.</p>
+  </section>
+</div>
+<script>
+(function () {
+  var pg = "light";
+  try { var t = localStorage.getItem("smp.theme"); if (t === "light" || t === "dark") pg = t; else if (matchMedia("(prefers-color-scheme: dark)").matches) pg = "dark"; } catch (e) {}
+  var SUN = '<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>';
+  var MOON = '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>';
+  var AUTO = {
+    1: '<circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.8a7.2 7.2 0 0 0 0 14.4z" fill="currentColor"/>',
+    2: '<circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.8a7.2 7.2 0 0 0 0 14.4z" fill="currentColor"/><path d="M10 10h4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.6 7.5l1.6-1.6M12.6 12.5l1.6 1.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+    3: '<rect x="2.5" y="4" width="15" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 17h6M10 14v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 9h15" stroke="currentColor" stroke-width="1.2" opacity=".5"/>'
+  };
+  var PICK = 1;
+  function svg(g, cls) { return '<svg viewBox="0 0 20 20" class="' + (cls || "") + '" aria-hidden="true">' + g + '</svg>'; }
+  function mark(state) { return svg(state === "light" ? SUN : state === "dark" ? MOON : AUTO[PICK]); }
+  var device = function () { return pg; };
+  function words(state) {
+    var next = { light: "Dark", dark: "Auto", auto: "Light" }[state];
+    var now = state === "auto" ? "Auto · " + device() + ", from your device" : state.charAt(0).toUpperCase() + state.slice(1);
+    return "Theme: " + now + " <i>— click for " + next + "</i>";
+  }
+  function tip(state) { return '<span class="tip">' + words(state) + "</span>"; }
+
+  function star() { return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg>'; }
+  function fold() { return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 7l-5 5 5 5M18 7l-5 5 5 5"/></svg>'; }
+  function out() { return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/></svg>'; }
+  function ic() { return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12h8M8 8h5M8 16h6"/></svg>'; }
+  function tab(l, on) { return '<div class="t' + (on ? " on" : "") + '">' + ic() + '<span class="lb">' + l + '</span></div>'; }
+  function column() {
+    return '<aside class="side"><div class="sbhead"><span class="sblogo">' + star() + '</span><span class="sbname"><b>Strategy Management</b><span>Platform</span></span><span class="sbbtn">' + fold() + '</span></div>' +
+      '<div class="nav"><div class="sbgrp"><span class="sbgl">Today</span>' + tab("Home", true) + tab("My tasks") + tab("Track record") + '</div><div class="sbgrp"><span class="sbgl">Clients</span>' + tab("Clients") + tab("Team") + '</div></div>' +
+      '<div class="sbfoot"><span class="sbav">IS</span><span class="who"><b>Islam Saadany</b><span>Super user</span></span><span class="sbbtn">' + out() + '</span></div></aside>';
+  }
+  function console_() {
+    return '<div class="shell short">' + column() + '<div class="main"><div class="band"><div><p class="eye">Thursday, 29 Oct 2026</p><h1>Good morning, Islam</h1><p class="sub">Here is what needs you today across your clients.</p></div><span class="sp"></span>' +
+      '<span class="tipwrap"><span class="ring on flag">' + mark("auto") + '</span>' + tip("auto") + '</span></div>' +
+      '<div class="cards"><div class="card"><b>Your clients</b><div class="ph"></div><div class="ph s"></div></div><div class="card"><b>Your tasks</b><div class="ph"></div><div class="ph s"></div></div></div></div></div>';
+  }
+  function strategyBar() {
+    return '<div class="stop" style="overflow:visible"><span class="trff">Forefront</span><span class="sep">›</span><span class="st q">Raya Trade ▾</span><span class="sep">›</span><span class="st">Strategy ▾</span><span class="sp"></span><span class="vw">Viewing as <span>Islam Saadany ▾</span></span><span class="acts"><span class="tipwrap"><span class="themebtn on flag" style="width:26px;height:26px">' + svg(AUTO[PICK]).replace("<svg", "<svg style=\"width:14px;height:14px\"") + '</span>' + tip("auto") + '</span><span class="key">?</span><span class="out">Sign out</span></span></div>';
+  }
+  function moduleBar() {
+    return '<header class="tb" style="overflow:visible"><div class="tbin" style="overflow:visible"><a class="tbbrand"><span class="tbmark">' + star() + '</span>Strategy Management Platform</a><span class="tborg">Raya Trade</span><nav class="tbtrail"><span class="tbstep">Internal Tracker</span></nav><div class="tbacts"><span class="tipwrap"><span class="tbtheme on flag">' + mark("auto") + '</span>' + tip("auto") + '</span><span class="tbout">Sign out</span></div></div></header>';
+  }
+  function draw() {
+    document.documentElement.setAttribute("data-theme", pg);
+    document.getElementById("trio").innerHTML = ["light", "dark", "auto"].map(function (s) {
+      return '<div class="state"><span class="big">' + mark(s) + '</span><b>' + (s === "auto" ? "Auto — follows the device" : s.charAt(0).toUpperCase() + s.slice(1)) + '</b><p>On hover: <br><span class="kbd">' + words(s).replace(/<[^>]+>/g, "") + '</span></p><p>' + (s === "light" ? "Chosen light, whatever the device says." : s === "dark" ? "Chosen dark, whatever the device says." : "No choice stored; the device decides, and the page follows it if it changes during the day.") + '</p></div>';
+    }).join("");
+    document.getElementById("cands").innerHTML = [1, 2, 3].map(function (k) {
+      return '<div class="cand' + (k === PICK ? " pick" : "") + '"><span class="big">' + svg(AUTO[k]) + '</span><span class="row"><span class="r26">' + svg(AUTO[k]) + '</span><span class="r20">' + svg(AUTO[k]) + '</span></span><b>' + k + ". " + ["Half circle", "Half circle with rays", "A screen"][k - 1] + '</b><p>' + ["the usual sign for automatic", "sun on one side, moon's shadow on the other", "the device, literally"][k - 1] + '</p></div>';
+    }).join("");
+    document.getElementById("optC").innerHTML = console_();
+    document.getElementById("barS").innerHTML = strategyBar();
+    document.getElementById("barM").innerHTML = moduleBar();
+    var b = document.getElementById("pgtheme");
+    b.innerHTML = svg(pg === "light" ? SUN : MOON) + (pg === "light" ? "View in dark" : "View in light");
+  }
+  document.getElementById("pgtheme").addEventListener("click", function () { pg = pg === "light" ? "dark" : "light"; draw(); });
+  draw();
+})();
+</script>
+</body>
+</html>

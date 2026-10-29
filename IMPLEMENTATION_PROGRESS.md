@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-29 — The reading window's tables: framed, lined, one title, the columns close (§682), on the branch.** The measures and tactics under an opened direction (and the key objectives, and the headline measures) are real tables in the platform's own style, with the header as their only title and the figure columns beside the names rather than at the card's far edge. Checked on the worked example.
+**2026-10-29 — The reading window's tables: framed, lined, one title, the columns close (§682), merged to `main` on Islam's word.** The measures and tactics under an opened direction (and the key objectives, and the headline measures) are real tables in the platform's own style, with the header as their only title and the figure columns beside the names rather than at the card's far edge. Checked on the worked example.
 
 **2026-10-29 — The reading window: the end in mind is a card of its own (§681), merged to `main` on Islam's word.** It was a line under the vision; it is a card between the vision and the mission, under the layer's own word for it (Moto at El Abd). Checked on the worked example.
 

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-29 — A seat that edits nothing lands in the reading window (§684), on the branch.** A reader's seat — not the office, holding no unit, function, capability, project, pillar, direction or contribution, and granted edit or fill nowhere — opens in the window on sign-in instead of the workbench, with Exit a press away. Checked on the worked example's 33 people; not with a real reader's sign-in.
+
 **2026-10-29 — The reading window's Overall performance reads a top layer by its own plan, and execution by the ratio (§683), on the branch.** El Abd's company showed dashes because the window scored a top layer by its units alone; it now takes the top layer's own directions mean and execution ratio where the plan is the top layer's, as the group page does, and execution everywhere is the ratio the Performance page shows. A unit's figures now equal the workbench's exactly. Not checked on El Abd itself.
 
 **2026-10-29 — The reading window's tables: framed, lined, one title, the columns close (§682), merged to `main` on Islam's word.** The measures and tactics under an opened direction (and the key objectives, and the headline measures) are real tables in the platform's own style, with the header as their only title and the figure columns beside the names rather than at the card's far edge. Checked on the worked example.

@@ -2181,8 +2181,14 @@ var SYNC = (function () {
                the tour's own offer, made visibly instead of automatically.
                TOUR.offer's memory is untouched, so with the welcome already
                seen this session the tour offers itself exactly as before. */
-            var greeted = false;
-            try { greeted = WELCOME.offer(person); } catch (e) {}
+            /* §684: A READER'S SEAT LANDS IN THE READING WINDOW, and is
+               neither greeted nor toured over it — the window is the whole
+               of the platform for them, and the welcome's doors lead to
+               pages they came here not to work. */
+            var reading = false;
+            try { reading = READING.offer(person); } catch (e) {}
+            var greeted = reading;
+            if (!greeted) { try { greeted = WELCOME.offer(person); } catch (e) {} }
             if (!greeted) TOUR.offer(person);
           });
           setInterval(save, 5000);

@@ -268,5 +268,54 @@ var READING = (function () {
     }, true);
   }
 
-  return { wire: wire, open: open, close: close, isOpen: function () { var r = root(); return !!(r && r.classList.contains("on")); } };
+  /* ── A SEAT THAT EDITS NOTHING OPENS IN THE WINDOW (§684) ──────────────
+     Islam: *"build it yes"*, of the mockup's first position. A reader's seat
+     — a CEO's, a peer's, anybody's that the access matrix lets look and never
+     write — lands in the window, with the workbench a press of Exit away;
+     everybody else lands on the workbench as before.
+
+     THE SEAT IS READ FROM THE MATRIX AND THE ROLES, NOT GUESSED FROM A NAME:
+     the office is never a reader (SMPRules.isOffice), nor is anybody holding
+     a piece — a unit, a function, a capability, a project, a pillar, a
+     direction, a contribution — and otherwise a seat is a reader exactly
+     when no page of the platform grants it edit or fill on any target it
+     could reach — the group, every unit, every supporting function,
+     every capability, every company — asked through the one rule every pen
+     asks, `SMPRules.grantAtPage` (§42). The same silences the welcome keeps:
+     no person, a projector, a deep address (a link straight to a page is a
+     page somebody meant to open, §148). */
+  var HOLDING = ["owner", "custodian", "capowner", "fnhead", "powner", "plowner", "dirowner", "contrib"];
+  function readerSeat(person) {
+    if (!person) return false;
+    var w = world();
+    if (SMPRules.isOffice(w, person)) return false;
+    /* a bounded role holds rows the page-level grant does not show — a
+       project's owner fills his project (§177) — so anybody holding a piece
+       works in the platform, whatever the matrix says of the page */
+    var roles = SMPRules.personRoleKeys ? SMPRules.personRoleKeys(w, person) : [];
+    if (roles.some(function (k) { return HOLDING.indexOf(k) > -1; })) return false;
+    var targets = ["group"];
+    (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function (k) { targets.push(k); });
+    Object.keys(typeof FUNCTIONS !== "undefined" ? FUNCTIONS : {}).forEach(function (k) { targets.push("fn:" + k); });
+    (Array.isArray(GROUP.capabilities) ? GROUP.capabilities : []).forEach(function (c) { if (c && c.id) targets.push("cap:" + c.id); });
+    Object.keys(typeof COMPANIES !== "undefined" ? COMPANIES : {}).forEach(function (k) { targets.push("co:" + k); });
+    var pages = SMPRules.PAGES || [];
+    for (var i = 0; i < pages.length; i++) {
+      for (var j = 0; j < targets.length; j++) {
+        var g = SMPRules.grantAtPage(w, person, pages[i].key, targets[j]);
+        if (g === "edit" || g === "fill") return false;
+      }
+    }
+    return true;
+  }
+  function offer(person) {
+    if (!readerSeat(person)) return false;
+    if (document.body && document.body.classList.contains("presenting")) return false;
+    try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {}
+    open("group");
+    return true;
+  }
+
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat,
+           isOpen: function () { var r = root(); return !!(r && r.classList.contains("on")); } };
 })();

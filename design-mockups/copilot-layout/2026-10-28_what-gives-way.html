@@ -1,0 +1,160 @@
+<title>What Gives Way</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column of frames; each width shows Before (today's rule) and After (§670) drawn from the real column arithmetic. */
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--bad:#B91C1C;--badbg:#FBE9E9;--good:#2E6B45;--goodbg:#E6F2EA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--bad:#F5A3A3;--badbg:#3A1E1E;--good:#8FCBA4;--goodbg:#1C2E23;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--bad:#F5A3A3;--badbg:#3A1E1E;--good:#8FCBA4;--goodbg:#1C2E23;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-size:26px;margin:0;text-wrap:balance}
+h2{font-size:18px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:80ch}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--ink-2)}
+.rule b{display:block;color:var(--ink);font-size:15px;margin-bottom:2px}
+.rule .k{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--nav);color:var(--navink);font-weight:700;font-size:12.5px;margin-right:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);flex-wrap:wrap}
+.seg button{border:0;background:var(--surface);color:var(--ink);padding:7px 14px;font:600 13.5px var(--sans);border-right:1px solid var(--line);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--navink)}
+.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.ctl span{color:var(--ink-3);font-size:13.5px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.pair{grid-template-columns:1fr}}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}
+.fh{display:flex;align-items:baseline;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.fh b{font-size:15px}
+.fh .tag{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 8px;border-radius:9px}
+.fh .tag.before{background:var(--badbg);color:var(--bad)}
+.fh .tag.after{background:var(--goodbg);color:var(--good)}
+.fh small{margin-left:auto;color:var(--ink-3);font-size:12.5px;font-variant-numeric:tabular-nums}
+.scr{position:relative;background:var(--surface-2);padding:10px}
+.pane{display:flex;gap:6px;height:230px;border:1px solid var(--line);background:var(--ground);padding:6px}
+.col{border:1px solid var(--line);background:var(--surface);border-radius:5px;min-width:0;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.col .cap{font:700 10.5px/1.3 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);padding:5px 7px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.col .px{position:absolute;right:6px;bottom:4px;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.col.rail{background:var(--surface-2)}
+.col.rail.strip{width:10px!important;flex:none;background:var(--nav);border-color:var(--nav)}
+.col.rail.strip .cap,.col.rail.strip .px{display:none}
+.col.chat .cap::after{content:" · chat"}
+.col.work.hurt{border-color:var(--bad);box-shadow:inset 0 0 0 2px var(--badbg)}
+.col.work.ok{border-color:var(--good)}
+.lines{padding:6px 7px;display:flex;flex-direction:column;gap:4px}
+.lines i{display:block;height:5px;border-radius:3px;background:var(--surface-2)}
+.lines i.w{width:70%}
+.btns{position:absolute;top:4px;right:6px;display:flex;gap:4px}
+.btns span{font-size:10px;padding:1px 6px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink-2);white-space:nowrap}
+.sheetb{position:absolute;right:6px;top:4px}
+.note{padding:8px 14px 12px;font-size:13.5px;color:var(--ink-2);border-top:1px solid var(--line)}
+.note b{color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:center;vertical-align:middle;font-size:12.5px}
+thead th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;background:var(--nav);color:var(--navink)}
+th[scope=row]{text-align:left;color:var(--ink)}
+.tick{display:inline-block;width:16px;height:16px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.gridwrap{width:300px;max-width:100%;margin:10px 14px;overflow:hidden;border:1px solid var(--line)}
+.g-before thead th{white-space:nowrap}
+.g-before th[scope=row]{width:36px;word-break:break-all;letter-spacing:.2em;line-height:1.25}
+.g-after{table-layout:auto}
+.g-after thead th{white-space:normal;line-height:1.2;vertical-align:middle;text-align:center;padding:5px 4px}
+.g-after th[scope=row]{white-space:nowrap}
+.g-after td{min-width:48px}
+.gridwrap.wide{width:380px}
+.foot{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;max-width:80ch}
+@media (prefers-reduced-motion:no-preference){.col{transition:width .25s}}
+</style>
+<div class="wrap">
+  <header>
+    <h1>What gives way when the Copilot is squeezed</h1>
+    <p class="lede">Your screenshot: a SWOT at a narrow window, the methods grid broken, nothing folded. Today's rule measured "enough room" and let the work pane shrink first. The proposal below keeps one order at every width, drawn from the real column arithmetic for a chat with a work pane and a to-do (the Foundation, the SWOT, Competitive Discipline).</p>
+  </header>
+
+  <div class="rules">
+    <div class="rule"><b>First the chat yields</b>It shrinks from its 760px default toward 420px before the work beside it goes under 480px. Today the work goes down to 360px while the chat keeps 760.</div>
+    <div class="rule"><b><span class="k">1</span>The rail folds</b>to its 24px strip, as its button does today, the moment three columns no longer fit beside it. First, as you asked.</div>
+    <div class="rule"><b><span class="k">2</span>The to-do folds</b>to its button in the chat's head (<i>To-do 2/5</i>) and opens as a sheet. Smallest and least needed while working.</div>
+    <div class="rule"><b><span class="k">3</span>The work pane</b>becomes a sheet behind <i>View the SWOT</i> (§642, unchanged), only when two columns no longer fit.</div>
+  </div>
+
+  <div class="ctl"><span class="seg" id="w" role="group" aria-label="Window width">
+    <button data-w="1440" aria-pressed="true">1440 · desktop</button><button data-w="1300">1300 · your screenshot</button><button data-w="1180">1180</button><button data-w="980">980 · laptop</button><button data-w="760">760 · narrow</button></span>
+    <span>Widths in layout pixels, what the rule reads: the page itself is at 80% from a 1000px window up, so a 1040px window is 1300 here. The frames are drawn to scale.</span></div>
+
+  <div class="pair">
+    <div class="frame"><div class="fh"><b>Before</b><span class="tag before">today's rule</span><small id="bsum"></small></div>
+      <div class="scr"><div class="pane" id="bpane"></div></div><div class="note" id="bnote"></div></div>
+    <div class="frame"><div class="fh"><b>After</b><span class="tag after">§670</span><small id="asum"></small></div>
+      <div class="scr"><div class="pane" id="apane"></div></div><div class="note" id="anote"></div></div>
+  </div>
+
+  <h2>The methods grid at the same squeeze</h2>
+  <div class="grid2">
+    <div class="frame"><div class="fh"><b>Before</b><span class="tag before">today</span></div>
+      <div class="gridwrap"><table class="g-before"><thead><tr><th></th><th>Guided questions</th><th>Template</th><th>Ready reports</th><th>Deep research</th></tr></thead>
+        <tbody><tr><th scope="row">Internal</th><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td><td>—</td></tr>
+        <tr><th scope="row">Micro</th><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td></tr></tbody></table></div>
+      <div class="note">The four column names refuse to wrap, so the row-name column is the one that gives: 36px, and <b>Internal</b> falls apart letter by letter.</div></div>
+    <div class="frame"><div class="fh"><b>After</b><span class="tag after">§670</span></div>
+      <div class="gridwrap wide"><table class="g-after"><thead><tr><th></th><th>Guided questions</th><th>Template</th><th>Ready reports</th><th>Deep research</th></tr></thead>
+        <tbody><tr><th scope="row">Internal</th><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td><td>—</td></tr>
+        <tr><th scope="row">Micro</th><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td><td><span class="tick"></span></td></tr></tbody></table></div>
+      <div class="note">Row names never break; column names take two lines at most, centred in their cell both ways; a tick cell keeps 64px. The grid has a floor of 440px and scrolls inside the chat only when there is truly no room.</div></div>
+  </div>
+
+  <div class="foot"><b>What stays the same.</b> The rail's own button still folds and keeps your choice across visits. Below 760px nothing changes from §642: both the work and the to-do wait behind two buttons. The chat never goes under 420px and can still be dragged wider with the grip. The same rule serves the Foundation, the SWOT and Competitive Discipline, and the Directions, Execution and Advisory splits will inherit it.</div>
+</div>
+<script>
+(function(){
+  var RAIL = 200, GAP = 8, PAD = 16, GRIP = 12, TODO = 208, CHATW = 760;
+  function level(before, W){
+    if (before) return W >= 1000 ? 3 : 1;
+    return W >= 1120 ? 3 : W >= 820 ? 2 : 1;
+  }
+  function calc(before, win){
+    var pane = win, railShut = pane < (before ? 1240 : 1344), rail = railShut ? 24 : RAIL;
+    var W = pane - rail - GAP - PAD, lv = level(before, W), chat, work = 0, todo = 0;
+    if (lv === 3) { chat = Math.min(CHATW, Math.max(420, W - (before ? 580 : 700))); todo = TODO; work = W - chat - GRIP - todo; }
+    else if (lv === 2) { chat = Math.min(CHATW, Math.max(420, W - 492)); work = W - chat - GRIP; }
+    else chat = W;
+    return { rail: rail, railShut: railShut, W: W, lv: lv, chat: Math.round(chat), work: Math.round(work), todo: todo };
+  }
+  function col(cls, cap, w, px, extra){
+    return '<div class="col ' + cls + '" style="width:' + w + '%"><div class="cap">' + cap + '</div><div class="lines"><i></i><i class="w"></i><i></i><i class="w"></i></div>' + (extra || '') + (px ? '<span class="px">' + px + 'px</span>' : '') + '</div>';
+  }
+  function draw(win){
+    [["b", true], ["a", false]].forEach(function(x){
+      var c = calc(x[1], win), tot = win, p = function(n){ return (n / tot * 100).toFixed(2); };
+      var h = '';
+      h += x[1] || !c.railShut ? col('rail' + (c.railShut ? ' strip' : ''), 'Chats', p(c.rail), c.railShut ? '' : c.rail) : col('rail strip', 'Chats', p(24), '');
+      var btns = '';
+      if (c.lv === 2) btns = '<div class="btns"><span>To-do 2/5</span></div>';
+      if (c.lv === 1) btns = '<div class="btns"><span>View the SWOT</span><span>To-do 2/5</span></div>';
+      h += col('chat', 'SWOT — Mobile', p(c.chat), c.chat, btns);
+      if (c.lv >= 2) h += col('work ' + (c.work < 480 ? 'hurt' : 'ok'), 'SWOT — Mobile v1', p(c.work), c.work);
+      if (c.lv === 3) h += col('todo', 'To-do', p(c.todo), c.todo);
+      document.getElementById(x[0] + 'pane').innerHTML = h;
+      var words = [];
+      words.push(c.railShut ? 'rail folded' : 'rail open');
+      words.push(c.lv === 3 ? 'three columns' : c.lv === 2 ? 'two columns, the to-do behind its button' : 'chat only, the work and the to-do behind buttons');
+      document.getElementById(x[0] + 'sum').textContent = win + 'px · ' + words.join(' · ');
+      var note;
+      if (x[1]) note = c.lv === 3 && c.work < 480 ? 'The chat keeps <b>' + c.chat + 'px</b> and the work pane is squeezed to <b>' + c.work + 'px</b>: the SWOT letters in a 2 × 2 grid at half their width, the methods grid broken. Nothing folded, because 1240 and 1000 were not crossed.'
+        : c.lv === 1 ? 'Both the work and the to-do go behind buttons at once, under 1000px of Copilot.' : 'Room enough: three columns, the chat at its default.';
+      else note = c.lv === 3 ? (c.railShut ? 'The rail has folded first; the three columns still stand, the chat yielded to <b>' + c.chat + 'px</b>, the work <b>' + c.work + 'px</b>.' : c.chat < CHATW ? 'The chat has yielded to <b>' + c.chat + 'px</b> so the work keeps <b>' + c.work + 'px</b>; the to-do still stands.' : 'Room enough: three columns, the chat at its default.')
+        : c.lv === 2 ? 'The rail folded first; now the to-do has folded to its button too; the chat <b>' + c.chat + 'px</b>, the work <b>' + c.work + 'px</b>.'
+        : 'Under 820px of Copilot the work pane becomes a sheet, where §642 had it under 1000.';
+      document.getElementById(x[0] + 'note').innerHTML = note;
+    });
+  }
+  var seg = document.getElementById('w');
+  seg.addEventListener('click', function(e){ var b = e.target.closest('[data-w]'); if (!b) return;
+    seg.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); }); draw(+b.dataset.w); });
+  draw(1440);
+})();
+</script>

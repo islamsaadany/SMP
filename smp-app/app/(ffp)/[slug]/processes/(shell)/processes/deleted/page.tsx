@@ -25,8 +25,8 @@ export default async function DeletedProcessesPage(
   if (!access.ok) {
     return (
       <main className="w-full">
-        <h2 className="text-lg font-semibold text-[#171B22]">Deleted processes</h2>
-        <p className="mb-3 mt-0.5 text-[13px] text-[#636C79]">You need edit access to this workspace to see what has been deleted.</p>
+        <h2 className="text-lg font-semibold text-[var(--ink)]">Deleted processes</h2>
+        <p className="mb-3 mt-0.5 text-[13px] text-[var(--ink-3)]">You need edit access to this workspace to see what has been deleted.</p>
         <p className="mt-6 text-sm text-slate-600">
           <Link href={`/${workspaceId}/processes/processes`} className="font-semibold underline">
             Back to Processes
@@ -50,8 +50,8 @@ export default async function DeletedProcessesPage(
 
   return (
     <main className="w-full">
-      <h2 className="text-lg font-semibold text-[#171B22]">Deleted processes</h2>
-      <p className="mb-3 mt-0.5 text-[13px] text-[#636C79]">Deleting a process hides it — it never destroys anything. Restore one to bring it back exactly as it was.</p>
+      <h2 className="text-lg font-semibold text-[var(--ink)]">Deleted processes</h2>
+      <p className="mb-3 mt-0.5 text-[13px] text-[var(--ink-3)]">Deleting a process hides it — it never destroys anything. Restore one to bring it back exactly as it was.</p>
 
       <p className="mt-4 text-sm">
         <Link

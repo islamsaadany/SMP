@@ -209,7 +209,7 @@ export function CreateProcessForm({
       </button>
 
       <span className="self-center text-xs text-slate-500">Codes are assigned automatically. Departments are the client's Official BU list and owners its register, both set in client settings.</span>
-      {fromSuggestionId && <span className="w-full text-xs text-[#8A6B22]">Creating it closes the request for this process on To handle.</span>}
+      {fromSuggestionId && <span className="w-full text-xs text-[var(--gold-deep)]">Creating it closes the request for this process on To handle.</span>}
       {error && <span className="w-full text-xs text-red-600">{error}</span>}
       {lastCreatedCode && (
         <span className="w-full text-xs text-emerald-700">

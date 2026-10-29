@@ -18,9 +18,147 @@
   .react-flow { zoom: 1.25; }
 }
 
+/* ── THE MODULE'S COLOURS, IN BOTH THEMES (2026-10-28) ───────────────────────
+   The pages name their colours two ways: Forefront's own, as the hex values
+   platform.css calls --ink, --line, --gold and so on, and Tailwind's slate,
+   indigo, amber, red, emerald, rose, sky and blue scales. Neither answered the
+   theme switch in the top bar (lib/topbar.ts §444): the bar went dark and the
+   page stayed white.
+
+   The house colours are read through the same tokens platform.css defines,
+   with the Forefront light and dark values copied from it (the platform
+   stylesheet is not loaded on these pages — the top bar carries only its own
+   --tb-* set — so the values are stated here, and must be kept in step with
+   it). Tailwind's utilities read their colour through a variable of their
+   own (`text-slate-500` is `color: var(--color-slate-500)`), so the dark
+   block below gives each shade the module uses a dark reading: the surfaces
+   turn over (white becomes the card, slate-50 the page), the inks lighten,
+   and a solid button (`bg-slate-900 text-white`, `bg-indigo-600 text-white`)
+   comes out as a light fill with dark type, which is how platform.css draws
+   its own call to action in the dark (--cta / --cta-ink).
+
+   ONE SELECTOR, NOT A MEDIA QUERY: the top bar's script writes an explicit
+   data-theme before the body paints, from the device preference when nothing
+   is stored, exactly as platform.css relies on (§27). And not under print:
+   a page printed from a dark screen comes out light. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ground: #F7F8FA; --surface: #FFFFFF; --surface-2: #EFF2F6; --thead: #E4E9F0; --zebra: #F5F7FA;
+  --line: #D6DCE5; --line-soft: #E6EAF0; --field-line: #78899F;
+  --ink: #171B22; --ink-2: #414A58; --ink-3: #636C79; --ink-4: #9AA3B0;
+  --stone: #16325C; --panel: #16325C; --panel-ink: #FFFFFF; --panel-quiet: #B9C2CE;
+  --gold: #C9A24D; --gold-deep: #8A6B22; --on-accent: #16325C; --over-bg: #FBF6E9; --over-line: #E8D9AE;
+  --good: #2E7D5B; --good-tx: #1F6248; --good-bg: #E4F0EA;
+  --attn-tx: #7A5D1C; --attn-bg: #F7EFD6;
+  --bad: #B04434; --bad-tx: #8C3327; --bad-bg: #F7E3E0;
+  --veil: rgba(10, 14, 22, .45);
+  --background: var(--ground);
+  --foreground: var(--ink);
+}
+
+@media not print {
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #14161A; --surface: #1C2027; --surface-2: #242932; --thead: #2A303A; --zebra: #212630;
+  --line: #333A45; --line-soft: #2A303A; --field-line: #68758C;
+  --ink: #E9ECF1; --ink-2: #B4BCC8; --ink-3: #949DAA; --ink-4: #6E7889;
+  --stone: #7FA3D8; --panel: #2B4C7E; --panel-ink: #FFFFFF; --panel-quiet: #B7C4D8;
+  --gold: #D9B665; --gold-deep: #C9A24D; --on-accent: #14161A; --over-bg: #332C16; --over-line: #4A3F1E;
+  --good: #5FB68C; --good-tx: #8FD3B0; --good-bg: #1B3129;
+  --attn-tx: #E8CA6A; --attn-bg: #332C16;
+  --bad: #D97066; --bad-tx: #E79A93; --bad-bg: #33201E;
+  --veil: rgba(0, 0, 0, .55);
+
+  /* Tailwind's scales, read in the dark. White and slate turn over; a colour's
+     50–300 become its tinted grounds and hairlines, its 500–900 its light
+     readings — so a tinted notice (`bg-amber-50 text-amber-800`) and a solid
+     button (`bg-red-600 text-white`) both keep their contrast. */
+  --color-white: #1C2027;
+  --color-slate-50: #14161A; --color-slate-100: #242932; --color-slate-200: #2A303A; --color-slate-300: #434B59;
+  --color-slate-400: #6E7889; --color-slate-500: #949DAA; --color-slate-600: #B4BCC8; --color-slate-700: #C5CCD6;
+  --color-slate-800: #D8DDE5; --color-slate-900: #E9ECF1; --color-slate-950: #F4F6F9;
+  --color-red-50: #2E1616; --color-red-100: #3B1D1D; --color-red-200: #4F2626; --color-red-300: #6B3030;
+  --color-red-400: #D96B6B; --color-red-500: #F08080; --color-red-600: #F87171; --color-red-700: #FCA5A5;
+  --color-red-800: #FECACA; --color-red-900: #FEE2E2;
+  --color-amber-50: #2E2510; --color-amber-100: #3B2F14; --color-amber-200: #4F3F1A; --color-amber-300: #6B5522;
+  --color-amber-400: #D4A33C; --color-amber-500: #E3B04B; --color-amber-600: #FBBF24; --color-amber-700: #FCD34D;
+  --color-amber-800: #FDE68A; --color-amber-900: #FEF3C7;
+  --color-emerald-50: #0F2A20; --color-emerald-100: #143427; --color-emerald-200: #1C4634; --color-emerald-300: #265C44;
+  --color-emerald-400: #3FAF80; --color-emerald-500: #34D399; --color-emerald-600: #34D399; --color-emerald-700: #6EE7B7;
+  --color-emerald-800: #A7F3D0; --color-emerald-900: #D1FAE5;
+  --color-indigo-50: #1E1E3A; --color-indigo-100: #26264A; --color-indigo-200: #343460; --color-indigo-300: #45457A;
+  --color-indigo-400: #8B8FE0; --color-indigo-500: #818CF8; --color-indigo-600: #818CF8; --color-indigo-700: #A5B4FC;
+  --color-indigo-800: #C7D2FE; --color-indigo-900: #E0E7FF;
+  --color-rose-50: #2E1620; --color-rose-100: #3B1C28; --color-rose-200: #4F2636; --color-rose-300: #6B3048;
+  --color-rose-400: #E06B8B; --color-rose-500: #FB7185; --color-rose-600: #FB7185; --color-rose-700: #FDA4AF;
+  --color-rose-800: #FECDD3; --color-rose-900: #FFE4E6;
+  --color-sky-50: #0F2433; --color-sky-100: #142E42; --color-sky-200: #1C3F5A; --color-sky-300: #265474;
+  --color-sky-400: #5BB8F0; --color-sky-500: #38BDF8; --color-sky-600: #38BDF8; --color-sky-700: #7DD3FC;
+  --color-sky-800: #BAE6FD; --color-sky-900: #E0F2FE;
+  --color-blue-50: #14213A; --color-blue-100: #1A2A4A; --color-blue-200: #243B66; --color-blue-300: #2F4E85;
+  --color-blue-400: #60A5FA; --color-blue-500: #60A5FA; --color-blue-600: #60A5FA; --color-blue-700: #93C5FD;
+  --color-blue-800: #BFDBFE; --color-blue-900: #DBEAFE;
+  --color-teal-600: #2DD4BF; --color-teal-700: #5EEAD4;
+
+  /* React Flow's widgets (the Landscape's controls) and its edge labels. */
+  --xy-controls-button-background-color: #242932;
+  --xy-controls-button-background-color-hover: #2E3440;
+  --xy-controls-button-color: #E9ECF1;
+  --xy-controls-button-color-hover: #FFFFFF;
+  --xy-controls-button-border-color: #333A45;
+  --xy-controls-box-shadow: 0 0 2px 1px rgba(0, 0, 0, .35);
+  --xy-edge-label-background-color: #1C2027;
+  --xy-edge-label-color: #E9ECF1;
+  --xy-background-color: #14161A;
+}
+}
+
+/* PRINTED THINGS STAY ON WHITE PAPER. The reports (the printed map, the SOP
+   document, the priorities page, the export preview) are documents drawn to
+   be printed; on a dark screen they are shown as the paper they will become,
+   so every token above is restated in its light reading under the wrapper
+   the reports' layout draws (reports/layout.tsx). */
+.ffp-paper,
+:root[data-theme="dark"] .ffp-paper {
+  color-scheme: light;
+  --ground: #F7F8FA; --surface: #FFFFFF; --surface-2: #EFF2F6; --thead: #E4E9F0; --zebra: #F5F7FA;
+  --line: #D6DCE5; --line-soft: #E6EAF0; --field-line: #78899F;
+  --ink: #171B22; --ink-2: #414A58; --ink-3: #636C79; --ink-4: #9AA3B0;
+  --stone: #16325C; --panel: #16325C; --panel-ink: #FFFFFF; --panel-quiet: #B9C2CE;
+  --gold: #C9A24D; --gold-deep: #8A6B22; --on-accent: #16325C; --over-bg: #FBF6E9; --over-line: #E8D9AE;
+  --good: #2E7D5B; --good-tx: #1F6248; --good-bg: #E4F0EA;
+  --attn-tx: #7A5D1C; --attn-bg: #F7EFD6;
+  --bad: #B04434; --bad-tx: #8C3327; --bad-bg: #F7E3E0;
+  --veil: rgba(10, 14, 22, .45);
+  --color-white: #FFFFFF;
+  --color-slate-50: #F8FAFC; --color-slate-100: #F1F5F9; --color-slate-200: #E2E8F0; --color-slate-300: #CBD5E1;
+  --color-slate-400: #94A3B8; --color-slate-500: #64748B; --color-slate-600: #475569; --color-slate-700: #334155;
+  --color-slate-800: #1E293B; --color-slate-900: #0F172A; --color-slate-950: #020617;
+  --color-red-50: #FEF2F2; --color-red-100: #FEE2E2; --color-red-200: #FECACA; --color-red-300: #FCA5A5;
+  --color-red-400: #F87171; --color-red-500: #EF4444; --color-red-600: #DC2626; --color-red-700: #B91C1C;
+  --color-red-800: #991B1B; --color-red-900: #7F1D1D;
+  --color-amber-50: #FFFBEB; --color-amber-100: #FEF3C7; --color-amber-200: #FDE68A; --color-amber-300: #FCD34D;
+  --color-amber-400: #FBBF24; --color-amber-500: #F59E0B; --color-amber-600: #D97706; --color-amber-700: #B45309;
+  --color-amber-800: #92400E; --color-amber-900: #78350F;
+  --color-emerald-50: #ECFDF5; --color-emerald-100: #D1FAE5; --color-emerald-200: #A7F3D0; --color-emerald-300: #6EE7B7;
+  --color-emerald-400: #34D399; --color-emerald-500: #10B981; --color-emerald-600: #059669; --color-emerald-700: #047857;
+  --color-emerald-800: #065F46; --color-emerald-900: #064E3B;
+  --color-indigo-50: #EEF2FF; --color-indigo-100: #E0E7FF; --color-indigo-200: #C7D2FE; --color-indigo-300: #A5B4FC;
+  --color-indigo-400: #818CF8; --color-indigo-500: #6366F1; --color-indigo-600: #4F46E5; --color-indigo-700: #4338CA;
+  --color-indigo-800: #3730A3; --color-indigo-900: #312E81;
+  --color-rose-50: #FFF1F2; --color-rose-100: #FFE4E6; --color-rose-200: #FECDD3; --color-rose-300: #FDA4AF;
+  --color-rose-400: #FB7185; --color-rose-500: #F43F5E; --color-rose-600: #E11D48; --color-rose-700: #BE123C;
+  --color-rose-800: #9F1239; --color-rose-900: #881337;
+  --color-sky-50: #F0F9FF; --color-sky-100: #E0F2FE; --color-sky-200: #BAE6FD; --color-sky-300: #7DD3FC;
+  --color-sky-400: #38BDF8; --color-sky-500: #0EA5E9; --color-sky-600: #0284C7; --color-sky-700: #0369A1;
+  --color-sky-800: #075985; --color-sky-900: #0C4A6E;
+  --color-blue-50: #EFF6FF; --color-blue-100: #DBEAFE; --color-blue-200: #BFDBFE; --color-blue-300: #93C5FD;
+  --color-blue-400: #60A5FA; --color-blue-500: #3B82F6; --color-blue-600: #2563EB; --color-blue-700: #1D4ED8;
+  --color-blue-800: #1E40AF; --color-blue-900: #1E3A8A;
+  --color-teal-600: #0D9488; --color-teal-700: #0F766E;
+  --xy-controls-button-background-color: initial; --xy-controls-button-background-color-hover: initial;
+  --xy-controls-button-color: initial; --xy-controls-button-color-hover: initial;
+  --xy-controls-button-border-color: initial; --xy-controls-box-shadow: initial;
+  --xy-edge-label-background-color: initial; --xy-edge-label-color: initial; --xy-background-color: initial;
 }
 
 @theme inline {
@@ -28,13 +166,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
@@ -52,4 +183,4 @@ body {
    with white under the darker header. Counted over the rows a reader can see,
    so a folded main process never leaves two greys together. No row hover
    (§278.3). */
-.ffp-zebra > tr:nth-child(even of :not([hidden])) > td { background: #F5F7FA; }
+.ffp-zebra > tr:nth-child(even of :not([hidden])) > td { background: var(--zebra); }

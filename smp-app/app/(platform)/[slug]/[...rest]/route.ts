@@ -4,11 +4,12 @@ import { requestUser, SLUG } from "../../../../lib/session.ts";
 import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
 import { serverFor } from "../../../../modules/registry.ts";
 import { landingStampFor } from "../../../../lib/landing.ts";
-import { mayOpenModule, openableModules } from "../../../../lib/access.ts";
+import { mayOpenModuleOn, openableModulesOn, onTenant } from "../../../../lib/access.ts";
+import { withTenant } from "../../../../lib/tenant.ts";
 import { MODULE_DEF } from "../../../../lib/modules.ts";
 import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 import { viewAsOf, narrowToViewed } from "../../../../lib/view-as.ts";
-import { libraryStampFor } from "../../../../lib/library-viewer.ts";
+import { libraryStampOn } from "../../../../lib/library-viewer.ts";
 import { copilotStampFor } from "../../../../lib/copilot.ts";
 import { withBarExtras } from "../../../../lib/bar-extras.ts";
 import { readingFor } from "../../../../ffp/lib/data/process-reading.ts";
@@ -92,7 +93,6 @@ export async function GET(req: Request, { params }: P) {
      never has to know how a Setup page is drawn: its Setup arrives on the
      spine with the rest of Setup, and the module brings only its defs.
      `tour` stays the default module's, being where the intro round is drawn. */
-  const key = w.module || DEFAULT_MODULE;
   /* WHO MAY OPEN THE MODULE (§359.5, spec 056 §4.4, research R3): asked of
      the spine BEFORE anything of the module is drawn — its Setup included —
      and a refusal is the redirect an unknown module word gets above, so a
@@ -100,9 +100,31 @@ export async function GET(req: Request, { params }: P) {
      address that LED with a module word is gated: the spine's own pages are
      the client's. The switcher and the landing read the same answer
      (openableModules), so a module shut by its address is shut on its row. */
-  if (w.module && !(await mayOpenModule(ans.tenant.id, who.seat, who.personKey, w.module)))
-    return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
-  const open = await openableModules(ans.tenant.id, who.seat, who.personKey, ans.tenant.modules);
+  /* ── THE TENANT IS READ ONCE PER DOCUMENT (§669) ─────────────────────
+     Measured before: the gate, the switcher, the Setup stamp and the
+     library's categories each opened a transaction of their own, one after
+     the other — a client's own person had the whole graph read TWICE, and
+     the office two to three transactions — before any HTML left, and every
+     one of them is a round trip to the database that the press waits on.
+     Now one transaction, the graph read at most once on it and shared
+     (lib/access.ts onTenant), the categories asked LAST because a failed
+     read is `[]` and a failure inside a transaction fails what follows it.
+     The rules are the same functions as before, handed a connection rather
+     than a tenant id; the console and the bare address still ask the way
+     they did. `null` is the gate's refusal, answered after the transaction
+     the way it was before. */
+  const key = w.module || DEFAULT_MODULE;
+  const read = await withTenant(ans.tenant.id, async (c) => {
+    const on = onTenant(c);
+    if (w.module && !(await mayOpenModuleOn(on, who.seat, who.personKey, w.module))) return null;
+    const open = await openableModulesOn(on, who.seat, who.personKey, ans.tenant.modules);
+    const landing = w.rest[0] === "setup"
+      ? await landingStampFor(ans.tenant.id, key, who.seat, who.personKey, ans.tenant.modules, on) : null;
+    const library = await libraryStampOn(c, who.seat, who.personKey, open);
+    return { open, landing, library };
+  });
+  if (!read) return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
+  const { open, landing, library } = read;
   /* WHAT THE BAR SAYS ABOUT THE PERSON (lib/bar-extras.ts): for a client's own
      person on the Client register, the staff reading link and how many
      processes wait for them. A page load only — the saves behind it do not
@@ -122,7 +144,7 @@ export async function GET(req: Request, { params }: P) {
     /* the module's Landing line page reads its declaration off the document
        (§359.4) — computed here, on the Setup document alone — and its Access
        page the module's declared areas (§359.5), the same way */
-    const landing = await landingStampFor(ans.tenant.id, key, who.seat, who.personKey, ans.tenant.modules);
+    /* `landing` and `library`: read above, in the document's one transaction (§669) */
     /* WHICH RAIL, STAMPED BY THE SIDE THAT KNOWS (§362, spec 058). `w.module`
        is set only where the module word LED the address, which is exactly the
        difference between a module's own Setup and the client's — the same
@@ -134,7 +156,6 @@ export async function GET(req: Request, { params }: P) {
        one too, or the tab drawn on arrival would offer the module's whole
        list. The same answer the module's own document is stamped with
        (lib/library-viewer.ts), asked once per document and never per paint. */
-    const library = await libraryStampFor(ans.tenant.id, who.seat, who.personKey, open);
     return withBarExtras(extras, () =>
       new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas,
                                  w.module ? key : "client", library, copilotStampFor(open, who.seat)),
@@ -146,7 +167,7 @@ export async function GET(req: Request, { params }: P) {
      already resolved both — a module asking for them again would be a second
      answer to a question `resolveTenant` exists to settle (§53.5). */
   return withBarExtras(extras, () => serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
-    have: open, rest: w.rest, personKey: who.personKey, seat: who.seat, admin: user.isAdmin && !asked,
+    have: open, library, rest: w.rest, personKey: who.personKey, seat: who.seat, admin: user.isAdmin && !asked,
     consultant: user.kind !== "client", me: { personKey: ans.personKey, seat: ans.seat } }));
 }
 

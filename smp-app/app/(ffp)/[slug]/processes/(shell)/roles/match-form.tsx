@@ -18,7 +18,7 @@ export function MatchForm({ workspaceId, roleId, titles, suggested }: { workspac
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         aria-label={m.title}
-        className="min-w-56 rounded-md border border-[#78899F] bg-white px-2 py-1 text-[13px]"
+        className="min-w-56 rounded-md border border-[var(--field-line)] bg-white px-2 py-1 text-[13px]"
       >
         <option value="">{m.pick}</option>
         {titles.map((t) => (
@@ -38,12 +38,12 @@ export function MatchForm({ workspaceId, roleId, titles, suggested }: { workspac
             else router.refresh();
           })
         }
-        className="rounded-md bg-[#C9A24D] px-3 py-1 text-[12.5px] font-bold text-[#16325C] disabled:opacity-55"
+        className="rounded-md bg-[var(--gold)] px-3 py-1 text-[12.5px] font-bold text-[var(--on-accent)] disabled:opacity-55"
       >
         {pending ? m.matching : m.match}
       </button>
       {error && (
-        <span role="alert" className="w-full text-xs text-[#8C3327]">
+        <span role="alert" className="w-full text-xs text-[var(--bad-tx)]">
           {error}
         </span>
       )}

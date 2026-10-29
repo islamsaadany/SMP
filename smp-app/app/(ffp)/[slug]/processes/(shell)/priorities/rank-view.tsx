@@ -20,20 +20,20 @@ export function RankView({ workspaceId, rows, selectedId, editable }: { workspac
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <h2 className="text-sm font-semibold text-slate-900">Importance across, risk up — bigger circle means more complex</h2>
         <svg viewBox={`0 0 ${W} ${H}`} className="mt-2 w-full" role="img" aria-label="Importance against risk for each process">
-          <rect x={L} y={T} width={PW} height={PH} rx={6} fill="#f1f5f9" />
-          <rect x={L + PW / 2} y={T} width={PW / 2} height={PH / 2} rx={6} fill="#fef3c7" />
-          <text x={L + PW - 8} y={T + 18} textAnchor="end" fontSize={12} fontWeight={700} fill="#334155">Start here</text>
-          <text x={L + 8} y={T + 18} fontSize={12} fill="#64748b">Risky, less central</text>
-          <text x={L + PW - 8} y={T + PH - 8} textAnchor="end" fontSize={12} fill="#64748b">Central, lower risk</text>
-          <text x={L + 8} y={T + PH - 8} fontSize={12} fill="#64748b">Leave high-level</text>
+          <rect x={L} y={T} width={PW} height={PH} rx={6} fill="var(--color-slate-100)" />
+          <rect x={L + PW / 2} y={T} width={PW / 2} height={PH / 2} rx={6} fill="var(--color-amber-100)" />
+          <text x={L + PW - 8} y={T + 18} textAnchor="end" fontSize={12} fontWeight={700} fill="var(--color-slate-700)">Start here</text>
+          <text x={L + 8} y={T + 18} fontSize={12} fill="var(--color-slate-500)">Risky, less central</text>
+          <text x={L + PW - 8} y={T + PH - 8} textAnchor="end" fontSize={12} fill="var(--color-slate-500)">Central, lower risk</text>
+          <text x={L + 8} y={T + PH - 8} fontSize={12} fill="var(--color-slate-500)">Leave high-level</text>
           {[1, 2, 3, 4, 5].map((k) => (
             <g key={k}>
-              <text x={L + ((k - 0.5) / 5) * PW} y={H - 18} textAnchor="middle" fontSize={11} fill="#64748b">{k}</text>
-              <text x={L - 8} y={T + PH - ((k - 0.5) / 5) * PH + 4} textAnchor="end" fontSize={11} fill="#64748b">{k}</text>
+              <text x={L + ((k - 0.5) / 5) * PW} y={H - 18} textAnchor="middle" fontSize={11} fill="var(--color-slate-500)">{k}</text>
+              <text x={L - 8} y={T + PH - ((k - 0.5) / 5) * PH + 4} textAnchor="end" fontSize={11} fill="var(--color-slate-500)">{k}</text>
             </g>
           ))}
-          <text x={L + PW / 2} y={H - 3} textAnchor="middle" fontSize={12} fontWeight={600} fill="#334155">Importance</text>
-          <text transform={`translate(12 ${T + PH / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fontWeight={600} fill="#334155">Risk</text>
+          <text x={L + PW / 2} y={H - 3} textAnchor="middle" fontSize={12} fontWeight={600} fill="var(--color-slate-700)">Importance</text>
+          <text transform={`translate(12 ${T + PH / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fontWeight={600} fill="var(--color-slate-700)">Risk</text>
           {plotted.map((r) => {
             const k = `${r.importance}-${r.risk}`;
             seen[k] = (seen[k] ?? 0) + 1;
@@ -43,7 +43,7 @@ export function RankView({ workspaceId, rows, selectedId, editable }: { workspac
             const on = selected?.id === r.id;
             return (
               <Link key={r.id} href={href(r.id)} aria-label={`${r.name}: importance ${r.importance}, risk ${r.risk}, complexity ${r.complexity}`}>
-                <circle cx={x} cy={y} r={7 + r.complexity! * 2.6} fill={FILL[r.decision ?? "NONE"]} stroke={on ? "#0f172a" : "#ffffff"} strokeWidth={on ? 2.5 : 2} strokeDasharray={r.decision ? undefined : "3 2"} opacity={0.9} />
+                <circle cx={x} cy={y} r={7 + r.complexity! * 2.6} fill={FILL[r.decision ?? "NONE"]} stroke={on ? "var(--color-slate-900)" : "var(--color-white)"} strokeWidth={on ? 2.5 : 2} strokeDasharray={r.decision ? undefined : "3 2"} opacity={0.9} />
               </Link>
             );
           })}

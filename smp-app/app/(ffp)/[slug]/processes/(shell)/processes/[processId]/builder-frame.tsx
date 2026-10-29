@@ -152,7 +152,7 @@ export function BuilderFrame({
           tiles={tiles}
         />
         {open && (
-          <div className="absolute start-5 top-[78px] z-30 grid w-[min(340px,calc(100%-40px))] gap-1 rounded-[10px] border border-[#D6DCE5] bg-white p-2 text-[#171B22] shadow-[0_10px_28px_rgba(15,23,42,.16)]">
+          <div className="absolute start-5 top-[78px] z-30 grid w-[min(340px,calc(100%-40px))] gap-1 rounded-[10px] border border-[var(--line)] bg-white p-2 text-[var(--ink)] shadow-[0_10px_28px_rgba(15,23,42,.16)]">
             <input
               autoFocus
               type="search"
@@ -162,7 +162,7 @@ export function BuilderFrame({
               placeholder={m.find}
               aria-label={m.find}
               autoComplete="off"
-              className="w-full rounded-md border border-[#78899F] px-2 py-1.5 text-[13px]"
+              className="w-full rounded-md border border-[var(--field-line)] px-2 py-1.5 text-[13px]"
             />
             <div role="list" className="grid max-h-[280px] overflow-auto">
               {found.length ? (
@@ -172,27 +172,27 @@ export function BuilderFrame({
                     role="listitem"
                     href={hrefFor(p.id)}
                     onClick={() => setOpen(false)}
-                    className={`flex gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-[#EFF2F6] ${p.id === processId ? "bg-[#EFF2F6]" : ""}`}
+                    className={`flex gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-[var(--surface-2)] ${p.id === processId ? "bg-[var(--surface-2)]" : ""}`}
                   >
-                    <span className="font-mono text-xs font-bold text-[#16325C]">{p.code}</span>
+                    <span className="font-mono text-xs font-bold text-[var(--stone)]">{p.code}</span>
                     <span>
                       {p.name}
                       <br />
-                      <small className="text-[11.5px] text-[#636C79]">{p.state}</small>
+                      <small className="text-[11.5px] text-[var(--ink-3)]">{p.state}</small>
                     </span>
                   </Link>
                 ))
               ) : (
-                <p className="px-2 py-1.5 text-[12.5px] text-[#636C79]">{m.noMatch}</p>
+                <p className="px-2 py-1.5 text-[12.5px] text-[var(--ink-3)]">{m.noMatch}</p>
               )}
             </div>
           </div>
         )}
       </div>
 
-      <div className="sticky top-0 z-20 -mx-4 mb-3.5 flex flex-wrap items-center justify-between gap-2.5 bg-[#F7F8FA] px-4 py-1.5 sm:-mx-6 sm:px-6">
-        <span className="text-[12.5px] text-[#636C79]">{m.saved}</span>
-        <button type="button" onClick={exit} className="rounded-md border border-[#C9A24D] bg-[#C9A24D] px-3 py-1.5 text-[13px] font-bold text-[#16325C]">
+      <div className="sticky top-0 z-20 -mx-4 mb-3.5 flex flex-wrap items-center justify-between gap-2.5 bg-[var(--ground)] px-4 py-1.5 sm:-mx-6 sm:px-6">
+        <span className="text-[12.5px] text-[var(--ink-3)]">{m.saved}</span>
+        <button type="button" onClick={exit} className="rounded-md border border-[var(--gold)] bg-[var(--gold)] px-3 py-1.5 text-[13px] font-bold text-[var(--on-accent)]">
           {m.exit}
         </button>
       </div>
@@ -201,27 +201,27 @@ export function BuilderFrame({
       <div className="grid items-start gap-3.5 min-[900px]:grid-cols-[210px_minmax(0,1fr)]">
         <nav
           aria-label={m.sections}
-          className="grid gap-0.5 rounded-lg border border-[#D6DCE5] bg-white p-2 max-[899px]:auto-cols-max max-[899px]:grid-flow-col max-[899px]:overflow-x-auto min-[900px]:sticky min-[900px]:top-[60px]"
+          className="grid gap-0.5 rounded-lg border border-[var(--line)] bg-white p-2 max-[899px]:auto-cols-max max-[899px]:grid-flow-col max-[899px]:overflow-x-auto min-[900px]:sticky min-[900px]:top-[60px]"
         >
           {SECTIONS.map((k, i) => (
             <div key={k} className="contents">
-              {(i === 6 || i === 9) && <span className="mx-1.5 my-1 h-px bg-[#E6EAF0] max-[899px]:hidden" />}
+              {(i === 6 || i === 9) && <span className="mx-1.5 my-1 h-px bg-[var(--line-soft)] max-[899px]:hidden" />}
               <Link
                 href={sectionHref(base, k)}
                 aria-current={k === sec ? "page" : undefined}
-                className={`flex items-center justify-between gap-2 whitespace-nowrap rounded-md px-2.5 py-2 text-[13.5px] font-semibold ${k === sec ? "bg-[#16325C] text-white" : "text-[#414A58] hover:bg-[#EFF2F6]"}`}
+                className={`flex items-center justify-between gap-2 whitespace-nowrap rounded-md px-2.5 py-2 text-[13.5px] font-semibold ${k === sec ? "bg-[var(--panel)] text-[var(--panel-ink)]" : "text-[var(--ink-2)] hover:bg-[var(--surface-2)]"}`}
               >
                 <span>
                   {m.menu[k]}
                   {k === "ai" && aiCount > 0 ? ` · ${aiCount}` : ""}
                 </span>
-                <span className={`h-2 w-2 flex-none rounded-full ${dots[k] === "bad" ? "bg-[#B04434]" : dots[k] === "ok" ? "bg-[#2E7D5B]" : "bg-[#D6DCE5]"}`} />
+                <span className={`h-2 w-2 flex-none rounded-full ${dots[k] === "bad" ? "bg-[var(--bad)]" : dots[k] === "ok" ? "bg-[var(--good)]" : "bg-[var(--line)]"}`} />
               </Link>
             </div>
           ))}
         </nav>
         <div className="min-w-0">
-          <p className="mb-2.5 text-[12.5px] text-[#636C79]">{m.desc[sec]}</p>
+          <p className="mb-2.5 text-[12.5px] text-[var(--ink-3)]">{m.desc[sec]}</p>
           {children}
         </div>
       </div>

@@ -45,8 +45,8 @@ export default async function ToHandlePage(props: PageProps<"/[slug]/processes/h
   if (!sugs.length && !sentBack.length && !approved.length && !withGaps.length && !toMatch.length)
     return (
       <main className="w-full">
-        <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">
-          <b className="mb-1 block text-[15px] text-[#171B22]">{m.emptyTitle}</b>
+        <div className="rounded-lg border border-dashed border-[var(--line)] bg-white px-[18px] py-[22px] text-[13.5px] text-[var(--ink-2)]">
+          <b className="mb-1 block text-[15px] text-[var(--ink)]">{m.emptyTitle}</b>
           {m.emptyBody}
         </div>
       </main>
@@ -55,22 +55,22 @@ export default async function ToHandlePage(props: PageProps<"/[slug]/processes/h
   const chip = (tone: "bad" | "gold" | "plain", text: string) => (
     <span
       className={`inline-flex items-center whitespace-nowrap rounded border px-1.5 py-px text-[10.5px] font-bold uppercase tracking-[.04em] ${
-        tone === "bad" ? "border-[#B04434] bg-[#F7E3E0] text-[#8C3327]" : tone === "gold" ? "border-[#C9A24D] bg-[#FBF6E9] text-[#8A6B22]" : "border-[#D6DCE5] bg-white text-[#414A58]"
+        tone === "bad" ? "border-[var(--bad)] bg-[var(--bad-bg)] text-[var(--bad-tx)]" : tone === "gold" ? "border-[var(--gold)] bg-[var(--over-bg)] text-[var(--gold-deep)]" : "border-[var(--line)] bg-white text-[var(--ink-2)]"
       }`}
     >
       {text}
     </span>
   );
-  const row = "grid grid-cols-[110px_minmax(0,1fr)_auto] items-start gap-3 border-t border-[#E6EAF0] px-4 py-3 first:border-t-0 max-sm:grid-cols-[minmax(0,1fr)]";
+  const row = "grid grid-cols-[110px_minmax(0,1fr)_auto] items-start gap-3 border-t border-[var(--line-soft)] px-4 py-3 first:border-t-0 max-sm:grid-cols-[minmax(0,1fr)]";
   const openBtn = (id: string) => (
-    <Link href={open(id)} className="whitespace-nowrap rounded-md bg-[#C9A24D] px-3 py-1.5 text-[12.5px] font-bold text-[#16325C]">
+    <Link href={open(id)} className="whitespace-nowrap rounded-md bg-[var(--gold)] px-3 py-1.5 text-[12.5px] font-bold text-[var(--on-accent)]">
       {m.open}
     </Link>
   );
 
   return (
     <main className="w-full">
-      <div className="overflow-hidden rounded-lg border border-[#D6DCE5] bg-white">
+      <div className="overflow-hidden rounded-lg border border-[var(--line)] bg-white">
         {sugs.map((x) => {
           const reply = x.state === "REPLIED";
           const step = stepName(x, all.reading.page.step);
@@ -80,22 +80,22 @@ export default async function ToHandlePage(props: PageProps<"/[slug]/processes/h
               <div className="min-w-0 text-[13.5px]">
                 {x.processId ? (
                   <>
-                    <span className="font-mono text-xs font-bold text-[#16325C]">{x.processCode}</span> <b>{x.processName}</b>
+                    <span className="font-mono text-xs font-bold text-[var(--stone)]">{x.processCode}</span> <b>{x.processName}</b>
                   </>
                 ) : (
                   <b>{m.newProcess}</b>
                 )}
-                <small className="block text-[12.5px] text-[#636C79]">
+                <small className="block text-[12.5px] text-[var(--ink-3)]">
                   {reply
                     ? m.replied(x.byName, formatDate(x.repliedAt ?? x.createdAt, locale))
                     : x.processId
                       ? m.suggested(x.byName, step, formatDate(x.createdAt, locale))
                       : m.asked(x.byName, formatDate(x.createdAt, locale))}
                 </small>
-                <blockquote className="mt-1.5 border-s-[3px] border-[#C9A24D] bg-[#FBF6E9] px-2.5 py-1.5 text-[13px] text-[#414A58]">
+                <blockquote className="mt-1.5 border-s-[3px] border-[var(--gold)] bg-[var(--over-bg)] px-2.5 py-1.5 text-[13px] text-[var(--ink-2)]">
                   {reply ? `“${x.replyText}” ${m.onText(x.text)}` : x.text}
-                  {!reply && x.why ? <span className="block text-[12.5px] text-[#636C79]">{x.why}</span> : null}
-                  {reply && x.answerText ? <span className="block text-[12.5px] text-[#636C79]">{m.youAnswered(x.answerText)}</span> : null}
+                  {!reply && x.why ? <span className="block text-[12.5px] text-[var(--ink-3)]">{x.why}</span> : null}
+                  {reply && x.answerText ? <span className="block text-[12.5px] text-[var(--ink-3)]">{m.youAnswered(x.answerText)}</span> : null}
                 </blockquote>
               </div>
               <div className="flex flex-wrap justify-end gap-1.5 max-sm:justify-start">
@@ -106,7 +106,7 @@ export default async function ToHandlePage(props: PageProps<"/[slug]/processes/h
                 ) : (
                   <Link
                     href={`/${workspaceId}/processes/processes?new=${encodeURIComponent(x.text.split(":")[0])}&from=${x.id}#new-process`}
-                    className="whitespace-nowrap rounded-md border border-[#C9A24D] bg-[#C9A24D] px-3 py-1.5 text-[12.5px] font-bold text-[#16325C]"
+                    className="whitespace-nowrap rounded-md border border-[var(--gold)] bg-[var(--gold)] px-3 py-1.5 text-[12.5px] font-bold text-[var(--on-accent)]"
                   >
                     {m.createIt}
                   </Link>
@@ -119,9 +119,9 @@ export default async function ToHandlePage(props: PageProps<"/[slug]/processes/h
           <div key={p.id} className={row}>
             <span>{chip("bad", m.sentBack)}</span>
             <div className="min-w-0 text-[13.5px]">
-              <span className="font-mono text-xs font-bold text-[#16325C]">{p.code}</span> <b>{p.name}</b>
-              <small className="block text-[12.5px] text-[#636C79]">{m.sentBackBy(p.approverName ?? m.theApprover)}</small>
-              <blockquote className="mt-1.5 border-s-[3px] border-[#C9A24D] bg-[#FBF6E9] px-2.5 py-1.5 text-[13px] text-[#414A58]">{p.returnReason}</blockquote>
+              <span className="font-mono text-xs font-bold text-[var(--stone)]">{p.code}</span> <b>{p.name}</b>
+              <small className="block text-[12.5px] text-[var(--ink-3)]">{m.sentBackBy(p.approverName ?? m.theApprover)}</small>
+              <blockquote className="mt-1.5 border-s-[3px] border-[var(--gold)] bg-[var(--over-bg)] px-2.5 py-1.5 text-[13px] text-[var(--ink-2)]">{p.returnReason}</blockquote>
             </div>
             <div>{openBtn(p.id)}</div>
           </div>
@@ -130,8 +130,8 @@ export default async function ToHandlePage(props: PageProps<"/[slug]/processes/h
           <div key={p.id} className={row}>
             <span>{chip("gold", m.approved)}</span>
             <div className="min-w-0 text-[13.5px]">
-              <span className="font-mono text-xs font-bold text-[#16325C]">{p.code}</span> <b>{p.name}</b>
-              <small className="block text-[12.5px] text-[#636C79]">{m.approvedLine(p.approverName ?? m.theApprover)}</small>
+              <span className="font-mono text-xs font-bold text-[var(--stone)]">{p.code}</span> <b>{p.name}</b>
+              <small className="block text-[12.5px] text-[var(--ink-3)]">{m.approvedLine(p.approverName ?? m.theApprover)}</small>
             </div>
             <div>{openBtn(p.id)}</div>
           </div>
@@ -141,10 +141,10 @@ export default async function ToHandlePage(props: PageProps<"/[slug]/processes/h
             <span>{chip("gold", m.roles)}</span>
             <div className="min-w-0 text-[13.5px]">
               <b>{m.rolesLine(toMatch.length)}</b>
-              <small className="block text-[12.5px] text-[#636C79]">{toMatch.map((r) => r.name).join(", ")}</small>
+              <small className="block text-[12.5px] text-[var(--ink-3)]">{toMatch.map((r) => r.name).join(", ")}</small>
             </div>
             <div>
-              <Link href={`/${workspaceId}/processes/roles`} className="whitespace-nowrap rounded-md bg-[#C9A24D] px-3 py-1.5 text-[12.5px] font-bold text-[#16325C]">
+              <Link href={`/${workspaceId}/processes/roles`} className="whitespace-nowrap rounded-md bg-[var(--gold)] px-3 py-1.5 text-[12.5px] font-bold text-[var(--on-accent)]">
                 {m.rolesOpen}
               </Link>
             </div>
@@ -155,10 +155,10 @@ export default async function ToHandlePage(props: PageProps<"/[slug]/processes/h
             <span>{chip("plain", m.gaps)}</span>
             <div className="min-w-0 text-[13.5px]">
               <b>{m.gapsLine(withGaps.length)}</b>
-              <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-[#636C79]">
+              <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-[var(--ink-3)]">
                 {withGaps.map((p) => (
                   <li key={p.id}>
-                    <Link href={open(p.id)} className="underline decoration-[#C9A24D] underline-offset-2 hover:text-[#171B22]">
+                    <Link href={open(p.id)} className="underline decoration-[var(--gold)] underline-offset-2 hover:text-[var(--ink)]">
                       {p.code} {p.name}
                     </Link>{" "}
                     · {m.gapCount(gaps.get(p.id) ?? 0)}

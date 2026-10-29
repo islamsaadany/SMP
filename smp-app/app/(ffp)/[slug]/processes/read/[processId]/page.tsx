@@ -58,7 +58,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   /* anyone reading what is in force, or the owner reading what is on its way, can suggest a change; the approver approves or sends back instead */
   const canSuggest = !!reader.personId && (p.mode === "live" || p.mode === "notyet");
   const pick = counted.map((s) => ({ id: s.id, n: s.n!, label: s.label }));
-  const suggestLink = "text-[12.5px] font-semibold text-[#16325C] underline underline-offset-2";
+  const suggestLink = "text-[12.5px] font-semibold text-[var(--stone)] underline underline-offset-2";
 
   /* Is it in good shape? (spec 067 §3.2): the next version, the RACI, risks with no control, who has not read it, the SOP, the review */
   const health: { k: "ok" | "warn" | "bad"; text: string; small?: string; act?: React.ReactNode }[] = [];
@@ -101,17 +101,17 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
   const purpose = p.purpose?.split(/(?<=\.)\s/)[0];
 
   const stepCard = (s: ReadStep, id: string) => (
-    <div key={s.id} id={id} className="grid scroll-mt-20 grid-cols-[34px_minmax(0,1fr)] gap-x-3 gap-y-1 border-t border-[#E6EAF0] px-4 py-3.5 first:border-t-0">
-      <span className="grid h-7 w-7 place-items-center rounded-full bg-[#16325C] text-[13px] font-extrabold text-white">{s.n}</span>
+    <div key={s.id} id={id} className="grid scroll-mt-20 grid-cols-[34px_minmax(0,1fr)] gap-x-3 gap-y-1 border-t border-[var(--line-soft)] px-4 py-3.5 first:border-t-0">
+      <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--panel)] text-[13px] font-extrabold text-[var(--panel-ink)]">{s.n}</span>
       <div>
-        <h3 className="flex flex-wrap items-center gap-1.5 text-[15.5px] font-semibold text-[#171B22]">
+        <h3 className="flex flex-wrap items-center gap-1.5 text-[15.5px] font-semibold text-[var(--ink)]">
           {s.label}
           {s.type === "DECISION" && <Chip>{m.decision}</Chip>}
           {s.controls.some((c) => !c.control) && <Chip tone="bad">{m.noControlChip}</Chip>}
           {s.mine && <Chip tone="navy">{m.yourStep}</Chip>}
           {s.changed && <Chip tone="gold">{m.changedIn(r.version)}</Chip>}
         </h3>
-        <p className="text-[12.5px] text-[#636C79]">{m.doneByLine(s.role ?? m.noRole)}</p>
+        <p className="text-[12.5px] text-[var(--ink-3)]">{m.doneByLine(s.role ?? m.noRole)}</p>
         {s.acts.length > 0 && (
           <ul className="mt-1 grid list-disc gap-0.5 ps-[18px] text-[13.5px]">
             {s.acts.map((a, i) => (
@@ -120,23 +120,23 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
           </ul>
         )}
         {(s.approval.length > 0 || s.time.length > 0) && (
-          <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-[#414A58]">
+          <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-[var(--ink-2)]">
             {s.approval.length > 0 && (
               <span>
-                <em className="me-1.5 not-italic text-[#636C79]">{m.approval}</em>
+                <em className="me-1.5 not-italic text-[var(--ink-3)]">{m.approval}</em>
                 {s.approval.join(" ")}
               </span>
             )}
             {s.time.length > 0 && (
               <span>
-                <em className="me-1.5 not-italic text-[#636C79]">{m.timeLimit}</em>
+                <em className="me-1.5 not-italic text-[var(--ink-3)]">{m.timeLimit}</em>
                 {s.time.join(" ")}
               </span>
             )}
           </div>
         )}
         {s.controls.map((c, i) => (
-          <p key={i} className={`mt-1 text-[12.5px] ${c.control ? "text-[#414A58]" : "font-semibold text-[#8C3327]"}`}>
+          <p key={i} className={`mt-1 text-[12.5px] ${c.control ? "text-[var(--ink-2)]" : "font-semibold text-[var(--bad-tx)]"}`}>
             {m.riskLine(c.risk, c.control)}
           </p>
         ))}
@@ -162,7 +162,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
     );
   } else if (tab === "steps") {
     body = !counted.length ? (
-      <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">{m.noSteps}</div>
+      <div className="rounded-lg border border-dashed border-[var(--line)] bg-white px-[18px] py-[22px] text-[13.5px] text-[var(--ink-2)]">{m.noSteps}</div>
     ) : (
       <div className="grid items-start gap-4 lg:grid-cols-[230px_minmax(0,1fr)]">
         <nav aria-label={m.theSteps} className={`${panel} px-3 py-2.5 max-lg:hidden lg:sticky lg:top-[72px]`}>
@@ -170,10 +170,10 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
           <ol className="mt-1.5 grid gap-0.5">
             {counted.map((s) => (
               <li key={s.id}>
-                <a href={`#sc-${s.id}`} className="grid grid-cols-[22px_minmax(0,1fr)] gap-x-1.5 rounded-md px-1.5 py-[5px] text-[13px] text-[#171B22] hover:bg-[#EFF2F6]">
-                  <i className="font-extrabold not-italic text-[#16325C]">{s.n}</i>
+                <a href={`#sc-${s.id}`} className="grid grid-cols-[22px_minmax(0,1fr)] gap-x-1.5 rounded-md px-1.5 py-[5px] text-[13px] text-[var(--ink)] hover:bg-[var(--surface-2)]">
+                  <i className="font-extrabold not-italic text-[var(--stone)]">{s.n}</i>
                   {s.label}
-                  <span className="col-start-2 text-[11.5px] text-[#636C79]">{s.role ?? m.noRole}</span>
+                  <span className="col-start-2 text-[11.5px] text-[var(--ink-3)]">{s.role ?? m.noRole}</span>
                 </a>
               </li>
             ))}
@@ -192,12 +192,12 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
             {(p.inScope.length > 0 || p.outScope.length > 0) && (
               <div className="mt-2.5 flex flex-wrap gap-[5px]">
                 {p.inScope.map((x, i) => (
-                  <span key={`i${i}`} className="rounded-[5px] border border-[#D6DCE5] bg-[#F5F7FA] px-2 py-0.5 text-xs">
+                  <span key={`i${i}`} className="rounded-[5px] border border-[var(--line)] bg-[var(--zebra)] px-2 py-0.5 text-xs">
                     {x}
                   </span>
                 ))}
                 {p.outScope.map((x, i) => (
-                  <span key={`o${i}`} className="rounded-[5px] border border-dashed border-[#D6DCE5] bg-[#F5F7FA] px-2 py-0.5 text-xs text-[#636C79]">
+                  <span key={`o${i}`} className="rounded-[5px] border border-dashed border-[var(--line)] bg-[var(--zebra)] px-2 py-0.5 text-xs text-[var(--ink-3)]">
                     {m.notIn(x)}
                   </span>
                 ))}
@@ -211,10 +211,10 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
                 </div>
                 <div className="grid gap-2.5 sm:grid-cols-3">
                   {p.kpis.map((k, i) => (
-                    <div key={i} className="rounded-lg border border-[#D6DCE5] bg-white px-3 py-2.5">
-                      <div className="text-[10.5px] font-bold uppercase tracking-[.08em] text-[#636C79]">{k.metric}</div>
+                    <div key={i} className="rounded-lg border border-[var(--line)] bg-white px-3 py-2.5">
+                      <div className="text-[10.5px] font-bold uppercase tracking-[.08em] text-[var(--ink-3)]">{k.metric}</div>
                       <div className="text-xl font-bold">{k.target}</div>
-                      {k.frequency && <div className="text-xs text-[#636C79]">{m.checked(k.frequency)}</div>}
+                      {k.frequency && <div className="text-xs text-[var(--ink-3)]">{m.checked(k.frequency)}</div>}
                     </div>
                   ))}
                 </div>
@@ -227,20 +227,20 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
               {health.map((h, i) => (
                 <div key={i} className="grid grid-cols-[20px_minmax(0,1fr)_auto] items-start gap-2 text-[13.5px]">
                   <i
-                    className={`mt-0.5 grid h-[18px] w-[18px] place-items-center rounded-full text-[11px] font-extrabold not-italic ${h.k === "ok" ? "bg-[#E4F0EA] text-[#1F6248]" : h.k === "warn" ? "bg-[#F7EFD6] text-[#7A5D1C]" : "bg-[#F7E3E0] text-[#8C3327]"}`}
+                    className={`mt-0.5 grid h-[18px] w-[18px] place-items-center rounded-full text-[11px] font-extrabold not-italic ${h.k === "ok" ? "bg-[var(--good-bg)] text-[var(--good-tx)]" : h.k === "warn" ? "bg-[var(--attn-bg)] text-[var(--attn-tx)]" : "bg-[var(--bad-bg)] text-[var(--bad-tx)]"}`}
                   >
                     {h.k === "ok" ? "✓" : "!"}
                   </i>
                   <span>
                     {h.text}
-                    {h.small && <small className="block text-xs text-[#636C79]">{h.small}</small>}
+                    {h.small && <small className="block text-xs text-[var(--ink-3)]">{h.small}</small>}
                   </span>
                   <span>{h.act}</span>
                 </div>
               ))}
             </div>
             {toReview && (
-              <div className="mt-3 rounded-lg border border-[#C9A24D] bg-[#FBF6E9] px-3 py-2.5">
+              <div className="mt-3 rounded-lg border border-[var(--gold)] bg-[var(--over-bg)] px-3 py-2.5">
                 <b className="text-[13.5px]">{m.reviewWait((review ?? 0) < 0, date(r.nextReviewDue)!)}</b>
                 <p className={`${note} mt-0.5`}>{m.reviewHint}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -248,14 +248,14 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
                     workspaceId={slug}
                     processId={processId}
                     label={m.stillRight}
-                    className="rounded-md border border-[#C9A24D] bg-[#C9A24D] px-2.5 py-1 text-[12.5px] font-semibold text-[#16325C] disabled:opacity-60"
+                    className="rounded-md border border-[var(--gold)] bg-[var(--gold)] px-2.5 py-1 text-[12.5px] font-semibold text-[var(--on-accent)] disabled:opacity-60"
                   />
-                  <SuggestButton workspaceId={slug} processId={processId} steps={pick} label={m.suggest} className="rounded-md border border-[#D6DCE5] bg-white px-2.5 py-1 text-[12.5px] font-semibold" />
+                  <SuggestButton workspaceId={slug} processId={processId} steps={pick} label={m.suggest} className="rounded-md border border-[var(--line)] bg-white px-2.5 py-1 text-[12.5px] font-semibold" />
                 </div>
               </div>
             )}
             {!toReview && toRead && (
-              <div className="mt-3 rounded-lg border border-[#C9A24D] bg-[#FBF6E9] px-3 py-2.5">
+              <div className="mt-3 rounded-lg border border-[var(--gold)] bg-[var(--over-bg)] px-3 py-2.5">
                 <b className="text-[13.5px]">{m.waitRead(r.version)}</b>
                 <p className={`${note} mt-0.5`}>{all.reading.todo.readMeta(r.mySteps)}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -279,7 +279,7 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
         <div className={`${panel} mb-3.5 px-4 py-3.5`}>
           <div className="mb-1 flex flex-wrap items-baseline gap-2">
             <span className={lbl}>{m.glance}</span>
-            <Link href={`${here}?tab=flow${q}`} className="ms-auto text-[13px] font-semibold text-[#16325C] underline underline-offset-2">
+            <Link href={`${here}?tab=flow${q}`} className="ms-auto text-[13px] font-semibold text-[var(--stone)] underline underline-offset-2">
               {m.fullFlow}
             </Link>
           </div>
@@ -287,17 +287,17 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
             {counted.map((s, i) => (
               <div key={s.id} className="flex items-stretch">
                 {i > 0 && (
-                  <span aria-hidden="true" className="self-center px-1.5 text-[#636C79]">
+                  <span aria-hidden="true" className="self-center px-1.5 text-[var(--ink-3)]">
                     →
                   </span>
                 )}
                 <Link
                   href={`${here}?tab=steps${q}#sc-${s.id}`}
-                  className={`relative grid w-32 shrink-0 gap-0.5 rounded-lg border bg-white px-2.5 py-2 text-[12.5px] ${s.type === "DECISION" ? "border-dashed border-[#16325C]" : "border-[#D6DCE5]"}`}
+                  className={`relative grid w-32 shrink-0 gap-0.5 rounded-lg border bg-white px-2.5 py-2 text-[12.5px] ${s.type === "DECISION" ? "border-dashed border-[var(--stone)]" : "border-[var(--line)]"}`}
                 >
-                  <span className="font-mono text-xs font-bold text-[#16325C]">{s.n}</span>
+                  <span className="font-mono text-xs font-bold text-[var(--stone)]">{s.n}</span>
                   <b className="text-[13px] leading-tight">{s.label}</b>
-                  <span className="text-[11.5px] text-[#636C79]">{s.role ?? m.noRole}</span>
+                  <span className="text-[11.5px] text-[var(--ink-3)]">{s.role ?? m.noRole}</span>
                   {s.controls.some((c) => !c.control) && (
                     <span className="absolute -top-2 end-1.5">
                       <Chip tone="bad">{m.noControlChip}</Chip>
@@ -314,11 +314,11 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
         </div>
         <div className={panel}>
           {counted.map((s) => (
-            <details key={s.id} id={`cs-${s.id}`} className="scroll-mt-20 border-t border-[#E6EAF0] first:border-t-0 [&[open]>summary]:border-b [&[open]>summary]:border-[#E6EAF0]">
+            <details key={s.id} id={`cs-${s.id}`} className="scroll-mt-20 border-t border-[var(--line-soft)] first:border-t-0 [&[open]>summary]:border-b [&[open]>summary]:border-[var(--line-soft)]">
               <summary className="flex cursor-pointer flex-wrap items-center gap-2 px-4 py-2.5 text-[14px] font-semibold">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-[#16325C] text-[12px] font-extrabold text-white">{s.n}</span>
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--panel)] text-[12px] font-extrabold text-[var(--panel-ink)]">{s.n}</span>
                 {s.label}
-                <span className="text-[12px] font-normal text-[#636C79]">{s.role ?? m.noRole}</span>
+                <span className="text-[12px] font-normal text-[var(--ink-3)]">{s.role ?? m.noRole}</span>
               </summary>
               {stepCard(s, `cs-in-${s.id}`)}
             </details>
@@ -414,17 +414,17 @@ export default async function ReadProcessPage(props: PageProps<"/[slug]/processe
         />
       )}
       {p.mode === "preview" && (
-        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[#C9A24D] bg-[#FBF6E9] px-3 py-2.5 text-[13.5px] print:hidden">
-          <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[#8A6B22]">{all.builder.page.previewStrip}</b>
+        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[var(--gold)] bg-[var(--over-bg)] px-3 py-2.5 text-[13.5px] print:hidden">
+          <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[var(--gold-deep)]">{all.builder.page.previewStrip}</b>
           <span className="min-w-0 flex-1">{all.builder.page.previewLine}</span>
-          <Link href={`/${slug}/processes/processes/${processId}/map`} className="rounded-md border border-[#C9A24D] bg-[#C9A24D] px-3 py-1.5 text-[13px] font-semibold text-[#16325C]">
+          <Link href={`/${slug}/processes/processes/${processId}/map`} className="rounded-md border border-[var(--gold)] bg-[var(--gold)] px-3 py-1.5 text-[13px] font-semibold text-[var(--on-accent)]">
             {all.builder.page.backToBuilder}
           </Link>
         </div>
       )}
       {p.mode === "notyet" && (
-        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[#16325C] bg-white px-3 py-2.5 text-[13.5px]">
-          <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[#16325C]">{m.notYet}</b>
+        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[var(--stone)] bg-white px-3 py-2.5 text-[13.5px]">
+          <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[var(--stone)]">{m.notYet}</b>
           <span>{r.status === "IN_REVIEW" ? m.notYetReview(v, r.approverName) : m.notYetLine(v)}</span>
         </div>
       )}

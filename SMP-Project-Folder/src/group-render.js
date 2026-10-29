@@ -3117,22 +3117,229 @@ function renderCompanyFoundation(){
   return foundationBody(o, "co:" + k, gpg);
 }
 
+/* ── WHO WE ARE IS TYPED IN ONE BOX (§679) ───────────────────────────
+   Islam, of the five lines of two boxes each: *"is there a more convenient
+   way for adding this part without filling 8 boxes"* — and, of the one-box
+   drawing §613 had set aside: *"keep approach 2 in creation but shows like
+   today with each bold title on the left and allows the user to make bold
+   the words from the start of the line only"*. So: ONE box while the pen is
+   on, a line per row, the bold opening words being the opener; and the
+   table exactly as it was while reading. The stored shape, `[opener, text]`
+   a line, does not move — the reading window, the slides and both
+   workbooks need nothing, and a unit's line keeps its id (§96's renumber
+   runs on the write as it did on Add). Bold runs from the START of a line
+   to the end of the selection and never from the middle, which is what
+   keeps every line splittable into the two columns; pressed inside the
+   bold words it takes the bold off. Written on blur like every other bound
+   field (§71.2, never a repaint under the cursor — §35), read back off the
+   box's lines; a blank line is not a row. Paste brings words only. */
+function clauseLines(clauses, page, tgt){
+  var cl = clauses || [];
+  if (!page) return '<dl style="margin:0">' + cl.map(function(c){
+      return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd><span class="flow">' + esc(c[1]) + '</span></dd></div>';
+    }).join("") + '</dl>';
+  return '<div class="clausebar"><button type="button" class="bbtn" data-clausebold="' + esc(tgt) +
+      '" title="Bold the opening words (Ctrl+B)" aria-keyshortcuts="Control+B" aria-pressed="false">B</button>' +
+      '<span class="clausehint">Select the opening words and press B (or Ctrl+B); bold runs from the start of the line. Enter starts a new line.</span></div>' +
+    '<div class="clausebox" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' + esc(L("brief")) +
+      '" data-clausebox="' + esc(tgt) + '">' +
+      (cl.length ? cl.map(function(c){ return CLAUSEBOX.lineHtml(c[0], c[1]); }).join("") : CLAUSEBOX.lineHtml("", "")) +
+    '</div>';
+}
+/* The box itself. One <div> per line; the opener is the <b> run at the very
+   start of it and everything after is the text. The browser is left to type,
+   delete and move the caret; this steps in for the four things it would get
+   wrong — Enter (a new line that carries no bold), Ctrl+B (from the start of
+   the line, never from the middle), paste (words only, a line per pasted
+   line) and a <b> that lands mid-line after two lines are joined (unwrapped,
+   the caret left where it is). */
+var CLAUSEBOX = {
+  lineHtml: function(op, tx){
+    return "<div>" + (op ? "<b>" + esc(op) + "</b>" : "") + (op && tx ? " " : "") + esc(tx) + (op || tx ? "" : "<br>") + "</div>";
+  },
+  lines: function(box){
+    return Array.prototype.filter.call(box.childNodes, function(n){ return n.nodeType === 1 && n.nodeName !== "BR"; });
+  },
+  read: function(div){
+    var op = "", tx = "", lead = true;
+    Array.prototype.forEach.call(div.childNodes, function(n){
+      var t = n.textContent || "";
+      if (n.nodeName === "BR") return;
+      if (lead && (n.nodeName === "B" || n.nodeName === "STRONG")) { op += t; return; }
+      if (lead && !op && !t.trim()) return;
+      lead = false; tx += t;
+    });
+    return [op.trim(), tx.trim()];
+  },
+  rows: function(box){
+    return CLAUSEBOX.lines(box).map(CLAUSEBOX.read).filter(function(l){ return l[0] || l[1]; });
+  },
+  setLine: function(div, op, tx){ div.innerHTML = CLAUSEBOX.lineHtml(op, tx).slice(5, -6); },
+  normalise: function(box){
+    if (!CLAUSEBOX.lines(box).length) {
+      var t = box.textContent; box.innerHTML = CLAUSEBOX.lineHtml("", t);
+      CLAUSEBOX.place(CLAUSEBOX.lines(box)[0], t.length); return;
+    }
+    Array.prototype.slice.call(box.childNodes).forEach(function(n){
+      if (n.nodeType === 3 && n.textContent.trim()) { var d = document.createElement("div"); box.replaceChild(d, n); d.appendChild(n); }
+      else if (n.nodeType === 3 || n.nodeName === "BR") box.removeChild(n);
+    });
+    CLAUSEBOX.lines(box).forEach(function(div){
+      var seen = false;
+      Array.prototype.slice.call(div.childNodes).forEach(function(n){
+        if (n.nodeName === "B" || n.nodeName === "STRONG") {
+          if (seen) { while (n.firstChild) div.insertBefore(n.firstChild, n); div.removeChild(n); }
+        } else if (n.nodeType === 1 && n.nodeName !== "BR") {
+          div.replaceChild(document.createTextNode(n.textContent), n); seen = true;
+        } else if ((n.textContent || "").trim()) seen = true;
+      });
+    });
+  },
+  lineOf: function(box, node){
+    while (node && node.parentNode !== box) node = node.parentNode;
+    return node && node.nodeType === 1 ? node : null;
+  },
+  offsetIn: function(div, node, off){
+    var r = document.createRange(); r.setStart(div, 0); r.setEnd(node, off); return r.toString().length;
+  },
+  place: function(div, off){
+    var w = document.createTreeWalker(div, NodeFilter.SHOW_TEXT), n, seen = 0,
+        sel = window.getSelection(), r = document.createRange();
+    while ((n = w.nextNode())) {
+      var len = n.textContent.length;
+      if (seen + len >= off) { r.setStart(n, off - seen); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); return; }
+      seen += len;
+    }
+    r.selectNodeContents(div); r.collapse(false); sel.removeAllRanges(); sel.addRange(r);
+  },
+  caret: function(box){
+    var sel = window.getSelection();
+    if (!sel.rangeCount || !box.contains(sel.anchorNode)) return null;
+    var r = sel.getRangeAt(0), div = CLAUSEBOX.lineOf(box, r.startContainer);
+    if (!div) return null;
+    var endDiv = CLAUSEBOX.lineOf(box, r.endContainer);
+    return { div: div,
+      start: CLAUSEBOX.offsetIn(div, r.startContainer, r.startOffset),
+      end: endDiv === div ? CLAUSEBOX.offsetIn(div, r.endContainer, r.endOffset) : div.textContent.length };
+  },
+  inOpener: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) return false;
+    var op = CLAUSEBOX.read(c.div)[0];
+    return !!op && c.end <= op.length;
+  },
+  mark: function(box){
+    var bar = box.previousElementSibling, b = bar && bar.querySelector(".bbtn");
+    if (!b) return;
+    var on = CLAUSEBOX.inOpener(box);
+    b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false");
+  },
+  toggleBold: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) { box.focus(); return; }
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div), op, tx;
+    if (l[0] && c.end <= l[0].length) { op = ""; tx = (l[0] + " " + l[1]).trim(); }
+    else { op = full.slice(0, c.end).trim(); tx = full.slice(c.end).trim(); }
+    CLAUSEBOX.setLine(c.div, op, tx);
+    CLAUSEBOX.place(c.div, Math.min(op ? op.length : c.end, c.div.textContent.length));
+    CLAUSEBOX.mark(box);
+  },
+  split: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) return;
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div);
+    var head = full.slice(0, c.start), tail = full.slice(c.end), inOp = l[0] && c.start <= l[0].length;
+    CLAUSEBOX.setLine(c.div, inOp ? head.trim() : l[0], inOp ? "" : head.slice(l[0].length).trim());
+    var nd = document.createElement("div"); CLAUSEBOX.setLine(nd, "", tail.trim());
+    c.div.parentNode.insertBefore(nd, c.div.nextSibling);
+    CLAUSEBOX.place(nd, 0); CLAUSEBOX.mark(box);
+  },
+  paste: function(box, e){
+    e.preventDefault();
+    var text = String((e.clipboardData || window.clipboardData).getData("text/plain") || "").replace(/\r/g, "");
+    var parts = text.split("\n"), c = CLAUSEBOX.caret(box);
+    if (!c) {
+      parts.forEach(function(p){ var d = document.createElement("div"); CLAUSEBOX.setLine(d, "", p.trim()); box.appendChild(d); });
+      return;
+    }
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div), inOp = l[0] && c.start <= l[0].length;
+    if (parts.length === 1) {
+      var joined = full.slice(0, c.start) + parts[0] + full.slice(c.end);
+      var op = inOp ? joined.slice(0, l[0].length + parts[0].length).trim() : l[0];
+      CLAUSEBOX.setLine(c.div, op, joined.slice(op ? op.length : 0).trim());
+      CLAUSEBOX.place(c.div, Math.min(c.start + parts[0].length, c.div.textContent.length));
+      CLAUSEBOX.mark(box); return;
+    }
+    var head = full.slice(0, c.start) + parts[0], tail = parts[parts.length - 1] + full.slice(c.end);
+    CLAUSEBOX.setLine(c.div, inOp ? head.trim() : l[0], inOp ? "" : head.slice(l[0].length).trim());
+    var after = c.div;
+    parts.slice(1).forEach(function(p, i){
+      var d = document.createElement("div");
+      CLAUSEBOX.setLine(d, "", (i === parts.length - 2 ? tail : p).trim());
+      after.parentNode.insertBefore(d, after.nextSibling); after = d;
+    });
+    CLAUSEBOX.place(after, parts[parts.length - 1].length); CLAUSEBOX.mark(box);
+  },
+  /* `write(rows)` is handed the lines as `[opener, text]` pairs, blank ones
+     left out, on blur and only when something changed — a `change` event,
+     which a contenteditable box never fires, done by hand. */
+  wire: function(box, write){
+    var was = JSON.stringify(CLAUSEBOX.rows(box));
+    var bar = box.previousElementSibling, b = bar && bar.querySelector(".bbtn");
+    box.addEventListener("input", function(){ CLAUSEBOX.normalise(box); CLAUSEBOX.mark(box); });
+    /* TYPING AT THE END OF THE BOLD WORDS WRITES THE TEXT, NOT THE OPENER. A
+       new unit starts with the group's openers and nothing after them
+       (§96's fresh shape), so the first thing anybody does is put the caret
+       after "We are" and type — and a browser carries the bold on from the
+       end of a <b>, which would have made the whole line the opener and
+       the text empty. So the letter typed at the end of the bold is put in
+       by hand, into the plain text after it, and the caret left in that
+       text (merely moving the caret out first is not enough: the browser
+       puts it back to the end of the <b> and types bold). Typing INSIDE
+       the opener still extends it, and B is how the opener grows on
+       purpose. */
+    box.addEventListener("beforeinput", function(e){
+      if (e.inputType !== "insertText" || !e.data) return;
+      var sel = window.getSelection(); if (!sel.rangeCount || !sel.isCollapsed) return;
+      var r = sel.getRangeAt(0), n = r.startContainer, bold = n.nodeType === 3 ? n.parentNode : n;
+      if (!bold || (bold.nodeName !== "B" && bold.nodeName !== "STRONG") || bold.parentNode.parentNode !== box) return;
+      if (n.nodeType === 3 && (r.startOffset !== n.textContent.length || n.nextSibling)) return;
+      if (n.nodeType !== 3 && r.startOffset !== n.childNodes.length) return;
+      e.preventDefault();
+      var t = bold.nextSibling;
+      if (!t || t.nodeType !== 3) { t = document.createTextNode(""); bold.parentNode.insertBefore(t, bold.nextSibling); }
+      t.insertData(0, e.data);
+      var nr = document.createRange(); nr.setStart(t, e.data.length); nr.collapse(true);
+      sel.removeAllRanges(); sel.addRange(nr);
+      CLAUSEBOX.mark(box);
+    });
+    box.addEventListener("keydown", function(e){
+      if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) { e.preventDefault(); CLAUSEBOX.toggleBold(box); }
+      else if (e.key === "Enter") { e.preventDefault(); CLAUSEBOX.split(box); }
+      else if ((e.ctrlKey || e.metaKey) && /^[iu]$/i.test(e.key)) e.preventDefault();
+    });
+    box.addEventListener("paste", function(e){ CLAUSEBOX.paste(box, e); });
+    box.addEventListener("blur", function(){
+      var now = CLAUSEBOX.rows(box), s = JSON.stringify(now);
+      if (s === was) return;
+      was = s; write(now);
+    });
+    if (b) {
+      b.addEventListener("mousedown", function(e){ e.preventDefault(); });
+      b.addEventListener("click", function(){ CLAUSEBOX.toggleBold(box); });
+    }
+    if (!CLAUSEBOX.listening) {
+      CLAUSEBOX.listening = true;
+      document.addEventListener("selectionchange", function(){
+        var a = document.activeElement;
+        if (a && a.classList && a.classList.contains("clausebox")) CLAUSEBOX.mark(a);
+      });
+    }
+  }
+};
+
 function foundationBody(o, tgt, gpg){
   /* §404: every block is a component the office may switch off. */
   var on = function(c){ return compOn(tgt, c); };
   return '<div class="fgrid">' + (on("brief") ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
-      '<dl style="margin:0">' +
-      (o.clauses || []).map(function(c, ci){
-        var clt = tgt + "|" + ci;
-        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
-          (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
-            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(tgt) + '">+ Add a line</button></div>' : '') +
+      clauseLines(o.clauses, gpg, tgt) +
       '</div>' : '') +
       '<div class="fcol">' +
         (on("purpose") ? '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
@@ -6097,19 +6304,7 @@ function renderUnitFoundation(u){
       "the Foundation") +
     '<div class="fgrid">' + (compOn(u.ukey, "brief")
       ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
-      '<dl style="margin:0">' +
-      u.clauses.map(function(c, ci){
-        var clt = u.ukey + "|" + ci;
-        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
-          (upg ? inputOr(upg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) +
-          (upg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
-            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
-        '">+ Add a line</button></div>' : '') + '</div>' : '') +
+      clauseLines(u.clauses, upg, u.ukey) + '</div>' : '') +
       unitPurposeAnd(u, upg,
         aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
           function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",

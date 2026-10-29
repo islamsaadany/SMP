@@ -113,9 +113,12 @@ with sync_playwright() as p:
     pg.evaluate("""() => { leaveModes(); current='mobile'; currentSub='strategy';
       CURSEC.strategy='foundation'; EDIT_PAGE.foundation=true; paint(); }""")
     pg.wait_for_timeout(600)
-    r3 = press_enter_in('#panel .clause textarea[rows="2"]')
-    ck("a clause's paragraph box is on the page to press Enter in", r3 is not None,
-       {"clauses": pg.evaluate("()=>document.querySelectorAll('#panel .clause').length")})
+    # §679: Who we are is one box now and draws no `.clause` with the pen
+    # on, so the rows-2 area pressed here is the unit's purpose — the same
+    # kind of box, on the same page.
+    r3 = press_enter_in('#panel textarea[rows="2"]:not(.grow)')
+    ck("a paragraph box is on the page to press Enter in", r3 is not None,
+       {"areas": pg.evaluate("()=>document.querySelectorAll('#panel textarea[rows=\"2\"]').length")})
     ck("Enter in a rows-2 area still makes a paragraph", r3 and r3["newline"], r3)
     ck("...and does not blur it", r3 and r3["stillFocused"], r3)
 

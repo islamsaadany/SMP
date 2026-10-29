@@ -209,12 +209,15 @@ with sync_playwright() as p:
 
     print("\n── 6 · the surfaces that could never start (§129's audit) ──")
     pg.query_selector('#buildband [data-bnav="found"]').click(); pg.wait_for_timeout(400)
-    ca = pg.query_selector("[data-clauseadd='%s']" % T)
+    # §679: Who we are is one box. A new unit starts with the group's openers
+    # and nothing after them, so the first line is written by putting the
+    # caret after "We are" and typing — the bold must NOT carry on.
+    ca = pg.query_selector("[data-clausebox='%s']" % T)
     ck("the first 'Who we are' line can be written", bool(ca))
-    ca.click(); pg.wait_for_timeout(200)
-    pg.fill('[data-bf="label"]', "We are")
-    pg.fill('[data-bf="text"]', "The consumer electronics arm")
-    pg.query_selector('[data-bfadd="one"]').click(); pg.wait_for_timeout(400)
+    ca.click(); pg.wait_for_timeout(100)
+    pg.evaluate("() => { var d = document.querySelector('[data-clausebox] > div'); CLAUSEBOX.place(d, d.textContent.length); }")
+    pg.keyboard.type(" The consumer electronics arm")
+    pg.evaluate("() => document.querySelector('[data-clausebox]').blur()"); pg.wait_for_timeout(400)
     ck("…and it is in the data with an id",
        pg.evaluate("UNITS['%s'].clauses.some(c=>c[0]==='We are' && c[1] && c[2])" % T))
     pg.query_selector('#buildband [data-bnav="obj"]').click(); pg.wait_for_timeout(400)

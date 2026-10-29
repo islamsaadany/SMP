@@ -482,11 +482,6 @@ function bformDef(kind, ctx){
         { k:"owner", label:"Owner", type:"owner" },
         { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
       ] },
-    clause: { title:"Add a line to “Who we are”",
-      fields:[
-        { k:"label", label:"The lead — the words down the left", req:true, ph:"e.g. We serve" },
-        { k:"text", label:"The line itself", type:"long" }
-      ] },
     swot: { title:"Add " + ({ s:"a strength", w:"a weakness", o:"an opportunity", t:"a threat" }[ctx && ctx.q] || "a line"),
       fields:[
         { k:"text", label:{ s:"Strength", w:"Weakness", o:"Opportunity", t:"Threat" }[ctx && ctx.q] || "Line",
@@ -707,13 +702,6 @@ function bApply(kind, ctx, d){
        id minted from the maximum, `status` left empty for the reporter. */
     var ac = addAction(ctx.fnKey); if (!ac) return false;
     ac.name = v("name"); ac.owner = v("owner"); ac.due = v("due");
-    return true;
-  }
-  if (kind === "clause") {
-    var cu = ctx.target === "group" ? GROUP : unitLikeWritable(ctx.target);
-    if (!cu || !Array.isArray(cu.clauses)) return false;
-    cu.clauses.push([v("label"), v("text")]);
-    if (cu.ukey) renumberUnit(cu);
     return true;
   }
   if (kind === "swot") {

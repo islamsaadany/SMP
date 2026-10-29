@@ -66150,6 +66150,7 @@ var COPILOT = (function(){
   function boxWord(pend){
     if (swotOn()) return swGuidedNow() ? "Type your answer…" : swCanChange() ? "Say what to change — move a line, drop one, reword one…" : PANE.swot.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
     if (competeOn()) return cpCanType() ? "Ask for a change — another title, a How to drop, a Measure to add…" : PANE.compete.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
+    if (advOn()) { var sa0 = PANE.advisory, pq0 = adPending(sa0); return !adCanType() ? (sa0.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…") : !sa0.ask ? "What would you like advice on?" : sa0.brief ? "Ask for a change — another option, a different recommendation, a step to add…" : pq0 && pq0.clash ? "Or give the number yourself…" : "Your answer…"; }
     if (execOn()) return exCanType() ? "Ask for a change to " + PANE.exec.items[PANE.exec.cursor].title + "’s measures or tactics…" : PANE.exec.saved ? "Saved — nothing more to type here." : PANE.exec.period ? "Pick an item on the right to ask about it…" : "Use the choices above to carry on…";
     if (dirsOn()) return dvCanType() ? (DVADD[PANE.chat.id] === dvAskWhat() ? (dvAskWhat() === "caps" ? "A Capability of your own — type it and press Enter…" : "A Direction of your own — type it and press Enter…") : "Ask for something — a couple more, or a different angle…") : PANE.dirs.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
     if (flowView()) {
@@ -66168,14 +66169,14 @@ var COPILOT = (function(){
     var text = DRAFT[c.id] || "";
     return '<div class="copcompose">' +
       '<div class="copbox">' +
-        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow() && !swCanChange()) || (competeOn() && !cpCanType()) || (dirsOn() && !dvCanType()) || (execOn() && !exCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
+        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow() && !swCanChange()) || (competeOn() && !cpCanType()) || (dirsOn() && !dvCanType()) || (execOn() && !exCanType()) || (advOn() && !adCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
         /* §652 — Send appears only once there is something to send (Islam:
            "the enter button should only appear when I write something, like
            Claude"); while the Copilot works it stays, held, saying so. */
         (function(){ var w = THINKING === c.id ? BUSY : "", none = !text.trim() && !pend;
         return '<button type="button" class="copsend' + heldCls(w) + '" data-cop-send aria-label="Send"' + (none ? ' hidden' : '') + (w ? held(w) : ' title="Send"') + '>' + SENDMARK + '</button>'; })() +
       '</div>' +
-      '<div class="copunder">' + (flowView() || swotOn() || competeOn() || dirsOn() || execOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
+      '<div class="copunder">' + (flowView() || swotOn() || competeOn() || dirsOn() || execOn() || advOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
         '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
         '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
         '<span class="cophint">Enter sends · Shift + Enter for a new line</span>' +
@@ -68288,7 +68289,7 @@ var COPILOT = (function(){
   function adSideHtml(){
     var s = PANE.advisory, todo = PANE.advisoryTodo || [], done = PANE.advisoryDone || 0, n = todo.length;
     var c = PANE.advisoryCount || { round:1, rounds:2, asked:0, of:5, total:0 };
-    var h = '<aside class="copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
+    var h = '<aside class="copftodo copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
       '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
       '<div class="copsw-tg"><ul>' + todo.map(function(t){
         return '<li class="copsw-li ' + t.state + '" data-cop-ad-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
@@ -68310,10 +68311,10 @@ var COPILOT = (function(){
   }
   function adAnswerHtml(t){
     var W = PANE.advisoryWords || {}, cw = W.clash || {};
-    if (t.how === "assumed") return cpMsg("me", E(W.assume || "Assume for me"));
-    if (t.how === "platform") return cpMsg("me", E(cw.platform || "Use the platform figure") + " — " + E(t.answer));
-    if (t.how === "file") return cpMsg("me", E(cw.file || "Use the file") + " — " + E(t.answer));
-    return t.how ? cpMsg("me", E(t.answer)) : "";
+    if (t.how === "assumed") return meMsg(W.assume || "Assume for me");
+    if (t.how === "platform") return meMsg((cw.platform || "Use the platform figure") + " — " + t.answer);
+    if (t.how === "file") return meMsg((cw.file || "Use the file") + " — " + t.answer);
+    return t.how ? meMsg(t.answer) : "";
   }
   function adBriefHtml(b){
     var L = "ABCD";
@@ -68327,14 +68328,35 @@ var COPILOT = (function(){
       (b.why ? '<div><h4>Why</h4><p>' + E(b.why) + '</p></div>' : '') +
       (b.next.length ? '<div><h4>Next steps</h4><ol>' + b.next.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ol></div>' : '') + '</div>';
   }
+  /* §685 — ADVISORY, SPLIT THREE WAYS (the last area; the working mockup
+     design-mockups/copilot-layout/2026-10-29_advisory-split-working.html,
+     Islam: "ok proceed and build the advisory split"): the conversation
+     stays the conversation — the question, then one question at a time with
+     its choices under it, a typed answer through the chat's own box; the
+     Decision Brief is the work on the right, with what was assumed before it
+     is written; Save at the pane's foot and no Apply — Advisory stays in the
+     Copilot (§645); the to-do, the round box and what it can see beside. */
+  function adStepWord(s){ return s.saved ? "Saved" : s.brief ? "The brief" : s.ask ? "Questions" : "Your question"; }
+  function adPending(s){ var t = s.turns[s.turns.length - 1]; return t && !t.how ? t : null; }
+  function adCanType(){ var s = PANE.advisory; if (!s || !canEdit() || s.saved || PANE.chat.archived) return false; return !s.ask || !!s.brief || !!adPending(s); }
   function advHtml(){
-    var s = PANE.advisory, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id;
-    var W = PANE.advisoryWords || {}, cw = W.clash || {};
-    var head = '<div class="copvline"><b>' + E(PANE.chat.title || adTitle()) + '</b> · ' + (s.saved ? "saved" : s.brief ? "brief written" : "in progress") + '</div>';
+    var s = PANE.advisory, c = PANE.chat, ed = canEdit() && !s.saved, busyHere = THINKING === c.id;
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
-    var main = cpMsg("ai", "Bring me a decision you are weighing about " + E(placeWord()) + ". I will ask a few questions — one at a time — then write a Decision Brief with options and one recommendation.");
-    if (s.ask) main += cpMsg("me", E(s.ask));
-    var last = s.turns.length - 1;
+    var todo = PANE.advisoryTodo || [], done = PANE.advisoryDone || 0;
+    var chat = '<div class="copchat copfchat copswchat copadchat adv" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
+      '<div class="copfhead"><b><span class="copfname">' + E(c.title || adTitle()) + '</span><small> · ' + E(adStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the brief") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
+      '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + adMsgs(s, ed, busyHere) + work + '</div></div>' +
+      (!canEdit() ? VIEWONLY
+        : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
+        : composerHtml(c, false)) + '</div>';
+    return '<div class="copflow copswflow' + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
+      chat + GRIP + adPaneHtml(s, ed, busyHere) + adSideHtml() + '<div class="copshade" data-cop-sheet=""></div></div>';
+  }
+  function adMsgs(s, ed, busyHere){
+    var out = [], W = PANE.advisoryWords || {}, cw = W.clash || {}, last = s.turns.length - 1;
+    out.push(aiMsg("Bring me a decision you are weighing about " + E(placeWord()) + ". I will ask a few questions — one at a time — then write a Decision Brief with options and one recommendation."));
+    if (!s.ask) return out.join("");
+    out.push(meMsg(s.ask));
     s.turns.forEach(function(t, k){
       var inRound = s.turns.slice(0, k + 1).filter(function(x){ return x.round === t.round; }).length;
       var q = '<div class="adq">Round ' + t.round + ' · Question ' + inRound + ' of ' + ((PANE.advisoryCount || {}).of || 5) + '</div>';
@@ -68342,40 +68364,43 @@ var COPILOT = (function(){
       q += '<p>' + E(t.q) + '</p>';
       if (t.clash) q += '<div class="adclash"><b>Two sources disagree on ' + E(t.clash.what) + '</b><div class="adsrc">' +
         adTag("platform") + '<span>' + E(t.clash.platform) + '</span>' + adTag("file") + '<span>' + E(t.clash.file) + '</span></div></div>';
-      main += cpMsg("ai", q) + adAnswerHtml(t);
+      if (!t.how && ed && !busyHere && !s.brief) q += '<div class="copopts" data-cop-ad-choices>' +
+        (t.clash ? '<button type="button" class="copopt" data-cop-ad-reply="platform">' + E(cw.platform || "Use the platform figure") + '</button>' +
+                   '<button type="button" class="copopt" data-cop-ad-reply="file">' + E(cw.file || "Use the file") + '</button>' : '') +
+        '<button type="button" class="copopt" data-cop-ad-reply="assume">' + E(W.assume || "Assume for me") + '</button>' +
+        '<button type="button" class="copopt" data-cop-ad-reply="proceed">' + E(W.proceed || "Proceed with what you have") + '</button></div>';
+      out.push(aiMsg(q, true));
+      /* Proceed marks the open question assumed on the row; the chat says what was pressed */
+      if (s.stopped && k === last && t.how === "assumed") out.push(meMsg(W.proceed || "Proceed with what you have"));
+      else { var a = adAnswerHtml(t); if (a) out.push(a); }
     });
-    var p = s.turns.length && !s.turns[last].how ? s.turns[last] : null;
+    if (s.stopped && (!s.turns.length || s.turns[last].how !== "assumed")) out.push(meMsg(W.proceed || "Proceed with what you have"));
+    if (!s.brief && ed && !busyHere && !adPending(s)) out.push(aiMsg((s.stopped ? "" : "Nothing is waiting on you. ") + '<div class="copopts"><button type="button" class="copopt rec" data-cop-ad-next>' + ((PANE.advisoryCount || {}).owed || s.stopped ? "Write the brief" : "Continue") + '</button></div>'));
     if (s.brief) {
-      if (s.lead) main += cpMsg("ai", E(s.lead));
-      main += adBriefHtml(s.brief);
-      if (s.reply) main += cpMsg("ai", E(s.reply));
+      var n = s.brief.options.length, as = (s.assumed || []).length;
+      out.push(aiMsg((s.lead ? E(s.lead) + ' ' : '') + 'The brief is on the right: <b>' + E(s.brief.title) + '</b> — ' + n + (n === 1 ? ' option' : ' options') + ', one recommended' + (as ? ', ' + as + (as === 1 ? ' thing' : ' things') + ' assumed' : '') + '.' +
+        (ed ? ' Ask here for a change — another option, a different recommendation, a step to add — or <b>Save</b> at the foot.' : '')));
+      (s.log || []).forEach(function(x){ out.push(x.w === "me" ? meMsg(x.t) : aiMsg(E(x.t))); });
     }
-    if (ed && !busyHere) {
-      if (!s.ask) {
-        main += '<div class="copcp-ask"><textarea class="fld" data-cop-ad-text rows="3" placeholder="What would you like advice on?" aria-label="Your question for the Copilot">' + E(ADTXT[id] || "") + '</textarea>' +
-          '<button type="button" class="copbtn solid" data-cop-ad-send>Ask</button></div>';
-      } else if (!s.brief) {
-        if (p) {
-          main += '<div class="copopts" data-cop-ad-choices>' +
-            (p.clash ? '<button type="button" class="copopt" data-cop-ad-reply="platform">' + E(cw.platform || "Use the platform figure") + '</button>' +
-                       '<button type="button" class="copopt" data-cop-ad-reply="file">' + E(cw.file || "Use the file") + '</button>' : '') +
-            '<button type="button" class="copopt" data-cop-ad-reply="assume">' + E(W.assume || "Assume for me") + '</button>' +
-            '<button type="button" class="copopt" data-cop-ad-reply="proceed">' + E(W.proceed || "Proceed with what you have") + '</button></div>' +
-            '<div class="copcp-ask"><textarea class="fld" data-cop-ad-text rows="2" placeholder="' + (p.clash ? "Or give the number yourself" : "Your answer") + '" aria-label="Your answer">' + E(ADTXT[id] || "") + '</textarea>' +
-            '<button type="button" class="copbtn" data-cop-ad-send>Send</button></div>';
-        } else {
-          /* Nothing waiting (the model did not answer, or proceed was pressed
-             and the brief failed): the way on is to ask again (§61). */
-          main += '<div class="copopts"><button type="button" class="copopt rec" data-cop-ad-next>' + ((PANE.advisoryCount || {}).owed ? "Write the brief" : "Continue") + '</button></div>';
-        }
-      } else {
-        main += '<div class="copcp-ask"><textarea class="fld" data-cop-ad-change rows="2" placeholder="Ask for a change — another option, a different recommendation, a step to add" aria-label="Ask the Copilot to change the brief">' + E(ADASK[id] || "") + '</textarea>' +
-          '<button type="button" class="copbtn" data-cop-ad-revise>Ask for changes</button></div>' +
-          '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-ad-finish>Save to Advisory deliverables</button></div>';
-      }
-    }
-    if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + " in Advisory deliverables. It stays in the Copilot and does not go into the plan.");
-    return head + '<div class="copsw adv"><div class="copsw-main">' + main + work + '</div>' + adSideHtml() + '</div>';
+    if (s.saved) out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Advisory deliverables. It stays in the Copilot and does not go into the plan.'));
+    return out.join("");
+  }
+  function adPaneHtml(s, ed, busyHere){
+    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E(s.brief ? s.brief.title : adTitle()) + ' v' + E(s.saved ? s.saved.n : 1) + '</b> · ' + (s.saved ? "saved" : s.brief ? "brief written" : "in progress") + '</span>' +
+      '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
+    var body;
+    if (s.brief) body = adBriefHtml(s.brief);
+    else body = '<div class="copsw-card"><h3>The Decision Brief</h3><p class="copnote">' + (s.ask ? "Not written yet — the questions first. It comes here once they are answered, or when you proceed with what it has." : "Nothing yet — bring a decision in the chat.") + '</p></div>' +
+      ((s.assumed || []).length ? '<div class="copsw-card"><h3>Assumed so far</h3><ul class="adlist">' + s.assumed.map(function(a){ return '<li>' + adTag("assumed") + ' ' + E(a) + '</li>'; }).join("") + '</ul></div>' : '');
+    return '<div class="copleft copswpane copadpane" data-cop-adpane>' + head + '<div class="copswpb">' + body + '</div>' + adFootHtml(s, busyHere) + '</div>';
+  }
+  function adFootHtml(s, busyHere){
+    var saved = !!s.saved, state = '<span class="copsvst" data-cop-adstate>' + (saved ? '<b>v' + E(s.saved.n) + '</b> saved' : '<b>v1</b> in progress') + '</span>';
+    return '<div class="copoutf copswfoot" data-cop-adfoot>' + state + '<span class="copsw-sp"></span>' +
+      (canEdit() ? (function(){
+        var wf = busyHere ? BUSY : saved ? "Nothing has changed since it was saved." : !s.brief ? "The brief is not written yet — answer the questions, or proceed with what it has." : "";
+        return '<button type="button" class="copbtn solid' + heldCls(wf) + '" data-cop-ad-finish' + held(wf) + '>Save</button>'; })() : '') +
+      '<span class="copm copadstays" title="An Advisory brief is kept under Deliverables and never written into the plan (§645)">Stays in the Copilot</span></div>';
   }
   function adClick(ev){
     if (!advOn()) return false;
@@ -69378,6 +69403,9 @@ var COPILOT = (function(){
       if (swCanChange()) { if (forced == null && t) t.value = ""; DRAFT[id] = ""; swAsk({ act:"swotChange", ask: text.trim(), swot: swCopy() }); return; }
       return;
     }
+    /* §685 — in an Advisory chat the box is the question, then the answer, then a change to the brief */
+    if (advOn()) { if (!adCanType()) return; var sa = PANE.advisory, pq = adPending(sa); if (forced == null && t) t.value = ""; DRAFT[id] = "";
+      if (sa.brief) adAsk({ act:"advisoryRevise", ask: text.trim() }); else adAsk({ act:"advisoryTurn", reply: pq && pq.clash ? "own" : "say", words: text.trim() }); return; }
     /* §684 — in an Execution chat the box asks for a change to the item in hand */
     if (execOn()) { if (!exCanType()) return; if (forced == null && t) t.value = ""; DRAFT[id] = ""; exAsk(text.trim()); return; }
     /* §675 — in a Directions chat the box asks for more, or adds a line of your own */

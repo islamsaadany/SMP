@@ -5729,8 +5729,8 @@
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" },
       body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
   });
-  /* Light or dark: theme.js owns the choice and the mark (§27); this only
-     hangs its control on the column, which has to exist first. */
+  /* Light, dark or auto: theme.js owns the choice and the mark (§27, §670);
+     this only hangs its control on the band, which has to exist first. */
   THEME.wire();
 
   /* ── Boot ──────────────────────────────────────────────────────

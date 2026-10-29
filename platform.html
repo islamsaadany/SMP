@@ -8,10 +8,10 @@
      same file the door and the client platforms use -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-<!-- Light or dark, applied before the first paint, by the same script and
-     the same stored key as the client platforms (theme.js, §27): the choice
-     made on any screen of the product holds on this one. The switch itself
-     sits at the foot of the column, by Sign out. -->
+<!-- Light, dark or auto, applied before the first paint, by the same script
+     and the same stored key as the client platforms (theme.js, §27, §670):
+     the choice made on any screen of the product holds on this one. The
+     switch itself is the ring at the right end of the band. -->
 <script src="/theme.js"></script>
 <!--
   FOREFRONT'S OWN PLATFORM (spec 042, revision 2 — Islam, 2026-08-29:
@@ -145,7 +145,25 @@
   .side{ position:sticky; top:0; z-index:20; flex:none; width:232px; height:100vh; height:100dvh;
     display:flex; flex-direction:column; background:var(--sb); color:var(--sb-quiet);
     border-right:1px solid var(--sb-edge) }
-  .main{ flex:1; min-width:0 }
+  .main{ flex:1; min-width:0; position:relative }
+  /* THE THEME SWITCH, ON THE BAND (§670; design-mockups/console-theme-switch,
+     Islam's C): the ring at the right end of every tab's band — the one
+     band everywhere (2026-10-24) opens every page at one size in one place,
+     so the ring is placed once, over the band's top right, and not drawn by
+     each tab. Hidden until THEME.wire() draws its mark (theme.js); the sign
+     on hover says the state alone (data-tip, kept by theme.js). The band's
+     own controls sit at its foot, so the two never meet. */
+  .bandtheme{ position:absolute; z-index:5; top:32px; right:44px; width:26px; height:26px; padding:0; border-radius:50%;
+    border:1px solid rgba(255,255,255,.26); background:rgba(255,255,255,.07); color:var(--ff-quiet);
+    display:grid; place-items:center; cursor:pointer }
+  .bandtheme:hover, .bandtheme:focus-visible{ background:rgba(255,255,255,.15); color:var(--ff-ink) }
+  .bandtheme:focus-visible{ outline:2px solid var(--amber); outline-offset:2px }
+  .bandtheme[hidden]{ display:none }
+  .bandtheme .themesvg{ width:14px; height:14px }
+  .bandtheme[data-tip]:hover::after, .bandtheme[data-tip]:focus-visible::after{ content:attr(data-tip); position:absolute; top:calc(100% + 8px); right:0;
+    white-space:nowrap; pointer-events:none; background:var(--ink); color:var(--surface); font-size:11.5px; font-weight:600; line-height:1; letter-spacing:.02em;
+    padding:7px 9px; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,.25) }
+  @media (max-width:999px){ .bandtheme{ top:80px; right:36px } }
   .sbhead{ display:flex; align-items:center; gap:8px; min-height:58px; padding:12px 12px 12px 18px;
     border-bottom:1px solid var(--sb-rule) }
   /* THE NAME AND ITS MARK (Islam, 2026-10-24: "the naming at the top should
@@ -167,9 +185,6 @@
     border:0; border-radius:7px; background:transparent; color:var(--sb-quiet); cursor:pointer }
   .sbbtn:hover{ background:var(--sb-wash); color:var(--sb-ink) }
   .sbbtn:focus-visible{ outline:2px solid var(--sb-mark); outline-offset:1px }
-  .sbbtn[hidden]{ display:none }
-  .sbfoot .sbbtn + .sbbtn{ margin-left:0 }
-  .sbfoot .sbbtn .themesvg{ width:15px; height:15px }
   .sbbtn svg{ width:16px; height:16px }
   #sbclose{ display:none }
 
@@ -1968,9 +1983,6 @@
   <div class="sbfoot">
     <span class="sbav" id="sbav" aria-hidden="true"></span>
     <span id="who"></span>
-    <!-- Light and Dark, each viewer's own: hidden until THEME.wire() draws
-         its mark and names the state (theme.js). -->
-    <button class="sbbtn" id="themebtn" type="button" hidden></button>
     <button class="sbbtn" id="signout" type="button" aria-label="Sign out" data-tip="Sign out"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/></svg></button>
   </div>
 </aside>
@@ -1985,6 +1997,9 @@
        before any script, and stands until the page is ready — the first
        visit after a release, when the page's script is still on its way,
        shows the band and the column's tabs rather than an empty page. -->
+  <!-- Light, Dark, Auto: each viewer's own, on the band's right end (§670).
+       Hidden until THEME.wire() draws its mark and names the state. -->
+  <button class="bandtheme" id="themebtn" type="button" hidden></button>
   <div class="bootwait" aria-hidden="true"><div class="bwband"><span class="a"></span><span class="t"></span><span></span></div></div>
   <div class="wrap" id="page"></div>
 </div>
@@ -7735,8 +7750,8 @@
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" },
       body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
   });
-  /* Light or dark: theme.js owns the choice and the mark (§27); this only
-     hangs its control on the column, which has to exist first. */
+  /* Light, dark or auto: theme.js owns the choice and the mark (§27, §670);
+     this only hangs its control on the band, which has to exist first. */
   THEME.wire();
 
   /* ── Boot ──────────────────────────────────────────────────────

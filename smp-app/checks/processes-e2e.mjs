@@ -281,11 +281,14 @@ await T.page.click("header button:text-is('I have read it')");
 await T.page.waitForFunction(() => !/Waiting on you/.test(document.querySelector("[data-ffp] header")?.innerText || "Waiting on you"), null, { timeout: 20000 });
 /* the refresh moved the bar's count: the bar must still be the one its script wired (top-bar.tsx) */
 const theme = () => T.page.evaluate(() => document.documentElement.getAttribute("data-theme"));
-const t0 = await theme(), drawn = await T.page.$eval("#tbtheme", (t) => t.innerHTML.includes("<svg")).catch(() => false);
+/* three states since §670 (Light, Dark, Auto): a press moves the sign every time, and the attribute unless Auto lands on what was chosen */
+const sign = () => T.page.$eval("#tbtheme", (t) => t.getAttribute("data-tip"));
+const t0 = await theme(), s0 = await sign(), drawn = await T.page.$eval("#tbtheme", (t) => t.innerHTML.includes("<svg")).catch(() => false);
 await T.page.click("#tbtheme");
-const t1 = await theme();
+const t1 = await theme(), s1 = await sign();
 await T.page.click("#tbtheme");
-check(drawn && t0 !== t1, "the top bar keeps working after the page refreshes: its theme button keeps its icon and still switches", JSON.stringify({ drawn, t0, t1 }));
+await T.page.click("#tbtheme");
+check(drawn && s0 !== s1 && /^(Light|Dark|Auto)/.test(s1 || "") && (t0 !== t1 || /^Auto/.test(s0 || "")), "the top bar keeps working after the page refreshes: its theme button keeps its icon and still switches", JSON.stringify({ drawn, t0, t1, s0, s1 }));
 const ack = await q(ffp, 'select "personKey" k, "versionNumber" n, "personName" nm from process_acknowledgements where "processId"=$1', [P2]);
 check(ack.length === 1 && ack[0].k === "mobhead" && ack[0].n === 1, "the acknowledgement is recorded against the person and the version", JSON.stringify(ack));
 const strat2 = await (await T.get("/" + S + "/strategy")).text();

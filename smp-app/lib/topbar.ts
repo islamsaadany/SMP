@@ -218,8 +218,9 @@ a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
 .tbviewer select{font-family:inherit;font-size:12.5px;max-width:260px;border:1px solid var(--tb-line);border-radius:5px;padding:2px 6px;background:var(--tb-surface);color:var(--tb-ink)}
 .tbnote{font-size:12.5px;color:var(--tb-ink-3);white-space:nowrap}
 .tbacts{display:flex;align-items:center;gap:10px}
-.tbtheme{width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--tb-line);background:none;color:var(--tb-ink-3);display:grid;place-items:center;cursor:pointer}
+.tbtheme{position:relative;width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--tb-line);background:none;color:var(--tb-ink-3);display:grid;place-items:center;cursor:pointer}
 .tbtheme svg{width:14px;height:14px}
+.tbtheme[data-tip]:hover::after,.tbtheme[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);right:0;z-index:60;white-space:nowrap;pointer-events:none;background:var(--tb-ink);color:var(--tb-surface);font-family:inherit;font-size:11.5px;font-weight:600;line-height:1;letter-spacing:.02em;padding:7px 9px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .tbout{font-family:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);background:none;border:1px solid var(--tb-line);border-radius:99px;padding:5px 14px;cursor:pointer}
 .tbtheme:hover,.tbout:hover{border-color:var(--tb-soft);color:var(--tb-ink)}
 .tb a:focus-visible,.tb button:focus-visible,.tb summary:focus-visible,.tb select:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
@@ -284,23 +285,33 @@ export function themedCss(css: string): string {
 
 export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/topbar.ts). */
 (function () {
+  /* Light, Dark and Auto (§670), the same three states theme.js keeps for
+     Strategy, under the same key: a stored light or dark is a choice, and no
+     key is Auto, which follows the device now and as it changes. */
   var KEY = "smp.theme";
   function read() {
     try { var v = localStorage.getItem(KEY); if (v === "light" || v === "dark") return v; } catch (e) {}
+    return "auto";
+  }
+  function device() {
     try { return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } catch (e) {}
     return "light";
   }
   var mode = read();
-  document.documentElement.setAttribute("data-theme", mode);
+  function applyTheme() { document.documentElement.setAttribute("data-theme", mode === "auto" ? device() : mode); }
+  applyTheme();
   var ICONS = {
     light: '<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>',
-    dark: '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>'
+    dark: '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>',
+    auto: '<circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.8a7.2 7.2 0 0 0 0 14.4z" fill="currentColor"/>'
   };
+  /* the sign on hover says the state alone; in Auto, the reading the device is giving */
+  function themeWords() { return mode === "auto" ? "Auto \\u00b7 " + device() : mode === "dark" ? "Dark" : "Light"; }
   function paintTheme(btn) {
     btn.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true">' + ICONS[mode] + "</svg>";
-    var next = mode === "light" ? "dark" : "light";
-    btn.title = "Theme: " + mode + " \\u2014 click for " + next;
-    btn.setAttribute("aria-label", btn.title);
+    var w = themeWords();
+    btn.setAttribute("data-tip", w);
+    btn.setAttribute("aria-label", "Theme: " + w);
   }
   function esc(v) {
     return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
@@ -314,11 +325,15 @@ export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/t
     if (t) {
       paintTheme(t);
       t.addEventListener("click", function () {
-        mode = mode === "light" ? "dark" : "light";
-        try { localStorage.setItem(KEY, mode); } catch (e) {}
-        document.documentElement.setAttribute("data-theme", mode);
+        mode = mode === "light" ? "dark" : mode === "dark" ? "auto" : "light";
+        try { if (mode === "auto") localStorage.removeItem(KEY); else localStorage.setItem(KEY, mode); } catch (e) {}
+        applyTheme();
         paintTheme(t);
       });
+      try {
+        var mq = window.matchMedia && matchMedia("(prefers-color-scheme: dark)");
+        if (mq && mq.addEventListener) mq.addEventListener("change", function () { if (mode === "auto") { applyTheme(); paintTheme(t); } });
+      } catch (e) {}
     }
     var out = document.getElementById("tbout");
     if (out) out.addEventListener("click", function () {

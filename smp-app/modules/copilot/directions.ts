@@ -11,7 +11,7 @@ import { partsOf } from "../../lib/copilot-settings.ts";
 import { doorPool } from "../../lib/auth.ts";
 import {
   type Dirs, type Fn, type Option, MAX_OPTIONS, MAX_CAPS, SCORE_MAX, CAP_KINDS, CAP_KIND_WORD, CAP_KIND_SAYS,
-  newDirs, sanitizeDirs, storedDirs, dirsOf, writeDirs, todoOf, doneCount, scoreOf, goes, finishBlocker,
+  newDirs, sanitizeDirs, storedDirs, dirsOf, writeDirs, todoOf, doneCount, scoreOf, goes, finishBlocker, nextDirsVersion, MAX_DV_LOG,
   dirsInstruction, OPTIONS_SCHEMA, CAPS_SCHEMA, suggestQuestion, moreQuestion, capsQuestion, modelOptions, modelCaps, saveDirs,
 } from "../../lib/copilot-directions.ts";
 
@@ -49,12 +49,13 @@ async function appliedOf(c: any, id: string): Promise<{ n: number; at: string; b
   const a = r.rows[0] && r.rows[0].a;
   return a && typeof a === "object" && Number(a.n) > 0 ? { n: Number(a.n), at: String(a.at || ""), by: String(a.by || "") } : null;
 }
-export async function dirsView(c: any, chat: { id: string }) {
+export async function dirsView(c: any, chat: { id: string; place?: string; section?: string }, pw?: string) {
   const s = await dirsOf(c, chat.id);
   if (!s) return {};
   const todo = todoOf(s);
   const applied = s.saved && s.saved.deliverableId ? await appliedOf(c, s.saved.deliverableId) : null;
   return { dirs: s, dirsApplied: applied, dirsTodo: todo, dirsDone: doneCount(todo), dirsScores: s.options.map(scoreOf),
+    dirsNextVersion: await nextDirsVersion(c, chat as any, s, pw || chat.place || ""),
     dirsWords: { max: SCORE_MAX, kinds: CAP_KINDS, kindWord: CAP_KIND_WORD, kindSays: CAP_KIND_SAYS }, dirsBlocker: finishBlocker(s) };
 }
 export async function dirsProgress(c: any, ids: string[]): Promise<Record<string, { done: number; of: number }>> {
@@ -78,7 +79,7 @@ export async function dirsAct(c: any, b: any, who: Who): Promise<Out> {
     const hadPlan = Math.max(0, Math.min(99, Number(b.hadPlan) || 0));
     const chat = await newChat(c, { place, section: mode, title: oneLine(b.title).slice(0, MAX_TITLE) || (mode === "capabilities" ? "Capabilities" : "Directions"), by });
     await writeDirs(c, chat.id, newDirs(mode, !!b.withCaps, hadPlan));
-    return out(200, { ok: true, chat: { ...chat, dirs: true }, ...(await dirsView(c, chat)) });
+    return out(200, { ok: true, chat: { ...chat, dirs: true }, ...(await dirsView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   const id = String(b.id || "");
   if (!UUID.test(id)) return refused(400, "Which chat?");
@@ -104,11 +105,11 @@ export async function dirsAct(c: any, b: any, who: Who): Promise<Out> {
         return { title: x && x.title, planId: x && x.id, mark: "plan", ...sc, ownedBy: x && x.ownedBy, go: !!(sc.urgency && sc.importance && sc.ease) }; }) : [];
     const s = sanitizeDirs({ start: b.start, options: existing }, stored);
     await writeDirs(c, id, s);
-    return out(200, { ok: true, ...(await dirsView(c, chat)) });
+    return out(200, { ok: true, ...(await dirsView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   if (kind === "dirSave") {
     await writeDirs(c, id, sanitizeDirs(b.dirs, stored));
-    return out(200, { ok: true, ...(await dirsView(c, chat)) });
+    return out(200, { ok: true, ...(await dirsView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   if (kind === "dirFinish") {
     const why = brk() === "dir-finish-any" ? "" : finishBlocker(stored);
@@ -121,7 +122,7 @@ export async function dirsAct(c: any, b: any, who: Who): Promise<Out> {
     const r = await saveDirs(c, chat, stored, placeWord, name, by, ownerName);
     const s: Dirs = { ...stored, saved: { deliverableId: r.deliverableId, n: r.n, title: r.title } };
     await writeDirs(c, id, s);
-    return out(200, { ok: true, saved: s.saved, ...(await dirsView(c, chat)) });
+    return out(200, { ok: true, saved: s.saved, ...(await dirsView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   return refused(400, "Not something the Copilot does.");
 }
@@ -221,7 +222,13 @@ export async function dirsAsk(tenantId: string, b: any, _who: Who): Promise<Out>
       g = sanitizeDirs({ caps: [...now.caps, ...got].slice(0, MAX_CAPS) }, now);
     }
     g.reply = reply;
+    /* §671 — the ask and its answer, kept in order under the step it belongs to */
+    if (kind !== "dirSuggest") {
+      const said = ask || (own.length ? "Add my own: " + own.join(", ") : "Suggest more");
+      const p = kind === "capSuggest" ? "caps" as const : "dirs" as const;
+      g.log = [...now.log, { p, w: "me" as const, t: said }, ...(reply ? [{ p, w: "ai" as const, t: reply }] : [])].slice(-MAX_DV_LOG);
+    }
     await writeDirs(c, id, g);
-    return out(200, { ok: true, ...(await dirsView(c, chat)) });
+    return out(200, { ok: true, ...(await dirsView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   });
 }

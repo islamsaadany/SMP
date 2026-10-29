@@ -59,10 +59,13 @@ export type Advisory = {
   phase: "asking" | "brief" | "saved";
   ask: string; turns: Turn[]; assumed: string[]; seen: string[];
   stopped: boolean; lead: string; brief: Brief | null; reply: string;
+  /* §685 — the chat in time after the brief: every change asked for and its answer, in order */
+  log: { w: "me" | "ai"; t: string }[];
   saved: { deliverableId: string; n: number; title: string } | null;
 };
+export const MAX_AD_LOG = 200;
 
-export const newAdvisory = (): Advisory => ({ phase: "asking", ask: "", turns: [], assumed: [], seen: [], stopped: false, lead: "", brief: null, reply: "", saved: null });
+export const newAdvisory = (): Advisory => ({ phase: "asking", ask: "", turns: [], assumed: [], seen: [], stopped: false, lead: "", brief: null, reply: "", log: [], saved: null });
 
 const line = (v: unknown, max = MAX_TEXT) => oneLine(v).slice(0, max);
 const list = (v: unknown, max = MAX_LIST) => (Array.isArray(v) ? v : []).map((x) => line(x)).filter(Boolean).slice(0, max);
@@ -123,6 +126,7 @@ export function storedAdvisory(raw: unknown): Advisory | null {
   s.stopped = !!j.stopped;
   s.lead = line(j.lead, 1200);
   s.reply = line(j.reply, 1200);
+  s.log = (Array.isArray(j.log) ? j.log : []).map((x: any) => ({ w: x && x.w === "ai" ? "ai" as const : "me" as const, t: line(x && x.t, 1200) })).filter((x: any) => x.t).slice(-MAX_AD_LOG);
   s.brief = cleanBrief(j.brief);
   if (j.saved && typeof j.saved === "object" && j.saved.deliverableId) s.saved = { deliverableId: str(j.saved.deliverableId), n: Number(j.saved.n) || 0, title: oneLine(j.saved.title) };
   s.phase = s.saved && j.phase === "saved" ? "saved" : s.brief ? "brief" : "asking";

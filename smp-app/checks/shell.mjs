@@ -2879,11 +2879,17 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/advisory");
     await newWorkflow();
-    await page.waitForSelector("[data-cop-ad-text]", { timeout: 15000 });
+    await page.waitForSelector("[data-cop-text]", { timeout: 15000 });
     check(!!(await page.$("[data-cop-ad-budget]")), "a new Advisory chat shows the question count in the right column");
+    /* §685 — the split: the chat's own box carries the question; the pane
+       says the brief is not written yet; the to-do and the round box beside. */
+    const sp0 = await page.evaluate(() => ({ ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "", dis: (document.querySelector("[data-cop-text]") || {}).disabled, pane: (document.querySelector("[data-cop-adpane]") || {}).textContent || "",
+      todo: !!document.querySelector(".copftodo [data-cop-ad-todo]"), budget: !!document.querySelector(".copftodo [data-cop-ad-budget]"), save: (document.querySelector("[data-cop-ad-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ad-finish]").getAttribute("data-tip") : null, apply: !!document.querySelector("[data-cop-adfoot] [data-cop-ad-apply], [data-cop-adfoot] .solid + .solid"), stays: /Stays in the Copilot/.test((document.querySelector("[data-cop-adfoot]") || {}).textContent || "") }));
+    check(/advice on/.test(sp0.ph) && sp0.dis === false && /Not written yet|Nothing yet/.test(sp0.pane) && sp0.todo && sp0.budget && /not written yet/.test(String(sp0.save)) && !sp0.apply && sp0.stays,
+      "§685 the chat's box asks what you would like advice on, the pane says the brief is not written yet, the to-do and the round box stand beside, Save is held saying why, and the foot says it stays in the Copilot with no Apply", JSON.stringify(sp0));
     setAns({ kind: "question", lead: "Good question.", question: "How many stores do you run today?" });
-    await page.fill("[data-cop-ad-text]", "Should we open stores in Upper Egypt?");
-    await page.click("[data-cop-ad-send]");
+    await page.fill("[data-cop-text]", "Should we open stores in Upper Egypt?");
+    await page.keyboard.press("Enter");
     await page.waitForSelector(".adq", { timeout: 15000 });
     let r = await row();
     check(!!r && r.s.ask === "Should we open stores in Upper Egypt?" && r.s.turns.length === 1, "the question is stored and ONE question comes back", JSON.stringify(r && r.s));
@@ -2903,6 +2909,21 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     check(recs === 1, "the brief shows exactly one recommended option", recs);
     const tags = await page.$$eval("[data-cop-ad-brief] .adtag", (a) => a.map((x) => x.textContent));
     check(tags.join() === "Platform,Assumed", "every fact says where it came from", JSON.stringify(tags));
+    const sp1 = await page.evaluate(() => ({ inPane: !!document.querySelector("[data-cop-adpane] [data-cop-ad-brief]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-ad-brief]"),
+      said: /brief is on the right/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"),
+      ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "", head: (document.querySelector("[data-cop-adpane] .copvline") || {}).textContent || "", save: (document.querySelector("[data-cop-ad-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ad-finish]").getAttribute("aria-disabled") : null }));
+    check(sp1.inPane && !sp1.inChat && sp1.said && /Proceed with what you have/.test(sp1.me) && /Ask for a change/.test(sp1.ph) && /Upper Egypt stores v1/.test(sp1.head) && sp1.save !== "true",
+      "§685 the brief stands in the pane, headed by its title; the chat says it is on the right and reads Proceed as the person's line; the box asks for a change; Save is live", JSON.stringify(sp1));
+    /* a change asked for through the chat's box: the brief changes on the right, the ask and the answer stay in the chat */
+    setAns({ reply: "Added a third option.", brief: { title: "Upper Egypt stores", situation: "Growth is flat in Cairo.", known: [{ source: "platform", text: "42 stores" }, { source: "assumed", text: "Rents flat" }],
+      options: [{ title: "Open 2", detail: "Pilot", recommended: true }, { title: "Open 5", detail: "Phased", recommended: false }, { title: "Franchise two", detail: "A partner carries the outlay", recommended: false }], why: "Lower risk", next: ["Pick sites"] } });
+    await page.fill("[data-cop-text]", "Add a franchise option");
+    await page.keyboard.press("Enter");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-adpane] [data-cop-ad-brief] .adopt").length === 3, null, { timeout: 15000 }).catch(() => {});
+    const rv = await page.evaluate(() => ({ opts: document.querySelectorAll("[data-cop-adpane] [data-cop-ad-brief] .adopt").length, me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).some((m) => /Add a franchise option/.test(m.textContent)), ai: /Added a third option/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || "") }));
+    check(rv.opts === 3 && rv.me && rv.ai, "§685 a change asked for through the chat's box changes the brief on the right, and the ask and the answer stay in the chat", JSON.stringify(rv));
+    r = await row();
+    check((r.s.log || []).length === 2 && r.s.log[0].t === "Add a franchise option", "§685 …stored on the row, so a reload reads the same", JSON.stringify(r.s.log));
     await heldSweep(page, "Advisory, before the save");
     await shot("1-before-save");
     await page.click("[data-cop-ad-finish]");
@@ -2910,7 +2931,7 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, d.kind, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.section = 'advisory' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Upper Egypt stores" && dv.kind === "copilot-only" && dv.n === 1, "Save writes the brief as an Advisory deliverable, v1, kept in the Copilot", JSON.stringify(dv));
     await shot("2-saved");
-    check(!(await page.$("[data-cop-ad-finish]")), "a saved chat offers no Save again");
+    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-ad-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §685)");
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     setAns(keep);

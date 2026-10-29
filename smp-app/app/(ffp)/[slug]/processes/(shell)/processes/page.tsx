@@ -165,10 +165,10 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
     return `/${workspaceId}/processes/processes?${next}`;
   };
   const TONE: Record<string, string> = {
-    good: "bg-[#E4F0EA] text-[#1F6248]",
-    attn: "bg-[#F7EFD6] text-[#7A5D1C]",
-    bad: "bg-[#F7E3E0] text-[#8C3327]",
-    q: "bg-[#EFF2F6] text-[#414A58]",
+    good: "bg-[var(--good-bg)] text-[var(--good-tx)]",
+    attn: "bg-[var(--attn-bg)] text-[var(--attn-tx)]",
+    bad: "bg-[var(--bad-bg)] text-[var(--bad-tx)]",
+    q: "bg-[var(--surface-2)] text-[var(--ink-2)]",
   };
 
   return (
@@ -197,7 +197,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
             Clear
           </Link>
         )}
-        <span className="text-[12.5px] text-[#636C79]">
+        <span className="text-[12.5px] text-[var(--ink-3)]">
           {q ? `${rows.length} of ${totalCount} processes` : `${totalCount} process${totalCount === 1 ? "" : "es"} · click a heading to sort`}
         </span>
       </form>
@@ -217,9 +217,9 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
 
       <FoldProvider enabled={folding} parentIds={[...directSubs.keys()]}>
       <FoldAllControls any={directSubs.size > 0} />
-      <div className="relative mt-3 overflow-x-auto rounded-lg border border-[#D6DCE5] bg-white">
+      <div className="relative mt-3 overflow-x-auto rounded-lg border border-[var(--line)] bg-white">
         <table className="w-full text-[13px]">
-          <thead className="bg-[#E4E9F0] text-start text-[10.5px] font-extrabold uppercase tracking-[.08em] text-[#414A58]">
+          <thead className="bg-[var(--thead)] text-start text-[10.5px] font-extrabold uppercase tracking-[.08em] text-[var(--ink-2)]">
             <tr>
               {(
                 [
@@ -230,16 +230,16 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                   ["gaps", "Gaps"],
                 ] as const
               ).map(([k, label]) => (
-                <th key={k} className="border-b border-[#D6DCE5] p-0 text-start" aria-sort={sort === k ? (desc ? "descending" : "ascending") : undefined}>
-                  <Link href={sortHref(k)} className="flex items-center gap-1.5 px-3 py-2.5 hover:text-[#171B22]">
+                <th key={k} className="border-b border-[var(--line)] p-0 text-start" aria-sort={sort === k ? (desc ? "descending" : "ascending") : undefined}>
+                  <Link href={sortHref(k)} className="flex items-center gap-1.5 px-3 py-2.5 hover:text-[var(--ink)]">
                     {label}
-                    <span aria-hidden="true" className={sort === k ? "text-[#8A6B22]" : "text-[#636C79]"}>
+                    <span aria-hidden="true" className={sort === k ? "text-[var(--gold-deep)]" : "text-[var(--ink-3)]"}>
                       {sort === k ? (desc ? "↓" : "↑") : "↕"}
                     </span>
                   </Link>
                 </th>
               ))}
-              <th className="border-b border-[#D6DCE5] px-3 py-2.5 text-end">
+              <th className="border-b border-[var(--line)] px-3 py-2.5 text-end">
                 <span className="sr-only">Actions</span>
               </th>
             </tr>
@@ -251,7 +251,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
               <FoldRow
                 key={p.id}
                 ancestors={ancestorsOf.get(p.id) ?? []}
-                className="border-t border-[#E6EAF0]"
+                className="border-t border-[var(--line-soft)]"
               >
                 <td
                   className="px-3 py-2.5"
@@ -263,19 +263,19 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                   <div className="flex items-start">
                     <FoldToggle id={p.id} code={p.code} count={directSubs.get(p.id) ?? 0} />
                     <div className="min-w-0">
-                      <span className="font-mono text-xs font-bold text-[#16325C]">{p.code}</span>{" "}
-                      <Link href={`/${workspaceId}/processes/processes/${p.id}`} className="font-bold text-[#171B22] hover:underline hover:decoration-[#C9A24D]">
+                      <span className="font-mono text-xs font-bold text-[var(--stone)]">{p.code}</span>{" "}
+                      <Link href={`/${workspaceId}/processes/processes/${p.id}`} className="font-bold text-[var(--ink)] hover:underline hover:decoration-[var(--gold)]">
                         {p.name}
                       </Link>
                       {folding && (directSubs.get(p.id) ?? 0) > 0 && (
-                        <span className="ms-2 text-xs font-normal text-[#636C79]" data-fold-count>
+                        <span className="ms-2 text-xs font-normal text-[var(--ink-3)]" data-fold-count>
                           {directSubs.get(p.id) === 1 ? "1 sub-process" : `${directSubs.get(p.id)} sub-processes`}
                         </span>
                       )}
                       {/* Said only where the parent is not the row it is folded
                           under — a search result, or one whose parent is deleted. */}
                       {p.parentProcessId && depth === 0 && (
-                        <span className="ms-2 text-xs font-normal text-[#636C79]">
+                        <span className="ms-2 text-xs font-normal text-[var(--ink-3)]">
                           sub-process of {p.parentProcess?.code}
                           {/* The parent is loaded regardless of its own deletion, so
                               without this the row named a code that is nowhere on
@@ -284,7 +284,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                           {p.parentProcess?.archivedAt ? " (deleted)" : ""}
                         </span>
                       )}
-                      {p.category && <span className="block text-xs text-[#636C79]">{p.category.name}</span>}
+                      {p.category && <span className="block text-xs text-[var(--ink-3)]">{p.category.name}</span>}
                       {p.branchFromStep && (
                         <span className="block text-xs font-normal text-amber-700">
                           ↰ branches from {p.branchFromStep.process.code} · {p.branchFromStep.label}
@@ -293,29 +293,29 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                     </div>
                   </div>
                 </td>
-                <td className="border-s border-[#E6EAF0] px-3 py-2.5">{p.owner?.name ?? <span className="text-[#636C79]">—</span>}</td>
-                <td className="border-s border-[#E6EAF0] px-3 py-2.5">
+                <td className="border-s border-[var(--line-soft)] px-3 py-2.5">{p.owner?.name ?? <span className="text-[var(--ink-3)]">—</span>}</td>
+                <td className="border-s border-[var(--line-soft)] px-3 py-2.5">
                   <span className={`inline-flex whitespace-nowrap rounded-full px-[9px] py-px text-[11.5px] font-semibold ${TONE[f.state.tone]}`}>{f.state.label}</span>
                 </td>
-                <td className="border-s border-[#E6EAF0] px-3 py-2.5">
+                <td className="border-s border-[var(--line-soft)] px-3 py-2.5">
                   <span className="inline-flex gap-[3px]" aria-label={`${f.ready} of 6 ready`}>
                     {READINESS_MARKS.map((mk) => (
                       <i
                         key={mk}
                         title={`${mk}: ${READINESS_RULES[mk]}${f.marks[mk] ? "" : " (not yet)"}`}
-                        className={`inline-grid h-[18px] w-[18px] place-items-center rounded-[4px] border text-[10px] font-extrabold not-italic ${f.marks[mk] ? "border-[#16325C] bg-[#16325C] text-white" : "border-[#D6DCE5] text-[#636C79]"}`}
+                        className={`inline-grid h-[18px] w-[18px] place-items-center rounded-[4px] border text-[10px] font-extrabold not-italic ${f.marks[mk] ? "border-[var(--panel)] bg-[var(--panel)] text-[var(--panel-ink)]" : "border-[var(--line)] text-[var(--ink-3)]"}`}
                       >
                         {mk === "Approved" ? "✓" : mk[0]}
                       </i>
                     ))}
                   </span>
                 </td>
-                <td className={`border-s border-[#E6EAF0] px-3 py-2.5 ${f.gaps ? "font-semibold text-[#8C3327]" : "text-[#636C79]"}`}>{f.gaps || "—"}</td>
-                <td className="border-s border-[#E6EAF0] px-3 py-2.5 text-end">
+                <td className={`border-s border-[var(--line-soft)] px-3 py-2.5 ${f.gaps ? "font-semibold text-[var(--bad-tx)]" : "text-[var(--ink-3)]"}`}>{f.gaps || "—"}</td>
+                <td className="border-s border-[var(--line-soft)] px-3 py-2.5 text-end">
                   <div className="flex items-center justify-end gap-3">
                     <Link
                       href={`/${workspaceId}/processes/processes/${p.id}`}
-                      className="whitespace-nowrap rounded-md border border-[#D6DCE5] bg-white px-2.5 py-1 text-xs font-semibold text-[#414A58] hover:border-[#C9A24D] hover:text-[#171B22]"
+                      className="whitespace-nowrap rounded-md border border-[var(--line)] bg-white px-2.5 py-1 text-xs font-semibold text-[var(--ink-2)] hover:border-[var(--gold)] hover:text-[var(--ink)]"
                     >
                       Open
                     </Link>

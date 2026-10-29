@@ -21,7 +21,7 @@ export default async function MatchRolesPage(props: PageProps<"/[slug]/processes
   if (!titles.length || !roles.length)
     return (
       <main className="w-full">
-        <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">
+        <div className="rounded-lg border border-dashed border-[var(--line)] bg-white px-[18px] py-[22px] text-[13.5px] text-[var(--ink-2)]">
           {titles.length ? m.empty : m.noTitles}
         </div>
       </main>
@@ -35,24 +35,24 @@ export default async function MatchRolesPage(props: PageProps<"/[slug]/processes
 
   return (
     <main className="w-full">
-      <p className="mb-3 text-[13px] text-[#636C79]">{m.hint}</p>
-      <div className="relative overflow-x-auto rounded-lg border border-[#D6DCE5] bg-white">
+      <p className="mb-3 text-[13px] text-[var(--ink-3)]">{m.hint}</p>
+      <div className="relative overflow-x-auto rounded-lg border border-[var(--line)] bg-white">
         <table className="w-full text-[13px]">
-          <thead className="bg-[#E4E9F0] text-start text-[10.5px] font-extrabold uppercase tracking-[.08em] text-[#414A58]">
+          <thead className="bg-[var(--thead)] text-start text-[10.5px] font-extrabold uppercase tracking-[.08em] text-[var(--ink-2)]">
             <tr>
-              <th className="border-b border-[#D6DCE5] px-3 py-2.5 text-start">{m.role}</th>
-              <th className="border-b border-s border-[#D6DCE5] px-3 py-2.5 text-start">{m.used}</th>
-              <th className="border-b border-s border-[#D6DCE5] px-3 py-2.5 text-start">{m.title}</th>
+              <th className="border-b border-[var(--line)] px-3 py-2.5 text-start">{m.role}</th>
+              <th className="border-b border-s border-[var(--line)] px-3 py-2.5 text-start">{m.used}</th>
+              <th className="border-b border-s border-[var(--line)] px-3 py-2.5 text-start">{m.title}</th>
             </tr>
           </thead>
           <tbody className="ffp-zebra">
             {roles.map((r) => {
               const used = m.usedIn(r.steps, r.raci, r.rules, r.governance);
               return (
-                <tr key={r.id} className="border-t border-[#E6EAF0]">
-                  <td className="px-3 py-2.5 font-bold text-[#171B22]">{r.name}</td>
-                  <td className="border-s border-[#E6EAF0] px-3 py-2.5 text-[#414A58]">{used || <span className="text-[#636C79]">{m.notUsed}</span>}</td>
-                  <td className="border-s border-[#E6EAF0] px-3 py-2.5">
+                <tr key={r.id} className="border-t border-[var(--line-soft)]">
+                  <td className="px-3 py-2.5 font-bold text-[var(--ink)]">{r.name}</td>
+                  <td className="border-s border-[var(--line-soft)] px-3 py-2.5 text-[var(--ink-2)]">{used || <span className="text-[var(--ink-3)]">{m.notUsed}</span>}</td>
+                  <td className="border-s border-[var(--line-soft)] px-3 py-2.5">
                     <MatchForm workspaceId={workspaceId} roleId={r.id} titles={titles} suggested={suggest(r.name)} />
                   </td>
                 </tr>

@@ -110,7 +110,7 @@ export function OfficeFrame({
         tabs={tabs.map((t) => ({ ...t, label: b.tabs[t.key], on: t.key === sec }))}
         views={
           views && (
-            <nav aria-label={b.views} className="mt-1.5 inline-flex max-w-full flex-wrap gap-0.5 rounded-lg border border-[#D6DCE5] bg-[#EFF2F6] p-[3px]">
+            <nav aria-label={b.views} className="mt-1.5 inline-flex max-w-full flex-wrap gap-0.5 rounded-lg border border-[var(--line)] bg-[var(--surface-2)] p-[3px]">
               {views.map((v) => {
                 const on = pathname.startsWith(v.href);
                 return (
@@ -118,7 +118,7 @@ export function OfficeFrame({
                     key={v.key}
                     href={v.href}
                     aria-current={on ? "page" : undefined}
-                    className={`whitespace-nowrap rounded-md px-3 py-[5px] text-[13px] font-semibold ${on ? "bg-white text-[#171B22] shadow-[0_1px_2px_rgba(15,23,42,.14)]" : "text-[#414A58]"}`}
+                    className={`whitespace-nowrap rounded-md px-3 py-[5px] text-[13px] font-semibold ${on ? "bg-white text-[var(--ink)] shadow-[0_1px_2px_rgba(15,23,42,.14)]" : "text-[var(--ink-2)]"}`}
                   >
                     {b.landscapeViews[v.key]}
                   </Link>

@@ -45,7 +45,7 @@ export function ReadButton({ workspaceId, processId, quiet }: { workspaceId: str
         className={
           quiet
             ? "font-semibold underline underline-offset-2 disabled:opacity-60"
-            : "rounded-md border border-[#C9A24D] bg-[#C9A24D] px-2.5 py-1 text-[12.5px] font-semibold text-[#16325C] disabled:opacity-60"
+            : "rounded-md border border-[var(--gold)] bg-[var(--gold)] px-2.5 py-1 text-[12.5px] font-semibold text-[var(--on-accent)] disabled:opacity-60"
         }
       >
         {pending ? m.saving : m.iHaveRead}
@@ -78,8 +78,8 @@ export function ApproveStrip({ workspaceId, processId, version, line }: { worksp
   };
   const btn = "rounded-md border px-3 py-1.5 text-[13px] font-semibold disabled:opacity-50";
   return (
-    <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[#C9A24D] bg-[#FBF6E9] px-3 py-2.5 text-[13.5px] print:hidden">
-      <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[#8A6B22]">{m.forYourApproval}</b>
+    <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-[var(--gold)] bg-[var(--over-bg)] px-3 py-2.5 text-[13.5px] print:hidden">
+      <b className="text-[11px] font-extrabold uppercase tracking-[.1em] text-[var(--gold-deep)]">{m.forYourApproval}</b>
       <span className="min-w-0 flex-1">{line}</span>
       {back ? (
         <span className="flex w-full flex-wrap items-center gap-1.5">
@@ -89,27 +89,27 @@ export function ApproveStrip({ workspaceId, processId, version, line }: { worksp
             placeholder={m.sendBackWhy}
             aria-label={m.sendBackWhy}
             maxLength={500}
-            className="min-w-60 flex-1 rounded-md border border-[#78899F] bg-white px-2 py-1.5 text-[13px]"
+            className="min-w-60 flex-1 rounded-md border border-[var(--field-line)] bg-white px-2 py-1.5 text-[13px]"
           />
-          <button type="button" disabled={pending || !why.trim()} onClick={() => run(() => returnProcessToDraft({ workspaceId, processId, reason: why }))} className={`${btn} border-[#D6DCE5] bg-white`}>
+          <button type="button" disabled={pending || !why.trim()} onClick={() => run(() => returnProcessToDraft({ workspaceId, processId, reason: why }))} className={`${btn} border-[var(--line)] bg-white`}>
             {m.sendBackGo}
           </button>
-          <button type="button" onClick={() => setBack(false)} className="text-[13px] font-semibold text-[#414A58] underline">
+          <button type="button" onClick={() => setBack(false)} className="text-[13px] font-semibold text-[var(--ink-2)] underline">
             {m.cancel}
           </button>
         </span>
       ) : (
         <span className="ms-auto flex flex-wrap gap-1.5">
-          <button type="button" disabled={pending} onClick={() => setBack(true)} className={`${btn} border-[#D6DCE5] bg-white`}>
+          <button type="button" disabled={pending} onClick={() => setBack(true)} className={`${btn} border-[var(--line)] bg-white`}>
             {m.sendBack}
           </button>
-          <button type="button" disabled={pending} onClick={() => run(() => approveProcess({ workspaceId, processId }))} className={`${btn} border-[#C9A24D] bg-[#C9A24D] text-[#16325C]`}>
+          <button type="button" disabled={pending} onClick={() => run(() => approveProcess({ workspaceId, processId }))} className={`${btn} border-[var(--gold)] bg-[var(--gold)] text-[var(--on-accent)]`}>
             {pending ? m.saving : m.approve(version)}
           </button>
         </span>
       )}
       {error && (
-        <span role="alert" className="w-full text-[13px] font-semibold text-[#8C3327]">
+        <span role="alert" className="w-full text-[13px] font-semibold text-[var(--bad-tx)]">
           {error}
         </span>
       )}

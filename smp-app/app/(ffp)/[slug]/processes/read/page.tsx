@@ -59,11 +59,11 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
     <>
       <Code>{r.code}</Code>{" "}
       {openable(r) ? (
-        <Link href={`${base}/${r.id}`} className="border-b border-transparent font-bold text-[#171B22] hover:border-[#C9A24D]">
+        <Link href={`${base}/${r.id}`} className="border-b border-transparent font-bold text-[var(--ink)] hover:border-[var(--gold)]">
           {r.name}
         </Link>
       ) : (
-        <b className="text-[#171B22]">{r.name}</b>
+        <b className="text-[var(--ink)]">{r.name}</b>
       )}
     </>
   );
@@ -108,7 +108,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
                 <tr key={r.id}>
                   <td className={td}>
                     {name(r)}
-                    {r.department && <span className="block text-xs text-[#636C79]">{r.department}</span>}
+                    {r.department && <span className="block text-xs text-[var(--ink-3)]">{r.department}</span>}
                   </td>
                   <td className={td}>
                     <span className="flex flex-wrap gap-1">
@@ -128,7 +128,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
             })}
           </tbody>
         </TableBox>
-        <p className="mt-2 text-[12.5px] text-[#636C79]">{m.yoursNote}</p>
+        <p className="mt-2 text-[12.5px] text-[var(--ink-3)]">{m.yoursNote}</p>
       </>
     );
   } else if (filt === "step") {
@@ -144,7 +144,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
                 <tr key={r.id}>
                   <td className={td}>
                     {name(r)}
-                    {(r.ownerName || r.department) && <span className="block text-xs text-[#636C79]">{r.ownerName ? m.ownerLine(r.ownerName) : r.department}</span>}
+                    {(r.ownerName || r.department) && <span className="block text-xs text-[var(--ink-3)]">{r.ownerName ? m.ownerLine(r.ownerName) : r.department}</span>}
                   </td>
                   <td className={td}>{r.mySteps.join(", ")}</td>
                   <td className={td}>
@@ -159,7 +159,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
             })}
           </tbody>
         </TableBox>
-        <p className="mt-2 text-[12.5px] text-[#636C79]">{m.stepNote}</p>
+        <p className="mt-2 text-[12.5px] text-[var(--ink-3)]">{m.stepNote}</p>
       </>
     );
   } else {
@@ -181,7 +181,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
     };
     const col = (k: typeof sort, label: string) => ({ label, href: sortHref(k), sorted: sort === k ? (desc ? ("descending" as const) : ("ascending" as const)) : null });
     body = !f.all.length ? (
-      <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">{m.nothingInForce}</div>
+      <div className="rounded-lg border border-dashed border-[var(--line)] bg-white px-[18px] py-[22px] text-[13.5px] text-[var(--ink-2)]">{m.nothingInForce}</div>
     ) : (
       <>
         <form method="get" action={base} className="mb-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-2">
@@ -193,13 +193,13 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
               defaultValue={q}
               placeholder={m.searchPlaceholder}
               autoComplete="off"
-              className="w-full rounded-md border border-[#78899F] bg-white px-2.5 py-[7px] text-[13.5px]"
+              className="w-full rounded-md border border-[var(--field-line)] bg-white px-2.5 py-[7px] text-[13.5px]"
             />
           </label>
-          <button type="submit" className="rounded-md border border-[#D6DCE5] bg-white px-3 py-[7px] text-[13px] font-semibold">
+          <button type="submit" className="rounded-md border border-[var(--line)] bg-white px-3 py-[7px] text-[13px] font-semibold">
             {m.searchGo}
           </button>
-          <span className="text-[12.5px] text-[#636C79]">{q ? m.matchNote(shown.length, f.all.length) : m.inForceNote(f.all.length)}</span>
+          <span className="text-[12.5px] text-[var(--ink-3)]">{q ? m.matchNote(shown.length, f.all.length) : m.inForceNote(f.all.length)}</span>
         </form>
         <TableBox>
           <Head cols={[col("name", m.head.process), col("owner", m.head.owner), col("since", m.head.since), col("part", m.head.part), <span key="o" className="sr-only">{m.head.open}</span>]} />
@@ -207,9 +207,9 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
             {shown.map((r) => (
               <tr key={r.id}>
                 <td className={td}>{name(r)}</td>
-                <td className={td}>{r.ownerName ?? <span className="text-[#636C79]">—</span>}</td>
+                <td className={td}>{r.ownerName ?? <span className="text-[var(--ink-3)]">—</span>}</td>
                 <td className={`${td} whitespace-nowrap`}>{m.since(r.version, date(r.since))}</td>
-                <td className={td}>{part(r) ? <Chip tone={r.owns || r.approves ? "gold" : "navy"}>{part(r)}</Chip> : <span className="text-[#636C79]">—</span>}</td>
+                <td className={td}>{part(r) ? <Chip tone={r.owns || r.approves ? "gold" : "navy"}>{part(r)}</Chip> : <span className="text-[var(--ink-3)]">—</span>}</td>
                 <td className={`${td} text-end`}>
                   <Btn href={`${base}/${r.id}`}>{m.open}</Btn>
                 </td>
@@ -217,7 +217,7 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
             ))}
           </tbody>
         </TableBox>
-        {!shown.length && <p className="px-4 py-[18px] text-[13.5px] text-[#414A58]">{m.noMatch(q)}</p>}
+        {!shown.length && <p className="px-4 py-[18px] text-[13.5px] text-[var(--ink-2)]">{m.noMatch(q)}</p>}
       </>
     );
   }
@@ -233,9 +233,9 @@ export default async function ReadProcesses(props: PageProps<"/[slug]/processes/
               key={k}
               href={k === "all" ? base : `${base}?f=${k}`}
               aria-current={k === filt ? "true" : undefined}
-              className={`whitespace-nowrap rounded-full border px-3 py-[5px] text-[13px] font-semibold ${k === filt ? "border-[#16325C] bg-[#16325C] text-white" : "border-[#D6DCE5] bg-white text-[#414A58] hover:border-[#C9A24D]"}`}
+              className={`whitespace-nowrap rounded-full border px-3 py-[5px] text-[13px] font-semibold ${k === filt ? "border-[var(--panel)] bg-[var(--panel)] text-[var(--panel-ink)]" : "border-[var(--line)] bg-white text-[var(--ink-2)] hover:border-[var(--gold)]"}`}
             >
-              {m.filters[k]} <span className={`ms-[3px] font-bold ${k === filt ? "text-[#B9C2CE]" : "text-[#636C79]"}`}>{n[k]}</span>
+              {m.filters[k]} <span className={`ms-[3px] font-bold ${k === filt ? "text-[var(--panel-quiet)]" : "text-[var(--ink-3)]"}`}>{n[k]}</span>
             </Link>
           ))}
       </div>

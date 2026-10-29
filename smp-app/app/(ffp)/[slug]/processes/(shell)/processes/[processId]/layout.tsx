@@ -65,7 +65,7 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
 
   const stateOf = (s: { lifecycleStatus: string; returnReason: string | null; approverName: string | null }, v: number | null) =>
     s.lifecycleStatus === "PUBLISHED" ? m.state.inForce(v) : s.lifecycleStatus === "IN_REVIEW" ? m.state.withApprover(s.approverName) : s.lifecycleStatus === "APPROVED" ? m.state.approved(v) : s.lifecycleStatus === "RETIRED" ? m.state.retired : s.returnReason ? m.state.sentBack : m.state.draft;
-  const tone = status === "PUBLISHED" ? "bg-[#E4F0EA] text-[#1F6248]" : sentBack ? "bg-[#F7E3E0] text-[#8C3327]" : status === "IN_REVIEW" || status === "APPROVED" ? "bg-[#F7EFD6] text-[#7A5D1C]" : "bg-[#EFF2F6] text-[#414A58]";
+  const tone = status === "PUBLISHED" ? "bg-[var(--good-bg)] text-[var(--good-tx)]" : sentBack ? "bg-[var(--bad-bg)] text-[var(--bad-tx)]" : status === "IN_REVIEW" || status === "APPROVED" ? "bg-[var(--attn-bg)] text-[var(--attn-tx)]" : "bg-[var(--surface-2)] text-[var(--ink-2)]";
   const version = status === "PUBLISHED" ? inForce?.number ?? null : status === "APPROVED" ? latest?.number ?? null : draftVersion;
 
   const marks = readinessMarks({ steps: g.steps, kinds: g.kinds, controls: g.controls, controlsMissing: g.controlsMissing, sopVersion: process.sopVersion, sopEffectiveDate: process.sopEffectiveDate, lifecycleStatus: status });
@@ -99,8 +99,8 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
 
   const strip =
     sentBack || status === "IN_REVIEW" || status === "APPROVED" ? (
-      <div className={`mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border px-3 py-2.5 text-[13.5px] ${status === "IN_REVIEW" ? "border-[#16325C] bg-white" : "border-[#C9A24D] bg-[#FBF6E9]"}`}>
-        <b className={`text-[11px] font-extrabold uppercase tracking-[.1em] ${status === "IN_REVIEW" ? "text-[#16325C]" : "text-[#8A6B22]"}`}>
+      <div className={`mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border px-3 py-2.5 text-[13.5px] ${status === "IN_REVIEW" ? "border-[var(--stone)] bg-white" : "border-[var(--gold)] bg-[var(--over-bg)]"}`}>
+        <b className={`text-[11px] font-extrabold uppercase tracking-[.1em] ${status === "IN_REVIEW" ? "text-[var(--stone)]" : "text-[var(--gold-deep)]"}`}>
           {sentBack ? m.strip.sentBack : status === "IN_REVIEW" ? m.strip.withApprover : m.strip.approved}
         </b>
         <span>
@@ -113,8 +113,8 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
       </div>
     ) : held ? (
       /* in force, with or without the next version being drawn */
-      <div className={`mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border px-3 py-2.5 text-[13.5px] ${draftOpen ? "border-[#C9A24D] bg-[#FBF6E9]" : "border-[#16325C] bg-white"}`}>
-        <b className={`text-[11px] font-extrabold uppercase tracking-[.1em] ${draftOpen ? "text-[#8A6B22]" : "text-[#16325C]"}`}>{draftOpen ? m.draftLabel : m.inForceLabel}</b>
+      <div className={`mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border px-3 py-2.5 text-[13.5px] ${draftOpen ? "border-[var(--gold)] bg-[var(--over-bg)]" : "border-[var(--stone)] bg-white"}`}>
+        <b className={`text-[11px] font-extrabold uppercase tracking-[.1em] ${draftOpen ? "text-[var(--gold-deep)]" : "text-[var(--stone)]"}`}>{draftOpen ? m.draftLabel : m.inForceLabel}</b>
         <span>{draftOpen ? m.draftLine(held.number, draftVersion, changedCount) : m.inForceLine(held.number)}</span>
       </div>
     ) : null;
@@ -149,13 +149,13 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
       pill={
         <>
           {held && status !== "PUBLISHED" && status !== "RETIRED" && (
-            <span className="inline-flex whitespace-nowrap rounded-full bg-[#E4F0EA] px-[9px] py-px text-[11.5px] font-semibold text-[#1F6248]">{m.state.inForce(held.number)}</span>
+            <span className="inline-flex whitespace-nowrap rounded-full bg-[var(--good-bg)] px-[9px] py-px text-[11.5px] font-semibold text-[var(--good-tx)]">{m.state.inForce(held.number)}</span>
           )}
           <span className={`inline-flex whitespace-nowrap rounded-full px-[9px] py-px text-[11.5px] font-semibold ${tone}`}>
             {held && status === "DRAFT" && !sentBack ? m.draftOf(draftVersion) : stateOf(process, version)}
           </span>
           {held && status === "PUBLISHED" && differs && (
-            <span className="inline-flex whitespace-nowrap rounded-full bg-[#EFF2F6] px-[9px] py-px text-[11.5px] font-semibold text-[#414A58]">{m.draftOf(draftVersion)}</span>
+            <span className="inline-flex whitespace-nowrap rounded-full bg-[var(--surface-2)] px-[9px] py-px text-[11.5px] font-semibold text-[var(--ink-2)]">{m.draftOf(draftVersion)}</span>
           )}
           {deepDive}
         </>

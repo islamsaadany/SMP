@@ -130,7 +130,7 @@ export function ProcessLandscapeCanvas({
           maxZoom={1.5}
           proOptions={{ hideAttribution: true }}
         >
-          <Background gap={20} size={1} color="#e2e8f0" />
+          <Background gap={20} size={1} color="var(--line-soft)" />
           <Controls showInteractive={false} />
           <Panel position="top-right">
             <ExportPngButton workspaceName={workspaceName} />

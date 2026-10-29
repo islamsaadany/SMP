@@ -2996,9 +2996,11 @@ var COPILOT = (function(){
         '<button type="button" class="copopt" data-cop-ad-reply="assume">' + E(W.assume || "Assume for me") + '</button>' +
         '<button type="button" class="copopt" data-cop-ad-reply="proceed">' + E(W.proceed || "Proceed with what you have") + '</button></div>';
       out.push(aiMsg(q, true));
-      var a = adAnswerHtml(t); if (a) out.push(a);
+      /* Proceed marks the open question assumed on the row; the chat says what was pressed */
+      if (s.stopped && k === last && t.how === "assumed") out.push(meMsg(W.proceed || "Proceed with what you have"));
+      else { var a = adAnswerHtml(t); if (a) out.push(a); }
     });
-    if (s.stopped && !s.brief) out.push(meMsg(W.proceed || "Proceed with what you have"));
+    if (s.stopped && (!s.turns.length || s.turns[last].how !== "assumed")) out.push(meMsg(W.proceed || "Proceed with what you have"));
     if (!s.brief && ed && !busyHere && !adPending(s)) out.push(aiMsg((s.stopped ? "" : "Nothing is waiting on you. ") + '<div class="copopts"><button type="button" class="copopt rec" data-cop-ad-next>' + ((PANE.advisoryCount || {}).owed || s.stopped ? "Write the brief" : "Continue") + '</button></div>'));
     if (s.brief) {
       var n = s.brief.options.length, as = (s.assumed || []).length;

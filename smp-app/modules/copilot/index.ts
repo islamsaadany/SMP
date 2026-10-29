@@ -131,7 +131,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
           ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}),
           ...(chat.section === "compete" ? await competeView(c, chat, pw) : {}),
           ...(chat.section === "directions" || chat.section === "capabilities" ? await dirsView(c, chat, pw) : {}),
-          ...(chat.section === "execution" ? await execView(c, chat) : {}),
+          ...(chat.section === "execution" ? await execView(c, chat, pw) : {}),
           ...(chat.section === "advisory" ? await advisoryView(c, chat) : {}) };
       });
       return got ? json(200, got) : no(404, "That chat is not here any more.");

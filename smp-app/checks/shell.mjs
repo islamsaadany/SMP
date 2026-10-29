@@ -2777,25 +2777,43 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(!!r && r.s && !r.s.period && (r.s.items || []).length > 0, "a new Execution chat asks the period first, with the plan's items listed", JSON.stringify(r && r.s && { p: r.s.period, n: (r.s.items || []).length }));
     check(!(await page.$("[data-cop-ex-draft]")), "…and offers no drafting before the period is chosen");
     await page.click('[data-cop-ex-period="rest"]');
-    await page.waitForSelector("[data-cop-ex-draft], [data-cop-ex-go]", { timeout: 15000 });
+    await page.waitForSelector("[data-cop-ex-draftall]", { timeout: 15000 });
     r = await row();
     const per = r.s.period;
     check(!!per && per.m2 === 12, "the period is stored, running to the year's end", JSON.stringify(per));
     const qs = [1, 2, 3, 4].filter((q) => (q - 1) * 3 + 1 <= per.m2 && q * 3 >= per.m1);
-    for (let n = 0; n < 40; n++) {
-      if (await page.$("[data-cop-ex-draft]")) { await page.click("[data-cop-ex-draft]"); await page.waitForTimeout(1500); continue; }
-      if (await page.$('[data-cop-ex-go="1"]')) { await page.click('[data-cop-ex-go="1"]'); await page.waitForTimeout(700); continue; }
-      break;
-    }
+    /* §684 — the split: the period strip and one card per item in the pane,
+       the first in hand with its Draft button, the to-do beside, the chat
+       reading the period as the person's line, its box held until the item
+       in hand is drafted, Save held with the real blocker. */
+    const sp = await page.evaluate(() => ({ strip: !!document.querySelector("[data-cop-expane] [data-cop-ex-strip]"), cards: document.querySelectorAll("[data-cop-expane] [data-cop-ex-card]").length, open: document.querySelectorAll("[data-cop-expane] .copex-card.now").length,
+      draftBtn: !!document.querySelector("[data-cop-expane] .copex-card.now [data-cop-ex-draft]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-ex-card], [data-cop-chatbox] [data-cop-ex-item]"), todo: !!document.querySelector(".copftodo [data-cop-dv-todo]"),
+      me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), dis: (document.querySelector("[data-cop-text]") || {}).disabled, step: (document.querySelector(".copfhead small") || {}).textContent || "",
+      save: (document.querySelector("[data-cop-ex-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ex-finish]").getAttribute("data-tip") : null, foot: (document.querySelector("[data-cop-exfoot]") || {}).textContent || "" }));
+    check(sp.strip && sp.cards === r.s.items.length && sp.open === 1 && sp.draftBtn && !sp.inChat && sp.todo && /Oct/.test(sp.me) && sp.dis === true && /Drafting · 0 of/.test(sp.step) && /still needs at least one measure/.test(String(sp.save)) && /v1/.test(sp.foot),
+      "§684 the period strip and one card per item stand in the pane, the first in hand with Draft on it, the to-do beside; the chat reads the period as the person's line, its box is held, Save is held with the item that still needs a measure", JSON.stringify(sp));
+    await page.click("[data-cop-ex-draftall]");
+    for (let n = 0; n < 40; n++) { await page.waitForTimeout(1200); r = await row(); if (r.s.items.every((x) => x.drafted)) break; }
+    await page.waitForTimeout(800);
     r = await row();
-    check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one at a time", JSON.stringify(r.s.items.map((x) => x.drafted)));
+    check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one after another from Draft all (§684)", JSON.stringify(r.s.items.map((x) => x.drafted)));
+    const lg = await page.evaluate(() => ({ me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), ai: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.ai")).map((m) => m.textContent).filter((t) => /measure/.test(t) && /tactic/.test(t) && /on the right/.test(t)).length,
+      ready: /Ready to save/.test((document.querySelector(".copfhead small") || {}).textContent || ""), box: (document.querySelector("[data-cop-text]") || {}).disabled, ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "" }));
+    check(/Draft all/.test(lg.me) && lg.ai === r.s.items.length && lg.ready && lg.box === false && /Ask for a change to/.test(lg.ph),
+      "§684 the chat reads Draft all as the person's line and one answer per item, each naming its counts; the head reads Ready to save; the box asks for a change to the item in hand", JSON.stringify(lg));
+    await page.click('[data-cop-ex-pick="0"]');
+    await page.waitForFunction(() => { const c = document.querySelector("[data-cop-expane] .copex-card.now"); return c && c.getAttribute("data-cop-ex-card") === "0"; }, null, { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(900);
+    const pk = await page.evaluate(() => ({ open: (document.querySelector("[data-cop-expane] .copex-card.now") || {}).getAttribute ? document.querySelector("[data-cop-expane] .copex-card.now").getAttribute("data-cop-ex-card") : null, rows: document.querySelectorAll("[data-cop-expane] .copex-card.now [data-cop-ex-m]").length }));
+    r = await row();
+    check(pk.open === "0" && pk.rows > 0 && r.s.cursor === 0, "§684 pressing a card's head puts that item in hand, its tables open to edit, stored as the cursor", JSON.stringify({ pk, cursor: r.s.cursor }));
     check(r.s.items.every((x) => x.tactics.every((t) => t.quarters.every((q) => qs.includes(q)))), "a quarter outside the period never reaches the chat", JSON.stringify(r.s.items.map((x) => x.tactics.map((t) => t.quarters))));
     await heldSweep(page, "Execution, before the save");
     await shot("1-before-save");
     const strip = await page.evaluate(() => (document.querySelector("[data-cop-ex-strip]") || {}).textContent || "");
     check(/This plan covers/.test(strip) && !/·/.test(strip), "§654 the period line carries no stray separator", strip);
     const fin = await page.$("[data-cop-ex-finish]");
-    check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645)");
+    check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645), at the pane's foot (§684)");
     const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
     const exArch = await page.evaluate(() => ARCHIVES.length);
     /* A Capability holding nothing yet has nothing to archive (archiveCapPlan
@@ -2804,8 +2822,9 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     if (fin) { await fin.click(); await page.waitForTimeout(2200); }
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
-    const exSv = await page.evaluate((b) => ({ same: JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]) === b, apply: !!document.querySelector("[data-cop-ex-apply]") }), exBefore);
-    check(exSv.same && exSv.apply, "§645 Save leaves the plan — measures, tactics, capabilities and the period — exactly as it was, and offers Apply to plan", JSON.stringify(exSv));
+    const exSv = await page.evaluate((b) => ({ same: JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]) === b, apply: (document.querySelector("[data-cop-ex-apply]") || {}).getAttribute ? document.querySelector("[data-cop-ex-apply]").getAttribute("aria-disabled") : "none",
+      line: /v1 saved.*not on the plan yet/.test((document.querySelector("[data-cop-exfoot]") || {}).textContent || ""), said: /Saved as .*v1.*under Deliverables/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || "") }), exBefore);
+    check(exSv.same && exSv.apply !== "true" && exSv.line && exSv.said, "§645 Save leaves the plan — measures, tactics, capabilities and the period — exactly as it was; the pane's foot says v1 saved · not on the plan yet with Apply to plan live, and the chat says where the version is (§684)", JSON.stringify(exSv));
     await page.click("[data-cop-ex-apply]");
     await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
     const askEx = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
@@ -2834,7 +2853,9 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     const qWant = [1, 2, 3, 4].map((q) => (qs.includes(q) ? 1 : 0)).join("");
     check(plan.dirs.length > 0 && plan.dirs.every((d) => d.m === "30%" && d.q === qWant), "each Direction gains its measure, and its tactic runs only in the period's quarters", JSON.stringify(plan.dirs) + " want " + qWant);
     check(plan.caps.every((c) => c.ko === "30%" && c.pj && c.pj[1] === "Dec " + String(per.y).slice(2)), "each Capability gains a key objective and a dated project inside the period", JSON.stringify(plan.caps));
-    check(!(await page.$("[data-cop-ex-finish]")), "a saved chat offers no Save again");
+    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-ex-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §684)");
+    const onp = await page.evaluate(() => /v1 on the plan/.test((document.querySelector("[data-cop-exfoot]") || {}).textContent || ""));
+    check(onp, "§684 …and after Apply the pane's foot says v1 on the plan");
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];

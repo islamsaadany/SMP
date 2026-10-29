@@ -993,3 +993,17 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copdvpane .copcp-wrap { margin:0; }
 .copdv-card h3 { display:flex; align-items:baseline; gap:8px; }
 .copdv-under { display:flex; justify-content:flex-end; margin-top:8px; }
+
+/* §684 — Execution split three ways: one card per item in the pane, the one in hand open. */
+.copexpane .copcp-wrap { margin:0; }
+.copex-card { padding:0; overflow:hidden; }
+.copex-head { display:flex; align-items:center; gap:8px; width:100%; border:0; background:none; text-align:left; padding:8px 12px; font:inherit; color:var(--ink); cursor:pointer; }
+.copex-head:hover { background:var(--surface-2); }
+.copex-head:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.copex-head b { font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copex-head small { flex:1 1 auto; min-width:0; color:var(--ink-3); font-size:var(--fs-small, 12.5px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.copex-kind { font:600 10px/1.5 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); border:1px solid var(--line); border-radius:6px; padding:0 5px; white-space:nowrap; }
+.copex-card.now { box-shadow:inset 3px 0 0 var(--gold); }
+.copex-body { border-top:1px solid var(--line); padding:8px 12px 10px; }
+.copex-body .copex-item { margin:0; }
+.copexpane .copex-period { margin:0; }

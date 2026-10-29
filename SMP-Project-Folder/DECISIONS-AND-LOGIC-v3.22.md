@@ -70473,3 +70473,5 @@ Islam, of the window: *"the initial descriptions at the top is not relevant to k
 And the aspiration in the mission's own type — same size, same weight, same ink — on Islam's next word: *"winning aspiration doesn't need to be bold it needs to match the mission"*. It had been set larger and heavier, as a headline; the two are a pair of cards and read as one.
 
 **Checked**: the frozen shell built whole on the worked example — the group's Foundation reads in that order, Mobile's too; every tab opens without its line; no error.
+
+**§680 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §679. The reading window's script, its stylesheet and the built files changed; no migrations, nobody signed out.

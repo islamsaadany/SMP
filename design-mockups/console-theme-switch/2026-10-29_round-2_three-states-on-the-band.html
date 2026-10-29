@@ -222,7 +222,7 @@ a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
   <div class="head">
     <div>
       <h1>The theme switch, round 2: on the band, three states, and a sign on hover</h1>
-      <p class="lede">From round 1 you picked <b>C</b>, the ring at the right end of the console's band. This round adds what you asked for: the switch has <b>three states — Light, Dark, Auto</b> — on the console, on Strategy and on every module's bar alike, one key in the browser as now; and a <b>sign on hover</b> that says which state you are in and what the press will do. Pick the auto mark below; the control at the right shows everything in the other theme.</p>
+      <p class="lede">From round 1 you picked <b>C</b>, the ring at the right end of the console's band. This round adds what you asked for: the switch has <b>three states — Light, Dark, Auto</b> — on the console, on Strategy and on every module's bar alike, one key in the browser as now; and a <b>sign on hover</b> that says which state you are in — the state alone, three words at most. Pick the auto mark below; the control at the right shows everything in the other theme.</p>
       <ul class="rules">
         <li><b>One cycle everywhere.</b> Light → Dark → Auto → Light. Auto follows the device, now and as it changes during the day, and is where a browser that has never chosen starts.</li>
         <li><b>The mark shows the state you are IN.</b> In Auto the mark is the auto mark, not the sun or moon the device happens to give — the hover sign says which the device is giving.</li>
@@ -247,7 +247,7 @@ a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
   <section>
     <div class="ph2"><span class="n">03</span><h2>On the console: C, with the pointer on it</h2><p>the ring at the band's right end, the hover sign under it</p></div>
     <div class="frame tall" id="optC"></div>
-    <p class="cap">The ring is on every tab's band (§647, one band everywhere), always at the right end, 26px, with the state's mark. The sign appears on hover and on keyboard focus, in the console's own label style, and reads: <b>Theme: Auto · dark, from your device — click for Light</b>. A screen reader gets the same words.</p>
+    <p class="cap">The ring is on every tab's band (§647, one band everywhere), always at the right end, 26px, with the state's mark. The sign appears on hover and on keyboard focus, in the console's own label style, and says the state alone: <b>Light</b>, <b>Dark</b>, or <b>Auto · dark</b> (Auto, and which reading the device is giving). A screen reader gets the same words.</p>
   </section>
 
   <section>
@@ -272,10 +272,11 @@ a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
   function svg(g, cls) { return '<svg viewBox="0 0 20 20" class="' + (cls || "") + '" aria-hidden="true">' + g + '</svg>'; }
   function mark(state) { return svg(state === "light" ? SUN : state === "dark" ? MOON : AUTO[PICK]); }
   var device = function () { return pg; };
+  /* Islam, round 2: "the message on hovering is too long just show the
+     current status in the message" — the state alone; in Auto, which
+     reading the device is giving. */
   function words(state) {
-    var next = { light: "Dark", dark: "Auto", auto: "Light" }[state];
-    var now = state === "auto" ? "Auto · " + device() + ", from your device" : state.charAt(0).toUpperCase() + state.slice(1);
-    return "Theme: " + now + " <i>— click for " + next + "</i>";
+    return state === "auto" ? "Auto · " + device() : state.charAt(0).toUpperCase() + state.slice(1);
   }
   function tip(state) { return '<span class="tip">' + words(state) + "</span>"; }
 
@@ -303,7 +304,7 @@ a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
   function draw() {
     document.documentElement.setAttribute("data-theme", pg);
     document.getElementById("trio").innerHTML = ["light", "dark", "auto"].map(function (s) {
-      return '<div class="state"><span class="big">' + mark(s) + '</span><b>' + (s === "auto" ? "Auto — follows the device" : s.charAt(0).toUpperCase() + s.slice(1)) + '</b><p>On hover: <br><span class="kbd">' + words(s).replace(/<[^>]+>/g, "") + '</span></p><p>' + (s === "light" ? "Chosen light, whatever the device says." : s === "dark" ? "Chosen dark, whatever the device says." : "No choice stored; the device decides, and the page follows it if it changes during the day.") + '</p></div>';
+      return '<div class="state"><span class="big">' + mark(s) + '</span><b>' + (s === "auto" ? "Auto — follows the device" : s.charAt(0).toUpperCase() + s.slice(1)) + '</b><p>On hover: <span class="kbd">' + words(s).replace(/<[^>]+>/g, "") + '</span></p><p>' + (s === "light" ? "Chosen light, whatever the device says." : s === "dark" ? "Chosen dark, whatever the device says." : "No choice stored; the device decides, and the page follows it if it changes during the day.") + '</p></div>';
     }).join("");
     document.getElementById("cands").innerHTML = [1, 2, 3].map(function (k) {
       return '<div class="cand' + (k === PICK ? " pick" : "") + '"><span class="big">' + svg(AUTO[k]) + '</span><span class="row"><span class="r26">' + svg(AUTO[k]) + '</span><span class="r20">' + svg(AUTO[k]) + '</span></span><b>' + k + ". " + ["Half circle", "Half circle with rays", "A screen"][k - 1] + '</b><p>' + ["the usual sign for automatic", "sun on one side, moon's shadow on the other", "the device, literally"][k - 1] + '</p></div>';

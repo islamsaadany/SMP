@@ -70439,3 +70439,11 @@ The Directions tab asked one list of every subject. El Abd's top layer keeps its
 **Checked**: the frozen shell built whole on the worked example — Mobile reads as one list of four; with the box's question answered yes in the page (standing in for El Abd, whose record this session does not hold) the tab draws *Directions* with three and *Capabilities* with one, no error. **Not checked**: on El Abd itself.
 
 **§677 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §676 went in. The reading window's script, its stylesheet and the built files changed; there are no migrations and nobody is signed out.
+
+## §678 — The reading window gives capabilities a tab of their own, as the workbench does (2026-10-29)
+
+Islam, of El Abd in the window: *"where is the capabilities tab?"*. §677 had put a split box's capabilities under Directions as a second list; the workbench gives such a box a Capabilities tab (§560), and a reader who knows the workbench looks for it there.
+
+So the window's tabs are now Foundation, Analysis, Directions, **Capabilities**, Overall performance — the Capabilities tab offered only where the box's own question answers yes (`boxSplit`, SMPRules.pillarsSplit) and there is a capability to read, since a tab over nothing is not a choice (§61). Under it, Directions holds the directions alone; where the box keeps one list, the tab is not there and Directions reads as before. The tab wears the layer's own word (`L("capability")`), opens with its own line for a first-timer, and folds its rows as Directions does. The first press of Read lands on Foundation whichever tabs the subject has; a tab that the picker's next subject does not offer falls back to Foundation. Also, with it: a key objective not yet given a target or a figure shows a dash in each cell, not a bare direction sign over nothing (El Abd's three, 2026-10-29).
+
+**Checked**: the frozen shell built whole on the worked example — Mobile reads four tabs and one list; with the box's question answered yes in the page (standing in for El Abd) five tabs, Directions with three rows and Capabilities with one, no error. **Not checked**: on El Abd itself.

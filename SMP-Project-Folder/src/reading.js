@@ -40,6 +40,15 @@ var READING = (function () {
       why: "Where things stand going in: what it is good at, what holds it back, what the market offers, and what could hurt. The reasoning behind the directions." },
     { k: "dir", label: function () { return "Directions"; },
       why: "What is being pushed on this year: each direction with the measures that say what done looks like and where they stand at the review point, and the tactics that deliver it — who owns each, the quarters it runs, whether it is on its way." },
+    /* CAPABILITIES, A TAB OF THEIR OWN WHERE THE BOX KEEPS THEM APART (§678).
+       Islam, of El Abd: *"where is the capabilities tab?"* — §677 had put them
+       under Directions as a second list; the workbench gives a split box a
+       Capabilities tab (§560), and so does the window. Offered only where the
+       box's own question (boxSplit) answers yes and there is a capability to
+       read, since a tab over nothing is not a choice (§61). */
+    { k: "cap", label: function () { return L("capability", "bu"); },
+      when: function (key) { var u = planOf(key); return boxSplit(u) && SMPRules.shown(itemsNow(u)).some(function (it) { return SMPRules.pillarIsCap(it); }); },
+      why: "What is being built to carry every direction: each capability with the measures that say what done looks like and where they stand, and the tactics that deliver it — who owns each, the quarters it runs, whether it is on its way." },
     { k: "perf", label: function () { return "Overall performance"; },
       why: "The reading across all of it, three figures never blended: how the headline measures are doing, how the directions are doing, and how much of the work has been delivered against what should have been by now." }
   ];
@@ -108,24 +117,19 @@ var READING = (function () {
     }).join("") + '</div>';
   }
 
-  /* DIRECTIONS AND CAPABILITIES APART WHERE THE BOX KEEPS THEM APART (§677).
-     Islam: *"in cases like el abd you need to split directions and
-     capabilities"*. The question is the workbench's own, `boxSplit(u)`
-     (SMPRules.pillarsSplit): where it answers yes the tab draws two lists
-     under two headings, the directions first, the capabilities under the
-     layer's own word for them; a heading over nothing is not drawn (§520.2).
-     Where it answers no, one list, as the box itself is. */
-  function directions(key) {
+  /* DIRECTIONS AND CAPABILITIES APART WHERE THE BOX KEEPS THEM APART (§677,
+     §678). The question is the workbench's own, `boxSplit(u)`
+     (SMPRules.pillarsSplit): where it answers yes, Directions holds the
+     directions alone and the capabilities have the tab above; where it
+     answers no, one list, as the box itself is. */
+  function directions(key, caps) {
     var u = planOf(key), items = SMPRules.shown(itemsNow(u));
-    if (!items.length) return '<p class="rnone">No directions this year.</p>';
-    var groups = boxSplit(u)
-      ? [{ t: "Directions", list: items.filter(function (it) { return !SMPRules.pillarIsCap(it); }) },
-         { t: L("capability", "bu"), list: items.filter(function (it) { return SMPRules.pillarIsCap(it); }) }]
-        .filter(function (g) { return g.list.length; })
-      : [{ t: null, list: items }];
-    return '<div class="rtools">' + items.length + ' direction' + (items.length === 1 ? "" : "s") + ', folded \u2014 press one to open it.' +
+    if (boxSplit(u)) items = items.filter(function (it) { return !!SMPRules.pillarIsCap(it) === !!caps; });
+    var word = caps ? L1("capability").toLowerCase() : "direction";
+    if (!items.length) return '<p class="rnone">No ' + esc(word) + 's this year.</p>';
+    return '<div class="rtools">' + items.length + ' ' + esc(word) + (items.length === 1 ? "" : "s") + ', folded \u2014 press one to open it.' +
       '<button type="button" data-rall="open">Open all</button><button type="button" data-rall="close">Close all</button></div>' +
-      groups.map(function (g) { return (g.t ? '<p class="rk rgrp">' + g.t + '</p>' : '') + dirList(u, g.list); }).join("");
+      dirList(u, items);
   }
   function dirList(u, items) {
     var all = u.items || [];
@@ -166,7 +170,8 @@ var READING = (function () {
     var r = root(); if (!r) return;
     var key = ST.target, subs = subjects();
     if (!subs.some(function (s) { return s.key === key; })) { key = ST.target = "group"; }
-    var tab = TABS.filter(function (t) { return t.k === ST.tab; })[0] || TABS[0];
+    var tabs = TABS.filter(function (t) { return !t.when || t.when(key); });
+    var tab = tabs.filter(function (t) { return t.k === ST.tab; })[0] || tabs[0];
     r.querySelector(".rwtop").innerHTML =
       '<span class="rmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span>' +
       '<span class="rco">' + esc(GROUP.org || "") + '</span>' +
@@ -176,10 +181,10 @@ var READING = (function () {
       '<span class="rsp"></span>' +
       (typeof cycleLabel === "function" ? '<span class="rasof">' + esc(cycleLabel()) + '</span>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
-    r.querySelector(".rwtabs").innerHTML = TABS.map(function (t) {
+    r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
     }).join("");
-    var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key) : performance(key);
+    var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false) : tab.k === "cap" ? directions(key, true) : performance(key);
     r.querySelector(".rwbody").innerHTML = '<p class="rwhy"><i>' + esc(tab.label(key)) + '</i>' + tab.why + '</p>' + body;
     r.querySelector(".rwbody").scrollTop = 0;
   }

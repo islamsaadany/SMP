@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-29 — Advisory, split three ways (§685).** The last area: the questions and their choices in the chat with the chat's own box as the answer, the Decision Brief on the right, Save at the pane's foot and no Apply (it stays in the Copilot), the to-do and the round box beside. Every Copilot area now shares one shape. Shell `smp-shell-v7.38-advisory-split`.
+
 **2026-10-29 — Execution, split three ways (§684).** The period in the chat; one card per Direction and Capability on the right, drafted from its card or all from the chat; the chat in the order it happened; asks through the chat's box for the item in hand; Save and Apply to plan at the pane's foot. Shell `smp-shell-v7.37-execution-split`.
 
 **2026-10-29 — The start screen's Send is not there until something is typed (§683).** As every chat's box has it since §652. Shell `smp-shell-v7.36-start-send`.

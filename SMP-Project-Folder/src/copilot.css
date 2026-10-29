@@ -988,3 +988,8 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copswdiff-l li.add { color:var(--good-tx); }
 .copswdiff-l li.drop { color:var(--bad-tx, #a33); }
 .copswdiff-l li.chg { color:var(--ink-2); }
+
+/* §675 — Directions split three ways: the two tables as cards in the pane, Go ahead under the first. */
+.copdvpane .copcp-wrap { margin:0; }
+.copdv-card h3 { display:flex; align-items:baseline; gap:8px; }
+.copdv-under { display:flex; justify-content:flex-end; margin-top:8px; }

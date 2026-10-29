@@ -10771,7 +10771,7 @@ html.smp-room body { background:#0B1A33; }
 html.smp-room body > *:not(.deckroot) { visibility:hidden !important; }
 @media print { .sl-live, .roomstrip, .roomfull, .sl-notroom { display:none !important; } }
 
-/* ── THE READING WINDOW (§675) ──────────────────────────────────────────
+/* ── THE READING WINDOW (§676) ──────────────────────────────────────────
    A mode over the platform, as the deck is (present.css .deckroot): fixed,
    the whole window, 61 so it beats the editor and nothing else. Its chrome
    is one navy strip and the tab row on the gold rule; the body is the page's
@@ -13435,3 +13435,8 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copswdiff-l li.add { color:var(--good-tx); }
 .copswdiff-l li.drop { color:var(--bad-tx, #a33); }
 .copswdiff-l li.chg { color:var(--ink-2); }
+
+/* §675 — Directions split three ways: the two tables as cards in the pane, Go ahead under the first. */
+.copdvpane .copcp-wrap { margin:0; }
+.copdv-card h3 { display:flex; align-items:baseline; gap:8px; }
+.copdv-under { display:flex; justify-content:flex-end; margin-top:8px; }

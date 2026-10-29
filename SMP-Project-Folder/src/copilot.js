@@ -773,6 +773,7 @@ var COPILOT = (function(){
   function boxWord(pend){
     if (swotOn()) return swGuidedNow() ? "Type your answer…" : swCanChange() ? "Say what to change — move a line, drop one, reword one…" : PANE.swot.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
     if (competeOn()) return cpCanType() ? "Ask for a change — another title, a How to drop, a Measure to add…" : PANE.compete.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
+    if (dirsOn()) return dvCanType() ? (DVADD[PANE.chat.id] === dvAskWhat() ? (dvAskWhat() === "caps" ? "A Capability of your own — type it and press Enter…" : "A Direction of your own — type it and press Enter…") : "Ask for something — a couple more, or a different angle…") : PANE.dirs.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
     if (flowView()) {
       var ph = PANE.flow.phase;
       /* §652 — the grey line invites what the box can do NOW (Islam: "use
@@ -789,14 +790,14 @@ var COPILOT = (function(){
     var text = DRAFT[c.id] || "";
     return '<div class="copcompose">' +
       '<div class="copbox">' +
-        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow() && !swCanChange()) || (competeOn() && !cpCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
+        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow() && !swCanChange()) || (competeOn() && !cpCanType()) || (dirsOn() && !dvCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
         /* §652 — Send appears only once there is something to send (Islam:
            "the enter button should only appear when I write something, like
            Claude"); while the Copilot works it stays, held, saying so. */
         (function(){ var w = THINKING === c.id ? BUSY : "", none = !text.trim() && !pend;
         return '<button type="button" class="copsend' + heldCls(w) + '" data-cop-send aria-label="Send"' + (none ? ' hidden' : '') + (w ? held(w) : ' title="Send"') + '>' + SENDMARK + '</button>'; })() +
       '</div>' +
-      '<div class="copunder">' + (flowView() || swotOn() || competeOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
+      '<div class="copunder">' + (flowView() || swotOn() || competeOn() || dirsOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
         '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
         '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
         '<span class="cophint">Enter sends · Shift + Enter for a new line</span>' +
@@ -3044,7 +3045,7 @@ var COPILOT = (function(){
      it. */
   var DVASK = {}, DVOWN = {}, DVADD = {}, DVPEND = null;
   function dirsOn(){ return !!(PANE && PANE.chat && PANE.dirs); }
-  function dvView(j){ ["dirs","dirsApplied","dirsTodo","dirsDone","dirsScores","dirsWords","dirsBlocker"]
+  function dvView(j){ ["dirs","dirsApplied","dirsNextVersion","dirsTodo","dirsDone","dirsScores","dirsWords","dirsBlocker"]
     .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
   function dvCopy(){ return JSON.parse(JSON.stringify(PANE.dirs)); }
   function dvProgress(id){
@@ -3124,7 +3125,7 @@ var COPILOT = (function(){
   }
   function dvSideHtml(){
     var todo = PANE.dirsTodo || [], done = PANE.dirsDone || 0, n = todo.length;
-    return '<aside class="copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
+    return '<aside class="copftodo copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
       '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
       '<div class="copsw-tg"><ul>' + todo.map(function(t){
         return '<li class="copsw-li ' + t.state + '" data-cop-dv-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
@@ -3192,49 +3193,133 @@ var COPILOT = (function(){
       '<div class="copcp-ask"><textarea class="fld" data-cop-dv-ask rows="2" placeholder="Ask for something — a couple more, or a different angle" aria-label="Ask the Copilot">' + E(DVASK[id] || "") + '</textarea>' +
       '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-dv-send="' + what + '"' + held(busyHere && BUSY) + '>Send</button></div>';
   }
+  /* §675 — DIRECTIONS, SPLIT THREE WAYS (the SWOT's shape, §641–§653;
+     Competitive Discipline's, §654 C1; the working mockup
+     design-mockups/copilot-layout/2026-10-29_directions-split-working.html,
+     Islam: "ok proceed and build it"): the chat on the left in the order it
+     happened; the Directions and the Capabilities on the right where they
+     stay put, Go ahead under the Directions; Save and Apply to plan at the
+     pane's foot; the to-do beside. Asks for more go through the chat's own
+     box; "+ Add my own" turns the box into a line of your own. */
+  function dvStepWord(s){
+    if (s.saved) return "Saved";
+    if (s.mode === "capabilities") return "The Capabilities";
+    if (!s.start) return "Start";
+    return s.chose && s.withCaps ? "The Capabilities" : "The Directions";
+  }
+  function dvCanType(){ var s = PANE.dirs; if (!s || !canEdit() || s.saved || PANE.chat.archived) return false; return s.mode === "capabilities" ? s.caps.length > 0 : s.options.length > 0; }
+  function dvAskWhat(){ var s = PANE.dirs; return s.mode === "capabilities" || (s.chose && s.withCaps) ? "caps" : "dirs"; }
   function dirsHtml(){
-    var s = PANE.dirs, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id;
-    var head = '<div class="copvline"><b>' + E(PANE.chat.title || dvTitle(s.mode)) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</div>';
+    var s = PANE.dirs, c = PANE.chat, ed = canEdit() && !s.saved, busyHere = THINKING === c.id;
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
-    var main = '', g = s.options.filter(function(o){ return o.go; }), k = s.caps.filter(function(x){ return x.keep; });
-    var reply = s.reply ? cpMsg("ai", E(s.reply)) : '';
+    var todo = PANE.dirsTodo || [], done = PANE.dirsDone || 0;
+    var chat = '<div class="copchat copfchat copswchat copdvchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
+      '<div class="copfhead"><b><span class="copfname">' + E(c.title || dvTitle(s.mode)) + '</span><small> · ' + E(dvStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the tables") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
+      '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + dvMsgs(s, ed, busyHere) + work + '</div></div>' +
+      (!canEdit() ? VIEWONLY
+        : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
+        : composerHtml(c, false)) + '</div>';
+    return '<div class="copflow copswflow' + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
+      chat + GRIP + dvPaneHtml(s, ed, busyHere) + dvSideHtml() + '<div class="copshade" data-cop-sheet=""></div></div>';
+  }
+  /* the conversation, drawn from what is stored, in the order it happened */
+  function dvMsgs(s, ed, busyHere){
+    var out = [], id = PANE.chat.id, g = s.options.filter(function(o){ return o.go; });
+    var moreOpts = function(what){ return ed && !busyHere ? swOpts([swOpt('data-cop-dv-more="' + what + '"', "Suggest more"), swOpt('data-cop-dv-add="' + what + '"', DVADD[id] === what ? "Never mind" : "+ Add my own")]) : ''; };
+    var logOf = function(p, withOpts){
+      var rows = (s.log || []).filter(function(x){ return x.p === p; });
+      return rows.map(function(x, k){
+        if (x.w === "me") return meMsg(x.t);
+        return aiMsg(E(x.t) + (withOpts && k === rows.length - 1 ? moreOpts(p) : ''));
+      }).join("");
+    };
     if (s.mode === "directions") {
-      if (s.start === "") {
-        main = cpMsg("ai", 'The plan already has <b>' + s.hadPlan + '</b> ' + (s.hadPlan === 1 ? "Direction" : "Directions") + '. Start from them, or start fresh?') +
-          (ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-start="plan">Start from the existing ones</button>' +
-            '<button type="button" class="copopt" data-cop-dv-start="fresh">Start fresh</button></div>' : '');
-      } else if (!s.options.length) {
-        main = cpMsg("ai", 'I will suggest the Directions ' + E(placeWord()) + ' could take, from the plan as it stands, and score each by Urgency × Importance × Ease.') +
-          (ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-suggest>Suggest Directions</button></div>' : '');
-      } else {
-        main = cpMsg("ai", 'Here are ' + s.options.length + ' possible Directions, each scored out of ' + E(String((PANE.dirsWords || {}).max || 64)) + '. Change any score, set who owns it, and tick what goes ahead.') + reply +
-          dvOptionsHtml(ed);
-        if (ed && !s.chose) main += '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-go-all' + held(g.length ? "" : "Tick at least one Direction first.") + '>Go ahead with the ' + g.length + ' ticked</button></div>' +
-          dvAskHtml("dirs", busyHere);
-        if (s.chose) {
-          main += cpMsg("me", "Go ahead with these " + g.length + ".");
-          if (s.withCaps) {
-            main += cpMsg("ai", g.length + (g.length === 1 ? " Direction" : " Directions") + " chosen. Next, the Capabilities we need to deliver them.");
-            if (!s.caps.length) main += ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-caps>Suggest Capabilities</button></div>' : '';
-            else main += dvCapsHtml(ed) + (ed ? dvAskHtml("caps", busyHere) : '');
-          }
-        }
+      if (s.hadPlan) {
+        out.push(aiMsg('The plan already has <b>' + s.hadPlan + '</b> ' + (s.hadPlan === 1 ? "Direction" : "Directions") + '. Start from them, or start fresh?' +
+          (!s.start && ed && !busyHere ? swOpts([swOpt('data-cop-dv-start="plan"', "Start from the existing ones", true), swOpt('data-cop-dv-start="fresh"', "Start fresh")]) : '')));
+        if (!s.start) return out.join("");
+        out.push(meMsg(s.start === "plan" ? "Start from the existing ones" : "Start fresh"));
+      }
+      if (!s.options.length) {
+        out.push(aiMsg('I will suggest the Directions ' + E(placeWord()) + ' could take, from the plan as it stands, and score each by Urgency × Importance × Ease.' + (ed && !busyHere ? swOpts([swOpt('data-cop-dv-suggest', "Suggest Directions", true)]) : '')));
+        return out.join("");
+      }
+      out.push(meMsg("Suggest Directions"));
+      var dirsLog = (s.log || []).some(function(x){ return x.p === "dirs"; });
+      out.push(aiMsg('Here are <b>' + s.options.length + '</b> possible Directions, scored out of ' + E(String((PANE.dirsWords || {}).max || 64)) + ', on the right. Change any score there, set who owns it, and tick what goes ahead' + (ed && !s.chose ? ' — then <b>Go ahead</b>, under the table' : '') + '.' +
+        (ed && !s.chose ? ' Ask here for a couple more, or a different angle.' : '') + (!s.chose && !dirsLog ? moreOpts("dirs") : '')));
+      out.push(logOf("dirs", !s.chose));
+      if (!s.chose) return out.join("");
+      /* §644 — the Directions fold where they were agreed, opening on a press */
+      out.push(dvFoldHtml(s));
+      out.push(meMsg("Go ahead with these " + g.length + "."));
+      if (s.withCaps) {
+        out.push(aiMsg(g.length + (g.length === 1 ? " Direction" : " Directions") + " chosen. Next, the Capabilities we need to deliver them." +
+          (!s.caps.length && ed && !busyHere ? swOpts([swOpt('data-cop-dv-caps', "Suggest Capabilities", true)]) : '')));
+        if (!s.caps.length) return out.join("");
+        out.push(meMsg("Suggest Capabilities"));
       }
     } else {
       var have = dvExisting();
-      main = cpMsg("ai", have.length ? 'I read your <b>' + have.length + '</b> saved ' + (have.length === 1 ? "Direction" : "Directions") + ' and the SWOT. These are the Capabilities I would build to deliver them.'
-        : 'This place has no saved Directions yet, so I will work from the SWOT alone.');
-      if (!s.caps.length) main += ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-caps>Suggest Capabilities</button></div>' : '';
-      else main += reply + dvCapsHtml(ed) + (ed ? dvAskHtml("caps", busyHere) : '');
+      out.push(aiMsg(have.length ? 'I read your <b>' + have.length + '</b> saved ' + (have.length === 1 ? "Direction" : "Directions") + ' and the SWOT. These are the Capabilities I would build to deliver them.'
+        : 'This place has no saved Directions yet, so I will work from the SWOT alone.') + (!s.caps.length && ed && !busyHere ? swOpts([swOpt('data-cop-dv-caps', "Suggest Capabilities", true)]) : ''));
+      if (!s.caps.length) return out.join("");
+      out.push(meMsg("Suggest Capabilities"));
     }
-    if (ed && (s.mode === "capabilities" ? s.caps.length : s.chose)) {
-      var label = s.mode === "capabilities" ? "Save " + k.length + (k.length === 1 ? " Capability" : " Capabilities")
-        : "Save " + g.length + (g.length === 1 ? " Direction" : " Directions") + (s.withCaps ? " and " + k.length + (k.length === 1 ? " Capability" : " Capabilities") : "");
-      var why = PANE.dirsBlocker || "";
-      main += '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-dv-finish' + held(why) + '>' + E(label) + '</button></div>';
+    if (s.caps.length) {
+      var capsLog = (s.log || []).some(function(x){ return x.p === "caps"; });
+      out.push(aiMsg((s.caps.length === 1 ? 'Here is <b>1</b> Capability' : 'Here are <b>' + s.caps.length + '</b> Capabilities') + ', on the right. Set the kind and the owner there, and keep the ones to build.' +
+        (ed ? ' Ask here for a couple more, or a different angle. <b>Save</b>, at the foot of the tables, keeps them as a version.' : '') + (!capsLog ? moreOpts("caps") : '')));
+      out.push(logOf("caps", true));
     }
-    if (s.saved) main += savedApplyHtml(s.saved, "dv");
-    return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + dvSideHtml() + '</div>';
+    if (s.saved) out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Deliverables. <b>Apply to plan</b>, at the foot of the tables, writes it into the plan.'));
+    return out.join("");
+  }
+  function dvFoldHtml(s){
+    var open = !!FOLD[PANE.chat.id + ":dvopts"], sc = PANE.dirsScores || [], g = s.options.filter(function(o){ return o.go; });
+    var body = open ? '<div class="coppfb"><ul class="copdul">' + s.options.map(function(o, i){
+        return '<li>' + (o.go ? '<b>' : '') + E(o.title) + (o.go ? '</b>' : '') + ' <span class="copm">· ' + (sc[i] == null ? "unscored" : sc[i] + " of " + ((PANE.dirsWords || {}).max || 64)) + (o.go ? " · goes ahead" : "") + (o.ownedBy ? " · " + E(dvFnName(o.ownedBy) || o.ownedBy) : "") + '</span></li>'; }).join("") + '</ul></div>' : '';
+    return '<div class="coppf' + (open ? ' open' : '') + '" data-cop-foldbox="dvopts"><button type="button" class="coppfh" data-cop-pfold="dvopts" aria-expanded="' + open + '">' +
+      '<span class="copchev" aria-hidden="true">▸</span><b>The Directions</b><small>' + s.options.length + ' offered · ' + g.length + ' ticked</small><span class="copst done">Agreed</span></button>' + body + '</div>';
+  }
+  /* the work, on the right: the Directions, Go ahead under them, then the Capabilities */
+  function dvPaneHtml(s, ed, busyHere){
+    var g = s.options.filter(function(o){ return o.go; }), k = s.caps.filter(function(x){ return x.keep; });
+    var vn = s.saved ? s.saved.n : (PANE.dirsNextVersion || 1);
+    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E(dvTitle(s.mode)) + ' v' + E(vn) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</span>' +
+      '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
+    var body = '';
+    if (s.mode === "directions") {
+      body += '<div class="copsw-card copdv-card"><h3>The Directions' + (s.options.length ? ' <span class="copsw-n">' + s.options.length + ' offered · ' + g.length + ' ticked</span>' : '') + '</h3>' +
+        (s.options.length ? dvOptionsHtml(ed && !s.chose) +
+          (ed && !s.chose ? '<div class="copdv-under"><button type="button" class="copbtn" data-cop-dv-go-all' + held(busyHere ? BUSY : g.length ? "" : "Tick at least one Direction first.") + '>Go ahead with the ' + g.length + ' ticked</button></div>' : '')
+          : '<p class="copnote">Nothing suggested yet — the chat suggests them first.</p>') + '</div>';
+      if (s.withCaps) body += '<div class="copsw-card copdv-card"><h3>The Capabilities' + (s.caps.length ? ' <span class="copsw-n">' + s.caps.length + ' suggested · ' + k.length + ' kept</span>' : '') + '</h3>' +
+        (s.caps.length ? dvCapsHtml(ed) : '<p class="copnote">' + (s.chose ? 'Nothing suggested yet — the chat suggests them next.' : 'After the Directions.') + '</p>') + '</div>';
+    } else {
+      body += '<div class="copsw-card copdv-card"><h3>The Capabilities' + (s.caps.length ? ' <span class="copsw-n">' + s.caps.length + ' suggested · ' + k.length + ' kept</span>' : '') + '</h3>' +
+        (s.caps.length ? dvCapsHtml(ed) : '<p class="copnote">Nothing suggested yet — the chat suggests them first.</p>') + '</div>';
+    }
+    return '<div class="copleft copswpane copdvpane" data-cop-dvpane>' + head + '<div class="copswpb">' + body + '</div>' + dvFootHtml(s, busyHere) + '</div>';
+  }
+  function dvFootHtml(s, busyHere){
+    var saved = !!s.saved, note = PANE.dirsApplied, on = saved && ((note && note.n === s.saved.n) || APPLIED[PANE.chat.id] === s.saved.n), g = s.options.filter(function(o){ return o.go; }), k = s.caps.filter(function(x){ return x.keep; });
+    var sb = [];
+    if (saved) { sb.push('<b>v' + E(s.saved.n) + '</b> saved'); sb.push(on ? '<span class="on">v' + E(s.saved.n) + ' on the plan</span>' : 'not on the plan yet'); }
+    else sb.push('<b>v' + E(PANE.dirsNextVersion || 1) + '</b> in progress');
+    var state = '<span class="copsvst" data-cop-dvstate>' + sb.join(' <i>·</i> ') + '</span>';
+    var label = saved ? "Save" : s.mode === "capabilities" ? "Save " + k.length + (k.length === 1 ? " Capability" : " Capabilities")
+      : "Save " + g.length + (g.length === 1 ? " Direction" : " Directions") + (s.withCaps ? " and " + k.length + (k.length === 1 ? " Capability" : " Capabilities") : "");
+    return '<div class="copoutf copswfoot" data-cop-dvfoot>' + state + '<span class="copsw-sp"></span>' +
+      (canEdit() ? (function(){
+        var wf = busyHere ? BUSY : saved ? "Nothing has changed since it was saved."
+          : s.mode === "directions" && !s.options.length ? "Suggest the Directions first."
+          : s.mode === "directions" && !s.chose ? "Press Go ahead under the Directions first — Save takes what goes ahead."
+          : s.mode === "capabilities" && !s.caps.length ? "Suggest the Capabilities first."
+          : (PANE.dirsBlocker || "");
+        var wa = busyHere ? BUSY : !saved ? "Save it first — the plan only takes a saved version." : "";
+        return '<button type="button" class="copbtn' + heldCls(wf) + '" data-cop-dv-finish' + held(wf) + '>' + E(label) + '</button>' +
+          '<button type="button" class="copbtn solid' + heldCls(wa) + '" data-cop-dv-apply' + held(wa) + '>' + (on ? "Apply to plan again" : "Apply to plan") + '</button>'; })() : '') + '</div>';
   }
   /* The plan is written after the press, the same order How we compete keeps
      (§35). A ticked Direction that came from the plan updates THAT pillar;
@@ -3369,6 +3454,7 @@ var COPILOT = (function(){
     if (!dirsOn()) return false;
     var b, s = PANE.dirs, id = PANE.chat.id;
     if ((b = hit(ev, "[data-cop-dv-apply]"))) { if (canEdit() && s.saved) dvApplyAsk(); return true; }
+    if ((b = hit(ev, "[data-cop-pfold]"))) { var fk = id + ":" + b.getAttribute("data-cop-pfold"); if (FOLD[fk]) delete FOLD[fk]; else FOLD[fk] = true; draw(); return true; }
     if (!canEdit() || s.saved) return false;
     if ((b = hit(ev, "[data-cop-dv-start]"))) {
       var st = b.getAttribute("data-cop-dv-start");
@@ -3411,23 +3497,10 @@ var COPILOT = (function(){
       return true;
     }
     if ((b = hit(ev, "[data-cop-dv-more]"))) { dvAsk({ act: b.getAttribute("data-cop-dv-more") === "caps" ? "capSuggest" : "dirMore" }); return true; }
+    /* §675 — "+ Add my own" turns the chat's box into a line of your own, pressed again it is the ask box again */
     if ((b = hit(ev, "[data-cop-dv-add]"))) {
       var w = b.getAttribute("data-cop-dv-add"); DVADD[id] = DVADD[id] === w ? null : w; draw();
-      var bx = document.querySelector("[data-cop-dv-owntitle]"); if (bx) bx.focus();
-      return true;
-    }
-    if ((b = hit(ev, "[data-cop-dv-addgo]"))) {
-      var t = String(DVOWN[id] || "").trim();
-      if (!t) { var bx2 = document.querySelector("[data-cop-dv-owntitle]"); if (bx2) bx2.focus(); return true; }
-      DVOWN[id] = ""; DVADD[id] = null;
-      dvAsk({ act: b.getAttribute("data-cop-dv-addgo") === "caps" ? "capSuggest" : "dirMore", own:[t] });
-      return true;
-    }
-    if ((b = hit(ev, "[data-cop-dv-send]"))) {
-      var q = String(DVASK[id] || "").trim();
-      if (!q) { var bx3 = document.querySelector("[data-cop-dv-ask]"); if (bx3) bx3.focus(); return true; }
-      DVASK[id] = "";
-      dvAsk({ act: b.getAttribute("data-cop-dv-send") === "caps" ? "capSuggest" : "dirMore", ask:q });
+      var bx = document.querySelector("[data-cop-text]"); if (bx) bx.focus();
       return true;
     }
     if ((b = hit(ev, "[data-cop-dv-finish]"))) {
@@ -3866,6 +3939,9 @@ var COPILOT = (function(){
       if (swCanChange()) { if (forced == null && t) t.value = ""; DRAFT[id] = ""; swAsk({ act:"swotChange", ask: text.trim(), swot: swCopy() }); return; }
       return;
     }
+    /* §675 — in a Directions chat the box asks for more, or adds a line of your own */
+    if (dirsOn()) { if (!dvCanType()) return; var w = dvAskWhat(), ownLine = DVADD[id] === w; if (forced == null && t) t.value = ""; DRAFT[id] = ""; DVADD[id] = null;
+      dvAsk(ownLine ? { act: w === "caps" ? "capSuggest" : "dirMore", own: [text.trim()] } : { act: w === "caps" ? "capSuggest" : "dirMore", ask: text.trim() }); return; }
     /* §654 C1 — in a Competitive Discipline chat the box asks for a change to the table */
     if (competeOn()) { if (!cpCanType()) return; if (forced == null && t) t.value = ""; DRAFT[id] = ""; cpAsk({ act:"competeRefine", ask: text.trim() }); return; }
     var ctx = contextOf();

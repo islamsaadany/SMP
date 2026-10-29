@@ -130,7 +130,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
           ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place), applied: await appliedFoundation(c, chat, pw || chat.place) } : {}),
           ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}),
           ...(chat.section === "compete" ? await competeView(c, chat, pw) : {}),
-          ...(chat.section === "directions" || chat.section === "capabilities" ? await dirsView(c, chat) : {}),
+          ...(chat.section === "directions" || chat.section === "capabilities" ? await dirsView(c, chat, pw) : {}),
           ...(chat.section === "execution" ? await execView(c, chat) : {}),
           ...(chat.section === "advisory" ? await advisoryView(c, chat) : {}) };
       });

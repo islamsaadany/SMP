@@ -1106,7 +1106,10 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
        and nothing is stored as the person's choice; it folds by itself only
        when the Copilot is tight. */
     check(shut0 && shut0[0] === null && shut0[1] === null && (await railNow()) > 0, "§653 with a draft beside the chat and room for it, the rail stays open — the chat and its versions in view — and nothing is stored as the person's choice", JSON.stringify(shut0) + " " + (await railNow()));
-    await page.setViewportSize({ width: 1000, height: 900 }); await page.waitForTimeout(300);
+    /* §670 — the rule reads layout pixels, so the window is set in them: at
+       the 80% zoom this section runs at, a 1000px layout window is 800px. */
+    const zRail = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
+    await page.setViewportSize({ width: Math.round(1000 * zRail), height: 900 }); await page.waitForTimeout(300);
     const tightRail = await railNow();
     await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(300);
     check(!tightRail && (await railNow()) > 0, "§653 …and folds by itself only when the Copilot is tight (a 1000px window), opening again with room", JSON.stringify({ tightRail, back: await railNow() }));
@@ -1521,11 +1524,40 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       /* §642 (Islam's screenshot: the cards over the chat on a laptop): the
          switch reads the Copilot's own width, not the window's, so at a
          1100px window the cards and the to-do stay beside the chat … */
-      await page.setViewportSize({ width: 1100, height: 900 }); await page.waitForTimeout(250);
-      const lap = await page.evaluate(() => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"), t = document.querySelector(".copftodo");
-        return { cards: getComputedStyle(l).display, todo: getComputedStyle(t).display, beside: l.getBoundingClientRect().left >= c.getBoundingClientRect().right - 1,
-          main: Math.round(parseFloat(getComputedStyle(document.querySelector(".copmain")).width)) }; });
-      check(lap.cards !== "none" && lap.todo !== "none" && lap.beside, "§642 at a 1100px window the cards and the to-do stay beside the chat, as on a laptop", JSON.stringify(lap));
+      /* §670 — REWRITTEN, NOT LOOSENED (§218): what gives way, in order
+         (Islam: the rail before the to-do). At 1440 the three stand together
+         and the chat keeps its default; at 1300 the rail has folded and the
+         three columns still stand, the chat having yielded; at 1100 the
+         to-do has folded to its button too and the cards are still beside
+         the chat; the work beside the chat never goes under 480 while there
+         are two columns. */
+      /* Widths are layout pixels (what the rule reads), so the window is set
+         and the columns measured through the page's zoom. */
+      /* A rail pressed open earlier in this section is kept open for the
+         visit (§653), so the widths are read on a fresh visit of the chat. */
+      await open("/raya-trade/strategy/mobile/copilot/foundation"); await page.click("[data-cop-chats] [data-cop-chat]"); await page.waitForSelector(".copleft", { timeout: 10000 });
+      /* Real window widths; the page is at 80% from 1000px of window up
+         (_shared.css) and at 100% under it, and the rule reads layout pixels,
+         so the columns are measured through whatever zoom applies after the
+         resize. A 1040px window is 1300 layout pixels; 980 is 980. */
+      const lay = async (w) => { await page.setViewportSize({ width: w, height: 900 }); await page.waitForTimeout(350);
+        const z = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
+        return page.evaluate((z) => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"), t = document.querySelector(".copftodo"), r = document.querySelector(".coprails");
+          const bt = document.querySelector('.copfhead [data-cop-sheet="todo"]'), px = (el) => Math.round(el.getBoundingClientRect().width / z);
+          return { cards: getComputedStyle(l).display, todo: getComputedStyle(t).display, beside: l.getBoundingClientRect().left >= c.getBoundingClientRect().right - 1,
+            chat: px(c), work: px(l), rail: r ? px(r) : 0, todoBtn: !!(bt && bt.offsetParent) }; }, z); };
+      const L1440 = await lay(1440), L1300 = await lay(1040), L1100 = await lay(980);
+      check(L1440.cards !== "none" && L1440.todo !== "none" && L1440.beside && L1440.rail > 0 && !L1440.todoBtn, "§670 at 1440 the cards and the to-do stand beside the chat and the rail is open", JSON.stringify(L1440));
+      check(L1300.cards !== "none" && L1300.todo !== "none" && L1300.beside && L1300.rail === 0 && !L1300.todoBtn && L1300.work >= 480 && L1300.chat < 740,
+        "§670 at a 1040px window (1300 layout) the rail has folded first, the three columns still stand, the chat has yielded and the cards keep at least 480px beside it", JSON.stringify(L1300));
+      check(L1100.cards !== "none" && L1100.todo === "none" && L1100.beside && L1100.rail === 0 && L1100.todoBtn && L1100.work >= 388,
+        "§670 at a 980px window the to-do has folded to its button too, and the cards are still beside the chat", JSON.stringify(L1100));
+      await page.click('.copfhead [data-cop-sheet="todo"]'); await page.waitForTimeout(150);
+      const tb = await page.evaluate(() => { const t = document.querySelector(".copftodo"), f = document.querySelector(".copflow"), l = document.querySelector(".copleft"); const a = t.getBoundingClientRect(), b = f.getBoundingClientRect(), w = l.getBoundingClientRect();
+        return { todo: getComputedStyle(t).display, over: Math.abs(a.right - b.right) <= 2 && a.left < w.right && a.right > w.left, shade: getComputedStyle(document.querySelector(".copflow > .copshade")).display }; });
+      await page.click(".copflow > .copshade", { position: { x: 20, y: 20 } }); await page.waitForTimeout(150);
+      check(tb.todo === "flex" && tb.over && tb.shade === "block" && (await page.evaluate(() => getComputedStyle(document.querySelector(".copftodo")).display)) === "none",
+        "§670 …and its button opens the to-do over the work's side of the Copilot, closed by a press beside it", JSON.stringify(tb));
       /* … and only when the Copilot itself has no room do they open over it. */
       await page.setViewportSize({ width: 760, height: 900 }); await page.waitForTimeout(250);
       const n0 = await page.evaluate(() => ({ cards: getComputedStyle(document.querySelector(".copleft")).display, todo: getComputedStyle(document.querySelector(".copftodo")).display,
@@ -2115,6 +2147,16 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     await page.waitForSelector(".copsw-grid", { timeout: 10000 });
     const resCell = await page.evaluate(() => { const rows = Array.from(document.querySelectorAll(".copsw-grid tbody tr")); const r = rows[0]; return r ? r.lastElementChild.textContent.trim() : null; });
     check(resCell === "—", "Internal has no Deep research — its cell reads a dash", resCell);
+    /* §670 — squeezed (Islam's screenshot), the methods grid keeps its shape:
+       row names on one line, column names on two at most, every tick in its column. */
+    const zGrid = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
+    await page.setViewportSize({ width: Math.round(1100 * zGrid), height: 900 }); await page.waitForTimeout(300);
+    const grid = await page.evaluate(() => { const rh = Array.from(document.querySelectorAll(".copsw-grid th[scope=row]")), ch = Array.from(document.querySelectorAll(".copsw-grid thead th"));
+      const lines = (t) => { const r = document.createRange(); r.selectNodeContents(t); const ys = new Set(Array.from(r.getClientRects()).map((b) => Math.round(b.top))); return ys.size || 1; };
+      return { rowLines: rh.map(lines), colLines: ch.map(lines),
+        ticks: document.querySelectorAll(".copsw-grid [data-cop-sw-m]").length, wrapW: Math.round(document.querySelector(".copsw-gridwrap").getBoundingClientRect().width), tableW: Math.round(document.querySelector(".copsw-grid").getBoundingClientRect().width) }; });
+    await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(300);
+    check(grid.rowLines.every((n) => n <= 1) && grid.colLines.every((n) => n <= 2) && grid.ticks === 11, "§670 at a 1100px window the methods grid keeps its shape — row names on one line, column names on two at most, eleven ticks", JSON.stringify(grid));
     for (const m of ["internal|guided", "micro|report", "macro|research"]) { await page.click('[data-cop-sw-m="' + m + '"]'); await page.waitForTimeout(300); }
     await shot("2-methods");
     let sw = await swotRow(id);

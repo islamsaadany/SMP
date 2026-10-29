@@ -1,0 +1,193 @@
+<title>Refine Loading</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- ═════════════════════════════════════════════════════════════════
+     MOCKUP · spec 055 · Meeting Notes — what the page shows while the
+     assistant refines, while the minutes are sent, and when the assistant
+     refuses. design-mockups/meeting-notes/2026-10-29_refine-loading.html
+
+     Islam, 2026-10-29: "the meeting notes when I press refine by AI it
+     doesn't show any loading behavior". Today the only sign is the button's
+     own word turning to "Refining…" and going pale; the page stands still
+     for several seconds. Rule 1d: every press shows something at once, in
+     the platform's one practice — the grey skeleton, shaped like what is
+     coming, the real thing replacing it when it lands.
+
+     Three frames, the note page's own look (the built page's tokens):
+       1 · Refine pressed — the minutes' skeleton where the minutes will land
+       2 · Send pressed — the foot says it is sending
+       3 · the assistant refused — the reason where the skeleton was
+     ═════════════════════════════════════════════════════════════════ -->
+<style>
+/* layout: the note page as built, three frames stacked, each labelled */
+:root{--bar:#16325C;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-ink:#FFF;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;--zebra:#F7F8FA;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-ink:#12151C;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;--zebra:#161A22;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-ink:#12151C;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;--zebra:#161A22;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.pg{max-width:1000px;margin:0 auto}
+/* the frame labels, the mockup's own and not the page's */
+.frame{margin:28px 0 0;padding-top:18px;border-top:2px solid var(--line)}
+.frame:first-child{border-top:0;margin-top:14px}
+.fl{font:600 11px/1.6 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0 0 4px}
+.fl small{display:block;font:400 13px/1.5 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3);max-width:70ch;text-wrap:pretty}
+/* ── the note page, as built ── */
+.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:10px 10px 0 0;font-size:13.5px}
+.bar b{font-weight:600}.bar .org{color:#A9BBD8;margin-left:auto}
+.note{background:var(--ground);border:1px solid var(--line);border-top:0;border-radius:0 0 10px 10px;padding:18px 20px 22px}
+.back{display:inline-block;font:600 12.5px/1 var(--font);color:var(--ink-3);text-decoration:none;margin-bottom:10px}
+.lab{font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 4px}
+.head{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;margin-bottom:8px}
+.ttl{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:600 21px/1.3 var(--font);padding:9px 11px}
+.date{display:inline-flex;align-items:center;gap:8px;font:400 13px/1.4 var(--mono);color:var(--ink-2);border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 9px;white-space:nowrap}
+.date svg{width:14px;height:14px;color:var(--gold)}
+.att{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 10px}
+.chip i{font-style:normal;font-weight:400;color:var(--ink-3)}.chip span{color:var(--ink-3);padding:0 2px;font-size:13px}
+.addatt{font:600 12.5px/1 var(--font);color:var(--gold);background:none;border:1px dashed var(--line);border-radius:999px;padding:6px 10px}
+.raw{width:100%;min-height:300px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:14px 16px;font:400 15px/1.6 var(--font);white-space:pre-wrap;margin:0}
+.side .raw{min-height:340px;font-size:14px}
+.foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+.foot .hint{font-size:13px;color:var(--ink-3)}.foot .spacer{flex:1}
+.saved{font:400 12px/1.4 var(--mono);color:var(--ink-3)}
+.btn{font:600 13px/1.5 var(--font);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;white-space:nowrap}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.btn.held{opacity:.55}
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-items:start}
+.side .lab{display:flex;align-items:center;gap:8px}.side .lab .btn{margin-left:auto;padding:5px 9px;font:600 11.5px/1 var(--font);letter-spacing:0;text-transform:none}
+.mins{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px}
+.mins .lab:first-child{margin-top:0}
+.mins p{margin:0;font-size:14.5px}.mins ul{margin:0;padding-left:20px;font-size:14.5px}.mins li{margin:0 0 3px}
+.acts{width:100%;border-collapse:collapse;font-size:14px}
+.acts th{text-align:left;font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 6px 4px 0;border-bottom:1px solid var(--line)}
+.acts td{padding:6px 6px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.rm{font-size:13px;color:var(--bad);text-decoration:underline}
+.said{margin:0 0 12px;padding:9px 13px;border:1px solid var(--bad);border-radius:8px;background:var(--bad-bg);color:var(--bad);font-size:13.5px}
+.unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
+/* ── THE SKELETON — the platform's own bars (§94.10, lib/navskel.ts): the
+   line colour, a 6px corner, the slow pulse; the quiet grey for a second
+   tone. Shaped like the minutes that will land: a summary, three bullets,
+   two agreed, an actions table of two rows, one open, the next meeting. ── */
+.sk{display:block;height:13px;border-radius:6px;background:var(--line);animation:pulse 1.5s ease-in-out infinite}
+.sk.q{background:var(--surface-2)}
+.sk.t{height:11px}
+.skrow{display:flex;gap:10px;align-items:center;margin:0 0 7px}
+.skrow .dot{width:5px;height:5px;border-radius:50%;background:var(--line);flex:none;margin-left:6px}
+.sklab{height:9px;width:68px;border-radius:5px;background:var(--surface-2);margin:14px 0 8px;animation:pulse 1.5s ease-in-out infinite}
+.sklab:first-child{margin-top:0}
+.sktab{display:grid;grid-template-columns:1fr 70px 70px;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line-2)}
+.sktab.h{border-bottom:1px solid var(--line);padding:0 0 5px}
+.sktab.h .sk{height:8px;width:36px}
+.working{display:flex;align-items:center;gap:10px;font:500 13.5px/1.4 var(--font);color:var(--gold);margin:0 0 12px}
+.working .spin{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--gold);animation:turn .9s linear infinite;flex:none}
+.foot .working{margin:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes turn{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sk,.sklab{animation:none;opacity:.75}.working .spin{animation:none}}
+@media (max-width:760px){.two{grid-template-columns:1fr}.head{grid-template-columns:1fr}}
+</style>
+
+<div class="pg">
+
+<!-- ═══ FRAME 1 · Refine pressed ═══ -->
+<section class="frame">
+  <p class="fl">1 · Refine pressed<small>The two-column page appears at the press. Where the minutes will land, their shape in the platform's grey bars, with one line over it. The notes stay readable beside them; Refine and Send are held. When the assistant answers, the real minutes replace the bars in place.</small></p>
+  <div class="bar"><b>Meeting Notes</b><span class="org">Raya Trade</span></div>
+  <div class="note">
+    <a class="back" href="#">&larr; All meetings</a>
+    <div class="head">
+      <div><p class="lab">Title</p><div class="ttl">Q4 planning</div></div>
+      <div><p class="lab">Date</p><span class="date">Wed 28 Oct 2026 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1.8" y="3" width="12.4" height="11.2" rx="2"/><path d="M1.8 6.4h12.4M5 1.6v2.6M11 1.6v2.6"/></svg></span></div>
+    </div>
+    <p class="lab">Attendees</p>
+    <div class="att"><span class="chip">Islam <i>&middot; office</i> <span>&times;</span></span><span class="chip">Ramy <i>&middot; Mobile</i> <span>&times;</span></span><span class="chip">Hala <i>&middot; Mobile</i> <span>&times;</span></span><span class="addatt">+ Add attendee</span></div>
+    <div class="two" style="margin-top:12px">
+      <div>
+        <div class="working"><span class="spin"></span>Refining the notes into minutes&hellip;</div>
+        <div class="mins" aria-busy="true">
+          <span class="sklab"></span>
+          <span class="sk" style="width:92%"></span><span class="sk" style="width:64%;margin-top:7px"></span>
+          <span class="sklab"></span>
+          <div class="skrow"><span class="dot"></span><span class="sk" style="width:80%"></span></div>
+          <div class="skrow"><span class="dot"></span><span class="sk" style="width:58%"></span></div>
+          <div class="skrow"><span class="dot"></span><span class="sk" style="width:71%"></span></div>
+          <span class="sklab"></span>
+          <div class="skrow"><span class="dot"></span><span class="sk" style="width:66%"></span></div>
+          <div class="skrow"><span class="dot"></span><span class="sk" style="width:45%"></span></div>
+          <span class="sklab"></span>
+          <div class="sktab h"><span class="sk q"></span><span class="sk q"></span><span class="sk q"></span></div>
+          <div class="sktab"><span class="sk" style="width:85%"></span><span class="sk q" style="width:48px"></span><span class="sk q" style="width:52px"></span></div>
+          <div class="sktab"><span class="sk" style="width:62%"></span><span class="sk q" style="width:40px"></span><span class="sk q" style="width:56px"></span></div>
+          <span class="sklab"></span>
+          <div class="skrow"><span class="dot"></span><span class="sk" style="width:52%"></span></div>
+          <span class="sklab"></span>
+          <span class="sk" style="width:38%"></span>
+        </div>
+      </div>
+      <div class="side">
+        <p class="lab">Notes <span class="btn held">Refining&hellip;</span></p>
+        <pre class="raw">ramy: mobile figures ready by 20 nov
+hala: marketing spend moved to q4, needs a line in the plan
+agreed: drafts by 22 nov, islam to review
+open: who owns the retail numbers?
+next meeting: 5 nov</pre>
+      </div>
+    </div>
+    <div class="foot"><span class="saved">Saved just now</span><span class="spacer"></span><span class="hint">Hala has no email and will not receive them.</span><span class="btn held">Send to 2 attendees</span></div>
+  </div>
+</section>
+
+<!-- ═══ FRAME 2 · Send pressed ═══ -->
+<section class="frame">
+  <p class="fl">2 · Yes, send pressed<small>The question gives way to the same line in the foot, where the press was made. The minutes stay as they are; nothing else moves. When the emails have gone, the line becomes "The minutes went to 2 people" here, and the sent note above the minutes appears.</small></p>
+  <div class="bar"><b>Meeting Notes</b><span class="org">Raya Trade</span></div>
+  <div class="note">
+    <div class="two">
+      <div>
+        <div class="mins">
+          <p class="lab">Summary</p><p>Preparing the Q4 plan: Mobile&rsquo;s figures by 20 November, marketing spend moved into Q4, drafts by 22 November.</p>
+          <p class="lab">Discussed</p><ul><li>Mobile&rsquo;s figures are ready by 20 November.</li><li>Marketing moved its spend to Q4 and needs a line in the plan.</li></ul>
+          <p class="lab">Agreed</p><ul><li>Drafts by 22 November, reviewed by Islam.</li></ul>
+          <p class="lab">Actions</p>
+          <table class="acts"><thead><tr><th>What</th><th>Who</th><th>By when</th></tr></thead><tbody><tr><td>Mobile Q4 figures</td><td>Ramy</td><td>20 Nov</td></tr><tr><td>Marketing line in the plan</td><td>Hala</td><td>22 Nov</td></tr></tbody></table>
+          <p class="lab">Open</p><ul><li>Who owns the retail numbers?</li></ul>
+          <p class="lab">Next meeting</p><p>5 November.</p>
+        </div>
+      </div>
+      <div class="side">
+        <p class="lab">Notes <span class="btn">Refine again</span></p>
+        <pre class="raw" style="min-height:200px">ramy: mobile figures ready by 20 nov
+hala: marketing spend moved to q4, needs a line in the plan
+agreed: drafts by 22 nov, islam to review
+open: who owns the retail numbers?
+next meeting: 5 nov</pre>
+      </div>
+    </div>
+    <div class="foot"><span class="saved">Saved just now</span><span class="spacer"></span><span class="hint">Hala has no email and will not receive them.</span><div class="working"><span class="spin"></span>Sending the minutes to 2 people&hellip;</div></div>
+  </div>
+</section>
+
+<!-- ═══ FRAME 3 · the assistant refused ═══ -->
+<section class="frame">
+  <p class="fl">3 · The assistant did not answer<small>The bars go, and the reason stands where they were, in the server's own words, with the button back. Not at the top of the page, where a person looking at the minutes would not see it.</small></p>
+  <div class="bar"><b>Meeting Notes</b><span class="org">Raya Trade</span></div>
+  <div class="note">
+    <div class="two">
+      <div>
+        <p class="said" style="margin:0">The assistant did not answer. Nothing was changed &mdash; press Refine again in a moment.</p>
+      </div>
+      <div class="side">
+        <p class="lab">Notes <span class="btn gold">Refine into minutes</span></p>
+        <pre class="raw" style="min-height:160px">ramy: mobile figures ready by 20 nov
+hala: marketing spend moved to q4, needs a line in the plan
+agreed: drafts by 22 nov, islam to review</pre>
+      </div>
+    </div>
+    <div class="foot"><span class="saved">Saved just now</span><span class="spacer"></span><span class="btn held">Send to 2 attendees</span></div>
+  </div>
+</section>
+
+</div>

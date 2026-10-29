@@ -1,0 +1,124 @@
+<title>SWOT Ways In</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: the Analysis start screen as it stands, then two ways of saying the SWOT's four ways in on it — chips that inform, or chips that start with a method ticked. */
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--goldbg:#FBF1DE;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--bad:#B91C1C;--badbg:#FBE9E9;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--goldbg:#2E2717;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--bad:#F5A3A3;--badbg:#3A1E1E;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--goldbg:#2E2717;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--bad:#F5A3A3;--badbg:#3A1E1E;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-size:26px;margin:0;text-wrap:balance}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:80ch}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.fh{display:flex;align-items:baseline;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.fh b{font-size:15px}
+.tag{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 8px;border-radius:9px}
+.tag.before{background:var(--badbg);color:var(--bad)}
+.tag.after{background:var(--goodbg);color:var(--good)}
+.fh small{color:var(--ink-3);font-size:12.5px}
+.scr{background:var(--surface-2);padding:28px 16px 32px}
+.start{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.start h2{margin:0 0 2px;text-align:center;font-size:17px}
+.box{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:12px 12px 26px;color:var(--ink-3)}
+.under{display:flex;gap:8px;align-items:center;color:var(--ink-3);font-size:11px}
+.under .clip{border:1px solid var(--line);border-radius:6px;padding:1px 8px;background:var(--surface);color:var(--ink)}
+.k{text-align:center;color:var(--ink-3);font-size:12px}
+.or{display:flex;align-items:center;gap:10px;font:700 10px/1.4 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:620px){.cards{grid-template-columns:1fr}}
+.card{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px 10px 38px;position:relative;display:flex;flex-direction:column;gap:4px;min-width:0}
+.card.plan{border-color:var(--goldfill);box-shadow:inset 0 0 0 1px var(--goldfill)}
+.card .ic{position:absolute;left:12px;top:12px;width:16px;height:16px;border:1.5px solid var(--ink-3);border-radius:3px}
+.card .eyebrow{font:700 9.5px/1.4 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.card b{font-size:13.5px}
+.card p{margin:0;color:var(--ink-2);font-size:12.5px}
+.card .meta{color:var(--ink-3);font-size:11px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.chip{font:600 11px/1.6 var(--sans);padding:0 8px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--ink-2)}
+.chip.b{background:var(--surface);cursor:pointer}
+.chip.b:hover{border-color:var(--gold);color:var(--ink)}
+.chip.b.on{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.chipnote{color:var(--ink-3);font-size:11px;margin:0}
+.note{padding:8px 14px 12px;font-size:13.5px;color:var(--ink-2);border-top:1px solid var(--line)}
+.note b{color:var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.pair{grid-template-columns:1fr}}
+.qs{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;max-width:85ch}
+.qs b{color:var(--ink)}
+.grid{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.grid th,.grid td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:center}
+.grid thead th{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;background:var(--nav);color:var(--navink);white-space:normal;line-height:1.2}
+.grid th[scope=row]{text-align:left;white-space:nowrap}
+.tick{display:inline-block;width:13px;height:13px;border:1px solid var(--line);border-radius:3px;vertical-align:middle}
+.tick.on{background:var(--nav);border-color:var(--nav)}
+.pre{margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.pre .h{font-size:12px;color:var(--ink-3);margin-bottom:4px}
+</style>
+<div class="wrap">
+  <header>
+    <h1>The SWOT's four ways in, on its start screen</h1>
+    <p class="lede">Today the Analysis start screen shows two cards, and the four ways of gathering a SWOT appear only one step later, in the methods grid inside the chat. Someone who wants to bring their reports cannot see that from the two cards. Two ways of saying it on the start screen, drawn on the screen as it stands.</p>
+  </header>
+
+  <div class="frame"><div class="fh"><b>Before</b><span class="tag before">today</span><small>the run's own screen of Mobile's Analysis start</small></div>
+    <div class="scr"><div class="start">
+      <h2>What would you like to do with Mobile’s Analysis?</h2>
+      <div class="box">Ask anything, attach your notes, or paste an earlier SWOT or analysis…</div>
+      <div class="under"><span class="clip">Attach notes</span><span>Word, PDF or Excel · or paste · Enter sends</span></div>
+      <div class="k">Typing, attaching or pasting here starts a free chat.</div>
+      <div class="or">or start step by step</div>
+      <div class="cards">
+        <div class="card plan"><span class="ic"></span><span class="eyebrow">On the plan today</span><b>Start from the existing plan</b><p>Load what is on the plan and change any part. The plan moves only on Apply.</p><span class="meta">Mobile’s Analysis · 19 lines</span></div>
+        <div class="card"><span class="ic"></span><b>SWOT, step by step</b><p>The internal, micro and macro analyses, then the SWOT — from notes, a template or guided questions.</p></div>
+      </div>
+    </div></div>
+    <div class="note">The second card's line names three of the four ways in passing and says nothing of Ready reports or Deep research; the real choice, per area, is the grid one step on.</div></div>
+
+  <div class="pair">
+    <div class="frame"><div class="fh"><b>A · chips that tell</b><span class="tag after">proposed</span></div>
+      <div class="scr"><div class="start">
+        <div class="or">or start step by step</div>
+        <div class="cards">
+          <div class="card plan"><span class="ic"></span><span class="eyebrow">On the plan today</span><b>Start from the existing plan</b><p>Load what is on the plan and change any part. The plan moves only on Apply.</p><span class="meta">Mobile’s Analysis · 19 lines</span></div>
+          <div class="card"><span class="ic"></span><b>SWOT, step by step</b><p>The internal, micro and macro analyses, then the SWOT.</p>
+            <div class="chips"><span class="chip">Guided questions</span><span class="chip">Template</span><span class="chip">Ready reports</span><span class="chip">Deep research</span></div>
+            <p class="chipnote">Pick one or more per area at the next step.</p></div>
+        </div>
+      </div></div>
+      <div class="note"><b>The card says the four ways; the grid still decides.</b> The chips are words, not buttons: the card is pressed as one, and the methods step opens as today with nothing ticked. Nothing changes in the flow; the start screen only stops hiding what comes next.</div></div>
+
+    <div class="frame"><div class="fh"><b>B · chips that start</b><span class="tag after">alternative</span><small>press a chip here to see it</small></div>
+      <div class="scr"><div class="start">
+        <div class="or">or start step by step</div>
+        <div class="cards">
+          <div class="card plan"><span class="ic"></span><span class="eyebrow">On the plan today</span><b>Start from the existing plan</b><p>Load what is on the plan and change any part. The plan moves only on Apply.</p><span class="meta">Mobile’s Analysis · 19 lines</span></div>
+          <div class="card"><span class="ic"></span><b>SWOT, step by step</b><p>The internal, micro and macro analyses, then the SWOT.</p>
+            <div class="chips" id="bchips"><button type="button" class="chip b" data-m="guided">Guided questions</button><button type="button" class="chip b" data-m="template">Template</button><button type="button" class="chip b" data-m="report">Ready reports</button><button type="button" class="chip b" data-m="research">Deep research</button></div>
+            <p class="chipnote" id="bnote">Press a way to start with it ticked for every area; the grid still lets you change it.</p></div>
+        </div>
+        <div class="pre" id="bpre" hidden><div class="h">The methods step would open like this:</div>
+          <table class="grid"><thead><tr><th></th><th>Guided questions</th><th>Template</th><th>Ready reports</th><th>Deep research</th></tr></thead><tbody id="bgrid"></tbody></table></div>
+      </div></div>
+      <div class="note"><b>A chip pressed starts the workflow with that way ticked wherever the area offers it</b> (Internal has no Deep research); the card pressed elsewhere starts with nothing ticked, as today. One press fewer for someone who knows how they will gather it; one more thing on the card that can be pressed by mistake.</div></div>
+  </div>
+
+  <div class="qs"><b>My recommendation is A.</b> It fixes what you noticed, that the ways in cannot be seen from the start, without putting a second control on a card that is already a button. B is there to compare; if you want it, the chip's choice would be carried into the chat's first step the way the plan card's is (§653).</div>
+</div>
+<script>
+(function(){
+  var OFF = { internal: ["guided", "template", "report"], micro: ["guided", "template", "report", "research"], macro: ["guided", "template", "report", "research"] };
+  var ROWS = [["internal", "Internal"], ["micro", "Micro"], ["macro", "Macro"]], COLS = ["guided", "template", "report", "research"], on = null;
+  function draw(){
+    document.querySelectorAll("#bchips .chip").forEach(function(c){ c.classList.toggle("on", c.getAttribute("data-m") === on); });
+    var pre = document.getElementById("bpre"); pre.hidden = !on; if (!on) return;
+    document.getElementById("bgrid").innerHTML = ROWS.map(function(r){ return '<tr><th scope="row">' + r[1] + '</th>' + COLS.map(function(m){ return OFF[r[0]].indexOf(m) < 0 ? '<td>—</td>' : '<td><span class="tick' + (m === on ? " on" : "") + '"></span></td>'; }).join("") + '</tr>'; }).join("");
+  }
+  document.getElementById("bchips").addEventListener("click", function(e){ var b = e.target.closest("[data-m]"); if (!b) return; on = on === b.getAttribute("data-m") ? null : b.getAttribute("data-m"); draw(); });
+  draw();
+})();
+</script>

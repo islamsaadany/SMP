@@ -159,15 +159,31 @@ var READING = (function () {
     return '<div class="rfig"><b style="color:' + bandInk(v) + '">' + pct(v) + '</b><span>' + what + ' — ' + sub + '</span>' +
       (v == null || isNaN(v) ? '' : '<i class="rband ' + band(v) + '">' + esc(bandWord(v)) + '</i>') + '</div>';
   }
+  /* OVERALL PERFORMANCE (§683). Islam, of El Abd's company: *"why the
+     overall performance is not showing while it is showing in the
+     performance tab for directions performance and execution"*. §676 scored
+     a top layer by its units alone; El Abd has none, and its plan is the top
+     layer's own. So the three figures are the ones the Performance page
+     draws for that subject: a unit's headline, its directions' mean and its
+     execution ratio (`unitObjectives`, `unitPillars`, `unitRatio` — the
+     ratio, delivered against planned, which is the page's own card, not the
+     delivered mean); a top layer's own key objectives, then, where it has a
+     plan of its own in directions, that plan's mean and ratio over
+     `topAsUnit()`, as the group page's own section does (§607), else the
+     units' headlines at their weights and their execution. */
   function performance(key) {
     var unit = isUnit(key), u = unit ? UNITS[key] : null;
+    var own = !unit && topHasPlan() && planOn("group") && topWay() !== "projects";
+    var tu = own ? topAsUnit() : null;
     var a = unit ? unitObjectives(u) : groupKeyObjectives();
-    var b = unit ? unitPillars(u) : groupUnitsObjectives();
-    var c = unit ? unitExec(u) : groupExec();
+    var b = unit ? unitPillars(u) : own ? unitPillars(tu) : groupUnitsObjectives();
+    var c = unit ? unitRatio(u) : own ? unitRatio(tu) : groupExec();
     var head = unit ? u.keyObjectives : GROUP.keyObjectives;
+    var bw = unit || own ? "Directions" : L1("unitword") + "s";
+    var bs = unit ? "each direction\u2019s measures, averaged per direction" : own ? "the " + esc(labelWord("topword", "group") || "company").toLowerCase() + "\u2019s own directions, averaged" : "the units\u2019 own headlines, at their weights";
     return '<div class="rthree">' +
-      figure(a, "Measures", unit ? "the unit’s headline measures against their targets" : "the group’s own headline measures against their targets") +
-      figure(b, unit ? "Directions" : L1("unitword") + "s", unit ? "each direction’s measures, averaged per direction" : "the units’ own headlines, at their weights") +
+      figure(a, "Measures", unit ? "the unit\u2019s headline measures against their targets" : "the group\u2019s own headline measures against their targets") +
+      figure(b, bw, bs) +
       figure(c, "Execution", "delivered against what should have been by now; 100% is on plan, not finished") + '</div>' +
       '<div class="rcard"><h3>Headline measures</h3>' + measureRows(head) + '</div>';
   }

@@ -70493,3 +70493,11 @@ Islam, of an opened direction at El Abd: *"the tables columns are too far away w
 **Checked**: the frozen shell built whole on the worked example — an opened direction, Foundation and Overall performance all draw the tables so; no error.
 
 **§682 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** A fast-forward: `main` had not moved since §681. No migrations, nobody signed out.
+
+## §683 — The reading window's Overall performance reads a top layer by its own plan, and execution by the ratio (2026-10-29)
+
+Islam, of El Abd's company in the window: *"why the overall performance is not showing while it showing in the performance tab for directions performance and execution"*.
+
+**Why it showed nothing.** §676 scored a top layer by its units alone — the units' headlines at their weights and their execution — which is the group page's reading for a client like Raya. El Abd has no business-unit layer; its directions and capabilities are the top layer's own, and the group page scores those through its own section (§607): the plan's directions averaged, `unitPillars(topAsUnit())`, and its execution ratio, `unitRatio(topAsUnit())`. The window asks the same question the page asks (`topHasPlan() && planOn("group") && topWay() !== "projects"`) and takes the same figures when it answers yes; otherwise the units' as before. **And the execution figure is the ratio**, delivered against what should have been by now, which is what the Performance page's own card shows (`unitRatio`), not the delivered mean (`unitExec`) §676 had taken; the page info says it in so many words — *execution is a ratio*. A unit's three figures now equal the workbench's to the point (Mobile: 78 / 67 / 54, both sides).
+
+**Checked**: the frozen shell built whole on the worked example — Mobile's three figures read as the Performance page computes them; Raya's group reads its measures and, with no weights set on its units, a dash for the other two, as the group page does. **Not checked**: El Abd itself, whose record this session does not hold; the condition is the group page's own.

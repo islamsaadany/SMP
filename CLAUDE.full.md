@@ -10918,7 +10918,7 @@ python3 checks/enter-commits.py # Enter commits a growing one-line box instead o
                                 # paragraph key — both ends (§229)
 python3 checks/who-we-are-box.py # Who we are is typed in ONE box with the pen on
                                 # and reads as the two-column list it always was
-                                # (§679): a line per row, the bold opening words
+                                # (§685): a line per row, the bold opening words
                                 # the opener, bold only from the start of a line,
                                 # Enter a new row, paste words only, a blank line
                                 # no row, written on blur and only when changed,

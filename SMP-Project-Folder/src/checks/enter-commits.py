@@ -113,7 +113,7 @@ with sync_playwright() as p:
     pg.evaluate("""() => { leaveModes(); current='mobile'; currentSub='strategy';
       CURSEC.strategy='foundation'; EDIT_PAGE.foundation=true; paint(); }""")
     pg.wait_for_timeout(600)
-    # §679: Who we are is one box now and draws no `.clause` with the pen
+    # §685: Who we are is one box now and draws no `.clause` with the pen
     # on, so the rows-2 area pressed here is the unit's purpose — the same
     # kind of box, on the same page.
     r3 = press_enter_in('#panel textarea[rows="2"]:not(.grow)')

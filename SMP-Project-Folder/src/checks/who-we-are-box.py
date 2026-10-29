@@ -1,4 +1,4 @@
-"""WHO WE ARE IS TYPED IN ONE BOX (§679).
+"""WHO WE ARE IS TYPED IN ONE BOX (§685).
 
 Islam, of the five lines of two boxes each: *"is there a more convenient way
 for adding this part without filling 8 boxes"*; then, shown the one-box

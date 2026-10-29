@@ -3117,7 +3117,7 @@ function renderCompanyFoundation(){
   return foundationBody(o, "co:" + k, gpg);
 }
 
-/* ── WHO WE ARE IS TYPED IN ONE BOX (§679) ───────────────────────────
+/* ── WHO WE ARE IS TYPED IN ONE BOX (§685) ───────────────────────────
    Islam, of the five lines of two boxes each: *"is there a more convenient
    way for adding this part without filling 8 boxes"* — and, of the one-box
    drawing §613 had set aside: *"keep approach 2 in creation but shows like

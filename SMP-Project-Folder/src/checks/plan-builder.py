@@ -209,7 +209,7 @@ with sync_playwright() as p:
 
     print("\n── 6 · the surfaces that could never start (§129's audit) ──")
     pg.query_selector('#buildband [data-bnav="found"]').click(); pg.wait_for_timeout(400)
-    # §679: Who we are is one box. A new unit starts with the group's openers
+    # §685: Who we are is one box. A new unit starts with the group's openers
     # and nothing after them, so the first line is written by putting the
     # caret after "We are" and typing — the bold must NOT carry on.
     ca = pg.query_selector("[data-clausebox='%s']" % T)

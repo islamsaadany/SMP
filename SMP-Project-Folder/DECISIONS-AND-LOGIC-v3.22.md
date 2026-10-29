@@ -70452,7 +70452,7 @@ Islam, with a picture of the Weekly check: *"the date is intersectin with the na
 
 **§678 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** `main` had taken §677 (the reading window's split lists) meanwhile; it touched none of the Tracker's files, so this section was renumbered §677 → §678 (§264.3), the two records joined, and `main` fast-forwarded. The Tracker's page and script changed, served by the module itself; there are no migrations, nobody is signed out, and the release stamp does not move.
 
-## §679 — Who we are is typed in one box, and reads as it always did (2026-10-29)
+## §685 — Who we are is typed in one box, and reads as it always did (2026-10-29; §679 on the branch, renumbered at the merge: main took §679–§684, §264.3)
 
 Islam, with two pictures of the Foundation page: *"in the foundation when I create a description statement I need to create it on multiple boxes as you can see to appear like this, is there a more convenient way for adding this part without filling 8 boxes"*. Three ways were put to him in plain words — paste-and-split, the openers ready-made, and the one-box drawing §613 had set aside (*"negelct the who we are keep it as is"*). He asked to see the third, then named a fourth of his own: *"can we keep approach 2 in creatoin but shows like today with each bold title is on the left and it alows the usr to make bold the words from the start of the line only?"* — then *"can you show me a working copy first to verify"*, and on the working copy: *"go ahead and build it everywhere"*.
 

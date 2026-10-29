@@ -928,7 +928,7 @@
   .clause:last-child { border-bottom:0; }
   .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
   .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
-  /* WHO WE ARE IS TYPED IN ONE BOX (§679): the lines above are how it READS;
+  /* WHO WE ARE IS TYPED IN ONE BOX (§685): the lines above are how it READS;
      with the pen on, this box stands in for the list — a line per row, the
      bold opening words being the left column. The bar above it holds the one
      button, B. */

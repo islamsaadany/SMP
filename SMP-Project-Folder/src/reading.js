@@ -203,7 +203,7 @@ var READING = (function () {
         return '<option value="' + esc(s.key) + '"' + (s.key === key ? ' selected' : '') + '>' + esc(s.name) + '</option>';
       }).join("") + '</select></label>' +
       '<span class="rsp"></span>' +
-      (typeof cycleLabel === "function" ? '<span class="rasof">' + esc(cycleLabel()) + '</span>' : '') +
+      (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
     r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
@@ -309,6 +309,8 @@ var READING = (function () {
     return true;
   }
   function offer(person) {
+    /* the client's own switch first (Structure step, SMPRules.readersOpen) */
+    if (!SMPRules.readersOpen(GROUP)) return false;
     if (!readerSeat(person)) return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
     try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {}

@@ -2213,6 +2213,28 @@ var CLIENTSETUP = (function () {
     /* §621: the note that closed this box is the hover on the step's own
        question now (render(), SHAPE_TIP) — and it no longer sends anybody to
        Terminology, which left Setup. */
+    /* §684: WHERE A READER'S SEAT LANDS. Islam: *"make a switch for it per
+       client"*. A reader — not the office, holding nothing, granted edit or
+       fill nowhere (reading.js readerSeat) — opens in the reading window on
+       sign-in while this is On, and on the workbench while it is Off. On is
+       the absence (§50.6), so a client that never pressed it reads as the
+       window was built to read; Off is written as `readers: "workbench"` on
+       the structure, where the rest of the client's shape is kept and the
+       office alone may write (SMPRules.readersOpen). */
+    if (!only || only === "reading") {
+      var rd = card("Reading window", box);
+      rd.setAttribute("data-stcard", "reading");
+      var rdOn = SMPRules.readersOpen(GROUP);
+      hd(rd, onOff(rdOn, function (v) {
+        var nx = structNow();
+        if (v) delete nx.readers; else nx.readers = "workbench";
+        structWrite(nx);
+      }));
+      rd.appendChild(el("p", "sthid", rdOn
+        ? "On: a person who may only read the strategy \u2014 no unit, function, capability, project or direction of their own, and nothing to edit \u2014 opens in the reading window on sign-in, with the workbench a press of Exit away."
+        : "Off: everybody opens on the workbench; Read on the bar still opens the window."));
+      if (ro) dummy(rd.querySelector(".stonoff"));
+    }
     return box;
   }
 

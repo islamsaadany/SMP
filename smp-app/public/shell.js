@@ -5346,6 +5346,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), t = s && s.top, b = t && t.plan;
     return !!(b && b.split === true);
   }
+  /* §684: WHERE A READER'S SEAT LANDS — in the reading window (the default,
+     Islam: "build it yes") or on the workbench. A switch per client, on the
+     Structure step; kept on the structure as `readers: "workbench"`, and an
+     ABSENCE for the window (§50.6), so a client that never touched the
+     switch reads as the window was built to read. */
+  function readersOpen(group) {
+    var s = structureOf(group);
+    return !(s && s.readers === "workbench");
+  }
   /* WHICH HALF A PILLAR BELONGS TO, as one answer rather than two call sites
      asking the question in opposite directions. `half` is "cap" or "dir";
      anything else means the whole list and every pillar is in it. */
@@ -6006,7 +6015,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     LAYER_KINDS: LAYER_KINDS, coUsedBy: coUsedBy, coOnLayer: coOnLayer,
     layerCompanies: layerCompanies, layerOn: layerOn, layerOrphans: layerOrphans, layerWords: layerWords,
     NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
-    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
+    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf, readersOpen: readersOpen,
     ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     endInMindOffered: endInMindOffered, endInMindOn: endInMindOn,
     holdsSeat: holdsSeat, holdsTopPart: holdsTopPart, mayReportTopOrPart: mayReportTopOrPart,
@@ -56087,7 +56096,7 @@ var READING = (function () {
         return '<option value="' + esc(s.key) + '"' + (s.key === key ? ' selected' : '') + '>' + esc(s.name) + '</option>';
       }).join("") + '</select></label>' +
       '<span class="rsp"></span>' +
-      (typeof cycleLabel === "function" ? '<span class="rasof">' + esc(cycleLabel()) + '</span>' : '') +
+      (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
     r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
@@ -56193,6 +56202,8 @@ var READING = (function () {
     return true;
   }
   function offer(person) {
+    /* the client's own switch first (Structure step, SMPRules.readersOpen) */
+    if (!SMPRules.readersOpen(GROUP)) return false;
     if (!readerSeat(person)) return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
     try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {}
@@ -72804,6 +72815,28 @@ var CLIENTSETUP = (function () {
     /* §621: the note that closed this box is the hover on the step's own
        question now (render(), SHAPE_TIP) — and it no longer sends anybody to
        Terminology, which left Setup. */
+    /* §684: WHERE A READER'S SEAT LANDS. Islam: *"make a switch for it per
+       client"*. A reader — not the office, holding nothing, granted edit or
+       fill nowhere (reading.js readerSeat) — opens in the reading window on
+       sign-in while this is On, and on the workbench while it is Off. On is
+       the absence (§50.6), so a client that never pressed it reads as the
+       window was built to read; Off is written as `readers: "workbench"` on
+       the structure, where the rest of the client's shape is kept and the
+       office alone may write (SMPRules.readersOpen). */
+    if (!only || only === "reading") {
+      var rd = card("Reading window", box);
+      rd.setAttribute("data-stcard", "reading");
+      var rdOn = SMPRules.readersOpen(GROUP);
+      hd(rd, onOff(rdOn, function (v) {
+        var nx = structNow();
+        if (v) delete nx.readers; else nx.readers = "workbench";
+        structWrite(nx);
+      }));
+      rd.appendChild(el("p", "sthid", rdOn
+        ? "On: a person who may only read the strategy \u2014 no unit, function, capability, project or direction of their own, and nothing to edit \u2014 opens in the reading window on sign-in, with the workbench a press of Exit away."
+        : "Off: everybody opens on the workbench; Read on the bar still opens the window."));
+      if (ro) dummy(rd.querySelector(".stonoff"));
+    }
     return box;
   }
 

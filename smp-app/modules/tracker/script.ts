@@ -368,7 +368,7 @@ export const APP_JS = `(function () {
      is under — the opened row's, or a row's on the check — and the list is
      drawn again with it at the top, the box empty and still under the
      cursor for the next one. Escape clears it. The key and the Enter button
-     beside the box (§677) do the same one thing. */
+     beside the box (§678) do the same one thing. */
   function addProgress(t) {
     var v = t.value.replace(/\\s+/g, " ").trim(), id = rowOf(t);
     if (!v || !id) { t.focus(); return; }

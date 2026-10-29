@@ -70430,7 +70430,7 @@ Islam: *"people who see for the first time they get confused somehow … some so
 
 **§676 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** `main` had taken §675 (Directions split three ways) meanwhile; it touched none of the reading window's files, so the merge joined the two records and the built files were rebuilt on the merged tree. Checked again there: the frozen shell built whole, Read opens the window, the picker moves to Mobile, Directions fold and open, Escape closes, no error. There are no migrations and nobody is signed out; the release stamp moves, since the shell, its stylesheet and body changed.
 
-## §677 — Internal Tracker: the when column fits a finished day, and Enter is a button (2026-10-29)
+## §678 — Internal Tracker: the when column fits a finished day, and Enter is a button (2026-10-29; §677 on the branch, renumbered at the merge: main took §677, §264.3)
 
 Islam, with a picture of the Weekly check: *"the date is intersectin with the name, and the enter box to add what happened needs to add by pressing enter button on screen as well not only press enter on keyboard"*.
 

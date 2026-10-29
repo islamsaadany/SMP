@@ -237,7 +237,7 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
    real page and looking at it, not by reading this file. */
 .sec:not(.showdone) .row.done:not(.fresh):not(.on):not(.chk){display:none}
 /* the row: tick · name · when · owner · status · the arrow */
-/* THE WHEN COLUMN FITS A FINISHED DAY (§677, Islam: "the date is
+/* THE WHEN COLUMN FITS A FINISHED DAY (§678, Islam: "the date is
    intersecting with the name"): "Done Wed 30 May" is 115px in the page's
    own face at 13px, and the column was 84 — the overrun sat on the owner's
    name. 116 holds every Done this year on one line; the rarer longer forms
@@ -365,7 +365,7 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 .pbox:focus-within{border-color:var(--gold)}
 .pbox input{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 14px/1.5 var(--font);padding:0;color:var(--ink)}
 .pbox input::placeholder{color:var(--ink-3)}
-/* the Enter badge is a button (§677, Islam: "by pressing enter button on
+/* the Enter badge is a button (§678, Islam: "by pressing enter button on
    screen as well, not only Enter on the keyboard"): the same look, pressable */
 .pbox .ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:none;border:1px solid var(--line);border-radius:5px;padding:4px 6px;white-space:nowrap;cursor:pointer}
 .pbox .ent:hover,.pbox .ent:focus-visible{border-color:var(--gold);color:var(--gold);outline:none}
@@ -742,7 +742,7 @@ function lastLine(a: Action, L: Loaded, today: string): string {
 }
 /* THE PROGRESS BOX (§657): one line and Enter, on the opened row and under
    every open row of this week on the check — one box, two places (§53.5).
-   Enter is a button too (§677): a press on it writes the line, as the key
+   Enter is a button too (§678): a press on it writes the line, as the key
    does, for a hand on a screen with no keyboard under it. */
 function progressBox(a: Action, label: string): string {
   return '<div class="pbox"><input class="pnew" data-act="progress-new" placeholder="' + esc(label) + '" aria-label="Progress on ' + esc(a.title) + '" maxlength="' + PROGRESS_MAX + '"><button class="ent" type="button" data-act="progress-go" title="Add this line">Enter</button></div>';

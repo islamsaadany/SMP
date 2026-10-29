@@ -1,0 +1,131 @@
+/* ── THE READING WINDOW (§676) ──────────────────────────────────────────
+   A mode over the platform, as the deck is (present.css .deckroot): fixed,
+   the whole window, 61 so it beats the editor and nothing else. Its chrome
+   is one navy strip and the tab row on the gold rule; the body is the page's
+   own ground. Every colour is a token, so it follows the theme. */
+.readroot { position:fixed; inset:0; z-index:61; display:none; flex-direction:column; background:var(--ground); color:var(--ink); }
+.readroot.on { display:flex; }
+body.reading { overflow:hidden; }
+.readroot .vh { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); }
+
+.readroot .rwtop { flex:none; display:flex; align-items:center; gap:14px; min-height:52px; padding:0 22px;
+  background:var(--panel); color:var(--panel-ink); }
+.readroot .rmark { flex:none; width:26px; height:26px; border-radius:7px; background:var(--gold); color:#16325C; display:grid; place-items:center; }
+.readroot .rmark svg { width:18px; height:18px; }
+.readroot .rco { font-size:14px; font-weight:600; white-space:nowrap; }
+.readroot .rpick select { font:inherit; font-size:13.5px; font-weight:600; color:var(--panel-ink); background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.22); border-radius:7px; padding:5px 10px; cursor:pointer; }
+.readroot .rpick select option { color:var(--ink); background:var(--surface); }
+.readroot .rsp { flex:1; }
+.readroot .rasof { font-size:12px; color:var(--panel-quiet); white-space:nowrap; }
+.readroot .rexit { font:inherit; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--panel-quiet);
+  background:none; border:1px solid rgba(255,255,255,.22); border-radius:999px; padding:4px 12px; cursor:pointer; }
+.readroot .rexit:hover, .readroot .rexit:focus-visible { color:var(--panel-ink); border-color:var(--panel-ink); }
+
+.readroot .rwtabs { flex:none; display:flex; gap:2px; padding:0 22px; background:var(--panel); border-bottom:3px solid var(--gold); overflow-x:auto; }
+.readroot .rwtabs button { font:inherit; font-size:13.5px; font-weight:600; color:var(--panel-quiet); background:none; border:0;
+  padding:10px 14px 9px; border-radius:8px 8px 0 0; cursor:pointer; white-space:nowrap; }
+.readroot .rwtabs button:hover { color:var(--panel-ink); }
+.readroot .rwtabs button[aria-current="page"] { background:var(--ground); color:var(--ink); }
+.readroot .rwtabs button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+
+.readroot .rwbody { flex:1; min-height:0; overflow-y:auto; padding:22px 26px 40px; }
+.readroot .rwbody > * { max-width:1040px; }
+.readroot .rwbody > * + * { margin-top:18px; }
+.readroot .rk { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px; }
+/* the aspiration reads as the mission does (Islam, §680): same size, same weight, same ink */
+.readroot .rasp { font-size:14.5px; line-height:1.55; font-weight:400; color:var(--ink-2); margin:0; }
+.readroot .rmis { font-size:14.5px; color:var(--ink-2); margin:0; }
+.readroot .rasp + .rmis { margin-top:8px; }
+.readroot .rtwo { display:grid; grid-template-columns:1.2fr 1fr; gap:18px; align-items:start; }
+.readroot .rtwo > .rcard:only-child { grid-column:1 / -1; }
+.readroot .rcol { display:grid; gap:12px; }
+.readroot .rcard { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
+.readroot .rcard h3 { margin:0 0 10px; font-size:13.5px; font-weight:700; }
+.readroot .rclauses { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:13.5px; }
+.readroot .rclauses b { color:var(--gold-deep); font-weight:700; white-space:nowrap; }
+.readroot .rclauses span { color:var(--ink-2); }
+.readroot .rvals { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; }
+.readroot .rval { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+.readroot .rval b { display:block; font-size:13.5px; margin-bottom:4px; }
+.readroot .rval span { font-size:12.5px; color:var(--ink-3); }
+.readroot .rnone { margin:0; font-size:13.5px; color:var(--ink-3); }
+
+.readroot .rswot { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.readroot .rswot h3 { display:flex; align-items:center; gap:8px; }
+.readroot .rswot h3 i { font-style:normal; width:22px; height:22px; border-radius:6px; display:grid; place-items:center; font-size:11px; font-weight:800; }
+.readroot .rswot ol { margin:0; padding:0 0 0 18px; font-size:13.5px; color:var(--ink-2); display:grid; gap:5px; }
+.readroot .rq-s i { background:var(--good-bg); color:var(--good-tx, var(--good)); }
+.readroot .rq-w i { background:var(--bad-bg); color:var(--bad-tx, var(--bad)); }
+.readroot .rq-o i { background:var(--over-bg); color:var(--stone); }
+.readroot .rq-t i { background:var(--attn-bg); color:var(--attn-tx, var(--attn)); }
+
+.readroot .rtools { display:flex; align-items:center; gap:14px; font-size:12.5px; color:var(--ink-3); }
+.readroot .rtools button { font:inherit; font-size:12.5px; font-weight:700; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; }
+.readroot .rtools button:hover { text-decoration:underline; }
+.readroot .rdirs { display:grid; gap:8px; }
+.readroot .rgrp { margin:4px 0 0; }
+.readroot .rgrp + .rdirs { margin-top:8px; }
+.readroot .rdirs + .rgrp { margin-top:22px; }
+.readroot .rdir { background:var(--surface); border:1px solid var(--line); border-radius:10px; }
+.readroot .rfold { display:grid; grid-template-columns:auto 1fr auto 150px 22px; gap:14px; align-items:center; padding:13px 18px; cursor:pointer; user-select:none; border-radius:10px; }
+.readroot .rfold:hover { background:var(--zebra); }
+.readroot .rfold:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.readroot .rcode { font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--gold-deep); }
+.readroot .rfold h3 { margin:0; font-size:15px; font-weight:700; }
+.readroot .rsub { display:block; font-size:12.5px; color:var(--ink-3); font-weight:400; margin-top:2px; }
+.readroot .rsum { font-size:12.5px; color:var(--ink-3); white-space:nowrap; }
+.readroot .rsum b { color:var(--ink-2); font-weight:600; }
+.readroot .rchev { width:22px; height:22px; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; color:var(--ink-3); transition:transform .15s; }
+.readroot .rchev svg { width:11px; height:11px; }
+.readroot .rdir.open .rchev { transform:rotate(180deg); }
+.readroot .rmore { display:none; padding:12px 18px 16px; border-top:1px solid var(--line-soft); }
+.readroot .rdir.open .rmore { display:grid; gap:10px; }
+
+/* the tables (§682): framed, a line under every row, the header the title,
+   the columns as wide as their figures and no wider */
+.readroot .rtable { border-collapse:collapse; width:auto; max-width:100%; min-width:min(100%, 640px); font-size:13px; background:var(--surface);
+  border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.readroot .rtable th, .readroot .rtable td { padding:7px 12px; border-bottom:1px solid var(--line-soft); text-align:left; vertical-align:middle; }
+.readroot .rtable th { font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); background:var(--surface-2); border-bottom:1px solid var(--line); white-space:nowrap; }
+.readroot .rtable tbody tr:last-child td { border-bottom:0; }
+.readroot .rtable td:first-child { min-width:220px; }
+.readroot .rtable .num { text-align:right; white-space:nowrap; color:var(--ink-2); }
+.readroot .rtable td.rst { white-space:nowrap; }
+.readroot .rst { display:flex; align-items:center; gap:8px; }
+.readroot .rst i { font-style:normal; font-size:12px; font-weight:700; min-width:36px; text-align:right; }
+.readroot .rbar { display:inline-block; width:110px; height:7px; border-radius:4px; background:var(--surface-2); position:relative; overflow:hidden; }
+.readroot .rbar b { position:absolute; left:0; top:0; bottom:0; border-radius:4px; background:var(--good); }
+.readroot .rbar.attn b, .readroot .rbar.warn b { background:var(--attn); }
+.readroot .rbar.bad b { background:var(--bad); }
+.readroot .rfold .rbar { width:100%; }
+.readroot .row { color:var(--ink-3); white-space:nowrap; }
+.readroot .rq { display:inline-flex; gap:3px; vertical-align:middle; }
+.readroot .rq span { width:22px; height:8px; border-radius:2px; background:var(--surface-2); }
+.readroot .rq span.on { background:var(--stone); }
+.readroot .rsts { font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--attn-tx, var(--attn)); background:var(--attn-bg); border-radius:4px; padding:2px 6px; white-space:nowrap; }
+.readroot .rmore .rtable + .rtable { margin-top:12px; }
+.readroot .rcard > .rtable { min-width:0; width:100%; border:0; border-radius:0; }
+
+.readroot .rthree { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+.readroot .rfig { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+.readroot .rfig b { display:block; font-size:30px; line-height:1; font-weight:700; }
+.readroot .rfig span { display:block; font-size:12.5px; color:var(--ink-3); margin-top:6px; }
+.readroot .rband { display:inline-block; margin-top:8px; font-style:normal; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; border-radius:4px; padding:2px 7px; }
+.readroot .rband.good { background:var(--good-bg); color:var(--good-tx, var(--good)); }
+.readroot .rband.attn, .readroot .rband.warn { background:var(--attn-bg); color:var(--attn-tx, var(--attn)); }
+.readroot .rband.bad { background:var(--bad-bg); color:var(--bad-tx, var(--bad)); }
+
+/* the door on the bar: the one filled-looking control beside the ring */
+.readbtn { display:inline-flex; align-items:center; gap:6px; color:var(--stone); border-color:var(--gold); background:var(--over-bg); }
+.readbtn:hover { color:var(--ink); border-color:var(--gold-deep); }
+.readbtn svg { width:12px; height:12px; }
+
+@media (max-width:760px) {
+  .readroot .rtwo, .readroot .rswot, .readroot .rthree { grid-template-columns:1fr; }
+  .readroot .rfold { grid-template-columns:auto 1fr 22px; }
+  .readroot .rfold .rsum, .readroot .rfold .rbar { display:none; }
+  .readroot .rtable { min-width:0; width:100%; }
+  .readroot .rtable td:first-child { min-width:0; }
+  .readroot .rtacs th:nth-child(3), .readroot .rtacs td:nth-child(3) { display:none; }
+}

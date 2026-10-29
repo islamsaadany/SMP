@@ -367,20 +367,24 @@ export const APP_JS = `(function () {
   /* THE PROGRESS BOX (§657): Enter writes the entry on the action the box
      is under — the opened row's, or a row's on the check — and the list is
      drawn again with it at the top, the box empty and still under the
-     cursor for the next one. Escape clears it. */
+     cursor for the next one. Escape clears it. The key and the Enter button
+     beside the box (§678) do the same one thing. */
+  function addProgress(t) {
+    var v = t.value.replace(/\\s+/g, " ").trim(), id = rowOf(t);
+    if (!v || !id) { t.focus(); return; }
+    var k = keep();
+    k.prog = k.prog.filter(function (st) { return st.id !== id; });
+    k.focus = { prog: id };
+    t.disabled = true; pressed = t;
+    post({ act: "progress-add", id: id, body: v }, k, function (j) { if (!j) { t.disabled = false; t.focus(); } });
+  }
   document.addEventListener("keydown", function (e) {
     var t = e.target;
     if (!t || !t.classList || !t.classList.contains("pnew")) return;
     if (e.key === "Escape") { t.value = ""; return; }
     if (e.key !== "Enter") return;
     e.preventDefault();
-    var v = t.value.replace(/\\s+/g, " ").trim(), id = rowOf(t);
-    if (!v || !id) return;
-    var k = keep();
-    k.prog = k.prog.filter(function (st) { return st.id !== id; });
-    k.focus = { prog: id };
-    t.disabled = true; pressed = t;
-    post({ act: "progress-add", id: id, body: v }, k, function (j) { if (!j) { t.disabled = false; t.focus(); } });
+    addProgress(t);
   });
   document.addEventListener("input", function (e) {
     var t = e.target;
@@ -643,6 +647,9 @@ export const APP_JS = `(function () {
          swaps that follow while the row is open. */
       var o = b.closest(".open"), on3 = !b.classList.contains("on");
       if (o) { drawHist(o, on3); if (on3) histOpen.add(id); else histOpen.delete(id); }
+    } else if (act === "progress-go") {
+      var pb = b.closest(".pbox"), pn = pb ? pb.querySelector(".pnew") : null;
+      if (pn && !pn.disabled) addProgress(pn);
     } else if (act === "progress-edit") {
       /* EDITED IN PLACE (§657): the words become a box; Enter or leaving it
          saves, Escape puts them back. The server stamps it edited. */

@@ -2378,14 +2378,14 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
        the first card, then the workflow's. */
     check(/Mobile/.test(st.head) && /Analysis/.test(st.head) && st.cards.length === 2 && /Start from the existing plan/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
       "§639, §653 the area opens on its start screen: a box to just ask, the plan card first and the SWOT workflow as a card under it, no menu, at the reading width", JSON.stringify(st));
-    /* §676 — Send is not there until something is typed, on the start
+    /* §683 — Send is not there until something is typed, on the start
        screen as in every chat (§652). */
     const sendVis0 = await page.evaluate(() => { const b = document.querySelector("[data-cop-startsend]"); return !!b && getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 0; });
     await page.fill("[data-cop-starttext]", "x"); await page.dispatchEvent("[data-cop-starttext]", "input");
     const sendVis1 = await page.evaluate(() => { const b = document.querySelector("[data-cop-startsend]"); return !!b && getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 0; });
     await page.fill("[data-cop-starttext]", ""); await page.dispatchEvent("[data-cop-starttext]", "input");
     const sendVis2 = await page.evaluate(() => { const b = document.querySelector("[data-cop-startsend]"); return !!b && getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 0; });
-    check(!sendVis0 && sendVis1 && !sendVis2, "§676 the start screen's Send is not there until something is typed, and goes again when the box is emptied", JSON.stringify([sendVis0, sendVis1, sendVis2]));
+    check(!sendVis0 && sendVis1 && !sendVis2, "§683 the start screen's Send is not there until something is typed, and goes again when the box is emptied", JSON.stringify([sendVis0, sendVis1, sendVis2]));
     /* §634: Competitive Discipline and the capabilities ride along too —
        set on the page's own objects, as their pages would set them. */
     await page.evaluate(() => {

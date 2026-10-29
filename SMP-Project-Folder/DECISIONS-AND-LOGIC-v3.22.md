@@ -70416,3 +70416,4 @@ Islam, of §673's foot button: *"the console already had no switch. that needed 
 
 **CHECKED.** `checks/shell.mjs` 3l, rewritten for the split (§218): the table in the pane with Go ahead under it, the to-do beside, the chat's two lines, the box asking for more, Save held saying to press Go ahead first; the fold after Go ahead with its counts, opening to one line per Direction; the foot through *v1 saved · not on the plan yet* to *v1 on the plan* after a reload; Save held after the save. `checks/copilot.mjs` **346 passed, 0 failed**; `checks/shell.mjs` **510 ok, 10 failed** — the known ten, every §675 check green.
 
+**§675 MERGED TO `main`** 2026-10-29, Islam: *"merge to main and start the execution split"*. `main` had taken §671–§674 meanwhile — merged in first, ours renumbered §671 → §675, the builds rebuilt on the merged tree and both suites run there: **346 passed, 0 failed**; **510 ok, 10 failed**, the known ten — then `369124f..a29f205`.

@@ -5729,6 +5729,9 @@
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" },
       body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
   });
+  /* Light, dark or auto: theme.js owns the choice and the mark (§27, §674);
+     this only hangs its control on the band, which has to exist first. */
+  THEME.wire();
 
   /* ── Boot ──────────────────────────────────────────────────────
      BOTH QUESTIONS AT ONCE (§369). Islam: "something strange the window is not

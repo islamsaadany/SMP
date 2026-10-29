@@ -153,6 +153,30 @@ input.date{cursor:auto}
 .sure{display:inline-flex;gap:10px;align-items:center;color:var(--ink-2);font-size:13px}
 .sure .go.danger{color:var(--bad);border-color:var(--bad)}
 .rm{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--bad);cursor:pointer;text-decoration:underline}
+/* ── WHAT THE PAGE SHOWS WHILE IT WAITS (§672, rule 1d), from
+   design-mockups/meeting-notes/2026-10-29_refine-loading.html. Refine takes
+   seconds and the page stood still for them. Now the minutes' own shape
+   stands where the minutes will land, in the platform's skeleton bars
+   (§94.10: the line colour, a 6px corner, the slow pulse), with one line
+   over it; Send says it is sending in the foot, where the press was made;
+   a refusal stands where the bars were, never at the top. ── */
+.sk{display:block;height:13px;border-radius:6px;background:var(--line);animation:pulse 1.5s ease-in-out infinite}
+.sk.q{background:var(--surface-2)}
+.skrow{display:flex;gap:10px;align-items:center;margin:0 0 7px}
+.skrow .dot{width:5px;height:5px;border-radius:50%;background:var(--line);flex:none;margin-left:6px}
+.sklab{display:block;height:9px;width:68px;border-radius:5px;background:var(--surface-2);margin:14px 0 8px;animation:pulse 1.5s ease-in-out infinite}
+.mins .sklab:first-child{margin-top:0}
+.sktab{display:grid;grid-template-columns:1fr 70px 70px;gap:12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line-2)}
+.sktab.h{border-bottom:1px solid var(--line);padding:0 0 5px}
+.sktab.h .sk{height:8px;width:36px}
+.working{display:flex;align-items:center;gap:10px;font:500 13.5px/1.4 var(--font);color:var(--gold);margin:0 0 12px}
+.working .spin{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--gold);animation:turn .9s linear infinite;flex:none}
+.foot .working{margin:0}
+.saved.good{color:var(--good)}.saved.bad{color:var(--bad)}
+.two .said{margin:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes turn{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sk,.sklab{animation:none;opacity:.75}.working .spin{animation:none}}
 @media (max-width:760px){.two{grid-template-columns:1fr}
   .nrow{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"d n s" "t t t";row-gap:4px;column-gap:10px}.nrow .t{grid-area:t}.nrow .word{grid-area:s}.nrow .d{grid-area:d}.nrow .n{grid-area:n}
   .head{grid-template-columns:1fr}.pick{width:min(300px,calc(var(--winw) - 60px))}}
@@ -313,6 +337,24 @@ function attendeeBlock(n: Note, L: Loaded): string {
     "<span>Each tick is already saved.</span></div></div></div>";
 }
 
+/* THE SHAPE OF WHAT IS COMING (§672): the minutes as grey bars — a summary,
+   three discussed, two agreed, an actions table of two rows, one open, the
+   next meeting — drawn HERE, by the server, and carried in the page in a
+   template the script shows at the press, so the page never writes a part of
+   its own (§53.5, the week picker's way). */
+function refineShape(): string {
+  const bar = (w: string, q = false, extra = "") => '<span class="sk' + (q ? " q" : "") + '" style="width:' + w + extra + '"></span>';
+  const bullet = (w: string) => '<div class="skrow"><span class="dot"></span>' + bar(w) + "</div>";
+  return '<div class="working"><span class="spin"></span>Refining the notes into minutes&hellip;</div>' +
+    '<div class="mins" aria-busy="true"><span class="sklab"></span>' + bar("92%") + bar("64%", false, ";margin-top:7px") +
+    '<span class="sklab"></span>' + bullet("80%") + bullet("58%") + bullet("71%") +
+    '<span class="sklab"></span>' + bullet("66%") + bullet("45%") +
+    '<span class="sklab"></span><div class="sktab h">' + bar("36px", true) + bar("36px", true) + bar("36px", true) + "</div>" +
+    '<div class="sktab">' + bar("85%") + bar("48px", true) + bar("52px", true) + "</div>" +
+    '<div class="sktab">' + bar("62%") + bar("40px", true) + bar("56px", true) + "</div>" +
+    '<span class="sklab"></span>' + bullet("52%") + '<span class="sklab"></span>' + bar("38%") + "</div>";
+}
+
 const EDITABLE = ' contenteditable="true" spellcheck="false"';
 /* THE MINUTES, every part a box the writer edits (decision 3). A part with
    nothing in it still draws its heading and an empty line, because this is
@@ -401,9 +443,24 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
   const notes = '<p class="lab">Notes</p><textarea class="raw" data-act="raw" aria-label="Notes" maxlength="60000" placeholder="Type as the meeting runs. Saved when you leave the box.">' + esc(n.raw) + "</textarea>";
   const refine = '<button class="btn gold" type="button" data-act="refine">' + (empty ? "Refine into minutes" : "Refine again") + "</button>";
   const sendWord = "Send to " + plural(withMail, "attendee", "attendees") + (n.sends ? " again" : "");
-  const send = '<button class="btn' + (sendable ? " gold" : "") + '" type="button" data-act="send"' +
-    (sendable ? "" : ' aria-disabled="true" data-why="' + esc(empty ? "The minutes are empty — refine the notes, or write them, before sending." : "Nobody on this meeting has an email address.") + '"') +
-    ">" + esc(sendWord) + "</button>";
+  /* SEND ASKS FIRST (§671, the UX Lens review's first fix): one press used to
+     email the client's people, and "again" too, while Delete on the same
+     page asked. So the gold button asks in place, in the words Delete uses —
+     "Email the minutes to 3 people now? Yes, send · Not yet" — and only Yes
+     posts. A send that cannot go stays the held button that says why. The
+     break `send-unasked` draws the old button, which must turn checks/notes.mjs
+     red (§94.5). */
+  const sendAsk = '<span class="sure" hidden>' + esc("Email the minutes to " + plural(withMail, "person", "people") + (n.sends ? " again" : "") + " now?") +
+    ' <button type="button" class="go btn gold" data-act="send">Yes, send</button>' +
+    '<button type="button" class="btn" data-act="send-no">Not yet</button></span>' +
+    /* and the line Yes gives way to, while the emails go (§672) */
+    '<span class="working" data-sending hidden><span class="spin"></span>' + esc("Sending the minutes to " + plural(withMail, "person", "people")) + "&hellip;</span>";
+  const send = !sendable
+    ? '<button class="btn" type="button" data-act="send" aria-disabled="true" data-why="' +
+      esc(empty ? "The minutes are empty — refine the notes, or write them, before sending." : "Nobody on this meeting has an email address.") + '">' + esc(sendWord) + "</button>"
+    : BRK() === "send-unasked"
+      ? '<button class="btn gold" type="button" data-act="send">' + esc(sendWord) + "</button>"
+      : '<button class="btn gold" type="button" data-act="send-ask">' + esc(sendWord) + "</button>" + sendAsk;
   const hint = noMail.length ? '<span class="hint">' + esc(noMail.join(", ")) + (noMail.length === 1 ? " has" : " have") + " no email and will not receive them.</span>" : "";
   const del = '<span class="sure" hidden>Delete this note and everything about it? ' +
     '<button type="button" class="go btn danger" data-act="delete">Yes, delete it</button>' +
@@ -422,7 +479,8 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
       esc(readableDay((n.lastSentAt || "").slice(0, 10), today)) + " to " + plural(L.sends[0] ? L.sends[0].to.filter((x) => x.ok).length : 0, "person", "people") +
       ". Editing these minutes and sending again marks them as updated.</p>"
     : "";
-  return head + attendeeBlock(n, L) + sentLine + body + '<div class="foot" style="margin-top:18px">' + del + "</div>";
+  return head + attendeeBlock(n, L) + sentLine + body + '<div class="foot" style="margin-top:18px">' + del + "</div>" +
+    '<template id="refine-wait">' + refineShape() + "</template>";
 }
 
 export async function notesDocument(p: PageArgs): Promise<string> {

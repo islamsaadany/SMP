@@ -4,13 +4,16 @@
    missing was a way to choose it. The product followed the laptop silently
    and a person who wanted the other one had nowhere to say so.
 
-   Two states. Light and Dark, and nothing else - Auto was here for one
-   version and went: a third state whose whole job is to be invisible is a
-   third state people have to work out, on a control they press once a month.
-   The device still decides where you START, so the default is unchanged for
-   anyone who never touches it; it just stops being a position on the switch.
-   Nothing is written to storage until someone actually chooses, so a browser
-   that has never been told keeps following the device across sessions.
+   Three states. Light, Dark and Auto (§674, 2026-10-29). Auto was here at
+   the start, went for being "a third state whose whole job is to be
+   invisible", and is back on Islam's word, with the sign on hover as what
+   makes it visible: the mark shows the auto mark and the sign says which
+   reading the device is giving now. The device decides where you START, so
+   the default is unchanged for anyone who never touches it; choosing Auto
+   again is choosing nothing, so it is stored as nothing. Nothing is written
+   to storage until someone actually chooses Light or Dark, so a browser that
+   has never been told keeps following the device across sessions — and keeps
+   following it through the day, as the device changes.
 
    The choice is a property of the SCREEN, not of the person and not of the
    tenant, so it lives in localStorage and NEVER in the state graph. Putting
@@ -25,7 +28,7 @@ var THEME = (function () {
   /* Shared with index.html — the gate reads this key so signing in does not
      change the colours under you. Changing it means changing both. */
   var KEY = "smp.theme";
-  var ORDER = ["light", "dark"];
+  var ORDER = ["light", "dark", "auto"];
 
   /* ── The PALETTE, added in 3.11 (§38) ────────────────────────────
      Two axes now, and they are deliberately separate things. LIGHT/DARK is
@@ -69,11 +72,14 @@ var THEME = (function () {
   function read() {
     try {
       var v = localStorage.getItem(KEY);
-      return ORDER.indexOf(v) === -1 ? fromDevice() : v;
-    } catch (e) { return fromDevice(); }
+      return v === "light" || v === "dark" ? v : "auto";
+    } catch (e) { return "auto"; }
   }
+  /* Auto is the absence of a choice, so it is stored as the absence of the
+     key — which is what the gate (index.html) and every other reader of the
+     key already understand as "follow the device". */
   function write(v) {
-    try { localStorage.setItem(KEY, v); } catch (e) {}
+    try { if (v === "auto") localStorage.removeItem(KEY); else localStorage.setItem(KEY, v); } catch (e) {}
   }
 
   /* ── The tenant's branding sits UNDER the personal switches (§39) ──
@@ -123,13 +129,15 @@ var THEME = (function () {
   var palette = readPalette();
 
   function apply() {
-    /* Always an explicit attribute now, even when the value came from the
-       device rather than from a person. With only two states there is nothing
-       left for the prefers-color-scheme block to decide, and stating it
-       outright means one selector paints the page instead of two that have to
-       agree. The media block stays in the stylesheet for the gate, which has
-       no switch of its own and no script beyond reading storage. */
-    document.documentElement.setAttribute("data-theme", mode);
+    /* Always an explicit attribute, even when the value came from the device
+       rather than from a person: in Auto the attribute says what the device
+       says now, and the listener below moves it as the device changes. There
+       is nothing left for the prefers-color-scheme block to decide, and
+       stating it outright means one selector paints the page instead of two
+       that have to agree. The media block stays in the stylesheet for the
+       gate, which has no switch of its own and no script beyond reading
+       storage. */
+    document.documentElement.setAttribute("data-theme", mode === "auto" ? fromDevice() : mode);
     /* Always stated, never left to a bare :root fallback. The stylesheet does
        list the slate values on bare :root as well, so a page whose script
        failed still paints something coherent rather than nothing — but the
@@ -162,19 +170,26 @@ var THEME = (function () {
            '<g stroke="currentColor" stroke-width="1.5" stroke-linecap="round">' +
            '<path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/>' +
            '<path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>',
-    dark: '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>'
+    dark: '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>',
+    /* the half circle, the sign for "automatic" (design-mockups/console-theme-switch, round 2, Islam's pick 1) */
+    auto: '<circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.8a7.2 7.2 0 0 0 0 14.4z" fill="currentColor"/>'
   };
-  var WORDS = { light: "light", dark: "dark" };
+  /* The sign on hover says the state alone (Islam: "just show the current
+     status"); in Auto, which reading the device is giving. */
+  function words() {
+    return mode === "auto" ? "Auto \u00b7 " + fromDevice() : mode === "dark" ? "Dark" : "Light";
+  }
 
+  var BTN = null;
   function paintBtn(btn) {
     btn.innerHTML = '<svg viewBox="0 0 20 20" class="themesvg" aria-hidden="true">' +
                     ICONS[mode] + '</svg>';
     /* The glyph is never the only carrier — same rule the nav marks follow.
-       The title says the state; the aria-label says the state AND what the
-       press will do, because a screen reader gets no hover. */
-    var next = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length];
-    btn.title = "Theme: " + WORDS[mode] + " — click for " + WORDS[next];
-    btn.setAttribute("aria-label", btn.title);
+       The sign on hover (data-tip, drawn by the stylesheet) says the state;
+       the aria-label says the same, because a screen reader gets no hover. */
+    var w = words();
+    btn.setAttribute("data-tip", w);
+    btn.setAttribute("aria-label", "Theme: " + w);
   }
 
   function set(v, btn) {
@@ -183,6 +198,17 @@ var THEME = (function () {
     apply();
     if (btn) paintBtn(btn);
   }
+
+  /* In Auto the page follows the device through the day: the attribute
+     moves with it, and the mark's sign says the new reading. */
+  try {
+    var mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+    if (mq && mq.addEventListener) mq.addEventListener("change", function () {
+      if (mode !== "auto") return;
+      apply();
+      if (BTN) paintBtn(BTN);
+    });
+  } catch (e) {}
 
 
   return {
@@ -200,6 +226,7 @@ var THEME = (function () {
     wire: function () {
       var btn = document.getElementById("themebtn");
       if (btn) {
+        BTN = btn;
         btn.hidden = false;
         paintBtn(btn);
         btn.addEventListener("click", function () {

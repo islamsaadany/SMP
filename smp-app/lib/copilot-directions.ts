@@ -55,7 +55,7 @@ export type Dirs = {
   chose: boolean;           // "Go ahead with the N ticked" was pressed
   caps: Cap[];
   reply: string;
-  /* §671 — the chat in time: every ask for more and its answer, in order, marked
+  /* §675 — the chat in time: every ask for more and its answer, in order, marked
      with the step it belongs to (the Directions or the Capabilities). */
   log: { p: "dirs" | "caps"; w: "me" | "ai"; t: string }[];
   saved: { deliverableId: string; n: number; title: string } | null;
@@ -260,7 +260,7 @@ export function dirsText(s: Dirs, fnName: (k: string) => string, ownerName: (k: 
   }
   return out.join("\n");
 }
-/* §671 — the version the pane's head names before the save (the SWOT's shape). */
+/* §675 — the version the pane's head names before the save (the SWOT's shape). */
 export async function nextDirsVersion(c: Q, chat: { place: string; section: string }, s: Dirs, placeWord: string): Promise<number> {
   const r = await c.query(
     "SELECT coalesce(max(v.n), 0) + 1 AS n FROM copilot_deliverables d LEFT JOIN copilot_versions v ON v.deliverable_id = d.id " +

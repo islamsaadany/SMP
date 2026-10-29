@@ -477,10 +477,20 @@
      a 30px one left from 3.0, and the later of the two won, so the row stayed
      31px tall no matter what the new number said. It is the tallest item in
      the row, so it alone was setting the height of the whole first line. */
-  .themebtn { padding:0; width:20px; height:20px; border-radius:50%;
+  /* 26px since §674, the size the modules' shared bar wears (lib/topbar.ts
+     .tbtheme) and the console's ring on its band: one mark, one size. */
+  .themebtn { padding:0; width:26px; height:26px; border-radius:50%;
               display:inline-flex; align-items:center; justify-content:center;
-              flex-shrink:0; }
-  .themesvg { width:12px; height:12px; display:block; }
+              flex-shrink:0; position:relative; }
+  .themesvg { width:14px; height:14px; display:block; }
+  /* THE SIGN ON HOVER (§674): the state alone — Light, Dark, or Auto and the
+     reading the device is giving — under the mark, on hover and on keyboard
+     focus. Drawn from data-tip, which theme.js keeps current. */
+  .themebtn[data-tip]:hover::after, .themebtn[data-tip]:focus-visible::after {
+    content:attr(data-tip); position:absolute; top:calc(100% + 8px); right:0; z-index:60;
+    white-space:nowrap; pointer-events:none; background:var(--ink); color:var(--surface);
+    font-family:inherit; font-size:11.5px; font-weight:600; line-height:1; letter-spacing:.02em; text-transform:none;
+    padding:7px 9px; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,.25); }
 
   /* ── THE WHITE TOP BAR, ON THE PLATFORM'S OWN SCALE (§410) ──────────────
      Islam, of the plan-page restyle: *"can you suggest a neat design for the

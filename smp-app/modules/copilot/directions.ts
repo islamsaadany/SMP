@@ -222,7 +222,7 @@ export async function dirsAsk(tenantId: string, b: any, _who: Who): Promise<Out>
       g = sanitizeDirs({ caps: [...now.caps, ...got].slice(0, MAX_CAPS) }, now);
     }
     g.reply = reply;
-    /* §671 — the ask and its answer, kept in order under the step it belongs to */
+    /* §675 — the ask and its answer, kept in order under the step it belongs to */
     if (kind !== "dirSuggest") {
       const said = ask || (own.length ? "Add my own: " + own.join(", ") : "Suggest more");
       const p = kind === "capSuggest" ? "caps" as const : "dirs" as const;

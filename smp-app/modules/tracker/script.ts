@@ -162,29 +162,59 @@ export const APP_JS = `(function () {
     var b = o.querySelector("[data-act=hist]"), h = o.querySelector(".hist"); if (!b || !h) return;
     h.hidden = !on; b.classList.toggle("on", !!on); b.setAttribute("aria-expanded", String(!!on));
   }
+  /* A PRESS SHOWS AT ONCE (§671, rule 1d). Every handler below notes the
+     control under the hand in "pressed", and a request made from it marks
+     the row, panel or line that control sits in busy — dimmed, and taking no
+     second press — until the answer's swap carries the mark away. A refusal
+     or a lost connection takes it off by hand. The add line is not marked:
+     its box already disables itself. */
+  var pressed = null;
+  function markBusy(el) {
+    var r = el && el.closest ? el.closest(".row, .open, .pline, .trow, .sh") : null;
+    if (!r) return null;
+    r.classList.add("busy"); r.setAttribute("aria-busy", "true");
+    return r;
+  }
+  function unmark(r) { if (r && r.isConnected) { r.classList.remove("busy"); r.removeAttribute("aria-busy"); } }
+  /* A SAVE OUTLIVES THE PAGE IT WAS SENT FROM (§671): the description saves
+     when its box is left, and the box is often left by the press that leaves
+     the page. A small body is sent keepalive (the browser refuses a keepalive
+     body past 64 KB, so a long one goes the plain way). */
+  function small(s) { return new Blob([s]).size <= 60000; }
   var chain = Promise.resolve();
-  function request(method, url, body, k, then) {
-    say("");
+  function request(method, url, body, k, then, quiet) {
+    if (!quiet) say("");
+    var busy = markBusy(pressed); pressed = null;
     chain = chain.then(function () {
       var init = { method: method, credentials: "same-origin", headers: {} };
-      if (body) { init.headers["Content-Type"] = "application/json"; init.body = JSON.stringify(body); }
+      if (body) { init.headers["Content-Type"] = "application/json"; init.body = JSON.stringify(body); init.keepalive = /*%KA%*/small(init.body); }
       return fetch(url, init)
         .then(function (r) { return r.json().catch(function () { return { ok: false, why: "The server did not answer." }; }); })
         .then(function (j) {
-          if (!j || !j.ok) { say((j && j.why) || "That did not save. Try again."); if (then) then(null); return; }
+          if (!j || !j.ok) {
+            say((j && j.why) || "That did not save. Try again."); unmark(busy); if (then) then(null);
+            /* A REFUSED CHANGE IS DRAWN AGAIN FROM THE SERVER (§671): a rename,
+               an edited entry or a picked status was written on screen before
+               the answer, so on a refusal the screen would keep the refused
+               words beside a message saying they were refused. The list is
+               read again, quietly, so what shows is what is stored. */
+            /*%REFUSED%*/
+            if (method === "POST") refetch(null, true);
+            return;
+          }
           swap(j, k); if (then) then(j);
         })
-        .catch(function () { say("Could not reach the server. Nothing was changed."); if (then) then(null); });
+        .catch(function () { say("Could not reach the server. Nothing was changed."); unmark(busy); if (then) then(null); });
     });
   }
   function post(act, k, then) {
     var a = ask(); act.view = a.view; act.q = a.q; act.group = a.group; act.dates = a.dates; act.open = a.open;
     request("POST", API, act, k || keep(), then);
   }
-  function refetch(k) {
+  function refetch(k, quiet) {
     var a = ask();
     request("GET", LIST + "?view=" + encodeURIComponent(a.view) + "&q=" + encodeURIComponent(a.q) +
-      "&group=" + encodeURIComponent(a.group) + "&dates=" + encodeURIComponent(a.dates) + (a.open ? "&open=" + encodeURIComponent(a.open) : ""), null, k || keep());
+      "&group=" + encodeURIComponent(a.group) + "&dates=" + encodeURIComponent(a.dates) + (a.open ? "&open=" + encodeURIComponent(a.open) : ""), null, k || keep(), null, quiet);
   }
   function rowOf(el) { var r = el.closest(".row, .open, .pline"); return r ? r.getAttribute("data-id") : null; }
   function entryOf(el) { var e = el.closest(".pe"); return e ? e.getAttribute("data-pid") : null; }
@@ -349,7 +379,7 @@ export const APP_JS = `(function () {
     var k = keep();
     k.prog = k.prog.filter(function (st) { return st.id !== id; });
     k.focus = { prog: id };
-    t.disabled = true;
+    t.disabled = true; pressed = t;
     post({ act: "progress-add", id: id, body: v }, k, function (j) { if (!j) { t.disabled = false; t.focus(); } });
   });
   document.addEventListener("input", function (e) {
@@ -367,6 +397,7 @@ export const APP_JS = `(function () {
            row in one press, the server finding it if the name exists. */
         var rid = rowOf(t);
         closePops(null);
+        pressed = t;
         if (v && rid) post({ act: "topic", id: rid, topicName: v });
         return;
       }
@@ -386,7 +417,7 @@ export const APP_JS = `(function () {
       e.preventDefault();
       var v = t.value.replace(/\\s+/g, " ").trim();
       if (!v) return;
-      t.value = "";
+      t.value = ""; pressed = t;
       post({ act: "topic-new", name: v });
     } else if (e.key === "Escape") { t.value = ""; }
   });
@@ -478,6 +509,7 @@ export const APP_JS = `(function () {
   });
 
   document.addEventListener("click", function (e) {
+    pressed = e.target;
     var b = e.target.closest("[data-act]");
     if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots")) closePops(null);
     if (!b) return;
@@ -596,6 +628,7 @@ export const APP_JS = `(function () {
         settled = true;
         if (trow) { inp.remove(); slot.hidden = false; trow.classList.remove("edit"); if (nmSpan) nmSpan.textContent = v; }
         else slot.textContent = v;
+        pressed = slot;
         post({ act: "topic-rename", topicId: tid, name: v });
       });
     } else if (act === "topic-close" || act === "topic-reopen" || act === "topic-delete") {
@@ -629,6 +662,7 @@ export const APP_JS = `(function () {
         var v3 = ta.value.replace(/[ \\t]+\\n/g, "\\n").trim();
         if (!v3 || v3 === was3) { back3(); return; }
         settled3 = true; ta.remove(); txt.hidden = false; txt.textContent = v3;
+        pressed = txt;
         post({ act: "progress-edit", progressId: pid, body: v3 });
       });
     } else if (act === "progress-delete-ask") {
@@ -663,6 +697,7 @@ export const APP_JS = `(function () {
   });
 
   document.addEventListener("change", function (e) {
+    pressed = e.target;
     var c = e.target.closest("[data-act]");
     if (!c) return;
     var act = c.getAttribute("data-act"), id = rowOf(c);
@@ -704,13 +739,13 @@ export const APP_JS = `(function () {
     var u = new URL(location.href);
     u.searchParams.set("view", v); u.searchParams.delete("open");
     history.pushState(null, "", u);
-    refetch();
+    pressed = null; refetch();
   });
   window.addEventListener("popstate", function () {
     var v = new URLSearchParams(location.search).get("view") || "week";
     if (v === (B.getAttribute("data-view") || "week")) return;
     B.setAttribute("data-view", v);
-    refetch();
+    pressed = null; refetch();
   });
 
   /* RENAME IN PLACE: a double-click on the name turns it into a box; Enter
@@ -735,6 +770,7 @@ export const APP_JS = `(function () {
       var v = inp.value.replace(/\\s+/g, " ").trim();
       if (!keep || !v) v = was;
       t.textContent = v;
+      pressed = t;
       if (keep && v !== was) post({ act: "rename", id: id, title: v });
     };
     inp.addEventListener("keydown", function (ev) {
@@ -750,6 +786,7 @@ export const APP_JS = `(function () {
     if (!c) return;
     if (c.value === c.defaultValue) return;
     var id = rowOf(c), v = c.value;
+    pressed = c;
     post({ act: "notes", id: id, description: v });
   });
 })();

@@ -3193,7 +3193,7 @@ var COPILOT = (function(){
       '<div class="copcp-ask"><textarea class="fld" data-cop-dv-ask rows="2" placeholder="Ask for something — a couple more, or a different angle" aria-label="Ask the Copilot">' + E(DVASK[id] || "") + '</textarea>' +
       '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-dv-send="' + what + '"' + held(busyHere && BUSY) + '>Send</button></div>';
   }
-  /* §671 — DIRECTIONS, SPLIT THREE WAYS (the SWOT's shape, §641–§653;
+  /* §675 — DIRECTIONS, SPLIT THREE WAYS (the SWOT's shape, §641–§653;
      Competitive Discipline's, §654 C1; the working mockup
      design-mockups/copilot-layout/2026-10-29_directions-split-working.html,
      Islam: "ok proceed and build it"): the chat on the left in the order it
@@ -3497,7 +3497,7 @@ var COPILOT = (function(){
       return true;
     }
     if ((b = hit(ev, "[data-cop-dv-more]"))) { dvAsk({ act: b.getAttribute("data-cop-dv-more") === "caps" ? "capSuggest" : "dirMore" }); return true; }
-    /* §671 — "+ Add my own" turns the chat's box into a line of your own, pressed again it is the ask box again */
+    /* §675 — "+ Add my own" turns the chat's box into a line of your own, pressed again it is the ask box again */
     if ((b = hit(ev, "[data-cop-dv-add]"))) {
       var w = b.getAttribute("data-cop-dv-add"); DVADD[id] = DVADD[id] === w ? null : w; draw();
       var bx = document.querySelector("[data-cop-text]"); if (bx) bx.focus();
@@ -3939,7 +3939,7 @@ var COPILOT = (function(){
       if (swCanChange()) { if (forced == null && t) t.value = ""; DRAFT[id] = ""; swAsk({ act:"swotChange", ask: text.trim(), swot: swCopy() }); return; }
       return;
     }
-    /* §671 — in a Directions chat the box asks for more, or adds a line of your own */
+    /* §675 — in a Directions chat the box asks for more, or adds a line of your own */
     if (dirsOn()) { if (!dvCanType()) return; var w = dvAskWhat(), ownLine = DVADD[id] === w; if (forced == null && t) t.value = ""; DRAFT[id] = ""; DVADD[id] = null;
       dvAsk(ownLine ? { act: w === "caps" ? "capSuggest" : "dirMore", own: [text.trim()] } : { act: w === "caps" ? "capSuggest" : "dirMore", ask: text.trim() }); return; }
     /* §654 C1 — in a Competitive Discipline chat the box asks for a change to the table */

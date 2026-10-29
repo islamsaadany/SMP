@@ -2590,7 +2590,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     check((r.s.options || []).some((o) => o.title === "Upper Egypt"), "…and the Copilot's own are added beside them");
     const marks = await page.$$eval(".copdv-mk.plan", (a) => a.length);
     check(marks === before.length, "a row from the plan says so on the page", marks);
-    /* §671 — the split: the Directions table in the pane on the right, the
+    /* §675 — the split: the Directions table in the pane on the right, the
        to-do beside, the chat reading what happened, its box live for an
        ask, Go ahead under the table, Save held saying why. */
     const spl = await page.evaluate(() => ({ pane: !!document.querySelector("[data-cop-dvpane] [data-cop-dv-sc]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-dv-sc]"),
@@ -2600,7 +2600,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       goall: !!document.querySelector("[data-cop-dvpane] [data-cop-dv-go-all]"), foot: (document.querySelector("[data-cop-dvfoot]") || {}).textContent || "",
       save: (document.querySelector("[data-cop-dv-finish]") || {}).getAttribute ? document.querySelector("[data-cop-dv-finish]").getAttribute("data-tip") : null }));
     check(spl.pane && !spl.inChat && spl.todo && /The Directions/.test(spl.step) && /Start from the existing ones/.test(spl.me) && /Suggest Directions/.test(spl.me) && /Ask for something/.test(spl.ph) && spl.dis === false && spl.goall && /v1/.test(spl.foot) && /in progress/.test(spl.foot) && /Go ahead under the Directions first/.test(String(spl.save)),
-      "§671 the Directions stand in the pane on the right with Go ahead under them, the to-do beside; the chat reads 'Start from the existing ones' and 'Suggest Directions' as what happened, its box asks for more, and Save is held saying to press Go ahead first", JSON.stringify(spl));
+      "§675 the Directions stand in the pane on the right with Go ahead under them, the to-do beside; the chat reads 'Start from the existing ones' and 'Suggest Directions' as what happened, its box asks for more, and Save is held saying to press Go ahead first", JSON.stringify(spl));
     const i = r.s.options.findIndex((o) => o.title === "Upper Egypt");
     const sc0 = await page.evaluate((i) => document.querySelectorAll("td.copdv-score")[i].textContent, i);
     check(sc0 === "64", "a Direction's score is drawn, Urgency × Importance × Ease", sc0);
@@ -2632,10 +2632,10 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     check(r.s.chose === true, "Go ahead stores the choice", JSON.stringify(r.s.chose));
     const fld = await page.evaluate(() => ({ fold: (document.querySelector('[data-cop-pfold="dvopts"]') || {}).textContent || "", me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), scLive: document.querySelectorAll("[data-cop-dvpane] button[data-cop-dv-sc]").length, goall: !!document.querySelector("[data-cop-dv-go-all]") }));
     check(/The Directions/.test(fld.fold) && new RegExp(r.s.options.length + " offered · " + goN + " ticked").test(fld.fold) && /Agreed/.test(fld.fold) && new RegExp("Go ahead with these " + goN).test(fld.me) && fld.scLive === 0 && !fld.goall,
-      "§671 …the Directions fold in the chat where they were agreed, the press reads as the person's line, and the scores settle (no Go ahead left)", JSON.stringify(fld));
+      "§675 …the Directions fold in the chat where they were agreed, the press reads as the person's line, and the scores settle (no Go ahead left)", JSON.stringify(fld));
     await page.click('[data-cop-pfold="dvopts"]'); await page.waitForTimeout(200);
     const fo2 = await page.$$eval(".coppf.open .copdul li", (a) => a.length);
-    check(fo2 === r.s.options.length, "§671 …and open again on a press, one line per Direction with its score and whether it goes ahead", fo2);
+    check(fo2 === r.s.options.length, "§675 …and open again on a press, one line per Direction with its score and whether it goes ahead", fo2);
     const withCaps = !!r.s.withCaps;
     if (withCaps) {
       await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
@@ -2670,7 +2670,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     check(!!dv && dv.title === "Directions — Mobile" && dv.n === 1, "Save writes Directions — Mobile v1", JSON.stringify(dv));
     const sv0 = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.items) === b, line: /v1 saved.*not on the plan yet/.test((document.querySelector("[data-cop-dvfoot]") || {}).textContent || ""),
       apply: (document.querySelector("[data-cop-dv-apply]") || {}).getAttribute ? document.querySelector("[data-cop-dv-apply]").getAttribute("aria-disabled") : "none", said: /Saved as .*v1.*under Deliverables/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || "") }), planBefore);
-    check(sv0.same && sv0.line && sv0.apply !== "true" && sv0.said, "§645 Save keeps a version and leaves the plan exactly as it was — the pane's foot says v1 saved · not on the plan yet with Apply to plan live, and the chat says where the version is (§671)", JSON.stringify(sv0));
+    check(sv0.same && sv0.line && sv0.apply !== "true" && sv0.said, "§645 Save keeps a version and leaves the plan exactly as it was — the pane's foot says v1 saved · not on the plan yet with Apply to plan live, and the chat says where the version is (§675)", JSON.stringify(sv0));
     await page.click("[data-cop-dv-apply]");
     await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
     const askDv = await page.evaluate((b) => ({ t: (document.getElementById("modal-b") || {}).textContent || "", same: JSON.stringify(UNITS.mobile.items) === b }), planBefore);
@@ -2688,7 +2688,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await page.click("[data-cop-chats] [data-cop-chat]");
     await page.waitForSelector("[data-cop-dv-apply]", { timeout: 10000 }).catch(() => {});
     const re = await page.evaluate(() => ({ line: /v1 on the plan/.test((document.querySelector("[data-cop-dvfoot]") || {}).textContent || ""), again: (document.querySelector("[data-cop-dv-apply]") || {}).textContent || "" }));
-    check(re.line && /again/.test(re.again), "§654 after a reload the pane's foot still says v1 on the plan — the note on the deliverable, not this visit's memory (§671)", JSON.stringify(re));
+    check(re.line && /again/.test(re.again), "§654 after a reload the pane's foot still says v1 on the plan — the note on the deliverable, not this visit's memory (§675)", JSON.stringify(re));
     await shot("2-applied");
     const after = await page.evaluate(() => UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name, u: p.urgency })));
     const kept = r.s.options.filter((o) => o.go && o.planId);
@@ -2700,7 +2700,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       const own = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; return c ? { head: c.head || null, fn: c.fn || null } : null; });
       check(!!own && own.head === CAP_OWNER && !own.fn, "§626 …and its Owner is the person picked, written as its owner and not as a function", JSON.stringify(own) + " want " + CAP_OWNER);
     }
-    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-dv-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §671)");
+    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-dv-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §675)");
     check(goN > 0, "something went ahead", goN);
     if (!withCaps) {
       /* Capabilities are their own layer here, so they are their own section

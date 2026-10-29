@@ -141,29 +141,86 @@ export const APP_JS = `(function () {
     restore(k);
   }
   var chain = Promise.resolve(), busy = false;
+  /* A SAVE OUTLIVES THE PAGE IT WAS SENT FROM (§671): the title, the notes
+     and the minutes save when their box is LEFT, and the box is often left by
+     the press that leaves the page too — "← All meetings", a link on the top
+     bar. Measured in Chromium the save still lands (the page unloads only
+     once the next one arrives); Safari is known to cut a request the moment
+     a move begins, and the iPad is where the meeting is typed. So a small
+     body is sent keepalive, which the browser carries to its end whatever the
+     page does. Only a small one: the browser refuses a keepalive body past
+     64 KB outright, so a long notes box goes the plain way it always did. The
+     break no-keepalive sends every body the plain way (checks/notes.mjs). */
+  function small(s) { return new Blob([s]).size <= 60000; }
   function post(act, opts) {
     opts = opts || {};
     var k = opts.keep === false ? null : keep();
     say("");
     chain = chain.then(function () {
       act.note = noteId();
-      return fetch(API, { method: "POST", credentials: "same-origin",
-          headers: { "Content-Type": "application/json" }, body: JSON.stringify(act) })
+      var body = JSON.stringify(act);
+      return fetch(API, { method: "POST", credentials: "same-origin", keepalive: /*%KA%*/small(body),
+          headers: { "Content-Type": "application/json" }, body: body })
         .then(function (r) { return r.json().catch(function () { return { ok: false, why: "The server did not answer." }; }); })
         .then(function (j) {
-          if (!j || !j.ok) { say((j && j.why) || "That did not save. Try again."); if (opts.then) opts.then(null); return; }
+          if (!j || !j.ok) {
+            /* a caller that shows the refusal where the press was made says
+               so (opts.said); the rest is said at the top as before */
+            var why = (j && j.why) || "That did not save. Try again.";
+            if (opts.said) opts.said(why); else say(why);
+            if (opts.then) opts.then(null); return;
+          }
           if (j.gone) { location.href = HERE; return; }
           swap(j, k);
-          if (j.said) say(j.said, true);
+          if (j.said) { if (opts.good) opts.good(j.said); else say(j.said, true); }
           if (opts.then) opts.then(j);
         })
         .catch(function () { say("Could not reach the server. Nothing was changed."); if (opts.then) opts.then(null); });
     });
     return chain;
   }
-  function saved() {
+  function saved() { footSay("Saved just now", ""); }
+  /* The foot's own slot, where Send's answer lands — where the press was
+     made, never at the top of the page (§672). */
+  function footSay(t, cls) {
     var s = document.querySelector("[data-saved]");
-    if (s) s.textContent = "Saved just now";
+    if (s) { s.textContent = t || ""; s.className = "saved" + (cls ? " " + cls : ""); }
+  }
+  /* WHAT THE PAGE SHOWS WHILE IT WAITS (§672, rule 1d). The break
+     no-wait-shape (modules/notes/index.ts) switches both shapes off, which
+     must turn checks/notes.mjs red. */
+  function waiting() { /*%WAIT%*/ return true; }
+  /* THE SHAPE OF WHAT IS COMING: the minutes' grey bars, drawn by the server
+     into a template, stand where the minutes will land — in place of the
+     minutes already there, or, on a page that has none yet, in a left column
+     the page opens for them with the notes moved beside it, as the real page
+     will draw them. Returns the way back for a refusal: the bars go and the
+     reason stands where they were. */
+  function drawRefineWait(btn) {
+    var none = function () {};
+    if (!waiting()) return none;
+    var tpl = document.getElementById("refine-wait"), body = document.getElementById("body");
+    if (!tpl || !body) return none;
+    var shape = document.createElement("div"); shape.className = "wait"; shape.innerHTML = tpl.innerHTML;
+    var ask = body.querySelector("[data-act=send-ask]"); if (ask) ask.setAttribute("aria-disabled", "true");
+    var mins = body.querySelector("[data-minutes]"), left;
+    if (mins) { mins.hidden = true; mins.parentNode.insertBefore(shape, mins); left = mins.parentNode; }
+    else {
+      var raw = body.querySelector("textarea[data-act=raw]"), lab = raw ? raw.previousElementSibling : null;
+      if (!raw || !lab) return none;
+      var two = document.createElement("div"); two.className = "two";
+      left = document.createElement("div"); left.appendChild(shape);
+      var side = document.createElement("div"); side.className = "side";
+      lab.parentNode.insertBefore(two, lab);
+      side.appendChild(lab); lab.appendChild(btn); side.appendChild(raw);
+      two.appendChild(left); two.appendChild(side);
+    }
+    return function (why) {
+      shape.remove();
+      if (mins) mins.hidden = false;
+      if (why) { var p = document.createElement("p"); p.className = "said"; p.setAttribute("role", "alert"); p.textContent = why; left.insertBefore(p, left.firstChild); }
+      if (ask) ask.removeAttribute("aria-disabled");
+    };
   }
 
   /* ── THE MINUTES: every part read off the page as it stands ──────────
@@ -211,24 +268,44 @@ export const APP_JS = `(function () {
       busy = true;
       var word = b.textContent;
       b.textContent = "Refining…"; b.setAttribute("aria-disabled", "true");
-      post({ act: "refine", minutes: minutes() }, { keep: false, then: function () {
+      var back = drawRefineWait(b);
+      post({ act: "refine", minutes: minutes() }, { keep: false, said: back, then: function () {
         busy = false;
         var again = document.querySelector("[data-act=refine]");
         if (again) { again.textContent = word; again.removeAttribute("aria-disabled"); }
         markMinutes();
       } });
+    } else if (act === "send-ask") {
+      /* SEND ASKS FIRST (§671): the button gives way to the question beside
+         it, and Yes is what posts. Not yet puts the button back. */
+      b.hidden = true;
+      var sq = b.parentNode.querySelector(".sure"); if (sq) { sq.hidden = false; var yes = sq.querySelector("[data-act=send]"); if (yes) yes.focus(); }
+    } else if (act === "send-no") {
+      var sq2 = b.closest(".sure");
+      if (sq2) { sq2.hidden = true; var ask = sq2.parentNode.querySelector("[data-act=send-ask]"); if (ask) { ask.hidden = false; ask.focus(); } }
     } else if (act === "send") {
       if (b.getAttribute("aria-disabled") === "true") { say(b.getAttribute("data-why") || ""); return; }
       if (busy) return;
       busy = true;
       var w = b.textContent;
       b.textContent = "Sending…"; b.setAttribute("aria-disabled", "true");
-      post({ act: "send", minutes: minutes() }, { keep: false, then: function () {
-        busy = false;
-        var s = document.querySelector("[data-act=send]");
-        if (s && s.textContent === "Sending…") { s.textContent = w; s.removeAttribute("aria-disabled"); }
-        markMinutes();
-      } });
+      /* THE FOOT SAYS IT IS SENDING (§672): the question gives way to the
+         line beside it, where the press was made; the answer lands in the
+         foot's own slot, good or refused, and a refusal puts the button back. */
+      var sure = b.closest(".sure"), sending = sure && waiting() ? sure.parentNode.querySelector("[data-sending]") : null;
+      if (sending) { sure.hidden = true; sending.hidden = false; }
+      post({ act: "send", minutes: minutes() }, { keep: false,
+        good: function (t) { footSay(t, "good"); },
+        said: function (why) {
+          footSay(why, "bad");
+          if (sending) { sending.hidden = true; var ask2 = sure.parentNode.querySelector("[data-act=send-ask]"); if (ask2) ask2.hidden = false; }
+        },
+        then: function () {
+          busy = false;
+          var s = document.querySelector("[data-act=send]");
+          if (s && s.textContent === "Sending…") { s.textContent = w; s.removeAttribute("aria-disabled"); }
+          markMinutes();
+        } });
     } else if (act === "open-att") {
       openAtt(b);
     } else if (act === "pick-att") {

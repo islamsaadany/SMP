@@ -53,7 +53,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
       /* §566: the views put back to pages — a press on a tab loads one. */
       .replace("/*%TABS%*/", brk() === "tabs-reload" ? "return;" : "")
       /* §567: the add line's picks carried past the add again. */
-      .replace("st.picked = false; /*%PICKS%*/", brk() === "keep-picks" ? "" : "st.picked = false;"),
+      .replace("st.picked = false; /*%PICKS%*/", brk() === "keep-picks" ? "" : "st.picked = false;")
+      /* §671: a refused change left standing on screen; a save sent the plain
+         way, for the browser to drop when the page leaves. */
+      .replace("/*%REFUSED%*/", brk() === "keep-refused" ? "return;" : "")
+      .replace("/*%KA%*/", brk() === "no-keepalive" ? "false && " : ""),
       { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which

@@ -68384,7 +68384,7 @@ var COPILOT = (function(){
     }
     if (s.caps.length) {
       var capsLog = (s.log || []).some(function(x){ return x.p === "caps"; });
-      out.push(aiMsg('Here are <b>' + s.caps.length + '</b> Capabilities, on the right. Set the kind and the owner there, and keep the ones to build.' +
+      out.push(aiMsg((s.caps.length === 1 ? 'Here is <b>1</b> Capability' : 'Here are <b>' + s.caps.length + '</b> Capabilities') + ', on the right. Set the kind and the owner there, and keep the ones to build.' +
         (ed ? ' Ask here for a couple more, or a different angle. <b>Save</b>, at the foot of the tables, keeps them as a version.' : '') + (!capsLog ? moreOpts("caps") : '')));
       out.push(logOf("caps", true));
     }

@@ -55990,14 +55990,29 @@ var READING = (function () {
     }).join("") + '</div>';
   }
 
+  /* DIRECTIONS AND CAPABILITIES APART WHERE THE BOX KEEPS THEM APART (§677).
+     Islam: *"in cases like el abd you need to split directions and
+     capabilities"*. The question is the workbench's own, `boxSplit(u)`
+     (SMPRules.pillarsSplit): where it answers yes the tab draws two lists
+     under two headings, the directions first, the capabilities under the
+     layer's own word for them; a heading over nothing is not drawn (§520.2).
+     Where it answers no, one list, as the box itself is. */
   function directions(key) {
     var u = planOf(key), items = SMPRules.shown(itemsNow(u));
     if (!items.length) return '<p class="rnone">No directions this year.</p>';
-    var all = u.items || [];
-    return '<div class="rtools">' + items.length + ' direction' + (items.length === 1 ? "" : "s") + ', folded — press one to open it.' +
+    var groups = boxSplit(u)
+      ? [{ t: "Directions", list: items.filter(function (it) { return !SMPRules.pillarIsCap(it); }) },
+         { t: L("capability", "bu"), list: items.filter(function (it) { return SMPRules.pillarIsCap(it); }) }]
+        .filter(function (g) { return g.list.length; })
+      : [{ t: null, list: items }];
+    return '<div class="rtools">' + items.length + ' direction' + (items.length === 1 ? "" : "s") + ', folded \u2014 press one to open it.' +
       '<button type="button" data-rall="open">Open all</button><button type="button" data-rall="close">Close all</button></div>' +
-      '<div class="rdirs">' + items.map(function (it) {
-        var id = key + "|" + all.indexOf(it), open = !!ST.open[id], sc = pillarPerf(it);
+      groups.map(function (g) { return (g.t ? '<p class="rk rgrp">' + g.t + '</p>' : '') + dirList(u, g.list); }).join("");
+  }
+  function dirList(u, items) {
+    var all = u.items || [];
+    return '<div class="rdirs">' + items.map(function (it) {
+        var id = u.ukey + "|" + all.indexOf(it), open = !!ST.open[id], sc = pillarPerf(it);
         var ms = SMPRules.shown(it.measures || []).length, ts = SMPRules.shown(it.tactics || []).length;
         return '<div class="rdir' + (open ? " open" : "") + '" data-rdir="' + esc(id) + '">' +
           '<div class="rfold" role="button" tabindex="0" aria-expanded="' + (open ? "true" : "false") + '">' +

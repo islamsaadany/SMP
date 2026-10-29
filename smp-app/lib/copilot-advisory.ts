@@ -59,7 +59,7 @@ export type Advisory = {
   phase: "asking" | "brief" | "saved";
   ask: string; turns: Turn[]; assumed: string[]; seen: string[];
   stopped: boolean; lead: string; brief: Brief | null; reply: string;
-  /* §685 — the chat in time after the brief: every change asked for and its answer, in order */
+  /* §688 — the chat in time after the brief: every change asked for and its answer, in order */
   log: { w: "me" | "ai"; t: string }[];
   saved: { deliverableId: string; n: number; title: string } | null;
 };

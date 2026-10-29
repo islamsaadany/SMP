@@ -931,6 +931,23 @@
   .clause:last-child { border-bottom:0; }
   .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
   .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
+  /* WHO WE ARE IS TYPED IN ONE BOX (§685): the lines above are how it READS;
+     with the pen on, this box stands in for the list — a line per row, the
+     bold opening words being the left column. The bar above it holds the one
+     button, B. */
+  .clausebar { display:flex; align-items:center; gap:12px; margin:0 0 8px; }
+  .bbtn { font:inherit; font-weight:800; font-size:14px; width:34px; height:30px; border:1px solid var(--field-line);
+          border-radius:7px; background:var(--surface); color:var(--stone); cursor:pointer; }
+  .bbtn:hover { background:var(--attn-bg); }
+  .bbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .bbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .clausehint { color:var(--none); font-size:13px; }
+  .clausebox { min-height:120px; border:1px solid var(--field-line); border-radius:8px; padding:10px 12px; outline:0;
+               background:var(--surface); color:var(--ink); font-family:var(--serif); font-size:15px; line-height:1.6;
+               white-space:pre-wrap; }
+  .clausebox:focus { border-color:var(--gold); }
+  .clausebox div { min-height:1.6em; }
+  .clausebox b { font-weight:700; color:var(--stone); }
   .statement { font-family:var(--serif); font-size:16px; line-height:1.5; }
   /* Prose somebody typed keeps the shape they typed it in (§51.1). pre-LINE,
      not pre-wrap: line breaks survive, accidental double spaces and pasted
@@ -5833,6 +5850,14 @@ html[data-client-settings] .viewer { display:none; }
                   background:var(--warn-bg); color:var(--warn-tx); font-size:13px; }
   .planblk-pen { border-top:1px solid var(--line); padding:12px 18px 14px; }
   .planblk-pen > .cyc2-r.planper:first-child { border-top:0; margin-top:0; padding-top:0; }
+
+/* §687: where a reader's seat lands — the line above the Roles & access matrix */
+.acreaders { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; padding:10px 14px;
+  background:var(--surface); border:1px solid var(--line); border-radius:10px; font-size:13.5px; }
+.acreaders b { font-weight:600; white-space:nowrap; }
+.acreaders .acrdnow { font-weight:600; color:var(--ink); }
+.acreaders .acrdwhy { flex:1 1 320px; font-size:12.5px; color:var(--ink-3); }
+
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are

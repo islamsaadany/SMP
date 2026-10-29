@@ -5346,6 +5346,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), t = s && s.top, b = t && t.plan;
     return !!(b && b.split === true);
   }
+  /* §687: WHERE A READER'S SEAT LANDS — in the reading window (the default,
+     Islam: "build it yes") or on the workbench. A switch per client, on the
+     Structure step; kept on the structure as `readers: "workbench"`, and an
+     ABSENCE for the window (§50.6), so a client that never touched the
+     switch reads as the window was built to read. */
+  function readersOpen(group) {
+    var s = structureOf(group);
+    return !(s && s.readers === "workbench");
+  }
   /* WHICH HALF A PILLAR BELONGS TO, as one answer rather than two call sites
      asking the question in opposite directions. `half` is "cap" or "dir";
      anything else means the whole list and every pillar is in it. */
@@ -6006,7 +6015,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     LAYER_KINDS: LAYER_KINDS, coUsedBy: coUsedBy, coOnLayer: coOnLayer,
     layerCompanies: layerCompanies, layerOn: layerOn, layerOrphans: layerOrphans, layerWords: layerWords,
     NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
-    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
+    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf, readersOpen: readersOpen,
     ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     endInMindOffered: endInMindOffered, endInMindOn: endInMindOn,
     holdsSeat: holdsSeat, holdsTopPart: holdsTopPart, mayReportTopOrPart: mayReportTopOrPart,
@@ -31048,22 +31057,229 @@ function renderCompanyFoundation(){
   return foundationBody(o, "co:" + k, gpg);
 }
 
+/* ── WHO WE ARE IS TYPED IN ONE BOX (§685) ───────────────────────────
+   Islam, of the five lines of two boxes each: *"is there a more convenient
+   way for adding this part without filling 8 boxes"* — and, of the one-box
+   drawing §613 had set aside: *"keep approach 2 in creation but shows like
+   today with each bold title on the left and allows the user to make bold
+   the words from the start of the line only"*. So: ONE box while the pen is
+   on, a line per row, the bold opening words being the opener; and the
+   table exactly as it was while reading. The stored shape, `[opener, text]`
+   a line, does not move — the reading window, the slides and both
+   workbooks need nothing, and a unit's line keeps its id (§96's renumber
+   runs on the write as it did on Add). Bold runs from the START of a line
+   to the end of the selection and never from the middle, which is what
+   keeps every line splittable into the two columns; pressed inside the
+   bold words it takes the bold off. Written on blur like every other bound
+   field (§71.2, never a repaint under the cursor — §35), read back off the
+   box's lines; a blank line is not a row. Paste brings words only. */
+function clauseLines(clauses, page, tgt){
+  var cl = clauses || [];
+  if (!page) return '<dl style="margin:0">' + cl.map(function(c){
+      return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd><span class="flow">' + esc(c[1]) + '</span></dd></div>';
+    }).join("") + '</dl>';
+  return '<div class="clausebar"><button type="button" class="bbtn" data-clausebold="' + esc(tgt) +
+      '" title="Bold the opening words (Ctrl+B)" aria-keyshortcuts="Control+B" aria-pressed="false">B</button>' +
+      '<span class="clausehint">Select the opening words and press B (or Ctrl+B); bold runs from the start of the line. Enter starts a new line.</span></div>' +
+    '<div class="clausebox" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' + esc(L("brief")) +
+      '" data-clausebox="' + esc(tgt) + '">' +
+      (cl.length ? cl.map(function(c){ return CLAUSEBOX.lineHtml(c[0], c[1]); }).join("") : CLAUSEBOX.lineHtml("", "")) +
+    '</div>';
+}
+/* The box itself. One <div> per line; the opener is the <b> run at the very
+   start of it and everything after is the text. The browser is left to type,
+   delete and move the caret; this steps in for the four things it would get
+   wrong — Enter (a new line that carries no bold), Ctrl+B (from the start of
+   the line, never from the middle), paste (words only, a line per pasted
+   line) and a <b> that lands mid-line after two lines are joined (unwrapped,
+   the caret left where it is). */
+var CLAUSEBOX = {
+  lineHtml: function(op, tx){
+    return "<div>" + (op ? "<b>" + esc(op) + "</b>" : "") + (op && tx ? " " : "") + esc(tx) + (op || tx ? "" : "<br>") + "</div>";
+  },
+  lines: function(box){
+    return Array.prototype.filter.call(box.childNodes, function(n){ return n.nodeType === 1 && n.nodeName !== "BR"; });
+  },
+  read: function(div){
+    var op = "", tx = "", lead = true;
+    Array.prototype.forEach.call(div.childNodes, function(n){
+      var t = n.textContent || "";
+      if (n.nodeName === "BR") return;
+      if (lead && (n.nodeName === "B" || n.nodeName === "STRONG")) { op += t; return; }
+      if (lead && !op && !t.trim()) return;
+      lead = false; tx += t;
+    });
+    return [op.trim(), tx.trim()];
+  },
+  rows: function(box){
+    return CLAUSEBOX.lines(box).map(CLAUSEBOX.read).filter(function(l){ return l[0] || l[1]; });
+  },
+  setLine: function(div, op, tx){ div.innerHTML = CLAUSEBOX.lineHtml(op, tx).slice(5, -6); },
+  normalise: function(box){
+    if (!CLAUSEBOX.lines(box).length) {
+      var t = box.textContent; box.innerHTML = CLAUSEBOX.lineHtml("", t);
+      CLAUSEBOX.place(CLAUSEBOX.lines(box)[0], t.length); return;
+    }
+    Array.prototype.slice.call(box.childNodes).forEach(function(n){
+      if (n.nodeType === 3 && n.textContent.trim()) { var d = document.createElement("div"); box.replaceChild(d, n); d.appendChild(n); }
+      else if (n.nodeType === 3 || n.nodeName === "BR") box.removeChild(n);
+    });
+    CLAUSEBOX.lines(box).forEach(function(div){
+      var seen = false;
+      Array.prototype.slice.call(div.childNodes).forEach(function(n){
+        if (n.nodeName === "B" || n.nodeName === "STRONG") {
+          if (seen) { while (n.firstChild) div.insertBefore(n.firstChild, n); div.removeChild(n); }
+        } else if (n.nodeType === 1 && n.nodeName !== "BR") {
+          div.replaceChild(document.createTextNode(n.textContent), n); seen = true;
+        } else if ((n.textContent || "").trim()) seen = true;
+      });
+    });
+  },
+  lineOf: function(box, node){
+    while (node && node.parentNode !== box) node = node.parentNode;
+    return node && node.nodeType === 1 ? node : null;
+  },
+  offsetIn: function(div, node, off){
+    var r = document.createRange(); r.setStart(div, 0); r.setEnd(node, off); return r.toString().length;
+  },
+  place: function(div, off){
+    var w = document.createTreeWalker(div, NodeFilter.SHOW_TEXT), n, seen = 0,
+        sel = window.getSelection(), r = document.createRange();
+    while ((n = w.nextNode())) {
+      var len = n.textContent.length;
+      if (seen + len >= off) { r.setStart(n, off - seen); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); return; }
+      seen += len;
+    }
+    r.selectNodeContents(div); r.collapse(false); sel.removeAllRanges(); sel.addRange(r);
+  },
+  caret: function(box){
+    var sel = window.getSelection();
+    if (!sel.rangeCount || !box.contains(sel.anchorNode)) return null;
+    var r = sel.getRangeAt(0), div = CLAUSEBOX.lineOf(box, r.startContainer);
+    if (!div) return null;
+    var endDiv = CLAUSEBOX.lineOf(box, r.endContainer);
+    return { div: div,
+      start: CLAUSEBOX.offsetIn(div, r.startContainer, r.startOffset),
+      end: endDiv === div ? CLAUSEBOX.offsetIn(div, r.endContainer, r.endOffset) : div.textContent.length };
+  },
+  inOpener: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) return false;
+    var op = CLAUSEBOX.read(c.div)[0];
+    return !!op && c.end <= op.length;
+  },
+  mark: function(box){
+    var bar = box.previousElementSibling, b = bar && bar.querySelector(".bbtn");
+    if (!b) return;
+    var on = CLAUSEBOX.inOpener(box);
+    b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false");
+  },
+  toggleBold: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) { box.focus(); return; }
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div), op, tx;
+    if (l[0] && c.end <= l[0].length) { op = ""; tx = (l[0] + " " + l[1]).trim(); }
+    else { op = full.slice(0, c.end).trim(); tx = full.slice(c.end).trim(); }
+    CLAUSEBOX.setLine(c.div, op, tx);
+    CLAUSEBOX.place(c.div, Math.min(op ? op.length : c.end, c.div.textContent.length));
+    CLAUSEBOX.mark(box);
+  },
+  split: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) return;
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div);
+    var head = full.slice(0, c.start), tail = full.slice(c.end), inOp = l[0] && c.start <= l[0].length;
+    CLAUSEBOX.setLine(c.div, inOp ? head.trim() : l[0], inOp ? "" : head.slice(l[0].length).trim());
+    var nd = document.createElement("div"); CLAUSEBOX.setLine(nd, "", tail.trim());
+    c.div.parentNode.insertBefore(nd, c.div.nextSibling);
+    CLAUSEBOX.place(nd, 0); CLAUSEBOX.mark(box);
+  },
+  paste: function(box, e){
+    e.preventDefault();
+    var text = String((e.clipboardData || window.clipboardData).getData("text/plain") || "").replace(/\r/g, "");
+    var parts = text.split("\n"), c = CLAUSEBOX.caret(box);
+    if (!c) {
+      parts.forEach(function(p){ var d = document.createElement("div"); CLAUSEBOX.setLine(d, "", p.trim()); box.appendChild(d); });
+      return;
+    }
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div), inOp = l[0] && c.start <= l[0].length;
+    if (parts.length === 1) {
+      var joined = full.slice(0, c.start) + parts[0] + full.slice(c.end);
+      var op = inOp ? joined.slice(0, l[0].length + parts[0].length).trim() : l[0];
+      CLAUSEBOX.setLine(c.div, op, joined.slice(op ? op.length : 0).trim());
+      CLAUSEBOX.place(c.div, Math.min(c.start + parts[0].length, c.div.textContent.length));
+      CLAUSEBOX.mark(box); return;
+    }
+    var head = full.slice(0, c.start) + parts[0], tail = parts[parts.length - 1] + full.slice(c.end);
+    CLAUSEBOX.setLine(c.div, inOp ? head.trim() : l[0], inOp ? "" : head.slice(l[0].length).trim());
+    var after = c.div;
+    parts.slice(1).forEach(function(p, i){
+      var d = document.createElement("div");
+      CLAUSEBOX.setLine(d, "", (i === parts.length - 2 ? tail : p).trim());
+      after.parentNode.insertBefore(d, after.nextSibling); after = d;
+    });
+    CLAUSEBOX.place(after, parts[parts.length - 1].length); CLAUSEBOX.mark(box);
+  },
+  /* `write(rows)` is handed the lines as `[opener, text]` pairs, blank ones
+     left out, on blur and only when something changed — a `change` event,
+     which a contenteditable box never fires, done by hand. */
+  wire: function(box, write){
+    var was = JSON.stringify(CLAUSEBOX.rows(box));
+    var bar = box.previousElementSibling, b = bar && bar.querySelector(".bbtn");
+    box.addEventListener("input", function(){ CLAUSEBOX.normalise(box); CLAUSEBOX.mark(box); });
+    /* TYPING AT THE END OF THE BOLD WORDS WRITES THE TEXT, NOT THE OPENER. A
+       new unit starts with the group's openers and nothing after them
+       (§96's fresh shape), so the first thing anybody does is put the caret
+       after "We are" and type — and a browser carries the bold on from the
+       end of a <b>, which would have made the whole line the opener and
+       the text empty. So the letter typed at the end of the bold is put in
+       by hand, into the plain text after it, and the caret left in that
+       text (merely moving the caret out first is not enough: the browser
+       puts it back to the end of the <b> and types bold). Typing INSIDE
+       the opener still extends it, and B is how the opener grows on
+       purpose. */
+    box.addEventListener("beforeinput", function(e){
+      if (e.inputType !== "insertText" || !e.data) return;
+      var sel = window.getSelection(); if (!sel.rangeCount || !sel.isCollapsed) return;
+      var r = sel.getRangeAt(0), n = r.startContainer, bold = n.nodeType === 3 ? n.parentNode : n;
+      if (!bold || (bold.nodeName !== "B" && bold.nodeName !== "STRONG") || bold.parentNode.parentNode !== box) return;
+      if (n.nodeType === 3 && (r.startOffset !== n.textContent.length || n.nextSibling)) return;
+      if (n.nodeType !== 3 && r.startOffset !== n.childNodes.length) return;
+      e.preventDefault();
+      var t = bold.nextSibling;
+      if (!t || t.nodeType !== 3) { t = document.createTextNode(""); bold.parentNode.insertBefore(t, bold.nextSibling); }
+      t.insertData(0, e.data);
+      var nr = document.createRange(); nr.setStart(t, e.data.length); nr.collapse(true);
+      sel.removeAllRanges(); sel.addRange(nr);
+      CLAUSEBOX.mark(box);
+    });
+    box.addEventListener("keydown", function(e){
+      if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) { e.preventDefault(); CLAUSEBOX.toggleBold(box); }
+      else if (e.key === "Enter") { e.preventDefault(); CLAUSEBOX.split(box); }
+      else if ((e.ctrlKey || e.metaKey) && /^[iu]$/i.test(e.key)) e.preventDefault();
+    });
+    box.addEventListener("paste", function(e){ CLAUSEBOX.paste(box, e); });
+    box.addEventListener("blur", function(){
+      var now = CLAUSEBOX.rows(box), s = JSON.stringify(now);
+      if (s === was) return;
+      was = s; write(now);
+    });
+    if (b) {
+      b.addEventListener("mousedown", function(e){ e.preventDefault(); });
+      b.addEventListener("click", function(){ CLAUSEBOX.toggleBold(box); });
+    }
+    if (!CLAUSEBOX.listening) {
+      CLAUSEBOX.listening = true;
+      document.addEventListener("selectionchange", function(){
+        var a = document.activeElement;
+        if (a && a.classList && a.classList.contains("clausebox")) CLAUSEBOX.mark(a);
+      });
+    }
+  }
+};
+
 function foundationBody(o, tgt, gpg){
   /* §404: every block is a component the office may switch off. */
   var on = function(c){ return compOn(tgt, c); };
   return '<div class="fgrid">' + (on("brief") ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
-      '<dl style="margin:0">' +
-      (o.clauses || []).map(function(c, ci){
-        var clt = tgt + "|" + ci;
-        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
-          (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
-            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(tgt) + '">+ Add a line</button></div>' : '') +
+      clauseLines(o.clauses, gpg, tgt) +
       '</div>' : '') +
       '<div class="fcol">' +
         (on("purpose") ? '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
@@ -34028,19 +34244,7 @@ function renderUnitFoundation(u){
       "the Foundation") +
     '<div class="fgrid">' + (compOn(u.ukey, "brief")
       ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
-      '<dl style="margin:0">' +
-      u.clauses.map(function(c, ci){
-        var clt = u.ukey + "|" + ci;
-        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
-          (upg ? inputOr(upg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) +
-          (upg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
-            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
-        '">+ Add a line</button></div>' : '') + '</div>' : '') +
+      clauseLines(u.clauses, upg, u.ukey) + '</div>' : '') +
       unitPurposeAnd(u, upg,
         aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
           function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
@@ -40032,9 +40236,26 @@ function renderAccess(){
       '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
     : '';
 
+  /* WHERE A READER'S SEAT LANDS (§687; Islam's A of the round-4 mockup):
+     the line above the matrix, because the matrix under it is exactly what
+     the rule reads to decide who is a reader — not the office, holding no
+     piece, granted edit or fill nowhere (reading.js readerSeat). Pressed by
+     whoever edits the matrix; kept on the client's structure as an absence
+     for the window (SMPRules.readersOpen). */
+  var rdOn = SMPRules.readersOpen(GROUP);
+  var readersLine = '<div class="acreaders"><b>Readers land in</b>' +
+    (editable
+      ? '<span class="segsw" role="group" aria-label="Where a reader\u2019s seat lands at sign-in">' +
+          '<button type="button" class="seg' + (rdOn ? ' on' : '') + '" data-readers="window" aria-pressed="' + rdOn + '">the reading window</button>' +
+          '<button type="button" class="seg' + (rdOn ? '' : ' on') + '" data-readers="workbench" aria-pressed="' + (!rdOn) + '">the workbench</button>' +
+        '</span>'
+      : '<span class="acrdnow">' + (rdOn ? 'the reading window' : 'the workbench') + '</span>') +
+    '<span class="acrdwhy">A reader: no unit, function, capability, project or direction of their own, and nothing to edit. ' +
+      (rdOn ? 'They open in the window on sign-in, with the workbench a press of Exit away.' : 'Everybody opens on the workbench; Read on the bar still opens the window.') + '</span></div>';
+
   return section("", "Roles & access",
       null,
-      differLine +
+      readersLine + differLine +
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
@@ -50262,11 +50483,6 @@ function bformDef(kind, ctx){
         { k:"owner", label:"Owner", type:"owner" },
         { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
       ] },
-    clause: { title:"Add a line to “Who we are”",
-      fields:[
-        { k:"label", label:"The lead — the words down the left", req:true, ph:"e.g. We serve" },
-        { k:"text", label:"The line itself", type:"long" }
-      ] },
     swot: { title:"Add " + ({ s:"a strength", w:"a weakness", o:"an opportunity", t:"a threat" }[ctx && ctx.q] || "a line"),
       fields:[
         { k:"text", label:{ s:"Strength", w:"Weakness", o:"Opportunity", t:"Threat" }[ctx && ctx.q] || "Line",
@@ -50487,13 +50703,6 @@ function bApply(kind, ctx, d){
        id minted from the maximum, `status` left empty for the reporter. */
     var ac = addAction(ctx.fnKey); if (!ac) return false;
     ac.name = v("name"); ac.owner = v("owner"); ac.due = v("due");
-    return true;
-  }
-  if (kind === "clause") {
-    var cu = ctx.target === "group" ? GROUP : unitLikeWritable(ctx.target);
-    if (!cu || !Array.isArray(cu.clauses)) return false;
-    cu.clauses.push([v("label"), v("text")]);
-    if (cu.ukey) renumberUnit(cu);
     return true;
   }
   if (kind === "swot") {
@@ -56043,15 +56252,31 @@ var READING = (function () {
     return '<div class="rfig"><b style="color:' + bandInk(v) + '">' + pct(v) + '</b><span>' + what + ' — ' + sub + '</span>' +
       (v == null || isNaN(v) ? '' : '<i class="rband ' + band(v) + '">' + esc(bandWord(v)) + '</i>') + '</div>';
   }
+  /* OVERALL PERFORMANCE (§686). Islam, of El Abd's company: *"why the
+     overall performance is not showing while it is showing in the
+     performance tab for directions performance and execution"*. §676 scored
+     a top layer by its units alone; El Abd has none, and its plan is the top
+     layer's own. So the three figures are the ones the Performance page
+     draws for that subject: a unit's headline, its directions' mean and its
+     execution ratio (`unitObjectives`, `unitPillars`, `unitRatio` — the
+     ratio, delivered against planned, which is the page's own card, not the
+     delivered mean); a top layer's own key objectives, then, where it has a
+     plan of its own in directions, that plan's mean and ratio over
+     `topAsUnit()`, as the group page's own section does (§607), else the
+     units' headlines at their weights and their execution. */
   function performance(key) {
     var unit = isUnit(key), u = unit ? UNITS[key] : null;
+    var own = !unit && topHasPlan() && planOn("group") && topWay() !== "projects";
+    var tu = own ? topAsUnit() : null;
     var a = unit ? unitObjectives(u) : groupKeyObjectives();
-    var b = unit ? unitPillars(u) : groupUnitsObjectives();
-    var c = unit ? unitExec(u) : groupExec();
+    var b = unit ? unitPillars(u) : own ? unitPillars(tu) : groupUnitsObjectives();
+    var c = unit ? unitRatio(u) : own ? unitRatio(tu) : groupExec();
     var head = unit ? u.keyObjectives : GROUP.keyObjectives;
+    var bw = unit || own ? "Directions" : L1("unitword") + "s";
+    var bs = unit ? "each direction\u2019s measures, averaged per direction" : own ? "the " + esc(labelWord("topword", "group") || "company").toLowerCase() + "\u2019s own directions, averaged" : "the units\u2019 own headlines, at their weights";
     return '<div class="rthree">' +
-      figure(a, "Measures", unit ? "the unit’s headline measures against their targets" : "the group’s own headline measures against their targets") +
-      figure(b, unit ? "Directions" : L1("unitword") + "s", unit ? "each direction’s measures, averaged per direction" : "the units’ own headlines, at their weights") +
+      figure(a, "Measures", unit ? "the unit\u2019s headline measures against their targets" : "the group\u2019s own headline measures against their targets") +
+      figure(b, bw, bs) +
       figure(c, "Execution", "delivered against what should have been by now; 100% is on plan, not finished") + '</div>' +
       '<div class="rcard"><h3>Headline measures</h3>' + measureRows(head) + '</div>';
   }
@@ -56071,7 +56296,7 @@ var READING = (function () {
         return '<option value="' + esc(s.key) + '"' + (s.key === key ? ' selected' : '') + '>' + esc(s.name) + '</option>';
       }).join("") + '</select></label>' +
       '<span class="rsp"></span>' +
-      (typeof cycleLabel === "function" ? '<span class="rasof">' + esc(cycleLabel()) + '</span>' : '') +
+      (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
     r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
@@ -56136,7 +56361,58 @@ var READING = (function () {
     }, true);
   }
 
-  return { wire: wire, open: open, close: close, isOpen: function () { var r = root(); return !!(r && r.classList.contains("on")); } };
+  /* ── A SEAT THAT EDITS NOTHING OPENS IN THE WINDOW (§687) ──────────────
+     Islam: *"build it yes"*, of the mockup's first position. A reader's seat
+     — a CEO's, a peer's, anybody's that the access matrix lets look and never
+     write — lands in the window, with the workbench a press of Exit away;
+     everybody else lands on the workbench as before.
+
+     THE SEAT IS READ FROM THE MATRIX AND THE ROLES, NOT GUESSED FROM A NAME:
+     the office is never a reader (SMPRules.isOffice), nor is anybody holding
+     a piece — a unit, a function, a capability, a project, a pillar, a
+     direction, a contribution — and otherwise a seat is a reader exactly
+     when no page of the platform grants it edit or fill on any target it
+     could reach — the group, every unit, every supporting function,
+     every capability, every company — asked through the one rule every pen
+     asks, `SMPRules.grantAtPage` (§42). The same silences the welcome keeps:
+     no person, a projector, a deep address (a link straight to a page is a
+     page somebody meant to open, §148). */
+  var HOLDING = ["owner", "custodian", "capowner", "fnhead", "powner", "plowner", "dirowner", "contrib"];
+  function readerSeat(person) {
+    if (!person) return false;
+    var w = world();
+    if (SMPRules.isOffice(w, person)) return false;
+    /* a bounded role holds rows the page-level grant does not show — a
+       project's owner fills his project (§177) — so anybody holding a piece
+       works in the platform, whatever the matrix says of the page */
+    var roles = SMPRules.personRoleKeys ? SMPRules.personRoleKeys(w, person) : [];
+    if (roles.some(function (k) { return HOLDING.indexOf(k) > -1; })) return false;
+    var targets = ["group"];
+    (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function (k) { targets.push(k); });
+    Object.keys(typeof FUNCTIONS !== "undefined" ? FUNCTIONS : {}).forEach(function (k) { targets.push("fn:" + k); });
+    (Array.isArray(GROUP.capabilities) ? GROUP.capabilities : []).forEach(function (c) { if (c && c.id) targets.push("cap:" + c.id); });
+    Object.keys(typeof COMPANIES !== "undefined" ? COMPANIES : {}).forEach(function (k) { targets.push("co:" + k); });
+    var pages = SMPRules.PAGES || [];
+    for (var i = 0; i < pages.length; i++) {
+      for (var j = 0; j < targets.length; j++) {
+        var g = SMPRules.grantAtPage(w, person, pages[i].key, targets[j]);
+        if (g === "edit" || g === "fill") return false;
+      }
+    }
+    return true;
+  }
+  function offer(person) {
+    /* the client's own switch first (Structure step, SMPRules.readersOpen) */
+    if (!SMPRules.readersOpen(GROUP)) return false;
+    if (!readerSeat(person)) return false;
+    if (document.body && document.body.classList.contains("presenting")) return false;
+    try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {}
+    open("group");
+    return true;
+  }
+
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat,
+           isOpen: function () { var r = root(); return !!(r && r.classList.contains("on")); } };
 })();
 
 /* ── slides.js ── */
@@ -76644,8 +76920,14 @@ var SYNC = (function () {
                the tour's own offer, made visibly instead of automatically.
                TOUR.offer's memory is untouched, so with the welcome already
                seen this session the tour offers itself exactly as before. */
-            var greeted = false;
-            try { greeted = WELCOME.offer(person); } catch (e) {}
+            /* §687: A READER'S SEAT LANDS IN THE READING WINDOW, and is
+               neither greeted nor toured over it — the window is the whole
+               of the platform for them, and the welcome's doors lead to
+               pages they came here not to work. */
+            var reading = false;
+            try { reading = READING.offer(person); } catch (e) {}
+            var greeted = reading;
+            if (!greeted) { try { greeted = WELCOME.offer(person); } catch (e) {} }
             if (!greeted) TOUR.offer(person);
           });
           setInterval(save, 5000);
@@ -83897,6 +84179,18 @@ var SYNC = (function () {
         setDriversOn(this.dataset.drvswitch === "1"); paint();
       });
     });
+    /* §687: where a reader's seat lands (Roles & access). The window is the
+       absence; the workbench is written on the client's structure (§50.6). */
+    document.querySelectorAll("[data-readers]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (this.dataset.readers === "workbench") structWritable().readers = "workbench";
+        else {
+          var st = GROUP[SMPRules.STRUCTURE];
+          if (st && typeof st === "object") { delete st.readers; if (!Object.keys(st).length) delete GROUP[SMPRules.STRUCTURE]; }
+        }
+        fieldSaved(); paint();
+      });
+    });
     var as = document.getElementById("addseason");
     if (as) as.addEventListener("click", function(){
       if (!Array.isArray(GROUP[SMPRules.SEASONS])) GROUP[SMPRules.SEASONS] = [];
@@ -87304,20 +87598,26 @@ var SYNC = (function () {
         paint();
       });
     });
-    document.querySelectorAll("[data-clauseadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var t = b.dataset.clauseadd;
-        /* §212: a function's page is gated on the FUNCTION's key. Gating an
-           `fn:` target on `u_found` is §211's fault exactly, and here it fails
-           CLOSED — the button renders and the click returns silently. */
-        var tr = boxRef(t), isCo = tr.kind === "mid";
-        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
-        if (!o || !Array.isArray(o.clauses)) return;
-        o.clauses.push(["", ""]);
+    /* §685: WHO WE ARE IS ONE BOX — its lines are read back on blur and
+       written over the stored ones in place, so a unit's line keeps its row
+       and is renumbered as Add used to (§96). */
+    document.querySelectorAll("[data-clausebox]").forEach(function(box){
+      var t = box.dataset.clausebox;
+      /* §212: a function's page is gated on the FUNCTION's key. Gating an
+         `fn:` target on `u_found` is §211's fault exactly, and here it fails
+         CLOSED — the box is drawn and cannot be typed in. */
+      var tr = boxRef(t), isCo = tr.kind === "mid";
+      var o = mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)
+        ? (t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t)) : null;
+      if (!o || !Array.isArray(o.clauses)) { box.contentEditable = "false"; return; }
+      CLAUSEBOX.wire(box, function(rows){
+        rows.forEach(function(l, i){
+          if (o.clauses[i]) { o.clauses[i][0] = l[0]; o.clauses[i][1] = l[1]; }
+          else o.clauses.push([l[0], l[1]]);
+        });
+        o.clauses.length = rows.length;
         if (o.ukey) renumberUnit(o);
-        fieldSaved(); paint();
+        fieldSaved();
       });
     });
     /* §478: a unit's Core Values — add and remove, re-asked on the click
@@ -87397,20 +87697,6 @@ var SYNC = (function () {
         if (!how) return;
         o.values.splice(i, 1);
         unitValuesTouch(o, how);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-clauserm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        var tr = boxRef(t), isCo = tr.kind === "mid";
-        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
-        if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
-        if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
-            rmAsk(b, "clauserm", b.dataset.clauserm, "Remove this line?")) return;
-        o.clauses.splice(i, 1);
-        if (o.ukey) renumberUnit(o);
         fieldSaved(); paint();
       });
     });

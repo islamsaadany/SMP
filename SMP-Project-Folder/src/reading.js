@@ -159,15 +159,31 @@ var READING = (function () {
     return '<div class="rfig"><b style="color:' + bandInk(v) + '">' + pct(v) + '</b><span>' + what + ' — ' + sub + '</span>' +
       (v == null || isNaN(v) ? '' : '<i class="rband ' + band(v) + '">' + esc(bandWord(v)) + '</i>') + '</div>';
   }
+  /* OVERALL PERFORMANCE (§686). Islam, of El Abd's company: *"why the
+     overall performance is not showing while it is showing in the
+     performance tab for directions performance and execution"*. §676 scored
+     a top layer by its units alone; El Abd has none, and its plan is the top
+     layer's own. So the three figures are the ones the Performance page
+     draws for that subject: a unit's headline, its directions' mean and its
+     execution ratio (`unitObjectives`, `unitPillars`, `unitRatio` — the
+     ratio, delivered against planned, which is the page's own card, not the
+     delivered mean); a top layer's own key objectives, then, where it has a
+     plan of its own in directions, that plan's mean and ratio over
+     `topAsUnit()`, as the group page's own section does (§607), else the
+     units' headlines at their weights and their execution. */
   function performance(key) {
     var unit = isUnit(key), u = unit ? UNITS[key] : null;
+    var own = !unit && topHasPlan() && planOn("group") && topWay() !== "projects";
+    var tu = own ? topAsUnit() : null;
     var a = unit ? unitObjectives(u) : groupKeyObjectives();
-    var b = unit ? unitPillars(u) : groupUnitsObjectives();
-    var c = unit ? unitExec(u) : groupExec();
+    var b = unit ? unitPillars(u) : own ? unitPillars(tu) : groupUnitsObjectives();
+    var c = unit ? unitRatio(u) : own ? unitRatio(tu) : groupExec();
     var head = unit ? u.keyObjectives : GROUP.keyObjectives;
+    var bw = unit || own ? "Directions" : L1("unitword") + "s";
+    var bs = unit ? "each direction\u2019s measures, averaged per direction" : own ? "the " + esc(labelWord("topword", "group") || "company").toLowerCase() + "\u2019s own directions, averaged" : "the units\u2019 own headlines, at their weights";
     return '<div class="rthree">' +
-      figure(a, "Measures", unit ? "the unit’s headline measures against their targets" : "the group’s own headline measures against their targets") +
-      figure(b, unit ? "Directions" : L1("unitword") + "s", unit ? "each direction’s measures, averaged per direction" : "the units’ own headlines, at their weights") +
+      figure(a, "Measures", unit ? "the unit\u2019s headline measures against their targets" : "the group\u2019s own headline measures against their targets") +
+      figure(b, bw, bs) +
       figure(c, "Execution", "delivered against what should have been by now; 100% is on plan, not finished") + '</div>' +
       '<div class="rcard"><h3>Headline measures</h3>' + measureRows(head) + '</div>';
   }
@@ -187,7 +203,7 @@ var READING = (function () {
         return '<option value="' + esc(s.key) + '"' + (s.key === key ? ' selected' : '') + '>' + esc(s.name) + '</option>';
       }).join("") + '</select></label>' +
       '<span class="rsp"></span>' +
-      (typeof cycleLabel === "function" ? '<span class="rasof">' + esc(cycleLabel()) + '</span>' : '') +
+      (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
     r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
@@ -252,5 +268,56 @@ var READING = (function () {
     }, true);
   }
 
-  return { wire: wire, open: open, close: close, isOpen: function () { var r = root(); return !!(r && r.classList.contains("on")); } };
+  /* ── A SEAT THAT EDITS NOTHING OPENS IN THE WINDOW (§687) ──────────────
+     Islam: *"build it yes"*, of the mockup's first position. A reader's seat
+     — a CEO's, a peer's, anybody's that the access matrix lets look and never
+     write — lands in the window, with the workbench a press of Exit away;
+     everybody else lands on the workbench as before.
+
+     THE SEAT IS READ FROM THE MATRIX AND THE ROLES, NOT GUESSED FROM A NAME:
+     the office is never a reader (SMPRules.isOffice), nor is anybody holding
+     a piece — a unit, a function, a capability, a project, a pillar, a
+     direction, a contribution — and otherwise a seat is a reader exactly
+     when no page of the platform grants it edit or fill on any target it
+     could reach — the group, every unit, every supporting function,
+     every capability, every company — asked through the one rule every pen
+     asks, `SMPRules.grantAtPage` (§42). The same silences the welcome keeps:
+     no person, a projector, a deep address (a link straight to a page is a
+     page somebody meant to open, §148). */
+  var HOLDING = ["owner", "custodian", "capowner", "fnhead", "powner", "plowner", "dirowner", "contrib"];
+  function readerSeat(person) {
+    if (!person) return false;
+    var w = world();
+    if (SMPRules.isOffice(w, person)) return false;
+    /* a bounded role holds rows the page-level grant does not show — a
+       project's owner fills his project (§177) — so anybody holding a piece
+       works in the platform, whatever the matrix says of the page */
+    var roles = SMPRules.personRoleKeys ? SMPRules.personRoleKeys(w, person) : [];
+    if (roles.some(function (k) { return HOLDING.indexOf(k) > -1; })) return false;
+    var targets = ["group"];
+    (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function (k) { targets.push(k); });
+    Object.keys(typeof FUNCTIONS !== "undefined" ? FUNCTIONS : {}).forEach(function (k) { targets.push("fn:" + k); });
+    (Array.isArray(GROUP.capabilities) ? GROUP.capabilities : []).forEach(function (c) { if (c && c.id) targets.push("cap:" + c.id); });
+    Object.keys(typeof COMPANIES !== "undefined" ? COMPANIES : {}).forEach(function (k) { targets.push("co:" + k); });
+    var pages = SMPRules.PAGES || [];
+    for (var i = 0; i < pages.length; i++) {
+      for (var j = 0; j < targets.length; j++) {
+        var g = SMPRules.grantAtPage(w, person, pages[i].key, targets[j]);
+        if (g === "edit" || g === "fill") return false;
+      }
+    }
+    return true;
+  }
+  function offer(person) {
+    /* the client's own switch first (Structure step, SMPRules.readersOpen) */
+    if (!SMPRules.readersOpen(GROUP)) return false;
+    if (!readerSeat(person)) return false;
+    if (document.body && document.body.classList.contains("presenting")) return false;
+    try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {}
+    open("group");
+    return true;
+  }
+
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat,
+           isOpen: function () { var r = root(); return !!(r && r.classList.contains("on")); } };
 })();

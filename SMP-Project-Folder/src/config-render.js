@@ -661,9 +661,26 @@ function renderAccess(){
       '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
     : '';
 
+  /* WHERE A READER'S SEAT LANDS (§687; Islam's A of the round-4 mockup):
+     the line above the matrix, because the matrix under it is exactly what
+     the rule reads to decide who is a reader — not the office, holding no
+     piece, granted edit or fill nowhere (reading.js readerSeat). Pressed by
+     whoever edits the matrix; kept on the client's structure as an absence
+     for the window (SMPRules.readersOpen). */
+  var rdOn = SMPRules.readersOpen(GROUP);
+  var readersLine = '<div class="acreaders"><b>Readers land in</b>' +
+    (editable
+      ? '<span class="segsw" role="group" aria-label="Where a reader\u2019s seat lands at sign-in">' +
+          '<button type="button" class="seg' + (rdOn ? ' on' : '') + '" data-readers="window" aria-pressed="' + rdOn + '">the reading window</button>' +
+          '<button type="button" class="seg' + (rdOn ? '' : ' on') + '" data-readers="workbench" aria-pressed="' + (!rdOn) + '">the workbench</button>' +
+        '</span>'
+      : '<span class="acrdnow">' + (rdOn ? 'the reading window' : 'the workbench') + '</span>') +
+    '<span class="acrdwhy">A reader: no unit, function, capability, project or direction of their own, and nothing to edit. ' +
+      (rdOn ? 'They open in the window on sign-in, with the workbench a press of Exit away.' : 'Everybody opens on the workbench; Read on the bar still opens the window.') + '</span></div>';
+
   return section("", "Roles & access",
       null,
-      differLine +
+      readersLine + differLine +
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +

@@ -2954,7 +2954,7 @@ var COPILOT = (function(){
       (b.why ? '<div><h4>Why</h4><p>' + E(b.why) + '</p></div>' : '') +
       (b.next.length ? '<div><h4>Next steps</h4><ol>' + b.next.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ol></div>' : '') + '</div>';
   }
-  /* §685 — ADVISORY, SPLIT THREE WAYS (the last area; the working mockup
+  /* §688 — ADVISORY, SPLIT THREE WAYS (the last area; the working mockup
      design-mockups/copilot-layout/2026-10-29_advisory-split-working.html,
      Islam: "ok proceed and build the advisory split"): the conversation
      stays the conversation — the question, then one question at a time with
@@ -4029,7 +4029,7 @@ var COPILOT = (function(){
       if (swCanChange()) { if (forced == null && t) t.value = ""; DRAFT[id] = ""; swAsk({ act:"swotChange", ask: text.trim(), swot: swCopy() }); return; }
       return;
     }
-    /* §685 — in an Advisory chat the box is the question, then the answer, then a change to the brief */
+    /* §688 — in an Advisory chat the box is the question, then the answer, then a change to the brief */
     if (advOn()) { if (!adCanType()) return; var sa = PANE.advisory, pq = adPending(sa); if (forced == null && t) t.value = ""; DRAFT[id] = "";
       if (sa.brief) adAsk({ act:"advisoryRevise", ask: text.trim() }); else adAsk({ act:"advisoryTurn", reply: pq && pq.clash ? "own" : "say", words: text.trim() }); return; }
     /* §684 — in an Execution chat the box asks for a change to the item in hand */

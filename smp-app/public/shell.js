@@ -69099,7 +69099,7 @@ var COPILOT = (function(){
         var now = k === s.cursor, done = it.measures.length > 0 && it.tactics.length > 0;
         var counts = it.drafted ? it.measures.length + (it.measures.length === 1 ? " measure" : " measures") + " · " + it.tactics.length + (it.tactics.length === 1 ? " tactic" : " tactics") : "Not drafted yet";
         return '<div class="copsw-card copex-card' + (now ? " now" : "") + '" data-cop-ex-card="' + k + '">' +
-          '<button type="button" class="copex-head" data-cop-ex-pick="' + k + '" aria-expanded="' + now + '"><span class="copex-kind">' + (it.kind === "capability" ? "Capability" : "Direction") + '</span><b>' + E(it.title) + '</b><small>' + E(counts) + '</small>' +
+          '<button type="button" class="copex-head" data-cop-ex-card-pick="' + k + '" aria-expanded="' + now + '"><span class="copex-kind">' + (it.kind === "capability" ? "Capability" : "Direction") + '</span><b>' + E(it.title) + '</b><small>' + E(counts) + '</small>' +
             (done ? '<span class="copst done">Drafted</span>' : now ? '<span class="copst now">In hand</span>' : '<span class="copst"></span>') + '</button>' +
           (now ? '<div class="copex-body">' + (it.drafted ? exItemHtml(it, k, ed) :
             '<p class="copnote">Nothing here yet.' + (ed ? ' <button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-ex-draft' + held(busyHere && BUSY) + '>Draft measures and tactics</button>' : '') + '</p>') + '</div>' : '') + '</div>';
@@ -69168,8 +69168,9 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-ex-draft]"))) { exAsk(""); return true; }
     if ((b = hit(ev, "[data-cop-ex-next]"))) { var nx = exLeft()[0]; if (nx == null) return true; PANE.exec.cursor = nx; exAsk(""); return true; }
     if ((b = hit(ev, "[data-cop-ex-draftall]"))) { var n0 = exLeft()[0]; if (n0 == null) return true; EXALL[id] = true; PANE.exec.cursor = n0; exAsk("", "Draft all"); return true; }
-    if ((b = hit(ev, "[data-cop-ex-pick]"))) { var g = exCopy(); g.cursor = +b.getAttribute("data-cop-ex-pick"); PANE.exec = g; exSave(g); return true; }
-    if ((b = hit(ev, "[data-cop-dv-todo]"))) { var tk = String(b.getAttribute("data-cop-dv-todo") || ""); if (tk.indexOf("item:") === 0) { var ti = s.items.findIndex(function(it){ return "item:" + it.planId === tk; }); if (ti >= 0) { var g1 = exCopy(); g1.cursor = ti; PANE.exec = g1; exSave(g1); } } return true; }
+    /* a card's head puts its item in hand (data-cop-ex-pick is the period's Pick months, above) */
+    if ((b = hit(ev, "[data-cop-ex-card-pick]"))) { var g = exCopy(); g.cursor = +b.getAttribute("data-cop-ex-card-pick"); PANE.exec = g; draw(); exSave(g); return true; }
+    if ((b = hit(ev, "[data-cop-dv-todo]"))) { var tk = String(b.getAttribute("data-cop-dv-todo") || ""); if (tk.indexOf("item:") === 0) { var ti = s.items.findIndex(function(it){ return "item:" + it.planId === tk; }); if (ti >= 0) { var g1 = exCopy(); g1.cursor = ti; PANE.exec = g1; draw(); exSave(g1); } } return true; }
     if ((b = hit(ev, "[data-cop-ex-addm]"))) return exItemPatch(function(it){ it.measures.push({ name:"New measure", target:"", compile:"" }); });
     if ((b = hit(ev, "[data-cop-ex-addt]"))) return exItemPatch(function(it){ it.tactics.push({ name:"New tactic", owner:"", quarters:[] }); });
     if ((b = hit(ev, "[data-cop-ex-mx]"))) { var mi = +b.getAttribute("data-cop-ex-mx"); return exItemPatch(function(it){ it.measures.splice(mi, 1); }); }

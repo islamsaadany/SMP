@@ -2797,11 +2797,11 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await page.waitForTimeout(800);
     r = await row();
     check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one after another from Draft all (§684)", JSON.stringify(r.s.items.map((x) => x.drafted)));
-    const lg = await page.evaluate(() => ({ me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), ai: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.ai")).map((m) => m.textContent).filter((t) => /measure/.test(t) && /tactic/.test(t) && /on the right/.test(t)).length,
+    const lg = await page.evaluate(() => ({ me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), ai: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.ai")).map((m) => m.textContent).filter((t) => /\d+ measures?, \d+ tactics?, on the right/.test(t)).length,
       ready: /Ready to save/.test((document.querySelector(".copfhead small") || {}).textContent || ""), box: (document.querySelector("[data-cop-text]") || {}).disabled, ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "" }));
     check(/Draft all/.test(lg.me) && lg.ai === r.s.items.length && lg.ready && lg.box === false && /Ask for a change to/.test(lg.ph),
       "§684 the chat reads Draft all as the person's line and one answer per item, each naming its counts; the head reads Ready to save; the box asks for a change to the item in hand", JSON.stringify(lg));
-    await page.click('[data-cop-ex-pick="0"]');
+    await page.click('[data-cop-ex-card-pick="0"]');
     await page.waitForFunction(() => { const c = document.querySelector("[data-cop-expane] .copex-card.now"); return c && c.getAttribute("data-cop-ex-card") === "0"; }, null, { timeout: 8000 }).catch(() => {});
     await page.waitForTimeout(900);
     const pk = await page.evaluate(() => ({ open: (document.querySelector("[data-cop-expane] .copex-card.now") || {}).getAttribute ? document.querySelector("[data-cop-expane] .copex-card.now").getAttribute("data-cop-ex-card") : null, rows: document.querySelectorAll("[data-cop-expane] .copex-card.now [data-cop-ex-m]").length }));

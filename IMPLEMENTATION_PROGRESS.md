@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-29 — The reading window keeps directions and capabilities apart where the box does (§677), on the branch.** Where a layer keeps its directions and capabilities apart, as El Abd's top layer does, the window's Directions tab now draws them as two lists under two headings, by the box's own setting; elsewhere one list as before. Checked on the worked example with the setting answered both ways; not on El Abd itself.
+
 **2026-10-29 — Strategy, for reading: a window with the strategy in it and nothing else (§676), merged to `main` on Islam's word.** Read, on Strategy's bar, opens a window over the platform for the CEO and for anyone who owns no function: a picker for the group or a unit and four tabs in the approach's order — Foundation, Analysis, Directions (each folded to one line, opened on a press to its measures and tactics), Overall performance — every figure the workbench's own, nothing editable, Exit or Escape returning you. Settled from three mockup rounds. Checked on the frozen shell built whole, on the worked example, both themes. Not yet: a non-owner seat opening in it by default, and its own address.
 
 **2026-10-29 — Directions, split three ways (§675).** The Directions chat laid out as the SWOT and Competitive Discipline are: the chat in the order it happened, the two tables on the right with Go ahead under the first, Save and Apply to plan at the pane's foot, the to-do beside; asks for more through the chat's own box, kept in order. Shell `smp-shell-v7.35-directions-split`.

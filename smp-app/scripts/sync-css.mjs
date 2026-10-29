@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SRC = join(here, "..", "..", "SMP-Project-Folder", "src");
-const ORDER = ["_shared.css", "group-extra.css", "config.css", "arrange.css", "present.css",
+const ORDER = ["_shared.css", "group-extra.css", "config.css", "arrange.css", "present.css", "reading.css",
                "chat.css", "tour.css", "welcome.css", "builder.css", "client-setup.css", "copilot.css"];
 
 /* SERVED AS FILES, NEVER BUNDLED. The product's own CSS carries a comment

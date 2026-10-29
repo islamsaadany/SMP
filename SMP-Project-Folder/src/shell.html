@@ -125,6 +125,10 @@
       <!-- Light and Dark. First of the three because it changes how the
            product LOOKS; the two beside it change what it shows or end the
            session. Hidden until THEME.wire() draws its mark. -->
+      <!-- READ (§676): the strategy with nothing else, for the CEO and for
+           anyone who owns no function — the reading window (reading.js).
+           Hidden until READING.wire() hangs it on the bar. -->
+      <button class="infobtn readbtn" id="readbtn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h6v16H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-6v16h6a2 2 0 0 1 2 2z"/></svg>Read</button>
       <button class="infobtn themebtn" id="themebtn" type="button" hidden></button>
       <!-- The palette switch was here until 3.12. It is gone at Islam's
            direction: "I don't need to have slate, the branding covers this
@@ -175,6 +179,14 @@
     <button data-dfs class="txt" title="Fullscreen">Fullscreen</button>
     <button data-dexit class="txt" title="Exit (Esc)">Exit</button>
   </div>
+</div>
+<!-- THE READING WINDOW (§676, reading.js): the strategy with nothing else.
+     A mode over the platform as the deck is: the navy strip, the four tabs,
+     the page. Filled on open; empty until then. -->
+<div id="readroot" class="readroot" role="dialog" aria-modal="true" aria-label="Read the strategy" tabindex="-1">
+  <div class="rwtop"></div>
+  <div class="rwtabs"></div>
+  <div class="rwbody"></div>
 </div>
 
 <!-- MANAGE SLIDES (§51.8). A MODE, not a dialog — the same argument
@@ -285,6 +297,7 @@
 <script src="CONFIGRENDER"></script>
 <script src="BUILDER"></script>
 <script src="PRESENT"></script>
+<script src="READING"></script>
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
 <script src="CHAT"></script>
@@ -13515,6 +13528,9 @@
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
+  /* §676: the reading window's door and its own controls, chrome that exists
+     before any page is drawn, like the theme's. */
+  READING.wire();
   /* §539: the key and the "?" beside Light and Dark. Wired here beside the
      theme because both are chrome that exists before any page is drawn. */
   KEYSHEET.wire();

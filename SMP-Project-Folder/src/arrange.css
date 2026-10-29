@@ -477,13 +477,13 @@
      a 30px one left from 3.0, and the later of the two won, so the row stayed
      31px tall no matter what the new number said. It is the tallest item in
      the row, so it alone was setting the height of the whole first line. */
-  /* 26px since §670, the size the modules' shared bar wears (lib/topbar.ts
+  /* 26px since §673, the size the modules' shared bar wears (lib/topbar.ts
      .tbtheme) and the console's ring on its band: one mark, one size. */
   .themebtn { padding:0; width:26px; height:26px; border-radius:50%;
               display:inline-flex; align-items:center; justify-content:center;
               flex-shrink:0; position:relative; }
   .themesvg { width:14px; height:14px; display:block; }
-  /* THE SIGN ON HOVER (§670): the state alone — Light, Dark, or Auto and the
+  /* THE SIGN ON HOVER (§673): the state alone — Light, Dark, or Auto and the
      reading the device is giving — under the mark, on hover and on keyboard
      focus. Drawn from data-tip, which theme.js keeps current. */
   .themebtn[data-tip]:hover::after, .themebtn[data-tip]:focus-visible::after {

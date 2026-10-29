@@ -70271,7 +70271,7 @@ Islam, with a picture of the console in the dark: *"the main console page and th
 
 **Checked**: `node scripts/build-shell.mjs` (shell/platform.html and public/platform-page.js regenerated, the only two outputs that changed); `checks/pages-types.mjs` — the console page 3 scripts, every console line ok; the console rendered on its own in a browser with the network held: boots light, the press turns it dark and stores the choice, a reload comes back dark. **Not this change's**: pages-types' strategy section fails on `copilot.js` lines 523–525 (four findings beyond the 128 recorded), and fails the same way on the tree before this change — §654 batch 3's, to be recorded or fixed there.
 
-## §670 — One theme switch on every screen: on the console's band, three states, a sign on hover (2026-10-29)
+## §673 — One theme switch on every screen: on the console's band, three states, a sign on hover (2026-10-29; §670 on the branch, renumbered at the merge: main took §670–§672, §264.3)
 
 Islam, of §669's foot button: *"the console already had no switch. that needed a mockup"*; of the mockup's four places: *"C and it needs to be either dark or light or auto to match the device and this approach applies to the strategy module as well in functionality and it needs a sign on hover to show what state are we on .. show me the auto icon as well"*; of the sign: *"the message on hovering is too long just show the current status in the message"*; of the auto marks: *"1"*. Mockups: design-mockups/console-theme-switch/, rounds 1 and 2.
 

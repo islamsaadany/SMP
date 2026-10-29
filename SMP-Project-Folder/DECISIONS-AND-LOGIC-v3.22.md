@@ -70461,3 +70461,13 @@ So the window's tabs are now Foundation, Analysis, Directions, **Capabilities**,
 **Checked**: the frozen shell built whole on the worked example — Mobile reads four tabs and one list; with the box's question answered yes in the page (standing in for El Abd) five tabs, Directions with three rows and Capabilities with one, no error. **Not checked**: on El Abd itself.
 
 **§679 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** `main` had taken §678 (the Tracker's when column and Enter) meanwhile, so the branch's §678 became §679 by matched text in its own lines (§264.3); the two sides touched no file in common but the records, which were joined. Checked again on the merged tree: the frozen shell built whole, five tabs where the box keeps directions and capabilities apart, four otherwise, no error. No migrations; nobody signed out.
+
+## §680 — The reading window: no explainer lines, and Foundation laid out as Islam reads it (2026-10-29)
+
+Islam, of the window: *"the initial descriptions at the top is not relevant to keep like Foundation — What has been committed to, and why …"* and *"the who we are is mainly the who we are first and then on the right side the vision and the mission and below them is the key objectives and the core values"*.
+
+**The line per tab goes.** §676 opened every tab with a sentence saying what it answers, for a first-timer. The tab's name says it; the sentence was in the way. Gone from all five.
+
+**Foundation, as read.** Who we are (the brief's clauses) on the left; on the right, the vision — the aspiration with its end in mind under it — and the mission (the purpose), each a card under the layer's own word for it (`L1("aspiration")`, `L1("purpose")`: *Winning aspiration* and *Mission* at Raya, *Vision* and *Mission* at El Abd); under them the key objectives and then the core values. Each block only where Structure carries it, as before; where there is no brief the right-hand pair takes the width.
+
+**Checked**: the frozen shell built whole on the worked example — the group's Foundation reads in that order, Mobile's too; every tab opens without its line; no error.

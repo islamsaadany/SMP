@@ -55891,8 +55891,9 @@ if (ROOM_MODE) {
    the company Strategy in general"*. Settled from three mockup rounds: a
    window over the platform, a picker for the company or a unit, four tabs in
    the approach's own order — Foundation, Analysis, Directions (each with its
-   measures and its tactics, folded to one line), Overall performance — a line
-   per tab for first-timers, and Exit.
+   measures and its tactics, folded to one line), Overall performance — and
+   Exit. The line per tab that said what the tab answers went on Islam's word
+   (2026-10-29, §680): the names say it.
 
    A MODE, NOT A PAGE, as Presentation mode is (present.js): it takes the
    whole window, the chrome disappears, Exit and Escape return the reader to
@@ -55918,12 +55919,9 @@ var READING = (function () {
   function planOf(key) { return isUnit(key) ? UNITS[key] : topAsUnit(); }
 
   var TABS = [
-    { k: "found", label: function (key) { return SMPRules.foundTitle(GROUP, key) || "Foundation"; },
-      why: "What has been committed to, and why: the aspiration, what it is, and the values it holds itself to. It outruns the year; the directions are annual, the foundation is not." },
-    { k: "swot", label: function (key) { return SMPRules.swotTitle(GROUP, key) || "Analysis"; },
-      why: "Where things stand going in: what it is good at, what holds it back, what the market offers, and what could hurt. The reasoning behind the directions." },
-    { k: "dir", label: function () { return "Directions"; },
-      why: "What is being pushed on this year: each direction with the measures that say what done looks like and where they stand at the review point, and the tactics that deliver it — who owns each, the quarters it runs, whether it is on its way." },
+    { k: "found", label: function (key) { return SMPRules.foundTitle(GROUP, key) || "Foundation"; } },
+    { k: "swot", label: function (key) { return SMPRules.swotTitle(GROUP, key) || "Analysis"; } },
+    { k: "dir", label: function () { return "Directions"; } },
     /* CAPABILITIES, A TAB OF THEIR OWN WHERE THE BOX KEEPS THEM APART (§679).
        Islam, of El Abd: *"where is the capabilities tab?"* — §677 had put them
        under Directions as a second list; the workbench gives a split box a
@@ -55931,10 +55929,8 @@ var READING = (function () {
        box's own question (boxSplit) answers yes and there is a capability to
        read, since a tab over nothing is not a choice (§61). */
     { k: "cap", label: function () { return L("capability", "bu"); },
-      when: function (key) { var u = planOf(key); return boxSplit(u) && SMPRules.shown(itemsNow(u)).some(function (it) { return SMPRules.pillarIsCap(it); }); },
-      why: "What is being built to carry every direction: each capability with the measures that say what done looks like and where they stand, and the tactics that deliver it — who owns each, the quarters it runs, whether it is on its way." },
-    { k: "perf", label: function () { return "Overall performance"; },
-      why: "The reading across all of it, three figures never blended: how the headline measures are doing, how the directions are doing, and how much of the work has been delivered against what should have been by now." }
+      when: function (key) { var u = planOf(key); return boxSplit(u) && SMPRules.shown(itemsNow(u)).some(function (it) { return SMPRules.pillarIsCap(it); }); } },
+    { k: "perf", label: function () { return "Overall performance"; } }
   ];
 
   /* ── the pieces ── */
@@ -55966,18 +55962,22 @@ var READING = (function () {
       }).join("") + '</div>';
   }
 
+  /* FOUNDATION, AS ISLAM READS IT (§680): who we are on the left; on the
+     right the vision (the aspiration, with its end in mind under it) and the
+     mission (the purpose), each in the layer's own words for them; under
+     them the key objectives and the core values. Each block only where
+     Structure carries it (compOn). */
   function foundation(key) {
     var o = recordOf(key), on = function (c) { return compOn(key, c); }, out = "";
-    var asp = String(o.aspiration || "").trim(), end = String(o.endInMind || "").trim();
-    if (on("aspiration") && (asp || end)) {
-      out += '<div><p class="rk">' + L1("aspiration") + '</p>' + (asp ? '<p class="rasp">' + esc(asp) + '</p>' : '') +
-        (end ? '<p class="rmis">' + esc(end) + '</p>' : '') + '</div>';
-    }
-    var cl = Array.isArray(o.clauses) ? o.clauses : [], mis = String(o.mission || "").trim();
-    var brief = on("brief") && cl.length ? '<div class="rcard"><h3>' + L("brief") + '</h3><div class="rclauses">' +
+    var asp = String(o.aspiration || "").trim(), end = String(o.endInMind || "").trim(), mis = String(o.mission || "").trim();
+    var cl = Array.isArray(o.clauses) ? o.clauses : [];
+    var who = on("brief") && cl.length ? '<div class="rcard"><h3>' + L("brief") + '</h3><div class="rclauses">' +
       cl.map(function (c) { return '<b>' + esc(c[0] || "") + '</b><span>' + esc(c[1] || "") + '</span>'; }).join("") + '</div></div>' : "";
-    var purpose = on("purpose") && mis ? '<div class="rcard"><h3>' + L1("purpose") + '</h3><p class="rmis">' + esc(mis) + '</p></div>' : "";
-    if (brief || purpose) out += '<div class="rtwo">' + brief + purpose + '</div>';
+    var vision = on("aspiration") && (asp || end) ? '<div class="rcard"><h3>' + L1("aspiration") + '</h3>' +
+      (asp ? '<p class="rasp">' + esc(asp) + '</p>' : '') + (end ? '<p class="rmis">' + esc(end) + '</p>' : '') + '</div>' : "";
+    var mission = on("purpose") && mis ? '<div class="rcard"><h3>' + L1("purpose") + '</h3><p class="rmis">' + esc(mis) + '</p></div>' : "";
+    var right = vision + mission;
+    if (who || right) out += '<div class="rtwo">' + (who || '') + (right ? '<div class="rcol">' + right + '</div>' : '') + '</div>';
     if (on("keyobj") && SMPRules.shown(o.keyObjectives || []).length) {
       var kw = L1("keyobj");
       out += '<div><p class="rk">' + kw + (/s$/i.test(kw) ? "" : "s") + '</p><div class="rcard">' + measureRows(o.keyObjectives) + '</div></div>';
@@ -56069,7 +56069,7 @@ var READING = (function () {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
     }).join("");
     var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false) : tab.k === "cap" ? directions(key, true) : performance(key);
-    r.querySelector(".rwbody").innerHTML = '<p class="rwhy"><i>' + esc(tab.label(key)) + '</i>' + tab.why + '</p>' + body;
+    r.querySelector(".rwbody").innerHTML = body;
     r.querySelector(".rwbody").scrollTop = 0;
   }
 

@@ -37,10 +37,10 @@ export type Proposal = { id: string; label: string; notes: string | null; after:
 type Res = { ok: boolean; error?: string; message?: string };
 export type Run = <T extends Res>(fn: () => Promise<T>) => Promise<T>;
 
-export const field = "w-full rounded-md border border-[#78899F] bg-white px-2.5 py-1.5 text-[13px] text-[#171B22] disabled:bg-[#F5F7FA]";
-export const lbl = "grid gap-1 text-[12px] font-semibold text-[#414A58]";
-export const btn = "rounded-md border border-[#D6DCE5] bg-white px-2.5 py-1 text-[12.5px] font-semibold text-[#171B22] hover:border-[#C9A24D] disabled:opacity-50";
-export const btnGold = "rounded-md border border-[#C9A24D] bg-[#C9A24D] px-2.5 py-1 text-[12.5px] font-bold text-[#16325C] disabled:opacity-50";
+export const field = "w-full rounded-md border border-[var(--field-line)] bg-white px-2.5 py-1.5 text-[13px] text-[var(--ink)] disabled:bg-[var(--zebra)]";
+export const lbl = "grid gap-1 text-[12px] font-semibold text-[var(--ink-2)]";
+export const btn = "rounded-md border border-[var(--line)] bg-white px-2.5 py-1 text-[12.5px] font-semibold text-[var(--ink)] hover:border-[var(--gold)] disabled:opacity-50";
+export const btnGold = "rounded-md border border-[var(--gold)] bg-[var(--gold)] px-2.5 py-1 text-[12.5px] font-bold text-[var(--on-accent)] disabled:opacity-50";
 
 export function MapEditor({
   workspaceId,
@@ -138,7 +138,8 @@ export function MapEditor({
     const el = wrap.current?.querySelector<HTMLElement>("[data-lane-grid]");
     if (!el) return;
     const { toPng } = await import("html-to-image");
-    const url = await toPng(el, { backgroundColor: "#ffffff", pixelRatio: 2 });
+    /* the drawing's own ground, so a dark theme's picture is not laid on white */
+    const url = await toPng(el, { backgroundColor: getComputedStyle(el).backgroundColor || "#ffffff", pixelRatio: 2 });
     const a = document.createElement("a");
     a.href = url;
     a.download = `${processCode}-process-map.png`;
@@ -171,24 +172,24 @@ export function MapEditor({
             {m.pdf}
           </a>
           <span className="flex-1" />
-          <span role="status" className={`text-[12px] ${err ? "font-semibold text-[#8C3327]" : "text-[#636C79]"}`}>
+          <span role="status" className={`text-[12px] ${err ? "font-semibold text-[var(--bad-tx)]" : "text-[var(--ink-3)]"}`}>
             {err ?? (busy || refreshing ? m.saving : m.status)}
           </span>
         </div>
       )}
       {branchFrom && (
-        <p className="mb-2 text-[12.5px] text-[#414A58]">
-          <Link className="font-semibold text-[#16325C] underline" href={`/${workspaceId}/processes/processes/${branchFrom.processId}/map`}>
+        <p className="mb-2 text-[12.5px] text-[var(--ink-2)]">
+          <Link className="font-semibold text-[var(--stone)] underline" href={`/${workspaceId}/processes/processes/${branchFrom.processId}/map`}>
             {m.branchFrom(branchFrom.code, branchFrom.n, branchFrom.label)}
           </Link>
         </p>
       )}
       {drawn.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">{m.empty}</div>
+        <div className="rounded-lg border border-dashed border-[var(--line)] bg-white px-[18px] py-[22px] text-[13.5px] text-[var(--ink-2)]">{m.empty}</div>
       ) : (
         <div className="grid items-start gap-3 xl:grid-cols-[minmax(0,1fr)_340px]">
           <LaneDrawing steps={drawn} lanes={drawLanes} connections={[...arrows, ...dashed]} sel={sel} onPick={setSel} pickEnds proposedLabel={m.proposed} />
-          <aside className="grid gap-3 rounded-lg border border-[#D6DCE5] bg-white px-3.5 py-3 text-[#171B22]" aria-live="polite">
+          <aside className="grid gap-3 rounded-lg border border-[var(--line)] bg-white px-3.5 py-3 text-[var(--ink)]" aria-live="polite">
             {picked ? (
               <ProposalPanel workspaceId={workspaceId} proposal={picked} after={steps.find((s) => s.id === picked.after)?.label ?? null} canEdit={canEdit} run={run} onGone={() => setSel(null)} />
             ) : step ? (
@@ -211,7 +212,7 @@ export function MapEditor({
                 onGone={() => setSel(null)}
               />
             ) : (
-              <p className="text-[12.5px] text-[#636C79]">{m.pickHint}</p>
+              <p className="text-[12.5px] text-[var(--ink-3)]">{m.pickHint}</p>
             )}
           </aside>
         </div>
@@ -289,7 +290,7 @@ function ConnectDialog({
         <input className={field} value={label} maxLength={60} placeholder={m.connLabelPh} onChange={(e) => setLabel(e.target.value)} />
       </label>
       {same && (
-        <p role="alert" className="text-[13px] font-semibold text-[#8C3327]">
+        <p role="alert" className="text-[13px] font-semibold text-[var(--bad-tx)]">
           {m.connSame}
         </p>
       )}
@@ -302,9 +303,9 @@ function ProposalPanel({ workspaceId, proposal, after, canEdit, run, onGone }: {
   const act = (fn: typeof confirmProposedStep) => void run(() => fn({ workspaceId, findingId: proposal.id })).then((r) => r.ok && onGone());
   return (
     <>
-      <span className="font-mono text-[12px] font-bold text-[#8A6B22]">{m.proposedTitle.toUpperCase()}</span>
+      <span className="font-mono text-[12px] font-bold text-[var(--gold-deep)]">{m.proposedTitle.toUpperCase()}</span>
       <h3 className="text-base font-semibold">{proposal.label}</h3>
-      <p className="text-[12.5px] text-[#636C79]">
+      <p className="text-[12.5px] text-[var(--ink-3)]">
         {after ? m.after(after) : m.atEnd}
         {proposal.notes ? ` ${proposal.notes}` : ""}
       </p>

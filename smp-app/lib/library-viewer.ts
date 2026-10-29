@@ -17,6 +17,7 @@
    and no `node_modules` at all (§54.5: a section that cannot run is not a
    section that passed). This one opens a tenant connection, so it is its own
    file, the way lib/library-file.ts already is. */
+import type { PoolClient } from "pg";
 import { withTenant } from "./tenant.ts";
 import { categoriesPresent, type Category, type Viewer } from "./library.ts";
 
@@ -45,6 +46,31 @@ export async function viewerFor(tenantId: string, seat: string | null | undefine
   if (!personKey) return { place: null, seesAll: false };
   const { placeOf } = await import("./place.ts");
   return { place: await withTenant(tenantId, (c) => placeOf(c, personKey)), seesAll: false };
+}
+/* THE SAME TWO ANSWERS ON A CONNECTION THE REQUEST ALREADY HOLDS (§669):
+   the document's route reads its tenant in one transaction, so the place
+   and the categories are asked there rather than each opening its own. The
+   rules are the functions above, word for word — this only changes which
+   connection asks. A failed categories read is still `[]`, and it is the
+   LAST thing the route asks on that connection, because a statement that
+   fails inside a transaction fails everything after it. */
+export async function viewerOn(c: PoolClient, seat: string | null | undefined,
+                               personKey: string | null | undefined): Promise<Viewer> {
+  if (seat === "super" || seat === "smoteam") return { place: null, seesAll: true };
+  if (!personKey) return { place: null, seesAll: false };
+  const { placeOf } = await import("./place.ts");
+  return { place: await placeOf(c, personKey), seesAll: false };
+}
+export async function libraryStampOn(c: PoolClient, seat: string | null | undefined,
+                                     personKey: string | null | undefined,
+                                     have: readonly string[]): Promise<Category[] | null> {
+  if (!have.includes("insights")) return null;
+  try {
+    return await categoriesPresent(c, "insights", await viewerOn(c, seat, personKey));
+  } catch (e) {
+    console.error("library categories:", (e as Error).message);
+    return [];
+  }
 }
 
 /* WHAT THE PLATFORM DOCUMENT CARRIES FOR THE REPORTS TAB (§385), in the shape

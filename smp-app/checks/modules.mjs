@@ -608,7 +608,8 @@ console.log("\n4c · who may open a module (§359.5)");
   /* THE ROUTE ASKS BEFORE THE TABLE, read off the source (§6's method) */
   const routeSrc = read("smp-app/app/(platform)/[slug]/[...rest]/route.ts");
   check("the route asks the gate BEFORE serverFor and before the Setup document (research R3)",
-    routeSrc.indexOf("mayOpenModule(") > -1 && routeSrc.indexOf("mayOpenModule(") < routeSrc.indexOf('w.rest[0] === "setup"') && routeSrc.indexOf("mayOpenModule(") < routeSrc.indexOf("serverFor(key)"));
+    /* §669: the gate is asked on the document's one connection now (mayOpenModuleOn); either spelling is the gate */
+    routeSrc.search(/mayOpenModule(?:On)?\(/) > -1 && routeSrc.search(/mayOpenModule(?:On)?\(/) < routeSrc.indexOf('w.rest[0] === "setup"') && routeSrc.search(/mayOpenModule(?:On)?\(/) < routeSrc.indexOf("serverFor(key)"));
 }
 
 console.log("\n5 · what a module's own page owes (driven)");

@@ -22,8 +22,8 @@ type Kpi = { metric: string; target: string; frequency: string };
 
 function Empty({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-dashed border-[#D6DCE5] bg-white px-[18px] py-[22px] text-[13.5px] text-[#414A58]">
-      <b className="mb-1 block text-[15px] text-[#171B22]">{title}</b>
+    <div className="rounded-lg border border-dashed border-[var(--line)] bg-white px-[18px] py-[22px] text-[13.5px] text-[var(--ink-2)]">
+      <b className="mb-1 block text-[15px] text-[var(--ink)]">{title}</b>
       {children}
     </div>
   );

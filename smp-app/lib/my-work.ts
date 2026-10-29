@@ -24,7 +24,7 @@
    Whether a row may be pressed is answered with the row, by the same rule,
    so a tick is never drawn where the write would refuse it (§61). */
 import type { PoolClient } from "pg";
-import { withTenant } from "./tenant.ts";
+import { withTenant, mapLimit } from "./tenant.ts";
 import { registerKeyFor } from "./state-api.ts";
 import { modulesFor } from "./modules.ts";
 import { writeUpsWhere } from "./case-api.ts";
@@ -126,8 +126,11 @@ export async function myWork(clients: Client[], seats: Seat[], email: string, op
   const rows: WorkRow[] = [];
   const tally: Record<string, ClientTally> = {};
   const unanswered: string[] = [];
-  for (const t of clients) {
-    const got = await openOn(t, email, keyOn.get(t.key) ?? null, today, opts.viewerOn ? opts.viewerOn(t) : null);
+  /* a few clients at once rather than one after another (§669); the rows
+     keep the clients' order, as the loop they replace kept it */
+  const gots = await mapLimit(clients, 4, (t) => openOn(t, email, keyOn.get(t.key) ?? null, today, opts.viewerOn ? opts.viewerOn(t) : null));
+  for (let i = 0; i < clients.length; i++) {
+    const t = clients[i], got = gots[i];
     if (got === null) { unanswered.push(t.name); continue; }
     rows.push(...got);
     if (modulesFor(t.modules).includes("tracker" as never))

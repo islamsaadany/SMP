@@ -7,8 +7,9 @@
    the company Strategy in general"*. Settled from three mockup rounds: a
    window over the platform, a picker for the company or a unit, four tabs in
    the approach's own order — Foundation, Analysis, Directions (each with its
-   measures and its tactics, folded to one line), Overall performance — a line
-   per tab for first-timers, and Exit.
+   measures and its tactics, folded to one line), Overall performance — and
+   Exit. The line per tab that said what the tab answers went on Islam's word
+   (2026-10-29, §680): the names say it.
 
    A MODE, NOT A PAGE, as Presentation mode is (present.js): it takes the
    whole window, the chrome disappears, Exit and Escape return the reader to
@@ -34,14 +35,18 @@ var READING = (function () {
   function planOf(key) { return isUnit(key) ? UNITS[key] : topAsUnit(); }
 
   var TABS = [
-    { k: "found", label: function (key) { return SMPRules.foundTitle(GROUP, key) || "Foundation"; },
-      why: "What has been committed to, and why: the aspiration, what it is, and the values it holds itself to. It outruns the year; the directions are annual, the foundation is not." },
-    { k: "swot", label: function (key) { return SMPRules.swotTitle(GROUP, key) || "Analysis"; },
-      why: "Where things stand going in: what it is good at, what holds it back, what the market offers, and what could hurt. The reasoning behind the directions." },
-    { k: "dir", label: function () { return "Directions"; },
-      why: "What is being pushed on this year: each direction with the measures that say what done looks like and where they stand at the review point, and the tactics that deliver it — who owns each, the quarters it runs, whether it is on its way." },
-    { k: "perf", label: function () { return "Overall performance"; },
-      why: "The reading across all of it, three figures never blended: how the headline measures are doing, how the directions are doing, and how much of the work has been delivered against what should have been by now." }
+    { k: "found", label: function (key) { return SMPRules.foundTitle(GROUP, key) || "Foundation"; } },
+    { k: "swot", label: function (key) { return SMPRules.swotTitle(GROUP, key) || "Analysis"; } },
+    { k: "dir", label: function () { return "Directions"; } },
+    /* CAPABILITIES, A TAB OF THEIR OWN WHERE THE BOX KEEPS THEM APART (§679).
+       Islam, of El Abd: *"where is the capabilities tab?"* — §677 had put them
+       under Directions as a second list; the workbench gives a split box a
+       Capabilities tab (§560), and so does the window. Offered only where the
+       box's own question (boxSplit) answers yes and there is a capability to
+       read, since a tab over nothing is not a choice (§61). */
+    { k: "cap", label: function () { return L("capability", "bu"); },
+      when: function (key) { var u = planOf(key); return boxSplit(u) && SMPRules.shown(itemsNow(u)).some(function (it) { return SMPRules.pillarIsCap(it); }); } },
+    { k: "perf", label: function () { return "Overall performance"; } }
   ];
 
   /* ── the pieces ── */
@@ -50,39 +55,53 @@ var READING = (function () {
     var w = Math.max(0, Math.min(100, Math.round(v)));
     return '<span class="rbar ' + band(v) + '"><b style="width:' + w + '%"></b></span>';
   }
+  /* THE TWO TABLES (§682). Islam, of an opened direction: *"the tables
+     columns are too far away … no frame or grid is confusing and the tables
+     are titled measures and then the table start with measures and then
+     tactics … confusing as well"*. So: a real table with a frame and a line
+     under every row, its header the only title — no label over it saying
+     the same word — and the columns kept to the width the figures need
+     rather than spread to the card's edge. */
   function measureRows(list) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No measures yet.</p>';
-    return '<div class="robj"><span class="rh">Measure</span><span class="rh num">Target</span><span class="rh num">Actual</span><span class="rh">Standing</span>' +
+    return '<table class="rtable rmeas"><thead><tr><th>Measure</th><th class="num">Target</th><th class="num">Actual</th><th>Standing</th></tr></thead><tbody>' +
       rows.map(function (m) {
         var sc = measureScore(m);
-        return '<span class="rnm">' + esc(m.name || "") + '</span><span class="rn">' + (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) + '</span>' +
-          '<span class="rn">' + figShown(m) + '</span><span class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></span>';
-      }).join("") + '</div>';
+        /* a measure not yet given a target or a figure shows a dash, never a bare direction sign over nothing (El Abd, 2026-10-29) */
+        var tgt = String(m.target == null ? "" : m.target).trim(), fig = String(figShown(m) || "").trim();
+        return '<tr><td>' + esc(m.name || "") + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
+          '<td class="num">' + (fig ? fig : '\u2014') + '</td><td class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></td></tr>';
+      }).join("") + '</tbody></table>';
   }
   function tacticRows(list) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No tactics yet.</p>';
-    return '<div class="rtac"><span class="rh">Tactic</span><span class="rh">Owner</span><span class="rh">Quarters</span><span class="rh">Status</span>' +
+    return '<table class="rtable rtacs"><thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Status</th></tr></thead><tbody>' +
       rows.map(function (t) {
-        return '<span>' + esc(t.name || "") + '</span><span class="row">' + esc(t.owner || "—") + '</span>' +
-          '<span class="rq">' + [t.q1, t.q2, t.q3, t.q4].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span>' +
-          '<span class="rsts">' + esc(t.status || "—") + '</span>';
-      }).join("") + '</div>';
+        return '<tr><td>' + esc(t.name || "") + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
+          '<td><span class="rq">' + [t.q1, t.q2, t.q3, t.q4].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span></td>' +
+          '<td><span class="rsts">' + esc(t.status || "\u2014") + '</span></td></tr>';
+      }).join("") + '</tbody></table>';
   }
 
+  /* FOUNDATION, AS ISLAM READS IT (§680): who we are on the left; on the
+     right the vision (the aspiration), the end in mind and the mission (the
+     purpose), each a card in the layer's own word for it; under
+     them the key objectives and the core values. Each block only where
+     Structure carries it (compOn). */
   function foundation(key) {
     var o = recordOf(key), on = function (c) { return compOn(key, c); }, out = "";
-    var asp = String(o.aspiration || "").trim(), end = String(o.endInMind || "").trim();
-    if (on("aspiration") && (asp || end)) {
-      out += '<div><p class="rk">' + L1("aspiration") + '</p>' + (asp ? '<p class="rasp">' + esc(asp) + '</p>' : '') +
-        (end ? '<p class="rmis">' + esc(end) + '</p>' : '') + '</div>';
-    }
-    var cl = Array.isArray(o.clauses) ? o.clauses : [], mis = String(o.mission || "").trim();
-    var brief = on("brief") && cl.length ? '<div class="rcard"><h3>' + L("brief") + '</h3><div class="rclauses">' +
+    var asp = String(o.aspiration || "").trim(), end = String(o.endInMind || "").trim(), mis = String(o.mission || "").trim();
+    var cl = Array.isArray(o.clauses) ? o.clauses : [];
+    var who = on("brief") && cl.length ? '<div class="rcard"><h3>' + L("brief") + '</h3><div class="rclauses">' +
       cl.map(function (c) { return '<b>' + esc(c[0] || "") + '</b><span>' + esc(c[1] || "") + '</span>'; }).join("") + '</div></div>' : "";
-    var purpose = on("purpose") && mis ? '<div class="rcard"><h3>' + L1("purpose") + '</h3><p class="rmis">' + esc(mis) + '</p></div>' : "";
-    if (brief || purpose) out += '<div class="rtwo">' + brief + purpose + '</div>';
+    var vision = on("aspiration") && asp ? '<div class="rcard"><h3>' + L1("aspiration") + '</h3><p class="rasp">' + esc(asp) + '</p></div>' : "";
+    /* the end in mind is its own card under the layer's own word for it — "Moto" at El Abd — not a line under the vision (Islam, 2026-10-29) */
+    var endin = on("aspiration") && end ? '<div class="rcard"><h3>' + L1("endinmind") + '</h3><p class="rmis">' + esc(end) + '</p></div>' : "";
+    var mission = on("purpose") && mis ? '<div class="rcard"><h3>' + L1("purpose") + '</h3><p class="rmis">' + esc(mis) + '</p></div>' : "";
+    var right = vision + endin + mission;
+    if (who || right) out += '<div class="rtwo">' + (who || '') + (right ? '<div class="rcol">' + right + '</div>' : '') + '</div>';
     if (on("keyobj") && SMPRules.shown(o.keyObjectives || []).length) {
       var kw = L1("keyobj");
       out += '<div><p class="rk">' + kw + (/s$/i.test(kw) ? "" : "s") + '</p><div class="rcard">' + measureRows(o.keyObjectives) + '</div></div>';
@@ -106,24 +125,19 @@ var READING = (function () {
     }).join("") + '</div>';
   }
 
-  /* DIRECTIONS AND CAPABILITIES APART WHERE THE BOX KEEPS THEM APART (§677).
-     Islam: *"in cases like el abd you need to split directions and
-     capabilities"*. The question is the workbench's own, `boxSplit(u)`
-     (SMPRules.pillarsSplit): where it answers yes the tab draws two lists
-     under two headings, the directions first, the capabilities under the
-     layer's own word for them; a heading over nothing is not drawn (§520.2).
-     Where it answers no, one list, as the box itself is. */
-  function directions(key) {
+  /* DIRECTIONS AND CAPABILITIES APART WHERE THE BOX KEEPS THEM APART (§677,
+     §679). The question is the workbench's own, `boxSplit(u)`
+     (SMPRules.pillarsSplit): where it answers yes, Directions holds the
+     directions alone and the capabilities have the tab above; where it
+     answers no, one list, as the box itself is. */
+  function directions(key, caps) {
     var u = planOf(key), items = SMPRules.shown(itemsNow(u));
-    if (!items.length) return '<p class="rnone">No directions this year.</p>';
-    var groups = boxSplit(u)
-      ? [{ t: "Directions", list: items.filter(function (it) { return !SMPRules.pillarIsCap(it); }) },
-         { t: L("capability", "bu"), list: items.filter(function (it) { return SMPRules.pillarIsCap(it); }) }]
-        .filter(function (g) { return g.list.length; })
-      : [{ t: null, list: items }];
-    return '<div class="rtools">' + items.length + ' direction' + (items.length === 1 ? "" : "s") + ', folded \u2014 press one to open it.' +
+    if (boxSplit(u)) items = items.filter(function (it) { return !!SMPRules.pillarIsCap(it) === !!caps; });
+    var word = caps ? L1("capability").toLowerCase() : "direction";
+    if (!items.length) return '<p class="rnone">No ' + esc(word) + 's this year.</p>';
+    return '<div class="rtools">' + items.length + ' ' + esc(word) + (items.length === 1 ? "" : "s") + ', folded \u2014 press one to open it.' +
       '<button type="button" data-rall="open">Open all</button><button type="button" data-rall="close">Close all</button></div>' +
-      groups.map(function (g) { return (g.t ? '<p class="rk rgrp">' + g.t + '</p>' : '') + dirList(u, g.list); }).join("");
+      dirList(u, items);
   }
   function dirList(u, items) {
     var all = u.items || [];
@@ -137,7 +151,7 @@ var READING = (function () {
           '<span class="rsum"><b>' + ms + '</b> measure' + (ms === 1 ? "" : "s") + ' · <b>' + ts + '</b> tactic' + (ts === 1 ? "" : "s") +
           ' · <b style="color:' + bandInk(sc) + '">' + pct(sc) + '</b></span>' + stand(sc) +
           '<span class="rchev" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></span></div>' +
-          '<div class="rmore"><p class="rk">Measures</p>' + measureRows(it.measures) + '<p class="rk">Tactics</p>' + tacticRows(it.tactics) + '</div></div>';
+          '<div class="rmore">' + measureRows(it.measures) + tacticRows(it.tactics) + '</div></div>';
       }).join("") + '</div>';
   }
 
@@ -164,7 +178,8 @@ var READING = (function () {
     var r = root(); if (!r) return;
     var key = ST.target, subs = subjects();
     if (!subs.some(function (s) { return s.key === key; })) { key = ST.target = "group"; }
-    var tab = TABS.filter(function (t) { return t.k === ST.tab; })[0] || TABS[0];
+    var tabs = TABS.filter(function (t) { return !t.when || t.when(key); });
+    var tab = tabs.filter(function (t) { return t.k === ST.tab; })[0] || tabs[0];
     r.querySelector(".rwtop").innerHTML =
       '<span class="rmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span>' +
       '<span class="rco">' + esc(GROUP.org || "") + '</span>' +
@@ -174,11 +189,11 @@ var READING = (function () {
       '<span class="rsp"></span>' +
       (typeof cycleLabel === "function" ? '<span class="rasof">' + esc(cycleLabel()) + '</span>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
-    r.querySelector(".rwtabs").innerHTML = TABS.map(function (t) {
+    r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
     }).join("");
-    var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key) : performance(key);
-    r.querySelector(".rwbody").innerHTML = '<p class="rwhy"><i>' + esc(tab.label(key)) + '</i>' + tab.why + '</p>' + body;
+    var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false) : tab.k === "cap" ? directions(key, true) : performance(key);
+    r.querySelector(".rwbody").innerHTML = body;
     r.querySelector(".rwbody").scrollTop = 0;
   }
 

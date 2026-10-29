@@ -931,7 +931,7 @@
   .clause:last-child { border-bottom:0; }
   .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
   .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
-  /* WHO WE ARE IS TYPED IN ONE BOX (§679): the lines above are how it READS;
+  /* WHO WE ARE IS TYPED IN ONE BOX (§685): the lines above are how it READS;
      with the pen on, this box stands in for the list — a line per row, the
      bold opening words being the left column. The bar above it holds the one
      button, B. */
@@ -10822,12 +10822,14 @@ body.reading { overflow:hidden; }
 .readroot .rwbody { flex:1; min-height:0; overflow-y:auto; padding:22px 26px 40px; }
 .readroot .rwbody > * { max-width:1040px; }
 .readroot .rwbody > * + * { margin-top:18px; }
-.readroot .rwhy { margin:0; font-size:13.5px; color:var(--ink-3); display:flex; gap:10px; align-items:baseline; }
-.readroot .rwhy i { font-style:normal; font-weight:700; color:var(--gold-deep); font-size:11px; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; }
 .readroot .rk { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px; }
-.readroot .rasp { font-size:22px; line-height:1.35; font-weight:600; color:var(--ink); margin:0; max-width:34ch; }
-.readroot .rmis { font-size:15px; color:var(--ink-2); margin:6px 0 0; max-width:70ch; }
-.readroot .rtwo { display:grid; grid-template-columns:1.2fr 1fr; gap:18px; }
+/* the aspiration reads as the mission does (Islam, §680): same size, same weight, same ink */
+.readroot .rasp { font-size:14.5px; line-height:1.55; font-weight:400; color:var(--ink-2); margin:0; }
+.readroot .rmis { font-size:14.5px; color:var(--ink-2); margin:0; }
+.readroot .rasp + .rmis { margin-top:8px; }
+.readroot .rtwo { display:grid; grid-template-columns:1.2fr 1fr; gap:18px; align-items:start; }
+.readroot .rtwo > .rcard:only-child { grid-column:1 / -1; }
+.readroot .rcol { display:grid; gap:12px; }
 .readroot .rcard { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
 .readroot .rcard h3 { margin:0 0 10px; font-size:13.5px; font-weight:700; }
 .readroot .rclauses { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:13.5px; }
@@ -10870,22 +10872,30 @@ body.reading { overflow:hidden; }
 .readroot .rmore { display:none; padding:12px 18px 16px; border-top:1px solid var(--line-soft); }
 .readroot .rdir.open .rmore { display:grid; gap:10px; }
 
-.readroot .robj { display:grid; grid-template-columns:1fr 110px 90px 150px; gap:8px 14px; font-size:13px; align-items:center; }
-.readroot .rtac { display:grid; grid-template-columns:1fr 150px 130px 70px; gap:6px 14px; font-size:13px; align-items:center; }
-.readroot .rh { font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); }
-.readroot .rh.num, .readroot .rn { text-align:right; }
-.readroot .rn { color:var(--ink-2); white-space:nowrap; }
+/* the tables (§682): framed, a line under every row, the header the title,
+   the columns as wide as their figures and no wider */
+.readroot .rtable { border-collapse:collapse; width:auto; max-width:100%; min-width:min(100%, 640px); font-size:13px; background:var(--surface);
+  border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.readroot .rtable th, .readroot .rtable td { padding:7px 12px; border-bottom:1px solid var(--line-soft); text-align:left; vertical-align:middle; }
+.readroot .rtable th { font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); background:var(--surface-2); border-bottom:1px solid var(--line); white-space:nowrap; }
+.readroot .rtable tbody tr:last-child td { border-bottom:0; }
+.readroot .rtable td:first-child { min-width:220px; }
+.readroot .rtable .num { text-align:right; white-space:nowrap; color:var(--ink-2); }
+.readroot .rtable td.rst { white-space:nowrap; }
 .readroot .rst { display:flex; align-items:center; gap:8px; }
 .readroot .rst i { font-style:normal; font-size:12px; font-weight:700; min-width:36px; text-align:right; }
-.readroot .rbar { display:inline-block; width:100%; height:7px; border-radius:4px; background:var(--surface-2); position:relative; overflow:hidden; }
+.readroot .rbar { display:inline-block; width:110px; height:7px; border-radius:4px; background:var(--surface-2); position:relative; overflow:hidden; }
 .readroot .rbar b { position:absolute; left:0; top:0; bottom:0; border-radius:4px; background:var(--good); }
 .readroot .rbar.attn b, .readroot .rbar.warn b { background:var(--attn); }
 .readroot .rbar.bad b { background:var(--bad); }
-.readroot .row { color:var(--ink-3); }
-.readroot .rq { display:flex; gap:3px; }
+.readroot .rfold .rbar { width:100%; }
+.readroot .row { color:var(--ink-3); white-space:nowrap; }
+.readroot .rq { display:inline-flex; gap:3px; vertical-align:middle; }
 .readroot .rq span { width:22px; height:8px; border-radius:2px; background:var(--surface-2); }
 .readroot .rq span.on { background:var(--stone); }
-.readroot .rsts { font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--attn-tx, var(--attn)); background:var(--attn-bg); border-radius:4px; padding:2px 6px; justify-self:start; }
+.readroot .rsts { font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--attn-tx, var(--attn)); background:var(--attn-bg); border-radius:4px; padding:2px 6px; white-space:nowrap; }
+.readroot .rmore .rtable + .rtable { margin-top:12px; }
+.readroot .rcard > .rtable { min-width:0; width:100%; border:0; border-radius:0; }
 
 .readroot .rthree { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
 .readroot .rfig { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
@@ -10905,9 +10915,9 @@ body.reading { overflow:hidden; }
   .readroot .rtwo, .readroot .rswot, .readroot .rthree { grid-template-columns:1fr; }
   .readroot .rfold { grid-template-columns:auto 1fr 22px; }
   .readroot .rfold .rsum, .readroot .rfold .rbar { display:none; }
-  .readroot .robj { grid-template-columns:1fr 80px 70px 110px; }
-  .readroot .rtac { grid-template-columns:1fr 100px 70px; }
-  .readroot .rtac .rq, .readroot .rtac .rh:nth-child(3) { display:none; }
+  .readroot .rtable { min-width:0; width:100%; }
+  .readroot .rtable td:first-child { min-width:0; }
+  .readroot .rtacs th:nth-child(3), .readroot .rtacs td:nth-child(3) { display:none; }
 }
 
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
@@ -13460,3 +13470,17 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copdvpane .copcp-wrap { margin:0; }
 .copdv-card h3 { display:flex; align-items:baseline; gap:8px; }
 .copdv-under { display:flex; justify-content:flex-end; margin-top:8px; }
+
+/* §684 — Execution split three ways: one card per item in the pane, the one in hand open. */
+.copexpane .copcp-wrap { margin:0; }
+.copex-card { padding:0; overflow:hidden; }
+.copex-head { display:flex; align-items:center; gap:8px; width:100%; border:0; background:none; text-align:left; padding:8px 12px; font:inherit; color:var(--ink); cursor:pointer; }
+.copex-head:hover { background:var(--surface-2); }
+.copex-head:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.copex-head b { font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copex-head small { flex:1 1 auto; min-width:0; color:var(--ink-3); font-size:var(--fs-small, 12.5px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.copex-kind { font:600 10px/1.5 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); border:1px solid var(--line); border-radius:6px; padding:0 5px; white-space:nowrap; }
+.copex-card.now { box-shadow:inset 3px 0 0 var(--gold); }
+.copex-body { border-top:1px solid var(--line); padding:8px 12px 10px; }
+.copex-body .copex-item { margin:0; }
+.copexpane .copex-period { margin:0; }

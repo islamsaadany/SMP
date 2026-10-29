@@ -70470,4 +70470,6 @@ Islam, of the window: *"the initial descriptions at the top is not relevant to k
 
 **Foundation, as read.** Who we are (the brief's clauses) on the left; on the right, the vision — the aspiration with its end in mind under it — and the mission (the purpose), each a card under the layer's own word for it (`L1("aspiration")`, `L1("purpose")`: *Winning aspiration* and *Mission* at Raya, *Vision* and *Mission* at El Abd); under them the key objectives and then the core values. Each block only where Structure carries it, as before; where there is no brief the right-hand pair takes the width.
 
+And the aspiration in the mission's own type — same size, same weight, same ink — on Islam's next word: *"winning aspiration doesn't need to be bold it needs to match the mission"*. It had been set larger and heavier, as a headline; the two are a pair of cards and read as one.
+
 **Checked**: the frozen shell built whole on the worked example — the group's Foundation reads in that order, Mobile's too; every tab opens without its line; no error.

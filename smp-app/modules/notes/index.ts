@@ -49,7 +49,10 @@ export async function serve(a: ServeArgs): Promise<Response> {
     return new Response(APP_JS
       .replace("/*%BRK%*/", brk() === "close-on-tick" ? "return false;" : "")
       .replace("/*%DATEBRK%*/", brk() === "date-two-presses" ? "throw 0;" : "")
-      .replace("/*%KA%*/", brk() === "no-keepalive" ? "false && " : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
+      .replace("/*%KA%*/", brk() === "no-keepalive" ? "false && " : "")
+      /* `no-wait-shape` (§669): no shape while Refine works, no line while
+         the minutes go — the page stands still again. */
+      .replace("/*%WAIT%*/", brk() === "no-wait-shape" ? "return false;" : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which
      must turn checks/notes.mjs red (§94.5). Never set on a deployment. */

@@ -36,7 +36,8 @@
      SMP_BREAK=title-as-heading   node checks/notes.mjs   # must go red
      SMP_BREAK=date-two-presses   node checks/notes.mjs   # must go red
      SMP_BREAK=send-unasked       node checks/notes.mjs   # must go red (§668)
-     SMP_BREAK=no-keepalive       node checks/notes.mjs   # must go red (§668) */
+     SMP_BREAK=no-keepalive       node checks/notes.mjs   # must go red (§668)
+     SMP_BREAK=no-wait-shape      node checks/notes.mjs   # must go red (§669) */
 import pg from "pg";
 import { createServer } from "node:http";
 
@@ -56,22 +57,25 @@ const probe = async (what, fn) => { try { return await fn(); } catch (e) { check
    imported, because lib/mailer.cjs reads its endpoint once at load. Each
    KEEPS what arrived, so what was asked and what left are facts. */
 let modelSeen = null, modelAnswer = null, modelStatus = 200;
+/* BOTH STAND-INS CAN BE HELD (§669): an answer kept back for so many
+   milliseconds, so what the page shows BEFORE it can be read. Zero otherwise. */
+let modelHold = 0, mailHold = 0;
 const model = createServer((req, res) => {
   let b = "";
   req.on("data", (d) => { b += d; });
-  req.on("end", () => {
+  req.on("end", () => setTimeout(() => {
     try { modelSeen = JSON.parse(b); } catch { modelSeen = null; }
     res.writeHead(modelStatus, { "Content-Type": "application/json" });
     res.end(JSON.stringify(modelStatus === 200
       ? { candidates: [{ content: { parts: [{ text: JSON.stringify(modelAnswer) }] } }] }
       : { error: { message: "the stand-in was told to refuse" } }));
-  });
+  }, modelHold));
 });
 let mailSeen = [], mailFail = null;
 const mail = createServer((req, res) => {
   let b = "";
   req.on("data", (d) => { b += d; });
-  req.on("end", () => {
+  req.on("end", () => setTimeout(() => {
     let j = null; try { j = JSON.parse(b); } catch {}
     mailSeen.push(j);
     if (mailFail && j && String((j.to || [])[0] || "").includes(mailFail)) {
@@ -81,7 +85,7 @@ const mail = createServer((req, res) => {
     }
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ id: "stub-" + mailSeen.length }));
-  });
+  }, mailHold));
 });
 await new Promise((r) => model.listen(0, "127.0.0.1", r));
 await new Promise((r) => mail.listen(0, "127.0.0.1", r));
@@ -696,7 +700,21 @@ try {
     check("...and Done closes it", !(await pgp.locator(".pick").isVisible()));
     /* REFINE, against the stand-in. */
     modelAnswer = { summary: "Preparing the Q3 review.", discussed: ["Mobile's figures are ready by 20 September."], agreed: ["Drafts by 22 September."], actions: [{ what: "Mobile Q3 figures", who: "Ramy", when: "20 Sep" }], open: [], next: "" };
-    await pgp.locator("[data-act=refine]").click(); await settle();
+    /* THE SHAPE OF WHAT IS COMING (§669, rule 1d): the model is held 900ms
+       and the page read 150ms after the press, before any answer can have
+       come. The page must have opened into two columns with the minutes'
+       grey bars on the left and the line over them, the notes readable on
+       the right, Refine held; then the real minutes replace the bars, no bar
+       left. SMP_BREAK=no-wait-shape must redden the first. */
+    modelHold = 900;
+    await pgp.locator("[data-act=refine]").click(); await pgp.waitForTimeout(150);
+    check("Refine shows at once: two columns, the minutes' shape in grey bars on the left, and a line saying it is refining (§669)",
+      (await pgp.locator(".two .wait .sk").count()) >= 8 && /Refining the notes into minutes/.test(await pgp.locator(".two .wait .working").innerText().catch(() => "")) &&
+      (await pgp.locator("[data-minutes]").count()) === 0, String(await pgp.locator(".wait .sk").count()));
+    check("...the notes readable beside it, and Refine held",
+      (await pgp.locator(".side textarea[data-act=raw]").inputValue().catch(() => "")).startsWith("ramy: figures") && (await pgp.locator("[data-act=refine]").getAttribute("aria-disabled")) === "true");
+    await pgp.waitForTimeout(1000); await settle(); modelHold = 0;
+    check("...and the real minutes replace the shape when they land, no bar left", (await pgp.locator(".wait").count()) === 0 && (await pgp.locator(".sk").count()) === 0);
     const refinedRow = await asTenant(A, (c) => N.oneNote(c, nid2));
     check("Refine writes the minutes and draws them beside the notes", refinedRow.minutes && refinedRow.minutes.summary === modelAnswer.summary && await pgp.locator("[data-minutes]").isVisible(), JSON.stringify(refinedRow.minutes));
     check("...silently: the page did not reload", await stayed());
@@ -716,6 +734,19 @@ try {
     check("...and it survives a second Refine, which ADDS (decision 6)",
       /Seasonality explained\./.test(eRow2.minutes.discussed[0]) && eRow2.minutes.discussed.length === 2 && eRow2.minutes.summary === "Preparing the Q3 review.",
       JSON.stringify(eRow2.minutes.discussed));
+    /* THE ASSISTANT REFUSES (§669): the reason stands where the bars were,
+       in the left column, with the minutes back under it and Refine offered
+       again — and nothing at the top of the page. */
+    modelStatus = 500;
+    await pgp.locator("[data-act=refine]").click(); await settle(); await settle();
+    const leftSaid = await pgp.locator(".two .said").innerText().catch(() => "");
+    check("when the assistant refuses, the reason stands where the bars were, not at the top (§669)",
+      leftSaid.length > 10 && (await pgp.locator(".wait").count()) === 0 && (await pgp.locator("#said").innerText()).trim() === "" && await pgp.locator("[data-minutes]").isVisible(), leftSaid);
+    check("...with Refine offered again", (await pgp.locator("[data-act=refine]").getAttribute("aria-disabled")) === null && /Refine again/.test(await pgp.locator("[data-act=refine]").innerText()));
+    modelStatus = 200;
+    /* The refusal is a 502 the browser logs on its console as a failed
+       load; it was asked for, so it is not a page error of the product's. */
+    const refusedLog = errs.findIndex((x) => /status of 502/.test(x)); if (refusedLog >= 0) errs.splice(refusedLog, 1);
     /* THE SEND ASKS FIRST (§668): the gold button gives way to a question in
        place, nothing has left; Not yet puts it back, nothing has left; Yes
        sends. Both ends, and the press on the question is what every line
@@ -732,11 +763,21 @@ try {
     if (asks) { await pgp.locator("[data-act=send-no]").click(); await pgp.waitForTimeout(120); }
     check("...Not yet puts the button back, and still nothing has gone out", asks && !(await pgp.locator(".foot .sure:has([data-act=send])").isVisible()) && (await askBtn.isVisible()) && mailSeen.length === 0);
     if (asks) { await askBtn.click(); await pgp.waitForTimeout(120); }
-    await pgp.locator("[data-act=send]").click(); await settle();
+    /* THE FOOT SAYS IT IS SENDING (§669): the mail stand-in is held and the
+       foot read before any email can have left — the question gone, the line
+       in its place, nothing sent yet. The answer then lands in the foot's own
+       slot, where the press was made. */
+    mailHold = 400;
+    await pgp.locator("[data-act=send]").click(); await pgp.waitForTimeout(150);
+    check("Yes, send shows at once: the foot says it is sending, where the press was made, and nothing has gone out yet (§669)",
+      /Sending the minutes to 3 people/.test(await pgp.locator(".foot [data-sending]").innerText().catch(() => "")) && !(await pgp.locator(".foot .sure:has([data-act=send])").isVisible()) && mailSeen.length === 0,
+      await pgp.locator(".foot [data-sending]").innerText().catch(() => "(no line)") + " / " + mailSeen.length);
+    await pgp.waitForTimeout(1600); await settle(); mailHold = 0;
     check("Send emails the minutes to the attendees with an address, and a copy to the sender",
       mailSeen.length === 3 && mailSeen.map((m) => m.to[0]).sort().join(",") === "karim@partner.test,noran@forefront.test,ramy@raya.test",
       mailSeen.map((m) => m.to[0]).join(","));
-    check("...and says who they went to", /went to 3 people/.test(await pgp.locator("#said").innerText()), await pgp.locator("#said").innerText());
+    check("...and says who they went to, in the foot where the press was made and not at the top (§669)",
+      /went to 3 people/.test(await pgp.locator(".foot [data-saved]").innerText()) && (await pgp.locator("#said").innerText()).trim() === "", await pgp.locator(".foot [data-saved]").innerText());
     check("...with the send kept and the page drawn again saying so", (await asTenant(A, (c) => N.sendsOf(c, nid2))).length === 1 && /last went out/.test(await pgp.locator("#body").innerText()) && await stayed());
     /* THE WAY BACK, AND DELETE. */
     await pgp.locator("[data-act=delete-ask]").click(); await pgp.waitForTimeout(120);

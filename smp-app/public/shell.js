@@ -55940,8 +55940,10 @@ var READING = (function () {
     return '<div class="robj"><span class="rh">Measure</span><span class="rh num">Target</span><span class="rh num">Actual</span><span class="rh">Standing</span>' +
       rows.map(function (m) {
         var sc = measureScore(m);
-        return '<span class="rnm">' + esc(m.name || "") + '</span><span class="rn">' + (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) + '</span>' +
-          '<span class="rn">' + figShown(m) + '</span><span class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></span>';
+        /* a measure not yet given a target or a figure shows a dash, never a bare direction sign over nothing (El Abd, 2026-10-29) */
+        var tgt = String(m.target == null ? "" : m.target).trim(), fig = String(figShown(m) || "").trim();
+        return '<span class="rnm">' + esc(m.name || "") + '</span><span class="rn">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</span>' +
+          '<span class="rn">' + (fig ? fig : '\u2014') + '</span><span class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></span>';
       }).join("") + '</div>';
   }
   function tacticRows(list) {

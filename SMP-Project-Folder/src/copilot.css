@@ -1007,3 +1007,8 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copex-body { border-top:1px solid var(--line); padding:8px 12px 10px; }
 .copex-body .copex-item { margin:0; }
 .copexpane .copex-period { margin:0; }
+
+/* §688 — Advisory split three ways: the brief fills the pane; the foot says it stays in the Copilot. */
+.copadpane .adbrief { max-width:none; }
+.copadstays { white-space:nowrap; }
+.copadchat .adq { font-size:var(--fs-micro, 11px); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-deep); margin-bottom:3px; }

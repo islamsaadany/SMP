@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategy, for reading: the reading window</title>
+<!-- Islam, 2026-10-29: "people who see for the first time they get confused
+     somehow … some sort of a window that opens, and this window has the
+     multiple tabs, the foundation, the analysis, the directions and so on just
+     for viewing things rather than the detailed view … this view is mainly for
+     the CEO or people are not owners on the function or people who want to see
+     the company Strategy in general". Then: "mock it". Drawn on the worked
+     example (Raya Trade, its Mobile unit) in the platform's own look; the
+     control at the top right shows it all in the other theme. -->
+<style>
+:root{
+  --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EFF2F6; --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F4F6F9;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --navy:#16325C; --navy-ink:#FFFFFF; --navy-quiet:#B7C4D8; --navy-rule:rgba(255,255,255,.14);
+  --gold:#C9A24D; --gold-deep:#8A6B22; --good:#2E7D5B; --good-bg:#E4F0EA; --attn:#B8860B; --attn-bg:#F7EFD6; --bad:#B04434; --bad-bg:#F7E3E0;
+  --veil:rgba(10,14,22,.55);
+  --sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --navy:#0E1014; --navy-ink:#EAF0FA; --navy-quiet:#9AA6B8; --navy-rule:rgba(255,255,255,.12);
+  --gold:#D9B665; --gold-deep:#C9A24D; --good:#5FB68C; --good-bg:#1B3129; --attn:#D9B23C; --attn-bg:#332C16; --bad:#D97066; --bad-bg:#33201E;
+  --veil:rgba(0,0,0,.7); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px;display:grid;gap:34px}
+.head{display:flex;align-items:flex-start;gap:16px}.head>div{flex:1}
+h1{margin:0;font-size:22px;font-weight:700;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:76ch}
+.rules{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
+.rules b{color:var(--ink);font-weight:600}
+.pgtheme{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--ink-2);font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.pgtheme svg{width:14px;height:14px}
+section{display:grid;gap:10px}
+.ph2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ph2 .n{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep);letter-spacing:.1em}
+h2{margin:0;font-size:16px;font-weight:700}
+.ph2 p{margin:0;color:var(--ink-3);font-size:13.5px}
+.cap{font-size:13.5px;color:var(--ink-2);margin:0;max-width:80ch}.cap b{color:var(--ink);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+
+/* ── Strategy's white bar, near enough, for the door ── */
+.stop{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 20px;min-height:40px;font-size:13.5px}
+.stop .trff{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--ink-2)}
+.stop .sep{color:var(--ink-3)}.stop .st{font-weight:600}.stop .st.q{color:var(--ink-2)}.stop .sp{flex:1}
+.stop .vw{display:flex;align-items:center;gap:8px;padding-right:14px;border-right:1px solid var(--line);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;color:var(--ink-2)}
+.stop .vw span{font-size:12.5px;letter-spacing:0;text-transform:none;font-weight:400;border:1px solid var(--line);border-radius:5px;padding:2px 22px 2px 8px;color:var(--ink)}
+.stop .acts{display:flex;align-items:center;gap:8px}
+.stop .ring{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}.stop .ring svg{width:14px;height:14px}
+.stop .out,.stop .read{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.stop .read{color:var(--navy);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--surface));display:inline-flex;align-items:center;gap:6px}
+:root[data-theme="dark"] .stop .read{color:var(--gold)}
+.stop .read svg{width:12px;height:12px}
+.unitbar{display:flex;gap:4px;padding:8px 20px;background:var(--surface);border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink-2)}
+.unitbar span{padding:5px 10px;border-radius:7px}.unitbar span.on{background:var(--navy);color:var(--navy-ink)}
+.wb{padding:14px 20px;display:grid;gap:8px;color:var(--ink-3);font-size:12.5px}
+.wb .ph{height:10px;border-radius:5px;background:var(--surface-2);width:55%}.wb .ph.s{width:30%}
+.wb .toolrow{display:flex;gap:6px}.wb .toolrow span{border:1px solid var(--line);border-radius:6px;padding:3px 9px;font-size:11.5px}
+
+/* ── THE READING WINDOW ── */
+.rw{background:var(--ground);min-height:560px;position:relative}
+.rwveil{position:absolute;inset:0;background:var(--veil);display:none}
+.rwtop{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:14px;padding:0 22px;min-height:52px}
+.rwtop .mark{width:26px;height:26px;border-radius:7px;background:var(--gold);color:#16325C;display:grid;place-items:center;flex:none}.rwtop .mark svg{width:18px;height:18px}
+.rwtop .co{font-size:14px;font-weight:600}
+.rwtop .pick{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--navy-rule);border-radius:7px;padding:5px 10px;font-size:13.5px;font-weight:600;background:rgba(255,255,255,.06)}
+.rwtop .pick i{font-style:normal;color:var(--navy-quiet);font-weight:500}
+.rwtop .sp{flex:1}
+.rwtop .asof{font-size:12px;color:var(--navy-quiet)}
+.rwtop .x{width:30px;height:30px;border-radius:7px;border:1px solid var(--navy-rule);display:grid;place-items:center;color:var(--navy-quiet)}.rwtop .x svg{width:14px;height:14px}
+.rwtop .ex{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--navy-quiet);border:1px solid var(--navy-rule);border-radius:999px;padding:4px 12px}
+.rwtabs{display:flex;gap:2px;padding:0 22px;background:var(--navy);border-bottom:3px solid var(--gold)}
+.rwtabs span{padding:10px 14px 9px;font-size:13.5px;font-weight:600;color:var(--navy-quiet);border-radius:8px 8px 0 0}
+.rwtabs span.on{background:var(--ground);color:var(--ink)}
+.rwbody{padding:22px 26px 30px;display:grid;gap:18px;max-width:1040px}
+.rwbody .why{margin:0;font-size:13.5px;color:var(--ink-3);display:flex;gap:8px;align-items:baseline}
+.rwbody .why i{font-style:normal;font-weight:700;color:var(--gold-deep);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.k{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.asp{font-size:22px;line-height:1.35;font-weight:600;color:var(--ink);margin:0;max-width:34ch;text-wrap:balance}
+.mis{font-size:15px;color:var(--ink-2);margin:0;max-width:70ch}
+.two{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.card h3{margin:0 0 10px;font-size:13.5px;font-weight:700}
+.clauses{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px}
+.clauses b{color:var(--gold-deep);font-weight:700;white-space:nowrap}.clauses span{color:var(--ink-2)}
+.vals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.val{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.val b{display:block;font-size:13.5px;margin-bottom:4px}.val span{font-size:12.5px;color:var(--ink-3)}
+.swot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.swot .card h3{display:flex;align-items:center;gap:8px}
+.swot .card h3 i{font-style:normal;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:800}
+.swot ul{margin:0;padding:0 0 0 18px;font-size:13.5px;color:var(--ink-2);display:grid;gap:5px}
+.s i{background:var(--good-bg);color:var(--good)}.w i{background:var(--bad-bg);color:var(--bad)}.o i{background:color-mix(in srgb,var(--navy) 14%,var(--surface));color:var(--navy)}.t i{background:var(--attn-bg);color:var(--attn)}
+:root[data-theme="dark"] .o i{color:#9AB5E3;background:#1E2B44}
+.pill{display:grid;gap:8px}
+.pillar{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;display:grid;gap:10px}
+.pillar .ph{display:flex;align-items:baseline;gap:10px}
+.pillar .code{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep)}
+.pillar h3{margin:0;font-size:15px}.pillar .sub{font-size:12.5px;color:var(--ink-3)}
+.obj{display:grid;grid-template-columns:1fr 90px 90px 120px;gap:8px 14px;font-size:13px;align-items:center}
+.obj .h{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.obj .nm{color:var(--ink)}.obj .n{color:var(--ink-2);text-align:right}
+.bar{height:7px;border-radius:4px;background:var(--surface-2);position:relative;overflow:hidden}.bar b{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--good)}
+.bar.a b{background:var(--attn)}.bar.b b{background:var(--bad)}
+.tac{display:grid;grid-template-columns:1fr 150px 150px 70px;gap:6px 14px;font-size:13px;align-items:center}
+.tac .h{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tac .q{display:flex;gap:3px}.tac .q span{width:22px;height:8px;border-radius:2px;background:var(--surface-2)}.tac .q span.on{background:var(--navy)}
+:root[data-theme="dark"] .tac .q span.on{background:#7FA3D8}
+.tac .st{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--attn);background:var(--attn-bg);border-radius:4px;padding:2px 6px;justify-self:start}
+.tac .ow{color:var(--ink-3)}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.fig b{display:block;font-size:30px;line-height:1;font-weight:700}.fig span{display:block;font-size:12.5px;color:var(--ink-3);margin-top:6px}
+.fig .band{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:2px 7px}
+.band.g{background:var(--good-bg);color:var(--good)}.band.a{background:var(--attn-bg);color:var(--attn)}.band.r{background:var(--bad-bg);color:var(--bad)}
+.gloss{font-size:12.5px;color:var(--ink-3)}
+.opt{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.opt .frame{min-height:0}
+.addr{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:12.5px;color:var(--ink-3)}
+.addr span{border:1px solid var(--line);border-radius:6px;padding:3px 10px;flex:1;color:var(--ink-2);font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.mini .rwtop{min-height:44px}.mini .rwtabs span{padding:7px 11px 6px;font-size:12.5px}.mini .rwbody{padding:14px 18px;gap:8px}
+.mini .ph{height:9px;border-radius:5px;background:var(--surface-2);width:60%}.mini .ph.s{width:35%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Strategy, for reading: a window with the strategy in it and nothing else</h1>
+      <p class="lede">The platform as it stands is a workbench: navigation, pens, Reporting, the cycle. A unit owner needs it. A CEO, a peer function head or anyone opening it for the first time wants to <b>read</b> the strategy. This is a window that opens over the platform and holds only that: a picker for the company or a unit, five tabs, and Exit. Drawn on the worked example in the platform's own look; the control at the right shows it in the other theme.</p>
+      <ul class="rules">
+        <li><b>Who.</b> A <b>Read</b> button on the bar for everyone; for a seat that owns nothing (a CEO, a reader) the platform <b>opens in the window</b>, with the workbench a press away only for those who have it.</li>
+        <li><b>Where it starts.</b> On the company, because that is "the company strategy in general". The units are in the picker, and a person who owns a unit starts on theirs.</li>
+        <li><b>What is in.</b> Foundation, Analysis, Directions, Plan, Performance — the five things a strategy is. Out: Reporting, the cycle, Reviews, the Copilot, every pen and button.</li>
+        <li><b>Which figures.</b> What is in the platform now, as Presentation mode does: no exported copy to go stale. The top says the review point ("as of H1 2026").</li>
+        <li><b>A line per tab for first-timers</b>, drawn from the page info the platform already carries (pageinfo.js), so nobody needs a tour to know what Directions means.</li>
+        <li><b>Read only.</b> No reacting in this round. A reader who has something to say has the chat, which is a tab of the workbench and not of this window.</li>
+      </ul>
+    </div>
+    <button class="pgtheme" id="pgtheme" type="button"></button>
+  </div>
+
+  <section>
+    <div class="ph2"><span class="n">01</span><h2>The door: Read, on Strategy's bar</h2><p>beside the theme ring and Sign out; one word, for everyone</p></div>
+    <div class="frame" id="door"></div>
+    <p class="cap"><b>Read</b> opens the window on what you are looking at — this unit if you are in one, the company otherwise — and Exit returns you to exactly where you were, as Presentation mode does. A seat that owns nothing never sees this bar first: for them the window <i>is</i> the platform, and the bar's place is taken by a quiet <b>Open the workbench</b> only where their seat allows it.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">02</span><h2>The window on the company: Foundation</h2><p>the aspiration first and large, then the mission, what the company is, and its values</p></div>
+    <div class="frame" id="w1"></div>
+    <p class="cap">The navy strip is the window's only chrome: the mark, whose strategy this is, the picker, the review point, Exit. Under it the five tabs on a gold rule, the same gold line the unit's own section row wears. Every tab opens with one line in the gold eyebrow's voice saying what the page answers.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">03</span><h2>The window on a unit: Directions</h2><p>Mobile's pillars, each with its objectives and where they stand</p></div>
+    <div class="frame" id="w2"></div>
+    <p class="cap">A pillar is a card: its code and name, its end-state, then its objectives with target, actual and a bar in the band's colour. No weights, no pens, no ordering. The tactics that deliver a pillar are on the next tab, Plan, so a reader is not shown everything at once.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">04</span><h2>Analysis, Plan and Performance, on the same unit</h2><p>the other three tabs, each as plain</p></div>
+    <div class="frame" id="w3"></div>
+    <div class="frame" id="w4" style="margin-top:12px"></div>
+    <div class="frame" id="w5" style="margin-top:12px"></div>
+    <p class="cap"><b>Analysis</b> is the SWOT as four plain lists. <b>Plan</b> is the tactics under their pillars: owner, the quarters they run, status. <b>Performance</b> is the unit's three figures, never blended (the page info's own rule), then the headline objectives. Each is the workbench's page with everything that edits, weighs or orders it taken off — nothing new is computed, so the window never disagrees with the page behind it.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">05</span><h2>Two ways to reach it, in order</h2><p>first a window over the platform; later, its own address</p></div>
+    <div class="opt">
+      <div><div class="frame mini" id="oa"></div><p class="cap" style="margin-top:8px"><b>A — a window over the platform (first).</b> Opens from Read, takes the whole window, Exit returns you. Built from the pages' own renderers in a read-only dress, the way the deck is. Quickest to have, and where the reading itself gets settled.</p></div>
+      <div><div class="frame mini" id="ob"></div><p class="cap" style="margin-top:8px"><b>B — its own address (after).</b> <code>/raya/strategy/read</code>, the way Processes has its reading side: a link a CEO opens directly, the landing for a seat that owns nothing, the console's door into Strategy. The same window, with an address instead of an Exit.</p></div>
+    </div>
+  </section>
+</div>
+<script>
+(function () {
+  var pg = "light";
+  try { var t = localStorage.getItem("smp.theme"); if (t === "light" || t === "dark") pg = t; else if (matchMedia("(prefers-color-scheme: dark)").matches) pg = "dark"; } catch (e) {}
+  var SUN = '<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>';
+  var MOON = '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>';
+  var AUTO = '<circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.8a7.2 7.2 0 0 0 0 14.4z" fill="currentColor"/>';
+  function svg(g) { return '<svg viewBox="0 0 20 20" aria-hidden="true">' + g + '</svg>'; }
+  var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg>';
+  var BOOK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h6v16H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-6v16h6a2 2 0 0 1 2 2z"/></svg>';
+  var X = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5 5 15"/></svg>';
+  var TABS = ["Foundation", "Analysis", "Directions", "Plan", "Performance"];
+  var WHY = {
+    Foundation: "What the company has committed to, and why: the aspiration, the mission, what it is, and the values it holds itself to. It outruns the year; the pillars are annual, the foundation is not.",
+    Analysis: "Where the unit stands going in: what it is good at, what holds it back, what the market offers, and what could hurt. The reasoning behind the directions.",
+    Directions: "The pillars the unit is pushing on this year, each with the objectives that say what done looks like and where they stand at the review point.",
+    Plan: "The work that delivers each pillar: who owns each tactic, the quarters it runs, and whether it is on its way.",
+    Performance: "Three figures, never blended: how the objectives are doing, how the pillars are doing, and how much of the plan has been delivered against what should have been by now."
+  };
+  function top(scope, mode) {
+    return '<div class="rwtop"><span class="mark">' + STAR + '</span><span class="co">Raya Trade</span><span class="pick">' + scope + ' <i>▾</i></span><span class="sp"></span><span class="asof">As of H1 2026</span>' +
+      (mode === "addr" ? '' : '<span class="ex">Exit</span>') + '</div>';
+  }
+  function tabs(on) { return '<div class="rwtabs">' + TABS.map(function (t) { return '<span class="' + (t === on ? "on" : "") + '">' + t + '</span>'; }).join("") + '</div>'; }
+  function why(t) { return '<p class="why"><i>' + t + '</i>' + WHY[t] + '</p>'; }
+  function bar(p) { var c = p >= 70 ? "" : p >= 45 ? " a" : " b"; return '<span class="bar' + c + '"><b style="width:' + Math.min(100, p) + '%"></b></span>'; }
+
+  document.getElementById("door").innerHTML =
+    '<div class="stop"><span class="trff">Forefront</span><span class="sep">›</span><span class="st q">Raya Trade ▾</span><span class="sep">›</span><span class="st">Strategy ▾</span><span class="sp"></span><span class="vw">Viewing as <span>Islam Saadany ▾</span></span><span class="acts"><span class="read flag">' + BOOK + 'Read</span><span class="ring">' + svg(AUTO) + '</span><span class="out">Sign out</span></span></div>' +
+    '<div class="unitbar"><span>Group</span><span class="on">Mobile</span><span>Retail Stores</span><span>B2B Ecomm</span><span>Online Shop</span><span>Consumer Electronics</span><span>Corporate</span><span>Care</span><span>IT Dist.</span><span>Logistics</span><span>Nigeria</span></div>' +
+    '<div class="wb"><div class="toolrow"><span>Strategy</span><span>Performance</span><span>Reporting ●</span><span>My work</span><span>Library</span><span>Copilot</span></div><div class="ph"></div><div class="ph s"></div><div class="ph"></div><span>…the workbench, as it is today, with its pens, its missing bar and its cycle</span></div>';
+
+  document.getElementById("w1").innerHTML = '<div class="rw">' + top("Company") + tabs("Foundation") + '<div class="rwbody">' + why("Foundation") +
+    '<div><p class="k">Winning aspiration</p><p class="asp">To be the most trusted and diversified provider for mobile, consumer electronics, IT products and logistics services in Egypt and Nigeria.</p></div>' +
+    '<div class="two"><div class="card"><h3>What we are</h3><div class="clauses"><b>We are</b><span>a diversified holding trade company</span><b>Offering</b><span>value-added distribution, retail, care, e-commerce for consumer electronics, IT products and services, and logistics for packages of every size</span><b>To</b><span>vendors, retail channels, independent sellers, large enterprises, government, e-commerce platforms and individuals</span><b>Through</b><span>a seamless network of distribution channels, retail locations, e-commerce platforms, logistics hubs and a dedicated sales force</span><b>Covering</b><span>all of Egypt and Nigeria</span><b>Empowered by</b><span>a diversified portfolio, economies of scale, reach, customer experience and after-sales support — owning the value chain</span></div></div>' +
+    '<div class="card"><h3>Mission</h3><p class="mis">To empower our partners and customers with reliable, accessible and efficient solutions and services across diverse channels, through a seamless distribution and logistics network with a solid financial infrastructure and exceptional people.</p></div></div>' +
+    '<div><p class="k">Values</p><div class="vals"><div class="val"><b>Respect for People</b><span>An empathetic employee with a socially positive attitude.</span></div><div class="val"><b>Teamwork</b><span>A key team player with a collaborative mindset and a culture of synergy.</span></div><div class="val"><b>Excellence</b><span>A proactive, self-developing employee who surpasses expectations.</span></div><div class="val"><b>Customer Focus</b><span>A customer-centric employee with an aptitude for business sustainability.</span></div></div></div>' +
+    '</div></div>';
+
+  function pillar(code, name, sub, objs) {
+    return '<div class="pillar"><div class="ph"><span class="code">' + code + '</span><h3>' + name + '</h3>' + (sub ? '<span class="sub">' + sub + '</span>' : '') + '</div>' +
+      '<div class="obj"><span class="h">Objective</span><span class="h" style="text-align:right">Target 2026</span><span class="h" style="text-align:right">Actual</span><span class="h">Standing</span>' +
+      objs.map(function (o) { return '<span class="nm">' + o[0] + '</span><span class="n">' + o[1] + '</span><span class="n">' + o[2] + '</span>' + bar(o[3]); }).join("") + '</div></div>';
+  }
+  document.getElementById("w2").innerHTML = '<div class="rw">' + top("Mobile") + tabs("Directions") + '<div class="rwbody">' + why("Directions") + '<div class="pill">' +
+    pillar("01", "Digital & Data-Driven Operations", "End-state: a unified market intelligence engine", [["Orders processed digitally", "90%", "48%", 53], ["Data duplicate rate", "≤ 1%", "1.4%", 71], ["App coverage rate", "50%", "22%", 44], ["Dependency on automated reports", "90%", "58%", 64]]) +
+    pillar("02", "Channel Preference & Development", "", [["Average delivery time", "≤ 24 h", "31 h", 77], ["Key retailer revenue growth", "50%", "24%", 48], ["Tier 2 merchants enrolled", "100", "58", 58], ["Tier 2 segment revenue growth", "100%", "62%", 62]]) +
+    pillar("03", "Portfolio & Value Chain Expansion", "", [["Non-Samsung revenue", "4B EGP", "1.6B", 40], ["Samsung market share", "30%", "31%", 103], ["Vivo market share", "60%", "48%", 80], ["Local production devices", "1M", "520K", 52]]) +
+    '</div></div></div>';
+
+  document.getElementById("w3").innerHTML = '<div class="rw" style="min-height:0">' + top("Mobile") + tabs("Analysis") + '<div class="rwbody">' + why("Analysis") + '<div class="swot">' +
+    '<div class="card s"><h3><i>S</i>Strengths</h3><ul><li>Samsung share at 31%, above the 30% target</li><li>Distribution reach: 3,180 active merchants and growing</li><li>Owning the value chain, from import to after-sales</li></ul></div>' +
+    '<div class="card w"><h3><i>W</i>Weaknesses</h3><ul><li>Orders processed digitally at 48%; six ERP instances</li><li>App coverage at 22%, gated on the merchant app</li><li>Finance reporting still manual until the warehouse is live</li></ul></div>' +
+    '<div class="card o"><h3><i>O</i>Opportunities</h3><ul><li>Tier 2 merchants: 58 of 100 enrolled, demand ahead of enrolment</li><li>Local production: 520K devices, half way to 1M</li><li>Accessories and wearables as high-margin lines</li></ul></div>' +
+    '<div class="card t"><h3><i>T</i>Threats</h3><ul><li>ERP cutover moved to Q3 with the principal</li><li>Credit check change slowing Tier 2 enrolment</li><li>Accessory supply constrained at the vendor</li></ul></div>' +
+    '</div></div></div>';
+
+  function tactics(code, name, rows) {
+    return '<div class="pillar"><div class="ph"><span class="code">' + code + '</span><h3>' + name + '</h3></div><div class="tac"><span class="h">Tactic</span><span class="h">Owner</span><span class="h">Quarters</span><span class="h">Status</span>' +
+      rows.map(function (r) { return '<span>' + r[0] + '</span><span class="ow">' + r[1] + '</span><span class="q">' + r[2].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span><span class="st">' + r[3] + '</span>'; }).join("") + '</div></div>';
+  }
+  document.getElementById("w4").innerHTML = '<div class="rw" style="min-height:0">' + top("Mobile") + tabs("Plan") + '<div class="rwbody">' + why("Plan") + '<div class="pill">' +
+    tactics("01", "Digital & Data-Driven Operations", [["Clean and standardize customer and SKU base", "Ramy Behairy", [0, 1, 1, 0], "WIP"], ["End-to-end order-to-cash digitization", "Mohamed Rizk", [0, 1, 1, 0], "WIP"], ["Scale Mobile Digital App across merchants", "Ashraf Laithy", [0, 1, 1, 1], "WIP"]]) +
+    tactics("02", "Channel Preference & Development", [["Joint business planning with key retailers", "Mohamed Rizk", [0, 1, 1, 1], "WIP"], ["Tier 2 growth acceleration programme", "Ashraf Laithy", [0, 1, 1, 1], "WIP"]]) +
+    '</div><p class="gloss">…and the third pillar below. A reader scrolls; nothing folds, nothing is dragged.</p></div></div>';
+
+  document.getElementById("w5").innerHTML = '<div class="rw" style="min-height:0">' + top("Mobile") + tabs("Performance") + '<div class="rwbody">' + why("Performance") +
+    '<div class="three"><div class="fig"><b>62%</b><span>Objectives — the unit\'s headline measures against their 2026 targets</span><span class="band a">Watch</span></div><div class="fig"><b>49%</b><span>Pillars — the directions\' objectives, averaged per pillar</span><span class="band a">Watch</span></div><div class="fig"><b>45%</b><span>Execution — delivered against what should have been by H1. 100% is on plan, not finished</span><span class="band r">Behind</span></div></div>' +
+    '<div class="pillar"><div class="ph"><h3>Headline objectives</h3></div><div class="obj"><span class="h">Objective</span><span class="h" style="text-align:right">Target 2026</span><span class="h" style="text-align:right">Actual</span><span class="h">Standing</span>' +
+    [["Distribution revenue", "6.2B EGP", "2.7B", 44], ["Mobile market share", "32%", "28%", 88], ["Active merchant reach", "4,500", "3,180", 71], ["App coverage rate", "50%", "22%", 44]].map(function (o) { return '<span class="nm">' + o[0] + '</span><span class="n">' + o[1] + '</span><span class="n">' + o[2] + '</span>' + bar(o[3]); }).join("") +
+    '</div></div></div></div>';
+
+  document.getElementById("oa").innerHTML = '<div class="rw" style="min-height:0">' + top("Company") + tabs("Foundation") + '<div class="rwbody"><div class="ph"></div><div class="ph s"></div><div class="ph"></div></div></div>';
+  document.getElementById("ob").innerHTML = '<div class="addr">Address <span>smp.forefront.consulting/raya/strategy/read</span></div><div class="rw" style="min-height:0">' + top("Company", "addr") + tabs("Foundation") + '<div class="rwbody"><div class="ph"></div><div class="ph s"></div><div class="ph"></div></div></div>';
+
+  function draw() {
+    document.documentElement.setAttribute("data-theme", pg);
+    var b = document.getElementById("pgtheme");
+    b.innerHTML = svg(pg === "light" ? SUN : MOON) + (pg === "light" ? "View in dark" : "View in light");
+  }
+  document.getElementById("pgtheme").addEventListener("click", function () { pg = pg === "light" ? "dark" : "light"; draw(); });
+  draw();
+})();
+</script>
+</body>
+</html>

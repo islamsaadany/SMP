@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-29 — Execution, split three ways (§684).** The period in the chat; one card per Direction and Capability on the right, drafted from its card or all from the chat; the chat in the order it happened; asks through the chat's box for the item in hand; Save and Apply to plan at the pane's foot. Shell `smp-shell-v7.37-execution-split`.
+
 **2026-10-29 — The start screen's Send is not there until something is typed (§683).** As every chat's box has it since §652. Shell `smp-shell-v7.36-start-send`.
 **2026-10-29 — The reading window's tables: framed, lined, one title, the columns close (§682), merged to `main` on Islam's word.** The measures and tactics under an opened direction (and the key objectives, and the headline measures) are real tables in the platform's own style, with the header as their only title and the figure columns beside the names rather than at the card's far edge. Checked on the worked example.
 

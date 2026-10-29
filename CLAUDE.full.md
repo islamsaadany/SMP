@@ -10916,6 +10916,14 @@ node scripts/test-graph-diff.js # the change list on its own: only what changed
 python3 checks/enter-commits.py # Enter commits a growing one-line box instead of
                                 # inserting a newline, and a rows-2 area keeps its
                                 # paragraph key — both ends (§229)
+python3 checks/who-we-are-box.py # Who we are is typed in ONE box with the pen on
+                                # and reads as the two-column list it always was
+                                # (§685): a line per row, the bold opening words
+                                # the opener, bold only from the start of a line,
+                                # Enter a new row, paste words only, a blank line
+                                # no row, written on blur and only when changed,
+                                # a unit's ids renumbered, the refused viewer
+                                # drawn the list
 python3 checks/fn-ko-edit.py    # a function's objectives are written at the page's
                                 # width (§226): the editing table in a band on BOTH
                                 # formats, the Unit column writing the stored target,

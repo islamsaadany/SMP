@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who We Are · one box, openers on the left · try it</title>
+<style>
+  :root {
+    --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --ink:#0F172A; --stone:#334155; --none:#636E7E; --line:#E2E8F0; --line-soft:#F1F5F9;
+    --gold:#4F46E5; --gold-deep:#4338CA; --attn-bg:#FFFBEB; --attn-tx:#B45309;
+    --field-line:#CBD5E1; --surface:#fff; --bg:#F8FAFC; --mark:#C58B1E;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.45; }
+  .wrap { max-width:980px; margin:0 auto; padding:28px 20px 60px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .lede { color:var(--none); margin:0 0 22px; }
+  h2.part { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--none); margin:30px 0 10px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px 20px; }
+  h2.sec { font-size:17px; font-weight:700; letter-spacing:-.01em; margin:0 0 10px; text-transform:uppercase; }
+  .new { outline:2px solid var(--mark); outline-offset:4px; border-radius:6px; }
+
+  /* the one box */
+  .bar { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+  .bbtn { font:inherit; font-weight:800; font-size:14px; width:34px; height:30px; border:1px solid var(--field-line);
+          border-radius:7px; background:#fff; color:var(--stone); cursor:pointer; }
+  .bbtn:hover { background:var(--attn-bg); }
+  .bbtn.on { background:var(--gold); border-color:var(--gold); color:#fff; }
+  .hint { color:var(--none); font-size:13px; }
+  .box { min-height:150px; border:1px solid var(--field-line); border-radius:8px; padding:10px 12px; outline:0;
+         font-size:15px; line-height:1.6; white-space:pre-wrap; }
+  .box:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(79,70,229,.12); }
+  .box div { min-height:1.6em; }
+  .box b { font-weight:700; color:var(--stone); }
+  .note { color:var(--none); font-size:13px; margin:8px 0 0; }
+
+  /* the table as it shows today */
+  dl { margin:0; }
+  .clause { display:grid; grid-template-columns:120px 1fr; gap:10px 14px; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+  .clause:last-child { border-bottom:0; }
+  .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
+  .clause dd { margin:0; font-size:15px; }
+  .empty { color:var(--none); font-style:italic; }
+
+  .ask { margin-top:28px; background:#fff; border:1px dashed var(--mark); border-radius:10px; padding:14px 18px; }
+  .ask h2 { margin:0 0 8px; font-size:15px; }
+  .ask ul { margin:0; padding-left:1.2rem; }
+  .ask li { margin:4px 0; }
+  kbd { font:inherit; font-size:12px; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:0 5px; background:#fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Who we are: typed in one box, shown as today</h1>
+  <p class="lede">A working copy to try. Type in the box; the table below redraws as you go. Nothing here is saved.</p>
+
+  <h2 class="part">1 · While editing</h2>
+  <div class="card">
+    <h2 class="sec">Description</h2>
+    <div class="new">
+      <div class="bar">
+        <button class="bbtn" id="bold" type="button" title="Bold the opening words (Ctrl+B)" aria-pressed="false">B</button>
+        <span class="hint">Select the opening words and press <b>B</b> (or <kbd>Ctrl</kbd>+<kbd>B</kbd>). Bold always runs from the start of the line. <kbd>Enter</kbd> starts a new line.</span>
+      </div>
+      <div class="box" id="box" contenteditable="true" spellcheck="true" aria-label="Who we are"></div>
+    </div>
+    <p class="note">What you have today comes in as it is: each line with its opener already bold. Pasting brings in the words only. A blank line is not a row.</p>
+  </div>
+
+  <h2 class="part">2 · How it shows (unchanged from today)</h2>
+  <div class="card">
+    <h2 class="sec">Description</h2>
+    <dl id="table"></dl>
+  </div>
+
+  <div class="ask">
+    <h2>What to try</h2>
+    <ul>
+      <li>Put the cursor anywhere on a line and press <b>B</b>: the bold runs from the start of the line to where you are, and the table moves those words to the left.</li>
+      <li>Press <b>B</b> inside bold words: the bold comes off and the words join the right-hand side.</li>
+      <li>Press <kbd>Enter</kbd> at the end: a new line, a new row. Type “Backed by” then the rest, select “Backed by”, press <b>B</b>.</li>
+      <li>Paste a whole statement from somewhere else: each pasted line is a row, with no colours or fonts carried in.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+  var START = [
+    ["We are", "An Egyptian food & trade company"],
+    ["Providing", "that provides -seasonal & all year products- (confectionary, sweets, bakery, ice-cream, nuts & beverages)"],
+    ["To", "to everyone with focus on B segment"],
+    ["Through", "through our self owned stores, stand alone products and our diverse sales channels (online ordering platforms, call center delivery, supermarkets & distributors)"],
+    ["With Focus on", "products diversity, remarkable quality & VFM"]
+  ];
+  var box = document.getElementById("box"), table = document.getElementById("table"), bbtn = document.getElementById("bold");
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+
+  /* ── One line of the box is one <div>. Its opener is the bold run at the
+     very start; everything after is the text. ─────────────────────────── */
+  function lineHtml(op, tx){
+    return "<div>" + (op ? "<b>" + esc(op) + "</b>" : "") + (op && tx ? " " : "") + esc(tx) + (op || tx ? "" : "<br>") + "</div>";
+  }
+  function lines(){ return Array.prototype.slice.call(box.children).filter(function(n){ return n.nodeType === 1; }); }
+  function readLine(div){
+    var op = "", tx = "", inOpener = true;
+    Array.prototype.forEach.call(div.childNodes, function(n){
+      var t = n.textContent || "";
+      if (n.nodeName === "BR") return;
+      if (inOpener && n.nodeName === "B" ) { op += t; return; }
+      if (inOpener && !t.trim() && !op) return;   /* leading whitespace before any bold */
+      inOpener = false; tx += t;
+    });
+    return [op.trim(), tx.trim()];
+  }
+  function model(){ return lines().map(readLine); }
+
+  /* Keep each line canonical without moving the caret: a <div> per line, and
+     bold only at the start (a <b> that lands mid-line, e.g. after joining two
+     lines with Backspace, is unwrapped). */
+  function normalise(){
+    if (!lines().length) {
+      /* Chrome types straight into the box before any <div> exists. */
+      var t = box.textContent; box.innerHTML = lineHtml("", t); place(lines()[0], t.length); return;
+    }
+    Array.prototype.slice.call(box.childNodes).forEach(function(n){
+      if (n.nodeType === 3 && n.textContent.trim()) { var d = document.createElement("div"); box.replaceChild(d, n); d.appendChild(n); }
+      else if (n.nodeType === 3) box.removeChild(n);
+    });
+    lines().forEach(function(div){
+      var seenText = false;
+      Array.prototype.slice.call(div.childNodes).forEach(function(n){
+        if (n.nodeName === "B" || n.nodeName === "STRONG") {
+          if (seenText) { while (n.firstChild) div.insertBefore(n.firstChild, n); div.removeChild(n); }
+        } else if (n.nodeType === 1 && n.nodeName !== "BR") {
+          /* any other tag (span, font…) becomes its text */
+          div.replaceChild(document.createTextNode(n.textContent), n); seenText = true;
+        } else if ((n.textContent || "").trim()) seenText = true;
+      });
+    });
+  }
+
+  function draw(){
+    var m = model().filter(function(l){ return l[0] || l[1]; });
+    table.innerHTML = m.length ? m.map(function(l){
+      return '<div class="clause"><dt>' + esc(l[0]) + '</dt><dd>' + (l[1] ? esc(l[1]) : '<span class="empty">—</span>') + '</dd></div>';
+    }).join("") : '<p class="empty">Nothing written yet.</p>';
+    bbtn.classList.toggle("on", caretInOpener());
+    bbtn.setAttribute("aria-pressed", caretInOpener() ? "true" : "false");
+  }
+
+  /* ── Where the caret is: which line, and how many characters in. ────── */
+  function lineOf(node){ while (node && node.parentNode !== box) node = node.parentNode; return node && node.nodeType === 1 ? node : null; }
+  function offsetIn(div, node, off){
+    var r = document.createRange(); r.setStart(div, 0); r.setEnd(node, off); return r.toString().length;
+  }
+  function place(div, off){
+    var walker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT), n, seen = 0, sel = window.getSelection(), r = document.createRange();
+    while ((n = walker.nextNode())) {
+      var len = n.textContent.length;
+      if (seen + len >= off) { r.setStart(n, off - seen); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); return; }
+      seen += len;
+    }
+    r.selectNodeContents(div); r.collapse(false); sel.removeAllRanges(); sel.addRange(r);
+  }
+  function caret(){
+    var sel = window.getSelection(); if (!sel.rangeCount || !box.contains(sel.anchorNode)) return null;
+    var r = sel.getRangeAt(0), div = lineOf(r.startContainer); if (!div) return null;
+    var endDiv = lineOf(r.endContainer);
+    var start = offsetIn(div, r.startContainer, r.startOffset);
+    var end = endDiv === div ? offsetIn(div, r.endContainer, r.endOffset) : div.textContent.length;
+    return { div: div, start: start, end: end };
+  }
+  function caretInOpener(){
+    var c = caret(); if (!c) return false; var op = readLine(c.div)[0];
+    return !!op && c.end <= op.length;
+  }
+
+  /* ── Bold: from the start of the line to the end of the selection. Pressed
+     inside bold words, it takes the bold off. ─────────────────────────── */
+  function toggleBold(){
+    var c = caret(); if (!c) { box.focus(); return; }
+    var full = c.div.textContent, l = readLine(c.div);
+    var op, tx;
+    if (l[0] && c.end <= l[0].length) { op = ""; tx = (l[0] + " " + l[1]).trim(); }
+    else { op = full.slice(0, c.end).trim(); tx = full.slice(c.end).trim(); }
+    c.div.innerHTML = lineHtml(op, tx).replace(/^<div>|<\/div>$/g, "");
+    var at = op ? Math.min(op.length, c.div.textContent.length) : Math.min(c.end, c.div.textContent.length);
+    place(c.div, at); draw();
+  }
+
+  /* ── Enter: split the line where the caret is; the new line carries no
+     bold. ─────────────────────────────────────────────────────────────── */
+  function splitLine(){
+    var c = caret(); if (!c) return;
+    var full = c.div.textContent, l = readLine(c.div);
+    var head = full.slice(0, c.start), tail = full.slice(c.end);
+    var op = l[0] && c.start <= l[0].length ? head.trim() : l[0];
+    var tx = l[0] && c.start <= l[0].length ? "" : head.slice(l[0].length).trim();
+    c.div.innerHTML = lineHtml(op, tx).replace(/^<div>|<\/div>$/g, "");
+    var nd = document.createElement("div"); nd.innerHTML = lineHtml("", tail.trim()).replace(/^<div>|<\/div>$/g, "");
+    c.div.parentNode.insertBefore(nd, c.div.nextSibling);
+    place(nd, 0); draw();
+  }
+
+  /* ── Paste: words only; each pasted line becomes a line of its own. ─── */
+  function paste(e){
+    e.preventDefault();
+    var text = (e.clipboardData || window.clipboardData).getData("text/plain") || "";
+    var parts = text.replace(/\r/g, "").split("\n");
+    var c = caret();
+    if (!c) { box.innerHTML += parts.map(function(p){ return lineHtml("", p.trim()); }).join(""); draw(); return; }
+    var full = c.div.textContent, l = readLine(c.div);
+    var head = full.slice(0, c.start) + parts[0], tail = parts[parts.length - 1] + full.slice(c.end);
+    var cur = c.div;
+    if (parts.length === 1) {
+      var joined = full.slice(0, c.start) + parts[0] + full.slice(c.end);
+      var inOp = l[0] && c.start <= l[0].length;
+      var op2 = inOp ? joined.slice(0, l[0].length + parts[0].length).trim() : l[0];
+      var tx2 = joined.slice(op2 ? op2.length : 0).trim();
+      cur.innerHTML = lineHtml(op2, tx2).replace(/^<div>|<\/div>$/g, "");
+      place(cur, Math.min(c.start + parts[0].length, cur.textContent.length)); draw(); return;
+    }
+    var inOp1 = l[0] && c.start <= l[0].length;
+    cur.innerHTML = lineHtml(inOp1 ? head.trim() : l[0], inOp1 ? "" : head.slice(l[0].length).trim()).replace(/^<div>|<\/div>$/g, "");
+    var after = cur;
+    parts.slice(1, -1).forEach(function(p){ var d = document.createElement("div"); d.innerHTML = lineHtml("", p.trim()).replace(/^<div>|<\/div>$/g, ""); after.parentNode.insertBefore(d, after.nextSibling); after = d; });
+    var last = document.createElement("div"); last.innerHTML = lineHtml("", tail.trim()).replace(/^<div>|<\/div>$/g, "");
+    after.parentNode.insertBefore(last, after.nextSibling);
+    place(last, parts[parts.length - 1].length); draw();
+  }
+
+  box.innerHTML = START.map(function(l){ return lineHtml(l[0], l[1]); }).join("");
+  box.addEventListener("input", function(){ normalise(); draw(); });
+  box.addEventListener("keydown", function(e){
+    if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) { e.preventDefault(); toggleBold(); }
+    else if (e.key === "Enter") { e.preventDefault(); splitLine(); }
+    else if ((e.ctrlKey || e.metaKey) && (e.key === "i" || e.key === "u")) e.preventDefault();
+  });
+  box.addEventListener("paste", paste);
+  bbtn.addEventListener("mousedown", function(e){ e.preventDefault(); });
+  bbtn.addEventListener("click", toggleBold);
+  document.addEventListener("selectionchange", function(){ var on = caretInOpener(); bbtn.classList.toggle("on", on); bbtn.setAttribute("aria-pressed", on ? "true" : "false"); });
+  draw();
+})();
+</script>
+</body>
+</html>

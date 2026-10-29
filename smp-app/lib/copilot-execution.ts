@@ -27,7 +27,10 @@ export type Period = { y: number; m1: number; m2: number };
 export type Measure = { name: string; target: string; compile: string };
 export type Tactic = { name: string; owner: string; quarters: number[] };
 export type Item = { kind: "direction" | "capability"; planId: string; title: string; ownedBy: string; measures: Measure[]; tactics: Tactic[]; drafted: boolean };
-export type Exec = { period: Period | null; items: Item[]; cursor: number; reply: string; saved: { deliverableId: string; n: number; title: string } | null };
+/* §684 — `log`: the chat in time — every draft asked for and its answer, in
+   order, marked with the item it was about. */
+export type Exec = { period: Period | null; items: Item[]; cursor: number; reply: string; log: { k: number; w: "me" | "ai"; t: string }[]; saved: { deliverableId: string; n: number; title: string } | null };
+export const MAX_EX_LOG = 300;
 
 /* ── THE PERIOD ─────────────────────────────────────────────────────── */
 export const quarterOf = (m: number) => Math.ceil(m / 3);
@@ -60,7 +63,7 @@ export function periodChoices(today: Date) {
   return { full, rest };
 }
 
-export const newExec = (items: Item[]): Exec => ({ period: null, items, cursor: 0, reply: "", saved: null });
+export const newExec = (items: Item[]): Exec => ({ period: null, items, cursor: 0, reply: "", log: [], saved: null });
 
 const cleanQs = (v: unknown, allowed: number[]) =>
   [...new Set((Array.isArray(v) ? v : []).map(Number).filter((q) => allowed.includes(q)))].sort();
@@ -101,6 +104,7 @@ export function storedExec(raw: unknown): Exec | null {
   const qs = periodQuarters(period);
   const s: Exec = {
     period, cursor: Math.max(0, Number(j.cursor) || 0), reply: str(j.reply).slice(0, 1200),
+    log: (Array.isArray(j.log) ? j.log : []).map((x: any) => ({ k: Math.max(-1, Number(x && x.k) || 0), w: x && x.w === "ai" ? "ai" as const : "me" as const, t: str(x && x.t).slice(0, 1200) })).filter((x: any) => x.t).slice(-MAX_EX_LOG),
     items: (Array.isArray(j.items) ? j.items : []).map((x: any) => cleanItem(x, qs)).filter((i: Item) => i.title).slice(0, MAX_ITEMS),
     saved: j.saved && j.saved.deliverableId ? { deliverableId: str(j.saved.deliverableId), n: Number(j.saved.n) || 0, title: oneLine(j.saved.title) } : null,
   };
@@ -176,6 +180,13 @@ export function execText(s: Exec): string {
     it.tactics.forEach((t) => out.push("  Tactic: " + t.name + (t.owner ? " · " + t.owner : "") + (t.quarters.length ? " · " + t.quarters.map((q) => "Q" + q).join(" ") : "")));
   }
   return out.join("\n");
+}
+/* §684 — the version the pane's head names before the save (the SWOT's shape). */
+export async function nextExecVersion(c: Q, chat: { place: string; section: string }, placeWord: string): Promise<number> {
+  const r = await c.query(
+    "SELECT coalesce(max(v.n), 0) + 1 AS n FROM copilot_deliverables d LEFT JOIN copilot_versions v ON v.deliverable_id = d.id " +
+    "WHERE d.place = $1 AND d.section = $2 AND lower(d.title) = lower($3)", [chat.place, chat.section, execTitle(placeWord)]);
+  return Number(r.rows[0]?.n) || 1;
 }
 export const execTitle = (placeWord: string) => ("Execution — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
 export async function saveExec(c: Q, chat: { id: string; place: string; title: string }, s: Exec, placeWord: string, by: string) {

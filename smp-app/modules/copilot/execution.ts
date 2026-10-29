@@ -12,6 +12,7 @@ import {
   type Exec, MAX_ITEMS, COMPILES, MONTHS, newExec, cleanItem, sanitizeExec, storedExec, execOf, writeExec, withPeriod,
   validPeriod, periodChoices, periodQuarters, periodWords, periodLength, todoOf, doneCount, finishBlocker,
   execInstruction, DRAFT_SCHEMA, draftQuestion, saveExec,
+  nextExecVersion, MAX_EX_LOG,
 } from "../../lib/copilot-execution.ts";
 
 type Out = { status: number; body: Record<string, unknown> };
@@ -30,13 +31,14 @@ async function appliedOf(c: any, id: string): Promise<{ n: number; at: string; b
   const a = r.rows[0] && r.rows[0].a;
   return a && typeof a === "object" && Number(a.n) > 0 ? { n: Number(a.n), at: String(a.at || ""), by: String(a.by || "") } : null;
 }
-export async function execView(c: any, chat: { id: string }) {
+export async function execView(c: any, chat: { id: string; place?: string; section?: string }, pw?: string) {
   const s = await execOf(c, chat.id);
   if (!s) return {};
   const todo = todoOf(s);
   const applied = s.saved && s.saved.deliverableId ? await appliedOf(c, s.saved.deliverableId) : null;
   const ch = periodChoices(new Date());
   return { exec: s, execApplied: applied, execTodo: todo, execDone: doneCount(todo), execBlocker: finishBlocker(s),
+    execNextVersion: await nextExecVersion(c, chat as any, pw || chat.place || ""),
     execWords: { quarters: periodQuarters(s.period), period: s.period ? periodWords(s.period) : "", length: s.period ? periodLength(s.period) : 0,
       compiles: COMPILES, months: MONTHS, choices: { full: ch.full, fullWord: periodWords(ch.full), rest: ch.rest, restWord: periodWords(ch.rest) } } };
 }
@@ -64,7 +66,7 @@ export async function execAct(c: any, b: any, who: Who): Promise<Out> {
       .filter((i: any) => i.title).slice(0, MAX_ITEMS);
     const chat = await newChat(c, { place, section: "execution", title: oneLine(b.title).slice(0, MAX_TITLE) || "Execution", by });
     await writeExec(c, chat.id, newExec(items));
-    return out(200, { ok: true, chat: { ...chat, exec: true }, ...(await execView(c, chat)) });
+    return out(200, { ok: true, chat: { ...chat, exec: true }, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   const id = String(b.id || "");
   if (!UUID.test(id)) return refused(400, "Which chat?");
@@ -80,11 +82,11 @@ export async function execAct(c: any, b: any, who: Who): Promise<Out> {
     const p = b.choice === "full" ? ch.full : b.choice === "rest" ? ch.rest : validPeriod(b.period);
     if (!p) return refused(400, "A plan period is months in ONE year, the first before the last.");
     await writeExec(c, id, withPeriod(stored, p));
-    return out(200, { ok: true, ...(await execView(c, chat)) });
+    return out(200, { ok: true, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   if (kind === "execSave") {
     await writeExec(c, id, sanitizeExec(b.exec, stored));
-    return out(200, { ok: true, ...(await execView(c, chat)) });
+    return out(200, { ok: true, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   if (kind === "execFinish") {
     const why = finishBlocker(stored);
@@ -92,7 +94,7 @@ export async function execAct(c: any, b: any, who: Who): Promise<Out> {
     const r = await saveExec(c, chat, stored, oneLine(b.placeWord).slice(0, 120) || chat.place, by);
     const s: Exec = { ...stored, saved: { deliverableId: r.deliverableId, n: r.n, title: r.title } };
     await writeExec(c, id, s);
-    return out(200, { ok: true, saved: s.saved, ...(await execView(c, chat)) });
+    return out(200, { ok: true, saved: s.saved, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   return refused(400, "Not something the Copilot does.");
 }
@@ -141,7 +143,12 @@ export async function execAsk(tenantId: string, b: any, _who: Who): Promise<Out>
     const got = cleanItem({ ...now.items[k], measures: j.measures, tactics: j.tactics }, periodQuarters(now.period));
     if (!got.measures.length && !got.tactics.length) return refused(503, failedLine("the answer had nothing in it"));
     const items = now.items.map((x, i) => (i === k ? { ...x, measures: got.measures, tactics: got.tactics, drafted: true } : x));
-    await writeExec(c, id, { ...now, items, reply: String(j.reply ?? "").trim().slice(0, 1200) });
-    return out(200, { ok: true, ...(await execView(c, chat)) });
+    const reply = String(j.reply ?? "").trim().slice(0, 1200);
+    /* §684 — the chat in time: what was asked (a draft, or a change in words) and what came back, on the item it was about */
+    const said = oneLine(b.said).slice(0, 200);
+    const log = [...now.log, ...(b.quiet ? [] : [{ k, w: "me" as const, t: ask || said || "Draft " + now.items[k].title }]),
+      { k, w: "ai" as const, t: (reply || "Drafted.") + " — " + got.measures.length + (got.measures.length === 1 ? " measure" : " measures") + ", " + got.tactics.length + (got.tactics.length === 1 ? " tactic" : " tactics") + ", on the right." }].slice(-MAX_EX_LOG);
+    await writeExec(c, id, { ...now, items, reply, log });
+    return out(200, { ok: true, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   });
 }

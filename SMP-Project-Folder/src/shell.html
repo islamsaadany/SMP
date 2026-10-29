@@ -10926,20 +10926,26 @@
         paint();
       });
     });
-    document.querySelectorAll("[data-clauseadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var t = b.dataset.clauseadd;
-        /* §212: a function's page is gated on the FUNCTION's key. Gating an
-           `fn:` target on `u_found` is §211's fault exactly, and here it fails
-           CLOSED — the button renders and the click returns silently. */
-        var tr = boxRef(t), isCo = tr.kind === "mid";
-        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
-        if (!o || !Array.isArray(o.clauses)) return;
-        o.clauses.push(["", ""]);
+    /* §685: WHO WE ARE IS ONE BOX — its lines are read back on blur and
+       written over the stored ones in place, so a unit's line keeps its row
+       and is renumbered as Add used to (§96). */
+    document.querySelectorAll("[data-clausebox]").forEach(function(box){
+      var t = box.dataset.clausebox;
+      /* §212: a function's page is gated on the FUNCTION's key. Gating an
+         `fn:` target on `u_found` is §211's fault exactly, and here it fails
+         CLOSED — the box is drawn and cannot be typed in. */
+      var tr = boxRef(t), isCo = tr.kind === "mid";
+      var o = mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)
+        ? (t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t)) : null;
+      if (!o || !Array.isArray(o.clauses)) { box.contentEditable = "false"; return; }
+      CLAUSEBOX.wire(box, function(rows){
+        rows.forEach(function(l, i){
+          if (o.clauses[i]) { o.clauses[i][0] = l[0]; o.clauses[i][1] = l[1]; }
+          else o.clauses.push([l[0], l[1]]);
+        });
+        o.clauses.length = rows.length;
         if (o.ukey) renumberUnit(o);
-        fieldSaved(); paint();
+        fieldSaved();
       });
     });
     /* §478: a unit's Core Values — add and remove, re-asked on the click
@@ -11019,20 +11025,6 @@
         if (!how) return;
         o.values.splice(i, 1);
         unitValuesTouch(o, how);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-clauserm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        var tr = boxRef(t), isCo = tr.kind === "mid";
-        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
-        if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
-        if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
-            rmAsk(b, "clauserm", b.dataset.clauserm, "Remove this line?")) return;
-        o.clauses.splice(i, 1);
-        if (o.ukey) renumberUnit(o);
         fieldSaved(); paint();
       });
     });

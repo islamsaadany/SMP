@@ -119,7 +119,7 @@ li.done .pill{color:var(--good);border-color:var(--good)}
 (function(){
   var ITEMS = [["Digital & Data-Driven Operations", "direction"], ["Channel Preference & Development", "direction"], ["Portfolio & Value Chain Expansion", "direction"], ["Upper Egypt", "direction"], ["Own label", "direction"], ["Data-led stock", "capability"]];
   var OWNERS = ["—", "Commercial", "Operations", "Finance", "Amaka Eze", "Mohamed Essam"];
-  var DRAFTS = { "Digital & Data-Driven Operations": [["Orders through the app", "35%"], ["App release cadence", "Monthly", "Operations", [4]]], "Channel Preference & Development": [["Share of sales by channel", "Online 25%"], ["Channel review", "Commercial", [4]]],
+  var DRAFTS = { "Digital & Data-Driven Operations": [["Orders through the app", "35%"], ["App release cadence", "Operations", [4]]], "Channel Preference & Development": [["Share of sales by channel", "Online 25%"], ["Channel review", "Commercial", [4]]],
     "Portfolio & Value Chain Expansion": [["New categories live", "2"], ["Category launch plan", "Commercial", [4]]], "Upper Egypt": [["Stores open in Upper Egypt", "6"], ["Regional roll-out wave 1", "Operations", [4]]], "Own label": [["Own-label share", "8%"], ["Own-label launch", "Commercial", [4]]], "Data-led stock": [["Stock-out rate", "under 3%"], ["Stock dashboard", "Operations", [4]]] };
   var S, E = function(x){ return String(x).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   function fresh(){ S = { period: null, items: ITEMS.map(function(x){ return { t: x[0], kind: x[1], measures: [], tactics: [], drafted: false, log: [] }; }), cur: -1, log: [], saved: null, applied: false }; draw(); }
@@ -186,10 +186,11 @@ li.done .pill{color:var(--good);border-color:var(--good)}
   }
   function held(b, why){ if (why) { b.setAttribute("aria-disabled", "true"); b.setAttribute("data-tip", why); } else { b.removeAttribute("aria-disabled"); b.removeAttribute("data-tip"); } }
   function draftOne(k, quiet){
-    var it = S.items[k], d = DRAFTS[it.t], qs = qsIn();
-    it.measures = [{ name: d[0][0], target: d[0][1] }]; it.tactics = [{ name: d[1][0], owner: d[1][1], quarters: d[1][2].filter(function(q){ return qs.indexOf(q) >= 0; }) }]; it.drafted = true; S.cur = k;
+    var it = S.items[k], d = DRAFTS[it.t] || [["New measure", ""], ["New tactic", "—", [4]]], qs = qsIn();
+    var wantQ = Array.isArray(d[1][2]) ? d[1][2] : [4];
+    it.measures = [{ name: d[0][0], target: d[0][1] }]; it.tactics = [{ name: d[1][0], owner: d[1][1], quarters: wantQ.filter(function(q){ return qs.indexOf(q) >= 0; }) }]; it.drafted = true; S.cur = k;
     if (!quiet) { S.log.push({ w: "me", t: "Draft " + it.t }); }
-    S.log.push({ w: "ai", t: "<b>" + E(it.t) + "</b> — drafted from the " + it.kind + ": 1 measure, 1 tactic" + (d[1][2].length > it.tactics[0].quarters.length ? " (Q1 left out: outside the period)" : "") + ", on the right." });
+    S.log.push({ w: "ai", t: "<b>" + E(it.t) + "</b> — drafted from the " + it.kind + ": 1 measure, 1 tactic" + (wantQ.length > it.tactics[0].quarters.length ? " (a quarter left out: outside the period)" : "") + ", on the right." });
   }
   document.addEventListener("click", function(ev){
     if (ev.target.closest("[aria-disabled='true']")) { ev.preventDefault(); return; }

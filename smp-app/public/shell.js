@@ -55963,8 +55963,8 @@ var READING = (function () {
   }
 
   /* FOUNDATION, AS ISLAM READS IT (§680): who we are on the left; on the
-     right the vision (the aspiration, with its end in mind under it) and the
-     mission (the purpose), each in the layer's own words for them; under
+     right the vision (the aspiration), the end in mind and the mission (the
+     purpose), each a card in the layer's own word for it; under
      them the key objectives and the core values. Each block only where
      Structure carries it (compOn). */
   function foundation(key) {
@@ -55973,10 +55973,11 @@ var READING = (function () {
     var cl = Array.isArray(o.clauses) ? o.clauses : [];
     var who = on("brief") && cl.length ? '<div class="rcard"><h3>' + L("brief") + '</h3><div class="rclauses">' +
       cl.map(function (c) { return '<b>' + esc(c[0] || "") + '</b><span>' + esc(c[1] || "") + '</span>'; }).join("") + '</div></div>' : "";
-    var vision = on("aspiration") && (asp || end) ? '<div class="rcard"><h3>' + L1("aspiration") + '</h3>' +
-      (asp ? '<p class="rasp">' + esc(asp) + '</p>' : '') + (end ? '<p class="rmis">' + esc(end) + '</p>' : '') + '</div>' : "";
+    var vision = on("aspiration") && asp ? '<div class="rcard"><h3>' + L1("aspiration") + '</h3><p class="rasp">' + esc(asp) + '</p></div>' : "";
+    /* the end in mind is its own card under the layer's own word for it — "Moto" at El Abd — not a line under the vision (Islam, 2026-10-29) */
+    var endin = on("aspiration") && end ? '<div class="rcard"><h3>' + L1("endinmind") + '</h3><p class="rmis">' + esc(end) + '</p></div>' : "";
     var mission = on("purpose") && mis ? '<div class="rcard"><h3>' + L1("purpose") + '</h3><p class="rmis">' + esc(mis) + '</p></div>' : "";
-    var right = vision + mission;
+    var right = vision + endin + mission;
     if (who || right) out += '<div class="rtwo">' + (who || '') + (right ? '<div class="rcol">' + right + '</div>' : '') + '</div>';
     if (on("keyobj") && SMPRules.shown(o.keyObjectives || []).length) {
       var kw = L1("keyobj");

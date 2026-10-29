@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-29 — The reading window: the end in mind is a card of its own (§681), on the branch.** It was a line under the vision; it is a card between the vision and the mission, under the layer's own word for it (Moto at El Abd). Checked on the worked example.
+**2026-10-29 — The reading window: the end in mind is a card of its own (§681), merged to `main` on Islam's word.** It was a line under the vision; it is a card between the vision and the mission, under the layer's own word for it (Moto at El Abd). Checked on the worked example.
 
 **2026-10-29 — The reading window: no explainer lines, and Foundation laid out as Islam reads it (§680), merged to `main` on Islam's word.** The sentence each tab opened with is gone; Foundation now reads who we are on the left, vision and mission on the right, key objectives and core values below. Checked on the worked example.
 

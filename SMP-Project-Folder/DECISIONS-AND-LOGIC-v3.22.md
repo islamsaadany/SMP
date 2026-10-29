@@ -70481,3 +70481,5 @@ And the aspiration in the mission's own type — same size, same weight, same in
 Islam, of El Abd's Foundation in the window: *"why isn't the moto appearing on its own rather appearing as part of the vision sometimes it's called end in mind"*. §680 had set the end in mind as a line under the vision in the vision's card. It is a thing of its own with a word of its own in each layer (`L1("endinmind")`: *End in mind* by default, *Moto* at El Abd), so it is now a card of its own on the right, between the vision and the mission, in the same type as both. Drawn only where there is one, as before.
 
 **Checked**: the frozen shell built whole on the worked example — Mobile's Foundation shows Winning aspiration, End in mind and Mission as three cards; the group's, which has no end in mind, two; no error.
+
+**§681 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge then work on the following"*).** A fast-forward: `main` had not moved since §680. No migrations, nobody signed out.

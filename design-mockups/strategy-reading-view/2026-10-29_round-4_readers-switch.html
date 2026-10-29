@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where the readers' switch sits</title>
+<!-- Islam, 2026-10-29, of §684's switch on the Structure step: "what a poor
+     place to set the button! show me". Where it sits, why that is wrong, and
+     three places it could sit instead. The control at the top right shows it
+     all in the other theme. -->
+<style>
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;--zebra:#F4F6F9;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-ink:#FFFFFF;--navy-quiet:#B7C4D8;--navy-rule:rgba(255,255,255,.14);--gold:#C9A24D;--gold-deep:#8A6B22;--good:#2E7D5B;--good-bg:#E4F0EA;--bad:#B04434;--bad-bg:#F7E3E0;--sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--zebra:#212630;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#0E1014;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--navy-rule:rgba(255,255,255,.12);--gold:#D9B665;--gold-deep:#C9A24D;--good:#5FB68C;--good-bg:#1B3129;--bad:#D97066;--bad-bg:#33201E;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px;display:grid;gap:32px}
+.head{display:flex;align-items:flex-start;gap:16px}.head>div{flex:1}
+h1{margin:0;font-size:22px;font-weight:700;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:76ch}
+.pgtheme{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--ink-2);font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.pgtheme svg{width:14px;height:14px}
+section{display:grid;gap:10px}
+.ph2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ph2 .n{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep);letter-spacing:.1em}
+h2{margin:0;font-size:16px;font-weight:700}.ph2 p{margin:0;color:var(--ink-3);font-size:13.5px}
+.cap{font-size:13.5px;color:var(--ink-2);margin:0;max-width:80ch}.cap b{color:var(--ink);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+.bad{outline:2px dashed var(--bad);outline-offset:3px;border-radius:6px}
+/* the platform's white bar + setup page */
+.stop{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 20px;min-height:40px;font-size:13.5px}
+.stop .trff{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--ink-2)}.stop .sep{color:var(--ink-3)}.stop .st{font-weight:600}.stop .st.q{color:var(--ink-2)}.stop .sp{flex:1}
+.stop .ring{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}.stop .ring svg{width:14px;height:14px}
+.stop .out,.stop .read{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.stop .read{color:var(--navy);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--surface))}
+:root[data-theme="dark"] .stop .read{color:var(--gold)}
+.page{display:grid;grid-template-columns:220px 1fr;min-height:360px}
+.rail{background:var(--surface);border-right:1px solid var(--line);padding:14px 10px;font-size:13.5px}
+.rail .g{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:8px 10px 4px}
+.rail .r{padding:7px 10px;border-radius:7px;color:var(--ink-2)}.rail .r.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.main{padding:18px 22px}
+.ptitle{display:flex;align-items:baseline;gap:12px;margin:0 0 12px}.ptitle h3{margin:0;font-size:19px;font-weight:700}.ptitle span{font-size:13px;color:var(--ink-3)}
+.row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:0 0 14px;font-size:13.5px}
+.row b{font-weight:600}.row .sp{flex:1}.row .why{color:var(--ink-3);font-size:12.5px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg span{padding:4px 12px;font-size:12.5px;font-weight:600;color:var(--ink-2)}.seg span.on{background:var(--navy);color:var(--navy-ink)}
+table.mx{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--surface);border:1px solid var(--line)}
+table.mx th{background:var(--navy);color:var(--navy-ink);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;text-align:left}
+table.mx td{padding:7px 10px;border-bottom:1px solid var(--line-soft);color:var(--ink-2)}table.mx tr:nth-child(even) td{background:var(--zebra)}
+table.mx td.c{text-align:center;font-weight:700;color:var(--ink)}
+/* the shape page */
+.tree{background:var(--surface);border-right:1px solid var(--line);padding:14px;font-size:13px}
+.tree .lv{padding:6px 8px;border-radius:7px;color:var(--ink-2)}.tree .lv.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.tree .bx{padding:4px 8px 4px 24px;color:var(--ink-3)}
+.stcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:0 0 12px;overflow:hidden}
+.stcard .hd{display:flex;align-items:center;gap:10px;background:var(--surface-2);padding:9px 14px;font-weight:700;font-size:13.5px}
+.stcard .hd .sp{flex:1}.stcard .bd{padding:12px 14px;font-size:13px;color:var(--ink-2)}
+.stcard .bd .ln{display:flex;gap:10px;align-items:center;margin:0 0 8px}.stcard .bd .ln span.l{color:var(--ink-3);min-width:110px}
+.sel{border:1px solid var(--line);border-radius:6px;padding:3px 24px 3px 8px;background:var(--surface);color:var(--ink);font-size:12.5px;display:inline-block}
+/* the reading window strip */
+.rwtop{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:14px;padding:0 22px;min-height:52px}
+.rwtop .mark{width:26px;height:26px;border-radius:7px;background:var(--gold);color:#16325C;display:grid;place-items:center}.rwtop .mark svg{width:18px;height:18px}
+.rwtop .co{font-size:14px;font-weight:600}.rwtop .pick{border:1px solid var(--navy-rule);border-radius:7px;padding:5px 10px;font-size:13.5px;font-weight:600;background:rgba(255,255,255,.06)}
+.rwtop .sp{flex:1}.rwtop .asof{font-size:12px;color:var(--navy-quiet)}
+.rwtop .ex,.rwtop .off{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--navy-quiet);border:1px solid var(--navy-rule);border-radius:999px;padding:4px 12px}
+.rwtop .off{display:inline-flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12.5px}
+.rwtop .off i{font-style:normal;width:26px;height:14px;border-radius:999px;background:rgba(255,255,255,.18);position:relative}.rwtop .off i::after{content:"";position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.rwtabs{display:flex;gap:2px;padding:0 22px;background:var(--navy);border-bottom:3px solid var(--gold)}.rwtabs span{padding:10px 14px 9px;font-size:13.5px;font-weight:600;color:var(--navy-quiet);border-radius:8px 8px 0 0}.rwtabs span.on{background:var(--ground);color:var(--ink)}
+.rwbody{padding:18px 22px;display:grid;gap:8px}.rwbody .ph{height:10px;border-radius:5px;background:var(--surface-2);width:60%}.rwbody .ph.s{width:35%}
+/* the console's client settings */
+.cs{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.cs h3{margin:0 0 4px;font-size:15px}.cs p{margin:0 0 12px;color:var(--ink-3);font-size:13px}
+.cs .ln{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line-soft);font-size:13.5px}.cs .ln .sp{flex:1}.cs .ln .why{color:var(--ink-3);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Where the readers' switch sits</h1>
+      <p class="lede">The switch says where a reader's seat lands at sign-in: in the reading window, or on the workbench. §684 put it on the Structure step as a card of its own. That was the wrong page — and worse, that step now draws one layer's panel at a time, so the card is never drawn at all. Three places it belongs, below, with my pick first.</p>
+    </div>
+    <button class="pgtheme" id="pgtheme" type="button"></button>
+  </div>
+
+  <section>
+    <div class="ph2"><span class="n">00</span><h2>Where it was put, and why it is wrong</h2><p>a "Reading window" card on the Structure step</p></div>
+    <div class="frame"><div class="stop"><span class="trff">Forefront</span><span class="sep">›</span><span class="st q">ElAbd ▾</span><span class="sep">›</span><span class="st">Strategy ▾</span><span class="sp"></span><span class="out">Sign out</span></div>
+      <div class="page"><div class="tree"><div class="lv on">Company</div><div class="bx">Directions · Capabilities</div><div class="lv">Functions</div><div class="bx">Finance · HR · IT …</div></div>
+        <div class="main"><div class="ptitle"><h3>The shape</h3><span>every box the client has, and each one's own answers</span></div>
+          <div class="stcard"><div class="hd">Top level<span class="sp"></span><span class="seg"><span class="on">On</span><span>Off</span></span></div><div class="bd"><div class="ln"><span class="l">plans in</span><span class="sel">Directions ▾</span></div><div class="ln"><span class="l">Directions show as</span><span class="sel">Directions and Capabilities apart ▾</span></div></div></div>
+          <div class="stcard bad"><div class="hd">Reading window<span class="sp"></span><span class="seg"><span class="on">On</span><span>Off</span></span></div><div class="bd">On: a person who may only read the strategy opens in the reading window on sign-in…</div></div>
+        </div></div></div>
+    <p class="cap"><b>Wrong page:</b> the Structure step is about the client's shape — its layers, what each carries, how each plans. Who lands where is not shape; it is access. <b>And not drawn:</b> the step draws one layer's card at a time from the tree on the left, and this card belongs to no layer, so nothing shows it. It is going, whichever place below you pick.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">A</span><h2>Setup › Roles &amp; access, a line above the matrix</h2><p>beside the rules that already say who may do what — my pick</p></div>
+    <div class="frame"><div class="stop"><span class="trff">Forefront</span><span class="sep">›</span><span class="st q">ElAbd ▾</span><span class="sep">›</span><span class="st">Strategy ▾</span><span class="sp"></span><span class="out">Sign out</span></div>
+      <div class="page"><div class="rail"><div class="g">Who</div><div class="r">Forefront team</div><div class="r">Client register</div><div class="g">Access</div><div class="r on">Roles &amp; access</div><div class="r">Landing line</div><div class="g">Shape</div><div class="r">The shape</div><div class="r">Terminology</div></div>
+        <div class="main"><div class="ptitle"><h3>Roles &amp; access</h3><span>what each role may open, fill and edit</span></div>
+          <div class="row flag"><b>Readers land in</b><span class="seg"><span class="on">the reading window</span><span>the workbench</span></span><span class="sp"></span><span class="why">A reader: no unit, function, capability, project or direction of their own, and nothing to edit. Exit is a press away.</span></div>
+          <table class="mx"><tr><th>Role</th><th>Foundation</th><th>Analysis</th><th>Plan</th><th>Reporting</th><th>Setup</th></tr><tr><td>Super user</td><td class="c">Edit</td><td class="c">Edit</td><td class="c">Edit</td><td class="c">Edit</td><td class="c">Edit</td></tr><tr><td>Group CEO</td><td class="c">View</td><td class="c">View</td><td class="c">View</td><td class="c">View</td><td class="c">—</td></tr><tr><td>BU owner</td><td class="c">Edit</td><td class="c">Edit</td><td class="c">Edit</td><td class="c">Fill</td><td class="c">—</td></tr><tr><td>Function head</td><td class="c">Edit</td><td class="c">Edit</td><td class="c">Edit</td><td class="c">Fill</td><td class="c">—</td></tr><tr><td>Contributor</td><td class="c">View</td><td class="c">View</td><td class="c">Fill</td><td class="c">—</td><td class="c">—</td></tr></table>
+        </div></div></div>
+    <p class="cap"><b>For:</b> it is the one page about who sees what, and the matrix under it is exactly what the rule reads to decide who is a reader — a person checking "why did the CEO land in the window" finds the answer on the same screen. Editable by whoever edits the matrix (a Super user), stored on the client's record as the other access settings are. <b>Against:</b> the matrix is the office's page, so a client's own admin never sees the switch — which is also true of the other two.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">B</span><h2>On the reading window's strip, for the office only</h2><p>where the effect is seen; a small switch beside Exit</p></div>
+    <div class="frame"><div class="rwtop"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span><span class="co">ElAbd</span><span class="pick">Company ▾</span><span class="sp"></span><span class="asof">H1 2026</span><span class="off flag">Readers land here <i></i></span><span class="ex">Exit</span></div><div class="rwtabs"><span class="on">Foundation</span><span>Analysis</span><span>Directions</span><span>Capabilities</span><span>Overall performance</span></div><div class="rwbody"><div class="ph"></div><div class="ph s"></div><div class="ph"></div></div></div>
+    <p class="cap"><b>For:</b> you set it where you see what it does, and only the office sees the control — a reader never does. <b>Against:</b> a setting about sign-in hidden inside a window a reader opens; nobody looking for it in Setup finds it, and it is the one control on a strip that otherwise holds nothing but a picker and Exit.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">C</span><h2>The console's Client settings</h2><p>SMP's own page for a client, beside its modules and branding</p></div>
+    <div class="frame"><div class="stop"><span class="trff">Forefront</span><span class="sep">›</span><span class="st">ElAbd ▾</span><span class="sep">›</span><span class="st q">Client settings</span><span class="sp"></span><span class="out">Sign out</span></div>
+      <div class="main"><div class="cs"><h3>Strategy</h3><p>How this client's Strategy module behaves.</p>
+        <div class="ln flag"><b>Readers land in</b><span class="seg"><span class="on">the reading window</span><span>the workbench</span></span><span class="sp"></span><span class="why">A reader: no unit, function, capability, project or direction of their own, and nothing to edit.</span></div>
+        <div class="ln"><b>Theme</b><span class="sel">Forefront ▾</span><span class="sp"></span><span class="why">the palette the client's pages wear</span></div>
+      </div></div></div>
+    <p class="cap"><b>For:</b> a client-level setting on the client-level page, where modules are switched on and branding is set. <b>Against:</b> it is a different surface (the console's, not Strategy's own), stored in a different place from the matrix it depends on, and the office goes there to set up a client, not to tune who lands where.</p>
+  </section>
+</div>
+<script>
+(function(){var pg="light";try{var t=localStorage.getItem("smp.theme");if(t==="light"||t==="dark")pg=t;else if(matchMedia("(prefers-color-scheme: dark)").matches)pg="dark";}catch(e){}
+var SUN='<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>',MOON='<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>';
+function draw(){document.documentElement.setAttribute("data-theme",pg);var b=document.getElementById("pgtheme");b.innerHTML='<svg viewBox="0 0 20 20">'+(pg==="light"?SUN:MOON)+'</svg>'+(pg==="light"?"View in dark":"View in light");}
+document.getElementById("pgtheme").addEventListener("click",function(){pg=pg==="light"?"dark":"light";draw();});draw();})();
+</script>
+</body>
+</html>

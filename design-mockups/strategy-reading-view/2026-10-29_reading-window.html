@@ -107,6 +107,22 @@ h2{margin:0;font-size:16px;font-weight:700}
 .pill{display:grid;gap:8px}
 .pillar{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;display:grid;gap:10px}
 .pillar .ph{display:flex;align-items:baseline;gap:10px}
+/* a direction folded: one line that says the whole of it, and that there is more */
+.dir{padding:0}
+.dir .fold{display:grid;grid-template-columns:auto 1fr auto 150px 22px;gap:14px;align-items:center;padding:13px 18px;cursor:pointer;user-select:none}
+.dir .fold:hover{background:var(--zebra)}
+.dir .fold .code{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep)}
+.dir .fold h3{margin:0;font-size:15px}.dir .fold .sub{display:block;font-size:12.5px;color:var(--ink-3);font-weight:400;margin-top:2px}
+.dir .fold .sum{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.dir .fold .sum b{color:var(--ink-2);font-weight:600}
+.dir .fold .chev{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3);transition:transform .15s}
+.dir .fold .chev svg{width:11px;height:11px}
+.dir.open .fold .chev{transform:rotate(180deg)}
+.dir .more{display:none;padding:0 18px 16px;gap:10px;border-top:1px solid var(--line-soft)}
+.dir.open .more{display:grid;padding-top:12px}
+.dir .fold .bar{width:150px}
+.rowtools{display:flex;align-items:center;gap:14px;font-size:12.5px;color:var(--ink-3)}
+.rowtools span{color:var(--gold-deep);font-weight:600;cursor:pointer}
 .pillar .code{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep)}
 .pillar h3{margin:0;font-size:15px}.pillar .sub{font-size:12.5px;color:var(--ink-3)}
 .obj{display:grid;grid-template-columns:1fr 90px 90px 120px;gap:8px 14px;font-size:13px;align-items:center}
@@ -165,9 +181,9 @@ h2{margin:0;font-size:16px;font-weight:700}
   </section>
 
   <section>
-    <div class="ph2"><span class="n">03</span><h2>The window on a unit: Directions</h2><p>Mobile's directions, each with its measures and the tactics that deliver it</p></div>
+    <div class="ph2"><span class="n">03</span><h2>The window on a unit: Directions</h2><p>Mobile's directions folded to one line each; a press opens the measures and the tactics</p></div>
     <div class="frame" id="w2"></div>
-    <p class="cap">A direction is a card: its code and name, its end-state, then its <b>measures</b> with target, actual and a bar in the band's colour, then the <b>tactics</b> that deliver it with owner, quarters and status. One card says the whole of a direction, which is how the approach reads it; there is no Plan tab. No weights, no pens, no ordering.</p>
+    <p class="cap"><b>Folded by default</b>, so the tab opens as the overall view: each direction on one line — code, name, end-state, how many measures and tactics it holds, and its standing as a figure and a bar — with a chevron that says there is more. A press opens it (try it above): its <b>measures</b> with target, actual and standing, then the <b>tactics</b> that deliver it with owner, quarters and status. Open all and Close all for a reader who wants everything. One card says the whole of a direction, which is how the approach reads it; there is no Plan tab. No weights, no pens, no ordering.</p>
   </section>
 
   <section>
@@ -227,13 +243,20 @@ h2{margin:0;font-size:16px;font-weight:700}
     return '<div class="tac"><span class="h">Tactic</span><span class="h">Owner</span><span class="h">Quarters</span><span class="h">Status</span>' +
       rows.map(function (r) { return '<span>' + r[0] + '</span><span class="ow">' + r[1] + '</span><span class="q">' + r[2].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span><span class="st">' + r[3] + '</span>'; }).join("") + '</div>';
   }
+  var CHEV = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>';
+  /* A direction, folded by default (Islam, round 3): one line with its code,
+     name and end-state, how many measures and tactics it holds, and its
+     standing — the overall view. The chevron says there is more; a press
+     opens the measures and the tactics under it. */
   function pillar(code, name, sub, objs, tacs) {
-    return '<div class="pillar"><div class="ph"><span class="code">' + code + '</span><h3>' + name + '</h3>' + (sub ? '<span class="sub">' + sub + '</span>' : '') + '</div>' +
-      '<p class="k" style="margin:2px 0 0">Measures</p><div class="obj"><span class="h">Measure</span><span class="h" style="text-align:right">Target 2026</span><span class="h" style="text-align:right">Actual</span><span class="h">Standing</span>' +
+    var avg = Math.round(objs.reduce(function (a, o) { return a + Math.min(100, o[3]); }, 0) / objs.length);
+    return '<div class="pillar dir" data-dir><div class="fold" tabindex="0" role="button" aria-expanded="false"><span class="code">' + code + '</span><h3>' + name + (sub ? '<span class="sub">' + sub + '</span>' : '') + '</h3>' +
+      '<span class="sum"><b>' + objs.length + '</b> measures · <b>' + (tacs ? tacs.length : 0) + '</b> tactics · <b>' + avg + '%</b></span>' + bar(avg) + '<span class="chev">' + CHEV + '</span></div>' +
+      '<div class="more"><p class="k" style="margin:2px 0 0">Measures</p><div class="obj"><span class="h">Measure</span><span class="h" style="text-align:right">Target 2026</span><span class="h" style="text-align:right">Actual</span><span class="h">Standing</span>' +
       objs.map(function (o) { return '<span class="nm">' + o[0] + '</span><span class="n">' + o[1] + '</span><span class="n">' + o[2] + '</span>' + bar(o[3]); }).join("") + '</div>' +
-      (tacs ? '<p class="k" style="margin:6px 0 0">Tactics</p>' + tacRows(tacs) : '') + '</div>';
+      (tacs ? '<p class="k" style="margin:6px 0 0">Tactics</p>' + tacRows(tacs) : '') + '</div></div>';
   }
-  document.getElementById("w2").innerHTML = '<div class="rw">' + top("Mobile") + tabs("Directions") + '<div class="rwbody">' + why("Directions") + '<div class="pill">' +
+  document.getElementById("w2").innerHTML = '<div class="rw">' + top("Mobile") + tabs("Directions") + '<div class="rwbody">' + why("Directions") + '<div class="rowtools">Three directions, folded — press one to open it. <span data-all="open">Open all</span><span data-all="close">Close all</span></div><div class="pill">' +
     pillar("01", "Digital & Data-Driven Operations", "End-state: a unified market intelligence engine", [["Orders processed digitally", "90%", "48%", 53], ["Data duplicate rate", "≤ 1%", "1.4%", 71], ["App coverage rate", "50%", "22%", 44], ["Dependency on automated reports", "90%", "58%", 64]],
       [["Clean and standardize customer and SKU base", "Ramy Behairy", [0, 1, 1, 0], "WIP"], ["End-to-end order-to-cash digitization", "Mohamed Rizk", [0, 1, 1, 0], "WIP"], ["Digitize sales reporting via Power BI", "Ramy Behairy", [0, 1, 1, 0], "WIP"], ["Scale Mobile Digital App across merchants", "Ashraf Laithy", [0, 1, 1, 1], "WIP"]]) +
     pillar("02", "Channel Preference & Development", "", [["Average delivery time", "≤ 24 h", "31 h", 77], ["Key retailer revenue growth", "50%", "24%", 48], ["Tier 2 merchants enrolled", "100", "58", 58], ["Tier 2 segment revenue growth", "100%", "62%", 62]],
@@ -258,6 +281,13 @@ h2{margin:0;font-size:16px;font-weight:700}
   document.getElementById("oa").innerHTML = '<div class="rw" style="min-height:0">' + top("Company") + tabs("Foundation") + '<div class="rwbody"><div class="ph"></div><div class="ph s"></div><div class="ph"></div></div></div>';
   document.getElementById("ob").innerHTML = '<div class="addr">Address <span>smp.forefront.consulting/raya/strategy/read</span></div><div class="rw" style="min-height:0">' + top("Company", "addr") + tabs("Foundation") + '<div class="rwbody"><div class="ph"></div><div class="ph s"></div><div class="ph"></div></div></div>';
 
+  document.addEventListener("click", function (e) {
+    var f = e.target.closest(".dir .fold");
+    if (f) { var d = f.parentNode, on = d.classList.toggle("open"); f.setAttribute("aria-expanded", String(on)); return; }
+    var a = e.target.closest("[data-all]");
+    if (a) document.querySelectorAll(".dir").forEach(function (d) { d.classList.toggle("open", a.getAttribute("data-all") === "open"); d.querySelector(".fold").setAttribute("aria-expanded", String(a.getAttribute("data-all") === "open")); });
+  });
+  document.addEventListener("keydown", function (e) { if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("fold")) { e.preventDefault(); e.target.click(); } });
   function draw() {
     document.documentElement.setAttribute("data-theme", pg);
     var b = document.getElementById("pgtheme");

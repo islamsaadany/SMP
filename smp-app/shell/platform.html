@@ -9,6 +9,11 @@
      same file the door and the client platforms use -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+<!-- Light or dark, applied before the first paint, by the same script and
+     the same stored key as the client platforms (theme.js, §27): the choice
+     made on any screen of the product holds on this one. The switch itself
+     sits at the foot of the column, by Sign out. -->
+<script src="/theme.js"></script>
 <!--
   FOREFRONT'S OWN PLATFORM (spec 042, revision 2 — Islam, 2026-08-29:
   "the page you are showing should be just for login ... and the rest should be
@@ -163,6 +168,9 @@
     border:0; border-radius:7px; background:transparent; color:var(--sb-quiet); cursor:pointer }
   .sbbtn:hover{ background:var(--sb-wash); color:var(--sb-ink) }
   .sbbtn:focus-visible{ outline:2px solid var(--sb-mark); outline-offset:1px }
+  .sbbtn[hidden]{ display:none }
+  .sbfoot .sbbtn + .sbbtn{ margin-left:0 }
+  .sbfoot .sbbtn .themesvg{ width:15px; height:15px }
   .sbbtn svg{ width:16px; height:16px }
   #sbclose{ display:none }
 
@@ -1961,6 +1969,9 @@
   <div class="sbfoot">
     <span class="sbav" id="sbav" aria-hidden="true"></span>
     <span id="who"></span>
+    <!-- Light and Dark, each viewer's own: hidden until THEME.wire() draws
+         its mark and names the state (theme.js). -->
+    <button class="sbbtn" id="themebtn" type="button" hidden></button>
     <button class="sbbtn" id="signout" type="button" aria-label="Sign out" data-tip="Sign out"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/></svg></button>
   </div>
 </aside>

@@ -116,7 +116,8 @@ interface Screen { isExtended: boolean; }
 ` + DOM;
 /* The console loads the debrief splitter, a module to the checker for the
    library files' reason, and nothing else of the frozen product's but the
-   set-up flow — whose strategy-page names it does NOT have (§594). */
+   set-up flow — whose strategy-page names it does NOT have (§594) — and
+   theme.js (§669), read as the script it is, so THEME is a name of the page. */
 const CONSOLE_GLOBALS = CLOSER + `type Closed<T> = { [K in keyof T]: T[K] };
 declare var MemorySplit: Closed<typeof import("./memory-split.js")>;
 declare var CaseSplit: Closed<typeof import("./case-split.js")>;
@@ -265,7 +266,7 @@ function assembleStrategy() {
    press drawing (lib/navskel.ts), one closed function that names nothing of
    the console's and that the console names nothing of — the same script
    every client page loads — so it is not part of the console's page. */
-const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/case-split.js": join(APP, "lib", "case-split.cjs"),
+const CONSOLE_SRC = { "/theme.js": join(SRC, "theme.js"), "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/case-split.js": join(APP, "lib", "case-split.cjs"),
                       "/client-setup.js": join(SRC, "client-setup.js"), "/navskel.js": null };
 function assembleConsole() {
   const dir = mkdtempSync(join(tmpdir(), "console-types-"));

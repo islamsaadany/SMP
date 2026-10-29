@@ -13,7 +13,10 @@
 
    A MODE, NOT A PAGE, as Presentation mode is (present.js): it takes the
    whole window, the chrome disappears, Exit and Escape return the reader to
-   exactly where they were. And NOTHING NEW IS COMPUTED (welcome.js's rule,
+   exactly where they were. AND AN ADDRESS OF ITS OWN (§689):
+   /<client>/strategy/read, /read/<unit>, /read/<unit>/<tab> — written and
+   read by shell/route.js off the `smp:reading` event this fires, so a link
+   a CEO is sent opens the window on the page it names. And NOTHING NEW IS COMPUTED (welcome.js's rule,
    §53.5): every figure is the same function the workbench's page calls —
    measureScore, pillarPerf, unitObjectives, unitPillars, unitExec and their
    group twins — and every list goes through SMPRules.shown, so the window
@@ -34,6 +37,9 @@ var READING = (function () {
   function recordOf(key) { return isUnit(key) ? UNITS[key] : GROUP; }
   function planOf(key) { return isUnit(key) ? UNITS[key] : topAsUnit(); }
 
+  /* THE TABS' WORDS IN AN ADDRESS (§689): /<client>/strategy/read/<subject>/<word> */
+  var TAB_WORD = { found: "foundation", swot: "analysis", dir: "directions", cap: "capabilities", perf: "performance" };
+  function tabKeyOf(word) { for (var k in TAB_WORD) if (TAB_WORD[k] === word || k === word) return k; return null; }
   var TABS = [
     { k: "found", label: function (key) { return SMPRules.foundTitle(GROUP, key) || "Foundation"; } },
     { k: "swot", label: function (key) { return SMPRules.swotTitle(GROUP, key) || "Analysis"; } },
@@ -211,23 +217,33 @@ var READING = (function () {
     var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false) : tab.k === "cap" ? directions(key, true) : performance(key);
     r.querySelector(".rwbody").innerHTML = body;
     r.querySelector(".rwbody").scrollTop = 0;
+    ST.tab = tab.k;
+    said();
   }
+  /* WHAT THE WINDOW SHOWS, SAID TO WHOEVER LISTENS (§689): shell/route.js
+     writes it into the address and reads an address back into it. */
+  function state() { return { open: isOpen(), target: ST.target, tab: TAB_WORD[ST.tab] || "foundation" }; }
+  function said() {
+    try { document.dispatchEvent(new CustomEvent("smp:reading", { detail: state() })); } catch (e) {}
+  }
+  function isOpen() { var r = root(); return !!(r && r.classList.contains("on")); }
 
-  function open(target) {
+  function open(target, tab) {
     var r = root(); if (!r) return;
     var t = String(target || TARGET || "group");
     ST.target = isUnit(t) ? t : "group";
-    ST.tab = "found";
+    ST.tab = (tab && tabKeyOf(String(tab))) || "found";
     ST.open = {};
-    paint();
     r.classList.add("on");
     document.body.classList.add("reading");
+    paint();
     r.focus();
   }
   function close() {
     var r = root(); if (!r) return;
     r.classList.remove("on");
     document.body.classList.remove("reading");
+    said();
     var b = document.getElementById("readbtn");
     if (b) b.focus();
   }
@@ -318,6 +334,5 @@ var READING = (function () {
     return true;
   }
 
-  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat,
-           isOpen: function () { var r = root(); return !!(r && r.classList.contains("on")); } };
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen };
 })();

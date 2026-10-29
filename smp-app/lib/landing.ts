@@ -25,7 +25,7 @@ export type Door = { target?: string; tab?: string; report?: boolean; setup?: st
    preview is that reader's answer and never a second one (§53.5). */
 export type LandingStamp = { module: ModuleKey; pick: string; lines: { key: string; label: string; example: string; text: string }[] };
 export async function landingStampFor(tenantId: string, module: string, seat: string | null | undefined, personKey: string | null | undefined, stored: unknown,
-                                      /* the route's own connection and graph (§668), so a Setup
+                                      /* the route's own connection and graph (§669), so a Setup
                                          document reads its tenant once; absent, as before */
                                       on?: OnTenant): Promise<LandingStamp | null> {
   if (!isModule(module)) return null;

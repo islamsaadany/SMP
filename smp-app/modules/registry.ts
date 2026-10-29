@@ -63,7 +63,7 @@ export type ServeArgs = {
      what a switcher may list — a module shut to somebody by its address is
      not offered to them either (spec 056 §6.4). */
   have: ModuleKey[];
-  /* THE INSIGHTS TAB'S CATEGORIES, READ BY THE ROUTE (§668) in the one
+  /* THE INSIGHTS TAB'S CATEGORIES, READ BY THE ROUTE (§669) in the one
      transaction it opens per document (lib/library-viewer.ts libraryStampOn,
      the same rule libraryStampFor answers). A module that draws the tab
      takes this rather than asking a second time; `undefined` means the

@@ -47,7 +47,7 @@ export async function viewerFor(tenantId: string, seat: string | null | undefine
   const { placeOf } = await import("./place.ts");
   return { place: await withTenant(tenantId, (c) => placeOf(c, personKey)), seesAll: false };
 }
-/* THE SAME TWO ANSWERS ON A CONNECTION THE REQUEST ALREADY HOLDS (§668):
+/* THE SAME TWO ANSWERS ON A CONNECTION THE REQUEST ALREADY HOLDS (§669):
    the document's route reads its tenant in one transaction, so the place
    and the categories are asked there rather than each opening its own. The
    rules are the functions above, word for word — this only changes which

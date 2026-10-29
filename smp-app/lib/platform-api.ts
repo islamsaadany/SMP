@@ -128,7 +128,7 @@ async function logAct(c: Q, who: Account, on: ClientRow | Tenant | null, what: s
 }
 
 /* What a card says — every number read, never stored (constitution V).
-   ONE TRANSACTION PER CLIENT (§668): this opened three — the counts, then
+   ONE TRANSACTION PER CLIENT (§669): this opened three — the counts, then
    the graph for the module marks, then the library rows — one after the
    other, for every client on the page, and the page waited for them all in
    turn. The same reads, on one connection, in the same order; and the

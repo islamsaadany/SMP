@@ -126,7 +126,7 @@ export async function myWork(clients: Client[], seats: Seat[], email: string, op
   const rows: WorkRow[] = [];
   const tally: Record<string, ClientTally> = {};
   const unanswered: string[] = [];
-  /* a few clients at once rather than one after another (§668); the rows
+  /* a few clients at once rather than one after another (§669); the rows
      keep the clients' order, as the loop they replace kept it */
   const gots = await mapLimit(clients, 4, (t) => openOn(t, email, keyOn.get(t.key) ?? null, today, opts.viewerOn ? opts.viewerOn(t) : null));
   for (let i = 0; i < clients.length; i++) {

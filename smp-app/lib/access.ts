@@ -69,7 +69,7 @@ export function decideOpen(seat: Seat, module: string, graph: unknown, personKey
   return frozen.mayOpen(graph, personKey || "", area);
 }
 
-/* ── WHAT A DOCUMENT READS OF ITS TENANT, ONCE (§668) ──────────────────
+/* ── WHAT A DOCUMENT READS OF ITS TENANT, ONCE (§669) ──────────────────
    The route asked the gate, then the switcher, then the library's stamp,
    and each opened a transaction of its own — the whole graph read TWICE,
    one after the other, before any HTML left. `OnTenant` is one connection

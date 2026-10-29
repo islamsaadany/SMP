@@ -14,7 +14,7 @@ import { appPool } from "./db.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-/* A FEW TENANTS AT ONCE, NEVER ALL AND NEVER ONE BY ONE (§668). The console
+/* A FEW TENANTS AT ONCE, NEVER ALL AND NEVER ONE BY ONE (§669). The console
    walked every client in turn — one transaction after another, so a page
    that reads ten clients waited ten times. This runs `fn` over `items` with
    at most `limit` in flight, keeps the answers in the items' order, and

@@ -31,7 +31,7 @@ export function picksOf(graph: any): Record<string, string> {
   return out;
 }
 
-/* `on` (§668): a connection the caller already holds inside its own
+/* `on` (§669): a connection the caller already holds inside its own
    transaction — the graph (when none is handed in) and the library rows are
    read on it rather than each opening a transaction. Without it, as before.
    The library read is the last statement either way, so a failure there

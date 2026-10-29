@@ -100,7 +100,7 @@ export async function GET(req: Request, { params }: P) {
      address that LED with a module word is gated: the spine's own pages are
      the client's. The switcher and the landing read the same answer
      (openableModules), so a module shut by its address is shut on its row. */
-  /* ── THE TENANT IS READ ONCE PER DOCUMENT (§668) ─────────────────────
+  /* ── THE TENANT IS READ ONCE PER DOCUMENT (§669) ─────────────────────
      Measured before: the gate, the switcher, the Setup stamp and the
      library's categories each opened a transaction of their own, one after
      the other — a client's own person had the whole graph read TWICE, and
@@ -144,7 +144,7 @@ export async function GET(req: Request, { params }: P) {
     /* the module's Landing line page reads its declaration off the document
        (§359.4) — computed here, on the Setup document alone — and its Access
        page the module's declared areas (§359.5), the same way */
-    /* `landing` and `library`: read above, in the document's one transaction (§668) */
+    /* `landing` and `library`: read above, in the document's one transaction (§669) */
     /* WHICH RAIL, STAMPED BY THE SIDE THAT KNOWS (§362, spec 058). `w.module`
        is set only where the module word LED the address, which is exactly the
        difference between a module's own Setup and the client's — the same

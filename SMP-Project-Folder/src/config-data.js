@@ -561,11 +561,15 @@ var NEWCYCLE = null;
    because the two panels answer different questions — NEWCYCLE really is a
    draft, of a cycle that does not exist yet and so has nothing to write to. */
 var CYCLEEDIT = null;
-/* §495: THE PLAN PERIOD HAS ITS OWN PEN on Setup › Planning & reporting
-   cycle, because it is the tenant's and outlives every cycle (§308) — so it
-   is no longer opened by the CYCLE's pen. Same shape as CYCLEEDIT: a mode,
-   nothing held back, the pickers write straight to GROUP. */
-var PLANEDIT = null;
+/* §693: WHICH TAB OF SETUP › PLANNING & REPORTING IS OPEN, and what the
+   board's filter row holds. A mode, like CYCLEEDIT above: nothing here is
+   stored. The filter is applied to the drawn rows in the shell, not by a
+   repaint, so Find keeps its cursor while it is typed in. PLANEDIT (§495)
+   is gone with the second pen — the plan period is edited in the one pen,
+   first, which is §308's own order. */
+var CYCLETAB = "setup";
+var BOARDFILTER = "all";
+var BOARDFIND = "";
 /* §495: HOW MANY TACTICS TICK A QUARTER THE PLAN PERIOD DOES NOT COVER.
    Flagged, never deleted (spec 064 §7): shortening the period must not throw
    away work somebody planned. A tactic's quarter is read in the plan's own

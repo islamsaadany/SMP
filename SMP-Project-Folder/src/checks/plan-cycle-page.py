@@ -57,34 +57,47 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
 
     print("\n── 1 · the page, and the plan period first ──")
+    # REWRITTEN, never loosened (§218), for §693: the page is two tabs, the
+    # set-up first, and its one card carries the plan period as its FIRST
+    # fact with the cycle's facts after it. The period's own Edit (§495) is
+    # gone with the second pen; what survives is the ORDER, and that the
+    # page's one Edit is the card's.
     t = js(pg, "()=>{ const h=document.querySelector('.setuphead'); return h?h.textContent:''; }")
     ok("the page is called Planning & reporting cycle", isinstance(t, str) and "Planning & reporting cycle" in t, t)
-    o = js(pg, """()=>{ const b=document.querySelector('[data-plan-block]'); const c=document.querySelector('[data-editcycle]');
+    tabs = js(pg, """()=>[...document.querySelectorAll('[data-cyctab]')].map(b=>({k:b.getAttribute('data-cyctab'), on:b.classList.contains('on'), t:b.textContent.trim()}))""")
+    ok("two tabs, the set-up first and open",
+       isinstance(tabs, list) and [x.get("k") for x in tabs] == ["setup", "board"] and tabs[0].get("on") is True, tabs)
+    ok("...the second carrying the headline count",
+       isinstance(tabs, list) and len(tabs) == 2 and "/" in tabs[1].get("t", ""), tabs)
+    o = js(pg, """()=>{ const b=document.querySelector('[data-plan-block]'); const c=document.querySelector('[data-fact-cycle]');
       if(!b) return {none:true};
-      return { first: !c || !!(b.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING),
-               edit: !!b.querySelector('[data-editplan]'),
-               unset: /Not set/.test(b.textContent) }; }""")
-    ok("the plan period block is drawn", o.get("none") is not True, o)
-    ok("...before the reporting cycle", o.get("first") is True, o)
-    ok("...with its own Edit", o.get("edit") is True, o)
+      const p=b.querySelector('[data-fact-plan]');
+      return { first: !!p && (!c || !!(p.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING)),
+               edit: !!b.querySelector('[data-editplan]'), oneEdit: b.querySelectorAll('[data-editcycle]').length === 1,
+               unset: /Not set/.test((p||{}).textContent||'') }; }""")
+    ok("the card is drawn", o.get("none") is not True, o)
+    ok("the plan period is its first fact, before the cycle's", o.get("first") is True, o)
+    ok("...with the card's one Edit, and no Edit of its own", o.get("edit") is False and o.get("oneEdit") is True, o)
     ok("with no period it says Not set", o.get("unset") is True, o)
-    ok("and draws no timeline while there is no period",
-       js(pg, "()=>!document.querySelector('[data-plan-timeline]')") is True)
+    # §693: THE TIMELINE DRAWS FOR THE CYCLE TOO, so with no period it is
+    # there — and lights NOTHING as the plan, saying so in its key. Both ends
+    # (§94.2): drawn, and no month wearing the plan's colour.
+    ok("with no period the timeline lights no month as the plan, and says so",
+       js(pg, "()=>{ const t=document.querySelector('[data-plan-timeline]'); return !!t && t.querySelectorAll('.pptl-m.inp').length===0 && /not set/i.test(t.textContent); }") is True)
 
-    print("\n── 2 · Edit opens the period's own pen ──")
-    b = pg.query_selector("[data-editplan]")
+    print("\n── 2 · Edit opens the one pen, the period first in it ──")
+    b = pg.query_selector("[data-editcycle]")
     if b: b.click(); pg.wait_for_timeout(400)
-    pen = js(pg, """()=>{ const p=document.querySelector('[data-plan-block] .planblk-pen');
-      return { open: !!p, pickers: p ? p.querySelectorAll('.monthbtn').length : 0,
-               word: (document.querySelector('[data-editplan]')||{}).textContent || '' }; }""")
-    ok("the pen opens inside the block", pen.get("open") is True, pen)
-    ok("holding the two month pickers", pen.get("pickers") == 2, pen)
-    ok("and the button says Done editing", "Done" in pen.get("word", ""), pen)
-    cb = pg.query_selector("[data-editcycle]")
-    if cb: cb.click(); pg.wait_for_timeout(400)
-    ok("the cycle's pen does not hold the period",
-       js(pg, "()=>{ const c=document.querySelector('.newcycle'); return !c || !c.querySelector('.planper'); }") is True)
-    js(pg, "()=>{ CYCLEEDIT=null; PLANEDIT=null; paint(); }"); pg.wait_for_timeout(250)
+    pen = js(pg, """()=>{ const p=document.querySelector('.newcycle');
+      const per = p && p.querySelector('.planper');
+      return { open: !!p, beside: !!(p && p.closest('.cycwrap.editing')),
+               first: !!per && per === p.querySelector('.cyc2-r'),
+               pickers: per ? per.querySelectorAll('.monthbtn').length : 0,
+               word: (document.querySelector('[data-editcycle]')||{}).textContent || '' }; }""")
+    ok("the pen opens beside the card", pen.get("open") is True and pen.get("beside") is True, pen)
+    ok("holding the period first, with its two month pickers", pen.get("first") is True and pen.get("pickers") == 2, pen)
+    ok("and the button says Done editing", pen.get("word") == "Done editing", pen)
+    js(pg, "()=>{ CYCLEEDIT=null; paint(); }"); pg.wait_for_timeout(250)
 
     print("\n── 3 · the timeline is the period ──")
     js(pg, "()=>{ REVIEW.from='Jul 2026'; REVIEW.to='Sep 2026'; GROUP[SMPRules.PLAN_FROM]='Jul 2026'; GROUP[SMPRules.PLAN_TO]='Dec 2026'; paint(); }")

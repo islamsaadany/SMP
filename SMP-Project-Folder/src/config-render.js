@@ -7590,41 +7590,178 @@ function cyclePick(label, value, setter, opts){
    pickers are §308's own `planPeriodBlock()`, drawn only while this pen is
    open, so one control writes the period (§53.5). The timeline is the plan's
    calendar year(s), the plan shaded and the open cycle outlined. */
-function planPeriodPanel(can){
+/* ── §693: ONE CARD, ONE EDIT, TWO TABS ──────────────────────────────
+   Islam, shown three ways the page could read (design-mockups/
+   planning-reporting-views/2026-10-30_three-views.html): "go with A, build
+   it". The page did two jobs in one column — SETTING the plan period and the
+   cycle, and WATCHING who has reported — with two pens (§308's and §273.4's)
+   for what the strip read as one fact ("6 of 12 months of the plan"), and
+   the cycle's pen pushing the board 156px down the page (measured at
+   §273.4).
+
+   So: a tab each (`CYCLETAB`). THE SET-UP is one card, The year and the
+   cycle — the timeline across the top with the due date and the review day
+   PINNED on it, the facts under it, closed cycles as chips — with ONE Edit,
+   which opens the pen BESIDE the card (`.cycwrap.editing`), so nothing under
+   it moves. The pen holds, in order, the plan period (§308's own block),
+   the cycle (§307's pickers, while it is open), the review, and Ending it;
+   the new-cycle panel (§47.8) draws in the same slot. WHO HAS REPORTED is the
+   board as it was, with the headline strip over it and a filter row.
+
+   `PLANEDIT` IS GONE (§24): there is one pen, `CYCLEEDIT`, and it opens
+   whichever state the cycle is in — Reopen sits where Close does, behind the
+   pen, which is §273.2's own placement; Edit no longer opens the reopen
+   dialog straight from the strip.
+
+   THE TIMELINE DRAWS WHENEVER THERE IS A MONTH TO DRAW — the plan's or the
+   cycle's — where §495 drew it for a set period only. The lit months are
+   still EXACTLY the period: with none set nothing is lit and the key says
+   so, because a timeline that lights the calendar year as if it were the
+   plan is §35's assumption printed as a fact. */
+function cycleCard(can, open){
   var set = planSet(), a = planFrom(), b = planTo();
+  var cf = monthsOf(REVIEW.from), ct = reviewAsOf();
   var qw = function(m0, m1){ var q0 = Math.floor((m0 % 12) / 3) + 1, q1 = Math.floor((m1 % 12) / 3) + 1;
-    return Math.floor(m0 / 12) === Math.floor(m1 / 12) ? (q0 === q1 ? "Q" + q0 : "Q" + q0 + "\u2013Q" + q1) : ""; };
-  var facts = set
-    ? '<div><small>From</small><b>' + esc(SMPRules.monthLabel(a)) + '</b></div>' +
-      '<div><small>To</small><b>' + esc(SMPRules.monthLabel(b)) + '</b></div>' +
-      '<div><small>Length</small><b>' + planLength() + ' months' + (qw(a, b) ? ' \u00b7 ' + qw(a, b) : '') + '</b></div>'
-    : '<div><small>Plan period</small><b>Not set</b><span class="why" style="margin:0">the calendar year is used</span></div>';
+    return Math.floor(m0 / 12) === Math.floor(m1 / 12) ? (q0 === q1 ? "Q" + q0 : "Q" + q0 + "–Q" + q1) : ""; };
+  /* THE PINS. A day date's month is read through the same `monthsOf` every
+     cycle date is read through; the review day is stored as the date input
+     writes it (yyyy-mm-dd), so its month is read off that shape. Two pins on
+     one month share the cell. */
+  var pins = {}, nPins = 0;
+  var pin = function(m, word){ if (m == null) return; pins[m] = pins[m] ? pins[m] + " · " + word : word; nPins++; };
+  var dueM = monthsOf(REVIEW.due);
+  if (dueM != null) pin(dueM, "due " + String(REVIEW.due).replace(/\s*\d{4}\s*$/, ""));
+  var rd = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(REVIEW.reviewDay || ""));
+  var rdM = rd ? (+rd[1]) * 12 + (+rd[2]) - 1 : null;
+  if (rdM != null) pin(rdM, "review " + (+rd[3]) + " " + SMPRules.monthLabel(rdM).slice(0, 3));
+  var lo = null, hi = null;
+  [set ? a : null, set ? b : null, cf, ct, dueM, rdM].forEach(function(m){
+    if (m == null) return;
+    lo = lo == null ? m : Math.min(lo, m); hi = hi == null ? m : Math.max(hi, m);
+  });
   var tl = "";
-  if (set) {
-    var cf = monthsOf(REVIEW.from), ct = reviewAsOf();
-    var lo = Math.min(a, cf != null ? cf : a), hi = Math.max(b, ct != null ? ct : b);
+  if (lo != null) {
     var y0 = Math.floor(lo / 12), y1 = Math.floor(hi / 12);
     if (y1 - y0 > 2) y1 = y0 + 2;
-    var cells = "";
+    var cells = "", pinRow = "";
     for (var m = y0 * 12; m < (y1 + 1) * 12; m++) {
-      var inP = m >= a && m <= b, inC = cf != null && ct != null && m >= cf && m <= ct;
-      cells += '<span class="pptl-m' + (inP ? ' inp' : '') + (inC ? ' inc' : '') + (inC && !inP ? ' past' : '') +
-        '" title="' + esc(SMPRules.monthLabel(m)) + '">' + "JFMAMJJASOND".charAt(m % 12) + '</span>';
+      var inP = set && m >= a && m <= b, inC = cf != null && ct != null && m >= cf && m <= ct, pn = pins[m];
+      cells += '<span class="pptl-m' + (inP ? ' inp' : '') + (inC ? ' inc' : '') + (inC && set && !inP ? ' past' : '') +
+        (pn ? ' pin' : '') + '" title="' + esc(SMPRules.monthLabel(m)) + '"' +
+        (pn ? ' data-pin="' + esc(pn) + '"' : '') + '>' + "JFMAMJJASOND".charAt(m % 12) + '</span>';
+      /* THE PIN'S WORDS SIT IN A ROW OF THEIR OWN under the strip, one slot
+         per month, because the strip clips whatever hangs below it. */
+      pinRow += '<span class="pptl-p">' + (pn ? '<em>' + esc(pn) + '</em>' : '') + '</span>';
     }
     var yrs = ""; for (var yy = y0; yy <= y1; yy++) yrs += '<span>' + yy + '</span>';
-    tl = '<div class="pptl" data-plan-timeline><div class="pptl-y">' + yrs + '</div><div class="pptl-ms">' + cells + '</div>' +
-      '<div class="pptl-key"><span class="k inp"></span>Plan period' + (cf != null && ct != null ? '<span class="k inc"></span>This cycle' : '') + '</div></div>';
+    tl = '<div class="pptl' + (nPins ? ' pinned' : '') + '" data-plan-timeline><div class="pptl-y">' + yrs + '</div>' +
+      '<div class="pptl-ms">' + cells + '</div>' + (nPins ? '<div class="pptl-ps">' + pinRow + '</div>' : '') +
+      '<div class="pptl-key"><span class="k inp"></span>' +
+        (set ? 'Plan period' : 'Plan period not set — the calendar year is used') +
+        (cf != null && ct != null ? '<span class="k inc"></span>This cycle' : '') +
+        (nPins ? '<span class="k pin"></span>' + (dueM != null ? 'Reports due' : '') +
+          (dueM != null && rdM != null ? ' · ' : '') + (rdM != null ? 'Review day' : '') : '') +
+      '</div></div>';
   }
+  /* THE FACTS. The strip's own sentences, kept word for word where a check
+     or a person reads them: "reported as of", the "n of m months of the
+     plan" every figure is prorated by (§239.3, §308), and what the plan
+     edits are while the cycle runs. */
+  var asof = (function(){
+    var em = elapsedMonths();
+    if (em == null) return 'the year is not set, so every figure is measured against a whole one';
+    var why = [];
+    if (!planSet()) why.push('taken from the calendar year');
+    if (reviewAsOfDerived()) why.push('the month is from the cycle’s name');
+    return em + ' of ' + planLength() + ' months' + (planSet() ? ' of the plan' : '') +
+      (why.length ? ', ' + why.join(', ') : '');
+  })();
+  var hrs = SMPRules.remindHours(REVIEW);
+  var span = String(REVIEW.from || "").trim() && String(REVIEW.to || "").trim()
+    ? esc(REVIEW.from) + ' to ' + esc(REVIEW.to) : "";
+  var facts =
+    '<div data-fact-plan><small>Plan period</small>' +
+      (set ? '<b>' + esc(SMPRules.monthLabel(a)) + ' – ' + esc(SMPRules.monthLabel(b)) + '</b>' +
+             '<span class="sub">' + planLength() + ' months' + (qw(a, b) ? ' · ' + qw(a, b) : '') + '</span>'
+           : '<b>Not set</b><span class="sub">the calendar year is used</span>') + '</div>' +
+    '<div data-fact-cycle><small>This cycle</small><b><span data-cycle-name>' + esc(REVIEW.name) + '</span> ' +
+      '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span></b>' +
+      '<span class="sub">' + (span ? span + ' · ' : '') + '<span class="asof">reported as of <b>' + esc(reviewAsOfLabel()) + '</b></span> · ' + asof + '</span></div>' +
+    '<div data-fact-due><small>Reports due</small><b>' + (String(REVIEW.due || "").trim() ? esc(REVIEW.due) : 'Not set') + '</b>' +
+      '<span class="sub fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</span></div>' +
+    '<div data-fact-review><small>The review</small><b>' + (reviewDayWord() ? 'presents <span>' + esc(reviewDayWord()) + '</span>' : 'Not set') + '</b>' +
+      '<span class="sub">' + (hrs.length ? 'reminders ' + esc(hrs.join(' · ')) + ' hours before' : 'no reminders') + '</span></div>';
   var nOut = tacticsOutsidePlan();
-  return '<div class="planblk" data-plan-block>' +
-    '<div class="planblk-h"><span>Plan period</span>' +
-      (can ? '<button class="editbtn' + (PLANEDIT ? ' penon' : '') + '" data-editplan="1">' + (PLANEDIT ? 'Done editing' : 'Edit') + '</button>' : '') +
-    '</div>' +
-    '<div class="planblk-facts">' + facts + '</div>' + tl +
+  var chips = HISTORY.length
+    ? '<div class="planblk-chips" data-closed-cycles><span class="lab">Closed cycles</span>' +
+        HISTORY.map(function(h){ return '<span class="pill kind">' + esc(h.name) + ' · ' + h.group + '%</span>'; }).join("") + '</div>'
+    : '';
+  return '<div class="planblk" data-plan-block data-cycle-card>' +
+    '<div class="planblk-h"><span>The year and the cycle</span><span class="planblk-acts">' +
+      (can && !open && !NEWCYCLE ? '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>' : '') +
+      (can && !NEWCYCLE ? '<button class="editbtn' + (CYCLEEDIT ? ' penon' : '') + '" data-editcycle="1">' +
+        (CYCLEEDIT ? 'Done editing' : 'Edit') + '</button>' : '') +
+    '</span></div>' +
+    tl +
+    '<div class="planblk-facts">' + facts + '</div>' +
+    (cyclePastPlan() ? '<div class="planblk-flag" data-cyc-past><b>Runs past the plan period.</b> A figure measured after the plan ended is measured against a whole target.</div>' : '') +
     (nOut ? '<div class="planblk-flag" data-plan-outside><b>' + nOut + ' tactic' + (nOut === 1 ? ' ticks a quarter' : 's tick a quarter') +
       ' outside the plan period.</b> They are kept as they are; change the period or the quarters on the plan.</div>' : '') +
-    (PLANEDIT && can ? '<div class="planblk-pen">' + planPeriodBlock() + '</div>' : '') +
+    chips +
   '</div>';
+}
+
+/* THE PEN, beside the card. `.newcycle` is kept as its class because every
+   field in it writes through FIELDS and is addressed by the checks under that
+   name (§53.5); `cycdrawer` is the shape. */
+function cycleDrawer(can, open){
+  if (!can || !CYCLEEDIT) return "";
+  return '<div class="cfg newcycle cycdrawer" data-cycle-drawer>' +
+    planPeriodBlock() +
+    (open
+      ? '<div class="cyc2-r cycown"><div class="nc-h">This cycle</div>' +
+          '<div class="nc-grid">' +
+            cycleField("Name", REVIEW.name, "H1 2027", function(v){
+              /* TRIMMED, and an empty name is REFUSED rather than stored: it
+                 is what every snapshot and archived plan is filed under once
+                 the cycle closes (§273.4). */
+              var t = String(v).trim();
+              if (!t) return false;
+              REVIEW.name = t;
+            }, "nm-lab") +
+            cyclePick("Covers from", REVIEW.from, function(v){ REVIEW.from = String(v).trim(); }, { wide:true }) +
+            cyclePick("to", REVIEW.to, function(v){ REVIEW.to = String(v).trim(); }, { wide:true, cls:"tobtn" }) +
+            cyclePick("Reports due", REVIEW.due, function(v){ REVIEW.due = String(v).trim(); }, { day:true }) +
+          '</div>' +
+          '<div class="nc-why"><b>The month it covers to decides what every figure ' +
+            'is measured against.</b> A target that adds up across the year is compared ' +
+            'with the share of it due by then, and work dated after it is not asked for. ' +
+            'Changes are kept as you type.</div>' +
+        '</div>'
+      : '') +
+    reviewDayBlock() +
+    '<div class="cyc2-r cyc2-d cycend"><div class="nc-h">' + (open ? 'Ending it' : 'Reopening it') + '</div>' +
+      (open
+        ? '<p class="cyc2-p">Closing files every figure under this name and stops ' +
+            'the units reporting.</p>' +
+          '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>'
+        : '<p class="cyc2-p">' + esc(REVIEW.name) + ' is closed and its figures are a record. ' +
+            'Reopening makes them live again.</p>' +
+          '<button class="editbtn danger" data-reopencycle="1">Reopen the cycle</button>') +
+    '</div>' +
+  '</div>';
+}
+
+function cycleTabs(){
+  var t = cycleTotals();
+  var tab = function(k, label, count){
+    var on = CYCLETAB === k;
+    return '<button type="button" role="tab" data-cyctab="' + k + '" aria-selected="' + on + '"' +
+      (on ? ' class="on"' : '') + '>' + label +
+      (count != null ? '<span class="kbcount">' + count + '</span>' : '') + '</button>';
+  };
+  return '<div class="kbtabs cyctabs" role="tablist">' +
+    tab("setup", "The set-up") + tab("board", "Who has reported", t.done + " / " + t.total) + '</div>';
 }
 
 function planPeriodBlock(){
@@ -7707,6 +7844,17 @@ function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
 function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
+  /* §693: EVERY ROW SAYS WHAT THE FILTER ROW ASKS — its state, whether it
+     owes a note, and the words Find a line matches — and is counted as it
+     is drawn, so the filters' numbers are the rows' own and cannot drift
+     from them (§53.5). The filter itself is applied in the shell on the
+     drawn rows, never by a repaint, so typing in Find keeps its cursor. */
+  var STATS = { all:0, late:0, part:0, done:0, notes:0 };
+  var brow = function(st, miss, name, who, extra){
+    STATS.all++; STATS[st.key] = (STATS[st.key] || 0) + 1; if (miss) STATS.notes++;
+    return '<tr' + (extra || '') + ' data-brow data-state="' + esc(st.key) + '" data-notes="' + (miss ? 1 : 0) +
+      '" data-find="' + esc(String(name + ' ' + who).toLowerCase()) + '">';
+  };
 
   /* §244: THE UNIT HALF CARRIES A PILLARS FUNCTION TOO (Islam: "put them on
      the unit half"). One builder over a TARGET rather than a second copy of
@@ -7739,7 +7887,7 @@ function renderCycle(){
          with the progress bar beside it, which counts the same rows. */
       if (rowAnswered(x)) by[slot][0]++;
     });
-    return '<tr><td><b>' + esc(placeLabel(t)) + '</b></td>' +
+    return brow(st, miss, placeLabel(t), who) + '<td><b>' + esc(placeLabel(t)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -7778,7 +7926,7 @@ function renderCycle(){
     var cell = function(k, show){
       return '<td class="num">' + (show ? by[k][0] + '/' + by[k][1] : '\u2014') + '</td>';
     };
-    return '<tr data-line><td><b>' + esc(name) + '</b></td>' +
+    return brow(st, miss, name, who, ' data-line') + '<td><b>' + esc(name) + '</b></td>' +
       '<td class="why' + (nobody ? ' nobody' : '') + '" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -7902,7 +8050,7 @@ function renderCycle(){
        nothing to tell the two rows apart, on the page the office uses to chase
        people. `placeLabel()` adds the suffix only where the clash is real
        (§65, §93.12) and is what the unit half beside it now uses (§53.5). */
-    return '<tr><td><b>' + esc(placeLabel(target)) + '</b></td>' +
+    return brow(st, miss, placeLabel(target), who) + '<td><b>' + esc(placeLabel(target)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -7950,159 +8098,41 @@ function renderCycle(){
      the FUNCTIONS this page put on the board (§105) as well as the units. */
   var t = cycleTotals();
 
-  var head =
-    '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
-      '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
-      '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
-      /* ── THE REVIEW POINT, EDITABLE WHILE THE CYCLE RUNS (§239) ──────
-         Islam: "if I will set the cycle dates you need to give me the ability
-         to set this on opening the cycle and ability to edit this in an open
-         cycle." Before this there was NO control anywhere -- the value could
-         only ever be whatever the seed left, which is how a tenant came to be
-         reporting in Q2 against a platform that thought the year was over.
-
-         It is a MONTH because a quarter cannot say "eight months in", and it
-         is the platform's own month picker rather than a box, for §177's own
-         reason: with no box there is nothing to mistype and the picker can
-         only produce a shape `monthsOf()` already reads. */
-      '<span class="fstrip-meta asof">reported as of ' +
-        /* IT SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With no month
-           picked the platform still has an answer -- the cycle's own quarter
-           end -- so showing the picker's "Missing" would print an alarm over
-           something that is not owed (§177, §214.4) while the note beside it
-           reported a real number. The note says whether it was chosen or
-           inherited.
-
-           §273: AND IT IS A VALUE HERE, NEVER A CONTROL. The picker moved
-           inside the pen with everything else the office can change, so this
-           line reads the same for everybody and the strip carries nothing that
-           can be pressed by accident. One control for one fact (§53.5): a
-           picker here AND a picker in the panel is two, and they would have to
-           be kept in step. */
-        /* §307: ONE SOURCE. This read the stored month and fell back to the
-           derived one, which is exactly the pair that could disagree with the
-           `Jan 2027 to Jun 2027` printed six pixels to its left. It reads the
-           cycle's end now, through the one function every score reads. */
-        '<b>' + esc(reviewAsOfLabel()) + '</b>' +
-        /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
-           whether the month he picked had taken -- "can you check if the cycle
-           adjustment is saved" -- because the strip showed the value and
-           nothing showed the consequence. `8 of 12 months` is the number every
-           figure on the platform is actually prorated by, so a review point
-           that is not working says so on the page rather than being inferred
-           from a table reading 100%.
-
-           §278: it is the number every figure is prorated by BY DEFAULT — a row
-           carrying a monthly plan is measured against the months that have
-           actually run instead. The sentence is unchanged because it is still
-           true of the review point, which is what this strip is about; the
-           clause is here so the next reader is not told something the code
-           stopped doing (§104.8). */
-        /* §308: OF THE PLAN, AND IT SAYS WHICH PLAN. The denominator was a
-           hard-coded twelve and the count was months of the calendar year, so
-           a cycle covering July to August read "8 of 12" — a number taken
-           from neither of its own dates. It is the planning period now, and
-           where nobody has set one the line NAMES the assumption instead of
-           printing it as a fact (§35, §124). */
-        (function(){
-          var em = elapsedMonths();
-          if (em == null)
-            return ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
-              'figure is measured against a whole one</span>';
-          var why = [];
-          if (!planSet()) why.push('taken from the calendar year');
-          if (reviewAsOfDerived()) why.push('the month is from the cycle\u2019s name');
-          return ' <span class="why" style="margin:0">&middot; ' + em + ' of ' +
-            planLength() + ' months' + (planSet() ? ' of the plan' : '') +
-            (why.length ? ', ' + why.join(', ') : '') + '</span>';
-        })() + '</span>' +
-      /* THE REVIEW DAY IS ON THE STRIP, so the day is readable without
-         opening the pen — and only when there is one, because a line reading
-         "not set" over a thing nobody has to set is furniture (§45.2, §94.15).
-         Drawn for everybody: the day of the review is not a secret, and only
-         TAKING the files is the office's. */
-      (reviewDayWord() ? '<span class="fstrip-meta">presents <b>' +
-        esc(reviewDayWord()) + '</b></span>' : '') +
-      '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
-      /* §495: A CYCLE RUNNING PAST THE PLAN PERIOD IS SAID ON ITS OWN STRIP,
-         in the attention voice — nothing is wrong yet, but a figure measured
-         after the plan ended is measured against a whole target (§308). */
-      (cyclePastPlan() ? '<span class="badge b-late" data-cyc-past>Runs past the plan period</span>' : '') +
-      /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
-         Islam: "keep the close cycle inside the edit. as it's a critical
-         button to click, the pen should hold everything editable so it's kept
-         secured." So the strip's only control while a cycle runs is Edit, and
-         Close the cycle is drawn INSIDE the panel it opens -- the strip is a
-         line you read, not a line you press.
-
-         Edit is drawn while the cycle is OPEN only, which is the gate the
-         review point already had: a closed cycle's figures are filed under the
-         name it closed with (HISTORY keeps the name, §49.1), so renaming it
-         afterwards would leave this page and the history saying different
-         things. With it closed the strip carries "Open a new cycle..." exactly
-         as it did before. */
-      /* §273.2: AND A CLOSED CYCLE GETS THE PEN TOO. Islam picked it over a
-         Reopen button on the strip: the pen's far end holds the cycle's one
-         dangerous state change, whichever direction it goes -- Close while it
-         runs, Reopen once it has stopped -- so the strip goes on carrying
-         nothing that changes anything. `Open a new cycle...` stays beside it
-         because it is a different act with its own panel and its own
-         confirmation, and it is the only way to start one. */
-      /* §273.4: THE PEN SAYS WHICH WAY IT GOES, and lights up — the platform's
-         own `penBtn()` has read `on ? "Done editing" : "Edit"` since it was
-         written, and this control said Edit while you were editing. Islam:
-         "why is the edit button still there it should turn into done editing
-         so I click it and the box collapse saving what I did". */
-      (can
-        ? '<button class="editbtn' + (open && CYCLEEDIT ? ' penon' : '') +
-            '" data-editcycle="1">' +
-            (open && CYCLEEDIT ? 'Done editing' : 'Edit') + '</button>' +
-          (open ? '' : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
-        : '') +
-    '</div>' +
-    /* ── OPENING A NEW CYCLE (§47.8), PUT BACK ────────────────────
-       §261.2 replaced the `NEWCYCLE ? ... : CYCLEEDIT ? ...` chain with a
-       CYCLEEDIT-only branch and took this arm with it, so on `main` today
-       "Open a new cycle..." sets the draft and DRAWS NOTHING — §96 exactly, a
-       control that renders perfectly and does nothing, and it is the only way
-       to start a cycle at all. Found by `checks/repeat-project.py` hanging on
-       `#nc-name`; reproduced on the shipped build before anything was written,
-       so it is not this section's doing and it is this section's to fix
-       (§51.11 from the other side: the check was RIGHT and had been red for
-       exactly as long as the panel had been gone).
-
-       PUT BACK VERBATIM, not rebuilt on §273.4's `cycleField()`: this panel
-       is wired by ID in the shell and writes on `input` rather than `change`
-       for a stated reason (Open can be pressed from inside a field), so
-       re-expressing it would be a second change riding a restoration. It keeps
-       its Open/Cancel pair, and that is NOT the Save and Cancel §273.4
-       removed — this really is a draft, describing a cycle that does not exist
-       yet, and nothing reaches REVIEW until Open is pressed. */
-    (NEWCYCLE
-      ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
-        /* §307: THE SAME FOUR CONTROLS THE PEN DRAWS. This panel typed its
-           three dates and picked a fourth month that no longer exists, so it
-           was the one place in the product where a cycle could be opened with
-           an end its own arithmetic could not read. The dates go through
-           `cyclePick` and write into the draft through FIELDS; only the NAME
-           is still typed, so only the name is still read by id. */
-        /* ── THE REFUSAL IS UNDER THE BOX THAT REFUSED (§534.2) ──────
-           Both of this panel's refusals were browser boxes, and a box opens
-           OVER the form: the empty field could not be seen while the sentence
-           about it was on screen. The name's box then put the cursor in the
-           field afterwards and the month's did not — one form, two
-           behaviours, because a notice said away from its control has no
-           natural place to point.
-
-           DERIVED, NEVER STORED STALE (§48.2's instinct, one layer down):
-           `NEWCYCLE.why` names the field that was empty when Open was
-           pressed, and this reads it back against the CURRENT value, so
-           filling the box clears the line with no handler to remember. */
+  /* §693: THE HEADLINE STRIP, OVER THE BOARD. The cycle's name and dates
+     moved into the card's facts; what is left here is the four numbers
+     cycleTotals() answers (§108.1), drawn on the board's tab where the rows
+     they add up are. */
+  var strip =
+    '<div class="fstrip" style="margin-bottom:14px"><div class="fstrip-body">' +
+      '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
+      '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
+        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
+        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
+      '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
+    '</div></div>';
+  var filt = function(k, label, n){
+    var on = BOARDFILTER === k;
+    return '<button type="button" class="bfilt' + (on ? ' on' : '') + '" data-bfilter="' + k +
+      '" aria-pressed="' + on + '">' + label + '<span class="kbcount">' + n + '</span></button>';
+  };
+  var filters =
+    '<div class="bfilters" data-board-filters>' +
+      filt("all", "All", STATS.all) + filt("late", "Not started", STATS.late) +
+      filt("notes", "Needs a note", STATS.notes) + filt("part", "In progress", STATS.part) +
+      filt("done", "Submitted", STATS.done) +
+      '<input class="fld bfind" id="board-find" value="' + esc(BOARDFIND) + '" placeholder="Find a line…" ' +
+        'aria-label="Find a reporting line">' +
+    '</div>';
+  /* THE NEW-CYCLE PANEL (§47.8, put back at §261.2's cost) draws in the pen's
+     slot beside the card. Verbatim from there: wired by ID in the shell and
+     writing on `input`, so Open can read the name before the box is left. */
+  var newPanel = NEWCYCLE
+      ? '<div class="cfg newcycle cycdrawer" data-cycle-drawer><div class="nc-h">Open a new cycle</div>' +
         (function(){
           var why = NEWCYCLE.why;
           if (why === "name" && String(NEWCYCLE.name || "").trim()) why = null;
           if (why === "to" && String(NEWCYCLE.to || "").trim()) why = null;
-          return '<div class="nc-grid nc-1line">' +
+          return '<div class="nc-grid">' +
             '<label class="nm-lab"><span>Name</span><input class="fld' +
               (why === "name" ? " bad" : "") + '" id="nc-name"' +
               (why === "name" ? ' aria-invalid="true"' : '') + ' value="' +
@@ -8121,9 +8151,6 @@ function renderCycle(){
             ? '<p class="picerr"><b>The cycle needs a name.</b> It is what its figures ' +
               'are filed under once it closes, and what the next cycle compares against.</p>'
             : why === "to"
-            /* The band below already says what the month decides, and it is on
-               screen — so the refusal names the control and leaves the
-               explaining to the sentence that was always there. */
             ? '<p class="picerr"><b>Pick the month this cycle covers to.</b> ' +
               'It is the review point, and the line below says what it decides.</p>'
             : '');
@@ -8135,92 +8162,8 @@ function renderCycle(){
         '<div class="nc-act">' +
           '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
           '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
-      : '') +
-    /* ── THE PEN ITSELF (§273, restructured by §273.4) ─────────────
-       Islam, of the shipped panel: "rather than having a save and cancel
-       buttons inside the box itself rearrange the buttons and think of
-       different structures of this banner" — and, of three drawn on his own
-       tenant, "C".
-
-       SAVE AND CANCEL ARE GONE, AND THAT IS THE WHOLE OF IT. Nowhere else in
-       this product has either: every bound field writes on `change`, which is
-       on blur (§35), and the pen only ever closed the mode. §273 invented a
-       second model — a draft, a Save, a Cancel and a guard to make the draft
-       safe — and needed two buttons nothing else here needs. The fields write
-       straight through `FIELDS` now, like every other field in the platform,
-       so there is no draft, nothing unsaved, and nothing for a guard to hold.
-
-       TWO COLUMNS, WHICH IS HIS PICK OVER EDITING IN PLACE AND OVER THE PLAIN
-       BOX: the fields on the left, and ENDING IT behind a rule on the right,
-       so the destructive act never shares a row with the boxes you are typing
-       in. The cost was measured before he chose — pressing Edit moves the page
-       below by 156px here against 12px for the in-place shape. */
-    (CYCLEEDIT && open
-      ? '<div class="cfg newcycle"><div class="cyc2">' +
-          '<div class="cyc2-f">' +
-            '<div class="nc-h">This cycle</div>' +
-            '<div class="nc-grid nc-1line">' +
-              cycleField("Name", REVIEW.name, "H1 2027", function(v){
-                /* TRIMMED, and an empty name is REFUSED rather than stored:
-                   it is what every snapshot and archived plan is filed under
-                   once the cycle closes. With no Save there is no press to
-                   refuse at, so the refusal is the name COMING BACK into the
-                   box — the value returning is the explanation (§124). */
-                var t = String(v).trim();
-                if (!t) return false;
-                REVIEW.name = t;
-              }, "nm-lab") +
-              /* ── EVERY DATE IS PICKED, AND THERE ARE THREE (§307) ────
-                 Islam: "all the dates should be date selector like the
-                 reporting as of. and why do we still have the reporting as
-                 of? ... the reports due is the only 1 with a day date as it's
-                 a cutt off dates. and if we set that they will be only 4 boxes
-                 can be in 1 line" — and then, deciding the question underneath
-                 it himself: "the cycle ending is the reporting as of so that's
-                 what the proration depend on ... if you are using reporting as
-                 of then this should replace the cover to."
-
-                 THE REPORTING AS OF BOX IS GONE, and its meaning is in `to`.
-                 Nothing keeps a second copy, so the two can never disagree
-                 again — which they could, and on his own tenant did: a cycle
-                 covering to Jun 2027 reporting as of Aug 2026, asking for work
-                 due to June and judging it against August.
-
-                 PICKED, NEVER TYPED, for §177's reason one field along: with
-                 no box there is nothing to mistype, and a cycle whose end
-                 cannot be read falls back — silently, until now — to a quarter
-                 nobody chose. `wide` because `cycleYear()` scrapes these
-                 strings for a four-digit year. */
-              cyclePick("Covers from", REVIEW.from, function(v){
-                REVIEW.from = String(v).trim();
-              }, { wide:true }) +
-              cyclePick("to", REVIEW.to, function(v){
-                REVIEW.to = String(v).trim();
-              }, { wide:true, cls:"tobtn" }) +
-              cyclePick("Reports due", REVIEW.due, function(v){
-                REVIEW.due = String(v).trim();
-              }, { day:true }) +
-            '</div>' +
-            '<div class="nc-why"><b>The month it covers to decides what every figure ' +
-              'is measured against.</b> A target that adds up across the year is compared ' +
-              'with the share of it due by then, and work dated after it is not asked for. ' +
-              'Changes are kept as you type.</div>' +
-          '</div>' +
-          '<div class="cyc2-d">' +
-            '<div class="nc-h">Ending it</div>' +
-            '<p class="cyc2-p">Closing files every figure under this name and stops ' +
-              'the units reporting.</p>' +
-            '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>' +
-          '</div>' +
-        '</div>' + reviewDayBlock() + '</div>'
-      : '') +
-    '<div class="fstrip-body">' +
-      '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
-      '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
-        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
-      '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
-    '</div></div>';
+      : '';
+  var drawer = newPanel || cycleDrawer(can, open);
 
   /* CLAIM REQUESTS (spec 008 §5). The SMO answers them, not the holder — the
      holder has an interest in the answer, and the SMO is the only person who
@@ -8242,42 +8185,45 @@ function renderCycle(){
         : '') + '</td></tr>';
   }).join("");
 
+  var board =
+    '<div class="cfg"><table><thead><tr><th style="width:17%">Reporting line</th><th>Reporting</th>' +
+      '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
+      '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
+      '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +
+    '<div class="note" data-board-empty hidden>No reporting line matches.</div>' +
+    (open
+      ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
+        'means never closing, and a cycle that never closes writes no history. Whatever is ' +
+        'unreported closes as unreported and stays visibly so.</div>'
+      : '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record. ' +
+        'Opening a new cycle asks every unit again and lets each score show what it was last time.</div>');
+
   return cfgHead("Planning & reporting cycle",
       ['<span class="pill kind">' + esc(REVIEW.cadence) + '</span>'].concat(
         claims.length ? ['<span class="pill attn">' + claims.length + ' claim request' +
           (claims.length === 1 ? "" : "s") + '</span>'] : []),
-      null, false) + planPeriodPanel(can) + head + contTakenSection() +
-    (claims.length
-      ? section("", "Claim requests", null,
-          '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +
-            '<th style="width:16%">Held by</th><th style="width:20%">Wanted by</th>' +
-            '<th style="width:18%">Asked by</th><th class="cc" style="width:12%"></th>' +
-          '</tr></thead><tbody>' + claimRows + '</tbody></table></div>' +
-          '<div class="note"><b>One figure belongs to one set</b>, so somebody has asked for ' +
-            'one that is already held. <b>Move it</b> puts the figure in the asking set; ' +
-            '<b>leave it</b> closes the request without moving anything. Either way the ' +
-            'conversation about whether it is the right number stays between the two ' +
-            'teams \u2014 this only decides who enters it.</div>')
-      : '') +
-    section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
-    section("", "Who has reported", null,
-      '<div class="cfg"><table><thead><tr><th style="width:17%">Reporting line</th><th>Reporting</th>' +
-        '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
-        '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +
-      (open
-        ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
-          'means never closing, and a cycle that never closes writes no history. Whatever is ' +
-          'unreported closes as unreported and stays visibly so.</div>'
-        : '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record. ' +
-          'Opening a new cycle asks every unit again and lets each score show what it was last time.</div>') +
-      (HISTORY.length
-        ? '<h4 class="mini">Closed cycles</h4><div class="cfg"><table><thead><tr><th>Cycle</th>' +
-          '<th class="cc">Group figure</th></tr></thead><tbody>' +
-          HISTORY.map(function(h){
-            return '<tr><td>' + esc(h.name) + '</td><td class="num">' + h.group + '%</td></tr>';
-          }).join("") + '</tbody></table></div>'
-        : ''));
+      null, false) + cycleTabs() +
+    (CYCLETAB === "board"
+      ? strip + filters + board
+      /* THE PEN IS A COLUMN OF ITS OWN beside everything on the tab — the
+         card AND the sections under it — so opening it moves nothing down
+         the page (§693): the sections narrow beside it, they do not drop. */
+      : '<div class="cycwrap' + (drawer ? ' editing' : '') + '"><div class="cycleft">' +
+        cycleCard(can, open) + contTakenSection() +
+        (claims.length
+          ? section("", "Claim requests", null,
+              '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +
+                '<th style="width:16%">Held by</th><th style="width:20%">Wanted by</th>' +
+                '<th style="width:18%">Asked by</th><th class="cc" style="width:12%"></th>' +
+              '</tr></thead><tbody>' + claimRows + '</tbody></table></div>' +
+              '<div class="note"><b>One figure belongs to one set</b>, so somebody has asked for ' +
+                'one that is already held. <b>Move it</b> puts the figure in the asking set; ' +
+                '<b>leave it</b> closes the request without moving anything. Either way the ' +
+                'conversation about whether it is the right number stays between the two ' +
+                'teams — this only decides who enters it.</div>')
+          : '') +
+        section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
+        '</div>' + drawer + '</div>');
 }
 
 /* ── Setup · Supporting functions ───────────────────────────────────

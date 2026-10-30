@@ -240,7 +240,7 @@ def main():
         # the office can move the review point and every figure follows, and
         # that is asserted here exactly as before, through the door it now has.
         ck("the strip carries no control of its own any more (§273)",
-           pg.evaluate("!document.querySelector('.fstrip-meta.asof .monthbtn')"))
+           pg.evaluate("!document.querySelector('[data-fact-cycle] .monthbtn')"))
         ck("...it carries the pen that holds one",
            pg.evaluate("!!document.querySelector('[data-editcycle]')"))
         before = pg.evaluate("()=>measureScore(GROUP.keyObjectives[0])")
@@ -352,7 +352,7 @@ def main():
         pg.evaluate("()=>{current='setup'; currentSub='cycle'; paint();}")
         pg.wait_for_timeout(300)
         said = pg.evaluate("""()=>{
-          var read = function(){ var e=document.querySelector('.fstrip-meta.asof');
+          var read = function(){ var e=document.querySelector('[data-fact-cycle] .sub');
             return e ? e.textContent.replace(/\\s+/g,' ').trim() : null; };
           var keep = REVIEW.to;
           REVIEW.to = ""; paint(); var unset = read();

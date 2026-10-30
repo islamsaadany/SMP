@@ -102,7 +102,8 @@ def pick(pg, sel_all, idx, word):
 
 
 def strip(pg):
-    return js(pg, """()=>{const e=document.querySelector('.fstrip-meta.asof');
+    # §693: the review point's line is the cycle's fact on the card now.
+    return js(pg, """()=>{const e=document.querySelector('[data-fact-cycle] .sub');
                           return e ? e.textContent.replace(/\\s+/g,' ').trim() : null;}""")
 
 
@@ -142,19 +143,24 @@ def run(pg):
     # the page, with its own Edit, and the cycle sits under it. What survives
     # from the old assertion is the ORDER: the period comes first.
     print("\n── 1 · the plan period block, first on the page, with its own pen ──")
-    btn = pg.query_selector("[data-editplan]")
+    # §693: ONE PEN, the page's, opened by the card's Edit; the period is
+    # its FIRST block, ahead of the cycle's own (`.cycown`). The old
+    # `notInCycle` is kept with its sign turned: the period is in the pen
+    # and BEFORE the cycle's block, never inside it.
+    btn = pg.query_selector("[data-editcycle]")
     if btn:
         btn.click(); pg.wait_for_timeout(420)
     shape = js(pg, """()=>{
       const blk = document.querySelector('[data-plan-block]');
       if (!blk) return {none:true};
-      const head = document.querySelector('.cyc2, [data-cyc-head], .fstrip');
-      const pen = blk.querySelector('.planblk-pen');
+      const head = blk.querySelector('[data-fact-cycle]');
+      const first = blk.querySelector('[data-fact-plan]');
+      const pen = document.querySelector('.newcycle');
       const per = pen && pen.querySelector('.planper');
-      const cyc = document.querySelector('.newcycle');
-      return { blockFirst: !head || !!(blk.compareDocumentPosition(head) & Node.DOCUMENT_POSITION_FOLLOWING),
+      const cyc = pen && pen.querySelector('.cycown');
+      return { blockFirst: !!first && (!head || !!(first.compareDocumentPosition(head) & Node.DOCUMENT_POSITION_FOLLOWING)),
                penOpen: !!pen, inPen: !!per,
-               notInCycle: !cyc || !cyc.querySelector('.planper'),
+               notInCycle: !!per && (!cyc || (!cyc.contains(per) && !!(per.compareDocumentPosition(cyc) & Node.DOCUMENT_POSITION_FOLLOWING))),
                picks: per ? per.querySelectorAll('.monthbtn').length : 0,
                labels: per ? [...per.querySelectorAll('label span')].map(e=>e.textContent) : [],
                status: per ? (per.querySelector('.nc-unit')||{}).textContent : null };
@@ -162,7 +168,7 @@ def run(pg):
     ok("the plan period block is drawn", shape.get("none") is not True, shape)
     ok("it comes BEFORE the reporting cycle", shape.get("blockFirst") is True, shape)
     ok("its own Edit opens a pen holding the period", shape.get("penOpen") and shape.get("inPen"), shape)
-    ok("...and the period is no longer inside the cycle's pen", shape.get("notInCycle") is True, shape)
+    ok("...ahead of the cycle's own block, never inside it", shape.get("notInCycle") is True, shape)
     ok("it holds two month pickers", shape.get("picks") == 2, shape)
     ok("named for the two ends of a period",
        [l for l in (shape.get("labels") or []) if l in ("Plan starts", "and ends")]

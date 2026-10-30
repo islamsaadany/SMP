@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Planning &amp; reporting, three views</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   SETUP › PLANNING & REPORTING — THREE WAYS THE PAGE COULD READ
+   2026-10-30. Drawn to choose from, nothing built. Figures and names are
+   the worked example's as the page shows them today (H1 2026, 234 of 255).
+
+   Layout: one column; a short "today" note, then the three views stacked,
+   each a faithful drawing of the page at laptop width that stacks on a
+   phone. The platform's own Forefront palette and type scale.
+   ══════════════════════════════════════════════════════════════════ */
+:root {
+  --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#A9B8CF;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --gold-wash:#F6EFDD;
+  --good:#2E7D5B; --good-bg:#E8F3EE; --attn:#B8860B; --attn-bg:#FBF4E0;
+  --bad:#B04434; --bad-bg:#F8E9E6; --none:#676C73; --none-bg:#EEF0F3;
+  --shadow:0 1px 3px rgb(22 50 92/.08);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0F2342; --panel-ink:#E9ECF1; --panel-quiet:#8FA3C4;
+  --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#2E2A1E;
+  --good:#4FB08A; --good-bg:#1B2E27; --attn:#D9A520; --attn-bg:#30291A;
+  --bad:#D9705F; --bad-bg:#33201D; --none:#949DAA; --none-bg:#262B33;
+  --shadow:0 1px 3px rgb(0 0 0/.4);
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0F2342; --panel-ink:#E9ECF1; --panel-quiet:#8FA3C4;
+  --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#2E2A1E;
+  --good:#4FB08A; --good-bg:#1B2E27; --attn:#D9A520; --attn-bg:#30291A;
+  --bad:#D9705F; --bad-bg:#33201D; --none:#949DAA; --none-bg:#262B33;
+  --shadow:0 1px 3px rgb(0 0 0/.4);
+  color-scheme: dark;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45;
+  padding-block:28px 60px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width:1240px; margin:0 auto; display:grid; gap:40px; }
+h1 { font-size:24px; margin:0 0 6px; text-wrap:balance; }
+h2 { font-size:19px; margin:0; text-wrap:balance; }
+p { margin:0; }
+.lede { color:var(--ink-2); max-width:64ch; }
+.lab { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); }
+.mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+.num { font-variant-numeric:tabular-nums; }
+
+/* ── the option frames ── */
+.opt { display:grid; gap:14px; }
+.opt-h { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; }
+.chip { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+  padding:4px 10px; border-radius:999px; background:var(--panel); color:var(--panel-ink); }
+.chip.rec { background:var(--gold); color:#171B22; }
+.opt-h .why { color:var(--ink-2); flex-basis:100%; max-width:72ch; }
+.changes { display:grid; gap:4px; margin:0; padding-left:18px; color:var(--ink-2); max-width:72ch; }
+.changes li::marker { color:var(--gold-deep); }
+.frame { background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:18px; overflow:hidden; }
+.today .frame { border-style:dashed; }
+
+/* ── the platform's own furniture, drawn small ── */
+.ptitle { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+.ptitle h3 { font-size:20px; margin:0; }
+.ptitle .right { margin-left:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.pill { font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:var(--surface-2); color:var(--ink-2); white-space:nowrap; }
+.btn { font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; padding:6px 12px; border-radius:999px;
+  border:1.5px solid var(--panel); color:var(--panel); background:transparent; cursor:default; white-space:nowrap; }
+.btn.gold { border-color:var(--gold); color:var(--gold-deep); }
+.btn.fill { background:var(--gold); border-color:var(--gold); color:#171B22; }
+.btn.danger { border-color:var(--bad); color:var(--bad); }
+.btn.link { border:0; text-transform:none; letter-spacing:0; text-decoration:underline; color:var(--ink-2); padding:6px 4px; }
+.badge { display:inline-block; font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:4px; }
+.b-done { background:var(--good-bg); color:var(--good); }
+.b-part { background:var(--attn-bg); color:var(--attn); }
+.b-late { background:var(--bad-bg); color:var(--bad); }
+.b-none { background:var(--none-bg); color:var(--none); }
+.b-open { background:var(--gold-wash); color:var(--gold-deep); }
+.tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:16px; }
+.tab { padding:8px 14px; font-weight:600; color:var(--ink-3); border-bottom:2px solid transparent; margin-bottom:-1px; display:flex; gap:8px; align-items:center; }
+.tab.on { color:var(--ink); border-bottom-color:var(--gold); }
+.tab .cnt { font-size:11px; font-weight:700; background:var(--surface-2); color:var(--ink-2); border-radius:999px; padding:1px 7px; }
+.card { border:1px solid var(--line); border-radius:8px; background:var(--surface); overflow:hidden; }
+.card-h { background:var(--panel); color:var(--panel-ink); padding:9px 14px; display:flex; align-items:center; gap:10px; font-weight:700; }
+.card-h .btn { margin-left:auto; border-color:var(--panel-ink); color:var(--panel-ink); }
+.card-h .btn.fill { background:var(--gold); border-color:var(--gold); color:#171B22; }
+.card-b { padding:14px; }
+.facts { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:14px 20px; }
+.fact small { display:block; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:2px; }
+.fact b { font-size:15px; }
+.fact .sub { color:var(--ink-3); font-size:12px; }
+.note { border-left:3px solid var(--gold); background:var(--surface-2); padding:10px 14px; color:var(--ink-2); font-size:13px; border-radius:0 6px 6px 0; }
+.note b { color:var(--ink); }
+
+/* the month timeline */
+.tl { display:grid; gap:4px; }
+.tl-y { font-size:10px; font-weight:800; letter-spacing:.12em; color:var(--ink-3); }
+.tl-row { display:grid; grid-template-columns:repeat(12, 1fr); gap:3px; }
+.tl-m { height:26px; border-radius:4px; background:var(--surface-2); display:grid; place-items:center; font-size:11px; font-weight:700; color:var(--ink-3); position:relative; }
+.tl-m.inp { background:var(--gold-wash); color:var(--ink-2); }
+.tl-m.inc { outline:2px solid var(--panel); outline-offset:-2px; color:var(--ink); }
+.tl-m.closed { background:var(--none-bg); color:var(--ink-3); }
+.tl-m.closed.inc { outline-color:var(--none); }
+.tl-m.ghost { border:1.5px dashed var(--line); background:transparent; }
+.tl-m.pin::after { content:attr(data-pin); position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:4px; white-space:nowrap;
+  font-size:10px; font-weight:700; color:var(--gold-deep); }
+.tl-m.pin::before { content:""; position:absolute; top:-5px; left:50%; width:2px; height:36px; background:var(--gold-deep); transform:translateX(-50%); }
+.tl-key { display:flex; gap:14px; font-size:11px; color:var(--ink-3); flex-wrap:wrap; margin-top:18px; }
+.tl-key i { display:inline-block; width:12px; height:10px; border-radius:2px; vertical-align:-1px; margin-right:5px; }
+.tl-key i.inp { background:var(--gold-wash); border:1px solid var(--line); }
+.tl-key i.inc { border:2px solid var(--panel); }
+.tl-key i.closed { background:var(--none-bg); border:1px solid var(--line); }
+.tl-key i.pin { width:2px; height:12px; background:var(--gold-deep); border-radius:0; margin-right:7px; }
+.tl-lane { display:grid; grid-template-columns:120px 1fr; gap:10px; align-items:center; }
+.tl-lane .lab { font-size:11px; }
+@media (max-width:560px) { .tl-lane { grid-template-columns:1fr; gap:4px; } }
+
+/* the switch row */
+.sw { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:10px 0; }
+.sw .tog { display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; font-size:11px; font-weight:700; }
+.sw .tog span { padding:3px 10px; }
+.sw .tog .on { background:var(--panel); color:var(--panel-ink); }
+.sw .exp { color:var(--ink-3); font-size:12px; }
+
+/* the board */
+.tbl { width:100%; border-collapse:collapse; font-size:13px; }
+.tbl th { background:var(--panel); color:var(--panel-ink); font-size:10px; letter-spacing:.1em; text-transform:uppercase; text-align:left; padding:7px 10px; font-weight:800; }
+.tbl td { padding:7px 10px; border-bottom:1px solid var(--line-soft); vertical-align:middle; }
+.tbl td.c, .tbl th.c { text-align:center; }
+.tbl .who { color:var(--ink-3); font-size:12px; }
+.tbl tr.band th { background:var(--panel); font-size:10px; }
+.tbl tr.band th em { font-style:normal; font-weight:400; color:var(--panel-quiet); margin-left:10px; text-transform:none; letter-spacing:0; font-size:11px; }
+.bar { display:inline-block; width:120px; height:5px; border-radius:3px; background:var(--surface-2); vertical-align:middle; margin-right:8px; overflow:hidden; }
+.bar i { display:block; height:100%; background:var(--good); }
+.bar.part i { background:var(--attn); }
+.bar.none i { background:var(--none); }
+.tscroll { overflow-x:auto; }
+.filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; align-items:center; }
+.filters .f { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; border:1px solid var(--line); color:var(--ink-2); }
+.filters .f.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+.filters .srch { margin-left:auto; border:1px solid var(--line); border-radius:6px; padding:4px 10px; font-size:12px; color:var(--ink-3); min-width:160px; }
+
+/* the headline figures strip */
+.kpis { display:flex; gap:22px; align-items:baseline; flex-wrap:wrap; }
+.kpi b { font-size:32px; font-weight:700; line-height:1; }
+.kpi span { color:var(--ink-3); margin-left:6px; }
+.kpis .badge { align-self:center; }
+
+/* A: two columns, drawer */
+.a-grid { display:grid; grid-template-columns:1fr 300px; gap:16px; align-items:start; }
+@media (max-width:860px) { .a-grid { grid-template-columns:1fr; } }
+.drawer { border:1px solid var(--gold); border-radius:8px; background:var(--surface); box-shadow:var(--shadow); }
+.drawer .dh { padding:10px 14px; border-bottom:1px solid var(--line); font-weight:700; display:flex; align-items:center; }
+.drawer .dh .btn { margin-left:auto; }
+.drawer .dsec { padding:12px 14px; border-bottom:1px solid var(--line-soft); display:grid; gap:8px; }
+.drawer .dsec:last-child { border-bottom:0; }
+.fld { display:grid; gap:3px; }
+.fld span { font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); }
+.fld .in { border:1px solid var(--line); border-radius:6px; padding:5px 9px; font-size:12px; font-family:var(--mono); color:var(--ink); background:var(--surface); display:flex; justify-content:space-between; }
+.fld .in.focus { border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-wash); }
+.fld .in small { color:var(--ink-3); font-family:var(--sans); }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.dsec.danger { background:var(--bad-bg); }
+.dsec.danger p { font-size:12px; color:var(--ink-2); }
+.chips { display:flex; gap:6px; flex-wrap:wrap; }
+.chips .pill b { color:var(--ink); }
+
+/* B: the calendar */
+.b-grid { display:grid; grid-template-columns:1fr 320px; gap:16px; align-items:start; }
+@media (max-width:860px) { .b-grid { grid-template-columns:1fr; } }
+.cyc-sel { border:1px solid var(--line); border-radius:8px; }
+.cyc-sel .ch { padding:10px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--line); }
+.cyc-sel .ch b { font-size:16px; }
+.cyc-sel .cb { padding:12px 14px; display:grid; gap:10px; }
+.cyc-sel .acts { display:flex; gap:8px; flex-wrap:wrap; }
+.groups { display:grid; gap:10px; }
+.grp { border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.grp .gh { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--surface-2); font-weight:700; }
+.grp .gh .cnt { margin-left:auto; color:var(--ink-3); font-weight:600; font-size:12px; }
+.grp .rows { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); }
+.grp .r { display:flex; align-items:center; gap:8px; padding:7px 12px; border-top:1px solid var(--line-soft); font-size:13px; }
+.grp .r .who { color:var(--ink-3); font-size:11px; margin-left:auto; white-space:nowrap; }
+.grp .r .n { font-family:var(--mono); font-size:11px; color:var(--ink-3); }
+
+/* C: the steps */
+.steps { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:16px; }
+@media (max-width:860px) { .steps { grid-template-columns:1fr; } }
+.step { border:1px solid var(--line); border-radius:8px; padding:10px 12px; display:grid; gap:4px; position:relative; background:var(--surface); }
+.step .n { font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); display:flex; gap:8px; align-items:center; }
+.step .n i { display:inline-grid; place-items:center; width:18px; height:18px; border-radius:50%; font-style:normal; font-size:10px; border:1.5px solid var(--line); color:var(--ink-3); }
+.step.done .n i { background:var(--good); border-color:var(--good); color:#fff; }
+.step.now { border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-wash); }
+.step.now .n i { background:var(--gold); border-color:var(--gold); color:#171B22; }
+.step b { font-size:14px; }
+.step .s { color:var(--ink-3); font-size:12px; }
+.step .btn { justify-self:start; margin-top:4px; }
+.owed { display:grid; gap:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.owed .oh { background:var(--panel); color:var(--panel-ink); padding:8px 12px; font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; display:flex; gap:10px; align-items:center; }
+.owed .oh em { font-style:normal; font-weight:400; color:var(--panel-quiet); text-transform:none; letter-spacing:0; font-size:11px; }
+.owed .or { display:grid; grid-template-columns:1.3fr .8fr 1.6fr 1fr auto; gap:10px; align-items:center; padding:8px 12px; border-top:1px solid var(--line-soft); font-size:13px; }
+.owed .or.fold { background:var(--surface-2); color:var(--ink-2); grid-template-columns:1fr auto; }
+@media (max-width:700px) { .owed .or { grid-template-columns:1fr 1fr; } }
+.owed .who { color:var(--ink-3); font-size:12px; }
+.verdict { border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:18px 20px; display:grid; gap:8px; max-width:72ch; }
+.verdict p { color:var(--ink-2); }
+.verdict b { color:var(--ink); }
+.shots { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+.shot { border:1px solid var(--line); border-radius:8px; padding:12px 14px; background:var(--surface-2); color:var(--ink-2); font-size:13px; display:grid; gap:4px; }
+.shot b { color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="lab">Setup › Planning &amp; reporting · 2026-10-30 · drawn to choose from, nothing built</div>
+  <h1>Three ways the page could read</h1>
+  <p class="lede">The page does two jobs at once: it <b>sets</b> the plan period and the cycle, and it <b>watches</b> who has reported. Today the two are stacked in one long column, with two separate Edits, and pressing either one pushes everything below it down the page. Each view below keeps every fact and control the page has now; what changes is where they sit.</p>
+</header>
+
+<!-- ───────────────────────── TODAY ───────────────────────── -->
+<section class="opt today">
+  <div class="opt-h"><span class="chip" style="background:var(--none)">Today</span><h2>One long column</h2>
+    <p class="why">Plan period card, then the cycle strip with the headline figure under it, then the entry switch, then the whole board, then closed cycles at the very bottom. What gets in the way:</p></div>
+  <div class="shots">
+    <div class="shot"><b>Two Edits for one idea</b>The plan period and the cycle each have their own pen, though the strip's "6 of 12 months of the plan" is one fact that needs both.</div>
+    <div class="shot"><b>Editing moves the page</b>Opening the cycle's pen drops the board and the headline figure 150px down the page; the review day and the red Close button share that pen.</div>
+    <div class="shot"><b>The board is not a setting</b>Who has reported is the office's daily watch, but it lives under the settings and past the switch, where nobody opens Setup to find it.</div>
+    <div class="shot"><b>Closed cycles are out of sight</b>H2 2025 and its 64% are a two-column table at the bottom; the timeline above never shows them.</div>
+  </div>
+</section>
+
+<!-- ───────────────────────── VIEW A ───────────────────────── -->
+<section class="opt" id="view-a">
+  <div class="opt-h"><span class="chip rec">A · recommended</span><h2>Set up on one tab, watch on the other</h2>
+    <p class="why">The smallest move from what is signed off. The plan period still comes first and the cycle sits under it, but the settings and the board get a tab each, there is <b>one Edit</b>, and it opens a panel beside the facts instead of pushing the page down.</p></div>
+  <ul class="changes">
+    <li>Two tabs under the title: <b>The set-up</b> and <b>Who has reported</b>, the second carrying the 234 of 255 so the count is readable from either tab.</li>
+    <li>One card, <b>The year and the cycle</b>: the timeline across the top with the due date and review day pinned on it, the facts in three short columns under it.</li>
+    <li>One Edit opens a panel on the right with the plan period, the cycle and the review day in that order. Close the cycle is at the panel's foot, in its own red strip, away from the boxes you type in.</li>
+    <li>Closed cycles become a row of chips under the card ("H2 2025 · 64%"), where the timeline can show them too.</li>
+    <li>The board gets a filter row: All · Not started · Needs a note · Submitted, and a search box.</li>
+  </ul>
+  <div class="frame">
+    <div class="ptitle"><h3>Planning &amp; reporting cycle</h3><div class="right"><span class="pill">Half-yearly</span></div></div>
+    <div class="tabs"><div class="tab on">The set-up</div><div class="tab">Who has reported <span class="cnt">234 / 255</span></div></div>
+    <div class="a-grid">
+      <div class="card">
+        <div class="card-h">The year and the cycle <span class="btn fill">Done editing</span></div>
+        <div class="card-b" style="display:grid; gap:16px">
+          <div class="tl">
+            <div class="tl-y">2026</div>
+            <div class="tl-row">
+              <div class="tl-m inp inc">J</div><div class="tl-m inp inc">F</div><div class="tl-m inp inc">M</div><div class="tl-m inp inc">A</div><div class="tl-m inp inc">M</div><div class="tl-m inp inc">J</div>
+              <div class="tl-m inp pin" data-pin="due 15 Jul">J</div><div class="tl-m inp">A</div><div class="tl-m inp">S</div><div class="tl-m inp">O</div><div class="tl-m inp">N</div><div class="tl-m inp">D</div>
+            </div>
+            <div class="tl-key"><span><i class="inp"></i>Plan period</span><span><i class="inc"></i>This cycle</span><span><i class="pin"></i>Reports due · review day not set</span></div>
+          </div>
+          <div class="facts">
+            <div class="fact"><small>Plan period</small><b>Jan – Dec 2026</b><div class="sub">12 months · Q1–Q4</div></div>
+            <div class="fact"><small>This cycle</small><b>H1 2026 <span class="badge b-open">Open</span></b><div class="sub">Jan – Jun 2026 · 6 of 12 months of the plan</div></div>
+            <div class="fact"><small>Reports due</small><b>15 Jul 2026</b><div class="sub">plan edits: SMO only while open</div></div>
+            <div class="fact"><small>The review</small><b>Not set</b><div class="sub">reminders 24 · 12 · 6 · 3 hours before</div></div>
+          </div>
+          <div class="chips"><span class="lab" style="align-self:center">Closed cycles</span><span class="pill"><b>H2 2025</b> · 64%</span></div>
+          <div class="sw"><span class="lab">Tactic owners enter their own lines</span><span class="tog"><span class="on">Off</span><span>On</span></span><span class="exp">The unit enters every figure. Turning this on moves 2 lines to the people the plan names as owner.</span></div>
+        </div>
+      </div>
+      <div class="drawer">
+        <div class="dh">Editing <span class="btn link">Changes are kept as you type</span></div>
+        <div class="dsec"><span class="lab">Plan period</span>
+          <div class="row2"><div class="fld"><span>Starts</span><div class="in">Jan 2026 <small>▾</small></div></div><div class="fld"><span>Ends</span><div class="in">Dec 2026 <small>▾</small></div></div></div>
+          <p class="sw exp" style="padding:0;font-size:12px;color:var(--ink-3)">Set once for the whole business. 12 months.</p></div>
+        <div class="dsec"><span class="lab">This cycle</span>
+          <div class="fld"><span>Name</span><div class="in focus">H1 2026</div></div>
+          <div class="row2"><div class="fld"><span>Covers from</span><div class="in">Jan 2026 <small>▾</small></div></div><div class="fld"><span>to</span><div class="in">Jun 2026 <small>▾</small></div></div></div>
+          <div class="fld"><span>Reports due</span><div class="in">15 Jul 2026 <small>▾</small></div></div></div>
+        <div class="dsec"><span class="lab">The review</span>
+          <div class="row2"><div class="fld"><span>Review day</span><div class="in"><small>not set</small><small>▾</small></div></div><div class="fld"><span>At</span><div class="in"><small>— : —</small><small>◷</small></div></div></div>
+          <div class="fld"><span>Remind the SMO team</span><div class="in">24 · 12 · 6 · 3 <small>hours before</small></div></div></div>
+        <div class="dsec danger"><span class="lab" style="color:var(--bad)">Ending it</span><p>Closing files every figure under H1 2026 and stops the units reporting.</p><span class="btn danger" style="justify-self:start">Close the cycle</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="frame">
+    <div class="tabs" style="margin-top:0"><div class="tab">The set-up</div><div class="tab on">Who has reported <span class="cnt">234 / 255</span></div></div>
+    <div class="kpis" style="margin-bottom:12px"><div class="kpi"><b class="num">234</b><span>of 255 items reported</span></div><span class="badge b-done">6 submitted</span><span class="badge b-part">12 in progress</span><span class="badge b-late">1 not started</span></div>
+    <div class="filters"><span class="f on">All 19</span><span class="f">Not started 1</span><span class="f">Needs a note 1</span><span class="f">In progress 12</span><span class="f">Submitted 6</span><span class="srch">Find a line…</span></div>
+    <div class="tscroll"><table class="tbl">
+      <thead><tr><th>Reporting line</th><th>Reporting</th><th>Progress</th><th class="c">Key objectives</th><th class="c">Key measures</th><th class="c">Tactics</th><th class="c">Notes</th><th class="c">State</th></tr></thead>
+      <tbody>
+        <tr><td><b>Mobile</b></td><td class="who">Mennah Farouk</td><td><span class="bar"><i style="width:100%"></i></span><span class="mono">41/41</span></td><td class="c mono">4/4</td><td class="c mono">19/19</td><td class="c mono">18/18</td><td class="c"></td><td class="c"><span class="badge b-part">In progress</span></td></tr>
+        <tr><td><b>Retail Stores</b></td><td class="who">Dalia Sabry</td><td><span class="bar"><i style="width:100%"></i></span><span class="mono">20/20</span></td><td class="c mono">4/4</td><td class="c mono">8/8</td><td class="c mono">8/8</td><td class="c"></td><td class="c"><span class="badge b-done">Submitted</span></td></tr>
+        <tr><td><b>Consumer Electronics</b></td><td class="who">Heba Salem</td><td><span class="bar part"><i style="width:67%"></i></span><span class="mono">10/15</span></td><td class="c mono">4/4</td><td class="c mono">1/6</td><td class="c mono">5/5</td><td class="c"></td><td class="c"><span class="badge b-part">In progress</span></td></tr>
+        <tr><td><b>Nigeria</b></td><td class="who">Amaka Eze</td><td><span class="bar none"><i style="width:0"></i></span><span class="mono">0/16</span></td><td class="c mono">0/4</td><td class="c mono">0/6</td><td class="c mono">0/6</td><td class="c"></td><td class="c"><span class="badge b-late">Not started</span></td></tr>
+        <tr class="band"><th colspan="8">Capabilities <em>1 capability reporting</em></th></tr>
+        <tr><td><b>Product Mindset</b></td><td class="who">Tarek Nour</td><td><span class="bar"><i style="width:100%"></i></span><span class="mono">3/3</span></td><td class="c mono">0/0</td><td class="c mono">0/0</td><td class="c mono">3/3</td><td class="c"><span class="badge b-late">1 needs a note</span></td><td class="c"><span class="badge b-part">In progress</span></td></tr>
+        <tr class="band"><th colspan="8">Supporting functions <em>8 functions reporting</em></th></tr>
+        <tr><td><b>Finance</b></td><td class="who">Hossam Abuelenien</td><td><span class="bar"><i style="width:100%"></i></span><span class="mono">15/15</span></td><td class="c mono">2/2</td><td class="c mono">1/1</td><td class="c mono">12/12</td><td class="c"></td><td class="c"><span class="badge b-part">In progress</span></td></tr>
+        <tr><td colspan="8" class="who">… the other 12 lines as today</td></tr>
+      </tbody></table></div>
+  </div>
+</section>
+
+<!-- ───────────────────────── VIEW B ───────────────────────── -->
+<section class="opt" id="view-b">
+  <div class="opt-h"><span class="chip">B</span><h2>The year as a calendar</h2>
+    <p class="why">For an office that thinks in dates. The whole page hangs off one year strip: the plan period is a lane, every cycle is a lane under it, closed ones included, and the one you press opens on the right. The board is grouped by state, so what is still owed is read first.</p></div>
+  <ul class="changes">
+    <li>Two lanes on the strip: <b>Plan period</b> and <b>Cycles</b>. H2 2025 sits in the past in grey with its 64%, H1 2026 is outlined, and a dashed <b>next cycle</b> ghost from July is where "Open a new cycle" lives.</li>
+    <li>Press a cycle and its card opens beside the strip: dates, state, progress, Edit and Close. Nothing under the strip moves.</li>
+    <li>The plan period's Edit stays on its own lane, as now.</li>
+    <li>The board becomes three groups, Not started first, then In progress, then Submitted, each a compact grid of lines rather than eight columns. The full table is one press away ("Show every column").</li>
+  </ul>
+  <div class="frame">
+    <div class="ptitle"><h3>Planning &amp; reporting cycle</h3><div class="right"><span class="pill">Half-yearly</span><span class="btn gold">Open a new cycle…</span></div></div>
+    <div class="b-grid">
+      <div style="display:grid; gap:18px">
+        <div class="tl" style="gap:10px">
+          <div class="tl-y" style="display:grid; grid-template-columns:120px 1fr"><span></span><span class="tl-row" style="gap:3px"><span style="grid-column:1/7">2025 · Jul–Dec</span><span style="grid-column:7/13">2026 · Jan–Jun</span></span></div>
+          <div class="tl-lane"><span class="lab">Plan period <span class="btn" style="margin-left:6px;padding:2px 8px">Edit</span></span>
+            <div class="tl-row"><div class="tl-m closed">J</div><div class="tl-m closed">A</div><div class="tl-m closed">S</div><div class="tl-m closed">O</div><div class="tl-m closed">N</div><div class="tl-m closed">D</div><div class="tl-m inp">J</div><div class="tl-m inp">F</div><div class="tl-m inp">M</div><div class="tl-m inp">A</div><div class="tl-m inp">M</div><div class="tl-m inp">J</div></div></div>
+          <div class="tl-lane"><span class="lab">Cycles</span>
+            <div class="tl-row"><div class="tl-m closed inc">H2 2025</div><div class="tl-m closed inc"></div><div class="tl-m closed inc"></div><div class="tl-m closed inc"></div><div class="tl-m closed inc"></div><div class="tl-m closed inc">64%</div><div class="tl-m inp inc" style="background:var(--surface)">H1 2026</div><div class="tl-m inp inc" style="background:var(--surface)"></div><div class="tl-m inp inc" style="background:var(--surface)"></div><div class="tl-m inp inc" style="background:var(--surface)"></div><div class="tl-m inp inc" style="background:var(--surface)"></div><div class="tl-m inp inc pin" style="background:var(--surface)" data-pin="due 15 Jul">open</div></div></div>
+          <div class="tl-lane" style="margin-top:14px"><span class="lab" style="color:var(--ink-3)">Next</span>
+            <div class="tl-row"><div class="tl-m" style="background:transparent"></div><div class="tl-m" style="background:transparent"></div><div class="tl-m" style="background:transparent"></div><div class="tl-m" style="background:transparent"></div><div class="tl-m" style="background:transparent"></div><div class="tl-m" style="background:transparent"></div><div class="tl-m ghost" style="grid-column:7/13; color:var(--ink-3)">+ H2 2026 · from Jul</div></div></div>
+          <div class="tl-key"><span><i class="inp"></i>Plan period · Jan–Dec 2026, 12 months</span><span><i class="inc"></i>Cycle</span><span><i class="closed"></i>Closed</span><span><i class="pin"></i>Reports due</span></div>
+        </div>
+        <div class="groups">
+          <div class="grp"><div class="gh"><span class="badge b-late">Not started</span> 1 line <span class="cnt">Show every column ›</span></div>
+            <div class="rows"><div class="r"><b>Nigeria</b><span class="n">0/16</span><span class="who">Amaka Eze</span></div></div></div>
+          <div class="grp"><div class="gh"><span class="badge b-part">In progress</span> 12 lines <span class="cnt">1 needs a note</span></div>
+            <div class="rows">
+              <div class="r"><b>Consumer Electronics</b><span class="n">10/15</span><span class="who">Heba Salem</span></div>
+              <div class="r"><b>Product Mindset</b><span class="badge b-late" style="padding:2px 6px">note</span><span class="n">3/3</span><span class="who">Tarek Nour</span></div>
+              <div class="r"><b>Mobile</b><span class="n">41/41</span><span class="who">Mennah Farouk</span></div>
+              <div class="r"><b>B2B Ecomm</b><span class="n">17/17</span><span class="who">Kareem Hafez</span></div>
+              <div class="r"><b>Finance</b><span class="n">15/15</span><span class="who">Hossam Abuelenien</span></div>
+              <div class="r"><b>HR</b><span class="n">11/11</span><span class="who">Noran Adel</span></div>
+              <div class="r"><b>Treasury</b><span class="n">8/8</span><span class="who">Fayad Sobhy</span></div>
+              <div class="r"><b>Marketing</b><span class="n">2/2</span><span class="who">Tarek Nour</span></div>
+              <div class="r"><b>IT</b><span class="n">10/10</span><span class="who">Dina Shawky</span></div>
+              <div class="r"><b>Care (function)</b><span class="n">5/5</span><span class="who">Rania Fahmy</span></div>
+              <div class="r"><b>Strategy Management Office</b><span class="n">7/7</span><span class="who">Mohamed Essam</span></div>
+              <div class="r"><b>Merchandising</b><span class="n">10/10</span><span class="who">Tamer Fouad</span></div>
+            </div></div>
+          <div class="grp"><div class="gh"><span class="badge b-done">Submitted</span> 6 lines</div>
+            <div class="rows">
+              <div class="r"><b>Retail Stores</b><span class="n">20/20</span><span class="who">Dalia Sabry</span></div>
+              <div class="r"><b>Online Shop</b><span class="n">14/14</span><span class="who">Nadia Fouad</span></div>
+              <div class="r"><b>Corporate</b><span class="n">15/15</span><span class="who">Laila Zaki</span></div>
+              <div class="r"><b>Care</b><span class="n">16/16</span><span class="who">Rania Fahmy</span></div>
+              <div class="r"><b>IT Dist.</b><span class="n">15/15</span><span class="who">Dina Shawky</span></div>
+              <div class="r"><b>Logistics</b><span class="n">15/15</span><span class="who">Mai Sobhy</span></div>
+            </div></div>
+        </div>
+      </div>
+      <div style="display:grid; gap:12px">
+        <div class="cyc-sel">
+          <div class="ch"><b>H1 2026</b><span class="badge b-open">Open</span><span class="btn gold" style="margin-left:auto">Edit</span></div>
+          <div class="cb">
+            <div class="facts" style="grid-template-columns:1fr 1fr">
+              <div class="fact"><small>Covers</small><b>Jan – Jun 2026</b><div class="sub">6 of 12 months of the plan</div></div>
+              <div class="fact"><small>Reports due</small><b>15 Jul 2026</b></div>
+              <div class="fact"><small>Review day</small><b>Not set</b></div>
+              <div class="fact"><small>Plan edits</small><b>SMO only</b><div class="sub">while open</div></div>
+            </div>
+            <div class="kpi"><b class="num" style="font-size:28px">234</b><span>of 255 items reported</span></div>
+            <span class="bar" style="width:100%; height:7px"><i style="width:92%"></i></span>
+            <div class="chips"><span class="badge b-done">6 submitted</span><span class="badge b-part">12 in progress</span><span class="badge b-late">1 not started</span></div>
+            <div class="note" style="font-size:12px"><b>A cycle can be closed with gaps.</b> Whatever is unreported closes as unreported and stays visibly so.</div>
+            <div class="acts"><span class="btn danger">Close the cycle</span></div>
+          </div>
+        </div>
+        <div class="sw" style="padding:0 2px"><span class="lab">Tactic owners enter their own lines</span><span class="tog"><span class="on">Off</span><span>On</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── VIEW C ───────────────────────── -->
+<section class="opt" id="view-c">
+  <div class="opt-h"><span class="chip">C</span><h2>The cycle as five steps</h2>
+    <p class="why">For an office that is new to the platform, or a client whose SMO team changes. The page reads as the order the work happens in; the step you are on is lit, and what it needs is drawn under it. Everything else is one line with its own Edit.</p></div>
+  <ul class="changes">
+    <li>Five steps across the top: <b>Plan period</b>, <b>Open the cycle</b>, <b>Collect reports</b>, <b>Review day</b>, <b>Close</b>. Done ones carry a tick and their fact; the current one is outlined in gold.</li>
+    <li>Under the steps, the current step opens: for Collect reports that is <b>who still owes something</b> first (3 lines), with the 15 complete lines folded under one row.</li>
+    <li>Pressing another step opens it in the same place: Plan period shows the pickers and the timeline, Review day its three boxes, Close its one red button and the sentence that explains it.</li>
+    <li>Closed cycles sit under step 5 as the record of every Close pressed before.</li>
+  </ul>
+  <div class="frame">
+    <div class="ptitle"><h3>Planning &amp; reporting cycle</h3><div class="right"><span class="pill">Half-yearly</span><span class="pill"><b>H1 2026</b> · open</span></div></div>
+    <div class="steps">
+      <div class="step done"><span class="n"><i>✓</i>1 · Plan period</span><b>Jan – Dec 2026</b><span class="s">12 months · Q1–Q4</span><span class="btn">Edit</span></div>
+      <div class="step done"><span class="n"><i>✓</i>2 · Open the cycle</span><b>H1 2026</b><span class="s">Jan – Jun · due 15 Jul</span><span class="btn">Edit</span></div>
+      <div class="step now"><span class="n"><i>3</i>Collect reports</span><b>234 of 255</b><span class="s">3 lines still owe something</span><span class="badge b-open" style="justify-self:start">Now</span></div>
+      <div class="step"><span class="n"><i>4</i>Review day</span><b>Not set</b><span class="s">the day the units present</span><span class="btn">Set the day</span></div>
+      <div class="step"><span class="n"><i>5</i>Close</span><b>Files every figure</b><span class="s">last closed: H2 2025 · 64%</span><span class="btn danger">Close the cycle</span></div>
+    </div>
+    <div class="owed">
+      <div class="oh">Still owed <em>in H1 2026 · reports due 15 Jul 2026</em></div>
+      <div class="or"><b>Nigeria</b><span class="who">Amaka Eze</span><span><span class="bar none"><i style="width:0"></i></span><span class="mono">0/16</span></span><span class="badge b-late" style="justify-self:start">Not started</span><span class="btn link">Send an email ›</span></div>
+      <div class="or"><b>Consumer Electronics</b><span class="who">Heba Salem</span><span><span class="bar part"><i style="width:67%"></i></span><span class="mono">10/15</span></span><span class="who">1 of 6 key measures</span><span class="btn link">Send an email ›</span></div>
+      <div class="or"><b>Product Mindset</b><span class="who">Tarek Nour</span><span><span class="bar"><i style="width:100%"></i></span><span class="mono">3/3</span></span><span class="badge b-late" style="justify-self:start">1 needs a note</span><span class="btn link">Send an email ›</span></div>
+      <div class="or fold"><span><b>15 lines</b> have reported in full · 6 submitted, 9 in progress</span><span class="btn link">Show them ›</span></div>
+    </div>
+    <div class="sw" style="margin-top:14px"><span class="lab">Tactic owners enter their own lines</span><span class="tog"><span class="on">Off</span><span>On</span></span><span class="exp">The unit enters every figure.</span></div>
+  </div>
+</section>
+
+<!-- ───────────────────────── VERDICT ───────────────────────── -->
+<section class="verdict">
+  <div class="lab">Which to pick</div>
+  <p><b>A</b> if the aim is a calmer page with the least change: it keeps the order Islam signed off and fixes the three things that get in the way today. It also carries B's timeline, so nothing is lost by starting here.</p>
+  <p><b>B</b> if the office mostly wants to <b>see the year</b>: where the cycle sits, what closed before, when the next one starts. It is the biggest redraw and the board loses its eight columns on the first screen.</p>
+  <p><b>C</b> if the people running the cycle are new to it and need to be led through. It is the most opinionated, and an office that knows the platform may find the steps in the way.</p>
+</section>
+
+</div>
+</body>
+</html>

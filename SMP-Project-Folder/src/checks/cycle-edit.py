@@ -158,14 +158,20 @@ def js(pg, expr, arg=None):
 
 
 def strip_state(pg):
+    # §690: THE STRIP IS THE CARD. The cycle's name, dates and review point
+    # are the card's facts now (`[data-fact-cycle]`), and the card's head
+    # carries the page's one Edit and, closed, Open a new cycle. What the
+    # strip was asserted to carry — nothing that changes anything — is asked
+    # of the card the same way: no Close, no picker, inside it.
     return js(pg, """() => {
-      const h = document.querySelector(".fstrip-head");
+      const h = document.querySelector("[data-cycle-card]");
       if (!h) return {none:true};
       const vis = el => !!(el && el.getClientRects().length);
+      const due = (h.querySelector("[data-fact-due] b") || {}).textContent || "";
       return {
-        name:  (h.querySelector(".fstrip-t") || {}).textContent || "",
-        meta:  (h.querySelector(".fstrip-meta") || {}).textContent || "",
-        asof:  (h.querySelector(".fstrip-meta.asof") || {}).textContent || "",
+        name:  (h.querySelector("[data-cycle-name]") || {}).textContent || "",
+        meta:  ((h.querySelector("[data-fact-cycle] .sub") || {}).textContent || "") + " · due " + due,
+        asof:  (h.querySelector("[data-fact-cycle] .sub") || {}).textContent || "",
         edit:  vis(h.querySelector("[data-editcycle]")),
         close: vis(h.querySelector("[data-closecycle]")),
         month: vis(h.querySelector(".monthbtn")),
@@ -184,7 +190,10 @@ def pen_state(pg):
       return {
         word: word,
         lit: !!(t && t.classList.contains("penon")),
-        cols: !!p.querySelector(".cyc2-f") && !!p.querySelector(".cyc2-d"),
+        /* §690: the cycle's own block is `.cycown` and Ending it is
+           `.cycend`, stacked in the pen beside the card rather than side by
+           side — the pen is a column now. */
+        cols: !!p.querySelector(".cycown") && !!p.querySelector(".cycend"),
         /* §308: THE CYCLE'S OWN BLOCKS, asked apart from the planning
            period's. That block is `.cyc2-r.planper` and leads the pen, so a
            flat `.nc-h` sweep reports four headings and every positional
@@ -192,7 +201,7 @@ def pen_state(pg):
            than a column. Scoped rather than loosened (§218): what this file
            owns is the CYCLE, and `checks/planning-period.py` owns the frame
            it sits in. */
-        heads: [...p.querySelectorAll(".cyc2-f .nc-h, .cyc2-d .nc-h, .cyc2-r:not(.planper) .nc-h")]
+        heads: [...p.querySelectorAll(".cyc2-r:not(.planper):not(.planyears) .nc-h")]
                   .map(h => h.textContent.trim()),
         labels: [...p.querySelectorAll(".nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
@@ -202,15 +211,15 @@ def pen_state(pg):
            already and how we preorate more dates will create confusion"* —
            so the assertion below reads this list and not every box in the
            pen, which is what makes it able to catch the drift back. */
-        cycleLabels: [...p.querySelectorAll(".cyc2-f .nc-grid label > span:first-child")]
+        cycleLabels: [...p.querySelectorAll(".cycown .nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
-        reviewLabels: [...p.querySelectorAll(".cyc2-r:not(.planper) .nc-grid label > span:first-child")]
+        reviewLabels: [...p.querySelectorAll(".cyc2-r:not(.planper):not(.cycown) .nc-grid label > span:first-child")]
                   .map(s => s.textContent.trim()),
         fields: [...p.querySelectorAll(".nc-grid input")].map(i => i.value),
         bound: [...p.querySelectorAll(".nc-grid input")].every(i => i.hasAttribute("data-fld")),
-        month: (p.querySelector(".cyc2-f .monthbtn .mval") || {}).textContent || "",
+        month: (p.querySelector(".cycown .monthbtn .mval") || {}).textContent || "",
         close: !!btn,
-        closeInDanger: !!(btn && btn.closest(".cyc2-d")),
+        closeInDanger: !!(btn && btn.closest(".cycend")),
         save: !!p.querySelector("[data-ce-save]"),
         cancel: !!p.querySelector("[data-ce-cancel]"),
         held: btn ? btn.getAttribute("aria-disabled") : null
@@ -387,29 +396,34 @@ with sync_playwright() as p:
     ok("...and Reporting as of is gone by name — the cycle's end IS the review point",
        not any("reporting as of" in x.lower() for x in (pen.get("cycleLabels") or [])),
        pen.get("cycleLabels"))
-    # AND THE FOUR ARE ON ONE LINE, which is the other half of what he asked
-    # for and the thing a check must hold: measured as ONE ROW at his own
-    # window, never as a pixel count (§94.8). At 1280 the pen's field area is
-    # 641px, which is where the five boxes wrapped.
+    # §690: THE PEN IS BESIDE THE CARD, NOT UNDER IT. §273.4 measured the
+    # in-place pen moving the page below by 156px and Islam chose it anyway;
+    # view A undoes that cost: the pen opens in a column on the card's right
+    # at his window, and what is under the card — the switch, the sections —
+    # stays exactly where it was. Measured as geometry, never as a pixel
+    # count (§94.8): the pen's left edge past the card's right edge, and the
+    # first thing below the wrap at the same top before and after. The four
+    # boxes still fit the pen they are in (§158).
     row = js(pg, """() => {
-      /* §308: THE CYCLE'S ROW. The planning period draws a `.nc-1line` of
-         its own and draws it FIRST, so an unscoped query measures three boxes
-         and calls a correct build broken (§51.11: a selector that still
-         matches and points at another control). */
-      const g = document.querySelector(".newcycle .cyc2-f .nc-1line");
-      if (!g) return {no:"no cycle row"};
+      const card = document.querySelector("[data-cycle-card]");
+      const pen = document.querySelector(".newcycle");
+      const g = document.querySelector(".newcycle .cycown .nc-grid");
+      if (!card || !pen || !g) return {no:"no pen beside the card"};
+      const c = card.getBoundingClientRect(), p = pen.getBoundingClientRect(), gr = g.getBoundingClientRect();
       const kids = [...g.children], r = kids.map(k => k.getBoundingClientRect());
-      const gr = g.getBoundingClientRect();
-      /* ONE ROW IS NOT ONE `top` (§122.4). The boxes are bottom-aligned and of
-         three different heights, so counting distinct tops reports two rows on
-         a row that is plainly one. They are on one line when every box overlaps
-         every other one vertically. */
-      return { oneRow: Math.max(...r.map(x => x.top)) < Math.min(...r.map(x => x.bottom)),
-               n: kids.length, h: Math.round(gr.height),
-               fits: r.every(x => x.right <= gr.right + 1) };
+      const below = card.nextElementSibling;
+      return { beside: p.left >= c.right - 1, n: kids.length,
+               fits: r.every(x => x.right <= gr.right + 1 && x.left >= gr.left - 1),
+               belowTop: below ? Math.round(below.getBoundingClientRect().top + window.scrollY) : null };
     }""")
-    ok("the four boxes are on ONE line", row.get("oneRow") is True and row.get("n") == 4, row)
-    ok("...and none of them runs past the row it is in (§158)", row.get("fits") is True, row)
+    ok("the pen opens beside the card", row.get("beside") is True, row)
+    ok("...holding the cycle's four boxes, none running past the pen (§158)",
+       row.get("n") == 4 and row.get("fits") is True, row)
+    press(pg, "[data-editcycle]", "Done editing")
+    shut_top = js(pg, "()=>{ const b=document.querySelector('[data-cycle-card]').nextElementSibling; return b ? Math.round(b.getBoundingClientRect().top + window.scrollY) : null; }")
+    press(pg, "[data-editcycle]", "Edit")
+    ok("and what is under the card did not move when it opened",
+       row.get("belowTop") is not None and row.get("belowTop") == shut_top, (row.get("belowTop"), shut_top))
     ok("and the review day is NOT among them — it changes no figure (spec 030)",
        not any("review" in x.lower() for x in (pen.get("cycleLabels") or [])),
        pen.get("cycleLabels"))
@@ -419,14 +433,17 @@ with sync_playwright() as p:
     # two spellings of the same word (§87).
     ok("filled from the cycle, not empty",
        (pen.get("fields") or [None])[0] == r0.get("name"), pen.get("fields"))
-    ok("two columns, headed", pen.get("cols") is True and
-       [h.lower() for h in (pen.get("heads") or [])][:2] == ["this cycle", "ending it"],
+    # §690: ONE COLUMN, in the order the facts are read — the cycle, the
+    # review, Ending it LAST, behind everything you type in (§273.4's reason
+    # for the second column, kept as an order now that the pen is beside the
+    # card and has one).
+    ok("the cycle's block, then the review, then Ending it", pen.get("cols") is True and
+       [h.lower() for h in (pen.get("heads") or [])] == ["this cycle", "the review", "ending it"],
        pen.get("heads"))
-    # spec 030: and the review sits UNDER them in a block of its own, which is
-    # the whole of how it is kept out of the arithmetic. Asserted at both ends
-    # — present as its own block, and its fields absent from the cycle's.
-    ok("with the review under them, in a block of its own",
-       [h.lower() for h in (pen.get("heads") or [])][2:] == ["the review"] and
+    # spec 030: and the review sits in a block of its own, which is the whole
+    # of how it is kept out of the arithmetic. Asserted at both ends — present
+    # as its own block, and its fields absent from the cycle's.
+    ok("with the review in a block of its own",
        len(pen.get("reviewLabels") or []) == 3,
        [pen.get("heads"), pen.get("reviewLabels")])
     ok("Close the cycle is in the ENDING IT column, not among the fields",
@@ -455,9 +472,9 @@ with sync_playwright() as p:
     #
     # PRESSED THROUGH THE REAL CONTROLS and read back off the CYCLE, because a
     # picker wired to nothing renders identically to one that works (§96).
-    pick_month(pg, ".newcycle .cyc2-f label:nth-child(2) .monthbtn", "Feb")
+    pick_month(pg, ".newcycle .cycown label:nth-child(2) .monthbtn", "Feb")
     pick_month(pg, ".newcycle .tobtn", "Jul")
-    pick_day(pg, ".newcycle .cyc2-f label:nth-child(4) .monthbtn", 20)
+    pick_day(pg, ".newcycle .cycown label:nth-child(4) .monthbtn", 20)
     saved = review(pg)
     ok("the name landed", saved.get("name") == "H2 2026 renamed", saved)
     # FOUR DIGITS, and that is not a style: `cycleYear()` scrapes a four-digit
@@ -642,11 +659,19 @@ with sync_playwright() as p:
     # pen, and pressing it reaches the CYCLE.
     shut2 = strip_state(pg)
     ok("the strip carries no Reopen",
-       js(pg, "()=>!document.querySelector('.fstrip-head [data-reopenyes]')") is True, shut2)
+       js(pg, "()=>!document.querySelector('[data-cycle-card] [data-reopenyes]')") is True, shut2)
     ok("...and it still offers Edit and Open a new cycle",
        shut2.get("edit") is True and shut2.get("opennew") is True, shut2)
     hist0 = js(pg, "()=>({n:HISTORY.length, last:(HISTORY[HISTORY.length-1]||{}).name})")
+    # §690: Edit opens the PEN for a closed cycle too — the plan period and
+    # the review are editable whatever the cycle's state — and Reopen is at
+    # the pen's far end, where Close is while it runs (§273.2). The dialog is
+    # behind that press now, not behind Edit.
     press(pg, "[data-editcycle]", "Edit")
+    ok("the pen opens for a closed cycle, with Reopen at its far end",
+       js(pg, "()=>!!document.querySelector('.newcycle .cycend [data-reopencycle]') && !document.querySelector('.newcycle [data-closecycle]')") is True,
+       pen_state(pg))
+    press(pg, ".newcycle [data-reopencycle]", "Reopen the cycle")
     dlg = js(pg, """() => {
       const ov = document.querySelector(".overlay.on, #overlay.on");
       const b = document.getElementById("modal-b");
@@ -657,7 +682,7 @@ with sync_playwright() as p:
         vals: [...b.querySelectorAll(".kv span:not(.k)")].map(k => k.textContent.trim()),
         yes: !!b.querySelector("[data-reopenyes]"),
         no: !!b.querySelector("[data-reopenno]"),
-        band: !!document.querySelector(".fstrip .newcycle"),
+        band: !!document.querySelector("[data-cycle-card] [data-reopenyes]"),
         inert: !!(ov || document.querySelector('[aria-hidden="true"].wrap, .wrap[inert]'))
       };
     }""")
@@ -681,7 +706,7 @@ with sync_playwright() as p:
     # CANCEL CHANGES NOTHING, asserted before the press that does.
     press(pg, "[data-reopenno]", "Cancel")
     ok("Cancel closes it and reopens nothing", review(pg).get("state") == "closed", review(pg))
-    press(pg, "[data-editcycle]", "Edit")
+    press(pg, ".newcycle [data-reopencycle]", "Reopen the cycle")
     press(pg, "[data-reopenyes]", "Reopen")
     pg.wait_for_timeout(500)
     back = review(pg)
@@ -728,7 +753,7 @@ with sync_playwright() as p:
           const r = { edit: !!box.querySelector("[data-editcycle]"),
                       close: !!box.querySelector("[data-closecycle]"),
                       month: !!box.querySelector(".monthbtn"),
-                      name: (box.querySelector(".fstrip-t") || {}).textContent || "" };
+                      name: (box.querySelector("[data-cycle-name]") || {}).textContent || "" };
           return r;
         }""")
         ok("no Edit", drawn.get("edit") is False, drawn)

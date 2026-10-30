@@ -6238,18 +6238,37 @@
        button only opens and closes the pen. `cycleDraft()`, `cycleEditDirty()`,
        `ceHoldPaint()`, the two `data-ce-*` handlers and the four `input`
        handlers are DELETED rather than left unreachable (§24). */
-    /* §495: THE PLAN PERIOD'S OWN PEN, the cycle pen's shape (§273.4): the
-       pickers write as they are picked, so this only opens and closes. */
-    var ep = document.querySelector("[data-editplan]");
-    if (ep) ep.addEventListener("click", function(){
-      var a = document.activeElement;
-      if (PLANEDIT && a && a.blur) a.blur();
-      PLANEDIT = PLANEDIT ? null : true;
-      paint();
+    /* §690: THE TWO TABS of Setup › Planning & reporting, and the board's
+       filter row. The tab is a mode and repaints; the filter is applied to
+       the rows already drawn, so typing in Find never loses its cursor to a
+       repaint (§219's cousin). */
+    document.querySelectorAll("[data-cyctab]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.getAttribute("data-cyctab");
+        if (k === CYCLETAB) return;
+        var a = document.activeElement;
+        if (a && a.blur) a.blur();
+        CYCLETAB = k;
+        paint();
+      });
     });
+    document.querySelectorAll("[data-bfilter]").forEach(function(b){
+      b.addEventListener("click", function(){
+        BOARDFILTER = b.getAttribute("data-bfilter");
+        document.querySelectorAll("[data-bfilter]").forEach(function(x){
+          var on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on));
+        });
+        applyBoardFilter();
+      });
+    });
+    var bf = document.getElementById("board-find");
+    if (bf) bf.addEventListener("input", function(){ BOARDFIND = bf.value; applyBoardFilter(); });
+    applyBoardFilter();
     var ec = document.querySelector("[data-editcycle]");
     if (ec) ec.addEventListener("click", function(){
-      if (REVIEW.state !== "open") return reopenDialog();
+      /* §690: the pen opens for a closed cycle too — the plan period and the
+         review are its to edit whatever the cycle's state, and Reopen sits
+         where Close does, at the pen's far end (§273.2). */
       /* COMMIT THE BOX BEFORE LEAVING IT (§219). A field writes on `change`,
          which is on blur — a mouse press blurs on the way past, which is the
          almost-always that hides this, and a keyboard press does not. `blur()`
@@ -6265,6 +6284,8 @@
       }
     });
 
+    var rc = document.querySelector("[data-reopencycle]");
+    if (rc) rc.addEventListener("click", function(){ reopenDialog(); });
     /* ── REOPENING A CLOSED CYCLE (§273.2, reshaped by §273.3) ──────
        Before this, NOTHING in the product reopened a cycle: `canReport()` and
        `canReportFn()` both open with `REVIEW.state !== "open"` BEFORE any role
@@ -6290,6 +6311,31 @@
        stack of label/value rows, two buttons — is what every confirmation in
        this product already wears (§53.5, and `.cbtns`' own note about the
        third copy being the one that gets extracted). */
+    /* §690: THE BOARD'S FILTER, applied to the drawn rows. A band (units,
+       capabilities, functions) whose every row is hidden hides with them,
+       and a board with no row left says so on one line. */
+    function applyBoardFilter(){
+      var rows = document.querySelectorAll("[data-brow]");
+      if (!rows.length) return;
+      var q = String(BOARDFIND || "").trim().toLowerCase();
+      rows.forEach(function(tr){
+        var ok = BOARDFILTER === "all" ||
+          (BOARDFILTER === "notes" ? tr.getAttribute("data-notes") === "1"
+                                   : tr.getAttribute("data-state") === BOARDFILTER);
+        if (ok && q) ok = (tr.getAttribute("data-find") || "").indexOf(q) >= 0;
+        tr.hidden = !ok;
+      });
+      document.querySelectorAll("tr.dxband").forEach(function(b){
+        var n = b.nextElementSibling, any = false;
+        while (n && !n.classList.contains("dxband")) {
+          if (n.hasAttribute("data-brow") && !n.hidden) any = true;
+          n = n.nextElementSibling;
+        }
+        b.hidden = !any;
+      });
+      var e = document.querySelector("[data-board-empty]");
+      if (e) e.hidden = !!document.querySelector("[data-brow]:not([hidden])");
+    }
     function reopenDialog(){
       var last = HISTORY.length ? HISTORY[HISTORY.length - 1] : null;
       var scored = last && last.name === REVIEW.name ? last.group : null;

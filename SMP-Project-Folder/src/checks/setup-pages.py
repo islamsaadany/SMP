@@ -85,12 +85,13 @@ with sync_playwright() as p:
 
     print("\n── 2 · a real section heading is NOT swallowed ──")
     # The rule drops a heading that MATCHES the page name, never simply the
-    # first one — the Reporting cycle's first section is "Who has reported",
-    # which is a real name and must survive.
-    pg.evaluate("()=>{currentSub='cycle';paint();}")
+    # first one — the Planning & reporting cycle's set-up tab has one real
+    # section, "How figures are entered", and it must survive (§690: Who has
+    # reported is the page's second TAB now, not a section).
+    pg.evaluate("()=>{currentSub='cycle';CYCLETAB='setup';paint();}")
     pg.wait_for_timeout(300)
     h2 = pg.eval_on_selector_all("#panel h2", "e=>e.map(x=>x.textContent.trim())")
-    ck("Reporting cycle keeps 'Who has reported'", "Who has reported" in h2, h2)
+    ck("Planning & reporting keeps 'How figures are entered'", "How figures are entered" in h2, h2)
 
     print("\n── 3 · the name stays put, and a BOXED table's head pins (§273.1) ──")
     # REWRITTEN, NOT DELETED (§218). This asserted §121.4's general rule — every

@@ -70586,7 +70586,7 @@ Islam, at the Analysis start screen: *"the SWOT has different entries — the qu
 
 **§691 MERGED TO `main`** 2026-10-30, Islam: *"merge to main"*. `main` had taken §689–§690 meanwhile — merged in first, ours renumbered §689 → §691, main's carried rules module re-carried (its §687 change had not been, so `generated-in-step` was red on `main`), the builds rebuilt on the merged tree and both suites run there: **346 passed, 0 failed**; **520 ok, 10 failed**, the known ten — then `60f3523e..47f25697`. No migrations; nobody signed out.
 
-## §692 — Ways back and the onward path: the Copilot stress test's first batch (2026-10-30)
+## §694 — Ways back and the onward path: the Copilot stress test's first batch (2026-10-30; §692 on the branch, renumbered at the merge: main took §692–§693)
 
 Islam asked for a stress test of the whole Copilot *"from a user experience approach… skipping concepts if something needs skipping or problems with movement in complex things like directions and plans"*. The write-up (`design-mockups/copilot-layout/2026-10-30_copilot-stress-test.html`) found fourteen things in three groups — no way back, cannot skip, movement between areas — and proposed three batches. Islam: *"start batch 1 show me a mockup first"*, then, on the mockup (`design-mockups/copilot-layout/2026-10-30_ways-back-and-onward.html`): *"ok proceed and build batch 1"*. Five findings, all small, none changing the chat's shape:
 

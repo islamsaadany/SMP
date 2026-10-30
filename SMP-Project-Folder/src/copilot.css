@@ -1018,7 +1018,7 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copway { font:600 11px/1.6 var(--sans); padding:0 8px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2); color:var(--ink-2); white-space:nowrap; }
 .copwaysk { grid-column:2; font-size:var(--fs-micro, 11px); color:var(--ink-3); }
 
-/* §692 — WAYS BACK AND THE ONWARD PATH (stress test batch 1). The Next
+/* §694 — WAYS BACK AND THE ONWARD PATH (stress test batch 1). The Next
    strip after Apply, the unfinished-chat line on the start screen, and the
    Change the Directions link on the card head. */
 .copnext{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:8px 12px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;background:var(--surface)}

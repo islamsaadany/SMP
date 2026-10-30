@@ -43,7 +43,7 @@ export async function execView(c: any, chat: { id: string; place?: string; secti
     execWords: { quarters: periodQuarters(s.period), period: s.period ? periodWords(s.period) : "", length: s.period ? periodLength(s.period) : 0,
       compiles: COMPILES, months: MONTHS, choices: { full: ch.full, fullWord: periodWords(ch.full), rest: ch.rest, restWord: periodWords(ch.rest) } } };
 }
-/* §692 S10 — WHEN THERE IS NOTHING TO PLAN FOR, the chat says whether a
+/* §694 S10 — WHEN THERE IS NOTHING TO PLAN FOR, the chat says whether a
    Directions version is saved and waiting for Apply, rather than sending the
    person back to choose what they chose. The latest saved one in this place. */
 async function dirsSavedIn(c: any, place: string): Promise<{ id: string; title: string; n: number } | null> {

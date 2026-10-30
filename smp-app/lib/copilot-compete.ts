@@ -138,7 +138,7 @@ export function sanitizeCompete(raw: unknown, stored: Compete): Compete {
   if ("internal" in j) s.internal = cleanScores("internal", j.internal);
   if (Array.isArray(j.edited)) s.edited = j.edited.map(str).filter((x: string) => /^(market|internal):[a-z_]+:(btc|bts|bp)$/.test(x)).slice(0, 60);
   if ("chosen" in j) s.chosen = isDisc(j.chosen) ? j.chosen : "";
-  /* §692 S2 — THE DISCIPLINE CAN BE CHANGED ONCE CHOSEN. The values and the
+  /* §694 S2 — THE DISCIPLINE CAN BE CHANGED ONCE CHOSEN. The values and the
      table were drawn for the other one, so they go with it; the scores stay
      as the person set them, and the recommendation is live again. */
   if ("chosen" in j && stored.chosen && s.chosen !== stored.chosen) { s.suggested = []; s.picked = []; s.table = null; s.alts = []; s.log = []; s.reply = ""; s.phase = s.chosen ? "values" : "discipline"; }

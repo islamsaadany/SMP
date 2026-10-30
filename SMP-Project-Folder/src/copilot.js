@@ -327,7 +327,7 @@ var COPILOT = (function(){
   }
   /* §654 B4 — the rail's chip in the Copilot's own words. */
   function kindWord(k){ return k === "promotable" ? "Can go on the plan" : "Stays in the Copilot"; }
-  /* §692 S9 — THE ONWARD PATH. After Apply (after Save, in Advisory) one line
+  /* §694 S9 — THE ONWARD PATH. After Apply (after Save, in Advisory) one line
      names the method's next step, with a button that opens that area's start
      screen in this place. The order is the method's: SWOT, Competitive
      Discipline, Directions, Execution; an area this place does not offer is
@@ -362,7 +362,7 @@ var COPILOT = (function(){
     if (delivId) openItem("deliv", delivId);
     try { window.scrollTo(0, 0); } catch (e) {}
   }
-  /* §692 S12 — AN UNFINISHED CHAT IS NAMED ON THE START SCREEN: a step-by-step
+  /* §694 S12 — AN UNFINISHED CHAT IS NAMED ON THE START SCREEN: a step-by-step
      chat in this place and area with steps still open (the rail's "N of M
      done"), so + New chat does not start a second one beside it unknowing.
      Free chats have no steps and are not counted. */
@@ -2734,7 +2734,7 @@ var COPILOT = (function(){
     var clar = (W.clarity || {})[m.clarity] || m.clarity;
     var line = '<b>' + E(cpWord(m.leader)) + '</b> leads the market by ' + E(String(m.gap)) + ' points <span class="copcp-cl ' + E(m.clarity) + '">' + E(clar) + '</span>. ' +
       (!i.complete ? '' : R.aligned ? 'Your internal scores point the same way.' : 'Your internal scores lean to ' + E(cpWord(i.leader)) + '.');
-    /* §692 S2 — the choice can be changed once made: a link under the
+    /* §694 S2 — the choice can be changed once made: a link under the
        recommendation brings the three back, saying what goes with the change. */
     var again = !!(s.chosen && ed && CPUNCH[PANE.chat.id]);
     var opts = (!s.chosen || again) && ed ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-choose="' + E(m.leader) + '">Yes, ' + E(cpWord(m.leader)) + '</button>' +
@@ -2838,7 +2838,7 @@ var COPILOT = (function(){
     var body;
     if (!m.complete) body = '<div class="copsw-card"><h3>The scores</h3><p class="copnote">Nothing scored yet — the chat scores the three disciplines first.</p></div>';
     else {
-      /* §692 S2 — the scores settle at the choice, not at the table: a changed
+      /* §694 S2 — the scores settle at the choice, not at the table: a changed
          score always has an effect, and after the choice the way to change
          them is to choose again. */
       var scoresOpen = !s.table || !!CPSCORES[id], scEd = ed && !s.chosen;
@@ -3349,7 +3349,7 @@ var COPILOT = (function(){
         (ed && !s.chose ? ' Ask here for a couple more, or a different angle.' : '') + (!s.chose && !dirsLog ? moreOpts("dirs") : '')));
       out.push(logOf("dirs", !s.chose));
       if (!s.chose) {
-        /* §692 S1 — opened again after Go ahead: said once, here. */
+        /* §694 S1 — opened again after Go ahead: said once, here. */
         if (s.caps.length) out.push(aiMsg('The Directions are open again — scores, owners and ticks as they were. Change the ticks, then <b>Go ahead</b> under the table. The ' + s.caps.length + ' Capabilities suggested so far are kept, marked as suggested for the earlier set.'));
         return out.join("");
       }
@@ -3394,7 +3394,7 @@ var COPILOT = (function(){
       '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
     var body = '';
     if (s.mode === "directions") {
-      /* §692 S1 — Go ahead can be undone: Change the Directions, on the card
+      /* §694 S1 — Go ahead can be undone: Change the Directions, on the card
          head and in the chat's folded row, unsets the choice and keeps the rest. */
       body += '<div class="copsw-card copdv-card"><h3>The Directions' + (s.options.length ? ' <span class="copsw-n">' + s.options.length + ' offered · ' + g.length + ' ticked</span>' : '') +
         (ed && s.chose ? ' <button type="button" class="linkbu copdv-unchoose" data-cop-dv-unchoose' + held(busyHere ? BUSY : "") + '>Change the Directions</button>' : '') + '</h3>' +
@@ -3814,7 +3814,7 @@ var COPILOT = (function(){
   }
   function exMsgs(s, ed, busyHere){
     var out = [], w = PANE.execWords || {}, id = PANE.chat.id, left = exLeft();
-    /* §692 S10 — nothing to plan for: a saved Directions version waiting for
+    /* §694 S10 — nothing to plan for: a saved Directions version waiting for
        Apply is named and opened, rather than sending the person to choose again. */
     if (!s.items.length) {
       var dsv = PANE.execDirsSaved;

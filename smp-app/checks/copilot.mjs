@@ -1056,15 +1056,15 @@ try {
     NEXT = { answer: SC }; await call("POST", "api", { act: "competeScore", id: nc2.j.chat?.id, placeWord: "Mobile" }, OMAR);
     const g2 = await call("GET", "chat", null, OMAR, "?id=" + nc2.j.chat?.id);
     await call("POST", "api", { act: "competeSave", id: nc2.j.chat?.id, compete: { ...g2.j.compete, chosen: "btc", table: { discipline: "btc", values: [VALS[1]] }, phase: "table" } }, OMAR);
-    /* §692 S2 — the discipline can be changed once chosen: what was drawn for
+    /* §694 S2 — the discipline can be changed once chosen: what was drawn for
        the other one goes, the scores stay, the recommendation is live again. */
     const g3 = await call("GET", "chat", null, OMAR, "?id=" + nc2.j.chat?.id);
     const sw = await call("POST", "api", { act: "competeSave", id: nc2.j.chat?.id, compete: { chosen: "bts" } }, OMAR);
-    check("§692 choosing a different discipline clears the values and the table and keeps the scores",
+    check("§694 choosing a different discipline clears the values and the table and keeps the scores",
       sw.st === 200 && sw.j.compete?.chosen === "bts" && sw.j.compete?.table === null && sw.j.compete?.suggested.length === 0 && sw.j.compete?.phase === "values" && JSON.stringify(sw.j.compete?.market) === JSON.stringify(g3.j.compete?.market),
       String(JSON.stringify(sw.j.compete)).slice(0, 200));
     const un = await call("POST", "api", { act: "competeSave", id: nc2.j.chat?.id, compete: { chosen: "" } }, OMAR);
-    check("§692 …and unchoosing altogether goes back to the recommendation", un.st === 200 && un.j.compete?.chosen === "" && un.j.compete?.phase === "discipline", String(JSON.stringify(un.j.compete)).slice(0, 120));
+    check("§694 …and unchoosing altogether goes back to the recommendation", un.st === 200 && un.j.compete?.chosen === "" && un.j.compete?.phase === "discipline", String(JSON.stringify(un.j.compete)).slice(0, 120));
     await call("POST", "api", { act: "competeSave", id: nc2.j.chat?.id, compete: { chosen: "btc", table: { discipline: "btc", values: [VALS[1]] }, phase: "table" } }, OMAR);
     const fn2 = await call("POST", "api", { act: "competeFinish", id: nc2.j.chat?.id, placeWord: "Mobile" }, OMAR);
     check("a second chat saves as version 2 of the SAME deliverable", fn2.j.saved && fn2.j.saved.n === 2 && fn.j.saved && fn2.j.saved.deliverableId === fn.j.saved.deliverableId, JSON.stringify(fn2.j.saved));
@@ -1126,14 +1126,14 @@ try {
       cs.st === 200 && cs.j.dirs?.caps.length === 2 && cs.j.dirs.caps.every((x) => x.keep) && cs.j.dirs.caps[0].serves.join() === chosen[0] && cs.j.dirs.caps[0].kind === "gap" && cs.j.dirsBlocker === "",
       String(JSON.stringify(cs.j.dirs?.caps)).slice(0, 300));
     check("...and the model was asked with the chosen Directions", chosen.every((t) => JSON.stringify(seen[seen.length - 1] || "").includes(t)));
-    /* §692 S1 — Go ahead can be undone: the choice is unset, the options keep
+    /* §694 S1 — Go ahead can be undone: the choice is unset, the options keep
        their scores and ticks, the Capabilities already suggested stay. */
     const unch = await call("POST", "api", { act: "dirSave", id: did, dirs: { chose: false } }, NORAN);
-    check("§692 un-choosing keeps the Directions as they were and the Capabilities suggested so far",
+    check("§694 un-choosing keeps the Directions as they were and the Capabilities suggested so far",
       unch.st === 200 && unch.j.dirs?.chose === false && unch.j.dirs?.options.length === 7 && unch.j.dirs?.options.filter((o) => o.go).length === chosen.length && unch.j.dirs?.caps.length === 2 && /Tick the Directions|Go ahead|Choose/.test(unch.j.dirsBlocker || ""),
       String(JSON.stringify({ c: unch.j.dirs?.chose, b: unch.j.dirsBlocker })).slice(0, 160));
     const rech = await call("POST", "api", { act: "dirSave", id: did, dirs: { chose: true } }, NORAN);
-    check("§692 …and Go ahead again stands, with the same Capabilities", rech.j.dirs?.chose === true && rech.j.dirs?.caps.length === 2 && rech.j.dirsBlocker === "");
+    check("§694 …and Go ahead again stands, with the same Capabilities", rech.j.dirs?.chose === true && rech.j.dirs?.caps.length === 2 && rech.j.dirsBlocker === "");
     const hf = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, HEND);
     check("a client's own person cannot save it", hf.st === 403);
     const fin = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
@@ -1174,14 +1174,14 @@ try {
     const xn = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution 2026",
       items: [{ kind: "direction", planId: "mobile-P1", title: "Win families", ownedBy: "Commercial" }, { kind: "capability", planId: "cap:cap1", title: "Supply chain" }, { title: "" }] }, NORAN);
     const xid = xn.j.chat?.id;
-    /* §692 S10 — nothing to plan for: the view names the latest saved
+    /* §694 S10 — nothing to plan for: the view names the latest saved
        Directions version in this place, so the chat can open it for Apply
        rather than send the person to choose what they chose. */
     const x0 = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution, empty", items: [] }, NORAN);
-    check("§692 an Execution chat with no items names the saved Directions version waiting for Apply",
+    check("§694 an Execution chat with no items names the saved Directions version waiting for Apply",
       x0.st === 200 && x0.j.exec?.items.length === 0 && x0.j.execDirsSaved && x0.j.execDirsSaved.title === "Directions \u2014 Mobile" && x0.j.execDirsSaved.n >= 1 && /^[0-9a-f-]{36}$/.test(x0.j.execDirsSaved.id),
       String(JSON.stringify(x0.j.execDirsSaved)));
-    check("§692 …and a chat with items carries none", xn.j.execDirsSaved === null);
+    check("§694 …and a chat with items carries none", xn.j.execDirsSaved === null);
     check("the office starts one: the plan's items, the period asked first, a to-do of period + items + save",
       xn.st === 200 && xn.j.chat?.section === "execution" && xn.j.exec?.items.length === 2 && xn.j.exec?.period === null && xn.j.execTodo?.length === 4 && /how long the plan is/.test(xn.j.execBlocker),
       String(JSON.stringify(xn.j)).slice(0, 200));

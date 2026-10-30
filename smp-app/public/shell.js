@@ -65931,7 +65931,7 @@ var COPILOT = (function(){
           '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>'; }).join("")
       : (function(c){ return '<button type="button" class="coppcard" data-cop-newchat>' + icon(PATH_CARDS[0].i) +
           '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span>' +
-          /* §689 — THE SWOT'S FOUR WAYS IN, SAID ON ITS CARD (Islam: "A"; the
+          /* §691 — THE SWOT'S FOUR WAYS IN, SAID ON ITS CARD (Islam: "A"; the
              mockup design-mockups/copilot-start/2026-10-29_swot-ways-in.html).
              They were one step on, in the methods grid, where someone bringing
              their reports could not see them. The chips are words, not buttons:

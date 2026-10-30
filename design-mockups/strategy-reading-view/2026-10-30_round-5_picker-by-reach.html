@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The reading window's picker, by reach</title>
+<!-- Islam, 2026-10-30, of the window's picker: "why don't we have the plans
+     like the navigator approach units and functions where the viewer can see
+     what he wants to see. that should follow the visibility logic we already
+     have in the roles and access" — then "mock it". -->
+<style>
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;--zebra:#F4F6F9;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-ink:#FFFFFF;--navy-quiet:#B7C4D8;--navy-rule:rgba(255,255,255,.14);--gold:#C9A24D;--gold-deep:#8A6B22;--good:#2E7D5B;--good-bg:#E4F0EA;--attn:#B8860B;--attn-bg:#F7EFD6;--bad:#B04434;--bad-bg:#F7E3E0;--sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--zebra:#212630;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#0E1014;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--navy-rule:rgba(255,255,255,.12);--gold:#D9B665;--gold-deep:#C9A24D;--good:#5FB68C;--good-bg:#1B3129;--attn:#D9B23C;--attn-bg:#332C16;--bad:#D97066;--bad-bg:#33201E;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px;display:grid;gap:32px}
+.head{display:flex;align-items:flex-start;gap:16px}.head>div{flex:1}
+h1{margin:0;font-size:22px;font-weight:700;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:76ch}
+.rules{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}.rules b{color:var(--ink);font-weight:600}
+.pgtheme{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--ink-2);font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.pgtheme svg{width:14px;height:14px}
+section{display:grid;gap:10px}
+.ph2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ph2 .n{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep);letter-spacing:.1em}
+h2{margin:0;font-size:16px;font-weight:700}.ph2 p{margin:0;color:var(--ink-3);font-size:13.5px}
+.cap{font-size:13.5px;color:var(--ink-2);margin:0;max-width:80ch}.cap b{color:var(--ink);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.who{font-size:12.5px;color:var(--ink-3);margin:0 0 6px}.who b{color:var(--ink);font-weight:600}
+/* the window's strip */
+.rwtop{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:14px;padding:0 22px;min-height:52px;position:relative}
+.rwtop .mark{width:26px;height:26px;border-radius:7px;background:var(--gold);color:#16325C;display:grid;place-items:center;flex:none}.rwtop .mark svg{width:18px;height:18px}
+.rwtop .co{font-size:14px;font-weight:600;white-space:nowrap}
+.rwtop .pick{border:1px solid var(--navy-rule);border-radius:7px;padding:5px 10px;font-size:13.5px;font-weight:600;background:rgba(255,255,255,.06);white-space:nowrap}
+.rwtop .pick.one{border-style:dashed;color:var(--navy-quiet)}
+.rwtop .sp{flex:1}.rwtop .asof{font-size:12px;color:var(--navy-quiet)}
+.rwtop .ex{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--navy-quiet);border:1px solid var(--navy-rule);border-radius:999px;padding:4px 12px}
+.rwtabs{display:flex;gap:2px;padding:0 22px;background:var(--navy);border-bottom:3px solid var(--gold);overflow:hidden}
+.rwtabs span{padding:10px 14px 9px;font-size:13.5px;font-weight:600;color:var(--navy-quiet);border-radius:8px 8px 0 0;white-space:nowrap}.rwtabs span.on{background:var(--ground);color:var(--ink)}
+.rwbody{padding:18px 22px;display:grid;gap:12px}
+/* the open picker */
+.menu{position:absolute;left:150px;top:46px;z-index:5;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(15,23,42,.18);min-width:250px;padding:6px;font-size:13.5px}
+.menu .g{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:8px 10px 3px}
+.menu .i{padding:6px 10px;border-radius:6px;color:var(--ink-2);display:flex;justify-content:space-between;gap:12px}.menu .i.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.menu .i small{color:var(--ink-3);font-weight:400}
+.frame.tall{min-height:700px;overflow:visible}
+.frame.tall .rwtop{overflow:visible}
+/* cards */
+.rcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.rcard h3{margin:0 0 8px;font-size:13.5px;font-weight:700}
+.rk{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.proj{display:grid;grid-template-columns:auto 1fr auto 150px 22px;gap:14px;align-items:center;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.proj .code{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep)}
+.proj h3{margin:0;font-size:14.5px}.proj .sub{display:block;font-size:12.5px;color:var(--ink-3);font-weight:400;margin-top:2px}
+.proj .sum{font-size:12.5px;color:var(--ink-3);white-space:nowrap}.proj .sum b{color:var(--ink-2);font-weight:600}
+.bar{height:7px;border-radius:4px;background:var(--surface-2);position:relative;overflow:hidden}.bar b{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--good)}.bar.a b{background:var(--attn)}.bar.b b{background:var(--bad)}
+.chev{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3);font-size:10px}
+.figs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.fig b{display:block;font-size:26px;line-height:1;font-weight:700}.fig span{display:block;font-size:12px;color:var(--ink-3);margin-top:5px}
+.swot{display:grid;grid-template-columns:1fr 1fr;gap:10px}.swot ol{margin:0;padding:0 0 0 18px;font-size:13px;color:var(--ink-2);display:grid;gap:4px}
+table.t{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--surface);border:1px solid var(--line)}
+table.t th{background:var(--navy);color:var(--navy-ink);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;text-align:left}
+table.t td{padding:6px 10px;border-bottom:1px solid var(--line-soft);color:var(--ink-2)}table.t td.n{text-align:right;white-space:nowrap}
+.mono{font:600 12px/1 ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>The reading window's picker, by reach</h1>
+      <p class="lede">Today the picker lists the company and every business unit, for everyone. That is less than the workbench's navigator shows and more than some seats should see. This round the picker is the navigator's own list — the company, the divisions, the units, the supporting functions, the capabilities — cut down for each viewer by the one rule Roles &amp; access already holds, and each subject is read in its own shape.</p>
+      <ul class="rules">
+        <li><b>In the picker</b> when the matrix gives this viewer <i>view</i> or better on the subject's pages; otherwise not there at all. The navigator's rule, not a second one.</li>
+        <li><b>Grouped</b> as the navigator groups: a CEO with ten units and eight functions needs the headings.</li>
+        <li><b>One subject reached, no picker to speak of:</b> the window opens on it, and the control reads the name and nothing else.</li>
+        <li><b>Each subject in its own shape.</b> A unit: Foundation, Analysis, Directions, Overall performance. A function: Foundation, S&amp;W, then what its plan is — Projects, Directions, or Objectives — then Overall performance. A division: its own Foundation and the performance of what it holds.</li>
+      </ul>
+    </div>
+    <button class="pgtheme" id="pgtheme" type="button"></button>
+  </div>
+
+  <section>
+    <div class="ph2"><span class="n">01</span><h2>The picker, open, for three viewers</h2><p>the same list, cut down by what each reaches</p></div>
+    <div class="three">
+      <div><p class="who"><b>Group CEO</b> — reaches everything</p><div class="frame tall" id="pA"></div></div>
+      <div><p class="who"><b>Mobile's reader</b> — the company and the unit</p><div class="frame tall" id="pB"></div></div>
+      <div><p class="who"><b>Finance's reader</b> — the function alone</p><div class="frame tall" id="pC"></div></div>
+    </div>
+    <p class="cap">The list is built once from the navigator's own entries and filtered by <b>grant at page</b> for the viewer: a subject stays when any of its pages answers view or better. For the third viewer the picker is the name alone, drawn quiet, and the window opens on Finance rather than on the company.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">02</span><h2>A supporting function: Finance, which plans in projects</h2><p>Foundation · S&amp;W · Projects · Overall performance</p></div>
+    <div class="frame" id="fn"></div>
+    <p class="cap">A function's second tab is <b>S&amp;W</b> — strengths and weaknesses alone, as the workbench keeps them for functions (§399). Its third tab says what its plan is: <b>Projects</b> here, folded to one line each as directions are, opened to the project's brief, owner, milestones and standing; <b>Directions</b> for a function that plans in pillars; <b>Objectives</b> for one that plans in objectives and actions. Overall performance reads the function's own figures, as its Performance page does.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">03</span><h2>A division: Distribution</h2><p>Foundation · Overall performance</p></div>
+    <div class="frame" id="co"></div>
+    <p class="cap">A division has a Foundation of its own where the office has given it one (§404), and a performance that is its units' headlines at their weights; it plans nothing of its own, so there is no Directions tab. Its units are in the picker under it, for whoever reaches them.</p>
+  </section>
+</div>
+<script>
+(function () {
+  var pg = "light";
+  try { var t = localStorage.getItem("smp.theme"); if (t === "light" || t === "dark") pg = t; else if (matchMedia("(prefers-color-scheme: dark)").matches) pg = "dark"; } catch (e) {}
+  var SUN = '<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>', MOON = '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>';
+  var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg>';
+  function strip(pick, one, tabs, on, menu) {
+    return '<div class="rwtop"><span class="mark">' + STAR + '</span><span class="co">Raya Trade</span><span class="pick' + (one ? " one" : "") + '">' + pick + (one ? "" : " ▾") + '</span><span class="sp"></span><span class="asof">Cycle 2</span><span class="ex">Exit</span>' + (menu || "") + '</div>' +
+      '<div class="rwtabs">' + tabs.map(function (x) { return '<span class="' + (x === on ? "on" : "") + '">' + x + '</span>'; }).join("") + '</div>';
+  }
+  function menu(groups, on) {
+    return '<div class="menu flag">' + groups.map(function (g) { return '<div class="g">' + g[0] + '</div>' + g[1].map(function (i) { return '<div class="i' + (i === on ? " on" : "") + '"><span>' + i + '</span></div>'; }).join(""); }).join("") + '</div>';
+  }
+  var ALL = [["Company", ["Raya Trade"]], ["Divisions", ["Distribution", "B2C"]], ["Business units", ["Mobile", "Retail Stores", "B2B Ecomm", "Consumer Electronics", "Care", "IT Dist.", "Logistics", "Nigeria"]], ["Supporting functions", ["Finance", "HR", "Treasury", "Marketing", "IT", "Strategy Management Office"]], ["Capabilities", ["Merchandising"]]];
+  var UNIT = ["Foundation", "Analysis", "Directions", "Overall performance"];
+  document.getElementById("pA").innerHTML = strip("Raya Trade", false, UNIT, "Foundation", menu(ALL, "Raya Trade")) + '<div class="rwbody"></div>';
+  document.getElementById("pB").innerHTML = strip("Mobile", false, UNIT, "Foundation", menu([["Company", ["Raya Trade"]], ["Business units", ["Mobile"]]], "Mobile")) + '<div class="rwbody"></div>';
+  document.getElementById("pC").innerHTML = strip("Finance", true, ["Foundation", "S&W", "Projects", "Overall performance"], "Foundation") + '<div class="rwbody"><p class="cap" style="color:var(--ink-3)">One subject reached: the window opens on it, the control is its name and opens nothing.</p></div>';
+
+  function proj(code, name, sub, owner, ms, pct, open) {
+    var cls = pct >= 70 ? "" : pct >= 45 ? " a" : " b";
+    return '<div class="proj"><span class="code">' + code + '</span><h3>' + name + (sub ? '<span class="sub">' + sub + '</span>' : '') + '</h3><span class="sum">' + owner + ' · <b>' + ms + '</b> milestones · <b>' + pct + '%</b></span><span class="bar' + cls + '"><b style="width:' + pct + '%"></b></span><span class="chev">' + (open ? "▲" : "▼") + '</span></div>';
+  }
+  document.getElementById("fn").innerHTML = strip("Finance", false, ["Foundation", "S&W", "Projects", "Overall performance"], "Projects") + '<div class="rwbody">' +
+    '<p class="cap" style="font-size:12.5px;color:var(--ink-3)">4 projects, folded — press one to open it. <b style="color:var(--gold-deep)">Open all</b> <b style="color:var(--gold-deep)">Close all</b></p>' +
+    proj("FN01", "Standardise the core order process across units", "One order process across Mobile, Retail and Mazaya", "Mohamed Rizk", 5, 62, true) +
+    '<div class="rcard" style="margin:-4px 0 4px"><table class="t"><tr><th>Milestone</th><th>Due</th><th>Status</th></tr><tr><td>Current-state map of the three order flows</td><td class="n">Q1</td><td>Done</td></tr><tr><td>One target process agreed with the three units</td><td class="n">Q2</td><td>Done</td></tr><tr><td>ERP configuration for the common flow</td><td class="n">Q3</td><td>WIP</td></tr><tr><td>Pilot on Mobile</td><td class="n">Q3</td><td>Not started</td></tr><tr><td>Roll-out to Retail and Mazaya</td><td class="n">Q4</td><td>Not started</td></tr></table></div>' +
+    proj("FN02", "Cost-to-serve model and standing review", "", "Hala Fawzy", 4, 48) +
+    proj("FN03", "Consolidate ERP instances across units", "Six instances become one", "Abdelhamid", 6, 35) +
+    proj("FN04", "Monthly close in five working days", "", "Hala Fawzy", 3, 80) +
+    '</div>';
+
+  document.getElementById("co").innerHTML = strip("Distribution", false, ["Foundation", "Overall performance"], "Overall performance") + '<div class="rwbody">' +
+    '<div class="figs"><div class="fig"><b style="color:var(--attn)">74%</b><span>Measures — the division’s own headline measures against their targets</span></div><div class="fig"><b style="color:var(--good)">79%</b><span>Units — the units’ own headlines, at their weights in Distribution</span></div><div class="fig"><b style="color:var(--attn)">61%</b><span>Execution — delivered against what should have been by now</span></div></div>' +
+    '<div class="rcard"><h3>The units it holds</h3><table class="t"><tr><th>Unit</th><th>Measures</th><th>Directions</th><th>Execution</th><th>Weight</th></tr><tr><td>Mobile</td><td class="n">88%</td><td class="n">91%</td><td class="n">71%</td><td class="n">40%</td></tr><tr><td>Consumer Electronics</td><td class="n">72%</td><td class="n">66%</td><td class="n">55%</td><td class="n">35%</td></tr><tr><td>IT Dist.</td><td class="n">69%</td><td class="n">70%</td><td class="n">52%</td><td class="n">25%</td></tr></table></div></div>';
+
+  function draw() { document.documentElement.setAttribute("data-theme", pg); var b = document.getElementById("pgtheme"); b.innerHTML = '<svg viewBox="0 0 20 20">' + (pg === "light" ? SUN : MOON) + '</svg>' + (pg === "light" ? "View in dark" : "View in light"); }
+  document.getElementById("pgtheme").addEventListener("click", function () { pg = pg === "light" ? "dark" : "light"; draw(); }); draw();
+})();
+</script>
+</body>
+</html>

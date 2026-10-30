@@ -1,0 +1,324 @@
+<title>Execution Reads the Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: one scene at a time, the Copilot's chat column on the left and its work pane on the right; the new part is outlined in purple and pressable. */
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--attn:#B45309;--attnbg:#FFF4E5;--new:#7A3E9D;--newbg:#F4ECF9;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2410;--new:#C9A0E6;--newbg:#2A1F33;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2410;--new:#C9A0E6;--newbg:#2A1F33;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top h1{font-size:17px;margin:0}
+.top .hint{color:var(--ink-3);font-size:13px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:5px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--navink);font-weight:600}
+.lead{font-size:13px;color:var(--ink-2);max-width:78ch;margin:0}
+.lead b{color:var(--ink)}
+.scene{display:none}
+.scene.on{display:block}
+.pane{display:grid;grid-template-columns:200px minmax(0,1fr);gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;min-width:0}
+.rail{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:8px;font-size:12.5px;display:flex;flex-direction:column;gap:6px}
+.rail .h{font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.rail .row{background:var(--surface);border-left:3px solid var(--goldfill);padding:6px 8px;border-radius:4px}
+.rail .row small{display:block;color:var(--ink-3)}
+.rail .newc{border:1px dashed var(--line);border-radius:4px;padding:5px 8px;text-align:center;color:var(--ink-2);background:none}
+.flow{display:grid;grid-template-columns:minmax(340px,4fr) 12px minmax(0,5fr);min-width:0}
+.flow.one{grid-template-columns:minmax(0,1fr)}
+@media (max-width:980px){.flow{grid-template-columns:minmax(0,1fr)}.grip,.work{display:none}.pane{grid-template-columns:minmax(0,1fr)}.rail{display:none}}
+.chat{display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.chead{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font-weight:700}
+.chead small{font-weight:400;color:var(--ink-3)}
+.msgs{padding:12px;display:flex;flex-direction:column;gap:10px;min-height:300px}
+.who{font-size:11px;color:var(--ink-3);margin-bottom:2px}
+.ai{border-left:3px solid var(--goldfill);padding:4px 10px;max-width:70ch}
+.me{align-self:flex-end;max-width:80%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
+.opt{font-size:12.5px;font-weight:600;padding:2px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.opt.rec{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.linkbu{border:0;background:none;color:var(--nav);text-decoration:underline;padding:0;font-size:12.5px}
+:root[data-theme="dark"] .linkbu{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .linkbu{color:var(--gold)}}
+.compose{padding:8px 12px 10px;border-top:1px solid var(--line);margin-top:auto}
+.box{display:flex;gap:6px;align-items:flex-end;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface);color:var(--ink-3);font-size:13px}
+.grip{border-left:1px solid var(--line);margin:0 6px}
+.work{display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);overflow:hidden}
+.whead{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface);font-size:13px}
+.wbody{padding:10px;display:flex;flex-direction:column;gap:8px;flex:1}
+.strip{font-size:12.5px;color:var(--ink-2);display:flex;gap:8px;align-items:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.card.now{border-color:var(--nav)}
+.card.out{opacity:.72}
+.chead2{display:flex;gap:8px;align-items:center;padding:8px 12px;flex-wrap:wrap}
+.kind{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);min-width:70px}
+.chead2 b{flex:1 1 16ch;min-width:0}
+.chead2 small{color:var(--ink-3)}
+.pill{font:600 11px/1.4 var(--sans);padding:1px 7px;border-radius:10px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface-2)}
+.pill.on{color:var(--good);background:var(--goodbg);border-color:transparent}
+.pill.out{color:var(--attn);background:var(--attnbg);border-color:transparent}
+.pill.new{color:var(--new);background:var(--newbg);border-color:transparent}
+.cbody{border-top:1px solid var(--line);padding:8px 12px;font-size:12.5px;display:flex;flex-direction:column;gap:6px}
+.cbody h5{margin:0;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.cbody ul{margin:0;padding-left:18px}
+.cbody li{margin:2px 0}
+.cbody li .m{color:var(--ink-3)}
+.cbody li.planline{color:var(--ink-2)}
+.cbody li.planline::after{content:" · on the plan";font-size:11px;color:var(--good)}
+.cbody li.draftline::after{content:" · new";font-size:11px;color:var(--new)}
+.foot{display:flex;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);background:var(--surface);font-size:12.5px;color:var(--ink-2);flex-wrap:wrap}
+.foot .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 10px;font-weight:600;font-size:12.5px}
+.btn.solid{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.btn.held{opacity:.5;cursor:not-allowed}
+.new{box-shadow:0 0 0 2px var(--new);border-radius:8px}
+.tag{display:inline-block;font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--new);background:var(--newbg);border-radius:4px;padding:1px 6px;vertical-align:middle;margin-left:6px}
+.start{padding:20px 14px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
+.start h2{margin:0;font-size:17px;text-wrap:balance}
+.start .box{width:min(560px,100%);text-align:left;min-height:52px;align-items:flex-start}
+.or{color:var(--ink-3);font-size:12.5px}
+.cards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%}
+.pcard{width:min(270px,100%);text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.pcard b{font-size:13.5px}
+.pcard small{color:var(--ink-3)}
+.pcard .ptag{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--good)}
+.notes{font-size:13px;color:var(--ink-2);max-width:78ch;margin:0;padding-left:18px}
+.notes li{margin:3px 0}
+.notes b{color:var(--ink)}
+.dim{color:var(--ink-3)}
+.todo{font-size:12.5px;color:var(--ink-2)}
+</style>
+
+<div class="top">
+  <h1>Execution reads the plan</h1>
+  <span class="hint">stress test batch 2 · S5, S6, S7, S11 · the new part is outlined in purple and pressable</span>
+</div>
+<div class="seg" role="tablist" id="tabs">
+  <button role="tab" aria-pressed="true" data-s="s7">S7 · What the plan holds</button>
+  <button role="tab" aria-pressed="false" data-s="s5">S5 · Leave out this period</button>
+  <button role="tab" aria-pressed="false" data-s="s6">S6 · Items read again</button>
+  <button role="tab" aria-pressed="false" data-s="s11">S11 · Start from the plan</button>
+</div>
+
+<!-- ============ S7 ============ -->
+<section class="scene on" id="s7">
+<p class="lead"><b>Execution, each card opened with what the plan holds.</b> Today a Direction that already carries measures and tactics on the plan opens as <i>Not drafted yet</i>; a draft suggests new ones, and Apply leaves the plan with both sets. The fix: a card opens with the plan's measures and tactics, marked <i>on the plan</i> as the Directions' rows are; <b>Draft</b> adds to them, marked <i>new</i>; a line can be dropped; Apply replaces what the card shows. Press <b>Draft more</b> on the first card.</p>
+<div class="pane">
+  <div class="rail"><div class="h">Chats</div><div class="row">Execution — Mobile<small>Islam · just now · 1 of 9 done</small></div><button class="newc">+ New chat</button></div>
+  <div class="flow">
+    <div class="chat">
+      <div class="chead">Execution — Mobile <small>· Drafting · 0 of 7</small></div>
+      <div class="msgs">
+        <div class="me">This quarter to year end</div>
+        <div class="ai new"><div class="who">Copilot</div>This plan covers <b>Q4 2026</b>. The 7 Directions and Capabilities are on the right. <b>2 of them already carry measures and tactics on the plan</b>, shown on their cards; a draft adds to what is there, and Apply replaces what the card shows. Draft them one at a time there, or all at once here.
+          <div class="opts"><span class="opt rec">Draft all 7</span><span class="opt">Draft the next one</span></div></div>
+        <div class="ai" id="s7said" hidden><div class="who">Copilot</div><b>Grow the SME segment</b> — two more measures and one tactic, under what the plan holds. The plan's own lines stay unless you drop them on the card.</div>
+      </div>
+      <div class="compose"><div class="box">Ask for a change to the item in hand…</div></div>
+    </div>
+    <div class="grip"></div>
+    <div class="work">
+      <div class="whead"><b>Execution — Mobile v1</b> · in progress</div>
+      <div class="wbody">
+        <div class="strip">This plan covers <b>Q4 2026</b> <button class="linkbu">Change</button></div>
+        <div class="card now new" id="s7card">
+          <div class="chead2"><span class="kind">Direction</span><b>Grow the SME segment</b><span class="pill on">On the plan · 2 measures · 1 tactic</span><small id="s7cnt"></small></div>
+          <div class="cbody">
+            <h5>Measures</h5>
+            <ul id="s7m">
+              <li class="planline">SME revenue share <span class="m">· 18% → 25%</span> <button class="linkbu">drop</button></li>
+              <li class="planline">SME accounts <span class="m">· 1,200 → 2,000</span> <button class="linkbu">drop</button></li>
+            </ul>
+            <h5>Tactics</h5>
+            <ul id="s7t">
+              <li class="planline">SME sales desk in Cairo <span class="m">· Sales · Q4</span> <button class="linkbu">drop</button></li>
+            </ul>
+            <div class="opts"><button class="btn solid" id="s7draft" data-s7="draft">Draft more from the plan</button><span class="dim">Adds to what is here; nothing on the plan is replaced until Apply.</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="chead2"><span class="kind">Direction</span><b>Rebuild the app’s onboarding</b><span class="pill on">On the plan · 1 measure · 2 tactics</span></div></div>
+        <div class="card"><div class="chead2"><span class="kind">Direction</span><b>Enter the prepaid data market</b><small>Not drafted yet</small></div></div>
+        <div class="card"><div class="chead2"><span class="kind">Capability</span><b>Data-led stock</b><small>Not drafted yet</small></div></div>
+        <div class="dim" style="font-size:12px">… 3 more</div>
+      </div>
+      <div class="foot"><span><b>v1</b> in progress</span><span class="sp"></span><button class="btn held" title="Draft at least one item first">Save</button><button class="btn solid held">Apply to plan</button></div>
+    </div>
+  </div>
+</div>
+<ul class="notes">
+  <li><b>What is read:</b> each pillar's measures (name, baseline → target, compile) and tactics (name, owner, quarters) as the plan holds them, and a Capability's objectives and projects. Read when the chat is made, and again on open (S6).</li>
+  <li><b>What Apply does:</b> what the card shows replaces what the plan holds for that item: a line dropped on the card is dropped from the plan, a line kept is kept, a new line is added. Today's "update by name, add the rest" goes, since the person now sees both.</li>
+  <li><b>The counts:</b> the card head says <i>On the plan · 2 measures · 1 tactic</i> until a draft adds to it, then <i>4 measures · 2 tactics · 3 new</i>. The chat's first line counts the items that carry something.</li>
+</ul>
+</section>
+
+<!-- ============ S5 ============ -->
+<section class="scene" id="s5">
+<p class="lead"><b>Execution, an item left out this period.</b> Today Save is held until every item has a measure and a tactic; a unit with six Directions of which two are not being executed this period cannot save. The fix: <b>Leave out this period</b> on a card's head; the card folds with <i>Left out</i>, Save needs at least one item drafted and names what is left out, Apply writes nothing for them. Press it on the third card, then <b>Put it back</b>.</p>
+<div class="pane">
+  <div class="rail"><div class="h">Chats</div><div class="row">Execution — Mobile<small>Islam · just now · 4 of 9 done</small></div><button class="newc">+ New chat</button></div>
+  <div class="flow">
+    <div class="chat">
+      <div class="chead">Execution — Mobile <small>· <span id="s5step">Drafting · 2 of 7</span></small></div>
+      <div class="msgs">
+        <div class="me">Draft the next one</div>
+        <div class="ai"><div class="who">Copilot</div><b>Rebuild the app’s onboarding</b> — two measures and two tactics, on the right.</div>
+        <div class="ai" id="s5said" hidden><div class="who">Copilot</div><b>Enter the prepaid data market</b> is left out this period: nothing is drafted for it, and Apply writes nothing for it. It stays on the plan as it is. <button class="linkbu" data-s5="back">Put it back</button></div>
+        <div class="ai" id="s5back" hidden><div class="who">Copilot</div><b>Enter the prepaid data market</b> is back in; it needs a measure and a tactic before Save.</div>
+      </div>
+      <div class="compose"><div class="box">Ask for a change to the item in hand…</div></div>
+    </div>
+    <div class="grip"></div>
+    <div class="work">
+      <div class="whead"><b>Execution — Mobile v1</b> · in progress</div>
+      <div class="wbody">
+        <div class="strip">This plan covers <b>Q4 2026</b> <button class="linkbu">Change</button></div>
+        <div class="card"><div class="chead2"><span class="kind">Direction</span><b>Grow the SME segment</b><small>4 measures · 2 tactics</small></div></div>
+        <div class="card"><div class="chead2"><span class="kind">Direction</span><b>Rebuild the app’s onboarding</b><small>2 measures · 2 tactics</small></div></div>
+        <div class="card now new" id="s5card">
+          <div class="chead2"><span class="kind">Direction</span><b>Enter the prepaid data market</b><small id="s5small">Not drafted yet</small><span class="pill out" id="s5pill" hidden>Left out this period</span></div>
+          <div class="cbody" id="s5body">
+            <div class="opts"><button class="btn solid">Draft</button><button class="linkbu" data-s5="out">Leave out this period</button><span class="tag">new</span></div>
+          </div>
+          <div class="cbody" id="s5outbody" hidden><span class="dim">Nothing is drafted for it and Apply writes nothing for it. </span><button class="linkbu" data-s5="back">Put it back</button></div>
+        </div>
+        <div class="card"><div class="chead2"><span class="kind">Capability</span><b>Data-led stock</b><small>Not drafted yet</small></div></div>
+        <div class="dim" style="font-size:12px">… 3 more</div>
+      </div>
+      <div class="foot"><span><b>v1</b> in progress</span><span class="sp"></span><span class="dim" id="s5tip">Save held: Enter the prepaid data market still needs at least one measure and one tactic</span><button class="btn held">Save</button><button class="btn solid held">Apply to plan</button></div>
+    </div>
+  </div>
+</div>
+<ul class="notes">
+  <li><b>Save's rule becomes:</b> at least one item drafted, and every item either drafted or left out. The foot's held reason names the first item that is neither.</li>
+  <li><b>The version</b> lists the left-out items by name under the drafted ones, so a reader of v1 knows they were a choice, not an omission. The to-do counts them as done.</li>
+  <li><b>Apply</b> archives and writes only the drafted items; a left-out item's measures and tactics on the plan are untouched.</li>
+</ul>
+</section>
+
+<!-- ============ S6 ============ -->
+<section class="scene" id="s6">
+<p class="lead"><b>Execution, the items read again when the chat opens.</b> Today the chat reads the plan's Directions and Capabilities once, when it is made; a Direction applied afterwards never appears. The fix: on open, the plan is read again; new items join as undrafted cards, marked <i>new on the plan</i>, with one line in the chat. An item drafted here is never removed; one gone from the plan is marked. Press <b>Open the chat again</b>.</p>
+<div class="pane">
+  <div class="rail"><div class="h">Chats</div><div class="row">Execution — Mobile<small>Islam · 2 h ago · 4 of 9 done</small></div><button class="newc">+ New chat</button></div>
+  <div class="flow">
+    <div class="chat">
+      <div class="chead">Execution — Mobile <small>· <span id="s6step">Drafting · 2 of 6</span></small></div>
+      <div class="msgs">
+        <div class="me">Draft the next one</div>
+        <div class="ai"><div class="who">Copilot</div><b>Rebuild the app’s onboarding</b> — two measures and two tactics, on the right.</div>
+        <div class="ai new" id="s6said" hidden><div class="who">Copilot</div>The plan has changed since this chat was opened: <b>Partner with a bank for payments</b> is new on the plan and joins the cards, not drafted yet. <b>Open two more flagship stores</b> is no longer on the plan; its draft stays here, marked, and Apply will not write it.</div>
+        <div class="opts" id="s6go"><button class="btn solid" data-s6="open">Open the chat again</button><span class="dim">as if coming back after Directions v2 was applied</span></div>
+      </div>
+      <div class="compose"><div class="box">Ask for a change to the item in hand…</div></div>
+    </div>
+    <div class="grip"></div>
+    <div class="work">
+      <div class="whead"><b>Execution — Mobile v1</b> · in progress</div>
+      <div class="wbody">
+        <div class="strip">This plan covers <b>Q4 2026</b> <button class="linkbu">Change</button></div>
+        <div class="card"><div class="chead2"><span class="kind">Direction</span><b>Grow the SME segment</b><small>4 measures · 2 tactics</small></div></div>
+        <div class="card now"><div class="chead2"><span class="kind">Direction</span><b>Rebuild the app’s onboarding</b><small>2 measures · 2 tactics</small></div></div>
+        <div class="card"><div class="chead2"><span class="kind">Direction</span><b>Enter the prepaid data market</b><small>Not drafted yet</small></div></div>
+        <div class="card new" id="s6newcard" hidden><div class="chead2"><span class="kind">Direction</span><b>Partner with a bank for payments</b><small>Not drafted yet</small><span class="pill new">New on the plan</span></div></div>
+        <div class="card" id="s6gone"><div class="chead2"><span class="kind">Direction</span><b>Open two more flagship stores</b><small>1 measure · 1 tactic</small><span class="pill out" id="s6gonepill" hidden>No longer on the plan</span></div></div>
+        <div class="card"><div class="chead2"><span class="kind">Capability</span><b>Data-led stock</b><small>Not drafted yet</small></div></div>
+        <div class="dim" style="font-size:12px">… 1 more</div>
+      </div>
+      <div class="foot"><span><b>v1</b> in progress</span><span class="sp"></span><button class="btn held">Save</button><button class="btn solid held">Apply to plan</button></div>
+    </div>
+  </div>
+</div>
+<ul class="notes">
+  <li><b>When:</b> every time the chat is opened, until it is saved. A saved chat is a record and is not re-read.</li>
+  <li><b>Matched by key</b> (the pillar's or Capability's id), as Apply matches today; a renamed Direction keeps its card with the new name.</li>
+  <li><b>The to-do</b> grows by the new items; the chat's step reads <i>Drafting · 2 of 7</i>.</li>
+</ul>
+</section>
+
+<!-- ============ S11 ============ -->
+<section class="scene" id="s11">
+<p class="lead"><b>Start from the existing plan, for Competitive Discipline and Execution.</b> Foundation, Analysis and Directions offer the plan card when the plan holds something (§653); these two do not. Competitive Discipline's card opens with the plan's discipline and values as the table, scored anew on request. Execution's card is the only card, since the chat always reads the plan. Switch the area.</p>
+<div class="seg" id="s11seg" style="margin-bottom:10px"><button aria-pressed="true" data-a="cd">Competitive Discipline</button><button aria-pressed="false" data-a="ex">Execution</button></div>
+<div class="pane">
+  <div class="rail"><div class="h">Chats</div><div class="dim" style="font-size:12px">No chats here yet.</div><button class="newc" style="background:var(--surface);border-style:solid">+ New chat</button></div>
+  <div class="flow one">
+    <div class="chat">
+      <div class="start">
+        <h2 id="s11h">What would you like to do with Mobile’s Competitive Discipline?</h2>
+        <div class="box" id="s11box">Ask anything, attach your notes, or paste your value proposition…</div>
+        <div class="or">or start step by step</div>
+        <div class="cards" id="s11cd">
+          <button class="pcard new"><span class="ptag">On the plan today</span><b>Start from the existing plan</b><small>Load the discipline and the values the plan holds as the table, and change any part. Score the disciplines anew if you want to check the choice. The plan moves only on Apply.</small><small>Mobile’s Competitive Discipline · Best Total Cost · 3 values</small></button>
+          <button class="pcard"><b>Score the value disciplines</b><small>Market and internal factors, then the value proposition.</small></button>
+        </div>
+        <div class="cards" id="s11ex" hidden>
+          <button class="pcard new"><span class="ptag">On the plan today</span><b>Start from the plan’s Directions</b><small>The period, then measures and tactics for each Direction and Capability, with what the plan already holds on their cards. The plan moves only on Apply.</small><small>Mobile’s Execution · 7 items · 2 with measures</small></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ul class="notes">
+  <li><b>Competitive Discipline from the plan:</b> the chat opens at the table, the discipline shown as chosen, the scores empty with <i>Score them</i> offered in the chat as a check; the recommendation then says whether it agrees with the plan's choice. Save and Apply as today.</li>
+  <li><b>Execution:</b> the one card replaces <i>Plan the period</i>; its line counts the items and how many carry measures. With nothing on the plan the card is not there, and the chat's first line is §694's (the saved Directions version, or Open Directions).</li>
+  <li><b>The free-chat box</b> stays above, as on every start screen.</li>
+</ul>
+</section>
+
+<script>
+(function(){
+  var tabs = document.getElementById("tabs");
+  function show(id){
+    tabs.querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-s") === id)); });
+    document.querySelectorAll(".scene").forEach(function(s){ s.classList.toggle("on", s.id === id); });
+  }
+  tabs.addEventListener("click", function(e){ var b = e.target.closest("button"); if (b) show(b.getAttribute("data-s")); });
+  var h = (location.hash || "").slice(1); if (/^s(5|6|7|11)$/.test(h)) show(h);
+
+  document.addEventListener("click", function(e){
+    var b;
+    if ((b = e.target.closest("[data-s7]"))) {
+      var m = document.getElementById("s7m"), t = document.getElementById("s7t");
+      m.insertAdjacentHTML("beforeend", '<li class="draftline">SME churn <span class="m">· 4% → 2.5%</span> <button class="linkbu">drop</button></li><li class="draftline">SME ARPU <span class="m">· EGP 310 → 360</span> <button class="linkbu">drop</button></li>');
+      t.insertAdjacentHTML("beforeend", '<li class="draftline">Bundle a payments terminal with the SME plan <span class="m">· Product · Q4</span> <button class="linkbu">drop</button></li>');
+      document.getElementById("s7draft").hidden = true;
+      document.getElementById("s7said").hidden = false;
+      document.querySelector("#s7card .pill").textContent = "4 measures · 2 tactics · 3 new";
+      document.querySelector(".scene#s7 .chead small").textContent = "· Drafting · 1 of 7";
+    }
+    if ((b = e.target.closest("[data-s5]"))) {
+      var out = b.getAttribute("data-s5") === "out";
+      document.getElementById("s5pill").hidden = !out;
+      document.getElementById("s5small").hidden = out;
+      document.getElementById("s5body").hidden = out;
+      document.getElementById("s5outbody").hidden = !out;
+      document.getElementById("s5card").classList.toggle("out", out);
+      document.getElementById("s5said").hidden = !out;
+      document.getElementById("s5back").hidden = out || !document.getElementById("s5said").dataset.was;
+      if (out) document.getElementById("s5said").dataset.was = "1";
+      document.getElementById("s5step").textContent = out ? "Drafting · 2 of 6 · 1 left out" : "Drafting · 2 of 7";
+      document.getElementById("s5tip").textContent = out ? "Save held: Data-led stock still needs at least one measure and one tactic · 1 left out" : "Save held: Enter the prepaid data market still needs at least one measure and one tactic";
+    }
+    if ((b = e.target.closest("[data-s6]"))) {
+      document.getElementById("s6said").hidden = false;
+      document.getElementById("s6go").hidden = true;
+      document.getElementById("s6newcard").hidden = false;
+      document.getElementById("s6gonepill").hidden = false;
+      document.getElementById("s6gone").classList.add("out");
+      document.getElementById("s6step").textContent = "Drafting · 2 of 7";
+    }
+  });
+  document.getElementById("s11seg").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    this.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", String(x === b)); });
+    var ex = b.getAttribute("data-a") === "ex";
+    document.getElementById("s11cd").hidden = ex; document.getElementById("s11ex").hidden = !ex;
+    document.getElementById("s11h").textContent = ex ? "What would you like to do with Mobile’s Execution?" : "What would you like to do with Mobile’s Competitive Discipline?";
+    document.getElementById("s11box").textContent = ex ? "Ask anything, attach your notes, or paste your plan…" : "Ask anything, attach your notes, or paste your value proposition…";
+  });
+})();
+</script>

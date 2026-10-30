@@ -12368,6 +12368,18 @@ function reportSectionState(){
     : { cls:"appear", badge:"" };
 }
 var CURRENT_REPORT_KEY = null;
+/* WHETHER THE REPORTING TAB IS DRAWN AT ALL (§690). Islam: *"make the
+   reporting button always available for the office."* For everybody else the
+   tab follows the cycle exactly as `reportSectionState()` says — open it is
+   there, closed it goes. The office is the one hand that opens, closes and
+   reopens cycles, so for it the tab stands whatever the cycle's state: on a
+   closed one the page says the cycle is closed and that its figures are a
+   record (renderReport / renderFnReport already draw that note), rather than
+   the tab disappearing from under the people who run the cycle. The grant is
+   still asked by `allowed()`; this answers only the cycle half. */
+function reportTabOn(){
+  return !!reportSectionState() || inOffice();
+}
 
 /* WHICH ROW A REPORTING BOX IS ABOUT (§334.18, correcting §326).
    IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,

@@ -20637,6 +20637,18 @@ function reportSectionState(){
     : { cls:"appear", badge:"" };
 }
 var CURRENT_REPORT_KEY = null;
+/* WHETHER THE REPORTING TAB IS DRAWN AT ALL (§690). Islam: *"make the
+   reporting button always available for the office."* For everybody else the
+   tab follows the cycle exactly as `reportSectionState()` says — open it is
+   there, closed it goes. The office is the one hand that opens, closes and
+   reopens cycles, so for it the tab stands whatever the cycle's state: on a
+   closed one the page says the cycle is closed and that its figures are a
+   record (renderReport / renderFnReport already draw that note), rather than
+   the tab disappearing from under the people who run the cycle. The grant is
+   still asked by `allowed()`; this answers only the cycle half. */
+function reportTabOn(){
+  return !!reportSectionState() || inOffice();
+}
 
 /* WHICH ROW A REPORTING BOX IS ABOUT (§334.18, correcting §326).
    IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,
@@ -66195,7 +66207,7 @@ var COPILOT = (function(){
   var WORKFLOW_WORD = { foundation:"Foundation workflow", analysis:"SWOT workflow", compete:"Competitive Discipline workflow",
     directions:"Directions workflow", capabilities:"Capabilities workflow", execution:"Execution workflow", advisory:"Advisory workflow" };
   var STARTS = {
-    analysis: ["SWOT, step by step", "The internal, micro and macro analyses, then the SWOT — from notes, a template or guided questions."],
+    analysis: ["SWOT, step by step", "The internal, micro and macro analyses, then the SWOT."],
     compete: ["Score the value disciplines", "Market and internal factors, then the value proposition."],
     directions: ["Suggest and score Directions", "From the SWOT and the discipline, scored Urgency × Importance × Ease."],
     capabilities: ["Choose Capabilities", "What the chosen Directions need, each with an owner."],
@@ -66235,7 +66247,14 @@ var COPILOT = (function(){
       ? PATH_CARDS.filter(function(c){ return STARTROADS.indexOf(c.k) >= 0; }).map(function(c){ return '<button type="button" class="coppcard" data-cop-road="' + c.k + '">' + icon(c.i) +
           '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>'; }).join("")
       : (function(c){ return '<button type="button" class="coppcard" data-cop-newchat>' + icon(PATH_CARDS[0].i) +
-          '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span></button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]));
+          '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span>' +
+          /* §691 — THE SWOT'S FOUR WAYS IN, SAID ON ITS CARD (Islam: "A"; the
+             mockup design-mockups/copilot-start/2026-10-29_swot-ways-in.html).
+             They were one step on, in the methods grid, where someone bringing
+             their reports could not see them. The chips are words, not buttons:
+             the card is pressed as one, and the grid opens as before. */
+          (s === "analysis" ? '<span class="copways" data-cop-ways>' + ["Guided questions", "Template", "Ready reports", "Deep research"].map(function(w){ return '<span class="copway">' + w + '</span>'; }).join("") + '</span>' +
+            '<span class="copwaysk">Pick one or more per area at the next step.</span>' : '') + '</button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]));
     return '<div class="copstart" data-cop-startscreen>' +
       '<h2 class="copstarth">What would you like to do with ' + E(area) + '?</h2>' +
       '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything, attach your notes, or paste ' + E(BOXWORK[s] || "finished work") + '…" aria-label="Ask the Copilot, attach notes or paste work — this starts a free chat">' + E(STARTTEXT[key()] || "") + '</textarea>' +
@@ -77635,8 +77654,9 @@ var SYNC = (function () {
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB,
@@ -77696,7 +77716,10 @@ var SYNC = (function () {
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
+        /* §690: the office keeps the tab whatever the cycle's state;
+           `canReport` says no to everyone on a closed cycle, so the office is
+           asked by name there. */
+        when: function(){ return reportTabOn() && topHasPlan() && planOn("group") && (inOffice() || canReport("group")); },
         render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB,
@@ -77804,8 +77827,9 @@ var SYNC = (function () {
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB,

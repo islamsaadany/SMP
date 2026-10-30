@@ -1012,3 +1012,8 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copadpane .adbrief { max-width:none; }
 .copadstays { white-space:nowrap; }
 .copadchat .adq { font-size:var(--fs-micro, 11px); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-deep); margin-bottom:3px; }
+
+/* §689 — the SWOT's four ways in, as chips on its start card */
+.copways { grid-column:2; display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+.copway { font:600 11px/1.6 var(--sans); padding:0 8px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2); color:var(--ink-2); white-space:nowrap; }
+.copwaysk { grid-column:2; font-size:var(--fs-micro, 11px); color:var(--ink-3); }

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-30 — The SWOT's four ways in, said on its start card (§689).** Guided questions · Template · Ready reports · Deep research as chips on the step-by-step card, words not buttons; the grid still decides per area. Shell `smp-shell-v7.40-swot-ways`.
+
 **2026-10-29 — Advisory, split three ways (§688).** The last area: the questions and their choices in the chat with the chat's own box as the answer, the Decision Brief on the right, Save at the pane's foot and no Apply (it stays in the Copilot), the to-do and the round box beside. Every Copilot area now shares one shape. Shell `smp-shell-v7.39-advisory-split`.
 **2026-10-29 — A seat that edits nothing lands in the reading window (§687), merged to `main` on Islam's word.** A reader's seat — not the office, holding no unit, function, capability, project, pillar, direction or contribution, and granted edit or fill nowhere — opens in the window on sign-in instead of the workbench, with Exit a press away — while the client's own switch, a line above the Roles & access matrix, says so (the default). Checked on the worked example's 33 people and the switch's three states; not with a real reader's sign-in.
 

@@ -20637,6 +20637,18 @@ function reportSectionState(){
     : { cls:"appear", badge:"" };
 }
 var CURRENT_REPORT_KEY = null;
+/* WHETHER THE REPORTING TAB IS DRAWN AT ALL (§690). Islam: *"make the
+   reporting button always available for the office."* For everybody else the
+   tab follows the cycle exactly as `reportSectionState()` says — open it is
+   there, closed it goes. The office is the one hand that opens, closes and
+   reopens cycles, so for it the tab stands whatever the cycle's state: on a
+   closed one the page says the cycle is closed and that its figures are a
+   record (renderReport / renderFnReport already draw that note), rather than
+   the tab disappearing from under the people who run the cycle. The grant is
+   still asked by `allowed()`; this answers only the cycle half. */
+function reportTabOn(){
+  return !!reportSectionState() || inOffice();
+}
 
 /* WHICH ROW A REPORTING BOX IS ABOUT (§334.18, correcting §326).
    IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,
@@ -56106,7 +56118,10 @@ if (ROOM_MODE) {
 
    A MODE, NOT A PAGE, as Presentation mode is (present.js): it takes the
    whole window, the chrome disappears, Exit and Escape return the reader to
-   exactly where they were. And NOTHING NEW IS COMPUTED (welcome.js's rule,
+   exactly where they were. AND AN ADDRESS OF ITS OWN (§689):
+   /<client>/strategy/read, /read/<unit>, /read/<unit>/<tab> — written and
+   read by shell/route.js off the `smp:reading` event this fires, so a link
+   a CEO is sent opens the window on the page it names. And NOTHING NEW IS COMPUTED (welcome.js's rule,
    §53.5): every figure is the same function the workbench's page calls —
    measureScore, pillarPerf, unitObjectives, unitPillars, unitExec and their
    group twins — and every list goes through SMPRules.shown, so the window
@@ -56127,6 +56142,9 @@ var READING = (function () {
   function recordOf(key) { return isUnit(key) ? UNITS[key] : GROUP; }
   function planOf(key) { return isUnit(key) ? UNITS[key] : topAsUnit(); }
 
+  /* THE TABS' WORDS IN AN ADDRESS (§689): /<client>/strategy/read/<subject>/<word> */
+  var TAB_WORD = { found: "foundation", swot: "analysis", dir: "directions", cap: "capabilities", perf: "performance" };
+  function tabKeyOf(word) { for (var k in TAB_WORD) if (TAB_WORD[k] === word || k === word) return k; return null; }
   var TABS = [
     { k: "found", label: function (key) { return SMPRules.foundTitle(GROUP, key) || "Foundation"; } },
     { k: "swot", label: function (key) { return SMPRules.swotTitle(GROUP, key) || "Analysis"; } },
@@ -56304,23 +56322,33 @@ var READING = (function () {
     var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false) : tab.k === "cap" ? directions(key, true) : performance(key);
     r.querySelector(".rwbody").innerHTML = body;
     r.querySelector(".rwbody").scrollTop = 0;
+    ST.tab = tab.k;
+    said();
   }
+  /* WHAT THE WINDOW SHOWS, SAID TO WHOEVER LISTENS (§689): shell/route.js
+     writes it into the address and reads an address back into it. */
+  function state() { return { open: isOpen(), target: ST.target, tab: TAB_WORD[ST.tab] || "foundation" }; }
+  function said() {
+    try { document.dispatchEvent(new CustomEvent("smp:reading", { detail: state() })); } catch (e) {}
+  }
+  function isOpen() { var r = root(); return !!(r && r.classList.contains("on")); }
 
-  function open(target) {
+  function open(target, tab) {
     var r = root(); if (!r) return;
     var t = String(target || TARGET || "group");
     ST.target = isUnit(t) ? t : "group";
-    ST.tab = "found";
+    ST.tab = (tab && tabKeyOf(String(tab))) || "found";
     ST.open = {};
-    paint();
     r.classList.add("on");
     document.body.classList.add("reading");
+    paint();
     r.focus();
   }
   function close() {
     var r = root(); if (!r) return;
     r.classList.remove("on");
     document.body.classList.remove("reading");
+    said();
     var b = document.getElementById("readbtn");
     if (b) b.focus();
   }
@@ -56411,8 +56439,7 @@ var READING = (function () {
     return true;
   }
 
-  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat,
-           isOpen: function () { var r = root(); return !!(r && r.classList.contains("on")); } };
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen };
 })();
 
 /* ── slides.js ── */
@@ -77310,8 +77337,9 @@ var SYNC = (function () {
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB,
@@ -77371,7 +77399,10 @@ var SYNC = (function () {
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
+        /* §690: the office keeps the tab whatever the cycle's state;
+           `canReport` says no to everyone on a closed cycle, so the office is
+           asked by name there. */
+        when: function(){ return reportTabOn() && topHasPlan() && planOn("group") && (inOffice() || canReport("group")); },
         render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB,
@@ -77479,8 +77510,9 @@ var SYNC = (function () {
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB,
@@ -90324,6 +90356,14 @@ var SYNC = (function () {
        `null` leaves the page exactly where it is rather than reading the
        word as a destination. */
     if (seg.length === 1 && seg[0] === LIB_TAB_KEY) return null;
+    /* §689: THE READING WINDOW'S OWN ADDRESS — `read`, then the subject (a
+       unit's key, or none for the company), then the tab's word. The place
+       remembered under it is the subject's own page, so Exit lands there;
+       and it is a deep address, a page somebody asked for by name. */
+    if (seg[0] === "read") {
+      var rt = seg[1] && seg[1] !== "group" ? seg[1] : "group";
+      return { d: rt, s: rt === "group" ? null : "strategy", c: null, read: { t: rt, tab: seg[2] || null } };
+    }
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
     else if (seg[0] === "co" && seg[1]) { d = "co:" + seg[1]; i = 2; }
     else if (seg[0] === "tour") { return { tour: true }; }
@@ -90717,8 +90757,31 @@ var SYNC = (function () {
   } catch (e) { /* a store that refuses: the shell opens where it would have */ }
   /* ── after every paint: the place is the address ── */
   var last = null;
+  /* §689: the reading window's address, beside the places'. */
+  function readAddressOf(t, tab) {
+    return "/" + SLUG + (MODULE ? "/" + MODULE : "") + "/read" +
+      (t && t !== "group" ? "/" + t : (tab ? "/group" : "")) + (tab ? "/" + tab : "");
+  }
+  var readOpened = false;
+  function readingOpen() { return typeof READING !== "undefined" && READING.isOpen && READING.isOpen(); }
+  document.addEventListener("smp:reading", function (ev) {
+    var st = ev.detail || {};
+    if (st.open) {
+      var a = readAddressOf(st.target, st.tab);
+      if (a === last) return;
+      var was = last; last = a;
+      try {
+        if (was !== null && !/\/read(\/|$)/.test(was)) history.pushState({ read: { t: st.target, tab: st.tab } }, "", a);
+        else history.replaceState({ read: { t: st.target, tab: st.tab } }, "", a);
+      } catch (e) {}
+    } else {
+      /* closed: the place's own address again, in place of the window's */
+      last = null; sync(false);
+    }
+  });
   function sync(push) {
     if (typeof current === "undefined" || !current) return;
+    if (readingOpen()) return;   /* §689: the window's address stands while it is up */
     var d = current, s = currentSub || null, c = (s && typeof CURSEC !== "undefined" && CURSEC[s]) || null;
     var a = addressOf(d, s, c);
     if (a === last) return;
@@ -90774,10 +90837,19 @@ var SYNC = (function () {
       try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
       try { mountProcessesLink(); } catch (e) {}
+      /* §689: arrived at the window's own address — opened once, after the
+         first true paint, on the subject and tab the address names */
+      if (here && here.read && !readOpened && typeof READING !== "undefined") {
+        readOpened = true;
+        try { READING.open(here.read.t, here.read.tab); } catch (e) {}
+      }
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
     var st = ev.state || placeOf(restOf(location.pathname));
+    /* §689: a history entry of the window's opens it there; one of a place closes it */
+    if (st && st.read && typeof READING !== "undefined") { last = location.pathname; READING.open(st.read.t, st.read.tab); return; }
+    if (readingOpen()) { last = location.pathname; try { READING.close(); } catch (e) {} }
     if (!st || !st.d || typeof current === "undefined") return;
     last = location.pathname;
     current = st.d; currentSub = st.s || null;

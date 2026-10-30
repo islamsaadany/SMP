@@ -2378,10 +2378,10 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
        the first card, then the workflow's. */
     check(/Mobile/.test(st.head) && /Analysis/.test(st.head) && st.cards.length === 2 && /Start from the existing plan/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
       "§639, §653 the area opens on its start screen: a box to just ask, the plan card first and the SWOT workflow as a card under it, no menu, at the reading width", JSON.stringify(st));
-    /* §689 — the SWOT's four ways in, said on its card as chips that are words, not buttons */
+    /* §691 — the SWOT's four ways in, said on its card as chips that are words, not buttons */
     const ways = await page.evaluate(() => ({ chips: Array.from(document.querySelectorAll(".copstart [data-cop-newchat] .copway")).map((x) => x.textContent), btns: document.querySelectorAll(".copstart [data-cop-newchat] button").length,
       note: (document.querySelector(".copstart [data-cop-newchat] .copwaysk") || {}).textContent || "" }));
-    check(ways.chips.join("|") === "Guided questions|Template|Ready reports|Deep research" && ways.btns === 0 && /one or more per area/.test(ways.note), "§689 the SWOT card says its four ways in as chips, words not buttons, with the line that the grid decides per area", JSON.stringify(ways));
+    check(ways.chips.join("|") === "Guided questions|Template|Ready reports|Deep research" && ways.btns === 0 && /one or more per area/.test(ways.note), "§691 the SWOT card says its four ways in as chips, words not buttons, with the line that the grid decides per area", JSON.stringify(ways));
     /* §683 — Send is not there until something is typed, on the start
        screen as in every chat (§652). */
     const sendVis0 = await page.evaluate(() => { const b = document.querySelector("[data-cop-startsend]"); return !!b && getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 0; });

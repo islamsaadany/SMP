@@ -88,6 +88,14 @@
        `null` leaves the page exactly where it is rather than reading the
        word as a destination. */
     if (seg.length === 1 && seg[0] === LIB_TAB_KEY) return null;
+    /* §689: THE READING WINDOW'S OWN ADDRESS — `read`, then the subject (a
+       unit's key, or none for the company), then the tab's word. The place
+       remembered under it is the subject's own page, so Exit lands there;
+       and it is a deep address, a page somebody asked for by name. */
+    if (seg[0] === "read") {
+      var rt = seg[1] && seg[1] !== "group" ? seg[1] : "group";
+      return { d: rt, s: rt === "group" ? null : "strategy", c: null, read: { t: rt, tab: seg[2] || null } };
+    }
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
     else if (seg[0] === "co" && seg[1]) { d = "co:" + seg[1]; i = 2; }
     else if (seg[0] === "tour") { return { tour: true }; }
@@ -481,8 +489,31 @@
   } catch (e) { /* a store that refuses: the shell opens where it would have */ }
   /* ── after every paint: the place is the address ── */
   var last = null;
+  /* §689: the reading window's address, beside the places'. */
+  function readAddressOf(t, tab) {
+    return "/" + SLUG + (MODULE ? "/" + MODULE : "") + "/read" +
+      (t && t !== "group" ? "/" + t : (tab ? "/group" : "")) + (tab ? "/" + tab : "");
+  }
+  var readOpened = false;
+  function readingOpen() { return typeof READING !== "undefined" && READING.isOpen && READING.isOpen(); }
+  document.addEventListener("smp:reading", function (ev) {
+    var st = ev.detail || {};
+    if (st.open) {
+      var a = readAddressOf(st.target, st.tab);
+      if (a === last) return;
+      var was = last; last = a;
+      try {
+        if (was !== null && !/\/read(\/|$)/.test(was)) history.pushState({ read: { t: st.target, tab: st.tab } }, "", a);
+        else history.replaceState({ read: { t: st.target, tab: st.tab } }, "", a);
+      } catch (e) {}
+    } else {
+      /* closed: the place's own address again, in place of the window's */
+      last = null; sync(false);
+    }
+  });
   function sync(push) {
     if (typeof current === "undefined" || !current) return;
+    if (readingOpen()) return;   /* §689: the window's address stands while it is up */
     var d = current, s = currentSub || null, c = (s && typeof CURSEC !== "undefined" && CURSEC[s]) || null;
     var a = addressOf(d, s, c);
     if (a === last) return;
@@ -538,10 +569,19 @@
       try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
       try { mountProcessesLink(); } catch (e) {}
+      /* §689: arrived at the window's own address — opened once, after the
+         first true paint, on the subject and tab the address names */
+      if (here && here.read && !readOpened && typeof READING !== "undefined") {
+        readOpened = true;
+        try { READING.open(here.read.t, here.read.tab); } catch (e) {}
+      }
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
     var st = ev.state || placeOf(restOf(location.pathname));
+    /* §689: a history entry of the window's opens it there; one of a place closes it */
+    if (st && st.read && typeof READING !== "undefined") { last = location.pathname; READING.open(st.read.t, st.read.tab); return; }
+    if (readingOpen()) { last = location.pathname; try { READING.close(); } catch (e) {} }
     if (!st || !st.d || typeof current === "undefined") return;
     last = location.pathname;
     current = st.d; currentSub = st.s || null;

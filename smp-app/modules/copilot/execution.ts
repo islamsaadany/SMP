@@ -38,9 +38,21 @@ export async function execView(c: any, chat: { id: string; place?: string; secti
   const applied = s.saved && s.saved.deliverableId ? await appliedOf(c, s.saved.deliverableId) : null;
   const ch = periodChoices(new Date());
   return { exec: s, execApplied: applied, execTodo: todo, execDone: doneCount(todo), execBlocker: finishBlocker(s),
+    execDirsSaved: s.items.length ? null : await dirsSavedIn(c, chat.place || ""),
     execNextVersion: await nextExecVersion(c, chat as any, pw || chat.place || ""),
     execWords: { quarters: periodQuarters(s.period), period: s.period ? periodWords(s.period) : "", length: s.period ? periodLength(s.period) : 0,
       compiles: COMPILES, months: MONTHS, choices: { full: ch.full, fullWord: periodWords(ch.full), rest: ch.rest, restWord: periodWords(ch.rest) } } };
+}
+/* §692 S10 — WHEN THERE IS NOTHING TO PLAN FOR, the chat says whether a
+   Directions version is saved and waiting for Apply, rather than sending the
+   person back to choose what they chose. The latest saved one in this place. */
+async function dirsSavedIn(c: any, place: string): Promise<{ id: string; title: string; n: number } | null> {
+  if (!place) return null;
+  const r = await c.query(
+    "SELECT d.id, d.title, v.n FROM copilot_deliverables d JOIN LATERAL (SELECT n, at FROM copilot_versions x WHERE x.deliverable_id = d.id ORDER BY n DESC LIMIT 1) v ON true " +
+    "WHERE d.place = $1 AND d.section = 'directions' AND d.type = 'directions' ORDER BY v.at DESC LIMIT 1", [place]);
+  const x = r.rows[0];
+  return x ? { id: String(x.id), title: String(x.title), n: Number(x.n) || 0 } : null;
 }
 export async function execProgress(c: any, ids: string[]): Promise<Record<string, { done: number; of: number }>> {
   if (!ids.length) return {};

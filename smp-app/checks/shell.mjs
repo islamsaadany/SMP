@@ -2497,6 +2497,17 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await page.click('[data-cop-cp-choose="btc"]');
     await page.waitForSelector("[data-cop-cp-pick]", { timeout: 15000 });
     check((await page.$$eval("[data-cop-cp-pick]", (a) => a.length)) === 5, "choosing the discipline brings five value cards");
+    /* §692 S2 — the scores settle at the choice, and the choice can be
+       changed: a link under the recommendation brings the three back with
+       what goes with the change; Never mind folds them again. */
+    const s2a = await page.evaluate(() => ({ live: document.querySelectorAll("[data-cop-cppane] button[data-cop-cp-sc]").length, link: document.querySelectorAll("[data-cop-cp-unchoose]").length, opts: document.querySelectorAll("[data-cop-cp-choose]").length,
+      settled: /Settled at the choice/.test((document.querySelector("[data-cop-cppane]") || {}).textContent || "") }));
+    check(s2a.live === 0 && s2a.link >= 1 && s2a.opts === 0 && s2a.settled, "§692 after the choice the scores are settled and say so, and 'Choose a different discipline' stands under the recommendation", JSON.stringify(s2a));
+    await page.click("[data-cop-msgs] [data-cop-cp-unchoose]"); await page.waitForTimeout(200);
+    const s2b = await page.evaluate(() => ({ opts: document.querySelectorAll("[data-cop-cp-choose]").length, note: /clears the values and the table/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), never: !!document.querySelector(".copopt[data-cop-cp-unchoose]") }));
+    check(s2b.opts === 3 && s2b.note && s2b.never, "§692 …pressed, the three choices come back with the line on what a change clears, and Never mind", JSON.stringify(s2b));
+    await page.click(".copopt[data-cop-cp-unchoose]"); await page.waitForTimeout(200);
+    check((await page.$$eval("[data-cop-cp-choose]", (a) => a.length)) === 0 && (await page.$$eval("[data-cop-cp-pick]", (a) => a.length)) === 5, "§692 …and Never mind folds them, the values untouched");
     await page.click('[data-cop-cp-pick="0"]'); await page.waitForTimeout(400);
     await page.click('[data-cop-cp-pick="2"]'); await page.waitForTimeout(400);
     await page.click("[data-cop-cp-use]");
@@ -2553,8 +2564,16 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(cpArch.had ? cpAr.includes("compete:mobile") && !cpAr.includes("unit:mobile") : cpAr.length === 0, "§654 …having archived the plan's Competitive Discipline as its own kind (or nothing, where the plan held none)", JSON.stringify({ cpAr, had: cpArch.had }));
     const cpOn = await page.evaluate(() => ({ line: /v1 on the plan/.test((document.querySelector("[data-cop-cpfoot]") || {}).textContent || ""), again: /again/.test((document.querySelector("[data-cop-cp-apply]") || {}).textContent || "") }));
     check(cpOn.line && cpOn.again, "§654 …and the pane's foot says v1 on the plan, offering Apply again", JSON.stringify(cpOn));
+    /* §692 S9 — the onward path: one line after Apply names the next step
+       and opens its start screen in this place. */
+    const nx = await page.evaluate(() => { const n = document.querySelector("[data-cop-msgs] [data-cop-next]"); return n ? { t: n.textContent, go: (n.querySelector("[data-cop-go]") || {}).getAttribute ? n.querySelector("[data-cop-go]").getAttribute("data-cop-go") : null } : null; });
+    check(!!nx && /Next/.test(nx.t) && /Directions/.test(nx.t) && nx.go === "directions", "§692 after Apply the chat says Next: Directions, with a button to open it", JSON.stringify(nx));
     await shot("2-saved");
     check(await page.evaluate(() => { const b = document.querySelector("[data-cop-cp-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649)");
+    await page.click('[data-cop-msgs] [data-cop-next] [data-cop-go="directions"]');
+    await page.waitForSelector("[data-cop-startscreen]", { timeout: 10000 });
+    const went = await page.evaluate(() => ({ h: (document.querySelector("[data-cop-startscreen] .copstarth") || {}).textContent || "", sec: typeof CURSEC !== "undefined" ? CURSEC.copilot : null }));
+    check(/Directions/.test(went.h) && went.sec === "directions", "§692 …which opens the Directions start screen in this place", JSON.stringify(went));
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
@@ -2649,6 +2668,33 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     const fo2 = await page.$$eval(".coppf.open .copdul li", (a) => a.length);
     check(fo2 === r.s.options.length, "§675 …and open again on a press, one line per Direction with its score and whether it goes ahead", fo2);
     const withCaps = !!r.s.withCaps;
+    /* §692 S1 — Go ahead can be undone: Change the Directions on the card
+       head (and in the open fold) unsets the choice, keeps what is ticked,
+       scored and owned, and keeps the Capabilities suggested so far. */
+    if (withCaps) await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
+    const capsBefore = ((await row()).s.caps || []).length;
+    const s1a = await page.evaluate(() => ({ head: !!document.querySelector("[data-cop-dvpane] h3 [data-cop-dv-unchoose]"), fold: !!document.querySelector(".coppf.open [data-cop-dv-unchoose]") }));
+    check(s1a.head && s1a.fold, "§692 Change the Directions stands on the card head and in the open fold", JSON.stringify(s1a));
+    await page.click("[data-cop-dvpane] h3 [data-cop-dv-unchoose]");
+    await page.waitForSelector("[data-cop-dv-go-all]", { timeout: 10000 });
+    await page.waitForTimeout(500);
+    r = await row();
+    const s1b = await page.evaluate(() => ({ scLive: document.querySelectorAll("[data-cop-dvpane] button[data-cop-dv-sc]").length, said: /open again/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), fold: !!document.querySelector('[data-cop-pfold="dvopts"]'),
+      kept: /suggested for the earlier set/i.test((document.querySelector("[data-cop-dvpane]") || {}).textContent || ""), step: (document.querySelector(".copfhead small") || {}).textContent || "" }));
+    check(r.s.chose === false && r.s.options.filter((o) => o.go).length === goN && (r.s.caps || []).length === capsBefore && s1b.scLive > 0 && s1b.said && !s1b.fold && (!withCaps || s1b.kept) && /Directions/.test(s1b.step),
+      "§692 …pressed: the choice is unset, the ticks and scores stay and are pressable again, the chat says so, the Capabilities are kept and marked for the earlier set", JSON.stringify({ chose: r.s.chose, go: r.s.options.filter((o) => o.go).length, caps: (r.s.caps || []).length, s1b }));
+    /* §692 S12 — with this chat unfinished, the start screen names it. */
+    await page.locator("[data-cop-home]:visible").first().click();
+    await page.waitForSelector("[data-cop-startscreen]", { timeout: 10000 });
+    const unf = await page.evaluate(() => { const u = document.querySelector("[data-cop-startscreen] [data-cop-unfinished]"); const cards = document.querySelector("[data-cop-startscreen] .copstartcards");
+      return u ? { t: u.textContent, btn: !!u.querySelector("[data-cop-chat]"), above: cards ? u.getBoundingClientRect().bottom <= cards.getBoundingClientRect().top : false } : null; });
+    check(!!unf && /Directions/.test(unf.t) && / of \d+ done/.test(unf.t) && unf.btn && unf.above, "§692 the start screen names the unfinished chat with its progress, Continue it above the cards", JSON.stringify(unf));
+    await page.click("[data-cop-startscreen] [data-cop-unfinished] [data-cop-chat]");
+    await page.waitForSelector("[data-cop-dv-go-all]", { timeout: 10000 });
+    await page.click("[data-cop-dv-go-all]");
+    await page.waitForTimeout(1500);
+    r = await row();
+    check(r.s.chose === true && (r.s.caps || []).length === capsBefore, "§692 Continue it opens the chat, and Go ahead again stands with the same Capabilities", JSON.stringify({ chose: r.s.chose, caps: (r.s.caps || []).length }));
     if (withCaps) {
       await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
       r = await row();
@@ -2701,6 +2747,8 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await page.waitForSelector("[data-cop-dv-apply]", { timeout: 10000 }).catch(() => {});
     const re = await page.evaluate(() => ({ line: /v1 on the plan/.test((document.querySelector("[data-cop-dvfoot]") || {}).textContent || ""), again: (document.querySelector("[data-cop-dv-apply]") || {}).textContent || "" }));
     check(re.line && /again/.test(re.again), "§654 after a reload the pane's foot still says v1 on the plan — the note on the deliverable, not this visit's memory (§675)", JSON.stringify(re));
+    const nx2 = await page.evaluate(() => { const n = document.querySelector("[data-cop-msgs] [data-cop-next]"); return n ? { t: n.textContent, go: (n.querySelector("[data-cop-go]") || {}).getAttribute ? n.querySelector("[data-cop-go]").getAttribute("data-cop-go") : null } : null; });
+    check(!!nx2 && /Execution/.test(nx2.t) && nx2.go === "execution", "§692 after Apply the Directions chat says Next: Execution", JSON.stringify(nx2));
     await shot("2-applied");
     const after = await page.evaluate(() => UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name, u: p.urgency })));
     const kept = r.s.options.filter((o) => o.go && o.planId);

@@ -86,7 +86,7 @@ with sync_playwright() as p:
     print("\n── 2 · a real section heading is NOT swallowed ──")
     # The rule drops a heading that MATCHES the page name, never simply the
     # first one — the Planning & reporting cycle's set-up tab has one real
-    # section, "How figures are entered", and it must survive (§690: Who has
+    # section, "How figures are entered", and it must survive (§693: Who has
     # reported is the page's second TAB now, not a section).
     pg.evaluate("()=>{currentSub='cycle';CYCLETAB='setup';paint();}")
     pg.wait_for_timeout(300)

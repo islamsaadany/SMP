@@ -6238,7 +6238,7 @@
        button only opens and closes the pen. `cycleDraft()`, `cycleEditDirty()`,
        `ceHoldPaint()`, the two `data-ce-*` handlers and the four `input`
        handlers are DELETED rather than left unreachable (§24). */
-    /* §690: THE TWO TABS of Setup › Planning & reporting, and the board's
+    /* §693: THE TWO TABS of Setup › Planning & reporting, and the board's
        filter row. The tab is a mode and repaints; the filter is applied to
        the rows already drawn, so typing in Find never loses its cursor to a
        repaint (§219's cousin). */
@@ -6266,7 +6266,7 @@
     applyBoardFilter();
     var ec = document.querySelector("[data-editcycle]");
     if (ec) ec.addEventListener("click", function(){
-      /* §690: the pen opens for a closed cycle too — the plan period and the
+      /* §693: the pen opens for a closed cycle too — the plan period and the
          review are its to edit whatever the cycle's state, and Reopen sits
          where Close does, at the pen's far end (§273.2). */
       /* COMMIT THE BOX BEFORE LEAVING IT (§219). A field writes on `change`,
@@ -6311,7 +6311,7 @@
        stack of label/value rows, two buttons — is what every confirmation in
        this product already wears (§53.5, and `.cbtns`' own note about the
        third copy being the one that gets extracted). */
-    /* §690: THE BOARD'S FILTER, applied to the drawn rows. A band (units,
+    /* §693: THE BOARD'S FILTER, applied to the drawn rows. A band (units,
        capabilities, functions) whose every row is hidden hides with them,
        and a board with no row left says so on one line. */
     function applyBoardFilter(){

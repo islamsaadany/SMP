@@ -3203,7 +3203,7 @@
                   background:var(--warn-bg); color:var(--warn-tx); font-size:13px; }
   .planblk-pen { border-top:1px solid var(--line); padding:12px 18px 14px; }
   .planblk-pen > .cyc2-r.planper:first-child { border-top:0; margin-top:0; padding-top:0; }
-  /* ── §690: ONE CARD, THE PEN BESIDE IT, TWO TABS ─────────────────────
+  /* ── §693: ONE CARD, THE PEN BESIDE IT, TWO TABS ─────────────────────
      The card keeps §495's own rules above; what is new is the wrap that
      puts the pen BESIDE it while editing (so nothing under the card moves,
      §273.4's 156px measured and refused), the pins on the timeline, the

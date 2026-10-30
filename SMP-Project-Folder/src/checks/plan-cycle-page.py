@@ -57,7 +57,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
 
     print("\n── 1 · the page, and the plan period first ──")
-    # REWRITTEN, never loosened (§218), for §690: the page is two tabs, the
+    # REWRITTEN, never loosened (§218), for §693: the page is two tabs, the
     # set-up first, and its one card carries the plan period as its FIRST
     # fact with the cycle's facts after it. The period's own Edit (§495) is
     # gone with the second pen; what survives is the ORDER, and that the
@@ -79,7 +79,7 @@ with sync_playwright() as p:
     ok("the plan period is its first fact, before the cycle's", o.get("first") is True, o)
     ok("...with the card's one Edit, and no Edit of its own", o.get("edit") is False and o.get("oneEdit") is True, o)
     ok("with no period it says Not set", o.get("unset") is True, o)
-    # §690: THE TIMELINE DRAWS FOR THE CYCLE TOO, so with no period it is
+    # §693: THE TIMELINE DRAWS FOR THE CYCLE TOO, so with no period it is
     # there — and lights NOTHING as the plan, saying so in its key. Both ends
     # (§94.2): drawn, and no month wearing the plan's colour.
     ok("with no period the timeline lights no month as the plan, and says so",

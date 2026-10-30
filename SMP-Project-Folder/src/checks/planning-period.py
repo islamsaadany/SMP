@@ -102,7 +102,7 @@ def pick(pg, sel_all, idx, word):
 
 
 def strip(pg):
-    # §690: the review point's line is the cycle's fact on the card now.
+    # §693: the review point's line is the cycle's fact on the card now.
     return js(pg, """()=>{const e=document.querySelector('[data-fact-cycle] .sub');
                           return e ? e.textContent.replace(/\\s+/g,' ').trim() : null;}""")
 
@@ -143,7 +143,7 @@ def run(pg):
     # the page, with its own Edit, and the cycle sits under it. What survives
     # from the old assertion is the ORDER: the period comes first.
     print("\n── 1 · the plan period block, first on the page, with its own pen ──")
-    # §690: ONE PEN, the page's, opened by the card's Edit; the period is
+    # §693: ONE PEN, the page's, opened by the card's Edit; the period is
     # its FIRST block, ahead of the cycle's own (`.cycown`). The old
     # `notInCycle` is kept with its sign turned: the period is in the pen
     # and BEFORE the cycle's block, never inside it.

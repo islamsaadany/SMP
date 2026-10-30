@@ -158,7 +158,7 @@ with sync_playwright() as p:
 
     print("\n6 · the yearly revision")
     safe(pg, "()=>{ current='setup'; currentSub='cycle'; paint(); }"); pg.wait_for_timeout(300)
-    # §495: the years live with the plan period (spec 064 §7); §690 puts the
+    # §495: the years live with the plan period (spec 064 §7); §693 puts the
     # period back in the page's ONE pen, first — rewritten, the same three
     # claims asked of the pen they moved into (§218).
     if not pg.query_selector(".newcycle"): click(pg, "[data-editcycle]", 500)

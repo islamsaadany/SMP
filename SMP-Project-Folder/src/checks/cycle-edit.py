@@ -158,7 +158,7 @@ def js(pg, expr, arg=None):
 
 
 def strip_state(pg):
-    # §690: THE STRIP IS THE CARD. The cycle's name, dates and review point
+    # §693: THE STRIP IS THE CARD. The cycle's name, dates and review point
     # are the card's facts now (`[data-fact-cycle]`), and the card's head
     # carries the page's one Edit and, closed, Open a new cycle. What the
     # strip was asserted to carry — nothing that changes anything — is asked
@@ -190,7 +190,7 @@ def pen_state(pg):
       return {
         word: word,
         lit: !!(t && t.classList.contains("penon")),
-        /* §690: the cycle's own block is `.cycown` and Ending it is
+        /* §693: the cycle's own block is `.cycown` and Ending it is
            `.cycend`, stacked in the pen beside the card rather than side by
            side — the pen is a column now. */
         cols: !!p.querySelector(".cycown") && !!p.querySelector(".cycend"),
@@ -396,7 +396,7 @@ with sync_playwright() as p:
     ok("...and Reporting as of is gone by name — the cycle's end IS the review point",
        not any("reporting as of" in x.lower() for x in (pen.get("cycleLabels") or [])),
        pen.get("cycleLabels"))
-    # §690: THE PEN IS BESIDE THE CARD, NOT UNDER IT. §273.4 measured the
+    # §693: THE PEN IS BESIDE THE CARD, NOT UNDER IT. §273.4 measured the
     # in-place pen moving the page below by 156px and Islam chose it anyway;
     # view A undoes that cost: the pen opens in a column on the card's right
     # at his window, and what is under the card — the switch, the sections —
@@ -433,7 +433,7 @@ with sync_playwright() as p:
     # two spellings of the same word (§87).
     ok("filled from the cycle, not empty",
        (pen.get("fields") or [None])[0] == r0.get("name"), pen.get("fields"))
-    # §690: ONE COLUMN, in the order the facts are read — the cycle, the
+    # §693: ONE COLUMN, in the order the facts are read — the cycle, the
     # review, Ending it LAST, behind everything you type in (§273.4's reason
     # for the second column, kept as an order now that the pen is beside the
     # card and has one).
@@ -663,7 +663,7 @@ with sync_playwright() as p:
     ok("...and it still offers Edit and Open a new cycle",
        shut2.get("edit") is True and shut2.get("opennew") is True, shut2)
     hist0 = js(pg, "()=>({n:HISTORY.length, last:(HISTORY[HISTORY.length-1]||{}).name})")
-    # §690: Edit opens the PEN for a closed cycle too — the plan period and
+    # §693: Edit opens the PEN for a closed cycle too — the plan period and
     # the review are editable whatever the cycle's state — and Reopen is at
     # the pen's far end, where Close is while it runs (§273.2). The dialog is
     # behind that press now, not behind Edit.

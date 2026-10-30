@@ -70566,7 +70566,7 @@ Islam: *"Give the reading window its own address next"* — the mockup's B (desi
 
 **§689 MERGED TO `main`, 2026-10-29, on Islam's word (*"merge to main"*).** `main` had taken §688 (Advisory split three ways) meanwhile; it touched none of the window's or the address's files, so the merge joined the two records and the built files were rebuilt on the merged tree. Checked again there: the served shell driven at the read address opens, moves, exits and walks Back and Forward as recorded; pages-types raises nothing new. No migrations; nobody signed out.
 
-## §690 — Setup › Planning & reporting: one card, one Edit, two tabs (2026-10-30)
+## §693 — Setup › Planning & reporting: one card, one Edit, two tabs (2026-10-30; §690 on the branch, renumbered at the merge: main took §690–§692)
 
 Islam: *"checkt he planing & reportning seetings page and suggest a more user experience views to choose from"*; shown three (design-mockups/planning-reporting-views/2026-10-30_three-views.html — A two tabs and one pen beside the card, B the year as a calendar, C the cycle as five steps): *"go with A, build it"*.
 

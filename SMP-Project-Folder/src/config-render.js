@@ -7590,7 +7590,7 @@ function cyclePick(label, value, setter, opts){
    pickers are §308's own `planPeriodBlock()`, drawn only while this pen is
    open, so one control writes the period (§53.5). The timeline is the plan's
    calendar year(s), the plan shaded and the open cycle outlined. */
-/* ── §690: ONE CARD, ONE EDIT, TWO TABS ──────────────────────────────
+/* ── §693: ONE CARD, ONE EDIT, TWO TABS ──────────────────────────────
    Islam, shown three ways the page could read (design-mockups/
    planning-reporting-views/2026-10-30_three-views.html): "go with A, build
    it". The page did two jobs in one column — SETTING the plan period and the
@@ -7844,7 +7844,7 @@ function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
 function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
-  /* §690: EVERY ROW SAYS WHAT THE FILTER ROW ASKS — its state, whether it
+  /* §693: EVERY ROW SAYS WHAT THE FILTER ROW ASKS — its state, whether it
      owes a note, and the words Find a line matches — and is counted as it
      is drawn, so the filters' numbers are the rows' own and cannot drift
      from them (§53.5). The filter itself is applied in the shell on the
@@ -8098,7 +8098,7 @@ function renderCycle(){
      the FUNCTIONS this page put on the board (§105) as well as the units. */
   var t = cycleTotals();
 
-  /* §690: THE HEADLINE STRIP, OVER THE BOARD. The cycle's name and dates
+  /* §693: THE HEADLINE STRIP, OVER THE BOARD. The cycle's name and dates
      moved into the card's facts; what is left here is the four numbers
      cycleTotals() answers (§108.1), drawn on the board's tab where the rows
      they add up are. */
@@ -8207,7 +8207,7 @@ function renderCycle(){
       ? strip + filters + board
       /* THE PEN IS A COLUMN OF ITS OWN beside everything on the tab — the
          card AND the sections under it — so opening it moves nothing down
-         the page (§690): the sections narrow beside it, they do not drop. */
+         the page (§693): the sections narrow beside it, they do not drop. */
       : '<div class="cycwrap' + (drawer ? ' editing' : '') + '"><div class="cycleft">' +
         cycleCard(can, open) + contTakenSection() +
         (claims.length

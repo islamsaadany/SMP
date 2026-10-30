@@ -561,7 +561,7 @@ var NEWCYCLE = null;
    because the two panels answer different questions — NEWCYCLE really is a
    draft, of a cycle that does not exist yet and so has nothing to write to. */
 var CYCLEEDIT = null;
-/* §690: WHICH TAB OF SETUP › PLANNING & REPORTING IS OPEN, and what the
+/* §693: WHICH TAB OF SETUP › PLANNING & REPORTING IS OPEN, and what the
    board's filter row holds. A mode, like CYCLEEDIT above: nothing here is
    stored. The filter is applied to the drawn rows in the shell, not by a
    repaint, so Find keeps its cursor while it is typed in. PLANEDIT (§495)

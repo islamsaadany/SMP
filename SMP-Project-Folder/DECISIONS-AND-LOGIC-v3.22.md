@@ -70576,5 +70576,4 @@ Islam: *"make the reporting button always available for the office."*
 
 **Checked** on the built file driven headless (node Playwright; the Python Playwright this container lacks is why the frozen checks were not run): as the office on the open cycle the unit's and the function's Reporting tabs are there as before; with the cycle set closed and repainted they are still there, the company's follows `topHasPlan()` as before, the tab is in the row and pressing it lands on Reporting with the closed note, no page error; as a unit head on the same closed cycle none of the three tabs is drawn, and on reopening his unit's tab is back. `built-in-step.py` all good; `generated-in-step.mjs` reports the one red `origin/main` already carries (rules.cjs carried vs frozen) and nothing new. **Not checked**: the frozen Python checks (no Python Playwright here); a served sign-in.
 
-**Branch only; not merged.**
-
+**§690 MERGED TO `main`, 2026-10-30, on Islam's word (*"merge to main"*).** `main` had not moved since §689, so the merge is a fast-forward of this one commit: no renumbering owed (§264.3), no second record to join, and the built file and the served copies are the ones asserted in step above. No migrations; nobody signed out.

@@ -5344,6 +5344,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), t = s && s.top, b = t && t.plan;
     return !!(b && b.split === true);
   }
+  /* §687: WHERE A READER'S SEAT LANDS — in the reading window (the default,
+     Islam: "build it yes") or on the workbench. A switch per client, on the
+     Structure step; kept on the structure as `readers: "workbench"`, and an
+     ABSENCE for the window (§50.6), so a client that never touched the
+     switch reads as the window was built to read. */
+  function readersOpen(group) {
+    var s = structureOf(group);
+    return !(s && s.readers === "workbench");
+  }
   /* WHICH HALF A PILLAR BELONGS TO, as one answer rather than two call sites
      asking the question in opposite directions. `half` is "cap" or "dir";
      anything else means the whole list and every pillar is in it. */
@@ -6004,7 +6013,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     LAYER_KINDS: LAYER_KINDS, coUsedBy: coUsedBy, coOnLayer: coOnLayer,
     layerCompanies: layerCompanies, layerOn: layerOn, layerOrphans: layerOrphans, layerWords: layerWords,
     NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
-    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
+    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf, readersOpen: readersOpen,
     ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     endInMindOffered: endInMindOffered, endInMindOn: endInMindOn,
     holdsSeat: holdsSeat, holdsTopPart: holdsTopPart, mayReportTopOrPart: mayReportTopOrPart,

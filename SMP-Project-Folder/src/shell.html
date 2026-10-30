@@ -185,6 +185,7 @@
      the page. Filled on open; empty until then. -->
 <div id="readroot" class="readroot" role="dialog" aria-modal="true" aria-label="Read the strategy" tabindex="-1">
   <div class="rwtop"></div>
+  <div class="rwnav"></div>
   <div class="rwtabs"></div>
   <div class="rwbody"></div>
 </div>
@@ -631,8 +632,9 @@
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB,
@@ -692,7 +694,10 @@
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
+        /* §690: the office keeps the tab whatever the cycle's state;
+           `canReport` says no to everyone on a closed cycle, so the office is
+           asked by name there. */
+        when: function(){ return reportTabOn() && topHasPlan() && planOn("group") && (inOffice() || canReport("group")); },
         render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB,
@@ -800,8 +805,9 @@
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB,
@@ -1750,7 +1756,20 @@
     if (r.kind === "fn")  return navName(FUNCTIONS[r.key]);
     return navName(UNITS[k]);
   }
+  /* §692: THE SAME ROW, ASKED WITH SOMEBODY ELSE'S PLACE AND FOLD. The
+     reading window draws this row under its strip (reading.js, Islam:
+     *"why don't we use the navigator concept?"*), with the window's own
+     subject lit and its own Units | Functions side open — so the builder
+     takes the place and the fold as arguments and hands the settled fold
+     back, and the workbench's own call below feeds it `current` and NAVFOLD
+     exactly as before. One builder, two rows that cannot disagree about
+     who reaches what (§53.5). */
   function unitTabs(){
+    var r = navParts(current, NAVFOLD, NAVFOLDAT);
+    NAVFOLD = r.fold; NAVFOLDAT = r.followed;
+    return r.parts;
+  }
+  function navParts(at, fold, followed){
     var out = [];
     /* ── THE GROUP BUTTON BECOMES A DROPDOWN (§68) ────────────────────
        Islam, asked where a company should sit: "make the group button name
@@ -1777,9 +1796,9 @@
     });
     if (tops.length === 1) out.push({ k:tops[0].k, label:tops[0].label });
     else if (tops.length > 1) out.push({ tops:tops });
-    var us = myUnits(), cs = myFns(), fold = foldsNeeded();
+    var us = myUnits(), cs = myFns(), folded = foldsNeeded();   /* §692: `folded`, since `fold` is the argument */
 
-    if (fold) {
+    if (folded) {
       /* The row does NOT group by company (§15.13). It was built that way and
          taken out in the same version: the SMO and the group CEO see
          everything and already have this fold, so companies added a second
@@ -1809,17 +1828,17 @@
       /* §464: on the company the list follows where you ARE when you arrive
          somewhere new — a function opened from a link, or a division's page —
          and is left alone while you are only browsing the switch. */
-      if (atCo && current !== NAVFOLDAT) {
-        NAVFOLDAT = current;
+      if (atCo && at !== followed) {
+        followed = at;
         sides.forEach(function(x){
-          if (x.keys.indexOf(current) !== -1 || (x.co && current === "co:" + x.co)) NAVFOLD = x.fold;
+          if (x.keys.indexOf(at) !== -1 || (x.co && at === "co:" + x.co)) fold = x.fold;
         });
       }
-      if (!sides.some(function(x){ return x.fold === NAVFOLD; }))
-        NAVFOLD = sides.length ? sides[0].fold : "units";
+      if (!sides.some(function(x){ return x.fold === fold; }))
+        fold = sides.length ? sides[0].fold : "units";
       out.push({ multi:atCo, folds: sides.map(function(x){
-        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold, co:x.co || null,
-          here:!!(x.co && current === "co:" + x.co), one:!!x.one };
+        return { fold:x.fold, label:x.label, open:fold === x.fold, co:x.co || null,
+          here:!!(x.co && at === "co:" + x.co), one:!!x.one };
       }) });
       /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
          (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
@@ -1833,7 +1852,7 @@
          silently, and it fails looking like the feature was never built. The
          same one-argument helper answers for both now, so a third kind of
          thing added later cannot get this wrong on its own. */
-      (sides.filter(function(x){ return x.fold === NAVFOLD; })[0] || { keys:[] })
+      (sides.filter(function(x){ return x.fold === fold; })[0] || { keys:[] })
         .keys.forEach(function(k){ out.push({ k:k, label:navLabelFor(k) }); });
     } else {
       /* NO SWITCH: every side's destinations, in the same order, on one line.
@@ -1850,7 +1869,7 @@
        Anchored right rather than trailing the row: it is the same destination
        wherever you are, and a control that moves as the list beside it grows
        is a control you have to look for. */
-    return out;
+    return { parts: out, fold: fold, followed: followed };
   }
 
 

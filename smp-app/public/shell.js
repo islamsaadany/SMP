@@ -20637,6 +20637,18 @@ function reportSectionState(){
     : { cls:"appear", badge:"" };
 }
 var CURRENT_REPORT_KEY = null;
+/* WHETHER THE REPORTING TAB IS DRAWN AT ALL (§690). Islam: *"make the
+   reporting button always available for the office."* For everybody else the
+   tab follows the cycle exactly as `reportSectionState()` says — open it is
+   there, closed it goes. The office is the one hand that opens, closes and
+   reopens cycles, so for it the tab stands whatever the cycle's state: on a
+   closed one the page says the cycle is closed and that its figures are a
+   record (renderReport / renderFnReport already draw that note), rather than
+   the tab disappearing from under the people who run the cycle. The grant is
+   still asked by `allowed()`; this answers only the cycle half. */
+function reportTabOn(){
+  return !!reportSectionState() || inOffice();
+}
 
 /* WHICH ROW A REPORTING BOX IS ABOUT (§334.18, correcting §326).
    IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,
@@ -77318,8 +77330,9 @@ var SYNC = (function () {
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB,
@@ -77379,7 +77392,10 @@ var SYNC = (function () {
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
+        /* §690: the office keeps the tab whatever the cycle's state;
+           `canReport` says no to everyone on a closed cycle, so the office is
+           asked by name there. */
+        when: function(){ return reportTabOn() && topHasPlan() && planOn("group") && (inOffice() || canReport("group")); },
         render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB,
@@ -77487,8 +77503,9 @@ var SYNC = (function () {
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB,

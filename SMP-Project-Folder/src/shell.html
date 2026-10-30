@@ -631,8 +631,9 @@
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB,
@@ -692,7 +693,10 @@
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
+        /* §690: the office keeps the tab whatever the cycle's state;
+           `canReport` says no to everyone on a closed cycle, so the office is
+           asked by name there. */
+        when: function(){ return reportTabOn() && topHasPlan() && planOn("group") && (inOffice() || canReport("group")); },
         render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB,
@@ -800,8 +804,9 @@
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB,

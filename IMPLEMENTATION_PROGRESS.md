@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-30 — The reading window's subjects are the navigator's, cut down by reach (§692), on the branch.** The drop-down is gone; the window carries the workbench's own navigation row under its strip — the company menu, the Units | Functions switch, the names on one scrolling line — built by the same builder (shell.html `navParts`), so a subject is there exactly when the matrix gives the viewer a page on it. A supporting function reads as its Overview, S&W, its plan under the plan's own name (Directions, Projects or Objectives) and Overall performance; a division as its Foundation and the performance of what it holds; addresses `/read/fn/<key>` and `/read/co/<key>`. Mockup rounds 5 and 6 in design-mockups/strategy-reading-view.
+
 **2026-10-29 — The reading window has an address of its own (§689), merged to `main` on Islam's word.** `/<client>/strategy/read`, `/read/<unit>`, `/read/<unit>/<tab>`: a link opens the window on the page it names; the tabs and the picker write the address, Exit lands on the page's own, Back closes the window and Forward reopens it. Checked on the served shell driven at the address; not with a real sign-in.
 
 **2026-10-29 — Advisory, split three ways (§688).** The last area: the questions and their choices in the chat with the chat's own box as the answer, the Decision Brief on the right, Save at the pane's foot and no Apply (it stays in the Copilot), the to-do and the round box beside. Every Copilot area now shares one shape. Shell `smp-shell-v7.39-advisory-split`.

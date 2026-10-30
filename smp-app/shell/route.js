@@ -93,8 +93,13 @@
        remembered under it is the subject's own page, so Exit lands there;
        and it is a deep address, a page somebody asked for by name. */
     if (seg[0] === "read") {
-      var rt = seg[1] && seg[1] !== "group" ? seg[1] : "group";
-      return { d: rt, s: rt === "group" ? null : "strategy", c: null, read: { t: rt, tab: seg[2] || null } };
+      /* §692: a supporting function or a division as the subject —
+         /read/fn/<key>, /read/co/<key> — spelt as the places' own are */
+      var rt = "group", ti = 2;
+      if ((seg[1] === "fn" || seg[1] === "co") && seg[2]) { rt = seg[1] + ":" + seg[2]; ti = 3; }
+      else if (seg[1] && seg[1] !== "group") rt = seg[1];
+      var rk = kindOf(rt), rs = rk === "unit" ? "strategy" : rk === "fn" ? "fnstrat" : null;
+      return { d: rt, s: rs, c: null, read: { t: rt, tab: seg[ti] || null } };
     }
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
     else if (seg[0] === "co" && seg[1]) { d = "co:" + seg[1]; i = 2; }
@@ -491,13 +496,14 @@
   var last = null;
   /* §689: the reading window's address, beside the places'. */
   function readAddressOf(t, tab) {
-    return "/" + SLUG + (MODULE ? "/" + MODULE : "") + "/read" +
-      (t && t !== "group" ? "/" + t : (tab ? "/group" : "")) + (tab ? "/" + tab : "");
+    var sub = !t || t === "group" ? (tab ? "/group" : "")
+      : /^(fn|co):/.test(t) ? "/" + t.slice(0, 2) + "/" + t.slice(3) : "/" + t;   /* §692 */
+    return "/" + SLUG + (MODULE ? "/" + MODULE : "") + "/read" + sub + (tab ? "/" + tab : "");
   }
   var readOpened = false;
   function readingOpen() { return typeof READING !== "undefined" && READING.isOpen && READING.isOpen(); }
   document.addEventListener("smp:reading", function (ev) {
-    var st = ev.detail || {};
+    var st = (ev instanceof CustomEvent && ev.detail) || {};
     if (st.open) {
       var a = readAddressOf(st.target, st.tab);
       if (a === last) return;

@@ -10928,6 +10928,66 @@ body.reading { overflow:hidden; }
   .readroot .rtacs th:nth-child(3), .readroot .rtacs td:nth-child(3) { display:none; }
 }
 
+/* ── THE ROW (§692): the navigator's row under the strip ────────────────
+   Drawn as the workbench's own (.units: arrange.css §136, §334, §464) in
+   the window's markup: the company menu and the switch pinned, the names
+   on one line that scrolls between two fades. A shade under the strip's
+   panel so the three bands read as three, and every colour a token. */
+.readroot .rwnav { flex:none; display:flex; align-items:center; gap:4px; min-height:46px; padding:0 14px;
+  background:color-mix(in srgb, var(--panel) 84%, black); color:var(--panel-quiet); }
+.readroot .rwnav:empty { display:none; }
+.readroot .rwnav button { font:inherit; font-size:13.5px; font-weight:600; color:var(--panel-quiet); background:none; border:0;
+  padding:8px 12px; border-radius:7px; cursor:pointer; white-space:nowrap; }
+.readroot .rwnav button:hover { color:var(--panel-ink); }
+.readroot .rwnav button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.readroot .rwnav button[aria-current="page"] { color:var(--panel-ink); background:color-mix(in srgb, var(--panel-ink) 16%, transparent); }
+.readroot .rsep { flex:none; width:1px; height:24px; margin:0 6px; background:color-mix(in srgb, var(--panel-ink) 16%, transparent); }
+.readroot .rtop1 { flex:none; }
+.readroot .rtop1 button { color:var(--panel-ink); }
+/* the company menu: a <details>, as the workbench's (arrange.css .topsel) */
+.readroot .rtops { position:relative; flex:none; }
+.readroot .rtops > summary { list-style:none; display:inline-flex; align-items:center; gap:7px; cursor:pointer; white-space:nowrap;
+  font-size:13.5px; font-weight:600; padding:8px 12px; border-radius:7px; color:var(--panel-ink); }
+.readroot .rtops > summary::-webkit-details-marker { display:none; }
+.readroot .rtops > summary i { font-style:normal; font-size:10px; color:var(--panel-quiet); }
+.readroot .rtops > summary:hover, .readroot .rtops[open] > summary { background:color-mix(in srgb, var(--panel-ink) 10%, transparent); }
+.readroot .rtops > summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.readroot .rmenu { position:absolute; z-index:5; top:calc(100% + 4px); left:0; min-width:230px; padding:6px; display:grid; gap:1px;
+  background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 28px rgba(15,23,42,.18); }
+.readroot .rmenu button { display:flex; justify-content:space-between; gap:12px; width:100%; text-align:left; color:var(--ink-2); font-weight:500; padding:7px 10px; border-radius:6px; }
+.readroot .rmenu button:hover { color:var(--ink); background:var(--surface-2); }
+.readroot .rmenu button[aria-current="true"] { color:var(--ink); font-weight:700; background:var(--surface-2); }
+.readroot .rmenu .rsubn { color:var(--ink-3); font-weight:400; font-size:12px; }
+/* the switch: one button of two words, a segmented control of more, one word alone (§41.8, §334, §464) */
+.readroot .rsw { display:inline-flex; align-items:center; flex:none; background:color-mix(in srgb, var(--panel-ink) 8%, transparent);
+  border:0; border-radius:7px; overflow:hidden; padding:0; margin:0 2px; cursor:pointer; font:inherit; }
+.readroot .rsw .nsw { display:block; padding:7px 13px; font-size:13.5px; font-weight:700; color:color-mix(in srgb, var(--panel-ink) 72%, transparent);
+  background:none; border:0; border-radius:0; letter-spacing:-.005em; }
+.readroot .rsw .nsw + .nsw { box-shadow:inset 1px 0 0 color-mix(in srgb, var(--panel-ink) 16%, transparent); }
+.readroot .rsw .nsw.on { color:var(--panel-ink); background:color-mix(in srgb, var(--panel-ink) 20%, transparent); }
+.readroot .rsw:hover { background:color-mix(in srgb, var(--panel-ink) 15%, transparent); }
+.readroot .rsw.multi { cursor:default; }
+.readroot .rsw.multi .nsw { cursor:pointer; }
+.readroot .rsw.multi .nsw:not(.on):hover { color:var(--panel-ink); background:color-mix(in srgb, var(--panel-ink) 10%, transparent); }
+.readroot .rsw.one { background:none; cursor:default; }
+.readroot .rsw.one .nsw.on { background:none; padding-left:10px; }
+/* the names: one line, scrolled, the fades saying there is more */
+.readroot .rclip { position:relative; flex:1 1 auto; min-width:0; align-self:stretch; display:flex; }
+.readroot .rscroll { display:flex; gap:2px; align-items:center; width:100%; overflow-x:auto; scrollbar-width:none; padding:0 4px; }
+.readroot .rscroll::-webkit-scrollbar { display:none; }
+.readroot .rscroll > * { flex:0 0 auto; }
+.readroot .rfade { position:absolute; top:0; bottom:0; width:40px; pointer-events:none; z-index:2; }
+.readroot .rfade.l { left:0;  background:linear-gradient(to right, color-mix(in srgb, var(--panel) 84%, black), transparent); }
+.readroot .rfade.r { right:0; background:linear-gradient(to left,  color-mix(in srgb, var(--panel) 84%, black), transparent); }
+/* a function's and a division's tables (§692) */
+.readroot .rcodecell { font:700 12px/1 ui-monospace, Menlo, monospace; color:var(--gold-deep); white-space:nowrap; }
+.readroot .rtwo-fig { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+.readroot .rtable .pill { display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:999px; background:var(--surface-2); color:var(--ink-2); }
+.readroot .rtable .pill.good { background:var(--good-bg); color:var(--good-tx, var(--good)); }
+.readroot .rtable .pill.attn { background:var(--attn-bg); color:var(--attn-tx, var(--attn)); }
+.readroot .rtable .lateval { color:var(--bad); } .readroot .rtable .latenote { font-size:11px; margin-left:6px; color:var(--bad); }
+.readroot .rtable .soonval { color:var(--ink-3); } .readroot .rtable .missing { color:var(--ink-3); font-style:italic; }
+
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.
 

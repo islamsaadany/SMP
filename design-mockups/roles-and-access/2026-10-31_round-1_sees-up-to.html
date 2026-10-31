@@ -40,6 +40,9 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
 .lad span{padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink-3);border-right:1px solid var(--line-soft);white-space:nowrap}
 .lad span:last-child{border-right:0}
 .lad span.on{background:var(--navy);color:var(--navy-ink)}
+.lad span b{margin-right:5px;font-weight:700}
+.lad span.pen{background:var(--good-bg);color:var(--good)}
+.lad span.eye{background:var(--navy);color:var(--navy-ink)}
 .lad span.off{color:var(--line);text-decoration:line-through;text-decoration-color:var(--line)}
 .lad.word{border:0;background:none}.lad.word span{padding-left:0;color:var(--ink-2);border:0}
 /* the worked example: navigator + plan */
@@ -84,17 +87,17 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
     <div class="ph2"><span class="n">01</span><h2>The screen</h2><p>Setup › Roles &amp; access, redrawn</p></div>
     <div class="frame"><div class="scr">
       <h3>Roles &amp; access</h3>
-      <p class="sub">Each role reports what it holds. Set how far up it sees.</p>
+      <p class="sub">&#9998; is where the role enters and submits figures: its own unit, function or piece, fixed by what it holds. &#9673; is what it can read, from there up to the rung you set. Press a rung to move the reading edge.</p>
       <table class="ac" id="ac"></table>
     </div></div>
-    <p class="cap"><b>Reports</b> is a word, never a control: it is what the role holds, and the register decides who holds what. <b>Sees up to</b> is the one control; the rung a role cannot stand on is struck through (a CEO holds no piece, so "own piece" is not a choice for him). The two office roles have no control: they see and write everything.</p>
+    <p class="cap"><b>The shift, on one line:</b> a unit owner set as drawn enters and submits on his own unit (&#9998;) and reads his company\u2019s other units (&#9673;); a function head set to the group reads everything and still submits only for his function. <b>The pen never moves with the setting</b>; only the reading edge does. The register decides who holds what; the rung a role cannot stand on is struck through (a CEO holds no piece, so "own piece" is not a choice for him). The two office roles have no control: they see and write everything.</p>
   </section>
 
   <section>
     <div class="ph2"><span class="n">02</span><h2>What it means for one person</h2><p>Hany, who owns direction MOB02 in Mobile</p></div>
     <div class="pair">
-      <div><p class="who"><b>Sees up to: the plan</b> — Mobile only, every direction, the pen on his</p><div class="frame" id="ex1"></div></div>
-      <div><p class="who"><b>Sees up to: the group</b> — every unit and function, still the pen on his alone</p><div class="frame" id="ex2"></div></div>
+      <div><p class="who"><b>Reads up to: own unit</b> — Mobile only, every direction, the pen on his</p><div class="frame" id="ex1"></div></div>
+      <div><p class="who"><b>Reads up to: the group</b> — every unit and function, still the pen on his alone</p><div class="frame" id="ex2"></div></div>
     </div>
     <p class="cap">Left, the navigation holds Mobile alone and the plan shows all four directions; only MOB02 carries the pen, the other three are read. Right, the same person moved to the top rung: the row fills with every unit and function, the plan is the same four directions, and the pen has not moved. The reading window follows the same row, so what he reads there is what he reaches here.</p>
   </section>
@@ -123,9 +126,14 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
   var pg = "light";
   try { var t = localStorage.getItem("smp.theme"); if (t === "light" || t === "dark") pg = t; else if (matchMedia("(prefers-color-scheme: dark)").matches) pg = "dark"; } catch (e) {}
   var SUN = '<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>', MOON = '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>';
-  var RUNGS = ["Own piece", "The plan", "The company", "The group"];
-  function ladder(on, off, flag) {
-    return '<span class="lad' + (flag ? " flag" : "") + '">' + RUNGS.map(function (r, i) { return '<span class="' + (i === on ? "on" : (off || []).indexOf(i) >= 0 ? "off" : "") + '">' + r + '</span>'; }).join("") + '</span>';
+  var RUNGS = ["Own piece", "Own unit or function", "Own company", "The group"];
+  /* held: the rung the person works on (enters and submits) · upto: the highest rung read */
+  function ladder(upto, off, flag, held) {
+    return '<span class="lad' + (flag ? " flag" : "") + '">' + RUNGS.map(function (r, i) {
+      var c = (off || []).indexOf(i) >= 0 ? "off" : i === held ? "pen" : (i <= upto && (held == null || i > held)) ? "eye" : i <= upto ? "eye" : "";
+      var mark = c === "pen" ? '<b>\u270e</b>' : c === "eye" ? '<b>\u25c9</b>' : '';
+      return '<span class="' + c + '">' + mark + r + '</span>';
+    }).join("") + '</span>';
   }
   var ROWS = [
     ["g", "The office"],
@@ -135,23 +143,23 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
     ["Group CEO", "", "<i>nothing — holds no piece</i>", [3, [0, 1, 2]]],
     ["Company CEO", "", "<i>nothing — holds no piece</i>", [2, [0, 1]]],
     ["g", "Holding a unit or a function"],
-    ["Unit owner", "the unit's head", "the unit's figures", [1, [0], true]],
-    ["Custodian", "keeps the unit's reporting", "the unit's figures", [1, [0]]],
-    ["Function head", "", "the function's figures and projects", [1, [0]]],
-    ["Capability owner", "", "the capability's projects", [1]],
+    ["Unit owner", "the unit's head", "the unit's figures", [2, [0], true, 1]],
+    ["Custodian", "keeps the unit's reporting", "the unit's figures", [1, [0], false, 1]],
+    ["Function head", "", "the function's figures and projects", [3, [0], false, 1]],
+    ["Capability owner", "", "the capability's projects", [1, null, false, 0]],
     ["g", "Holding a piece of a plan"],
-    ["Project owner", "", "the project's milestones and deliverables", [1]],
-    ["Pillar owner", "", "the pillar's measures and tactics", [1]],
-    ["Direction owner", "", "the direction's measures and tactics", [0]],
-    ["Contributor", "", "the lines assigned to him", [0]],
+    ["Project owner", "", "the project's milestones and deliverables", [1, null, false, 0]],
+    ["Pillar owner", "", "the pillar's measures and tactics", [1, null, false, 0]],
+    ["Direction owner", "", "the direction's measures and tactics", [0, null, false, 0]],
+    ["Contributor", "", "the lines assigned to him", [2, null, false, 0]],
     ["g", "Holding nothing"],
     ["Employee", "on the register, no seat", "<i>nothing</i>", [-1, [0, 1, 2, 3]]]
   ];
-  document.getElementById("ac").innerHTML = '<thead><tr><th style="width:230px">Role</th><th style="width:280px">Reports</th><th>Sees up to</th></tr></thead><tbody>' + ROWS.map(function (r) {
+  document.getElementById("ac").innerHTML = '<thead><tr><th style="width:230px">Role</th><th style="width:250px">Enters and submits</th><th>&#9998; works on &nbsp;·&nbsp; &#9673; reads</th></tr></thead><tbody>' + ROWS.map(function (r) {
     if (r[0] === "g") return '<tr class="grp"><td colspan="3">' + r[1] + '</td></tr>';
     var l = r[3];
     return '<tr><td class="role"><b>' + r[0] + '</b>' + (r[1] ? '<span>' + r[1] + '</span>' : '') + '</td><td class="rep">' + r[2] + '</td><td>' +
-      (l === null ? '<span class="lad word"><span>everything</span></span>' : l[0] === -1 ? '<span class="lad word"><span>nothing</span></span>' : ladder(l[0], l[1], l[2])) + '</td></tr>';
+      (l === null ? '<span class="lad word"><span>everything</span></span>' : l[0] === -1 ? '<span class="lad word"><span>nothing</span></span>' : ladder(l[0], l[1], l[2], l[3])) + '</td></tr>';
   }).join("") + '</tbody>';
 
   function nav(names, lit, all) {
@@ -168,15 +176,15 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
   document.getElementById("ex1").innerHTML = nav(["Mobile"], "Mobile", false) + plan();
   document.getElementById("ex2").innerHTML = nav(["Mobile", "Retail", "Mazaya", "CE", "Online", "Corporate", "Care"], "Mobile", true) + plan();
 
-  var P = [["Hany Mostafa", "Direction owner · Mobile", 0, "as the role"], ["Dina Sherif", "Direction owner · Mobile", 1, "moved up one — she sits on the unit's board"], ["Ahmed Saleh", "Pillar owner · Retail", 1, "as the role"]];
+  var P = [["Hany Mostafa", "Direction owner · Mobile", 0, "as the role"], ["Dina Sherif", "Direction owner · Mobile", 1, "reads one rung higher — she sits on the unit's board"], ["Ahmed Saleh", "Pillar owner · Retail", 1, "as the role"]];
   document.getElementById("reg").innerHTML = P.map(function (x, i) {
     return '<div class="row"><div class="nm"><b>' + x[0] + '</b><span>' + x[1] + '</span></div><div>' + ladder(x[2], null, i === 1) + '</div><div class="inh">' + x[3] + '</div></div>';
   }).join("");
 
   var OPEN = [["Group CEO", "nothing — holds no piece", [3, [0, 1, 2]], "window"], ["Company CEO", "nothing — holds no piece", [2, [0, 1]], "window"],
-    ["Unit owner", "the unit's figures", [1, [0]], "work"], ["Direction owner", "the direction's measures and tactics", [0], "work"]];
-  document.getElementById("ac2").innerHTML = '<thead><tr><th style="width:170px">Role</th><th style="width:230px">Reports</th><th>Sees up to</th><th style="width:220px">Opens in</th></tr></thead><tbody>' + OPEN.map(function (r, i) {
-    return '<tr><td class="role"><b>' + r[0] + '</b></td><td class="rep">' + (/^nothing/.test(r[1]) ? '<i>' + r[1] + '</i>' : r[1]) + '</td><td>' + ladder(r[2][0], r[2][1]) + '</td><td>' +
+    ["Unit owner", "the unit's figures", [2, [0], false, 1], "work"], ["Direction owner", "the direction's measures and tactics", [0, null, false, 0], "work"]];
+  document.getElementById("ac2").innerHTML = '<thead><tr><th style="width:170px">Role</th><th style="width:200px">Enters and submits</th><th>&#9998; works on · &#9673; reads</th><th style="width:220px">Opens in</th></tr></thead><tbody>' + OPEN.map(function (r, i) {
+    return '<tr><td class="role"><b>' + r[0] + '</b></td><td class="rep">' + (/^nothing/.test(r[1]) ? '<i>' + r[1] + '</i>' : r[1]) + '</td><td>' + ladder(r[2][0], r[2][1], false, r[2][3]) + '</td><td>' +
       '<span class="lad' + (i === 0 ? " flag" : "") + '"><span class="' + (r[3] === "window" ? "on" : "") + '">Reading window</span><span class="' + (r[3] === "work" ? "on" : "") + '">Workbench</span></span></td></tr>';
   }).join("") + '</tbody>';
 

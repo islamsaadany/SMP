@@ -65,6 +65,13 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
 .reg .row{display:grid;grid-template-columns:180px auto 1fr;gap:14px;align-items:center;padding:8px 10px;border:1px solid var(--line-soft);border-radius:8px;background:var(--surface)}
 .reg .row .nm b{display:block;font-weight:600}.reg .row .nm span{font-size:12px;color:var(--ink-3)}
 .reg .inh{font-size:12px;color:var(--ink-3)}
+.days{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.day{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--ground)}
+.day .dh{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-3);padding:8px 12px;background:var(--surface)}
+.day .scrn{height:84px;margin:0 12px;border-radius:7px 7px 0 0;display:grid;place-items:center;font-size:13px;font-weight:700}
+.day .scrn.win{background:var(--navy);color:var(--navy-ink);border-bottom:3px solid var(--gold)}
+.day .scrn.wb{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-bottom:0}
+.day p{margin:0;padding:10px 12px;font-size:12.5px;color:var(--ink-2);border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -99,7 +106,7 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
       <p class="sub">&#9998; is where the role enters and submits figures: its own unit, function or piece, fixed by what it holds. &#9673; is what it can read, from there up to the level you set. Press a level to move the reading edge.</p>
       <table class="ac" id="ac"></table>
     </div></div>
-    <p class="cap"><b>The shift, on one line:</b> a unit owner set as drawn enters and submits on his own unit (&#9998;) and reads his company\u2019s other units (&#9673;); a function head set to the group reads everything and still submits only for his function. <b>The pen never moves with the setting</b>; only the reading edge does. The register decides who holds what; the level a role cannot stand on is struck through (a CEO holds no piece, so "own piece" is not a choice for him). The two office roles have no control: they see and write everything.</p>
+    <p class="cap"><b>A custodian is not a role of its own.</b> Whoever keeps the figures for a unit, a function, a pillar or a direction stands on that holder's row: the same pen, the same reading. Setup › People names whose custodian they are. <b>The shift, on one line:</b> a unit owner set as drawn enters and submits on his own unit (&#9998;) and reads his company’s other units (&#9673;); a function head set to the group reads everything and still submits only for his function. <b>The pen never moves with the setting</b>; only the reading edge does. The register decides who holds what; the level a role cannot stand on is struck through (a CEO holds no piece, so "own piece" is not a choice for him). The two office roles have no control: they see and write everything.</p>
   </section>
 
   <section>
@@ -117,16 +124,14 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
     <p class="cap">The role's level is the default and reads as such; one press moves a person up or down for an exception, and "as the role" puts it back. Nothing else about the seat changes: what she reports is still what she holds.</p>
   </section>
   <section>
-    <div class="ph2"><span class="n">04</span><h2>Where the reading window lands</h2><p>the ladder says what you see; the window is one way of seeing it</p></div>
-    <div class="frame"><div class="scr">
-      <h3>Roles &amp; access</h3>
-      <p class="sub">The same table with one more column: where the role opens on sign-in.</p>
-      <table class="ac" id="ac2"></table>
-    </div></div>
+    <div class="ph2"><span class="n">04</span><h2>Reading window or workbench: remembered, not set</h2><p>no control on this page</p></div>
+    <div class="frame"><div class="scr"><div class="days" id="days"></div></div></div>
     <ul class="rules" style="margin:0">
-      <li><b>The window shows the same levels.</b> Its row of units and functions is exactly what the person reaches on the ladder of levels, no more. It never carries a pen, so nothing is reported from it.</li>
-      <li><b>Opens in</b> replaces today's computed rule and the client-wide switch. A role that reports nothing (the CEOs) opens in the window by default; a role that holds a piece opens on the workbench, where its pen is.</li>
-      <li><b>Read is a button for everyone</b>, on every page, as today. Opens in only decides the first screen.</li>
+      <li><b>First sign-in follows what the person holds.</b> Holding nothing (the CEOs): the reading window. Holding a piece: the workbench, where the pen is.</li>
+      <li><b>After that, where they last were.</b> Left from the window, they open in the window; left from the workbench, on the workbench. Using it is the choice.</li>
+      <li><b>A link wins.</b> An address that names a page opens that page, whatever was last.</li>
+      <li><b>Kept on the person, not the browser,</b> so the phone and the laptop agree. Read stays a button on every page, and Exit stays on the window.</li>
+      <li><b>So this page loses two things:</b> the client-wide "readers open in the window" switch and any "Opens in" column. Its one control is how far each role reads.</li>
     </ul>
   </section>
 </div>
@@ -152,14 +157,13 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
     ["Group CEO", "", "<i>nothing — holds no piece</i>", [3, [0, 1, 2]]],
     ["Company CEO", "", "<i>nothing — holds no piece</i>", [2, [0, 1]]],
     ["g", "Holding a unit or a function"],
-    ["Unit owner", "the unit's head", "the unit's figures", [2, [0], true, 1]],
-    ["Custodian", "keeps the unit's reporting", "the unit's figures", [1, [0], false, 1]],
-    ["Function head", "", "the function's figures and projects", [3, [0], false, 1]],
+    ["Unit owner", "or the unit's custodian", "the unit's figures", [2, [0], true, 1]],
+    ["Function head", "or the function's custodian", "the function's figures and projects", [3, [0], false, 1]],
     ["g", "Holding a piece of a plan"],
-    ["Project owner", "", "the project's milestones and deliverables", [1, null, false, 0]],
-    ["Pillar owner", "", "the pillar's measures and tactics", [1, null, false, 0]],
-    ["Direction owner", "", "the direction's measures and tactics", [1, null, false, 0]],
-    ["Capability owner", "", "the capability's measures and tactics", [1, null, false, 0]],
+    ["Project owner", "or its custodian", "the project's milestones and deliverables", [1, null, false, 0]],
+    ["Pillar owner", "or its custodian", "the pillar's measures and tactics", [1, null, false, 0]],
+    ["Direction owner", "or its custodian", "the direction's measures and tactics", [1, null, false, 0]],
+    ["Capability owner", "or its custodian", "the capability's measures and tactics", [1, null, false, 0]],
     ["Contributor", "", "the lines assigned to him", [2, null, false, 0]],
     ["g", "Holding nothing"],
     ["Employee", "on the register, no seat", "<i>nothing</i>", [-1, [0, 1, 2, 3]]]
@@ -185,17 +189,17 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
   document.getElementById("ex1").innerHTML = nav(["Mobile"], "Mobile", false) + plan();
   document.getElementById("ex2").innerHTML = nav(["Mobile", "Retail", "Mazaya", "CE", "Online", "Corporate", "Care"], "Mobile", true) + plan();
 
-  var P = [["Hany Mostafa", "Direction owner · Mobile", 0, "as the role"], ["Dina Sherif", "Direction owner · Mobile", 1, "reads one level higher — she sits on the unit's board"], ["Ahmed Saleh", "Pillar owner · Retail", 1, "as the role"]];
+  var P = [["Hany Mostafa", "Direction owner · Mobile", 1, "as the role"], ["Dina Sherif", "Direction owner · Mobile", 2, "reads one level higher — she sits on the company's board"], ["Ahmed Saleh", "Pillar owner · Retail", 1, "as the role"]];
   document.getElementById("reg").innerHTML = P.map(function (x, i) {
-    return '<div class="row"><div class="nm"><b>' + x[0] + '</b><span>' + x[1] + '</span></div><div>' + ladder(x[2], null, i === 1) + '</div><div class="inh">' + x[3] + '</div></div>';
+    return '<div class="row"><div class="nm"><b>' + x[0] + '</b><span>' + x[1] + '</span></div><div>' + ladder(x[2], null, i === 1, 0) + '</div><div class="inh">' + x[3] + '</div></div>';
   }).join("");
 
-  var OPEN = [["Group CEO", "nothing — holds no piece", [3, [0, 1, 2]], "window"], ["Company CEO", "nothing — holds no piece", [2, [0, 1]], "window"],
-    ["Unit owner", "the unit's figures", [2, [0], false, 1], "work"], ["Direction owner", "the direction's measures and tactics", [1, null, false, 0], "work"]];
-  document.getElementById("ac2").innerHTML = '<thead><tr><th style="width:170px">Role</th><th style="width:200px">Enters and submits</th><th>&#9998; works on · &#9673; reads</th><th style="width:220px">Opens in</th></tr></thead><tbody>' + OPEN.map(function (r, i) {
-    return '<tr><td class="role"><b>' + r[0] + '</b></td><td class="rep">' + (/^nothing/.test(r[1]) ? '<i>' + r[1] + '</i>' : r[1]) + '</td><td>' + ladder(r[2][0], r[2][1], false, r[2][3]) + '</td><td>' +
-      '<span class="lad' + (i === 0 ? " flag" : "") + '"><span class="' + (r[3] === "window" ? "on" : "") + '">Reading window</span><span class="' + (r[3] === "work" ? "on" : "") + '">Workbench</span></span></td></tr>';
-  }).join("") + '</tbody>';
+  var DAYS = [["Sunday · first sign-in", "win", "Reading window", "Samir, Group CEO, holds nothing: the window, on the group."],
+    ["Sunday · later", "wb", "Workbench", "He presses Exit and works on Mobile's Performance page, then signs out."],
+    ["Monday · sign-in", "wb", "Workbench", "He opens where he left: the workbench. Pressing Read and leaving from there would bring the window back next time."]];
+  document.getElementById("days").innerHTML = DAYS.map(function (d) {
+    return '<div class="day"><div class="dh">' + d[0] + '</div><div class="scrn ' + d[1] + '">' + d[2] + '</div><p>' + d[3] + '</p></div>';
+  }).join("");
 
   function shape(levels) {
     return '<span class="lad">' + levels.map(function (r, i) { return '<span class="' + (i === levels.length - 1 ? "eye" : "") + '">' + r + '</span>'; }).join("") + '</span>' +

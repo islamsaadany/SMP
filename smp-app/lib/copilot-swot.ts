@@ -121,6 +121,11 @@ export type Swot = {
   proposal: { ask: string; reply: string; draft: Record<Letter, Item[]> } | null;
   log: { w: "me" | "ai" | "note"; t: string }[];
   saved: { deliverableId: string; n: number; title: string } | null;
+  /* §698 S3 — ONE STEP BACK: the draft as it was before the last Use it,
+     kept on the row so "Put back the SWOT as it was" can bring it back; and
+     whether the draft now on the right is the one put back (so the link
+     turns into "Use the change again"). */
+  before: { draft: Record<Letter, Item[]>; reply: string; next: Record<Letter, Item[]> } | null;
 };
 export const MAX_SW_LOG = 200;
 
@@ -143,7 +148,7 @@ export function newSwot(fromPlan: Partial<Record<Letter, unknown>> | null): Swot
     methods: { internal: [], micro: [], macro: [] },
     ans: { internal: QUESTIONS.internal.map(() => ""), micro: QUESTIONS.micro.map(() => ""), macro: QUESTIONS.macro.map(() => "") },
     q: { area: "internal", i: 0 }, links: [], promptAt: { micro: null, macro: null },
-    micro: null, macro: null, draft: null, check: null, proposal: null, log: [], saved: null,
+    micro: null, macro: null, draft: null, check: null, proposal: null, log: [], saved: null, before: null,
   };
 }
 
@@ -229,6 +234,8 @@ export function storedSwot(raw: unknown): Swot | null {
   const pd = j.proposal && typeof j.proposal === "object" ? cleanDraft(j.proposal.draft) : null;
   fromPage.proposal = pd ? { ask: oneLine(j.proposal.ask).slice(0, 1000), reply: String(j.proposal.reply ?? "").slice(0, 1200), draft: pd } : null;
   fromPage.log = (Array.isArray(j.log) ? j.log : []).map((x: any) => ({ w: x && (x.w === "ai" || x.w === "note") ? x.w : "me", t: String((x && x.t) ?? "").slice(0, 1200) })).filter((x: any) => x.t).slice(-MAX_SW_LOG) as Swot["log"];
+  const bd = j.before && typeof j.before === "object" ? cleanDraft(j.before.draft) : null, bn = j.before && typeof j.before === "object" ? cleanDraft(j.before.next) : null;
+  fromPage.before = bd && bn ? { draft: bd, next: bn, reply: String(j.before.reply ?? "").slice(0, 1200) } : null;
   if (s.saved && j.phase === "saved") fromPage.phase = "saved";
   return fromPage;
 }

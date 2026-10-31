@@ -91,10 +91,15 @@ const MODEL_ANSWER = {
 /* §472: a provider that takes its time, so the working line can be seen
    while it waits (0 = answer at once, which is every other section). */
 let MODEL_DELAY = 0;
+/* §698 — the request with this index (in MODEL_SEEN) is answered with a 500,
+   so a failure can be pressed through; -1 fails none. */
+let MODEL_FAIL_AT = -1;
 const model = http.createServer((req, res) => {
   let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
     try { MODEL_SEEN.push(JSON.parse(b)); } catch { MODEL_SEEN.push(null); }
+    const failThis = MODEL_SEEN.length - 1 === MODEL_FAIL_AT;
     setTimeout(() => {
+      if (failThis) { res.writeHead(500, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: { message: "stand-in failure" } })); return; }
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(MODEL_ANSWER) }] } }] }));
     }, MODEL_DELAY);
@@ -2311,6 +2316,16 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     const used = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, note: Array.from(document.querySelectorAll(".copswchat .copfnote")).map((n) => n.textContent).join("|"),
       prop: !!document.querySelector("[data-cop-sw-prop]"), check: !!document.querySelector(".copswpane .copsw-check") }));
     check(used.paneW === 4 && /Used — Merged/.test(used.note) && !used.prop && !used.check, "§654 C2 Use it writes the proposal into the SWOT on the right (four weaknesses), says so in the chat's record, and clears the old check", JSON.stringify(used));
+    /* §698 S3 — one step back: Put back the SWOT as it was, and Use the change again */
+    check(!!(await page.$('[data-cop-sw-putback="back"]')), "§698 after Use it the chat offers Put back the SWOT as it was");
+    await page.click('[data-cop-sw-putback="back"]');
+    await page.waitForFunction(() => document.querySelectorAll(".copswpane .copsw-l.w li").length === 5, null, { timeout: 10000 }).catch(() => {});
+    const pb = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, note: Array.from(document.querySelectorAll(".copswchat .copfnote")).map((n) => n.textContent).join("|"), again: !!document.querySelector('[data-cop-sw-putback="again"]') }));
+    check(pb.paneW === 5 && /Put back as it was/.test(pb.note) && pb.again, "§698 …pressed, the SWOT on the right holds five weaknesses again, the chat says so, and Use the change again is offered", JSON.stringify(pb));
+    await page.click('[data-cop-sw-putback="again"]');
+    await page.waitForFunction(() => document.querySelectorAll(".copswpane .copsw-l.w li").length === 4, null, { timeout: 10000 }).catch(() => {});
+    const ua = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, back: !!document.querySelector('[data-cop-sw-putback="back"]') }));
+    check(ua.paneW === 4 && ua.back, "§698 …and Use the change again brings the change back, with Put back offered again", JSON.stringify(ua));
     await open("/raya-trade/strategy/mobile/copilot/analysis"); await page.click("[data-cop-chats] [data-cop-chat]");
     await page.waitForSelector(".copswpane .copsw-l", { timeout: 15000 });
     const again = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, me: Array.from(document.querySelectorAll(".copswchat .copmsg.me")).filter((m) => /Merge the two/.test(m.textContent)).length }));
@@ -2664,8 +2679,9 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     if (iPlan > -1 && !r.s.options[iPlan].go) {
       const unscored = !(r.s.options[iPlan].urgency && r.s.options[iPlan].importance && r.s.options[iPlan].ease);
       const heldTick = await page.evaluate((i) => { const b = document.querySelector('[data-cop-dv-go="' + i + '"]'); return b ? { held: b.getAttribute("aria-disabled"), tip: b.getAttribute("data-tip") || "" } : null; }, iPlan);
-      check(!!heldTick && (unscored ? heldTick.held === "true" && /Score it first/.test(heldTick.tip) : heldTick.held !== "true"),
-        unscored ? "§654 a plan row with no scores has its go-ahead tick held, saying to score it first" : "§654 a plan row carries the scores the plan holds, so its tick is live", JSON.stringify({ unscored, heldTick, o: r.s.options[iPlan] }));
+      check(!!heldTick && (unscored ? heldTick.held === "true" && /Score it first — or leave it unticked; it stays on the plan as it is/.test(heldTick.tip) : heldTick.held !== "true"),
+        unscored ? "§654 a plan row with no scores has its go-ahead tick held, saying to score it first — §698: or leave it unticked, as it stays on the plan" : "§654 a plan row carries the scores the plan holds, so its tick is live", JSON.stringify({ unscored, heldTick, o: r.s.options[iPlan] }));
+      if (unscored) check(/carr(y|ies) no scores/.test((await page.evaluate(() => (document.querySelector("[data-cop-msgs]") || {}).textContent || ""))), "§698 …and the chat says how many of the plan's rows carry no scores, and that leaving them unticked keeps them");
       if (unscored) { for (const k of ["urgency", "importance", "ease"]) { if (!r.s.options[iPlan][k]) { await page.click('[data-cop-dv-sc="' + iPlan + '|' + k + '"]'); await page.waitForTimeout(500); } } r = await row(); }
       await page.click('[data-cop-dv-go="' + iPlan + '"]'); await page.waitForTimeout(700);
     }
@@ -2887,8 +2903,23 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     r = await row();
     check(r.s.items[lastK].out === false, "§697 …and Put it back puts it back");
     await page.click('[data-cop-ex-card-pick="0"]'); await page.waitForTimeout(600);
+    /* §698 S14 — the third draft of the chain fails: the line names the item,
+       its card stays in hand, and Draft all the rest carries on */
+    const failK = r.s.items.length >= 3 ? 2 : -1;
+    if (failK >= 0) MODEL_FAIL_AT = MODEL_SEEN.length + failK;
     await page.click("[data-cop-ex-draftall]");
+    if (failK >= 0) {
+      await page.waitForSelector("[data-cop-ex-fail]", { timeout: 30000 }).catch(() => {});
+      MODEL_FAIL_AT = -1;
+      r = await row();
+      const fl = await page.evaluate(() => { const f = document.querySelector("[data-cop-ex-fail]"); return f ? { t: f.textContent, again: !!f.querySelector("[data-cop-ex-draft]"), all: !!f.querySelector("[data-cop-ex-draftall]"), skip: !!f.querySelector("[data-cop-ex-skip]"),
+        inHand: (document.querySelector("[data-cop-expane] .copex-card.now") || {}).getAttribute ? document.querySelector("[data-cop-expane] .copex-card.now").getAttribute("data-cop-ex-card") : null } : null; });
+      check(!!fl && new RegExp("Draft all stopped at " + r.s.items[failK].title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(fl.t) && /2 of \d+ are drafted/.test(fl.t) && fl.again && fl.all && fl.skip && fl.inHand === String(failK) && r.s.items[failK].drafted === false,
+        "§698 when a draft fails in Draft all, the chat names the item it stopped at, counts what is drafted, keeps its card in hand, and offers Draft it again, Draft all left and Skip it", JSON.stringify(fl));
+      await page.click("[data-cop-ex-fail] [data-cop-ex-draftall]");
+    }
     for (let n = 0; n < 40; n++) { await page.waitForTimeout(1200); r = await row(); if (r.s.items.every((x) => x.drafted)) break; }
+    if (failK >= 0) check(!(await page.$("[data-cop-ex-fail]")), "§698 …and the line goes once the chain carries on");
     await page.waitForTimeout(800);
     r = await row();
     check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one after another from Draft all (§684)", JSON.stringify(r.s.items.map((x) => x.drafted)));

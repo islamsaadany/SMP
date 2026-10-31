@@ -1417,6 +1417,8 @@ try {
   check("§654 C2 a change asked for in words is refused, in words, until there is a draft", sw_chg0.st === 400 && /Draft the SWOT first/.test(sw_chg0.j && sw_chg0.j.why), sw_chg0.st + " " + JSON.stringify(sw_chg0.j));
   const sw_prop0 = await call("POST", "api", { act: "swotProposal", id: sw_sid, use: true, placeWord: "Mobile" }, NORAN);
   check("§654 C2 Use it with no proposal in hand is refused, in words", sw_prop0.st === 400 && /no proposed change/.test(sw_prop0.j && sw_prop0.j.why), sw_prop0.st + " " + JSON.stringify(sw_prop0.j));
+  const sw_pb0 = await call("POST", "api", { act: "swotPutBack", id: sw_sid, placeWord: "Mobile" }, NORAN);
+  check("§698 Put back with no change used is refused, in words", sw_pb0.st === 400 && /no earlier SWOT/.test(sw_pb0.j && sw_pb0.j.why), sw_pb0.st + " " + JSON.stringify(sw_pb0.j));
   const sw_fin0 = await call("POST", "api", { act: "swotFinish", id: sw_sid, placeWord: "Mobile" }, NORAN);
   check("saving is refused until there is a draft and the analyses are agreed", sw_fin0.st === 400 && /Draft the SWOT/.test(sw_fin0.j && sw_fin0.j.why), sw_fin0.st + " " + JSON.stringify(sw_fin0.j));
   const sw_nsaved = (await asTenant(A, (c) => c.query("SELECT count(*)::int n FROM copilot_deliverables WHERE title LIKE 'SWOT%'"))).rows[0].n;

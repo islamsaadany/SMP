@@ -1027,3 +1027,12 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copunfinished{display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:min(560px,100%);margin:0 auto;padding:8px 12px;border:1px solid var(--line);border-left:3px solid var(--attn, var(--gold));border-radius:8px;background:var(--surface);font-size:13px;text-align:left}
 .copunfinished>span:first-child{flex:1 1 24ch;min-width:0}
 .copdv-card h3 .copdv-unchoose{margin-left:auto;font-weight:400;font-size:12.5px}
+
+/* §695 — EXECUTION READS THE PLAN. A line the plan holds is marked beside its
+   name, a new one beside it; an item left out this period, or gone from the
+   plan, stands faded with its state on the head. */
+.copex-mark{display:inline-block;margin-left:6px;font:600 10px/1.4 var(--sans, inherit);letter-spacing:.04em;text-transform:uppercase;padding:0 5px;border-radius:8px;vertical-align:middle;white-space:nowrap}
+.copex-mark.plan{color:var(--good-tx);background:var(--surface-2)}
+.copex-mark.new{color:var(--ink-3);background:var(--surface-2)}
+.copex-card.out{opacity:.72}
+.copst.off{color:var(--ink-3)}

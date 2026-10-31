@@ -2462,6 +2462,18 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/compete");
+    /* §695 S11 — the plan card, exactly when the plan holds a discipline and values */
+    const cps = await page.evaluate(() => { let w = null; try { w = (typeof UNITS !== "undefined" && UNITS.mobile && UNITS.mobile.compete) || (typeof competeWritable === "function" ? competeWritable("mobile") : null); } catch (e) {} const held = !!(w && w.discipline && (w.values || []).some((v) => v && v.title));
+      const c = document.querySelector('.copstart [data-cop-newplan="compete"]'); return { held, card: !!c, t: c ? c.textContent : "" }; });
+    check(cps.card === cps.held && (!cps.held || /Start from the existing plan/.test(cps.t) && /values/.test(cps.t)), "§695 Competitive Discipline's start screen offers Start from the existing plan exactly when the plan holds a discipline and values", JSON.stringify(cps));
+    if (cps.held) {
+      await page.click('.copstart [data-cop-newplan="compete"]');
+      await page.waitForSelector("[data-cop-cppane] table.cmptab", { timeout: 15000 });
+      const fp = await page.evaluate(() => ({ said: /Started from the plan/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), score: !!document.querySelector("[data-cop-cp-score]"), cells: document.querySelectorAll("[data-cop-cp-cell]").length,
+        step: (document.querySelector(".copfhead small") || {}).textContent || "", save: (document.querySelector("[data-cop-cp-finish]") || {}).getAttribute ? document.querySelector("[data-cop-cp-finish]").getAttribute("aria-disabled") : null }));
+      check(fp.said && fp.score && fp.cells > 0 && fp.save !== "true", "§695 …pressed, the chat opens at the plan's table, editable, Score them offered as a check, Save live", JSON.stringify(fp));
+      await open("/raya-trade/strategy/mobile/copilot/compete");
+    }
     await newWorkflow();
     /* A new chat scores itself, so "Score them" is on the page only for a
        moment: wait for the scores, and press the button only if they never
@@ -2823,6 +2835,11 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/execution");
+    /* §695 S11 — two roads on the start screen: Refine the existing execution
+       (when some item carries measures) and Build from the Directions */
+    const sc = await page.evaluate(() => { const held = (UNITS.mobile.items || []).some((p) => p && p.name && ((p.measures || []).some((m) => m && m.name) || (p.tactics || []).some((x) => x && x.name)));
+      const rf = document.querySelector('.copstart [data-cop-newplan="execution"]'); return { held, refine: !!rf, refineT: rf ? rf.textContent : "", build: (document.querySelector(".copstart [data-cop-newchat]") || {}).textContent || "" }; });
+    check(sc.refine === sc.held && (!sc.held || /Refine the existing execution/.test(sc.refineT) && /with measures/.test(sc.refineT)) && /Build from the Directions/.test(sc.build), "§695 Execution's start screen offers Refine the existing execution when the plan holds measures, and Build from the Directions", JSON.stringify(sc));
     await newWorkflow();
     await page.waitForSelector("[data-cop-ex-period]", { timeout: 15000 });
     let r = await row();
@@ -2844,6 +2861,24 @@ await section("3m · the Execution chat: the period once, each item drafted, the
       save: (document.querySelector("[data-cop-ex-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ex-finish]").getAttribute("data-tip") : null, foot: (document.querySelector("[data-cop-exfoot]") || {}).textContent || "" }));
     check(sp.strip && sp.cards === r.s.items.length && sp.open === 1 && sp.draftBtn && !sp.inChat && sp.todo && /Oct/.test(sp.me) && sp.dis === true && /Drafting · 0 of/.test(sp.step) && /still needs at least one measure/.test(String(sp.save)) && /v1/.test(sp.foot),
       "§684 the period strip and one card per item stand in the pane, the first in hand with Draft on it, the to-do beside; the chat reads the period as the person's line, its box is held, Save is held with the item that still needs a measure", JSON.stringify(sp));
+    /* §695 S7 — a card opens with what the plan holds, marked; the chat counts them */
+    const heldItems = r.s.items.filter((x) => x.measures.some((m) => m.mark === "plan") || x.tactics.some((y) => y.mark === "plan"));
+    const hm = await page.evaluate(() => ({ heads: Array.from(document.querySelectorAll("[data-cop-expane] .copex-head small")).map((s) => s.textContent), marks: document.querySelectorAll("[data-cop-expane] .copex-card.now .copex-mark.plan").length,
+      said: /already carr/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), draft: (document.querySelector("[data-cop-expane] .copex-card.now [data-cop-ex-draft]") || {}).textContent || "" }));
+    check(hm.heads.filter((h) => /^On the plan/.test(h)).length === heldItems.length && (heldItems.length === 0 || hm.said) && (heldItems[0] !== r.s.items[0] || (hm.marks > 0 && /Draft anew/.test(hm.draft))),
+      "§695 the cards whose item carries measures on the plan say so on the head, the lines are marked on the plan, the chat counts them, and on the build road the button reads Draft anew", JSON.stringify({ hm, held: heldItems.length }));
+    /* §695 S5 — left out this period, and back */
+    const lastK = r.s.items.length - 1;
+    await page.click('[data-cop-ex-card-pick="' + lastK + '"]'); await page.waitForTimeout(600);
+    await page.click('[data-cop-ex-out="' + lastK + '"]'); await page.waitForTimeout(900);
+    r = await row();
+    const lo = await page.evaluate((k) => ({ head: (document.querySelector('[data-cop-ex-card="' + k + '"] .copex-head small') || {}).textContent || "", step: (document.querySelector(".copfhead small") || {}).textContent || "",
+      said: /left out this period/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), back: !!document.querySelector('[data-cop-ex-in="' + k + '"]') }), lastK);
+    check(r.s.items[lastK].out === true && /Left out this period/.test(lo.head) && /1 left out/.test(lo.step) && lo.said && lo.back, "§695 Leave out this period marks the card, the head counts it, the chat says what it means, Put it back is offered", JSON.stringify({ out: r.s.items[lastK].out, lo }));
+    await page.click('[data-cop-ex-in="' + lastK + '"]'); await page.waitForTimeout(900);
+    r = await row();
+    check(r.s.items[lastK].out === false, "§695 …and Put it back puts it back");
+    await page.click('[data-cop-ex-card-pick="0"]'); await page.waitForTimeout(600);
     await page.click("[data-cop-ex-draftall]");
     for (let n = 0; n < 40; n++) { await page.waitForTimeout(1200); r = await row(); if (r.s.items.every((x) => x.drafted)) break; }
     await page.waitForTimeout(800);
@@ -2866,11 +2901,17 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(/This plan covers/.test(strip) && !/·/.test(strip), "§654 the period line carries no stray separator", strip);
     const fin = await page.$("[data-cop-ex-finish]");
     check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645), at the pane's foot (§684)");
+    /* §695 S5 — the last item is left out before the save: Save stays live, Apply leaves it untouched */
+    await page.click('[data-cop-ex-card-pick="' + lastK + '"]'); await page.waitForTimeout(600);
+    await page.click('[data-cop-ex-out="' + lastK + '"]'); await page.waitForTimeout(900);
+    r = await row();
+    const outIt = r.s.items[lastK];
+    check(outIt.out === true && outIt.drafted === true && (await page.evaluate(() => (document.querySelector("[data-cop-ex-finish]") || {}).getAttribute("aria-disabled"))) !== "true", "§695 a drafted item can still be left out, and Save stays live", JSON.stringify({ out: outIt.out }));
     const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
     const exArch = await page.evaluate(() => ARCHIVES.length);
     /* A Capability holding nothing yet has nothing to archive (archiveCapPlan
        keeps nothing empty), so the ones expected are those that hold something. */
-    const exCapIds = r.s.items.filter((x) => x.kind !== "direction").map((x) => String(x.planId));
+    const exCapIds = r.s.items.filter((x) => x.kind !== "direction" && !x.out).map((x) => String(x.planId));
     if (fin) { await fin.click(); await page.waitForTimeout(2200); }
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
@@ -2899,7 +2940,10 @@ await section("3m · the Execution chat: the period once, each item drafted, the
         const pj = (c.projects || []).filter((x) => x.name === "Ex launch")[0];
         out.caps.push({ ko: ko ? ko.target : null, pj: pj ? [pj.start, pj.end] : null }); });
       return out;
-    }, r.s.items.map((x) => x.planId));
+    }, r.s.items.filter((x) => !x.out).map((x) => x.planId));
+    const outPlan = await page.evaluate((it) => { if (it.kind === "direction") { const p = (UNITS.mobile.items || []).find((x) => x && x.id === it.planId); return p ? !(p.measures || []).some((m) => m.name === "Ex share") : null; }
+      const c = (GROUP.capabilities || []).find((x) => String(x.id) === it.planId); return c ? !(c.keyObjectives || []).some((m) => m.name === "Ex share") : null; }, outIt);
+    check(outPlan === true, "§695 the item left out this period is untouched by Apply — its drafted measure never reaches the plan", JSON.stringify(outPlan));
     const want = await page.evaluate((p) => [SMPRules.monthLabel(p.y * 12 + p.m1 - 1), SMPRules.monthLabel(p.y * 12 + p.m2 - 1)], per);
     check(plan.from === want[0] && plan.to === want[1], "the period becomes the plan period", JSON.stringify([plan.from, plan.to]));
     const qWant = [1, 2, 3, 4].map((q) => (qs.includes(q) ? 1 : 0)).join("");

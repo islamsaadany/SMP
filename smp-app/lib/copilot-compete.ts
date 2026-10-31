@@ -104,13 +104,26 @@ export type Compete = {
   reply: string;                    // what the last refine said
   log: { w: "me" | "ai"; t: string }[]; // §654 C1 — every ask for a change and its answer, in order (the chat in time)
   saved: { deliverableId: string; n: number; title: string } | null;
+  /* §695 S11 — STARTED FROM THE PLAN: the plan's discipline and values came
+     in as the table, so the chat stands at the table with nothing scored;
+     scoring is offered as a check of the plan's choice, and the scores stay
+     pressable after it (the choice was not made from them). */
+  fromPlan: boolean;
 };
 export const MAX_CP_LOG = 200;
 export const MAX_VALUES = 5;
 export const MAX_BULLETS = 5;
 export const MAX_TEXT = 300;
 
-export const newCompete = (): Compete => ({ phase: "score", market: null, internal: null, edited: [], chosen: "", suggested: [], picked: [], table: null, alts: [], reply: "", log: [], saved: null });
+export const newCompete = (): Compete => ({ phase: "score", market: null, internal: null, edited: [], chosen: "", suggested: [], picked: [], table: null, alts: [], reply: "", log: [], saved: null, fromPlan: false });
+/* §695 S11 — a chat started from what the plan holds. */
+export function competeFromPlan(raw: unknown): Compete | null {
+  const j: any = raw && typeof raw === "object" ? raw : null;
+  if (!j || !isDisc(j.discipline)) return null;
+  const values = cleanValues(j.values, 8);
+  if (!values.length) return null;
+  return { ...newCompete(), phase: "table", chosen: j.discipline, table: { discipline: j.discipline, values }, fromPlan: true };
+}
 
 const cleanScore = (raw: any): Score | null => {
   if (!raw || typeof raw !== "object") return null;
@@ -155,7 +168,7 @@ export function sanitizeCompete(raw: unknown, stored: Compete): Compete {
 /* The phase follows the work, never ahead of it. */
 function settle(s: Compete): Compete {
   const scored = resultOf("market", s.market).complete;
-  if (s.phase !== "score" && !scored) s.phase = "score";
+  if (s.phase !== "score" && !scored && !s.fromPlan) s.phase = "score";
   if ((s.phase === "values" || s.phase === "table") && !s.chosen) s.phase = "discipline";
   if (s.phase === "table" && !s.table) s.phase = "values";
   if (s.phase === "saved" && !s.saved) s.phase = s.table ? "table" : "values";
@@ -165,6 +178,7 @@ export function storedCompete(raw: unknown): Compete | null {
   if (!raw || typeof raw !== "object") return null;
   const j: any = raw;
   const base = newCompete();
+  base.fromPlan = !!j.fromPlan;
   if (j.saved && typeof j.saved === "object" && j.saved.deliverableId) base.saved = { deliverableId: str(j.saved.deliverableId), n: Number(j.saved.n) || 0, title: oneLine(j.saved.title) };
   base.alts = (Array.isArray(j.alts) ? j.alts : []).map((x: unknown) => oneLine(x).slice(0, 160)).filter(Boolean).slice(0, 4);
   base.reply = String(j.reply ?? "").slice(0, 1200);
@@ -188,8 +202,8 @@ export function todoOf(s: Compete): Todo[] {
   const m = resultOf("market", s.market);
   const scored = m.complete && resultOf("internal", s.internal).complete;
   return [
-    { key: "score", title: "Score the disciplines", state: scored ? "done" : "open", status: scored ? DISC_WORD[m.leader] + " leads the market" : "20 factors, 3 disciplines" },
-    { key: "discipline", title: "Choose the discipline", state: s.chosen ? "done" : "open", status: s.chosen ? DISC_WORD[s.chosen] : "Not chosen yet" },
+    { key: "score", title: s.fromPlan ? "Score the disciplines, as a check" : "Score the disciplines", state: scored || (s.fromPlan && !m.complete && !!s.table) ? "done" : "open", status: scored ? DISC_WORD[m.leader] + " leads the market" : s.fromPlan ? "Optional — the plan's choice stands" : "20 factors, 3 disciplines" },
+    { key: "discipline", title: "Choose the discipline", state: s.chosen ? "done" : "open", status: s.chosen ? DISC_WORD[s.chosen] + (s.fromPlan ? " · from the plan" : "") : "Not chosen yet" },
     { key: "values", title: "Pick the values", state: s.table ? "done" : "open", status: s.table ? s.table.values.length + " values" : s.suggested.length ? s.picked.length + " ticked" : "Not suggested yet" },
     { key: "table", title: "Refine and check the table", state: s.saved ? "done" : "open", status: s.saved ? "Checked" : s.table ? "On the table now" : "After the values" },
     { key: "save", title: "Save", state: s.saved ? "done" : "open", status: s.saved ? "Saved as " + s.saved.title + " v" + s.saved.n : "Into Competitive Discipline" },

@@ -12,6 +12,7 @@ import {
   DISCS, DISC_WORD, DISC_SUB, MARKET, INTERNAL, CLARITY_WORD, MAX_VALUES, isDisc, resultOf, cleanScores, cleanValue,
   type Compete, newCompete, sanitizeCompete, storedCompete, competeOf, writeCompete, todoOf, doneCount,
   competeInstruction, SCORE_SCHEMA, VALUES_SCHEMA, REFINE_SCHEMA, scoreQuestion, valuesQuestion, refineQuestion, saveCompete, nextCompeteVersion, MAX_CP_LOG,
+  competeFromPlan,
 } from "../../lib/copilot-compete.ts";
 
 type Out = { status: number; body: Record<string, unknown> };
@@ -63,7 +64,9 @@ export async function competeAct(c: any, b: any, who: Who): Promise<Out> {
     const place = String(b.place || "");
     if (!isPlace(place)) return refused(400, "Which place?");
     const chat = await newChat(c, { place, section: "compete", title: oneLine(b.title).slice(0, MAX_TITLE) || "Competitive Discipline", by });
-    const s = newCompete();
+    /* §695 S11 — Start from the existing plan: the plan's discipline and
+       values come in as the table; the chat stands there, scoring offered. */
+    const s = competeFromPlan(b.fromPlan) || newCompete();
     await writeCompete(c, chat.id, s);
     return out(200, { ok: true, chat: { ...chat, compete: true }, ...(await competeView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }

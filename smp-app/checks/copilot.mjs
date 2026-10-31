@@ -1212,6 +1212,69 @@ try {
     check("...the version holds the period and both items", xv.length === 1 && xv[0].body.period?.m1 === 7 && xv[0].body.items.length === 2 && /PLAN PERIOD: Jul\u2013Dec 2026/.test(xv[0].body.text), String(JSON.stringify(xv)).slice(0, 300));
     const xafter = await call("POST", "api", { act: "execPeriod", id: xid, choice: "full" }, NORAN);
     check("a saved chat refuses further changes", xafter.st === 400 && /Start a new chat/.test(xafter.j.why));
+
+    section("§9d · §695 — Execution reads the plan: the plan's lines marked, two roads, left out this period, read again; Competitive Discipline from the plan");
+    const PL = [{ kind: "direction", planId: "mobile-P1", title: "Win families", ownedBy: "Commercial", measures: [{ name: "Family share", target: "20%", compile: "Latest", mark: "new" }], tactics: [{ name: "Family day", owner: "Commercial", quarters: [1, 2] }] },
+      { kind: "direction", planId: "mobile-P2", title: "Grow SME" }];
+    const rf = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution, refined", items: PL, road: "refine" }, NORAN);
+    const rfi = rf.j.exec?.items || [];
+    check("§695 a chat started from the plan carries the plan's measures and tactics under each item, every line marked the plan's whatever the page said; the road is kept",
+      rf.st === 200 && rf.j.exec?.road === "refine" && rfi.length === 2 && rfi[0].measures.length === 1 && rfi[0].measures[0].mark === "plan" && rfi[0].tactics[0].mark === "plan" && rfi[0].drafted === false && rfi[1].measures.length === 0,
+      String(JSON.stringify(rfi)).slice(0, 240));
+    check("§695 …an item carrying the plan's lines is done in the to-do; the one without is what Save waits for",
+      rf.j.execTodo?.find((x) => x.key === "item:mobile-P1")?.state === "done" && /Grow SME/.test(rf.j.execBlocker) && /or Leave out this period/.test(rf.j.execBlocker), JSON.stringify([rf.j.execTodo, rf.j.execBlocker]).slice(0, 300));
+    const rfid = rf.j.chat?.id;
+    await call("POST", "api", { act: "execPeriod", id: rfid, choice: "full" }, NORAN);
+    NEXT = { answer: { reply: "Added.", measures: [{ name: "family share", target: "25%", compile: "Latest" }, { name: "Family ARPU", target: "EGP 300", compile: "Average" }], tactics: [{ name: "Family app bundle", owner: "Product", quarters: [2, 3] }] } };
+    const rfd = await call("POST", "api", { act: "execDraft", id: rfid, placeWord: "Mobile" }, NORAN);
+    const r0 = rfd.j.exec?.items[0];
+    check("§695 refine: a draft ADDS to the plan's lines, marked new, and a line with a name already there is not added twice",
+      rfd.st === 200 && r0?.measures.length === 2 && r0.measures[0].mark === "plan" && r0.measures[1].name === "Family ARPU" && r0.measures[1].mark === "new" && r0.tactics.length === 2 && r0.tactics[1].mark === "new" && r0.drafted === true,
+      String(JSON.stringify(r0)).slice(0, 300));
+    check("§695 …and the model was told what is already on the plan, to add to, not repeat", /ALREADY ON THE PLAN/.test(JSON.stringify(seen[seen.length - 1] || "")) && /Add 1 to 3 measures/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    const bd = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution, built", items: PL, road: "build" }, NORAN);
+    const bdid = bd.j.chat?.id;
+    await call("POST", "api", { act: "execPeriod", id: bdid, choice: "full" }, NORAN);
+    NEXT = { answer: { reply: "Drafted anew.", measures: [{ name: "Family ARPU", target: "EGP 300", compile: "Average" }], tactics: [{ name: "Family app bundle", owner: "Product", quarters: [2, 3] }] } };
+    const bdd = await call("POST", "api", { act: "execDraft", id: bdid, placeWord: "Mobile" }, NORAN);
+    const b0 = bdd.j.exec?.items[0];
+    check("§695 build: a draft REPLACES what the card held; the plan's lines were on the card until then", bd.j.exec?.road === "build" && bd.j.exec?.items[0].measures[0].mark === "plan" && bdd.st === 200 && b0?.measures.length === 1 && b0.measures[0].name === "Family ARPU" && b0.measures[0].mark === "new" && b0.tactics.length === 1,
+      String(JSON.stringify(b0)).slice(0, 240));
+    /* S5 — left out this period */
+    const lo = await call("POST", "api", { act: "execSave", id: bdid, exec: { items: bdd.j.exec.items.map((x, k) => (k === 1 ? { ...x, out: true } : x)) } }, NORAN);
+    check("§695 an item left out this period is done in the to-do, said so, and Save is no longer held by it",
+      lo.st === 200 && lo.j.exec?.items[1].out === true && lo.j.execTodo?.find((x) => x.key === "item:mobile-P2")?.status === "Left out this period" && lo.j.execBlocker === "", JSON.stringify([lo.j.execBlocker, lo.j.execTodo]).slice(0, 240));
+    const allOut = await call("POST", "api", { act: "execSave", id: bdid, exec: { items: lo.j.exec.items.map((x) => ({ ...x, out: true })) } }, NORAN);
+    check("§695 …but every item left out holds Save, in words", /Every item is left out/.test(allOut.j.execBlocker || ""), allOut.j.execBlocker);
+    await call("POST", "api", { act: "execSave", id: bdid, exec: { items: lo.j.exec.items } }, NORAN);
+    const bf = await call("POST", "api", { act: "execFinish", id: bdid, placeWord: "Mobile" }, NORAN);
+    const bv = bf.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1 AND n = $2", [bf.j.saved.deliverableId, bf.j.saved.n]))).rows : [];
+    check("§695 the version keeps the left-out item marked and names it under the drafted ones", bf.st === 200 && bv.length === 1 && bv[0].body.items[1].out === true && /LEFT OUT THIS PERIOD/.test(bv[0].body.text) && /Grow SME/.test(bv[0].body.text.split("LEFT OUT")[1] || ""),
+      String(JSON.stringify(bv[0] && bv[0].body.text)).slice(0, 300));
+    /* S6 — the plan read again on open */
+    const sy = await call("POST", "api", { act: "execSync", id: rfid, placeWord: "Mobile", items: [
+      { kind: "direction", planId: "mobile-P1", title: "Win families, renamed", measures: [{ name: "Family share", target: "22%", compile: "Latest" }], tactics: [] },
+      { kind: "direction", planId: "mobile-P9", title: "Partner with a bank" }] }, NORAN);
+    const syi = sy.j.exec?.items || [];
+    check("§695 read again: a new item joins undrafted, one gone from the plan is marked and kept, a drafted item keeps its draft under the plan's new name, and the chat says so once",
+      sy.st === 200 && sy.j.synced === true && syi.length === 3 && syi[0].title === "Win families, renamed" && syi[0].measures.length === 2 && syi[1].gone === true && syi[1].title === "Grow SME" && syi[2].planId === "mobile-P9" && syi[2].drafted === false &&
+        sy.j.exec.log[sy.j.exec.log.length - 1].k === -1 && /plan has changed/.test(sy.j.exec.log[sy.j.exec.log.length - 1].t) && /Partner with a bank/.test(sy.j.exec.log[sy.j.exec.log.length - 1].t) && /Grow SME/.test(sy.j.exec.log[sy.j.exec.log.length - 1].t),
+      String(JSON.stringify(syi.map((x) => [x.title, x.gone, x.measures.length]))) + " " + String(sy.j.exec?.log.slice(-1)[0]?.t).slice(0, 120));
+    const sy2 = await call("POST", "api", { act: "execSync", id: rfid, placeWord: "Mobile", items: [
+      { kind: "direction", planId: "mobile-P1", title: "Win families, renamed", measures: [{ name: "Family share", target: "22%", compile: "Latest" }], tactics: [] },
+      { kind: "direction", planId: "mobile-P9", title: "Partner with a bank" }] }, NORAN);
+    check("§695 …and read again with nothing changed writes nothing and says nothing", sy2.st === 200 && sy2.j.synced === false && sy2.j.exec?.log.length === sy.j.exec.log.length);
+    check("§695 the gone item is done in the to-do, as nothing is owed for it", sy.j.execTodo?.find((x) => x.key === "item:mobile-P2")?.status === "No longer on the plan" && sy.j.execTodo?.find((x) => x.key === "item:mobile-P2")?.state === "done");
+    /* S11 — Competitive Discipline from the plan */
+    const cpl = await call("POST", "api", { act: "newCompete", place: "mobile", title: "Competitive Discipline, from the plan", fromPlan: { discipline: "btc", values: [{ title: "Lowest price", how: ["Own towers"], measure: ["Cost per GB"] }] } }, NORAN);
+    const cps = cpl.j.compete;
+    check("§695 a Competitive Discipline chat from the plan stands at the table with nothing scored: the plan's discipline chosen, its values as the table, scoring a check",
+      cpl.st === 200 && cps?.fromPlan === true && cps.chosen === "btc" && cps.phase === "table" && cps.table?.values.length === 1 && cps.market === null && /from the plan/.test(cpl.j.competeTodo?.[1]?.status || "") && /Optional/.test(cpl.j.competeTodo?.[0]?.status || ""),
+      String(JSON.stringify([cps && cps.phase, cpl.j.competeTodo])).slice(0, 300));
+    const cpf = await call("POST", "api", { act: "competeFinish", id: cpl.j.chat?.id, placeWord: "Mobile" }, NORAN);
+    check("§695 …and it saves without the scores, as the next version of the same deliverable", cpf.st === 200 && cpf.j.saved?.n >= 2 && cpf.j.compete?.phase === "saved", String(JSON.stringify(cpf.j.saved)));
+    const cpn = await call("POST", "api", { act: "newCompete", place: "mobile", title: "Competitive Discipline", fromPlan: { discipline: "nope", values: [] } }, NORAN);
+    check("§695 …a plan start that holds nothing is a plain start", cpn.st === 200 && cpn.j.compete?.fromPlan === false && cpn.j.compete?.phase === "score");
     const notEx = await call("POST", "api", { act: "execSave", id: ch.id, exec: {} }, NORAN);
     check("a chat that is not Execution is refused", notEx.st === 400 && /not an Execution/.test(notEx.j.why));
     NEXT = null;

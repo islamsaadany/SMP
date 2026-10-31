@@ -13,7 +13,10 @@ import {
   validPeriod, periodChoices, periodQuarters, periodWords, periodLength, todoOf, doneCount, finishBlocker,
   execInstruction, DRAFT_SCHEMA, draftQuestion, saveExec,
   nextExecVersion, MAX_EX_LOG,
+  planItem, syncItems, roadOf, MAX_MEASURES, MAX_TACTICS,
 } from "../../lib/copilot-execution.ts";
+/* The plan's items as the page sends them, cut to shape and marked the plan's. */
+const planItemsOf = (v: unknown) => (Array.isArray(v) ? v : []).map((x: any) => planItem(x, [1, 2, 3, 4])).filter((i) => i.title).slice(0, MAX_ITEMS);
 
 type Out = { status: number; body: Record<string, unknown> };
 const out = (status: number, body: Record<string, unknown>): Out => ({ status, body });
@@ -62,7 +65,7 @@ export async function execProgress(c: any, ids: string[]): Promise<Record<string
   return m;
 }
 
-export const EXEC_ACTS = ["newExecution", "execPeriod", "execSave", "execFinish"];
+export const EXEC_ACTS = ["newExecution", "execSync", "execPeriod", "execSave", "execFinish"];
 export const EXEC_ASKS = ["execDraft"];
 
 export async function execAct(c: any, b: any, who: Who): Promise<Out> {
@@ -74,10 +77,11 @@ export async function execAct(c: any, b: any, who: Who): Promise<Out> {
     /* The plan's Directions and Capabilities, as the page reads them. Only
        their names and keys are taken; what is drafted under them is the
        chat's own work. */
-    const items = (Array.isArray(b.items) ? b.items : []).map((x: any) => cleanItem({ kind: x && x.kind, planId: x && x.planId, title: x && x.title, ownedBy: x && x.ownedBy }, [1, 2, 3, 4]))
-      .filter((i: any) => i.title).slice(0, MAX_ITEMS);
+    /* §695 — with the measures and tactics the plan holds under each, marked
+       as the plan's; and the road: build (the default) or refine. */
+    const items = planItemsOf(b.items);
     const chat = await newChat(c, { place, section: "execution", title: oneLine(b.title).slice(0, MAX_TITLE) || "Execution", by });
-    await writeExec(c, chat.id, newExec(items));
+    await writeExec(c, chat.id, newExec(items, roadOf(b.road)));
     return out(200, { ok: true, chat: { ...chat, exec: true }, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   const id = String(b.id || "");
@@ -95,6 +99,20 @@ export async function execAct(c: any, b: any, who: Who): Promise<Out> {
     if (!p) return refused(400, "A plan period is months in ONE year, the first before the last.");
     await writeExec(c, id, withPeriod(stored, p));
     return out(200, { ok: true, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
+  }
+  /* §695 S6 — the plan read again when the chat opens: the page sends the
+     plan's items as they stand; new ones join, gone ones are marked, undrafted
+     ones take the plan's lines as they now are. One line in the chat when
+     something changed; nothing written when nothing did. */
+  if (kind === "execSync") {
+    const r = syncItems(stored, planItemsOf(b.items));
+    if (!r.changed) return out(200, { ok: true, synced: false, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
+    const bits: string[] = [];
+    if (r.added.length) bits.push(r.added.map((x) => "“" + x + "”").join(", ") + (r.added.length === 1 ? " is new on the plan and joins the cards, not drafted yet." : " are new on the plan and join the cards, not drafted yet."));
+    if (r.gone.length) bits.push(r.gone.map((x) => "“" + x + "”").join(", ") + (r.gone.length === 1 ? " is no longer on the plan; its draft stays here, marked, and Apply will not write it." : " are no longer on the plan; their drafts stay here, marked, and Apply will not write them."));
+    const log = bits.length ? [...r.s.log, { k: -1, w: "ai" as const, t: "The plan has changed since this chat was opened: " + bits.join(" ") }].slice(-MAX_EX_LOG) : r.s.log;
+    await writeExec(c, id, { ...r.s, log });
+    return out(200, { ok: true, synced: true, added: r.added, gone: r.gone, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
   if (kind === "execSave") {
     await writeExec(c, id, sanitizeExec(b.exec, stored));
@@ -154,7 +172,14 @@ export async function execAsk(tenantId: string, b: any, _who: Who): Promise<Out>
     const k = now.cursor;
     const got = cleanItem({ ...now.items[k], measures: j.measures, tactics: j.tactics }, periodQuarters(now.period));
     if (!got.measures.length && !got.tactics.length) return refused(503, failedLine("the answer had nothing in it"));
-    const items = now.items.map((x, i) => (i === k ? { ...x, measures: got.measures, tactics: got.tactics, drafted: true } : x));
+    /* §695 — refine adds to what the card holds; build replaces it. A line
+       the model returned with a name already on the card is not added twice. */
+    const was = now.items[k];
+    const fresh = <T extends { name: string }>(xs: T[], have: { name: string }[]): T[] => xs.filter((x) => !have.some((h) => h.name.trim().toLowerCase() === x.name.trim().toLowerCase()));
+    const newM = got.measures.map((m) => ({ ...m, mark: "new" as const })), newT = got.tactics.map((x) => ({ ...x, mark: "new" as const }));
+    const measures = (now.road === "refine" ? [...was.measures, ...fresh(newM, was.measures)] : newM).slice(0, MAX_MEASURES);
+    const tactics = (now.road === "refine" ? [...was.tactics, ...fresh(newT, was.tactics)] : newT).slice(0, MAX_TACTICS);
+    const items = now.items.map((x, i) => (i === k ? { ...x, measures, tactics, drafted: true } : x));
     const reply = String(j.reply ?? "").trim().slice(0, 1200);
     /* §684 — the chat in time: what was asked (a draft, or a change in words) and what came back, on the item it was about */
     const said = oneLine(b.said).slice(0, 200);

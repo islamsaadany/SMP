@@ -24,12 +24,24 @@ export const COMPILES = ["Sum", "Count", "Latest", "Average"];
 export const MAX_MEASURES = 6, MAX_TACTICS = 8, MAX_ITEMS = 16;
 
 export type Period = { y: number; m1: number; m2: number };
-export type Measure = { name: string; target: string; compile: string };
-export type Tactic = { name: string; owner: string; quarters: number[] };
-export type Item = { kind: "direction" | "capability"; planId: string; title: string; ownedBy: string; measures: Measure[]; tactics: Tactic[]; drafted: boolean };
+/* §695 — EXECUTION READS THE PLAN (the stress test's second batch). A line
+   carries a `mark`: "plan" when it is what the plan holds today, read when
+   the chat is made and again when it opens (S6, S7); "new" when the chat
+   drafted or the person typed it. An item can be `out` — left out this
+   period, nothing drafted for it and nothing written on Apply (S5) — or
+   `gone` — no longer on the plan since the chat was made; its draft stays,
+   marked, and Apply skips it (S6). The chat's `road` (S11): "build" drafts
+   each item anew, replacing the plan's lines on the card; "refine" keeps
+   them and adds. */
+export type Mark = "plan" | "new";
+export type Measure = { name: string; target: string; compile: string; mark: Mark };
+export type Tactic = { name: string; owner: string; quarters: number[]; mark: Mark };
+export type Item = { kind: "direction" | "capability"; planId: string; title: string; ownedBy: string; measures: Measure[]; tactics: Tactic[]; drafted: boolean; out: boolean; gone: boolean };
+export type Road = "build" | "refine";
 /* §684 — `log`: the chat in time — every draft asked for and its answer, in
    order, marked with the item it was about. */
-export type Exec = { period: Period | null; items: Item[]; cursor: number; reply: string; log: { k: number; w: "me" | "ai"; t: string }[]; saved: { deliverableId: string; n: number; title: string } | null };
+export type Exec = { road: Road; period: Period | null; items: Item[]; cursor: number; reply: string; log: { k: number; w: "me" | "ai"; t: string }[]; saved: { deliverableId: string; n: number; title: string } | null };
+export const roadOf = (v: unknown): Road => (v === "refine" ? "refine" : "build");
 export const MAX_EX_LOG = 300;
 
 /* ── THE PERIOD ─────────────────────────────────────────────────────── */
@@ -63,14 +75,15 @@ export function periodChoices(today: Date) {
   return { full, rest };
 }
 
-export const newExec = (items: Item[]): Exec => ({ period: null, items, cursor: 0, reply: "", log: [], saved: null });
+export const newExec = (items: Item[], road: Road = "build"): Exec => ({ road, period: null, items, cursor: 0, reply: "", log: [], saved: null });
 
 const cleanQs = (v: unknown, allowed: number[]) =>
   [...new Set((Array.isArray(v) ? v : []).map(Number).filter((q) => allowed.includes(q)))].sort();
+const markOf = (v: unknown): Mark => (v === "plan" ? "plan" : "new");
 const cleanMeasure = (x: any): Measure => ({ name: oneLine(x && x.name).slice(0, 200), target: oneLine(x && x.target).slice(0, 60),
-  compile: COMPILES.includes(str(x && x.compile)) ? str(x.compile) : "" });
+  compile: COMPILES.includes(str(x && x.compile)) ? str(x.compile) : "", mark: markOf(x && x.mark) });
 const cleanTactic = (x: any, allowed: number[]): Tactic => ({ name: oneLine(x && x.name).slice(0, 200), owner: oneLine(x && x.owner).slice(0, 120),
-  quarters: brk() === "exec-any-quarter" ? cleanQs(x && x.quarters, [1, 2, 3, 4]) : cleanQs(x && x.quarters, allowed) });
+  quarters: brk() === "exec-any-quarter" ? cleanQs(x && x.quarters, [1, 2, 3, 4]) : cleanQs(x && x.quarters, allowed), mark: markOf(x && x.mark) });
 const ID = /^[A-Za-z0-9:_.-]{1,80}$/;
 export function cleanItem(x: any, allowed: number[]): Item {
   return {
@@ -79,8 +92,37 @@ export function cleanItem(x: any, allowed: number[]): Item {
     title: oneLine(x && x.title).slice(0, 160), ownedBy: oneLine(x && x.ownedBy).slice(0, 120),
     measures: (Array.isArray(x && x.measures) ? x.measures : []).map(cleanMeasure).filter((m: Measure) => m.name).slice(0, MAX_MEASURES),
     tactics: (Array.isArray(x && x.tactics) ? x.tactics : []).map((t: any) => cleanTactic(t, allowed)).filter((t: Tactic) => t.name).slice(0, MAX_TACTICS),
-    drafted: !!(x && x.drafted),
+    drafted: !!(x && x.drafted), out: !!(x && x.out), gone: !!(x && x.gone),
   };
+}
+/* An item as the PAGE reads it off the plan: its lines are the plan's, so
+   every one is marked "plan" whatever the page said. */
+export function planItem(x: any, allowed: number[]): Item {
+  const it = cleanItem(x, allowed);
+  return { ...it, measures: it.measures.map((m) => ({ ...m, mark: "plan" as Mark })), tactics: it.tactics.map((t) => ({ ...t, mark: "plan" as Mark })), drafted: false, out: false, gone: false };
+}
+/* §695 S6 — THE PLAN READ AGAIN when the chat opens. Matched by key: an item
+   still there keeps its draft and, while undrafted, takes the plan's lines
+   as they now are; a new one joins undrafted; one gone from the plan is
+   marked, never removed. */
+export function syncItems(s: Exec, plan: Item[]): { s: Exec; added: string[]; gone: string[]; changed: boolean } {
+  const byId = new Map(plan.filter((p) => p.planId).map((p) => [p.planId, p]));
+  const added: string[] = [], gone: string[] = [];
+  let changed = false;
+  const items: Item[] = s.items.map((it) => {
+    const p = it.planId ? byId.get(it.planId) : undefined;
+    if (!p) { if (!it.gone) { changed = true; gone.push(it.title); } return { ...it, gone: true }; }
+    byId.delete(it.planId);
+    const next: Item = { ...it, gone: false, title: p.title || it.title, ownedBy: p.ownedBy || it.ownedBy };
+    if (!it.drafted) {
+      const keptM = it.measures.filter((m) => m.mark !== "plan"), keptT = it.tactics.filter((x) => x.mark !== "plan");
+      next.measures = [...p.measures, ...keptM].slice(0, MAX_MEASURES); next.tactics = [...p.tactics, ...keptT].slice(0, MAX_TACTICS);
+    }
+    if (JSON.stringify(next) !== JSON.stringify(it)) changed = true;
+    return next;
+  });
+  for (const p of byId.values()) { if (items.length >= MAX_ITEMS) break; items.push(p); added.push(p.title); changed = true; }
+  return { s: { ...s, items, cursor: Math.min(s.cursor, Math.max(0, items.length - 1)) }, added, gone, changed };
 }
 
 /* The page's version, cut to shape. The items' identities (kind, planId,
@@ -92,7 +134,7 @@ export function sanitizeExec(raw: unknown, stored: Exec): Exec {
   const qs = periodQuarters(s.period);
   if (Array.isArray(j.items)) s.items = stored.items.map((it, k) => {
     const got = cleanItem(j.items[k], qs);
-    return { ...it, measures: got.measures, tactics: got.tactics, drafted: it.drafted || got.drafted };
+    return { ...it, measures: got.measures, tactics: got.tactics, drafted: it.drafted || got.drafted, out: got.out };
   });
   if ("cursor" in j) s.cursor = Math.max(0, Math.min(s.items.length - 1, Number(j.cursor) || 0));
   return s;
@@ -103,7 +145,7 @@ export function storedExec(raw: unknown): Exec | null {
   const period = validPeriod(j.period);
   const qs = periodQuarters(period);
   const s: Exec = {
-    period, cursor: Math.max(0, Number(j.cursor) || 0), reply: str(j.reply).slice(0, 1200),
+    road: roadOf(j.road), period, cursor: Math.max(0, Number(j.cursor) || 0), reply: str(j.reply).slice(0, 1200),
     log: (Array.isArray(j.log) ? j.log : []).map((x: any) => ({ k: Math.max(-1, Number(x && x.k) || 0), w: x && x.w === "ai" ? "ai" as const : "me" as const, t: str(x && x.t).slice(0, 1200) })).filter((x: any) => x.t).slice(-MAX_EX_LOG),
     items: (Array.isArray(j.items) ? j.items : []).map((x: any) => cleanItem(x, qs)).filter((i: Item) => i.title).slice(0, MAX_ITEMS),
     saved: j.saved && j.saved.deliverableId ? { deliverableId: str(j.saved.deliverableId), n: Number(j.saved.n) || 0, title: oneLine(j.saved.title) } : null,
@@ -128,7 +170,9 @@ export function withPeriod(s: Exec, p: Period): Exec {
 
 /* ── THE TO-DO LIST, WORKED OUT ────────────────────────────────────── */
 export type Todo = { key: string; title: string; status: string; state: "done" | "open" };
-const itemDone = (it: Item) => it.measures.length > 0 && it.tactics.length > 0;
+/* Done: drafted or carrying the plan's lines, or left out, or gone (nothing is owed for it). */
+const itemDone = (it: Item) => it.out || it.gone || (it.measures.length > 0 && it.tactics.length > 0);
+export const itemIn = (it: Item) => !it.out && !it.gone;
 /* "1 measure", "2 tactics" — a word the platform writes itself, never a
    tenant label, so inflecting it is safe (§107.8 is about labels). */
 const nOf = (n: number, w: string) => n + " " + w + (n === 1 ? "" : "s");
@@ -136,7 +180,7 @@ const nOf = (n: number, w: string) => n + " " + w + (n === 1 ? "" : "s");
 export function todoOf(s: Exec): Todo[] {
   const out: Todo[] = [{ key: "period", title: "Plan period", state: s.period ? "done" : "open", status: s.period ? periodWords(s.period) : "How long is this plan?" }];
   for (const it of s.items) out.push({ key: "item:" + it.planId, title: it.title, state: itemDone(it) ? "done" : "open",
-    status: it.measures.length || it.tactics.length ? nOf(it.measures.length, "measure") + " · " + nOf(it.tactics.length, "tactic") : "Not drafted yet" });
+    status: it.gone ? "No longer on the plan" : it.out ? "Left out this period" : it.measures.length || it.tactics.length ? nOf(it.measures.length, "measure") + " · " + nOf(it.tactics.length, "tactic") : "Not drafted yet" });
   out.push({ key: "save", title: "Save", state: s.saved ? "done" : "open", status: s.saved ? "Saved as " + s.saved.title + " v" + s.saved.n : "Into the plan" });
   return out;
 }
@@ -145,8 +189,9 @@ export function finishBlocker(s: Exec): string {
   if (!s.period) return "Say how long the plan is first.";
   if (!s.items.length) return "There is nothing in the plan to set measures for yet.";
   if (brk() === "exec-finish-any") return "";
+  if (!s.items.some((it) => itemIn(it))) return "Every item is left out — put at least one back.";
   const left = s.items.find((it) => !itemDone(it));
-  return left ? "“" + left.title + "” still needs at least one measure and one tactic." : "";
+  return left ? "“" + left.title + "” still needs at least one measure and one tactic, or Leave out this period." : "";
 }
 
 /* ── WHAT THE MODEL READS AND RETURNS ────────────────────────────────── */
@@ -166,19 +211,26 @@ export function draftQuestion(s: Exec, it: Item, ask: string): string {
   const qs = periodQuarters(p);
   return "THE PLAN PERIOD: " + periodWords(p) + ". Quarters a tactic may run in: " + qs.map((q) => "Q" + q).join(", ") + ".\n\n" +
     (it.kind === "capability" ? "THE CAPABILITY: " : "THE DIRECTION: ") + it.title + (it.ownedBy ? " (owned by " + it.ownedBy + ")" : "") +
-    (it.measures.length || it.tactics.length ? "\n\nALREADY DRAFTED (improve, keep what is good):\n" + it.measures.map((m) => "- measure: " + m.name + " · " + m.target).join("\n") + "\n" + it.tactics.map((t) => "- tactic: " + t.name).join("\n") : "") +
+    (it.measures.length || it.tactics.length ? (s.road === "refine" || !it.drafted
+        ? (it.measures.some((m) => m.mark === "plan") || it.tactics.some((x) => x.mark === "plan")
+          ? "\n\nALREADY ON THE PLAN (these stay; do not repeat them — add what completes them):\n" : "\n\nALREADY DRAFTED (these stay; do not repeat them — add what completes them):\n")
+        : "\n\nALREADY DRAFTED (improve, keep what is good):\n") + it.measures.map((m) => "- measure: " + m.name + " · " + m.target).join("\n") + "\n" + it.tactics.map((t) => "- tactic: " + t.name).join("\n") : "") +
     (ask ? "\n\nThe client asks: " + ask : "") +
-    "\n\nDraft 2 to 4 measures with targets for the period and 3 to 6 tactics. In `reply`, say in one sentence what you drafted.";
+    (s.road === "refine" && (it.measures.length || it.tactics.length)
+      ? "\n\nAdd 1 to 3 measures with targets for the period and 1 to 3 tactics. In `reply`, say in one sentence what you added."
+      : "\n\nDraft 2 to 4 measures with targets for the period and 3 to 6 tactics. In `reply`, say in one sentence what you drafted.");
 }
 
 /* ── SAVING: THE DELIVERABLE ─────────────────────────────────────────── */
 export function execText(s: Exec): string {
   const out: string[] = ["PLAN PERIOD: " + (s.period ? periodWords(s.period) : "—")];
-  for (const it of s.items) {
+  for (const it of s.items.filter(itemIn)) {
     out.push("", (it.kind === "capability" ? "CAPABILITY: " : "DIRECTION: ") + it.title);
-    it.measures.forEach((m) => out.push("  Measure: " + m.name + " — " + (m.target || "no target") + (m.compile ? " (" + m.compile + ")" : "")));
-    it.tactics.forEach((t) => out.push("  Tactic: " + t.name + (t.owner ? " · " + t.owner : "") + (t.quarters.length ? " · " + t.quarters.map((q) => "Q" + q).join(" ") : "")));
+    it.measures.forEach((m) => out.push("  Measure: " + m.name + " — " + (m.target || "no target") + (m.compile ? " (" + m.compile + ")" : "") + (m.mark === "plan" ? " [on the plan]" : "")));
+    it.tactics.forEach((t) => out.push("  Tactic: " + t.name + (t.owner ? " · " + t.owner : "") + (t.quarters.length ? " · " + t.quarters.map((q) => "Q" + q).join(" ") : "") + (t.mark === "plan" ? " [on the plan]" : "")));
   }
+  const left = s.items.filter((it) => it.out && !it.gone);
+  if (left.length) { out.push("", "LEFT OUT THIS PERIOD (nothing drafted, nothing written on Apply):"); left.forEach((it) => out.push("  " + it.title)); }
   return out.join("\n");
 }
 /* §684 — the version the pane's head names before the save (the SWOT's shape). */

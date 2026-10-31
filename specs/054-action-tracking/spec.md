@@ -207,9 +207,16 @@ rather than as a name nobody can find.
   switcher — a hidden entry is decoration (§42, §44).
 - **Create:** anybody who can open it, naming any office row as owner.
 - **Change status, date, title, description; hand it to somebody else;
-  delete:** the owner or the client's Super user — ONE rule since §356.11,
-  where the first build kept two (a collaborator could change but not hand
-  on). Being the creator confers nothing.
+  delete:** the owner, the client's Super user, or — since §695 — the **lead
+  of one of the client's assignments** (the Clients page's registry, over
+  the assignments not yet written up), who answers for every task on the
+  client and not only their own. ONE rule since §356.11, where the first
+  build kept two (a collaborator could change but not hand on). Being the
+  creator confers nothing. A progress entry keeps its own rule: only the
+  person who wrote it changes it, the lead included.
+- **On the Weekly check, the rows inside each week's box stand by the
+  owner's name, A to Z** (§695), a person's own rows in the list's order.
+  The ordinary list is not touched: it has Group by.
 - **The rule lives on the server** and the screen asks the same function
   (§42): a control the server refuses is never drawn.
 

@@ -5037,7 +5037,7 @@
       tick.setAttribute("aria-label", (done ? "Mark not done: " : "Mark done: ") + (r.title || ""));
       if (done) tick.innerHTML = MW_TICK;
       if (r.canChange && act) tick.addEventListener("click", function (e) { e.stopPropagation(); act(r, b); });
-      else { tick.disabled = true; tick.title = "Only its owner or the client's Super user can finish this"; }
+      else { tick.disabled = true; tick.title = "Only its owner, the lead of one of the client's assignments or the client's Super user can finish this"; }
       b.appendChild(tick);
     }
     var t = el("span", "t");

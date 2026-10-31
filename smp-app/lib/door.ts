@@ -177,3 +177,16 @@ export function seatAt(user: { isAdmin: boolean }, mine: Pick<Membership, "tenan
   const seat = mine.find((m) => m.tenant_id === tenantId);
   return { seat: seat ? seat.seat : user.isAdmin ? "super" : null, personKey: seat ? seat.person_key : null };
 }
+
+/* THE CLIENTS AN ACCOUNT LEADS AN ASSIGNMENT ON (§695): the registry's
+   `lead_id` on the Clients page, over the assignments not yet written up
+   (`state <> 'done'`), so a lead's standing ends with the write-up and not
+   with the end month — the same window case_lead's own index keeps. Read
+   here, beside seatAt, because it is part of the one answer to WHO THIS
+   PERSON IS ON A CLIENT that the Tracker's rule (lib/tracker.ts mayChange)
+   and My work's tick both ask (§53.5). `case_studies` is a platform table,
+   so it is asked of the platform's pool, never under a tenant. */
+export async function leadsOf(c: Q, userId: string): Promise<Set<string>> {
+  const r = await c.query("SELECT DISTINCT about_tenant_id FROM case_studies WHERE lead_id = $1 AND state <> 'done'", [userId]);
+  return new Set(r.rows.map((x: any) => String(x.about_tenant_id)));
+}

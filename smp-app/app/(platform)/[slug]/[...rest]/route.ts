@@ -1,5 +1,5 @@
 import { doorPool } from "../../../../lib/auth.ts";
-import { resolveTenant } from "../../../../lib/door.ts";
+import { resolveTenant, leadsOf } from "../../../../lib/door.ts";
 import { requestUser, SLUG } from "../../../../lib/session.ts";
 import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
 import { serverFor } from "../../../../modules/registry.ts";
@@ -71,6 +71,9 @@ export async function GET(req: Request, { params }: P) {
     ? await narrowToViewed(doorPool(), ans.tenant.id, { personKey: ans.personKey, seat: ans.seat }, asked)
     : { personKey: ans.personKey, seat: ans.seat };
   if ("refuse" in who) return new Response(who.refuse, { status: 403 });
+  /* the assignment lead's standing (§695) rides with the seat, and is
+     nobody's under view-as, which only narrows */
+  const lead = !asked && (await leadsOf(doorPool(), user.id)).has(ans.tenant.id);
   const have = modulesFor(ans.tenant.modules);
   const w = whereOf(rest || [], have);
   if (w.legacy) return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
@@ -167,7 +170,7 @@ export async function GET(req: Request, { params }: P) {
      already resolved both — a module asking for them again would be a second
      answer to a question `resolveTenant` exists to settle (§53.5). */
   return withBarExtras(extras, () => serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
-    have: open, library, rest: w.rest, personKey: who.personKey, seat: who.seat, admin: user.isAdmin && !asked,
+    have: open, library, rest: w.rest, personKey: who.personKey, seat: who.seat, lead, admin: user.isAdmin && !asked,
     consultant: user.kind !== "client", me: { personKey: ans.personKey, seat: ans.seat } }));
 }
 

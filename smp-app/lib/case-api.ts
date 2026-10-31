@@ -86,7 +86,7 @@ export function mayWrite(me: SessionUser, r: Row): boolean {
 /* ── READING ───────────────────────────────────────────────────────── */
 const HEAD =
   "cs.id, cs.name, cs.started, cs.ended, cs.state, cs.due::text AS due, cs.done_at, cs.created_at, cs.updated_at, " +
-  "cs.writer_id, cs.opened_by, cs.kind, cs.lead_id, ld.name AS lead_name, ld.email AS lead_email, t.key AS client_key, t.name AS client_name, t.industry, t.size, t.mark, t.past, " +
+  "cs.writer_id, cs.opened_by, cs.kind, cs.lead_id, cs.planned_days, ld.name AS lead_name, ld.email AS lead_email, t.key AS client_key, t.name AS client_name, t.industry, t.size, t.mark, t.past, " +
   "t.status AS client_status, w.name AS writer_name, w.email AS writer_email, o.name AS opener_name, a.name AS asker_name, " +
   "jsonb_array_length(cs.deliverables) AS n_deliverables, " +
   "(SELECT count(*)::int FROM memory_entries m WHERE m.case_id = cs.id) AS n_insights";
@@ -99,6 +99,8 @@ function head(r: Row) {
   return {
     id: r.id, name: r.name, started: r.started, ended: r.ended, state: r.state, due: r.due, kind: r.kind,
     lead: r.lead_id ? { id: r.lead_id, name: r.lead_name, email: r.lead_email } : null,
+    /* the days agreed with the client (§696); null where none was recorded */
+    plannedDays: r.planned_days == null ? null : Number(r.planned_days),
     doneAt: r.done_at, createdAt: r.created_at,
     client: { key: r.client_key, name: r.client_name, industry: r.industry, size: r.size, mark: r.mark || null,
               past: !!r.past, archived: r.client_status === "retired" },
@@ -323,8 +325,8 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
   }
 
   /* ADDING OR CHANGING AN ASSIGNMENT (the super user, on Clients). Its name,
-     type, months, lead and team; a lead is one of the team by being named
-     the lead, and is put on the team if left off it. */
+     type, months, planned man-days, lead and team; a lead is one of the team
+     by being named the lead, and is put on the team if left off it. */
   if (action === "assign") {
     if (!mayOpen(me)) return no(403, "Adding an assignment is for the super user.");
     const name = oneLine(body.name, 160);
@@ -334,6 +336,12 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
     const started = month(body.started), ended = month(body.ended);
     if (!started) return no(400, "Say the month it started.");
     if (ended && ended < started) return no(400, "It cannot end before it started.");
+    /* THE PLANNED MAN-DAYS (§696): a whole number of days, or nothing. An
+       empty box is nothing; anything that is not a whole number of days is
+       refused in words rather than rounded or dropped. */
+    const daysIn = str(body.plannedDays).trim();
+    const plannedDays = daysIn === "" ? null : Number(daysIn);
+    if (plannedDays !== null && !(Number.isInteger(plannedDays) && plannedDays >= 0 && plannedDays <= 100000)) return no(400, "Planned man-days is a whole number of days.");
     const lead = isUuid(body.lead) ? str(body.lead) : "";
     const office = await officeIds(pool, [lead, ...list(body.team).map((p: any) => p?.id ?? p)]);
     if (!lead || !office.has(lead)) return no(400, "Pick the lead from the consultants.");
@@ -345,16 +353,16 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
       /* the roles typed on the write-up survive a change of team */
       const roles = new Map(list(r.our_team).map((p) => [str(p.id), str(p.role)]));
       const kept = team.map((p) => ({ id: p.id, role: roles.get(p.id) || "" }));
-      await pool.query("UPDATE case_studies SET name=$2, kind=$3, started=$4, ended=$5, lead_id=$6, our_team=$7::jsonb, updated_at=now() WHERE id=$1",
-        [r.id, name, kind, started, ended, lead, JSON.stringify(kept)]);
+      await pool.query("UPDATE case_studies SET name=$2, kind=$3, started=$4, ended=$5, lead_id=$6, our_team=$7::jsonb, planned_days=$8, updated_at=now() WHERE id=$1",
+        [r.id, name, kind, started, ended, lead, JSON.stringify(kept), plannedDays]);
       return ok({ id: r.id });
     }
     const t = await pool.query("SELECT id FROM tenants WHERE key = $1 AND kind <> 'demo'", [str(body.client)]);
     if (!t.rowCount) return no(400, "Say which client it is for.");
     const r = await pool.query(
-      "INSERT INTO case_studies (about_tenant_id, name, kind, started, ended, state, opened_by, lead_id, our_team) " +
-      "VALUES ($1,$2,$3,$4,$5,'running',$6,$7,$8::jsonb) RETURNING id",
-      [t.rows[0].id, name, kind, started, ended, me.id, lead, JSON.stringify(team)]);
+      "INSERT INTO case_studies (about_tenant_id, name, kind, started, ended, state, opened_by, lead_id, our_team, planned_days) " +
+      "VALUES ($1,$2,$3,$4,$5,'running',$6,$7,$8::jsonb,$9) RETURNING id",
+      [t.rows[0].id, name, kind, started, ended, me.id, lead, JSON.stringify(team), plannedDays]);
     return ok({ id: r.rows[0].id });
   }
 

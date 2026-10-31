@@ -3424,12 +3424,13 @@
       var row = function (k, v) { if (!v) return; dl.appendChild(el("dt", null, k)); var dd = el("dd"); if (typeof v === "string") dd.textContent = v; else dd.appendChild(v); dl.appendChild(dd); };
       row("Type", typeTag(c.kind));
       row("When", spanWord(c.started, c.ended));
+      row("Planned man-days", c.plannedDays != null ? String(c.plannedDays) : "");
       row("Lead", c.lead ? c.lead.name : "");
       row("Team", c.ourTeam.map(function (p) { return p.name; }).join(", "));
       if (!c.hidden && c.state !== "running") row("Deliverables", String(c.deliverables.length));
       row("Learnings", String(c.insightList.length));
       g.appendChild(dl);
-      g.appendChild(el("p", "src", "Type, months, lead and team come from the Clients page."));
+      g.appendChild(el("p", "src", "Type, months, man-days, lead and team come from the Clients page."));
       var stl = el("p", "trst");
       stl.appendChild(el("span", "st " + st[1], st[0] + (c.state === "done" && c.doneAt ? " · " + whenWord(c.doneAt) : "")));
       if (c.writer && c.state !== "running") stl.appendChild(el("span", "muted", (c.state === "done" ? "by " : "writing: ") + c.writer.name));
@@ -3710,6 +3711,7 @@
       "  Client:    " + c.client.name + (c.client.industry ? " (" + c.client.industry + ")" : "") + "\n" +
       "  The work:  " + c.name + " (" + (TYPE_WORD[c.kind] || "Planning") + ")\n" +
       (spanLong(c.started, c.ended) ? "  When:      " + spanLong(c.started, c.ended) + "\n" : "") +
+      (c.plannedDays != null ? "  Man-days:  " + c.plannedDays + " agreed with the client\n" : "") +
       (c.lead ? "  Lead:      " + c.lead.name + "\n" : "") +
       (team ? "  Our team:  " + team + "\n" : "") + "\n" +
       "Interview me. Ask ONE question at a time and wait for my answer before asking the next one. " +
@@ -3760,6 +3762,7 @@
     page.appendChild(row);
     var ctx = el("div", "trctxs");
     [["Client", c.client.name], ["Industry", c.client.industry], ["When", spanWord(c.started, c.ended)],
+     ["Man-days", c.plannedDays != null ? String(c.plannedDays) : ""],
      ["Lead", c.lead ? c.lead.name : ""], ["Team", c.ourTeam.map(function (p) { return p.name; }).join(", ")]].forEach(function (p) {
       if (!p[1]) return;
       var d = el("span"); d.appendChild(el("i", null, p[0] + " ")); d.appendChild(el("b", null, p[1])); ctx.appendChild(d);
@@ -5542,6 +5545,7 @@
     var facts = el("span", "facts");
     facts.appendChild(el("span", "mo", spanWord(a.started, a.ended)));
     var fact = function (label, value) { var x = el("span"); x.appendChild(el("b", null, label)); x.appendChild(document.createTextNode(" " + value)); facts.appendChild(x); };
+    if (a.plannedDays != null) fact("Man-days:", String(a.plannedDays));
     if (a.lead) fact("Lead:", a.lead.name);
     var team = (a.team || []).filter(function (p2) { return !a.lead || p2.id !== a.lead.id; }).map(function (p2) { return p2.name; });
     if (team.length) fact("Team:", team.join(", "));
@@ -5569,6 +5573,11 @@
     ty.value = a ? a.kind : "planning";
     var st = box("asg-start", "Start", monthPick(a ? a.started : "", "Pick the month"));
     var en = box("asg-end", "End", monthPick(a ? a.ended : "", "Still running"));
+    /* THE PLANNED MAN-DAYS (§696) — Islam: "the number of days of the
+       agreement that we agreed on with the client". A whole number, or
+       empty where none was recorded. */
+    var dy = box("asg-days", "Planned man-days", el("input", "fld")); dy.type = "number"; dy.min = "0"; dy.step = "1"; dy.inputMode = "numeric";
+    dy.value = a && a.plannedDays != null ? String(a.plannedDays) : ""; dy.placeholder = "Days agreed";
     var ld = box("asg-lead", "Lead", el("select", "fld"));
     var pick0 = el("option", null, "Pick the lead"); pick0.value = ""; ld.appendChild(pick0);
     o.consultants.forEach(function (p) { var op = el("option", null, p.name || p.email); op.value = p.id; ld.appendChild(op); });
@@ -5623,7 +5632,7 @@
     var save = csButton(a ? "Save" : "Add", "amber sm", function () {
       save.disabled = true;
       cpostCases({ action: "assign", id: a ? a.id : undefined, client: c.key, name: nm.value, kind: ty.value, started: st.value, ended: en.value,
-                   lead: ld.value, team: team.map(function (t) { return t.id; }) }).then(function (r) {
+                   plannedDays: dy.value, lead: ld.value, team: team.map(function (t) { return t.id; }) }).then(function (r) {
         save.disabled = false;
         if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be saved."; said.hidden = false; return; }
         CLREG.open = ""; clRegRead();

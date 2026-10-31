@@ -50,7 +50,9 @@ of clients and only the super user adds to it — not a second page.
 
 1. **The super user adds assignments on Clients** (list view): under each
    client, *+ Add an assignment* — name, Planning or Retainer, start month, end
-   month (empty while running), lead, team, each picked from the consultants.
+   month (empty while running), **planned man-days** (the days agreed with the
+   client, a whole number, empty where none was recorded; §696), lead, team,
+   each picked from the consultants.
    *Edit* changes one; *Remove* (asked twice) removes it and its write-up, and
    its learnings go back under the client. A **past client** is added on
    Clients › Ended (name, industry, size), made ended with nothing behind its
@@ -105,7 +107,10 @@ A client's own people reach none of it (067 §8).
 `case_studies` keeps its name (the record), and each row is now an
 assignment: two columns added — `kind` (`planning` | `retainer`) and
 `lead_id` — in `schema.sql` and migration `034-track-record.sql`. Rows already
-there become Planning with no lead. The state word is unchanged in storage
+there become Planning with no lead. `planned_days` (integer, NULL where none
+was recorded, never 0 for nothing) follows in migration `036-planned-days.sql`
+(§696); it is shown on the assignment's line, in the write-up's At a glance and
+in the interview prompt. The state word is unchanged in storage
 (`running` = nothing written, `writing` = draft, `done` = published); the
 first save sets the writer. `asked_by` and `due` stay for the record and are
 no longer written. The console's tab key stays `memory`.

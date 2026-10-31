@@ -79,6 +79,11 @@ export type ServeArgs = {
      client, and null where the door resolved no membership at all. */
   personKey: string | null;
   seat: "super" | "smoteam" | "none" | null;
+  /* THE LEAD OF ONE OF THIS CLIENT'S ASSIGNMENTS (§695): the registry's
+     answer (door.ts leadsOf), read at the door with the seat. False under
+     view-as, which narrows and never widens. The Tracker's rule widens on
+     it; nothing else reads it yet. */
+  lead?: boolean;
   /* A FOREFRONT SUPER USER (§456): the platform admin flag on the account,
      already false while the office is viewing as somebody (§383 — viewing as
      somebody may only narrow). What the Copilot's own settings ask before any

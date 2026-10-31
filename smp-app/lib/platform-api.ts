@@ -18,7 +18,7 @@ import { join } from "node:path";
 import crypto from "node:crypto";
 import type { SessionUser } from "./auth.ts";
 import { hashPassword } from "./auth.ts";
-import { resolveTenant, seatAt, type Tenant, type Membership } from "./door.ts";
+import { resolveTenant, seatAt, leadsOf, type Tenant, type Membership } from "./door.ts";
 import { withTenant, mapLimit } from "./tenant.ts";
 import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
@@ -275,11 +275,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        too: the client must be one the console lets them open, and the door's
        own answer for who they are there (door.ts seatAt) must be an office
        seat — the Tracker's gate. The row then asks the Tracker's rule. */
+    const leads = await leadsOf(pool, me.id);   /* the clients I lead an assignment on (§695) */
     const viewerOn = (t: { key: string }): Who | null => {
       const row = shown.find((r) => r.key === t.key);
       if (!row || !FF.mayOpenClient(world, account, row)) return null;
       const s = seatAt(me, world.mine as Membership[], row.id);
-      return isOffice(s.seat) ? { seat: s.seat, personKey: s.personKey } : null;
+      return isOffice(s.seat) ? { seat: s.seat, personKey: s.personKey, lead: leads.has(row.id) } : null;
     };
     const w = await myWork(shown, whoWorld.mine, whoAcc.email, { viewerOn });
     const people = account.is_admin
@@ -302,7 +303,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
   if (action === "workStatus") {
     const door = await resolveTenant(pool, me, String((body && body.client) || ""));
     if (!door.ok) return no(404, "That client is not available.");
-    const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey }, String((body && body.id) || ""), body && body.status);
+    const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) }, String((body && body.id) || ""), body && body.status);
     return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
   }
 

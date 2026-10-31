@@ -67,7 +67,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
     if (first === "api") return no(403, "The Internal Tracker is the office's.");
     return new Response(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have, !!a.consultant), { status: 403, headers: shellHeaders() });
   }
-  const who: Who = { personKey: a.personKey ?? null, seat: a.seat ?? null };
+  const who: Who = { personKey: a.personKey ?? null, seat: a.seat ?? null, lead: !!a.lead };
 
   const page = (ask: Ask): PageArgs => ({ slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, ask, who, consultant: !!a.consultant });
 

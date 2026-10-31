@@ -146,6 +146,7 @@ async function addAssignment(p, client, a) {
   await p.selectOption("#asg-type", a.kind);
   await pickMonth(p, "asg-start", a.start);
   if (a.end) await pickMonth(p, "asg-end", a.end);
+  if (a.days != null) await p.fill("#asg-days", String(a.days));
   if (a.lead) await p.selectOption("#asg-lead", { label: a.lead });
   await p.click('tr.asgform button:has-text("Add")'); await p.waitForTimeout(1200);
 }
@@ -179,10 +180,11 @@ await section("2 · the registry is the Clients page (the super user's)", async 
   check(/Pick the lead/.test(await boss.textContent("tr.asgform")), "an assignment with no lead is refused, in words, and the form stays open", await boss.textContent("tr.asgform").catch(() => ""));
   await boss.selectOption("#asg-lead", { label: "Islam Writer" });
   await boss.click('tr.asgform button:has-text("Add")'); await boss.waitForTimeout(1200);
-  await addAssignment(boss, "raya-trade", { name: "Strategy follow-up", kind: "retainer", start: "2025-07", lead: "Islam Writer" });
+  await addAssignment(boss, "raya-trade", { name: "Strategy follow-up", kind: "retainer", start: "2025-07", days: 24, lead: "Islam Writer" });
   const rows = await boss.$$eval("tr.asgrow", (rs) => rs.map((r) => r.textContent));
-  check(rows.length === 2 && rows.some((t) => /Planning.*Strategy build.*Jan – Jun 2025.*Lead: Islam Writer/.test(t)) && rows.some((t) => /Retainer.*Strategy follow-up.*since Jul 2025.*Running/.test(t)),
-    "both assignments stand under Raya Trade with their type, months and lead", JSON.stringify(rows));
+  check(rows.length === 2 && rows.some((t) => /Planning.*Strategy build.*Jan – Jun 2025.*Lead: Islam Writer/.test(t)) && rows.some((t) => /Retainer.*Strategy follow-up.*since Jul 2025.*Man-days: 24.*Lead: Islam Writer.*Running/.test(t)),
+    "both assignments stand under Raya Trade with their type, months and lead — and the planned man-days where they were given (§696)", JSON.stringify(rows));
+  check(!rows.some((t) => /Strategy build.*Man-days/.test(t)), "…an assignment with none recorded says nothing about man-days", JSON.stringify(rows));
   const db = (await owner.query("SELECT id, kind, lead_id, started, ended, state FROM case_studies ORDER BY started")).rows;
   planId = db[0] && db[0].id; retId = db[1] && db[1].id;
   check(db.length === 2 && db[0].kind === "planning" && db[1].kind === "retainer" && db[0].lead_id === writerId && db.every((r) => r.state === "running"),

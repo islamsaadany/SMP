@@ -236,6 +236,12 @@ check("the strip: 5 open · 2 late · 2 due this week (f is done, so it is not o
 check("ONE RULE: the owner may change the action, the Super user may, and nobody else — being on the same team is not being on it",
   mayChange(rows[2], SUPER) && mayChange(rows[2], { personKey: "islam", seat: "smoteam" }) && !mayChange(rows[2], ME) && !mayChange(rows[2], OTHER) && mayChange(rows[2], { personKey: "hana", seat: "super" }));
 check("somebody the register has not placed may change nothing but as Super user", !mayChange(rows[2], { personKey: null, seat: "smoteam" }) && mayChange(rows[2], { personKey: null, seat: "super" }));
+/* THE ASSIGNMENT LEAD (§695): the registry's lead on one of this client's
+   assignments answers for every task, as the Super user does — and a team
+   seat without that standing still does not. SMP_BREAK=lead-nobody. */
+check("the lead of one of the client's assignments may change any action, their own or not (§695)",
+  mayChange(rows[2], { ...ME, lead: true }) && mayChange(rows[2], { ...OTHER, lead: true }) && !mayChange(rows[2], { ...ME, lead: false }) &&
+  mayChange(rows[2], { personKey: null, seat: "smoteam", lead: true }));
 
 /* ══ §2b · the weekly check's three weeks (§532) ═══════════════════════
    Islam's own description of the meeting: "we have topics with actions for
@@ -356,6 +362,25 @@ check("...every topic's write line is already set to next week, in its own topic
   (chk.match(/class="addrow chk"[^>]*/g) || []).join(" | "));
 check("...and the count says how far through the meeting you are, not how many actions there are",
   draw("check").count === "2 topics · 1 still to write for next week", draw("check").count);
+/* INSIDE A WEEK'S BOX THE ROWS STAND BY OWNER (§695) — Islam: "make the
+   tasks in each box arranged by the owner name". Three people's rows under
+   one topic this week, given in the wrong order; the box draws Islam, then
+   Noran, then Omar, and a person's own rows keep the list's order (the open
+   one before the finished one, as given). SMP_BREAK=check-unsorted. */
+const sRows = [
+  mk({ id: "u1", owner: "omar", due: "2026-09-17" }),
+  mk({ id: "u2", owner: "noran", due: "2026-09-16" }),
+  mk({ id: "u3", owner: "islam", due: "2026-09-15" }),
+  mk({ id: "u4", owner: "noran", due: "2026-09-14", status: "done", doneDay: "2026-09-14" }),
+].map((a) => ({ ...a, topicId: "t1" }));
+const sLoaded = { ...dLoaded, actions: sRows,
+  office: [{ key: "islam", name: "Islam Saadany" }, { key: "noran", name: "Noran Adel" }, { key: "omar", name: "Omar Hassan" }],
+  names: new Map([["islam", "Islam Saadany"], ["noran", "Noran Adel"], ["omar", "Omar Hassan"]]),
+  short: new Map([["islam", "Islam"], ["noran", "Noran"], ["omar", "Omar"]]) };
+const sChk = listBody(sLoaded, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
+  ask: { view: "check", q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
+const sOrder = (sChk.match(/data-id="u\d"/g) || []).map((x) => x.slice(9, -1)).filter((x, i, all) => all.indexOf(x) === i).join(" ");
+check("inside this week's box the rows stand by the owner's name, A to Z, a person's own in the list's order (§695)", sOrder === "u3 u2 u4 u1", sOrder);
 /* THE PANEL IS ON EVERY VIEW, because a topic is renamed wherever you are. */
 for (const v of ["week", "check", "all"]) {
   const h = draw(v).body;

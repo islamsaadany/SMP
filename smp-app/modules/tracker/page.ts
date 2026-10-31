@@ -939,7 +939,17 @@ function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { 
   let ix = 0;
   const secOf = (t: Topic | null): string => {
     const rows = t ? shown.filter((a) => a.topicId === t.id) : loose;
-    const byWeek = (k: CheckWeek) => rows.filter((a) => checkWeek(a, today) === k);
+    /* INSIDE EACH WEEK'S BOX THE ROWS STAND BY OWNER (§695). Islam: "make the
+       tasks in each box arranged by the owner name". The register's name,
+       A to Z, and under one name the list's own order (open before done,
+       then by date), which a stable sort keeps. The ordinary list is not
+       touched: it has Group by. SMP_BREAK=check-unsorted drops the sort;
+       checks/tracker.mjs §2b must go red under it. */
+    const nameOf = (a: Action) => L.names.get(a.ownerKey) || a.ownerKey;
+    const byWeek = (k: CheckWeek) => {
+      const w = rows.filter((a) => checkWeek(a, today) === k);
+      return brk() === "check-unsorted" ? w : w.sort((x, y) => nameOf(x).localeCompare(nameOf(y)));
+    };
     const open = rows.filter((a) => a.status !== "done");
     const late = open.filter((a) => isLate(a.due, today)).length;
     const nowRows = byWeek("now");

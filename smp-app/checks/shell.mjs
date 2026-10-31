@@ -186,6 +186,7 @@ async function section(name, fn) {
       last = await page.evaluate(() => JSON.stringify({ say: (document.querySelector(".copsay") || {}).textContent || "", msgs: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg, .copsw-main .copmsg")).slice(-3).map((m) => m.className + ":" + m.textContent.trim().slice(0, 90)), flow: (document.querySelector(".copflow, .copsw, .copstart") || {}).className,
         hit: Array.from(document.querySelectorAll(".copcp-more [data-cop-cp-more], [data-cop-cp-score], [data-cop-chats] [data-cop-chat]")).map((el) => { const r = el.getBoundingClientRect(); const t = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return [el.outerHTML.slice(0, 60), Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height), t ? t.tagName + "." + t.className : null, el.contains(t)]; }) })); } } catch {}
     if (last) console.log("DIED " + last);
+    if (errs.length) console.log("DIED-ERRS " + errs.slice(-3).join(" | ").slice(0, 600));
     fail(name + " — the section died rather than reporting (§215)", (e && e.message ? e.message.split("\n")[0] : e) + " @ " + (page ? page.url() : "")); }
   finally { try { if (ctx) await ctx.close(); } catch {} ctx = null; page = null; }
 }
@@ -2463,6 +2464,7 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/compete");
     /* §695 S11 — the plan card, exactly when the plan holds a discipline and values */
+    await page.waitForSelector(".copstart [data-cop-newchat]", { timeout: 15000 });
     const cps = await page.evaluate(() => { let w = null; try { w = (typeof UNITS !== "undefined" && UNITS.mobile && UNITS.mobile.compete) || (typeof competeWritable === "function" ? competeWritable("mobile") : null); } catch (e) {} const held = !!(w && w.discipline && (w.values || []).some((v) => v && v.title));
       const c = document.querySelector('.copstart [data-cop-newplan="compete"]'); return { held, card: !!c, t: c ? c.textContent : "" }; });
     check(cps.card === cps.held && (!cps.held || /Start from the existing plan/.test(cps.t) && /values/.test(cps.t)), "§695 Competitive Discipline's start screen offers Start from the existing plan exactly when the plan holds a discipline and values", JSON.stringify(cps));
@@ -2837,6 +2839,7 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await open("/raya-trade/strategy/mobile/copilot/execution");
     /* §695 S11 — two roads on the start screen: Refine the existing execution
        (when some item carries measures) and Build from the Directions */
+    await page.waitForSelector(".copstart [data-cop-newchat]", { timeout: 15000 });
     const sc = await page.evaluate(() => { const held = (UNITS.mobile.items || []).some((p) => p && p.name && ((p.measures || []).some((m) => m && m.name) || (p.tactics || []).some((x) => x && x.name)));
       const rf = document.querySelector('.copstart [data-cop-newplan="execution"]'); return { held, refine: !!rf, refineT: rf ? rf.textContent : "", build: (document.querySelector(".copstart [data-cop-newchat]") || {}).textContent || "" }; });
     check(sc.refine === sc.held && (!sc.held || /Refine the existing execution/.test(sc.refineT) && /with measures/.test(sc.refineT)) && /Build from the Directions/.test(sc.build), "§695 Execution's start screen offers Refine the existing execution when the plan holds measures, and Build from the Directions", JSON.stringify(sc));
@@ -2859,7 +2862,12 @@ await section("3m · the Execution chat: the period once, each item drafted, the
       draftBtn: !!document.querySelector("[data-cop-expane] .copex-card.now [data-cop-ex-draft]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-ex-card], [data-cop-chatbox] [data-cop-ex-item]"), todo: !!document.querySelector(".copftodo [data-cop-dv-todo]"),
       me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), dis: (document.querySelector("[data-cop-text]") || {}).disabled, step: (document.querySelector(".copfhead small") || {}).textContent || "",
       save: (document.querySelector("[data-cop-ex-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ex-finish]").getAttribute("data-tip") : null, foot: (document.querySelector("[data-cop-exfoot]") || {}).textContent || "" }));
-    check(sp.strip && sp.cards === r.s.items.length && sp.open === 1 && sp.draftBtn && !sp.inChat && sp.todo && /Oct/.test(sp.me) && sp.dis === true && /Drafting · 0 of/.test(sp.step) && /still needs at least one measure/.test(String(sp.save)) && /v1/.test(sp.foot),
+    /* §695 — an item that carries the plan's measures and tactics opens with
+       them: its box is live and Save is not held by it; the §684 holds apply
+       to an item that carries nothing. */
+    const held0 = r.s.items[0].measures.some((m) => m.mark === "plan") && r.s.items[0].tactics.some((x) => x.mark === "plan");
+    const anyBare = r.s.items.some((x) => !(x.measures.length && x.tactics.length));
+    check(sp.strip && sp.cards === r.s.items.length && sp.open === 1 && sp.draftBtn && !sp.inChat && sp.todo && /Oct/.test(sp.me) && sp.dis === !held0 && /Drafting · 0 of/.test(sp.step) && (anyBare ? /still needs at least one measure/.test(String(sp.save)) : sp.save === null) && /v1/.test(sp.foot),
       "§684 the period strip and one card per item stand in the pane, the first in hand with Draft on it, the to-do beside; the chat reads the period as the person's line, its box is held, Save is held with the item that still needs a measure", JSON.stringify(sp));
     /* §695 S7 — a card opens with what the plan holds, marked; the chat counts them */
     const heldItems = r.s.items.filter((x) => x.measures.some((m) => m.mark === "plan") || x.tactics.some((y) => y.mark === "plan"));
@@ -2912,7 +2920,8 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     /* A Capability holding nothing yet has nothing to archive (archiveCapPlan
        keeps nothing empty), so the ones expected are those that hold something. */
     const exCapIds = r.s.items.filter((x) => x.kind !== "direction" && !x.out).map((x) => String(x.planId));
-    if (fin) { await fin.click(); await page.waitForTimeout(2200); }
+    const fin2 = await page.$("[data-cop-ex-finish]");
+    if (fin2) { await fin2.click(); await page.waitForTimeout(2200); }
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
     const exSv = await page.evaluate((b) => ({ same: JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]) === b, apply: (document.querySelector("[data-cop-ex-apply]") || {}).getAttribute ? document.querySelector("[data-cop-ex-apply]").getAttribute("aria-disabled") : "none",

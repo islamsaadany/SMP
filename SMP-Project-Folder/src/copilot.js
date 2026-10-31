@@ -2675,7 +2675,10 @@ var COPILOT = (function(){
   function cpTitle(){ return "Competitive Discipline — " + placeWord(); }
   /* §695 S11 — the plan's Competitive Discipline, when it holds one. */
   function cpPlanHeld(){
-    var w = null; try { w = typeof competeWritable === "function" ? competeWritable(place()) : null; } catch (e) { w = null; }
+    /* Read, never written: competeWritable would make the plan's compete
+       object where there is none and dirty the plan on every draw. */
+    var h = null; try { h = typeof competeHolder === "function" ? competeHolder(place()) : null; } catch (e) { h = null; }
+    var w = h && h.compete && typeof h.compete === "object" ? h.compete : null;
     if (!w || !w.discipline || !Array.isArray(w.values)) return null;
     var vals = w.values.filter(function(v){ return v && String(v.title || "").trim(); }).map(function(v){ return { title: String(v.title).trim(), how: (v.how || []).slice(), measure: (v.measure || []).slice() }; });
     return vals.length ? { discipline: w.discipline, values: vals } : null;
@@ -3918,19 +3921,19 @@ var COPILOT = (function(){
     else if (!s.period) body = '<div class="copsw-card"><h3>The items</h3><p class="copnote">The plan period first — the chat asks it. Then the ' + s.items.length + ' Directions and Capabilities come here, one card each.</p></div>';
     else body = '<div class="copex-period" data-cop-ex-strip>This plan covers <b>' + E(w.period) + '</b>' + (ed ? '<button type="button" class="linkbu" data-cop-ex-change>Change</button>' : '') + '</div>' +
       s.items.map(function(it, k){
-        var now = k === s.cursor, has = it.measures.length > 0 || it.tactics.length > 0, done = it.measures.length > 0 && it.tactics.length > 0, held = exHeld(it);
+        var now = k === s.cursor, has = it.measures.length > 0 || it.tactics.length > 0, done = it.measures.length > 0 && it.tactics.length > 0, onPlan = exHeld(it);
         var nM = it.measures.length, nT = it.tactics.length, nNew = it.measures.filter(function(m){ return m.mark !== "plan"; }).length + it.tactics.filter(function(x){ return x.mark !== "plan"; }).length;
         /* §695 S7, S5, S6 — the head says what the plan holds, what is new,
            what is left out, what is gone */
         var counts = it.gone ? "No longer on the plan" : it.out ? "Left out this period"
           : !has ? "Not drafted yet"
-          : (held && !it.drafted ? "On the plan · " : "") + nM + (nM === 1 ? " measure" : " measures") + " · " + nT + (nT === 1 ? " tactic" : " tactics") + (held && nNew ? " · " + nNew + " new" : "");
+          : (onPlan && !it.drafted ? "On the plan · " : "") + nM + (nM === 1 ? " measure" : " measures") + " · " + nT + (nT === 1 ? " tactic" : " tactics") + (onPlan && nNew ? " · " + nNew + " new" : "");
         var st = it.gone ? '<span class="copst off">Gone</span>' : it.out ? '<span class="copst off">Left out</span>' : done ? '<span class="copst done">' + (it.drafted ? "Drafted" : "On the plan") + '</span>' : now ? '<span class="copst now">In hand</span>' : '<span class="copst"></span>';
         var body = it.gone ? '<p class="copnote">This item is no longer on the plan. Its lines stay here, and Apply will not write them.</p>' + (has ? exItemHtml(it, k, false) : '')
           : it.out ? '<p class="copnote">Nothing is drafted for it and Apply writes nothing for it.' + (ed ? ' <button type="button" class="linkbu" data-cop-ex-in="' + k + '">Put it back</button>' : '') + '</p>'
           : (has ? exItemHtml(it, k, ed) : '<p class="copnote">Nothing here yet.</p>') +
-            (ed && !it.drafted ? '<div class="copopts"><button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-ex-draft' + held(busyHere && BUSY) + '>' + (held ? (s.road === "refine" ? "Draft more from the plan" : "Draft anew") : "Draft measures and tactics") + '</button>' +
-              (held ? '<span class="copm">' + (s.road === "refine" ? "Adds to what is here; nothing on the plan is replaced until Apply." : "Replaces what is here on the card; nothing on the plan changes until Apply.") + '</span>' : '') +
+            (ed && !it.drafted ? '<div class="copopts"><button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-ex-draft' + held(busyHere && BUSY) + '>' + (onPlan ? (s.road === "refine" ? "Draft more from the plan" : "Draft anew") : "Draft measures and tactics") + '</button>' +
+              (onPlan ? '<span class="copm">' + (s.road === "refine" ? "Adds to what is here; nothing on the plan is replaced until Apply." : "Replaces what is here on the card; nothing on the plan changes until Apply.") + '</span>' : '') +
               '<button type="button" class="linkbu" data-cop-ex-out="' + k + '">Leave out this period</button></div>'
              : ed && it.drafted ? '<div class="copopts"><button type="button" class="linkbu" data-cop-ex-out="' + k + '">Leave out this period</button></div>' : '');
         return '<div class="copsw-card copex-card' + (now ? " now" : "") + (it.out || it.gone ? " out" : "") + '" data-cop-ex-card="' + k + '">' +

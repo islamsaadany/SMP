@@ -91,7 +91,7 @@ const MODEL_ANSWER = {
 /* §472: a provider that takes its time, so the working line can be seen
    while it waits (0 = answer at once, which is every other section). */
 let MODEL_DELAY = 0;
-/* §698 — the request with this index (in MODEL_SEEN) is answered with a 500,
+/* §698 — the request with this index (in MODEL_SEEN) is answered with a 400 (a 5xx is "busy" and retried, §458),
    so a failure can be pressed through; -1 fails none. */
 let MODEL_FAIL_AT = -1;
 const model = http.createServer((req, res) => {
@@ -99,7 +99,7 @@ const model = http.createServer((req, res) => {
     try { MODEL_SEEN.push(JSON.parse(b)); } catch { MODEL_SEEN.push(null); }
     const failThis = MODEL_SEEN.length - 1 === MODEL_FAIL_AT;
     setTimeout(() => {
-      if (failThis) { res.writeHead(500, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: { message: "stand-in failure" } })); return; }
+      if (failThis) { res.writeHead(400, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: { message: "stand-in failure" } })); return; }
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(MODEL_ANSWER) }] } }] }));
     }, MODEL_DELAY);
@@ -2992,7 +2992,9 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(await page.evaluate(() => { const b = document.querySelector("[data-cop-ex-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §684)");
     const onp = await page.evaluate(() => /v1 on the plan/.test((document.querySelector("[data-cop-exfoot]") || {}).textContent || ""));
     check(onp, "§684 …and after Apply the pane's foot says v1 on the plan");
-    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+    /* §698 — the deliberate failure above is a 503 the browser logs; nothing else may be */
+    const errs3m = errs.filter((e) => !(failK >= 0 && /status of 503/.test(e)));
+    check(!errs3m.length, "no page errors through the whole flow", errs3m.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);

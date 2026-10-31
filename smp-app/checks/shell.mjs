@@ -3263,7 +3263,8 @@ await section("4 · Forefront's own pages", async () => {
         const r = await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "workStatus", client: "raya-trade", id, status: "done" }) });
         return { status: r.status, body: await r.json() };
       }, ids["MW not mine"]);
-      check(refused.status === 403 && /owner or the client's Super user/.test(refused.body.error || "") && (await stored("MW not mine")) === "not_started",
+      /* §695 (main) — the refusal names the assignment's lead too; the check reads the Tracker's own constant's words. */
+      check(refused.status === 403 && /Only its owner, the lead of one of the client's assignments or the client's Super user/.test(refused.body.error || "") && (await stored("MW not mine")) === "not_started",
         "somebody else's action is refused to a team seat, in the Tracker's words, and left as it was (\u00a7583)", JSON.stringify(refused));
     } finally {
       await owner.query("UPDATE tenant_users SET seat = 'super' WHERE tenant_id = $1 AND user_id = $2", [tenantId, officeId]);

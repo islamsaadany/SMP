@@ -66186,7 +66186,7 @@ var COPILOT = (function(){
     if (s === "foundation") { var pp = planParts(), off = skipNow(), n = Object.keys(pp).filter(function(k){ return pp[k] && (!Array.isArray(pp[k]) || pp[k].length) && off.indexOf(k) < 0; }).length; if (!n) return ""; attr = 'data-cop-road="plan"'; meta = n + (n === 1 ? " part" : " parts"); }
     else if (s === "analysis") { var sw = planSwot(), ln = LETTERS.reduce(function(k, L){ return k + ((sw[L] || []).length); }, 0); if (!ln) return ""; attr = 'data-cop-newplan="analysis"'; meta = ln + (ln === 1 ? " line" : " lines"); }
     else if (s === "directions") { var nd = dvExisting().length; if (!nd) return ""; attr = 'data-cop-newplan="directions"'; meta = nd + (nd === 1 ? " Direction" : " Directions"); }
-    /* §695 S11 — the same card for Competitive Discipline (the plan's
+    /* §697 S11 — the same card for Competitive Discipline (the plan's
        discipline and values come in as the table) and for Execution, where it
        reads "Refine the existing execution": the measures and tactics the
        plan holds, on each card, drafts adding to them. */
@@ -68617,7 +68617,7 @@ var COPILOT = (function(){
     var l = list(); if (l && l.swotProgress && PANE && PANE.competeTodo) l.swotProgress[id] = { done: PANE.competeDone, of: PANE.competeTodo.length };
   }
   function cpTitle(){ return "Competitive Discipline — " + placeWord(); }
-  /* §695 S11 — the plan's Competitive Discipline, when it holds one. */
+  /* §697 S11 — the plan's Competitive Discipline, when it holds one. */
   function cpPlanHeld(){
     /* Read, never written: competeWritable would make the plan's compete
        object where there is none and dirty the plan on every draw. */
@@ -68628,7 +68628,7 @@ var COPILOT = (function(){
     return vals.length ? { discipline: w.discipline, values: vals } : null;
   }
   /* The discipline's word from the open chat's words, or the platform's own
-     when no chat is open (§695: the start screen's plan card names it). */
+     when no chat is open (§697: the start screen's plan card names it). */
   var CP_DISC_WORD = { btc: "Best Total Cost", bts: "Best Total Solution", bp: "Best Product" };
   function cpWord(d){ return (((PANE && PANE.competeWords) || {}).disc || {})[d] || CP_DISC_WORD[d] || d; }
   /* A press made while an earlier save is still on its way is not dropped:
@@ -68714,7 +68714,7 @@ var COPILOT = (function(){
         (again ? '<button type="button" class="copopt" data-cop-cp-unchoose>Never mind</button></div><p class="copnote">Choosing another clears the values and the table drawn for ' + E(cpWord(s.chosen)) + '; the scores stay.</p>'
           : '<button type="button" class="copopt" data-cop-cp-more="1">Let me change scores</button></div>')
       : s.chosen && ed ? '<div class="copopts"><button type="button" class="linkbu" data-cop-cp-unchoose>Choose a different discipline</button></div>' : '';
-    /* §695 S11 — scored as a check of the plan's choice: the line says
+    /* §697 S11 — scored as a check of the plan's choice: the line says
        whether the market agrees, and nobody "went with" anything here. */
     if (s.fromPlan && s.chosen && !again) line += m.leader === s.chosen ? ' That matches the plan’s choice.' : ' The plan’s choice is <b>' + E(cpWord(s.chosen)) + '</b> — keep it, or choose ' + E(cpWord(m.leader)) + ' instead.';
     var h = aiMsg(line + (s.chosen ? '' : ' Go with it?') + opts);
@@ -68773,7 +68773,7 @@ var COPILOT = (function(){
   /* the conversation, drawn from what is stored, in the order it happened */
   function cpMsgs(s, ed, busyHere){
     var out = [], m = ((PANE.competeResult || {}).market) || {};
-    /* §695 S11 — started from the plan: the table is already on the right,
+    /* §697 S11 — started from the plan: the table is already on the right,
        and scoring is a check of the plan's choice, offered not owed. */
     if (s.fromPlan && s.table) out.push(aiMsg('Started from the plan’s Competitive Discipline — <b>' + E(cpWord(s.table.discipline)) + '</b> and ' + s.table.values.length + (s.table.values.length === 1 ? ' value' : ' values') + ', as the table on the right. Every cell can be edited there; ask here for a change. Score the three disciplines to check the choice.' +
       (!m.complete && ed ? swOpts([swOpt('data-cop-cp-score', "Score them", true, busyHere)]) : '')));
@@ -69666,7 +69666,7 @@ var COPILOT = (function(){
   function exProgress(id){ var l = list(); if (l && l.swotProgress && PANE && PANE.execTodo) l.swotProgress[id] = { done: PANE.execDone, of: PANE.execTodo.length }; }
   /* The plan's Directions and the capabilities this place holds, as the
      items the chat walks. */
-  /* §695 S7 — WITH WHAT THE PLAN HOLDS under each item: a pillar's measures
+  /* §697 S7 — WITH WHAT THE PLAN HOLDS under each item: a pillar's measures
      and tactics, a Capability's key objectives and projects (the quarters
      read off its months), every line marked the plan's. */
   function exPlanLines(pl, cap){
@@ -69693,7 +69693,7 @@ var COPILOT = (function(){
       GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) { var ln = exPlanLines(null, c); out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: dvPersonName(c.head), measures: ln.measures, tactics: ln.tactics }); } });
     return out;
   }
-  /* §695 S6 — the plan read again when the chat opens, once a visit. */
+  /* §697 S6 — the plan read again when the chat opens, once a visit. */
   var EXSYNCED = {};
   function exSync(){
     if (!execOn() || !canEdit() || PANE.exec.saved || PANE.chat.archived) return;
@@ -69755,7 +69755,7 @@ var COPILOT = (function(){
   }
   function exItemHtml(it, k, ed){
     var w = PANE.execWords || {}, qs = w.quarters || [1,2,3,4], comp = w.compiles || ["Sum","Count","Latest","Average"];
-    /* §695 S7 — a line the plan holds is marked so, and beside it a new one */
+    /* §697 S7 — a line the plan holds is marked so, and beside it a new one */
     var showMarks = exHeld(it), mk = function(x){ return !showMarks ? '' : x.mark === "plan" ? '<span class="copex-mark plan">on the plan</span>' : '<span class="copex-mark new">new</span>'; };
     var mrow = function(m, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-m="' + i + '|name" value="' + E(m.name) + '" aria-label="Measure">' : E(m.name)) + mk(m) + '</td>' +
       '<td>' + (ed ? '<input class="fld" data-cop-ex-m="' + i + '|target" value="' + E(m.target) + '" aria-label="Target for the period">' : E(m.target || "—")) + '</td>' +
@@ -69804,7 +69804,7 @@ var COPILOT = (function(){
      item in hand; Save and Apply to plan at the pane's foot; the to-do
      beside. Back and Next go — the cards are all there. */
   var EXALL = {};
-  /* §695 — what is left to draft: not left out, not gone, not drafted; and on
+  /* §697 — what is left to draft: not left out, not gone, not drafted; and on
      the refine road an item carrying the plan's measures and tactics is not
      owed a draft either. */
   function exIn(it){ return !it.out && !it.gone; }
@@ -69844,14 +69844,14 @@ var COPILOT = (function(){
     out.push(exPeriodAsk(ed && (!s.period || !!EXPICK[id])));
     if (!s.period) return out.join("");
     out.push(meMsg(w.period || "The period"));
-    /* §695 — what the plan already holds is said, and the road with it. */
+    /* §697 — what the plan already holds is said, and the road with it. */
     var heldN = s.items.filter(function(it){ return exIn(it) && exHeld(it); }).length, inN = s.items.filter(exIn).length;
     out.push(aiMsg('This plan covers <b>' + E(w.period) + '</b>. The ' + inN + ' Directions and Capabilities are on the right' +
       (heldN ? ' — <b>' + heldN + ' of them already ' + (heldN === 1 ? 'carries' : 'carry') + ' measures and tactics on the plan</b>, shown on ' + (heldN === 1 ? 'its card' : 'their cards') + '; ' + (s.road === "refine" ? 'a draft adds to what is there, and Apply replaces what the card shows.' : 'a draft replaces what the card shows, and nothing on the plan changes until Apply.') : ' — I draft each one\u2019s measures and tactics from the plan.') +
       ' Draft them one at a time there, or all at once here.' +
       (ed && !busyHere && left.length ? swOpts([swOpt('data-cop-ex-draftall', (s.road === "refine" && heldN ? "Draft the " + left.length + " without" : "Draft all " + left.length + " left"), true), swOpt('data-cop-ex-next', "Draft the next one")]) : '')));
     (s.log || []).forEach(function(x){ out.push(x.w === "me" ? meMsg(x.t) : aiMsg((x.k >= 0 && s.items[x.k] ? '<b>' + E(s.items[x.k].title) + '</b> — ' : '') + E(x.t))); });
-    /* §695 S5 — what is left out this period, said once, from the state */
+    /* §697 S5 — what is left out this period, said once, from the state */
     var outs = s.items.filter(function(it){ return it.out && !it.gone; });
     if (outs.length) out.push(aiMsg(outs.map(function(it){ return '<b>' + E(it.title) + '</b>'; }).join(", ") + (outs.length === 1 ? ' is' : ' are') + ' left out this period: nothing is drafted for ' + (outs.length === 1 ? 'it' : 'them') + ', and Apply writes nothing for ' + (outs.length === 1 ? 'it. It stays' : 'them. They stay') + ' on the plan as ' + (outs.length === 1 ? 'it is.' : 'they are.')));
     if (s.saved && appliedOn(s.saved, PANE.execApplied)) out.push(aiMsg('<b>v' + E(s.saved.n) + '</b> is on the plan.' + nextHtml("execution")));
@@ -69870,7 +69870,7 @@ var COPILOT = (function(){
       s.items.map(function(it, k){
         var now = k === s.cursor, has = it.measures.length > 0 || it.tactics.length > 0, done = it.measures.length > 0 && it.tactics.length > 0, onPlan = exHeld(it);
         var nM = it.measures.length, nT = it.tactics.length, nNew = it.measures.filter(function(m){ return m.mark !== "plan"; }).length + it.tactics.filter(function(x){ return x.mark !== "plan"; }).length;
-        /* §695 S7, S5, S6 — the head says what the plan holds, what is new,
+        /* §697 S7, S5, S6 — the head says what the plan holds, what is new,
            what is left out, what is gone */
         var counts = it.gone ? "No longer on the plan" : it.out ? "Left out this period"
           : !has ? "Not drafted yet"
@@ -69913,7 +69913,7 @@ var COPILOT = (function(){
     if (R && R.monthLabel) { GROUP[R.PLAN_FROM || "planFrom"] = R.monthLabel(p.y * 12 + p.m1 - 1); GROUP[R.PLAN_TO || "planTo"] = R.monthLabel(p.y * 12 + p.m2 - 1); }
     var h = dvHolder(), wrote = 0, yy = String(p.y).slice(2);
     var find = function(list, name){ return list.filter(function(x){ return x && String(x.name || "").trim().toLowerCase() === name.toLowerCase(); })[0]; };
-    /* §695 S7 — WHAT THE CARD SHOWS REPLACES WHAT THE ITEM HOLDS: a row with
+    /* §697 S7 — WHAT THE CARD SHOWS REPLACES WHAT THE ITEM HOLDS: a row with
        the card's name is updated (its id and actuals kept), a new one added,
        and a row the card no longer carries is dropped — the person saw it
        there and dropped it. An item left out this period, or gone from the
@@ -69967,7 +69967,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-dv-todo]"))) { var tk = String(b.getAttribute("data-cop-dv-todo") || ""); if (tk.indexOf("item:") === 0) { var ti = s.items.findIndex(function(it){ return "item:" + it.planId === tk; }); if (ti >= 0) { var g1 = exCopy(); g1.cursor = ti; PANE.exec = g1; draw(); exSave(g1); } } return true; }
     if ((b = hit(ev, "[data-cop-ex-addm]"))) return exItemPatch(function(it){ it.measures.push({ name:"New measure", target:"", compile:"", mark:"new" }); });
     if ((b = hit(ev, "[data-cop-ex-addt]"))) return exItemPatch(function(it){ it.tactics.push({ name:"New tactic", owner:"", quarters:[], mark:"new" }); });
-    /* §695 S5 — left out this period, and back */
+    /* §697 S5 — left out this period, and back */
     if ((b = hit(ev, "[data-cop-ex-out]")) || (b = hit(ev, "[data-cop-ex-in]"))) {
       var ko = +b.getAttribute(b.hasAttribute("data-cop-ex-out") ? "data-cop-ex-out" : "data-cop-ex-in"), g4 = exCopy(); if (!g4.items[ko]) return true;
       g4.items[ko].out = b.hasAttribute("data-cop-ex-out"); PANE.exec = g4; draw(); exSave({ items: g4.items }); return true;

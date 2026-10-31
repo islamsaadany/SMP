@@ -68627,7 +68627,10 @@ var COPILOT = (function(){
     var vals = w.values.filter(function(v){ return v && String(v.title || "").trim(); }).map(function(v){ return { title: String(v.title).trim(), how: (v.how || []).slice(), measure: (v.measure || []).slice() }; });
     return vals.length ? { discipline: w.discipline, values: vals } : null;
   }
-  function cpWord(d){ return ((PANE.competeWords || {}).disc || {})[d] || d; }
+  /* The discipline's word from the open chat's words, or the platform's own
+     when no chat is open (§695: the start screen's plan card names it). */
+  var CP_DISC_WORD = { btc: "Best Total Cost", bts: "Best Total Solution", bp: "Best Product" };
+  function cpWord(d){ return (((PANE && PANE.competeWords) || {}).disc || {})[d] || CP_DISC_WORD[d] || d; }
   /* A press made while an earlier save is still on its way is not dropped:
      the latest patch waits and goes when the line is free. */
   function cpSave(patch, quiet){

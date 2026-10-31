@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roles &amp; access as a ladder</title>
+<!-- Islam, 2026-10-31: "it's more of levels of visibility … everyone set on a
+     level can see his level or see the bigger level(s) one by one" — "take
+     care seeing doesn't mean reporting. a person can see the sibling
+     directions but can only report his". -->
+<style>
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-2:#0F2546;--navy-ink:#FFFFFF;--navy-quiet:#B7C4D8;--gold:#C9A24D;--gold-deep:#8A6B22;--good:#2E7D5B;--good-bg:#E4F0EA;--attn:#B8860B;--attn-bg:#F7EFD6;--sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#0E1014;--navy-2:#090B0E;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--gold:#D9B665;--gold-deep:#C9A24D;--good:#5FB68C;--good-bg:#1B3129;--attn:#D9B23C;--attn-bg:#332C16;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px;display:grid;gap:32px}
+.head{display:flex;align-items:flex-start;gap:16px}.head>div{flex:1}
+h1{margin:0;font-size:22px;font-weight:700}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:78ch}
+.rules{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}.rules b{color:var(--ink);font-weight:600}
+.pgtheme{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--ink-2);font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.pgtheme svg{width:14px;height:14px}
+section{display:grid;gap:10px}
+.ph2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ph2 .n{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep);letter-spacing:.1em}
+h2{margin:0;font-size:16px;font-weight:700}.ph2 p{margin:0;color:var(--ink-3);font-size:13.5px}
+.cap{font-size:13.5px;color:var(--ink-2);margin:0;max-width:80ch}.cap b{color:var(--ink);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+/* the screen */
+.scr{padding:18px 22px}
+.scr h3{margin:0 0 4px;font-size:15px}.scr .sub{margin:0 0 14px;font-size:13px;color:var(--ink-3)}
+table.ac{border-collapse:collapse;width:100%;font-size:13.5px}
+table.ac th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:8px 10px;border-bottom:1px solid var(--line)}
+table.ac td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+table.ac tr.grp td{background:var(--surface-2);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:6px 10px}
+table.ac td.role b{display:block;font-weight:600}table.ac td.role span{font-size:12.5px;color:var(--ink-3)}
+table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var(--ink-3)}
+.lad{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.lad span{padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink-3);border-right:1px solid var(--line-soft);white-space:nowrap}
+.lad span:last-child{border-right:0}
+.lad span.on{background:var(--navy);color:var(--navy-ink)}
+.lad span.off{color:var(--line);text-decoration:line-through;text-decoration-color:var(--line)}
+.lad.word{border:0;background:none}.lad.word span{padding-left:0;color:var(--ink-2);border:0}
+/* the worked example: navigator + plan */
+.nav{background:var(--navy-2);color:var(--navy-quiet);display:flex;align-items:center;gap:6px;padding:0 14px;min-height:42px;font-size:13.5px;font-weight:600}
+.nav .top{padding:6px 10px;color:var(--navy-ink)}.nav .sep{width:1px;height:22px;background:rgba(255,255,255,.14);margin:0 6px}
+.nav .sw{display:inline-flex;background:rgba(255,255,255,.16);border-radius:7px;padding:3px;gap:2px}.nav .sw span{padding:4px 11px;border-radius:5px;color:var(--navy-ink)}.nav .sw span.on{background:rgba(255,255,255,.22)}
+.nav .names{display:flex;gap:2px}.nav .names span{padding:6px 11px;border-radius:6px;color:var(--navy-ink);opacity:.86}.nav .names span.on{background:rgba(255,255,255,.16);opacity:1}
+.tabs{display:flex;gap:2px;padding:0 18px;background:var(--navy);border-bottom:3px solid var(--gold)}.tabs span{padding:8px 12px 7px;font-size:13px;font-weight:600;color:var(--navy-quiet);border-radius:7px 7px 0 0}.tabs span.on{background:var(--surface);color:var(--ink)}
+.plan{padding:14px 18px;display:grid;gap:8px;background:var(--ground)}
+.dir{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;min-width:0;align-items:center;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:9px;font-size:13.5px}
+.dir .code{font:700 11.5px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep)}
+.dir .sum{font-size:12.5px;color:var(--ink-3);white-space:nowrap}.pair .dir{grid-template-columns:auto 1fr auto}.pair .dir .sum{display:none}
+.dir .pen{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--good-bg);color:var(--good)}
+.dir .eye{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-3)}
+.dir.mine{border-color:var(--gold)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.who{font-size:12.5px;color:var(--ink-3);margin:0 0 6px}.who b{color:var(--ink);font-weight:600}
+/* the register line */
+.reg{padding:14px 18px;display:grid;gap:8px;font-size:13.5px}
+.reg .row{display:grid;grid-template-columns:180px auto 1fr;gap:14px;align-items:center;padding:8px 10px;border:1px solid var(--line-soft);border-radius:8px;background:var(--surface)}
+.reg .row .nm b{display:block;font-weight:600}.reg .row .nm span{font-size:12px;color:var(--ink-3)}
+.reg .inh{font-size:12px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Roles &amp; access as a ladder</h1>
+      <p class="lede">Nine columns become one question per role: how far up the ladder they see. What they report is not a setting at all: a person reports the piece they hold and nothing else, whatever they can see above it.</p>
+      <ul class="rules">
+        <li><b>The ladder, bottom up:</b> own piece · the plan it sits in · the company · the group. Each rung includes everything on it: seeing the plan means seeing the sibling directions too.</li>
+        <li><b>Seeing is not reporting.</b> A direction owner set to see the plan reads every direction in it and enters figures on his own alone. The pen stays with the holder.</li>
+        <li><b>The office writes everything</b> and runs the cycle and Setup. By rule, not by cell.</li>
+        <li><b>A role sets the default; a person can be moved</b> one rung up or down in the register.</li>
+      </ul>
+    </div>
+    <button class="pgtheme" id="pgtheme" type="button"></button>
+  </div>
+
+  <section>
+    <div class="ph2"><span class="n">01</span><h2>The screen</h2><p>Setup › Roles &amp; access, redrawn</p></div>
+    <div class="frame"><div class="scr">
+      <h3>Roles &amp; access</h3>
+      <p class="sub">Each role reports what it holds. Set how far up it sees.</p>
+      <table class="ac" id="ac"></table>
+    </div></div>
+    <p class="cap"><b>Reports</b> is a word, never a control: it is what the role holds, and the register decides who holds what. <b>Sees up to</b> is the one control; the rung a role cannot stand on is struck through (a CEO holds no piece, so "own piece" is not a choice for him). The two office roles have no control: they see and write everything.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">02</span><h2>What it means for one person</h2><p>Hany, who owns direction MOB02 in Mobile</p></div>
+    <div class="pair">
+      <div><p class="who"><b>Sees up to: the plan</b> — Mobile only, every direction, the pen on his</p><div class="frame" id="ex1"></div></div>
+      <div><p class="who"><b>Sees up to: the group</b> — every unit and function, still the pen on his alone</p><div class="frame" id="ex2"></div></div>
+    </div>
+    <p class="cap">Left, the navigation holds Mobile alone and the plan shows all four directions; only MOB02 carries the pen, the other three are read. Right, the same person moved to the top rung: the row fills with every unit and function, the plan is the same four directions, and the pen has not moved. The reading window follows the same row, so what he reads there is what he reaches here.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">03</span><h2>A person moved off the role's rung</h2><p>Setup › People, the seat column</p></div>
+    <div class="frame"><div class="reg" id="reg"></div></div>
+    <p class="cap">The role's rung is the default and reads as such; one press moves a person up or down for an exception, and "as the role" puts it back. Nothing else about the seat changes: what she reports is still what she holds.</p>
+  </section>
+  <section>
+    <div class="ph2"><span class="n">04</span><h2>Where the reading window lands</h2><p>the ladder says what you see; the window is one way of seeing it</p></div>
+    <div class="frame"><div class="scr">
+      <h3>Roles &amp; access</h3>
+      <p class="sub">The same table with one more column: where the role opens on sign-in.</p>
+      <table class="ac" id="ac2"></table>
+    </div></div>
+    <ul class="rules" style="margin:0">
+      <li><b>The window shows the same rungs.</b> Its row of units and functions is exactly what the person reaches on the ladder, no more. It never carries a pen, so nothing is reported from it.</li>
+      <li><b>Opens in</b> replaces today's computed rule and the client-wide switch. A role that reports nothing (the CEOs) opens in the window by default; a role that holds a piece opens on the workbench, where its pen is.</li>
+      <li><b>Read is a button for everyone</b>, on every page, as today. Opens in only decides the first screen.</li>
+    </ul>
+  </section>
+</div>
+<script>
+(function () {
+  var pg = "light";
+  try { var t = localStorage.getItem("smp.theme"); if (t === "light" || t === "dark") pg = t; else if (matchMedia("(prefers-color-scheme: dark)").matches) pg = "dark"; } catch (e) {}
+  var SUN = '<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>', MOON = '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>';
+  var RUNGS = ["Own piece", "The plan", "The company", "The group"];
+  function ladder(on, off, flag) {
+    return '<span class="lad' + (flag ? " flag" : "") + '">' + RUNGS.map(function (r, i) { return '<span class="' + (i === on ? "on" : (off || []).indexOf(i) >= 0 ? "off" : "") + '">' + r + '</span>'; }).join("") + '</span>';
+  }
+  var ROWS = [
+    ["g", "The office"],
+    ["Super user", "runs the platform", "<i>everything</i>", null],
+    ["SMO team", "the office's people", "<i>everything</i>", null],
+    ["g", "Holding a rung, not a piece"],
+    ["Group CEO", "", "<i>nothing — holds no piece</i>", [3, [0, 1, 2]]],
+    ["Company CEO", "", "<i>nothing — holds no piece</i>", [2, [0, 1]]],
+    ["g", "Holding a unit or a function"],
+    ["Unit owner", "the unit's head", "the unit's figures", [1, [0], true]],
+    ["Custodian", "keeps the unit's reporting", "the unit's figures", [1, [0]]],
+    ["Function head", "", "the function's figures and projects", [1, [0]]],
+    ["Capability owner", "", "the capability's projects", [1]],
+    ["g", "Holding a piece of a plan"],
+    ["Project owner", "", "the project's milestones and deliverables", [1]],
+    ["Pillar owner", "", "the pillar's measures and tactics", [1]],
+    ["Direction owner", "", "the direction's measures and tactics", [0]],
+    ["Contributor", "", "the lines assigned to him", [0]],
+    ["g", "Holding nothing"],
+    ["Employee", "on the register, no seat", "<i>nothing</i>", [-1, [0, 1, 2, 3]]]
+  ];
+  document.getElementById("ac").innerHTML = '<thead><tr><th style="width:230px">Role</th><th style="width:280px">Reports</th><th>Sees up to</th></tr></thead><tbody>' + ROWS.map(function (r) {
+    if (r[0] === "g") return '<tr class="grp"><td colspan="3">' + r[1] + '</td></tr>';
+    var l = r[3];
+    return '<tr><td class="role"><b>' + r[0] + '</b>' + (r[1] ? '<span>' + r[1] + '</span>' : '') + '</td><td class="rep">' + r[2] + '</td><td>' +
+      (l === null ? '<span class="lad word"><span>everything</span></span>' : l[0] === -1 ? '<span class="lad word"><span>nothing</span></span>' : ladder(l[0], l[1], l[2])) + '</td></tr>';
+  }).join("") + '</tbody>';
+
+  function nav(names, lit, all) {
+    return '<div class="nav"><span class="top">Group' + (all ? ' ▾' : '') + '</span><span class="sep"></span>' + (all ? '<span class="sw"><span class="on">Units</span><span>Functions</span></span><span class="sep"></span>' : '') +
+      '<div class="names">' + names.map(function (n) { return '<span class="' + (n === lit ? "on" : "") + '">' + n + '</span>'; }).join("") + '</div></div>' +
+      '<div class="tabs"><span class="on">Strategy</span><span>Performance</span><span>Reporting</span></div>';
+  }
+  var DIRS = [["MOB01", "Grow the smartphone channel", "Ahmed", false], ["MOB02", "Open the accessories line", "Hany", true], ["MOB03", "Cut dead stock by a third", "Dina", false], ["MOB04", "Dealer service in 48 hours", "Karim", false]];
+  function plan() {
+    return '<div class="plan">' + DIRS.map(function (d) {
+      return '<div class="dir' + (d[3] ? " mine" : "") + '"><span class="code">' + d[0] + '</span><span>' + d[1] + '</span><span class="sum">' + d[2] + ' · 3 measures · 4 tactics</span>' + (d[3] ? '<span class="pen">Reports</span>' : '<span class="eye">Reads</span>') + '</div>';
+    }).join("") + '</div>';
+  }
+  document.getElementById("ex1").innerHTML = nav(["Mobile"], "Mobile", false) + plan();
+  document.getElementById("ex2").innerHTML = nav(["Mobile", "Retail", "Mazaya", "CE", "Online", "Corporate", "Care"], "Mobile", true) + plan();
+
+  var P = [["Hany Mostafa", "Direction owner · Mobile", 0, "as the role"], ["Dina Sherif", "Direction owner · Mobile", 1, "moved up one — she sits on the unit's board"], ["Ahmed Saleh", "Pillar owner · Retail", 1, "as the role"]];
+  document.getElementById("reg").innerHTML = P.map(function (x, i) {
+    return '<div class="row"><div class="nm"><b>' + x[0] + '</b><span>' + x[1] + '</span></div><div>' + ladder(x[2], null, i === 1) + '</div><div class="inh">' + x[3] + '</div></div>';
+  }).join("");
+
+  var OPEN = [["Group CEO", "nothing — holds no piece", [3, [0, 1, 2]], "window"], ["Company CEO", "nothing — holds no piece", [2, [0, 1]], "window"],
+    ["Unit owner", "the unit's figures", [1, [0]], "work"], ["Direction owner", "the direction's measures and tactics", [0], "work"]];
+  document.getElementById("ac2").innerHTML = '<thead><tr><th style="width:170px">Role</th><th style="width:230px">Reports</th><th>Sees up to</th><th style="width:220px">Opens in</th></tr></thead><tbody>' + OPEN.map(function (r, i) {
+    return '<tr><td class="role"><b>' + r[0] + '</b></td><td class="rep">' + (/^nothing/.test(r[1]) ? '<i>' + r[1] + '</i>' : r[1]) + '</td><td>' + ladder(r[2][0], r[2][1]) + '</td><td>' +
+      '<span class="lad' + (i === 0 ? " flag" : "") + '"><span class="' + (r[3] === "window" ? "on" : "") + '">Reading window</span><span class="' + (r[3] === "work" ? "on" : "") + '">Workbench</span></span></td></tr>';
+  }).join("") + '</tbody>';
+
+  function draw() { document.documentElement.setAttribute("data-theme", pg); var b = document.getElementById("pgtheme"); b.innerHTML = '<svg viewBox="0 0 20 20">' + (pg === "light" ? SUN : MOON) + '</svg>' + (pg === "light" ? "View in dark" : "View in light"); }
+  document.getElementById("pgtheme").addEventListener("click", function () { pg = pg === "light" ? "dark" : "light"; draw(); }); draw();
+})();
+</script>
+</body>
+</html>

@@ -1221,10 +1221,10 @@ try {
     check("§695 a chat started from the plan carries the plan's measures and tactics under each item, every line marked the plan's whatever the page said; the road is kept",
       rf.st === 200 && rf.j.exec?.road === "refine" && rfi.length === 2 && rfi[0].measures.length === 1 && rfi[0].measures[0].mark === "plan" && rfi[0].tactics[0].mark === "plan" && rfi[0].drafted === false && rfi[1].measures.length === 0,
       String(JSON.stringify(rfi)).slice(0, 240));
-    check("§695 …an item carrying the plan's lines is done in the to-do; the one without is what Save waits for",
-      rf.j.execTodo?.find((x) => x.key === "item:mobile-P1")?.state === "done" && /Grow SME/.test(rf.j.execBlocker) && /or Leave out this period/.test(rf.j.execBlocker), JSON.stringify([rf.j.execTodo, rf.j.execBlocker]).slice(0, 300));
     const rfid = rf.j.chat?.id;
-    await call("POST", "api", { act: "execPeriod", id: rfid, choice: "full" }, NORAN);
+    const rfp = await call("POST", "api", { act: "execPeriod", id: rfid, choice: "full" }, NORAN);
+    check("§695 …an item carrying the plan's lines is done in the to-do; the one without is what Save waits for, with the way out named",
+      rf.j.execTodo?.find((x) => x.key === "item:mobile-P1")?.state === "done" && /Grow SME/.test(rfp.j.execBlocker) && /or Leave out this period/.test(rfp.j.execBlocker), JSON.stringify([rf.j.execTodo, rfp.j.execBlocker]).slice(0, 300));
     NEXT = { answer: { reply: "Added.", measures: [{ name: "family share", target: "25%", compile: "Latest" }, { name: "Family ARPU", target: "EGP 300", compile: "Average" }], tactics: [{ name: "Family app bundle", owner: "Product", quarters: [2, 3] }] } };
     const rfd = await call("POST", "api", { act: "execDraft", id: rfid, placeWord: "Mobile" }, NORAN);
     const r0 = rfd.j.exec?.items[0];

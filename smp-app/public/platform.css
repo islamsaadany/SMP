@@ -13635,3 +13635,7 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copex-mark.new{color:var(--ink-3);background:var(--surface-2)}
 .copex-card.out{opacity:.72}
 .copst.off{color:var(--ink-3)}
+
+/* §698 S14 — a draft that failed, named, in the chat */
+.copmsg.ai.copbad .copbody { border-left-color:var(--bad); }
+.copmsg.ai.copbad .copbody > b:first-child { color:var(--bad-tx); }

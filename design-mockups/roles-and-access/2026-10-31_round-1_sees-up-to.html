@@ -155,11 +155,11 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
     ["Unit owner", "the unit's head", "the unit's figures", [2, [0], true, 1]],
     ["Custodian", "keeps the unit's reporting", "the unit's figures", [1, [0], false, 1]],
     ["Function head", "", "the function's figures and projects", [3, [0], false, 1]],
-    ["Capability owner", "", "the capability's projects", [1, null, false, 0]],
     ["g", "Holding a piece of a plan"],
     ["Project owner", "", "the project's milestones and deliverables", [1, null, false, 0]],
     ["Pillar owner", "", "the pillar's measures and tactics", [1, null, false, 0]],
-    ["Direction owner", "", "the direction's measures and tactics", [0, null, false, 0]],
+    ["Direction owner", "", "the direction's measures and tactics", [1, null, false, 0]],
+    ["Capability owner", "", "the capability's measures and tactics", [1, null, false, 0]],
     ["Contributor", "", "the lines assigned to him", [2, null, false, 0]],
     ["g", "Holding nothing"],
     ["Employee", "on the register, no seat", "<i>nothing</i>", [-1, [0, 1, 2, 3]]]
@@ -191,7 +191,7 @@ table.ac td.rep{color:var(--ink-2)}table.ac td.rep i{font-style:normal;color:var
   }).join("");
 
   var OPEN = [["Group CEO", "nothing — holds no piece", [3, [0, 1, 2]], "window"], ["Company CEO", "nothing — holds no piece", [2, [0, 1]], "window"],
-    ["Unit owner", "the unit's figures", [2, [0], false, 1], "work"], ["Direction owner", "the direction's measures and tactics", [0, null, false, 0], "work"]];
+    ["Unit owner", "the unit's figures", [2, [0], false, 1], "work"], ["Direction owner", "the direction's measures and tactics", [1, null, false, 0], "work"]];
   document.getElementById("ac2").innerHTML = '<thead><tr><th style="width:170px">Role</th><th style="width:200px">Enters and submits</th><th>&#9998; works on · &#9673; reads</th><th style="width:220px">Opens in</th></tr></thead><tbody>' + OPEN.map(function (r, i) {
     return '<tr><td class="role"><b>' + r[0] + '</b></td><td class="rep">' + (/^nothing/.test(r[1]) ? '<i>' + r[1] + '</i>' : r[1]) + '</td><td>' + ladder(r[2][0], r[2][1], false, r[2][3]) + '</td><td>' +
       '<span class="lad' + (i === 0 ? " flag" : "") + '"><span class="' + (r[3] === "window" ? "on" : "") + '">Reading window</span><span class="' + (r[3] === "work" ? "on" : "") + '">Workbench</span></span></td></tr>';

@@ -77,7 +77,7 @@ export async function execAct(c: any, b: any, who: Who): Promise<Out> {
     /* The plan's Directions and Capabilities, as the page reads them. Only
        their names and keys are taken; what is drafted under them is the
        chat's own work. */
-    /* §695 — with the measures and tactics the plan holds under each, marked
+    /* §697 — with the measures and tactics the plan holds under each, marked
        as the plan's; and the road: build (the default) or refine. */
     const items = planItemsOf(b.items);
     const chat = await newChat(c, { place, section: "execution", title: oneLine(b.title).slice(0, MAX_TITLE) || "Execution", by });
@@ -100,7 +100,7 @@ export async function execAct(c: any, b: any, who: Who): Promise<Out> {
     await writeExec(c, id, withPeriod(stored, p));
     return out(200, { ok: true, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }
-  /* §695 S6 — the plan read again when the chat opens: the page sends the
+  /* §697 S6 — the plan read again when the chat opens: the page sends the
      plan's items as they stand; new ones join, gone ones are marked, undrafted
      ones take the plan's lines as they now are. One line in the chat when
      something changed; nothing written when nothing did. */
@@ -172,7 +172,7 @@ export async function execAsk(tenantId: string, b: any, _who: Who): Promise<Out>
     const k = now.cursor;
     const got = cleanItem({ ...now.items[k], measures: j.measures, tactics: j.tactics }, periodQuarters(now.period));
     if (!got.measures.length && !got.tactics.length) return refused(503, failedLine("the answer had nothing in it"));
-    /* §695 — refine adds to what the card holds; build replaces it. A line
+    /* §697 — refine adds to what the card holds; build replaces it. A line
        the model returned with a name already on the card is not added twice. */
     const was = now.items[k];
     const fresh = <T extends { name: string }>(xs: T[], have: { name: string }[]): T[] => xs.filter((x) => !have.some((h) => h.name.trim().toLowerCase() === x.name.trim().toLowerCase()));

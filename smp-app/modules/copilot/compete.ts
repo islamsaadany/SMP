@@ -64,7 +64,7 @@ export async function competeAct(c: any, b: any, who: Who): Promise<Out> {
     const place = String(b.place || "");
     if (!isPlace(place)) return refused(400, "Which place?");
     const chat = await newChat(c, { place, section: "compete", title: oneLine(b.title).slice(0, MAX_TITLE) || "Competitive Discipline", by });
-    /* §695 S11 — Start from the existing plan: the plan's discipline and
+    /* §697 S11 — Start from the existing plan: the plan's discipline and
        values come in as the table; the chat stands there, scoring offered. */
     const s = competeFromPlan(b.fromPlan) || newCompete();
     await writeCompete(c, chat.id, s);

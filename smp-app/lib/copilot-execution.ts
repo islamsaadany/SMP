@@ -24,7 +24,7 @@ export const COMPILES = ["Sum", "Count", "Latest", "Average"];
 export const MAX_MEASURES = 6, MAX_TACTICS = 8, MAX_ITEMS = 16;
 
 export type Period = { y: number; m1: number; m2: number };
-/* §695 — EXECUTION READS THE PLAN (the stress test's second batch). A line
+/* §697 — EXECUTION READS THE PLAN (the stress test's second batch). A line
    carries a `mark`: "plan" when it is what the plan holds today, read when
    the chat is made and again when it opens (S6, S7); "new" when the chat
    drafted or the person typed it. An item can be `out` — left out this
@@ -101,7 +101,7 @@ export function planItem(x: any, allowed: number[]): Item {
   const it = cleanItem(x, allowed);
   return { ...it, measures: it.measures.map((m) => ({ ...m, mark: "plan" as Mark })), tactics: it.tactics.map((t) => ({ ...t, mark: "plan" as Mark })), drafted: false, out: false, gone: false };
 }
-/* §695 S6 — THE PLAN READ AGAIN when the chat opens. Matched by key: an item
+/* §697 S6 — THE PLAN READ AGAIN when the chat opens. Matched by key: an item
    still there keeps its draft and, while undrafted, takes the plan's lines
    as they now are; a new one joins undrafted; one gone from the plan is
    marked, never removed. */

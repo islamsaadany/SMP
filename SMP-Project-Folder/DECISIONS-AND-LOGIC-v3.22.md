@@ -70637,7 +70637,7 @@ Islam asked for a stress test of the whole Copilot *"from a user experience appr
 
 **§694 MERGED TO `main`** 2026-10-30, Islam: *"merge to main and start batch 2"*. `main` had taken §692–§693 meanwhile — merged in first, ours renumbered §692 → §694, the builds rebuilt on the merged tree and both suites run there: **352 passed, 0 failed**; **530 ok, 10 failed**, the known ten; `generated-in-step` and `release-stamp` all clear — then `b83cf05b..571d42e0`. No migrations; nobody signed out.
 
-## §695 — Execution reads the plan: the Copilot stress test's second batch (2026-10-31)
+## §697 — Execution reads the plan: the Copilot stress test's second batch (2026-10-31; §695 on the branch, renumbered at the merge: main took §695–§696)
 
 The second batch of the stress test (§694 was the first): Islam, on the mockup (`design-mockups/copilot-layout/2026-10-30_execution-reads-the-plan.html`), first on why Execution had no plan card — *"why doesn't the execution has start from the current plans?"* — and then the correction that shaped S11: *"it can start from the current directions or capabilities or the current strategy… or start from existing. That's the point. It's not about starting fresh… It starts building on the strategy or building from the existing or refining the existing."* Then *"Proceed"*. Four findings:
 

@@ -104,7 +104,7 @@ export type Compete = {
   reply: string;                    // what the last refine said
   log: { w: "me" | "ai"; t: string }[]; // §654 C1 — every ask for a change and its answer, in order (the chat in time)
   saved: { deliverableId: string; n: number; title: string } | null;
-  /* §695 S11 — STARTED FROM THE PLAN: the plan's discipline and values came
+  /* §697 S11 — STARTED FROM THE PLAN: the plan's discipline and values came
      in as the table, so the chat stands at the table with nothing scored;
      scoring is offered as a check of the plan's choice, and the scores stay
      pressable after it (the choice was not made from them). */
@@ -116,7 +116,7 @@ export const MAX_BULLETS = 5;
 export const MAX_TEXT = 300;
 
 export const newCompete = (): Compete => ({ phase: "score", market: null, internal: null, edited: [], chosen: "", suggested: [], picked: [], table: null, alts: [], reply: "", log: [], saved: null, fromPlan: false });
-/* §695 S11 — a chat started from what the plan holds. */
+/* §697 S11 — a chat started from what the plan holds. */
 export function competeFromPlan(raw: unknown): Compete | null {
   const j: any = raw && typeof raw === "object" ? raw : null;
   if (!j || !isDisc(j.discipline)) return null;

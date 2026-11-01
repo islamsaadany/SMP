@@ -91,10 +91,15 @@ const MODEL_ANSWER = {
 /* §472: a provider that takes its time, so the working line can be seen
    while it waits (0 = answer at once, which is every other section). */
 let MODEL_DELAY = 0;
+/* §698 — the request with this index (in MODEL_SEEN) is answered with a 400 (a 5xx is "busy" and retried, §458),
+   so a failure can be pressed through; -1 fails none. */
+let MODEL_FAIL_AT = -1;
 const model = http.createServer((req, res) => {
   let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
     try { MODEL_SEEN.push(JSON.parse(b)); } catch { MODEL_SEEN.push(null); }
+    const failThis = MODEL_SEEN.length - 1 === MODEL_FAIL_AT;
     setTimeout(() => {
+      if (failThis) { res.writeHead(400, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: { message: "stand-in failure" } })); return; }
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(MODEL_ANSWER) }] } }] }));
     }, MODEL_DELAY);
@@ -186,6 +191,7 @@ async function section(name, fn) {
       last = await page.evaluate(() => JSON.stringify({ say: (document.querySelector(".copsay") || {}).textContent || "", msgs: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg, .copsw-main .copmsg")).slice(-3).map((m) => m.className + ":" + m.textContent.trim().slice(0, 90)), flow: (document.querySelector(".copflow, .copsw, .copstart") || {}).className,
         hit: Array.from(document.querySelectorAll(".copcp-more [data-cop-cp-more], [data-cop-cp-score], [data-cop-chats] [data-cop-chat]")).map((el) => { const r = el.getBoundingClientRect(); const t = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return [el.outerHTML.slice(0, 60), Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height), t ? t.tagName + "." + t.className : null, el.contains(t)]; }) })); } } catch {}
     if (last) console.log("DIED " + last);
+    if (errs.length) console.log("DIED-ERRS " + errs.slice(-3).join(" | ").slice(0, 600));
     fail(name + " — the section died rather than reporting (§215)", (e && e.message ? e.message.split("\n")[0] : e) + " @ " + (page ? page.url() : "")); }
   finally { try { if (ctx) await ctx.close(); } catch {} ctx = null; page = null; }
 }
@@ -2310,6 +2316,16 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     const used = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, note: Array.from(document.querySelectorAll(".copswchat .copfnote")).map((n) => n.textContent).join("|"),
       prop: !!document.querySelector("[data-cop-sw-prop]"), check: !!document.querySelector(".copswpane .copsw-check") }));
     check(used.paneW === 4 && /Used — Merged/.test(used.note) && !used.prop && !used.check, "§654 C2 Use it writes the proposal into the SWOT on the right (four weaknesses), says so in the chat's record, and clears the old check", JSON.stringify(used));
+    /* §698 S3 — one step back: Put back the SWOT as it was, and Use the change again */
+    check(!!(await page.$('[data-cop-sw-putback="back"]')), "§698 after Use it the chat offers Put back the SWOT as it was");
+    await page.click('[data-cop-sw-putback="back"]');
+    await page.waitForFunction(() => document.querySelectorAll(".copswpane .copsw-l.w li").length === 5, null, { timeout: 10000 }).catch(() => {});
+    const pb = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, note: Array.from(document.querySelectorAll(".copswchat .copfnote")).map((n) => n.textContent).join("|"), again: !!document.querySelector('[data-cop-sw-putback="again"]') }));
+    check(pb.paneW === 5 && /Put back as it was/.test(pb.note) && pb.again, "§698 …pressed, the SWOT on the right holds five weaknesses again, the chat says so, and Use the change again is offered", JSON.stringify(pb));
+    await page.click('[data-cop-sw-putback="again"]');
+    await page.waitForFunction(() => document.querySelectorAll(".copswpane .copsw-l.w li").length === 4, null, { timeout: 10000 }).catch(() => {});
+    const ua = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, back: !!document.querySelector('[data-cop-sw-putback="back"]') }));
+    check(ua.paneW === 4 && ua.back, "§698 …and Use the change again brings the change back, with Put back offered again", JSON.stringify(ua));
     await open("/raya-trade/strategy/mobile/copilot/analysis"); await page.click("[data-cop-chats] [data-cop-chat]");
     await page.waitForSelector(".copswpane .copsw-l", { timeout: 15000 });
     const again = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, me: Array.from(document.querySelectorAll(".copswchat .copmsg.me")).filter((m) => /Merge the two/.test(m.textContent)).length }));
@@ -2462,6 +2478,19 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/compete");
+    /* §697 S11 — the plan card, exactly when the plan holds a discipline and values */
+    await page.waitForSelector(".copstart [data-cop-newchat]", { timeout: 15000 });
+    const cps = await page.evaluate(() => { let w = null; try { w = (typeof UNITS !== "undefined" && UNITS.mobile && UNITS.mobile.compete) || (typeof competeWritable === "function" ? competeWritable("mobile") : null); } catch (e) {} const held = !!(w && w.discipline && (w.values || []).some((v) => v && v.title));
+      const c = document.querySelector('.copstart [data-cop-newplan="compete"]'); return { held, card: !!c, t: c ? c.textContent : "" }; });
+    check(cps.card === cps.held && (!cps.held || /Start from the existing plan/.test(cps.t) && /values/.test(cps.t)), "§697 Competitive Discipline's start screen offers Start from the existing plan exactly when the plan holds a discipline and values", JSON.stringify(cps));
+    if (cps.held) {
+      await page.click('.copstart [data-cop-newplan="compete"]');
+      await page.waitForSelector("[data-cop-cppane] table.cmptab", { timeout: 15000 });
+      const fp = await page.evaluate(() => ({ said: /Started from the plan/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), score: !!document.querySelector("[data-cop-cp-score]"), cells: document.querySelectorAll("[data-cop-cp-cell]").length,
+        step: (document.querySelector(".copfhead small") || {}).textContent || "", save: (document.querySelector("[data-cop-cp-finish]") || {}).getAttribute ? document.querySelector("[data-cop-cp-finish]").getAttribute("aria-disabled") : null }));
+      check(fp.said && fp.score && fp.cells > 0 && fp.save !== "true", "§697 …pressed, the chat opens at the plan's table, editable, Score them offered as a check, Save live", JSON.stringify(fp));
+      await open("/raya-trade/strategy/mobile/copilot/compete");
+    }
     await newWorkflow();
     /* A new chat scores itself, so "Score them" is on the page only for a
        moment: wait for the scores, and press the button only if they never
@@ -2497,6 +2526,17 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await page.click('[data-cop-cp-choose="btc"]');
     await page.waitForSelector("[data-cop-cp-pick]", { timeout: 15000 });
     check((await page.$$eval("[data-cop-cp-pick]", (a) => a.length)) === 5, "choosing the discipline brings five value cards");
+    /* §694 S2 — the scores settle at the choice, and the choice can be
+       changed: a link under the recommendation brings the three back with
+       what goes with the change; Never mind folds them again. */
+    const s2a = await page.evaluate(() => ({ live: document.querySelectorAll("[data-cop-cppane] button[data-cop-cp-sc]").length, link: document.querySelectorAll("[data-cop-cp-unchoose]").length, opts: document.querySelectorAll("[data-cop-cp-choose]").length,
+      settled: /Settled at the choice/.test((document.querySelector("[data-cop-cppane]") || {}).textContent || "") }));
+    check(s2a.live === 0 && s2a.link >= 1 && s2a.opts === 0 && s2a.settled, "§694 after the choice the scores are settled and say so, and 'Choose a different discipline' stands under the recommendation", JSON.stringify(s2a));
+    await page.click("[data-cop-msgs] [data-cop-cp-unchoose]"); await page.waitForTimeout(200);
+    const s2b = await page.evaluate(() => ({ opts: document.querySelectorAll("[data-cop-cp-choose]").length, note: /clears the values and the table/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), never: !!document.querySelector(".copopt[data-cop-cp-unchoose]") }));
+    check(s2b.opts === 3 && s2b.note && s2b.never, "§694 …pressed, the three choices come back with the line on what a change clears, and Never mind", JSON.stringify(s2b));
+    await page.click(".copopt[data-cop-cp-unchoose]"); await page.waitForTimeout(200);
+    check((await page.$$eval("[data-cop-cp-choose]", (a) => a.length)) === 0 && (await page.$$eval("[data-cop-cp-pick]", (a) => a.length)) === 5, "§694 …and Never mind folds them, the values untouched");
     await page.click('[data-cop-cp-pick="0"]'); await page.waitForTimeout(400);
     await page.click('[data-cop-cp-pick="2"]'); await page.waitForTimeout(400);
     await page.click("[data-cop-cp-use]");
@@ -2553,8 +2593,16 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(cpArch.had ? cpAr.includes("compete:mobile") && !cpAr.includes("unit:mobile") : cpAr.length === 0, "§654 …having archived the plan's Competitive Discipline as its own kind (or nothing, where the plan held none)", JSON.stringify({ cpAr, had: cpArch.had }));
     const cpOn = await page.evaluate(() => ({ line: /v1 on the plan/.test((document.querySelector("[data-cop-cpfoot]") || {}).textContent || ""), again: /again/.test((document.querySelector("[data-cop-cp-apply]") || {}).textContent || "") }));
     check(cpOn.line && cpOn.again, "§654 …and the pane's foot says v1 on the plan, offering Apply again", JSON.stringify(cpOn));
+    /* §694 S9 — the onward path: one line after Apply names the next step
+       and opens its start screen in this place. */
+    const nx = await page.evaluate(() => { const n = document.querySelector("[data-cop-msgs] [data-cop-next]"); return n ? { t: n.textContent, go: (n.querySelector("[data-cop-go]") || {}).getAttribute ? n.querySelector("[data-cop-go]").getAttribute("data-cop-go") : null } : null; });
+    check(!!nx && /Next/.test(nx.t) && /Directions/.test(nx.t) && nx.go === "directions", "§694 after Apply the chat says Next: Directions, with a button to open it", JSON.stringify(nx));
     await shot("2-saved");
     check(await page.evaluate(() => { const b = document.querySelector("[data-cop-cp-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649)");
+    await page.click('[data-cop-msgs] [data-cop-next] [data-cop-go="directions"]');
+    await page.waitForSelector("[data-cop-startscreen]", { timeout: 10000 });
+    const went = await page.evaluate(() => ({ h: (document.querySelector("[data-cop-startscreen] .copstarth") || {}).textContent || "", sec: typeof CURSEC !== "undefined" ? CURSEC.copilot : null }));
+    check(/Directions/.test(went.h) && went.sec === "directions", "§694 …which opens the Directions start screen in this place", JSON.stringify(went));
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
@@ -2631,8 +2679,9 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     if (iPlan > -1 && !r.s.options[iPlan].go) {
       const unscored = !(r.s.options[iPlan].urgency && r.s.options[iPlan].importance && r.s.options[iPlan].ease);
       const heldTick = await page.evaluate((i) => { const b = document.querySelector('[data-cop-dv-go="' + i + '"]'); return b ? { held: b.getAttribute("aria-disabled"), tip: b.getAttribute("data-tip") || "" } : null; }, iPlan);
-      check(!!heldTick && (unscored ? heldTick.held === "true" && /Score it first/.test(heldTick.tip) : heldTick.held !== "true"),
-        unscored ? "§654 a plan row with no scores has its go-ahead tick held, saying to score it first" : "§654 a plan row carries the scores the plan holds, so its tick is live", JSON.stringify({ unscored, heldTick, o: r.s.options[iPlan] }));
+      check(!!heldTick && (unscored ? heldTick.held === "true" && /Score it first — or leave it unticked; it stays on the plan as it is/.test(heldTick.tip) : heldTick.held !== "true"),
+        unscored ? "§654 a plan row with no scores has its go-ahead tick held, saying to score it first — §698: or leave it unticked, as it stays on the plan" : "§654 a plan row carries the scores the plan holds, so its tick is live", JSON.stringify({ unscored, heldTick, o: r.s.options[iPlan] }));
+      if (unscored) check(/carr(y|ies) no scores/.test((await page.evaluate(() => (document.querySelector("[data-cop-msgs]") || {}).textContent || ""))), "§698 …and the chat says how many of the plan's rows carry no scores, and that leaving them unticked keeps them");
       if (unscored) { for (const k of ["urgency", "importance", "ease"]) { if (!r.s.options[iPlan][k]) { await page.click('[data-cop-dv-sc="' + iPlan + '|' + k + '"]'); await page.waitForTimeout(500); } } r = await row(); }
       await page.click('[data-cop-dv-go="' + iPlan + '"]'); await page.waitForTimeout(700);
     }
@@ -2649,6 +2698,33 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     const fo2 = await page.$$eval(".coppf.open .copdul li", (a) => a.length);
     check(fo2 === r.s.options.length, "§675 …and open again on a press, one line per Direction with its score and whether it goes ahead", fo2);
     const withCaps = !!r.s.withCaps;
+    /* §694 S1 — Go ahead can be undone: Change the Directions on the card
+       head (and in the open fold) unsets the choice, keeps what is ticked,
+       scored and owned, and keeps the Capabilities suggested so far. */
+    if (withCaps) await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
+    const capsBefore = ((await row()).s.caps || []).length;
+    const s1a = await page.evaluate(() => ({ head: !!document.querySelector("[data-cop-dvpane] h3 [data-cop-dv-unchoose]"), fold: !!document.querySelector(".coppf.open [data-cop-dv-unchoose]") }));
+    check(s1a.head && s1a.fold, "§694 Change the Directions stands on the card head and in the open fold", JSON.stringify(s1a));
+    await page.click("[data-cop-dvpane] h3 [data-cop-dv-unchoose]");
+    await page.waitForSelector("[data-cop-dv-go-all]", { timeout: 10000 });
+    await page.waitForTimeout(500);
+    r = await row();
+    const s1b = await page.evaluate(() => ({ scLive: document.querySelectorAll("[data-cop-dvpane] button[data-cop-dv-sc]").length, said: /open again/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), fold: !!document.querySelector('[data-cop-pfold="dvopts"]'),
+      kept: /suggested for the earlier set/i.test((document.querySelector("[data-cop-dvpane]") || {}).textContent || ""), step: (document.querySelector(".copfhead small") || {}).textContent || "" }));
+    check(r.s.chose === false && r.s.options.filter((o) => o.go).length === goN && (r.s.caps || []).length === capsBefore && s1b.scLive > 0 && s1b.said && !s1b.fold && (!withCaps || s1b.kept) && /Directions/.test(s1b.step),
+      "§694 …pressed: the choice is unset, the ticks and scores stay and are pressable again, the chat says so, the Capabilities are kept and marked for the earlier set", JSON.stringify({ chose: r.s.chose, go: r.s.options.filter((o) => o.go).length, caps: (r.s.caps || []).length, s1b }));
+    /* §694 S12 — with this chat unfinished, the start screen names it. */
+    await page.locator("[data-cop-home]:visible").first().click();
+    await page.waitForSelector("[data-cop-startscreen]", { timeout: 10000 });
+    const unf = await page.evaluate(() => { const u = document.querySelector("[data-cop-startscreen] [data-cop-unfinished]"); const cards = document.querySelector("[data-cop-startscreen] .copstartcards");
+      return u ? { t: u.textContent, btn: !!u.querySelector("[data-cop-chat]"), above: cards ? u.getBoundingClientRect().bottom <= cards.getBoundingClientRect().top : false } : null; });
+    check(!!unf && /Directions/.test(unf.t) && / of \d+ done/.test(unf.t) && unf.btn && unf.above, "§694 the start screen names the unfinished chat with its progress, Continue it above the cards", JSON.stringify(unf));
+    await page.click("[data-cop-startscreen] [data-cop-unfinished] [data-cop-chat]");
+    await page.waitForSelector("[data-cop-dv-go-all]", { timeout: 10000 });
+    await page.click("[data-cop-dv-go-all]");
+    await page.waitForTimeout(1500);
+    r = await row();
+    check(r.s.chose === true && (r.s.caps || []).length === capsBefore, "§694 Continue it opens the chat, and Go ahead again stands with the same Capabilities", JSON.stringify({ chose: r.s.chose, caps: (r.s.caps || []).length }));
     if (withCaps) {
       await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
       r = await row();
@@ -2701,6 +2777,8 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await page.waitForSelector("[data-cop-dv-apply]", { timeout: 10000 }).catch(() => {});
     const re = await page.evaluate(() => ({ line: /v1 on the plan/.test((document.querySelector("[data-cop-dvfoot]") || {}).textContent || ""), again: (document.querySelector("[data-cop-dv-apply]") || {}).textContent || "" }));
     check(re.line && /again/.test(re.again), "§654 after a reload the pane's foot still says v1 on the plan — the note on the deliverable, not this visit's memory (§675)", JSON.stringify(re));
+    const nx2 = await page.evaluate(() => { const n = document.querySelector("[data-cop-msgs] [data-cop-next]"); return n ? { t: n.textContent, go: (n.querySelector("[data-cop-go]") || {}).getAttribute ? n.querySelector("[data-cop-go]").getAttribute("data-cop-go") : null } : null; });
+    check(!!nx2 && /Execution/.test(nx2.t) && nx2.go === "execution", "§694 after Apply the Directions chat says Next: Execution", JSON.stringify(nx2));
     await shot("2-applied");
     const after = await page.evaluate(() => UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name, u: p.urgency })));
     const kept = r.s.options.filter((o) => o.go && o.planId);
@@ -2775,6 +2853,12 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/execution");
+    /* §697 S11 — two roads on the start screen: Refine the existing execution
+       (when some item carries measures) and Build from the Directions */
+    await page.waitForSelector(".copstart [data-cop-newchat]", { timeout: 15000 });
+    const sc = await page.evaluate(() => { const held = (UNITS.mobile.items || []).some((p) => p && p.name && ((p.measures || []).some((m) => m && m.name) || (p.tactics || []).some((x) => x && x.name)));
+      const rf = document.querySelector('.copstart [data-cop-newplan="execution"]'); return { held, refine: !!rf, refineT: rf ? rf.textContent : "", build: (document.querySelector(".copstart [data-cop-newchat]") || {}).textContent || "" }; });
+    check(sc.refine === sc.held && (!sc.held || /Refine the existing execution/.test(sc.refineT) && /with measures/.test(sc.refineT)) && /Build from the Directions/.test(sc.build), "§697 Execution's start screen offers Refine the existing execution when the plan holds measures, and Build from the Directions", JSON.stringify(sc));
     await newWorkflow();
     await page.waitForSelector("[data-cop-ex-period]", { timeout: 15000 });
     let r = await row();
@@ -2794,10 +2878,48 @@ await section("3m · the Execution chat: the period once, each item drafted, the
       draftBtn: !!document.querySelector("[data-cop-expane] .copex-card.now [data-cop-ex-draft]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-ex-card], [data-cop-chatbox] [data-cop-ex-item]"), todo: !!document.querySelector(".copftodo [data-cop-dv-todo]"),
       me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), dis: (document.querySelector("[data-cop-text]") || {}).disabled, step: (document.querySelector(".copfhead small") || {}).textContent || "",
       save: (document.querySelector("[data-cop-ex-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ex-finish]").getAttribute("data-tip") : null, foot: (document.querySelector("[data-cop-exfoot]") || {}).textContent || "" }));
-    check(sp.strip && sp.cards === r.s.items.length && sp.open === 1 && sp.draftBtn && !sp.inChat && sp.todo && /Oct/.test(sp.me) && sp.dis === true && /Drafting · 0 of/.test(sp.step) && /still needs at least one measure/.test(String(sp.save)) && /v1/.test(sp.foot),
+    /* §697 — an item that carries the plan's measures and tactics opens with
+       them: its box is live and Save is not held by it; the §684 holds apply
+       to an item that carries nothing. */
+    const held0 = r.s.items[0].measures.some((m) => m.mark === "plan") && r.s.items[0].tactics.some((x) => x.mark === "plan");
+    const anyBare = r.s.items.some((x) => !(x.measures.length && x.tactics.length));
+    check(sp.strip && sp.cards === r.s.items.length && sp.open === 1 && sp.draftBtn && !sp.inChat && sp.todo && /Oct/.test(sp.me) && sp.dis === !held0 && /Drafting · 0 of/.test(sp.step) && (anyBare ? /still needs at least one measure/.test(String(sp.save)) : sp.save === null) && /v1/.test(sp.foot),
       "§684 the period strip and one card per item stand in the pane, the first in hand with Draft on it, the to-do beside; the chat reads the period as the person's line, its box is held, Save is held with the item that still needs a measure", JSON.stringify(sp));
+    /* §697 S7 — a card opens with what the plan holds, marked; the chat counts them */
+    const heldItems = r.s.items.filter((x) => x.measures.some((m) => m.mark === "plan") || x.tactics.some((y) => y.mark === "plan"));
+    const hm = await page.evaluate(() => ({ heads: Array.from(document.querySelectorAll("[data-cop-expane] .copex-head small")).map((s) => s.textContent), marks: document.querySelectorAll("[data-cop-expane] .copex-card.now .copex-mark.plan").length,
+      said: /already carr/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), draft: (document.querySelector("[data-cop-expane] .copex-card.now [data-cop-ex-draft]") || {}).textContent || "" }));
+    check(hm.heads.filter((h) => /^On the plan/.test(h)).length === heldItems.length && (heldItems.length === 0 || hm.said) && (heldItems[0] !== r.s.items[0] || (hm.marks > 0 && /Draft anew/.test(hm.draft))),
+      "§697 the cards whose item carries measures on the plan say so on the head, the lines are marked on the plan, the chat counts them, and on the build road the button reads Draft anew", JSON.stringify({ hm, held: heldItems.length }));
+    /* §697 S5 — left out this period, and back */
+    const lastK = r.s.items.length - 1;
+    await page.click('[data-cop-ex-card-pick="' + lastK + '"]'); await page.waitForTimeout(600);
+    await page.click('[data-cop-ex-out="' + lastK + '"]'); await page.waitForTimeout(900);
+    r = await row();
+    const lo = await page.evaluate((k) => ({ head: (document.querySelector('[data-cop-ex-card="' + k + '"] .copex-head small') || {}).textContent || "", step: (document.querySelector(".copfhead small") || {}).textContent || "",
+      said: /left out this period/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), back: !!document.querySelector('[data-cop-ex-in="' + k + '"]') }), lastK);
+    check(r.s.items[lastK].out === true && /Left out this period/.test(lo.head) && /1 left out/.test(lo.step) && lo.said && lo.back, "§697 Leave out this period marks the card, the head counts it, the chat says what it means, Put it back is offered", JSON.stringify({ out: r.s.items[lastK].out, lo }));
+    await page.click('[data-cop-ex-in="' + lastK + '"]'); await page.waitForTimeout(900);
+    r = await row();
+    check(r.s.items[lastK].out === false, "§697 …and Put it back puts it back");
+    await page.click('[data-cop-ex-card-pick="0"]'); await page.waitForTimeout(600);
+    /* §698 S14 — the third draft of the chain fails: the line names the item,
+       its card stays in hand, and Draft all the rest carries on */
+    const failK = r.s.items.length >= 3 ? 2 : -1;
+    if (failK >= 0) MODEL_FAIL_AT = MODEL_SEEN.length + failK;
     await page.click("[data-cop-ex-draftall]");
+    if (failK >= 0) {
+      await page.waitForSelector("[data-cop-ex-fail]", { timeout: 30000 }).catch(() => {});
+      MODEL_FAIL_AT = -1;
+      r = await row();
+      const fl = await page.evaluate(() => { const f = document.querySelector("[data-cop-ex-fail]"); return f ? { t: f.textContent, again: !!f.querySelector("[data-cop-ex-draft]"), all: !!f.querySelector("[data-cop-ex-draftall]"), skip: !!f.querySelector("[data-cop-ex-skip]"),
+        inHand: (document.querySelector("[data-cop-expane] .copex-card.now") || {}).getAttribute ? document.querySelector("[data-cop-expane] .copex-card.now").getAttribute("data-cop-ex-card") : null } : null; });
+      check(!!fl && new RegExp("Draft all stopped at " + r.s.items[failK].title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(fl.t) && /2 of \d+ are drafted/.test(fl.t) && fl.again && fl.all && fl.skip && fl.inHand === String(failK) && r.s.items[failK].drafted === false,
+        "§698 when a draft fails in Draft all, the chat names the item it stopped at, counts what is drafted, keeps its card in hand, and offers Draft it again, Draft all left and Skip it", JSON.stringify(fl));
+      await page.click("[data-cop-ex-fail] [data-cop-ex-draftall]");
+    }
     for (let n = 0; n < 40; n++) { await page.waitForTimeout(1200); r = await row(); if (r.s.items.every((x) => x.drafted)) break; }
+    if (failK >= 0) check(!(await page.$("[data-cop-ex-fail]")), "§698 …and the line goes once the chain carries on");
     await page.waitForTimeout(800);
     r = await row();
     check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one after another from Draft all (§684)", JSON.stringify(r.s.items.map((x) => x.drafted)));
@@ -2818,12 +2940,19 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(/This plan covers/.test(strip) && !/·/.test(strip), "§654 the period line carries no stray separator", strip);
     const fin = await page.$("[data-cop-ex-finish]");
     check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645), at the pane's foot (§684)");
+    /* §697 S5 — the last item is left out before the save: Save stays live, Apply leaves it untouched */
+    await page.click('[data-cop-ex-card-pick="' + lastK + '"]'); await page.waitForTimeout(600);
+    await page.click('[data-cop-ex-out="' + lastK + '"]'); await page.waitForTimeout(900);
+    r = await row();
+    const outIt = r.s.items[lastK];
+    check(outIt.out === true && outIt.drafted === true && (await page.evaluate(() => (document.querySelector("[data-cop-ex-finish]") || {}).getAttribute("aria-disabled"))) !== "true", "§697 a drafted item can still be left out, and Save stays live", JSON.stringify({ out: outIt.out }));
     const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
     const exArch = await page.evaluate(() => ARCHIVES.length);
     /* A Capability holding nothing yet has nothing to archive (archiveCapPlan
        keeps nothing empty), so the ones expected are those that hold something. */
-    const exCapIds = r.s.items.filter((x) => x.kind !== "direction").map((x) => String(x.planId));
-    if (fin) { await fin.click(); await page.waitForTimeout(2200); }
+    const exCapIds = r.s.items.filter((x) => x.kind !== "direction" && !x.out).map((x) => String(x.planId));
+    const fin2 = await page.$("[data-cop-ex-finish]");
+    if (fin2) { await fin2.click(); await page.waitForTimeout(2200); }
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
     const exSv = await page.evaluate((b) => ({ same: JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]) === b, apply: (document.querySelector("[data-cop-ex-apply]") || {}).getAttribute ? document.querySelector("[data-cop-ex-apply]").getAttribute("aria-disabled") : "none",
@@ -2851,7 +2980,10 @@ await section("3m · the Execution chat: the period once, each item drafted, the
         const pj = (c.projects || []).filter((x) => x.name === "Ex launch")[0];
         out.caps.push({ ko: ko ? ko.target : null, pj: pj ? [pj.start, pj.end] : null }); });
       return out;
-    }, r.s.items.map((x) => x.planId));
+    }, r.s.items.filter((x) => !x.out).map((x) => x.planId));
+    const outPlan = await page.evaluate((it) => { if (it.kind === "direction") { const p = (UNITS.mobile.items || []).find((x) => x && x.id === it.planId); return p ? !(p.measures || []).some((m) => m.name === "Ex share") : null; }
+      const c = (GROUP.capabilities || []).find((x) => String(x.id) === it.planId); return c ? !(c.keyObjectives || []).some((m) => m.name === "Ex share") : null; }, outIt);
+    check(outPlan === true, "§697 the item left out this period is untouched by Apply — its drafted measure never reaches the plan", JSON.stringify(outPlan));
     const want = await page.evaluate((p) => [SMPRules.monthLabel(p.y * 12 + p.m1 - 1), SMPRules.monthLabel(p.y * 12 + p.m2 - 1)], per);
     check(plan.from === want[0] && plan.to === want[1], "the period becomes the plan period", JSON.stringify([plan.from, plan.to]));
     const qWant = [1, 2, 3, 4].map((q) => (qs.includes(q) ? 1 : 0)).join("");
@@ -2860,7 +2992,9 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(await page.evaluate(() => { const b = document.querySelector("[data-cop-ex-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §684)");
     const onp = await page.evaluate(() => /v1 on the plan/.test((document.querySelector("[data-cop-exfoot]") || {}).textContent || ""));
     check(onp, "§684 …and after Apply the pane's foot says v1 on the plan");
-    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+    /* §698 — the deliberate failure above is a 503 the browser logs; nothing else may be */
+    const errs3m = errs.filter((e) => !(failK >= 0 && /status of 503/.test(e)));
+    check(!errs3m.length, "no page errors through the whole flow", errs3m.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
@@ -3162,7 +3296,8 @@ await section("4 · Forefront's own pages", async () => {
         const r = await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "workStatus", client: "raya-trade", id, status: "done" }) });
         return { status: r.status, body: await r.json() };
       }, ids["MW not mine"]);
-      check(refused.status === 403 && /owner or the client's Super user/.test(refused.body.error || "") && (await stored("MW not mine")) === "not_started",
+      /* §695 (main) — the refusal names the assignment's lead too; the check reads the Tracker's own constant's words. */
+      check(refused.status === 403 && /Only its owner, the lead of one of the client's assignments or the client's Super user/.test(refused.body.error || "") && (await stored("MW not mine")) === "not_started",
         "somebody else's action is refused to a team seat, in the Tracker's words, and left as it was (\u00a7583)", JSON.stringify(refused));
     } finally {
       await owner.query("UPDATE tenant_users SET seat = 'super' WHERE tenant_id = $1 AND user_id = $2", [tenantId, officeId]);
@@ -3671,8 +3806,14 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
   check(/javascript|ecmascript/i.test(r.headers.get("content-type") || ""), "…as JavaScript, or the browser refuses it", r.headers.get("content-type"));
   check(body.includes('addEventListener("push"') && body.includes('addEventListener("notificationclick"'),
         "…and it carries the notification half (Phase G's row: a push cannot arrive without it)");
-  check(!/addEventListener\("fetch"/.test(body),
-        "…and NO fetch handler: nothing here is served from disk (the plan's line 47, kept)");
+  /* §701: ONE fetch handler, for page loads alone, answering SMP's own
+     offline page when the network fails — and still nothing on disk (the
+     plan's line 47, kept): it never opens a cache. */
+  const fetchAt = body.indexOf('addEventListener("fetch"');
+  const handler = fetchAt < 0 ? "" : body.slice(fetchAt, body.indexOf("\n});", fetchAt));
+  check(fetchAt >= 0 && /mode !== "navigate"/.test(handler) && !/caches/.test(handler),
+        "…and its one fetch handler answers page loads only, and opens no cache (§701; the plan's line 47, kept)");
+  check((body.match(/addEventListener\("fetch"/g) || []).length === 1, "…and there is only the one");
 
   /* THE BOTH-ENDS HALF (§94.2): it is not enough that the frozen caches are
      gone — a build that served no worker at all would satisfy that. So the
@@ -3707,6 +3848,15 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
   const after = await page.evaluate(() => caches.keys());
   check(after.length === 0, "…and a navigation under it stores nothing", JSON.stringify(after));
+
+  /* §701: AND A PAGE LOAD WITH NO CONNECTION IS SMP'S OWN OFFLINE PAGE, not
+     the browser's error — answered by the worker, so still nothing stored. */
+  await ctx.setOffline(true);
+  await page.goto(BASE + "/raya-trade/strategy").catch(() => {});
+  const off = await page.evaluate(() => ({ h: (document.querySelector("h1") || {}).textContent || "", retry: !!document.getElementById("retry") })).catch(() => ({ h: "", retry: false }));
+  await ctx.setOffline(false);
+  check(off.h === "You're offline" && off.retry, "a page load with no connection shows SMP's own offline page, with Try again (§701)", JSON.stringify(off));
+  check((await page.evaluate(() => caches.keys())).length === 0, "…and showing it stored nothing");
 
   /* AND THE HALF THE WORKER IS FOR ON AN IPHONE (§26): a push is only ever
      delivered to a platform that has been ADDED TO A HOME SCREEN, which

@@ -33,7 +33,7 @@ def safe(pg, js, dflt=None):
     try: return pg.evaluate(js)
     except Exception: return dflt
 
-BOARD = """()=>{current='setup'; currentSub='cycle'; paint();
+BOARD = """()=>{current='setup'; currentSub='cycle'; CYCLETAB='board'; paint();
   var t=[...document.querySelectorAll('#panel table')].filter(t=>t.querySelector('thead') && /Reporting/.test(t.querySelector('thead').textContent))[0];
   if (!t) return null;
   return {head:t.querySelector('thead th').textContent.trim(),

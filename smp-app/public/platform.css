@@ -5850,6 +5850,60 @@ html[data-client-settings] .viewer { display:none; }
                   background:var(--warn-bg); color:var(--warn-tx); font-size:13px; }
   .planblk-pen { border-top:1px solid var(--line); padding:12px 18px 14px; }
   .planblk-pen > .cyc2-r.planper:first-child { border-top:0; margin-top:0; padding-top:0; }
+  /* ── §693: ONE CARD, THE PEN BESIDE IT, TWO TABS ─────────────────────
+     The card keeps §495's own rules above; what is new is the wrap that
+     puts the pen BESIDE it while editing (so nothing under the card moves,
+     §273.4's 156px measured and refused), the pins on the timeline, the
+     closed-cycle chips, and the board's filter row. Under 900px the pen
+     goes back under the card, which is the one width where "beside" would
+     be narrower than the pickers it holds. */
+  .cyctabs { margin:0 0 16px; }
+  .cycwrap { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start;
+             margin:0 0 16px; }
+  .cycwrap.editing { grid-template-columns:minmax(0,1fr) 360px; }
+  .cycwrap .newcycle { margin:0; }
+  .cycleft { min-width:0; }
+  .cycleft > .planblk { margin:0 0 20px; }
+  .planblk-acts { display:flex; gap:8px; align-items:center; }
+  .planblk-facts .sub { display:block; font-size:12px; color:var(--ink-3); margin-top:2px; }
+  .planblk-facts .sub.fmean { margin-left:0; }
+  .planblk-facts .badge { vertical-align:2px; margin-left:4px; }
+  .planblk-chips { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:0 12px 12px; }
+  .planblk-chips .lab { font-size:11px; letter-spacing:.07em; text-transform:uppercase;
+                        color:var(--ink-3); font-weight:700; }
+  .pptl { padding:12px 12px 12px; }
+  .pptl-m { position:relative; }
+  .pptl-m.pin::before { content:""; position:absolute; left:50%; top:0; bottom:0; width:2px;
+                        margin-left:-1px; background:var(--gold-deep); }
+  .pptl-ps { display:flex; margin-top:4px; }
+  .pptl-p { flex:1 1 0; min-width:0; position:relative; height:12px; }
+  .pptl-p em { position:absolute; left:50%; top:0; transform:translateX(-50%); white-space:nowrap;
+               font:700 10px/12px var(--sans); font-style:normal; color:var(--gold-deep); }
+  .pptl-key .k.pin { width:2px; height:12px; border-radius:0; background:var(--gold-deep); }
+  .cycdrawer { padding:14px 16px 16px; }
+  .cycdrawer > .cyc2-r:first-child, .cycdrawer > .nc-h:first-child + .nc-grid { border-top:0; margin-top:0; padding-top:0; }
+  .cycdrawer .nc-grid label, .cycdrawer .nc-grid .nm-lab { flex:1 1 140px; min-width:0; }
+  .cycdrawer .nc-grid .fld, .cycdrawer .nc-grid .cycbtn, .cycdrawer .nc-grid .nc-time,
+  .cycdrawer .nc-grid .nc-rem, .cycdrawer .nc-1line .cycbtn { width:100%; }
+  .cycdrawer .nc-1line { flex-wrap:wrap; }
+  .cycdrawer .cyc2-d { border-left:0; padding-left:0; }
+  .cycdrawer .cycend { background:var(--bad-bg); margin:18px -16px -16px; padding:14px 16px 16px;
+                       border-top:1px solid var(--line); border-radius:0 0 var(--r) var(--r); }
+  .cycdrawer .cycend .nc-h { color:var(--bad-tx); }
+  .cycdrawer .cycend .cyc2-p { color:var(--ink-2); }
+  .bfilters { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 0 12px; }
+  .bfilt { font:600 12px/1 var(--sans); padding:6px 11px; border:1px solid var(--line);
+           border-radius:999px; background:var(--surface); color:var(--ink-2); cursor:pointer; }
+  .bfilt.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+  .bfilt:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  .bfilters .bfind { margin-left:auto; width:200px; max-width:100%; }
+  @media (max-width:900px) {
+    .cycwrap.editing { grid-template-columns:minmax(0,1fr); }
+    .bfilters .bfind { margin-left:0; width:100%; }
+  }
+  /* A month is too narrow for its pin's words on a phone; the line and the
+     key stay, and the words are on the month's own hover. */
+  @media (max-width:600px) { .pptl-ps { display:none; } }
 
 /* §687: where a reader's seat lands — the line above the Roles & access matrix */
 .acreaders { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; padding:10px 14px;
@@ -5859,7 +5913,7 @@ html[data-client-settings] .viewer { display:none; }
 .acreaders .acrdwhy { flex:1 1 320px; font-size:12.5px; color:var(--ink-3); }
 
 
-/* ── ROLES & ACCESS AS A LADDER (§693) ─────────────────────────────────── */
+/* ── ROLES & ACCESS AS A LADDER (§704) ─────────────────────────────────── */
 .acgrid-ladder td.acsays { font-size:13px; color:var(--ink-2); }
 .acgrid-ladder td.acladder { white-space:nowrap; }
 .cfg.acgrid.acgrid-ladder table { width:auto; max-width:100%; table-layout:auto; min-width:0; }
@@ -5890,12 +5944,12 @@ html[data-client-settings] .viewer { display:none; }
 .acexpick { display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-3); }
 .acexpick select { font:inherit; font-size:13px; padding:4px 8px; border:1px solid var(--line); border-radius:7px; background:var(--surface); color:var(--ink); }
 .acex .segsw button:disabled { color:var(--line); cursor:default; }
-/* §693: the ladder is one control on one line; the settings tables' cell cap
+/* §704: the ladder is one control on one line; the settings tables' cell cap
    (.cfg table td, 150px with an ellipsis) would cut it, so it is lifted here */
 .cfg.acgrid.acgrid-ladder td { max-width:none; overflow:visible; text-overflow:clip; }
 .cfg.acgrid.acgrid-ladder td.acsays { white-space:normal; }
 :root[data-theme="dark"] .ladder button.eye { background:var(--ink-2); color:var(--ground); }
-/* §699: each column as wide as what it holds, with a little room around */
+/* §704: each column as wide as what it holds, with a little room around */
 .cfg.acgrid.acgrid-ladder th, .cfg.acgrid.acgrid-ladder td { padding-left:14px; padding-right:14px; }
 .cfg.acgrid.acgrid-ladder th:first-child, .cfg.acgrid.acgrid-ladder td.rolecell { width:auto; white-space:nowrap; }
 .cfg.acgrid.acgrid-ladder td.acsays { width:auto; max-width:280px; white-space:normal; }
@@ -5904,13 +5958,13 @@ html[data-client-settings] .viewer { display:none; }
 .ladder.ro button:not(.pen):not(.eye):not(.nil) { background:none; }
 .acro { margin:0 0 10px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); font-size:13px; color:var(--ink-2); }
 .acro b { color:var(--ink); }
-/* §699: the platform's own eye and pen in the ladder */
+/* §704: the platform's own eye and pen in the ladder */
 .ladder button svg { width:14px; height:14px; margin-right:5px; flex:none; }
 .acladderkey { display:flex; flex-wrap:wrap; gap:6px 18px; }
 .acladderkey span { display:inline-flex; align-items:center; gap:5px; }
 .acladderkey svg { width:14px; height:14px; }
 .acsays .acoff { display:block; margin-top:2px; font-size:12px; font-weight:600; color:var(--bad, var(--ink-3)); }
-/* ── §699 refined: named rows, the live meaning, Copilot as eye and pen,
+/* ── §704 refined: named rows, the live meaning, Copilot as eye and pen,
    and the first-screen switch as its own settings row ─────────────────── */
 .cfg.acgrid.acgrid-ladder table { width:100%; }
 .cfg.acgrid.acgrid-ladder th { white-space:nowrap; }
@@ -13645,3 +13699,26 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copways { grid-column:2; display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
 .copway { font:600 11px/1.6 var(--sans); padding:0 8px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2); color:var(--ink-2); white-space:nowrap; }
 .copwaysk { grid-column:2; font-size:var(--fs-micro, 11px); color:var(--ink-3); }
+
+/* §694 — WAYS BACK AND THE ONWARD PATH (stress test batch 1). The Next
+   strip after Apply, the unfinished-chat line on the start screen, and the
+   Change the Directions link on the card head. */
+.copnext{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:8px 12px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;background:var(--surface)}
+.copnext .copnextk{font:700 10.5px/1.4 inherit;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.copnext .copnextt{flex:1 1 24ch;min-width:0}
+.copunfinished{display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:min(560px,100%);margin:0 auto;padding:8px 12px;border:1px solid var(--line);border-left:3px solid var(--attn, var(--gold));border-radius:8px;background:var(--surface);font-size:13px;text-align:left}
+.copunfinished>span:first-child{flex:1 1 24ch;min-width:0}
+.copdv-card h3 .copdv-unchoose{margin-left:auto;font-weight:400;font-size:12.5px}
+
+/* §697 — EXECUTION READS THE PLAN. A line the plan holds is marked beside its
+   name, a new one beside it; an item left out this period, or gone from the
+   plan, stands faded with its state on the head. */
+.copex-mark{display:inline-block;margin-left:6px;font:600 10px/1.4 var(--sans, inherit);letter-spacing:.04em;text-transform:uppercase;padding:0 5px;border-radius:8px;vertical-align:middle;white-space:nowrap}
+.copex-mark.plan{color:var(--good-tx);background:var(--surface-2)}
+.copex-mark.new{color:var(--ink-3);background:var(--surface-2)}
+.copex-card.out{opacity:.72}
+.copst.off{color:var(--ink-3)}
+
+/* §698 S14 — a draft that failed, named, in the chat */
+.copmsg.ai.copbad .copbody { border-left-color:var(--bad); }
+.copmsg.ai.copbad .copbody > b:first-child { color:var(--bad-tx); }

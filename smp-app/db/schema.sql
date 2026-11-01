@@ -198,7 +198,11 @@ CREATE TABLE case_studies (
   -- is asked for the write-up when the end month comes (migration 034).
   kind            text NOT NULL DEFAULT 'planning',
   lead_id         uuid REFERENCES users (id) ON DELETE SET NULL,
+  -- the days agreed with the client (§696, migration 036): a whole number,
+  -- NULL where none was recorded
+  planned_days    integer,
   CONSTRAINT case_kind CHECK (kind IN ('planning','retainer')),
+  CONSTRAINT case_planned_days CHECK (planned_days IS NULL OR planned_days >= 0),
   CONSTRAINT case_state CHECK (state IN ('running','writing','done')),
   CONSTRAINT case_name CHECK (btrim(name) <> ''),
   CONSTRAINT case_writing_has_writer CHECK (state = 'running' OR writer_id IS NOT NULL)

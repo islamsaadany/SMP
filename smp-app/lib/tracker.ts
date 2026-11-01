@@ -248,7 +248,10 @@ export type Action = {
   status: Status; doneDay: string | null;
   createdBy: string; createdAt: string; updatedAt: string;
 };
-export type Who = { personKey: string | null; seat: string | null };
+/* `lead` (§695): this account leads one of the client's assignments that is
+   not yet written up — the Clients page's registry, read at the door, never
+   from the page. It widens mayChange and nothing else. */
+export type Who = { personKey: string | null; seat: string | null; lead?: boolean };
 
 export function shape(r: Record<string, any>): Action {
   return {
@@ -362,14 +365,20 @@ export function summary(all: Action[], today: string): Summary {
 
 /* ══ who may do what (spec 054 §6, one rule since §356.11) ════════════
    Change the title, the notes, the date, the status; hand it to somebody
-   else; delete it: the owner or the client's Super user. Being the creator
-   confers nothing, and with collaborators gone nobody else was ever on it. */
+   else; delete it: the owner, the client's Super user — or, since §695, the
+   LEAD of one of the client's assignments (the Clients page's registry),
+   who answers for every task on the client and not only their own. Being
+   the creator confers nothing, and with collaborators gone nobody else was
+   ever on it. Progress entries keep their own rule (mayChangeProgress): the
+   lead does not edit what somebody else wrote.
+   SMP_BREAK=lead-nobody drops the lead from the rule; checks/tracker.mjs §2
+   must go red under it. */
 export function mayChange(a: Action, who: Who): boolean {
-  return who.seat === "super" || isMine(a, who);
+  return who.seat === "super" || (who.lead === true && brk() !== "lead-nobody") || isMine(a, who);
 }
 /* What a refusal of that rule says — the Tracker's api and My work's tick
    (§583) refuse with the one sentence. */
-export const ONLY_CHANGE = "Only its owner or the client's Super user can change this action.";
+export const ONLY_CHANGE = "Only its owner, the lead of one of the client's assignments or the client's Super user can change this action.";
 
 /* THE SHORT NAME ON A ROW is the SPINE's answer now (lib/people.ts) — the
    register's own first-name rule, a clashing pair lengthened, and the whole

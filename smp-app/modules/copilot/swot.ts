@@ -83,7 +83,7 @@ export async function sourceFile(tenantId: string, id: string): Promise<Response
 }
 
 /* ── THE WRITES THAT NEED NO MODEL ────────────────────────────────────── */
-export const SWOT_ACTS = ["newSwot", "swotSave", "swotLink", "swotUnlink", "swotPrompt", "swotFinish", "swotProposal", "addSource", "deleteSource", "retagSource"];
+export const SWOT_ACTS = ["newSwot", "swotSave", "swotLink", "swotUnlink", "swotPrompt", "swotFinish", "swotProposal", "swotPutBack", "addSource", "deleteSource", "retagSource"];
 export const SWOT_ASKS = ["swotAnswer", "swotAnalysis", "swotDraft", "swotCheck", "swotChange"];
 
 export async function swotAct(c: any, b: any, who: Who): Promise<Out> {
@@ -179,8 +179,23 @@ export async function swotAct(c: any, b: any, who: Who): Promise<Out> {
     if (!stored.proposal) return refused(400, "There is no proposed change to decide on.");
     const use = b.use === true || b.use === "true";
     const note = use ? "Used — " + stored.proposal.reply : "Kept as it was.";
+    /* §698 S3 — the draft before Use it is kept, one step back */
     const s: Swot = { ...stored, proposal: null, log: [...stored.log, { w: "note" as const, t: note }].slice(-MAX_SW_LOG),
-      ...(use ? { draft: stored.proposal.draft, check: null, phase: "draft" as const } : {}) };
+      ...(use ? { draft: stored.proposal.draft, check: null, phase: "draft" as const, before: stored.draft ? { draft: stored.draft, next: stored.proposal.draft, reply: stored.proposal.reply } : null } : {}) };
+    await writeSwot(c, id, s);
+    return out(200, { ok: true, ...(await swotView(c, chat, oneLine(b.placeWord))) });
+  }
+  /* §698 S3 — PUT BACK THE SWOT AS IT WAS, and the way forward again: the
+     draft swaps with the one kept, said in a note; nothing else moves. */
+  if (kind === "swotPutBack") {
+    const bf = stored.before;
+    if (!bf || !stored.draft) return refused(400, "There is no earlier SWOT to put back.");
+    const back = b.again !== true && b.again !== "true";
+    const same = (a: unknown, c2: unknown) => JSON.stringify(a) === JSON.stringify(c2);
+    if (back && !same(stored.draft, bf.next)) return refused(400, "The SWOT has changed since; there is nothing to put back.");
+    if (!back && !same(stored.draft, bf.draft)) return refused(400, "The SWOT has changed since; there is nothing to use again.");
+    const note = back ? "Put back as it was, before: " + bf.reply : "Used again — " + bf.reply;
+    const s: Swot = { ...stored, draft: back ? bf.draft : bf.next, check: null, phase: "draft", log: [...stored.log, { w: "note" as const, t: note }].slice(-MAX_SW_LOG) };
     await writeSwot(c, id, s);
     return out(200, { ok: true, ...(await swotView(c, chat, oneLine(b.placeWord))) });
   }

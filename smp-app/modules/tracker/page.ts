@@ -70,14 +70,15 @@ const CSS = `
    title (the top bar is the way back) and the third count reads "Due". */
 :root{%BARVARS%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
   --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;--bad-bg:#FBEDEB;
+  --ns:#2B3A55;--ns-bg:#E3E8EF;--yel:#6B4E00;--yel-bg:#FFF0A8;--done-bg:#DCF0E5;--carry:#1F5FBF;--wk:#EAF2FB;--wk-line:#B9D3EF;--wk-ink:#1F4E86;
   --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
 /* THE FONT FAMILY IS NAMED, NEVER "inherit" INSIDE THE SHORTHAND (§356.14):
    a shorthand ending in a CSS-wide keyword is not CSS a browser will read,
    so every such line was silently dropped. */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
-  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}}
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;--ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;--wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;color-scheme:dark}}
 :root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
-  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;--ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;--wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;color-scheme:dark}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 48px}
 /* THE BAND STAYS PUT (§565, design-mockups/internal-tracker/2026-10-21_frozen-band.html).
@@ -308,18 +309,35 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 .team button.on::after,.topics button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
 .topics{min-width:190px}
 .topics .tnew{display:block;width:100%;border:0;border-top:1px solid var(--line);margin-top:3px;padding:7px 9px 5px;background:transparent;color:var(--ink);font:400 13.5px/1.4 var(--font);outline:none}
-/* THE STATUS IS A WORD (§497): one box whether it can be pressed or not —
-   the same font, height and width for a select and a span — with a dash
-   before it in the colour of what it says. */
-.st{display:inline-flex;align-items:center;gap:7px;height:26px;width:128px;font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;padding:0;border:0;border-radius:6px;color:var(--ink-3);background:transparent;white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0}
-span.st::before{content:"";width:12px;height:2px;background:currentColor;flex:none}
-select.st{cursor:pointer;padding:0 14px 0 19px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%235E6E85'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 0 center,right 3px center}
-select.st:hover,select.st:focus-visible{background-color:var(--surface-2);outline:none}
-.st.prog{color:var(--gold)}
-select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%239C5D08'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%239C5D08'/%3E%3C/svg%3E")}
-.st.done{color:var(--good)}
-select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%231B6E4E'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%231B6E4E'/%3E%3C/svg%3E")}
-select.st option{text-transform:none;letter-spacing:0;color:var(--ink);background:var(--surface)}
+/* THE PILL HUGS ITS WORDS (2026-11-01, §700, Islam: "why are they bigger
+   than their writing? doesn't seem clean"): no fixed width; the column holds
+   the place and the pill sits at its start. A select sizes to what it says
+   where the browser can (field-sizing), else to its widest choice. */
+/* THE STATUS IS A PILL OF ITS OWN COLOUR (2026-11-01, Islam: "grey with
+   grey and not really clear"; option C of
+   design-mockups/internal-tracker/2026-11-01_status-and-carry-colours.html):
+   a soft tint per status, no outline — Not started slate, In progress yellow,
+   Done green — with a mark in front (an empty ring, a half, a full dot). One
+   box whether it can be pressed or not: the same font, height and width for
+   a select and a span (§497). The marks on the select are pictures, so each
+   carries its colour twice, light and dark. */
+.st{display:inline-flex;align-items:center;justify-self:start;gap:5px;height:24px;width:auto;font:600 12.5px/1 var(--font);letter-spacing:0;text-transform:none;padding:0 9px 0 8px;border:0;border-radius:6px;color:var(--ns);background-color:var(--ns-bg);white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0}
+span.st::before{content:"";width:10px;height:10px;border-radius:50%;box-sizing:border-box;border:1.5px solid currentColor;flex:none}
+span.st.prog::before{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+span.st.done::before{background:currentColor}
+select.st{cursor:pointer;padding:0 19px 0 23px;field-sizing:content;background-repeat:no-repeat;background-position:left 8px center,right 7px center}
+select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%232B3A55' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%232B3A55'/%3E%3C/svg%3E")}
+select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%236B4E00' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%236B4E00'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%236B4E00'/%3E%3C/svg%3E")}
+select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%231B6E4E'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%231B6E4E'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23DDE3EC' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23DDE3EC'/%3E%3C/svg%3E")} :root:not([data-theme="light"]) select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23FFE07A' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%23FFE07A'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23FFE07A'/%3E%3C/svg%3E")} :root:not([data-theme="light"]) select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%2363BE96'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%2363BE96'/%3E%3C/svg%3E")}}
+:root[data-theme="dark"] select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23DDE3EC' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23DDE3EC'/%3E%3C/svg%3E")} :root[data-theme="dark"] select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23FFE07A' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%23FFE07A'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23FFE07A'/%3E%3C/svg%3E")} :root[data-theme="dark"] select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%2363BE96'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%2363BE96'/%3E%3C/svg%3E")}
+select.st:hover,select.st:focus-visible{box-shadow:inset 0 0 0 1px currentColor;outline:none}
+/* .prog is also the progress list's name: the pill's own margin and padding win */
+.st.prog{color:var(--yel);background-color:var(--yel-bg);margin:0;max-height:none;overflow:visible;list-style:none}
+span.st.prog{padding:0 9px 0 8px}
+select.st.prog{padding:0 19px 0 23px}
+.st.done{color:var(--good);background-color:var(--done-bg)}
+select.st option{color:var(--ink);background:var(--surface)}
 /* the arrow that expands a row for its notes and history, and folds it */
 .more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
 .more:hover,.more.on,.more:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
@@ -393,10 +411,20 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 /* the latest entry under a row's name, one line, cut at the edge */
 .last{font:400 12.5px/1.4 var(--font);color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
 .last b{font-weight:600;color:var(--ink-2)}
-/* on the Weekly check, the box under every open row of this week */
-.pline{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;padding:0 14px 10px;border-bottom:1px solid var(--line-soft)}
-.pline .pbox{grid-column:2;border-color:var(--line-2);background:var(--ground)}
-.row.chk:has(+ .pline){border-bottom:0}
+/* on the Weekly check, the box under every open row of this week.
+   THE ROW AND ITS BOX ARE ONE BLOCK (2026-11-01, Islam: "a problem between
+   the task and what happened this week ... looks bad and confusing"): the
+   box sat in a band of its own, full width, so it read as belonging to no
+   task. Now it lines up under the name, stops before the status, says the
+   week in front, shares the row's ground (a hover lights both), and the
+   rule comes after the box, not between them. */
+.pline{display:grid;grid-template-columns:20px minmax(0,1fr) 116px 64px 112px 150px 26px;gap:12px;padding:0 14px 12px;border-bottom:1px solid var(--line-2)}
+.pline .pbox{grid-column:2/5;height:32px;padding:0 6px 0 10px;border-radius:7px;border-color:var(--line);background:var(--surface)}
+.pline .pbox::before{content:"This week";font:600 11px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding-right:8px;border-right:1px solid var(--line);white-space:nowrap}
+.pline .pbox input{font-size:13.5px}
+.pline .pbox .ent{padding:3px 5px}
+.row.chk:has(+ .pline){border-bottom:0;padding-bottom:5px}
+.row.chk:hover,.row.chk:hover+.pline,.row.chk:has(+ .pline:hover),.pline:hover{background:var(--ground)}
 .open .ro{font-size:14px;color:var(--ink-2)}
 .hist{list-style:none;margin:0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable;color:var(--ink-2)}
 .hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line-2)}
@@ -440,13 +468,16 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 /* The row sheds two columns here: the heading says the topic and the card
    says the week (§87), so what is left is the tick, the name, how late it
    is, the owner, the status, the carry and the arrow. */
-.row.chk{grid-template-columns:20px minmax(0,1fr) 116px 64px 128px 140px 26px;padding:9px 14px}
+.row.chk{grid-template-columns:20px minmax(0,1fr) 116px 64px 112px 150px 26px;padding:9px 14px}
 .row.chk:last-child{border-bottom:0}
 .blk .row.on{background:var(--surface-2)}
 .blk .open{padding-left:46px;padding-right:14px}
-.carry{display:inline-flex;align-items:center;gap:6px;font:500 12.5px/1 var(--font);color:var(--gold);background:none;border:1px solid transparent;border-radius:7px;padding:5px 8px;white-space:nowrap;cursor:pointer;justify-self:start}
-.carry svg{width:13px;height:13px;flex:none}
-.carry:hover,.carry:focus-visible{border-color:var(--gold);background:var(--gold-bg);outline:none}
+/* CARRY IS A BUTTON, NOT A STATUS (2026-11-01, Islam: "the carry to next
+   week looks like in progress"): it was the gold of In progress; now a plain
+   button in the ink with a blue arrow (option C of the same mockup). */
+.carry{display:inline-flex;align-items:center;gap:5px;height:24px;font:600 12.5px/1 var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:0 8px;white-space:nowrap;cursor:pointer;justify-self:start}
+.carry svg{width:13px;height:13px;flex:none;color:var(--carry)}
+.carry:hover,.carry:focus-visible{border-color:var(--carry);background:var(--ground);outline:none}
 .carry.off{visibility:hidden}
 /* THE WRITE LINE SITS IN THE TOPIC IT IS FOR, and it is the SAME line the
    page writes at the top — one renderer, one behaviour (§53.5) — with its
@@ -457,7 +488,7 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 .blk .quiet{padding:10px 14px;font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic}
 .sec .asleep{font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic;padding:10px 0 0}
 @media (max-width:760px){.strip{gap:14px}.open{grid-template-columns:1fr;padding-left:4px}
-  .pline{grid-template-columns:1fr}.pline .pbox{grid-column:1}
+  .pline{grid-template-columns:minmax(0,1fr)}.pline .pbox{grid-column:1}
   .row.chk{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t t more" ". when st more" ". carry carry carry"}
   .row.chk .tick{grid-area:tick}.row.chk .tn2{grid-area:t}.row.chk .st{grid-area:st}.row.chk .when{grid-area:when}.row.chk .who{display:none}.row.chk .carry{grid-area:carry}.row.chk .more{grid-area:more}
   .addrow.chk{grid-template-columns:20px minmax(0,1fr) 26px}.addrow.chk .tpk,.addrow.chk .when,.addrow.chk .who,.addrow.chk .ent{display:none}
@@ -491,6 +522,10 @@ const LOOK = `
 .pin .card.ctop.solo{border-bottom:1px solid var(--line)}
 .cbot .list .row{padding:8px 14px;border-bottom-color:var(--line-soft)}
 .cbot .sec .row:nth-child(odd of .row:not(.done)),.cbot .sec.showdone .row:nth-child(odd of .row){background:var(--zebra)}
+/* a row's weekly box wears the row's stripe and its hover: one block (2026-11-01) */
+.cbot .sec .row:nth-child(odd of .row:not(.done))+.pline,.cbot .sec.showdone .row:nth-child(odd of .row)+.pline{background:var(--zebra)}
+.cbot .sec .row.chk:hover,.cbot .sec .row.chk:hover+.pline,.cbot .sec .row.chk:has(+ .pline:hover),.cbot .sec .pline:hover{background:var(--surface-2)}
+.cbot .list .row.chk:has(+ .pline){padding-bottom:4px}
 .cbot .sec .row.on{background:var(--surface)}
 .cbot .open{padding-left:46px;padding-right:14px}
 .cbot .foot{padding:8px 14px 10px 46px}
@@ -504,6 +539,38 @@ const LOOK = `
 .cbot .blk .row.chk{padding:9px 14px}
 .cbot .none{padding:16px 14px 12px}
 @media (max-width:760px){.cbot .open{padding-left:14px}.cbot .foot{padding-left:14px}}
+/* THE WEEKLY CHECK AS TOPIC CARDS (2026-11-01, §700; option 3 of
+   design-mockups/internal-tracker/2026-11-01_weekly-check-revamp.html, with
+   heading A of 2026-11-01_topic-headings.html). Islam: the topics were not
+   told apart, and This week's yellowish ground read like In progress. Each
+   topic is its own card under a grey band — its number in gold, its name
+   bold, its counts, a small done bar; the weeks inside lose their frames and
+   are strips: This week pale blue, last and next week plain over a dashed
+   rule. The card head above stands alone. Corners are drawn on the edges,
+   never clipped, so the write line's week and owner lists can still open
+   past the card. */
+.pin:has(+ .cbot.ck) .card.ctop,.pin:has(+ .cbot.ck) .card.ctop.solo{border-radius:12px}
+.card.cbot.ck{background:none;border:0;box-shadow:none;padding:14px 0 0}
+.cbot.ck .list>.sec{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 14px;padding:0}
+.cbot.ck .sec:has(.blk){padding-bottom:0}
+.cbot.ck .sec>.sh{background:var(--surface-2);border-bottom:1px solid var(--line);border-radius:11px 11px 0 0;padding:11px 14px;align-items:center;gap:10px}
+.cbot.ck .sh .ix{display:inline;font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.cbot.ck .sh h3{font:700 15.5px/1.25 var(--font);letter-spacing:0;text-transform:none;color:var(--ink)}
+.cbot.ck .sh .meta{font:500 12.5px/1.3 var(--font);color:var(--ink-2)}
+.cbot.ck .sh .end{font:500 12.5px/1 var(--font);color:var(--ink-2)}
+.cbot.ck .sh.quiet h3{color:var(--ink-2);font-style:italic;font-weight:600}
+.cbot.ck .mtr{display:inline-block;width:72px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.cbot.ck .mtr i{display:block;height:100%;background:var(--good)}
+.cbot.ck .asleep{padding:10px 14px}
+.cbot.ck .blk{margin:0;border:0;border-radius:0;box-shadow:none;background:transparent}
+.cbot.ck .wkh{border-radius:0;background:transparent;color:var(--ink-3);border-bottom:1px dashed var(--line);font-weight:700}
+.cbot.ck .blk .wkh .days{color:var(--ink-3)}
+.cbot.ck .blk+.blk{border-top:1px solid var(--line)}
+.cbot.ck .blk.now .wkh{background:var(--wk);color:var(--wk-ink);border-bottom:1px solid var(--wk-line)}
+.cbot.ck .blk.now .wkh .days{color:var(--wk-ink)}
+.cbot.ck .sec>:last-child,.cbot.ck .sec>.blk:last-child>:last-child{border-bottom-left-radius:11px;border-bottom-right-radius:11px}
+.cbot.ck .sec .row.chk:last-child,.cbot.ck .sec .pline:last-child{border-bottom:0}
+@media (max-width:760px){.cbot.ck .mtr{display:none}}
 `;
 
 /* What the script needs to know rides on <body>: the two addresses it talks
@@ -934,12 +1001,25 @@ function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { 
      three weeks (§532's own point): a topic skipped three weeks running is
      the one the meeting most needs to see. A closed one leaves once its last
      open action is done, which is topicShown's rule and not a second one. */
+  /* THE QUIET ONES LAST (§700): a topic with nothing in these three weeks
+     is a short card after the ones the meeting talks through. */
+  const busy = (t: Topic) => shown.some((a) => a.topicId === t.id);
   const topics = L.topics.filter((t) => topicShown(t, all));
   const loose = shown.filter((a) => !a.topicId);
   let ix = 0;
   const secOf = (t: Topic | null): string => {
     const rows = t ? shown.filter((a) => a.topicId === t.id) : loose;
-    const byWeek = (k: CheckWeek) => rows.filter((a) => checkWeek(a, today) === k);
+    /* INSIDE EACH WEEK'S BOX THE ROWS STAND BY OWNER (§695). Islam: "make the
+       tasks in each box arranged by the owner name". The register's name,
+       A to Z, and under one name the list's own order (open before done,
+       then by date), which a stable sort keeps. The ordinary list is not
+       touched: it has Group by. SMP_BREAK=check-unsorted drops the sort;
+       checks/tracker.mjs §2b must go red under it. */
+    const nameOf = (a: Action) => L.names.get(a.ownerKey) || a.ownerKey;
+    const byWeek = (k: CheckWeek) => {
+      const w = rows.filter((a) => checkWeek(a, today) === k);
+      return brk() === "check-unsorted" ? w : w.sort((x, y) => nameOf(x).localeCompare(nameOf(y)));
+    };
     const open = rows.filter((a) => a.status !== "done");
     const late = open.filter((a) => isLate(a.due, today)).length;
     const nowRows = byWeek("now");
@@ -949,7 +1029,7 @@ function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { 
        week being reviewed. */
     const draw = (k: CheckWeek) =>
       byWeek(k).map((a) => row(a, L, p.who, today, dates, a.id === L.open, "topic", true) + (a.id === L.open ? openPanel(a, L, p.who, today) : "") +
-        (k === "now" && a.status !== "done" && me && a.id !== L.open ? '<div class="pline" data-id="' + esc(a.id) + '">' + progressBox(a, "What happened this week?") + "</div>" : "")).join("");
+        (k === "now" && a.status !== "done" && me && a.id !== L.open ? '<div class="pline" data-id="' + esc(a.id) + '">' + progressBox(a, "What happened?") + "</div>" : "")).join("");
     const mine = t ? all.filter((a) => a.topicId === t.id) : all.filter((a) => !a.topicId);
     const done = mine.filter((a) => a.status === "done").length;
     const head = t
@@ -957,8 +1037,8 @@ function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { 
         '<span class="ix">' + String(++ix).padStart(2, "0") + "</span>" +
         "<h3>" + esc(t.name) + "</h3>" +
         '<span class="meta">' + (nowRows.length ? open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") : "nothing this week") + "</span>" +
-        '<span class="end">' + (t.closed ? '<span class="shut">Closed</span>' : "") + done + " of " + mine.length + " done" + topicMenu(t) + "</span></div>" +
-        '<div class="meter"><i style="width:' + (mine.length ? Math.round(done * 100 / mine.length) : 0) + '%"></i></div>'
+        '<span class="end">' + (t.closed ? '<span class="shut">Closed</span>' : "") + done + " of " + mine.length + " done" +
+        '<span class="mtr"><i style="width:' + (mine.length ? Math.round(done * 100 / mine.length) : 0) + '%"></i></span>' + topicMenu(t) + "</span></div>"
       : '<div class="grp sh quiet" data-key="none"><span class="ix">&mdash;</span><h3>No topic</h3>' +
         '<span class="meta">' + open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") + '</span><span class="end"></span></div>';
     /* A TOPIC NOBODY HAS TOUCHED FOR THESE THREE WEEKS SAYS SO, and points
@@ -972,7 +1052,7 @@ function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { 
       (t ? weekCard("next", draw("next"), today, line) : weekCard("next", draw("next"), today));
     return '<div class="sec" data-key="' + esc(t ? t.id : "none") + '">' + head + asleep + body + "</div>";
   };
-  const html = topics.map((t) => secOf(t)).join("") + (loose.length ? secOf(null) : "");
+  const html = topics.filter(busy).map((t) => secOf(t)).join("") + (loose.length ? secOf(null) : "") + topics.filter((t) => !busy(t)).map((t) => secOf(t)).join("");
   /* HOW FAR THROUGH THE MEETING YOU ARE: the topics, and the ones whose next
      week is still empty — which is the question the check exists to answer. */
   const toWrite = topics.filter((t) => !shown.some((a) => a.topicId === t.id && checkWeek(a, today) === "next")).length;
@@ -1141,7 +1221,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
         "The check is read one topic at a time, so it needs a topic first. Make one on any action's topic tag, or behind the &middot;&middot;&middot; above.</div>";
     return {
       body: pinned(masthead(p, today, all, sum, L, { inner: '<div class="counted ck">' + ck.countHtml + "</div>" })) +
-        '<div class="card cbot"><div class="list">' + ck.html + "</div>" + nothing + "</div>",
+        '<div class="card cbot ck"><div class="list">' + ck.html + "</div>" + nothing + "</div>",
       count: ck.count, open: L.open,
     };
   }

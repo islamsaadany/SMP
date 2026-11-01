@@ -814,204 +814,62 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
    opened again, served; the seat served over a shut row; the SMO team shown
    the table and given no button (§89). Strategy's matrix is asserted
    byte-identical before and after (spec 056 §6.4). Put back in a finally. */
-await section("9 · Insights' Setup: Access writes a grant the door reads (spec 056 §4.4)", async () => {
+await section("9 · Insights' Setup is the Landing line alone; posting decides who reads (§702)", async () => {
+  /* REWRITTEN, never loosened (§218). This section pressed the eyes on
+     Insights' own Roles & access table and watched the door read them
+     (spec 056 §4.4). §702 removed that page on Islam's word — *"the choice
+     made when posting do the job. no need for the roles and access in the
+     insights"* — so what is asserted now is the new rule, both ends of it
+     (§94.2): the page is gone from the rail and its address lands nowhere
+     near it, the Landing line still works, and a grant stored under
+     a_insights before today (the state a client that used the old page is
+     in) no longer shuts anybody out. */
   const booted = () => page.waitForFunction(() => !document.documentElement.classList.contains("booting"));
-  const storedAccess = async () => { const st = await (await page.request.get(BASE + "/api/raya-trade/state")).json(); return (st.state && st.state.access) || null; };
-  /* KEY ORDER IS NOT CONTENT (§249.3): the store reads access_grants with no
-     ORDER BY, so a rewrite may hand the same rows back in another order.
-     Compared CANONICALLY — roles and keys sorted — never by raw stringify. */
-  const canon = (acc, drop) => JSON.stringify(Object.fromEntries(Object.keys(acc || {}).sort().map((r) => [r, Object.fromEntries(Object.keys(acc[r]).filter((k) => k !== drop).sort().map((k) => [k, acc[r][k]]))]).filter(([, row]) => Object.keys(row).length)));
-  const stripIns = (acc) => canon(acc, "a_insights");
-  const readAccessPage = () => page.evaluate(() => ({
-    sub: currentSub, scope: document.documentElement.getAttribute("data-setup-scope"),
-    head: (document.querySelector(".setuprail .rhead") || {}).textContent || "",
-    rail: [...document.querySelectorAll(".setuprail [data-setupgo]")].map((e) => e.dataset.setupgo),
-    areas: document.documentElement.getAttribute("data-areas"),
-    cols: [...document.querySelectorAll(".macgrid thead th")].map((t) => t.textContent.trim()),
-    rows: document.querySelectorAll(".macgrid tbody tr").length, roles: typeof matrixRows === "function" ? matrixRows().length : -1,
-    btns: [...document.querySelectorAll("[data-mac]")].map((b) => b.dataset.mac),
-    lit: [...document.querySelectorAll(".macgrid .stbtn.on")].length,
-    spans: document.querySelectorAll(".macgrid .st").length,
-    none: !!document.querySelector(".mnone"),
-    owner: (function () { const b = document.querySelector('[data-mac^="owner|a_insights|"]'); return b ? { press: b.dataset.mac, on: b.classList.contains("on"), off: !!b.closest(".stset.off") } : null; })(),
-  }));
   const goSetup = async (path) => { await page.goto(BASE + path, { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500); };
-  /* the client holds Insights for this section */
+  const railOf = () => page.evaluate(() => ({
+    sub: currentSub, scope: document.documentElement.getAttribute("data-setup-scope"),
+    rail: [...document.querySelectorAll(".setuprail [data-setupgo]")].map((e) => e.dataset.setupgo),
+    areas: document.documentElement.getAttribute("data-areas"), grid: !!document.querySelector(".macgrid") }));
   await owner.query(`UPDATE tenants SET modules = '["insights"]'::jsonb WHERE id = $1`, [tenant.id]);
   try {
     ({ ctx, page } = await fresh());
     await page.goto(BASE + "/", { waitUntil: "networkidle" });
     await signIn(page, "office@forefront.example", "Raya-2026!");
     await page.waitForURL(BASE + "/platform");
-    /* Strategy's matrix, before */
-    await goSetup("/raya-trade/strategy/setup/access");
-    const stratBefore = await page.evaluate(() => (document.querySelector("#panel .acgrid") || {}).innerHTML || "");
-    const accBefore = await storedAccess();
-    check(stratBefore.length > 1000 && !!accBefore, "Strategy's own matrix is drawn on its rail before anything is written", stratBefore.length);
-    /* Insights' Access page */
-    await goSetup("/raya-trade/insights/setup/access");
-    let r = await readAccessPage();
-    check(r.sub === "access" && r.scope === "insights", "Insights' Roles & access is on Insights' own rail — the same key as Strategy's, told apart by the scope", JSON.stringify([r.sub, r.scope]));
-    check(/Insights/.test(r.head) && /Setup/.test(r.head), "…headed Insights · Setup", r.head);
-    check(r.rail.join(",") === "access,landing", "…whose rail is exactly Insights' two pages and none of Strategy's (spec 056 §4.2)", r.rail.join(","));
-    const decl = MODULE_DEF.insights.areas;
-    check(!!r.areas && JSON.parse(r.areas).map((a) => a.key).join(",") === decl.map((a) => a.key).join(","), "the Setup document carries Insights' declared areas (data-areas)", r.areas);
-    check(!r.none && r.cols.length === decl.length + 1 && r.cols[1] === decl[0].label, "the table has the module's areas as its columns — one, Insights — and never the no-stamp sentence", JSON.stringify(r.cols));
-    check(r.rows > 0 && r.rows === r.roles, "…and the matrix's own roles down, the floor row included (matrixRows, §53.5)", JSON.stringify([r.rows, r.roles]));
-    check(r.btns.length === r.rows && r.btns.every((b) => /^[a-z]+\|a_insights\|(view|none)\|view$/.test(b)), "every cell is ONE toggle carrying the shipped state — view | none, no edit (§94.15)", JSON.stringify(r.btns.slice(0, 3)));
-    check(r.lit === r.rows, "with nothing stored every eye is lit: absent is the shipped state, not a refusal (§30.2)", JSON.stringify([r.lit, r.rows]));
-    check(!!accBefore && !Object.values(accBefore).some((row) => "a_insights" in row), "…and the stored map holds no a_insights key at all", JSON.stringify(Object.keys(accBefore || {})));
-    /* PRESS the owner's eye */
-    const ownerBtn = page.locator('[data-mac^="owner|a_insights|"]');
-    if (await ownerBtn.count()) { await ownerBtn.click(); await page.waitForTimeout(2500); }
-    else fail("pressing the BU owner's eye", "no such button to press");
-    /* AND EVERY OTHER ROW THIS PERSON HOLDS \u2014 ASKED, NEVER TYPED
-       (\u00a7218, \u00a7214.3, \u00a7255). Shutting one role is not shutting a
-       person: access is the MOST GENEROUS grant across the roles they hold
-       (\u00a733), and the matrix has a row per role precisely so two can
-       differ. \u00a7384 made a tactic's owner a role, so the Mobile head derived
-       `towner@mobile` as well as `owner@mobile` and the door below went on
-       serving them Insights with the BU owner's cell plainly shut \u2014 the
-       fixture had stopped making the state its own assertions are about,
-       which is a check reporting a correct build broken.
-
-       \u00a7387.1 THEN REMOVED THAT ROW on Islam's word, and the guard written
-       for it \u2014 `heldRows.length >= 2` \u2014 went red on a correct build:
-       \u00a7214.3, the same literal-outliving-its-decision one round later, and
-       in the SECOND file carrying it (\u00a751.11: when a decision moves, grep
-       every check for the assumption rather than the one that failed first).
-       REWRITTEN, NEVER LOOSENED (\u00a7218) to the claim that survives EITHER
-       decision \u2014 the rows are the product's own answer and one of them is
-       the BU owner's \u2014 which still fails if personRoles stops deriving it
-       or the head stops being an owner. What the COUNT was standing in for is
-       driven where it can be driven, in checks/modules.mjs \u00a74c, over a
-       person who does hold two.
-
-       THE ROLES COME FROM THE PRODUCT'S OWN RULE (personRoles, the one both
-       sides ask \u2014 \u00a742), so the row derived by the NEXT thing somebody is
-       named on is shut here the day it is added rather than being a second
-       list to remember. */
-    const heldRows = await page.evaluate(() =>
-      Array.from(new Set(personRoles(personBy("mobhead")).map((r) => r.role))));
-    check(heldRows.length > 0 && heldRows.includes("owner"),
-          "\u2026and the rows shut below are the product's own answer for the Mobile head, never a typed list (\u00a742)", JSON.stringify(heldRows));
-    for (const role of heldRows) {
-      if (role === "owner") continue;
-      const b2 = page.locator('[data-mac^="' + role + '|a_insights|"]');
-      if (await b2.count()) { await b2.click(); await page.waitForTimeout(2000); }
-      else fail("pressing the " + role + " row's eye", "no such button to press");
-    }
-    r = await readAccessPage();
-    let acc = await storedAccess();
-    check(!!r.owner && !r.owner.on && r.owner.off, "pressing the lit eye turns the cell off — nothing lit IS the answer", JSON.stringify(r.owner));
-    check(!!acc && acc.owner && acc.owner.a_insights === "none", "…and is STORED under the module's key on the owner row (read off the server through the tenant)", JSON.stringify(acc && acc.owner));
-    check(!!acc && stripIns(acc) === stripIns(accBefore), "Strategy's cells are byte-identical either side of it (spec 056 §6.4)", acc && stripIns(acc) === stripIns(accBefore) ? "" : stripIns(acc).slice(0, 200) + " vs " + stripIns(accBefore).slice(0, 200));
-    await goSetup("/raya-trade/strategy/setup/access");
-    const stratAfter = await page.evaluate(() => (document.querySelector("#panel .acgrid") || {}).innerHTML || "");
-    check(stratAfter === stratBefore, "…and so is Strategy's own matrix as drawn", stratAfter.length + " vs " + stratBefore.length);
-    /* Insights' Landing line page, on the same rail */
     await goSetup("/raya-trade/insights/setup/landing");
-    const ll = await page.evaluate(() => { let st = null; try { st = JSON.parse(document.documentElement.getAttribute("data-landing") || "null"); } catch (e) {}
-      return { sub: currentSub, scope: document.documentElement.getAttribute("data-setup-scope"), mod: st && st.module, keys: st ? st.lines.map((l) => l.key) : null, radios: document.querySelectorAll("[data-landpick]").length }; });
-    check(ll.sub === "landing" && ll.scope === "insights" && ll.mod === "insights", "Insights' Landing line page is on its rail and carries Insights' own declaration", JSON.stringify(ll));
-    check(!!ll.keys && ll.keys.join(",") === MODULE_DEF.insights.lines.map((l) => l.key).join(",") && ll.radios === ll.keys.length, "…offering Insights' three lines and no other module's", JSON.stringify(ll.keys));
-    await ctx.close();
-    /* THE DOOR: the unit head (BU owner, seat none) is refused everywhere the module is */
-    ({ ctx, page } = await fresh());
-    await page.goto(BASE + "/", { waitUntil: "networkidle" });
-    await signIn(page, "mobhead@raya.example", "Raya-2026!");
-    await inModule(page); await booted(page);
-    /* REWRITTEN (§218): the landing's Your modules list went with the landing
-       (§360); the same answer (openableModules) is now the served document's
-       own `data-modules` stamp.
-
-       AND IT IS READ, NEVER INFERRED FROM ITS ABSENCE (§362.1). This fell
-       back to `data-module` when the attribute was missing, because it was
-       written only for a client holding more than one — it is stamped for
-       every client now, so an absent one is a build that dropped it and must
-       go RED here rather than quietly answering "Strategy alone", which is
-       the same thing a correct build says (§113.8). */
-    const modsOf = () => page.evaluate(() => { const raw = document.documentElement.getAttribute("data-modules"); if (!raw) return null; try { return JSON.parse(raw).map((m) => m.key); } catch (e) { return null; } });
-    let mods = await modsOf();
-    check(mods && mods.join(",") === "strategy", "shut, the BU owner's document offers Strategy alone — no Insights entry (spec 056 §6.4)", JSON.stringify(mods));
-    await page.goto(BASE + "/raya-trade/insights", { waitUntil: "networkidle" });
-    check(!page.url().startsWith(BASE + "/raya-trade/insights"), "…and Insights' own address is refused, exactly as an unknown module word is (§320.5)", page.url());
-    await page.goto(BASE + "/raya-trade/insights/setup/access", { waitUntil: "networkidle" });
-    check(!page.url().startsWith(BASE + "/raya-trade/insights"), "…its Setup address too", page.url());
-    await page.goto(BASE + "/raya-trade/strategy/mobile/strategy", { waitUntil: "networkidle" }); await booted();
-    check((await page.locator(".topmark").count()) === 0, "…and the switcher offers no menu, one module being all they may open (§32)");
-    await ctx.close();
-    /* the function head, whose row is untouched, is served */
-    ({ ctx, page } = await fresh());
-    await page.goto(BASE + "/", { waitUntil: "networkidle" });
-    await signIn(page, "fn_fin@raya.example", "Raya-2026!");
-    await inModule(page); await booted(page);
-    mods = await modsOf();
-    check(mods.join(",") === "strategy,insights", "the function head, whose row is untouched, still has the Insights entry", mods.join(","));
-    await page.goto(BASE + "/raya-trade/insights", { waitUntil: "networkidle" });
-    check(page.url() === BASE + "/raya-trade/insights" && /<title>[^<]*Insights/.test(await page.content()), "…and is served the module at its address", page.url());
-    await ctx.close();
-    /* THE OFFICE IS SERVED OVER A SHUT ROW (spec 046 §4.10), and shown the
-       table with no button (§89). A client's own SMO team member holds that
-       role on the REGISTER ROW (`people.role`, the register's picker) — a
-       client login never carries a seat in `tenant_users`, which is the
-       consultants' route (platform-api setTeam) — and the register row is
-       what the frozen page reads its roles off. So the fixture writes the
-       role there: the owner row stays shut and the best grant across the
-       person's roles wins (§33); the SEAT short-circuit is modules.mjs §4c's.
-       The first draft wrote `tenant_users.seat` instead, a state the product
-       cannot produce for a client login, and the page rightly drew nothing. */
-    await owner.query("UPDATE people SET role = 'smoteam' WHERE tenant_id = $1 AND key = 'mobhead'", [tenant.id]);
-    try {
-      ({ ctx, page } = await fresh());
-      await page.goto(BASE + "/", { waitUntil: "networkidle" });
-      await signIn(page, "mobhead@raya.example", "Raya-2026!");
-      await inModule(page);
-      await page.goto(BASE + "/raya-trade/insights", { waitUntil: "networkidle" });
-      check(page.url() === BASE + "/raya-trade/insights", "given the SMO team role on the register, the same person is served over their shut owner row — the best grant across their roles wins (§33)", page.url());
-      await goSetup("/raya-trade/insights/setup/access");
-      r = await readAccessPage();
-      check(r.sub === "access" && r.scope === "insights" && r.rows > 0 && r.btns.length === 0 && r.spans === r.rows,
-        "…and the SMO team is SHOWN Insights' table and given no button: the matrix is the Super user's (§89)", JSON.stringify([r.rows, r.btns.length, r.spans]));
-      await ctx.close();
-    } finally { await owner.query("UPDATE people SET role = '' WHERE tenant_id = $1 AND key = 'mobhead'", [tenant.id]); }
-    /* OPENED AGAIN: the key is DELETED (§50.6) and the door opens */
-    ({ ctx, page } = await fresh());
-    await page.goto(BASE + "/", { waitUntil: "networkidle" });
-    await signIn(page, "office@forefront.example", "Raya-2026!");
-    await page.waitForURL(BASE + "/platform");
+    let r = await railOf();
+    check(r.sub === "landing" && r.scope === "insights", "Insights' Landing line is on Insights' own rail", JSON.stringify(r));
+    check(r.rail.join(",") === "landing", "…which is that page alone: no Roles & access (§702)", r.rail.join(","));
+    check(!r.areas, "…and the Setup document stamps no declared areas for Insights", r.areas);
     await goSetup("/raya-trade/insights/setup/access");
-    /* THE OTHER ROWS COME BACK FIRST, so the assertion below reads the whole
-       map restored rather than one row of it: `canon(acc) === canon(accBefore)`
-       is what says never-set and set-then-cleared are the same bytes, and it
-       is about every row this section touched (\u00a794.2, \u00a750.6). */
-    for (const role of heldRows) {
-      if (role === "owner") continue;
-      const b3 = page.locator('[data-mac^="' + role + '|a_insights|"]');
-      if (await b3.count()) { await b3.click(); await page.waitForTimeout(2000); }
-      else fail("opening the " + role + " row's eye again", "no such button to press");
-    }
-    /* a NEW locator: the earlier one was bound to a page since closed, and a
-       locator on a closed page throws rather than reporting (§215) */
-    const ownerBtn2 = page.locator('[data-mac^="owner|a_insights|"]');
-    if (await ownerBtn2.count()) { await ownerBtn2.click(); await page.waitForTimeout(2500); }
-    else fail("pressing the BU owner's eye again", "no such button to press");
-    acc = await storedAccess();
-    check(!!acc && acc.owner && !("a_insights" in acc.owner) && canon(acc) === canon(accBefore),
-      "pressing it again puts the SHIPPED state back by deleting the key — never-set and set-then-cleared are the same bytes (§50.6)", JSON.stringify(acc && acc.owner));
+    r = await railOf();
+    /* the key `access` is Strategy's too, so the old address resolves to
+       Strategy's own Roles & access (resolveSetupScope's fallback) — never to
+       an Insights table */
+    check(!(r.sub === "access" && r.scope === "insights") && !r.grid, "the old Insights Roles & access address draws no Insights access table (it lands on Strategy's own)", JSON.stringify([r.sub, r.scope, r.grid]));
+    const ll = await page.evaluate(() => document.querySelectorAll("[data-landpick]").length);
+    await goSetup("/raya-trade/insights/setup/landing");
+    check((await page.evaluate(() => document.querySelectorAll("[data-landpick]").length)) === MODULE_DEF.insights.lines.length,
+      "the Landing line still offers Insights' own lines", ll);
     await ctx.close();
+    /* A GRANT FROM BEFORE §702: every row the Mobile head holds shut under
+       a_insights, as the old page would have stored it */
+    const roles = (await owner.query("SELECT DISTINCT role_key FROM access_grants WHERE tenant_id = $1", [tenant.id])).rows.map((x) => x.role_key);
+    for (const role of Array.from(new Set(["owner", "employee", ...roles])))
+      await owner.query("INSERT INTO access_grants (tenant_id, role_key, page_key, grant_) VALUES ($1, $2, 'a_insights', 'none') ON CONFLICT DO NOTHING", [tenant.id, role]).catch(() => {});
     ({ ctx, page } = await fresh());
     await page.goto(BASE + "/", { waitUntil: "networkidle" });
     await signIn(page, "mobhead@raya.example", "Raya-2026!");
     await inModule(page); await booted(page);
-    mods = await modsOf();
+    const mods = await page.evaluate(() => { const raw = document.documentElement.getAttribute("data-modules"); if (!raw) return null; try { return JSON.parse(raw).map((m) => m.key); } catch (e) { return null; } });
+    check(!!mods && mods.join(",") === "strategy,insights", "with a_insights stored as none on every row, the BU owner still has Insights (the grant is no longer read)", JSON.stringify(mods));
     await page.goto(BASE + "/raya-trade/insights", { waitUntil: "networkidle" });
-    check(mods.join(",") === "strategy,insights" && page.url() === BASE + "/raya-trade/insights", "…and the BU owner has the entry and the address back", JSON.stringify([mods, page.url()]));
+    check(page.url() === BASE + "/raya-trade/insights", "…and is served it at its address", page.url());
+    await ctx.close();
   } finally {
     await owner.query(`UPDATE tenants SET modules = '[]'::jsonb WHERE id = $1`, [tenant.id]).catch(() => {});
     await owner.query("DELETE FROM access_grants WHERE tenant_id = $1 AND page_key = 'a_insights'", [tenant.id]).catch(() => {});
   }
-  await ctx.close();
 });
 
 {

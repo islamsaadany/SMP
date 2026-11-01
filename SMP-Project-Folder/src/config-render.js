@@ -589,7 +589,7 @@ function ladderCell(r, editable){
   var lv = SMPRules.ladderStored(world(), role);
   if (lv === 2 && !midExists()) lv = 1;
   var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = role === "gceo";
-  return '<span class="ladder" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + ladderLevels().map(function(i){
+  return '<span class="ladder' + (editable ? '' : ' ro') + '" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + ladderLevels().map(function(i){
     var struck = i < lo && !(info.floor && i === 0);
     var cls = struck ? "off" : info.held === i ? "pen" : (i <= lv && (info.held == null ? (info.floor ? i >= 1 : true) : i > info.held)) ? "eye" : "";
     if (info.floor && i === 0 && lv === 0) cls = "nil";
@@ -634,7 +634,7 @@ function renderAccess(){
   var editable = grant("c_access") === "edit" && mayEditAccess();
   var ROWS = SMPRules.ACCESS_ROWS.filter(function(r){ return !r.mid || midExists(); });
   var COPA = copilotArea();
-  var head = '<tr><th style="width:18%">Role</th><th>Enters and submits</th><th class="acladh">✎ works on · ◉ reads up to</th>' +
+  var head = '<tr><th>Role</th><th>Enters and submits</th><th class="acladh">✎ works on · ◉ reads up to</th>' +
     (COPA ? '<th class="ac" title="' + esc(COPA.label + " — " + COPA.note) + '">' + esc(COPA.label) + '</th>' : '') + '</tr>';
   var body = ROWS.map(function(r){
     var office = r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]);
@@ -660,9 +660,17 @@ function renderAccess(){
       : '<span class="acrdnow">' + (rdOn ? 'the reading window' : 'the workbench') + '</span>') +
     '<span class="acrdwhy">A reader: no unit, function, capability, project or direction of their own, and nothing to edit. ' +
       (rdOn ? 'They open in the window on sign-in, with the workbench a press of Exit away.' : 'Everybody opens on the workbench; Read on the bar still opens the window.') + '</span></div>';
+  /* §699: WHEN THIS PERSON CANNOT CHANGE THE PAGE, SAY SO. The controls are
+     drawn for reading and do nothing for anyone but the Super user (the
+     server refuses the rest, §89) — a page of buttons that do nothing, with
+     no word why, reads as broken (Islam, of the first build: "I can't click
+     on things to change"). */
+  var mine = SMPRules.personRoleKeys(world(), viewer()).map(accessRoleName).join(", ");
+  var roLine = editable ? '' : '<p class="acro"><b>Read only.</b> You are on this client as ' + esc(mine || "no seat") +
+    '. Only the Super user changes who reads and writes what.</p>';
   return section("", "Roles & access",
       null,
-      readersLine +
+      roLine + readersLine +
       '<div class="cfg acgrid acgrid-ladder"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<p class="acladderkey"><b>✎</b> where the role enters and submits, fixed by what it holds · <b>◉</b> what it reads · struck through: not a level the role stands on. ' +
         'The plan itself, the reporting cycle and Setup are the office’s.</p>' +

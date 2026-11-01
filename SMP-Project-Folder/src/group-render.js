@@ -8118,7 +8118,7 @@ function capsShown(subject) {
   var target = holderTarget(subject);
   if (isCapTarget(target)) {
     var one = capById(capKeyOf(target));
-    return one ? [one] : [];
+    return one ? pieceHolders(target, [one]) : [];
   }
   /* §334: ONE HOLDER, SO THERE IS NOTHING LEFT TO ORDER. §310 sorted this
      list so a project owner met their own capability first; since §326 a
@@ -8129,8 +8129,22 @@ function capsShown(subject) {
      their project rather than a function page with nothing of theirs on it. */
   /* §405: a business unit that does not plan in pillars holds its own work
      exactly as a function does — one holder, addressed `u:<key>`. */
-  if (isUnitHolderId(target)) return unitHolders(subjKey(target));
-  return fnHolders(target.slice(3));
+  var hs = isUnitHolderId(target) ? unitHolders(subjKey(target)) : fnHolders(target.slice(3));
+  return pieceHolders(target, hs);
+}
+/* §693: AT "OWN PIECE" a holder is drawn with only the person's own projects
+   — one door, so Performance, Projects and Reporting narrow together. A
+   reading view: the holder's other fields are its own (the prototype), and
+   the projects are the same objects, so a figure reported lands where it
+   always did. Nobody who edits a plan is ever at own piece (the office reads
+   everything), so nothing adds to this list. */
+function pieceHolders(target, hs){
+  var place = isUnitHolderId(target) ? subjKey(target) : target;
+  if (!SMPRules.pieceOnlyAt(world(), viewer(), place)) return hs;
+  var w = world(), v = viewer();
+  return hs.map(function(c){
+    return Object.create(c, { projects: { value: (c.projects || []).filter(function(p){ return SMPRules.holdsItem(w, v, p); }), enumerable: true } });
+  });
 }
 /* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
    halves differ we say which and why). Projects, Reporting and Performance

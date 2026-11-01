@@ -5658,6 +5658,44 @@
           : accessImpact(d.askfrom, to, d.askwhat || "this"),
         go: function(){ go(); paint(); askSaved(findCell); } });
     }
+    /* §693: THE LADDER. A press sets how far up every role on the row reads,
+       as the three reach rows of the map — the place, the division, the top,
+       each view or none — and clears §517's half eye, which the part owners'
+       row read as its level only until the row was set. */
+    document.querySelectorAll("[data-lad]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.lad.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], lv = +p[1];
+        if (!row) return;
+        var words = ladderWords();
+        askFirst(b, { title: b.dataset.askwho || "This role",
+          body: lv === 0 && row.floor ? "Will read <b>nothing</b> unless they hold something."
+            : "Will read up to <b>" + esc(words[lv]) + "</b>. What they enter and submit does not change.",
+          go: function(){
+            var R = SMPRules.REACH;
+            row.of.forEach(function(k){
+              var a = (ACCESS[k] = ACCESS[k] || {});
+              a[R.place] = lv >= 1 ? "view" : "none";
+              a[R.div] = lv >= 2 ? "view" : "none";
+              a[R.top] = lv >= 3 ? "view" : "none";
+            });
+            if (row.key === "part") delete GROUP[SMPRules.DIR_SCOPE];
+            paint(); askSaved(function(){ var x = document.querySelector('[data-lad^="' + p[0] + '|"]'); return x && x.closest("td"); });
+          } });
+      });
+    });
+    /* One person moved a level from their role (person.reach, +1 or -1). */
+    document.querySelectorAll("[data-reachp]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.reachp.split("|"), who = PEOPLE.filter(function(x){ return x.key === p[0]; })[0], mv = +p[1];
+        if (!who) return;
+        askFirst(b, { title: who.name || who.key,
+          body: mv === 0 ? "Will read <b>as their role</b> again." : "Will read <b>one level " + (mv > 0 ? "higher" : "lower") + "</b> than their role. What they enter and submit does not change.",
+          go: function(){ if (mv) who.reach = mv; else delete who.reach; if (!mv && ACC_EXC_PICK === who.key) ACC_EXC_PICK = null; paint(); askSaved(function(){ return document.querySelector(".acex"); }); } });
+      });
+    });
+    document.querySelectorAll("[data-reachpick]").forEach(function(sel){
+      sel.addEventListener("change", function(){ ACC_EXC_PICK = sel.value || null; paint(); });
+    });
     function accessPartCell(){ var x = document.querySelector("[data-dirscope]"); return x && x.closest("td"); }
     document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){

@@ -1151,13 +1151,159 @@
   ];
 
   /** @param {World} w @param {Person|null|undefined} person @param {string} area @param {string} target @returns {Grant} */
+  /* ── THE LADDER (§693; design-mockups/roles-and-access) ─────────────────
+     Islam, 2026-10-31: *"it's more of levels of visibility … everyone set on a
+     level can see his level or see the bigger level(s) one by one"*, *"take
+     care seeing doesn't mean reporting. a person can see the sibling
+     directions but can only report his"*, and after the measured comparison
+     of the two rules on every Raya seat, 2026-11-01: *"Apply the ladder."*
+
+     SO A ROLE ANSWERS TWO QUESTIONS, AND ONLY ONE OF THEM IS A SETTING.
+       · WHAT IT WRITES is what it holds, by rule: a unit's owner and
+         custodian, a function's head and custodian and a capability's owner
+         enter and submit for that place; a pillar's, a project's or a
+         direction's owner, and a contributor, enter their own lines in it
+         (bounded by OWN_LINES_ONLY, unchanged). The plan itself, the cycle
+         and Setup stay the office's (mayAuthorPage, neverOffered).
+       · HOW FAR UP IT READS is the one setting: own piece · own unit or
+         function · own division · the top. Each level holds everything on
+         it — reading your unit is reading its sibling pillars — and plan and
+         figures go together, so a unit's Strategy and Reporting can no
+         longer be read apart.
+
+     STORED IN THE ACCESS MAP IT ALREADY HAD, so no table moves and the server
+     reads it through the same `w.access`: three rows per role, each `view`
+     or `none` — a_reach_place, a_reach_div, a_reach_top — the level being the
+     highest one on. A role with none of the three stored reads its shipped
+     level (LADDER_DEFAULT), the levels every role had before (§693's own
+     measurement). The part owners' row reads §517's half eye as its level
+     until the row is set: "part" is own piece, absent is the whole place.
+
+     A PERSON CAN BE MOVED ONE LEVEL, up or down from their role
+     (`person.reach`, +1 or -1, on the register's own record) — an exception,
+     never a second table. The office (super, smoteam) is not on the ladder:
+     it reads and writes everything, as its own rows of the map say. */
+  var REACH = { place: "a_reach_place", div: "a_reach_div", top: "a_reach_top" };
+  var REACH_KEYS = [REACH.place, REACH.div, REACH.top];
+  /* the page areas the ladder answers for; any other area (a module's own,
+     `always`) is asked of the map exactly as before */
+  var LADDER_AREAS = ["unit", "unit_strat", "fn", "fn_strat", "a_group", "a_cycle", "a_setup"];
+  var PEN_ROLES = ["owner", "custodian", "fnhead", "capowner"];
+  var LINE_PEN_ROLES = ["powner", "plowner", "dirowner", "contrib"];
+  var LADDER_DEFAULT = { gceo: 3, cceo: 2, owner: 1, fnhead: 1, custodian: 1,
+    powner: 1, plowner: 1, dirowner: 1, capowner: 1, contrib: 1, employee: 0 };
+  /* the lowest level a role can be set to: a holder of a whole place always
+     reads it; a CEO holds a level, not a piece */
+  var LADDER_MIN = { gceo: 3, cceo: 2, owner: 1, fnhead: 1, custodian: 1 };
+  function ladderStored(w, roleKey) {
+    var row = ((w && w.access) || {})[roleKey];
+    var has = function (k) { return !!row && Object.prototype.hasOwnProperty.call(row, k); };
+    if (!REACH_KEYS.some(has)) {
+      var d = LADDER_DEFAULT[roleKey];
+      if (d == null) return 0;
+      if (isPartRole(roleKey) && dirScopePart(w && w.group)) return 0;
+      return d;
+    }
+    var on = function (k) { return has(k) && row[k] !== "none"; };
+    return on(REACH.top) ? 3 : on(REACH.div) ? 2 : on(REACH.place) ? 1 : 0;
+  }
+  function reachMove(person) {
+    var m = person ? Number(person.reach) : 0;
+    return m === 1 || m === -1 ? m : 0;
+  }
+  /* The level a person reads at through one role: the role's, moved by
+     theirs, kept between the role's floor and the top, and stepping over a
+     division level the client does not have. */
+  function ladderLevel(w, person, roleKey) {
+    if (isOfficeRole(roleKey)) return 3;
+    var mv = reachMove(person), lv = ladderStored(w, roleKey) + mv;
+    if (lv === 2 && !midExists(w && w.group, w && w.companies)) lv = mv > 0 ? 3 : 1;
+    var lo = LADDER_MIN[roleKey] != null ? LADDER_MIN[roleKey] : 0;
+    return Math.max(lo, Math.min(3, lv));
+  }
+  /* where a seat stands: its place, a capability read as the function (or
+     the top) that holds it, as capHolderTarget reads every capability */
+  function seatPlace(w, r) {
+    var at = String((r && r.at) || "group");
+    return boxRef(at).kind === "cap" ? capHolderTarget(w, at) : at;
+  }
+  function divisionOf(w, place) {
+    var r = boxRef(place), cs = (w && w.companies) || {}, live = function (ck) {
+      return !!ck && !!cs[ck] && cs[ck].active !== false ? ck : null; };
+    if (r.kind === "mid") return live(r.key);
+    if (r.kind === "fn") return live(((w.functions || {})[r.key] || {}).company);
+    if (r.kind === "top" || r.kind !== "bu") return null;
+    return live(((w.units || {})[r.key] || {}).company);
+  }
+  /* Does this seat read that target? The top reads everything; a division
+     level reads the division's page and every unit and function in it; any
+     level reads the seat's own place — at "own piece" the place's pages are
+     open and its lists hold only the person's own (pieceOnlyAt, the page's
+     part filter). The floor holds no piece, so its "own piece" is nothing. */
+  function ladderReads(w, person, r, target) {
+    var lv = ladderLevel(w, person, r.role);
+    if (lv >= 3) return true;
+    if (r.role === NO_ROLE && lv < 1) return false;
+    var t = capHolderTarget(w, target), p = seatPlace(w, r);
+    if (t === p) return true;
+    if (lv >= 2) {
+      var d = divisionOf(w, p);
+      if (d && (t === "co:" + d || divisionOf(w, t) === d)) return true;
+    }
+    return false;
+  }
+  /* One seat's grant on one area, the ladder's answer for every role but the
+     office's. Asked by grantIn and by rolesAtState, so "may they" and "which
+     role let them" cannot disagree (§53.5). */
+  function seatGrant(w, person, r, area, target) {
+    if (LADDER_AREAS.indexOf(area) < 0 || isOfficeRole(r.role)) {
+      if (!companyAllows(w, r, target)) return "none";
+      return grantFor(w, r.role, areaFor(area, w, r, target));
+    }
+    if (area === "a_cycle" || area === "a_setup") return "none";
+    /* the group's own pages are about the top or a division, whatever page
+       they are drawn beside: read as the top unless a division is named */
+    if (area === "a_group" && boxRef(target).kind !== "mid") target = "group";
+    /* any page family: a pillars function reports on the unit's pages, a
+       unit planning in projects on the function's */
+    if ((area === "unit" || area === "fn") && roleOwns(w, r, target) &&
+        (PEN_ROLES.indexOf(r.role) > -1 || LINE_PEN_ROLES.indexOf(r.role) > -1)) return "edit";
+    return ladderReads(w, person, r, target) ? "view" : "none";
+  }
+  /* AT "OWN PIECE" ON A PLACE: the page is open and its lists are narrowed to
+     what the person holds. True only when every seat that reaches the place
+     reaches it at level 0 — a second seat that reads the whole place (its
+     owner's, a division's, the top's) opens it whole. */
+  function pieceOnlyAt(w, person, place) {
+    if (!person || !w) return false;
+    var t = capHolderTarget(w, String(place || "")), rs = rolesOrFloor(w, person), any = false;
+    for (var i = 0; i < rs.length; i++) {
+      var r = rs[i];
+      if (isOfficeRole(r.role) || PEN_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, t)) return false;
+      var lv = ladderLevel(w, person, r.role), p = seatPlace(w, r);
+      if (lv >= 3) return false;
+      if (lv >= 2) { var d = divisionOf(w, p); if (d && (t === "co:" + d || divisionOf(w, t) === d)) return false; }
+      if (p === t) { if (lv >= 1) return false; any = true; }
+    }
+    return any;
+  }
+  /* Is this pillar, direction or project the person's: its owner or its
+     custodian, or named on any of its rows — the same `namedOn` every role
+     here is derived with. */
+  function holdsItem(w, person, it) {
+    if (!it || !person) return false;
+    if (namedOn({ owner: it.owner }, person) || (it.custodian && namedOn({ owner: it.custodian }, person))) return true;
+    return ["measures", "tactics", "milestones", "deliverables", "outcomes"].some(function (k) {
+      return Array.isArray(it[k]) && it[k].some(function (row) { return namedOn(row, person); });
+    });
+  }
+
   function grantIn(w, person, area, target) {
     if (area === "always") return "view";
     var rs = rolesOrFloor(w, person);
     /** @type {Grant} */ var best = "none";
     for (var i = 0; i < rs.length; i++) {
-      if (!companyAllows(w, rs[i], target)) continue;
-      var g = grantFor(w, rs[i].role, areaFor(area, w, rs[i], target));
+      var g = seatGrant(w, person, rs[i], area, target);
       if (STATE_RANK[g] > STATE_RANK[best]) best = g;
     }
     return best;
@@ -4180,8 +4326,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      about who a bounded role is (§53.5). */
   function rolesAtState(w, person, area, target, state) {
     return rolesOrFloor(w, person).filter(function (r) {
-      if (!companyAllows(w, r, target)) return false;
-      return grantFor(w, r.role, areaFor(area, w, r, target)) === state;
+      return seatGrant(w, person, r, area, target) === state;   /* §693: the ladder's, as grantIn asks */
     }).map(function (r) { return r.role; });
   }
   function editingRoles(w, person, area, target) {
@@ -5243,10 +5388,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   var DIR_SCOPE = "dirScope";
   function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
   function partOnly(w, person) {
-    if (!person || !w || !dirScopePart(w.group)) return false;
+    if (!person || !w) return false;
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
       if (!isPartRole(rs[i].role)) return false;
+      /* §693: narrowed when the part owners' level is "own piece" — which is
+         what §517's half eye reads as until the row is set */
+      if (ladderLevel(w, person, rs[i].role) > 0) return false;
       holds = true;
     }
     return holds;
@@ -5928,6 +6076,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
+    /* §693: the ladder */
+    REACH: REACH, LADDER_DEFAULT: LADDER_DEFAULT, LADDER_MIN: LADDER_MIN,
+    ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove,
+    ladderReads: ladderReads, pieceOnlyAt: pieceOnlyAt, holdsItem: holdsItem, divisionOf: divisionOf,
     neverOffered: neverOffered,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
@@ -17681,6 +17833,14 @@ function partFilter(u){
   if (u && u.topLayer && partOnly()) {
     var w = world(), v = viewer();
     pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
+  }
+  /* §693: "OWN PIECE" ON A UNIT OR A FUNCTION. The ladder's lowest level,
+     where the place's pages are open and its lists hold only what the person
+     holds — the half eye's narrowing, carried from the top's own plan to
+     every place, and asked of the one rule both sides read. */
+  else if (u && !u.topLayer && u.ukey && SMPRules.pieceOnlyAt(world(), viewer(), u.ukey)) {
+    var w2 = world(), v2 = viewer();
+    pf = function(p){ return SMPRules.holdsItem(w2, v2, p); };
   }
   if (!pf) return hf;
   if (!hf) return pf;
@@ -36070,7 +36230,7 @@ function capsShown(subject) {
   var target = holderTarget(subject);
   if (isCapTarget(target)) {
     var one = capById(capKeyOf(target));
-    return one ? [one] : [];
+    return one ? pieceHolders(target, [one]) : [];
   }
   /* §334: ONE HOLDER, SO THERE IS NOTHING LEFT TO ORDER. §310 sorted this
      list so a project owner met their own capability first; since §326 a
@@ -36081,8 +36241,22 @@ function capsShown(subject) {
      their project rather than a function page with nothing of theirs on it. */
   /* §405: a business unit that does not plan in pillars holds its own work
      exactly as a function does — one holder, addressed `u:<key>`. */
-  if (isUnitHolderId(target)) return unitHolders(subjKey(target));
-  return fnHolders(target.slice(3));
+  var hs = isUnitHolderId(target) ? unitHolders(subjKey(target)) : fnHolders(target.slice(3));
+  return pieceHolders(target, hs);
+}
+/* §693: AT "OWN PIECE" a holder is drawn with only the person's own projects
+   — one door, so Performance, Projects and Reporting narrow together. A
+   reading view: the holder's other fields are its own (the prototype), and
+   the projects are the same objects, so a figure reported lands where it
+   always did. Nobody who edits a plan is ever at own piece (the office reads
+   everything), so nothing adds to this list. */
+function pieceHolders(target, hs){
+  var place = isUnitHolderId(target) ? subjKey(target) : target;
+  if (!SMPRules.pieceOnlyAt(world(), viewer(), place)) return hs;
+  var w = world(), v = viewer();
+  return hs.map(function(c){
+    return Object.create(c, { projects: { value: (c.projects || []).filter(function(p){ return SMPRules.holdsItem(w, v, p); }), enumerable: true } });
+  });
 }
 /* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
    halves differ we say which and why). Projects, Reporting and Performance
@@ -40140,144 +40314,120 @@ function accessMerged(row, col){
            value: vals.length === 1 ? vals[0] : null, mixed: vals.length > 1 };
 }
 
+/* ── ROLES & ACCESS AS A LADDER (§693; design-mockups/roles-and-access) ──
+   Islam: *"it's more of levels of visibility … everyone set on a level can
+   see his level or see the bigger level(s) one by one"*, *"seeing doesn't
+   mean reporting"*, and, after the two rules were measured side by side on
+   every Raya seat, *"Apply the ladder."* So each role is one line: what it
+   ENTERS AND SUBMITS — a fact of what it holds, written as words, never a
+   control — and HOW FAR UP IT READS, the one control: own piece · own unit or
+   function · own division · the top, in the client's own words, the division
+   only where the client has one. ✎ marks the level a role works on, ◉ every
+   level it reads; a level the role cannot stand on is struck through.
+
+   The office's two rows are not on the ladder (they read and write
+   everything); the Copilot column and the reading-window switch stay as they
+   were. Under the table, one person can be moved a level up or down from
+   their role — an exception kept on the person, never a second table. */
+var ACC_EXC_PICK = null;
+function ladderWords(){
+  var top = String(labelWord("topword", "group") || "group").trim().toLowerCase();
+  var div = String(labelWord("division", "group") || "division").trim().toLowerCase();
+  return ["Own piece", buExists() ? "Own unit or function" : "Own function", "Own " + div, "The " + top];
+}
+var LADDER_ROW = {
+  gceo:      { held: null, says: "Nothing — holds no piece" },
+  cceo:      { held: null, says: "Nothing — holds no piece" },
+  owner:     { held: 1, says: "Their unit’s or function’s figures, and its submission" },
+  custodian: { held: 1, says: "What they keep, as its owner would" },
+  part:      { held: 0, says: "The lines of their own pillar, project, direction or capability" },
+  contrib:   { held: 0, says: "The lines that name them" }
+};
+LADDER_ROW[SMPRules.ACCESS_ROWS.filter(function(r){ return r.floor; })[0].key] = { held: null, floor: true, says: "Nothing" };
+function ladderLevels(){ return midExists() ? [0, 1, 2, 3] : [0, 1, 3]; }
+function ladderCell(r, editable){
+  var info = LADDER_ROW[r.key] || {}, words = ladderWords(), role = r.of[0];
+  var lv = SMPRules.ladderStored(world(), role);
+  if (lv === 2 && !midExists()) lv = 1;
+  var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = role === "gceo";
+  return '<span class="ladder" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + ladderLevels().map(function(i){
+    var struck = i < lo && !(info.floor && i === 0);
+    var cls = struck ? "off" : info.held === i ? "pen" : (i <= lv && (info.held == null ? (info.floor ? i >= 1 : true) : i > info.held)) ? "eye" : "";
+    if (info.floor && i === 0 && lv === 0) cls = "nil";
+    var word = info.floor && i === 0 ? "Nothing" : words[i];
+    var mark = cls === "pen" ? '<b aria-hidden="true">✎</b>' : cls === "eye" ? '<b aria-hidden="true">◉</b>' : "";
+    var can = editable && !struck && !fixed && i !== lv;
+    return '<button type="button" class="' + cls + '"' + (can ? ' data-lad="' + esc(r.key) + '|' + i + '"' : ' disabled') +
+      ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + (i === lv) + '"' +
+      (struck ? ' title="Not a level this role stands on"' : '') + '>' + mark + esc(word) + '</button>';
+  }).join("") + '</span>';
+}
+/* A person's own level: the highest any of their roles reads at, moved by
+   their exception — what the navigation will actually give them. */
+function personReadsAt(p){
+  var w = world(), rs = SMPRules.personRoles(w, p).map(function(x){ return x.role; });
+  if (!rs.length) rs = ["employee"];
+  return rs.reduce(function(m, k){ return Math.max(m, SMPRules.isOfficeRole(k) ? 3 : SMPRules.ladderLevel(w, p, k)); }, 0);
+}
+function accessExceptions(editable){
+  var words = ladderWords(), w = world();
+  var moved = PEOPLE.filter(function(p){ return SMPRules.reachMove(p) !== 0 || p.key === ACC_EXC_PICK; });
+  var rows = moved.map(function(p){
+    var mv = SMPRules.reachMove(p), now = personReadsAt(p);
+    var at = function(m){ var o = p.reach; if (m) p.reach = m; else delete p.reach; var v = personReadsAt(p); if (o == null) delete p.reach; else p.reach = o; return v; };
+    var asRole = at(0), down = at(-1) < asRole, up = at(1) > asRole;
+    var b = function(m, label, ok){ return '<button type="button" class="seg' + (mv === m ? ' on' : '') + '"' +
+      (mv === m ? '' : editable && ok ? ' data-reachp="' + esc(p.key) + '|' + m + '"' : ' disabled') + ' aria-pressed="' + (mv === m) + '">' + label + '</button>'; };
+    var roles = SMPRules.personRoleKeys(w, p).map(accessRoleName).join(", ") || "no role";
+    return '<div class="acexrow"><span class="acexwho"><b>' + esc(p.name || p.key) + '</b><span>' + esc(roles) + '</span></span>' +
+      '<span class="segsw">' + b(-1, "One lower", down) + b(0, "As the role", true) + b(1, "One higher", up) + '</span>' +
+      '<span class="acexnow">Reads up to <b>' + esc(words[Math.min(3, now)] || "") + '</b></span></div>';
+  }).join("");
+  var pick = editable ? '<label class="acexpick"><span>Move one person</span><select data-reachpick><option value="">Choose a person…</option>' +
+    PEOPLE.filter(function(p){ return personActive(p) && !SMPRules.isOffice(w, p) && SMPRules.reachMove(p) === 0 && p.key !== ACC_EXC_PICK; })
+      .map(function(p){ return '<option value="' + esc(p.key) + '">' + esc(p.name || p.key) + '</option>'; }).join("") + '</select></label>' : '';
+  if (!rows && !editable) return "";
+  return '<div class="acex"><h3>Exceptions</h3>' + (rows || '<p class="acexnone">Nobody reads differently from their role.</p>') + pick + '</div>';
+}
 function renderAccess(){
-  /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
-     A grant cannot express this: the SMO team holds `a_setup` at edit, which
-     is what lets them run every other Setup page — and editing THIS page is
-     editing who may edit this page, so anybody who can is a Super user
-     whatever their row says. The page stays READABLE to them: knowing what
-     everyone may do is part of running the office, and §37's rules are shown
-     to everyone who can open the page. */
+  /* Editing this page is editing who may edit it, so it is the Super user's
+     whatever any row says; it stays readable to whoever can open it. */
   var editable = grant("c_access") === "edit" && mayEditAccess();
-  /* §516.1: the second layer's row exists only where the client HAS a
-     second layer — Islam: "a client with no second layer has no second layer
-     row". Asked of midExists(), the one answer the set-up flow and the
-     Structure step already ask (§53.5). */
-  var COLS = SMPRules.ACCESS_COLS, ROWS = SMPRules.ACCESS_ROWS.filter(function(r){
-    return !r.mid || midExists(); });
-
-  /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
-     (Islam, 2026-08-22: "remove all the descriptions from the headers and just
-     make it appear on hovering"). The notes are lists, and stacked under the
-     labels they made the HEAD of the table taller than its body. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §516) ──
-     Plan and Reporting are two answers about the same box, so the box's name
-     is written ONCE above them. Built off the `pair`/`col` fields the columns
-     carry — the header is derived from the same list the cells walk, so a
-     column cannot appear in one and not the other. */
-  var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
-  var hi = 0;
-  while (hi < COLS.length) {
-    var hc = COLS[hi];
-    if (!hc.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' +
-        esc(hc.label + " — " + hc.note) + '">' + esc(hc.label) + '</th>';
-      hi++;
-      continue;
-    }
-    var span = 0;
-    while (hi + span < COLS.length && COLS[hi + span].pair === hc.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(hc.pair) +
-      '">' + esc(hc.pair) + '</th>';
-    for (var hj = 0; hj < span; hj++) {
-      var hb = COLS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.label + " — " + hb.note) +
-        '">' + esc(hb.col) + '</th>';
-    }
-    hi += span;
-  }
-  /* ── THE COPILOT COLUMN (Islam, 2026-10-01, from the signed-off
-     design-mockups/copilot-access/2026-10-01_copilot-column.html) ──────
-     Last, and only where the client has the Copilot: the served document
-     stamps its area (`data-copilot-area`, MODULE_DEF's own declaration), so
-     over file:// and on a client without it there is no column to write to
-     nothing (§61). The office's two rows carry the eye and the pen through
-     the module cell's own writer (§359.5: the default is an ABSENCE, edit);
-     every other row is a dash by RULE — "office only for now" — because the
-     api refuses a client's own person whatever the map holds, and a toggle
-     that changes nothing is decoration (§42). Both office rows are a single
-     role each on the merged table (§516), so the cell names that role. */
+  var ROWS = SMPRules.ACCESS_ROWS.filter(function(r){ return !r.mid || midExists(); });
   var COPA = copilotArea();
-  if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
-  var head = headTop + "</tr>" + headSub + "</tr>";
-
-  /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
-     Employee stopped being one: nobody grants it, and it was drawn as a chip
-     claiming somebody held something they did not. What it decided is still
-     a real question — what somebody on the register with NO role may open —
-     so it is still a row here, labelled as the state it is, and editable: a
-     client who wants people with no role to see nothing sets it to none and
-     can see that they have. */
-  var differ = [];
+  var head = '<tr><th style="width:18%">Role</th><th>Enters and submits</th><th class="acladh">✎ works on · ◉ reads up to</th>' +
+    (COPA ? '<th class="ac" title="' + esc(COPA.label + " — " + COPA.note) + '">' + esc(COPA.label) + '</th>' : '') + '</tr>';
   var body = ROWS.map(function(r){
+    var office = r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]);
+    var info = LADDER_ROW[r.key] || {};
     return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      COLS.map(function(c){
-        var m = accessMerged(r, c);
-        if (!m.pairs.length) return stateCell(r.of[0], c.areas[0], editable, m.why || "Cannot come up for this role.");
-        var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
-        var opt = { attr: "data-acm", target: target, value: m.value,
-                    ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: ACC_WHAT[c.key] || c.label } };
-        if (c.key === "plan") opt.states = ["view", "fill", "edit"];
-        if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
-        if (m.mixed) {
-          differ.push(accessRowName(r) + " · " + (c.col ? c.pair + ": " + c.col : c.label));
-          opt.mixed = true;
-          opt.title = "These differ underneath: " + m.pairs.map(function(p){
-            return accessRoleName(p.role) + " in " + accessAreaLabel(p.area).toLowerCase().replace(/^own /, "own ") +
-              " — " + ACC_WORD[p.v];
-          }).join("; ") + "." + (editable ? " Press a state to give them all that one." : "");
-        }
-        return stateCell(r.of[0], c.areas[0], editable, null, opt);
-      }).join("") +
-      (COPA ? (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])
+      '<td class="acsays">' + esc(office ? "Everything" : info.says || "") + '</td>' +
+      '<td class="acladder">' + (office ? '<span class="acall">Everything, by rule</span>' : ladderCell(r, editable)) + '</td>' +
+      (COPA ? (office
         ? stateCell(r.of[0], COPA.key, editable, null, {
             value: moduleGrantFor(r.of[0], COPA), states: ["view", "edit"],
             attr: "data-mac", shipped: COPA.shipped || "none",
             ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: COPA.label || COPA.key } })
         : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
   }).join("");
-
-  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§516). Its
-     hover says which pairs and what each holds; this line says that there is
-     something to decide at all, because a cell with nothing lit is easy to
-     read as "no access" from across the room. A status, not a description
-     (1b-ii), and drawn only while there is one. */
-  var differLine = differ.length
-    ? '<p class="acdiffer"><b>' + differ.length + (differ.length === 1 ? ' cell holds' : ' cells hold') +
-      ' different answers underneath</b> — ' + differ.map(esc).join(", ") +
-      '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
-    : '';
-
-  /* WHERE A READER'S SEAT LANDS (§687; Islam's A of the round-4 mockup):
-     the line above the matrix, because the matrix under it is exactly what
-     the rule reads to decide who is a reader — not the office, holding no
-     piece, granted edit or fill nowhere (reading.js readerSeat). Pressed by
-     whoever edits the matrix; kept on the client's structure as an absence
-     for the window (SMPRules.readersOpen). */
+  /* WHERE A READER'S SEAT LANDS (§687), unchanged. */
   var rdOn = SMPRules.readersOpen(GROUP);
   var readersLine = '<div class="acreaders"><b>Readers land in</b>' +
     (editable
-      ? '<span class="segsw" role="group" aria-label="Where a reader\u2019s seat lands at sign-in">' +
+      ? '<span class="segsw" role="group" aria-label="Where a reader’s seat lands at sign-in">' +
           '<button type="button" class="seg' + (rdOn ? ' on' : '') + '" data-readers="window" aria-pressed="' + rdOn + '">the reading window</button>' +
           '<button type="button" class="seg' + (rdOn ? '' : ' on') + '" data-readers="workbench" aria-pressed="' + (!rdOn) + '">the workbench</button>' +
         '</span>'
       : '<span class="acrdnow">' + (rdOn ? 'the reading window' : 'the workbench') + '</span>') +
     '<span class="acrdwhy">A reader: no unit, function, capability, project or direction of their own, and nothing to edit. ' +
       (rdOn ? 'They open in the window on sign-in, with the workbench a press of Exit away.' : 'Everybody opens on the workbench; Read on the bar still opens the window.') + '</span></div>';
-
   return section("", "Roles & access",
       null,
-      readersLine + differLine +
-      '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
-      '<div class="chart-legend" style="margin-top:12px">' +
-        '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-view">' + ICON_HALFEYE + '</i> may read their part only (Part owner)</span>' +
-        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Plan only)</span>' +
-        '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
-        '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
-        (differ.length ? '<span><i class="st st-mixed">differs</i> answers differ underneath</span>' : '') +
-        '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
-      '</div>');
+      readersLine +
+      '<div class="cfg acgrid acgrid-ladder"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
+      '<p class="acladderkey"><b>✎</b> where the role enters and submits, fixed by what it holds · <b>◉</b> what it reads · struck through: not a level the role stands on. ' +
+        'The plan itself, the reporting cycle and Setup are the office’s.</p>' +
+      accessExceptions(editable));
 }
 /* THE TWO ESSAYS ARE GONE FROM THE PAGE (Islam, 2026-08-22, on this table:
    "the design is poor"). "Own is not a setting" and "Three things are rules"
@@ -56354,7 +56504,9 @@ var READING = (function () {
      directions alone and the capabilities have the tab above; where it
      answers no, one list, as the box itself is. */
   function directions(key, caps) {
-    var u = planOf(key), items = SMPRules.shown(itemsNow(u));
+    /* §693: at "own piece" the person's own alone, as the page narrows it */
+    var u = planOf(key), pf = typeof partFilter === "function" ? partFilter(u) : null, items = SMPRules.shown(itemsNow(u));
+    if (pf) items = items.filter(pf);
     if (boxSplit(u)) items = items.filter(function (it) { return !!SMPRules.pillarIsCap(it) === !!caps; });
     var word = caps ? L1("capability").toLowerCase() : "direction";
     if (!items.length) return '<p class="rnone">No ' + esc(word) + 's this year.</p>';
@@ -82680,6 +82832,44 @@ var SYNC = (function () {
           : accessImpact(d.askfrom, to, d.askwhat || "this"),
         go: function(){ go(); paint(); askSaved(findCell); } });
     }
+    /* §693: THE LADDER. A press sets how far up every role on the row reads,
+       as the three reach rows of the map — the place, the division, the top,
+       each view or none — and clears §517's half eye, which the part owners'
+       row read as its level only until the row was set. */
+    document.querySelectorAll("[data-lad]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.lad.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], lv = +p[1];
+        if (!row) return;
+        var words = ladderWords();
+        askFirst(b, { title: b.dataset.askwho || "This role",
+          body: lv === 0 && row.floor ? "Will read <b>nothing</b> unless they hold something."
+            : "Will read up to <b>" + esc(words[lv]) + "</b>. What they enter and submit does not change.",
+          go: function(){
+            var R = SMPRules.REACH;
+            row.of.forEach(function(k){
+              var a = (ACCESS[k] = ACCESS[k] || {});
+              a[R.place] = lv >= 1 ? "view" : "none";
+              a[R.div] = lv >= 2 ? "view" : "none";
+              a[R.top] = lv >= 3 ? "view" : "none";
+            });
+            if (row.key === "part") delete GROUP[SMPRules.DIR_SCOPE];
+            paint(); askSaved(function(){ var x = document.querySelector('[data-lad^="' + p[0] + '|"]'); return x && x.closest("td"); });
+          } });
+      });
+    });
+    /* One person moved a level from their role (person.reach, +1 or -1). */
+    document.querySelectorAll("[data-reachp]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.reachp.split("|"), who = PEOPLE.filter(function(x){ return x.key === p[0]; })[0], mv = +p[1];
+        if (!who) return;
+        askFirst(b, { title: who.name || who.key,
+          body: mv === 0 ? "Will read <b>as their role</b> again." : "Will read <b>one level " + (mv > 0 ? "higher" : "lower") + "</b> than their role. What they enter and submit does not change.",
+          go: function(){ if (mv) who.reach = mv; else delete who.reach; if (!mv && ACC_EXC_PICK === who.key) ACC_EXC_PICK = null; paint(); askSaved(function(){ return document.querySelector(".acex"); }); } });
+      });
+    });
+    document.querySelectorAll("[data-reachpick]").forEach(function(sel){
+      sel.addEventListener("change", function(){ ACC_EXC_PICK = sel.value || null; paint(); });
+    });
     function accessPartCell(){ var x = document.querySelector("[data-dirscope]"); return x && x.closest("td"); }
     document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){

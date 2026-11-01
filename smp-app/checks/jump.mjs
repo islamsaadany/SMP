@@ -3,8 +3,10 @@
    Insights and Portfolio for the run and put back after:
      · the "Jump to…" box is on Strategy's bar, a module's bar and the
        console's column, and Ctrl K opens the window on each;
-     · the office is offered the modules, the Tracker's views, Setup and the
-       console — and NOT Strategy's own tabs, units or functions;
+     · the office is offered the modules, Setup and the console as one
+       entry each — and nothing inside a module or the console (Strategy's
+       tabs, units and functions, the Tracker's views, Processes' sections,
+       the console's tabs);
      · a client's own person is offered neither Setup, the console, nor the
        office's own modules (the Tracker and Meeting Notes turn them away);
      · typing narrows the list and Enter opens the page it names;
@@ -79,24 +81,23 @@ try {
   const names = L.map((x) => x.n + " | " + x.w);
   check(await page.evaluate(() => !!document.getElementById("sjscrim") && !document.getElementById("sjscrim").hidden), "Ctrl K opens the window");
   check(names.includes("Strategy | Module") && names.includes("Internal Tracker | Module"), "…listing the modules, Strategy as one entry", names.slice(0, 6).join("; "));
-  check(names.includes("Weekly check | Internal Tracker"), "…the other modules' pages (the Tracker's views)");
   check(names.includes("Roles & access | Setup · Strategy") && names.includes("Client register | Setup · Client"), "…Setup's pages");
-  check(names.includes("Who sees what | Console"), "…and the console's tabs");
-  check(!L.some((x) => /^(Foundation|Analysis|Directions|Overall performance|Mobile|Logistics)$/.test(x.n)), "…and none of Strategy's tabs, units or functions (Islam's rule)", names.join("; "));
-  await page.keyboard.type("weekly");
+  check(names.includes("Console | Forefront"), "…and the console, as one entry");
+  check(!L.some((x) => /^(Foundation|Analysis|Directions|Overall performance|Mobile|Logistics|This week|Weekly check|All processes|Value chain|Home|Clients|Consultants|Who sees what)$/.test(x.n)),
+        "…and nothing inside a module or the console (Islam's rule)", names.join("; "));
+  await page.keyboard.type("tracker");
   const narrowed = await listed(page);
-  check(narrowed.length === 1 && narrowed[0].n === "Weekly check", "typing narrows it", JSON.stringify(narrowed));
-  await Promise.all([page.waitForURL(/\/raya-trade\/tracker\?view=check/, { timeout: 10000 }).catch(() => {}), page.keyboard.press("Enter")]);
-  check(/\/raya-trade\/tracker\?view=check$/.test(page.url()), "…and Enter opens the page it names", page.url());
+  check(narrowed.length === 1 && narrowed[0].n === "Internal Tracker", "typing narrows it", JSON.stringify(narrowed));
+  await Promise.all([page.waitForURL(/\/raya-trade\/tracker$/, { timeout: 10000 }).catch(() => {}), page.keyboard.press("Enter")]);
+  check(/\/raya-trade\/tracker$/.test(page.url()), "…and Enter opens what it names", page.url());
   await page.waitForLoadState("networkidle");
   check(await page.evaluate(() => !!document.querySelector("header.tb .sjbtn")), "the box is on a module's bar too");
-  await page.goto(BASE + "/platform", { waitUntil: "networkidle" }); await page.waitForTimeout(800);
-  check(await page.evaluate(() => !!document.querySelector(".sjbtn.sjside")), "…and in the console's column");
   await openWith(page, "button");
-  await page.keyboard.type("consultants");
-  await Promise.all([page.waitForURL(/#consultants$/, { timeout: 10000 }).catch(() => {}), page.keyboard.press("Enter")]);
+  await page.keyboard.type("console");
+  await Promise.all([page.waitForURL(/\/platform$/, { timeout: 10000 }).catch(() => {}), page.keyboard.press("Enter")]);
   await page.waitForLoadState("networkidle"); await page.waitForTimeout(800);
-  check(/\/platform#consultants$/.test(page.url()), "a jump to a console tab lands on that tab", page.url());
+  check(/\/platform$/.test(page.url()), "a jump to the console lands on it", page.url());
+  check(await page.evaluate(() => !!document.querySelector(".sjbtn.sjside")), "…and the box is in the console's column");
 
   /* ── the strip ──────────────────────────────────────────────────── */
   await page.goto(BASE + "/raya-trade/strategy", { waitUntil: "networkidle" }); await page.waitForTimeout(800);
@@ -126,7 +127,7 @@ try {
   const C = await listed(page);
   check(C.some((x) => x.n === "Strategy"), "a client's own person is offered Strategy", JSON.stringify(C));
   check(!C.some((x) => /^Setup/.test(x.w) || x.w === "Console"), "…and neither Setup nor the console", C.map((x) => x.n + " | " + x.w).join("; "));
-  check(!C.some((x) => x.n === "Internal Tracker" || x.n === "Meeting Notes" || x.w === "Internal Tracker"), "…nor the office's Tracker and Notes, which would only turn them away");
+  check(!C.some((x) => x.n === "Internal Tracker" || x.n === "Meeting Notes"), "…nor the office's Tracker and Notes, which would only turn them away");
   await ctx.close();
 
   check(errs.length === 0, "no script error on any page", errs.slice(0, 3).join(" | "));

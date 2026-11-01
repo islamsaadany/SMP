@@ -4,13 +4,15 @@
    modules and the settings but not the functions or the pages inside the
    strategy module itself"*, and *"build it"*.
 
-   SO THE LIST IS FOUR KINDS OF THING, AND ONLY THESE:
-     · the modules this person may open — Strategy as ONE entry, never its
-       tabs, units or functions (its own row already reaches them);
-     · the pages inside the other modules (the Tracker's views, Processes'
-       sections);
+   And, round three, of the Processes sections and the console's tabs: *"no
+   need for internal parts of the modules. and for the console the same
+   thing"*.
+
+   SO THE LIST IS THREE KINDS OF THING, AND ONLY THESE:
+     · the modules this person may open, each as ONE entry — never the tabs,
+       units, views or sections inside one (its own navigation reaches them);
      · Setup's pages, the client's and each module's;
-     · the console's tabs, for Forefront's own people.
+     · the console, as one entry, for Forefront's own people.
 
    ASKED OF THE SERVER, NOT WORKED OUT IN THE BROWSER, because "only what
    your role can open" is the door's question and the door is here (§42,
@@ -28,7 +30,7 @@ import type { SessionUser } from "./auth.ts";
 import { resolveTenant } from "./door.ts";
 import { openableModules } from "./access.ts";
 import { MODULE_DEF, clientHref, shownOutside, type ModuleKey } from "./modules.ts";
-import { VIEWS, VIEW_WORD, isOffice } from "./tracker.ts";
+import { isOffice } from "./tracker.ts";
 import { platformAction } from "./platform-api.ts";
 
 export type JumpItem = { name: string; where: string; href: string; group: string };
@@ -49,35 +51,17 @@ const SETUP_STRATEGY: [string, string][] = [
 ];
 const SETUP_INSIGHTS: [string, string][] = [["access", "Roles & access"], ["landing", "Landing line"]];
 
-/* Processes' sections, as its own band names them (ffp/lib/i18n/messages/en.ts). */
-const PROCESSES: [string, string][] = [
-  ["processes", "All processes"], ["handle", "To handle"], ["value-chain", "Value chain"],
-  ["helicopter", "Helicopter view"], ["priorities", "Priorities"], ["governance", "Governance"],
-  ["export", "Export"], ["roles", "Job roles"], ["read", "Staff view"],
-];
-
-/* The console's tabs (public/platform-page.js `tabs`), two of them gated. */
-function consoleItems(f: { canConsultants: boolean; canAccess: boolean }): JumpItem[] {
-  const tabs: [string, string, boolean][] = [
-    ["home", "Home", true], ["mywork", "My tasks", true], ["clients", "Clients", true],
-    ["consultants", "Consultants", f.canConsultants], ["access", "Who sees what", f.canAccess],
-    ["memory", "Track Record", true], ["frameworks", "Frameworks", true],
-    ["copilot", "Copilot settings", true], ["history", "History", true],
-  ];
-  return tabs.filter((t) => t[2]).map((t) => ({ name: t[1], where: "Console", href: "/platform#" + t[0], group: "Console" }));
+/* THE CONSOLE IS ONE ENTRY, as Strategy is (Islam, round three: *"the same
+   thing"* for the console as for the modules' insides): its tabs are its
+   own column's to reach. Forefront's people only. */
+function consoleItem(): JumpItem {
+  return { name: "Console", where: "Forefront", href: "/platform", group: "Console" };
 }
 
 function moduleItems(slug: string, open: ModuleKey[], setup: boolean): JumpItem[] {
   const out: JumpItem[] = [];
   const mods = open.filter(shownOutside);
   for (const k of mods) out.push({ name: MODULE_DEF[k].label, where: "Module", href: clientHref(slug, k, ""), group: "Modules" });
-  for (const k of mods) {
-    const label = MODULE_DEF[k].label;
-    if (k === "tracker")
-      for (const v of VIEWS) out.push({ name: VIEW_WORD[v], where: label, href: clientHref(slug, k, "") + "?view=" + v, group: label });
-    if (k === "processes")
-      for (const [p, n] of PROCESSES) out.push({ name: n, where: label, href: clientHref(slug, k, p), group: label });
-  }
   if (setup) {
     const s = (scope: ModuleKey | null, rows: [string, string][], where: string) =>
       rows.forEach(([p, n]) => out.push({ name: n, where, href: clientHref(slug, scope, "setup/" + p), group: "Setup" }));
@@ -94,12 +78,12 @@ function moduleItems(slug: string, open: ModuleKey[], setup: boolean): JumpItem[
 
 export async function jumpList(pool: Q, user: SessionUser, slug: string | null): Promise<JumpItem[]> {
   const consultant = user.kind !== "client";
-  /* the console's own rules, asked through the console's own code, so the
-     two gated tabs and the settings answer exactly as the console does */
+  /* the console's own rule for the client's settings, asked through the
+     console's own code */
   const ff = consultant
     ? await platformAction(pool as never, user, { action: "jump", client: slug })
     : null;
-  const facts = ff && ff.code === 200 ? (ff.body as { canConsultants?: boolean; canAccess?: boolean; canConfig?: boolean }) : {};
+  const facts = ff && ff.code === 200 ? (ff.body as { canConfig?: boolean }) : {};
   const items: JumpItem[] = [];
   if (slug) {
     const ans = await resolveTenant(pool, user, slug);
@@ -118,6 +102,6 @@ export async function jumpList(pool: Q, user: SessionUser, slug: string | null):
       items.push(...moduleItems(slug, open, consultant ? !!facts.canConfig || office : office));
     }
   }
-  if (consultant) items.push(...consoleItems({ canConsultants: !!facts.canConsultants, canAccess: !!facts.canAccess }));
+  if (consultant) items.push(consoleItem());
   return items;
 }

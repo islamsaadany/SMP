@@ -187,13 +187,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       .map((row) => ({ key: row.key, name: row.name, kind: row.kind })) });
   }
 
-  /* JUMP TO'S GATED ENTRIES (§699, lib/jump.ts): the console's two gated
-     tabs and whether this client's settings are this person's to read — the
-     same three rules the cards and the console's own column ask. */
+  /* JUMP TO (§699, lib/jump.ts): whether this client's settings are this
+     person's to read — the rule the cards ask. */
   if (action === "jump") {
     const row = body && body.client ? await clientByKey(pool, body.client) : null;
-    return ok({ canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account),
-      canConfig: !!(row && FF.mayReadConfig(world, account, row)) });
+    return ok({ canConfig: !!(row && FF.mayReadConfig(world, account, row)) });
   }
 
   if (action === "cards") {

@@ -187,6 +187,15 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       .map((row) => ({ key: row.key, name: row.name, kind: row.kind })) });
   }
 
+  /* JUMP TO'S GATED ENTRIES (§699, lib/jump.ts): the console's two gated
+     tabs and whether this client's settings are this person's to read — the
+     same three rules the cards and the console's own column ask. */
+  if (action === "jump") {
+    const row = body && body.client ? await clientByKey(pool, body.client) : null;
+    return ok({ canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account),
+      canConfig: !!(row && FF.mayReadConfig(world, account, row)) });
+  }
+
   if (action === "cards") {
     const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
     const shown: ClientRow[] = FF.visibleClients(world, account, all);

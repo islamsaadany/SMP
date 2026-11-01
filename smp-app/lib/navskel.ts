@@ -37,6 +37,7 @@
    that has both from running it twice. */
 import { createHash } from "node:crypto";
 import { MODULE_DEF } from "./modules.ts";
+import { JUMP_SCRIPT } from "./jump-script.ts";
 
 const LABELS: Record<string, string> = Object.fromEntries(Object.entries(MODULE_DEF).map(([k, d]) => [k, d.label]));
 
@@ -254,4 +255,8 @@ export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §620
 })();
 `;
 
-export const NAVSKEL_STAMP = createHash("sha256").update(NAVSKEL_SCRIPT).digest("hex").slice(0, 12);
+/* §699: Jump to and the offline strip ride in the same file, so every page
+   that loads this one has them without a request of its own
+   (lib/jump-script.ts). The file is the two scripts; the stamp is its hash. */
+export const NAVSKEL_FILE = NAVSKEL_SCRIPT + JUMP_SCRIPT;
+export const NAVSKEL_STAMP = createHash("sha256").update(NAVSKEL_FILE).digest("hex").slice(0, 12);

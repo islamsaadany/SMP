@@ -35,6 +35,8 @@
     "check:shell": "node checks/shell.mjs",
     "check:instant": "node checks/instant-nav.mjs",
     "check:instant:red": "for b in no-navskel unversioned; do node checks/instant-nav.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:jump": "node checks/jump.mjs",
+    "check:jump:red": "node checks/jump.mjs --break=jump-office-for-all >/dev/null 2>&1 && { echo \"NOT RED: jump-office-for-all\"; exit 1; }; echo \"red: jump-office-for-all\"",
     "check:shell:red": "for b in no-route open-csp keep-caches serve-from-disk no-setup-scope no-library-cats mywork-everyone mywork-press-anyone company-plan-unseen apply-unguarded no-copilot-stamp no-copilot-area keep-stale-check; do SMP_BREAK=$b node checks/shell.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:blob": "node checks/blob-api.mjs",
     "check:blob:red": "for b in store-first watch-truthy; do node checks/blob-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",

@@ -128,7 +128,7 @@ kbd{font:600 11px/1 var(--sans);border:1px solid var(--line);border-bottom-width
   <div class="scrim" id="scrim" hidden>
     <div class="pal new" role="dialog" aria-label="Jump to">
       <div class="q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="qin" type="text" autocomplete="off" placeholder="Jump to a page, unit, function or person…" aria-label="Jump to"><kbd>Esc</kbd></div>
+        <input id="qin" type="text" autocomplete="off" placeholder="Jump to a module, page or setting…" aria-label="Jump to"><kbd>Esc</kbd></div>
       <div class="res" id="res" role="listbox"></div>
       <div class="pfoot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move</span><span><kbd>Enter</kbd> to open</span><span><kbd>Esc</kbd> to close</span><span class="sp"></span><span id="kbdFoot">Ctrl K from any page</span></div>
     </div>
@@ -138,22 +138,20 @@ kbd{font:600 11px/1 var(--sans);border:1px solid var(--line);border-bottom-width
 
 <script>
 const LEADS={
- jump:'<b>Jump to.</b> Press <kbd>Ctrl K</kbd> (<kbd>⌘K</kbd> on a Mac) on any page, or the box in the top bar. It lists every page in every module, then units, functions and people. Type to narrow it down, use the arrows and Enter to open. It only lists what your role can open. <b>Try it below.</b>',
+ jump:'<b>Jump to.</b> Press <kbd>Ctrl K</kbd> (<kbd>⌘K</kbd> on a Mac) on any page, or the box in the top bar. It lists the modules, every page of the other modules, all of Setup and the console. Strategy\'s own tabs, units, functions and people are left out, since Strategy\'s own row already reaches them. Type to narrow it down, use the arrows and Enter to open. It only lists what your role can open. <b>Try it below.</b>',
  off:'<b>No internet when you open SMP.</b> Instead of the browser\'s own error, a calm page in SMP\'s look. Try again checks at once, and the page reloads by itself when the connection returns.',
  lost:'<b>The connection drops while you work.</b> The page stays as it is, with a strip at the top. Save is held and says why. What you typed stays in the box.',
  back:'<b>The connection returns.</b> The strip turns green for a few seconds, then goes away. Save works again.'
 };
 const P=(n,w)=>({n,w});
 const DATA=[
- ["Strategy",[P("Foundation","Strategy"),P("Analysis (SWOT)","Strategy"),P("Directions","Strategy"),P("Capabilities","Strategy"),P("Projects","Strategy"),P("Overall performance","Strategy"),P("Reporting","Strategy"),P("Weighting","Strategy · Group"),P("Temple","Strategy · Group"),P("Read the strategy","Strategy"),P("Copilot","Strategy"),P("Messages","Strategy"),P("History","Strategy")]],
+ ["Modules",[P("Strategy","Module"),P("Internal Tracker","Module"),P("Meeting Notes","Module"),P("Processes","Module"),P("Insights","Module"),P("Portfolio","Module")]],
  ["Setup",[P("Profile","Setup · Client"),P("The shape","Setup · Client"),P("Business units","Setup · Client"),P("Companies","Setup · Client"),P("Functions","Setup · Client"),P("Capabilities","Setup · Client"),P("Official BU list","Setup · Client"),P("Client register","Setup · People"),P("Forefront team","Setup · People"),P("Roles & access","Setup · Strategy"),P("Landing line","Setup · Strategy"),P("Figure sets","Setup · Measures"),P("Focus measures","Setup · Measures"),P("Scoring bands","Setup · Measures"),P("Revenue drivers","Setup · Measures"),P("Planning & reporting","Setup · Cycle"),P("Platform Inbox","Setup · Cycle"),P("Import","Setup")]],
  ["Internal Tracker",[P("My work","Internal Tracker"),P("Weekly check","Internal Tracker"),P("All tasks","Internal Tracker")]],
  ["Meeting Notes",[P("Meetings","Meeting Notes"),P("New meeting","Meeting Notes")]],
  ["Processes",[P("Overview","Processes"),P("Processes","Processes"),P("Value chain","Processes"),P("Governance","Processes"),P("Priorities","Processes"),P("Roles","Processes"),P("Helicopter view","Processes"),P("Reports","Processes"),P("Export","Processes"),P("Deleted processes","Processes")]],
- ["Insights & Portfolio",[P("Insights library","Insights"),P("Portfolio","Portfolio")]],
- ["Console",[P("Clients","Console"),P("Consultants","Console"),P("Who sees what","Console")]],
- ["Units & functions",[P("Mobility","Business unit"),P("Logistics","Business unit"),P("Retail","Business unit"),P("Finance","Function"),P("IT","Function"),P("Corporate Affairs","Function"),P("Operations Support","Function")]],
- ["People",[P("Mohamed Essam","SMO team"),P("Ashraf Laithy","Mobility · BU owner"),P("Hazem Roushdy","Logistics · BU owner"),P("Hossam Farid","Retail · BU owner"),P("Sherif Adel","Operations Support · Function head"),P("Yasser Kamal","IT · Function head"),P("Sara Helmy","Contributor")]]
+ ["Insights",[P("Insights library","Insights")]],
+ ["Console",[P("Clients","Console"),P("Consultants","Console"),P("Who sees what","Console")]]
 ];
 const $=s=>document.querySelector(s);
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -175,7 +173,7 @@ function render(){
       flat.push(i);
     }
   }
-  $("#res").innerHTML=html||'<div class="empty">Nothing called “'+esc(q)+'”. Try part of a page, unit or name.</div>';
+  $("#res").innerHTML=html||'<div class="empty">Nothing called “'+esc(q)+'”. Try part of a module, page or setting name.</div>';
   sel=Math.min(sel,Math.max(flat.length-1,0));mark();
 }
 function mark(){document.querySelectorAll(".it").forEach(b=>{const on=+b.dataset.i===sel;b.classList.toggle("sel",on);b.setAttribute("aria-selected",on);if(on)b.scrollIntoView({block:"nearest"});});}

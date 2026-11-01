@@ -1205,7 +1205,13 @@
     powner: 1, plowner: 1, dirowner: 1, capowner: 1, contrib: 1, employee: 0 };
   /* the lowest level a role can be set to: a holder of a whole place always
      reads it; a CEO holds a level, not a piece */
-  var LADDER_MIN = { gceo: 3, cceo: 2, owner: 1, fnhead: 1, custodian: 1 };
+  var LADDER_MIN = { owner: 1, fnhead: 1, custodian: 1 };
+  /* A CEO HOLDS A LEVEL, NOT A PIECE: the Group CEO stands only on the top,
+     a Division head on their division or the top — and either can be turned
+     off, to nothing (Islam, 2026-11-01: "on the company level and division I
+     can't click off the view option"). Between nothing and where they stand
+     there is no level for them, so a setting there reads as nothing. */
+  var LADDER_STAND = { gceo: 3, cceo: 2 };
   function ladderStored(w, roleKey) {
     var row = ((w && w.access) || {})[roleKey];
     var has = function (k) { return !!row && Object.prototype.hasOwnProperty.call(row, k); };
@@ -1230,7 +1236,9 @@
     var mv = reachMove(person), lv = ladderStored(w, roleKey) + mv;
     if (lv === 2 && !midExists(w && w.group, w && w.companies)) lv = mv > 0 ? 3 : 1;
     var lo = LADDER_MIN[roleKey] != null ? LADDER_MIN[roleKey] : 0;
-    return Math.max(lo, Math.min(3, lv));
+    lv = Math.max(lo, Math.min(3, lv));
+    if (LADDER_STAND[roleKey] != null && lv < LADDER_STAND[roleKey]) lv = 0;
+    return lv;
   }
   /* where a seat stands: its place, a capability read as the function (or
      the top) that holds it, as capHolderTarget reads every capability */
@@ -1254,7 +1262,7 @@
   function ladderReads(w, person, r, target) {
     var lv = ladderLevel(w, person, r.role);
     if (lv >= 3) return true;
-    if (r.role === NO_ROLE && lv < 1) return false;
+    if ((r.role === NO_ROLE || LADDER_STAND[r.role] != null) && lv < 1) return false;
     var t = capHolderTarget(w, target), p = seatPlace(w, r);
     if (t === p) return true;
     if (lv >= 2) {
@@ -6088,7 +6096,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
     /* §693: the ladder */
-    REACH: REACH, LADDER_DEFAULT: LADDER_DEFAULT, LADDER_MIN: LADDER_MIN,
+    REACH: REACH, LADDER_DEFAULT: LADDER_DEFAULT, LADDER_MIN: LADDER_MIN, LADDER_STAND: LADDER_STAND,
     ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove, penOn: penOn,
     ladderReads: ladderReads, pieceOnlyAt: pieceOnlyAt, holdsItem: holdsItem, divisionOf: divisionOf,
     neverOffered: neverOffered,
@@ -40360,11 +40368,14 @@ function ladderCell(r, editable){
   var info = LADDER_ROW[r.key] || {}, words = ladderWords(), role = r.of[0], levels = ladderLevels();
   var lv = SMPRules.ladderStored(world(), role);
   if (lv === 2 && !midExists()) lv = 1;
-  var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = role === "gceo";
+  var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = false;
+  /* a CEO stands only from their level up, and can be turned off to nothing */
+  var stand = SMPRules.LADDER_STAND[role];
+  if (stand != null) { lo = stand; if (lv < stand) lv = 0; }
   var pen = info.held != null && SMPRules.penOn(world(), role);
   /* the level a press on the lit one steps down to: the next one below that
      the client has, never under the role's floor */
-  var below = function(i){ var k = levels.indexOf(i); return k > 0 && levels[k - 1] >= lo ? levels[k - 1] : null; };
+  var below = function(i){ var k = levels.indexOf(i); return k > 0 && levels[k - 1] >= lo ? levels[k - 1] : stand != null ? 0 : null; };
   return '<span class="ladder' + (editable ? '' : ' ro') + '" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + levels.map(function(i){
     var struck = i < lo && !(info.floor && i === 0);
     var word = info.floor && i === 0 ? "Nothing" : words[i];
@@ -40425,7 +40436,8 @@ function renderAccess(){
     var office = r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]);
     var info = LADDER_ROW[r.key] || {};
     return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      '<td class="acsays">' + esc(office ? "Everything" : info.held != null && !SMPRules.penOn(world(), r.of[0]) ? "Nothing \u2014 reads only" : info.says || "") + '</td>' +
+      '<td class="acsays">' + esc(office ? "Everything" : info.held != null && !SMPRules.penOn(world(), r.of[0]) ? "Nothing \u2014 reads only" : info.says || "") +
+        (SMPRules.LADDER_STAND[r.of[0]] != null && SMPRules.ladderStored(world(), r.of[0]) < SMPRules.LADDER_STAND[r.of[0]] ? '<span class="acoff">Reads nothing</span>' : '') + '</td>' +
       '<td class="acladder">' + (office ? '<span class="acall">Everything, by rule</span>' : ladderCell(r, editable)) + '</td>' +
       (COPA ? (office
         ? stateCell(r.of[0], COPA.key, editable, null, {

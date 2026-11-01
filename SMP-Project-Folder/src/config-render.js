@@ -588,11 +588,14 @@ function ladderCell(r, editable){
   var info = LADDER_ROW[r.key] || {}, words = ladderWords(), role = r.of[0], levels = ladderLevels();
   var lv = SMPRules.ladderStored(world(), role);
   if (lv === 2 && !midExists()) lv = 1;
-  var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = role === "gceo";
+  var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = false;
+  /* a CEO stands only from their level up, and can be turned off to nothing */
+  var stand = SMPRules.LADDER_STAND[role];
+  if (stand != null) { lo = stand; if (lv < stand) lv = 0; }
   var pen = info.held != null && SMPRules.penOn(world(), role);
   /* the level a press on the lit one steps down to: the next one below that
      the client has, never under the role's floor */
-  var below = function(i){ var k = levels.indexOf(i); return k > 0 && levels[k - 1] >= lo ? levels[k - 1] : null; };
+  var below = function(i){ var k = levels.indexOf(i); return k > 0 && levels[k - 1] >= lo ? levels[k - 1] : stand != null ? 0 : null; };
   return '<span class="ladder' + (editable ? '' : ' ro') + '" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + levels.map(function(i){
     var struck = i < lo && !(info.floor && i === 0);
     var word = info.floor && i === 0 ? "Nothing" : words[i];
@@ -653,7 +656,8 @@ function renderAccess(){
     var office = r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]);
     var info = LADDER_ROW[r.key] || {};
     return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      '<td class="acsays">' + esc(office ? "Everything" : info.held != null && !SMPRules.penOn(world(), r.of[0]) ? "Nothing \u2014 reads only" : info.says || "") + '</td>' +
+      '<td class="acsays">' + esc(office ? "Everything" : info.held != null && !SMPRules.penOn(world(), r.of[0]) ? "Nothing \u2014 reads only" : info.says || "") +
+        (SMPRules.LADDER_STAND[r.of[0]] != null && SMPRules.ladderStored(world(), r.of[0]) < SMPRules.LADDER_STAND[r.of[0]] ? '<span class="acoff">Reads nothing</span>' : '') + '</td>' +
       '<td class="acladder">' + (office ? '<span class="acall">Everything, by rule</span>' : ladderCell(r, editable)) + '</td>' +
       (COPA ? (office
         ? stateCell(r.of[0], COPA.key, editable, null, {

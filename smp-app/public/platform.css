@@ -5909,6 +5909,7 @@ html[data-client-settings] .viewer { display:none; }
 .acladderkey { display:flex; flex-wrap:wrap; gap:6px 18px; }
 .acladderkey span { display:inline-flex; align-items:center; gap:5px; }
 .acladderkey svg { width:14px; height:14px; }
+.acsays .acoff { display:block; margin-top:2px; font-size:12px; font-weight:600; color:var(--bad, var(--ink-3)); }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are

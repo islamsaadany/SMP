@@ -1160,8 +1160,12 @@ try {
        stops a row being made must leave this REPORTING, not dying. */
     const box = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();var c=getComputedStyle(e);return [e.tagName,Math.round(r.width),Math.round(r.height),c.fontSize,c.fontFamily.split(',')[0]].join(' ')})()");
     const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".write .addrow .st");
-    check("the status pill is one box whether it is a select or a span — and the add line draws none (§497)", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
-      pillSel.slice(6) === pillSpan.slice(4) && /^SPAN 0 /.test(pillAdd), pillSel + " | " + pillSpan + " | " + pillAdd);
+    /* THE PILL HUGS ITS WORDS (§700): the width follows what it says (a
+       select also carries its caret), so the height and the font are what
+       stay one box; the add line still draws none. */
+    const noW = (x) => x.split(" ").filter((_, i) => i !== 1).join(" ");
+    check("the status pill is one box whether it is a select or a span — the same height and font — and the add line draws none (§497, §700)", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
+      noW(pillSel).slice(6) === noW(pillSpan).slice(4) && /^SPAN 0 /.test(pillAdd), pillSel + " | " + pillSpan + " | " + pillAdd);
     check("...in the page's own font, never the browser's control font (the main screens' since §646)", /system-ui/.test(pillSel) && /12.5px/.test(pillSel), pillSel);
     await pg.goto(base); await settle();
     await pg.evaluate("window.__stay = 1");

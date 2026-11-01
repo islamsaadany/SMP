@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-01 — The Weekly check as topic cards (§700).** Each topic is its own card under a grey band with its number, bold name, counts and a done bar; This week is a pale blue strip; status pills and Carry are only as wide as their words. Islam's picks: heading A, layout 3.
+
 **2026-11-01 — The Weekly check reads clearly (§699).** Each status is a coloured pill (Not started slate, In progress yellow, Done green, one size); Carry to next week is a plain button with a blue arrow, no longer gold like In progress; the *What happened?* box sits under its task as one block, with THIS WEEK in front. Islam picked option C of four and the box layout from the mockup.
 
 **2026-10-31 — Small ways back (§698), the Copilot stress test's third batch.** A used SWOT change can be put back (one step) and used again. The held tick on an unscored plan Direction says leaving it unticked keeps it. Apply is held, in words, if a chat's place ever differs from the page's. A failed draft in Execution names its item and offers draft again, Draft all left, or skip. Not built: switching a guided Foundation chat to the template (the template road is a plain chat with no generated file to fill). Mockup `design-mockups/copilot-layout/2026-10-31_small-ways-back.html`.

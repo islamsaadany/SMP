@@ -1,0 +1,598 @@
+<!doctype html><html lang="en" data-module="tracker" data-theme="light" style="--tbh: 41px;"><head><meta name="description" content="The Weekly check as built: option C status pills, the plain Carry button, and the weekly box joined to its task. Captured from the real page.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weekly Check Final</title>
+
+<meta name="theme-color" content="#16325C">
+
+<style>
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Sans_3.woff2) format('woff2')}
+:root{--tb-surface:#FFFFFF;--tb-surface-2:#EFF2F6;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;--tb-soft:#24487A;--tb-gold:#C9A24D}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}}
+:root[data-theme="dark"]{--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}
+/* THE MODULE PAGES AT 80% ON A COMPUTER (2026-10-26, Islam's option 1 of
+   two): the console (§601) and Strategy (§631) already are, so a bar and the
+   page under it were 80% in two places and 100% in the rest. Every module
+   page loads this stylesheet, so the rule is said once, here, in their
+   words: zoomed from 1000px, a phone kept at 100%. The window's size is said
+   in the page's own pixels (--winw, --winh), as _shared.css does for
+   Strategy, because under a zoom 100vh is 80% of the window. */
+:root{--winw:100vw;--winh:100vh}
+@media (min-width:1000px){html{zoom:.8}:root{--winw:calc(100vw / .8);--winh:calc(100vh / .8)}}
+.tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink);font-family:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;position:relative;z-index:30}
+.tbin{display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
+.tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;font-size:13.5px;white-space:nowrap}
+.tbmark{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#F5A623;color:#0F2C69;text-decoration:none}
+.tbmark svg{width:17px;height:17px;display:block}
+a.tbmark:hover{box-shadow:0 0 0 2px var(--tb-surface),0 0 0 4px var(--tb-gold);filter:brightness(1.04)}
+a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
+.tbbar{flex:none;width:1px;height:18px;background:var(--tb-line);margin:0 6px 0 4px}
+.tbsep{color:var(--tb-ink-3);font-size:15px;line-height:1}
+.tbstep{position:relative}
+.tbstep>summary{list-style:none;display:inline-flex;align-items:center;cursor:pointer;gap:6px;padding:3px 7px;border-radius:7px;color:var(--tb-ink);font-weight:600}
+.tbstep>summary::-webkit-details-marker{display:none}
+.tbclient>summary{color:var(--tb-ink-2)}
+.tbstep>summary:hover,.tbstep[open]>summary{background:var(--tb-surface-2);color:var(--tb-ink)}
+.tbstep>summary>span{overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.tbstep>summary>svg{width:10px;height:10px;flex:none;color:var(--tb-ink-3)}
+/* §519: quieter while a view is on — the resting weight is what reads as
+   the viewed person's own access, so the ground still answers the pointer
+   (the control plainly works) and only the ink stands down. Islam's A of two
+   drawn; B, which also held the menus, is refused in arrange.css's own note. */
+.tbviewing .tbff{background:var(--tb-surface-2);color:var(--tb-ink-3)}
+.tbviewing .tbstep>summary,.tbviewing .tbclient>summary,.tbviewing .tbstep>summary:hover,.tbviewing .tbstep[open]>summary{color:var(--tb-ink-3)}
+.tbviewing .tbstep>summary>svg{color:var(--tb-ink-3)}
+.tbviewing .tbsep{color:var(--tb-line)}
+.tbmenu{position:absolute;z-index:40;top:calc(100% + 6px);left:0;min-width:290px;background:var(--tb-surface);border:1px solid var(--tb-line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:4px 0;white-space:normal}
+.tbmenu a{display:block;text-decoration:none;font-size:13.5px;color:var(--tb-ink);padding:9px 14px}
+.tbmenu a:hover{background:var(--tb-surface-2)}
+.tbmenu a[aria-current="true"]{font-weight:700}
+.tbsub{display:block;font-size:11.5px;color:var(--tb-ink-2);margin-top:2px;font-weight:400}
+.tbquiet{padding:9px 14px;font-size:13.5px;color:var(--tb-ink-2);font-style:italic}
+.tbrule{height:1px;background:var(--tb-line);margin:4px 0}
+.tbbrand{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:14px;color:var(--tb-ink);text-decoration:none}
+.tbbrand:hover{text-decoration:underline}
+.tborg{color:var(--tb-ink-3);font-size:13.5px;margin-right:auto}
+.tbread{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--tb-ink);text-decoration:none;padding:3px 8px;border-radius:7px}
+.tbread:hover,.tbread[aria-current="page"]{background:var(--tb-surface-2)}
+.tbn{font-size:11.5px;font-weight:700;color:var(--tb-ink);background:color-mix(in srgb,var(--tb-gold) 22%,var(--tb-surface));border:1px solid var(--tb-gold);border-radius:99px;padding:0 7px;line-height:18px}
+.tbviewer{display:flex;align-items:center;gap:8px;padding-right:16px;border-right:1px solid var(--tb-line);min-width:0}
+.tbviewer label{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-2);white-space:nowrap}
+.tbviewer select{font-family:inherit;font-size:12.5px;max-width:260px;border:1px solid var(--tb-line);border-radius:5px;padding:2px 6px;background:var(--tb-surface);color:var(--tb-ink)}
+.tbnote{font-size:12.5px;color:var(--tb-ink-3);white-space:nowrap}
+.tbacts{display:flex;align-items:center;gap:10px}
+.tbtheme{position:relative;width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--tb-line);background:none;color:var(--tb-ink-3);display:grid;place-items:center;cursor:pointer}
+.tbtheme svg{width:14px;height:14px}
+.tbtheme[data-tip]:hover::after,.tbtheme[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);right:0;z-index:60;white-space:nowrap;pointer-events:none;background:var(--tb-ink);color:var(--tb-surface);font-family:inherit;font-size:11.5px;font-weight:600;line-height:1;letter-spacing:.02em;padding:7px 9px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.tbout{font-family:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);background:none;border:1px solid var(--tb-line);border-radius:99px;padding:5px 14px;cursor:pointer}
+.tbtheme:hover,.tbout:hover{border-color:var(--tb-soft);color:var(--tb-ink)}
+.tb a:focus-visible,.tb button:focus-visible,.tb summary:focus-visible,.tb select:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
+@media (max-width:760px){.tbin{flex-wrap:wrap;padding:6px 16px;gap:8px}.tbviewer{border-right:0;padding-right:0}}
+
+*{box-sizing:border-box}
+/* THE LEDGER (§497), from design-mockups/internal-tracker/2026-10-06_topics-refined.html,
+   its "Refined" column, with Islam's two changes: no way back above the
+   title (the top bar is the way back) and the third count reads "Due". */
+:root{--bar:#16325C;--bar-ink:#FFFFFF;--bar-quiet:#B9C2CE;--bar-accent:#E8A33A;--bar-late:#FF9B8F;--bar-hover:rgba(255,255,255,.1);--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;--bad-bg:#FBEDEB;
+  --ns:#2B3A55;--ns-bg:#E3E8EF;--yel:#6B4E00;--yel-bg:#FFF0A8;--done-bg:#DCF0E5;--carry:#1F5FBF;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+/* THE FONT FAMILY IS NAMED, NEVER "inherit" INSIDE THE SHORTHAND (§356.14):
+   a shorthand ending in a CSS-wide keyword is not CSS a browser will read,
+   so every such line was silently dropped. */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;--ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;--ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
+.pg{max-width:1000px;margin:0 auto;padding:20px 20px 48px}
+/* THE BAND STAYS PUT (§565, design-mockups/internal-tracker/2026-10-21_frozen-band.html).
+   Islam: *"make this part freezed on scrolling down"* — the masthead, the add
+   line, the search and the count ride together at the top while the list
+   scrolls under them. It paints the page's ground behind itself, the .pg's
+   own 20px above it included, so a row never shows through the band's
+   rounded corners or the gap over the add line; flow-root keeps the last
+   line's margin inside that ground rather than letting it collapse out
+   under the rows. The 20px is taken back only while no refusal is showing
+   above it (#said), or the band's ground would paint over that sentence's
+   foot; with one showing the band pins flush to the top. On a phone, or a
+   window too short to spare it, it scrolls away as before: pinned, it would
+   cover most of the screen. */
+/* ...AND THE PLATFORM'S WHITE TOP BAR PINS ABOVE IT (§566). Islam: *"the
+   freeze starts by the top bar and ends by the text box to add an action"*.
+   On this page only — the bar is every module's (lib/topbar.ts) and nobody
+   asked for the others. The band pins at the bar's foot, which the script
+   MEASURES into --tbh rather than this file assuming 41px (a sticky offset
+   written as a number is right until the thing above it changes height, the
+   smeared header the platform has already paid for); 41px is only the first
+   paint's guess. */
+.tb{position:sticky;top:0}
+.pin{position:sticky;top:var(--tbh,41px);z-index:20;display:flow-root;background:var(--ground)}
+.said:empty+#body>.pin{margin-top:-20px;padding-top:20px}
+@media (max-width:760px),(max-height:600px){.pin{position:static}.tb{position:relative}}
+/* the masthead: the week, the name, the four counts, the views */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--bar-ink)}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+/* ONE HEIGHT, WHATEVER THE WORDS SAY (§356.16): the floor holds the counts
+   still when a status changes; the label never takes a second line. */
+.tile{text-align:right;min-height:48px}
+.tile b{display:block;font:600 22px/1 var(--font);color:var(--bar-ink)}
+.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.tile.late b{color:var(--bar-late)}
+.cats{display:flex;gap:2px;margin:14px 0 0;align-items:flex-end;flex-wrap:wrap}
+.cats a{font:600 13.5px/1 var(--font);color:var(--bar-quiet);padding:10px 12px 12px;border-bottom:3px solid transparent;text-decoration:none}
+.cats a[aria-current="true"]{color:var(--bar-ink);border-bottom-color:var(--bar-accent)}
+.cats a:hover,.cats a:focus-visible{color:var(--bar-ink);outline:none}
+.cats .sp{flex:1}
+/* the settings — how the list is grouped, and dates as weeks or days —
+   behind "Group by" on the far right of the views row (§356.14, §497) */
+.dots{position:relative;align-self:center;margin-bottom:9px}
+.dots>button{display:inline-flex;align-items:center;gap:6px;font:500 13px/1 var(--font);color:var(--bar-quiet);padding:6px 8px;border-radius:7px;background:none;border:0;cursor:pointer}
+.dots>button b{color:var(--bar-ink);font-weight:600}
+.dots>button svg{width:12px;height:12px}
+.dots>button svg.d3{width:16px;height:16px;margin-left:4px}
+.dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:var(--bar-hover);color:var(--bar-ink);outline:none}
+.setmenu,.tmenu{position:absolute;top:32px;right:0;z-index:9;display:flex;gap:4px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:6px;text-align:left}
+.setmenu .col{display:grid;align-content:start;min-width:0}
+.setmenu .col+.col{border-left:1px solid var(--line);padding-left:4px}
+.setmenu .lab{display:block;font:600 10.5px/1.7 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:3px 9px 2px}
+.setmenu button,.tmenu button{display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap}
+.setmenu button:hover,.setmenu button:focus-visible,.tmenu button:hover,.tmenu button:focus-visible{background:var(--ground);outline:none}
+.setmenu button.on{font-weight:600}
+.setmenu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto;flex:none}
+.tmenu{display:grid;min-width:150px}
+.tmenu button.danger{color:var(--bad)}
+.tmenu .sure{display:grid;gap:4px;padding:4px 9px;font-size:13px;color:var(--ink-2);max-width:220px;white-space:normal}
+/* TOPICS JOINS THE TWO SETTINGS (§533), on a row of its own under them
+   because it is not a third way of reading the list — it is the list of
+   topics itself. So the menu stacks: the two columns, then the way in. */
+.setmenu{display:grid}
+.setmenu .two{display:flex;gap:4px}
+.setmenu .sep{display:block;border-top:1px solid var(--line);margin:2px 3px 0;padding-top:3px}
+.setmenu .sep button{width:100%}
+.setmenu .sep svg{width:14px;height:14px;color:var(--ink-3);flex:none}
+.setmenu .sep .arr{margin-left:auto;color:var(--ink-3);display:grid}
+.setmenu .sep .arr svg{width:12px;height:12px}
+/* THE TOPICS PANEL (§533): every topic on this client, open and closed, and
+   the ones with no actions on them — which the page could not reach at all
+   before, because a heading is only drawn over rows that are in view. */
+.tpanel{position:absolute;top:32px;right:0;z-index:9;width:380px;max-width:min(380px,calc(var(--winw) - 48px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(20,28,43,.2);text-align:left}
+.tpanel .ph{display:flex;align-items:center;gap:8px;padding:9px 12px 8px;border-bottom:1px solid var(--line)}
+.tpanel .ph .lab{font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tpanel .ph .hint{margin-left:auto;font:400 12px/1.4 var(--font);color:var(--ink-3)}
+.tlist{display:block;max-height:304px;overflow-y:auto}
+.trow{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto 24px;gap:9px;align-items:center;padding:4px 8px 4px 12px;border-bottom:1px solid var(--line-2)}
+.trow:last-child{border-bottom:0}
+.trow:hover{background:var(--ground)}
+.trow .nm{min-width:0;display:flex;align-items:center;gap:7px;font:400 14.5px/1.35 var(--font);color:var(--ink);background:none;border:0;border-radius:6px;padding:4px 5px;margin-left:-5px;cursor:text;text-align:left}
+.trow .nm .who2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .nm svg{width:13px;height:13px;color:var(--gold);opacity:0;flex:none}
+.trow:hover .nm svg,.trow .nm:focus-visible svg{opacity:1}
+.trow .nm:focus-visible{outline:none;background:var(--surface-2)}
+.trow .shut{font:600 9.5px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:3px 6px;flex:none}
+.trow .ct{font:500 12px/1 var(--font);color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.trow .ct.nil{font-style:italic}
+.trow .tdots>button{background:none;border:0;border-radius:6px;color:var(--ink-3);padding:3px 5px;cursor:pointer;display:grid;place-items:center}
+.trow .tdots{position:relative}
+.trow .tdots>button:hover,.trow .tdots>button.on{background:var(--surface-2);color:var(--ink)}
+.trow .tdots svg{width:16px;height:16px}
+.trow .tmenu{top:26px;z-index:11}
+.trow input{display:block;width:100%;min-width:0;font:400 14.5px/1.3 var(--font);color:var(--ink);background:var(--surface);border:1.5px solid var(--gold);border-radius:7px;padding:4px 8px;outline:none}
+/* While a name is being typed over, the line is the box and nothing else:
+   the count and the ⋯ would only be in the way of the one thing being done. */
+.trow.edit{background:var(--gold-bg)}
+.trow.edit input{grid-column:1/-1}
+.trow.edit .ct,.trow.edit .tdots{display:none}
+.tpanel .tadd{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:7px 12px}
+.tpanel .tadd .pl{color:var(--gold);font-weight:600}
+.tpanel .tadd input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:400 14px/1.5 var(--font);padding:2px 0;outline:none}
+.tpanel .tadd input::placeholder{color:var(--ink-3)}
+.tpanel .tnone{padding:14px 12px;font-size:13.5px;color:var(--ink-3)}
+/* the tools: write the next action, or search */
+.tools{display:flex;gap:18px;align-items:stretch;margin:0 0 22px;flex-wrap:wrap}
+.write{flex:1 1 380px;min-width:0;border-bottom:1.5px solid var(--gold)}
+.find{display:flex;align-items:center;gap:8px;flex:0 1 240px;min-width:0;border-bottom:1.5px solid var(--line);padding:6px 2px;color:var(--ink-3)}
+.find svg{width:14px;height:14px;flex:none}
+.srch{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:400 14px/1.5 var(--font);padding:2px 0;outline:none}
+.srch::placeholder{color:var(--ink-3)}
+.go{border:0;background:none;color:var(--ink-3);font:600 12.5px/1 var(--font);cursor:pointer;padding:4px 2px}
+.cnt{font:500 12.5px/1 var(--font);color:var(--ink-3);white-space:nowrap}
+.find .cnt{display:none}
+.counted{font:500 12.5px/1 var(--font);color:var(--ink-3);margin:-14px 0 18px;text-align:right}
+/* THE CHECK COUNTS TOPICS, NOT ACTIONS (§532), and says how far through the
+   meeting you are: the gold is what is still owed to next week. */
+.counted.ck{text-align:left;margin:4px 0 4px;font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase}
+.counted.ck .left{color:var(--gold)}
+.list{display:flex;flex-direction:column}
+.none{padding:30px 4px 10px;color:var(--ink-3);font-size:14px;max-width:60ch}
+.none b{color:var(--ink);font-weight:600;display:block;font-size:15.5px;margin-bottom:6px}
+/* a section: a numbered head, its counts, its rows, and what it folds */
+.sec{margin:0 0 26px}
+.sh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.sh .ix{font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.sh h3{margin:0;font:600 17px/1.2 var(--font);min-width:0}
+.sh h3 input{font:600 17px/1.2 var(--font);color:var(--ink);border:1px solid var(--gold);border-radius:6px;padding:1px 6px;background:var(--surface);outline:none}
+.sh .meta{font:400 13px/1 var(--font);color:var(--ink-3)}
+.sh .meta .bad{color:var(--bad);font-weight:600}
+.sh .end{margin-left:auto;display:flex;align-items:center;gap:10px;font:500 12.5px/1 var(--font);color:var(--ink-3)}
+.sh .tdots{position:relative}
+.sh .tdots>button{background:none;border:0;border-radius:6px;color:var(--ink-3);padding:3px 5px;cursor:pointer;display:grid;place-items:center}
+.sh .tdots>button:hover,.sh .tdots>button.on,.sh .tdots>button:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.sh .tdots svg{width:16px;height:16px}
+.sh .tmenu{top:26px}
+.sh.quiet{border-bottom-color:var(--line)}
+.sh.quiet h3{color:var(--ink-2);font-weight:500;font-style:italic}
+.sh .shut{font:600 10.5px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:3px 7px}
+.meter{height:2px;background:var(--line-2);position:relative;top:-2px;margin-bottom:-2px}
+.meter i{display:block;height:100%;background:var(--good)}
+.foot{display:flex;gap:16px;padding:9px 0 0 32px;font:500 13px/1.4 var(--font);color:var(--ink-3)}
+.foot button{background:none;border:0;padding:0;font:500 13px/1.4 var(--font);color:var(--ink-3);cursor:pointer}
+.foot button b{color:var(--gold);font-weight:600}
+.foot button:hover,.foot button:focus-visible{color:var(--ink);outline:none}
+/* DONE FOLDS UNDER ITS SECTION (§497): a section shows what is still to do,
+   and "N done ›" opens the rest. A row ticked a moment ago stays where the
+   hand left it, and an opened row always shows. */
+/* ...BUT NEVER ON THE WEEKLY CHECK (§532), where a finished action is not
+   something to fold away: last week's card holds nothing else, so this rule
+   emptied it and left a card standing over nothing — the very thing §497
+   refused for headings, in a box. A done row ticked during the meeting also
+   has to stay where the hand left it, under this week. Caught by drawing the
+   real page and looking at it, not by reading this file. */
+.sec:not(.showdone) .row.done:not(.fresh):not(.on):not(.chk){display:none}
+/* the row: tick · name · when · owner · status · the arrow */
+/* THE WHEN COLUMN FITS A FINISHED DAY (§678, Islam: "the date is
+   intersecting with the name"): "Done Wed 30 May" is 115px in the page's
+   own face at 13px, and the column was 84 — the overrun sat on the owner's
+   name. 116 holds every Done this year on one line; the rarer longer forms
+   (a date with its year, Late with the exact date beside it) wrap inside
+   the column instead of running out of it. */
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 132px 116px 64px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2)}
+.row .when{white-space:normal}
+.row .t{min-width:0;font-size:15px;line-height:1.35}
+.row .t[data-rename]{cursor:text}
+.row .tn2{min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:8px}
+.tn2.editing{align-items:center}
+/* THE TOPIC'S OWN COLUMN (§503), beside the week: a quiet rounded tag with a
+   gold dot, or "+ Add a topic" on a row that has none — outlined when the row
+   is under the pointer, so the empty column says what it is for without
+   shouting on every row. The press opens the add line's own topic list. */
+.tcwrap{position:relative;justify-self:end;max-width:132px;min-width:0;cursor:pointer;border-radius:999px;outline:none}
+.tc{display:inline-flex;align-items:center;gap:6px;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border:1px solid transparent;border-radius:999px;padding:5px 10px}
+.tc .tw{overflow:hidden;text-overflow:ellipsis}
+.tc::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
+.tcwrap:hover .tc,.tcwrap.on .tc,.tcwrap:focus-visible .tc{border-color:var(--line)}
+.tc.add{background:transparent;color:var(--ink-3);border:1px dashed transparent}
+.tc.add::before{display:none}
+.row:hover .tc.add,.tcwrap.on .tc.add,.tcwrap:focus-visible .tc.add{border-color:var(--line);color:var(--ink)}
+.tcwrap.ro{cursor:default}.tcwrap.ro .tc{border-color:transparent}
+.tcwrap .topics{top:30px;right:0}
+/* THE RENAME BOX TAKES THE NAME'S WHOLE SPACE (§565). Islam: *"give the text
+   space we already have space to write in"*. The name is a flex item sized
+   by its words, so the box inside it was sized by an input's default — about
+   twenty letters, the rest of a long name scrolled out of sight with the
+   whole column empty beside it. While it is a box, the name grows to the
+   topic's column. */
+.tn2.editing .t{flex:1 1 auto}
+.row input.ttl{width:100%;min-width:0;border:1px solid var(--gold);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 7px;margin:-4px -8px;font:400 15px/1.35 var(--font);outline:none}
+.row.done .t{color:var(--ink-3)}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
+.tick:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row.late .tick{border-color:var(--bad)}
+.row.done .tick{background:var(--good);border-color:var(--good)}
+.tick svg{width:11px;height:11px}
+.tick[disabled]{cursor:default;opacity:.55}
+.when{font:500 13px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;text-align:left;background:none;border:0;padding:0;position:relative}
+.when.late{color:var(--bad);font-weight:600}
+.when.pick{cursor:pointer;border-radius:6px;padding:3px 6px;margin:-3px -6px}
+.when.pick:hover,.when.pick.on,.when.pick:focus-visible{background:var(--surface-2);outline:none}
+.when .wk{display:inline-block;font:500 13px/1.4 var(--font);color:inherit}
+/* the week picker: a small table — the week, the days — this week bold
+   (§356.15); No date and a day of your own at the foot */
+.weeks{position:absolute;top:26px;right:0;z-index:5;width:232px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left;font-variant-numeric:tabular-nums}
+.weeks .wh{display:grid;grid-template-columns:86px 1fr;padding:5px 9px 4px;font:600 10px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);margin-bottom:3px}
+.weeks button{display:grid;grid-template-columns:86px 1fr;width:100%;align-items:baseline;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.weeks button b{font-weight:400;font-variant-numeric:tabular-nums}
+.weeks button.now b{font-weight:700}
+.weeks button small{font:400 12px/1.3 var(--font);color:var(--ink-3);white-space:nowrap}
+.weeks button:hover,.weeks button:focus-visible{background:var(--ground);outline:none}
+.weeks button.on{background:var(--surface-2)}
+.weeks .wf{display:grid;border-top:1px solid var(--line);margin-top:3px;padding-top:3px}
+.weeks .wf button{grid-template-columns:1fr;color:var(--ink-3);font-size:13px}
+.row input.dt,.addrow input.dt{font:400 13px/1.4 var(--font);color:var(--ink);border:1px solid var(--gold);border-radius:6px;padding:2px 5px;background:var(--surface)}
+/* the owner is a first name, drawn as the fact; a press opens the team */
+.who{font:500 13px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;text-align:left;background:none;border:0;padding:0;position:relative}
+.who.pick{cursor:pointer;border-radius:6px;padding:3px 6px;margin:-3px -6px}
+.who.pick:hover,.who.pick.on,.who.pick:focus-visible{background:var(--surface-2);outline:none}
+/* COMPACT (§356.16): the box is its widest name */
+.team,.topics{position:absolute;top:26px;right:0;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left}
+.team button,.topics button{display:flex;width:100%;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap}
+.team button:hover,.team button:focus-visible,.topics button:hover,.topics button:focus-visible{background:var(--ground);outline:none}
+.team button.on,.topics button.on{font-weight:600}
+.team button.on::after,.topics button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
+.topics{min-width:190px}
+.topics .tnew{display:block;width:100%;border:0;border-top:1px solid var(--line);margin-top:3px;padding:7px 9px 5px;background:transparent;color:var(--ink);font:400 13.5px/1.4 var(--font);outline:none}
+/* THE STATUS IS A PILL OF ITS OWN COLOUR (2026-11-01, Islam: "grey with
+   grey and not really clear"; option C of
+   design-mockups/internal-tracker/2026-11-01_status-and-carry-colours.html):
+   a soft tint per status, no outline — Not started slate, In progress yellow,
+   Done green — with a mark in front (an empty ring, a half, a full dot). One
+   box whether it can be pressed or not: the same font, height and width for
+   a select and a span (§497). The marks on the select are pictures, so each
+   carries its colour twice, light and dark. */
+.st{display:inline-flex;align-items:center;gap:6px;height:26px;width:128px;font:600 12.5px/1 var(--font);letter-spacing:0;text-transform:none;padding:0 10px 0 9px;border:0;border-radius:6px;color:var(--ns);background-color:var(--ns-bg);white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0}
+span.st::before{content:"";width:10px;height:10px;border-radius:50%;box-sizing:border-box;border:1.5px solid currentColor;flex:none}
+span.st.prog::before{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+span.st.done::before{background:currentColor}
+select.st{cursor:pointer;padding:0 20px 0 25px;background-repeat:no-repeat;background-position:left 9px center,right 9px center}
+select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%232B3A55' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%232B3A55'/%3E%3C/svg%3E")}
+select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%236B4E00' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%236B4E00'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%236B4E00'/%3E%3C/svg%3E")}
+select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%231B6E4E'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%231B6E4E'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23DDE3EC' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23DDE3EC'/%3E%3C/svg%3E")} :root:not([data-theme="light"]) select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23FFE07A' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%23FFE07A'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23FFE07A'/%3E%3C/svg%3E")} :root:not([data-theme="light"]) select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%2363BE96'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%2363BE96'/%3E%3C/svg%3E")}}
+:root[data-theme="dark"] select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23DDE3EC' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23DDE3EC'/%3E%3C/svg%3E")} :root[data-theme="dark"] select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23FFE07A' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%23FFE07A'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23FFE07A'/%3E%3C/svg%3E")} :root[data-theme="dark"] select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%2363BE96'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%2363BE96'/%3E%3C/svg%3E")}
+select.st:hover,select.st:focus-visible{box-shadow:inset 0 0 0 1px currentColor;outline:none}
+/* .prog is also the progress list's name: the pill's own margin and padding win */
+.st.prog{color:var(--yel);background-color:var(--yel-bg);margin:0;max-height:none;overflow:visible;list-style:none}
+span.st.prog{padding:0 10px 0 9px}
+select.st.prog{padding:0 20px 0 25px}
+.st.done{color:var(--good);background-color:var(--done-bg)}
+select.st option{color:var(--ink);background:var(--surface)}
+/* the arrow that expands a row for its notes and history, and folds it */
+.more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
+.more:hover,.more.on,.more:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.more svg{width:14px;height:14px;transition:transform .15s}
+.more.on svg{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.more svg{transition:none}}
+/* THE NEXT ACTION is written at the top, under a gold rule: the pen, the box,
+   and — once a first letter lands — its topic, week, owner and note */
+.addrow{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto auto 0 26px;gap:12px;align-items:center;padding:6px 0}
+.addrow .plus{width:18px;height:18px;display:grid;place-items:center;color:var(--gold)}
+.addrow .plus svg{width:15px;height:15px}
+.addrow input.new{border:0;background:transparent;color:var(--ink);font:400 15px/1.35 var(--font);padding:2px 0;width:100%;min-width:0;outline:none}
+.addrow input::placeholder{color:var(--ink-3)}
+.addrow .tn{min-width:0;display:grid;gap:2px}
+.addrow input.nt{border:0;background:transparent;color:var(--ink-2);font:400 13px/1.4 var(--font);padding:0;width:100%;min-width:0;outline:none}
+.addrow .tpk{font:600 13px/1.4 var(--font);color:var(--ink-3);white-space:nowrap;background:none;border:0;padding:3px 6px;margin:-3px -6px;border-radius:6px;cursor:pointer;position:relative}
+.addrow .tpk .tw{text-decoration:underline dotted;text-underline-offset:3px}
+.addrow .tpk.set{color:var(--gold)}
+.addrow .tpk.set .tw{text-decoration:underline solid 1.5px}
+.addrow .tpk:hover,.addrow .tpk.on,.addrow .tpk:focus-visible{background:var(--surface-2);outline:none}
+.addrow .when .wk,.addrow .who .wn{text-decoration:underline dotted;text-underline-offset:3px}
+.addrow .st{width:0;overflow:hidden;padding:0;gap:0}
+/* THE DETAILS ARRIVE WITH THE FIRST LETTER (§356.16): their space is kept,
+   so the box does not narrow under the hand when a letter lands */
+.addrow .tpk,.addrow .when,.addrow .who,.addrow .st,.addrow .more{visibility:hidden}
+.addrow.typing .tpk,.addrow.typing .when,.addrow.typing .who,.addrow.typing .st,.addrow.typing .more{visibility:visible}
+.addhint{font:400 12.5px/1.5 var(--font);color:var(--ink-3);padding:6px 0 0 32px}
+/* the opened row: its topic, its notes, its history */
+.open{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:12px 4px 10px 32px;border-bottom:1px solid var(--line-2);background:var(--surface)}
+.open .lab{font:600 10.5px/1.7 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:10px 0 4px}
+.open .lab:first-child{margin-top:0}
+.open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:72px;resize:vertical}
+.open select.tsel{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 14px/1.4 var(--font);max-width:100%}
+.open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
+/* THE DESCRIPTION FITS WHAT IS WRITTEN (§657, Islam: "fit the content not
+   with a scrolling"): the box grows with its text and never scrolls inside
+   itself; the script sizes it where the browser cannot (field-sizing). */
+.open textarea.desc{min-height:44px;resize:none;overflow:hidden;field-sizing:content}
+/* PROGRESS (§657): the box with Enter, and the entries under it — newest
+   first, the week in front, who wrote it, Edit and Delete for the writer.
+   The entries scroll inside their own box once there are many. */
+.pbox{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;background:var(--surface)}
+.pbox:focus-within{border-color:var(--gold)}
+.pbox input{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 14px/1.5 var(--font);padding:0;color:var(--ink)}
+.pbox input::placeholder{color:var(--ink-3)}
+/* the Enter badge is a button (§678, Islam: "by pressing enter button on
+   screen as well, not only Enter on the keyboard"): the same look, pressable */
+.pbox .ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:none;border:1px solid var(--line);border-radius:5px;padding:4px 6px;white-space:nowrap;cursor:pointer}
+.pbox .ent:hover,.pbox .ent:focus-visible{border-color:var(--gold);color:var(--gold);outline:none}
+.prog{list-style:none;margin:8px 0 0;padding:0 8px 0 0;max-height:236px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable}
+.prog li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1px solid var(--line-2);font-size:13.5px;line-height:1.45;color:var(--ink)}
+.prog li:last-child{border-bottom:0}
+.prog .wk{font:600 11px/1.6 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;padding-top:2px;cursor:default}
+.prog .wk.now{color:var(--gold)}
+.prog .pb{min-width:0}
+.prog .ptxt{white-space:pre-wrap;overflow-wrap:anywhere}
+.prog .by{font:600 12px/1.4 var(--font);color:var(--ink-2);margin-top:1px;display:flex;flex-wrap:wrap;gap:0 10px;align-items:center}
+.prog .by .ed{font-weight:400;color:var(--ink-3);font-style:italic}
+.prog .by button{background:none;border:0;padding:0;font:400 12px/1.4 var(--font);color:var(--ink-3);cursor:pointer;text-decoration:underline}
+.prog .by button.danger{color:var(--bad)}
+.prog .by .sure{display:flex;gap:8px;align-items:center;font-weight:400;color:var(--ink-2)}
+.prog .by .sure .go{border:1px solid var(--line);border-radius:6px;padding:2px 8px;text-decoration:none;color:var(--ink)}
+.prog .by .sure .go.danger{color:var(--bad);border-color:var(--bad)}
+.prog textarea{border:1px solid var(--gold);border-radius:7px;background:var(--surface);color:var(--ink);padding:5px 9px;font:400 13.5px/1.45 var(--font);width:100%;resize:none;overflow:hidden;display:block;field-sizing:content}
+.pnone{font-size:13px;color:var(--ink-3);margin-top:8px}
+/* the automatic history, behind one link */
+.histlink{display:inline-flex;align-items:center;gap:5px;margin-top:12px;background:none;border:0;padding:0;font:500 12.5px/1.4 var(--font);color:var(--ink-3);cursor:pointer}
+.histlink svg{width:10px;height:10px}
+.histlink.on svg{transform:rotate(90deg)}
+.hist{margin-top:6px}
+/* the latest entry under a row's name, one line, cut at the edge */
+.last{font:400 12.5px/1.4 var(--font);color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.last b{font-weight:600;color:var(--ink-2)}
+/* on the Weekly check, the box under every open row of this week.
+   THE ROW AND ITS BOX ARE ONE BLOCK (2026-11-01, Islam: "a problem between
+   the task and what happened this week ... looks bad and confusing"): the
+   box sat in a band of its own, full width, so it read as belonging to no
+   task. Now it lines up under the name, stops before the status, says the
+   week in front, shares the row's ground (a hover lights both), and the
+   rule comes after the box, not between them. */
+.pline{display:grid;grid-template-columns:20px minmax(0,1fr) 116px 64px 128px 156px 26px;gap:12px;padding:0 14px 12px;border-bottom:1px solid var(--line-2)}
+.pline .pbox{grid-column:2/5;height:32px;padding:0 6px 0 10px;border-radius:7px;border-color:var(--line);background:var(--surface)}
+.pline .pbox::before{content:"This week";font:600 11px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding-right:8px;border-right:1px solid var(--line);white-space:nowrap}
+.pline .pbox input{font-size:13.5px}
+.pline .pbox .ent{padding:3px 5px}
+.row.chk:has(+ .pline){border-bottom:0;padding-bottom:5px}
+.row.chk:hover,.row.chk:hover+.pline,.row.chk:has(+ .pline:hover),.pline:hover{background:var(--ground)}
+.open .ro{font-size:14px;color:var(--ink-2)}
+.hist{list-style:none;margin:0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable;color:var(--ink-2)}
+.hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line-2)}
+.hist li:last-child{border-bottom:0}
+.hist time{font:400 10.5px/1.6 var(--font);color:var(--ink-3);white-space:nowrap}
+.hist b{font-weight:600;color:var(--ink)}
+.open .acts{display:flex;gap:14px;padding-top:10px;font-size:13px;align-items:center}
+.open .acts button{background:none;border:0;padding:0;font:400 13px/1.4 var(--font);color:var(--ink-3);cursor:pointer;text-decoration:underline}
+.open .acts button.danger{color:var(--bad)}
+.open .acts .sure{display:flex;gap:10px;align-items:center;color:var(--ink-2)}
+/* An author display beats the browser's own [hidden] rule (§356.8). */
+[hidden]{display:none!important}
+.open .acts .sure .go,.tmenu .sure .go{border:1px solid var(--line);border-radius:7px;padding:5px 10px;text-decoration:none;color:var(--ink)}
+.open .acts .sure .go.danger,.tmenu .sure .go.danger{color:var(--bad);border-color:var(--bad)}
+.row.on{background:var(--surface);border-bottom-color:transparent}
+/* A PRESS SHOWS AT ONCE (§671, rule 1d): the row under the hand dims — the
+   same .55 a tick nobody may press already wears — and takes no second press
+   until the server's answer redraws it. The script marks it at the press and
+   the swap carries the mark away; a refusal takes it off by hand. */
+.row.busy,.open.busy,.pline.busy,.trow.busy,.sh.busy{opacity:.55;cursor:progress}
+.busy [data-act]{pointer-events:none}
+.said{margin:0 0 12px;padding:9px 13px;border:1px solid var(--bad);border-radius:8px;background:var(--bad-bg);color:var(--bad);font-size:13.5px}
+.said:empty{display:none}
+.unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
+/* ══ THE WEEKLY CHECK (§532) ═══════════════════════════════════════════
+   EACH WEEK INSIDE A TOPIC IS ITS OWN CARD — option D of the four put to
+   Islam, chosen over the band this file would otherwise have drawn. Nothing
+   can be mistaken for belonging to the wrong week, and this week's is the
+   only one lit: last week plain, this week ringed in gold, next week a
+   dashed outline with no fill, which says "not written yet" as a shape
+   rather than as a second word. Measured before it was built: four topics
+   stand 1258px, about one and a half laptop screens. */
+.blk{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:10px 0 0}
+.blk.now{border-color:var(--gold);box-shadow:0 2px 10px rgba(156,93,8,.10)}
+.blk.next{border-style:dashed;background:transparent}
+.wkh{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);border-radius:9px 9px 0 0;font:600 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.wkh .days{margin-left:auto;font:500 12px/1 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.blk.now .wkh{background:var(--gold-bg);border-bottom-color:var(--gold);color:var(--gold)}
+.blk.now .wkh .days{color:var(--gold)}
+.blk.next .wkh{background:transparent;border-bottom-style:dashed;color:var(--gold)}
+/* The row sheds two columns here: the heading says the topic and the card
+   says the week (§87), so what is left is the tick, the name, how late it
+   is, the owner, the status, the carry and the arrow. */
+.row.chk{grid-template-columns:20px minmax(0,1fr) 116px 64px 128px 156px 26px;padding:9px 14px}
+.row.chk:last-child{border-bottom:0}
+.blk .row.on{background:var(--surface-2)}
+.blk .open{padding-left:46px;padding-right:14px}
+/* CARRY IS A BUTTON, NOT A STATUS (2026-11-01, Islam: "the carry to next
+   week looks like in progress"): it was the gold of In progress; now a plain
+   button in the ink with a blue arrow (option C of the same mockup). */
+.carry{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 10px;white-space:nowrap;cursor:pointer;justify-self:start}
+.carry svg{width:13px;height:13px;flex:none;color:var(--carry)}
+.carry:hover,.carry:focus-visible{border-color:var(--carry);background:var(--ground);outline:none}
+.carry.off{visibility:hidden}
+/* THE WRITE LINE SITS IN THE TOPIC IT IS FOR, and it is the SAME line the
+   page writes at the top — one renderer, one behaviour (§53.5) — with its
+   topic fixed by the card it stands in and its week already Next week. */
+.addrow.chk{grid-template-columns:20px minmax(0,1fr) auto auto auto 0 26px;padding:7px 14px;gap:10px}
+.addrow.chk .tpk,.addrow.chk .when,.addrow.chk .who,.addrow.chk .more{visibility:visible}
+.addrow.chk .ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:4px 6px;white-space:nowrap}
+.blk .quiet{padding:10px 14px;font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic}
+.sec .asleep{font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic;padding:10px 0 0}
+@media (max-width:760px){.strip{gap:14px}.open{grid-template-columns:1fr;padding-left:4px}
+  .pline{grid-template-columns:minmax(0,1fr)}.pline .pbox{grid-column:1}
+  .row.chk{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t t more" ". when st more" ". carry carry carry"}
+  .row.chk .tick{grid-area:tick}.row.chk .tn2{grid-area:t}.row.chk .st{grid-area:st}.row.chk .when{grid-area:when}.row.chk .who{display:none}.row.chk .carry{grid-area:carry}.row.chk .more{grid-area:more}
+  .addrow.chk{grid-template-columns:20px minmax(0,1fr) 26px}.addrow.chk .tpk,.addrow.chk .when,.addrow.chk .who,.addrow.chk .ent{display:none}
+  .tpanel{width:min(380px,calc(var(--winw) - 32px))}
+  .addrow{grid-template-columns:20px minmax(0,1fr) 26px}.addrow .tpk,.addrow .when,.addrow .who,.addrow .st{display:none}
+  .row{grid-template-columns:20px minmax(0,1fr) auto auto 26px;grid-template-areas:"tick t t st more" ". when tcol who more"}.row .tick{grid-area:tick}.row .tn2{grid-area:t}.row .tcol{grid-area:tcol;justify-self:start}.row .st{grid-area:st}.row .when{grid-area:when}.row .who{grid-area:who}.row .more{grid-area:more}
+  .team,.weeks,.topics{right:auto;left:0}}
+
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--zebra:#F4F6F9;--line:#D8DEE8;--line-2:#E6EAF1;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--gold:#9C5D08;--amber:#F5A623;--amber-ink:#231500;--amber-wash:#FEF4E2;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--title:Georgia,'Times New Roman',serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1F2531;--line:#333B4A;--line-2:#2A313E;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--gold:#F5A623;--amber-wash:#2B2210;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35)}}:root[data-theme="dark"]{--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1F2531;--line:#333B4A;--line-2:#2A313E;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--gold:#F5A623;--amber-wash:#2B2210;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35)}
+body{font-family:var(--font)}
+.pg{max-width:1000px}
+/* THE BAND: Home's, in the client's colour */
+.mast,.mast.flat{position:relative;overflow:hidden;border-radius:14px;padding:16px 22px 17px;margin:0 0 16px;box-shadow:none;min-height:113px;display:flex;flex-direction:column;justify-content:flex-end}
+.mast::before{content:"";position:absolute;width:300px;height:300px;right:-90px;top:-120px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);pointer-events:none}
+.mast::after{content:"";position:absolute;width:210px;height:210px;right:-20px;top:-70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);pointer-events:none}
+.mast>*{position:relative}
+.mast .mrow{align-items:flex-end;gap:16px}
+.mast .wkof{font:700 10.5px/1.5 var(--font);letter-spacing:.16em;margin:0 0 4px;color:var(--bar-accent)}
+.mast h2.pt{font:400 27px/1.15 var(--title);letter-spacing:0}
+.mast .lsub{margin:4px 0 0;font:400 13.5px/1.5 var(--font);color:var(--bar-quiet)}
+.mast .strip{gap:20px}
+.mast .tile b{font:600 19px/1 var(--font)}
+.mast .tile span{font:600 10.5px/1.5 var(--font);letter-spacing:.1em}
+.mast .ends{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.mast .act{border:0;border-radius:9px;background:var(--amber);color:var(--amber-ink);font:700 13px/1.5 var(--font);padding:8px 14px;cursor:pointer;white-space:nowrap}
+.mast .act:hover{filter:brightness(1.05)}
+.mast .act:focus-visible{outline:2px solid var(--bar-ink);outline-offset:2px}
+/* THE CARD: its header holds the title, the count and the filters */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:clip;margin:0 0 16px}
+.chd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.cic{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--gold)}
+.cic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.chd h2{margin:0;font:700 19px/1.15 var(--title);color:var(--ink);white-space:nowrap}
+.chd .ccnt{display:inline-block;font:700 11.5px/1.5 var(--font);border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.chd .sp{flex:1}
+.chd .cx{display:inline-flex;align-items:center;gap:6px;font:400 12px/1.4 var(--font);color:var(--ink-3);white-space:nowrap;min-width:0;max-width:100%}
+/* the views, as My tasks' switch */
+.chd .cats{display:inline-flex;gap:0;margin:0;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%}
+.chd .cats::-webkit-scrollbar{display:none}
+.chd .cats a{font:600 12px/1.4 var(--font);color:var(--ink-2);padding:3px 9px;border:0;border-radius:6px;text-decoration:none;white-space:nowrap}
+.chd .cats a[aria-current="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.chd .cats a:hover{color:var(--ink)}
+.chd .cats a:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+/* the search, as My tasks' box */
+.chd .find{flex:0 1 210px;display:flex;align-items:center;gap:6px;margin:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:3px 4px 3px 9px;color:var(--ink-3)}
+.chd .find:focus-within{border-color:var(--gold)}
+.chd .find svg{width:13px;height:13px;flex:none}
+.chd .find .srch{font:400 12.5px/1.5 var(--font);padding:1px 0}
+.chd .find .go{font:600 12px/1 var(--font);padding:3px 4px}
+/* THE GROUPS: a label over a grey rule, as on My tasks */
+.card .sh{align-items:baseline;gap:8px;padding:14px 14px 7px;border-bottom:2px solid var(--line)}
+.card .sh .ix{display:none}
+.card .sh h3{font:700 11px/1.4 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.card .sh .meta{font:600 11.5px/1.4 var(--font);color:var(--ink-3)}
+.card .sec{margin:0}
+.card .none{padding:16px 14px 18px;margin:0}
+
+.card.ctop{margin:0;border-radius:12px 12px 0 0;box-shadow:none;overflow:visible}
+.card.ctop.solo{border-radius:12px;margin:0 0 16px}
+.card.cbot{border-top:0;border-radius:0 0 12px 12px;overflow:visible;padding-bottom:6px;margin:0 0 16px}
+.ctop .chd .dots{margin:0;align-self:center}
+.ctop .chd .dots>button{color:var(--ink-3);font:400 12px/1 var(--font);padding:4px 8px;border:1px solid var(--line);background:var(--surface)}
+.ctop .chd .dots>button b{color:var(--ink);font-weight:600}
+.ctop .chd .dots>button:hover,.ctop .chd .dots>button.on,.ctop .chd .dots>button:focus-visible{background:var(--surface-2);color:var(--ink)}
+.ctop .tools{margin:0;padding:4px 14px;border-top:0;gap:0}
+.ctop .write{border-bottom:0}
+.ctop .tools+.counted,.ctop .counted.ck{margin:0;padding:8px 14px 4px;text-align:left}
+.ctop .unread{margin:0;border:0;border-radius:0}
+.pin .card.ctop{border-bottom:1.5px solid var(--gold)}
+.pin .card.ctop.solo{border-bottom:1px solid var(--line)}
+.cbot .list .row{padding:8px 14px;border-bottom-color:var(--line-soft)}
+.cbot .sec .row:nth-child(odd of .row:not(.done)),.cbot .sec.showdone .row:nth-child(odd of .row){background:var(--zebra)}
+/* a row's weekly box wears the row's stripe and its hover: one block (2026-11-01) */
+.cbot .sec .row:nth-child(odd of .row:not(.done))+.pline,.cbot .sec.showdone .row:nth-child(odd of .row)+.pline{background:var(--zebra)}
+.cbot .sec .row.chk:hover,.cbot .sec .row.chk:hover+.pline,.cbot .sec .row.chk:has(+ .pline:hover),.cbot .sec .pline:hover{background:var(--surface-2)}
+.cbot .list .row.chk:has(+ .pline){padding-bottom:4px}
+.cbot .sec .row.on{background:var(--surface)}
+.cbot .open{padding-left:46px;padding-right:14px}
+.cbot .foot{padding:8px 14px 10px 46px}
+.cbot .sh .end{font:600 11.5px/1.4 var(--font)}
+.cbot .sh h3 input{font:600 14px/1.2 var(--font);letter-spacing:0;text-transform:none}
+.cbot .sh.quiet h3{font-style:italic}
+.cbot .meter{margin:0 14px -2px}
+.cbot .asleep{padding:10px 14px 0}
+.cbot .blk{margin:10px 14px 0}
+.cbot .sec:has(.blk){padding-bottom:12px}
+.cbot .blk .row.chk{padding:9px 14px}
+.cbot .none{padding:16px 14px 12px}
+@media (max-width:760px){.cbot .open{padding-left:14px}.cbot .foot{padding-left:14px}}
+</style>
+</head>
+<body data-api="/x/tracker/api" data-list="/x/tracker/list" data-view="check" data-q="" data-group="owner" data-dates="weeks">
+<header class="tb"><div class="tbin"><a class="tbbrand" href="/x/strategy"><span class="tbmark"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"></path><circle cx="12" cy="12" r="1.3"></circle></svg></span>Strategy Management Platform</a><span class="tborg">Raya Trade</span><div class="tbacts"><button class="tbtheme" id="tbtheme" type="button" aria-label="Theme: Auto · light" data-tip="Auto · light"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"></circle><path d="M10 2.8a7.2 7.2 0 0 0 0 14.4z" fill="currentColor"></path></svg></button><button class="tbout" id="tbout" type="button" data-door="/x/sign-in">Sign out</button></div></div></header>
+<main class="pg"><p class="said" id="said" role="alert" aria-live="polite"></p><div id="body"><div class="pin"><header class="mast"><div class="mrow"><div class="mt"><div class="wkof">This week · 1 Nov – 5 Nov</div><h2 class="pt">Internal Tracker</h2><p class="lsub">Raya Trade’s actions, read by the week.</p></div><div class="ends"><div class="strip"><div class="tile"><b>6</b><span>Open</span></div><div class="tile late"><b>3</b><span>Late</span></div><div class="tile"><b>1</b><span>Due</span></div><div class="tile"><b>0</b><span>Done this week</span></div></div></div></div></header><div class="card ctop"><div class="chd"><span class="cic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"></path><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"></path></svg></span><h2>Actions</h2><span class="sp"></span><span class="cx">Show <nav class="cats" aria-label="Views"><a href="/x/tracker?view=week">This week</a><a href="/x/tracker?view=all">All</a><a href="/x/tracker?view=mine">Mine</a><a href="/x/tracker?view=undated">Undated</a><a href="/x/tracker?view=check" aria-current="true">Weekly check</a></nav></span><span class="dots"><button type="button" data-act="settings" aria-haspopup="menu" aria-expanded="false" title="Settings" aria-label="Settings"><svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"></circle><circle cx="8" cy="8" r="1.4" fill="currentColor"></circle><circle cx="13" cy="8" r="1.4" fill="currentColor"></circle></svg></button><span class="setmenu" role="menu" hidden=""><span class="two"><span class="col"><span class="lab">Dates as</span><button type="button" role="menuitemradio" data-act="set-dates" data-value="weeks" class="on" aria-checked="true">Weeks</button><button type="button" role="menuitemradio" data-act="set-dates" data-value="dates" aria-checked="false">Exact dates</button></span></span><span class="sep"><button type="button" role="menuitem" data-act="topics"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>Topics<span class="arr"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button></span></span><span class="tpanel" hidden=""><span class="ph"><span class="lab">Topics</span><span class="hint">Press a name to rename it</span></span><div class="tlist"><div class="trow" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178"><button type="button" class="nm" data-act="topic-rename" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178" title="Rename this topic"><span class="who2">Facilities</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path></svg></button><span class="ct nil">no actions yet</span><span class="tdots"><button type="button" data-act="topic-menu" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178" aria-haspopup="menu" aria-expanded="false" aria-label="Topic options" title="Topic options"><svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"></circle><circle cx="8" cy="8" r="1.4" fill="currentColor"></circle><circle cx="13" cy="8" r="1.4" fill="currentColor"></circle></svg></button><span class="tmenu" role="menu" hidden=""><button type="button" role="menuitem" data-act="topic-rename" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178">Rename</button><button type="button" role="menuitem" data-act="topic-close" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178">Close the topic</button><button type="button" role="menuitem" class="danger" data-act="topic-delete-ask" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178">Delete</button><span class="sure" hidden="">Delete the topic? Its actions stay, with no topic. <button type="button" class="go danger" data-act="topic-delete" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178">Yes, delete it</button><button type="button" class="go" data-act="topic-delete-no">Keep it</button></span></span></span></div></div><div class="tadd"><span class="pl" aria-hidden="true">+</span><input class="tpnew" placeholder="New topic…" aria-label="New topic" maxlength="120"></div></span></span></div><div class="counted ck">1 topic · <span class="left">1 still to write for next week</span></div></div></div><div class="card cbot"><div class="list"><div class="sec" data-key="9561ad0e-1079-4f05-8fc8-e81cf5ee0178"><div class="grp sh quiet" data-key="9561ad0e-1079-4f05-8fc8-e81cf5ee0178"><span class="ix">01</span><h3>Facilities</h3><span class="meta">nothing this week</span><span class="end">0 of 0 done<span class="tdots"><button type="button" data-act="topic-menu" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178" aria-haspopup="menu" aria-expanded="false" aria-label="Topic options" title="Topic options"><svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"></circle><circle cx="8" cy="8" r="1.4" fill="currentColor"></circle><circle cx="13" cy="8" r="1.4" fill="currentColor"></circle></svg></button><span class="tmenu" role="menu" hidden=""><button type="button" role="menuitem" data-act="topic-rename" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178">Rename</button><button type="button" role="menuitem" data-act="topic-close" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178">Close the topic</button><button type="button" role="menuitem" class="danger" data-act="topic-delete-ask" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178">Delete</button><span class="sure" hidden="">Delete the topic? Its actions stay, with no topic. <button type="button" class="go danger" data-act="topic-delete" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178">Yes, delete it</button><button type="button" class="go" data-act="topic-delete-no">Keep it</button></span></span></span></span></div><div class="meter"><i style="width:0%"></i></div><div class="asleep">Nothing on this topic in these three weeks. Write the next action, or close the topic from its ···</div><div class="blk next"><div class="wkh">Next week<span class="days">W2 Nov · 8 – 12 Nov</span></div><div class="addrow chk" data-due="2026-11-12" data-owner="noran" data-topic="9561ad0e-1079-4f05-8fc8-e81cf5ee0178" data-line="t:9561ad0e-1079-4f05-8fc8-e81cf5ee0178"><span class="plus"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path></svg></span><div class="tn"><input class="new" data-act="add" placeholder="Write next week's action for Facilities" aria-label="Write next week's action for Facilities" maxlength="200"><input class="nt" placeholder="A note, if the line needs one" aria-label="Note for the new action" maxlength="5000" hidden=""></div><span class="when pick" role="button" tabindex="0" data-act="due" data-due="2026-11-12" aria-haspopup="listbox" aria-expanded="false" title="Which week"><span class="wk">Next week</span><span class="weeks" role="listbox" aria-label="Due" hidden=""><span class="wh"><span>Week</span><span>Sun – Thu</span></span><button type="button" role="option" data-act="pick-week" data-day="2026-11-05" class="now" aria-selected="false"><b>This week</b><small>1 – 5 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-12" class=" on" aria-selected="true"><b>Next week</b><small>8 – 12 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-19" class="" aria-selected="false"><b>W3 Nov</b><small>15 – 19 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-26" class="" aria-selected="false"><b>W4 Nov</b><small>22 – 26 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-12-03" class="" aria-selected="false"><b>W1 Dec</b><small>29 Nov – 3 Dec</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-12-10" class="" aria-selected="false"><b>W2 Dec</b><small>6 – 10 Dec</small></button><span class="wf"><button type="button" role="option" data-act="pick-week" data-day="" aria-selected="false">No date</button><button type="button" data-act="pick-day">A day of my own…</button></span></span></span><span class="who pick" role="button" tabindex="0" data-act="who" aria-haspopup="listbox" aria-expanded="false" title="Whose it is"><span class="wn">Noran</span><span class="team" role="listbox" aria-label="Owner" hidden=""><button type="button" role="option" data-act="pick-owner" data-key="islam" aria-selected="false">Islam</button><button type="button" role="option" data-act="pick-owner" data-key="noran" class="on" aria-selected="true">Noran</button><button type="button" role="option" data-act="pick-owner" data-key="omarA" aria-selected="false">Omar</button></span></span><span class="ent" aria-hidden="true">Enter</span><span class="st"></span><button class="more" type="button" data-act="add-note" aria-expanded="false" aria-label="Add a note" title="Add a note"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div></div><div class="sec" data-key="none"><div class="grp sh quiet" data-key="none"><span class="ix">—</span><h3>No topic</h3><span class="meta">6 open · <span class="bad">3 late</span></span><span class="end"></span></div><div class="blk now"><div class="wkh">This week<span class="days">W1 Nov · 1 – 5 Nov</span></div><div class="row chk late" data-id="5768c5ae-e117-4272-9687-0857da543d39" data-status="not_started"><button class="tick" type="button" role="checkbox" aria-checked="false" aria-label="Mark done" disabled=""></button><div class="tn2"><div class="t">HR project: review the two projects &amp; develop the 3rd</div></div><span class="when late">Late 5 w</span><span class="who">Islam</span><span class="st">Not started</span><span class="carry off"></span><button class="more" type="button" data-act="more" aria-expanded="false" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="pline" data-id="5768c5ae-e117-4272-9687-0857da543d39"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened?" aria-label="Progress on Full line" maxlength="2000"><button class="ent" type="button" data-act="progress-go" title="Add this line">Enter</button></div></div><div class="row chk" data-id="6daa9a5f-61a1-482f-9826-f13da46401b3" data-status="not_started"><button class="tick" type="button" role="checkbox" aria-checked="false" aria-label="Mark done" disabled=""></button><div class="tn2"><div class="t">Retention analytics: first cut</div></div><span class="when"></span><span class="who">Islam</span><span class="st">Not started</span><span class="carry off"></span><button class="more" type="button" data-act="more" aria-expanded="false" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="pline" data-id="6daa9a5f-61a1-482f-9826-f13da46401b3"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened?" aria-label="Progress on For Islam" maxlength="2000"><button class="ent" type="button" data-act="progress-go" title="Add this line">Enter</button></div></div><div class="row chk late" data-id="751c2d54-f493-4532-9852-dd3eea985f61" data-status="not_started"><button class="tick" type="button" role="checkbox" aria-checked="false" aria-label="Mark done" data-act="tick"></button><div class="tn2"><div class="t" data-rename="1" title="Double-click to rename">Finance: adjust the project missing milestones</div></div><span class="when late pick" role="button" tabindex="0" data-act="due" data-due="2026-09-20" aria-haspopup="listbox" aria-expanded="false" title="Change the week">Late 6 w<span class="weeks" role="listbox" aria-label="Due" hidden=""><span class="wh"><span>Week</span><span>Sun – Thu</span></span><button type="button" role="option" data-act="pick-week" data-day="2026-11-05" class="now" aria-selected="false"><b>This week</b><small>1 – 5 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-12" class="" aria-selected="false"><b>Next week</b><small>8 – 12 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-19" class="" aria-selected="false"><b>W3 Nov</b><small>15 – 19 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-26" class="" aria-selected="false"><b>W4 Nov</b><small>22 – 26 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-12-03" class="" aria-selected="false"><b>W1 Dec</b><small>29 Nov – 3 Dec</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-12-10" class="" aria-selected="false"><b>W2 Dec</b><small>6 – 10 Dec</small></button><span class="wf"><button type="button" role="option" data-act="pick-week" data-day="" aria-selected="false">No date</button><button type="button" data-act="pick-day">A day of my own…</button></span></span></span><span class="who pick" role="button" tabindex="0" data-act="who" aria-haspopup="listbox" aria-expanded="false" title="Hand it to somebody else"><span class="wn">Noran</span><span class="team" role="listbox" aria-label="Owner" hidden=""><button type="button" role="option" data-act="pick-owner" data-key="islam" aria-selected="false">Islam</button><button type="button" role="option" data-act="pick-owner" data-key="noran" class="on" aria-selected="true">Noran</button><button type="button" role="option" data-act="pick-owner" data-key="omarA" aria-selected="false">Omar</button></span></span><select class="st" data-act="status" aria-label="Status"><option value="not_started" selected="">Not started</option><option value="in_progress">In progress</option><option value="done">Done</option></select><button class="carry" type="button" data-act="carry" title="Carry this action to next week"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Carry to next week</button><button class="more" type="button" data-act="more" aria-expanded="false" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="pline" data-id="751c2d54-f493-4532-9852-dd3eea985f61"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened?" aria-label="Progress on Chase Finance" maxlength="2000"><button class="ent" type="button" data-act="progress-go" title="Add this line">Enter</button></div></div><div class="row chk late" data-id="45cf0b3f-8b7c-433e-a56d-093562529c85" data-status="in_progress"><button class="tick" type="button" role="checkbox" aria-checked="false" aria-label="Mark done" data-act="tick"></button><div class="tn2"><div class="t" data-rename="1" title="Double-click to rename">Book the big room for Thursday</div></div><span class="when late pick" role="button" tabindex="0" data-act="due" data-due="2026-10-29" aria-haspopup="listbox" aria-expanded="false" title="Change the week">Late<span class="weeks" role="listbox" aria-label="Due" hidden=""><span class="wh"><span>Week</span><span>Sun – Thu</span></span><button type="button" role="option" data-act="pick-week" data-day="2026-11-05" class="now" aria-selected="false"><b>This week</b><small>1 – 5 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-12" class="" aria-selected="false"><b>Next week</b><small>8 – 12 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-19" class="" aria-selected="false"><b>W3 Nov</b><small>15 – 19 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-11-26" class="" aria-selected="false"><b>W4 Nov</b><small>22 – 26 Nov</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-12-03" class="" aria-selected="false"><b>W1 Dec</b><small>29 Nov – 3 Dec</small></button><button type="button" role="option" data-act="pick-week" data-day="2026-12-10" class="" aria-selected="false"><b>W2 Dec</b><small>6 – 10 Dec</small></button><span class="wf"><button type="button" role="option" data-act="pick-week" data-day="" aria-selected="false">No date</button><button type="button" data-act="pick-day">A day of my own…</button></span></span></span><span class="who pick" role="button" tabindex="0" data-act="who" aria-haspopup="listbox" aria-expanded="false" title="Hand it to somebody else"><span class="wn">Noran</span><span class="team" role="listbox" aria-label="Owner" hidden=""><button type="button" role="option" data-act="pick-owner" data-key="islam" aria-selected="false">Islam</button><button type="button" role="option" data-act="pick-owner" data-key="noran" class="on" aria-selected="true">Noran</button><button type="button" role="option" data-act="pick-owner" data-key="omarA" aria-selected="false">Omar</button></span></span><select class="st prog" data-act="status" aria-label="Status"><option value="not_started">Not started</option><option value="in_progress" selected="">In progress</option><option value="done">Done</option></select><button class="carry" type="button" data-act="carry" title="Carry this action to next week"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Carry to next week</button><button class="more" type="button" data-act="more" aria-expanded="false" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="pline" data-id="45cf0b3f-8b7c-433e-a56d-093562529c85"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened?" aria-label="Progress on Book the big room for Thursday" maxlength="2000"><button class="ent" type="button" data-act="progress-go" title="Add this line">Enter</button></div></div><div class="row chk" data-id="600c7579-6561-44f2-a789-3624103d1195" data-status="in_progress"><button class="tick" type="button" role="checkbox" aria-checked="false" aria-label="Mark done" data-act="tick"></button><div class="tn2"><div class="t" data-rename="1" title="Double-click to rename">Draft the Q4 board pack</div></div><span class="when"></span><span class="who pick" role="button" tabindex="0" data-act="who" aria-haspopup="listbox" aria-expanded="false" title="Hand it to somebody else"><span class="wn">Noran</span><span class="team" role="listbox" aria-label="Owner" hidden=""><button type="button" role="option" data-act="pick-owner" data-key="islam" aria-selected="false">Islam</button><button type="button" role="option" data-act="pick-owner" data-key="noran" class="on" aria-selected="true">Noran</button><button type="button" role="option" data-act="pick-owner" data-key="omarA" aria-selected="false">Omar</button></span></span><select class="st prog" data-act="status" aria-label="Status"><option value="not_started">Not started</option><option value="in_progress" selected="">In progress</option><option value="done">Done</option></select><button class="carry" type="button" data-act="carry" title="Carry this action to next week"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>Carry to next week</button><button class="more" type="button" data-act="more" aria-expanded="false" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="pline" data-id="600c7579-6561-44f2-a789-3624103d1195"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened?" aria-label="Progress on Someday" maxlength="2000"><button class="ent" type="button" data-act="progress-go" title="Add this line">Enter</button></div></div></div><div class="blk next"><div class="wkh">Next week<span class="days">W2 Nov · 8 – 12 Nov</span></div><div class="row chk" data-id="b2c2f90b-b64b-476d-bf4a-f3965dc7fff0" data-status="not_started"><button class="tick" type="button" role="checkbox" aria-checked="false" aria-label="Mark done" disabled=""></button><div class="tn2"><div class="t">Send the outcome to the managers</div></div><span class="when"></span><span class="who">Islam</span><span class="st">Not started</span><span class="carry off"></span><button class="more" type="button" data-act="more" aria-expanded="false" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div></div></div></div></div></main>
+
+
+
+</body></html>

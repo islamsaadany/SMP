@@ -9413,7 +9413,7 @@ function partFilter(u){
     var w = world(), v = viewer();
     pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
   }
-  /* §693: "OWN PIECE" ON A UNIT OR A FUNCTION. The ladder's lowest level,
+  /* §704: "OWN PIECE" ON A UNIT OR A FUNCTION. The ladder's lowest level,
      where the place's pages are open and its lists hold only what the person
      holds — the half eye's narrowing, carried from the top's own plan to
      every place, and asked of the one rule both sides read. */

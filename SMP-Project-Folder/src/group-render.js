@@ -8132,7 +8132,7 @@ function capsShown(subject) {
   var hs = isUnitHolderId(target) ? unitHolders(subjKey(target)) : fnHolders(target.slice(3));
   return pieceHolders(target, hs);
 }
-/* §693: AT "OWN PIECE" a holder is drawn with only the person's own projects
+/* §704: AT "OWN PIECE" a holder is drawn with only the person's own projects
    — one door, so Performance, Projects and Reporting narrow together. A
    reading view: the holder's other fields are its own (the prototype), and
    the projects are the same objects, so a figure reported lands where it

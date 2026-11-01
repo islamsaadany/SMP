@@ -249,7 +249,7 @@ var READING = (function () {
      directions alone and the capabilities have the tab above; where it
      answers no, one list, as the box itself is. */
   function directions(key, caps) {
-    /* §693: at "own piece" the person's own alone, as the page narrows it */
+    /* §704: at "own piece" the person's own alone, as the page narrows it */
     var u = planOf(key), pf = typeof partFilter === "function" ? partFilter(u) : null, items = SMPRules.shown(itemsNow(u));
     if (pf) items = items.filter(pf);
     if (boxSplit(u)) items = items.filter(function (it) { return !!SMPRules.pillarIsCap(it) === !!caps; });

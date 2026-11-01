@@ -315,7 +315,7 @@ function collect(stored, incoming, w) {
         if (!(stored.people || []).some(function (x) { return x.key === ip.key; }) && ip.role)
           seatMoved.push((ip.name || ip.key) + " added holding " + ip.role);
       });
-      /* §693: AND A PERSON'S LEVEL. `reach` moves how far up one person reads
+      /* §704: AND A PERSON'S LEVEL. `reach` moves how far up one person reads
          (the ladder's exception), which is who may see what — the same
          question as a seat, so the same classification, whichever screen
          wrote it. */

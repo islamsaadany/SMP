@@ -5658,7 +5658,7 @@
           : accessImpact(d.askfrom, to, d.askwhat || "this"),
         go: function(){ go(); paint(); askSaved(findCell); } });
     }
-    /* §693: THE LADDER. A press sets how far up every role on the row reads,
+    /* §704: THE LADDER. A press sets how far up every role on the row reads,
        as the three reach rows of the map — the place, the division, the top,
        each view or none — and clears §517's half eye, which the part owners'
        row read as its level only until the row was set. */
@@ -5683,7 +5683,7 @@
           } });
       });
     });
-    /* §699: the pen, a switch on the role's own level (`a_pen`, edit or none). */
+    /* §704: the pen, a switch on the role's own level (`a_pen`, edit or none). */
     document.querySelectorAll("[data-pen]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.pen.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], on = p[1] === "on";

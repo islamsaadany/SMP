@@ -1149,7 +1149,7 @@
   ];
 
   /** @param {World} w @param {Person|null|undefined} person @param {string} area @param {string} target @returns {Grant} */
-  /* ── THE LADDER (§693; design-mockups/roles-and-access) ─────────────────
+  /* ── THE LADDER (§704; design-mockups/roles-and-access) ─────────────────
      Islam, 2026-10-31: *"it's more of levels of visibility … everyone set on a
      level can see his level or see the bigger level(s) one by one"*, *"take
      care seeing doesn't mean reporting. a person can see the sibling
@@ -1173,7 +1173,7 @@
      reads it through the same `w.access`: three rows per role, each `view`
      or `none` — a_reach_place, a_reach_div, a_reach_top — the level being the
      highest one on. A role with none of the three stored reads its shipped
-     level (LADDER_DEFAULT), the levels every role had before (§693's own
+     level (LADDER_DEFAULT), the levels every role had before (§704's own
      measurement). The part owners' row reads §517's half eye as its level
      until the row is set: "part" is own piece, absent is the whole place.
 
@@ -4343,7 +4343,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      about who a bounded role is (§53.5). */
   function rolesAtState(w, person, area, target, state) {
     return rolesOrFloor(w, person).filter(function (r) {
-      return seatGrant(w, person, r, area, target) === state;   /* §693: the ladder's, as grantIn asks */
+      return seatGrant(w, person, r, area, target) === state;   /* §704: the ladder's, as grantIn asks */
     }).map(function (r) { return r.role; });
   }
   function editingRoles(w, person, area, target) {
@@ -5409,7 +5409,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
       if (!isPartRole(rs[i].role)) return false;
-      /* §693: narrowed when the part owners' level is "own piece" — which is
+      /* §704: narrowed when the part owners' level is "own piece" — which is
          what §517's half eye reads as until the row is set */
       if (ladderLevel(w, person, rs[i].role) > 0) return false;
       holds = true;
@@ -6093,7 +6093,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
-    /* §693: the ladder */
+    /* §704: the ladder */
     REACH: REACH, LADDER_DEFAULT: LADDER_DEFAULT, LADDER_MIN: LADDER_MIN, LADDER_STAND: LADDER_STAND,
     ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove, penOn: penOn,
     ladderReads: ladderReads, pieceOnlyAt: pieceOnlyAt, holdsItem: holdsItem, divisionOf: divisionOf,

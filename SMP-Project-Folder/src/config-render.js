@@ -553,7 +553,7 @@ function accessMerged(row, col){
            value: vals.length === 1 ? vals[0] : null, mixed: vals.length > 1 };
 }
 
-/* ── ROLES & ACCESS AS A LADDER (§693; design-mockups/roles-and-access) ──
+/* ── ROLES & ACCESS AS A LADDER (§704; design-mockups/roles-and-access) ──
    Islam: *"it's more of levels of visibility … everyone set on a level can
    see his level or see the bigger level(s) one by one"*, *"seeing doesn't
    mean reporting"*, and, after the two rules were measured side by side on
@@ -644,7 +644,7 @@ function accessExceptions(editable){
   if (!rows && !editable) return "";
   return '<div class="acex"><h3>Exceptions</h3>' + (rows || '<p class="acexnone">Nobody reads differently from their role.</p>') + pick + '</div>';
 }
-/* ── §699, REFINED (Islam, 2026-11-01) ────────────────────────────────
+/* ── §704, REFINED (Islam, 2026-11-01) ────────────────────────────────
    *"the copilot has the old icons. and the owner is just owner — is that the
    capability owner or function or direction or what? the description column
    needs to be useful to the SMO team to adjust"*, and of the switch above

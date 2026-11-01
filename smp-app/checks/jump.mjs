@@ -1,4 +1,4 @@
-/* JUMP TO AND THE OFFLINE STRIP (§699), driven in a real browser against the
+/* JUMP TO AND THE OFFLINE STRIP (§701), driven in a real browser against the
    BUILT app on its own port and the dev tenant, given the Tracker, Notes,
    Insights and Portfolio for the run and put back after:
      · the "Jump to…" box is on Strategy's bar, a module's bar and the

@@ -399,7 +399,7 @@ export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/t
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
 })();
-` + NAVSKEL_FILE;   /* §620: the press draws the next page's shape (lib/navskel.ts); §699: Jump to and the offline strip */
+` + NAVSKEL_FILE;   /* §620: the press draws the next page's shape (lib/navskel.ts); §701: Jump to and the offline strip */
 
 /* The script is a file, never inline: the shell's policy is `script-src
    'self'` (lib/shell.ts SHELL_CSP), so an inline handler would render

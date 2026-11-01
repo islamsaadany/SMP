@@ -1,4 +1,4 @@
-/* JUMP TO'S LIST (§699, lib/jump.ts): GET /api/jump?client=<slug>. The
+/* JUMP TO'S LIST (§701, lib/jump.ts): GET /api/jump?client=<slug>. The
    pages this person may open, asked once when the window is first opened. */
 import { NextResponse } from "next/server";
 import { doorPool } from "../../../lib/auth.ts";

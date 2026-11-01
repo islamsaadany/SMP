@@ -255,7 +255,7 @@ export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §620
 })();
 `;
 
-/* §699: Jump to and the offline strip ride in the same file, so every page
+/* §701: Jump to and the offline strip ride in the same file, so every page
    that loads this one has them without a request of its own
    (lib/jump-script.ts). The file is the two scripts; the stamp is its hash. */
 export const NAVSKEL_FILE = NAVSKEL_SCRIPT + JUMP_SCRIPT;

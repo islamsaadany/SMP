@@ -28,7 +28,7 @@
    drift a word at a time (§53.5; the discipline scripts/build-shell.mjs
    already uses on build.py's own list).
 
-   §699 ADDS ONE THING AND STORES NOTHING: a fetch handler for PAGE LOADS
+   §701 ADDS ONE THING AND STORES NOTHING: a fetch handler for PAGE LOADS
    alone, which hands the network's answer straight back and, only when the
    network fails, answers SMP's own offline page — a string in this file, not
    a copy of anybody's page. Its own note is at OFFLINE_PAGE below.
@@ -86,7 +86,7 @@ must(!/addEventListener\("fetch"/.test(carried), "the carried half holds a fetch
    reason the stamp is: every generator that writes those files has run. */
 writeFileSync(join(here, "..", "shell", "asset-stamps.json"), JSON.stringify(assetStamps(), null, 2) + "\n");
 
-/* ── THE OFFLINE PAGE (§699) ───────────────────────────────────────────────
+/* ── THE OFFLINE PAGE (§701) ───────────────────────────────────────────────
    Islam: *"the page that shows that you are offline if there is no
    internet"*, drawn in design-mockups/jump-to-offline/ and approved. Opening
    the platform with no connection showed the browser's own error, because
@@ -154,7 +154,7 @@ button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 </body></html>
 `;
 const OFFLINE_HALF =
-  "/* §699 — SMP's own offline page, for a page load that cannot reach the\n" +
+  "/* §701 — SMP's own offline page, for a page load that cannot reach the\n" +
   "   network. Written here, never stored (scripts/build-sw.mjs). */\n" +
   "const OFFLINE_PAGE = " + JSON.stringify(OFFLINE_PAGE) + ";\n" +
   "self.addEventListener(\"fetch\", (e) => {\n" +
@@ -177,7 +177,7 @@ const head =
   "   carried verbatim below; the caching half dropped, because the new platform\n" +
   "   document is server-rendered and per person, so a cached copy is one\n" +
   "   person's page served to the next. This worker STORES NOTHING. Its one\n" +
-  "   fetch handler (§699) touches page loads alone, and only when the network\n" +
+  "   fetch handler (§701) touches page loads alone, and only when the network\n" +
   "   fails: then it answers SMP's own offline page, written into this file. */\n" +
   "\n" +
   /* THE RELEASE STAMP (§397): the line that makes /sw.js differ between two
@@ -207,4 +207,4 @@ const head =
 mkdirSync(join(here, "..", "public"), { recursive: true });
 const out = join(here, "..", "public", "sw.js");
 writeFileSync(out, head + carried);
-console.log("wrote public/sw.js —", statSync(out).size, "bytes;", carried.split("\n").length, "lines carried verbatim from sw.js, the caching half dropped, the offline page added (§699)");
+console.log("wrote public/sw.js —", statSync(out).size, "bytes;", carried.split("\n").length, "lines carried verbatim from sw.js, the caching half dropped, the offline page added (§701)");

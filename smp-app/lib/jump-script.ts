@@ -1,4 +1,4 @@
-/* ── JUMP TO AND THE OFFLINE STRIP, ON EVERY PAGE (§699) ───────────────────
+/* ── JUMP TO AND THE OFFLINE STRIP, ON EVERY PAGE (§701) ───────────────────
    Islam, of two things the HR platform does: *"the jump to concept and the
    page that shows that you are offline if there is no internet"*; drawn in
    design-mockups/jump-to-offline/ (two rounds), then *"build it"*.
@@ -25,7 +25,7 @@
    touched: what is typed stays where it was typed. Opening the platform
    with no connection at all is the worker's half (scripts/build-sw.mjs),
    because no page of ours has loaded to say anything. */
-export const JUMP_SCRIPT = `/* §699 — Jump to, and the offline strip (lib/jump-script.ts). */
+export const JUMP_SCRIPT = `/* §701 — Jump to, and the offline strip (lib/jump-script.ts). */
 (function () {
   if (window.__smpjump) return;
   window.__smpjump = 1;

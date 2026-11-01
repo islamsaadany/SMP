@@ -187,7 +187,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       .map((row) => ({ key: row.key, name: row.name, kind: row.kind })) });
   }
 
-  /* JUMP TO (§699, lib/jump.ts): whether this client's settings are this
+  /* JUMP TO (§701, lib/jump.ts): whether this client's settings are this
      person's to read — the rule the cards ask. */
   if (action === "jump") {
     const row = body && body.client ? await clientByKey(pool, body.client) : null;

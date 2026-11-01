@@ -1,4 +1,4 @@
-/* ── JUMP TO: WHAT IT LISTS, FOR WHOM (§699) ───────────────────────────────
+/* ── JUMP TO: WHAT IT LISTS, FOR WHOM (§701) ───────────────────────────────
    Islam, of the HR platform's own: *"the jump to concept"*, then of the
    mockup (design-mockups/jump-to-offline/), *"it should only cover the other
    modules and the settings but not the functions or the pages inside the

@@ -138,7 +138,7 @@ kbd{font:600 11px/1 var(--sans);border:1px solid var(--line);border-bottom-width
 
 <script>
 const LEADS={
- jump:'<b>Jump to.</b> Press <kbd>Ctrl K</kbd> (<kbd>⌘K</kbd> on a Mac) on any page, or the box in the top bar. It lists each module once, the Setup pages and the console as one entry. Nothing inside a module or the console is listed: their own tabs and menus reach those. Type to narrow it down, use the arrows and Enter to open. It only lists what your role can open, so a client\'s own person sees only their modules. <b>Try it below.</b>',
+ jump:'<b>Jump to.</b> Press <kbd>Ctrl K</kbd> (<kbd>⌘K</kbd> on a Mac) on any page, or the box in the top bar. It lists each module once, the Setup pages, and the console\'s own sections: Home, My tasks, Clients, Track Record, Frameworks and the rest. Nothing inside a module is listed: its own tabs reach those. Type to narrow it down, use the arrows and Enter to open. It only lists what your role can open, so a client\'s own person sees only their modules. <b>Try it below.</b>',
 
  off:'<b>No internet when you open SMP.</b> Instead of the browser\'s own error, a calm page in SMP\'s look. Try again checks at once, and the page reloads by itself when the connection returns.',
  lost:'<b>The connection drops while you work.</b> The page stays as it is, with a strip at the top. Save is held and says why. What you typed stays in the box.',
@@ -148,7 +148,7 @@ const P=(n,w)=>({n,w});
 const DATA=[
  ["Modules",[P("Strategy","Module"),P("Internal Tracker","Module"),P("Meeting Notes","Module"),P("Processes","Module"),P("Insights","Module"),P("Portfolio","Module")]],
  ["Setup",[P("Profile","Setup · Client"),P("The shape","Setup · Client"),P("Business units","Setup · Client"),P("Functions","Setup · Client"),P("Capabilities","Setup · Client"),P("Official BU list","Setup · Client"),P("Client register","Setup · Client"),P("Roles & access","Setup · Strategy"),P("Landing line","Setup · Strategy"),P("Figure sets","Setup · Strategy"),P("Focus measures","Setup · Strategy"),P("Scoring bands","Setup · Strategy"),P("Revenue drivers","Setup · Strategy"),P("Planning & reporting","Setup · Strategy"),P("Platform Inbox","Setup · Strategy"),P("History","Setup · Strategy"),P("Roles & access","Setup · Insights"),P("Landing line","Setup · Insights")]],
- ["Console",[P("Console","Forefront")]]
+ ["Console",[P("Home","Console"),P("My tasks","Console"),P("Clients","Console"),P("Consultants","Console"),P("Who sees what","Console"),P("Track Record","Console"),P("Frameworks","Console"),P("Copilot","Console"),P("History","Console")]]
 ];
 const $=s=>document.querySelector(s);
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));

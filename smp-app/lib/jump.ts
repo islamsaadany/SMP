@@ -12,7 +12,8 @@
      · the modules this person may open, each as ONE entry — never the tabs,
        units, views or sections inside one (its own navigation reaches them);
      · Setup's pages, the client's and each module's;
-     · the console, as one entry, for Forefront's own people.
+     · the console's sections (Home, My tasks, Clients, Track Record,
+       Frameworks…), for Forefront's own people — §703, below.
 
    ASKED OF THE SERVER, NOT WORKED OUT IN THE BROWSER, because "only what
    your role can open" is the door's question and the door is here (§42,
@@ -51,11 +52,21 @@ const SETUP_STRATEGY: [string, string][] = [
 ];
 const SETUP_INSIGHTS: [string, string][] = [["landing", "Landing line"]];   /* §702: its Roles & access is gone */
 
-/* THE CONSOLE IS ONE ENTRY, as Strategy is (Islam, round three: *"the same
-   thing"* for the console as for the modules' insides): its tabs are its
-   own column's to reach. Forefront's people only. */
-function consoleItem(): JumpItem {
-  return { name: "Console", where: "Forefront", href: "/platform", group: "Console" };
+/* THE CONSOLE'S SECTIONS, EACH AN ENTRY (§703). Round three made the
+   console one entry; Islam, the same day: *"the jump should take me as well
+   to the other modules like my tasks, the track record the frameworks or
+   clients"* — to him these are places of their own, not the insides of one,
+   so each is listed under the console's own words (public/platform-page.js
+   `tabs`), and Consultants and Who sees what only where the console's own
+   column would draw them. Forefront's people only. */
+function consoleItems(f: { canConsultants: boolean; canAccess: boolean }): JumpItem[] {
+  const tabs: [string, string, boolean][] = [
+    ["home", "Home", true], ["mywork", "My tasks", true], ["clients", "Clients", true],
+    ["consultants", "Consultants", f.canConsultants], ["access", "Who sees what", f.canAccess],
+    ["memory", "Track Record", true], ["frameworks", "Frameworks", true],
+    ["copilot", "Copilot", true], ["history", "History", true],
+  ];
+  return tabs.filter((t) => t[2]).map((t) => ({ name: t[1], where: "Console", href: "/platform#" + t[0], group: "Console" }));
 }
 
 function moduleItems(slug: string, open: ModuleKey[], setup: boolean): JumpItem[] {
@@ -83,7 +94,7 @@ export async function jumpList(pool: Q, user: SessionUser, slug: string | null):
   const ff = consultant
     ? await platformAction(pool as never, user, { action: "jump", client: slug })
     : null;
-  const facts = ff && ff.code === 200 ? (ff.body as { canConfig?: boolean }) : {};
+  const facts = ff && ff.code === 200 ? (ff.body as { canConfig?: boolean; canConsultants?: boolean; canAccess?: boolean }) : {};
   const items: JumpItem[] = [];
   if (slug) {
     const ans = await resolveTenant(pool, user, slug);
@@ -102,6 +113,6 @@ export async function jumpList(pool: Q, user: SessionUser, slug: string | null):
       items.push(...moduleItems(slug, open, consultant ? !!facts.canConfig || office : office));
     }
   }
-  if (consultant) items.push(consoleItem());
+  if (consultant) items.push(...consoleItems({ canConsultants: !!facts.canConsultants, canAccess: !!facts.canAccess }));
   return items;
 }

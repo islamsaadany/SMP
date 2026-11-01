@@ -82,9 +82,10 @@ try {
   check(await page.evaluate(() => !!document.getElementById("sjscrim") && !document.getElementById("sjscrim").hidden), "Ctrl K opens the window");
   check(names.includes("Strategy | Module") && names.includes("Internal Tracker | Module"), "…listing the modules, Strategy as one entry", names.slice(0, 6).join("; "));
   check(names.includes("Roles & access | Setup · Strategy") && names.includes("Client register | Setup · Client"), "…Setup's pages");
-  check(names.includes("Console | Forefront"), "…and the console, as one entry");
-  check(!L.some((x) => /^(Foundation|Analysis|Directions|Overall performance|Mobile|Logistics|This week|Weekly check|All processes|Value chain|Home|Clients|Consultants|Who sees what)$/.test(x.n)),
-        "…and nothing inside a module or the console (Islam's rule)", names.join("; "));
+  check(["Home", "My tasks", "Clients", "Track Record", "Frameworks", "Who sees what"].every((n) => names.includes(n + " | Console")),
+        "…and the console's sections, each an entry (§703)", names.filter((n) => /Console$/.test(n)).join("; "));
+  check(!L.some((x) => /^(Foundation|Analysis|Directions|Overall performance|Mobile|Logistics|This week|Weekly check|All processes|Value chain)$/.test(x.n)),
+        "…and nothing inside a module (Islam's rule)", names.join("; "));
   await page.keyboard.type("tracker");
   const narrowed = await listed(page);
   check(narrowed.length === 1 && narrowed[0].n === "Internal Tracker", "typing narrows it", JSON.stringify(narrowed));
@@ -93,10 +94,16 @@ try {
   await page.waitForLoadState("networkidle");
   check(await page.evaluate(() => !!document.querySelector("header.tb .sjbtn")), "the box is on a module's bar too");
   await openWith(page, "button");
-  await page.keyboard.type("console");
-  await Promise.all([page.waitForURL(/\/platform$/, { timeout: 10000 }).catch(() => {}), page.keyboard.press("Enter")]);
+  await page.keyboard.type("track record");
+  await Promise.all([page.waitForURL(/\/platform#memory$/, { timeout: 10000 }).catch(() => {}), page.keyboard.press("Enter")]);
   await page.waitForLoadState("networkidle"); await page.waitForTimeout(800);
-  check(/\/platform$/.test(page.url()), "a jump to the console lands on it", page.url());
+  check(/\/platform#memory$/.test(page.url()), "a jump to Track Record lands on the console's Track Record (§703)", page.url());
+  await openWith(page, "key");
+  await page.keyboard.type("frameworks");
+  await Promise.all([page.waitForURL(/#frameworks$/, { timeout: 10000 }).catch(() => {}), page.keyboard.press("Enter")]);
+  await page.waitForTimeout(1500);
+  check(/\/platform#frameworks$/.test(page.url()) && await page.evaluate(() => /Frameworks/.test((document.querySelector("#page") || {}).textContent || "")),
+        "…and from the console itself, to Frameworks, which it then shows", page.url());
   check(await page.evaluate(() => !!document.querySelector(".sjbtn.sjside")), "…and the box is in the console's column");
 
   /* ── the strip ──────────────────────────────────────────────────── */

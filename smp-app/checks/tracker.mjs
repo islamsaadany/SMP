@@ -479,7 +479,7 @@ const chk2 = listBody({ ...pLoaded, open: null, progress: [], events: [] }, { sl
   ask: { view: "check", q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
 check("...closed again: the box sits under row p (open, this week), none under q (done, last week) nor r (next week)",
   count(chk2, /<div class="pline" data-id="p">/g) === 1 && !/<div class="pline" data-id="q">/.test(chk2) && !/<div class="pline" data-id="r">/.test(chk2) &&
-  /data-id="p"[\s\S]*?<div class="pline" data-id="p"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened this week\?"/.test(chk2),
+  /data-id="p"[\s\S]*?<div class="pline" data-id="p"><div class="pbox"><input class="pnew" data-act="progress-new" placeholder="What happened\?"/.test(chk2),
   (chk2.match(/<div class="pline"[^>]*>/g) || []).join(" | "));
 check("...and the opened row on the check has the panel's box and not a second one under it", count(pChk, /class="pnew"/g) === 1 && !/<div class="pline" data-id="p">/.test(pChk));
 
@@ -1162,7 +1162,7 @@ try {
     const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".write .addrow .st");
     check("the status pill is one box whether it is a select or a span — and the add line draws none (§497)", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
       pillSel.slice(6) === pillSpan.slice(4) && /^SPAN 0 /.test(pillAdd), pillSel + " | " + pillSpan + " | " + pillAdd);
-    check("...in the page's own font, never the browser's control font (the main screens' since §646)", /system-ui/.test(pillSel) && /11px/.test(pillSel), pillSel);
+    check("...in the page's own font, never the browser's control font (the main screens' since §646)", /system-ui/.test(pillSel) && /12.5px/.test(pillSel), pillSel);
     await pg.goto(base); await settle();
     await pg.evaluate("window.__stay = 1");
     /* THE TICK is Done; pressed again it is Not started — both ends. And a

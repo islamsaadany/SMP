@@ -78100,9 +78100,14 @@ var SYNC = (function () {
          single rail never shows a second Roles & access. Access is
          `c_access` — the same door as Strategy's matrix, readable to the
          office and written by the Super user alone (§89). */
-      { k:"access", ac:"c_access", grp:"access", mod:"insights", label:"Roles & access", glyph:"⚿", find:"permissions roles who can open insights library grant",
-        when: function(){ return moduleWord() === "insights"; },
-        render:renderModuleAccess },
+      /* §702: INSIGHTS' ROLES & ACCESS IS GONE. Islam: *"the choice made when
+         posting do the job. no need for the roles and access in the
+         insights."* Who reads a report is chosen when it is posted (the
+         departments it goes to, or everyone), so a second gate on opening
+         the library was a second place to look. Insights now declares no
+         area (lib/modules.ts) and its Setup is the Landing line alone.
+         renderModuleAccess stays in config-render.js for the next module
+         that declares an area. */
       { k:"landing", ac:"c_landing", grp:"landing", mod:"insights", label:"Landing line", glyph:"▤", find:"landing line welcome screen what insights says row sentence",
         when: function(){ return moduleWord() === "insights" && inOffice(); },
         render:renderLandingLine },

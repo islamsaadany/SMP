@@ -49,7 +49,7 @@ const SETUP_STRATEGY: [string, string][] = [
   ["bands", "Scoring bands"], ["seasons", "Revenue drivers"], ["cycle", "Planning & reporting"],
   ["chat", "Platform Inbox"], ["history", "History"],
 ];
-const SETUP_INSIGHTS: [string, string][] = [["access", "Roles & access"], ["landing", "Landing line"]];
+const SETUP_INSIGHTS: [string, string][] = [["landing", "Landing line"]];   /* §702: its Roles & access is gone */
 
 /* THE CONSOLE IS ONE ENTRY, as Strategy is (Islam, round three: *"the same
    thing"* for the console as for the modules' insides): its tabs are its

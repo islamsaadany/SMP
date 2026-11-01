@@ -523,75 +523,34 @@ console.log("\n4c · who may open a module (§359.5)");
   const graphWith = (mutate) => { const g = JSON.parse(JSON.stringify(seed)); mutate(g); return g; };
   const UK = Object.keys(seed.units)[0];
   const head = seed.unitRoles[UK].head, cust = seed.unitRoles[UK].custodian;
-  const area = openingArea("insights");
-  check("Insights is opened by its first declared area, whose shipped state is view",
-    !!area && area.key === "a_insights" && area.shipped === "view", JSON.stringify(area));
-  /* DERIVED (§214.3): whichever modules declare no area — Strategy is the
-     only one today, and was not the only one yesterday (§363). */
+  /* §702: INSIGHTS DECLARES NO AREA. Its Roles & access page is gone —
+     Islam: *"the choice made when posting do the job"* — so who reads a
+     report is the post's own `seen` and nothing else. REWRITTEN, never
+     loosened (§218): this section drove the per-role grant through
+     a_insights, the only client-grantable area there was. The grant's
+     reader (frozen.mayOpen) stays for the next module that declares one;
+     today no module a client's person can be granted declares any, so there
+     is nothing left to drive it with, and that is said rather than faked. */
+  check("Insights declares no area any more (§702)", openingArea("insights") === null, JSON.stringify(MODULE_DEF.insights.areas));
   const NO_AREA = MODULES.filter((k) => !MODULE_DEF[k].areas.length);
-  check("a module declaring no area is opened by nobody's grant",
-    NO_AREA.length > 0 && NO_AREA.every((k) => openingArea(k) === null), NO_AREA.join(", "));
-  /* absent = shipped, never none (§30.2) */
-  check("with nothing stored a unit head opens Insights — absent is the shipped state, not a refusal",
-    decideOpen("none", "insights", seed, head) === true);
-  /* SHUT EVERY ROW THIS PERSON HOLDS, ASKED RATHER THAN TYPED (§218,
-     §214.3, §255). Access is the MOST GENEROUS grant across the roles
-     somebody holds (§33), so shutting ONE row is not shutting a person. The
-     roles come from the product's own rule (personRoles, the one both sides
-     ask — §42), so the row derived by whatever somebody is named on NEXT is
-     shut here the day it is added.
-
-     AND WHICH PERSON MAKES §33's POINT BELONGS TO THE SEED, NOT TO THIS FILE
-     (§218, §385.5): the guard here read `headRoles.length >= 2`, true only
-     while §384's tactic-owner row existed — §385 took that row off the table
-     and the guard started reporting a correct build broken, which is the same
-     staleness §383.8 recorded in this file's own fixtures, arriving from the
-     other direction. What is asserted now is the CLAIM rather than a count,
-     and it is DRIVEN: the custodian beside the head holds two rows (25 of the
-     seed's 33 people hold more than one), so shutting one of theirs and
-     watching them still open is §33 measured rather than assumed.
-
-     THE CUSTODIAN BESIDE THEM IS WHAT MAKES THE SHUT MEAN ANYTHING (§113.8):
-     a build that refused everybody passes the line below perfectly, so their
-     rows are asserted UNTOUCHED and still open. */
+  check("a module declaring no area is opened by nobody's grant — Strategy and Insights among them",
+    NO_AREA.includes("strategy") && NO_AREA.includes("insights") && NO_AREA.every((k) => openingArea(k) === null), NO_AREA.join(", "));
+  /* BOTH ENDS (§94.2): a grant stored before today, shutting every row the
+     unit head holds, no longer shuts them — and with nothing stored they
+     open too, so the line above is not passing on an empty map. */
   const rulesOf = createRequire(import.meta.url)(join(ROOT, "lib", "rules.js"));
-  const rolesHeldBy = (key) => {
-    const w = rulesOf.worldOf(seed);
-    const p2 = (seed.people || []).find((x) => x.key === key);
-    return Array.from(new Set(rulesOf.personRoles(w, p2).map((r) => r.role)));
-  };
-  const headRoles = rolesHeldBy(head), custRoles = rolesHeldBy(cust);
-  check("the head's rows are the product's own answer, never a typed list (§42)",
-    headRoles.length > 0 && headRoles.includes("owner"), JSON.stringify(headRoles));
-  check("…and shutting ONE row of somebody who holds several is not shutting them (§33)",
-    custRoles.length >= 2 &&
-      decideOpen("none", "insights",
-        graphWith((g) => { g.access[custRoles[0]] = { ...(g.access[custRoles[0]] || {}), a_insights: "none" }; }),
-        cust) === true,
-    JSON.stringify({ [head]: headRoles, [cust]: custRoles }));
+  const headRoles = Array.from(new Set(rulesOf.personRoles(rulesOf.worldOf(seed), (seed.people || []).find((x) => x.key === head)).map((r) => r.role)));
   const shutOwner = graphWith((g) => { headRoles.forEach((r) => { g.access[r] = g.access[r] || {}; g.access[r].a_insights = "none"; }); });
-  check("…and with every row they hold shut, the same person is REFUSED by the decision the route asks",
-    decideOpen("none", "insights", shutOwner, head) === false, JSON.stringify(headRoles));
-  check("…while the custodian beside them, whose rows are untouched, still opens it (the grant is per role)",
-    decideOpen("none", "insights", shutOwner, cust) === true,
-    JSON.stringify([custRoles, custRoles.filter((r) => headRoles.includes(r))]));
-  const openOwner = graphWith((g) => { g.access.owner.a_insights = "view"; });
-  check("…and a stored view opens it", decideOpen("none", "insights", openOwner, head) === true);
-  check("THE SEAT OPENS EVERYTHING: the Super user and the SMO team are served over a shut row (spec 046 §4.10)",
+  check("a unit head opens Insights with nothing stored", decideOpen("none", "insights", seed, head) === true);
+  check("…and a grant stored under a_insights before §702, shutting every row they hold, is no longer read",
+    headRoles.length > 0 && decideOpen("none", "insights", shutOwner, head) === true, JSON.stringify(headRoles));
+  check("…and the custodian beside them opens it too", decideOpen("none", "insights", shutOwner, cust) === true);
+  check("THE SEAT OPENS EVERYTHING: the Super user and the SMO team are served (spec 046 §4.10)",
     decideOpen("super", "insights", shutOwner, head) === true && decideOpen("smoteam", "insights", shutOwner, head) === true);
   check("a module with no area is never gated, whatever the map says",
     NO_AREA.every((k) => decideOpen("none", k, shutOwner, head) === true), NO_AREA.join(", "));
-  /* the floor: somebody on the register holding no role is judged on the
-     Everyone-else row (§93) */
-  const floor = graphWith((g) => { g.people.push({ key: "nobody_x", name: "Nobody Here", unit: UK, email: "" }); g.access.employee.a_insights = "none"; });
-  check("a person holding no role is judged on the Everyone-else row — shut there, refused", decideOpen("none", "insights", floor, "nobody_x") === false);
-  const floorOpen = graphWith((g) => { g.people.push({ key: "nobody_x", name: "Nobody Here", unit: UK, email: "" }); });
-  check("…and open there by default", decideOpen("none", "insights", floorOpen, "nobody_x") === true);
-  check("a person the register does not hold is judged as holding nothing — the shipped state",
-    decideOpen("none", "insights", seed, "no-such-key") === true && decideOpen("none", "insights", null, head) === true);
-  /* STRATEGY'S MATRIX IS BYTE-IDENTICAL EITHER SIDE OF A MODULE'S GRANT */
-  const strip = (g) => JSON.stringify(Object.fromEntries(Object.entries(g.access).map(([r, row]) => [r, Object.fromEntries(Object.entries(row).filter(([k]) => k !== "a_insights"))])));
-  check("a module's grant touches no cell of Strategy's matrix", strip(shutOwner) === strip(seed) && strip(openOwner) === strip(seed));
+  check("Insights' Setup draws no Roles & access row (§702)",
+    !/mod:"insights", label:"Roles & access"/.test(read("SMP-Project-Folder/src/shell.html")) && /mod:"insights", label:"Landing line"/.test(read("SMP-Project-Folder/src/shell.html")));
   /* THE CLIENT'S ADDRESS READS THE SAME ANSWER (§360, spec 057): there is
      no landing any more — `/<client>` redirects into the first module the
      person may OPEN, read from openableModules, the one reader the switcher

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-01 — Insights has no Roles & access page any more (§702).** Islam: *"the choice made when posting do the job. no need for the roles and access in the insights."* Insights opens for everybody the client's door lets in; who reads each report is chosen when it is posted (departments, or everyone). Its Setup is the Landing line alone. A role a client had shut out of Insights before today is let in again. Checked: the module and door checks rewritten to the new rule and green (228 and 121 ok), Jump to green.
+
 **2026-11-01 — Jump to and the offline page (§701), merged to `main` 2026-11-01 on Islam's word.** Renumbered from §699 (main took §699–§700). On the merged tree the build, the type check and `checks/jump.mjs` are green; the Tracker's check has one red line that `main` alone has too.
 
 **2026-11-01 — Jump to lists modules, Setup and the console only (§701, round three).** Islam: *"no need for internal parts of the modules. and for the console the same thing"*. The Tracker's views and Processes' sections are gone, and the console is one entry (Forefront's people only) instead of its tabs. Jump to now offers each module once, Setup's pages, and the console. Checked: `checks/jump.mjs` 22 ok, 0 failed, its break red.

@@ -40477,7 +40477,7 @@ function accMeaning(r){
     lv === 1 ? "Their own " + w.place + " in full: every piece in it, its plan and its figures." :
     lv === 2 ? "Every " + w.place + " in their " + w.div + ", and the " + w.div + "’s page." : everything;
   var writes = info.held == null ? "Nothing. They hold no piece."
-    : pen ? "Enters and submits " + ({ owner: "their unit’s or function’s figures, and its report", custodian: "what they keep, as its owner would",
+    : pen ? "Enters and submits " + ({ owner: (buExists() ? "their unit’s or function’s" : "their function’s") + " figures, and its report", custodian: "what they keep, as its owner would",
         part: "the lines of their own piece", contrib: "the lines that name them" }[r.key] || "what they hold") + "."
     : "Nothing. Reads only until the pen is on.";
   var hides = [];

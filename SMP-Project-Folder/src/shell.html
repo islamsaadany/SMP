@@ -5683,6 +5683,19 @@
           } });
       });
     });
+    /* §699: the pen, a switch on the role's own level (`a_pen`, edit or none). */
+    document.querySelectorAll("[data-pen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pen.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], on = p[1] === "on";
+        if (!row) return;
+        askFirst(b, { title: b.dataset.askwho || "This role",
+          body: on ? "Will <b>enter and submit</b> what they hold." : "Will <b>read only</b> what they hold, and enter nothing.",
+          go: function(){
+            row.of.forEach(function(k){ (ACCESS[k] = ACCESS[k] || {})[SMPRules.REACH.pen] = on ? "edit" : "none"; });
+            paint(); askSaved(function(){ var x = document.querySelector('[data-pen^="' + p[0] + '|"]'); return x && x.closest("td"); });
+          } });
+      });
+    });
     /* One person moved a level from their role (person.reach, +1 or -1). */
     document.querySelectorAll("[data-reachp]").forEach(function(b){
       b.addEventListener("click", function(){

@@ -3257,3 +3257,8 @@
 .ladder.ro button:not(.pen):not(.eye):not(.nil) { background:none; }
 .acro { margin:0 0 10px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); font-size:13px; color:var(--ink-2); }
 .acro b { color:var(--ink); }
+/* §699: the platform's own eye and pen in the ladder */
+.ladder button svg { width:14px; height:14px; margin-right:5px; flex:none; }
+.acladderkey { display:flex; flex-wrap:wrap; gap:6px 18px; }
+.acladderkey span { display:inline-flex; align-items:center; gap:5px; }
+.acladderkey svg { width:14px; height:14px; }

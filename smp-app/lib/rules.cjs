@@ -1181,13 +1181,24 @@
      (`person.reach`, +1 or -1, on the register's own record) — an exception,
      never a second table. The office (super, smoteam) is not on the ladder:
      it reads and writes everything, as its own rows of the map say. */
-  var REACH = { place: "a_reach_place", div: "a_reach_div", top: "a_reach_top" };
+  var REACH = { place: "a_reach_place", div: "a_reach_div", top: "a_reach_top", pen: "a_pen" };
   var REACH_KEYS = [REACH.place, REACH.div, REACH.top];
   /* the page areas the ladder answers for; any other area (a module's own,
      `always`) is asked of the map exactly as before */
   var LADDER_AREAS = ["unit", "unit_strat", "fn", "fn_strat", "a_group", "a_cycle", "a_setup"];
   var PEN_ROLES = ["owner", "custodian", "fnhead", "capowner"];
   var LINE_PEN_ROLES = ["powner", "plowner", "dirowner", "contrib"];
+  /* THE PEN IS A SWITCH ON THE ROLE'S OWN LEVEL (Islam, 2026-11-01: "the view
+     approach is not clickable for on and off and the same for the editing").
+     On, the role enters and submits what it holds; off, it reads it. Stored as
+     one more row of the map (`a_pen`, edit or none). Shipped as the platform
+     already behaved: a place's holders write, a piece's holders and a
+     contributor read until the office turns their pen on. */
+  function penOn(w, roleKey) {
+    var row = ((w && w.access) || {})[roleKey];
+    if (row && Object.prototype.hasOwnProperty.call(row, REACH.pen)) return row[REACH.pen] === "edit";
+    return PEN_ROLES.indexOf(roleKey) > -1;
+  }
   var LADDER_DEFAULT = { gceo: 3, cceo: 2, owner: 1, fnhead: 1, custodian: 1,
     powner: 1, plowner: 1, dirowner: 1, capowner: 1, contrib: 1, employee: 0 };
   /* the lowest level a role can be set to: a holder of a whole place always
@@ -1265,7 +1276,7 @@
     /* any page family: a pillars function reports on the unit's pages, a
        unit planning in projects on the function's */
     if ((area === "unit" || area === "fn") && roleOwns(w, r, target) &&
-        (PEN_ROLES.indexOf(r.role) > -1 || LINE_PEN_ROLES.indexOf(r.role) > -1)) return "edit";
+        (PEN_ROLES.indexOf(r.role) > -1 || LINE_PEN_ROLES.indexOf(r.role) > -1) && penOn(w, r.role)) return "edit";
     return ladderReads(w, person, r, target) ? "view" : "none";
   }
   /* AT "OWN PIECE" ON A PLACE: the page is open and its lists are narrowed to
@@ -6076,7 +6087,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
     /* §693: the ladder */
     REACH: REACH, LADDER_DEFAULT: LADDER_DEFAULT, LADDER_MIN: LADDER_MIN,
-    ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove,
+    ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove, penOn: penOn,
     ladderReads: ladderReads, pieceOnlyAt: pieceOnlyAt, holdsItem: holdsItem, divisionOf: divisionOf,
     neverOffered: neverOffered,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,

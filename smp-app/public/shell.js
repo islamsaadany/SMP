@@ -1183,13 +1183,24 @@
      (`person.reach`, +1 or -1, on the register's own record) — an exception,
      never a second table. The office (super, smoteam) is not on the ladder:
      it reads and writes everything, as its own rows of the map say. */
-  var REACH = { place: "a_reach_place", div: "a_reach_div", top: "a_reach_top" };
+  var REACH = { place: "a_reach_place", div: "a_reach_div", top: "a_reach_top", pen: "a_pen" };
   var REACH_KEYS = [REACH.place, REACH.div, REACH.top];
   /* the page areas the ladder answers for; any other area (a module's own,
      `always`) is asked of the map exactly as before */
   var LADDER_AREAS = ["unit", "unit_strat", "fn", "fn_strat", "a_group", "a_cycle", "a_setup"];
   var PEN_ROLES = ["owner", "custodian", "fnhead", "capowner"];
   var LINE_PEN_ROLES = ["powner", "plowner", "dirowner", "contrib"];
+  /* THE PEN IS A SWITCH ON THE ROLE'S OWN LEVEL (Islam, 2026-11-01: "the view
+     approach is not clickable for on and off and the same for the editing").
+     On, the role enters and submits what it holds; off, it reads it. Stored as
+     one more row of the map (`a_pen`, edit or none). Shipped as the platform
+     already behaved: a place's holders write, a piece's holders and a
+     contributor read until the office turns their pen on. */
+  function penOn(w, roleKey) {
+    var row = ((w && w.access) || {})[roleKey];
+    if (row && Object.prototype.hasOwnProperty.call(row, REACH.pen)) return row[REACH.pen] === "edit";
+    return PEN_ROLES.indexOf(roleKey) > -1;
+  }
   var LADDER_DEFAULT = { gceo: 3, cceo: 2, owner: 1, fnhead: 1, custodian: 1,
     powner: 1, plowner: 1, dirowner: 1, capowner: 1, contrib: 1, employee: 0 };
   /* the lowest level a role can be set to: a holder of a whole place always
@@ -1267,7 +1278,7 @@
     /* any page family: a pillars function reports on the unit's pages, a
        unit planning in projects on the function's */
     if ((area === "unit" || area === "fn") && roleOwns(w, r, target) &&
-        (PEN_ROLES.indexOf(r.role) > -1 || LINE_PEN_ROLES.indexOf(r.role) > -1)) return "edit";
+        (PEN_ROLES.indexOf(r.role) > -1 || LINE_PEN_ROLES.indexOf(r.role) > -1) && penOn(w, r.role)) return "edit";
     return ladderReads(w, person, r, target) ? "view" : "none";
   }
   /* AT "OWN PIECE" ON A PLACE: the page is open and its lists are narrowed to
@@ -6078,7 +6089,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
     /* §693: the ladder */
     REACH: REACH, LADDER_DEFAULT: LADDER_DEFAULT, LADDER_MIN: LADDER_MIN,
-    ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove,
+    ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove, penOn: penOn,
     ladderReads: ladderReads, pieceOnlyAt: pieceOnlyAt, holdsItem: holdsItem, divisionOf: divisionOf,
     neverOffered: neverOffered,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
@@ -40322,7 +40333,7 @@ function accessMerged(row, col){
    ENTERS AND SUBMITS — a fact of what it holds, written as words, never a
    control — and HOW FAR UP IT READS, the one control: own piece · own unit or
    function · own division · the top, in the client's own words, the division
-   only where the client has one. ✎ marks the level a role works on, ◉ every
+   only where the client has one. The pen marks the level a role writes on (a switch), the eye every
    level it reads; a level the role cannot stand on is struck through.
 
    The office's two rows are not on the ladder (they read and write
@@ -40346,20 +40357,33 @@ var LADDER_ROW = {
 LADDER_ROW[SMPRules.ACCESS_ROWS.filter(function(r){ return r.floor; })[0].key] = { held: null, floor: true, says: "Nothing" };
 function ladderLevels(){ return midExists() ? [0, 1, 2, 3] : [0, 1, 3]; }
 function ladderCell(r, editable){
-  var info = LADDER_ROW[r.key] || {}, words = ladderWords(), role = r.of[0];
+  var info = LADDER_ROW[r.key] || {}, words = ladderWords(), role = r.of[0], levels = ladderLevels();
   var lv = SMPRules.ladderStored(world(), role);
   if (lv === 2 && !midExists()) lv = 1;
   var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = role === "gceo";
-  return '<span class="ladder' + (editable ? '' : ' ro') + '" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + ladderLevels().map(function(i){
+  var pen = info.held != null && SMPRules.penOn(world(), role);
+  /* the level a press on the lit one steps down to: the next one below that
+     the client has, never under the role's floor */
+  var below = function(i){ var k = levels.indexOf(i); return k > 0 && levels[k - 1] >= lo ? levels[k - 1] : null; };
+  return '<span class="ladder' + (editable ? '' : ' ro') + '" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + levels.map(function(i){
     var struck = i < lo && !(info.floor && i === 0);
-    var cls = struck ? "off" : info.held === i ? "pen" : (i <= lv && (info.held == null ? (info.floor ? i >= 1 : true) : i > info.held)) ? "eye" : "";
-    if (info.floor && i === 0 && lv === 0) cls = "nil";
     var word = info.floor && i === 0 ? "Nothing" : words[i];
-    var mark = cls === "pen" ? '<b aria-hidden="true">✎</b>' : cls === "eye" ? '<b aria-hidden="true">◉</b>' : "";
-    var can = editable && !struck && !fixed && i !== lv;
-    return '<button type="button" class="' + cls + '"' + (can ? ' data-lad="' + esc(r.key) + '|' + i + '"' : ' disabled') +
-      ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + (i === lv) + '"' +
-      (struck ? ' title="Not a level this role stands on"' : '') + '>' + mark + esc(word) + '</button>';
+    /* the role's own level carries the pen switch: on, it enters and submits
+       what it holds; off, it reads it */
+    if (!struck && info.held === i) {
+      return '<button type="button" class="' + (pen ? 'pen' : 'eye') + '"' + (editable ? ' data-pen="' + esc(r.key) + '|' + (pen ? 'off' : 'on') + '"' : ' disabled') +
+        ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + pen + '" title="' + (pen ? 'Enters and submits here — press to make it read only' : 'Reads only here — press to let them enter and submit') + '">' +
+        (pen ? ICON_PEN : ICON_EYE) + esc(word) + '</button>';
+    }
+    var lit = !struck && i <= lv && (info.held == null ? (info.floor ? i >= 1 : true) : i > info.held);
+    var nil = info.floor && i === 0 && lv === 0;
+    var to = lit && i === lv ? below(i) : i;
+    if (info.floor && lit && i === lv && to === null) to = 0;
+    var can = editable && !struck && !fixed && to !== null && !nil;
+    return '<button type="button" class="' + (struck ? "off" : lit ? "eye" : nil ? "nil" : "") + '"' + (can ? ' data-lad="' + esc(r.key) + '|' + to + '"' : ' disabled') +
+      ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + lit + '"' +
+      (struck ? ' title="Not a level this role stands on"' : lit && i === lv && can ? ' title="Press to stop reading at this level"' : '') + '>' +
+      (lit ? ICON_EYE : '') + esc(word) + '</button>';
   }).join("") + '</span>';
 }
 /* A person's own level: the highest any of their roles reads at, moved by
@@ -40395,13 +40419,13 @@ function renderAccess(){
   var editable = grant("c_access") === "edit" && mayEditAccess();
   var ROWS = SMPRules.ACCESS_ROWS.filter(function(r){ return !r.mid || midExists(); });
   var COPA = copilotArea();
-  var head = '<tr><th>Role</th><th>Enters and submits</th><th class="acladh">✎ works on · ◉ reads up to</th>' +
+  var head = '<tr><th>Role</th><th>Enters and submits</th><th class="acladh">Reads up to \u00b7 writes</th>' +
     (COPA ? '<th class="ac" title="' + esc(COPA.label + " — " + COPA.note) + '">' + esc(COPA.label) + '</th>' : '') + '</tr>';
   var body = ROWS.map(function(r){
     var office = r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]);
     var info = LADDER_ROW[r.key] || {};
     return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      '<td class="acsays">' + esc(office ? "Everything" : info.says || "") + '</td>' +
+      '<td class="acsays">' + esc(office ? "Everything" : info.held != null && !SMPRules.penOn(world(), r.of[0]) ? "Nothing \u2014 reads only" : info.says || "") + '</td>' +
       '<td class="acladder">' + (office ? '<span class="acall">Everything, by rule</span>' : ladderCell(r, editable)) + '</td>' +
       (COPA ? (office
         ? stateCell(r.of[0], COPA.key, editable, null, {
@@ -40433,8 +40457,9 @@ function renderAccess(){
       null,
       roLine + readersLine +
       '<div class="cfg acgrid acgrid-ladder"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
-      '<p class="acladderkey"><b>✎</b> where the role enters and submits, fixed by what it holds · <b>◉</b> what it reads · struck through: not a level the role stands on. ' +
-        'The plan itself, the reporting cycle and Setup are the office’s.</p>' +
+      '<p class="acladderkey"><span>' + ICON_EYE + ' reads \u2014 press a level to read up to it, the last lit one to stop there</span>' +
+        '<span>' + ICON_PEN + ' enters and submits what it holds \u2014 a switch on the role\u2019s own level</span>' +
+        '<span>Struck through: not a level the role stands on. The plan itself, the cycle and Setup are the office\u2019s.</span></p>' +
       accessExceptions(editable));
 }
 /* THE TWO ESSAYS ARE GONE FROM THE PAGE (Islam, 2026-08-22, on this table:
@@ -82862,6 +82887,19 @@ var SYNC = (function () {
             });
             if (row.key === "part") delete GROUP[SMPRules.DIR_SCOPE];
             paint(); askSaved(function(){ var x = document.querySelector('[data-lad^="' + p[0] + '|"]'); return x && x.closest("td"); });
+          } });
+      });
+    });
+    /* §699: the pen, a switch on the role's own level (`a_pen`, edit or none). */
+    document.querySelectorAll("[data-pen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pen.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], on = p[1] === "on";
+        if (!row) return;
+        askFirst(b, { title: b.dataset.askwho || "This role",
+          body: on ? "Will <b>enter and submit</b> what they hold." : "Will <b>read only</b> what they hold, and enter nothing.",
+          go: function(){
+            row.of.forEach(function(k){ (ACCESS[k] = ACCESS[k] || {})[SMPRules.REACH.pen] = on ? "edit" : "none"; });
+            paint(); askSaved(function(){ var x = document.querySelector('[data-pen^="' + p[0] + '|"]'); return x && x.closest("td"); });
           } });
       });
     });

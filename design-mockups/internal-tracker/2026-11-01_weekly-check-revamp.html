@@ -1,0 +1,217 @@
+<title>Weekly Check Revamp</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>
+/* Layout: the tracker's own page — navy masthead, one Actions card — redrawn
+   three ways so the topics and the weeks read at a glance. Tokens are the
+   tracker's (modules/tracker/page.ts) plus the pale blue for This week. */
+:root{
+  --bar:#1F3158;--bar-ink:#FFF;--bar-quiet:#C6D2E5;--bar-accent:#E3A64A;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--zebra:#F8F9FB;
+  --gold:#9C5D08;--bad:#B23025;--good:#1B6E4E;
+  --ns:#2B3A55;--ns-bg:#E3E8EF;--yel:#6B4E00;--yel-bg:#FFF0A8;--done-bg:#DCF0E5;--carry:#1F5FBF;
+  --wk:#EAF2FB;--wk-line:#B9D3EF;--wk-ink:#1F4E86;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1D232E;
+  --gold:#F5A623;--bad:#E8776B;--good:#63BE96;
+  --ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;
+  --wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1D232E;
+  --gold:#F5A623;--bad:#E8776B;--good:#63BE96;
+  --ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;
+  --wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button{font:inherit;color:inherit}
+svg{display:block}
+
+/* the option switcher */
+.pick{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.pick .in{max-width:1000px;margin:0 auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pick b{font-weight:600;margin-right:6px}
+.pick button{font:600 13.5px/1 var(--font);padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.pick button[aria-pressed="true"]{background:var(--bar);color:#fff;border-color:var(--bar)}
+.pick button:focus-visible{outline:2px solid var(--carry);outline-offset:2px}
+.why{max-width:1000px;margin:14px auto 0;font-size:14px;color:var(--ink-2)}
+.why b{color:var(--ink)}
+
+.pg{max-width:1000px;margin:0 auto;padding-block:16px 56px}
+/* masthead — as built */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 16px;margin:0 0 14px;box-shadow:inset 0 -3px 0 var(--bar-accent);display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.mast h1{margin:0;font:600 24px/1.15 var(--serif)}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.tile{text-align:right}.tile b{display:block;font:600 22px/1 var(--font)}
+.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px}
+.tile.late b{color:#F2A091}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.chd{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.chd h2{margin:0;font:600 17px/1.2 var(--serif);flex:1}
+.views{display:flex;background:var(--surface-2);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap}
+.views span{font:500 13px/1 var(--font);padding:6px 9px;border-radius:6px;color:var(--ink-2)}
+.views span.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(20,28,43,.08)}
+
+/* the topic band (option A, agreed) */
+.band{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--surface-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.band .ix{font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.band h3{margin:0;font:700 15.5px/1.25 var(--font)}
+.band .meta{font:500 12.5px/1.3 var(--font);color:var(--ink-2)}
+.band .meta .bad{color:var(--bad);font-weight:600}
+.band .end{margin-left:auto;display:flex;align-items:center;gap:10px;font:500 12.5px/1 var(--font);color:var(--ink-2)}
+.meter{width:72px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--good)}
+.band.quiet h3{color:var(--ink-2);font-style:italic;font-weight:600}
+
+/* the week label */
+.wkh{display:flex;align-items:center;gap:10px;font:700 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;padding:9px 14px}
+.wkh .days{margin-left:auto;font:500 12px/1 var(--font);letter-spacing:0;text-transform:none}
+.wkh.now{background:var(--wk);color:var(--wk-ink);border-bottom:1px solid var(--wk-line)}
+.wkh.next{color:var(--ink-3);border-bottom:1px dashed var(--line)}
+
+/* the row and its weekly box — as built */
+.task{border-bottom:1px solid var(--line-2)}
+.task:nth-child(even of .task){background:var(--zebra)}
+.task:hover{background:var(--surface-2)}
+.row,.nin{display:grid;grid-template-columns:20px minmax(0,1fr) 92px 60px 128px 156px 22px;gap:12px;align-items:center;padding:9px 14px 4px}
+.nin{padding:0 14px 11px}
+.row.solo{padding-bottom:9px}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface)}
+.tick.late{border-color:var(--bad)}
+.tn{min-width:0}
+.t{font-size:15px;line-height:1.35}
+.last{font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.last b{font-weight:600;color:var(--ink-2)}
+.when,.who{font:500 13px/1.3 var(--font);color:var(--ink-2);white-space:nowrap}
+.when.late{color:var(--bad);font-weight:600}
+.st{display:inline-flex;align-items:center;gap:6px;height:26px;width:128px;padding:0 10px 0 9px;border-radius:6px;font:600 12.5px/1 var(--font);background:var(--ns-bg);color:var(--ns)}
+.st i{width:10px;height:10px;border-radius:50%;border:1.5px solid currentColor;flex:none}
+.st.prog{background:var(--yel-bg);color:var(--yel)}.st.prog i{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+.st.done{background:var(--done-bg);color:var(--good)}.st.done i{background:currentColor}
+.carry{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--font);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 10px;white-space:nowrap;justify-self:start;cursor:pointer}
+.carry svg{width:13px;height:13px;color:var(--carry)}
+.carry:hover,.carry:focus-visible{border-color:var(--carry);outline:none}
+.more{color:var(--ink-3);width:22px;height:22px;display:grid;place-items:center}
+.more svg{width:13px;height:13px}
+.nbox{grid-column:2/5;display:flex;align-items:center;gap:8px;height:32px;border:1px solid var(--line);border-radius:7px;padding:0 6px 0 10px;background:var(--surface);font-size:13.5px;color:var(--ink-3)}
+.nbox b{font:600 11px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding-right:8px;border-right:1px solid var(--line);white-space:nowrap}
+.nbox span{flex:1;min-width:0}
+.nbox .ent{flex:none}
+.ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:3px 5px}
+.write{display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--ink-3);font-size:14px}
+.write svg{width:14px;height:14px;color:var(--gold)}
+.write span{flex:1}
+.write u{color:var(--ink-2);text-decoration-style:dotted;text-underline-offset:3px;font-size:13px}
+
+/* ── OPTION 1: Tidy — same order, fewer boxes ── */
+.o1 .topic+.topic{margin-top:0}
+.o1 .quietline{padding:9px 14px;font-size:13.5px;color:var(--ink-3);font-style:italic}
+
+/* ── OPTION 2: Week first — This week, then Next week; topics inside ── */
+.o2 .weekblock.now>.wkh{font-size:12px;padding:12px 14px}
+.o2 .sub{display:flex;align-items:center;gap:10px;padding:9px 14px 7px;border-bottom:1px solid var(--line)}
+.o2 .sub .ix{font:600 12px/1 var(--font);color:var(--gold)}
+.o2 .sub h3{margin:0;font:700 14.5px/1.25 var(--font)}
+.o2 .sub .meta{font:500 12.5px/1 var(--font);color:var(--ink-2)}
+.o2 .sub .meta .bad{color:var(--bad);font-weight:600}
+.o2 .sub .end{margin-left:auto;font:500 12.5px/1 var(--font);color:var(--ink-2);display:flex;gap:10px;align-items:center}
+.o2 .weekblock.next{border-top:1px solid var(--line);margin-top:10px}
+.o2 .nxrow{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line-2)}
+.o2 .nxrow .tp{font:600 12px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 9px}
+.o2 .nxrow.ask{color:var(--ink-3);font-style:italic}
+
+/* ── OPTION 3: Topic cards — each topic its own card; next week folds to a line ── */
+.o3.card{background:none;border:0;overflow:visible}
+.o3 .chd{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:14px}
+.o3 .topic{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.o3 .band{border-top:0}
+.o3 .nextline{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px dashed var(--line);font-size:13.5px;color:var(--ink-2);flex-wrap:wrap}
+.o3 .nextline .lab{font:700 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.o3 .nextline .add{margin-left:auto;color:var(--gold);font-weight:600}
+.o3 .quiets{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13.5px;color:var(--ink-2)}
+.o3 .quiets .lab{font:700 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.o3 .quiets .q{border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-weight:600;color:var(--ink)}
+.o3 .quiets .q em{font-style:normal;color:var(--gold);margin-left:6px}
+
+@media (max-width:760px){
+  .row{grid-template-columns:20px minmax(0,1fr) auto;grid-template-areas:"tick t more" ". meta meta" ". carry carry"}
+  .row .tick{grid-area:tick}.row .tn{grid-area:t}.row .more{grid-area:more}
+  .row .when,.row .who{display:none}
+  .row .st{grid-area:meta}.row .carry{grid-area:carry}
+  .nin{grid-template-columns:minmax(0,1fr)}.nbox{grid-column:1}
+  .strip{gap:14px}
+  .band .end .meter{display:none}
+}
+@media (prefers-reduced-motion:no-preference){.view{animation:in .25s ease-out}@keyframes in{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}}
+</style>
+
+<div class="pick"><div class="in"><b>Weekly check</b>
+  <button type="button" id="b1" data-v="1" aria-pressed="true">1 · Tidy</button>
+  <button type="button" id="b2" data-v="2" aria-pressed="false">2 · Week first</button>
+  <button type="button" id="b3" data-v="3" aria-pressed="false">3 · Topic cards</button>
+</div></div>
+
+<div class="pg">
+  <p class="why" id="why"></p>
+  <div class="mast" style="margin-top:14px">
+    <div><p class="wkof">This week · 1 – 5 Nov</p><h1>Internal Tracker</h1></div>
+    <div class="strip"><div class="tile"><b>6</b><span>Open</span></div><div class="tile late"><b>3</b><span>Late</span></div><div class="tile"><b>1</b><span>Due</span></div><div class="tile"><b>0</b><span>Done this week</span></div></div>
+  </div>
+  <div id="view"></div>
+</div>
+
+<script>
+const ARROW='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>';
+const CHEV='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"/></svg>';
+const PEN='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5 13.5 5 6 12.5 3 13l.5-3z"/></svg>';
+const ST={ns:'Not started',prog:'In progress',done:'Done'};
+const TOPICS=[
+  {ix:'01',name:'HR & People',open:2,late:1,done:1,total:3,now:[
+    {t:'Review the two HR projects and develop the 3rd',last:'had a meeting and postponed to Thursday',when:'Late 5 w',late:1,who:'Islam',st:'ns',carry:0},
+    {t:'Retention analytics: first cut',when:'Fri 5 Nov',who:'Sara',st:'prog',carry:1}],
+   next:[{t:'Share the retention cut with the managers',who:'Sara'}]},
+  {ix:'02',name:'Finance',open:3,late:2,done:0,total:3,now:[
+    {t:'Adjust the project that is missing milestones',when:'Late 6 w',late:1,who:'Noran',st:'ns',carry:1},
+    {t:'Book the board room for Thursday',when:'Late',late:1,who:'Noran',st:'prog',carry:1},
+    {t:'Draft the Q4 board pack',last:'outline agreed with the CFO',when:'Thu 4 Nov',who:'Omar',st:'prog',carry:1}],
+   next:[]},
+  {ix:'03',name:'Facilities',open:0,late:0,done:0,total:0,now:[],next:[]}];
+
+const meta=t=>t.open?t.open+' open'+(t.late?' · <span class="bad">'+t.late+' late</span>':''):'nothing this week';
+const meter=t=>t.total?'<span>'+t.done+' of '+t.total+' done</span><span class="meter"><i style="width:'+Math.round(100*t.done/t.total)+'%"></i></span>':'';
+const row=a=>'<div class="task"><div class="row"><span class="tick'+(a.late?' late':'')+'"></span><div class="tn"><div class="t">'+a.t+'</div>'+(a.last?'<div class="last"><b>Last week</b> · '+a.last+'</div>':'')+'</div>'+
+  '<span class="when'+(a.late?' late':'')+'">'+a.when+'</span><span class="who">'+a.who+'</span><span class="st '+a.st+'"><i></i>'+ST[a.st]+'</span>'+
+  (a.carry?'<button type="button" class="carry">'+ARROW+'Carry to next week</button>':'<span></span>')+'<span class="more">'+CHEV+'</span></div>'+
+  '<div class="nin"><div class="nbox"><b>This week</b><span>What happened?</span><span class="ent">Enter</span></div></div></div>';
+const nextRow=(a)=>'<div class="task"><div class="row solo"><span class="tick"></span><div class="tn"><div class="t">'+a.t+'</div></div><span class="when">Next week</span><span class="who">'+a.who+'</span><span class="st ns"><i></i>Not started</span><span></span><span class="more">'+CHEV+'</span></div></div>';
+const write=t=>'<div class="write">'+PEN+'<span>Write next week\'s action for '+t.name+'</span><u>Next week</u><u>Islam</u><span class="ent" style="flex:none">Enter</span></div>';
+const head='<div class="chd"><h2>Actions</h2><div class="views"><span>This week</span><span>All</span><span>Mine</span><span>Undated</span><span class="on">Weekly check</span></div></div>';
+const band=(t,q)=>'<div class="band'+(q?' quiet':'')+'"><span class="ix">'+t.ix+'</span><h3>'+t.name.replace('&','&amp;')+'</h3><span class="meta">'+meta(t)+'</span><span class="end">'+meter(t)+'</span></div>';
+
+const V={
+ 1:{why:'<b>Tidy.</b> The same order as today, with fewer boxes. Each topic opens with its band. Inside, This week is a pale blue strip, not a framed box, and Next week is a plain strip with its write line. An empty topic is one line.',
+  html:()=>'<div class="card o1 view">'+head+TOPICS.map(t=>'<div class="topic">'+band(t,!t.now.length)+
+    (t.now.length?'<div class="wkh now">This week<span class="days">W1 Nov · 1 – 5 Nov</span></div>'+t.now.map(row).join(''):'<div class="quietline">Nothing on this topic in the last three weeks.</div>')+
+    '<div class="wkh next">Next week<span class="days">W2 Nov · 8 – 12 Nov</span></div>'+t.next.map(nextRow).join('')+write(t)+'</div>').join('')+'</div>'},
+ 2:{why:'<b>Week first.</b> The check is about this week, so the page opens with it: one pale blue This week heading, and each topic\'s actions under its own small heading. Next week comes after, as one short list of what is already written and which topics still need an action.',
+  html:()=>'<div class="card o2 view">'+head+'<div class="weekblock now"><div class="wkh now">This week<span class="days">W1 Nov · 1 – 5 Nov</span></div>'+
+    TOPICS.filter(t=>t.now.length).map(t=>'<div class="sub"><span class="ix">'+t.ix+'</span><h3>'+t.name.replace('&','&amp;')+'</h3><span class="meta">'+meta(t)+'</span><span class="end">'+meter(t)+'</span></div>'+t.now.map(row).join('')).join('')+'</div>'+
+    '<div class="weekblock next"><div class="wkh next">Next week<span class="days">W2 Nov · 8 – 12 Nov</span></div>'+
+    TOPICS.flatMap(t=>t.next.map(a=>'<div class="nxrow"><span class="tick"></span><span>'+a.t+'</span><span class="tp">'+t.name.replace('&','&amp;')+'</span></div>')).join('')+
+    TOPICS.filter(t=>!t.next.length).map(t=>'<div class="nxrow ask"><span style="color:var(--gold)">'+PEN+'</span><span>'+t.name.replace('&','&amp;')+' has nothing for next week yet. Write one.</span><span class="tp">'+t.name.replace('&','&amp;')+'</span></div>').join('')+'</div></div>'},
+ 3:{why:'<b>Topic cards.</b> Each topic is its own card: the band, this week\'s actions on a pale blue strip, and next week folded into one line at the bottom. Topics with nothing this week are gathered in a single strip at the end.',
+  html:()=>'<div class="card o3 view">'+head+TOPICS.filter(t=>t.now.length).map(t=>'<div class="topic">'+band(t)+
+    '<div class="wkh now">This week<span class="days">W1 Nov · 1 – 5 Nov</span></div>'+t.now.map(row).join('')+
+    '<div class="nextline"><span class="lab">Next week</span>'+(t.next.length?t.next.map(a=>a.t+' · '+a.who).join(', '):'<span>Nothing written yet</span>')+'<span class="add">+ Write next week\'s action</span></div></div>').join('')+
+    '<div class="quiets"><span class="lab">Nothing this week</span>'+TOPICS.filter(t=>!t.now.length).map(t=>'<span class="q">'+t.name+'<em>+ Write</em></span>').join('')+'</div></div>'}
+};
+function show(v){document.getElementById('view').innerHTML=V[v].html();document.getElementById('why').innerHTML=V[v].why;
+  document.querySelectorAll('.pick button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v==v)));}
+document.querySelectorAll('.pick button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+show(1);
+</script>

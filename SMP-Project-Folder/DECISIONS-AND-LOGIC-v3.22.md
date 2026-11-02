@@ -70862,6 +70862,13 @@ Islam, while §708's breaks ran: *"how can [we] refine the my tasks page based o
 
 **§709 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. `main` had not moved since §708: a fast-forward, §709 kept, shell `smp-shell-v7.44-my-tasks-like-tracker` (unique in `sw.js`'s history). `generated-in-step`'s one red is `authorize.cjs`, `origin/main`'s since §706 and untouched here. No migrations; nobody signed out.
 
+
+## §710 — Jump to's box folds with the console's column (2026-11-02; §704 on the branch, renumbered at the merge: main took §704–§709)
+
+Islam, with a picture of the console's column folded to icons: *"check this glitch"*. The Jump to box (§701) kept its 190px and its words when the « button narrowed the column to 64px (§601, `html[data-rail="1"]`), so it ran out over the page beside it. Under that mark, from 1000px as §601's own rules are, `lib/jump-script.ts` now draws it as its glass alone, 38px, centred like every other row of the folded column, with *Jump to… (Ctrl K)* on hover; unfolded it is as before. Checked in a browser on the built console: folded, the box sits inside the column (box 10–40px, column 0–51px at the page's 0.8) and still opens the window; unfolded, the full box. `checks/jump.mjs` 23 ok. Picture: `design-mockups/jump-to-offline/built/8-console-folded.png`.
+
+**§710 MERGED TO `main`** 2026-11-02, Islam: *"merge to main"*. `main` had moved to §709 and was merged into the branch first (recorded above); it has not moved since, so this is a fast-forward. No migrations; nobody signed out.
+
 ## §711 — Home's Your tasks carries My tasks' row: a task opened in the card (2026-11-03; §710 on the branch, renumbered at the merge: main took §710)
 
 Islam: *"now refine the home page tasks the same way"*; drawn working (`design-mockups/home/2026-11-03_home-tasks-working.html`, its *Now* from a screenshot of the real Home); *"go ahead, build it"*.

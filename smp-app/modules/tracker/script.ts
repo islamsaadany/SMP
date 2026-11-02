@@ -591,6 +591,9 @@ export const APP_JS = `(function () {
 
   document.addEventListener("click", function (e) {
     pressed = e.target;
+    /* §723: Search is an icon in the bar; a press on it opens its box */
+    var fd = e.target.closest && e.target.closest(".chd .find");
+    if (fd && !e.target.closest("input, button")) { var si = fd.querySelector(".srch"); if (si) si.focus(); }
     var b = e.target.closest("[data-act]");
     if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots, .rdots")) closePops(null);
     if (!b) return;

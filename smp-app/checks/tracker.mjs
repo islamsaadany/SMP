@@ -1011,6 +1011,16 @@ try {
     check("...and the due card says the week and no count of its own", (await pg.locator(".strip .tile:nth-child(3) span").innerText()).toLowerCase() === "due",
       await pg.locator(".strip .tile:nth-child(3) span").innerText());
     check("the views row carries no Group by select any more, and a three-dots button", (await pg.locator(".gby").count()) === 0 && (await pg.locator("[data-act=settings]").count()) === 1);
+    /* §723 ONE QUIET BAR */
+    const bar723 = await pg.evaluate(() => { const h = document.querySelector(".ctop .chd"), ic = h && h.querySelector(".cic"), f = h && h.querySelector(".find .srch"), g = h && h.querySelector("[data-act=settings]"), c = document.querySelector(".pin .card.ctop");
+      return h ? { tile: !!ic && getComputedStyle(ic).display !== "none", show: /\bShow\b/.test(h.querySelector(".cx").textContent), inHead: !!f, srchW: f ? Math.round(f.getBoundingClientRect().width) : -1,
+        group: g ? g.textContent.replace(/\s+/g, " ").trim() : "", rule: c ? getComputedStyle(c).borderBottomColor : "" } : null; });
+    check("the bar is quiet: no icon tile, no \"Show\", Search an icon in the head's row with its box shut, Group a small \"Group: Owner\" (§723)",
+      !!bar723 && !bar723.tile && !bar723.show && bar723.inHead && bar723.srchW === 0 && /^Group: Owner$/.test(bar723.group), JSON.stringify(bar723));
+    await pg.locator(".ctop .chd .find svg").click();
+    check("...a press on the search icon opens its box, under the cursor (§723)", (await pg.evaluate("Math.round(document.querySelector('.ctop .chd .find .srch').getBoundingClientRect().width)")) > 100 &&
+      (await pg.evaluate("document.activeElement && document.activeElement.classList.contains('srch')")));
+    await pg.keyboard.press("Escape"); await pg.locator("body").click({ position: { x: 5, y: 5 } }).catch(() => {});
     check("the menu is hidden until the dots are pressed", !(await pg.locator(".setmenu").isVisible()));
     await pg.locator("[data-act=settings]").click();
     check("...pressed, it names Owner and Weeks as what is in force, side by side", await pg.locator(".setmenu").isVisible() &&
@@ -1038,15 +1048,17 @@ try {
     /* THE QUIET LIST DRAWS THE LINE'S DETAILS FROM THE START (§707, the
        mockup): the topic, the week and the owner as small chips beside the
        box, nothing typed yet. */
-    check("the add line shows its topic, week and owner as chips from the start", (await pg.locator(".write .addrow .when").isVisible()) &&
-      (await pg.locator(".write .addrow .who").isVisible()) && (await pg.locator(".write .addrow .tpk").isVisible()));
-    check("...and they are still drawn, so their place is held", (await pg.locator(".write .addrow .when").count()) === 1 &&
-      (await pg.evaluate("document.querySelector('.write .addrow .when').getBoundingClientRect().width")) > 0);
+    /* §723 ONE QUIET BAR: the add line rests as one slim row — its topic,
+       week and owner come out once it is clicked into, and stay while
+       something is typed; the status never shows there (§497). */
+    check("the add line rests slim: its topic, week and owner are not out until it is clicked into (§723)", !(await pg.locator(".write .addrow .when").isVisible()) &&
+      !(await pg.locator(".write .addrow .who").isVisible()) && !(await pg.locator(".write .addrow .tpk").isVisible()) && (await pg.locator(".write .addrow .when").count()) === 1);
+    await pg.locator("#add").focus();
+    check("...a click into it brings them out (§723)", (await pg.locator(".write .addrow .when").isVisible()) && (await pg.locator(".write .addrow .who").isVisible()) && (await pg.locator(".write .addrow .tpk").isVisible()));
     await pg.locator("#add").fill("x");
-    check("...the first letter brings them back, and nothing moved to make room — the status never shows there, a new line is Not started (§497)", (await pg.locator(".write .addrow .when").isVisible()) &&
+    check("...and the first letter keeps them out — the status never shows there, a new line is Not started (§497)", (await pg.locator(".write .addrow .when").isVisible()) &&
       (await pg.locator(".write .addrow .who").isVisible()) && !(await pg.locator(".write .addrow .st").isVisible()) &&
-      (await pg.locator(".write .addrow [data-act=add-note]").isVisible()) && (await addBox(".write .addrow .tn")) === restBox,
-      restBox + " -> " + (await addBox(".write .addrow .tn")));
+      (await pg.locator(".write .addrow [data-act=add-note]").isVisible()), restBox);
     check("the add line opens on This week in words, owned by me", (await pg.locator(".write .addrow .when .wk").innerText()) === "This week" &&
       weekWord(real, real) === "This week" &&
       (await pg.locator(".write .addrow").getAttribute("data-due")) === thu && (await pg.locator(".write .addrow").getAttribute("data-owner")) === "noran");

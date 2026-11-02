@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — The Tracker's top bar is one quiet bar (§723).** No tile, plain count and views, Search an icon, "Group: Owner", slim add line with chips on click, no gold rule. Tracker 364/0.
+
 **2026-11-03 — No date popup on a Tracker row's line (§722).** Top-bar mockup drawn (A/B), not built. Tracker 362/0.
 
 **2026-11-03 — The Tracker task's name leads; the line under it is quieter (§721).** Option A: name 600, line one grey, topic plain, "This week" dropped, "Last week" kept. Tracker 362/0.

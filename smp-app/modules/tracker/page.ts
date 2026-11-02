@@ -519,6 +519,42 @@ const LOOK = `
 .ctop .tools+.counted,.ctop .counted.ck{margin:0;padding:8px 14px 4px;text-align:left}
 .ctop .unread{margin:0;border:0;border-radius:0}
 .pin .card.ctop{border-bottom:1.5px solid var(--gold)}
+/* §723 ONE QUIET BAR (option A of design-mockups/internal-tracker/
+   2026-11-03_top-bar.html). Islam: "it's functional but taking the focus
+   somehow from the tasks". Nothing it does is gone; it is quieter: no icon
+   tile, a smaller heading, the count a plain figure, the views plain words
+   (the chosen one on a soft grey) right after it, Search an icon that opens
+   its box, Group a small word; the add line one slim row whose topic, week
+   and owner come out once it is clicked into (or typed in, or picked); no
+   gold rule under the card. */
+.ctop .chd{padding:12px 16px 10px;gap:6px 10px;border-bottom:0}
+.ctop .chd .cic{display:none}
+.ctop .chd h2{font-size:18px}
+.ctop .chd .ccnt{background:none;padding:0;font:500 14px/1.5 var(--font);color:var(--ink-3)}
+.ctop .chd .sp{display:none}
+.ctop .chd .cx{margin-right:auto;margin-left:6px}
+.ctop .chd .cats{border:0;background:none;padding:0;gap:2px}
+.ctop .chd .cats a{font:400 13.5px/1.4 var(--font);color:var(--ink-3);padding:4px 10px;border-radius:7px}
+.ctop .chd .cats a:hover{color:var(--ink);background:var(--surface-2)}
+.ctop .chd .cats a[aria-current="true"]{background:var(--surface-2);color:var(--ink);font-weight:600;box-shadow:none}
+.ctop .chd .find{flex:0 0 auto;height:32px;border:1px solid transparent;border-radius:8px;padding:0 8px;background:none;cursor:pointer;gap:6px}
+.ctop .chd .find:hover{background:var(--surface-2)}
+.ctop .chd .find svg{width:15px;height:15px}
+.ctop .chd .find .srch{width:180px;border:0;background:none;outline:none;font:400 13.5px/1.4 var(--font);color:var(--ink);padding:0}
+.ctop .chd .find:not(:focus-within):has(.srch:placeholder-shown) .srch{width:0}
+.ctop .chd .find:focus-within,.ctop .chd .find:has(.srch:not(:placeholder-shown)){border-color:var(--line);background:var(--surface);cursor:auto}
+.ctop .chd .find .go{display:none}
+.ctop .chd .dots>button{border:0;background:none;padding:8px;font:400 13.5px/1 var(--font);color:var(--ink-3)}
+.ctop .chd .dots>button b{color:var(--ink-2);margin-left:3px}
+.ctop .chd .dots>button svg{width:11px;height:11px}
+.ctop .chd .setmenu{top:36px;right:0}
+.ctop .tools.qt{border-top:0;padding:0 16px 14px}
+.ctop .tools.qt .addrow{background:var(--ground);border-color:var(--line-2);min-height:38px}
+.ctop .tools.qt .addrow:focus-within{background:var(--surface);border-color:var(--line)}
+.ctop .tools.qt .addrow .plus{color:var(--ink-3)}
+.ctop .tools.qt .addrow input.new::placeholder{color:var(--ink-3)}
+.ctop .tools.qt .addrow:not(:focus-within):not(.typing):not([data-picked]):not(:has(.tpk.set)) :is(.tpk,.when,.who,.more){display:none}
+.pin .card.ctop{border-bottom:1px solid var(--line)}
 .pin .card.ctop.solo{border-bottom:1px solid var(--line)}
 .cbot .list .row{padding:8px 14px;border-bottom-color:var(--line-soft)}
 .cbot .sec .row:nth-child(odd of .row:not(.done)),.cbot .sec.showdone .row:nth-child(odd of .row){background:var(--zebra)}
@@ -931,6 +967,7 @@ function whoCell(a: Action, L: Loaded, live: boolean): string {
 }
 
 const PEN = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const LENS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const CARET = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const DOTS3 = '<svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>';
@@ -1444,7 +1481,9 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
      control (§96). Dates as, and Topics, go on working there. */
   const isCheck = view === "check";
   const settings = '<span class="dots"><button type="button" data-act="settings" aria-haspopup="menu" aria-expanded="false" title="Settings"' + (isCheck ? ' aria-label="Settings"' : "") + ">" +
-    (isCheck ? "" : "Group by <b>" + esc(GROUP_WORD[p.ask.group]) + "</b>" + CARET) + DOTS3 + "</button>" +
+    /* §723: "Group: Owner ▾" — the same menu (Group by, Dates as, Topics);
+       the ⋯ stays only on the weekly check, where there is no grouping to name */
+    (isCheck ? DOTS3 : "Group: <b>" + esc(GROUP_WORD[p.ask.group]) + "</b>" + CARET) + "</button>" +
     '<span class="setmenu" role="menu" hidden><span class="two">' +
     (isCheck ? "" :
       '<span class="col"><span class="lab">Group by</span>' +
@@ -1456,11 +1495,12 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
     "</span>" + topicsPanel(L) + "</span>";
   const band = bandHtml({ esc, eyebrow: weekWord(thu, today) + " \u00b7 " + weekLabel(weekOf(today), today), title: MODULE_DEF.tracker.label,
     sentence: p.tenantName + "\u2019s actions, read by the week.", tiles });
-  const views = '<span class="cx">Show <nav class="cats" aria-label="Views">' +
+  /* §723: the views as plain words right after the count, no "Show" */
+  const views = '<span class="cx"><nav class="cats" aria-label="Views">' +
     VIEWS.map((v) => '<a href="' + esc(viewHref(v)) + '"' + (v === view ? ' aria-current="true"' : "") + ">" + esc(VIEW_WORD[v]) + "</a>").join("") +
     "</nav></span>";
   return band + '<div class="card ctop' + (o.solo ? " solo" : "") + '">' +
-    cardHead({ esc, icon: "tasks", title: "Actions", count: o.shown == null ? null : o.shown, right: views + (o.inner && o.inner.includes("<!--settings-->") ? "" : settings + (o.find || "")) }) +
+    cardHead({ esc, icon: "tasks", title: "Actions", count: o.shown == null ? null : o.shown, right: views + (o.inner && o.inner.includes("<!--settings-->") ? "" : (o.find || "") + settings) }) +
     (o.inner || "").replace("<!--settings-->", settings) + "</div>";
 }
 
@@ -1622,8 +1662,8 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
      register has not placed yet (§313.32) is told so (§61). */
   const tpk = topicPick(L);
   const addrow = me
-    ? '<div class="addrow" data-due="' + thu + '" data-owner="' + esc(me) + '"><span class="plus">' + PEN + "</span>" +
-      '<div class="tn"><input id="add" class="new" data-act="add" placeholder="' + (all.length ? "Write the next action and press Enter" : "Write the first action for " + esc(p.tenantName) + " and press Enter") + '" aria-label="New action" maxlength="200">' +
+    ? '<div class="addrow" data-due="' + thu + '" data-owner="' + esc(me) + '"><span class="plus">' + PLUS + "</span>" +
+      '<div class="tn"><input id="add" class="new" data-act="add" placeholder="' + (all.length ? "Add an action and press Enter" : "Write the first action for " + esc(p.tenantName) + " and press Enter") + '" aria-label="New action" maxlength="200">' +
       '<input id="addnote" class="nt" placeholder="A note, if the line needs one" aria-label="Note for the new action" maxlength="5000"' + (brk() === "note-standing" ? "" : " hidden") + "></div>" +
       tpk +
       (dates === "weeks"
@@ -1640,7 +1680,10 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     '<span class="cnt" id="count">' + esc(count) + "</span></form>";
   /* THE WRITE LINE, SEARCH AND GROUP BY ON ONE ROW (§707, the mockup's
      row); the card head keeps Actions and the views. */
-  const tools = '<div class="tools qt' + (all.length ? "" : " solo") + '"><div class="write">' + addrow + "</div>" + (all.length ? find : "") + "<!--settings--></div>";
+  /* §723 ONE QUIET BAR (Islam chose A of design-mockups/internal-tracker/
+     2026-11-03_top-bar.html): search and Group go up into the head's row,
+     after the views; this row is the add line alone. */
+  const tools = '<div class="tools qt' + (all.length ? "" : " solo") + '"><div class="write">' + addrow + "</div></div>";
   /* NO COUNT LINE UNDER THE ADD LINE (§566). Islam: *"remove the small 14
      action line under the add action as it's already existing in the navy
      large panel"*. It went with its search figure too, said and agreed. The
@@ -1651,7 +1694,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     : !shown.length
       ? '<div class="none"><b>Nothing ' + (q ? "matches" : "here") + '.</b>' + (q ? "Try another word, or " : "Add one on the line above, or ") + '<a href="' + esc(viewHref("all")) + '">see all of them</a>.</div>'
       : "";
-  return { body: pinned(masthead(p, today, all, sum, L, { inner: tools + counted, shown: shown.length })) +
+  return { body: pinned(masthead(p, today, all, sum, L, { inner: tools + counted, shown: shown.length, find: all.length ? find : "" })) +
     '<div class="card cbot cards"><div class="list">' + secs + "</div>" + none + "</div>", count, open: L.open };
 }
 

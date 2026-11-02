@@ -70962,3 +70962,15 @@ Also drawn for Islam, not built: `design-mockups/internal-tracker/2026-11-03_row
 **Asked** (Islam): "a date popup appear on hovering over the task no need". The line under a Tracker task's name had a `title` with the note's day and time; it's gone. The opened task's progress entries keep theirs on the week word. Also drawn, not built: `design-mockups/internal-tracker/2026-11-03_top-bar.html` — the Tracker's top bar before, A (one quiet bar, recommended) and B (the bar off the card).
 
 **Checked**: `checks/tracker.mjs` **362 passed, 0 failed** (the markup check no longer expects the title). Tracker-only.
+
+## §723 — The Tracker's top bar is one quiet bar (2026-11-03)
+
+**Asked** (Islam): "for the top bar how we make it simpler and cleaner as it's functional but taking the focus somehow from the tasks itself", then "go with A, build it" — option A of `design-mockups/internal-tracker/2026-11-03_top-bar.html`.
+
+Nothing it does is gone; it is quieter:
+- **Head row**: no icon tile; "Actions" 18px; the count a plain grey figure (was a pill); the views right after it as plain words, the chosen one on a soft grey (no "Show" label, no boxed switch); then **Search as an icon** whose box opens on a press (it stays open while it holds words); then **"Group: Owner ▾"**, a small word opening the same menu (Group by, Dates as, Topics). On the weekly check, where there's no grouping, the button is still the ⋯.
+- **Add line**: one slim row, "+ Add an action and press Enter" on a pale ground; its topic, week and owner come out once it is clicked into, typed in, or picked (`data-picked`), and the note arrow with them. (Reverses §707's "chips from the start".)
+- **No gold rule** under the card; a plain line.
+- Search and Group moved up from the add line's row into the head's row (`masthead` takes them as `find`; the tools row is the add line alone).
+
+**Checked**: `checks/tracker.mjs` **364 passed, 0 failed** — new: no tile, no "Show", Search shut in the head's row and opening on a press with the cursor in it, "Group: Owner"; the add line's three §707 checks rewritten (chips out on a click, kept while typing). Looked at on the real page. Tracker-only; `checks/shell.mjs` not re-run (it reads none of this).

@@ -674,6 +674,81 @@ const LOOK = `
 .mbtn.pri{background:#1F3158;border-color:#1F3158;color:#fff}
 .mbtn.pri:hover{background:#2A4275}
 .macts .carry{height:34px;padding:0 12px;border-radius:8px}
+/* §731 THE MEETING, CLEANED — the rail a checklist (B), the box the agreed
+   one (design-mockups/internal-tracker/2026-11-03_check-rail.html and
+   2026-11-03_check-task-box.html) */
+.mlist .sh.mh{padding:14px 16px 4px;border-top:1px solid var(--line-2)}
+.mlist .sh.mh h3{font:600 13px/1.3 var(--font);color:var(--ink-2);font-style:normal}
+.mlist .sh.mh.quiet h3{color:var(--ink-3);font-style:normal}
+.mlist .sh.mh .mprog{margin-left:auto;font:400 12px/1 var(--font);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.mlist .sh.mh .end{margin-left:6px}
+.mlist .sh.mh .end .dots>button{opacity:0}
+.mlist .sh.mh:hover .end .dots>button,.mlist .sh.mh .end .dots>button.on,.mlist .sh.mh .end .dots>button:focus-visible{opacity:1}
+.mlist .tbar{height:3px;border-radius:2px;background:var(--line-2);margin:4px 16px 6px;overflow:hidden}
+.mlist .tbar i{display:block;height:100%;width:0;background:var(--carry)}
+.mi{border-left:0;padding:6px 16px;gap:10px;font-size:14px}
+.mi .mc{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:grid;place-items:center;box-sizing:border-box}
+.mi.rev .mc{background:var(--ink-3);border-color:var(--ink-3)}
+.mi.rev .mc::after{content:"\\2713";color:var(--surface);font:700 9px/1 var(--font)}
+.mi.rev::after{content:none}
+.mi.rev .mt{color:var(--ink-3)}
+.mi[aria-current="true"]{background:var(--wk);border-left:0}
+.mi[aria-current="true"] .mc{border:4px solid var(--carry);background:var(--surface)}
+.mi[aria-current="true"] .mc::after{content:none}
+.mlks{display:flex;gap:14px;flex-wrap:wrap;padding:4px 16px 12px 41px}
+.mfold{border:0;background:none;padding:0;font:400 12.5px/1.4 var(--font);color:var(--ink-3);cursor:pointer}
+.mfold.add{color:var(--carry)}
+.mfold:hover{text-decoration:underline;text-underline-offset:2px}
+.mfold:focus-visible{outline:2px solid var(--carry);outline-offset:2px;border-radius:3px}
+.mlist .mf .msub{padding:6px 16px 2px 41px;font-size:10px}
+.mlist .mf{padding-bottom:8px}
+.walk{border-top:1px solid var(--line-2);font-size:12px;padding:10px 16px}
+.walk .bar{display:none}
+.mopen{padding:22px 26px 16px}
+.mopen .crumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:400 12.5px/1.4 var(--font);color:var(--ink-3);margin:0 0 4px}
+.mopen .crumb .sd{width:3px;height:3px;border-radius:50%;background:var(--ink-3);opacity:.7;flex:none}
+.mopen .crumb .who,.mopen .crumb .when{font-size:inherit;font-weight:inherit;line-height:inherit;color:inherit;padding:0;margin:0}
+.mopen .crumb .who .wn,.mopen .crumb .when .wk{text-decoration:none}
+.mopen h3.t{font-size:21px;margin:0 0 16px}
+.mopen .pbox.mq{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--surface)}
+.mopen .pbox.mq:focus-within{border-color:var(--carry)}
+.mopen .pbox.mq .pnew{flex:1;min-width:0;border:0;outline:none;background:none;padding:11px 0;font:400 15px/1.4 var(--font);color:var(--ink)}
+.mopen .pbox.mq .ek{font:500 11.5px/1 var(--font);color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:3px 6px}
+.mopen .mrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.mopen .mrow .seg{background:none;padding:0;gap:6px;margin:0}
+.mopen .mrow .seg button{border:1px solid var(--line);border-radius:999px;padding:4px 11px;font:400 13px/1.2 var(--font);color:var(--ink-2);box-shadow:none}
+.mopen .mrow .seg button[aria-pressed="true"]{border-color:var(--ink-2);color:var(--ink);font-weight:600;background:var(--surface)}
+.mopen .mrow .mbtn.pri{margin-left:auto;height:38px;padding:0 16px;font-size:14px;display:inline-flex;align-items:center;gap:10px}
+.mopen .mrow .mbtn.pri kbd{font:500 11px/1 var(--font);opacity:.7}
+.mopen .cyl{display:flex;justify-content:flex-end;gap:4px;margin-top:6px;font-size:12.5px;color:var(--ink-3)}
+.mopen .cyk{border:0;background:none;padding:0;font-size:inherit;line-height:inherit;font-family:inherit;color:var(--carry);cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--line)}
+.mopen .mph{margin-top:20px;font:600 12px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.mopen .mtl{list-style:none;margin:12px 0 0 6px;padding:0 0 0 18px;border-left:1px solid var(--line-2);display:grid;gap:12px}
+.mopen .mtl li{position:relative}
+.mopen .mtl li::before{content:"";position:absolute;left:-22px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.mopen .mtl li.now::before{background:var(--carry)}
+.mopen .mtl .bd{font:400 14.5px/1.45 var(--font);color:var(--ink);overflow-wrap:anywhere}
+.mopen .mtl .sub{font:400 12.5px/1.4 var(--font);color:var(--ink-3)}
+.mopen .mtl .sub b{font-weight:400}
+.mopen .mtl li.now .sub b{color:var(--carry);font-weight:600}
+.mopen .mnil{margin:10px 0 0;font-size:13px;color:var(--ink-3)}
+.mopen .mmore{display:flex;gap:14px;align-items:center;margin-top:18px;position:relative}
+.mopen .mlk{border:0;background:none;padding:4px 6px;margin:0 -6px;border-radius:7px;font:500 13px/1.2 var(--font);color:var(--ink-3);cursor:pointer}
+.mopen .mlk:hover,.mopen .mlk[aria-expanded="true"]{color:var(--ink);background:var(--surface-2)}
+.mopen .mdots{position:relative}
+.mopen .mmenu{position:absolute;left:0;top:28px;z-index:12;display:grid;gap:6px;min-width:180px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(20,28,43,.16);padding:6px}
+.mopen .mmenu[hidden]{display:none}
+.mopen .mmenu .danger{border:0;background:none;text-align:left;padding:6px 10px;border-radius:7px;font:400 13.5px/1.2 var(--font);color:var(--bad);cursor:pointer}
+.mopen .mmenu .danger:hover{background:var(--surface-2)}
+.mopen .mmenu .sure{padding:4px 8px;font-size:13px;color:var(--ink-2);display:grid;gap:6px}
+.mopen .mdesc{margin-top:12px}
+.mopen .mdesc textarea.desc{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:400 14px/1.45 var(--font);background:var(--surface);color:var(--ink);resize:vertical}
+.mopen .mhist{margin-top:12px}
+.mopen .macts{margin-top:18px;padding-top:12px;border-top:1px solid var(--line-2)}
+.mopen .keys{display:none}
+/* §731: the check's count line under the bar, in the quiet bar's own voice */
+.ctop .counted.ck{font:400 12.5px/1.4 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3);padding:0 16px 12px}
+.ctop .counted.ck .left{color:var(--ink-2)}
 .keys{margin:10px 0 0;font-size:12px;color:var(--ink-3)}
 .keys kbd{font:600 11px/1 var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:2px 5px;background:var(--surface)}
 .mnone{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;color:var(--ink-3)}
@@ -1208,10 +1283,15 @@ const RIGHT_SM = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1l4 4-
    week, a hand-over, a rename, a move to another topic — the day, who, what,
    and what it was before. */
 function taskTabs(a: Action, L: Loaded, who: Who, today: string, live: boolean): string {
+  return taskTabsWith(a, L, who, today, live, histItems(a, L, today));
+}
+/* the automatic record, newest first — the opened task's History and the
+   meeting box's (§731), one drawing (§53.5) */
+function histItems(a: Action, L: Loaded, today: string): string {
   const name = (k: string) => L.names.get(k) || k;
   const wk = (d: string | null | undefined) => d ? weekWord(d, today) : "no date";
   const topicName = (id: string | null | undefined) => id ? (L.topics.find((t) => t.id === id)?.name || "a topic since deleted") : "No topic";
-  const hist = L.events.map((e) => {
+  return L.events.map((e) => {
     const at = e.at ? new Date(e.at) : null;
     const day = at ? todayIn(at) : "";
     const hm = at ? new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Cairo", hour: "2-digit", minute: "2-digit", hour12: false }).format(at) : "";
@@ -1225,6 +1305,8 @@ function taskTabs(a: Action, L: Loaded, who: Who, today: string, live: boolean):
       : esc(STATUS_WORD[e.from || "not_started"]) + " → " + esc(STATUS_WORD[e.to || "not_started"]);
     return "<li><time>" + esc(readableDay(day, today)) + " " + esc(hm) + "</time><span><b>" + esc(name(e.by)) + "</b> · " + what + "</span></li>";
   }).join("");
+}
+function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boolean, hist: string): string {
   const n = (k: number) => k ? ' <span class="n">' + k + "</span>" : "";
   const tabs = '<div class="ptabs" role="tablist">' +
     '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="p" aria-selected="true">Progress' + n(L.progress.length) + "</button>" +
@@ -1396,29 +1478,46 @@ function meetingView(L: Loaded, p: PageArgs, today: string, dates: Format): { ht
   /* the task opened, else the first the meeting would come to (loadFor
      picks it first, so its progress and history are read with it) */
   const selId = L.open || firstCheckId(L, p, today);
-  const item = (a: Action, k: CheckWeek) => {
-    const w = whenText(a, today, dates);
-    const tail = a.status === "done" ? '<span class="mok">Done</span>' : w.late ? '<span class="mlate">' + esc(w.text) + "</span>" : "";
-    return '<button type="button" class="mi ' + k + (a.status === "done" ? " done" : "") + '" data-act="pick-task" data-id="' + esc(a.id) + '" aria-current="' + (a.id === selId) + '">' +
-      '<span class="' + dotOf(a.status) + '"></span><span class="mt">' + esc(a.title) + "</span>" + tail + "</button>";
-  };
+  /* §731 THE RAIL IS THE MEETING'S CHECKLIST (Islam chose B of
+     design-mockups/internal-tracker/2026-11-03_check-rail.html): each task
+     a circle — empty until talked about, filled once gone through (this
+     browser, today: the walk), a blue ring on the one on screen — and its
+     name; the status is set in the box, so the rail has one job. */
+  const item = (a: Action, k: CheckWeek) =>
+    '<button type="button" class="mi ' + k + (a.status === "done" ? " done" : "") + '" data-act="pick-task" data-id="' + esc(a.id) + '" aria-current="' + (a.id === selId) + '">' +
+      '<span class="mc" aria-hidden="true"></span><span class="mt">' + esc(a.title) + "</span></button>";
   let ix = 0;
   const list = groups.map((g) => {
     const t = g.t;
     const open = g.rows.filter((a) => a.status !== "done");
     const late = open.filter((a) => isLate(a.due, today)).length;
     const meta = g.rows.length ? open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") : "nothing this week";
+    /* §731: the topic's name, how far the meeting has got through its week
+       ("2 of 9", drawn by the walk) and a thin bar; its ⋯ */
+    void meta; void ix;
+    const prog = '<span class="mprog" data-n="' + g.now.length + '">0 of ' + g.now.length + "</span>";
+    const tbar = '<div class="tbar"><i></i></div>';
     const head = t
-      ? '<div class="grp sh mh' + (g.now.length ? "" : " quiet") + '" data-key="' + esc(t.id) + '"><span class="ix">' + String(++ix).padStart(2, "0") + "</span>" +
-        "<h3>" + esc(t.name) + '</h3><span class="meta">' + meta + '</span><span class="end">' + (t.closed ? '<span class="shut">Closed</span>' : "") + topicMenu(t) + "</span></div>"
-      : '<div class="grp sh mh quiet" data-key="none"><span class="ix">&mdash;</span><h3>No topic</h3><span class="meta">' + meta + '</span><span class="end"></span></div>';
+      ? '<div class="grp sh mh' + (g.now.length ? "" : " quiet") + '" data-key="' + esc(t.id) + '">' +
+        "<h3>" + esc(t.name) + "</h3>" + prog + '<span class="end">' + (t.closed ? '<span class="shut">Closed</span>' : "") + topicMenu(t) + "</span></div>" + tbar
+      : '<div class="grp sh mh quiet" data-key="none"><h3>No topic</h3>' + prog + '<span class="end"></span></div>' + tbar;
     /* A TOPIC NOBODY HAS TOUCHED FOR THESE THREE WEEKS SAYS SO (§61) */
     const asleep = t && !g.rows.length
       ? '<div class="asleep" title="Write the next action, or close the topic from its &middot;&middot;&middot;">Nothing on this topic in these three weeks.</div>' : "";
     const sub = (word: string, xs: Action[], k: CheckWeek) => xs.length ? '<div class="msub">' + word + "</div>" + xs.map((a) => item(a, k)).join("") : "";
     const line = me && t && !t.closed ? checkLine(t, L, me, meShort, today, dates) : "";
+    /* §731: last week's finished work and next week's (with the line that
+       writes it) fold behind two quiet links under the topic; a fold holding
+       the task on screen is drawn open */
+    const has = (xs: Action[]) => xs.some((a) => a.id === selId);
+    const lastF = g.last.length ? '<div class="mf" data-f="last"' + (has(g.last) ? "" : " hidden") + ">" + sub(CHECK_WORD.last, g.last, "last") + "</div>" : "";
+    const nextF = g.next.length || line ? '<div class="mf" data-f="next"' + (has(g.next) ? "" : " hidden") + ">" +
+      (g.next.length ? sub(CHECK_WORD.next, g.next, "next") : line ? '<div class="msub">' + CHECK_WORD.next + "</div>" : "") + line + "</div>" : "";
+    const links = lastF || nextF ? '<div class="mlks">' +
+      (lastF ? '<button type="button" class="mfold" data-act="mfold" data-f="last">' + g.last.length + " done last week &rsaquo;</button>" : "") +
+      (nextF ? '<button type="button" class="mfold add" data-act="mfold" data-f="next">' + (g.next.length ? "Next week (" + g.next.length + ")" : "+ Next week&rsquo;s action") + "</button>" : "") + "</div>" : "";
     return '<div class="sec" data-key="' + esc(t ? t.id : "none") + '">' + head + asleep + g.now.map((a) => item(a, "now")).join("") +
-      sub(CHECK_WORD.last, g.last, "last") + sub(CHECK_WORD.next, g.next, "next") + (line && !g.next.length ? '<div class="msub">' + CHECK_WORD.next + "</div>" : "") + line + "</div>";
+      links + lastF + nextF + "</div>";
   }).join("");
   const sel = selId ? L.actions.find((a) => a.id === selId) || null : null;
   const panel = sel ? meetPanel(sel, L, p.who, today, dates) : '<div class="mnone">Nothing to go through: no task is due in these three weeks.</div>';
@@ -1437,20 +1536,50 @@ function meetingView(L: Loaded, p: PageArgs, today: string, dates: Format): { ht
    double-click, the status is three buttons for the same act — and Save and
    next writes what was typed in the progress box and opens the next task. */
 function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format): string {
+  /* §731 THE BOX, CLEANED (Islam: "this box needs cleaning"; the agreed one
+     of design-mockups/internal-tracker/2026-11-03_check-task-box.html): the
+     topic, owner and week one grey line over the name; "What happened this
+     week?" with a quiet Enter in it; the status as three chips and Save and
+     next on one row; under Save, "Moves to next week · Keep it this week" —
+     Save and next carries an unfinished task of this week (or late) to next
+     week unless kept, so there is no Carry button; the progress so far on a
+     quiet timeline, no Edit or Delete here (§712's are the task's own,
+     outside the meeting); Description · History · ⋯ (Delete) folded; and
+     Previous · Skip at the foot. */
   const live = brk() === "who-everyone" ? true : mayChange(a, who);
   const t = a.topicId ? L.topics.find((x) => x.id === a.topicId) : null;
-  const seg = live
+  const P = L.eventsBy && L.progressBy ? { ev: L.eventsBy.get(a.id) || [], pr: L.progressBy.get(a.id) || [] } : { ev: L.events, pr: L.progress };
+  const chips = live
     ? '<div class="seg" role="group" aria-label="Status">' + STATUSES.map((s) =>
         '<button type="button" data-act="set-status" data-value="' + s + '" aria-pressed="' + (a.status === s) + '"><span class="' + dotOf(s) + '"></span>' + esc(STATUS_WORD[s]) + "</button>").join("") + "</div>"
     : '<div class="seg ro">' + statusPill(a, false) + "</div>";
-  return '<div class="open mopen" data-id="' + esc(a.id) + '" data-tab="p">' +
-    '<p class="crumb">' + (t ? esc(t.name) : "No topic") + "</p>" +
+  const carry = live && brk() !== "no-carry" && mayCarry(a, today);
+  const name = (k: string) => L.short.get(k) || L.names.get(k) || k;
+  const tl = P.pr.length
+    ? '<ul class="mtl">' + P.pr.map((e) => { const w = entryWeek(e.at, today);
+        return '<li' + (w.now ? ' class="now"' : "") + '><div class="bd">' + esc(e.body) + '</div><div class="sub">' + esc(name(e.by)) + " &middot; <b>" + esc(w.word.toLowerCase()) + "</b></div></li>"; }).join("") + "</ul>"
+    : '<p class="mnil">Nothing written yet.</p>';
+  const box = who.personKey
+    ? '<div class="pbox mq"><input class="pnew" data-act="progress-new" placeholder="What happened this week?" aria-label="Progress on ' + esc(a.title) + '" maxlength="' + PROGRESS_MAX + '"><span class="ek" aria-hidden="true">Enter</span></div>'
+    : "";
+  const desc = '<div class="mdesc" hidden>' + (live
+    ? '<textarea class="desc" data-act="notes" aria-label="Description" maxlength="5000" rows="2" placeholder="What the task is. Click to write it.">' + esc(a.description) + "</textarea>"
+    : '<div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>") + "</div>";
+  const hist = '<ul class="hist mhist" hidden>' + histItems(a, { ...L, events: P.ev }, today) + "</ul>";
+  const more = '<div class="mmore"><button type="button" class="mlk" data-act="mshow" data-w="desc">Description</button>' +
+    '<button type="button" class="mlk" data-act="mshow" data-w="hist">History' + (P.ev.length ? " (" + P.ev.length + ")" : "") + "</button>" +
+    (live ? '<span class="mdots"><button type="button" class="mlk" data-act="mshow" data-w="dots" aria-label="More">&middot;&middot;&middot;</button>' +
+      '<span class="mmenu acts" hidden><button type="button" class="danger" data-act="delete-ask">Delete this task</button>' +
+      '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button> <button type="button" class="go" data-act="delete-no">No</button></span></span></span>' : "") + "</div>";
+  return '<div class="open mopen" data-id="' + esc(a.id) + '" data-tab="p"' + (carry ? ' data-carry="1"' : "") + ">" +
+    '<p class="crumb facts">' + (t ? esc(t.name) : "No topic") + '<i class="sd"></i>' + whoCell(a, L, live) + '<i class="sd"></i>' + whenCell(a, today, dates, live) + "</p>" +
     '<h3 class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</h3>" +
-    '<div class="facts">' + whoCell(a, L, live) + whenCell(a, today, dates, live) + "</div>" + seg +
-    taskTabs(a, L, who, today, live) +
-    '<div class="macts"><button type="button" class="mbtn" data-act="step" data-dir="-1">Previous</button>' + carryCell(a, today, live) +
-    '<span class="sp"></span><button type="button" class="mbtn pri" data-act="step" data-dir="1">Save and next</button></div>' +
-    '<p class="keys"><kbd>&uarr;</kbd> <kbd>&darr;</kbd> move through the list &middot; <kbd>Ctrl</kbd> + <kbd>Enter</kbd> save and next</p></div>';
+    box +
+    '<div class="mrow">' + chips + '<button type="button" class="mbtn pri" data-act="step" data-dir="1">Save and next <kbd>Ctrl &crarr;</kbd></button></div>' +
+    (carry ? '<div class="cyl">Moves to next week &middot; <button type="button" class="cyk" data-act="carry-keep">Keep it this week</button></div>' : "") +
+    '<div class="mph">Progress so far</div>' + tl + more + desc + hist +
+    '<div class="macts"><button type="button" class="mlk" data-act="step" data-dir="-1">&larr; Previous</button><span class="sp"></span>' +
+    '<button type="button" class="mlk" data-act="skip">Skip &rarr;</button></div></div>';
 }
 
 export type ListOut = { body: string; count: string; open: string | null };

@@ -278,13 +278,41 @@ export const APP_JS = `(function () {
     var wn = w.querySelector(".wn"), i = w.querySelector(".bar i");
     if (wn) wn.textContent = n + " of " + ids.length + " gone through";
     if (i) i.style.width = (ids.length ? Math.round(100 * n / ids.length) : 0) + "%";
+    /* §731: each topic says how far the meeting has got through its week */
+    document.querySelectorAll(".mlist .sec").forEach(function (sec) {
+      var all = sec.querySelectorAll(".mi.now[data-id]"), k = 0;
+      all.forEach(function (x) { if (done.indexOf(x.getAttribute("data-id")) >= 0) k++; });
+      var pg = sec.querySelector(".mprog"), bi = sec.querySelector(".tbar i");
+      if (pg) pg.textContent = k + " of " + all.length;
+      if (bi) bi.style.width = (all.length ? Math.round(100 * k / all.length) : 0) + "%";
+    });
+    keptDraw();
+  }
+  /* §731 SAVE AND NEXT CARRIES: an unfinished task of this week (or late)
+     goes on to next week with Save and next, unless "Keep it this week" was
+     pressed — remembered by task for the rest of the meeting, so a redraw
+     (a status press) does not undo the choice. */
+  var kept = new Set();
+  function keptDraw() {
+    var p = document.querySelector(".mopen[data-carry]"); if (!p) return;
+    var id = p.getAttribute("data-id"), keep = kept.has(id), l = p.querySelector(".cyl");
+    p.setAttribute("data-carry", keep ? "0" : "1");
+    if (l) l.innerHTML = keep ? 'Stays this week &middot; <button type="button" class="cyk" data-act="carry-keep">Move to next week</button>'
+      : 'Moves to next week &middot; <button type="button" class="cyk" data-act="carry-keep">Keep it this week</button>';
   }
   function stepTask(dir, save) {
     var ids = meetIds(), panel = document.querySelector(".mopen"), cur = panel ? panel.getAttribute("data-id") : openId();
     var i = ids.indexOf(cur), nx = ids[Math.max(0, Math.min(ids.length - 1, (i < 0 ? 0 : i) + dir))];
     if (save && dir > 0 && cur) walk(cur);
     var pn = save && dir > 0 && panel ? panel.querySelector(".pnew") : null;
-    if (pn && !pn.disabled && pn.value.replace(/\s+/g, "")) { if (nx) setOpen(nx); addProgress(pn); return; }
+    var carry = save && dir > 0 && panel && panel.getAttribute("data-carry") === "1";
+    var wrote = !!(pn && !pn.disabled && pn.value.replace(/\\s+/g, ""));
+    if (wrote || carry) {
+      if (nx) setOpen(nx);
+      if (wrote) addProgress(pn);
+      if (carry) { pressed = null; post({ act: "carry", id: cur }); }
+      return;
+    }
     if (!nx || nx === cur) { drawWalk(); return; }
     setOpen(nx); pressed = null; refetch();
   }
@@ -790,6 +818,21 @@ export const APP_JS = `(function () {
       post({ act: "status", id: id, status: sv });
     } else if (act === "step") {
       stepTask(Number(b.getAttribute("data-dir")) || 1, true);
+    } else if (act === "skip") {
+      /* Skip moves on without saving, carrying or counting (§731) */
+      stepTask(1, false);
+    } else if (act === "carry-keep") {
+      var kp = b.closest(".mopen"), kid = kp && kp.getAttribute("data-id");
+      if (kid) { if (kept.has(kid)) kept.delete(kid); else kept.add(kid); keptDraw(); }
+    } else if (act === "mshow") {
+      /* the box's Description, History and ⋯, folded until pressed (§731) */
+      var mo = b.closest(".mopen"), w8 = b.getAttribute("data-w");
+      var tgt = mo && (w8 === "desc" ? mo.querySelector(".mdesc") : w8 === "hist" ? mo.querySelector(".mhist") : b.parentNode.querySelector(".mmenu"));
+      if (tgt) { tgt.hidden = !tgt.hidden; b.setAttribute("aria-expanded", String(!tgt.hidden)); if (w8 === "desc" && !tgt.hidden) { var dd = tgt.querySelector("textarea"); if (dd) dd.focus(); } }
+    } else if (act === "mfold") {
+      /* last week's finished work and next week's, behind their links (§731) */
+      var sc = b.closest(".sec"), fo = sc && sc.querySelector('.mf[data-f="' + b.getAttribute("data-f") + '"]');
+      if (fo) { fo.hidden = !fo.hidden; b.setAttribute("aria-expanded", String(!fo.hidden)); }
     } else if (act === "progress-go") {
       var pb = b.closest(".pbox"), pn = pb ? pb.querySelector(".pnew") : null;
       if (pn && !pn.disabled) addProgress(pn);

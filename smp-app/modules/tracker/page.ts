@@ -692,7 +692,7 @@ const LOOK = `
 /* the row's one control: ⋯, a menu */
 .rdots{position:relative;justify-self:end}
 .rdots>.more{width:28px;height:28px;border-radius:7px;margin-top:-3px}
-.rdots>.more svg{width:16px;height:16px}
+.rdots>.more svg{width:16px;height:16px;transform:none;transition:none}
 .rdots>.more.on,.rdots>.more[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
 .rdots .tmenu{top:30px;right:0;min-width:210px;display:grid;gap:0;padding:4px}
 .rdots .tmenu button{padding:8px 10px;font:400 14px/1.3 var(--font);gap:9px}

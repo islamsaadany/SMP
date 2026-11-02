@@ -70906,3 +70906,5 @@ Islam, of §713's Tracker menu: *"change topic looks like handing to someone sho
 **Asked** (Islam): "change hand it to someone else to Change Owner .. just like the others", then "make it Week, Owner, Topic … no need for change". The three items that open a small list now carry one word each — **Week**, **Owner**, **Topic** — in the Tracker's ⋯ and in My tasks and Home (Topic is Tracker only). The lists themselves are unchanged; the owner list's heading reads **New owner** (was "Hand to"). Rename and Delete keep their names: they act, they don't open a list. Supersedes the labels named in §713 and §714.
 
 **Checked**: `checks/tracker.mjs` **358 passed, 0 failed**; `checks/shell.mjs` 553 ok / 11 failed — the same 11 that fail on main (§653 plan cards among them, which comes and goes). Shell cache `smp-shell-v7.48-week-owner-topic`.
+
+**§712–§715 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.

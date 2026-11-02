@@ -3542,7 +3542,7 @@ await section("4 · Forefront's own pages", async () => {
     const hopen = await page.evaluate(() => { const r = document.querySelector('[data-home="tasks"] .mwrow.on');
       return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), hash: location.hash } : null; });
     check(!!hopen && hopen.tabs.join("|") === "Progress|Description|History" && hopen.open && hopen.hash !== "#mywork",
-      "\u2026a press on a task's name on Home opens it in the card, in the Tracker's three tabs (\u00a7710)", JSON.stringify(hopen));
+      "\u2026a press on a task's name on Home opens it in the card, in the Tracker's three tabs (\u00a7711)", JSON.stringify(hopen));
     if (process.env.SHOTDIR) await page.screenshot({ path: process.env.SHOTDIR + "/home-new.png", fullPage: true });
     await page.click('[data-home="tasks"] .mwrow.on .t').catch(() => {});
     check(!(await page.locator('[data-home="tasks"] .mwrow.on').count()), "\u2026and pressed again it folds");

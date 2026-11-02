@@ -1122,7 +1122,9 @@ function lastLine(a: Action, L: Loaded, today: string): string {
   const p = L.latest.get(a.id);
   if (!p) return "";
   const w = entryWeek(p.at, today);
-  return '<div class="last" title="' + esc(w.full) + '"><span class="lw' + (w.now ? " now" : "") + '"><b>' + esc(w.word) + "</b> &middot; </span>" + esc(oneLine(p.body)) + "</div>";
+  /* §722 (Islam: "a date popup appear on hovering over the task no need"):
+     no tooltip with the note's day and time */
+  return '<div class="last"><span class="lw' + (w.now ? " now" : "") + '"><b>' + esc(w.word) + "</b> &middot; </span>" + esc(oneLine(p.body)) + "</div>";
 }
 /* THE PROGRESS BOX (§657): one line and Enter, on the opened row and under
    every open row of this week on the check — one box, two places (§53.5).

@@ -70956,3 +70956,9 @@ Also drawn for Islam, not built: `design-mockups/internal-tracker/2026-11-03_row
 **Checked**: `checks/tracker.mjs` **362 passed, 0 failed** — new: the name heavier than the line, topic plain, no "This week" in front of this week's note; the markup check updated for the `lw` span. Tracker-only CSS and markup, so `checks/shell.mjs` was not re-run.
 
 **§719–§721 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §722 — No date popup on a Tracker row's line (2026-11-03)
+
+**Asked** (Islam): "a date popup appear on hovering over the task no need". The line under a Tracker task's name had a `title` with the note's day and time; it's gone. The opened task's progress entries keep theirs on the week word. Also drawn, not built: `design-mockups/internal-tracker/2026-11-03_top-bar.html` — the Tracker's top bar before, A (one quiet bar, recommended) and B (the bar off the card).
+
+**Checked**: `checks/tracker.mjs` **362 passed, 0 failed** (the markup check no longer expects the title). Tracker-only.

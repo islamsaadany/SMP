@@ -484,7 +484,7 @@ check("the history is behind one link and hidden until it is pressed, and it say
   /carried to This week \(was W2 Sep\)/.test(openPart) && /handed to Islam Saadany \(was Noran Essam\)/.test(openPart) && /created it, owner Noran Essam, due W2 Sep/.test(openPart),
   (openPart.match(/<ul class="hist"[\s\S]*?<\/ul>/) || [""])[0].slice(0, 500));
 check("the latest entry reads under the row's name as one quiet line, the week in front, and a row with no progress has no second line",
-  /data-id="p"[\s\S]*?<div class="last" title="[^"]*"><span class="lw now"><b>This week<\/b> &middot; <\/span>Finance sent four of six cost centres\.<\/div>/.test(pOpen) && count(pOpen, /class="last"/g) === 1);
+  /data-id="p"[\s\S]*?<div class="last"><span class="lw now"><b>This week<\/b> &middot; <\/span>Finance sent four of six cost centres\.<\/div>/.test(pOpen) && count(pOpen, /class="last"/g) === 1);
 const chk2 = listBody({ ...pLoaded, open: null, progress: [], events: [] }, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
   ask: { view: "check", q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
 check("...on the check the progress box is on the task being talked about, and on no row of the list",

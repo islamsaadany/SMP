@@ -70908,3 +70908,9 @@ Islam, of §713's Tracker menu: *"change topic looks like handing to someone sho
 **Checked**: `checks/tracker.mjs` **358 passed, 0 failed**; `checks/shell.mjs` 553 ok / 11 failed — the same 11 that fail on main (§653 plan cards among them, which comes and goes). Shell cache `smp-shell-v7.48-week-owner-topic`.
 
 **§712–§715 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §716 — The ⋯ says "Open in Tracker" on one line (2026-11-03)
+
+**Asked** (Islam): "Open in Raya … it's taking 2 lines, can we figure out a way to open the tracker in a simpler way". On My tasks and Home the ⋯ item now reads **Open in Tracker** — the client's name is already on the row — with the full "Open in <client>'s Tracker" as its tooltip. Same place, same press. The opened task's tab row keeps its longer link: it has the room. Mockup `design-mockups/home/2026-11-03_task-menu.html` redrawn to the built menu (Week, Owner, Topic on hover; Open in Tracker).
+
+**Checked**: `checks/shell.mjs` 554 ok / 10 failed — main's own (§713's check now also wants Open in Tracker fourth). Shell cache `smp-shell-v7.49-open-in-tracker`.

@@ -1,11 +1,12 @@
 <title>Task Menu Reordered</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* The task's ⋯, reordered at Islam's word: Change the week and Hand to someone
-   else first, each opening a small list beside the menu (the hand-over list is
-   the rest of the team, the owner left out); Rename third; Details and progress
-   gone — a press on the name already opens the task. The same menu on My tasks,
-   Home and the Internal Tracker (which keeps Change topic). Example task. */
+/* The task's ⋯ as built (§713–§715): Week and Owner first, each a small list
+   that opens beside the menu on hover (or a press); the owner list is the rest
+   of the team, the owner left out. On the Internal Tracker, Topic follows — the
+   open topics, No topic, and New topic… typed in place. Then Rename; Delete
+   last. Details and progress is gone: a press on the name opens the task.
+   Example task. */
 :root{--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--line:#D6DCE5;--line-soft:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EFF2F6;
   --bad:#B23025;--d1:#E0B300;--blue:#1F5FBF;--ff:#0F2C69;--amber-tx:#9C5D08;
   --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -41,16 +42,20 @@ svg{display:block}
 .pop hr{border:0;border-top:1px solid var(--line-soft);margin:4px 2px}
 .pop .danger,.pop .danger svg{color:var(--bad)}
 /* the small list beside the menu */
-.side{position:absolute;right:calc(100% + 6px);top:0;min-width:200px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(20,28,43,.16);padding:4px}
+.subw{position:relative}
+.subw>.side{display:none}
+.subw:hover>.side,.subw.on>.side,.subw:focus-within>.side{display:block}
+.side::after{content:"";position:absolute;top:0;bottom:0;left:100%;width:8px}
+.side input{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);padding:7px 10px;margin:4px 0 2px}
+.side{position:absolute;z-index:6;right:calc(100% + 6px);top:-4px;min-width:200px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(20,28,43,.16);padding:4px}
 .side .h{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:6px 10px 4px}
 .side button small{margin-left:auto;color:var(--ink-3);font-size:12px}
 .side button.cur{font-weight:700}
-.side button.cur::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber-tx);margin-left:8px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ff);color:#fff;border-radius:9px;padding:10px 16px;font-size:13.5px}
 @media (max-width:700px){.row{grid-template-columns:22px minmax(0,1fr) 28px}.wc,.st{display:none}.side{right:0;top:calc(100% + 6px)}}
 </style>
 <div class="pg">
-  <p class="note"><b>Try it:</b> press ⋯, then <b>Change the week</b> or <b>Hand to someone else</b> — each opens a small list beside the menu. The hand-over list is the rest of the team (the owner, Islam, is not in it). <b>Details and progress</b> is gone: a press on the task's name opens it. Rename is third. The switch shows the same menu on the Internal Tracker, which keeps Change topic.</p>
+  <p class="note"><b>Try it:</b> press ⋯, then rest on <b>Week</b> or <b>Owner</b> — each opens a small list beside the menu (a press opens it too). <b>Owner</b> lists the rest of the team; the owner, Islam, is not in it. The switch shows the Internal Tracker's menu, where <b>Topic</b> comes next: the open topics, No topic, and a New topic… box. Then Rename; on My tasks and Home, <b>Open in Tracker</b> — one short line, since the client is already on the row; Delete last.</p>
   <div class="sw" role="group"><button type="button" data-ctx="mine" aria-pressed="true">My tasks and Home</button><button type="button" data-ctx="tracker" aria-pressed="false">Internal Tracker</button></div>
   <div class="card"><div class="row"><span class="tick"></span><div style="min-width:0"><div class="t">Logitics Strategy Revamp</div><div class="meta"><b>Raya Trade</b></div></div><span class="wc">2 w late</span><span class="st"><span class="dot"></span>In progress</span>
     <span class="menu" id="menu"><button type="button" class="kb" id="kb" aria-haspopup="menu" aria-expanded="false" aria-label="More for this task"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></button></span></div></div>
@@ -64,34 +69,43 @@ const I={cal:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-
  out:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h4v4M13 3 7.5 8.5M12 9.5V13H3V4h3.5"/></svg>',
  bin:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5"/></svg>'};
 const CH='<span class="chev">›</span>';
-const WEEKS=[['This week','1 – 5 Nov'],['Next week','8 – 12 Nov'],['W3 Nov','15 – 19 Nov'],['W4 Nov','22 – 26 Nov'],['W1 Dec','29 Nov – 3 Dec']];
+const WEEKS=[['This week','1 – 5 Nov',1],['Next week','8 – 12 Nov'],['W3 Nov','15 – 19 Nov'],['W4 Nov','22 – 26 Nov'],['W1 Dec','29 Nov – 3 Dec']];
 const TEAM=['Islam','Mohamed','Omar','Noran','Aley'],OWNER='Islam';
+const TOPICS=['Logistics','Pricing','Hiring'],TOPIC='Logistics';
 let S={open:false,sub:null,ctx:'mine'};
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2000)}
+function sub(k,icon,word,side){return '<div class="subw'+(S.sub===k?' on':'')+'"><button type="button" data-sub="'+k+'" aria-haspopup="true">'+icon+word+CH+'</button><div class="side" role="listbox">'+side+'</div></div>'}
 function draw(){
  const m=document.getElementById('menu');m.querySelectorAll('.pop').forEach(x=>x.remove());
  document.getElementById('kb').setAttribute('aria-expanded',String(S.open));
  if(!S.open)return;
- const side=S.sub==='week'?'<div class="side" role="listbox"><div class="h">Move to</div>'+WEEKS.map(w=>'<button type="button" data-pick="'+w[0]+'" class="'+(w[2]?'cur':'')+'">'+w[0]+'<small>'+w[1]+'</small></button>').join('')+'</div>'
-  :S.sub==='hand'?'<div class="side" role="listbox"><div class="h">Hand to</div>'+TEAM.filter(n=>n!==OWNER).map(n=>'<button type="button" data-hand="'+n+'">'+n+'</button>').join('')+'</div>':'';
- const html='<div class="pop" role="menu">'+side+
-  '<button type="button" data-sub="week" class="'+(S.sub==='week'?'on':'')+'">'+I.cal+'Change the week'+CH+'</button>'+
-  '<button type="button" data-sub="hand" class="'+(S.sub==='hand'?'on':'')+'">'+I.hand+'Hand to someone else'+CH+'</button>'+
+ const week='<div class="h">Move to</div>'+WEEKS.map(w=>'<button type="button" data-pick="'+w[0]+'" class="'+(w[2]?'cur':'')+'">'+w[0]+'<small>'+w[1]+'</small></button>').join('');
+ const owner='<div class="h">New owner</div>'+TEAM.filter(n=>n!==OWNER).map(n=>'<button type="button" data-hand="'+n+'">'+n+'</button>').join('');
+ const topic='<div class="h">Move to topic</div>'+TOPICS.map(t=>'<button type="button" data-topic="'+t+'" class="'+(t===TOPIC?'cur':'')+'">'+t+'</button>').join('')+'<button type="button" data-topic="">No topic</button><input placeholder="New topic…" aria-label="New topic" maxlength="120">';
+ const html='<div class="pop" role="menu">'+
+  sub('week',I.cal,'Week',week)+sub('hand',I.hand,'Owner',owner)+
+  (S.ctx==='tracker'?sub('topic',I.tag,'Topic',topic):'')+
   '<button type="button" data-do="Rename">'+I.pen+'Rename</button>'+
-  (S.ctx==='tracker'?'<button type="button" data-do="Change topic">'+I.tag+'Change topic</button>':'<button type="button" data-do="Open">'+I.out+'Open in Raya Trade’s Tracker</button>')+
+  (S.ctx==='mine'?'<button type="button" data-do="Open" title="Open in Raya Trade’s Tracker">'+I.out+'Open in Tracker</button>':'')+
   '<hr><button type="button" class="danger" data-do="Delete">'+I.bin+'Delete</button></div>';
  m.insertAdjacentHTML('beforeend',html);
 }
+function close(){S.open=false;S.sub=null;draw()}
 document.addEventListener('click',e=>{
  const c=e.target.closest('[data-ctx]');if(c){S.ctx=c.dataset.ctx;document.querySelectorAll('[data-ctx]').forEach(x=>x.setAttribute('aria-pressed',String(x===c)));draw();return}
  if(e.target.closest('#kb')){S.open=!S.open;S.sub=null;draw();return}
+ if(e.target.closest('.side input'))return;
  const b=e.target.closest('.pop button');
- if(!b){if(S.open){S.open=false;S.sub=null;draw()}return}
+ if(!b){if(S.open&&!e.target.closest('.pop'))close();return}
  if(b.dataset.sub){S.sub=S.sub===b.dataset.sub?null:b.dataset.sub;draw();return}
- if(b.dataset.pick){toast('Moved to '+b.dataset.pick);S.open=false;S.sub=null;draw();return}
- if(b.dataset.hand){toast('Handed to '+b.dataset.hand);S.open=false;S.sub=null;draw();return}
- if(b.dataset.do){toast(b.dataset.do==='Open'?'Opens Raya Trade’s Tracker on this task':b.dataset.do==='Delete'?'Asks first, then deletes':b.dataset.do+' — as now');S.open=false;draw()}
+ if(b.dataset.pick){toast('Moved to '+b.dataset.pick);close();return}
+ if(b.dataset.hand){toast('Now '+b.dataset.hand+'’s');close();return}
+ if('topic' in b.dataset){toast(b.dataset.topic?'Moved to '+b.dataset.topic:'No topic now');close();return}
+ if(b.dataset.do){toast(b.dataset.do==='Open'?'Opens Raya Trade’s Tracker on this task':b.dataset.do==='Delete'?'Asks first, then deletes':'Renames in place');close()}
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.open){S.open=false;S.sub=null;draw()}});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&e.target.matches('.side input')&&e.target.value.trim()){toast('New topic “'+e.target.value.trim()+'” — moved there');close();return}
+ if(e.key==='Escape'&&S.open)close();
+});
 draw();
 </script>

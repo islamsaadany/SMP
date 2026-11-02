@@ -4878,7 +4878,11 @@
     go.href = mwTrackerHref(r);
     go.setAttribute("role", "menuitem");
     go.innerHTML = MW_I.out;
-    go.appendChild(document.createTextNode("Open in " + r.clientName + "’s Tracker"));
+    /* §716 (Islam: "it's taking 2 lines … open the tracker in a simpler way"):
+       "Open in Tracker" — the client's name is already on the row; the full
+       name rides as the tooltip. */
+    go.appendChild(document.createTextNode("Open in Tracker"));
+    go.title = "Open in " + r.clientName + "’s Tracker";
     pop.appendChild(go);
     if (r.canChange) {
       pop.appendChild(el("hr"));

@@ -3350,12 +3350,13 @@ await section("4 · Forefront's own pages", async () => {
     await page.hover(".mwpop .mwsubw:first-child > button").catch(() => {});
     await page.waitForTimeout(300);
     const weeks = await page.evaluate(() => { const s = document.querySelector(".mwpop .mwsubw:first-child > .mwside"); return s && getComputedStyle(s).display !== "none" ? s.querySelectorAll("button").length : 0; });
-    check(order[0] === "Week" && order[1] === "Owner" && order[2] === "Open in Tracker" && order[3] === "Rename" && !order.includes("Details and progress") && weeks >= 4,
-      "\u2026the \u22ef starts with Week and Owner, each a list that opens on hover; then Open in Tracker on one short line, Rename last before Delete (\u00a7713, \u00a7716, \u00a7718); no Details and progress", JSON.stringify({ order, weeks }));
+    check(order[0] === "Week" && order[1] === "Owner" && order[2] === "View in Tracker" && order[3] === "Rename" && !order.includes("Details and progress") && weeks >= 4,
+      "\u2026the \u22ef starts with Week and Owner, each a list that opens on hover; then View in Tracker on one short line, Rename last before Delete (\u00a7713, \u00a7716, \u00a7718, \u00a7720); no Details and progress", JSON.stringify({ order, weeks }));
     await page.keyboard.press("Escape");
+    const viewHref = await page.getAttribute(".mwrow.on .mwopen", "href").catch(() => "");
     await page.click(".mwrow.on .mwopen");
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
-    check(path() === "/raya-trade/tracker", "\u2026and Open in its Tracker opens that client's Tracker", path());
+    check(path() === "/raya-trade/tracker" && /[?&]show=/.test(viewHref) && !/[?&]open=/.test(viewHref), "\u2026and View in its Tracker goes to that client's Tracker to show the task, not open it (\u00a7720)", path() + " " + viewHref);
     await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
     /* §620: arriving shows the tab's SAVED copy first, marked and inert, then
        the latest — the card is read off the latest, never the saved one */

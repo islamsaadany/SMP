@@ -1459,6 +1459,14 @@ try {
     check("...and Yes removes it, the line under the name with it", (await asTenant(A, (c) => progressOf(c, born.id))).length === 0 && (await pg.locator(row + ".last").count()) === 0 && await stayed());
     await pg.locator(row + ".t").click(); await settle();
     check("the arrow again folds it, and the address forgets it", (await pg.locator(".open").count()) === 0 && !pg.url().includes("open=") && await stayed(), pg.url());
+    /* §720 VIEW IN TRACKER: show=<id> brings the row into view and lights
+       it for a moment — it does not open it — and the address forgets show= */
+    await pg.goto(base + "?view=all&show=" + born.id); await settle();
+    const shown720 = await pg.evaluate((id) => { const r = document.querySelector('.row[data-id="' + id + '"]'); if (!r) return null;
+      const b = r.getBoundingClientRect(); return { lit: r.classList.contains("shown"), inView: b.top >= 0 && b.bottom <= innerHeight }; }, born.id);
+    check("View in Tracker (show=) lights the task and brings it into view, without opening it; the address forgets show= (§720)",
+      !!shown720 && shown720.lit && shown720.inView && (await pg.locator(".open").count()) === 0 && !pg.url().includes("show=") && !pg.url().includes("open="), JSON.stringify(shown720) + " " + pg.url());
+    await pg.evaluate("window.__stay = 1");
     /* GROUP BY, from the dots: drawn again in place, remembered by this
        browser (a cookie the page reads on the next visit). */
     await pg.locator("[data-act=settings]").click();

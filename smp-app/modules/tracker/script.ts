@@ -924,5 +924,23 @@ export const APP_JS = `(function () {
     pressed = c;
     post({ act: "notes", id: id, description: v });
   });
+
+  /* §720 VIEW IN TRACKER (Islam: "it should just show it in tracker without
+     opening it"): My tasks and Home link here with show=<id>. The row is
+     brought to the middle of the screen and lit for a moment — not opened;
+     its section unfolds its done rows if it is one. The address forgets
+     show= so a reload is the plain list. */
+  (function () {
+    var u = new URL(location.href), sid = u.searchParams.get("show");
+    if (!sid) return;
+    u.searchParams.delete("show"); history.replaceState(null, "", u);
+    var r = document.querySelector('.row[data-id="' + sid.replace(/"/g, "") + '"]');
+    if (!r) return;
+    var sec = r.closest(".sec");
+    if (sec && r.classList.contains("done")) { sec.classList.add("showdone"); shown.add(sec.getAttribute("data-key")); }
+    r.scrollIntoView({ block: "center" });
+    r.classList.add("shown");
+    setTimeout(function () { r.classList.remove("shown"); }, 2600);
+  })();
 })();
 `;

@@ -242,6 +242,9 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
    name. 116 holds every Done this year on one line; the rarer longer forms
    (a date with its year, Late with the exact date beside it) wrap inside
    the column instead of running out of it. */
+/* §720: the row View in Tracker brought here, lit for a moment */
+.row.shown{animation:rshown 2.6s ease-out}
+@keyframes rshown{0%,45%{background:color-mix(in srgb,var(--carry) 16%,transparent);box-shadow:0 0 0 8px color-mix(in srgb,var(--carry) 16%,transparent)}100%{background:transparent;box-shadow:0 0 0 8px transparent}}
 .row{display:grid;grid-template-columns:20px minmax(0,1fr) 132px 116px 64px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2)}
 .row .when{white-space:normal}
 .row .t{min-width:0;font-size:15px;line-height:1.35}

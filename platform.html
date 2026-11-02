@@ -4701,7 +4701,8 @@
     bin: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
   };
   function mwKey(r) { return r.client + ":" + r.id; }
-  function mwTrackerHref(r) { return "/" + r.client + "/tracker?view=all&open=" + encodeURIComponent(r.id); }
+  /* §720: View in Tracker shows the task in its Tracker, lit — it does not open it */
+  function mwTrackerHref(r) { return "/" + r.client + "/tracker?view=all&show=" + encodeURIComponent(r.id); }
   /* the opened task's details, read once and again after every write */
   function mwLoad(r) {
     var key = mwKey(r);
@@ -4880,8 +4881,8 @@
     /* §716 (Islam: "it's taking 2 lines … open the tracker in a simpler way"):
        "Open in Tracker" — the client's name is already on the row; the full
        name rides as the tooltip. */
-    go.appendChild(document.createTextNode("Open in Tracker"));
-    go.title = "Open in " + r.clientName + "’s Tracker";
+    go.appendChild(document.createTextNode("View in Tracker"));
+    go.title = "View in " + r.clientName + "’s Tracker";
     pop.appendChild(go);
     if (r.canChange) {
       /* §718 (Islam: "make open in tracker before rename so rename becomes
@@ -4914,7 +4915,7 @@
       tabs.appendChild(b);
     });
     tabs.appendChild(el("span", "sp"));
-    var go = el("a", "mwopen", "Open in " + r.clientName + "’s Tracker →");
+    var go = el("a", "mwopen", "View in " + r.clientName + "’s Tracker →");
     go.href = mwTrackerHref(r);
     tabs.appendChild(go);
     box.appendChild(tabs);

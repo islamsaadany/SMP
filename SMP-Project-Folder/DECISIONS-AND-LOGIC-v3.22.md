@@ -70938,3 +70938,11 @@ Islam, of §713's Tracker menu: *"change topic looks like handing to someone sho
 **One press.** The opened row's ⋯ was drawn with `.on`, the class that means "its menu is open", so the first press shut a menu that wasn't showing. The opened row's ⋯ is now lit with `.lit`.
 
 **Checked**: `checks/tracker.mjs` **360 passed, 0 failed** — two new checks (no request on opening; the ⋯ opens on one press on an opened task), both seen RED with the fixes taken out. `checks/shell.mjs` 553 ok / 11 failed — main's own. Shell cache `smp-shell-v7.52-open-at-once`.
+
+## §720 — View in Tracker shows the task, it doesn't open it (2026-11-03)
+
+**Asked** (Islam): "when I click open in tracker it opens the task details in the tracker while it should just show it in tracker without opening it we can make it view in tracker to be more clear". On My tasks and Home the ⋯ item reads **View in Tracker** (the opened task's link: **View in <client>'s Tracker →**). It links with `show=<id>`, not `open=`: the Tracker brings that row to the middle of the screen and lights it for 2.6 s (`.row.shown`, a pale wash of the Tracker's blue), unfolding its section's done rows if it is done, and drops `show=` from the address so a reload is the plain list. Nothing is opened.
+
+Also drawn for Islam, not built: `design-mockups/internal-tracker/2026-11-03_row-line.html` — the line under a task's name, before and two afters (A quieter, recommended; B on hover). The "This week" in that line is when the last note was written, not when the task is due.
+
+**Checked**: `checks/tracker.mjs` **361 passed, 0 failed** (new: show= lights the row in view, opens nothing, the address forgets it). `checks/shell.mjs`: §713's check wants View in Tracker; the link's address carries show=, not open=. Shell cache `smp-shell-v7.53-view-in-tracker`.

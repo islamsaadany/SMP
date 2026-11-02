@@ -53,7 +53,7 @@ export type WorkRow = {
      its card does */
   cell: string;
   /* the latest progress line, for the row's quiet line (§709) */
-  last: { week: string; body: string } | null;
+  last: { week: string; body: string; now: boolean } | null;
 };
 export type ClientTally = { open: number; late: number };
 
@@ -107,7 +107,8 @@ function rowOf(t: Client, a: Action, today: string, who: Who | null, last: Progr
     canChange: !!who && isOffice(who.seat) && mayChange(a, who),
     doneDay: a.doneDay,
     cell: cellOf(a, today),
-    last: last ? { week: entryWeekWord(last.at, today), body: oneLine(last.body) } : null,
+    /* §728: now — written this week, so the row's quiet line leaves the week out */
+    last: last ? { week: entryWeekWord(last.at, today), body: oneLine(last.body), now: sameWeek(last.at ? todayIn(new Date(last.at)) : today, today) } : null,
   };
 }
 

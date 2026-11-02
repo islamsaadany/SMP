@@ -317,6 +317,29 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
   }
 
+  /* ── EVERY TASK'S DETAILS AT ONCE (§728) ──────────────────────────────
+     Islam: "opening the task … should open momentarily". My tasks and Home
+     ask for the details of every task on the list in one call as soon as
+     the list is drawn, so a press on a name opens it with nothing to wait
+     for. Each task goes through the same door and the same read as
+     workDetail below (one client's door once); one that can't be read says
+     why, in its own place, and the others are unaffected. */
+  if (action === "workDetails") {
+    const items = Array.isArray(body && body.items) ? (body.items as unknown[]).slice(0, 300) : [];
+    const doors = new Map<string, Awaited<ReturnType<typeof resolveTenant>>>();
+    const leads = await leadsOf(pool, me.id);
+    const details: unknown[] = [];
+    for (const it of items as { client?: unknown; id?: unknown }[]) {
+      const client = String((it && it.client) || ""), id = String((it && it.id) || "");
+      if (!doors.has(client)) doors.set(client, await resolveTenant(pool, me, client));
+      const door = doors.get(client)!;
+      if (!door.ok) { details.push({ error: "That client is not available." }); continue; }
+      const d = await workDetail(door.tenant, { seat: door.seat, personKey: door.personKey, lead: leads.has(door.tenant.id) }, id);
+      details.push(d.ok ? d.detail : { error: d.why });
+    }
+    return ok({ details });
+  }
+
   /* ── A TASK OPENED, OR WRITTEN TO, ON MY TASKS (§709) ────────────────
      The same door as workStatus above (door.ts resolveTenant), then the
      Tracker's own reads and writes under the Tracker's own rules

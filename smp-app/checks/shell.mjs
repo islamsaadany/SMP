@@ -3321,7 +3321,16 @@ await section("4 · Forefront's own pages", async () => {
        there is the Tracker's own entry, read back from Postgres (§96); the
        way into the client's Tracker is that link, and it still goes there. */
     const firstId = await page.locator(".mwrow >> nth=0").getAttribute("data-id");
+    /* §728: the details were read with the list, so the press asks nothing,
+       and the tabs are there at once */
+    await page.waitForFunction(() => { const r = document.querySelector(".mwrow"); return !!r; }, null, { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+    let asked728 = 0; const c728 = (rq) => { const d = rq.postData() || ""; if (/"action":"workDetails?"/.test(d)) asked728++; };
+    page.on("request", c728);
     await page.click(".mwrow .t >> nth=0");
+    const now728 = await page.evaluate(() => !!document.querySelector(".mwrow.on .mwdet .mwtabs"));
+    page.off("request", c728);
+    check(asked728 === 0 && now728, "\u2026a task opens at once: its details came with the list, the press asks the server nothing (\u00a7728)", JSON.stringify({ asked728, now728 }));
     await page.waitForSelector(".mwrow.on .mwdet .mwtabs", { timeout: 8000 }).catch(() => {});
     const det = await page.evaluate(() => { const r = document.querySelector(".mwrow.on");
       return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), path: location.pathname } : null; });
@@ -3333,6 +3342,13 @@ await section("4 · Forefront's own pages", async () => {
     const wrote = (await owner.query("SELECT body FROM tracker_progress WHERE action_id = $1", [firstId])).rows.map((x) => x.body);
     check(wrote.includes("Written from My tasks") && /Written from My tasks/.test(await page.locator(".mwrow.on .mwtl").textContent().catch(() => "")),
       "\u2026and a line of progress written there is the Tracker's own entry, drawn on its timeline", JSON.stringify(wrote));
+    /* §728: the row's quiet line — the name heavier than the line, the
+       client plain, and no "This week" in front of this week's note */
+    const q728 = await page.evaluate((id) => { const r = document.querySelector('.mwrow[data-id="' + id + '"]'); if (!r) return null;
+      const t = r.querySelector(".t"), up = r.querySelector(".mwmeta .up"), cl = r.querySelector(".mwmeta .mwcl");
+      return { name: t ? +getComputedStyle(t).fontWeight : 0, up: up ? up.textContent : "", cl: cl ? +getComputedStyle(cl).fontWeight : 400 }; }, firstId);
+    check(!!q728 && q728.name >= 600 && q728.cl <= 400 && /^Written from My tasks/.test(q728.up),
+      "\u2026and the row's line is the Tracker's quiet one: the name heavier, the client plain, no \"This week\" in front of this week's note (\u00a7728)", JSON.stringify(q728));
     /* §712: YOUR OWN ENTRY IS EDITED AND DELETED HERE TOO — Edit turns it into
        a box, Enter saves it (read back from Postgres); Delete asks first,
        and Yes removes it */

@@ -1841,6 +1841,13 @@
   .mwmeta .sep{ width:1px; height:11px; background:var(--line); flex:none }
   .mwmeta .up{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0 }
   .mwmeta .up b{ font-weight:600; color:var(--ink-2) }
+  /* §728 THE NAME LEADS, AS ON THE TRACKER (§721): the name a step heavier;
+     the line one grey, the client a plain word, a small dot between */
+  .mwlist .mwrow .t, .mwhome .mwrow .t{ font-weight:600 }
+  .mwmeta{ gap:6px }
+  .mwmeta .mwcl{ font-weight:400; color:var(--ink-3) }
+  .mwmeta .sep{ width:3px; height:3px; border-radius:50%; background:var(--ink-3); opacity:.7 }
+  .mwmeta .up b{ font-weight:400; color:var(--ink-3) }
   .mwlist .mwwhen{ justify-self:end; text-align:right; font-size:12.5px; font-weight:600; color:var(--ink-3) }
   .mwlist .mwwhen.late{ color:var(--bad) }
   .mwlist .mwst, .mwlist .mwst.prog, .mwlist .mwst.done{ justify-self:start; color:var(--ink-2) }

@@ -2544,6 +2544,24 @@
       if (MW.redraw) MW.redraw();
     }).catch(function () { delete MW.loading[key]; MW.detail[key] = { error: "Could not reach the server." }; if (MW.redraw) MW.redraw(); });
   }
+  /* §728 OPENS AT ONCE: once a list is drawn, every task's details are read
+     in one call, in the background; a press on a name finds them already
+     here. A task already read (or being read) is not asked for again. */
+  function mwPrefetch(list) {
+    var want = (list || []).filter(function (r) { var k = mwKey(r); return r && r.id && !MW.detail[k] && !MW.loading[k]; });
+    if (!want.length) return;
+    want.forEach(function (r) { MW.loading[mwKey(r)] = true; });
+    post({ action: "workDetails", items: want.map(function (r) { return { client: r.client, id: r.id }; }) }).then(function (j) {
+      var got = (j && j.ok && j.details) || [];
+      var redraw = false;
+      want.forEach(function (r, i) {
+        var k = mwKey(r);
+        delete MW.loading[k];
+        if (got[i] && !got[i].error) { MW.detail[k] = got[i]; if (MW.open === k) redraw = true; }
+      });
+      if (redraw && MW.redraw) MW.redraw();
+    }).catch(function () { want.forEach(function (r) { delete MW.loading[mwKey(r)]; }); });
+  }
   function mwToggle(r) {
     var key = mwKey(r);
     MW.open = MW.open === key ? null : key;
@@ -2600,7 +2618,9 @@
     }
     var bits = [];
     if (TSORT.by !== "client") { var cl = el("span", "mwcl", r.clientName); bits.push(cl); }
-    if (r.last) { var up = el("span", "up"); up.appendChild(el("b", null, r.last.week)); up.appendChild(document.createTextNode(" · " + r.last.body)); bits.push(up); }
+    /* §728 THE TRACKER'S QUIET LINE (§721): the note's week said only when it
+       is not this week, so "Last week" still flags a task nobody has touched */
+    if (r.last) { var up = el("span", "up"); if (!r.last.now) { up.appendChild(el("b", null, r.last.week)); up.appendChild(document.createTextNode(" · ")); } up.appendChild(document.createTextNode(r.last.body)); bits.push(up); }
     if (bits.length) {
       var meta = el("div", "mwmeta");
       bits.forEach(function (b, i) { if (i) meta.appendChild(el("span", "sep")); meta.appendChild(b); });
@@ -3145,6 +3165,7 @@
       body.appendChild(card);
       draw();
       setCnt();
+      mwPrefetch(rows.concat(doneRows));
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
@@ -3476,6 +3497,7 @@
     if (j.unanswered && j.unanswered.length) box.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + "."));
     box.appendChild(rows);
     draw();
+    mwPrefetch(list.filter(function (x) { return !x[1]; }).map(function (x) { return x[2]; }));
   }
 
   function hoCases(c, j) {

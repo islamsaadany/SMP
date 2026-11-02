@@ -70862,7 +70862,7 @@ Islam, while §708's breaks ran: *"how can [we] refine the my tasks page based o
 
 **§709 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. `main` had not moved since §708: a fast-forward, §709 kept, shell `smp-shell-v7.44-my-tasks-like-tracker` (unique in `sw.js`'s history). `generated-in-step`'s one red is `authorize.cjs`, `origin/main`'s since §706 and untouched here. No migrations; nobody signed out.
 
-## §710 — Home's Your tasks carries My tasks' row: a task opened in the card (2026-11-03)
+## §711 — Home's Your tasks carries My tasks' row: a task opened in the card (2026-11-03; §710 on the branch, renumbered at the merge: main took §710)
 
 Islam: *"now refine the home page tasks the same way"*; drawn working (`design-mockups/home/2026-11-03_home-tasks-working.html`, its *Now* from a screenshot of the real Home); *"go ahead, build it"*.
 

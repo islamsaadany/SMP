@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-03 — Home's Your tasks carries My tasks' row (§710).** A press on a task opens it in the card (Progress, Description, History, Open in its Tracker); the ⋯, tick and status as on My tasks; Late and This week as quiet strips. The card's place, size, header and its late-and-this-week rule unchanged.
+**2026-11-03 — Home's Your tasks carries My tasks' row (§711).** A press on a task opens it in the card (Progress, Description, History, Open in its Tracker); the ⋯, tick and status as on My tasks; Late and This week as quiet strips. The card's place, size, header and its late-and-this-week rule unchanged.
 
 **2026-11-03 — My tasks as the Internal Tracker now is (§709).** A press on a task opens it in place — Progress (Add beside the box, a timeline), Description, History, and Open in its Tracker beside them; ⋯ holds Rename, Change the week, Hand to someone else, Open in its Tracker, Delete. Every group a card; the Tracker's quiet row. Sort by unchanged (remembered). New platform actions workDetail and workWrite under the Tracker's own rules.
 

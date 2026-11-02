@@ -3534,7 +3534,7 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForSelector('.hotask[data-id="' + lateId + '"]:not(.done)', { timeout: 8000 }).catch(() => {});
     check((await stored("MW late one")) === "in_progress" && (await home()).count === "2",
       "\u2026and unticking puts it back as it was", await stored("MW late one"));
-    /* §710: HOME'S ROW IS MY TASKS' ROW — a press on a task's name opens it in
+    /* §711: HOME'S ROW IS MY TASKS' ROW — a press on a task's name opens it in
        the card, in the Tracker's three tabs with Open in its Tracker, and
        Home stays where it is; pressed again, it folds */
     await page.click('[data-home="tasks"] .mwrow[data-id="' + lateId + '"] .t');

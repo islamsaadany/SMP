@@ -3249,7 +3249,7 @@
     said.hidden = true;
     var rows = el("div", "mwlist mwhome");
     var recount = function () { c.count(rows.querySelectorAll(".hotask:not(.done)").length); };
-    /* §710: HOME'S ROWS ARE MY TASKS' ROWS (Islam: "now refine the home page
+    /* §711: HOME'S ROWS ARE MY TASKS' ROWS (Islam: "now refine the home page
        tasks the same way"; design-mockups/home/2026-11-03_home-tasks-working.html).
        The same mwRow — the name on one line opening the task HERE, in the
        card, with Progress · Description · History and Open in its Tracker; the

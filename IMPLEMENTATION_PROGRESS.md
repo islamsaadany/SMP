@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-02 — Jump to's box folds with the console's column (§710).** Islam: *"check this glitch"*. With the console's column folded to icons, the box now shows as its magnifying glass alone inside the column, instead of spilling over the page. Checked in a browser; `checks/jump.mjs` green.
+**2026-11-02 — Jump to's box folds with the console's column (§710), merged to `main` 2026-11-02 on Islam's word.** Islam: *"check this glitch"*. With the console's column folded to icons, the box now shows as its magnifying glass alone inside the column, instead of spilling over the page. Checked in a browser; `checks/jump.mjs` green.
 
 **2026-11-03 — My tasks as the Internal Tracker now is (§709).** A press on a task opens it in place — Progress (Add beside the box, a timeline), Description, History, and Open in its Tracker beside them; ⋯ holds Rename, Change the week, Hand to someone else, Open in its Tracker, Delete. Every group a card; the Tracker's quiet row. Sort by unchanged (remembered). New platform actions workDetail and workWrite under the Tracker's own rules.
 

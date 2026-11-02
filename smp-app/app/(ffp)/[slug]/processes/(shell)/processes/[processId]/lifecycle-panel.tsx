@@ -47,7 +47,7 @@ export function LifecyclePanel(p: PanelProps) {
   // The approver cannot also be a reviewer: their box is greyed and left out.
   const [approverId, setApproverId] = useState("");
   const [reviewerIds, setReviewerIds] = useState<ReadonlySet<string>>(new Set());
-  // Retire asks through the module's own dialog, never the browser's (§724).
+  // Retire asks through the module's own dialog, never the browser's (§731).
   const [askRetire, setAskRetire] = useState(false);
 
   function run(fn: () => Promise<{ ok: boolean; error?: string; message?: string }>) {

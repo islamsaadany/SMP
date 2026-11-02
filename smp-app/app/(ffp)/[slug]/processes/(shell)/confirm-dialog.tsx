@@ -1,6 +1,6 @@
 "use client";
 
-/* THE PROCESSES MODULE'S OWN "ARE YOU SURE" (§724). The four questions this
+/* THE PROCESSES MODULE'S OWN "ARE YOU SURE" (§731). The four questions this
    module used to ask through the browser's confirm() and prompt() go through
    this instead — a browser box can be silenced for good with one tick on some
    other site, after which the act happens on one press with nothing shown

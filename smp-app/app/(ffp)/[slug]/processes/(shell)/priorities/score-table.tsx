@@ -66,7 +66,7 @@ export function ScoreTable({
   const [kinds, setKinds] = useState<ReadonlySet<string>>(new Set());
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   // The questions this table asks go through the module's own dialog, never
-  // the browser's confirm() or prompt() (§724).
+  // the browser's confirm() or prompt() (§731).
   const [askClear, setAskClear] = useState(false);
   const [promote, setPromote] = useState<{ stepId: string; label: string; name: string } | null>(null);
   const tree = useMemo(() => inTree(rows), [rows]);
@@ -468,7 +468,7 @@ function StepLine({
   onPromote: () => void;
 }) {
   const sugg = { importance: null, complexity: st.suggestedComplexity, risk: st.suggestedRisk } as const;
-  // Clearing a flag takes the step's scores with it, so it asks first (§724).
+  // Clearing a flag takes the step's scores with it, so it asks first (§731).
   const [askUnflag, setAskUnflag] = useState(false);
   return (
     <tr className="border-t border-slate-100 bg-amber-50/30 align-top text-[13px]">

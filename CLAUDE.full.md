@@ -183,7 +183,7 @@ A drift between specs and code is a documentation bug — report it before silen
   settles. "Nothing happens" for more than a moment, or "blank" at any point,
   is a defect — and the check goes red on it.
 
-### 1e. UX RULE: EVERY "ARE YOU SURE" ASKS THE SAME WAY (2026-11-03, §724)
+### 1e. UX RULE: EVERY "ARE YOU SURE" ASKS THE SAME WAY (2026-11-03, §731)
 - **Islam, from a picture of a delete dialog: *"a nice concept for all are you
   sure boxes with the name and verb of the action and the description tells
   what really happen with a dismiss button and action on the right bright and

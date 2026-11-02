@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-THE "ARE YOU SURE" RULES, HELD (§724). Islam, from a picture of a delete
+THE "ARE YOU SURE" RULES, HELD (§731). Islam, from a picture of a delete
 dialog: the title asks with the verb and the thing in it, the body says what
 really happens, Cancel on the left, the act on the right in its own words,
 red only when it destroys, and never the browser's own box.
@@ -14,7 +14,7 @@ module's pages.
      in the markup, which with no row-reverse anywhere is the left.
   3. A button whose words are Restore / Reinstate, or plain Close, is never
      drawn red: `class="danger"` may not be the literal class in front of
-     them. (Close THE CYCLE stays red on Islam's word — §724: "keep the
+     them. (Close THE CYCLE stays red on Islam's word — §731: "keep the
      cycle buttons red".)
   4. The Processes module's pages call no window.confirm / prompt / alert.
 

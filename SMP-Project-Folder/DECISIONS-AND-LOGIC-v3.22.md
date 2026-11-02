@@ -70977,7 +70977,7 @@ Nothing it does is gone; it is quieter:
 
 **§722–§723 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
 
-## §724 — Every "are you sure" asks the same way (2026-11-03)
+## §731 — Every "are you sure" asks the same way (2026-11-03)
 
 **Asked** (Islam), from a picture of a delete dialog — *Delete file? · This will permanently delete "Project brief.pdf". This action cannot be undone. · Cancel | Delete file* — *"a nice concept for all are you sure boxes with the name and verb of the action and the description tells what really happen with a dismiss button and action on the right bright and the cancel on the left. what do you think about this as a best practice?"*, then *"ok for all … we need to check all the buttons in the app and fix them according to these rules"*, then *"go, keep the cycle buttons red"*.
 

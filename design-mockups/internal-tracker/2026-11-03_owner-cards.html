@@ -1,0 +1,171 @@
+<title>Tracker Owner Cards</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>
+/* The main list, This week, grouped by owner, with the office's real kind
+   of rows (long names, links in updates): as built (§707), and two cleaner
+   ways — a card per owner with tidier rows, and the same rows in one list.
+   Tokens are the tracker's. */
+:root{
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E9EDF3;--ground:#F5F7FA;--surface:#FFF;--surface-2:#EEF1F6;
+  --gold:#9C5D08;--bad:#B23025;--bad-bg:#FBECEA;--good:#1B6E4E;--d0:#8A97AB;--d1:#E0B300;--blue:#1F5FBF;--bar:#1F3158;--av:#E4EAF5;--av-ink:#1F3158;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#272D39;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--bad:#E8776B;--bad-bg:#3A2322;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;--blue:#8FB4F0;--bar:#3A5794;--av:#26324A;--av-ink:#C9D6EE;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#272D39;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--bad:#E8776B;--bad-bg:#3A2322;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;--blue:#8FB4F0;--bar:#3A5794;--av:#26324A;--av-ink:#C9D6EE;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+svg{display:block}
+.pick{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.pick .in{max-width:1000px;margin:0 auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pick button{font:600 13.5px/1 var(--font);padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.pick button[aria-pressed="true"]{background:var(--bar);color:#fff;border-color:var(--bar)}
+.pg{max-width:1000px;margin:0 auto;padding-block:16px 56px}
+.why{font-size:14px;color:var(--ink-2);margin:0 0 14px;max-width:80ch}
+.why b{color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.chd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.chd h2{margin:0;font:600 19px/1.2 var(--serif);flex:1;display:flex;gap:10px;align-items:center}
+.chd h2 .n{font:600 12px/1 var(--font);background:var(--surface-2);border-radius:999px;padding:4px 8px;color:var(--ink-2)}
+.views{display:flex;background:var(--surface-2);border-radius:8px;padding:3px;gap:2px}
+.views span{font:500 13px/1 var(--font);padding:7px 10px;border-radius:6px;color:var(--ink-2)}
+.views span.on{background:var(--surface);color:var(--ink);font-weight:600}
+.tools{display:flex;gap:10px;align-items:center;padding:12px 16px;flex-wrap:wrap}
+.add{flex:1 1 360px;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:0 6px 0 12px;height:40px;color:var(--ink-3);font-size:14.5px}
+.add svg{width:15px;height:15px;color:var(--gold)}
+.add span.t{flex:1}
+.add .opt{background:var(--surface-2);border-radius:6px;padding:5px 8px;font:600 12.5px/1 var(--font);color:var(--ink-2)}
+.find{flex:0 0 190px;height:40px;border:1px solid var(--line);border-radius:9px;display:flex;align-items:center;gap:7px;padding:0 10px;color:var(--ink-3);font-size:14px}
+.gb{height:40px;border:1px solid var(--line);border-radius:9px;padding:0 12px;display:flex;align-items:center;gap:5px;font-size:13.5px;color:var(--ink-2)}
+.gb b{color:var(--ink)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--d0);flex:none}.dot.d1{background:var(--d1)}
+.kb{color:var(--ink-3);width:28px;height:28px;display:grid;place-items:center;border-radius:7px}
+.kb svg{width:16px;height:16px}
+.tag{font:600 11.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:4px 8px;white-space:nowrap}
+.ltag{font:600 11.5px/1 var(--font);color:var(--bad);background:var(--bad-bg);border-radius:4px;padding:3px 6px;white-space:nowrap}
+
+/* NOW — as built */
+.now .sh{display:flex;align-items:center;gap:10px;padding:14px 16px 8px;border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
+.now .sh .ix{font:600 12px/1 var(--font);color:var(--gold)}
+.now .sh h3{margin:0;font:700 15.5px/1.25 var(--font)}
+.now .sh .meta{font:500 13px/1.3 var(--font);color:var(--ink-2)}
+.now .sh .meta b{color:var(--bad);font-weight:600}
+.now .sh .addto{margin-left:auto;color:var(--blue);font:600 13px/1 var(--font)}
+.now .row{display:grid;grid-template-columns:22px minmax(0,1fr) 110px 70px 118px 28px;gap:4px 14px;align-items:start;padding:11px 16px;border-bottom:1px solid var(--line-2)}
+.now .tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;margin-top:2px}
+.now .tick.late{border-color:var(--bad)}
+.now .nm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.now .nm .t{font-weight:500}
+.now .last{font-size:13px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now .last b{color:var(--ink-2);font-weight:600}
+.now .cell{font:500 13px/1.3 var(--font);color:var(--ink-2);padding-top:3px}
+.now .cell.red{color:var(--bad);font-weight:600}
+.now .st{display:flex;gap:7px;align-items:center;font:600 13px/1.3 var(--font);color:var(--ink-2);padding-top:3px}
+
+/* PROPOSED rows (B and C) */
+.q .row{display:grid;grid-template-columns:22px minmax(0,1fr) auto 118px 28px;gap:2px 14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line-2)}
+.q .row:last-child{border-bottom:0}
+.q .tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px}
+.q .tick.late{border-color:var(--bad)}
+.q .main{min-width:0}
+.q .t{font-weight:500;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.q .meta{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-3);margin-top:2px;min-width:0}
+.q .meta .tw{font-weight:600;color:var(--ink-2);white-space:nowrap}
+.q .meta .sep{color:var(--line)}
+.q .meta .up{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.q .meta .up b{font-weight:600;color:var(--ink-2)}
+.q .wcell{justify-self:end;font:600 12.5px/1 var(--font);white-space:nowrap}
+.q .wcell.red{color:var(--bad)}
+.q .wcell.dim{color:var(--ink-3);font-weight:500}
+.q .st{display:flex;gap:7px;align-items:center;font:600 13px/1.3 var(--font);color:var(--ink-2)}
+.q .kb{justify-self:end}
+/* B — a card per owner */
+.B .owners{display:grid;gap:12px;margin-top:12px}
+.B .oc{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.B .oh{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--av);color:var(--av-ink);font:700 12px/1 var(--font);flex:none}
+.B .oh h3{margin:0;font:700 15.5px/1.2 var(--font)}
+.B .oh .meta{font:500 13px/1.2 var(--font);color:var(--ink-2)}
+.B .oh .meta b{color:var(--bad);font-weight:600}
+.B .oh .addto{margin-left:auto;color:var(--blue);font:600 13px/1 var(--font)}
+/* C — the same rows, one list */
+.C .gh{display:flex;align-items:center;gap:10px;padding:16px 16px 8px;border-top:1px solid var(--line)}
+.C .gh h3{margin:0;font:700 15px/1.2 var(--font)}
+.C .gh .meta{font:500 13px/1.2 var(--font);color:var(--ink-2)}
+.C .gh .meta b{color:var(--bad);font-weight:600}
+.C .gh .addto{margin-left:auto;color:var(--blue);font:600 13px/1 var(--font)}
+@media (max-width:760px){
+  .now .row,.q .row{grid-template-columns:22px minmax(0,1fr) 28px}
+  .now .cell,.now .st{display:none}
+  .q .wcell{grid-column:2;grid-row:2;justify-self:start;margin-top:4px}
+  .q .st{grid-column:2;grid-row:3}
+  .find{flex:1 1 100%}.add .opt{display:none}
+}
+</style>
+
+<div class="pick"><div class="in"><b style="margin-right:6px">Main list</b>
+  <button type="button" data-v="now" aria-pressed="false">Now</button>
+  <button type="button" data-v="B" aria-pressed="true">B · A card per owner</button>
+  <button type="button" data-v="C" aria-pressed="false">C · Same rows, one list</button>
+</div></div>
+<div class="pg">
+  <p class="why" id="why"></p>
+  <div id="view"></div>
+</div>
+
+<script>
+const KB='<span class="kb"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></span>';
+const PEN='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 13l1-3 7-7 2 2-7 7z"/></svg>';
+const LENS='<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>';
+const ST={ns:'Not started',p:'In progress'};
+/* the office's own kind of rows, as in Islam's picture */
+const O=[
+ {n:'Islam Saadany',s:'Islam',i:'IS',late:1,rows:[
+  {t:'Logitics Strategy Revamp',tp:'Units',late:'2 w late',wk:'Last week',st:'ns'},
+  {t:'HR project we want to review the two projects & Develop the 3rd Project Retention Analytics',tp:'Functions',wk:'This week',st:'p',u:['Last week','had a meeting this week and postponed to next week']},
+  {t:'Finance Adjust Project that is missing MIlestones',tp:'Functions',wk:'This week',st:'p'}]},
+ {n:'Mohamed Essam',s:'Mohamed',i:'ME',rows:[
+  {t:'UNITS plan require refinement, since there are redundancy',tp:'Units',wk:'This week',st:'p',u:['This week','The link of BUs plans review is: https://docs.google.com/spreadsheets/d/1x9…']},
+  {t:"UNITS - Don't have foundation | Online",tp:'Units',wk:'This week',st:'p',u:['This week','Elkady Pushed it to next week']},
+  {t:'Develop Monthly reports across Units & Functions',tp:'Reporting',wk:'This week',st:'p',u:['This week','I have developed one main key measure per each BU. https://docs.go…']}]},
+ {n:'Omar Alaa',s:'Omar',i:'OA',rows:[
+  {t:'Close the Q3 performance pack for the board',tp:'Reporting',wk:'Thu 5 Nov',st:'ns'},
+  {t:'Map the shared services KPIs',tp:'Functions',wk:'This week',st:'p',u:['Last week','First draft with HR and IT']}]}];
+const head='<div class="card"><div class="chd"><h2>Actions <span class="n">13</span></h2><div class="views"><span>Show</span><span class="on">This week</span><span>All</span><span>Mine</span><span>Undated</span><span>Weekly check</span></div></div>'+
+ '<div class="tools"><div class="add">'+PEN+'<span class="t">Write the next action and press Enter</span><span class="opt">Topic</span><span class="opt">This week</span><span class="opt">Islam</span></div><div class="find">'+LENS+'Search</div><div class="gb">Group by <b>Owner</b></div></div>';
+const meta=o=>{const n=o.rows.length;return n+' open'+(o.late?' · <b>'+o.late+' late</b>':'')};
+function now(){
+ return head+O.map((o,i)=>'<div class="sh"><span class="ix">0'+(i+1)+'</span><h3>'+o.n+'</h3><span class="meta">'+meta(o)+'</span><span class="addto">+ Add for '+o.s+'</span></div>'+
+  o.rows.map(r=>'<div class="row"><span class="tick'+(r.late?' late':'')+'"></span><div><div class="nm"><span class="t">'+r.t+'</span><span class="tag">'+r.tp+'</span>'+(r.late?'<span class="ltag">'+r.late+'</span>':'')+'</div>'+
+   (r.u?'<div class="last"><b>'+r.u[0]+'</b> · '+r.u[1]+'</div>':'')+'</div><span class="cell'+(r.late?' red':'')+'">'+r.wk+'</span><span class="cell">'+o.s+'</span><span class="st"><span class="dot'+(r.st==='p'?' d1':'')+'"></span>'+ST[r.st]+'</span>'+KB+'</div>').join('')).join('')+'</div>';
+}
+/* the cleaner row: the name on one line, cut with … (the whole name on hover and when opened);
+   under it, one quiet line — the topic, then the latest update; the week only when it is not
+   the view's own week; no owner column when the list is grouped by owner */
+function qrow(r){
+ const wk=r.late?'<span class="wcell red">'+r.late+'</span>':r.wk==='This week'?'<span class="wcell"></span>':'<span class="wcell dim">'+r.wk+'</span>';
+ return '<div class="row"><span class="tick'+(r.late?' late':'')+'"></span><div class="main"><div class="t" title="'+r.t.replace(/"/g,'&quot;')+'">'+r.t+'</div>'+
+  '<div class="meta"><span class="tw">'+r.tp+'</span>'+(r.u?'<span class="sep">|</span><span class="up"><b>'+r.u[0]+'</b> · '+r.u[1]+'</span>':'')+'</div></div>'+
+  wk+'<span class="st"><span class="dot'+(r.st==='p'?' d1':'')+'"></span>'+ST[r.st]+'</span>'+KB+'</div>';
+}
+function B(){
+ return '<div class="B">'+head+'</div><div class="owners q">'+O.map(o=>'<div class="oc"><div class="oh"><span class="av">'+o.i+'</span><h3>'+o.n+'</h3><span class="meta">'+meta(o)+'</span><span class="addto">+ Add for '+o.s+'</span></div>'+o.rows.map(qrow).join('')+'</div>').join('')+'</div></div>';
+}
+function C(){
+ return '<div class="q C">'+head+O.map(o=>'<div class="gh"><span class="av">'+o.i+'</span><h3>'+o.n+'</h3><span class="meta">'+meta(o)+'</span><span class="addto">+ Add for '+o.s+'</span></div>'+o.rows.map(qrow).join('')).join('')+'</div></div>';
+}
+const WHY={
+ now:'<b>Now, as built.</b> The owner appears on every row although the list is grouped by owner; This week appears on every row although the view is This week; a long name wraps and pushes its topic onto a line of its own; updates with links run the width of the page.',
+ B:'<b>B · A card per owner.</b> Each person is a card with their initials, name, counts and + Add. Inside, the rows lose what the card and the view already say: no owner column, and the week only when it is not this week (late shows how late, in red). The name stays on one line (the whole of it on hover, and when the task is opened); under it one quiet line carries the topic and the latest update.',
+ C:'<b>C · The same rows, one list.</b> The cleaner rows of B with the owners as headings inside one card, for comparison: the card per owner is what parts the people; the rows are what make it calm.'};
+function show(v){document.getElementById('view').innerHTML=v==='now'?now():v==='B'?B():C();document.getElementById('why').innerHTML=WHY[v];
+ document.querySelectorAll('.pick button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));}
+document.querySelectorAll('.pick button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+show('B');
+</script>

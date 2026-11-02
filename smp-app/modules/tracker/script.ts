@@ -59,6 +59,33 @@ export const APP_JS = `(function () {
     return { view: B.getAttribute("data-view") || "week", q: B.getAttribute("data-q") || "",
       group: B.getAttribute("data-group") || "owner", dates: B.getAttribute("data-dates") || "weeks", open: openId() };
   }
+  /* §719 OPENS AT ONCE: the page carries each row's opened panel in a
+     <template class="otpl"> after the row; opening is putting a copy in place
+     (and folding the one open), with no trip to the server. False when this
+     list carries no panels (the meeting), and the caller reads the list. */
+  function openHere(id) {
+    var tpl = id ? document.querySelector('template.otpl[data-id="' + id + '"]') : null;
+    if (!document.querySelector("template.otpl") || (id && !tpl)) return false;
+    document.querySelectorAll("#body .open[data-id]").forEach(function (o) { o.remove(); });
+    document.querySelectorAll("#body .row.on").forEach(function (r) {
+      r.classList.remove("on");
+      r.querySelectorAll('[data-act=more]').forEach(function (m) { m.setAttribute("aria-expanded", "false"); if (m.matches("button.more")) m.classList.remove("on"); });
+      var d = r.querySelector(".rdots > .more"); if (d) d.classList.remove("lit");
+    });
+    if (!id) return true;
+    var r = tpl.previousElementSibling;
+    while (r && !(r.classList.contains("row") && r.getAttribute("data-id") === id)) r = r.previousElementSibling;
+    if (r) {
+      r.classList.add("on");
+      r.querySelectorAll('[data-act=more]').forEach(function (m) { m.setAttribute("aria-expanded", "true"); if (m.matches("button.more")) m.classList.add("on"); });
+      var d2 = r.querySelector(".rdots > .more"); if (d2) d2.classList.add("lit");
+    }
+    tpl.parentNode.insertBefore(tpl.content.cloneNode(true), tpl);
+    var o = document.querySelector('#body .open[data-id="' + id + '"]');
+    if (o && histOpen.has(id)) drawHist(o, true); else if (o && tabOf[id]) setTab(o, tabOf[id]);
+    sizeAll();
+    return true;
+  }
   function remember(name, value) {
     try { document.cookie = name + "=" + encodeURIComponent(value) + "; path=" + location.pathname + "; max-age=31536000; samesite=lax"; } catch (x) {}
   }
@@ -775,7 +802,7 @@ export const APP_JS = `(function () {
       closePops(null);
       var next = openId() === id ? null : id;
       setOpen(next);
-      refetch();
+      if (!openHere(next)) refetch();
     } else if (act === "delete-ask") {
       b.hidden = true; var s = b.parentNode.querySelector(".sure"); if (s) s.hidden = false;
     } else if (act === "delete-no") {

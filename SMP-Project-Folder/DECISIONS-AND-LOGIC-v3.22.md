@@ -70928,3 +70928,13 @@ Islam, of §713's Tracker menu: *"change topic looks like handing to someone sho
 **Checked**: `checks/shell.mjs` 553 ok / 11 failed — main's own (§653 comes and goes); §713's check now wants Open in Tracker third, Rename fourth. Shell cache `smp-shell-v7.51-rename-last`.
 
 **§716–§718 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §719 — A Tracker task opens at once; its ⋯ opens on one press (2026-11-03)
+
+**Asked** (Islam): "opening the task loads and takes time it should open momentarily like our main rules … when I press the 3 dots I need 2 click to open it while it should open on 1 click".
+
+**Opens at once.** Opening a task used to read the whole list again from the server, because only the opened task's progress and history were read. Now the page reads every task's progress and history in one query each (`eventsByAction`, `progressByAction` in `lib/tracker.ts`) and carries each task's opened panel in an inert `<template class="otpl">` after its row. A press on the name puts a copy in place and folds the one open — nothing is asked of the server; the address still carries `open=`. Writes inside the panel post and redraw as before. A list with no templates (the meeting) still reads the list.
+
+**One press.** The opened row's ⋯ was drawn with `.on`, the class that means "its menu is open", so the first press shut a menu that wasn't showing. The opened row's ⋯ is now lit with `.lit`.
+
+**Checked**: `checks/tracker.mjs` **360 passed, 0 failed** — two new checks (no request on opening; the ⋯ opens on one press on an opened task), both seen RED with the fixes taken out. `checks/shell.mjs` 553 ok / 11 failed — main's own. Shell cache `smp-shell-v7.52-open-at-once`.

@@ -37,8 +37,8 @@ import {
   FORMATS, FORMAT_WORD, todayIn, weekOf, weekLabel, readableDay, isLate, carriedWeeks, lateWord, inView, summary, mayChange,
   thursdayOf, weekWord, sameWeek, weekOptions, weekDays, weekInMonth,
   type CheckWeek, CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay, topicShown,
-  officeRows, namesOf, shortNames, listActions, eventsOf, listTopics, type Topic,
-  type Progress, progressOf, latestProgress, mayChangeProgress, PROGRESS_MAX, addDays, oneLine,
+  officeRows, namesOf, shortNames, listActions, eventsByAction, progressByAction, listTopics, type Topic,
+  type Progress, latestProgress, mayChangeProgress, PROGRESS_MAX, addDays, oneLine,
 } from "../../lib/tracker.ts";
 
 const esc = (s: unknown) =>
@@ -692,7 +692,7 @@ const LOOK = `
 .rdots{position:relative;justify-self:end}
 .rdots>.more{width:28px;height:28px;border-radius:7px;margin-top:-3px}
 .rdots>.more svg{width:16px;height:16px;transform:none;transition:none}
-.rdots>.more.on,.rdots>.more[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
+.rdots>.more.on,.rdots>.more.lit,.rdots>.more[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
 .rdots .tmenu{top:30px;right:0;min-width:170px;display:grid;gap:0;padding:4px}
 .rdots .tmenu button{padding:6px 10px;font:400 13.5px/1.3 var(--font);gap:9px}
 .rdots .tmenu button svg{width:14px;height:14px;color:var(--ink-3);flex:none}
@@ -821,7 +821,9 @@ export type PageArgs = {
 type Q = Parameters<typeof officeRows>[0];
 export type Loaded = { office: Person[]; names: Map<string, string>; short: Map<string, string>; actions: Action[]; events: Event[]; open: string | null; topics: Topic[];
   /* §657: the opened row's progress entries, and the latest entry of every row */
-  progress: Progress[]; latest: Map<string, Progress> };
+  progress: Progress[]; latest: Map<string, Progress>;
+  /* §719: every row's history and progress, for the panels the page carries */
+  eventsBy?: Map<string, Event[]>; progressBy?: Map<string, Progress[]> };
 
 /* ONE READ FOR THE PAGE AND FOR A PRESS. An opened row that is no longer on
    the list (deleted, or another client's id on a pasted link) is read as
@@ -834,8 +836,9 @@ export async function load(c: Q, openId: string | null): Promise<Loaded> {
   for (const a of actions) if (!named.has(a.ownerKey)) named.set(a.ownerKey, names.get(a.ownerKey) || a.ownerKey);
   const short = shortNames(Array.from(named, ([key, name]) => ({ key, name })));
   const open = openId && actions.some((a) => a.id === openId) ? openId : null;
-  return { office, names, short, actions, events: open ? await eventsOf(c, open) : [], open, topics: await listTopics(c),
-    progress: open ? await progressOf(c, open) : [], latest: await latestProgress(c) };
+  const eventsBy = await eventsByAction(c), progressBy = await progressByAction(c);
+  return { office, names, short, actions, events: open ? eventsBy.get(open) || [] : [], open, topics: await listTopics(c),
+    progress: open ? progressBy.get(open) || [] : [], latest: await latestProgress(c), eventsBy, progressBy };
 }
 
 const statusPill = (a: Action, live: boolean): string => {
@@ -1007,7 +1010,10 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
     '<input class="tnew" placeholder="New topic…" aria-label="New topic" maxlength="120"></span>';
   const subOf = (which: string, icon: string, word: string, side: string) =>
     '<span class="rmsub" data-sub="' + which + '"><button type="button" role="menuitem" data-act="sub-open" aria-haspopup="true">' + icon + word + '<span class="chev" aria-hidden="true">&rsaquo;</span></button>' + side + "</span>";
-  const menu = '<span class="rdots"><button class="more' + (opened ? " on" : "") + '" type="button" data-act="row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="More for this action" title="More">' + DOTS3 + "</button>" +
+  /* §719: the opened row's ⋯ is lit with .lit, never .on — .on is "the menu
+     is open", so an opened row's first press used to shut a menu that was
+     not showing, and the menu took two presses */
+  const menu = '<span class="rdots"><button class="more' + (opened ? " lit" : "") + '" type="button" data-act="row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="More for this action" title="More">' + DOTS3 + "</button>" +
     '<span class="tmenu" role="menu" hidden>' +
     (live && a.status !== "done" ? subOf("week", CAL, "Week", weekSide) : "") +
     (live ? subOf("hand", HAND, "Owner", handSide) : "") +
@@ -1180,6 +1186,8 @@ function taskTabs(a: Action, L: Loaded, who: Who, today: string, live: boolean):
    and Delete at the end of the tabs, behind its question. The topic is not
    asked here any more: the row's own topic column sets it (§503). */
 function openPanel(a: Action, L: Loaded, who: Who, today: string): string {
+  if (L.eventsBy && L.progressBy) L = { ...L, events: L.eventsBy.get(a.id) || [], progress: L.progressBy.get(a.id) || [] };
+  else if (a.id !== L.open) L = { ...L, events: [], progress: [] };
   return '<div class="open" data-id="' + esc(a.id) + '" data-tab="p">' + taskTabs(a, L, who, today, mayChange(a, who)) + "</div>";
 }
 
@@ -1549,7 +1557,12 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     const open = g.rows.filter((a) => a.status !== "done");
     const late = open.filter((a) => !!a.due && isLate(a.due, today)).length;
     const done = g.rows.length - open.length;
-    const rows = g.rows.map((a) => row(a, L, p.who, today, dates, a.id === L.open, group, false, view) + (a.id === L.open ? openPanel(a, L, p.who, today) : "")).join("");
+    /* §719: every row carries its opened panel in a <template> — inert, not
+       on the page — and a press on the name puts it in place at once; the
+       server is asked nothing. The one the address opens is drawn as well. */
+    const rows = g.rows.map((a) => { const pan = openPanel(a, L, p.who, today);
+      return row(a, L, p.who, today, dates, a.id === L.open, group, false, view) + (a.id === L.open ? pan : "") +
+        '<template class="otpl" data-id="' + esc(a.id) + '">' + pan + "</template>"; }).join("");
     const t = group === "topic" && g.key !== "none" ? L.topics.find((x) => x.id === g.key) || null : null;
     const quiet = group === "topic" && g.key === "none";
     /* THE SECTION'S OWN LINE (§656): under a topic's rows with the topic

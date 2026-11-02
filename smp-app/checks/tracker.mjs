@@ -1410,7 +1410,16 @@ try {
     /* THE ARROW opens the row in place for its notes and history, on the
        address, and folds it again; no Title box; the history is small type
        in a box that scrolls — measured as PAINT, not read off a class. */
+    /* §719: opening asks the server nothing — the panel rides in the page */
+    let asked719 = 0; const count719 = (rq) => { if (/\/api\//.test(rq.url()) || rq.resourceType() === "fetch" || rq.resourceType() === "xhr") asked719++; };
+    pg.on("request", count719);
     await pg.locator(row + ".t").click(); await settle();
+    pg.off("request", count719);
+    check("the name opens the task at once — no request to the server, the panel was already in the page (§719)", asked719 === 0 && (await pg.locator(".open").count()) === 1, String(asked719));
+    /* §719: the opened row's ⋯ opens its menu on the first press */
+    await pg.locator(row + ".rdots > .more").click();
+    check("on an opened task the ⋯ opens its menu on one press (§719)", await pg.locator(row + ".rdots .tmenu").isVisible());
+    await pg.keyboard.press("Escape");
     check("the name opens the row in place, on the address, without a reload (§707)", pg.url().includes("open=" + born.id) &&
       (await pg.locator(".open textarea[data-act=notes]").count()) === 1 && (await pg.locator(row + ".t").getAttribute("aria-expanded")) === "true" && await stayed(), pg.url());
     check("...with no Title box and no With", (await pg.locator(".open input.ttl").count()) === 0 && !/With/.test(await pg.locator(".open").innerText()));

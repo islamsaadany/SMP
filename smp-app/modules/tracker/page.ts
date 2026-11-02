@@ -693,8 +693,8 @@ const LOOK = `
 .rdots>.more{width:28px;height:28px;border-radius:7px;margin-top:-3px}
 .rdots>.more svg{width:16px;height:16px;transform:none;transition:none}
 .rdots>.more.on,.rdots>.more[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
-.rdots .tmenu{top:30px;right:0;min-width:210px;display:grid;gap:0;padding:4px}
-.rdots .tmenu button{padding:8px 10px;font:400 14px/1.3 var(--font);gap:9px}
+.rdots .tmenu{top:30px;right:0;min-width:170px;display:grid;gap:0;padding:4px}
+.rdots .tmenu button{padding:6px 10px;font:400 13.5px/1.3 var(--font);gap:9px}
 .rdots .tmenu button svg{width:14px;height:14px;color:var(--ink-3);flex:none}
 .rdots .tmenu .danger,.rdots .tmenu .danger svg{color:var(--bad)}
 .rdots .tmenu .sep{display:block;border-top:1px solid var(--line-2);margin:4px 2px}
@@ -752,9 +752,9 @@ const LOOK = `
 .rdots .rmsub>button{width:100%}
 .rdots .rmsub .chev{margin-left:auto;color:var(--ink-3)}
 .rdots .rmsub:hover>button,.rdots .rmsub.on>button{background:var(--ground)}
-.rdots .rmside{display:none;position:absolute;right:calc(100% + 2px);top:-5px;z-index:13;min-width:210px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px}
+.rdots .rmside{display:none;position:absolute;right:calc(100% + 2px);top:-5px;z-index:13;min-width:150px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px}
 .rdots .rmsub:hover>.rmside,.rdots .rmsub.on>.rmside,.rdots .rmsub:focus-within>.rmside{display:grid}
-.rdots .rmside button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font:400 14px/1.3 var(--font)}
+.rdots .rmside button{display:flex;align-items:center;gap:8px;width:100%;padding:5px 10px;font:400 13.5px/1.3 var(--font)}
 .rdots .rmside button.on{font-weight:700}
 .rdots .rmside.mteam{min-width:0}
 .rdots .rmside small{margin-left:auto;color:var(--ink-3);font-size:12px}

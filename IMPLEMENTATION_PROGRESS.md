@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — The task ⋯ is compact (§717).** Tighter rows, 13.5px, side lists 150px; the Tracker keeps 170px so it matches My tasks. Tracker 358/0; shell 554 ok / main's 10.
+
 **2026-11-03 — The ⋯ says Open in Tracker, one line (§716).** The client is already on the row; the full name is the tooltip. Mockup redrawn to the built menu. Shell 554 ok / main's 10.
 
 **2026-11-03 — The ⋯ lists are named Week, Owner, Topic (§715).** One word each, no "Change"; the owner list is headed New owner. Tracker 358/0; shell 553 ok / main's 11.

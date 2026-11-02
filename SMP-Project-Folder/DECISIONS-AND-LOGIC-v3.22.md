@@ -70914,3 +70914,9 @@ Islam, of §713's Tracker menu: *"change topic looks like handing to someone sho
 **Asked** (Islam): "Open in Raya … it's taking 2 lines, can we figure out a way to open the tracker in a simpler way". On My tasks and Home the ⋯ item now reads **Open in Tracker** — the client's name is already on the row — with the full "Open in <client>'s Tracker" as its tooltip. Same place, same press. The opened task's tab row keeps its longer link: it has the room. Mockup `design-mockups/home/2026-11-03_task-menu.html` redrawn to the built menu (Week, Owner, Topic on hover; Open in Tracker).
 
 **Checked**: `checks/shell.mjs` 554 ok / 10 failed — main's own (§713's check now also wants Open in Tracker fourth). Shell cache `smp-shell-v7.49-open-in-tracker`.
+
+## §717 — The task ⋯ is compact (2026-11-03)
+
+**Asked** (Islam): "make the list more compact", then of the Internal Tracker "a bit too tight, give it some slack". The ⋯ on My tasks, Home and the Tracker: items 6px 10px at 13.5px (were 8px 10px at 14px), one line each; the small lists beside it 150px at least (were 210px). The menu's width: My tasks and Home hug their words (Open in Tracker sets it); the Tracker's, which has no long item, keeps 170px so it isn't pinched — the two come out alike. The delete question wraps at 240px. Mockup redrawn.
+
+**Checked**: `checks/tracker.mjs` **358 passed, 0 failed**; `checks/shell.mjs` 554 ok / 10 failed — main's own. Shell cache `smp-shell-v7.50-compact-menu`.

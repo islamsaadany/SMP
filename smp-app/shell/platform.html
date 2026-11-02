@@ -1825,17 +1825,17 @@
   .mwkb{ width:28px; height:28px; border:0; border-radius:7px; background:none; color:var(--ink-3); display:grid; place-items:center; cursor:pointer; padding:0 }
   .mwkb svg{ width:16px; height:16px }
   .mwkb:hover, .mwkb[aria-expanded="true"]{ background:var(--surface-2); color:var(--ink) }
-  .mwpop{ position:absolute; right:0; top:30px; z-index:30; min-width:230px; background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  .mwpop{ position:absolute; right:0; top:30px; z-index:30; min-width:0; /* §717: hugs its words */ background:var(--surface); border:1px solid var(--line); border-radius:10px;
     box-shadow:0 10px 28px rgba(20,28,43,.16); padding:4px; display:grid }
-  .mwpop button, .mwpop a{ display:flex; align-items:center; gap:9px; width:100%; text-align:left; border:0; background:none; padding:8px 10px; border-radius:7px;
-    font:inherit; font-size:14px; color:var(--ink); text-decoration:none; cursor:pointer }
+  .mwpop button, .mwpop a{ display:flex; align-items:center; gap:9px; width:100%; text-align:left; border:0; background:none; padding:6px 10px; border-radius:7px; white-space:nowrap;
+    font:inherit; font-size:13.5px; color:var(--ink); text-decoration:none; cursor:pointer }
   .mwpop button:hover, .mwpop a:hover, .mwpop button:focus-visible, .mwpop a:focus-visible{ background:var(--surface-2); outline:none }
   .mwpop svg{ width:14px; height:14px; color:var(--ink-3); flex:none }
   .mwpop hr{ border:0; border-top:1px solid var(--line-soft); margin:4px 2px }
   .mwpop .danger, .mwpop .danger svg{ color:var(--bad) }
   .mwpop .on{ font-weight:700 }
   .mwpop small{ margin-left:auto; color:var(--ink-3); font-size:12px }
-  .mwpop .sure{ padding:6px 10px; font-size:13px; color:var(--ink-2); display:grid; gap:6px }
+  .mwpop .sure{ padding:6px 10px; font-size:13px; color:var(--ink-2); display:grid; gap:6px; max-width:240px }
   .mwpop .sure div{ display:flex; gap:6px }
   .mwpop .sure button{ width:auto; border:1px solid var(--line); padding:5px 10px; font-size:13px }
   .mwpop .sure button.danger{ border-color:var(--bad) }
@@ -1844,7 +1844,7 @@
   .mwsubw{ position:relative }
   .mwsubb .chev{ margin-left:auto; color:var(--ink-3) }
   .mwsubw:hover > .mwsubb, .mwsubw.on > .mwsubb{ background:var(--surface-2) }
-  .mwside{ display:none; position:absolute; right:calc(100% + 2px); top:-5px; z-index:31; min-width:210px; background:var(--surface); border:1px solid var(--line);
+  .mwside{ display:none; position:absolute; right:calc(100% + 2px); top:-5px; z-index:31; min-width:150px; background:var(--surface); border:1px solid var(--line);
     border-radius:10px; box-shadow:0 10px 28px rgba(20,28,43,.16); padding:4px }
   .mwsubw:hover > .mwside, .mwsubw.on > .mwside, .mwsubw:focus-within > .mwside{ display:grid }
   .mwside .h{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); padding:6px 10px 4px }

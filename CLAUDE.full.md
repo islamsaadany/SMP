@@ -183,6 +183,35 @@ A drift between specs and code is a documentation bug — report it before silen
   settles. "Nothing happens" for more than a moment, or "blank" at any point,
   is a defect — and the check goes red on it.
 
+### 1e. UX RULE: EVERY "ARE YOU SURE" ASKS THE SAME WAY (2026-11-03, §724)
+- **Islam, from a picture of a delete dialog: *"a nice concept for all are you
+  sure boxes with the name and verb of the action and the description tells
+  what really happen with a dismiss button and action on the right bright and
+  the cancel on the left"*, then *"ok for all"*.** Every question the product
+  asks before an act — a dialog, a strip, an inline "Delete?" row — is shaped
+  the same way:
+  1. **The title is the question, verb and thing in it** — *Delete the
+     function?* — never *Are you sure?*
+  2. **The body says what really happens**, names the thing, and says
+     "cannot be undone" only where it is true.
+  3. **Cancel on the left, the act on the right, carrying its own verb** —
+     *Delete it*, *Clear the plan*, *Send it*. **Never *Yes*, *No*, *OK*.**
+     A cancel-word may be *Keep it*, *Not yet*, *Keep editing*; it still goes
+     left.
+  4. **Red only for what destroys or cannot be walked back.** Retire is red,
+     Restore is not. **The cycle acts (open, reopen, start the revision) stay
+     red on Islam's word.**
+  5. **An × and Escape both mean Cancel. Never the browser's own box** (§95).
+- **A row of three or more is a list of choices, not a question** (the
+  Copilot's *Choose A · Choose B instead · Never mind*): the rule is about
+  the pair.
+- **HELD BY `checks/confirm-buttons.py`**, which reads every `<button>` in the
+  sources, the Notes and Tracker modules and the Processes pages, no browser
+  and no database. A new question anywhere inherits the rule and goes red on
+  the check if it breaks it. The Processes module asks through its own
+  `confirm-dialog.tsx`; the main app through `openModalHtml` and the
+  `rmConfirmOpen` / `destroyConfirmOpen` builders (§534).
+
 ### 2. Think Before Acting
 - **Don't follow commands blindly** — analyze requests and challenge if something seems incorrect or risky.
 - **Align before action** — if there's ambiguity or risk, discuss first.

@@ -29555,8 +29555,8 @@ function arrangeBtn(scope, unitKey){
    which is exactly why the button had to be honest about what it does. */
 function draftBtns(){
   return '<span class="repdraft">' +
-    '<button class="editbtn" data-repsave="1">Save draft</button>' +
     '<button class="linkbu" data-repcancel="1">Cancel</button>' +
+    '<button class="editbtn" data-repsave="1">Save draft</button>' +
     '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
     '</span>';
 }
@@ -40864,8 +40864,10 @@ function cfgHead(title, alerts, editKey, mayEdit, clearScope, labels, extra){
                           "Each one is archived first and can be restored."
                         : "Actuals and notes, everywhere on this page. Every plan stands.") +
                     '</span></div>' +
-                  '<button class="danger" data-clearyes="' + CLEARING + '">Yes, clear</button>' +
                   '<button data-clearno="1">Cancel</button>' +
+                  '<button class="danger" data-clearyes="' + CLEARING + '">' +
+                    (CLEARING === clearScope + "||plan" ? "Clear every plan" : "Clear the progress") +
+                  '</button>' +
                 '</div>'
               : open
               ? '<div class="menu">' +
@@ -40983,9 +40985,9 @@ function assignPicker(where, roleKey, current, editable){
     '<div class="pickfoot">' +
       '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +
       '<span class="why pickhint" style="margin:0">Type a name to add someone new</span>' +
+      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
       (current ? '<button class="linkbu" data-pick-clear="' + esc(id + '|' + current) +
                  '">Unassign</button>' : '') +
-      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
     '</div></div>';
 }
 
@@ -41149,15 +41151,15 @@ function unitPanels(k, u){
       L("pillar") + ', ' + L("measure") + ', ' + L("tactic") + ', ' + L("keyobj") + ', SWOT and the foundation text. ' +
       'Kept as an archive dated today and restorable from <b>Import &amp; archives</b>.' +
       '</div><div class="cbtns">' +
-        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Yes, clear the plan</button>' +
-        '<button data-clearno="1">Cancel</button></div></div>';
+        '<button data-clearno="1">Cancel</button>' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Clear the plan</button></div></div>';
   if (CLEARING === k + "|nums")
     return '<div class="kmenu kconfirm"><div class="cq">' +
       '<b>Clear ' + esc(u.name) + '’s reported progress?</b> ' +
       'Actuals and progress only. The plan stands.' +
       '</div><div class="cbtns">' +
-        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Yes, clear the progress</button>' +
-        '<button data-clearno="1">Cancel</button></div></div>';
+        '<button data-clearno="1">Cancel</button>' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Clear the progress</button></div></div>';
   return "";
 }
 
@@ -41177,7 +41179,7 @@ function unitKebab(k, u, mayEdit){
      product has never offered to destroy one — so there is no entry here whose
      refusal would have to be written (§62). Retire is reversible and keeps
      every attribution true. */
-  acts.push('<button class="danger" data-uact="' + esc(k) + '">' +
+  acts.push('<button' + (u.active ? ' class="danger"' : '') + ' data-uact="' + esc(k) + '">' +
     (u.active ? "Retire this unit" : "Restore this unit") + '</button>');
   return kebabCell(UMENU === k, acts, panels, u.name, 'data-umenu="' + esc(k) + '"',
                    String(CLEARING || "").indexOf(k + "|") === 0);
@@ -42971,7 +42973,7 @@ function renderPeople(){
          save refuses it, and `setTeam` is what actually retires a consultant
          whose seat is taken away (§338's sweep). */
       if (!ffRow)
-        danger.push('<button class="danger" data-pact="' + p.key + '">' +
+        danger.push('<button' + (personActive(p) ? ' class="danger"' : '') + ' data-pact="' + p.key + '">' +
           (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
       /* ── DELETE, AND THE REFUSAL IS WHERE THE CONFIRMATION WOULD BE ──
          §62's shape, because it is the same job on a different table: the
@@ -43120,8 +43122,8 @@ function renderPeople(){
           ') \u2014 those are text, not a link to this row.'
         : '') +
       '</div><div class="cbtns">' +
-        '<button data-pdel-no="1">No</button>' +
-        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Yes, delete</button>' +
+        '<button data-pdel-no="1">Cancel</button>' +
+        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Delete for good</button>' +
       '</div></div>';
   }
 
@@ -43983,7 +43985,7 @@ function mergeStepHtml(){
   if (PMERGE.done) {
     return '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
       '<div class="cbtns" style="margin-top:14px">' +
-        '<button class="danger" data-pmerge-close="1">Close</button></div>';
+        '<button data-pmerge-close="1">Close</button></div>';
   }
   var a = PMERGE.a ? personBy(PMERGE.a) : null;
   if (!a) return '<div class="note">That row is no longer on the register.</div>';
@@ -44546,16 +44548,16 @@ function coPanels(ck, co, on){
           'so nothing is deleted and restoring puts it back exactly as it was.'
         : 'It returns to the group dropdown and every role held over it reads again.') +
     '</div><div class="cbtns">' +
-      '<button class="danger" data-coact="' + esc(ck) + '">Yes, ' +
-        (on ? "retire" : "restore") + '</button>' +
-      '<button data-clearno="1">Cancel</button></div></div>';
+      '<button data-clearno="1">Cancel</button>' +
+      '<button' + (on ? ' class="danger"' : '') + ' data-coact="' + esc(ck) + '">' +
+        (on ? "Retire the company" : "Restore the company") + '</button></div></div>';
 }
 function coKebab(ck, co, on, mayEdit){
   if (!mayEdit) return '<td class="cc kebcell"></td>';
   var acts = [
     '<button data-rowdlg="companies|' + esc(ck) + '">Edit details</button>',
     '<hr>',
-    '<button class="danger" data-coclear="' + esc(ck) + '">' +
+    '<button' + (on ? ' class="danger"' : '') + ' data-coclear="' + esc(ck) + '">' +
       (on ? "Retire this company" : "Restore this company") + '</button>'
   ];
   return kebabCell(COMENU === ck, acts, coPanels(ck, co, on), co.name,
@@ -46486,8 +46488,8 @@ function namePicker(unitKey, m, editable){
       '<div class="pickempty" hidden>No name matches.</div>' +
     '</div>' +
     '<div class="pickfoot">' +
-      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
       '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
+      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
     '</div></div>';
 }
 
@@ -48009,8 +48011,8 @@ function renderCycle(){
           'the share of it due by then, and a tactic whose span has not started yet is ' +
           'not asked for.</div>' +
         '<div class="nc-act">' +
-          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
-          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
+          '<button class="linkbu" data-nc-cancel="1">Cancel</button>' +
+          '<button class="editbtn" data-nc-go="1">Open this cycle</button></div></div>'
       : '';
   var drawer = newPanel || cycleDrawer(can, open);
 
@@ -48029,8 +48031,8 @@ function renderCycle(){
       '<td>' + esc((want && want.name) || c.set) + '</td>' +
       '<td class="why" style="margin:0">' + esc(personName(c.by) || c.by) + '</td>' +
       '<td class="cc">' + (can
-        ? '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button> ' +
-          '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button>'
+        ? '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button> ' +
+          '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button>'
         : '') + '</td></tr>';
   }).join("");
 
@@ -48291,7 +48293,7 @@ function fnKebab(fk, f, mayEdit){
   if (mayDestroy())
     acts.push('<button data-clear="fn|' + esc(fk) + '|plan">Clear plan</button>');
   acts.push('<hr>');
-  acts.push('<button class="danger" data-fnretire="' + esc(fk) + '">' +
+  acts.push('<button' + (f.active === false ? '' : ' class="danger"') + ' data-fnretire="' + esc(fk) + '">' +
     (f.active === false ? "Reinstate this function" : "Retire this function") + '</button>');
   if (mayDestroy())
     acts.push('<button class="danger" data-fndel="' + esc(fk) + '">Delete permanently</button>');
@@ -48350,7 +48352,7 @@ function fnPanels(fk, f){
         : "Nothing points at it and nothing has been reported against it. There is no " +
           "undo \u2014 Retire is the reversible one.") +
       '</div><div class="cbtns"><button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-fndelyes="' + esc(fk) + '">Yes, delete it</button></div></div>';
+      '<button class="danger" data-fndelyes="' + esc(fk) + '">Delete the function</button></div></div>';
   }
   var n = functionCapCount(fk);
   var caps = n + " " + (n === 1 ? "capability" : "capabilities");
@@ -48359,13 +48361,13 @@ function fnPanels(fk, f){
       L("keyobj") + ' and ' + L("project") + ' across ' + caps + '. The definitions stand, and each ' +
       'plan is archived first.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Yes, clear the plan</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Clear the plan</button>' +
       '</div></div>';
   if (CLEARING === "fn|" + fk + "|nums")
     return '<div class="kmenu kconfirm"><div class="cq"><b>Clear the reported progress?</b> ' +
       'Actuals and notes across ' + caps + '. The plan stands.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Yes, clear the progress</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Clear the progress</button>' +
       '</div></div>';
   return "";
 }
@@ -49980,8 +49982,8 @@ function tkBar(id, opts){
 function rowActions(table, key, ed, extra){
   if (ed) {
     return '<td class="cc tk-editcell">' +
-      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button>' +
-      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>' +
+      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button></td>';
   }
   return '<td class="cc">' +
     '<button class="ico tk-pen" data-rowedit="' + esc(table + "|" + key) + '" ' +
@@ -50561,8 +50563,8 @@ function builderChooserHtml(){
       '<span class="bstat ' + (has ? "has" : "empty") + '">' + (has ? "Has a plan" : "Empty") + '</span>' +
       (confirming
         ? '<span class="bconfirm">Archive today’s plan and start fresh? ' +
-            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Yes, archive it</button>' +
-            '<button class="blink" data-bnofresh="1">Cancel</button></span>'
+            '<button class="blink" data-bnofresh="1">Cancel</button>' +
+            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Archive it</button></span>'
         /* A subject with content gets TWO ways in: Continue picks up a
            paused build exactly where the data stands (§129: progress is the
            plan itself, so nothing was ever "saved" to resume), and Start
@@ -51067,8 +51069,8 @@ function builderReviewHtml(target){
   return '<div class="brv">' + rows + '</div>' +
     '<p class="bfoot">Finishing closes the band and nothing else — the plan has been live all along. ' +
       'Gaps stay findable on the pages' + (gaps.length ? '' : ' — and there are none') + '.</p>' +
-    '<div class="bfacts"><button class="bprim" data-bdone="1">Finish building</button>' +
-    '<button class="blink" data-brvback="1">Keep building</button></div>';
+    '<div class="bfacts"><button class="blink" data-brvback="1">Keep building</button>' +
+    '<button class="bprim" data-bdone="1">Finish building</button></div>';
 }
 
 /* ── present.js ── */
@@ -62465,8 +62467,8 @@ var CHAT = (function(){
               'placeholder="Write to them…"></textarea>' +
           "</div>" +
           '<div class="chnew-acts">' +
-            '<button class="chsend" type="button" data-chnewsend="1">Send</button>' +
             '<button class="chnew-x" type="button" data-chnewcancel="1">Cancel</button>' +
+            '<button class="chsend" type="button" data-chnewsend="1">Send</button>' +
           "</div>" +
           '<div class="chnote" id="chnewnote">' +
             "They will see it in the corner, get a box on their screen if they " +
@@ -64660,8 +64662,8 @@ var WELCOME = (function(){
               '<div class="wtourbody" data-wtourbody hidden>' +
                 "<p>A short walk of the platform on your own plan — about two minutes.</p>" +
                 '<div class="wtourbtns">' +
-                  '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
                   '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+                  '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
                 "</div>" +
               "</div>" +
             "</div>" +
@@ -66509,8 +66511,8 @@ var COPILOT = (function(){
     return head + rows.map(function(c){
       var on = o.kind === "chat" && o.id === c.id;
       if (ASKDEL === c.id) return '<div class="coprow ask" data-cop-row="' + E(c.id) + '"><span class="copt">' + E(c.title) + '</span>' +
-        '<span class="copaskrow">Delete? <button type="button" class="copbtn danger solid" data-cop-delete-yes="' + E(c.id) + '">Delete</button>' +
-        '<button type="button" class="copbtn quiet" data-cop-delete-no>Cancel</button></span></div>';
+        '<span class="copaskrow">Delete? <button type="button" class="copbtn quiet" data-cop-delete-no>Cancel</button>' +
+        '<button type="button" class="copbtn danger solid" data-cop-delete-yes="' + E(c.id) + '">Delete</button></span></div>';
       if (RENAME === c.id) return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
         '<input class="fld copren" data-cop-rename-box="' + E(c.id) + '" value="' + E(c.title) + '" aria-label="Chat name" maxlength="160"></div>';
       var menu = MENU === c.id ? '<div class="copmenu" role="menu">' + (arch
@@ -66920,8 +66922,8 @@ var COPILOT = (function(){
       var sw = p.pastedOffer.section, lab = "";
       for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === sw) lab = SECTIONS[i].label;
       h += '<div class="copopts"><span class="copm">Keep the pasted material as its own deliverable?</span>' +
-        '<button type="button" class="copopt rec" data-cop-savepasted="' + E(p.pastedOffer.messageId) + '" data-cop-sec="' + E(sw) + '">Save to ' + E(lab || sw) + '</button>' +
-        '<button type="button" class="copopt" data-cop-notnow="' + E(p.pastedOffer.messageId) + '">Not now</button></div>';
+        '<button type="button" class="copopt" data-cop-notnow="' + E(p.pastedOffer.messageId) + '">Not now</button>' +
+        '<button type="button" class="copopt rec" data-cop-savepasted="' + E(p.pastedOffer.messageId) + '" data-cop-sec="' + E(sw) + '">Save to ' + E(lab || sw) + '</button></div>';
     }
     if (p.options && p.options.length && last && canEdit()) {
       h += '<div class="copopts">' + p.options.map(function(o){
@@ -67475,8 +67477,9 @@ var COPILOT = (function(){
       var agreedNow = !!String(f.drafts[p] || "").trim();
       return aiMsg('<span class="copeh">' + E(partName(S[p])) + ' · Proposal ' + n + '</span><div class="copfdraft">' + E(withY(t, f)) + '</div>' +
         (ed ? 'Refine it, or type what to change in the box below.' + refBtns +
-          '<div class="copbtns"><button type="button" class="copbtn solid' + heldCls(busyHere && BUSY) + '" data-cop-fsave' + held(busyHere && BUSY) + '>Save to the card</button>' +
-          (agreedNow ? '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-fkeep' + held(busyHere && BUSY) + '>Keep as it was</button>' : '') + '</div>' : ''), true);
+          '<div class="copbtns">' +
+          (agreedNow ? '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-fkeep' + held(busyHere && BUSY) + '>Keep as it was</button>' : '') +
+          '<button type="button" class="copbtn solid' + heldCls(busyHere && BUSY) + '" data-cop-fsave' + held(busyHere && BUSY) + '>Save to the card</button></div>' : ''), true);
     };
     log.forEach(function(x, k){
       var p = x.p, el = p >= 0 ? S[p] : null;
@@ -68042,8 +68045,8 @@ var COPILOT = (function(){
     var body = editing
       ? '<textarea class="fld copedit" data-cop-edit-text rows="12" aria-label="Deliverable text">' + E(EDIT.text) + '</textarea>' +
         '<input class="fld" data-cop-edit-note placeholder="What changed (optional)" aria-label="What changed" value="' + E(EDIT.note) + '">' +
-        '<div class="copbtns"><button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button>' +
-        '<button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button></div>'
+        '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button>' +
+        '<button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button></div>'
       : '<div class="copdoc">' + (text ? E(text) : '<span class="copnone">This version holds no text.</span>') + '</div>';
     /* §524 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
        client's own words, with whether it is on the plan and the same
@@ -68312,8 +68315,8 @@ var COPILOT = (function(){
     if (!s.list.length) return '<div class="copnone">No sources yet. Reports and answers brought into a SWOT are kept here.</div>';
     return s.list.map(function(r){
       if (SRCASK === r.id) return '<div class="coprow ask"><span class="copt">' + E(r.name) + '</span><span class="copaskrow">Delete? ' +
-        '<button type="button" class="copbtn danger solid" data-cop-src-del-yes="' + E(r.id) + '">Delete</button>' +
-        '<button type="button" class="copbtn quiet" data-cop-src-del-no>Cancel</button></span></div>';
+        '<button type="button" class="copbtn quiet" data-cop-src-del-no>Cancel</button>' +
+        '<button type="button" class="copbtn danger solid" data-cop-src-del-yes="' + E(r.id) + '">Delete</button></span></div>';
       return '<div class="coprow copsrcrow" data-cop-src="' + E(r.id) + '">' +
         '<a class="copitem" href="' + E(url("source", ["id=" + encodeURIComponent(r.id)])) + '" target="_blank" rel="noopener">' +
           '<span class="copt">' + E(r.name) + '</span>' +
@@ -68650,7 +68653,7 @@ var COPILOT = (function(){
           }).join("") + '</ul>' : '<p class="copnote">Nothing found here.</p>') +
           (it.from && !editing ? '<div class="copsw-used">Used: ' + E(it.from) + '</div>' : '') + '</div>';
       }).join("") + '</div>' +
-      (ed && editing ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-sw-ansave="' + area + '">Save the changes</button><button type="button" class="copbtn quiet" data-cop-sw-anedit-no>Cancel</button></div>' : '') + '</div>';
+      (ed && editing ? '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-sw-anedit-no>Cancel</button><button type="button" class="copbtn solid" data-cop-sw-ansave="' + area + '">Save the changes</button></div>' : '') + '</div>';
   }
   function swExternal(s){ return ["micro","macro"].filter(function(a){ return (s.methods[a] || []).length; }); }
   /* APPLY TO PLAN WRITES THE PLAN (§641; before it, Save did): the server
@@ -68976,7 +68979,7 @@ var COPILOT = (function(){
     /* §694 S2 — the choice can be changed once made: a link under the
        recommendation brings the three back, saying what goes with the change. */
     var again = !!(s.chosen && ed && CPUNCH[PANE.chat.id]);
-    var opts = (!s.chosen || again) && ed ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-choose="' + E(m.leader) + '">Yes, ' + E(cpWord(m.leader)) + '</button>' +
+    var opts = (!s.chosen || again) && ed ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-choose="' + E(m.leader) + '">Choose ' + E(cpWord(m.leader)) + '</button>' +
         ((W.discs || []).filter(function(d){ return d !== m.leader; }).map(function(d){
           return '<button type="button" class="copopt" data-cop-cp-choose="' + E(d) + '">Choose ' + E(cpWord(d)) + ' instead</button>'; }).join("")) +
         (again ? '<button type="button" class="copopt" data-cop-cp-unchoose>Never mind</button></div><p class="copnote">Choosing another clears the values and the table drawn for ' + E(cpWord(s.chosen)) + '; the scores stay.</p>'
@@ -80754,9 +80757,9 @@ var SYNC = (function () {
     strip.setAttribute("role", "alertdialog");
     strip.innerHTML = '<div class="lsay"><b>“' + esc(a.title) + '” has changes that aren’t applied:</b> ' +
       esc(a.waiting().join(", ")) + '.</div><div class="lacts">' +
-      '<button type="button" class="askyes" data-leave="go">Apply and continue</button>' +
+      '<button type="button" class="askno" data-leave="stay">Keep editing</button>' +
       '<button type="button" class="askno" data-leave="drop">Discard changes</button>' +
-      '<button type="button" class="askno" data-leave="stay">Keep editing</button></div>';
+      '<button type="button" class="askyes" data-leave="go">Apply and continue</button></div>';
     document.body.appendChild(strip);
     LEAVE = strip;
     var on = function(){ leaveClose(); placeGo(target); leaveModes(); paint(); };
@@ -86903,7 +86906,7 @@ var SYNC = (function () {
               'this test copy goes for good. Messages that went to the business ' +
               'are never removed.</span></div>' +
             '<div class="cbtns"><button data-delno="1">Cancel</button>' +
-            '<button class="danger" data-delyes="1">Yes, remove it</button></div>' +
+            '<button class="danger" data-delyes="1">Remove the copy</button></div>' +
           '</div>');
         var box = document.getElementById("modal-b");
         if (!box) return;
@@ -87044,7 +87047,7 @@ var SYNC = (function () {
           '<div class="kv"><span class="k">No undo</span><span>A message that has ' +
             'gone cannot be recalled.</span></div>' +
           '<div class="cbtns"><button data-sendno="1">Cancel</button>' +
-          '<button class="danger" data-sendyes="1">Yes, send it</button></div>' +
+          '<button class="danger" data-sendyes="1">Send it</button></div>' +
         '</div>');
       var box = document.getElementById("modal-b");
       if (box) {

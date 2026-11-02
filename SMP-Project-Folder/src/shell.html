@@ -3274,9 +3274,9 @@
     strip.setAttribute("role", "alertdialog");
     strip.innerHTML = '<div class="lsay"><b>“' + esc(a.title) + '” has changes that aren’t applied:</b> ' +
       esc(a.waiting().join(", ")) + '.</div><div class="lacts">' +
-      '<button type="button" class="askyes" data-leave="go">Apply and continue</button>' +
+      '<button type="button" class="askno" data-leave="stay">Keep editing</button>' +
       '<button type="button" class="askno" data-leave="drop">Discard changes</button>' +
-      '<button type="button" class="askno" data-leave="stay">Keep editing</button></div>';
+      '<button type="button" class="askyes" data-leave="go">Apply and continue</button></div>';
     document.body.appendChild(strip);
     LEAVE = strip;
     var on = function(){ leaveClose(); placeGo(target); leaveModes(); paint(); };
@@ -9423,7 +9423,7 @@
               'this test copy goes for good. Messages that went to the business ' +
               'are never removed.</span></div>' +
             '<div class="cbtns"><button data-delno="1">Cancel</button>' +
-            '<button class="danger" data-delyes="1">Yes, remove it</button></div>' +
+            '<button class="danger" data-delyes="1">Remove the copy</button></div>' +
           '</div>');
         var box = document.getElementById("modal-b");
         if (!box) return;
@@ -9564,7 +9564,7 @@
           '<div class="kv"><span class="k">No undo</span><span>A message that has ' +
             'gone cannot be recalled.</span></div>' +
           '<div class="cbtns"><button data-sendno="1">Cancel</button>' +
-          '<button class="danger" data-sendyes="1">Yes, send it</button></div>' +
+          '<button class="danger" data-sendyes="1">Send it</button></div>' +
         '</div>');
       var box = document.getElementById("modal-b");
       if (box) {

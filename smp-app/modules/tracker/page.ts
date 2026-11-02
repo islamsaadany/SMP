@@ -1029,8 +1029,8 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
   const byOwner = group === "owner";
   const del = live
     ? '<span class="sep"></span><span class="acts"><button type="button" role="menuitem" class="danger" data-act="delete-ask">' + BIN + "Delete</button>" +
-      '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
-      '<button type="button" class="go" data-act="delete-no">Keep it</button></span></span>'
+      '<span class="sure" hidden>Delete this action? <button type="button" class="go" data-act="delete-no">Keep it</button>' +
+      '<button type="button" class="go danger" data-act="delete">Delete it</button></span></span>'
     : "";
   /* THE ⋯, REORDERED (2026-11-03, §713; design-mockups/home/2026-11-03_task-menu.html,
      Islam: "change the week and hand to someone should be on the top of the
@@ -1182,8 +1182,8 @@ function progressList(L: Loaded, who: Who, today: string): string {
       '<div class="pb"><div class="ptxt">' + esc(p.body) + "</div>" +
       '<div class="by"><span>' + esc(name(p.by)) + "</span>" + (p.editedAt ? '<span class="ed">edited</span>' : "") +
       (mine ? '<button type="button" data-act="progress-edit">Edit</button><button type="button" class="danger" data-act="progress-delete-ask">Delete</button>' +
-        '<span class="sure" hidden>Delete this entry? <button type="button" class="go danger" data-act="progress-delete">Yes, delete it</button>' +
-        '<button type="button" class="go" data-act="progress-delete-no">Keep it</button></span>' : "") +
+        '<span class="sure" hidden>Delete this entry? <button type="button" class="go" data-act="progress-delete-no">Keep it</button>' +
+        '<button type="button" class="go danger" data-act="progress-delete">Delete it</button></span>' : "") +
       "</div></div></li>";
   }).join("") + "</ul>";
 }
@@ -1221,8 +1221,8 @@ function taskTabs(a: Action, L: Loaded, who: Who, today: string, live: boolean):
     '<button type="button" role="tab" class="ptab histlink" data-act="hist" data-tab="h" aria-selected="false" aria-expanded="false">History' + n(L.events.length) + "</button>" +
     '<span class="sp"></span>' +
     (live ? '<span class="acts"><button type="button" class="danger" data-act="delete-ask">Delete</button>' +
-      '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
-      '<button type="button" class="go" data-act="delete-no">Keep it</button></span></span>' : "") + "</div>";
+      '<span class="sure" hidden>Delete this action? <button type="button" class="go" data-act="delete-no">Keep it</button>' +
+      '<button type="button" class="go danger" data-act="delete">Delete it</button></span></span>' : "") + "</div>";
   /* anybody past the gate writes progress (§657); somebody the register has
      not placed yet has no name to write it under (§313.32) */
   const prog = '<div class="tp tp-p">' + (who.personKey ? progressBox(a, "What happened this week?") : "") + progressList(L, who, today) + "</div>";
@@ -1561,8 +1561,8 @@ function topicMenu(t: Topic): string {
       : '<button type="button" role="menuitem" data-act="topic-close" data-topic="' + esc(t.id) + '">Close the topic</button>') +
     '<button type="button" role="menuitem" class="danger" data-act="topic-delete-ask" data-topic="' + esc(t.id) + '">Delete</button>' +
     '<span class="sure" hidden>Delete the topic? Its actions stay, with no topic. ' +
-    '<button type="button" class="go danger" data-act="topic-delete" data-topic="' + esc(t.id) + '">Yes, delete it</button>' +
-    '<button type="button" class="go" data-act="topic-delete-no">Keep it</button></span>' +
+    '<button type="button" class="go" data-act="topic-delete-no">Keep it</button>' +
+    '<button type="button" class="go danger" data-act="topic-delete" data-topic="' + esc(t.id) + '">Delete it</button></span>' +
     "</span></span>";
 }
 

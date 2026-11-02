@@ -1450,8 +1450,8 @@ function arrangeBtn(scope, unitKey){
    which is exactly why the button had to be honest about what it does. */
 function draftBtns(){
   return '<span class="repdraft">' +
-    '<button class="editbtn" data-repsave="1">Save draft</button>' +
     '<button class="linkbu" data-repcancel="1">Cancel</button>' +
+    '<button class="editbtn" data-repsave="1">Save draft</button>' +
     '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
     '</span>';
 }

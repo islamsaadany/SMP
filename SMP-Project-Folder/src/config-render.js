@@ -1098,8 +1098,10 @@ function cfgHead(title, alerts, editKey, mayEdit, clearScope, labels, extra){
                           "Each one is archived first and can be restored."
                         : "Actuals and notes, everywhere on this page. Every plan stands.") +
                     '</span></div>' +
-                  '<button class="danger" data-clearyes="' + CLEARING + '">Yes, clear</button>' +
                   '<button data-clearno="1">Cancel</button>' +
+                  '<button class="danger" data-clearyes="' + CLEARING + '">' +
+                    (CLEARING === clearScope + "||plan" ? "Clear every plan" : "Clear the progress") +
+                  '</button>' +
                 '</div>'
               : open
               ? '<div class="menu">' +
@@ -1217,9 +1219,9 @@ function assignPicker(where, roleKey, current, editable){
     '<div class="pickfoot">' +
       '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +
       '<span class="why pickhint" style="margin:0">Type a name to add someone new</span>' +
+      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
       (current ? '<button class="linkbu" data-pick-clear="' + esc(id + '|' + current) +
                  '">Unassign</button>' : '') +
-      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
     '</div></div>';
 }
 
@@ -1383,15 +1385,15 @@ function unitPanels(k, u){
       L("pillar") + ', ' + L("measure") + ', ' + L("tactic") + ', ' + L("keyobj") + ', SWOT and the foundation text. ' +
       'Kept as an archive dated today and restorable from <b>Import &amp; archives</b>.' +
       '</div><div class="cbtns">' +
-        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Yes, clear the plan</button>' +
-        '<button data-clearno="1">Cancel</button></div></div>';
+        '<button data-clearno="1">Cancel</button>' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Clear the plan</button></div></div>';
   if (CLEARING === k + "|nums")
     return '<div class="kmenu kconfirm"><div class="cq">' +
       '<b>Clear ' + esc(u.name) + '’s reported progress?</b> ' +
       'Actuals and progress only. The plan stands.' +
       '</div><div class="cbtns">' +
-        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Yes, clear the progress</button>' +
-        '<button data-clearno="1">Cancel</button></div></div>';
+        '<button data-clearno="1">Cancel</button>' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Clear the progress</button></div></div>';
   return "";
 }
 
@@ -1411,7 +1413,7 @@ function unitKebab(k, u, mayEdit){
      product has never offered to destroy one — so there is no entry here whose
      refusal would have to be written (§62). Retire is reversible and keeps
      every attribution true. */
-  acts.push('<button class="danger" data-uact="' + esc(k) + '">' +
+  acts.push('<button' + (u.active ? ' class="danger"' : '') + ' data-uact="' + esc(k) + '">' +
     (u.active ? "Retire this unit" : "Restore this unit") + '</button>');
   return kebabCell(UMENU === k, acts, panels, u.name, 'data-umenu="' + esc(k) + '"',
                    String(CLEARING || "").indexOf(k + "|") === 0);
@@ -3205,7 +3207,7 @@ function renderPeople(){
          save refuses it, and `setTeam` is what actually retires a consultant
          whose seat is taken away (§338's sweep). */
       if (!ffRow)
-        danger.push('<button class="danger" data-pact="' + p.key + '">' +
+        danger.push('<button' + (personActive(p) ? ' class="danger"' : '') + ' data-pact="' + p.key + '">' +
           (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
       /* ── DELETE, AND THE REFUSAL IS WHERE THE CONFIRMATION WOULD BE ──
          §62's shape, because it is the same job on a different table: the
@@ -3354,8 +3356,8 @@ function renderPeople(){
           ') \u2014 those are text, not a link to this row.'
         : '') +
       '</div><div class="cbtns">' +
-        '<button data-pdel-no="1">No</button>' +
-        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Yes, delete</button>' +
+        '<button data-pdel-no="1">Cancel</button>' +
+        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Delete for good</button>' +
       '</div></div>';
   }
 
@@ -4217,7 +4219,7 @@ function mergeStepHtml(){
   if (PMERGE.done) {
     return '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
       '<div class="cbtns" style="margin-top:14px">' +
-        '<button class="danger" data-pmerge-close="1">Close</button></div>';
+        '<button data-pmerge-close="1">Close</button></div>';
   }
   var a = PMERGE.a ? personBy(PMERGE.a) : null;
   if (!a) return '<div class="note">That row is no longer on the register.</div>';
@@ -4780,16 +4782,16 @@ function coPanels(ck, co, on){
           'so nothing is deleted and restoring puts it back exactly as it was.'
         : 'It returns to the group dropdown and every role held over it reads again.') +
     '</div><div class="cbtns">' +
-      '<button class="danger" data-coact="' + esc(ck) + '">Yes, ' +
-        (on ? "retire" : "restore") + '</button>' +
-      '<button data-clearno="1">Cancel</button></div></div>';
+      '<button data-clearno="1">Cancel</button>' +
+      '<button' + (on ? ' class="danger"' : '') + ' data-coact="' + esc(ck) + '">' +
+        (on ? "Retire the company" : "Restore the company") + '</button></div></div>';
 }
 function coKebab(ck, co, on, mayEdit){
   if (!mayEdit) return '<td class="cc kebcell"></td>';
   var acts = [
     '<button data-rowdlg="companies|' + esc(ck) + '">Edit details</button>',
     '<hr>',
-    '<button class="danger" data-coclear="' + esc(ck) + '">' +
+    '<button' + (on ? ' class="danger"' : '') + ' data-coclear="' + esc(ck) + '">' +
       (on ? "Retire this company" : "Restore this company") + '</button>'
   ];
   return kebabCell(COMENU === ck, acts, coPanels(ck, co, on), co.name,
@@ -6720,8 +6722,8 @@ function namePicker(unitKey, m, editable){
       '<div class="pickempty" hidden>No name matches.</div>' +
     '</div>' +
     '<div class="pickfoot">' +
-      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
       '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
+      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
     '</div></div>';
 }
 
@@ -8243,8 +8245,8 @@ function renderCycle(){
           'the share of it due by then, and a tactic whose span has not started yet is ' +
           'not asked for.</div>' +
         '<div class="nc-act">' +
-          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
-          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
+          '<button class="linkbu" data-nc-cancel="1">Cancel</button>' +
+          '<button class="editbtn" data-nc-go="1">Open this cycle</button></div></div>'
       : '';
   var drawer = newPanel || cycleDrawer(can, open);
 
@@ -8263,8 +8265,8 @@ function renderCycle(){
       '<td>' + esc((want && want.name) || c.set) + '</td>' +
       '<td class="why" style="margin:0">' + esc(personName(c.by) || c.by) + '</td>' +
       '<td class="cc">' + (can
-        ? '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button> ' +
-          '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button>'
+        ? '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button> ' +
+          '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button>'
         : '') + '</td></tr>';
   }).join("");
 
@@ -8525,7 +8527,7 @@ function fnKebab(fk, f, mayEdit){
   if (mayDestroy())
     acts.push('<button data-clear="fn|' + esc(fk) + '|plan">Clear plan</button>');
   acts.push('<hr>');
-  acts.push('<button class="danger" data-fnretire="' + esc(fk) + '">' +
+  acts.push('<button' + (f.active === false ? '' : ' class="danger"') + ' data-fnretire="' + esc(fk) + '">' +
     (f.active === false ? "Reinstate this function" : "Retire this function") + '</button>');
   if (mayDestroy())
     acts.push('<button class="danger" data-fndel="' + esc(fk) + '">Delete permanently</button>');
@@ -8584,7 +8586,7 @@ function fnPanels(fk, f){
         : "Nothing points at it and nothing has been reported against it. There is no " +
           "undo \u2014 Retire is the reversible one.") +
       '</div><div class="cbtns"><button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-fndelyes="' + esc(fk) + '">Yes, delete it</button></div></div>';
+      '<button class="danger" data-fndelyes="' + esc(fk) + '">Delete the function</button></div></div>';
   }
   var n = functionCapCount(fk);
   var caps = n + " " + (n === 1 ? "capability" : "capabilities");
@@ -8593,13 +8595,13 @@ function fnPanels(fk, f){
       L("keyobj") + ' and ' + L("project") + ' across ' + caps + '. The definitions stand, and each ' +
       'plan is archived first.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Yes, clear the plan</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Clear the plan</button>' +
       '</div></div>';
   if (CLEARING === "fn|" + fk + "|nums")
     return '<div class="kmenu kconfirm"><div class="cq"><b>Clear the reported progress?</b> ' +
       'Actuals and notes across ' + caps + '. The plan stands.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Yes, clear the progress</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Clear the progress</button>' +
       '</div></div>';
   return "";
 }
@@ -10214,8 +10216,8 @@ function tkBar(id, opts){
 function rowActions(table, key, ed, extra){
   if (ed) {
     return '<td class="cc tk-editcell">' +
-      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button>' +
-      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>' +
+      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button></td>';
   }
   return '<td class="cc">' +
     '<button class="ico tk-pen" data-rowedit="' + esc(table + "|" + key) + '" ' +

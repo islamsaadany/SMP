@@ -769,7 +769,7 @@ try {
        slot, where the press was made. */
     mailHold = 400;
     await pgp.locator("[data-act=send]").click(); await pgp.waitForTimeout(150);
-    check("Yes, send shows at once: the foot says it is sending, where the press was made, and nothing has gone out yet (§672)",
+    check("Send them shows at once: the foot says it is sending, where the press was made, and nothing has gone out yet (§672)",
       /Sending the minutes to 3 people/.test(await pgp.locator(".foot [data-sending]").innerText().catch(() => "")) && !(await pgp.locator(".foot .sure:has([data-act=send])").isVisible()) && mailSeen.length === 0,
       await pgp.locator(".foot [data-sending]").innerText().catch(() => "(no line)") + " / " + mailSeen.length);
     await pgp.waitForTimeout(1600); await settle(); mailHold = 0;

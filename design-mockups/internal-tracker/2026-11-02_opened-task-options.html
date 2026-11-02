@@ -1,0 +1,208 @@
+<title>Opened Task Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+/* An opened task in the quiet list, drawn three ways: A two columns tidied,
+   B one column with a timeline, C tabs. The row above it is the quiet row
+   as agreed; only what opens under it changes. */
+:root{
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E9EDF3;--ground:#F5F7FA;--surface:#FFF;--surface-2:#EEF1F6;
+  --gold:#9C5D08;--bad:#B23025;--bad-bg:#FBECEA;--good:#1B6E4E;--yel-dot:#E0B300;--ns-dot:#8A97AB;--blue:#1F5FBF;--sel:#F3F7FD;--bar:#1F3158;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#272D39;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--bad:#E8776B;--bad-bg:#3A2322;--good:#63BE96;--yel-dot:#E8C547;--ns-dot:#7D889B;--blue:#8FB4F0;--sel:#1B2638;--bar:#3A5794;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#272D39;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--bad:#E8776B;--bad-bg:#3A2322;--good:#63BE96;--yel-dot:#E8C547;--ns-dot:#7D889B;--blue:#8FB4F0;--sel:#1B2638;--bar:#3A5794;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+svg{display:block}
+.pg{max-width:1040px;margin:0 auto;padding-block:24px 64px;display:grid;gap:30px}
+.opt h2{margin:0 0 4px;font:700 17px/1.3 var(--font)}
+.opt p.d{margin:0 0 10px;color:var(--ink-2);font-size:14px;max-width:80ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+
+/* the quiet row, as agreed */
+.task{display:grid;grid-template-columns:22px minmax(0,1fr) 110px 70px 118px 28px;gap:4px 14px;align-items:start;padding:11px 16px}
+.task.on{background:var(--sel)}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;background:var(--surface);margin-top:2px}
+.nm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nm b{font-weight:500}
+.tag{font:600 11.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:4px 8px}
+.upd{font-size:13px;color:var(--ink-3);margin-top:2px}
+.upd b{font-weight:600;color:var(--ink-2)}
+.cell{font:500 13px/1.3 var(--font);color:var(--ink-2);padding-top:3px;white-space:nowrap}
+.status{display:inline-flex;align-items:center;gap:7px;font:600 13px/1.3 var(--font);color:var(--ink-2);padding-top:3px;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--yel-dot)}
+.chev{color:var(--ink-3);width:28px;height:24px;display:grid;place-items:center}
+.chev svg{width:14px;height:14px;transform:rotate(180deg)}
+.below{height:46px;border-top:1px solid var(--line-2);display:flex;align-items:center;padding:0 16px 0 52px;color:var(--ink-3);font-size:14.5px}
+
+/* the opened area sits under the name, inside the row's light blue */
+.det{grid-column:2/-1;margin-top:12px}
+.lab{font:600 12.5px/1.3 var(--font);color:var(--ink);margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.lab .hint{font-weight:400;color:var(--ink-3)}
+.box{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:14px;line-height:1.5;background:var(--surface);resize:none;display:block;field-sizing:content;min-height:42px}
+.box:focus{border-color:var(--blue);outline:none}
+.btn{font:600 13px/1 var(--font);border-radius:7px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.btn.pri{background:var(--bar);border-color:var(--bar);color:#fff}
+.link{border:0;background:none;padding:0;font:600 12.5px/1.3 var(--font);color:var(--ink-3);display:inline-flex;gap:5px;align-items:center}
+.link svg{width:11px;height:11px}
+.link.danger{color:var(--bad)}
+.entries{list-style:none;margin:0;padding:0;font-size:13.5px}
+.entries li{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;padding:8px 0;border-top:1px solid var(--line-2)}
+.entries .wk{font:600 12px/1.6 var(--font);color:var(--ink-3)}
+.entries .by{font-size:12px;color:var(--ink-3);margin-top:1px}
+.hist{list-style:none;margin:0;padding:0;font-size:12.5px;color:var(--ink-2)}
+.hist li{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;padding:5px 0}
+.hist time{color:var(--ink-3)}
+
+/* A — two columns, tidied */
+.A .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}
+.A .compose{position:relative}
+.A .compose .box{padding-bottom:44px}
+.A .compose .btn{position:absolute;right:7px;bottom:7px;padding:7px 12px}
+.A .entries{margin-top:10px}
+.A .foot{display:flex;gap:18px;align-items:center;margin-top:14px;padding-top:10px;border-top:1px solid var(--line-2)}
+.A .foot .sp{flex:1}
+
+/* B — one column, progress as a timeline */
+.B .det{max-width:720px}
+.B .desc{font-size:14px;color:var(--ink);padding:8px 11px;margin:0 -11px;border-radius:8px;border:1px solid transparent;cursor:text}
+.B .desc:hover{border-color:var(--line);background:var(--surface)}
+.B .sec{margin-top:16px}
+.B .row-end{display:flex;justify-content:flex-end;margin-top:8px}
+.B .tl{list-style:none;margin:12px 0 0;padding:0 0 0 18px;position:relative}
+.B .tl::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.B .tl li{position:relative;padding:0 0 12px}
+.B .tl li::before{content:"";position:absolute;left:-18px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--blue)}
+.B .tl li.auto::before{border-color:var(--line);width:8px;height:8px;left:-17px;top:6px}
+.B .tl .wk{font:600 12px/1.4 var(--font);color:var(--ink-3)}
+.B .tl .tx{font-size:14px}
+.B .tl li.auto .tx{font-size:12.5px;color:var(--ink-3)}
+.B .foot{display:flex;gap:18px;margin-top:4px}
+
+/* C — tabs */
+.C .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.C .tabs button{border:0;background:none;padding:8px 12px 9px;font:600 13.5px/1 var(--font);color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;gap:6px;align-items:center}
+.C .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
+.C .tabs .n{font-size:11.5px;background:var(--surface-2);border-radius:999px;padding:2px 6px;color:var(--ink-2)}
+.C .tabs .sp{flex:1}
+.C .row-end{display:flex;justify-content:flex-end;margin-top:8px}
+.C .entries{margin-top:12px}
+.C [role="tabpanel"]{max-width:760px}
+
+@media (max-width:800px){
+  .task{grid-template-columns:22px minmax(0,1fr) 28px}.task>.cell,.task>.status{display:none}
+  .det{grid-column:1/-1}
+  .A .cols{grid-template-columns:1fr;gap:18px}
+}
+</style>
+
+<div class="pg">
+
+<section class="opt A">
+  <h2>A · Two columns, tidied</h2>
+  <p class="d">Description on the left, Progress on the right. <b>Add</b> sits inside the progress box at its bottom right, the way a message box sends. The boxes grow with their text instead of showing a resize corner. History and Delete move to one quiet line at the bottom.</p>
+  <div class="card">
+    <div class="task on">
+      <span class="tick"></span>
+      <div><div class="nm"><b>2027 Budget – P&amp;L up to CM</b><span class="tag">Budget</span></div><div class="upd"><b>This week</b> · Draft sent to the CFO, comments due Wednesday</div></div>
+      <span class="cell">This week</span><span class="cell">Aley</span><span class="status"><span class="dot"></span>In progress</span>
+      <span class="chev"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"/></svg></span>
+      <div class="det">
+        <div class="cols">
+          <div><p class="lab">Description</p><textarea class="box" id="a-desc" aria-label="Description">P&amp;L down to contribution margin for each business line, in the 2027 template.</textarea></div>
+          <div><p class="lab">Progress</p>
+            <div class="compose"><textarea class="box" id="a-prog" placeholder="What happened this week?" aria-label="Progress"></textarea><button type="button" class="btn pri">Add</button></div>
+            <ul class="entries">
+              <li><span class="wk">This week</span><div>Draft sent to the CFO, comments due Wednesday<div class="by">Aley</div></div></li>
+              <li><span class="wk">Last week</span><div>Template agreed with Finance<div class="by">Aley</div></div></li>
+            </ul>
+          </div>
+        </div>
+        <div class="foot"><button type="button" class="link">History <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button><span class="sp"></span><button type="button" class="link danger">Delete</button></div>
+      </div>
+    </div>
+    <div class="below">Update the timeline with Akeed</div>
+  </div>
+</section>
+
+<section class="opt B">
+  <h2>B · One column, progress as a timeline</h2>
+  <p class="d">Everything reads top to bottom. The description is plain text you click to edit. Under it, the progress box with <b>Add</b> on the right below it, then every update on a timeline. History joins the timeline as small grey steps, so there is nothing separate to open.</p>
+  <div class="card">
+    <div class="task on">
+      <span class="tick"></span>
+      <div><div class="nm"><b>2027 Budget – P&amp;L up to CM</b><span class="tag">Budget</span></div><div class="upd"><b>This week</b> · Draft sent to the CFO, comments due Wednesday</div></div>
+      <span class="cell">This week</span><span class="cell">Aley</span><span class="status"><span class="dot"></span>In progress</span>
+      <span class="chev"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"/></svg></span>
+      <div class="det">
+        <p class="lab">Description <span class="hint">click to edit</span></p>
+        <div class="desc" tabindex="0">P&amp;L down to contribution margin for each business line, in the 2027 template.</div>
+        <div class="sec"><p class="lab">Progress</p>
+          <textarea class="box" id="b-prog" placeholder="What happened this week?" aria-label="Progress"></textarea>
+          <div class="row-end"><button type="button" class="btn pri">Add</button></div>
+          <ol class="tl">
+            <li><div class="wk">This week · Aley</div><div class="tx">Draft sent to the CFO, comments due Wednesday</div></li>
+            <li class="auto"><div class="wk">Mon 2 Nov</div><div class="tx">Islam moved it to In progress</div></li>
+            <li><div class="wk">Last week · Aley</div><div class="tx">Template agreed with Finance</div></li>
+            <li class="auto"><div class="wk">Tue 27 Oct</div><div class="tx">Islam made it, for Aley, due this week</div></li>
+          </ol>
+        </div>
+        <div class="foot"><button type="button" class="link danger">Delete</button></div>
+      </div>
+    </div>
+    <div class="below">Update the timeline with Akeed</div>
+  </div>
+</section>
+
+<section class="opt C">
+  <h2>C · Tabs</h2>
+  <p class="d">Three tabs under the name: <b>Progress</b> (open first), <b>Description</b> and <b>History</b>, each with its count. Only one shows at a time, so the opened task stays short. <b>Add</b> sits on the right below the progress box.</p>
+  <div class="card">
+    <div class="task on">
+      <span class="tick"></span>
+      <div><div class="nm"><b>2027 Budget – P&amp;L up to CM</b><span class="tag">Budget</span></div><div class="upd"><b>This week</b> · Draft sent to the CFO, comments due Wednesday</div></div>
+      <span class="cell">This week</span><span class="cell">Aley</span><span class="status"><span class="dot"></span>In progress</span>
+      <span class="chev"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"/></svg></span>
+      <div class="det">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" id="t-p" aria-selected="true" data-tab="p">Progress <span class="n">2</span></button>
+          <button type="button" role="tab" id="t-d" aria-selected="false" data-tab="d">Description</button>
+          <button type="button" role="tab" id="t-h" aria-selected="false" data-tab="h">History <span class="n">4</span></button>
+          <span class="sp"></span><button type="button" class="link danger" style="padding:0 4px">Delete</button>
+        </div>
+        <div role="tabpanel" data-panel="p">
+          <textarea class="box" id="c-prog" placeholder="What happened this week?" aria-label="Progress"></textarea>
+          <div class="row-end"><button type="button" class="btn pri">Add</button></div>
+          <ul class="entries">
+            <li><span class="wk">This week</span><div>Draft sent to the CFO, comments due Wednesday<div class="by">Aley</div></div></li>
+            <li><span class="wk">Last week</span><div>Template agreed with Finance<div class="by">Aley</div></div></li>
+          </ul>
+        </div>
+        <div role="tabpanel" data-panel="d" hidden><textarea class="box" id="c-desc" aria-label="Description">P&amp;L down to contribution margin for each business line, in the 2027 template.</textarea></div>
+        <div role="tabpanel" data-panel="h" hidden><ul class="hist">
+          <li><time>Mon 2 Nov</time><span>Islam moved it to In progress</span></li>
+          <li><time>Thu 29 Oct</time><span>Aley wrote progress</span></li>
+          <li><time>Wed 28 Oct</time><span>Islam set the topic to Budget</span></li>
+          <li><time>Tue 27 Oct</time><span>Islam made it, for Aley, due this week</span></li></ul></div>
+      </div>
+    </div>
+    <div class="below">Update the timeline with Akeed</div>
+  </div>
+</section>
+
+</div>
+<script>
+document.querySelectorAll('.C [role=tab]').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.C [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===t)));
+  document.querySelectorAll('.C [role=tabpanel]').forEach(p=>p.hidden=p.dataset.panel!==t.dataset.tab);
+}));
+</script>

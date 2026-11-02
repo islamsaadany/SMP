@@ -740,6 +740,18 @@ const LOOK = `
 .cbot .row .meta .tc{background:none;padding:0;border-radius:0;font:600 12.5px/1.3 var(--font);color:var(--ink-2)}
 .cbot .row .meta .msep{width:1px;height:11px;background:var(--line);flex:none}
 .cbot .row .meta .last{flex:1;min-width:0;margin:0;font-size:12.5px}
+/* §721 THE NAME LEADS (Islam chose A of design-mockups/internal-tracker/
+   2026-11-03_row-line.html): the name a step heavier; the line under it a
+   step quieter — one grey, the topic a plain word, a small dot between —
+   and the note's week said only when it is not this week, so "Last week"
+   still flags a task nobody has touched. */
+.cbot .row .nm .t{font-weight:600}
+.cbot .row .meta{gap:6px}
+.cbot .row .meta .tc{font-weight:400;color:var(--ink-3)}
+.cbot .row .meta .msep{width:3px;height:3px;border-radius:50%;background:var(--ink-3);opacity:.7}
+.cbot .row .meta .last{color:var(--ink-3)}
+.cbot .row .meta .last b{font-weight:400;color:var(--ink-3)}
+.cbot .row .meta .last .lw.now{display:none}
 .cbot .list .row:not(.chk) .when{justify-self:end;text-align:right;padding-top:0;font:600 12.5px/1.3 var(--font);color:var(--ink-3)}
 .cbot .list .row:not(.chk) .when.late{color:var(--bad)}
 .cbot .list .row:not(.chk) .when .weeks{right:0;left:auto}
@@ -1110,7 +1122,7 @@ function lastLine(a: Action, L: Loaded, today: string): string {
   const p = L.latest.get(a.id);
   if (!p) return "";
   const w = entryWeek(p.at, today);
-  return '<div class="last" title="' + esc(w.full) + '"><b>' + esc(w.word) + "</b> &middot; " + esc(oneLine(p.body)) + "</div>";
+  return '<div class="last" title="' + esc(w.full) + '"><span class="lw' + (w.now ? " now" : "") + '"><b>' + esc(w.word) + "</b> &middot; </span>" + esc(oneLine(p.body)) + "</div>";
 }
 /* THE PROGRESS BOX (§657): one line and Enter, on the opened row and under
    every open row of this week on the check — one box, two places (§53.5).

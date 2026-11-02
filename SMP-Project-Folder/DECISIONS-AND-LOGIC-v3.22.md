@@ -70946,3 +70946,11 @@ Islam, of §713's Tracker menu: *"change topic looks like handing to someone sho
 Also drawn for Islam, not built: `design-mockups/internal-tracker/2026-11-03_row-line.html` — the line under a task's name, before and two afters (A quieter, recommended; B on hover). The "This week" in that line is when the last note was written, not when the task is due.
 
 **Checked**: `checks/tracker.mjs` **361 passed, 0 failed** (new: show= lights the row in view, opens nothing, the address forgets it). `checks/shell.mjs`: §713's check wants View in Tracker; the link's address carries show=, not open=. Shell cache `smp-shell-v7.53-view-in-tracker`.
+
+**§720 shell run**: 553 ok / 11 failed — the same 11 as main; both §720 checks ok.
+
+## §721 — On the Tracker the task's name leads; the line under it is quieter (2026-11-03)
+
+**Asked** (Islam): "go with A, build it" — option A of `design-mockups/internal-tracker/2026-11-03_row-line.html`. On the Tracker's rows (the card list): the name is a step heavier (600); the line under it is one grey (`--ink-3`) at 12.5px, the topic a plain word (400, was 600 in `--ink-2`), a small dot between topic and note (was a hairline); and the note's week is said only when it isn't this week — the markup carries `<span class="lw now">` and the card list hides it — so "Last week ·" still flags a task nobody has touched. The title on hover still gives the note's day and time.
+
+**Checked**: `checks/tracker.mjs` **362 passed, 0 failed** — new: the name heavier than the line, topic plain, no "This week" in front of this week's note; the markup check updated for the `lw` span. Tracker-only CSS and markup, so `checks/shell.mjs` was not re-run.

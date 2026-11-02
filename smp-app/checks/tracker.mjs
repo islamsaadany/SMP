@@ -484,7 +484,7 @@ check("the history is behind one link and hidden until it is pressed, and it say
   /carried to This week \(was W2 Sep\)/.test(openPart) && /handed to Islam Saadany \(was Noran Essam\)/.test(openPart) && /created it, owner Noran Essam, due W2 Sep/.test(openPart),
   (openPart.match(/<ul class="hist"[\s\S]*?<\/ul>/) || [""])[0].slice(0, 500));
 check("the latest entry reads under the row's name as one quiet line, the week in front, and a row with no progress has no second line",
-  /data-id="p"[\s\S]*?<div class="last" title="[^"]*"><b>This week<\/b> &middot; Finance sent four of six cost centres\.<\/div>/.test(pOpen) && count(pOpen, /class="last"/g) === 1);
+  /data-id="p"[\s\S]*?<div class="last" title="[^"]*"><span class="lw now"><b>This week<\/b> &middot; <\/span>Finance sent four of six cost centres\.<\/div>/.test(pOpen) && count(pOpen, /class="last"/g) === 1);
 const chk2 = listBody({ ...pLoaded, open: null, progress: [], events: [] }, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
   ask: { view: "check", q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
 check("...on the check the progress box is on the task being talked about, and on no row of the list",
@@ -1446,6 +1446,12 @@ try {
       (await pg.locator(".open .prog .pe").count()) === 1 && (await pg.locator(".open .prog .pe .wk").innerText()).trim().toUpperCase() === "THIS WEEK" && await stayed(), JSON.stringify(entries));
     check("...the box is empty and under the cursor for the next one", (await pg.locator(".open .pnew").inputValue()) === "" && (await pg.evaluate("document.activeElement && document.activeElement.className")) === "pnew");
     check("...and the row's name carries the latest line under it", (await pg.locator(row + ".last").count()) === 1 && /Facilities answered/.test(await pg.locator(row + ".last").innerText()));
+    /* §721: the name leads — heavier than the quiet line under it, and a
+       note written this week shows no "This week" in front */
+    const lead721 = await pg.evaluate((r) => { const t = document.querySelector(r + ".nm .t"), l = document.querySelector(r + ".last"), m = document.querySelector(r + ".meta");
+      return t && l ? { name: +getComputedStyle(t).fontWeight, line: getComputedStyle(l).color, nameColor: getComputedStyle(t).color, size: parseFloat(getComputedStyle(l).fontSize), text: l.innerText.trim(), tc: m.querySelector(".tc") ? +getComputedStyle(m.querySelector(".tc")).fontWeight : 400 } : null; }, row);
+    check("the name leads: heavier than the line under it, the line one quiet grey, the topic plain, and no \"This week\" in front of a note written this week (§721)",
+      !!lead721 && lead721.name >= 600 && lead721.tc <= 400 && lead721.line !== lead721.nameColor && lead721.size <= 12.5 && /^Facilities answered/.test(lead721.text), JSON.stringify(lead721));
     await pg.locator(".open .pe [data-act=progress-edit]").click();
     await pg.locator(".open .pe textarea").fill("Facilities answered; the big room is free on Thursday."); await pg.locator(".open .pe textarea").press("Enter"); await settle();
     const edited = await asTenant(A, (c) => progressOf(c, born.id));

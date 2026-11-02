@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — The Tracker task's name leads; the line under it is quieter (§721).** Option A: name 600, line one grey, topic plain, "This week" dropped, "Last week" kept. Tracker 362/0.
+
 **2026-11-03 — View in Tracker shows the task, lit, without opening it (§720).** My tasks/Home link with show=; the Tracker scrolls to the row and lights it. Row-line mockup drawn (A/B), not built.
 
 **2026-11-03 — A Tracker task opens at once; its ⋯ opens on one press (§719).** Every task's panel rides in the page; no trip to the server. Tracker 360/0 (2 new, seen red); shell 553 ok / main's 11.

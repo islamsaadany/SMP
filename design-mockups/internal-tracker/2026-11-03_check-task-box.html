@@ -1,0 +1,166 @@
+<title>Check Task Box</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* The task box on the weekly check (the right side of the meeting), before
+   and two quieter afters. Islam: "this box needs cleaning suggest for me a
+   quieter clean options". Nothing the box does is dropped; what changes is
+   how much of it shouts. Example task. */
+:root{--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F3F5F8;--surface:#FFF;--surface-2:#EDF0F5;
+  --gold:#9C5D08;--blue:#1F5FBF;--blue-bg:#EAF2FB;--navy:#22304F;--bad:#B23025;--good:#2F6B4F;--d0:#8A97AB;--d1:#E0B300;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--bad:#E8776B;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--bad:#E8776B;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+svg{display:block}
+.pg{max-width:760px;margin:0 auto;padding-block:24px 48px;display:grid;gap:14px}
+.vs{display:inline-flex;flex-wrap:wrap;background:var(--surface-2);border-radius:8px;padding:3px;justify-self:start}
+.vs button{border:0;background:none;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--ink-2)}
+.vs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0}
+.note b{color:var(--ink)}.note p{margin:0}.note p+p{margin-top:6px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
+
+/* ---------- BEFORE ---------- */
+.b .eb{font-weight:600;color:var(--gold);font-size:15px}
+.b h2{font-size:24px;margin:4px 0 8px;line-height:1.25}
+.b .who{display:flex;gap:18px;color:var(--ink-2);font-size:15px}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:4px;margin:14px 0 18px}
+.seg span{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:600;color:var(--ink-2);font-size:15px}
+.seg span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--d1);flex:none}.dot.ns{background:var(--d0)}.dot.dn{background:var(--good)}
+.b .tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);padding:0 18px;align-items:flex-end}
+.b .tabs span{padding:8px 0 10px;font-size:15px;color:var(--ink-3);font-weight:600}
+.b .tabs span.on{color:var(--ink);border-bottom:3px solid var(--blue)}
+.b .tabs i{font-style:normal;background:var(--surface-2);border-radius:999px;padding:1px 8px;font-size:12px;margin-left:6px}
+.b .tabs .del{margin-left:auto;color:var(--bad);text-decoration:underline;font-weight:400}
+.b .inrow{display:flex;gap:12px;margin:18px 0}
+.b .inrow .in{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 16px;color:var(--ink-3);font-size:15px}
+.b .inrow .add{background:var(--navy);color:#fff;border-radius:10px;padding:11px 26px;font-weight:600}
+.tl{list-style:none;margin:0;padding:0 0 0 22px;border-left:2px solid var(--line-2);margin-left:8px;display:grid;gap:14px}
+.tl li{position:relative}
+.tl li::before{content:"";position:absolute;left:-31px;top:4px;width:12px;height:12px;border-radius:50%;border:2.5px solid var(--blue);background:var(--surface)}
+.tl .wk{font-weight:600;color:var(--blue);font-size:14.5px}.tl .wk.old{color:var(--ink-3)}
+.tl .bd{font-size:15.5px}
+.tl .by{font-size:14px;color:var(--ink-2);display:flex;gap:12px}
+.tl .by b{font-weight:600}
+.tl .by u{color:var(--ink-3)}.tl .by u.r{color:var(--bad)}
+.b .foot{display:flex;gap:12px;border-top:1px solid var(--line);margin-top:22px;padding-top:20px;flex-wrap:wrap}
+.b .foot span{border:1px solid var(--line);border-radius:10px;padding:10px 22px;font-weight:600}
+.b .foot .sv{margin-left:auto;background:var(--navy);color:#fff;border-color:var(--navy)}
+.b .keys{margin-top:12px;color:var(--ink-3);font-size:13.5px}
+.b .keys kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;font-size:12px;background:var(--surface)}
+
+/* ---------- A: one quiet column ---------- */
+.a h2{font-size:21px;margin:0;line-height:1.3}
+.a .top{display:flex;align-items:flex-start;gap:12px}
+.a .top .kb{margin-left:auto;color:var(--ink-3);padding:2px 6px;border-radius:7px}
+.a .meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:13.5px;color:var(--ink-3)}
+.a .meta .sd{width:3px;height:3px;border-radius:50%;background:var(--ink-3);opacity:.7}
+.a .stp{display:inline-flex;align-items:center;gap:7px;font-weight:600;color:var(--ink-2);border-radius:7px;padding:3px 8px;margin-left:-8px}
+.a .stp:hover{background:var(--surface-2)}
+.a .tabs{display:flex;gap:4px;margin:20px 0 14px}
+.a .tabs span{padding:4px 10px;border-radius:7px;color:var(--ink-3);font-size:13.5px}
+.a .tabs span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.a .tabs i{font-style:normal;color:var(--ink-3);margin-left:5px;font-weight:400}
+.a .in{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;padding:9px 12px;color:var(--ink-3)}
+.a .in kbd{margin-left:auto;font:500 11.5px/1 var(--font);color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:3px 6px}
+.a .tl{margin-top:16px;gap:12px;border-left-width:1px;padding-left:18px}
+.a .tl li::before{left:-23px;top:7px;width:7px;height:7px;border:0;background:var(--ink-3)}
+.a .tl li.now::before{background:var(--blue)}
+.a .tl .bd{font-size:14.5px}
+.a .tl .sub{font-size:12.5px;color:var(--ink-3);display:flex;gap:6px;align-items:center}
+.a .tl .act{display:none;gap:8px;margin-left:6px}
+.a .tl li:hover .act{display:inline-flex}
+.a .tl .act u{text-decoration:none;color:var(--ink-3)}.a .tl .act u:hover{color:var(--ink);text-decoration:underline}
+.a .foot{display:flex;align-items:center;gap:8px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line-2);flex-wrap:wrap}
+.a .lk{color:var(--ink-3);padding:6px 8px;border-radius:7px;font-weight:500}
+.a .lk:hover{background:var(--surface-2);color:var(--ink)}
+.a .sv{margin-left:auto;background:var(--navy);color:#fff;border-radius:8px;padding:8px 16px;font-weight:600;display:inline-flex;align-items:center;gap:10px}
+.a .sv kbd{font:500 11px/1 var(--font);opacity:.7}
+
+/* ---------- B: the update first ---------- */
+.bb .eb{font-size:12.5px;color:var(--ink-3)}
+.bb h2{font-size:21px;margin:2px 0 0;line-height:1.3}
+.bb .q{margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:14px 16px 10px;background:var(--surface)}
+.bb .q .ph{color:var(--ink-3);font-size:15px;min-height:46px}
+.bb .q .bar{display:flex;align-items:center;gap:6px;border-top:1px solid var(--line-2);padding-top:10px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;color:var(--ink-2)}
+.chip.on{border-color:var(--ink-2);color:var(--ink);font-weight:600}
+.bb .q .bar .sv{margin-left:auto;background:var(--navy);color:#fff;border-radius:8px;padding:7px 14px;font-weight:600}
+.bb .last{margin-top:16px;display:grid;gap:8px}
+.bb .last .h{font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.bb .last .e{font-size:14px;color:var(--ink-2)}
+.bb .last .e b{font-weight:600;color:var(--ink-3);font-size:12.5px;margin-right:6px}
+.bb .more{display:flex;gap:14px;margin-top:10px;font-size:13px}
+.bb .more span{color:var(--ink-3)}
+.bb .foot{display:flex;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--line-2);flex-wrap:wrap}
+.bb .lk{color:var(--ink-3);padding:6px 8px;border-radius:7px;font-weight:500}
+.bb .lk.r{margin-left:auto}
+@media (max-width:600px){.box{padding:18px}.a .sv{margin-left:0}}
+</style>
+<div class="pg">
+  <div class="vs" role="group" aria-label="Which version">
+    <button type="button" data-v="before" aria-pressed="false">Before</button>
+    <button type="button" data-v="a" aria-pressed="true">A · one quiet column</button>
+    <button type="button" data-v="b" aria-pressed="false">B · the update first</button>
+  </div>
+  <div class="note" id="note"></div>
+
+  <div class="box b" id="v-before" hidden>
+    <div class="eb">Functions</div>
+    <h2>Review the two HR projects &amp; Launch Retention Analytics</h2>
+    <div class="who"><span>Islam</span><span>This week</span></div>
+    <div class="seg"><span><i class="dot ns"></i>Not started</span><span class="on"><i class="dot"></i>In progress</span><span><i class="dot dn"></i>Done</span></div>
+    <div class="tabs"><span class="on">Progress<i>2</i></span><span>Description</span><span>History<i>5</i></span><span class="del">Delete</span></div>
+    <div class="inrow"><span class="in">What happened this week?</span><span class="add">Add</span></div>
+    <ul class="tl">
+      <li><div class="wk">This week</div><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="by"><b>Islam</b><u>Edit</u><u class="r">Delete</u></div></li>
+      <li><div class="wk old">Last week</div><div class="bd">had a meeting this week and postponed to next week</div><div class="by"><b>Islam</b><u>Edit</u><u class="r">Delete</u></div></li>
+    </ul>
+    <div class="foot"><span>Previous</span><span>→ Carry to next week</span><span class="sv">Save and next</span></div>
+    <div class="keys"><kbd>↑</kbd> <kbd>↓</kbd> move through the list · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> save and next</div>
+  </div>
+
+  <div class="box a" id="v-a">
+    <div class="top"><h2>Review the two HR projects &amp; Launch Retention Analytics</h2><span class="kb">⋯</span></div>
+    <div class="meta"><span>Functions</span><i class="sd"></i><span>Islam</span><i class="sd"></i><span>This week</span><i class="sd"></i><span class="stp"><i class="dot"></i>In progress ▾</span></div>
+    <div class="tabs"><span class="on">Progress<i>2</i></span><span>Description</span><span>History<i>5</i></span></div>
+    <div class="in">What happened this week?<kbd>Enter</kbd></div>
+    <ul class="tl">
+      <li class="now"><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="sub">Islam · this week<span class="act"><u>Edit</u><u>Delete</u></span></div></li>
+      <li><div class="bd">had a meeting this week and postponed to next week</div><div class="sub">Islam · last week<span class="act"><u>Edit</u><u>Delete</u></span></div></li>
+    </ul>
+    <div class="foot"><span class="lk">← Previous</span><span class="lk">Carry to next week</span><span class="sv">Save and next <kbd>Ctrl ↵</kbd></span></div>
+  </div>
+
+  <div class="box bb" id="v-b" hidden>
+    <div class="eb">Functions · Islam · This week</div>
+    <h2>Review the two HR projects &amp; Launch Retention Analytics</h2>
+    <div class="q">
+      <div class="ph">What happened this week?</div>
+      <div class="bar"><span class="chip"><i class="dot ns"></i>Not started</span><span class="chip on"><i class="dot"></i>In progress</span><span class="chip"><i class="dot dn"></i>Done</span><span class="sv">Save and next</span></div>
+    </div>
+    <div class="last"><div class="h">Before</div>
+      <div class="e"><b>This week</b>Trying to meet this week Wednesday still didn't commit</div>
+      <div class="e"><b>Last week</b>had a meeting this week and postponed to next week</div></div>
+    <div class="more"><span>Description</span><span>History (5)</span><span>⋯</span></div>
+    <div class="foot"><span class="lk">← Previous</span><span class="lk">Carry to next week</span><span class="lk r">Skip →</span></div>
+  </div>
+</div>
+<script>
+const NOTES={
+ before:'<p><b>Today.</b> A gold topic, a big title, the owner and week, a large three-way status switch, tabs with Delete in red at their end, a box with its own Add button, every entry carrying Edit and Delete, three big buttons and a keyboard line. Each piece is useful, but they all speak at once.</p>',
+ a:'<p><b>A, one quiet column (recommended).</b> The title leads. One grey line under it holds topic · owner · week · status, with the status a dot and its word that opens Not started / In progress / Done, as on the rows. Delete moves into the ⋯ beside the title. The tabs are plain words. The box takes Enter, so there\'s no Add button. Entries are a quiet timeline and show Edit and Delete only when you point at one. Previous and Carry to next week are plain links; <b>Save and next</b> is the one button, with its shortcut inside it.</p>',
+ b:'<p><b>B, the update first.</b> Built for the meeting: one big box for "What happened this week?", with the status as three small chips and <b>Save and next</b> right under it. The last two entries sit below as a short read. Description and History step back to small links. Previous, Carry to next week and Skip are plain links at the foot.</p><p>Faster to run a meeting with; less room to read a long history.</p>'};
+function show(v){
+ ['before','a','b'].forEach(k=>document.getElementById('v-'+k).hidden=k!==v);
+ document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));
+ document.getElementById('note').innerHTML=NOTES[v];
+}
+document.querySelectorAll('[data-v]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+show('a');
+</script>

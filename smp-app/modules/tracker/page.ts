@@ -54,9 +54,9 @@ const brk = () => process.env.SMP_BREAK || "";
 function brkCss(): string {
   const b = brk();
   if (b === "card-jumps") return ".tile{min-height:0}";                                         /* §356.16 put back */
-  if (b === "week-auto") return ".row{grid-template-columns:20px minmax(0,1fr) 132px auto 64px 128px 26px}"; /* §503 put back: the week sized by its words */
+  if (b === "week-auto") return ".cbot .list .row:not(.chk){grid-template-columns:22px minmax(0,1fr) auto 70px 118px 28px}"; /* §503 put back: the week sized by its words */
   if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
-  if (b === "narrow-rename") return ".tn2.editing .t{flex:0 1 auto}";                       /* §565 put back: the box sized by an input's default */
+  if (b === "narrow-rename") return ".tn2.editing .t,.tn2.editing .nm .t{flex:0 1 auto}";                       /* §565 put back: the box sized by an input's default */
   if (b === "bar-scrolls") return ".tb{position:relative}.pin{top:0}";                        /* §566 put back: the top bar scrolls away */
   if (b === "no-busy-mark") return ".busy{opacity:1!important;cursor:auto!important}.busy [data-act]{pointer-events:auto!important}"; /* §671 put back: a press shows nothing until the answer */
   return "";

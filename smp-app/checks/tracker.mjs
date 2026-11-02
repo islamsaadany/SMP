@@ -1335,6 +1335,13 @@ try {
        back from Postgres, never off the row (§96). The double-click only
        renames now. Both ends (§94.2): set, then taken off again. */
     check("a row with no topic carries no tag on its name (§707)", (await pg.locator(row + ".tc:not(.add)").count()) === 0 && !(await pg.locator(row + ".tc.add").isVisible()));
+    /* THE COLUMNS LINE UP DOWN THE LIST (§503, kept through §707): every row
+       is its own grid, so a week sized by its words would start at a
+       different place on every row. Measured where the WORDS start — a name that can be pressed
+       wears a padded box pulled out by the same padding. SMP_BREAK=week-auto
+       puts the sizing back and must redden this. */
+    const whoLefts = await pg.locator(".cbot .row .when").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().left + parseFloat(getComputedStyle(e).paddingLeft))));
+    check("...and the week column lines up down the list, whatever each week says", whoLefts.length > 1 && Math.max(...whoLefts) - Math.min(...whoLefts) <= 1, JSON.stringify(whoLefts) + " · weeks " + JSON.stringify(await pg.locator(".cbot .row .when").allInnerTexts()));
     if (process.env.SMP_SHOT2) await pg.screenshot({ path: process.env.SMP_SHOT2 });
     /* THE MEETING, PRESSED (§706): the check opens on the first task, a press
        on the left opens another on the right (on the address, no reload), a

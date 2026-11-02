@@ -141,9 +141,9 @@ const head='<div class="card"><div class="chd"><h2>Actions <span class="n">13</s
  '<div class="tools"><div class="add">'+PEN+'<span class="t">Write the next action and press Enter</span><span class="opt">Topic</span><span class="opt">This week</span><span class="opt">Islam</span></div><div class="find">'+LENS+'Search</div><div class="gb">Group by <b>Owner</b></div></div>';
 const meta=o=>{const n=o.rows.length;return n+' open'+(o.late?' · <b>'+o.late+' late</b>':'')};
 function now(){
- return head+O.map((o,i)=>'<div class="sh"><span class="ix">0'+(i+1)+'</span><h3>'+o.n+'</h3><span class="meta">'+meta(o)+'</span><span class="addto">+ Add for '+o.s+'</span></div>'+
+ return '<div class="now">'+head+O.map((o,i)=>'<div class="sh"><span class="ix">0'+(i+1)+'</span><h3>'+o.n+'</h3><span class="meta">'+meta(o)+'</span><span class="addto">+ Add for '+o.s+'</span></div>'+
   o.rows.map(r=>'<div class="row"><span class="tick'+(r.late?' late':'')+'"></span><div><div class="nm"><span class="t">'+r.t+'</span><span class="tag">'+r.tp+'</span>'+(r.late?'<span class="ltag">'+r.late+'</span>':'')+'</div>'+
-   (r.u?'<div class="last"><b>'+r.u[0]+'</b> · '+r.u[1]+'</div>':'')+'</div><span class="cell'+(r.late?' red':'')+'">'+r.wk+'</span><span class="cell">'+o.s+'</span><span class="st"><span class="dot'+(r.st==='p'?' d1':'')+'"></span>'+ST[r.st]+'</span>'+KB+'</div>').join('')).join('')+'</div>';
+   (r.u?'<div class="last"><b>'+r.u[0]+'</b> · '+r.u[1]+'</div>':'')+'</div><span class="cell'+(r.late?' red':'')+'">'+r.wk+'</span><span class="cell">'+o.s+'</span><span class="st"><span class="dot'+(r.st==='p'?' d1':'')+'"></span>'+ST[r.st]+'</span>'+KB+'</div>').join('')).join('')+'</div></div>';
 }
 /* the cleaner row: the name on one line, cut with … (the whole name on hover and when opened);
    under it, one quiet line — the topic, then the latest update; the week only when it is not

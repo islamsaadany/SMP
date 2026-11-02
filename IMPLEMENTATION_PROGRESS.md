@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — A task's name is never cut on My tasks and Home (§730).** It wraps; the note line stays one line. Shell run pending.
+
 **2026-11-03 — My tasks' Done menu shut; Home's rows hover all alike (§729).** Two cascade faults. Shell run pending.
 
 **2026-11-03 — My tasks and Home: the Tracker's quiet line; a task opens at once (§728).** workDetails read with the list. Tracker 369/0; shell run pending.

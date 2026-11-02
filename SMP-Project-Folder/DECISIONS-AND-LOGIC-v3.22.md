@@ -71023,3 +71023,9 @@ Nothing it does is gone; it is quieter:
 - The odd rows' reset (`.mwlist .mwrow:nth-child(odd of .mwrow){background:none}`, and Home's) outweighs `.mwrow:hover` and `.mwrow.on`, so rows 1, 3, 5… never greyed on hover nor took the opened tint — on Home's three rows, only the middle one did. The hover and `.on` rules now carry the same `:nth-child(odd of …)` weight.
 
 **Checked**: `checks/shell.mjs` — new: the Done menu is shut at rest and after a choice; a hover greys the first row. Shell cache `smp-shell-v7.56-menu-hover-fix`. (Run result below when it lands.)
+
+## §730 — A task's name is never cut on My tasks and Home (2026-11-03)
+
+**Asked** (Islam): "for the home page tasks some of the task names or the notes below is trimmed do you think we make it appear on hovering?" Answered: not on hover (a tooltip is the popup §722 took away and a phone has no hover; a row that grows under the pointer jumps). Instead: the name is never cut — a long name wraps onto a second line — and the note line stays one line, cut, its whole a press away in the opened task (which opens at once, §728). "ok do it for both home and my tasks". One rule (`.mwlist .mwrow .t`), Home's rows being `.mwlist.mwhome`.
+
+**Checked**: `checks/shell.mjs` — new: the name wraps (white-space normal, no ellipsis), the note line stays one line. Shell cache `smp-shell-v7.57-names-wrap`. (Run result below when it lands; it covers §729 too.)

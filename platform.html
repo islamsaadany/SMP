@@ -1848,6 +1848,11 @@
   /* §728 THE NAME LEADS, AS ON THE TRACKER (§721): the name a step heavier;
      the line one grey, the client a plain word, a small dot between */
   .mwlist .mwrow .t, .mwhome .mwrow .t{ font-weight:600 }
+  /* §730 A TASK'S NAME IS NEVER CUT (Islam: "some of the task names or the
+     notes below is trimmed"; agreed: "do it for both home and my tasks"):
+     a long name wraps onto a second line; the note line under it stays one
+     line, cut, the whole of it a press away in the opened task */
+  .mwlist .mwrow .t{ white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere }
   .mwmeta{ gap:6px }
   .mwmeta .mwcl{ font-weight:400; color:var(--ink-3) }
   .mwmeta .sep{ width:3px; height:3px; border-radius:50%; background:var(--ink-3); opacity:.7 }

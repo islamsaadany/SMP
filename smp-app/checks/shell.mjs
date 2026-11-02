@@ -3227,6 +3227,10 @@ await section("4 · Forefront's own pages", async () => {
     const menu729 = await page.evaluate(() => { const m = document.querySelector(".mwcardhd .mwwordm"); return m ? getComputedStyle(m).display : "gone"; });
     await page.hover(".mwlist .mwrow >> nth=0");
     const hov729 = await page.evaluate(() => { const r = document.querySelector(".mwlist .mwrow"); return r ? getComputedStyle(r).backgroundColor : ""; });
+    /* §730: a name is never cut — it wraps; the note line stays one line */
+    const wrap730 = await page.evaluate(() => { const t = document.querySelector(".mwlist .mwrow .t"), up = document.querySelector(".mwlist .mwmeta .up");
+      return { ws: t ? getComputedStyle(t).whiteSpace : "", tov: t ? getComputedStyle(t).textOverflow : "", up: up ? getComputedStyle(up).whiteSpace : "nowrap" }; });
+    check(wrap730.ws === "normal" && wrap730.tov !== "ellipsis" && wrap730.up === "nowrap", "\u2026a task's name is never cut, it wraps; the note line under it stays one line (\u00a7730)", JSON.stringify(wrap730));
     check(menu729 === "none" && !/rgba\(0, 0, 0, 0\)|transparent/.test(hov729),
       "\u2026the Done menu is shut until pressed, and a hover greys the first row as it does the others (\u00a7729)", JSON.stringify({ menu729, hov729 }));
     await page.click(".mwcardhd .mwfind svg");

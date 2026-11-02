@@ -1,0 +1,146 @@
+<title>Check Side Rail</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* The weekly check's left rail (the meeting's list), before and two quieter
+   afters, each beside the task box Islam chose (C, the update first with the
+   timeline). Islam: "suggest cleaner options for the side rail to match the
+   clean right section". Example tasks. */
+:root{--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F3F5F8;--surface:#FFF;--surface-2:#EDF0F5;
+  --gold:#9C5D08;--blue:#1F5FBF;--blue-bg:#EAF2FB;--navy:#22304F;--good:#2F6B4F;--d0:#8A97AB;--d1:#E0B300;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.pg{max-width:1100px;margin:0 auto;padding-block:24px 48px;display:grid;gap:14px}
+.vs{display:inline-flex;flex-wrap:wrap;background:var(--surface-2);border-radius:8px;padding:3px;justify-self:start}
+.vs button{border:0;background:none;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--ink-2)}
+.vs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0;max-width:85ch}
+.note b{color:var(--ink)}.note p{margin:0}.note p+p{margin-top:6px}
+.meet{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--d1);flex:none}.dot.ns{background:var(--d0)}.dot.dn{background:var(--good)}
+.it{display:flex;align-items:center;gap:10px;padding:8px 16px;min-width:0}
+.it span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+
+/* BEFORE */
+.r0 .th{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
+.r0 .th .ix{color:var(--gold);font-weight:600;letter-spacing:.04em}
+.r0 .th h3{margin:0;font-size:16px}
+.r0 .th .n{color:var(--ink-3)}
+.r0 .th .k{margin-left:auto;color:var(--ink-3)}
+.r0 .it{font-size:15px}
+.r0 .it.on{background:var(--blue-bg);box-shadow:inset 3px 0 0 var(--blue)}
+.r0 .sh{font-size:11.5px;font-weight:700;letter-spacing:.1em;color:var(--ink-3);padding:10px 16px 2px}
+.r0 .it.dn span{color:var(--ink-3)}
+.r0 .it .dw{margin-left:auto;color:var(--good);font-weight:600;font-size:13px}
+.r0 .wl{display:flex;align-items:center;gap:8px;padding:6px 16px 12px;color:var(--ink-3);border-bottom:1px solid var(--line-2)}
+.r0 .wl u{color:var(--ink-2);text-decoration:underline dotted;white-space:nowrap}
+
+/* A: QUIET LIST */
+.r1 .th{display:flex;align-items:baseline;gap:8px;padding:14px 16px 4px}
+.r1 .th h3{margin:0;font-size:13px;font-weight:600;color:var(--ink-2)}
+.r1 .th .n{color:var(--ink-3);font-size:12.5px}
+.r1 .it{padding:6px 16px;font-size:14px;color:var(--ink);border-radius:0}
+.r1 .it .dot{width:7px;height:7px}
+.r1 .it.on{background:var(--surface-2);font-weight:600}
+.r1 .it.gone span{color:var(--ink-3)}
+.r1 .it .ck{margin-left:auto;color:var(--ink-3);font-size:12px;flex:none}
+.r1 .lks{display:flex;gap:14px;padding:4px 16px 12px 33px;font-size:12.5px;border-bottom:1px solid var(--line-2)}
+.r1 .lks span{color:var(--ink-3)}.r1 .lks span.add{color:var(--blue)}
+
+/* B: WALK THROUGH */
+.r2 .th{padding:14px 16px 6px}
+.r2 .th .t1{display:flex;align-items:baseline;gap:8px}
+.r2 .th h3{margin:0;font-size:13px;font-weight:600;color:var(--ink-2)}
+.r2 .th .n{margin-left:auto;color:var(--ink-3);font-size:12px;font-variant-numeric:tabular-nums}
+.r2 .bar{height:3px;border-radius:2px;background:var(--line-2);margin-top:6px;overflow:hidden}
+.r2 .bar i{display:block;height:100%;background:var(--blue)}
+.r2 .it{padding:6px 16px;font-size:14px}
+.r2 .c{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:grid;place-items:center;font-size:9px;color:#fff}
+.r2 .it.gone .c{background:var(--ink-3);border-color:var(--ink-3)}
+.r2 .it.gone span{color:var(--ink-3)}
+.r2 .it.on{background:var(--blue-bg)}
+.r2 .it.on .c{border-color:var(--blue);border-width:4px}
+.r2 .it .sw{margin-left:auto;font-size:12px;color:var(--ink-3);flex:none}
+.r2 .lks{display:flex;gap:14px;padding:4px 16px 12px 41px;font-size:12.5px;border-bottom:1px solid var(--line-2)}
+.r2 .lks span{color:var(--ink-3)}.r2 .lks span.add{color:var(--blue)}
+
+/* the box beside it (C) */
+.box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
+.box .eb{font-size:12.5px;color:var(--ink-3)}
+.box h2{font-size:21px;margin:2px 0 0;line-height:1.3}
+.q{margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:14px 16px 10px}
+.q .ph{color:var(--ink-3);font-size:15px;min-height:46px}
+.q .bar2{display:flex;align-items:center;gap:6px;border-top:1px solid var(--line-2);padding-top:10px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;color:var(--ink-2)}
+.chip.on{border-color:var(--ink-2);color:var(--ink);font-weight:600}
+.sv{margin-left:auto;background:var(--navy);color:#fff;border-radius:8px;padding:7px 14px;font-weight:600}
+.tlh{margin-top:18px;font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.tl{list-style:none;margin:14px 0 0 8px;padding:0 0 0 22px;border-left:2px solid var(--line-2);display:grid;gap:14px}
+.tl li{position:relative}
+.tl li::before{content:"";position:absolute;left:-30px;top:5px;width:11px;height:11px;border-radius:50%;border:2px solid var(--blue);background:var(--surface)}
+.tl li.old::before{border-color:var(--ink-3)}
+.tl .wk{font-weight:600;color:var(--blue);font-size:13.5px}.tl .wk.old{color:var(--ink-3)}
+.tl .bd{font-size:14.5px}
+.tl .by{font-size:12.5px;color:var(--ink-3)}
+.more{display:flex;gap:14px;margin-top:18px;font-size:13px;color:var(--ink-3)}
+.foot{display:flex;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--line-2);flex-wrap:wrap;color:var(--ink-3);font-weight:500}
+.foot .r{margin-left:auto}
+@media (max-width:820px){.meet{grid-template-columns:1fr}}
+</style>
+<div class="pg">
+  <div class="vs" role="group" aria-label="Which version">
+    <button type="button" data-v="0" aria-pressed="false">Before</button>
+    <button type="button" data-v="1" aria-pressed="true">A · quiet list</button>
+    <button type="button" data-v="2" aria-pressed="false">B · walk-through</button>
+  </div>
+  <div class="note" id="note"></div>
+  <div class="meet"><div id="rail"></div>
+    <div class="box">
+      <div class="eb">Functions · Islam · This week</div>
+      <h2>Review the two HR projects &amp; Launch Retention Analytics</h2>
+      <div class="q"><div class="ph">What happened this week?</div>
+        <div class="bar2"><span class="chip"><i class="dot ns"></i>Not started</span><span class="chip on"><i class="dot"></i>In progress</span><span class="chip"><i class="dot dn"></i>Done</span><span class="sv">Save and next</span></div></div>
+      <div class="tlh">Progress so far</div>
+      <ul class="tl">
+        <li><div class="wk">This week</div><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="by">Islam</div></li>
+        <li class="old"><div class="wk old">Last week</div><div class="bd">had a meeting this week and postponed to next week</div><div class="by">Islam</div></li>
+      </ul>
+      <div class="more"><span>Description</span><span>History (5)</span><span>⋯</span></div>
+      <div class="foot"><span>← Previous</span><span>Carry to next week</span><span class="r">Skip →</span></div>
+    </div>
+  </div>
+</div>
+<script>
+const T=[['Review the two HR projects & Launch Retention Analytics','p'],['Finance Adjust Project that is missing Milestones','p'],['Confirm IT Project updates with IT Function head','p'],['Transformation Project Refinement','p'],['Transformation project Confirmation (Mostafa)','ns'],['Reporting for Supply Chain (AbdelAzim)','p'],['Finance Reporting','ns'],['CX one Project that Has 8 deliverables dropped','ns'],['Risk Team (Mena with Men3em) we need to align','ns']];
+const GONE=1; /* the first one is being talked about; none gone through yet in Functions except none */
+const dot=s=>'<i class="dot'+(s==='ns'?' ns':'')+'"></i>';
+const R={
+ 0:{note:'<p><b>Today.</b> Each topic is a card with a gold number, its name and "9 open", a ⋯; every task with its status dot; the one being talked about in blue with a blue bar; then LAST WEEK with what was done, and NEXT WEEK with a write line and its week and owner picks always out.</p>',
+  html:()=>'<div class="rail r0"><div class="th"><span class="ix">01</span><h3>Functions</h3><span class="n">9 open</span><span class="k">⋯</span></div>'+
+   T.map((t,i)=>'<div class="it'+(i===0?' on':'')+'">'+dot(t[1])+'<span>'+t[0]+'</span></div>').join('')+
+   '<div class="sh">LAST WEEK</div><div class="it dn"><i class="dot dn"></i><span>IT Refinement and adjust redundancy</span><b class="dw">Done</b></div>'+
+   '<div class="sh">NEXT WEEK</div><div class="wl">✎ <span style="flex:1">Write next week\'s action</span><u>Next week</u><u>Islam</u></div>'+
+   '<div class="th"><span class="ix">02</span><h3>Reporting</h3><span class="n">1 open</span><span class="k">⋯</span></div></div>'},
+ 1:{note:'<p><b>A, quiet list (recommended).</b> Topics are small grey headings with a plain count; no gold numbers, no card per topic. Each task is one line with a small status dot; the one being talked about sits on soft grey and in bold (no blue bar); one already gone through turns grey with a small ✓. Last week\'s done work and next week\'s line fold into two quiet links under each topic: <b>1 done last week</b> and <b>+ Next week\'s action</b> (which opens the write line). The topic\'s ⋯ shows on hover.</p>',
+  html:()=>'<div class="rail r1"><div class="th"><h3>Functions</h3><span class="n">9</span></div>'+
+   T.map((t,i)=>'<div class="it'+(i===0?' on':'')+(i===1||i===2?' gone':'')+'">'+dot(t[1])+'<span>'+t[0]+'</span>'+(i===1||i===2?'<span class="ck">✓</span>':'')+'</div>').join('')+
+   '<div class="lks"><span>1 done last week ›</span><span class="add">+ Next week\'s action</span></div>'+
+   '<div class="th"><h3>Reporting</h3><span class="n">1</span></div><div class="it">'+dot('p')+'<span>Monthly reporting pack</span></div><div class="lks"><span class="add">+ Next week\'s action</span></div></div>'},
+ 2:{note:'<p><b>B, walk-through.</b> The rail becomes the meeting\'s checklist. Each topic heading shows how far the meeting has got, "2 of 9", with a thin bar. Each task has a circle: empty until talked about, filled once gone through; the one on screen has a blue ring. The status moves to the right box only (where you set it), so the rail has one job: where are we. Last week and next week fold into the same two links as A.</p><p>Best for running the meeting; the status at a glance moves off the rail.</p>',
+  html:()=>'<div class="rail r2"><div class="th"><div class="t1"><h3>Functions</h3><span class="n">2 of 9</span></div><div class="bar"><i style="width:22%"></i></div></div>'+
+   T.map((t,i)=>'<div class="it'+(i===0?' on':'')+(i===1||i===2?' gone':'')+'"><i class="c">'+(i===1||i===2?'✓':'')+'</i><span>'+t[0]+'</span></div>').join('')+
+   '<div class="lks"><span>1 done last week ›</span><span class="add">+ Next week\'s action</span></div>'+
+   '<div class="th"><div class="t1"><h3>Reporting</h3><span class="n">0 of 1</span></div><div class="bar"><i style="width:0"></i></div></div><div class="it"><i class="c"></i><span>Monthly reporting pack</span></div><div class="lks"><span class="add">+ Next week\'s action</span></div></div>'}};
+function show(v){
+ document.getElementById('rail').innerHTML=R[v].html();
+ document.getElementById('note').innerHTML=R[v].note;
+ document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(v))));
+}
+document.querySelectorAll('[data-v]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+show(1);
+</script>

@@ -106,7 +106,7 @@ svg{display:block}
 .c .tl li.old::before{border-color:var(--ink-3)}
 .c .tl .wk{font-size:13.5px}
 .c .tl .bd{font-size:14.5px}
-.c .tl .by{font-size:13px;gap:10px}
+.c .tl .by{font-size:12.5px;color:var(--ink-3);font-weight:400}
 .c .tl .by u{text-decoration:underline;text-underline-offset:2px}
 .c .more{margin-top:18px}
 .c .tlh{margin-top:18px;font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
@@ -171,8 +171,8 @@ svg{display:block}
     </div>
     <div class="tlh">Progress so far</div>
     <ul class="tl">
-      <li><div class="wk">This week</div><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="by"><b>Islam</b><u>Edit</u><u class="r">Delete</u></div></li>
-      <li class="old"><div class="wk old">Last week</div><div class="bd">had a meeting this week and postponed to next week</div><div class="by"><b>Islam</b><u>Edit</u><u class="r">Delete</u></div></li>
+      <li><div class="wk">This week</div><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="by">Islam</div></li>
+      <li class="old"><div class="wk old">Last week</div><div class="bd">had a meeting this week and postponed to next week</div><div class="by">Islam</div></li>
     </ul>
     <div class="more"><span>Description</span><span>History (5)</span><span>⋯</span></div>
     <div class="foot"><span class="lk">← Previous</span><span class="lk">Carry to next week</span><span class="lk r">Skip →</span></div>
@@ -183,7 +183,7 @@ const NOTES={
  before:'<p><b>Today.</b> A gold topic, a big title, the owner and week, a large three-way status switch, tabs with Delete in red at their end, a box with its own Add button, every entry carrying Edit and Delete, three big buttons and a keyboard line. Each piece is useful, but they all speak at once.</p>',
  a:'<p><b>A, one quiet column (recommended).</b> The title leads. One grey line under it holds topic · owner · week · status, with the status a dot and its word that opens Not started / In progress / Done, as on the rows. Delete moves into the ⋯ beside the title. The tabs are plain words. The box takes Enter, so there\'s no Add button. Entries are a quiet timeline and show Edit and Delete only when you point at one. Previous and Carry to next week are plain links; <b>Save and next</b> is the one button, with its shortcut inside it.</p>',
  b:'<p><b>B, the update first.</b> Built for the meeting: one big box for "What happened this week?", with the status as three small chips and <b>Save and next</b> right under it. The last two entries sit below as a short read. Description and History step back to small links. Previous, Carry to next week and Skip are plain links at the foot.</p><p>Faster to run a meeting with; less room to read a long history.</p>',
- c:'<p><b>C, B with the timeline.</b> The same update-first box, but the earlier entries sit on the timeline you had before, under "Progress so far": the week on top (this week in blue), the words, then the writer with Edit and Delete, along a thin line. Every entry is shown, not just the last two, so nothing is a press away.</p>'};
+ c:'<p><b>C, B with the timeline.</b> The same update-first box, but the earlier entries sit on the timeline you had before, under "Progress so far": the week on top (this week in blue), the words, then the writer in small grey, along a thin line. Every entry is shown, not just the last two. No Edit or Delete here: an entry is put right from the task itself, out of the meeting.</p>'};
 function show(v){
  ['before','a','b','c'].forEach(k=>document.getElementById('v-'+k).hidden=k!==v);
  document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));

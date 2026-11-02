@@ -70,15 +70,15 @@ const CSS = `
    title (the top bar is the way back) and the third count reads "Due". */
 :root{%BARVARS%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
   --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;--bad-bg:#FBEDEB;
-  --ns:#2B3A55;--ns-bg:#E3E8EF;--yel:#6B4E00;--yel-bg:#FFF0A8;--done-bg:#DCF0E5;--carry:#1F5FBF;--wk:#EAF2FB;--wk-line:#B9D3EF;--wk-ink:#1F4E86;
+  --ns:#2B3A55;--ns-bg:#E3E8EF;--yel:#6B4E00;--yel-bg:#FFF0A8;--done-bg:#DCF0E5;--carry:#1F5FBF;--wk:#EAF2FB;--wk-line:#B9D3EF;--wk-ink:#1F4E86;--d0:#8A97AB;--d1:#E0B300;--sel:#F0F5FD;
   --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
 /* THE FONT FAMILY IS NAMED, NEVER "inherit" INSIDE THE SHORTHAND (§356.14):
    a shorthand ending in a CSS-wide keyword is not CSS a browser will read,
    so every such line was silently dropped. */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
-  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;--ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;--wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;color-scheme:dark}}
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;--ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;--wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;--d0:#7D889B;--d1:#E8C547;--sel:#1B2638;color-scheme:dark}}
 :root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
-  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;--ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;--wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;color-scheme:dark}
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;--ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--done-bg:#1B2C26;--carry:#8FB4F0;--wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;--d0:#7D889B;--d1:#E8C547;--sel:#1B2638;color-scheme:dark}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 48px}
 /* THE BAND STAYS PUT (§565, design-mockups/internal-tracker/2026-10-21_frozen-band.html).
@@ -309,35 +309,34 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 .team button.on::after,.topics button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
 .topics{min-width:190px}
 .topics .tnew{display:block;width:100%;border:0;border-top:1px solid var(--line);margin-top:3px;padding:7px 9px 5px;background:transparent;color:var(--ink);font:400 13.5px/1.4 var(--font);outline:none}
-/* THE PILL HUGS ITS WORDS (2026-11-01, §700, Islam: "why are they bigger
-   than their writing? doesn't seem clean"): no fixed width; the column holds
-   the place and the pill sits at its start. A select sizes to what it says
-   where the browser can (field-sizing), else to its widest choice. */
-/* THE STATUS IS A PILL OF ITS OWN COLOUR (2026-11-01, Islam: "grey with
-   grey and not really clear"; option C of
-   design-mockups/internal-tracker/2026-11-01_status-and-carry-colours.html):
-   a soft tint per status, no outline — Not started slate, In progress yellow,
-   Done green — with a mark in front (an empty ring, a half, a full dot). One
-   box whether it can be pressed or not: the same font, height and width for
-   a select and a span (§497). The marks on the select are pictures, so each
-   carries its colour twice, light and dark. */
-.st{display:inline-flex;align-items:center;justify-self:start;gap:5px;height:24px;width:auto;font:600 12.5px/1 var(--font);letter-spacing:0;text-transform:none;padding:0 9px 0 8px;border:0;border-radius:6px;color:var(--ns);background-color:var(--ns-bg);white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0}
-span.st::before{content:"";width:10px;height:10px;border-radius:50%;box-sizing:border-box;border:1.5px solid currentColor;flex:none}
-span.st.prog::before{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
-span.st.done::before{background:currentColor}
-select.st{cursor:pointer;padding:0 19px 0 23px;field-sizing:content;background-repeat:no-repeat;background-position:left 8px center,right 7px center}
-select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%232B3A55' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%232B3A55'/%3E%3C/svg%3E")}
-select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%236B4E00' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%236B4E00'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%236B4E00'/%3E%3C/svg%3E")}
-select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%231B6E4E'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%231B6E4E'/%3E%3C/svg%3E")}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23DDE3EC' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23DDE3EC'/%3E%3C/svg%3E")} :root:not([data-theme="light"]) select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23FFE07A' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%23FFE07A'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23FFE07A'/%3E%3C/svg%3E")} :root:not([data-theme="light"]) select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%2363BE96'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%2363BE96'/%3E%3C/svg%3E")}}
-:root[data-theme="dark"] select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23DDE3EC' stroke-width='1.5'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23DDE3EC'/%3E%3C/svg%3E")} :root[data-theme="dark"] select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.1' fill='none' stroke='%23FFE07A' stroke-width='1.5'/%3E%3Cpath d='M5 .9a4.1 4.1 0 0 0 0 8.2z' fill='%23FFE07A'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%23FFE07A'/%3E%3C/svg%3E")} :root[data-theme="dark"] select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4.85' fill='%2363BE96'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%2363BE96'/%3E%3C/svg%3E")}
-select.st:hover,select.st:focus-visible{box-shadow:inset 0 0 0 1px currentColor;outline:none}
-/* .prog is also the progress list's name: the pill's own margin and padding win */
-.st.prog{color:var(--yel);background-color:var(--yel-bg);margin:0;max-height:none;overflow:visible;list-style:none}
-span.st.prog{padding:0 9px 0 8px}
-select.st.prog{padding:0 19px 0 23px}
-.st.done{color:var(--good);background-color:var(--done-bg)}
+/* THE STATUS IS A DOT AND ITS WORD (2026-11-02, §701; the quiet list of
+   design-mockups/internal-tracker/2026-11-02_actions-quiet-list.html): grey
+   Not started, yellow In progress, green Done, the word in the row's own
+   ink. The tinted pill of §699–§700 went with the quiet list: one colour
+   per row is enough, and the dot carries it. One box whether it can be
+   pressed or not (§497): the same height and font for a select and a span.
+   The select draws its dot and caret as pictures, so each carries its
+   colour twice, light and dark. */
+.st{display:inline-flex;align-items:center;justify-self:start;gap:7px;height:26px;width:auto;font:600 13px/1 var(--font);letter-spacing:0;text-transform:none;padding:0 6px;border:0;border-radius:6px;color:var(--ink-2);background-color:transparent;white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0 0 0 -6px}
+span.st::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--d0);flex:none}
+span.st.prog::before{background:var(--d1)}
+span.st.done::before{background:var(--good)}
+select.st{cursor:pointer;padding:0 18px 0 22px;field-sizing:content;background-repeat:no-repeat;background-position:left 6px center,right 5px center}
+select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%238A97AB'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E")}
+select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%23E0B300'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E")}
+select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%231B6E4E'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%237D889B'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%238E99AC'/%3E%3C/svg%3E")} :root:not([data-theme="light"]) select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%23E8C547'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%238E99AC'/%3E%3C/svg%3E")} :root:not([data-theme="light"]) select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%2363BE96'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%238E99AC'/%3E%3C/svg%3E")}}
+:root[data-theme="dark"] select.st{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%237D889B'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%238E99AC'/%3E%3C/svg%3E")} :root[data-theme="dark"] select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%23E8C547'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%238E99AC'/%3E%3C/svg%3E")} :root[data-theme="dark"] select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Ccircle cx='4.5' cy='4.5' r='4.5' fill='%2363BE96'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%238E99AC'/%3E%3C/svg%3E")}
+select.st:hover,select.st:focus-visible{background-color:var(--surface-2);outline:none}
+/* .prog is also the progress list's name: the status's own margin and padding win */
+.st.prog{color:var(--ink-2);background-color:transparent;margin:0 0 0 -6px;max-height:none;overflow:visible;list-style:none}
+span.st.prog{padding:0 6px}
+select.st.prog{padding:0 18px 0 22px}
+.st.done{color:var(--ink-2);background-color:transparent}
 select.st option{color:var(--ink);background:var(--surface)}
+/* a status dot on its own (§701): the meeting list and its status buttons */
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--d0)}
+.dot.d1{background:var(--d1)}.dot.d2{background:var(--good)}
 /* the arrow that expands a row for its notes and history, and folds it */
 .more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
 .more:hover,.more.on,.more:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
@@ -539,38 +538,100 @@ const LOOK = `
 .cbot .blk .row.chk{padding:9px 14px}
 .cbot .none{padding:16px 14px 12px}
 @media (max-width:760px){.cbot .open{padding-left:14px}.cbot .foot{padding-left:14px}}
-/* THE WEEKLY CHECK AS TOPIC CARDS (2026-11-01, §700; option 3 of
-   design-mockups/internal-tracker/2026-11-01_weekly-check-revamp.html, with
-   heading A of 2026-11-01_topic-headings.html). Islam: the topics were not
-   told apart, and This week's yellowish ground read like In progress. Each
-   topic is its own card under a grey band — its number in gold, its name
-   bold, its counts, a small done bar; the weeks inside lose their frames and
-   are strips: This week pale blue, last and next week plain over a dashed
-   rule. The card head above stands alone. Corners are drawn on the edges,
-   never clipped, so the write line's week and owner lists can still open
-   past the card. */
-.pin:has(+ .cbot.ck) .card.ctop,.pin:has(+ .cbot.ck) .card.ctop.solo{border-radius:12px}
-.card.cbot.ck{background:none;border:0;box-shadow:none;padding:14px 0 0}
-.cbot.ck .list>.sec{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 14px;padding:0}
-.cbot.ck .sec:has(.blk){padding-bottom:0}
-.cbot.ck .sec>.sh{background:var(--surface-2);border-bottom:1px solid var(--line);border-radius:11px 11px 0 0;padding:11px 14px;align-items:center;gap:10px}
-.cbot.ck .sh .ix{display:inline;font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
-.cbot.ck .sh h3{font:700 15.5px/1.25 var(--font);letter-spacing:0;text-transform:none;color:var(--ink)}
-.cbot.ck .sh .meta{font:500 12.5px/1.3 var(--font);color:var(--ink-2)}
-.cbot.ck .sh .end{font:500 12.5px/1 var(--font);color:var(--ink-2)}
-.cbot.ck .sh.quiet h3{color:var(--ink-2);font-style:italic;font-weight:600}
-.cbot.ck .mtr{display:inline-block;width:72px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
-.cbot.ck .mtr i{display:block;height:100%;background:var(--good)}
-.cbot.ck .asleep{padding:10px 14px}
-.cbot.ck .blk{margin:0;border:0;border-radius:0;box-shadow:none;background:transparent}
-.cbot.ck .wkh{border-radius:0;background:transparent;color:var(--ink-3);border-bottom:1px dashed var(--line);font-weight:700}
-.cbot.ck .blk .wkh .days{color:var(--ink-3)}
-.cbot.ck .blk+.blk{border-top:1px solid var(--line)}
-.cbot.ck .blk.now .wkh{background:var(--wk);color:var(--wk-ink);border-bottom:1px solid var(--wk-line)}
-.cbot.ck .blk.now .wkh .days{color:var(--wk-ink)}
-.cbot.ck .sec>:last-child,.cbot.ck .sec>.blk:last-child>:last-child{border-bottom-left-radius:11px;border-bottom-right-radius:11px}
-.cbot.ck .sec .row.chk:last-child,.cbot.ck .sec .pline:last-child{border-bottom:0}
-@media (max-width:760px){.cbot.ck .mtr{display:none}}
+/* THE QUIET LIST (2026-11-02, §701; design-mockups/internal-tracker/
+   2026-11-02_actions-quiet-list.html). No stripes: rows parted by a
+   hairline, a dot and a word for the status, and one control on the right
+   — the ⋯ that opens the task. */
+.cbot .sec .row:nth-child(odd of .row:not(.done)),.cbot .sec.showdone .row:nth-child(odd of .row){background:transparent}
+.cbot .list .row{padding:10px 14px;border-bottom-color:var(--line-2)}
+.cbot .sec .row.on{background:var(--sel)}
+.row .more svg{width:16px;height:16px}
+.row .more.on{background:var(--surface);color:var(--ink)}
+
+/* THE OPENED TASK, TABBED (§701, option D) */
+.open{display:block;grid-template-columns:none;grid-column:auto}
+.cbot .open{grid-column:1/-1}
+.ptab.histlink{margin:0 0 -1px;padding:9px 12px 10px;font:600 13.5px/1 var(--font)}
+.cbot .open{padding:2px 14px 14px 48px;background:var(--sel);border-bottom:1px solid var(--line-2)}
+.ptabs{display:flex;align-items:center;gap:2px;border-bottom:1px solid var(--line);margin:0 0 12px}
+.ptab{border:0;background:none;padding:9px 12px 10px;font:600 13.5px/1 var(--font);color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.ptab:hover{color:var(--ink)}
+.ptab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--carry)}
+.ptab .n{font:600 11.5px/1 var(--font);background:var(--surface-2);border-radius:999px;padding:3px 6px;color:var(--ink-2)}
+.ptab svg{display:none}
+.ptabs .sp{flex:1}
+.ptabs .acts{padding:0;font-size:13px}
+.open .tp{max-width:780px}
+.open:not([data-tab="p"]) .tp-p,.open:not([data-tab="d"]) .tp-d{display:none}
+.open .pbox{border:0;padding:0;background:none;gap:8px;align-items:stretch}
+.open .pbox input{border:1px solid var(--line);border-radius:8px;padding:8px 11px;background:var(--surface);height:38px}
+.open .pbox input:focus{border-color:var(--carry)}
+.open .pbox .ent{height:38px;padding:0 16px;font:600 13px/1 var(--font);letter-spacing:0;text-transform:none;color:#fff;background:#1F3158;border:1px solid #1F3158;border-radius:8px}
+.open .pbox .ent:hover,.open .pbox .ent:focus-visible{color:#fff;background:#2A4275;border-color:#2A4275}
+/* the entries on a timeline, newest first, right under the box */
+.open .prog{list-style:none;margin:10px 0 0;padding:0 0 0 20px;position:relative;max-height:300px}
+.open .prog::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.open .prog li{display:block;position:relative;padding:0 0 12px;border:0}
+.open .prog li::before{content:"";position:absolute;left:-20px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--carry);box-sizing:border-box}
+.open .prog .wk{display:inline;font:600 12px/1.4 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3);padding:0}
+.open .prog .wk.now{color:var(--carry)}
+.open .prog .ptxt{font-size:14px;color:var(--ink)}
+.open .pnone{margin-top:10px}
+/* the description reads as text; a click is the pen */
+.open textarea.desc{width:100%;border:1px solid transparent;border-radius:8px;background:transparent;padding:8px 11px;margin:0 -11px;font:400 14px/1.55 var(--font);color:var(--ink);cursor:text;min-height:40px;resize:none;overflow:hidden;field-sizing:content}
+.open textarea.desc:hover{border-color:var(--line);background:var(--surface)}
+.open textarea.desc:focus{border-color:var(--carry);background:var(--surface);outline:none}
+
+/* THE WEEKLY CHECK AS A MEETING (§701) */
+.pin:has(+ .meetwrap) .card.ctop,.pin:has(+ .meetwrap) .card.ctop.solo{border-radius:12px}
+.meetwrap{padding-top:14px}
+.meet{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:14px;align-items:start}
+.mlist{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.mlist .sec{margin:0}
+.mlist .sh.mh{padding:12px 14px 6px;border:0;border-top:1px solid var(--line-2);gap:8px;align-items:center}
+.mlist .sec:first-child .sh.mh{border-top:0}
+.mlist .sh.mh .ix{display:inline;font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.mlist .sh.mh h3{font:700 14px/1.25 var(--font);letter-spacing:0;text-transform:none;color:var(--ink)}
+.mlist .sh.mh .meta{font:500 12px/1.3 var(--font);color:var(--ink-3)}
+.mlist .sh.mh.quiet h3{color:var(--ink-2);font-style:italic}
+.mlist .sh.mh .end{font:500 12px/1 var(--font)}
+.mi{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-left:3px solid transparent;background:none;padding:8px 14px 8px 11px;font:400 14px/1.35 var(--font);color:var(--ink);cursor:pointer}
+.mi:hover{background:var(--surface-2)}
+.mi:focus-visible{outline:2px solid var(--carry);outline-offset:-2px}
+.mi[aria-current="true"]{background:var(--sel);border-left-color:var(--carry)}
+.mi .mt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi.last .mt,.mi.done .mt{color:var(--ink-3)}
+.mi .mlate{font:600 11.5px/1 var(--font);color:var(--bad);background:var(--bad-bg);border-radius:4px;padding:3px 6px;white-space:nowrap}
+.mi .mok{font:600 11.5px/1 var(--font);color:var(--good)}
+.mi.rev::after{content:"\\2713";font:700 12px/1 var(--font);color:var(--good)}
+.msub{font:600 10.5px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:10px 14px 4px}
+.mlist .asleep{padding:0 14px 4px;font-size:12.5px}
+.mlist .addrow.chk{grid-template-columns:20px minmax(0,1fr) auto auto 0;padding:4px 14px 10px;gap:8px;border:0}
+.mlist .addrow.chk .ent,.mlist .addrow.chk .more{display:none}
+.walk{padding:10px 14px;border-top:1px solid var(--line);font:500 12.5px/1.3 var(--font);color:var(--ink-3)}
+.walk .bar{height:5px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
+.walk .bar i{display:block;height:100%;width:0;background:var(--carry)}
+.mopen{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px 16px}
+.mopen .crumb{font:600 12.5px/1 var(--font);color:var(--gold);margin:0 0 8px}
+.mopen h3.t{margin:0 0 10px;font:700 20px/1.3 var(--font);color:var(--ink);text-wrap:balance}
+.mopen h3.t input.ttl{font:700 20px/1.3 var(--font);margin:0;width:100%}
+.mopen .facts{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:3px;flex-wrap:wrap;margin:0 0 16px}
+.seg button{border:0;background:none;border-radius:7px;padding:8px 13px;font:600 13.5px/1 var(--font);color:var(--ink-2);display:inline-flex;gap:7px;align-items:center;cursor:pointer}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(20,28,43,.12)}
+.seg.ro{background:none;padding:0}
+.macts{display:flex;gap:10px;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.macts .sp{flex:1}
+.mbtn{font:600 13px/1 var(--font);border-radius:8px;padding:0 14px;height:34px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
+.mbtn:hover{border-color:var(--ink-3)}
+.mbtn.pri{background:#1F3158;border-color:#1F3158;color:#fff}
+.mbtn.pri:hover{background:#2A4275}
+.macts .carry{height:34px;padding:0 12px;border-radius:8px}
+.keys{margin:10px 0 0;font-size:12px;color:var(--ink-3)}
+.keys kbd{font:600 11px/1 var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:2px 5px;background:var(--surface)}
+.mnone{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;color:var(--ink-3)}
+@media (max-width:860px){.meet{grid-template-columns:minmax(0,1fr)}.cbot .open{padding-left:14px}}
 `;
 
 /* What the script needs to know rides on <body>: the two addresses it talks
@@ -735,7 +796,7 @@ function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opene
     whoCell(a, L, live) +
     statusPill(a, live) +
     (chk ? carryCell(a, today, live) : "") +
-    '<button class="more' + (opened ? " on" : "") + '" type="button" data-act="more" aria-expanded="' + opened + '" aria-label="' + (opened ? "Close" : "Notes and history") + '" title="' + (opened ? "Close" : "Notes and history") + '">' + ARROW + "</button>" +
+    '<button class="more' + (opened ? " on" : "") + '" type="button" data-act="more" aria-expanded="' + opened + '" aria-label="' + (opened ? "Close the details" : "Details and progress") + '" title="' + (opened ? "Close the details" : "Details and progress") + '">' + DOTS3 + "</button>" +
     "</div>";
 }
 
@@ -812,7 +873,7 @@ function lastLine(a: Action, L: Loaded, today: string): string {
    Enter is a button too (§678): a press on it writes the line, as the key
    does, for a hand on a screen with no keyboard under it. */
 function progressBox(a: Action, label: string): string {
-  return '<div class="pbox"><input class="pnew" data-act="progress-new" placeholder="' + esc(label) + '" aria-label="Progress on ' + esc(a.title) + '" maxlength="' + PROGRESS_MAX + '"><button class="ent" type="button" data-act="progress-go" title="Add this line">Enter</button></div>';
+  return '<div class="pbox"><input class="pnew" data-act="progress-new" placeholder="' + esc(label) + '" aria-label="Progress on ' + esc(a.title) + '" maxlength="' + PROGRESS_MAX + '"><button class="ent" type="button" data-act="progress-go" title="Add this line">Add</button></div>';
 }
 /* THE ENTRIES, newest first: the week, the words, who — and for the writer
    alone, Edit and Delete (behind a question). An edited one says so. */
@@ -840,8 +901,7 @@ const RIGHT_SM = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1l4 4-
    history now says every movement (§657): a status change, a carry to another
    week, a hand-over, a rename, a move to another topic — the day, who, what,
    and what it was before. */
-function openPanel(a: Action, L: Loaded, who: Who, today: string): string {
-  const live = mayChange(a, who);
+function taskTabs(a: Action, L: Loaded, who: Who, today: string, live: boolean): string {
   const name = (k: string) => L.names.get(k) || k;
   const wk = (d: string | null | undefined) => d ? weekWord(d, today) : "no date";
   const topicName = (id: string | null | undefined) => id ? (L.topics.find((t) => t.id === id)?.name || "a topic since deleted") : "No topic";
@@ -859,27 +919,33 @@ function openPanel(a: Action, L: Loaded, who: Who, today: string): string {
       : esc(STATUS_WORD[e.from || "not_started"]) + " → " + esc(STATUS_WORD[e.to || "not_started"]);
     return "<li><time>" + esc(readableDay(day, today)) + " " + esc(hm) + "</time><span><b>" + esc(name(e.by)) + "</b> · " + what + "</span></li>";
   }).join("");
-  const cur = a.topicId ? L.topics.find((x) => x.id === a.topicId) : null;
-  const opts = L.topics.filter((t) => !t.closed || t.id === a.topicId);
-  const topic = live
-    ? '<p class="lab">Topic</p><select class="tsel" data-act="topic" aria-label="Topic">' +
-      '<option value=""' + (cur ? "" : " selected") + ">No topic</option>" +
-      opts.map((t) => '<option value="' + esc(t.id) + '"' + (t.id === a.topicId ? " selected" : "") + ">" + esc(t.name) + (t.closed ? " (closed)" : "") + "</option>").join("") +
-      "</select>"
-    : '<p class="lab">Topic</p><div class="ro">' + (cur ? esc(cur.name) : "&mdash;") + "</div>";
-  const left = live
-    ? topic + '<p class="lab">Description</p><textarea class="desc" data-act="notes" aria-label="Description" maxlength="5000" rows="2">' + esc(a.description) + "</textarea>" +
-      '<div class="hint">What the task is. Grows with what you write; saved when you leave the box.</div>' +
-      '<div class="acts"><button type="button" class="danger" data-act="delete-ask">Delete</button>' +
+  const n = (k: number) => k ? ' <span class="n">' + k + "</span>" : "";
+  const tabs = '<div class="ptabs" role="tablist">' +
+    '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="p" aria-selected="true">Progress' + n(L.progress.length) + "</button>" +
+    '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="d" aria-selected="false">Description</button>' +
+    '<button type="button" role="tab" class="ptab histlink" data-act="hist" data-tab="h" aria-selected="false" aria-expanded="false">History' + n(L.events.length) + "</button>" +
+    '<span class="sp"></span>' +
+    (live ? '<span class="acts"><button type="button" class="danger" data-act="delete-ask">Delete</button>' +
       '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
-      '<button type="button" class="go" data-act="delete-no">Keep it</button></span></div>'
-    : topic + '<p class="lab">Description</p><div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>";
+      '<button type="button" class="go" data-act="delete-no">Keep it</button></span></span>' : "") + "</div>";
   /* anybody past the gate writes progress (§657); somebody the register has
      not placed yet has no name to write it under (§313.32) */
-  const right = '<p class="lab">Progress</p>' + (who.personKey ? progressBox(a, "What happened on this task this week?") : "") + progressList(L, who, today) +
-    '<button type="button" class="histlink" data-act="hist" aria-expanded="false">' + RIGHT_SM + "History</button>" +
-    '<ul class="hist" hidden>' + hist + "</ul>";
-  return '<div class="open" data-id="' + esc(a.id) + '"><div>' + left + "</div><div>" + right + "</div></div>";
+  const prog = '<div class="tp tp-p">' + (who.personKey ? progressBox(a, "What happened this week?") : "") + progressList(L, who, today) + "</div>";
+  const desc = '<div class="tp tp-d">' + (live
+    ? '<textarea class="desc" data-act="notes" aria-label="Description" maxlength="5000" rows="1" placeholder="What the task is. Click to write it.">' + esc(a.description) + "</textarea>"
+    : '<div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>") + "</div>";
+  return tabs + prog + desc + '<ul class="hist" hidden>' + hist + "</ul>";
+}
+/* THE OPENED TASK, TABBED (2026-11-02, §701; option D of
+   design-mockups/internal-tracker/2026-11-02_opened-task-options.html).
+   Islam: "the part in the opened task ... are a bit clumsy". Three tabs —
+   Progress first: the box with Add beside it, the entries on a timeline
+   right under it; Description, read as text and written by clicking into
+   it (saved on leaving, as before); History, the plain list of movements —
+   and Delete at the end of the tabs, behind its question. The topic is not
+   asked here any more: the row's own topic column sets it (§503). */
+function openPanel(a: Action, L: Loaded, who: Who, today: string): string {
+  return '<div class="open" data-id="' + esc(a.id) + '" data-tab="p">' + taskTabs(a, L, who, today, mayChange(a, who)) + "</div>";
 }
 
 /* HOW THE ROWS ARE GROUPED: by owner in the register's own order (decision
@@ -976,92 +1042,107 @@ function topicPick(L: Loaded): string {
     '<input class="tnew" placeholder="New topic…" aria-label="New topic" maxlength="120"></span></span>';
 }
 
-/* ONE WEEK'S CARD. Drawn only where there is something in it — a card over
-   nothing is the empty heading §497 already refused, in a box. Next week is
-   the exception and always stands, because its write line IS the something:
-   the meeting's whole purpose is the line that is not there yet. */
-function weekCard(k: CheckWeek, rows: string, today: string, extra = ""): string {
-  if (!rows && !extra) return "";
-  const w = checkWeeks(today)[k];
-  return '<div class="blk ' + (k === "now" ? "now" : k === "next" ? "next" : "past") + '">' +
-    '<div class="wkh">' + esc(CHECK_WORD[k]) + '<span class="days">' + esc(weekInMonth(w.from)) + " &middot; " + esc(weekDays(w, today)) + "</span></div>" +
-    rows + extra + "</div>";
-}
-
-/* A TOPIC, READ DOWN ITS THREE WEEKS. The heading is the grouped list's own
-   — number, name, counts, how much is done, its ⋯ — so a topic looks the
-   same wherever the page draws it (§53.5). Under it: what happened, what is
-   being decided, what is being promised. */
-function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { html: string; count: string; countHtml: string } {
+/* THE WEEKLY CHECK AS A MEETING (2026-11-02, §701; option 2 of
+   design-mockups/internal-tracker/2026-11-01_weekly-check-rethink.html).
+   Islam: "I like the meeting mode for the weekly check". The check is a
+   meeting that goes through tasks one at a time, so the page does the same:
+   on the left every topic and its tasks — this week's, then last week's
+   finished ones, then next week's and the topic's own line to write it
+   (§532) — each a status dot and a name; on the right the one task being
+   talked about: its owner and week, its status as three buttons, the tabbed
+   details every opened task has, and Previous · Carry to next week · Save and
+   next. The task on the right IS the opened task (?open=), so a link opens
+   the meeting on it. Topics with something in the three weeks first, then
+   No topic, then the quiet ones; inside a topic each week by owner (§695). */
+type MGroup = { t: Topic | null; rows: Action[]; last: Action[]; now: Action[]; next: Action[] };
+function checkGroups(L: Loaded, p: PageArgs, today: string): { groups: MGroup[]; topics: Topic[]; shown: Action[] } {
   const all = L.actions;
   const shown = all.filter((a) => inView(a, "check", p.who, today));
+  const nameOf = (a: Action) => L.names.get(a.ownerKey) || a.ownerKey;
+  /* EVERY TOPIC THE LIST STILL HOLDS (§532): a topic skipped three weeks
+     running is the one the meeting most needs to see. */
+  const topics = L.topics.filter((t) => topicShown(t, all));
+  const busy = (t: Topic) => shown.some((a) => a.topicId === t.id);
+  const mk = (t: Topic | null): MGroup => {
+    const rows = t ? shown.filter((a) => a.topicId === t.id) : shown.filter((a) => !a.topicId);
+    /* SMP_BREAK=check-unsorted drops the by-owner sort; §2b must go red */
+    const wk = (k: CheckWeek) => { const w = rows.filter((a) => checkWeek(a, today) === k); return brk() === "check-unsorted" ? w : w.sort((x, y) => nameOf(x).localeCompare(nameOf(y))); };
+    return { t, rows, last: wk("last"), now: wk("now"), next: wk("next") };
+  };
+  const loose = shown.some((a) => !a.topicId);
+  return { groups: [...topics.filter(busy).map(mk), ...(loose ? [mk(null)] : []), ...topics.filter((t) => !busy(t)).map(mk)], topics, shown };
+}
+/* The task the meeting opens on when none is picked: the first of this
+   week's, else the first of any week's. */
+export function firstCheckId(L: Loaded, p: PageArgs, today: string): string | null {
+  const g = checkGroups(L, p, today).groups;
+  for (const x of g) if (x.now.length) return x.now[0].id;
+  for (const x of g) { const r = x.last[0] || x.next[0]; if (r) return r.id; }
+  return null;
+}
+const dotOf = (s: Action["status"]) => "dot" + (s === "in_progress" ? " d1" : s === "done" ? " d2" : "");
+function meetingView(L: Loaded, p: PageArgs, today: string, dates: Format): { html: string; count: string; countHtml: string } {
+  const { groups, topics, shown } = checkGroups(L, p, today);
   const me = p.who.personKey;
   const meShort = me ? L.short.get(me) || L.names.get(me) || me : "";
-  /* EVERY TOPIC THE LIST STILL HOLDS, not only the ones with rows in these
-     three weeks (§532's own point): a topic skipped three weeks running is
-     the one the meeting most needs to see. A closed one leaves once its last
-     open action is done, which is topicShown's rule and not a second one. */
-  /* THE QUIET ONES LAST (§700): a topic with nothing in these three weeks
-     is a short card after the ones the meeting talks through. */
-  const busy = (t: Topic) => shown.some((a) => a.topicId === t.id);
-  const topics = L.topics.filter((t) => topicShown(t, all));
-  const loose = shown.filter((a) => !a.topicId);
-  let ix = 0;
-  const secOf = (t: Topic | null): string => {
-    const rows = t ? shown.filter((a) => a.topicId === t.id) : loose;
-    /* INSIDE EACH WEEK'S BOX THE ROWS STAND BY OWNER (§695). Islam: "make the
-       tasks in each box arranged by the owner name". The register's name,
-       A to Z, and under one name the list's own order (open before done,
-       then by date), which a stable sort keeps. The ordinary list is not
-       touched: it has Group by. SMP_BREAK=check-unsorted drops the sort;
-       checks/tracker.mjs §2b must go red under it. */
-    const nameOf = (a: Action) => L.names.get(a.ownerKey) || a.ownerKey;
-    const byWeek = (k: CheckWeek) => {
-      const w = rows.filter((a) => checkWeek(a, today) === k);
-      return brk() === "check-unsorted" ? w : w.sort((x, y) => nameOf(x).localeCompare(nameOf(y)));
-    };
-    const open = rows.filter((a) => a.status !== "done");
-    const late = open.filter((a) => isLate(a.due, today)).length;
-    const nowRows = byWeek("now");
-    /* THE PROGRESS BOX UNDER EVERY OPEN ROW OF THIS WEEK (§657): the entry is
-       typed while the task is being talked about. Last week's and next week's
-       rows show their latest line and no box — progress is written on the
-       week being reviewed. */
-    const draw = (k: CheckWeek) =>
-      byWeek(k).map((a) => row(a, L, p.who, today, dates, a.id === L.open, "topic", true) + (a.id === L.open ? openPanel(a, L, p.who, today) : "") +
-        (k === "now" && a.status !== "done" && me && a.id !== L.open ? '<div class="pline" data-id="' + esc(a.id) + '">' + progressBox(a, "What happened?") + "</div>" : "")).join("");
-    const mine = t ? all.filter((a) => a.topicId === t.id) : all.filter((a) => !a.topicId);
-    const done = mine.filter((a) => a.status === "done").length;
-    const head = t
-      ? '<div class="grp sh' + (nowRows.length ? "" : " quiet") + '" data-key="' + esc(t.id) + '">' +
-        '<span class="ix">' + String(++ix).padStart(2, "0") + "</span>" +
-        "<h3>" + esc(t.name) + "</h3>" +
-        '<span class="meta">' + (nowRows.length ? open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") : "nothing this week") + "</span>" +
-        '<span class="end">' + (t.closed ? '<span class="shut">Closed</span>' : "") + done + " of " + mine.length + " done" +
-        '<span class="mtr"><i style="width:' + (mine.length ? Math.round(done * 100 / mine.length) : 0) + '%"></i></span>' + topicMenu(t) + "</span></div>"
-      : '<div class="grp sh quiet" data-key="none"><span class="ix">&mdash;</span><h3>No topic</h3>' +
-        '<span class="meta">' + open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") + '</span><span class="end"></span></div>';
-    /* A TOPIC NOBODY HAS TOUCHED FOR THESE THREE WEEKS SAYS SO, and points
-       at the one control that clears it away — otherwise the check fills up
-       with threads the office has quietly left (§61). */
-    const asleep = t && !rows.length
-      ? '<div class="asleep">Nothing on this topic in these three weeks. Write the next action, or close the topic from its &middot;&middot;&middot;</div>'
-      : "";
-    const line = me && t && !t.closed ? checkLine(t, L, me, meShort, today, dates) : "";
-    const body = weekCard("last", draw("last"), today) + weekCard("now", draw("now"), today) +
-      (t ? weekCard("next", draw("next"), today, line) : weekCard("next", draw("next"), today));
-    return '<div class="sec" data-key="' + esc(t ? t.id : "none") + '">' + head + asleep + body + "</div>";
+  /* the task opened, else the first the meeting would come to (loadFor
+     picks it first, so its progress and history are read with it) */
+  const selId = L.open || firstCheckId(L, p, today);
+  const item = (a: Action, k: CheckWeek) => {
+    const w = whenText(a, today, dates);
+    const tail = a.status === "done" ? '<span class="mok">Done</span>' : w.late ? '<span class="mlate">' + esc(w.text) + "</span>" : "";
+    return '<button type="button" class="mi ' + k + (a.status === "done" ? " done" : "") + '" data-act="pick-task" data-id="' + esc(a.id) + '" aria-current="' + (a.id === selId) + '">' +
+      '<span class="' + dotOf(a.status) + '"></span><span class="mt">' + esc(a.title) + "</span>" + tail + "</button>";
   };
-  const html = topics.filter(busy).map((t) => secOf(t)).join("") + (loose.length ? secOf(null) : "") + topics.filter((t) => !busy(t)).map((t) => secOf(t)).join("");
+  let ix = 0;
+  const list = groups.map((g) => {
+    const t = g.t;
+    const open = g.rows.filter((a) => a.status !== "done");
+    const late = open.filter((a) => isLate(a.due, today)).length;
+    const meta = g.rows.length ? open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") : "nothing this week";
+    const head = t
+      ? '<div class="grp sh mh' + (g.now.length ? "" : " quiet") + '" data-key="' + esc(t.id) + '"><span class="ix">' + String(++ix).padStart(2, "0") + "</span>" +
+        "<h3>" + esc(t.name) + '</h3><span class="meta">' + meta + '</span><span class="end">' + (t.closed ? '<span class="shut">Closed</span>' : "") + topicMenu(t) + "</span></div>"
+      : '<div class="grp sh mh quiet" data-key="none"><span class="ix">&mdash;</span><h3>No topic</h3><span class="meta">' + meta + '</span><span class="end"></span></div>';
+    /* A TOPIC NOBODY HAS TOUCHED FOR THESE THREE WEEKS SAYS SO (§61) */
+    const asleep = t && !g.rows.length
+      ? '<div class="asleep" title="Write the next action, or close the topic from its &middot;&middot;&middot;">Nothing on this topic in these three weeks.</div>' : "";
+    const sub = (word: string, xs: Action[], k: CheckWeek) => xs.length ? '<div class="msub">' + word + "</div>" + xs.map((a) => item(a, k)).join("") : "";
+    const line = me && t && !t.closed ? checkLine(t, L, me, meShort, today, dates) : "";
+    return '<div class="sec" data-key="' + esc(t ? t.id : "none") + '">' + head + asleep + g.now.map((a) => item(a, "now")).join("") +
+      sub(CHECK_WORD.last, g.last, "last") + sub(CHECK_WORD.next, g.next, "next") + (line && !g.next.length ? '<div class="msub">' + CHECK_WORD.next + "</div>" : "") + line + "</div>";
+  }).join("");
+  const sel = selId ? L.actions.find((a) => a.id === selId) || null : null;
+  const panel = sel ? meetPanel(sel, L, p.who, today, dates) : '<div class="mnone">Nothing to go through: no task is due in these three weeks.</div>';
   /* HOW FAR THROUGH THE MEETING YOU ARE: the topics, and the ones whose next
      week is still empty — which is the question the check exists to answer. */
   const toWrite = topics.filter((t) => !shown.some((a) => a.topicId === t.id && checkWeek(a, today) === "next")).length;
   const tail = toWrite + " still to write for next week";
   return {
-    html,
+    html: groups.length ? '<div class="meet"><div class="mlist">' + list + '<div class="walk"><span class="wn"></span><div class="bar"><i></i></div></div></div>' + panel + "</div>" : "",
     count: plural(topics.length, "topic", "topics") + " · " + tail,
     countHtml: plural(topics.length, "topic", "topics") + " &middot; " + (toWrite ? '<span class="left">' + tail + "</span>" : "all written for next week"),
   };
+}
+/* THE TASK BEING TALKED ABOUT. Its controls are the row's own (§53.5) — the
+   owner's name hands it on, the week picker moves it, the name renames on a
+   double-click, the status is three buttons for the same act — and Save and
+   next writes what was typed in the progress box and opens the next task. */
+function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format): string {
+  const live = brk() === "who-everyone" ? true : mayChange(a, who);
+  const t = a.topicId ? L.topics.find((x) => x.id === a.topicId) : null;
+  const seg = live
+    ? '<div class="seg" role="group" aria-label="Status">' + STATUSES.map((s) =>
+        '<button type="button" data-act="set-status" data-value="' + s + '" aria-pressed="' + (a.status === s) + '"><span class="' + dotOf(s) + '"></span>' + esc(STATUS_WORD[s]) + "</button>").join("") + "</div>"
+    : '<div class="seg ro">' + statusPill(a, false) + "</div>";
+  return '<div class="open mopen" data-id="' + esc(a.id) + '" data-tab="p">' +
+    '<p class="crumb">' + (t ? esc(t.name) : "No topic") + "</p>" +
+    '<h3 class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</h3>" +
+    '<div class="facts">' + whoCell(a, L, live) + whenCell(a, today, dates, live) + "</div>" + seg +
+    taskTabs(a, L, who, today, live) +
+    '<div class="macts"><button type="button" class="mbtn" data-act="step" data-dir="-1">Previous</button>' + carryCell(a, today, live) +
+    '<span class="sp"></span><button type="button" class="mbtn pri" data-act="step" data-dir="1">Save and next</button></div>' +
+    '<p class="keys"><kbd>&uarr;</kbd> <kbd>&darr;</kbd> move through the list &middot; <kbd>Ctrl</kbd> + <kbd>Enter</kbd> save and next</p></div>';
 }
 
 export type ListOut = { body: string; count: string; open: string | null };
@@ -1215,13 +1296,13 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
      top: the writing happens inside the topic the meeting is on, which is
      the whole reason the view exists. */
   if (view === "check") {
-    const ck = checkSections(L, p, today, dates);
+    const ck = meetingView(L, p, today, dates);
     const nothing = ck.html ? ""
       : '<div class="none"><b>No topics yet for ' + esc(p.tenantName) + ".</b>" +
         "The check is read one topic at a time, so it needs a topic first. Make one on any action's topic tag, or behind the &middot;&middot;&middot; above.</div>";
     return {
       body: pinned(masthead(p, today, all, sum, L, { inner: '<div class="counted ck">' + ck.countHtml + "</div>" })) +
-        '<div class="card cbot ck"><div class="list">' + ck.html + "</div>" + nothing + "</div>",
+        '<div class="meetwrap">' + ck.html + nothing + "</div>",
       count: ck.count, open: L.open,
     };
   }
@@ -1314,9 +1395,17 @@ function pinned(html: string): string {
 
 /* A press's answer: the list read again under the tenant and drawn by the
    same function — never a second renderer (§53.5). */
+/* ON THE CHECK SOMETHING IS ALWAYS BEING TALKED ABOUT (§701): with no task
+   picked, the meeting opens on the first of this week's. */
+async function loadFor(c: Q, p: PageArgs, today: string): Promise<Loaded> {
+  const L = await load(c, p.ask.open);
+  if (p.ask.view !== "check" || L.open) return L;
+  const first = firstCheckId(L, p, today);
+  return first ? load(c, first) : L;
+}
 export async function listFragment(p: PageArgs): Promise<ListOut> {
   const today = p.today || todayIn();
-  const L = await withTenant(p.tenantId, (c) => load(c, p.ask.open));
+  const L = await withTenant(p.tenantId, (c) => loadFor(c, p, today));
   return listBody(L, p, today);
 }
 
@@ -1331,7 +1420,7 @@ export async function trackerDocument(p: PageArgs): Promise<string> {
      masthead without its counts, and the sentence. */
   let L: Loaded | null = null;
   try {
-    L = await withTenant(p.tenantId, (c) => load(c, p.ask.open));
+    L = await withTenant(p.tenantId, (c) => loadFor(c, p, today));
   } catch (e) {
     console.error("tracker: reading " + p.slug + "'s list:", (e as Error).message);
   }

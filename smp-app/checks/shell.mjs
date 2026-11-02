@@ -3215,6 +3215,26 @@ await section("4 · Forefront's own pages", async () => {
         font: h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : "" }; });
     check(mwc.cards === 1 && mwc.secs === 3 && mwc.title === "Open tasks" && mwc.count === "3" && mwc.ctl && /^[\d.]+px solid$/.test(mwc.rule) && parseFloat(mwc.rule) >= 1 && /Internal Tracker/.test(mwc.sub) && mwc.font === "Georgia 700",
       "\u2026in one card titled Open tasks (Georgia bold) with its filters in its header, the groups labelled over a grey rule, under Home's band", JSON.stringify(mwc));
+    /* §725 MY TASKS' BAR IS THE TRACKER'S QUIET BAR */
+    const bar725 = await page.evaluate(() => { const h = document.querySelector(".mwcardhd"), ic = h && h.querySelector(".hocic"), s = h && h.querySelector(".mwfind .mwsearch"), d = h && h.querySelector(".mwwordb");
+      return h ? { tile: !!ic && getComputedStyle(ic).display !== "none", views: Array.from(h.querySelectorAll(".mwviews button")).map((b) => b.textContent), srchW: s ? Math.round(s.getBoundingClientRect().width) : -1,
+        done: d ? d.textContent.replace(/\s+/g, " ").trim() : "", order: Array.from(h.children).filter((x) => getComputedStyle(x).display !== "none").map((x) => x.className || x.tagName) } : null; });
+    check(!!bar725 && !bar725.tile && bar725.views.join("|") === "By date|By client" && bar725.srchW === 0 && /^Done: Hide/.test(bar725.done),
+      "\u2026its bar is the Tracker's quiet bar: no tile, By date \u00b7 By client as plain words, Search an icon with its box shut, Done a small word (\u00a7725)", JSON.stringify(bar725));
+    /* §729: the Done menu is shut until pressed (an author display had beaten
+       [hidden], so it stood open); and a hover greys the FIRST row too (the
+       odd rows' background:none had outweighed the hover) */
+    const menu729 = await page.evaluate(() => { const m = document.querySelector(".mwcardhd .mwwordm"); return m ? getComputedStyle(m).display : "gone"; });
+    await page.hover(".mwlist .mwrow >> nth=0");
+    const hov729 = await page.evaluate(() => { const r = document.querySelector(".mwlist .mwrow"); return r ? getComputedStyle(r).backgroundColor : ""; });
+    /* §730: a name is never cut — it wraps; the note line stays one line */
+    const wrap730 = await page.evaluate(() => { const t = document.querySelector(".mwlist .mwrow .t"), up = document.querySelector(".mwlist .mwmeta .up");
+      return { ws: t ? getComputedStyle(t).whiteSpace : "", tov: t ? getComputedStyle(t).textOverflow : "", up: up ? getComputedStyle(up).whiteSpace : "nowrap" }; });
+    check(wrap730.ws === "normal" && wrap730.tov !== "ellipsis" && wrap730.up === "nowrap", "\u2026a task's name is never cut, it wraps; the note line under it stays one line (\u00a7730)", JSON.stringify(wrap730));
+    check(menu729 === "none" && !/rgba\(0, 0, 0, 0\)|transparent/.test(hov729),
+      "\u2026the Done menu is shut until pressed, and a hover greys the first row as it does the others (\u00a7729)", JSON.stringify({ menu729, hov729 }));
+    await page.click(".mwcardhd .mwfind svg");
+    check((await page.evaluate("Math.round(document.querySelector('.mwcardhd .mwsearch').getBoundingClientRect().width)")) > 100, "\u2026a press on the search icon opens its box (\u00a7725)", "");
     await page.fill(".mwsearch", "far off");
     const found = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwrow")).filter((r) => !r.hidden).map((r) => r.querySelector(".t").textContent));
     check(JSON.stringify(found) === JSON.stringify(["MW far off"]), "\u2026and its search finds a task by its words", JSON.stringify(found));
@@ -3234,14 +3254,15 @@ await section("4 · Forefront's own pages", async () => {
       return sec ? { h: sec.querySelector(".mwsh h2").textContent, rows: Array.from(sec.querySelectorAll(".mwrow .t")).map((t) => t.textContent) } : null; });
     check((await doneOf()) === null && !!(await page.$('.mwcardhd button[data-sort="hide"][aria-pressed="true"]')),
       "\u2026finished tasks are hidden until asked for", "");
-    await page.click('.mwcardhd button[data-sort="week"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="week"]');
     const dw = await doneOf();
     check(!!dw && dw.h === "Done in the last week" && dw.rows.includes("MW finished") && !dw.rows.includes("MW done in the month") && !dw.rows.includes("MW not mine"),
       "\u2026Show done \u00b7 Last week lists the one finished this week, under its own heading, not the older one, and never somebody else's", JSON.stringify(dw));
-    await page.click('.mwcardhd button[data-sort="month"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="month"]');
     const dm = await doneOf();
     check(!!dm && dm.h === "Done in the last 30 days" && JSON.stringify(dm.rows) === JSON.stringify(["MW finished", "MW done in the month"]), "\u2026and 30 days lists it and the one three weeks back, newest first", JSON.stringify(dm));
-    await page.click('.mwcardhd button[data-sort="hide"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="hide"]');
+    check((await page.evaluate(() => getComputedStyle(document.querySelector(".mwcardhd .mwwordm")).display)) === "none", "\u2026and the Done menu shuts once a choice is pressed (\u00a7729)", "");
     check((await doneOf()) === null, "\u2026and Hide puts them away again", "");
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
@@ -3313,7 +3334,16 @@ await section("4 · Forefront's own pages", async () => {
        there is the Tracker's own entry, read back from Postgres (§96); the
        way into the client's Tracker is that link, and it still goes there. */
     const firstId = await page.locator(".mwrow >> nth=0").getAttribute("data-id");
+    /* §728: the details were read with the list, so the press asks nothing,
+       and the tabs are there at once */
+    await page.waitForFunction(() => { const r = document.querySelector(".mwrow"); return !!r; }, null, { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+    let asked728 = 0; const c728 = (rq) => { const d = rq.postData() || ""; if (/"action":"workDetails?"/.test(d)) asked728++; };
+    page.on("request", c728);
     await page.click(".mwrow .t >> nth=0");
+    const now728 = await page.evaluate(() => !!document.querySelector(".mwrow.on .mwdet .mwtabs"));
+    page.off("request", c728);
+    check(asked728 === 0 && now728, "\u2026a task opens at once: its details came with the list, the press asks the server nothing (\u00a7728)", JSON.stringify({ asked728, now728 }));
     await page.waitForSelector(".mwrow.on .mwdet .mwtabs", { timeout: 8000 }).catch(() => {});
     const det = await page.evaluate(() => { const r = document.querySelector(".mwrow.on");
       return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), path: location.pathname } : null; });
@@ -3325,6 +3355,13 @@ await section("4 · Forefront's own pages", async () => {
     const wrote = (await owner.query("SELECT body FROM tracker_progress WHERE action_id = $1", [firstId])).rows.map((x) => x.body);
     check(wrote.includes("Written from My tasks") && /Written from My tasks/.test(await page.locator(".mwrow.on .mwtl").textContent().catch(() => "")),
       "\u2026and a line of progress written there is the Tracker's own entry, drawn on its timeline", JSON.stringify(wrote));
+    /* §728: the row's quiet line — the name heavier than the line, the
+       client plain, and no "This week" in front of this week's note */
+    const q728 = await page.evaluate((id) => { const r = document.querySelector('.mwrow[data-id="' + id + '"]'); if (!r) return null;
+      const t = r.querySelector(".t"), up = r.querySelector(".mwmeta .up"), cl = r.querySelector(".mwmeta .mwcl");
+      return { name: t ? +getComputedStyle(t).fontWeight : 0, up: up ? up.textContent : "", cl: cl ? +getComputedStyle(cl).fontWeight : 400 }; }, firstId);
+    check(!!q728 && q728.name >= 600 && q728.cl <= 400 && /^Written from My tasks/.test(q728.up),
+      "\u2026and the row's line is the Tracker's quiet one: the name heavier, the client plain, no \"This week\" in front of this week's note (\u00a7728)", JSON.stringify(q728));
     /* §712: YOUR OWN ENTRY IS EDITED AND DELETED HERE TOO — Edit turns it into
        a box, Enter saves it (read back from Postgres); Delete asks first,
        and Yes removes it */
@@ -3398,7 +3435,7 @@ await section("4 · Forefront's own pages", async () => {
     const h1 = await home();
     check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Track Record"]),
       "Home draws your clients, your tasks and the Track Record, each a card with its header inside it (spec 068, 069)", JSON.stringify(h1.heads));
-    check(h1.tabs === 0 && h1.sort === "Date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
+    check(h1.tabs === 0 && h1.sort === "By date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
       "\u2026its tasks are one list by date, the late one first in the alarm, then the one due now; the far one is left to My tasks", JSON.stringify(h1));
     check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)) && !h1.industry,
       "\u2026the client you have a seat on is one line with a door into each module, and no industry or seat", JSON.stringify(h1.clients));
@@ -3577,11 +3614,11 @@ await section("4 · Forefront's own pages", async () => {
     /* SORT BY CLIENT, in the same card, kept on the device */
     await page.click('[data-home="tasks"] .hosort button[data-sort="client"]');
     const hc = await home();
-    check(hc.sort === "Client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
+    check(hc.sort === "By client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
       "\u2026Sort by Client groups the same tasks under the client, late first", JSON.stringify(hc));
     await page.reload({ waitUntil: "networkidle" });
     await page.waitForSelector('[data-home="tasks"] .hogrp', { timeout: 8000 }).catch(() => {});
-    check((await home()).sort === "Client", "\u2026and the choice is kept after a reload", (await home()).sort);
+    check((await home()).sort === "By client", "\u2026and the choice is kept after a reload", (await home()).sort);
     await page.click('[data-home="tasks"] .hosort button[data-sort="date"]');
     await page.click('[data-home="tasks"] .holink');
     await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});

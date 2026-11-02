@@ -68,7 +68,14 @@ import { usePools } from "../lib/db.ts";
 import { SCHEMA } from "../db/schema-name.mjs";
 import { PLATFORM_TABLES } from "../lib/schema-check.ts";
 import { serve } from "../modules/tracker/index.ts";
-import { trackerDocument, whenText, listBody } from "../modules/tracker/page.ts";
+import { trackerDocument as trackerDocument0, whenText, listBody as listBody0 } from "../modules/tracker/page.ts";
+/* §726: the page carries the list as each view draws it, and every task's
+   panel, in inert templates after the list; the string checks read the list
+   in view, so the spare copies are taken out first (the templates are
+   checked on their own, below) */
+const liveOnly = (html) => html.replace(/<div class="vtpls" hidden>[\s\S]*?<!--\/vtpls-->/g, "");
+const trackerDocument = async (...a) => liveOnly(await trackerDocument0(...a));
+const listBody = (...a) => { const o = listBody0(...a); return { ...o, body: liveOnly(o.body), full: o.body }; };
 import { barInks, barVars, contrastOf } from "../lib/branding.ts";
 import {
   STATUSES, STATUS_WORD, VIEWS, VIEW_WORD, GROUPS, GROUP_WORD, FORMATS, FORMAT_WORD, isFormat, isStatus, isView, isGroup, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
@@ -977,6 +984,32 @@ try {
        list is told apart by the count's own words, which only This week's
        carries "on this week". */
     const tabOn = () => pg.evaluate("(document.querySelector('.cats a[aria-current=\"true\"]') || {}).textContent || ''");
+    /* §726: and asks the server nothing — the view rides in the page */
+    const rows726 = () => pg.evaluate("document.querySelectorAll('#body .card.cbot .row[data-id]').length");
+    const weekRows726 = await rows726();
+    let asked726 = 0; const c726 = (rq) => { if (["fetch", "xhr", "document"].includes(rq.resourceType())) asked726++; };
+    pg.on("request", c726);
+    await pg.locator('.cats a[href*="view=mine"]').click(); await settle();
+    const mineRows726 = await rows726(), head726 = (await pg.locator(".ctop .chd .ccnt").textContent()).trim(), url726 = new URL(pg.url()).searchParams.get("view");
+    await pg.evaluate("history.back()"); await settle();
+    const backRows726 = await rows726();
+    pg.off("request", c726);
+    check("a view opens at once — no request to the server, the list and the head's count those of the view, the address following, and Back the same (§726)",
+      asked726 === 0 && mineRows726 < weekRows726 && head726 === String(mineRows726) && url726 === "mine" && backRows726 === weekRows726, JSON.stringify({ asked726, weekRows726, mineRows726, head726, url726, backRows726 }));
+    /* §727 THE CHECK IS A BUTTON, NOT A VIEW: the views are This week · All ·
+       Mine · Undated; "Start weekly check" at the bar's end opens it, its bar
+       says Weekly check with "Back to the list", which returns to the view
+       it was opened from */
+    await pg.locator('.cats a[href*="view=mine"]').click(); await settle();
+    const tabs727 = await pg.evaluate("Array.from(document.querySelectorAll('.cats a')).map(function(a){return a.textContent}).join('|')");
+    await pg.locator(".ctop .chd a.wcgo").click(); await settle();
+    const in727 = await pg.evaluate("({ v: document.body.getAttribute('data-view'), h: (document.querySelector('.ctop .chd h2')||{}).textContent, back: !!document.querySelector('.ctop .chd a.wcback'), tabs: document.querySelectorAll('.cats a').length, go: !!document.querySelector('.ctop .chd a.wcgo') })");
+    await pg.locator(".ctop .chd a.wcback").click(); await settle();
+    const out727 = await pg.evaluate("({ v: document.body.getAttribute('data-view'), tab: (document.querySelector('.cats a[aria-current=\"true\"]')||{}).textContent })");
+    check("the views are only views; Start weekly check at the bar's end opens the check, whose bar reads Weekly check with Back to the list, and Back returns to the view it came from (§727)",
+      tabs727 === "This week|All|Mine|Undated" && in727.v === "check" && in727.h === "Weekly check" && in727.back && in727.tabs === 0 && !in727.go && out727.v === "mine" && out727.tab === "Mine" && await stayed(),
+      JSON.stringify({ tabs727, in727, out727 }));
+    await pg.locator('.cats a[href*="view=week"]').click(); await settle();
     await pg.locator('.cats a[href*="view=all"]').click(); await settle();
     const allAt = { url: new URL(pg.url()).searchParams.get("view"), body: await pg.evaluate("document.body.getAttribute('data-view')"), tab: await tabOn(), count: await pg.locator("#count").textContent() };
     check("a press on All filters the list in place, with no page loaded (§566)",
@@ -1020,6 +1053,23 @@ try {
     await pg.locator(".ctop .chd .find svg").click();
     check("...a press on the search icon opens its box, under the cursor (§723)", (await pg.evaluate("Math.round(document.querySelector('.ctop .chd .find .srch').getBoundingClientRect().width)")) > 100 &&
       (await pg.evaluate("document.activeElement && document.activeElement.classList.contains('srch')")));
+    /* §724 SEARCH AS YOU TYPE: the rows narrow with each letter, the head's
+       count follows, nothing is asked of the server; clearing brings all back */
+    const vis724 = () => pg.evaluate("Array.from(document.querySelectorAll('#body .list .row[data-id]')).filter(function(r){return r.offsetParent!==null}).map(function(r){return r.querySelector('.t').textContent.trim()})");
+    const before724 = await vis724();
+    const word724 = (before724[0] || "").split(/\s+/).sort((x, y) => y.length - x.length)[0] || "";
+    let asked724 = 0; const c724 = (rq) => { if (rq.resourceType() === "fetch" || rq.resourceType() === "xhr" || rq.resourceType() === "document") asked724++; };
+    pg.on("request", c724);
+    await pg.locator(".ctop .chd .find .srch").pressSequentially(word724, { delay: 20 }); await pg.waitForTimeout(150);
+    const after724 = await vis724(), cnt724 = (await pg.locator(".ctop .chd .ccnt").textContent()).trim();
+    pg.off("request", c724);
+    check("Search narrows the list as you type, the count following, with no trip to the server (§724)",
+      before724.length > 1 && after724.length >= 1 && after724.length < before724.length && after724.every((t) => t.toLowerCase().includes(word724.toLowerCase())) && cnt724 === String(after724.length) && asked724 === 0,
+      JSON.stringify({ word724, before724, after724, cnt724, asked724 }));
+    await pg.locator(".ctop .chd .find .srch").fill("zzzq"); await pg.waitForTimeout(100);
+    check("...a word that matches nothing says so in place (§724)", (await pg.locator("#siftnone").isVisible()) && /Nothing matches/.test(await pg.locator("#siftnone").innerText()));
+    await pg.locator(".ctop .chd .find .srch").fill(""); await pg.waitForTimeout(100);
+    check("...and clearing it brings every row back (§724)", (await vis724()).length === before724.length && (await pg.locator("#siftnone").count()) === 0);
     await pg.keyboard.press("Escape"); await pg.locator("body").click({ position: { x: 5, y: 5 } }).catch(() => {});
     check("the menu is hidden until the dots are pressed", !(await pg.locator(".setmenu").isVisible()));
     await pg.locator("[data-act=settings]").click();

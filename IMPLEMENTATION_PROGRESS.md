@@ -6,6 +6,18 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **2026-11-03 — Every "are you sure" asks the same way (§731).** Islam's rules from a delete-dialog picture, held everywhere: the question in the title, what really happens in the body, Cancel left, the act right in its own words (no Yes/No/OK), red only for what destroys (the cycle buttons stay red on his word), × and Escape. The Processes module's four browser boxes replaced by its own dialog; 26 button pairs turned round; 17 "Yes, …"/"No" labels reworded; red off six Restore/Close buttons. New `checks/confirm-buttons.py` 879/0, proved red 32 ways on the before-copies; typecheck clean; test:processes 228/0; shell v7.54. Notes/Tracker/shell browser checks not re-run here (no served stack).
 
+**2026-11-03 — A task's name is never cut on My tasks and Home (§730).** It wraps; the note line stays one line. Shell run pending.
+
+**2026-11-03 — My tasks' Done menu shut; Home's rows hover all alike (§729).** Two cascade faults. Shell run pending.
+
+**2026-11-03 — My tasks and Home: the Tracker's quiet line; a task opens at once (§728).** workDetails read with the list. Tracker 369/0; shell run pending.
+
+**2026-11-03 — The weekly check is a button, not a view (§727).** Start weekly check at the bar's end; ← Back to the list inside. Tracker 369/0.
+
+**2026-11-03 — A Tracker view opens at once (§726).** Each view rides in the page; a press swaps it in, no request. Tracker 368/0 (new check seen red). §725 shell 555 ok / main's 11.
+
+**2026-11-03 — Tracker search narrows as you type (§724); My tasks' bar is the Tracker's quiet bar (§725).** Tracker 367/0; shell run pending.
+
 **2026-11-03 — The Tracker's top bar is one quiet bar (§723).** No tile, plain count and views, Search an icon, "Group: Owner", slim add line with chips on click, no gold rule. Tracker 364/0.
 
 **2026-11-03 — No date popup on a Tracker row's line (§722).** Top-bar mockup drawn (A/B), not built. Tracker 362/0.

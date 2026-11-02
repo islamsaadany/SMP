@@ -1723,6 +1723,42 @@
   .mwlist .mwrow:hover{ box-shadow:none }
   .mwlist .mwsec:last-child .mwrow:last-child{ border-bottom:0 }
   .mwsearch{ width:170px; padding:5px 10px; font-size:13px }
+  /* §725 MY TASKS' BAR IS THE TRACKER'S QUIET BAR (§723): no tile, the count
+     a plain figure, the views (By date · By client) as plain words right
+     after it, Search an icon that opens its box, Done and Show small words */
+  .mwcardhd{ padding:12px 16px 10px; gap:6px 10px }
+  .mwcardhd .hocic, .mwcardhd .sp{ display:none }
+  .mwcardhd h2{ font-size:18px }
+  .mwcardhd .hocnt{ background:none; padding:0; font-size:14px; font-weight:500; color:var(--ink-3) }
+  .hosort.mwviews{ margin-right:auto; margin-left:6px }
+  [data-home] .hosort.mwviews{ margin:0 }
+  .hosort.mwviews .sw{ border:0; background:none; padding:0; gap:2px }
+  .hosort.mwviews button{ font-size:13.5px; font-weight:400; color:var(--ink-3); padding:4px 10px; border-radius:7px }
+  .hosort.mwviews button:hover{ color:var(--ink); background:var(--surface-2) }
+  .hosort.mwviews button[aria-pressed="true"]{ background:var(--surface-2); color:var(--ink); font-weight:600; box-shadow:none }
+  .mwfind{ display:flex; align-items:center; gap:6px; height:32px; border:1px solid transparent; border-radius:8px; padding:0 8px; color:var(--ink-3); cursor:pointer }
+  .mwfind:hover{ background:var(--surface-2) }
+  .mwfind svg{ width:15px; height:15px; flex:none }
+  .mwfind .mwsearch{ border:0; background:none; outline:none; padding:0; box-shadow:none; color:var(--ink); font-size:13.5px }
+  .mwfind:not(:focus-within):has(.mwsearch:placeholder-shown) .mwsearch{ width:0 }
+  .mwfind:focus-within, .mwfind:has(.mwsearch:not(:placeholder-shown)){ border-color:var(--line); background:var(--surface); cursor:auto }
+  .mwword{ position:relative }
+  .mwwordb{ border:0; background:none; padding:8px; border-radius:8px; font-family:inherit; font-size:13.5px; color:var(--ink-3); cursor:pointer; white-space:nowrap }
+  .mwwordb b{ color:var(--ink-2); font-weight:600; margin-left:3px }
+  .mwwordb .car{ margin-left:4px; font-size:11px }
+  .mwwordb:hover, .mwwordb[aria-expanded="true"]{ background:var(--surface-2) }
+  .mwwordb:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:1px }
+  /* §729: an author display beats [hidden] (§93.11) — the menu stood open */
+  .mwwordm[hidden]{ display:none }
+  .mwwordm{ position:absolute; right:0; top:36px; z-index:30; min-width:160px; background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    box-shadow:0 10px 28px rgba(20,28,43,.16); padding:4px; display:grid }
+  .mwwordm button{ display:flex; align-items:center; border:0; background:none; text-align:left; padding:6px 10px; border-radius:7px; font-family:inherit;
+    font-size:13.5px; color:var(--ink); cursor:pointer; white-space:nowrap }
+  .mwwordm button:hover, .mwwordm button:focus-visible{ background:var(--surface-2); outline:none }
+  .mwwordm button[aria-pressed="true"]{ font-weight:700 }
+  .mwwordm button[aria-pressed="true"]::after{ content:""; width:6px; height:6px; border-radius:50%; background:var(--amber-tx); margin-left:auto; padding-left:0 }
+  .mwcardhd .mwwho{ font-size:13.5px; color:var(--ink-3) }
+  .mwcardhd .mwwho select{ border:0; background:none; font-weight:600; color:var(--ink-2); margin-left:2px }
   /* Show sits in a white header now, not on the navy */
   .mwcardhd .mwwho{ color:var(--ink-3); font-size:12px }
   .mwcardhd .mwwho select{ color:var(--ink); border:1px solid var(--line); background:var(--surface); padding:4px 24px 4px 9px; margin-left:6px; font-size:12.5px }
@@ -1792,8 +1828,11 @@
   .mwlist .mwrow, .mwlist .mwrow:nth-child(odd of .mwrow){ grid-template-columns:22px minmax(0,1fr) 100px 124px 28px; gap:2px 14px; padding:10px 16px;
     border-bottom:0; border-top:1px solid var(--line-soft); background:none; cursor:default }
   .mwlist .mwsh + .mwrow{ border-top:0 }
-  .mwlist .mwrow:hover{ background:var(--zebra) }
-  .mwlist .mwrow.on{ background:var(--mw-sel) }
+  /* §729: the odd rows' "background:none" above is the more specific rule,
+     so a hover (or the opened row's tint) on rows 1, 3, 5… never showed —
+     on Home's three rows only the middle one greyed. Same weight now. */
+  .mwlist .mwrow:hover, .mwlist .mwrow:nth-child(odd of .mwrow):hover{ background:var(--zebra) }
+  .mwlist .mwrow.on, .mwlist .mwrow.on:nth-child(odd of .mwrow){ background:var(--mw-sel) }
   .mwlist .mwsec > :last-child{ border-bottom-left-radius:11px; border-bottom-right-radius:11px }
   .mwmain{ min-width:0 }
   .mwlist .mwrow .t{ display:block; max-width:100%; border:0; background:none; padding:0; margin:0; text-align:left; font:inherit; font-size:15px; font-weight:500;
@@ -1807,6 +1846,18 @@
   .mwmeta .sep{ width:1px; height:11px; background:var(--line); flex:none }
   .mwmeta .up{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0 }
   .mwmeta .up b{ font-weight:600; color:var(--ink-2) }
+  /* §728 THE NAME LEADS, AS ON THE TRACKER (§721): the name a step heavier;
+     the line one grey, the client a plain word, a small dot between */
+  .mwlist .mwrow .t, .mwhome .mwrow .t{ font-weight:600 }
+  /* §730 A TASK'S NAME IS NEVER CUT (Islam: "some of the task names or the
+     notes below is trimmed"; agreed: "do it for both home and my tasks"):
+     a long name wraps onto a second line; the note line under it stays one
+     line, cut, the whole of it a press away in the opened task */
+  .mwlist .mwrow .t{ white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere }
+  .mwmeta{ gap:6px }
+  .mwmeta .mwcl{ font-weight:400; color:var(--ink-3) }
+  .mwmeta .sep{ width:3px; height:3px; border-radius:50%; background:var(--ink-3); opacity:.7 }
+  .mwmeta .up b{ font-weight:400; color:var(--ink-3) }
   .mwlist .mwwhen{ justify-self:end; text-align:right; font-size:12.5px; font-weight:600; color:var(--ink-3) }
   .mwlist .mwwhen.late{ color:var(--bad) }
   .mwlist .mwst, .mwlist .mwst.prog, .mwlist .mwst.done{ justify-self:start; color:var(--ink-2) }
@@ -1891,8 +1942,8 @@
   .mwlist .mwcase .mwgo{ justify-self:end }
   /* §711: Home's card carries the same rows, in its half width, under quiet strips */
   .mwhome .mwrow, .mwhome .mwrow:nth-child(odd of .mwrow), .mwhome .hotask:nth-child(odd of .hotask){ grid-template-columns:20px minmax(0,1fr) auto auto 28px; gap:2px 10px; padding:9px 14px; background:none; border-bottom:0 }
-  .mwhome .mwrow:hover{ background:var(--zebra) }
-  .mwhome .mwrow.on{ background:var(--mw-sel) }
+  .mwhome .mwrow:hover, .mwhome .mwrow:nth-child(odd of .mwrow):hover, .mwhome .hotask:nth-child(odd of .hotask):hover{ background:var(--zebra) }
+  .mwhome .mwrow.on, .mwhome .mwrow.on:nth-child(odd of .mwrow), .mwhome .hotask.on:nth-child(odd of .hotask){ background:var(--mw-sel) }
   .mwhome .mwrow .t{ font-size:14px }
   .mwhome .mwwhen{ font-size:12px }
   .mwhome .mwst select, .mwhome .mwst > span:not(.mwdot){ font-size:12.5px }

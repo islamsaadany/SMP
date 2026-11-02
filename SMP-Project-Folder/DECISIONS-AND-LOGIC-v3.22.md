@@ -70977,6 +70977,63 @@ Nothing it does is gone; it is quieter:
 
 **§722–§723 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
 
+## §724 — The Tracker's search narrows as you type (2026-11-03)
+
+**Asked** (Islam): "the search bar should filter the tasks or even show them like the quick jump rather than finish and click enter to filter" — "ok build both". Each letter hides the rows whose name, topic, latest note and owner don't hold the words (a section's own name counts for its rows, as on My tasks); a section left with nothing is hidden; the head's count follows the rows shown; a word that matches nothing says "Nothing matches" in place; clearing brings every row back; Enter does nothing more. The server is no longer asked to narrow by words (`ask().q` is empty); an old link carrying `q=` is read whole once and sifted. Filtering the list in place was chosen over a quick-jump list: the rows keep their status, week and ⋯.
+
+**Checked**: `checks/tracker.mjs` **367 passed, 0 failed** — new: narrows as you type with the count following and no request; nothing-matches said in place; clearing restores.
+
+## §725 — My tasks' bar is the Tracker's quiet bar (2026-11-03)
+
+**Asked** (Islam): "show me My tasks top bar match the tracker before and after" → `design-mockups/home/2026-11-03_my-tasks-bar.html` → "ok for the mockup … build both". My tasks' card head: no tile; "Open tasks" 18px, the count a plain figure; Sort by as plain words right after it, **By date · By client**, the chosen one on soft grey; Search an icon whose box opens on a press (still filters as you type); **Done: Hide ▾** a small word opening Hide / Last week / Last 30 days; an admin's **Show:** a quiet word-select at the end. Home's Your tasks card shares the sort control, so it reads By date · By client too; it keeps its tile, as its sibling cards (Your clients, Track Record) do.
+
+**Checked**: `checks/shell.mjs` — new §725 check (no tile, the two words, the search box shut and opening on a press, Done a small word); the Done checks press the word then the choice; the sort words read By date / By client. Shell cache `smp-shell-v7.54-quiet-my-tasks-bar`. (Run result added below when it lands.)
+
+**§725 shell run**: 555 ok / 11 failed — the same 11 as main; both §725 checks ok, the Done and sort checks ok.
+
+## §726 — A Tracker view opens at once (2026-11-03)
+
+**Asked** (Islam): "on clicking the filters at the top of the internal tracker it feels like the whole list reloads I things that's not the right behavior" → "1. ok". The page now carries the list as each of the four list views (This week, All, Mine, Undated) draws it, each in an inert `<template class="vtpl" data-view data-n data-count>`, all drawn by the one renderer (`listOne`, §53.5) so sections, counts and folded done rows are the server's. A press on a view swaps that copy in place of the list: the tab, the head's count, the hidden count line, unfolded sections and fresh rows carried over, a search still sifting (§724); the address follows by pushState and Back works the same way. Every task's opened panel now rides once after the views (`template.otpl`) and is put after its row in whatever view is showing (§719 moved). The weekly check, a meeting, is still read from the server. The string checks in `checks/tracker.mjs` read the list in view (`liveOnly` strips the copies, which end at `<!--/vtpls-->`).
+
+**Checked**: `checks/tracker.mjs` **368 passed, 0 failed** — new: a view press makes no request, shows the view's rows with the head's count matching, the address follows, Back the same; seen RED with the swap taken out (2 requests).
+
+## §727 — The weekly check is a button, not a view (2026-11-03)
+
+**Asked** (Islam): "the weekly check is actually an action and shouldn't be sitting with the filters" → mockup `design-mockups/internal-tracker/2026-11-03_weekly-check-button.html` → "I like the weekly check in mockup" … "ok for the 3". The views are This week · All · Mine · Undated. **Start weekly check** — outlined, a clipboard in the Tracker's blue — sits at the bar's end. Inside the check the bar reads **← Back to the list** · **Weekly check** · its week (no views, no search; the ⋯ stays for Dates as and Topics). Back returns to the list view the check was opened from (kept on this browser for the session), else This week. Both go the way the views do (no page load; the check is read from the server, §726).
+
+**Checked**: `checks/tracker.mjs` **369 passed, 0 failed** — new: the four views only, the button opens the check with its bar, Back returns to the view it came from, no page load.
+
+## §728 — My tasks and Home: the Tracker's quiet line, and a task opens at once (2026-11-03)
+
+**Asked** (Islam): "in the my tasks and home page shouldn't we make the 2nd list quieter like the tracker … check what needs to match up between the 3 areas" → "ok for the 3". The comparison found two things left to match (the line under the name, and opening a task); the rest already matched (search as you type, sort instant, the ⋯, one-press ⋯). My tasks and Home share one row (`mwRow`), so both change together.
+
+- **The quiet line (§721's)**: the name 600 (was 500); the line one grey with the client a plain word (was 600 in `--ink-2`), a small dot between (was a hairline), the note's week said only when it isn't this week — `lib/my-work.ts` now sends `last.now`, so "Last week ·" still flags a task nobody has touched. The topic is not added: these lists run across clients, so the client says more.
+- **Opens at once (§719's rule)**: a new `workDetails` action reads every listed task's details in one call — each through the same door and `workDetail` read, one client's door once, a task that can't be read saying why in its own place. My tasks and Home ask for it as soon as the list is drawn (`mwPrefetch`), so a press on a name finds the details already there; a press before they land waits as before and is drawn when they do.
+
+**Checked**: `checks/tracker.mjs` **369 passed, 0 failed**. `checks/shell.mjs` — new: opening a task asks the server nothing, its tabs there at once; the row's line is the quiet one (name ≥600, client plain, no "This week" in front of this week's note). Shell cache `smp-shell-v7.55-tasks-quiet-instant`. (Run result below when it lands.)
+
+**§728 shell run**: 558 ok / 10 failed — main's own; both §728 checks ok.
+
+**§724–§728 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §729 — My tasks' Done menu stood open; Home's rows hovered only in the middle (2026-11-03)
+
+**Reported** (Islam): "this list is appearing and not closing"; "in the home page tasks the middle task only gets grey background when I hover above it". Both were the cascade:
+- The Done menu (`.mwwordm`, §725) set `display:grid`, which beats `[hidden]` (§93.11 — the console has no blanket `[hidden]` rule), so it was always drawn. `.mwwordm[hidden]{display:none}`.
+- The odd rows' reset (`.mwlist .mwrow:nth-child(odd of .mwrow){background:none}`, and Home's) outweighs `.mwrow:hover` and `.mwrow.on`, so rows 1, 3, 5… never greyed on hover nor took the opened tint — on Home's three rows, only the middle one did. The hover and `.on` rules now carry the same `:nth-child(odd of …)` weight.
+
+**Checked**: `checks/shell.mjs` — new: the Done menu is shut at rest and after a choice; a hover greys the first row. Shell cache `smp-shell-v7.56-menu-hover-fix`. (Run result below when it lands.)
+
+## §730 — A task's name is never cut on My tasks and Home (2026-11-03)
+
+**Asked** (Islam): "for the home page tasks some of the task names or the notes below is trimmed do you think we make it appear on hovering?" Answered: not on hover (a tooltip is the popup §722 took away and a phone has no hover; a row that grows under the pointer jumps). Instead: the name is never cut — a long name wraps onto a second line — and the note line stays one line, cut, its whole a press away in the opened task (which opens at once, §728). "ok do it for both home and my tasks". One rule (`.mwlist .mwrow .t`), Home's rows being `.mwlist.mwhome`.
+
+**Checked**: `checks/shell.mjs` — new: the name wraps (white-space normal, no ellipsis), the note line stays one line. Shell cache `smp-shell-v7.57-names-wrap`. (Run result below when it lands; it covers §729 too.)
+
+**§729–§730 shell run**: 560 ok / 11 failed — main's own (§653 comes and goes); the three new checks ok.
+
+**§729–§730 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
 ## §731 — Every "are you sure" asks the same way (2026-11-03)
 
 **Asked** (Islam), from a picture of a delete dialog — *Delete file? · This will permanently delete "Project brief.pdf". This action cannot be undone. · Cancel | Delete file* — *"a nice concept for all are you sure boxes with the name and verb of the action and the description tells what really happen with a dismiss button and action on the right bright and the cancel on the left. what do you think about this as a best practice?"*, then *"ok for all … we need to check all the buttons in the app and fix them according to these rules"*, then *"go, keep the cycle buttons red"*.

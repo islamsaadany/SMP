@@ -1382,18 +1382,25 @@ try {
        presses below would each wait thirty seconds for nothing. */
     if ((await pg.locator(row + ".tcwrap").count()) !== 1) check("Change topic — but there is no topic cell on the row to open", false);
     else {
-    await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(row + "[data-act=topic-start]").click();
-    check("Change topic in the row's ⋯ opens the topic list, the open topics and No topic", await pg.locator(row + ".tcwrap .topics").isVisible() &&
-      (await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic="' + roomTopic.id + '"]').count()) === 1 && (await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic=""]').count()) === 1);
-    await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic="' + roomTopic.id + '"]').click(); await settle();
+    /* §714: Change topic is the ⋯'s third small list — the open topics, No
+       topic, and New topic… — opened on hover or a press */
+    const topicList = row + '.rmsub[data-sub="topic"] ';
+    const topicMenu = async () => { await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(topicList + "> button").click(); };
+    await topicMenu();
+    const menuOrder = await pg.locator(row + ".tmenu > .rmsub > button, " + row + ".tmenu > button").allInnerTexts();
+    check("Change topic in the row's ⋯ is a small list after Hand to someone else and before Rename — the open topics, No topic and New topic… (§714)",
+      await pg.locator(topicList + ".rmside").isVisible() && (await pg.locator(topicList + '[data-act=pick-topic][data-topic="' + roomTopic.id + '"]').count()) === 1 &&
+      (await pg.locator(topicList + '[data-act=pick-topic][data-topic=""]').count()) === 1 && (await pg.locator(topicList + ".tnew").count()) === 1 &&
+      menuOrder.map((x) => x.replace("\u203a", "").trim()).slice(0, 4).join("|") === "Change the week|Hand to someone else|Change topic|Rename", JSON.stringify(menuOrder));
+    await pg.locator(topicList + '[data-act=pick-topic][data-topic="' + roomTopic.id + '"]').click(); await settle();
     check("...and a pick puts the action under that topic, the name unchanged, the tag reading it, without a reload", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === roomTopic.id &&
       (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" && (await pg.locator(row + ".tcwrap .tc:not(.add) .tw").innerText()) === "Facilities" && await stayed());
     await pg.locator(row + ".tcwrap").click();
     await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic=""]').click(); await settle();
     check("...and No topic takes it off again, the tag gone from the name", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === null && (await pg.locator(row + ".tc:not(.add)").count()) === 0);
-    await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(row + "[data-act=topic-start]").click();
-    await pg.locator(row + ".tcwrap .tnew").fill("Venue hunt");
-    await pg.locator(row + ".tcwrap .tnew").press("Enter"); await settle();
+    await topicMenu();
+    await pg.locator(topicList + ".tnew").fill("Venue hunt");
+    await pg.locator(topicList + ".tnew").press("Enter"); await settle();
     const madeTopic = (await asTenant(A, (c) => listTopics(c))).find((x) => x.name === "Venue hunt");
     check("...and New topic… makes the topic and sets it on that row in one press", !!madeTopic && (await asTenant(A, (c) => oneAction(c, born.id))).topicId === madeTopic.id &&
       (await pg.locator(row + ".tcwrap .tw").innerText()) === "Venue hunt");

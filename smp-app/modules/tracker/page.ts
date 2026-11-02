@@ -760,6 +760,8 @@ const LOOK = `
 .rdots .rmside small{margin-left:auto;color:var(--ink-3);font-size:12px}
 .rdots .rmh{font:700 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:8px 10px 6px;white-space:nowrap}
 .rdots .mwait{padding:6px 10px;font-size:13px;color:var(--ink-3)}
+.rdots .rmside .tnew{display:block;margin:4px 6px 6px;width:calc(100% - 12px);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);background:var(--surface);color:var(--ink);outline:none}
+.rdots .rmside .tnew:focus{border-color:var(--carry)}
 @media (max-width:760px){.rdots .rmside{right:0;top:calc(100% + 2px)}}
 @media (max-width:760px){
   .cbot .list .row:not(.chk),.cbot .list .row.o:not(.chk){grid-template-columns:22px auto minmax(0,1fr) 28px;grid-template-areas:"tick t t more" ". when st st";row-gap:4px}
@@ -992,14 +994,25 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
   const handSide = '<span class="rmside mteam" role="listbox"><span class="rmh">Hand to</span>' +
     (rest.length ? rest.map((p) => '<button type="button" role="option" data-act="pick-owner" data-key="' + esc(p.key) + '">' + esc(nm(p.key)) + "</button>").join("")
       : '<span class="mwait">Nobody else holds a seat on this client.</span>') + "</span>";
+  /* §714 (Islam: "change topic ... should come above rename ... how can we
+     make the list the current topics and add new?"): Change topic is the
+     third small list — the open topics (and a closed one the action still
+     carries), the one it holds marked; No topic; and New topic… typed in
+     place, made and set on Enter. The same buttons and box the row's topic
+     tag opens (pick-topic, .tnew), so one handler answers both (§53.5). */
+  const topicOpts = L.topics.filter((x) => !x.closed || x.id === a.topicId);
+  const topicSide = '<span class="rmside" role="listbox"><span class="rmh">Move to topic</span>' +
+    topicOpts.map((x) => '<button type="button" role="option" data-act="pick-topic" data-topic="' + esc(x.id) + '"' + (x.id === a.topicId ? ' class="on" aria-selected="true"' : ' aria-selected="false"') + ">" + esc(x.name) + (x.closed ? " (closed)" : "") + "</button>").join("") +
+    '<button type="button" role="option" data-act="pick-topic" data-topic=""' + (a.topicId ? ' aria-selected="false"' : ' class="on" aria-selected="true"') + ">No topic</button>" +
+    '<input class="tnew" placeholder="New topic…" aria-label="New topic" maxlength="120"></span>';
   const subOf = (which: string, icon: string, word: string, side: string) =>
     '<span class="rmsub" data-sub="' + which + '"><button type="button" role="menuitem" data-act="sub-open" aria-haspopup="true">' + icon + word + '<span class="chev" aria-hidden="true">&rsaquo;</span></button>' + side + "</span>";
   const menu = '<span class="rdots"><button class="more' + (opened ? " on" : "") + '" type="button" data-act="row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="More for this action" title="More">' + DOTS3 + "</button>" +
     '<span class="tmenu" role="menu" hidden>' +
     (live && a.status !== "done" ? subOf("week", CAL, "Change the week", weekSide) : "") +
     (live ? subOf("hand", HAND, "Hand to someone else", handSide) : "") +
+    (live && group !== "topic" ? subOf("topic", TAG, "Change topic", topicSide) : "") +
     (live ? '<button type="button" role="menuitem" data-act="rename-start">' + PEN + "Rename</button>" : "") +
-    (live && group !== "topic" ? '<button type="button" role="menuitem" data-act="topic-start">' + TAG + "Change topic</button>" : "") +
     (live ? "" : '<button type="button" role="menuitem" data-act="more">' + LINES + (opened ? "Close the details" : "Details and progress") + "</button>") +
     del + "</span>" + (byOwner ? whoCell(a, L, live) : "") + "</span>";
   const last = lastLine(a, L, today);

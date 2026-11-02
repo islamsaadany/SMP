@@ -2686,15 +2686,15 @@
         w.appendChild(side);
         pop.appendChild(w);
       };
-      if (r.status !== "done") sub("week", MW_I.cal, "Change the week", function (side) {
+      if (r.status !== "done") sub("week", MW_I.cal, "Week", function (side) {
         side.appendChild(el("div", "h", "Move to"));
         d.weeks.forEach(function (wk) {
           var b = item("", wk.word, function () { MW.write(r, "due", { due: wk.day }); }, wk.on ? "on" : null, side);
           b.appendChild(el("small", null, wk.days));
         });
       });
-      sub("hand", MW_I.hand, "Hand to someone else", function (side) {
-        side.appendChild(el("div", "h", "Hand to"));
+      sub("hand", MW_I.hand, "Owner", function (side) {
+        side.appendChild(el("div", "h", "New owner"));
         var rest = d.team.filter(function (p) { return !p.owner; });
         if (!rest.length) side.appendChild(el("p", "wait", "Nobody else holds a seat on this client."));
         rest.forEach(function (p) {

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — The ⋯ lists are named Week, Owner, Topic (§715).** One word each, no "Change"; the owner list is headed New owner. Tracker 358/0; shell 553 ok / main's 11.
+
 **2026-11-03 — Change topic is a small list in the Tracker's ⋯ (§714).** After Hand to someone else, before Rename: the open topics, No topic, and New topic… made and set on Enter.
 
 **2026-11-03 — The task's ⋯ reordered (§713).** Change the week and Hand to someone else first, each a small list beside the menu (hover or press; the hand-over list is the rest of the team); Rename third; Details and progress gone. On My tasks, Home and the Internal Tracker.

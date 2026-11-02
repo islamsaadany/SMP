@@ -991,7 +991,7 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
   const weekSide = '<span class="rmside" role="listbox"><span class="rmh">Move to</span>' + weekOptions(today).map((w) =>
     '<button type="button" role="option" data-act="pick-week" data-day="' + w.to + '"' + (a.due && sameWeek(a.due, w.to) ? ' class="on"' : "") + ">" + esc(w.word) + "<small>" + esc(w.days) + "</small></button>").join("") + "</span>";
   const rest = L.office.filter((p) => p.key !== a.ownerKey);
-  const handSide = '<span class="rmside mteam" role="listbox"><span class="rmh">Hand to</span>' +
+  const handSide = '<span class="rmside mteam" role="listbox"><span class="rmh">New owner</span>' +
     (rest.length ? rest.map((p) => '<button type="button" role="option" data-act="pick-owner" data-key="' + esc(p.key) + '">' + esc(nm(p.key)) + "</button>").join("")
       : '<span class="mwait">Nobody else holds a seat on this client.</span>') + "</span>";
   /* §714 (Islam: "change topic ... should come above rename ... how can we
@@ -1009,9 +1009,9 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
     '<span class="rmsub" data-sub="' + which + '"><button type="button" role="menuitem" data-act="sub-open" aria-haspopup="true">' + icon + word + '<span class="chev" aria-hidden="true">&rsaquo;</span></button>' + side + "</span>";
   const menu = '<span class="rdots"><button class="more' + (opened ? " on" : "") + '" type="button" data-act="row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="More for this action" title="More">' + DOTS3 + "</button>" +
     '<span class="tmenu" role="menu" hidden>' +
-    (live && a.status !== "done" ? subOf("week", CAL, "Change the week", weekSide) : "") +
-    (live ? subOf("hand", HAND, "Hand to someone else", handSide) : "") +
-    (live && group !== "topic" ? subOf("topic", TAG, "Change topic", topicSide) : "") +
+    (live && a.status !== "done" ? subOf("week", CAL, "Week", weekSide) : "") +
+    (live ? subOf("hand", HAND, "Owner", handSide) : "") +
+    (live && group !== "topic" ? subOf("topic", TAG, "Topic", topicSide) : "") +
     (live ? '<button type="button" role="menuitem" data-act="rename-start">' + PEN + "Rename</button>" : "") +
     (live ? "" : '<button type="button" role="menuitem" data-act="more">' + LINES + (opened ? "Close the details" : "Details and progress") + "</button>") +
     del + "</span>" + (byOwner ? whoCell(a, L, live) : "") + "</span>";

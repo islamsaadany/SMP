@@ -1388,10 +1388,10 @@ try {
     const topicMenu = async () => { await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(topicList + "> button").click(); };
     await topicMenu();
     const menuOrder = await pg.locator(row + ".tmenu > .rmsub > button, " + row + ".tmenu > button").allInnerTexts();
-    check("Change topic in the row's ⋯ is a small list after Hand to someone else and before Rename — the open topics, No topic and New topic… (§714)",
+    check("Topic in the row's ⋯ is a small list after Owner and before Rename — the open topics, No topic and New topic… (§714)",
       await pg.locator(topicList + ".rmside").isVisible() && (await pg.locator(topicList + '[data-act=pick-topic][data-topic="' + roomTopic.id + '"]').count()) === 1 &&
       (await pg.locator(topicList + '[data-act=pick-topic][data-topic=""]').count()) === 1 && (await pg.locator(topicList + ".tnew").count()) === 1 &&
-      menuOrder.map((x) => x.replace("\u203a", "").trim()).slice(0, 4).join("|") === "Change the week|Hand to someone else|Change topic|Rename", JSON.stringify(menuOrder));
+      menuOrder.map((x) => x.replace("\u203a", "").trim()).slice(0, 4).join("|") === "Week|Owner|Topic|Rename", JSON.stringify(menuOrder));
     await pg.locator(topicList + '[data-act=pick-topic][data-topic="' + roomTopic.id + '"]').click(); await settle();
     check("...and a pick puts the action under that topic, the name unchanged, the tag reading it, without a reload", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === roomTopic.id &&
       (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" && (await pg.locator(row + ".tcwrap .tc:not(.add) .tw").innerText()) === "Facilities" && await stayed());
@@ -1519,7 +1519,7 @@ try {
       + "var z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;"
       + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width/z),need:Math.round(w+slack),"
       + "row:Math.round(t.querySelector('button').getBoundingClientRect().height/z),pad:bc.paddingTop};})()");
-    check("Hand to someone else in the ⋯ opens the rest of the team, first names only, the owner left out (§713)", await team.isVisible() &&
+    check("Owner in the ⋯ opens the rest of the team, first names only, the owner left out (§713)", await team.isVisible() &&
       (await team.locator("button").allInnerTexts()).join("|") === "Islam|Omar",
       (await team.locator("button").allInnerTexts()).join("|"));
     const fit = await teamFit();

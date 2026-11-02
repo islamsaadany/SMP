@@ -278,7 +278,7 @@ export const APP_JS = `(function () {
     var wn = w.querySelector(".wn"), i = w.querySelector(".bar i");
     if (wn) wn.textContent = n + " of " + ids.length + " gone through";
     if (i) i.style.width = (ids.length ? Math.round(100 * n / ids.length) : 0) + "%";
-    /* §731: each topic says how far the meeting has got through its week */
+    /* §732: each topic says how far the meeting has got through its week */
     document.querySelectorAll(".mlist .sec").forEach(function (sec) {
       var all = sec.querySelectorAll(".mi.now[data-id]"), k = 0;
       all.forEach(function (x) { if (done.indexOf(x.getAttribute("data-id")) >= 0) k++; });
@@ -288,7 +288,7 @@ export const APP_JS = `(function () {
     });
     keptDraw();
   }
-  /* §731 SAVE AND NEXT CARRIES: an unfinished task of this week (or late)
+  /* §732 SAVE AND NEXT CARRIES: an unfinished task of this week (or late)
      goes on to next week with Save and next, unless "Keep it this week" was
      pressed — remembered by task for the rest of the meeting, so a redraw
      (a status press) does not undo the choice. */
@@ -819,18 +819,18 @@ export const APP_JS = `(function () {
     } else if (act === "step") {
       stepTask(Number(b.getAttribute("data-dir")) || 1, true);
     } else if (act === "skip") {
-      /* Skip moves on without saving, carrying or counting (§731) */
+      /* Skip moves on without saving, carrying or counting (§732) */
       stepTask(1, false);
     } else if (act === "carry-keep") {
       var kp = b.closest(".mopen"), kid = kp && kp.getAttribute("data-id");
       if (kid) { if (kept.has(kid)) kept.delete(kid); else kept.add(kid); keptDraw(); }
     } else if (act === "mshow") {
-      /* the box's Description, History and ⋯, folded until pressed (§731) */
+      /* the box's Description, History and ⋯, folded until pressed (§732) */
       var mo = b.closest(".mopen"), w8 = b.getAttribute("data-w");
       var tgt = mo && (w8 === "desc" ? mo.querySelector(".mdesc") : w8 === "hist" ? mo.querySelector(".mhist") : b.parentNode.querySelector(".mmenu"));
       if (tgt) { tgt.hidden = !tgt.hidden; b.setAttribute("aria-expanded", String(!tgt.hidden)); if (w8 === "desc" && !tgt.hidden) { var dd = tgt.querySelector("textarea"); if (dd) dd.focus(); } }
     } else if (act === "mfold") {
-      /* last week's finished work and next week's, behind their links (§731) */
+      /* last week's finished work and next week's, behind their links (§732) */
       var sc = b.closest(".sec"), fo = sc && sc.querySelector('.mf[data-f="' + b.getAttribute("data-f") + '"]');
       if (fo) { fo.hidden = !fo.hidden; b.setAttribute("aria-expanded", String(!fo.hidden)); }
     } else if (act === "progress-go") {

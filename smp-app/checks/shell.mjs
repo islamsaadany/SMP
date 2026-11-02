@@ -3373,7 +3373,7 @@ await section("4 · Forefront's own pages", async () => {
     check(edited.length === 1 && edited[0].body === "Edited from My tasks" && !!edited[0].edited_at, "\u2026and my own entry is edited in place there, saved as the Tracker saves it (\u00a7712)", JSON.stringify(edited));
     await page.click(".mwrow.on .mwpacts button >> text=Delete").catch(() => {});
     const asked = (await page.locator(".mwrow.on .mwpacts").textContent().catch(() => "")) || "";
-    await page.click(".mwrow.on .mwpacts button >> text=Yes, delete it").catch(() => {});
+    await page.click(".mwrow.on .mwpacts button >> text=Delete it").catch(() => {});
     await page.waitForSelector(".mwrow.on .mwdet .none", { timeout: 8000 }).catch(() => {});
     const leftE = (await owner.query("SELECT count(*)::int AS n FROM tracker_progress WHERE action_id = $1", [firstId])).rows[0].n;
     check(/Delete this entry\?/.test(asked) && leftE === 0, "\u2026and deleted there, asked first", asked + " · left " + leftE);

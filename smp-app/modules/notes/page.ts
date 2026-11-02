@@ -446,13 +446,13 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
   /* SEND ASKS FIRST (§671, the UX Lens review's first fix): one press used to
      email the client's people, and "again" too, while Delete on the same
      page asked. So the gold button asks in place, in the words Delete uses —
-     "Email the minutes to 3 people now? Yes, send · Not yet" — and only Yes
+     "Email the minutes to 3 people now? Not yet · Send them" — and only Send
      posts. A send that cannot go stays the held button that says why. The
      break `send-unasked` draws the old button, which must turn checks/notes.mjs
      red (§94.5). */
   const sendAsk = '<span class="sure" hidden>' + esc("Email the minutes to " + plural(withMail, "person", "people") + (n.sends ? " again" : "") + " now?") +
-    ' <button type="button" class="go btn gold" data-act="send">Yes, send</button>' +
-    '<button type="button" class="btn" data-act="send-no">Not yet</button></span>' +
+    ' <button type="button" class="btn" data-act="send-no">Not yet</button>' +
+    '<button type="button" class="go btn gold" data-act="send">Send them</button></span>' +
     /* and the line Yes gives way to, while the emails go (§672) */
     '<span class="working" data-sending hidden><span class="spin"></span>' + esc("Sending the minutes to " + plural(withMail, "person", "people")) + "&hellip;</span>";
   const send = !sendable
@@ -463,8 +463,8 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
       : '<button class="btn gold" type="button" data-act="send-ask">' + esc(sendWord) + "</button>" + sendAsk;
   const hint = noMail.length ? '<span class="hint">' + esc(noMail.join(", ")) + (noMail.length === 1 ? " has" : " have") + " no email and will not receive them.</span>" : "";
   const del = '<span class="sure" hidden>Delete this note and everything about it? ' +
-    '<button type="button" class="go btn danger" data-act="delete">Yes, delete it</button>' +
-    '<button type="button" class="btn" data-act="delete-no">Keep it</button></span>' +
+    '<button type="button" class="btn" data-act="delete-no">Keep it</button>' +
+    '<button type="button" class="go btn danger" data-act="delete">Delete it</button></span>' +
     '<button type="button" class="rm" data-act="delete-ask">Delete this note</button>';
   const foot = '<div class="foot"><span class="saved" data-saved></span><span class="spacer"></span>' + hint + refine + send + "</div>";
   const body = empty

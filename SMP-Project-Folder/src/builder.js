@@ -340,8 +340,8 @@ function builderChooserHtml(){
       '<span class="bstat ' + (has ? "has" : "empty") + '">' + (has ? "Has a plan" : "Empty") + '</span>' +
       (confirming
         ? '<span class="bconfirm">Archive today’s plan and start fresh? ' +
-            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Yes, archive it</button>' +
-            '<button class="blink" data-bnofresh="1">Cancel</button></span>'
+            '<button class="blink" data-bnofresh="1">Cancel</button>' +
+            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Archive it</button></span>'
         /* A subject with content gets TWO ways in: Continue picks up a
            paused build exactly where the data stands (§129: progress is the
            plan itself, so nothing was ever "saved" to resume), and Start
@@ -846,6 +846,6 @@ function builderReviewHtml(target){
   return '<div class="brv">' + rows + '</div>' +
     '<p class="bfoot">Finishing closes the band and nothing else — the plan has been live all along. ' +
       'Gaps stay findable on the pages' + (gaps.length ? '' : ' — and there are none') + '.</p>' +
-    '<div class="bfacts"><button class="bprim" data-bdone="1">Finish building</button>' +
-    '<button class="blink" data-brvback="1">Keep building</button></div>';
+    '<div class="bfacts"><button class="blink" data-brvback="1">Keep building</button>' +
+    '<button class="bprim" data-bdone="1">Finish building</button></div>';
 }

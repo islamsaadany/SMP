@@ -358,10 +358,10 @@ check("...and with nothing picked it opens on the first of this week's, marked o
   /class="mi now" data-act="pick-task" data-id="p" aria-current="true"/.test(chk) && count(chk, /data-act="pick-task" data-id="[^"]*" aria-current="true"/g) === 1 && /<div class="open mopen" data-id="p" data-tab="p"(?: data-carry="1")?>/.test(chk), (chk.match(/<button type="button" class="mi[^>]*>/g) || []).join(" | ") + " || " + ((chk.match(/<div class="open mopen[^>]*>/) || [""])[0]));
 check("...the task on the right carries its status as three buttons, the current one pressed",
   /data-act="set-status" data-value="not_started" aria-pressed="true"/.test(chk) && count(chk, /data-act="set-status"/g) === 3);
-/* §731: no Carry button — Save and next carries the task on screen when it
+/* §732: no Carry button — Save and next carries the task on screen when it
    is open and this week's, and says so under the button, with the way to
    keep it here; drawn once, on the task open, which is this week's */
-check("...Save and next will carry the open task, this week's, to next week — said once under the button, with Keep it this week, and no Carry button (§731)",
+check("...Save and next will carry the open task, this week's, to next week — said once under the button, with Keep it this week, and no Carry button (§732)",
   count(chk, /data-act="carry"/g) === 0 && count(chk, /class="cyl"/g) === 1 && /data-id="p" data-tab="p" data-carry="1"[\s\S]*?Moves to next week[\s\S]*?data-act="carry-keep"/.test(chk),
   count(chk, /class="cyl"/g) + " lines");
 check("...and a topic with nothing in these three weeks still gets its section and its write line",
@@ -1434,16 +1434,16 @@ try {
     check("...and counts the task left as gone through, ticked on the left",
       /^1 of \d+ gone through$/.test(await pg.locator(".walk .wn").innerText()) && (await pg.locator('.mlist .mi.rev[data-id="' + mTask + '"]').count()) === 1,
       await pg.locator(".walk .wn").innerText());
-    /* §731: Save and next carried it — an unfinished task of this week goes
+    /* §732: Save and next carried it — an unfinished task of this week goes
        on to next week with the save, unless kept (read back, §96) */
     const mDue1 = (await asTenant(A, (c) => oneAction(c, mTask))).due;
-    check("...and carried it to next week with the save, the Carry button gone (§731)",
+    check("...and carried it to next week with the save, the Carry button gone (§732)",
       mDue1 === nextWeekDay(todayIn()) && mDue1 !== mDue0 && (await pg.locator(".mopen [data-act=carry]").count()) === 0, JSON.stringify({ mDue0, mDue1 }));
     const order731 = await pg.locator(".mlist .mi[data-id]").evaluateAll((els) => els.map((e) => e.getAttribute("data-id")));
     const at731 = order731.indexOf(await pg.locator(".mopen").getAttribute("data-id"));
     await pg.locator(".mopen .mph").click(); await pg.keyboard.press("ArrowUp"); await settle();
     check("the arrow keys walk the list", at731 > 0 && (await pg.locator(".mopen").getAttribute("data-id")) === order731[at731 - 1] && await stayed(), JSON.stringify({ at731, order731 }));
-    /* §731: Keep it this week stops the carry — the next Save and next writes
+    /* §732: Keep it this week stops the carry — the next Save and next writes
        and moves on, the task's week untouched */
     const kTask = await pg.locator(".mopen").getAttribute("data-id");
     const kHad = await asTenant(A, (c) => oneAction(c, kTask));
@@ -1452,7 +1452,7 @@ try {
       const kSaid = await pg.locator(".mopen .cyl").innerText();
       await pg.locator(".mopen [data-act=step][data-dir='1']").click(); await settle();
       const kNow = await asTenant(A, (c) => oneAction(c, kTask));
-      check("...Keep it this week stops the carry: it says Stays this week, and Save and next leaves the week as it was (§731)",
+      check("...Keep it this week stops the carry: it says Stays this week, and Save and next leaves the week as it was (§732)",
         /^Stays this week/.test(kSaid) && kNow.due === kHad.due, JSON.stringify({ kSaid, was: kHad.due, now: kNow.due }));
     } else check("...Keep it this week — but the task arrived at has no carry line to keep", false, kTask);
     /* put the action back as it was: the walk-through above is not what the

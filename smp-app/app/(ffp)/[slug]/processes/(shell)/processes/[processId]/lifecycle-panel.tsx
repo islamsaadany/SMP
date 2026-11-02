@@ -10,6 +10,7 @@ import {
   setReviewInterval,
 } from "@/ffp/lib/actions/process-lifecycle";
 import { StaffLink } from "../../staff-link";
+import { ConfirmDialog } from "../../confirm-dialog";
 import { STATUS_LABEL, type ProcessLifecycleStatus } from "@/ffp/lib/domain/process-lifecycle";
 
 const FLOW: ProcessLifecycleStatus[] = ["DRAFT", "IN_REVIEW", "APPROVED", "PUBLISHED", "RETIRED"];
@@ -46,6 +47,8 @@ export function LifecyclePanel(p: PanelProps) {
   // The approver cannot also be a reviewer: their box is greyed and left out.
   const [approverId, setApproverId] = useState("");
   const [reviewerIds, setReviewerIds] = useState<ReadonlySet<string>>(new Set());
+  // Retire asks through the module's own dialog, never the browser's (§731).
+  const [askRetire, setAskRetire] = useState(false);
 
   function run(fn: () => Promise<{ ok: boolean; error?: string; message?: string }>) {
     setError(null);
@@ -228,16 +231,24 @@ export function LifecyclePanel(p: PanelProps) {
             />
             <span>months</span>
           </label>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => {
-              if (window.confirm("Retire this process? It stays on record but is no longer in force.")) run(() => retireProcess(ids));
-            }}
-            className={secondary}
-          >
+          <button type="button" disabled={pending} onClick={() => setAskRetire(true)} className={secondary}>
             Retire
           </button>
+          {askRetire && (
+            <ConfirmDialog
+              title="Retire this process?"
+              action="Retire the process"
+              destructive
+              pending={pending}
+              onClose={() => setAskRetire(false)}
+              onConfirm={() => {
+                setAskRetire(false);
+                run(() => retireProcess(ids));
+              }}
+            >
+              <p>It stays on record, with every version it holds, but is no longer in force. Nothing is deleted.</p>
+            </ConfirmDialog>
+          )}
         </div>
       )}
 

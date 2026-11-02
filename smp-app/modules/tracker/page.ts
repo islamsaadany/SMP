@@ -674,7 +674,7 @@ const LOOK = `
 .mbtn.pri{background:#1F3158;border-color:#1F3158;color:#fff}
 .mbtn.pri:hover{background:#2A4275}
 .macts .carry{height:34px;padding:0 12px;border-radius:8px}
-/* §731 THE MEETING, CLEANED — the rail a checklist (B), the box the agreed
+/* §732 THE MEETING, CLEANED — the rail a checklist (B), the box the agreed
    one (design-mockups/internal-tracker/2026-11-03_check-rail.html and
    2026-11-03_check-task-box.html) */
 .mlist .sh.mh{padding:14px 16px 4px;border-top:1px solid var(--line-2)}
@@ -746,7 +746,7 @@ const LOOK = `
 .mopen .mhist{margin-top:12px}
 .mopen .macts{margin-top:18px;padding-top:12px;border-top:1px solid var(--line-2)}
 .mopen .keys{display:none}
-/* §731: the check's count line under the bar, in the quiet bar's own voice */
+/* §732: the check's count line under the bar, in the quiet bar's own voice */
 .ctop .counted.ck{font:400 12.5px/1.4 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3);padding:0 16px 12px}
 .ctop .counted.ck .left{color:var(--ink-2)}
 .keys{margin:10px 0 0;font-size:12px;color:var(--ink-3)}
@@ -1115,8 +1115,8 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
   const byOwner = group === "owner";
   const del = live
     ? '<span class="sep"></span><span class="acts"><button type="button" role="menuitem" class="danger" data-act="delete-ask">' + BIN + "Delete</button>" +
-      '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
-      '<button type="button" class="go" data-act="delete-no">Keep it</button></span></span>'
+      '<span class="sure" hidden>Delete this action? <button type="button" class="go" data-act="delete-no">Keep it</button>' +
+      '<button type="button" class="go danger" data-act="delete">Delete it</button></span></span>'
     : "";
   /* THE ⋯, REORDERED (2026-11-03, §713; design-mockups/home/2026-11-03_task-menu.html,
      Islam: "change the week and hand to someone should be on the top of the
@@ -1268,8 +1268,8 @@ function progressList(L: Loaded, who: Who, today: string): string {
       '<div class="pb"><div class="ptxt">' + esc(p.body) + "</div>" +
       '<div class="by"><span>' + esc(name(p.by)) + "</span>" + (p.editedAt ? '<span class="ed">edited</span>' : "") +
       (mine ? '<button type="button" data-act="progress-edit">Edit</button><button type="button" class="danger" data-act="progress-delete-ask">Delete</button>' +
-        '<span class="sure" hidden>Delete this entry? <button type="button" class="go danger" data-act="progress-delete">Yes, delete it</button>' +
-        '<button type="button" class="go" data-act="progress-delete-no">Keep it</button></span>' : "") +
+        '<span class="sure" hidden>Delete this entry? <button type="button" class="go" data-act="progress-delete-no">Keep it</button>' +
+        '<button type="button" class="go danger" data-act="progress-delete">Delete it</button></span>' : "") +
       "</div></div></li>";
   }).join("") + "</ul>";
 }
@@ -1286,7 +1286,7 @@ function taskTabs(a: Action, L: Loaded, who: Who, today: string, live: boolean):
   return taskTabsWith(a, L, who, today, live, histItems(a, L, today));
 }
 /* the automatic record, newest first — the opened task's History and the
-   meeting box's (§731), one drawing (§53.5) */
+   meeting box's (§732), one drawing (§53.5) */
 function histItems(a: Action, L: Loaded, today: string): string {
   const name = (k: string) => L.names.get(k) || k;
   const wk = (d: string | null | undefined) => d ? weekWord(d, today) : "no date";
@@ -1314,8 +1314,8 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
     '<button type="button" role="tab" class="ptab histlink" data-act="hist" data-tab="h" aria-selected="false" aria-expanded="false">History' + n(L.events.length) + "</button>" +
     '<span class="sp"></span>' +
     (live ? '<span class="acts"><button type="button" class="danger" data-act="delete-ask">Delete</button>' +
-      '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
-      '<button type="button" class="go" data-act="delete-no">Keep it</button></span></span>' : "") + "</div>";
+      '<span class="sure" hidden>Delete this action? <button type="button" class="go" data-act="delete-no">Keep it</button>' +
+      '<button type="button" class="go danger" data-act="delete">Delete it</button></span></span>' : "") + "</div>";
   /* anybody past the gate writes progress (§657); somebody the register has
      not placed yet has no name to write it under (§313.32) */
   const prog = '<div class="tp tp-p">' + (who.personKey ? progressBox(a, "What happened this week?") : "") + progressList(L, who, today) + "</div>";
@@ -1478,7 +1478,7 @@ function meetingView(L: Loaded, p: PageArgs, today: string, dates: Format): { ht
   /* the task opened, else the first the meeting would come to (loadFor
      picks it first, so its progress and history are read with it) */
   const selId = L.open || firstCheckId(L, p, today);
-  /* §731 THE RAIL IS THE MEETING'S CHECKLIST (Islam chose B of
+  /* §732 THE RAIL IS THE MEETING'S CHECKLIST (Islam chose B of
      design-mockups/internal-tracker/2026-11-03_check-rail.html): each task
      a circle — empty until talked about, filled once gone through (this
      browser, today: the walk), a blue ring on the one on screen — and its
@@ -1492,7 +1492,7 @@ function meetingView(L: Loaded, p: PageArgs, today: string, dates: Format): { ht
     const open = g.rows.filter((a) => a.status !== "done");
     const late = open.filter((a) => isLate(a.due, today)).length;
     const meta = g.rows.length ? open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") : "nothing this week";
-    /* §731: the topic's name, how far the meeting has got through its week
+    /* §732: the topic's name, how far the meeting has got through its week
        ("2 of 9", drawn by the walk) and a thin bar; its ⋯ */
     void meta; void ix;
     const prog = '<span class="mprog" data-n="' + g.now.length + '">0 of ' + g.now.length + "</span>";
@@ -1506,7 +1506,7 @@ function meetingView(L: Loaded, p: PageArgs, today: string, dates: Format): { ht
       ? '<div class="asleep" title="Write the next action, or close the topic from its &middot;&middot;&middot;">Nothing on this topic in these three weeks.</div>' : "";
     const sub = (word: string, xs: Action[], k: CheckWeek) => xs.length ? '<div class="msub">' + word + "</div>" + xs.map((a) => item(a, k)).join("") : "";
     const line = me && t && !t.closed ? checkLine(t, L, me, meShort, today, dates) : "";
-    /* §731: last week's finished work and next week's (with the line that
+    /* §732: last week's finished work and next week's (with the line that
        writes it) fold behind two quiet links under the topic; a fold holding
        the task on screen is drawn open */
     const has = (xs: Action[]) => xs.some((a) => a.id === selId);
@@ -1536,7 +1536,7 @@ function meetingView(L: Loaded, p: PageArgs, today: string, dates: Format): { ht
    double-click, the status is three buttons for the same act — and Save and
    next writes what was typed in the progress box and opens the next task. */
 function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format): string {
-  /* §731 THE BOX, CLEANED (Islam: "this box needs cleaning"; the agreed one
+  /* §732 THE BOX, CLEANED (Islam: "this box needs cleaning"; the agreed one
      of design-mockups/internal-tracker/2026-11-03_check-task-box.html): the
      topic, owner and week one grey line over the name; "What happened this
      week?" with a quiet Enter in it; the status as three chips and Save and
@@ -1570,7 +1570,7 @@ function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format)
     '<button type="button" class="mlk" data-act="mshow" data-w="hist">History' + (P.ev.length ? " (" + P.ev.length + ")" : "") + "</button>" +
     (live ? '<span class="mdots"><button type="button" class="mlk" data-act="mshow" data-w="dots" aria-label="More">&middot;&middot;&middot;</button>' +
       '<span class="mmenu acts" hidden><button type="button" class="danger" data-act="delete-ask">Delete this task</button>' +
-      '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button> <button type="button" class="go" data-act="delete-no">No</button></span></span></span>' : "") + "</div>";
+      '<span class="sure" hidden>Delete this action? <button type="button" class="go" data-act="delete-no">Keep it</button> <button type="button" class="go danger" data-act="delete">Delete it</button></span></span></span>' : "") + "</div>";
   return '<div class="open mopen" data-id="' + esc(a.id) + '" data-tab="p"' + (carry ? ' data-carry="1"' : "") + ">" +
     '<p class="crumb facts">' + (t ? esc(t.name) : "No topic") + '<i class="sd"></i>' + whoCell(a, L, live) + '<i class="sd"></i>' + whenCell(a, today, dates, live) + "</p>" +
     '<h3 class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</h3>" +
@@ -1710,8 +1710,8 @@ function topicMenu(t: Topic): string {
       : '<button type="button" role="menuitem" data-act="topic-close" data-topic="' + esc(t.id) + '">Close the topic</button>') +
     '<button type="button" role="menuitem" class="danger" data-act="topic-delete-ask" data-topic="' + esc(t.id) + '">Delete</button>' +
     '<span class="sure" hidden>Delete the topic? Its actions stay, with no topic. ' +
-    '<button type="button" class="go danger" data-act="topic-delete" data-topic="' + esc(t.id) + '">Yes, delete it</button>' +
-    '<button type="button" class="go" data-act="topic-delete-no">Keep it</button></span>' +
+    '<button type="button" class="go" data-act="topic-delete-no">Keep it</button>' +
+    '<button type="button" class="go danger" data-act="topic-delete" data-topic="' + esc(t.id) + '">Delete it</button></span>' +
     "</span></span>";
 }
 

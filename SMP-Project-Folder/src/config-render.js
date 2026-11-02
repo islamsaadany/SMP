@@ -6525,8 +6525,9 @@ function renderMyLines(){
        has one, as the figure sets' page does (§16.7). */
     var noteOf = function(r){
       return rowAtRisk(r) && canEnterLine(r.target, r, "mine")
-        ? noteBox("note", r.id, r.obj.note, needsNote(r), r.target)
-        : (r.obj.note ? noteRead(r.obj.note, true) : '<span class="nobody">&mdash;</span>');
+        ? noteBox("note", r.id, r.obj.note, noteWant(r), r.target)
+        : (r.obj.note || needsNote(r) ? noteRead(r.obj.note, true, needsNote(r))
+                                      : '<span class="nobody">&mdash;</span>');
     };
     var body = '<table class="cfg"><thead><tr>' +
         '<th style="width:26%">' + L1("tactic") + '</th><th style="width:18%">What it produced</th>' +
@@ -6583,7 +6584,7 @@ function renderMyLines(){
         (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
     (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
       'This is a record until the SMO opens the next one.</div>') +
-    noteLockBar() + chips + blocks +
+    chips + blocks +
     '<div class="note"><b>You enter the figure, and its note when it is red; the unit submits.</b> ' +
       'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
 }

@@ -38,14 +38,13 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE
   open Submit — a build that cleared the bar and left Submit shut is the
   dangerous one, and either half alone passes on it.
 
-§576 — A NOTE OWED IS NO LONGER THIS BAR'S. Islam: a red figure with no note
-blocks every other entry until the note is written, and the approved mockup
-puts the lock's own bar in this one's place. So the state this file was built
-from — one note owed, on a pillar the rail is not on — is now §576's, and
-section 2b asserts it there: the lock's bar instead of this one, the rail still
-naming the place, and Go to it landing on the note (§279's promise, kept by the
-new bar). The walk, the chips and the pair are asserted over the blocker this
-bar still owns: a figure still to enter (rewritten, never loosened — §218).
+§576 took the note away from this bar (a red figure with no note locked every
+other entry, and the lock's own bar stood in this one's place); §705 gave it
+back. Islam: "don't stop a person from entering the numbers" — the lock is
+gone, the owed note is said by a tag on its own box, and THIS bar counts the
+note again, as it did before §576. Section 2b asserts that state: this bar,
+naming the place, its chip landing on the tagged note, nothing shut. The walk,
+the chips and the pair are still asserted over a figure still to enter.
 
 PROVED ABLE TO FAIL: run against the previous build with
 `SMP_FILE=/path/to/old.html python3 checks/report-blockers.py` — 24 red, the
@@ -180,32 +179,38 @@ with sync_playwright() as p:
     ck("...and Submit is live", pg.evaluate(
         "()=>{const s=document.querySelector('.rc-submit'); return s? s.getAttribute('aria-disabled') : 'no button';}") is None)
 
-    # 2b ── HIS STATE, ONE NOTE OWED: §576's LOCK NOW, IN THIS BAR'S PLACE
-    print("\n2b · one figure at risk with no note — the lock's bar takes this one's place (§576)")
+    # 2b ── HIS STATE, ONE NOTE OWED: THIS BAR COUNTS IT AGAIN (§705)
+    print("\n2b · one figure at risk with no note — this bar counts it, the box is tagged, nothing is shut (§705)")
     madeN = js(pg, ONE_NOTE, UNIT)
     pg.evaluate("()=>paint()")
     pg.wait_for_timeout(500)
     pg.evaluate("()=>{const r=document.querySelectorAll('.rail .ritem');"
                 "if(r.length && !r[0].classList.contains('on')) r[0].click();}")
     pg.wait_for_timeout(450)
-    lk = js(pg, """()=>({ bar:(document.querySelector('.lockbar')||{}).textContent||null,
+    lk = js(pg, """()=>({ lockbar:!!document.querySelector('.lockbar'),
         repband:!!document.querySelector('[data-repband]'),
+        count:(document.querySelector('[data-repband] .secmiss')||{}).textContent||"",
+        chips:[...document.querySelectorAll('[data-repband] .mchip')].map(c=>c.getAttribute('title')||""),
+        shut:document.querySelectorAll('[data-rep][disabled],[data-note][disabled],[data-crep][disabled],[data-cnote][disabled]').length,
         alarm:[...document.querySelectorAll('.rail .ritem .rsub .missing')].map(x=>x.textContent) })""")
-    ck("the lock's bar is drawn, naming the row",
-       isinstance(lk, dict) and (lk.get("bar") or "").find("Write its note before entering anything else.") > -1, lk)
-    ck("...in place of this bar, never beside it", isinstance(lk, dict) and lk.get("repband") is False, lk)
-    ck("...and the rail still names the place, and that a note is owed",
+    ck("this bar is drawn, counting the note, and no lock bar stands in its place",
+       isinstance(lk, dict) and lk.get("repband") is True and lk.get("lockbar") is False and
+       lk.get("count") == "1 to finish" and any("note" in t for t in (lk.get("chips") or [])), lk)
+    ck("...nothing is disabled", isinstance(lk, dict) and lk.get("shut") == 0, lk)
+    ck("...and the rail names the place, and that a note is owed",
        isinstance(lk, dict) and len(lk.get("alarm") or []) == 1 and "note" in (lk.get("alarm") or [""])[0], lk)
     try:
-        pg.click("[data-notego]")
+        pg.click("[data-repband] .mchip")
     except Exception as e:
-        errs.append("notego: " + str(e))
+        errs.append("chip: " + str(e))
     pg.wait_for_timeout(700)
-    lit0 = js(pg, """()=>{const a=document.activeElement;
-        return a?{tag:a.tagName, note:a.getAttribute('data-note')||""}:null;}""")
-    ck("Go to it lands in that row's note, on its pillar",
+    lit0 = js(pg, """()=>{const a=document.activeElement, t=a&&a.previousElementSibling;
+        return a?{tag:a.tagName, note:a.getAttribute('data-note')||"", ph:a.placeholder||"",
+                  tag2:(t&&t.classList.contains('notetag'))?t.textContent:null}:null;}""")
+    ck("the chip lands in that row's note, on its pillar — tagged, asking in the prompt's words",
        isinstance(lit0, dict) and lit0.get("tag") == "TEXTAREA" and
-       lit0.get("note") == (madeN.get("id") if isinstance(madeN, dict) else None), (lit0, madeN))
+       lit0.get("note") == (madeN.get("id") if isinstance(madeN, dict) else None) and
+       lit0.get("tag2") == "Note needed \u00b7 off track" and lit0.get("ph", "").startswith("No justification yet"), (lit0, madeN))
     pg.evaluate("""()=>{const l=document.activeElement;
         if(!l||l.tagName!=='TEXTAREA') return; l.value='Supplier outage in July; recovery agreed.';
         l.dispatchEvent(new Event('change',{bubbles:true}));}""")
@@ -371,8 +376,8 @@ with sync_playwright() as p:
       const p=(h.projects||[]).filter(x=>(x.milestones||[]).length)[0];
       if(!p) return null;
       const m=p.milestones[0]; m.status='wip'; m.pct=null; m.note='';
-      /* §576: and nothing else red and unexplained, or the lock's bar takes
-         this one's place — a seeded red row is not what this section asks. */
+      /* §576/§705: and nothing else red and unexplained — a seeded red row's
+         own note chip is not what this section asks. */
       subjectAsked(t).filter(needsNote).forEach(x=>{ x.obj.note='Explained.'; });
       paint(); return {holder:h.id, project:p.id, row:m.id};}"""
     subjects = js(pg, """()=>{

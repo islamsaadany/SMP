@@ -71029,3 +71029,7 @@ Nothing it does is gone; it is quieter:
 **Asked** (Islam): "for the home page tasks some of the task names or the notes below is trimmed do you think we make it appear on hovering?" Answered: not on hover (a tooltip is the popup §722 took away and a phone has no hover; a row that grows under the pointer jumps). Instead: the name is never cut — a long name wraps onto a second line — and the note line stays one line, cut, its whole a press away in the opened task (which opens at once, §728). "ok do it for both home and my tasks". One rule (`.mwlist .mwrow .t`), Home's rows being `.mwlist.mwhome`.
 
 **Checked**: `checks/shell.mjs` — new: the name wraps (white-space normal, no ellipsis), the note line stays one line. Shell cache `smp-shell-v7.57-names-wrap`. (Run result below when it lands; it covers §729 too.)
+
+**§729–§730 shell run**: 560 ok / 11 failed — main's own (§653 comes and goes); the three new checks ok.
+
+**§729–§730 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.

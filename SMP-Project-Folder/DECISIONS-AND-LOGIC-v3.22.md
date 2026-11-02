@@ -71011,3 +71011,7 @@ Nothing it does is gone; it is quieter:
 - **Opens at once (§719's rule)**: a new `workDetails` action reads every listed task's details in one call — each through the same door and `workDetail` read, one client's door once, a task that can't be read saying why in its own place. My tasks and Home ask for it as soon as the list is drawn (`mwPrefetch`), so a press on a name finds the details already there; a press before they land waits as before and is drawn when they do.
 
 **Checked**: `checks/tracker.mjs` **369 passed, 0 failed**. `checks/shell.mjs` — new: opening a task asks the server nothing, its tabs there at once; the row's line is the quiet one (name ≥600, client plain, no "This week" in front of this week's note). Shell cache `smp-shell-v7.55-tasks-quiet-instant`. (Run result below when it lands.)
+
+**§728 shell run**: 558 ok / 10 failed — main's own; both §728 checks ok.
+
+**§724–§728 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.

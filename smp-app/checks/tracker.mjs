@@ -996,6 +996,20 @@ try {
     pg.off("request", c726);
     check("a view opens at once — no request to the server, the list and the head's count those of the view, the address following, and Back the same (§726)",
       asked726 === 0 && mineRows726 < weekRows726 && head726 === String(mineRows726) && url726 === "mine" && backRows726 === weekRows726, JSON.stringify({ asked726, weekRows726, mineRows726, head726, url726, backRows726 }));
+    /* §727 THE CHECK IS A BUTTON, NOT A VIEW: the views are This week · All ·
+       Mine · Undated; "Start weekly check" at the bar's end opens it, its bar
+       says Weekly check with "Back to the list", which returns to the view
+       it was opened from */
+    await pg.locator('.cats a[href*="view=mine"]').click(); await settle();
+    const tabs727 = await pg.evaluate("Array.from(document.querySelectorAll('.cats a')).map(function(a){return a.textContent}).join('|')");
+    await pg.locator(".ctop .chd a.wcgo").click(); await settle();
+    const in727 = await pg.evaluate("({ v: document.body.getAttribute('data-view'), h: (document.querySelector('.ctop .chd h2')||{}).textContent, back: !!document.querySelector('.ctop .chd a.wcback'), tabs: document.querySelectorAll('.cats a').length, go: !!document.querySelector('.ctop .chd a.wcgo') })");
+    await pg.locator(".ctop .chd a.wcback").click(); await settle();
+    const out727 = await pg.evaluate("({ v: document.body.getAttribute('data-view'), tab: (document.querySelector('.cats a[aria-current=\"true\"]')||{}).textContent })");
+    check("the views are only views; Start weekly check at the bar's end opens the check, whose bar reads Weekly check with Back to the list, and Back returns to the view it came from (§727)",
+      tabs727 === "This week|All|Mine|Undated" && in727.v === "check" && in727.h === "Weekly check" && in727.back && in727.tabs === 0 && !in727.go && out727.v === "mine" && out727.tab === "Mine" && await stayed(),
+      JSON.stringify({ tabs727, in727, out727 }));
+    await pg.locator('.cats a[href*="view=week"]').click(); await settle();
     await pg.locator('.cats a[href*="view=all"]').click(); await settle();
     const allAt = { url: new URL(pg.url()).searchParams.get("view"), body: await pg.evaluate("document.body.getAttribute('data-view')"), tab: await tabOn(), count: await pg.locator("#count").textContent() };
     check("a press on All filters the list in place, with no page loaded (§566)",

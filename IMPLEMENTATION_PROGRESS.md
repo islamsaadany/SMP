@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — The weekly check is a button, not a view (§727).** Start weekly check at the bar's end; ← Back to the list inside. Tracker 369/0.
+
 **2026-11-03 — A Tracker view opens at once (§726).** Each view rides in the page; a press swaps it in, no request. Tracker 368/0 (new check seen red). §725 shell 555 ok / main's 11.
 
 **2026-11-03 — Tracker search narrows as you type (§724); My tasks' bar is the Tracker's quiet bar (§725).** Tracker 367/0; shell run pending.

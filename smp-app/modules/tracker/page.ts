@@ -555,6 +555,15 @@ const LOOK = `
 .ctop .tools.qt .addrow input.new::placeholder{color:var(--ink-3)}
 .ctop .tools.qt .addrow:not(:focus-within):not(.typing):not([data-picked]):not(:has(.tpk.set)) :is(.tpk,.when,.who,.more){display:none}
 .pin .card.ctop{border-bottom:1px solid var(--line)}
+/* §727 THE CHECK IS A BUTTON, NOT A VIEW */
+.ctop .chd .wcgo{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font:600 13.5px/1.2 var(--font);color:var(--ink);text-decoration:none;white-space:nowrap}
+.ctop .chd .wcgo:hover,.ctop .chd .wcgo:focus-visible{border-color:var(--carry);color:var(--carry);outline:none}
+.ctop .chd .wcgo svg{width:15px;height:15px;color:var(--carry);flex:none}
+.ctop .chd .wcback{order:-1;display:inline-flex;align-items:center;gap:6px;padding:6px 8px;margin-left:-8px;border-radius:8px;font:600 13.5px/1.2 var(--font);color:var(--carry);text-decoration:none;white-space:nowrap}
+.ctop .chd .wcback:hover,.ctop .chd .wcback:focus-visible{background:var(--wk);outline:none}
+.ctop .chd .wcback svg{width:14px;height:14px;flex:none}
+.ctop.inchk .chd h2{padding-left:12px;border-left:1px solid var(--line)}
+.ctop .chd .wcwhen{color:var(--ink-3);font-size:13.5px;margin-right:auto;margin-left:4px}
 .pin .card.ctop.solo{border-bottom:1px solid var(--line)}
 .cbot .list .row{padding:8px 14px;border-bottom-color:var(--line-soft)}
 .cbot .sec .row:nth-child(odd of .row:not(.done)),.cbot .sec.showdone .row:nth-child(odd of .row){background:var(--zebra)}
@@ -967,6 +976,8 @@ function whoCell(a: Action, L: Loaded, live: boolean): string {
 }
 
 const PEN = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+const BACKI = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CLIPI = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2.5" width="10" height="11.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 2.5h4v2H6zM5.8 9.2l1.6 1.6 3-3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const PLUS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const LENS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const CARET = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -1495,12 +1506,21 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
     "</span>" + topicsPanel(L) + "</span>";
   const band = bandHtml({ esc, eyebrow: weekWord(thu, today) + " \u00b7 " + weekLabel(weekOf(today), today), title: MODULE_DEF.tracker.label,
     sentence: p.tenantName + "\u2019s actions, read by the week.", tiles });
-  /* §723: the views as plain words right after the count, no "Show" */
-  const views = '<span class="cx"><nav class="cats" aria-label="Views">' +
-    VIEWS.map((v) => '<a href="' + esc(viewHref(v)) + '"' + (v === view ? ' aria-current="true"' : "") + ">" + esc(VIEW_WORD[v]) + "</a>").join("") +
-    "</nav></span>";
-  return band + '<div class="card ctop' + (o.solo ? " solo" : "") + '">' +
-    cardHead({ esc, icon: "tasks", title: "Actions", count: o.shown == null ? null : o.shown, right: views + (o.inner && o.inner.includes("<!--settings-->") ? "" : (o.find || "") + settings) }) +
+  /* §723: the views as plain words right after the count, no "Show".
+     §727 (Islam: "the weekly check is actually an action and shouldn't be
+     sitting with the filters"; option of design-mockups/internal-tracker/
+     2026-11-03_weekly-check-button.html): the views are only views, and the
+     check is a button of its own at the bar's end, "Start weekly check";
+     inside it the bar reads "← Back to the list · Weekly check · its week". */
+  const views = isCheck ? '<span class="wcwhen">' + esc(weekWord(thu, today) + " \u00b7 " + weekLabel(weekOf(today), today)) + "</span>"
+    : '<span class="cx"><nav class="cats" aria-label="Views">' +
+      VIEWS.filter((v) => v !== "check").map((v) => '<a href="' + esc(viewHref(v)) + '"' + (v === view ? ' aria-current="true"' : "") + ">" + esc(VIEW_WORD[v]) + "</a>").join("") +
+      "</nav></span>";
+  const back = isCheck ? '<a class="wcback" href="' + esc(viewHref("week")) + '">' + BACKI + "Back to the list</a>" : "";
+  const startCheck = isCheck ? "" : '<a class="wcgo" href="' + esc(viewHref("check")) + '">' + CLIPI + "Start weekly check</a>";
+  return band + '<div class="card ctop' + (o.solo ? " solo" : "") + (isCheck ? " inchk" : "") + '">' +
+    cardHead({ esc, icon: "tasks", title: isCheck ? "Weekly check" : "Actions", count: o.shown == null ? null : o.shown,
+      right: back + views + (o.inner && o.inner.includes("<!--settings-->") ? "" : (o.find || "") + settings) + startCheck }) +
     (o.inner || "").replace("<!--settings-->", settings) + "</div>";
 }
 

@@ -901,10 +901,12 @@ export const APP_JS = `(function () {
      did not run, still opens it as before. */
   function viewOf(href) { return new URL(href, location.href).searchParams.get("view"); }
   document.addEventListener("click", function (e) {
-    var t = e.target.closest && e.target.closest(".cats a[href]");
+    /* §727: Start weekly check and Back to the list go the same way */
+    var t = e.target.closest && e.target.closest(".cats a[href], a.wcgo[href], a.wcback[href]");
     if (!t || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     /*%TABS%*/
     var v = viewOf(t.href);
+    if (t.classList.contains("wcback")) { try { v = sessionStorage.getItem("smp.tracker.lastview") || v; } catch (x) {} }
     if (!v) return;
     e.preventDefault();
     closePops(null);
@@ -913,6 +915,7 @@ export const APP_JS = `(function () {
       if (viewOf(o.href) === v) o.setAttribute("aria-current", "true"); else o.removeAttribute("aria-current");
     });
     var was = B.getAttribute("data-view") || "week";
+    if (v === "check" && was !== "check") { try { sessionStorage.setItem("smp.tracker.lastview", was); } catch (x) {} }
     B.setAttribute("data-view", v);
     var u = new URL(location.href);
     u.searchParams.set("view", v); u.searchParams.delete("open");

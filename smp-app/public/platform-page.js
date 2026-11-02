@@ -2702,7 +2702,6 @@
           if (p.me) b.appendChild(el("small", null, "you"));
         });
       });
-      item(MW_I.pen, "Rename", function () { MW.renaming = key; MW.menu = null; MW.redraw(); });
     }
     var go = el("a");
     go.href = mwTrackerHref(r);
@@ -2715,6 +2714,9 @@
     go.title = "Open in " + r.clientName + "’s Tracker";
     pop.appendChild(go);
     if (r.canChange) {
+      /* §718 (Islam: "make open in tracker before rename so rename becomes
+         the last in all lists"): Rename last before Delete, as on the Tracker. */
+      item(MW_I.pen, "Rename", function () { MW.renaming = key; MW.menu = null; MW.redraw(); });
       pop.appendChild(el("hr"));
       item(MW_I.bin, "Delete", function () { MW.sub = "del"; MW.redraw(); }, "danger");
     }

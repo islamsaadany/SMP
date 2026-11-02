@@ -55,7 +55,7 @@ svg{display:block}
 @media (max-width:700px){.row{grid-template-columns:22px minmax(0,1fr) 28px}.wc,.st{display:none}.side{right:0;top:calc(100% + 6px)}}
 </style>
 <div class="pg">
-  <p class="note"><b>Try it:</b> press ⋯, then rest on <b>Week</b> or <b>Owner</b> — each opens a small list beside the menu (a press opens it too). <b>Owner</b> lists the rest of the team; the owner, Islam, is not in it. The switch shows the Internal Tracker's menu, where <b>Topic</b> comes next: the open topics, No topic, and a New topic… box. Then Rename; on My tasks and Home, <b>Open in Tracker</b> — one short line, since the client is already on the row; Delete last.</p>
+  <p class="note"><b>Try it:</b> press ⋯, then rest on <b>Week</b> or <b>Owner</b> — each opens a small list beside the menu (a press opens it too). <b>Owner</b> lists the rest of the team; the owner, Islam, is not in it. The switch shows the Internal Tracker's menu, where <b>Topic</b> comes next: the open topics, No topic, and a New topic… box. On My tasks and Home, <b>Open in Tracker</b> next — one short line, since the client is already on the row. <b>Rename</b> is last before Delete everywhere.</p>
   <div class="sw" role="group"><button type="button" data-ctx="mine" aria-pressed="true">My tasks and Home</button><button type="button" data-ctx="tracker" aria-pressed="false">Internal Tracker</button></div>
   <div class="card"><div class="row"><span class="tick"></span><div style="min-width:0"><div class="t">Logitics Strategy Revamp</div><div class="meta"><b>Raya Trade</b></div></div><span class="wc">2 w late</span><span class="st"><span class="dot"></span>In progress</span>
     <span class="menu" id="menu"><button type="button" class="kb" id="kb" aria-haspopup="menu" aria-expanded="false" aria-label="More for this task"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></button></span></div></div>
@@ -85,8 +85,8 @@ function draw(){
  const html='<div class="pop" role="menu">'+
   sub('week',I.cal,'Week',week)+sub('hand',I.hand,'Owner',owner)+
   (S.ctx==='tracker'?sub('topic',I.tag,'Topic',topic):'')+
-  '<button type="button" data-do="Rename">'+I.pen+'Rename</button>'+
   (S.ctx==='mine'?'<button type="button" data-do="Open" title="Open in Raya Trade’s Tracker">'+I.out+'Open in Tracker</button>':'')+
+  '<button type="button" data-do="Rename">'+I.pen+'Rename</button>'+
   '<hr><button type="button" class="danger" data-do="Delete">'+I.bin+'Delete</button></div>';
  m.insertAdjacentHTML('beforeend',html);
 }

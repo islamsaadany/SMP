@@ -70920,3 +70920,9 @@ Islam, of §713's Tracker menu: *"change topic looks like handing to someone sho
 **Asked** (Islam): "make the list more compact", then of the Internal Tracker "a bit too tight, give it some slack". The ⋯ on My tasks, Home and the Tracker: items 6px 10px at 13.5px (were 8px 10px at 14px), one line each; the small lists beside it 150px at least (were 210px). The menu's width: My tasks and Home hug their words (Open in Tracker sets it); the Tracker's, which has no long item, keeps 170px so it isn't pinched — the two come out alike. The delete question wraps at 240px. Mockup redrawn.
 
 **Checked**: `checks/tracker.mjs` **358 passed, 0 failed**; `checks/shell.mjs` 554 ok / 10 failed — main's own. Shell cache `smp-shell-v7.50-compact-menu`.
+
+## §718 — Rename is last before Delete on every task ⋯ (2026-11-03)
+
+**Asked** (Islam): "in the my tasks make open in tracker before rename so rename becomes the last in all lists". My tasks and Home now read Week · Owner · Open in Tracker · Rename · Delete; the Tracker reads Week · Owner · Topic · Rename · Delete. Mockup redrawn.
+
+**Checked**: `checks/shell.mjs` 553 ok / 11 failed — main's own (§653 comes and goes); §713's check now wants Open in Tracker third, Rename fourth. Shell cache `smp-shell-v7.51-rename-last`.

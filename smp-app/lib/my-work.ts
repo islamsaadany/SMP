@@ -31,6 +31,8 @@ import { writeUpsWhere } from "./case-api.ts";
 import {
   shape, todayIn, weekOf, addDays, isLate, carriedWeeks, lateWord, weekWord, weekLabel, readableDay, STATUS_WORD, STATUSES,
   isStatus, isOffice, mayChange, oneAction, setStatus, ONLY_CHANGE, type Action, type Who,
+  sameWeek, weekOptions, calendarDay, oneLine, setFields, deleteAction, isOfficeRow, officeRows, shortNames, namesOf,
+  progressOf, addProgress, latestProgress, eventsOf, type Progress,
 } from "./tracker.ts";
 
 export type Bucket = "late" | "week" | "later";
@@ -44,6 +46,13 @@ export type WorkRow = {
   canChange: boolean;
   /* the day it was finished, for My tasks' Show done (2026-10-24) */
   doneDay: string | null;
+  /* THE WEEK CELL'S WORD (§709, the Tracker's §708): only the exception —
+     how late ("2 w late", "Late" when carried nought), a week that is not
+     this one, the day it was finished; a row due this week says nothing,
+     its card does */
+  cell: string;
+  /* the latest progress line, for the row's quiet line (§709) */
+  last: { week: string; body: string } | null;
 };
 export type ClientTally = { open: number; late: number };
 
@@ -74,7 +83,19 @@ type Client = { id: string; key: string; name: string; modules?: unknown };
    the rules for opening a client (platform-api.ts). */
 export type ViewerOn = (t: Client) => Who | null;
 
-function rowOf(t: Client, a: Action, today: string, who: Who | null): WorkRow {
+/* WHEN AN ENTRY WAS WRITTEN, in the Tracker's words (modules/tracker/page.ts
+   entryWeek): This week, Last week, then the week's own word. */
+export function entryWeekWord(at: string, today: string): string {
+  const day = at ? todayIn(new Date(at)) : today;
+  return sameWeek(day, today) ? "This week" : sameWeek(day, addDays(weekOf(today).from, -7)) ? "Last week" : weekWord(day, today);
+}
+function cellOf(a: Action, today: string): string {
+  if (a.status === "done") return whenOf(a, today);
+  if (!a.due) return "No date";
+  if (isLate(a.due, today)) { const n = carriedWeeks(a.firstDue || a.due, today); return n ? n + " w late" : "Late"; }
+  return a.due <= weekOf(today).to ? "" : weekWord(a.due, today);
+}
+function rowOf(t: Client, a: Action, today: string, who: Who | null, last: Progress | null = null): WorkRow {
   const done = a.status === "done";
   const late = !done && isLate(a.due, today);
   return {
@@ -84,6 +105,8 @@ function rowOf(t: Client, a: Action, today: string, who: Who | null): WorkRow {
     status: a.status, statusWord: STATUS_WORD[a.status],
     canChange: !!who && isOffice(who.seat) && mayChange(a, who),
     doneDay: a.doneDay,
+    cell: cellOf(a, today),
+    last: last ? { week: entryWeekWord(last.at, today), body: oneLine(last.body) } : null,
   };
 }
 
@@ -108,7 +131,8 @@ export async function openOn(t: Client, email: string, personKey: string | null,
         "to_char(done_at AT TIME ZONE 'Africa/Cairo', 'YYYY-MM-DD') AS done_day FROM tracker_actions " +
         "WHERE " + (everyone ? "$1::text IS NOT NULL" : "owner_key = $1") +
         " AND (status <> 'done' OR done_at >= now() - interval '30 days') ORDER BY due ASC NULLS FIRST, created_at ASC", [key]);
-      return r.rows.map((row) => rowOf(t, shape(row), today, viewer));
+      const latest = await latestProgress(c);
+      return r.rows.map((row) => { const a = shape(row); return rowOf(t, a, today, viewer, latest.get(a.id) || null); });
     });
   } catch (e) {
     console.error("my work on " + t.key + ":", (e as Error).message);
@@ -203,7 +227,113 @@ export async function setWorkStatus(t: Client, who: Who, id: string, status: unk
     if (!mayChange(cur, who) && process.env.SMP_BREAK !== "mywork-press-anyone") return { ok: false, status: 403, why: ONLY_CHANGE };
     await setStatus(c, id, status, who.personKey || "");
     const a = await oneAction(c, id);
-    return a ? { ok: true, row: rowOf(t, a, today, who) } : gone;
+    return a ? { ok: true, row: rowOf(t, a, today, who, (await latestProgress(c)).get(id) || null) } : gone;
+  });
+}
+
+/* ── A TASK OPENED IN PLACE ON MY TASKS (§709) ────────────────────────
+   Islam: "go ahead, build it" — the working mockup
+   design-mockups/home/2026-11-03_my-tasks-working.html. A press on a task's
+   name opens it on My tasks as the Tracker opens it (§706's option D):
+   Progress, Description, History. This is that task read through the same
+   door and the same rules as the Tracker's page — the action, its entries
+   (each marked whether the person looking wrote it), its history in the
+   Tracker's words, the office on that client to hand it to, and the weeks
+   it may move to — never a second copy of any of it (§53.5). */
+export type WorkDetail = { ok: true; detail: {
+  id: string; description: string; canChange: boolean; canWrite: boolean;
+  progress: { id: string; week: string; now: boolean; body: string; by: string; mine: boolean; edited: boolean }[];
+  history: { day: string; text: string }[];
+  team: { key: string; name: string; me: boolean }[];
+  weeks: { day: string; word: string; days: string; on: boolean }[];
+} } | { ok: false; status: number; why: string };
+function gate(t: Client, who: Who): { ok: false; status: number; why: string } | null {
+  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Internal Tracker." };
+  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "The Internal Tracker is the office's." };
+  return null;
+}
+const GONE = { ok: false as const, status: 404, why: "That action is not on this client's list any more." };
+export async function workDetail(t: Client, who: Who, id: string, now: Date = new Date()): Promise<WorkDetail> {
+  const g = gate(t, who); if (g) return g;
+  if (!UUID.test(id)) return GONE;
+  const today = todayIn(now);
+  return withTenant(t.id, async (c: PoolClient): Promise<WorkDetail> => {
+    const a = await oneAction(c, id);
+    if (!a) return GONE;
+    const names = await namesOf(c);
+    const office = await officeRows(c);
+    const short = shortNames(office.map((p) => ({ key: p.key, name: p.name })));
+    const nm = (k: string) => names.get(k) || k;
+    const sn = (k: string) => short.get(k) || nm(k);
+    const wk = (d: string | null | undefined) => d ? weekWord(d, today) : "no date";
+    const hist = (await eventsOf(c, id)).map((e) => {
+      const d = e.detail || {};
+      const what = e.kind === "created" ? "made it, for " + nm(d.owner || a.ownerKey) + (d.due !== undefined ? ", due " + wk(d.due) : "")
+        : e.kind === "due" ? "carried it to " + wk(d.to) + " (was " + wk(d.from) + ")"
+        : e.kind === "owner" ? "handed it to " + nm(d.to || "") + " (was " + nm(d.from || "") + ")"
+        : e.kind === "title" ? "renamed it to \u201c" + (d.to || "") + "\u201d"
+        : e.kind === "topic" ? "moved it to another topic"
+        : STATUS_WORD[e.from || "not_started"] + " \u2192 " + STATUS_WORD[e.to || "not_started"];
+      return { day: e.at ? readableDay(todayIn(new Date(e.at)), today) : "", text: nm(e.by) + " " + what };
+    });
+    const live = mayChange(a, who);
+    return { ok: true, detail: {
+      id: a.id, description: a.description, canChange: live, canWrite: !!who.personKey,
+      progress: (await progressOf(c, id)).map((p) => ({ id: p.id, week: entryWeekWord(p.at, today), now: sameWeek(todayIn(new Date(p.at)), today),
+        body: p.body, by: sn(p.by), mine: !!who.personKey && p.by === who.personKey, edited: !!p.editedAt })),
+      history: hist,
+      team: live ? office.map((p) => ({ key: p.key, name: sn(p.key), me: p.key === who.personKey })) : [],
+      weeks: live ? weekOptions(today).map((w) => ({ day: w.to, word: w.word, days: w.days, on: !!a.due && sameWeek(a.due, w.to) })) : [],
+    } };
+  });
+}
+
+/* ── WRITING TO A TASK FROM MY TASKS (§709) ───────────────────────────
+   Each op is the Tracker's own act, judged as the Tracker's api judges it
+   (modules/tracker/index.ts), against the STORED row (§42): progress by
+   anybody past the gate with a name on the register; everything else by
+   mayChange — the owner, a lead of one of the client's assignments, or the
+   client's Super user. A hand-over takes the row off this person's list and
+   a delete takes it off everyone's; the answer says so (gone), and otherwise
+   carries the row drawn again by the list's own reader. */
+export type WorkOp = "progress" | "notes" | "due" | "owner" | "rename" | "delete";
+export type WorkWrite2 = { ok: true; row: WorkRow | null; gone: boolean } | { ok: false; status: number; why: string };
+export async function workWrite(t: Client, who: Who, id: string, op: unknown, body: Record<string, unknown>, now: Date = new Date()): Promise<WorkWrite2> {
+  const g = gate(t, who); if (g) return g;
+  if (!["progress", "notes", "due", "owner", "rename", "delete"].includes(String(op))) return { ok: false, status: 400, why: "Not something this list does." };
+  if (!UUID.test(id)) return GONE;
+  const today = todayIn(now);
+  const by = who.personKey || "";
+  return withTenant(t.id, async (c: PoolClient): Promise<WorkWrite2> => {
+    const cur = await oneAction(c, id);
+    if (!cur) return GONE;
+    if (op === "progress") {
+      if (!by) return { ok: false, status: 400, why: "You are not on this client's register yet, so nothing can be written under your name here." };
+      if (!oneLine(body.body)) return { ok: false, status: 400, why: "A progress entry needs a few words." };
+      await addProgress(c, id, String(body.body), by);
+    } else {
+      if (!mayChange(cur, who)) return { ok: false, status: 403, why: ONLY_CHANGE };
+      if (op === "notes") await setFields(c, id, { description: String(body.description || "") });
+      else if (op === "rename") {
+        if (!oneLine(body.title)) return { ok: false, status: 400, why: "An action needs a few words." };
+        await setFields(c, id, { title: String(body.title) }, by);
+      } else if (op === "due") {
+        const due = body.due == null || body.due === "" ? null : calendarDay(body.due);
+        if (body.due && !due) return { ok: false, status: 400, why: "That is not a date this list can read." };
+        await setFields(c, id, { due }, by);
+      } else if (op === "owner") {
+        const k = String(body.ownerKey || "");
+        if (!k || !(await isOfficeRow(c, k))) return { ok: false, status: 400, why: "An action is owned by somebody on the office's seats." };
+        await setFields(c, id, { ownerKey: k }, by);
+        /* handed on, it leaves the list it was on — whoever's that list is */
+        if (k !== cur.ownerKey) return { ok: true, row: null, gone: true };
+      } else if (op === "delete") {
+        await deleteAction(c, id);
+        return { ok: true, row: null, gone: true };
+      }
+    }
+    const a = await oneAction(c, id);
+    return a ? { ok: true, row: rowOf(t, a, today, who, (await latestProgress(c)).get(id) || null), gone: false } : GONE;
   });
 }
 

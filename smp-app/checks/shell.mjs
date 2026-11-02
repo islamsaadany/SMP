@@ -3222,11 +3222,14 @@ await section("4 · Forefront's own pages", async () => {
     /* ROUND THREE (2026-10-24): rows alternate light grey and white, grey
        first; and Show done brings the finished tasks back, the last week by
        default of the two (Islam: "last week is the important one") */
-    const zebra = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwsec:not(.done)")).map((sec) =>
-      Array.from(sec.querySelectorAll(".mwrow")).map((r) => getComputedStyle(r).backgroundColor)));
-    const z0 = zebra.length ? zebra[0][0] : "";
-    check(zebra.length === 3 && z0 && !/rgba\(0, 0, 0, 0\)|transparent/.test(z0) && zebra.every((g) => g[0] === z0),
-      "\u2026each group's rows start light grey (the alternation restarts under each group)", JSON.stringify(zebra));
+    /* §709 (Islam: "go ahead, build it", the working mockup): every group is a
+       card of its own — its own frame and rounded corners — and the rows are
+       not striped any more, the Tracker's quiet row */
+    const cards = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwsec:not(.done)")).map((sec) => {
+      const c = getComputedStyle(sec), r = sec.querySelector(".mwrow");
+      return { radius: parseFloat(c.borderTopLeftRadius), border: c.borderTopStyle, row: r ? getComputedStyle(r).backgroundColor : "" }; }));
+    check(cards.length === 3 && cards.every((g) => g.radius >= 8 && g.border === "solid" && /rgba\(0, 0, 0, 0\)|transparent/.test(g.row)),
+      "\u2026each group is a card of its own, its rows unstriped (\u00a7709)", JSON.stringify(cards));
     const doneOf = () => page.evaluate(() => { const sec = document.querySelector(".mwlist .mwsec.done");
       return sec ? { h: sec.querySelector(".mwsh h2").textContent, rows: Array.from(sec.querySelectorAll(".mwrow .t")).map((t) => t.textContent) } : null; });
     check((await doneOf()) === null && !!(await page.$('.mwcardhd button[data-sort="hide"][aria-pressed="true"]')),
@@ -3305,9 +3308,27 @@ await section("4 · Forefront's own pages", async () => {
     /* the made state put back for the card below: three open, one late */
     await owner.query("UPDATE tracker_actions SET status = $2, done_at = NULL, first_due = due WHERE id = $1", [ids["MW late one"], "in_progress"]);
     await owner.query("UPDATE tracker_actions SET status = $2, done_at = NULL, first_due = due WHERE id = $1", [ids["MW far off"], "not_started"]);
+    /* §709: A PRESS ON A TASK'S NAME OPENS IT HERE — the Tracker's three tabs,
+       with Open in its Tracker beside them — and a line of progress written
+       there is the Tracker's own entry, read back from Postgres (§96); the
+       way into the client's Tracker is that link, and it still goes there. */
+    const firstId = await page.locator(".mwrow >> nth=0").getAttribute("data-id");
     await page.click(".mwrow .t >> nth=0");
+    await page.waitForSelector(".mwrow.on .mwdet .mwtabs", { timeout: 8000 }).catch(() => {});
+    const det = await page.evaluate(() => { const r = document.querySelector(".mwrow.on");
+      return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), path: location.pathname } : null; });
+    check(!!det && det.tabs.join("|") === "Progress|Description|History" && det.open && det.path === "/platform",
+      "\u2026a press on a task's name opens it here, in the Tracker's three tabs, Open in its Tracker beside them (\u00a7709)", JSON.stringify(det));
+    await page.fill("#mwp-" + firstId, "Written from My tasks").catch(() => {});
+    await page.click(".mwrow.on .mwcompose button").catch(() => {});
+    await page.waitForSelector(".mwrow.on .mwtl li", { timeout: 8000 }).catch(() => {});
+    const wrote = (await owner.query("SELECT body FROM tracker_progress WHERE action_id = $1", [firstId])).rows.map((x) => x.body);
+    check(wrote.includes("Written from My tasks") && /Written from My tasks/.test(await page.locator(".mwrow.on .mwtl").textContent().catch(() => "")),
+      "\u2026and a line of progress written there is the Tracker's own entry, drawn on its timeline", JSON.stringify(wrote));
+    await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
+    await page.click(".mwrow.on .mwopen");
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
-    check(path() === "/raya-trade/tracker", "\u2026and a row opens that client's Tracker", path());
+    check(path() === "/raya-trade/tracker", "\u2026and Open in its Tracker opens that client's Tracker", path());
     await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
     /* §620: arriving shows the tab's SAVED copy first, marked and inert, then
        the latest — the card is read off the latest, never the saved one */

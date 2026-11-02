@@ -70954,3 +70954,5 @@ Also drawn for Islam, not built: `design-mockups/internal-tracker/2026-11-03_row
 **Asked** (Islam): "go with A, build it" — option A of `design-mockups/internal-tracker/2026-11-03_row-line.html`. On the Tracker's rows (the card list): the name is a step heavier (600); the line under it is one grey (`--ink-3`) at 12.5px, the topic a plain word (400, was 600 in `--ink-2`), a small dot between topic and note (was a hairline); and the note's week is said only when it isn't this week — the markup carries `<span class="lw now">` and the card list hides it — so "Last week ·" still flags a task nobody has touched. The title on hover still gives the note's day and time.
 
 **Checked**: `checks/tracker.mjs` **362 passed, 0 failed** — new: the name heavier than the line, topic plain, no "This week" in front of this week's note; the markup check updated for the `lw` span. Tracker-only CSS and markup, so `checks/shell.mjs` was not re-run.
+
+**§719–§721 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.

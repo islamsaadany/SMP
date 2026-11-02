@@ -70974,3 +70974,5 @@ Nothing it does is gone; it is quieter:
 - Search and Group moved up from the add line's row into the head's row (`masthead` takes them as `find`; the tools row is the add line alone).
 
 **Checked**: `checks/tracker.mjs` **364 passed, 0 failed** — new: no tile, no "Show", Search shut in the head's row and opening on a press with the cursor in it, "Group: Owner"; the add line's three §707 checks rewritten (chips out on a click, kept while typing). Looked at on the real page. Tracker-only; `checks/shell.mjs` not re-run (it reads none of this).
+
+**§722–§723 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.

@@ -751,6 +751,13 @@ export const APP_JS = `(function () {
       closePops(null);
       var rt = b.closest(".row") && b.closest(".row").querySelector(".t[data-rename]");
       if (rt) startRename(rt);
+    } else if (act === "week-start" || act === "who-start") {
+      /* §708: the week a row due this week no longer shows, and the owner a
+         card per owner no longer shows, are opened from the ⋯ — the same
+         pickers, pressed for the hand */
+      closePops(null);
+      var rw = b.closest(".row"), pk2 = rw && rw.querySelector(act === "week-start" ? ".when.pick" : ".who.pick");
+      if (pk2) pk2.click();
     } else if (act === "topic-start") {
       closePops(null);
       var rp = b.closest(".row") && b.closest(".row").querySelector(".tpk");

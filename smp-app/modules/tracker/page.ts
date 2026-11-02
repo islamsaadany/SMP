@@ -54,9 +54,8 @@ const brk = () => process.env.SMP_BREAK || "";
 function brkCss(): string {
   const b = brk();
   if (b === "card-jumps") return ".tile{min-height:0}";                                         /* §356.16 put back */
-  if (b === "week-auto") return ".cbot .list .row:not(.chk){grid-template-columns:22px minmax(0,1fr) auto 70px 118px 28px}"; /* §503 put back: the week sized by its words */
   if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
-  if (b === "narrow-rename") return ".tn2.editing .t,.tn2.editing .nm .t{flex:0 1 auto}";                       /* §565 put back: the box sized by an input's default */
+  if (b === "narrow-rename") return ".tn2.editing .t,.tn2.editing .nm .t{flex:0 1 auto}.cbot .row .tn2.editing .nm .t{display:inline-block;width:auto}";                       /* §565 put back: the box sized by an input's default */
   if (b === "bar-scrolls") return ".tb{position:relative}.pin{top:0}";                        /* §566 put back: the top bar scrolls away */
   if (b === "no-busy-mark") return ".busy{opacity:1!important;cursor:auto!important}.busy [data-act]{pointer-events:auto!important}"; /* §671 put back: a press shows nothing until the answer */
   return "";
@@ -681,9 +680,9 @@ const LOOK = `
 .row.done .nm .t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line)}
 .row .nm .tcol{justify-self:auto;max-width:none}
 .row .nm .tc{font:600 11.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border:0;border-radius:999px;padding:4px 8px}
-.row .nm .tc::before{display:none}
-.row .nm .tc.add{display:none}
-.row .nm .tcwrap .topics{left:0;right:auto;top:26px}
+.row .tc::before{display:none}
+.row .tc.add{display:none}
+.row .tcwrap .topics{left:0;right:auto;top:22px}
 .ltag{font:600 11.5px/1 var(--font);color:var(--bad);background:var(--bad-bg);border-radius:4px;padding:3px 6px;white-space:nowrap}
 .cbot .row .last{font-size:13px;margin-top:2px}
 .cbot .list .row:not(.chk) .when,.cbot .list .row:not(.chk) .who{padding-top:3px;font:500 13px/1.3 var(--font)}
@@ -713,6 +712,47 @@ const LOOK = `
   .cbot .list .row:not(.chk) .when{grid-area:when;display:block}.cbot .list .row:not(.chk) .who{grid-area:who;display:block}.cbot .list .row:not(.chk) .st{grid-area:st}
   .tools.qt .find{flex:1 1 100%}.tools.qt .addrow .tpk,.tools.qt .addrow .when,.tools.qt .addrow .who{display:none}
   .cbot .open{padding-left:14px}.cbot .list .foot{padding-left:16px}
+}
+/* A CARD PER OWNER (2026-11-03, §708; option B of
+   design-mockups/internal-tracker/2026-11-03_owner-cards.html). The list's
+   lower card gives up its frame and each group is a card of its own; the
+   card head above stands alone, fully rounded. Corners are drawn on the
+   edges, never clipped, so the pickers can still open past a card. */
+.pin:has(+ .cbot.cards) .card.ctop,.pin:has(+ .cbot.cards) .card.ctop.solo{border-radius:12px}
+.card.cbot.cards{background:none;border:0;box-shadow:none;padding:12px 0 0}
+.cbot.cards .list>.sec{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 12px;padding:0}
+.cbot.cards .list>.sec>.sh{border-radius:11px 11px 0 0;padding:12px 16px;gap:10px}
+.cbot.cards .list>.sec>:last-child{border-bottom:0;border-bottom-left-radius:11px;border-bottom-right-radius:11px}
+.cbot.cards .list .sh .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--wk);color:var(--wk-ink);font:700 12px/1 var(--font);flex:none}
+.cbot.cards .none{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+/* the row: the name on one line; one quiet line under it */
+.cbot .list .row:not(.chk){grid-template-columns:22px minmax(0,1fr) 100px 70px 118px 28px;align-items:center;padding:10px 16px;gap:2px 14px}
+.cbot .list .row.o:not(.chk){grid-template-columns:22px minmax(0,1fr) 100px 118px 28px}
+.cbot .list .row:not(.chk) .tick{margin-top:0}
+.cbot .row .nm{display:block;min-width:0}
+.cbot .row .nm .t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbot .row .tn2.editing .nm .t{overflow:visible}
+.cbot .row .meta{display:flex;align-items:center;gap:8px;min-width:0;margin-top:2px}
+.cbot .row .meta:not(:has(.tc:not(.add))):not(:has(.last)){margin:0}
+.cbot .row .meta .tc{background:none;padding:0;border-radius:0;font:600 12.5px/1.3 var(--font);color:var(--ink-2)}
+.cbot .row .meta .msep{width:1px;height:11px;background:var(--line);flex:none}
+.cbot .row .meta .last{flex:1;min-width:0;margin:0;font-size:12.5px}
+.cbot .list .row:not(.chk) .when{justify-self:end;text-align:right;padding-top:0;font:600 12.5px/1.3 var(--font);color:var(--ink-3)}
+.cbot .list .row:not(.chk) .when.late{color:var(--bad)}
+.cbot .list .row:not(.chk) .when .weeks{right:0;left:auto}
+.cbot .list .row:not(.chk) .who{padding-top:0}
+.cbot .list .row:not(.chk) .st{margin-top:0}
+.rdots>.more{margin-top:0}
+/* grouped by owner, the owner's name rides behind the ⋯ (Hand to someone else) */
+.rdots>.who{position:absolute;right:0;top:0;width:0;height:28px;padding:0;margin:0;overflow:visible;visibility:hidden}
+.rdots>.who .team{visibility:visible;top:30px;right:0;left:auto}
+.rdots .tmenu{z-index:12}
+@media (max-width:760px){
+  .cbot .list .row:not(.chk),.cbot .list .row.o:not(.chk){grid-template-columns:22px auto minmax(0,1fr) 28px;grid-template-areas:"tick t t more" ". when st st";row-gap:4px}
+  .cbot .list .row:not(.chk) .st{grid-area:st;justify-self:start}
+  .cbot .list .row:not(.chk) .when{grid-area:when;justify-self:start;text-align:left}
+  .cbot .list .row:not(.chk) .when:empty,.cbot .list .row:not(.chk) .when:not(:has(*)):empty{display:none}
+  .cbot .list .row:not(.chk) .who{display:none}
 }
 `;
 
@@ -863,15 +903,17 @@ const DOTS3 = '<svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx
 const LINES = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const RIGHT = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const TAG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 2.5h5l6 6-5 5-6-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="5.5" cy="5.5" r="1" fill="currentColor"/></svg>';
+const CAL = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+const HAND = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 const BIN = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 
 /* THE ROW (§497): tick · the name, with its topic beside it unless the list
    is grouped by topic (the heading says it then, §87) · when · owner · the
    status as a word · the arrow. A late row's tick is ringed in the alarm. */
-function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opened: boolean, group: Group, chk = false): string {
+function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opened: boolean, group: Group, chk = false, view: View = "all"): string {
   const live = brk() === "who-everyone" ? true : mayChange(a, who);
   const late = a.status !== "done" && !!a.due && isLate(a.due, today);
-  if (!chk) return quietRow(a, L, live, late, today, dates, opened, group);
+  if (!chk) return quietRow(a, L, live, late, today, dates, opened, group, view);
   return '<div class="row' + (chk ? " chk" : "") + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
     '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
     (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
@@ -894,11 +936,26 @@ function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opene
    Change topic, Delete. The name no longer renames on a double-click — a
    single click opens — so Rename is the menu's. A row with no topic shows
    no tag; Change topic opens the same list the tag does. */
+/* a person's initials for their card: the first letters of the first two words */
+function initials(name: string): string {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+}
 function lateTag(a: Action, today: string): string {
   const n = carriedWeeks(a.firstDue || a.due, today);
   return '<span class="ltag">' + (n ? n + " w late" : "Late") + "</span>";
 }
-function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: string, dates: Format, opened: boolean, group: Group): string {
+/* A CARD PER OWNER, AND ROWS THAT SAY ONLY WHAT THE CARD AND THE VIEW DO
+   NOT (2026-11-03, §708; option B of design-mockups/internal-tracker/
+   2026-11-03_owner-cards.html). Islam: "still looks messy". The name on one
+   line, cut with … (the whole of it on hover, and when opened); under it
+   one quiet line — the topic, then the latest update. The week cell says
+   only the exception: how late, in red; or a week that is not the view's
+   own (on This week, a row due this week says nothing). Grouped by owner
+   the owner column goes — the card says whose — and handing on moves to
+   the ⋯ (Hand to someone else), as Change the week does for a row whose
+   week the cell no longer shows. */
+function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: string, dates: Format, opened: boolean, group: Group, view: View): string {
+  const byOwner = group === "owner";
   const del = live
     ? '<span class="sep"></span><span class="acts"><button type="button" role="menuitem" class="danger" data-act="delete-ask">' + BIN + "Delete</button>" +
       '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
@@ -909,22 +966,27 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
     '<button type="button" role="menuitem" data-act="more">' + LINES + (opened ? "Close the details" : "Details and progress") + "</button>" +
     (live ? '<button type="button" role="menuitem" data-act="rename-start">' + PEN + "Rename</button>" : "") +
     (live && group !== "topic" ? '<button type="button" role="menuitem" data-act="topic-start">' + TAG + "Change topic</button>" : "") +
-    del + "</span></span>";
-  return '<div class="row' + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
+    (live && a.status !== "done" ? '<button type="button" role="menuitem" data-act="week-start">' + CAL + "Change the week</button>" : "") +
+    (live && byOwner ? '<button type="button" role="menuitem" data-act="who-start">' + HAND + "Hand to someone else</button>" : "") +
+    del + "</span>" + (byOwner ? whoCell(a, L, live) : "") + "</span>";
+  const last = lastLine(a, L, today);
+  return '<div class="row' + (byOwner ? " o" : "") + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
     '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
     (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
-    '<div class="tn2"><div class="nm"><span class="t" role="button" tabindex="0" data-act="more"' + (live ? ' data-rename="1"' : "") + ' aria-expanded="' + opened + '" title="' + (opened ? "Close the details" : "Open the details") + '">' + esc(a.title) + "</span>" +
-    topicCell(a, L, live, group) + (late ? lateTag(a, today) : "") + "</div>" + lastLine(a, L, today) + "</div>" +
-    quietWhen(a, today, dates, live) + whoCell(a, L, live) + statusPill(a, live) + menu + "</div>";
+    '<div class="tn2"><div class="nm"><span class="t" role="button" tabindex="0" data-act="more"' + (live ? ' data-rename="1"' : "") + ' aria-expanded="' + opened + '" title="' + esc(a.title) + '">' + esc(a.title) + "</span></div>" +
+    '<div class="meta">' + topicCell(a, L, live, group) + (a.topicId && group !== "topic" && last ? '<span class="msep" aria-hidden="true"></span>' : "") + last + "</div></div>" +
+    quietWhen(a, today, dates, live, view) + (byOwner ? "" : whoCell(a, L, live)) + statusPill(a, live) + menu + "</div>";
 }
-/* The week a late row was due, in red, rather than how late (the tag on
-   the name says that): Last week, then the week's own word. */
-function quietWhen(a: Action, today: string, dates: Format, live: boolean): string {
+/* THE WEEK CELL SAYS THE EXCEPTION (§708): a late row how late, in red; a
+   row due in the view's own week (This week) nothing — the view says it. */
+function quietWhen(a: Action, today: string, dates: Format, live: boolean, view: View = "all"): string {
   const w = whenText(a, today, dates);
-  if (!w.late || !a.due) return whenCell(a, today, dates, live);
-  const lastWeek = sameWeek(a.due, addDays(weekOf(today).from, -7));
-  const word = dates === "weeks" ? (lastWeek ? "Last week" : weekWord(a.due, today)) : readableDay(a.due, today);
-  return whenCell(a, today, dates, live, word);
+  if (w.late && a.due) {
+    const n = carriedWeeks(a.firstDue || a.due, today);
+    return whenCell(a, today, dates, live, n ? n + " w late" : "Late");
+  }
+  if (view === "week" && a.status !== "done" && a.due && sameWeek(a.due, today)) return whenCell(a, today, dates, live, "");
+  return whenCell(a, today, dates, live);
 }
 
 /* ON THE CHECK THE WHEN CELL SAYS ONLY WHAT THE CARD CANNOT (§87, §532).
@@ -1441,7 +1503,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     const open = g.rows.filter((a) => a.status !== "done");
     const late = open.filter((a) => !!a.due && isLate(a.due, today)).length;
     const done = g.rows.length - open.length;
-    const rows = g.rows.map((a) => row(a, L, p.who, today, dates, a.id === L.open, group) + (a.id === L.open ? openPanel(a, L, p.who, today) : "")).join("");
+    const rows = g.rows.map((a) => row(a, L, p.who, today, dates, a.id === L.open, group, false, view) + (a.id === L.open ? openPanel(a, L, p.who, today) : "")).join("");
     const t = group === "topic" && g.key !== "none" ? L.topics.find((x) => x.id === g.key) || null : null;
     const quiet = group === "topic" && g.key === "none";
     /* THE SECTION'S OWN LINE (§656): under a topic's rows with the topic
@@ -1466,7 +1528,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
       const all4 = t ? all.filter((a) => a.topicId === t.id) : [];
       const allDone = all4.filter((a) => a.status === "done").length;
       head = '<div class="grp sh' + (quiet ? " quiet" : "") + '" data-key="' + esc(g.key) + '">' +
-        '<span class="ix">' + (quiet ? "&mdash;" : String(++ix).padStart(2, "0")) + "</span>" +
+        (group === "owner" ? '<span class="av" aria-hidden="true">' + esc(initials(g.label)) + "</span>" : '<span class="ix">' + (quiet ? "&mdash;" : String(++ix).padStart(2, "0")) + "</span>") +
         "<h3>" + esc(g.label) + "</h3>" +
         '<span class="meta">' + open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") + "</span>" +
         '<span class="end">' + (t ? (t.closed ? '<span class="shut">Closed</span>' : "") + allDone + " of " + all4.length + " done" : "") + addBtn + (t ? topicMenu(t) : "") + "</span></div>";
@@ -1514,7 +1576,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
       ? '<div class="none"><b>Nothing ' + (q ? "matches" : "here") + '.</b>' + (q ? "Try another word, or " : "Add one on the line above, or ") + '<a href="' + esc(viewHref("all")) + '">see all of them</a>.</div>'
       : "";
   return { body: pinned(masthead(p, today, all, sum, L, { inner: tools + counted, shown: shown.length })) +
-    '<div class="card cbot"><div class="list">' + secs + "</div>" + none + "</div>", count, open: L.open };
+    '<div class="card cbot cards"><div class="list">' + secs + "</div>" + none + "</div>", count, open: L.open };
 }
 
 /* What stays at the top while the list scrolls (§565): one wrapper, so the

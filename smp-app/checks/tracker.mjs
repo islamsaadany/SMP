@@ -777,13 +777,14 @@ try {
   check("...and NO Title box and NO With: the name is renamed on the row and one action has one owner", !/class="open"[\s\S]*input class="ttl"/.test(opened) && !/>With</.test(opened) && !/class="ticks"/.test(opened));
   /* WHO GETS THE PRESS, BOTH ENDS (§61, §94.2): the owner's name is a button
      for the owner and the Super user, and plain text for everybody else. */
-  const rowOf = (html) => (html.match(new RegExp('<div class="row[^"]*" data-id="' + a1.id + '"[\\s\\S]*?<button class="more')) || [""])[0];
+  /* the row's own markup, to the next row (§708: the owner rides behind the ⋯ now, after the menu button) */
+  const rowOf = (html) => { const part = html.split('<div class="row').find((x) => x.includes('data-id="' + a1.id + '"')); return part ? '<div class="row' + part.split(/<div class="(?:open|addrow|foot)/)[0] : ""; };
   const asOmar = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "owner" }, who: OMAR, today: TODAY });
   check("the owner's name opens the team for the owner", /class="who pick"[^>]*data-act="who"/.test(rowOf(opened)) && /class="team" role="listbox"/.test(rowOf(opened)) && /data-act="pick-owner" data-key="islam"/.test(rowOf(opened)));
   check("...and is plain text for somebody who is not — with the tick and the name not pressable either", /<span class="who">Noran<\/span>/.test(rowOf(asOmar)) && !/who pick/.test(rowOf(asOmar)) && /<button class="tick"[^>]*disabled/.test(rowOf(asOmar)) && !/data-rename/.test(rowOf(asOmar)), rowOf(asOmar).slice(0, 200));
   check("...and the team is first names only, no surnames", (rowOf(opened).match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).map((x) => x.replace(/^.*>/, "").replace(/<$/, "")).join("|") === "Islam|Noran|Omar", (rowOf(opened).match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).join());
   /* GROUPED THREE OTHER WAYS: the headings are the words, in their order. */
-  const heads = (html) => [...html.matchAll(/class="grp sh[^"]*" data-key="[^"]*"><span class="ix">[^<]*<\/span><h3>([^<]*)<\/h3>/g)].map((m) => m[1].trim());
+  const heads = (html) => [...html.matchAll(/class="grp sh[^"]*" data-key="[^"]*"><span class="(?:ix|av)"[^>]*>[^<]*<\/span><h3>([^<]*)<\/h3>/g)].map((m) => m[1].trim());
   const byStatus = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "status" }, who: NORAN, today: TODAY });
   const byDue = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "due", dates: "dates" }, who: NORAN, today: TODAY });
   const byWeek = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "due", dates: "weeks" }, who: NORAN, today: TODAY });
@@ -1104,9 +1105,11 @@ try {
     check("...the line is empty and still under the cursor for the next one",
       (await pg.locator("#add").inputValue()) === "" && (await pg.evaluate("document.activeElement && document.activeElement.id")) === "add");
     const row = '.row[data-id="' + (born && born.id) + '"] ';
-    check("...and the new row is on the page, under my own name, reading my first name and This week", (await pg.locator(row).count()) === 1 &&
-      (await pg.locator('.grp[data-key="noran"] h3').textContent()).trim() === "Noran Essam" && (await pg.locator(row + ".who .wn").innerText()) === "Noran" &&
-      (await pg.locator(row + ".when .wk").innerText()) === "This week" && (await pg.locator(".wk.now").count()) === 0);
+    /* §708: on This week a row due this week says nothing in its week cell, and
+       grouped by owner its owner rides behind the ⋯ — the card says whose */
+    check("...and the new row is on the page, in my own card, mine behind the ⋯, its week cell silent on This week", (await pg.locator(row).count()) === 1 &&
+      (await pg.locator('.grp[data-key="noran"] h3').textContent()).trim() === "Noran Essam" && (await pg.locator('.grp[data-key="noran"] ~ ' + row.trim()).count()) === 1 &&
+      (await pg.locator(row + ".who .wn").textContent()) === "Noran" && (await pg.locator(row + ".when").innerText()).trim() === "" && (await pg.locator(".wk.now").count()) === 0);
     /* textContent, not innerText: the count is uppercased by CSS (§301.6). */
     check("...with the count moved in place", /^\d+ actions on this week$/.test(await pg.locator("#count").textContent()) && +(await pg.locator("#count").textContent()).split(" ")[0] === (await asTenant(A, (c) => listActions(c))).filter((r) => inView(r, "week", NORAN, real)).length, await pg.locator("#count").textContent());
     /* THE ADD LINE TAKES EVERYTHING (§356.14): a note under the action, a
@@ -1261,8 +1264,8 @@ try {
     /* §707: the cell says the day it was due, in red; how late is the tag on
        the name — carried from the FIRST date, which was this week, so the
        word alone. */
-    check("a date last week reads its day in red, and the name carries 'Late' — carried from the FIRST date, which was this week — never 'carried'",
-      when === readableDay(lastWeek, real) && (await pg.locator(row + ".when.late").count()) === 1 && (await pg.locator(row + ".ltag").innerText()) === "Late" && !/carried/.test(when), when);
+    check("a date last week reads Late in red in its week cell (§708) — carried from the FIRST date, which was this week — never 'carried'",
+      when === "Late" && (await pg.locator(row + ".when.late").count()) === 1 && (await pg.locator(row + ".ltag").count()) === 0 && !/carried/.test(when), when);
     await pg.locator(row + "[data-act=due]").click();
     await pg.locator(row + "input.dt").press("Escape");
     check("Escape puts the word back and writes nothing", (await pg.locator(row + "[data-act=due]").count()) === 1 &&
@@ -1272,7 +1275,7 @@ try {
     check("a press elsewhere on the page puts the word back too", (await pg.locator(row + "input.dt").count()) === 0 && (await pg.locator(row + "[data-act=due]").count()) === 1);
     await pg.locator("[data-act=settings]").click();
     await pg.locator('.setmenu [data-act=set-dates][data-value="weeks"]').click(); await settle();
-    check("back to weeks, a late row's cell says the week it was due — Last week, in red — and the tag on its name how late", (await pg.locator(row + ".when").innerText()) === "Last week" && (await pg.locator(row + ".when.late").count()) === 1 && (await pg.locator(row + ".ltag").innerText()) === "Late" && await stayed(), await pg.locator(row + ".when").innerText());
+    check("back to weeks, a late row's cell says how late — Late, in red — and the name carries no second tag", (await pg.locator(row + ".when").innerText()) === "Late" && (await pg.locator(row + ".when.late").count()) === 1 && (await pg.locator(row + ".ltag").count()) === 0 && await stayed(), await pg.locator(row + ".when").innerText());
     /* RENAME FROM THE ⋯ (§707): a single click on the name opens the task,
        so Rename is the row menu's; the name becomes a box in place, Enter
        renames, Escape puts the name back and writes nothing. */
@@ -1335,13 +1338,6 @@ try {
        back from Postgres, never off the row (§96). The double-click only
        renames now. Both ends (§94.2): set, then taken off again. */
     check("a row with no topic carries no tag on its name (§707)", (await pg.locator(row + ".tc:not(.add)").count()) === 0 && !(await pg.locator(row + ".tc.add").isVisible()));
-    /* THE COLUMNS LINE UP DOWN THE LIST (§503, kept through §707): every row
-       is its own grid, so a week sized by its words would start at a
-       different place on every row. Measured where the WORDS start — a name that can be pressed
-       wears a padded box pulled out by the same padding. SMP_BREAK=week-auto
-       puts the sizing back and must redden this. */
-    const whoLefts = await pg.locator(".cbot .row .when").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().left + parseFloat(getComputedStyle(e).paddingLeft))));
-    check("...and the week column lines up down the list, whatever each week says", whoLefts.length > 1 && Math.max(...whoLefts) - Math.min(...whoLefts) <= 1, JSON.stringify(whoLefts) + " · weeks " + JSON.stringify(await pg.locator(".cbot .row .when").allInnerTexts()));
     if (process.env.SMP_SHOT2) await pg.screenshot({ path: process.env.SMP_SHOT2 });
     /* THE MEETING, PRESSED (§706): the check opens on the first task, a press
        on the left opens another on the right (on the address, no reload), a
@@ -1491,7 +1487,9 @@ try {
     /* THE OWNER'S NAME opens the office on this client, first names only;
        picking one hands the action on — and then the old owner has no
        control left on that row (both ends, §61). */
-    await pg.locator(row + ".who.pick").click();
+    /* §708: grouped by owner the name rides behind the ⋯ — Hand to someone else */
+    const handMenu = async () => { await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(row + "[data-act=who-start]").click(); };
+    await handMenu();
     const team = pg.locator(row + ".team");
     /* COMPACT (§356.16): the width was a FLOOR in the stylesheet rather than
        anything the names needed, so what is asserted is that the floor is gone
@@ -1512,7 +1510,7 @@ try {
       + "var z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;"
       + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width/z),need:Math.round(w+slack),"
       + "row:Math.round(t.querySelector('button').getBoundingClientRect().height/z),pad:bc.paddingTop};})()");
-    check("pressing my name opens the team, first names only and no heading", await team.isVisible() &&
+    check("Hand to someone else in the ⋯ opens the team, first names only and no heading", await team.isVisible() &&
       (await team.locator("button").allInnerTexts()).join("|") === "Islam|Noran|Omar" && (await pg.locator(row + ".who.pick").getAttribute("aria-expanded")) === "true",
       (await team.locator("button").allInnerTexts()).join("|"));
     const fit = await teamFit();
@@ -1524,11 +1522,11 @@ try {
     check("...with rows short enough to be compact and tall enough to press", !!fit && fit.row <= 30 && fit.row >= 24, fit && fit.row);
     await pg.locator("h2.pt").click();
     check("a click elsewhere closes it and changes nothing", !(await team.isVisible()) && (await asTenant(A, (c) => oneAction(c, born.id))).ownerKey === "noran");
-    await pg.locator(row + ".who.pick").click();
+    await handMenu();
     await team.locator('button[data-key="islam"]').click(); await settle();
     const handed = await asTenant(A, (c) => oneAction(c, born.id));
     check("picking Islam hands the action to him, silently", handed.ownerKey === "islam" && await stayed(), JSON.stringify(handed));
-    check("...the row moves under Islam and reads his first name", (await pg.locator('.grp[data-key="islam"] ~ ' + row.trim()).count()) === 1 && (await pg.locator(row + ".who").innerText()) === "Islam");
+    check("...the row moves under Islam and reads his first name", (await pg.locator('.grp[data-key="islam"] ~ ' + row.trim()).count()) === 1 && (await pg.locator(row + ".who").textContent()) === "Islam");
     check("...and I, no longer its owner, have no control left on it — the name is plain, the tick is off, the name will not rename",
       (await pg.locator(row + ".who.pick").count()) === 0 && (await pg.locator(row + "[data-act=tick]").count()) === 0 && (await pg.locator(row + ".t[data-rename]").count()) === 0);
     await asTenant(A, (c) => setFields(c, born.id, { ownerKey: "noran" }));

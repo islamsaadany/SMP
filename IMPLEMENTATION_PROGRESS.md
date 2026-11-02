@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — A card per owner, and quieter rows (§708).** Every group of the main list is a card (owners with their initials); a row is the name on one line and one quiet line of topic and latest update; the week cell shows only the exception (late, or another week); grouped by owner the owner column goes, with Hand to someone else and Change the week in the ⋯.
+
 **2026-11-02 — The main list matched to its mockup (§707).** The name opens the task; ⋯ is a menu (Details and progress, Rename, Change topic, Delete); topic and lateness are tags on the name, a late row's week in red; bold group headings with + Add at the right; the write line, Search and Group by on one row, its chips always shown. Banner and Actions heading unchanged.
 
 **2026-11-02 — The Weekly check as a meeting; the main list quiet; the opened task tabbed (§706).** The check lists every task on the left and opens one at a time on the right with its status as three buttons, Previous, Carry and Save and next, and a gone-through count. The main list loses its stripes and pills: a status dot and word, one ⋯ per row. An opened task has Progress (Add beside the box, entries on a timeline), Description (click to edit) and History tabs, Delete at the end. Banner and Actions heading unchanged.

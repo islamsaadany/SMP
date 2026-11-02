@@ -1814,6 +1814,12 @@
   .mwlist .mwst > span:not(.mwdot){ padding-right:6px }
   .mwdot{ position:absolute; left:7px; top:50%; margin-top:-4.5px; width:9px; height:9px; border-radius:50%; background:var(--mw-d0); pointer-events:none }
   .mwst.prog .mwdot{ background:var(--mw-d1) } .mwst.done .mwdot{ background:var(--good) }
+  /* the old rule sizes every span in the status cell (.mwst > span: 128 × 26); the dot is not a word */
+  .mwlist .mwst > .mwdot, .hocard .mwst > .mwdot{ display:block; width:9px; height:9px; padding:0; margin:-4.5px 0 0; line-height:0; border-radius:50% }
+  .mwlist .mwst > .mwdot{ background:var(--mw-d0) }
+  .mwlist .mwst.prog > .mwdot{ background:var(--mw-d1) } .mwlist .mwst.done > .mwdot{ background:var(--good) }
+  /* the ⋯ and its lists open past the card's edge, never clipped by it */
+  .hocard.mwlist{ overflow:visible }
   .mwmenu{ position:relative; justify-self:end }
   .mwkb{ width:28px; height:28px; border:0; border-radius:7px; background:none; color:var(--ink-3); display:grid; place-items:center; cursor:pointer; padding:0 }
   .mwkb svg{ width:16px; height:16px }

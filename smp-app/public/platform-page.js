@@ -2642,30 +2642,25 @@
      someone else · Open in the client's Tracker · Delete — the last behind
      its question, the week and the people read with the task's details */
   function mwMenu(r) {
+    /* §713 (Islam: "change the week and hand to someone should be on the top
+       of the list and remove details and progress ... rename come third",
+       and "the sub lists open on hovering"): Change the week and Hand to
+       someone else first, each opening a small list beside the menu — on
+       hover, and on a press for a hand with no hover; the hand-over list is
+       the rest of the team, the owner left out. Then Rename, Open in its
+       Tracker, Delete. The lists are read with the task's details. */
     var key = mwKey(r), pop = el("div", "mwpop"), d = MW.detail[key];
     pop.setAttribute("role", "menu");
-    var item = function (icon, word, fn, cls) {
+    var item = function (icon, word, fn, cls, into) {
       var b = el("button", cls || null);
       b.type = "button";
       b.setAttribute("role", "menuitem");
       b.innerHTML = icon || "";
       b.appendChild(document.createTextNode(word));
       b.addEventListener("click", function (e) { e.stopPropagation(); fn(); });
-      pop.appendChild(b);
+      (into || pop).appendChild(b);
       return b;
     };
-    if (MW.sub === "week" || MW.sub === "hand") {
-      if (!d || d.error) { pop.appendChild(el("p", "wait", d && d.error ? d.error : "Reading…")); mwLoad(r); return pop; }
-      if (MW.sub === "week") d.weeks.forEach(function (w) {
-        var b = item("", w.word, function () { MW.write(r, "due", { due: w.day }); }, w.on ? "on" : null);
-        b.appendChild(el("small", null, w.days));
-      });
-      else d.team.forEach(function (p) {
-        var b = item("", p.name, function () { MW.write(r, "owner", { ownerKey: p.key }); });
-        if (p.me) b.appendChild(el("small", null, "you"));
-      });
-      return pop;
-    }
     if (MW.sub === "del") {
       var sure = el("div", "sure");
       sure.appendChild(document.createTextNode("Delete this action from " + r.clientName + "’s Tracker?"));
@@ -2677,11 +2672,37 @@
       two.appendChild(yes); two.appendChild(no2); sure.appendChild(two); pop.appendChild(sure);
       return pop;
     }
-    item(MW_I.lines, MW.open === key ? "Close the details" : "Details and progress", function () { mwToggle(r); });
     if (r.canChange) {
+      mwLoad(r);
+      var sub = function (which, icon, word, fill) {
+        var w = el("div", "mwsubw" + (MW.sub === which ? " on" : ""));
+        var b = item(icon, word, function () { MW.sub = MW.sub === which ? null : which; MW.redraw(); }, "mwsubb", w);
+        b.setAttribute("aria-haspopup", "true");
+        b.appendChild(el("span", "chev", "›"));
+        var side = el("div", "mwside");
+        side.setAttribute("role", "listbox");
+        if (!d || d.error) side.appendChild(el("p", "wait", d && d.error ? d.error : "Reading…"));
+        else fill(side);
+        w.appendChild(side);
+        pop.appendChild(w);
+      };
+      if (r.status !== "done") sub("week", MW_I.cal, "Change the week", function (side) {
+        side.appendChild(el("div", "h", "Move to"));
+        d.weeks.forEach(function (wk) {
+          var b = item("", wk.word, function () { MW.write(r, "due", { due: wk.day }); }, wk.on ? "on" : null, side);
+          b.appendChild(el("small", null, wk.days));
+        });
+      });
+      sub("hand", MW_I.hand, "Hand to someone else", function (side) {
+        side.appendChild(el("div", "h", "Hand to"));
+        var rest = d.team.filter(function (p) { return !p.owner; });
+        if (!rest.length) side.appendChild(el("p", "wait", "Nobody else holds a seat on this client."));
+        rest.forEach(function (p) {
+          var b = item("", p.name, function () { MW.write(r, "owner", { ownerKey: p.key }); }, null, side);
+          if (p.me) b.appendChild(el("small", null, "you"));
+        });
+      });
       item(MW_I.pen, "Rename", function () { MW.renaming = key; MW.menu = null; MW.redraw(); });
-      if (r.status !== "done") item(MW_I.cal, "Change the week", function () { MW.sub = "week"; mwLoad(r); MW.redraw(); });
-      item(MW_I.hand, "Hand to someone else", function () { MW.sub = "hand"; mwLoad(r); MW.redraw(); });
     }
     var go = el("a");
     go.href = mwTrackerHref(r);

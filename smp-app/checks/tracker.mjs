@@ -782,7 +782,7 @@ try {
   const asOmar = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "owner" }, who: OMAR, today: TODAY });
   check("the owner's name opens the team for the owner", /class="who pick"[^>]*data-act="who"/.test(rowOf(opened)) && /class="team" role="listbox"/.test(rowOf(opened)) && /data-act="pick-owner" data-key="islam"/.test(rowOf(opened)));
   check("...and is plain text for somebody who is not — with the tick and the name not pressable either", /<span class="who">Noran<\/span>/.test(rowOf(asOmar)) && !/who pick/.test(rowOf(asOmar)) && /<button class="tick"[^>]*disabled/.test(rowOf(asOmar)) && !/data-rename/.test(rowOf(asOmar)), rowOf(asOmar).slice(0, 200));
-  check("...and the team is first names only, no surnames", (rowOf(opened).match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).map((x) => x.replace(/^.*>/, "").replace(/<$/, "")).join("|") === "Islam|Noran|Omar", (rowOf(opened).match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).join());
+  check("...and the team is first names only, no surnames", ((rowOf(opened).match(/<span class="team"[\s\S]*?<\/span>/) || [""])[0].match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).map((x) => x.replace(/^.*>/, "").replace(/<$/, "")).join("|") === "Islam|Noran|Omar", ((rowOf(opened).match(/<span class="team"[\s\S]*?<\/span>/) || [""])[0].match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).join());
   /* GROUPED THREE OTHER WAYS: the headings are the words, in their order. */
   const heads = (html) => [...html.matchAll(/class="grp sh[^"]*" data-key="[^"]*"><span class="(?:ix|av)"[^>]*>[^<]*<\/span><h3>([^<]*)<\/h3>/g)].map((m) => m[1].trim());
   const byStatus = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "status" }, who: NORAN, today: TODAY });
@@ -1488,9 +1488,11 @@ try {
        picking one hands the action on — and then the old owner has no
        control left on that row (both ends, §61). */
     /* §708: grouped by owner the name rides behind the ⋯ — Hand to someone else */
-    const handMenu = async () => { await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(row + "[data-act=who-start]").click(); };
+    /* §713: Hand to someone else is the ⋯'s first list — open on hover or a
+       press, the rest of the office on this client, the owner left out */
+    const handMenu = async () => { await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(row + '.rmsub[data-sub="hand"] > button').click(); };
     await handMenu();
-    const team = pg.locator(row + ".team");
+    const team = pg.locator(row + ".mteam");
     /* COMPACT (§356.16): the width was a FLOOR in the stylesheet rather than
        anything the names needed, so what is asserted is that the floor is gone
        and the box is what its widest name needs plus the space the stylesheet
@@ -1501,8 +1503,8 @@ try {
        an unscoped probe measured a hidden list and reported box 0 and row 0 —
        a correct build called broken, with the assertion two lines above it
        passing because THAT one is scoped. Found by running it. §442. */
-    const teamFit = () => pg.evaluate("(function(){var t=document.querySelector('" + row.trim() + " .team');if(!t)return null;var c=getComputedStyle(t);"
-      + "var w=Math.max(...[...t.querySelectorAll('button')].map(b=>b.scrollWidth));var bc=getComputedStyle(t.querySelector('button'));"
+    const teamFit = () => pg.evaluate("(function(){var t=document.querySelector('" + row.trim() + " .mteam');if(!t)return null;var c=getComputedStyle(t);"
+      + "var w=Math.max(...[...t.querySelectorAll('button, .rmh')].map(b=>b.scrollWidth));var bc=getComputedStyle(t.querySelector('button'));"
       + "var slack=parseFloat(c.paddingLeft)+parseFloat(c.paddingRight)+parseFloat(c.borderLeftWidth)+parseFloat(c.borderRightWidth);"
       /* boxes the browser reports are in the screen's pixels and the page is
          zoomed to 0.8 on a computer (lib/topbar.ts), so they are read back in
@@ -1510,8 +1512,8 @@ try {
       + "var z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;"
       + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width/z),need:Math.round(w+slack),"
       + "row:Math.round(t.querySelector('button').getBoundingClientRect().height/z),pad:bc.paddingTop};})()");
-    check("Hand to someone else in the ⋯ opens the team, first names only and no heading", await team.isVisible() &&
-      (await team.locator("button").allInnerTexts()).join("|") === "Islam|Noran|Omar" && (await pg.locator(row + ".who.pick").getAttribute("aria-expanded")) === "true",
+    check("Hand to someone else in the ⋯ opens the rest of the team, first names only, the owner left out (§713)", await team.isVisible() &&
+      (await team.locator("button").allInnerTexts()).join("|") === "Islam|Omar",
       (await team.locator("button").allInnerTexts()).join("|"));
     const fit = await teamFit();
     check("...and the list is no wider than its longest name needs — the floor in the stylesheet is gone", !!fit &&

@@ -1840,6 +1840,15 @@
   .mwpop .sure button{ width:auto; border:1px solid var(--line); padding:5px 10px; font-size:13px }
   .mwpop .sure button.danger{ border-color:var(--bad) }
   .mwpop .wait{ margin:0; padding:8px 10px; color:var(--ink-3); font-size:13px }
+  /* §713: the small lists beside the menu, open on hover, focus or a press */
+  .mwsubw{ position:relative }
+  .mwsubb .chev{ margin-left:auto; color:var(--ink-3) }
+  .mwsubw:hover > .mwsubb, .mwsubw.on > .mwsubb{ background:var(--surface-2) }
+  .mwside{ display:none; position:absolute; right:calc(100% + 2px); top:-5px; z-index:31; min-width:210px; background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; box-shadow:0 10px 28px rgba(20,28,43,.16); padding:4px }
+  .mwsubw:hover > .mwside, .mwsubw.on > .mwside, .mwsubw:focus-within > .mwside{ display:grid }
+  .mwside .h{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); padding:6px 10px 4px }
+  @media (max-width:760px){ .mwside{ right:0; top:calc(100% + 2px) } }
   .mwdet{ grid-column:2 / -1; margin-top:8px }
   .mwtabs{ display:flex; align-items:center; gap:2px; border-bottom:1px solid var(--line); margin:0 0 12px; flex-wrap:wrap }
   .mwtab{ border:0; background:none; padding:9px 12px 10px; font:inherit; font-size:13.5px; font-weight:600; color:var(--ink-3); border-bottom:2px solid transparent;

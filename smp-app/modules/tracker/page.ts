@@ -747,6 +747,20 @@ const LOOK = `
 .rdots>.who{position:absolute;right:0;top:0;width:0;height:28px;padding:0;margin:0;overflow:visible;visibility:hidden}
 .rdots>.who .team{visibility:visible;top:30px;right:0;left:auto}
 .rdots .tmenu{z-index:12}
+/* §713: the small lists beside the ⋯, open on hover, focus or a press */
+.rdots .rmsub{position:relative;display:block}
+.rdots .rmsub>button{width:100%}
+.rdots .rmsub .chev{margin-left:auto;color:var(--ink-3)}
+.rdots .rmsub:hover>button,.rdots .rmsub.on>button{background:var(--ground)}
+.rdots .rmside{display:none;position:absolute;right:calc(100% + 2px);top:-5px;z-index:13;min-width:210px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px}
+.rdots .rmsub:hover>.rmside,.rdots .rmsub.on>.rmside,.rdots .rmsub:focus-within>.rmside{display:grid}
+.rdots .rmside button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font:400 14px/1.3 var(--font)}
+.rdots .rmside button.on{font-weight:700}
+.rdots .rmside.mteam{min-width:0}
+.rdots .rmside small{margin-left:auto;color:var(--ink-3);font-size:12px}
+.rdots .rmh{font:700 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:8px 10px 6px;white-space:nowrap}
+.rdots .mwait{padding:6px 10px;font-size:13px;color:var(--ink-3)}
+@media (max-width:760px){.rdots .rmside{right:0;top:calc(100% + 2px)}}
 @media (max-width:760px){
   .cbot .list .row:not(.chk),.cbot .list .row.o:not(.chk){grid-template-columns:22px auto minmax(0,1fr) 28px;grid-template-areas:"tick t t more" ". when st st";row-gap:4px}
   .cbot .list .row:not(.chk) .st{grid-area:st;justify-self:start}
@@ -961,13 +975,32 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
       '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
       '<button type="button" class="go" data-act="delete-no">Keep it</button></span></span>'
     : "";
+  /* THE ⋯, REORDERED (2026-11-03, §713; design-mockups/home/2026-11-03_task-menu.html,
+     Islam: "change the week and hand to someone should be on the top of the
+     list and remove details and progress ... rename come third", "the sub
+     lists open on hovering"): Change the week and Hand to someone else first,
+     each a small list beside the menu — open on hover, on focus, or on a
+     press for a hand with no hover — the weeks ahead, and the rest of the
+     office on this client (the owner left out); then Rename, Change topic,
+     Delete. Details and progress went: a press on the name opens the task.
+     The lists carry the acts the row's own pickers carry (pick-week,
+     pick-owner), so one handler answers both (§53.5). */
+  const nm = (k: string) => L.short.get(k) || L.names.get(k) || k;
+  const weekSide = '<span class="rmside" role="listbox"><span class="rmh">Move to</span>' + weekOptions(today).map((w) =>
+    '<button type="button" role="option" data-act="pick-week" data-day="' + w.to + '"' + (a.due && sameWeek(a.due, w.to) ? ' class="on"' : "") + ">" + esc(w.word) + "<small>" + esc(w.days) + "</small></button>").join("") + "</span>";
+  const rest = L.office.filter((p) => p.key !== a.ownerKey);
+  const handSide = '<span class="rmside mteam" role="listbox"><span class="rmh">Hand to</span>' +
+    (rest.length ? rest.map((p) => '<button type="button" role="option" data-act="pick-owner" data-key="' + esc(p.key) + '">' + esc(nm(p.key)) + "</button>").join("")
+      : '<span class="mwait">Nobody else holds a seat on this client.</span>') + "</span>";
+  const subOf = (which: string, icon: string, word: string, side: string) =>
+    '<span class="rmsub" data-sub="' + which + '"><button type="button" role="menuitem" data-act="sub-open" aria-haspopup="true">' + icon + word + '<span class="chev" aria-hidden="true">&rsaquo;</span></button>' + side + "</span>";
   const menu = '<span class="rdots"><button class="more' + (opened ? " on" : "") + '" type="button" data-act="row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="More for this action" title="More">' + DOTS3 + "</button>" +
     '<span class="tmenu" role="menu" hidden>' +
-    '<button type="button" role="menuitem" data-act="more">' + LINES + (opened ? "Close the details" : "Details and progress") + "</button>" +
+    (live && a.status !== "done" ? subOf("week", CAL, "Change the week", weekSide) : "") +
+    (live ? subOf("hand", HAND, "Hand to someone else", handSide) : "") +
     (live ? '<button type="button" role="menuitem" data-act="rename-start">' + PEN + "Rename</button>" : "") +
     (live && group !== "topic" ? '<button type="button" role="menuitem" data-act="topic-start">' + TAG + "Change topic</button>" : "") +
-    (live && a.status !== "done" ? '<button type="button" role="menuitem" data-act="week-start">' + CAL + "Change the week</button>" : "") +
-    (live && byOwner ? '<button type="button" role="menuitem" data-act="who-start">' + HAND + "Hand to someone else</button>" : "") +
+    (live ? "" : '<button type="button" role="menuitem" data-act="more">' + LINES + (opened ? "Close the details" : "Details and progress") + "</button>") +
     del + "</span>" + (byOwner ? whoCell(a, L, live) : "") + "</span>";
   const last = lastLine(a, L, today);
   return '<div class="row' + (byOwner ? " o" : "") + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +

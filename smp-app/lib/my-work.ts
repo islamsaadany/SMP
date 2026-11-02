@@ -245,7 +245,7 @@ export type WorkDetail = { ok: true; detail: {
   id: string; description: string; canChange: boolean; canWrite: boolean;
   progress: { id: string; week: string; now: boolean; body: string; by: string; mine: boolean; edited: boolean }[];
   history: { day: string; text: string }[];
-  team: { key: string; name: string; me: boolean }[];
+  team: { key: string; name: string; me: boolean; owner: boolean }[];
   weeks: { day: string; word: string; days: string; on: boolean }[];
 } } | { ok: false; status: number; why: string };
 function gate(t: Client, who: Who): { ok: false; status: number; why: string } | null {
@@ -283,7 +283,7 @@ export async function workDetail(t: Client, who: Who, id: string, now: Date = ne
       progress: (await progressOf(c, id)).map((p) => ({ id: p.id, week: entryWeekWord(p.at, today), now: sameWeek(todayIn(new Date(p.at)), today),
         body: p.body, by: sn(p.by), mine: !!who.personKey && p.by === who.personKey, edited: !!p.editedAt })),
       history: hist,
-      team: live ? office.map((p) => ({ key: p.key, name: sn(p.key), me: p.key === who.personKey })) : [],
+      team: live ? office.map((p) => ({ key: p.key, name: sn(p.key), me: p.key === who.personKey, owner: p.key === a.ownerKey })) : [],
       weeks: live ? weekOptions(today).map((w) => ({ day: w.to, word: w.word, days: w.days, on: !!a.due && sameWeek(a.due, w.to) })) : [],
     } };
   });

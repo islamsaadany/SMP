@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — The task's ⋯ reordered (§713).** Change the week and Hand to someone else first, each a small list beside the menu (hover or press; the hand-over list is the rest of the team); Rename third; Details and progress gone. On My tasks, Home and the Internal Tracker.
+
 **2026-11-03 — Your own progress entry edited or deleted on My tasks and Home too (§712).** Edit and Delete under the writer's own entry, as the Tracker has them; Delete asks first.
 
 **2026-11-03 — Home's Your tasks carries My tasks' row (§711).** A press on a task opens it in the card (Progress, Description, History, Open in its Tracker); the ⋯, tick and status as on My tasks; Late and This week as quiet strips. The card's place, size, header and its late-and-this-week rule unchanged.

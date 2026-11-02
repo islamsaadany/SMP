@@ -751,6 +751,11 @@ export const APP_JS = `(function () {
       closePops(null);
       var rt = b.closest(".row") && b.closest(".row").querySelector(".t[data-rename]");
       if (rt) startRename(rt);
+    } else if (act === "sub-open") {
+      /* §713: a press opens the small list beside the ⋯ for a hand with no
+         hover (the stylesheet opens it on hover and on focus); one at a time */
+      var ms = b.closest(".rmsub"), was = ms && ms.classList.contains("on");
+      if (ms) { ms.parentNode.querySelectorAll(".rmsub.on").forEach(function (x) { x.classList.remove("on"); }); ms.classList.toggle("on", !was); }
     } else if (act === "week-start" || act === "who-start") {
       /* §708: the week a row due this week no longer shows, and the owner a
          card per owner no longer shows, are opened from the ⋯ — the same

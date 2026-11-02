@@ -3341,6 +3341,18 @@ await section("4 · Forefront's own pages", async () => {
     const leftE = (await owner.query("SELECT count(*)::int AS n FROM tracker_progress WHERE action_id = $1", [firstId])).rows[0].n;
     check(/Delete this entry\?/.test(asked) && leftE === 0, "\u2026and deleted there, asked first", asked + " · left " + leftE);
     await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
+    /* §713: THE ⋯ — Change the week and Hand to someone else first, each a
+       small list opened by HOVER beside the menu; Details and progress gone;
+       Rename third */
+    await page.click(".mwrow:not(.on) .mwkb >> nth=0").catch(() => {});
+    await page.waitForSelector(".mwpop .mwsubb", { timeout: 8000 }).catch(() => {});
+    const order = await page.evaluate(() => Array.from(document.querySelectorAll(".mwpop > .mwsubw > button, .mwpop > button, .mwpop > a")).map((b) => b.textContent.replace("›", "").trim()));
+    await page.hover(".mwpop .mwsubw:first-child > button").catch(() => {});
+    await page.waitForTimeout(300);
+    const weeks = await page.evaluate(() => { const s = document.querySelector(".mwpop .mwsubw:first-child > .mwside"); return s && getComputedStyle(s).display !== "none" ? s.querySelectorAll("button").length : 0; });
+    check(order[0] === "Change the week" && order[1] === "Hand to someone else" && order[2] === "Rename" && !order.includes("Details and progress") && weeks >= 4,
+      "\u2026the \u22ef starts with Change the week and Hand to someone else, each a list that opens on hover; Rename third; no Details and progress (\u00a7713)", JSON.stringify({ order, weeks }));
+    await page.keyboard.press("Escape");
     await page.click(".mwrow.on .mwopen");
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
     check(path() === "/raya-trade/tracker", "\u2026and Open in its Tracker opens that client's Tracker", path());

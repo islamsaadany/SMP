@@ -71015,3 +71015,11 @@ Nothing it does is gone; it is quieter:
 **§728 shell run**: 558 ok / 10 failed — main's own; both §728 checks ok.
 
 **§724–§728 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §729 — My tasks' Done menu stood open; Home's rows hovered only in the middle (2026-11-03)
+
+**Reported** (Islam): "this list is appearing and not closing"; "in the home page tasks the middle task only gets grey background when I hover above it". Both were the cascade:
+- The Done menu (`.mwwordm`, §725) set `display:grid`, which beats `[hidden]` (§93.11 — the console has no blanket `[hidden]` rule), so it was always drawn. `.mwwordm[hidden]{display:none}`.
+- The odd rows' reset (`.mwlist .mwrow:nth-child(odd of .mwrow){background:none}`, and Home's) outweighs `.mwrow:hover` and `.mwrow.on`, so rows 1, 3, 5… never greyed on hover nor took the opened tint — on Home's three rows, only the middle one did. The hover and `.on` rules now carry the same `:nth-child(odd of …)` weight.
+
+**Checked**: `checks/shell.mjs` — new: the Done menu is shut at rest and after a choice; a hover greys the first row. Shell cache `smp-shell-v7.56-menu-hover-fix`. (Run result below when it lands.)

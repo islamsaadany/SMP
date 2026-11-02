@@ -3221,6 +3221,14 @@ await section("4 · Forefront's own pages", async () => {
         done: d ? d.textContent.replace(/\s+/g, " ").trim() : "", order: Array.from(h.children).filter((x) => getComputedStyle(x).display !== "none").map((x) => x.className || x.tagName) } : null; });
     check(!!bar725 && !bar725.tile && bar725.views.join("|") === "By date|By client" && bar725.srchW === 0 && /^Done: Hide/.test(bar725.done),
       "\u2026its bar is the Tracker's quiet bar: no tile, By date \u00b7 By client as plain words, Search an icon with its box shut, Done a small word (\u00a7725)", JSON.stringify(bar725));
+    /* §729: the Done menu is shut until pressed (an author display had beaten
+       [hidden], so it stood open); and a hover greys the FIRST row too (the
+       odd rows' background:none had outweighed the hover) */
+    const menu729 = await page.evaluate(() => { const m = document.querySelector(".mwcardhd .mwwordm"); return m ? getComputedStyle(m).display : "gone"; });
+    await page.hover(".mwlist .mwrow >> nth=0");
+    const hov729 = await page.evaluate(() => { const r = document.querySelector(".mwlist .mwrow"); return r ? getComputedStyle(r).backgroundColor : ""; });
+    check(menu729 === "none" && !/rgba\(0, 0, 0, 0\)|transparent/.test(hov729),
+      "\u2026the Done menu is shut until pressed, and a hover greys the first row as it does the others (\u00a7729)", JSON.stringify({ menu729, hov729 }));
     await page.click(".mwcardhd .mwfind svg");
     check((await page.evaluate("Math.round(document.querySelector('.mwcardhd .mwsearch').getBoundingClientRect().width)")) > 100, "\u2026a press on the search icon opens its box (\u00a7725)", "");
     await page.fill(".mwsearch", "far off");
@@ -3250,6 +3258,7 @@ await section("4 · Forefront's own pages", async () => {
     const dm = await doneOf();
     check(!!dm && dm.h === "Done in the last 30 days" && JSON.stringify(dm.rows) === JSON.stringify(["MW finished", "MW done in the month"]), "\u2026and 30 days lists it and the one three weeks back, newest first", JSON.stringify(dm));
     await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="hide"]');
+    check((await page.evaluate(() => getComputedStyle(document.querySelector(".mwcardhd .mwwordm")).display)) === "none", "\u2026and the Done menu shuts once a choice is pressed (\u00a7729)", "");
     check((await doneOf()) === null, "\u2026and Hide puts them away again", "");
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));

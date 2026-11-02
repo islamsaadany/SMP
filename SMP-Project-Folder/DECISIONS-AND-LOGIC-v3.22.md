@@ -70753,6 +70753,6 @@ Islam: *"the jump should take me as well to the other modules like my tasks, the
 
 **§703 MERGED TO `main`** 2026-11-01, Islam: *"merge to main"*. `main` had not moved since §702, so the merge is a fast-forward and the checks are the ones recorded above. No migrations; nobody signed out.
 
-## §704 — Jump to's box folds with the console's column (2026-11-02)
+## §710 — Jump to's box folds with the console's column (2026-11-02; §704 on the branch, renumbered at the merge: main took §704–§709)
 
 Islam, with a picture of the console's column folded to icons: *"check this glitch"*. The Jump to box (§701) kept its 190px and its words when the « button narrowed the column to 64px (§601, `html[data-rail="1"]`), so it ran out over the page beside it. Under that mark, from 1000px as §601's own rules are, `lib/jump-script.ts` now draws it as its glass alone, 38px, centred like every other row of the folded column, with *Jump to… (Ctrl K)* on hover; unfolded it is as before. Checked in a browser on the built console: folded, the box sits inside the column (box 10–40px, column 0–51px at the page's 0.8) and still opens the window; unfolded, the full box. `checks/jump.mjs` 23 ok. Picture: `design-mockups/jump-to-offline/built/8-console-folded.png`.

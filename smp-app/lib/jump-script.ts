@@ -50,7 +50,7 @@ export const JUMP_SCRIPT = `/* §701 — Jump to, and the offline strip (lib/jum
     ".sjside{display:flex;width:calc(100% - 20px);margin:10px 10px 0;min-width:0}" +
     /* the console's column folded to icons (§601, html[data-rail="1"], 64px
        from 1000px): the box folds with it to its glass alone, centred, the
-       way every other row of the column does (§704) */
+       way every other row of the column does (§710) */
     "@media (min-width:1000px){html[data-rail='1'] .sjside{width:38px;min-width:0;height:34px;margin:10px auto 0;padding:0;justify-content:center}" +
     "html[data-rail='1'] .sjside .sjl,html[data-rail='1'] .sjside .sjk{display:none}}" +
     ".sjk{font:600 11px/1 'Source Sans 3',system-ui,sans-serif;border:1px solid var(--sj-line);border-bottom-width:2px;border-radius:4px;padding:2px 5px;background:var(--sj-surface);color:var(--sj-ink2);white-space:nowrap}" +

@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-02 — Jump to's box folds with the console's column (§704).** Islam: *"check this glitch"*. With the console's column folded to icons, the box now shows as its magnifying glass alone inside the column, instead of spilling over the page. Checked in a browser; `checks/jump.mjs` green.
+**2026-11-02 — Jump to's box folds with the console's column (§710).** Islam: *"check this glitch"*. With the console's column folded to icons, the box now shows as its magnifying glass alone inside the column, instead of spilling over the page. Checked in a browser; `checks/jump.mjs` green.
 
 **2026-11-01 — Jump to reaches the console's sections (§703), merged to `main` 2026-11-01 on Islam's word.** Islam: *"the jump should take me as well to the other modules like my tasks, the track record the frameworks or clients"*. For Forefront's people, Jump to lists Home, My tasks, Clients, Track Record, Frameworks, Copilot and History, plus Consultants and Who sees what for those allowed to open them. Checked: `checks/jump.mjs` green (23 ok).
 

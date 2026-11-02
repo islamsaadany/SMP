@@ -3325,6 +3325,21 @@ await section("4 · Forefront's own pages", async () => {
     const wrote = (await owner.query("SELECT body FROM tracker_progress WHERE action_id = $1", [firstId])).rows.map((x) => x.body);
     check(wrote.includes("Written from My tasks") && /Written from My tasks/.test(await page.locator(".mwrow.on .mwtl").textContent().catch(() => "")),
       "\u2026and a line of progress written there is the Tracker's own entry, drawn on its timeline", JSON.stringify(wrote));
+    /* §712: YOUR OWN ENTRY IS EDITED AND DELETED HERE TOO — Edit turns it into
+       a box, Enter saves it (read back from Postgres); Delete asks first,
+       and Yes removes it */
+    await page.click(".mwrow.on .mwpacts button >> text=Edit").catch(() => {});
+    await page.fill(".mwrow.on .mwpedit", "Edited from My tasks").catch(() => {});
+    await page.press(".mwrow.on .mwpedit", "Enter").catch(() => {});
+    await page.waitForFunction(() => /Edited from My tasks/.test((document.querySelector(".mwrow.on .mwtl") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
+    const edited = (await owner.query("SELECT body, edited_at FROM tracker_progress WHERE action_id = $1", [firstId])).rows;
+    check(edited.length === 1 && edited[0].body === "Edited from My tasks" && !!edited[0].edited_at, "\u2026and my own entry is edited in place there, saved as the Tracker saves it (\u00a7712)", JSON.stringify(edited));
+    await page.click(".mwrow.on .mwpacts button >> text=Delete").catch(() => {});
+    const asked = (await page.locator(".mwrow.on .mwpacts").textContent().catch(() => "")) || "";
+    await page.click(".mwrow.on .mwpacts button >> text=Yes, delete it").catch(() => {});
+    await page.waitForSelector(".mwrow.on .mwdet .none", { timeout: 8000 }).catch(() => {});
+    const leftE = (await owner.query("SELECT count(*)::int AS n FROM tracker_progress WHERE action_id = $1", [firstId])).rows[0].n;
+    check(/Delete this entry\?/.test(asked) && leftE === 0, "\u2026and deleted there, asked first", asked + " · left " + leftE);
     await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
     await page.click(".mwrow.on .mwopen");
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});

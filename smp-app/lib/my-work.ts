@@ -33,6 +33,7 @@ import {
   isStatus, isOffice, mayChange, oneAction, setStatus, ONLY_CHANGE, type Action, type Who,
   sameWeek, weekOptions, calendarDay, oneLine, setFields, deleteAction, isOfficeRow, officeRows, shortNames, namesOf,
   progressOf, addProgress, latestProgress, eventsOf, type Progress,
+  oneProgress, editProgress, deleteProgress, mayChangeProgress, ONLY_WRITER,
 } from "./tracker.ts";
 
 export type Bucket = "late" | "week" | "later";
@@ -296,11 +297,11 @@ export async function workDetail(t: Client, who: Who, id: string, now: Date = ne
    client's Super user. A hand-over takes the row off this person's list and
    a delete takes it off everyone's; the answer says so (gone), and otherwise
    carries the row drawn again by the list's own reader. */
-export type WorkOp = "progress" | "notes" | "due" | "owner" | "rename" | "delete";
+export type WorkOp = "progress" | "progress-edit" | "progress-delete" | "notes" | "due" | "owner" | "rename" | "delete";
 export type WorkWrite2 = { ok: true; row: WorkRow | null; gone: boolean } | { ok: false; status: number; why: string };
 export async function workWrite(t: Client, who: Who, id: string, op: unknown, body: Record<string, unknown>, now: Date = new Date()): Promise<WorkWrite2> {
   const g = gate(t, who); if (g) return g;
-  if (!["progress", "notes", "due", "owner", "rename", "delete"].includes(String(op))) return { ok: false, status: 400, why: "Not something this list does." };
+  if (!["progress", "progress-edit", "progress-delete", "notes", "due", "owner", "rename", "delete"].includes(String(op))) return { ok: false, status: 400, why: "Not something this list does." };
   if (!UUID.test(id)) return GONE;
   const today = todayIn(now);
   const by = who.personKey || "";
@@ -311,6 +312,17 @@ export async function workWrite(t: Client, who: Who, id: string, op: unknown, bo
       if (!by) return { ok: false, status: 400, why: "You are not on this client's register yet, so nothing can be written under your name here." };
       if (!oneLine(body.body)) return { ok: false, status: 400, why: "A progress entry needs a few words." };
       await addProgress(c, id, String(body.body), by);
+    } else if (op === "progress-edit" || op === "progress-delete") {
+      /* AN ENTRY IS ITS WRITER'S (§657), on My tasks and Home as in the
+         Tracker (§712): edited or deleted by them alone, judged against the
+         stored entry, which must be this action's */
+      const p = await oneProgress(c, String(body.progressId || ""));
+      if (!p || p.actionId !== id) return { ok: false, status: 404, why: "That entry is not on this action any more." };
+      if (!mayChangeProgress(p, who)) return { ok: false, status: 403, why: ONLY_WRITER };
+      if (op === "progress-edit") {
+        if (!oneLine(body.body)) return { ok: false, status: 400, why: "A progress entry needs a few words." };
+        await editProgress(c, p.id, String(body.body));
+      } else await deleteProgress(c, p.id);
     } else {
       if (!mayChange(cur, who)) return { ok: false, status: 403, why: ONLY_CHANGE };
       if (op === "notes") await setFields(c, id, { description: String(body.description || "") });

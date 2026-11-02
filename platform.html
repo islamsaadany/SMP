@@ -1862,6 +1862,15 @@
   .mwtl .wk.now{ color:var(--mw-blue) }
   .mwtl .tx{ font-size:14px; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere }
   .mwdet .none{ margin:10px 0 0; color:var(--ink-3); font-size:13px }
+  /* §712: Edit and Delete under your own entry, as in the Tracker */
+  .mwpacts{ display:flex; flex-wrap:wrap; gap:4px 12px; align-items:center; margin-top:2px; font-size:12px; color:var(--ink-2) }
+  .mwpacts button{ border:0; background:none; padding:0; font:inherit; font-size:12px; color:var(--ink-3); text-decoration:underline; cursor:pointer }
+  .mwpacts button:hover{ color:var(--ink) }
+  .mwpacts .danger{ color:var(--bad) }
+  .mwpacts .sure{ text-decoration:none; border:1px solid var(--line); border-radius:6px; padding:2px 8px; color:var(--ink) }
+  .mwpacts .sure.danger{ color:var(--bad); border-color:var(--bad) }
+  .mwpedit{ display:block; width:100%; max-width:760px; border:1px solid var(--mw-blue); border-radius:7px; background:var(--surface); color:var(--ink);
+    padding:5px 9px; font:inherit; font-size:14px; line-height:1.45; resize:none; field-sizing:content; margin-top:2px }
   .mwdesc{ display:block; width:100%; max-width:780px; border:1px solid transparent; border-radius:8px; background:transparent; padding:8px 11px; margin:0 -11px;
     font:inherit; font-size:14px; line-height:1.55; color:var(--ink); resize:none; min-height:40px; field-sizing:content; cursor:text }
   .mwdesc:hover{ border-color:var(--line); background:var(--surface) }
@@ -4671,7 +4680,7 @@
      when it is the exception; the status as a dot and its word; ⋯. `act(r,
      status, via, row)` is the tick's and the status's press; the rest is
      MW's, set by drawMyWork. */
-  var MW = { open: null, tab: {}, detail: {}, loading: {}, menu: null, sub: null, renaming: null,
+  var MW = { open: null, tab: {}, detail: {}, loading: {}, menu: null, sub: null, renaming: null, pedit: null, pdel: null,
     write: null, redraw: null, said: null };
   var MW_DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>';
   var MW_I = {
@@ -4892,7 +4901,48 @@
         d.progress.forEach(function (p) {
           var li = el("li");
           li.appendChild(el("div", "wk" + (p.now ? " now" : ""), p.week + " · " + p.by + (p.edited ? " · edited" : "")));
-          li.appendChild(el("div", "tx", p.body));
+          /* YOUR OWN ENTRY: Edit turns it into a box in place (Enter or
+             leaving saves, Escape puts it back); Delete asks first (§712) —
+             the Tracker's own rule, the writer alone */
+          if (MW.pedit === p.id) {
+            var ta = el("textarea", "mwpedit");
+            ta.value = p.body;
+            ta.rows = 2;
+            ta.maxLength = 2000;
+            ta.setAttribute("aria-label", "Edit the entry");
+            var settled = false;
+            var finish = function (keep) {
+              if (settled) return; settled = true;
+              var v = ta.value.replace(/[ \t]+\n/g, "\n").trim();
+              MW.pedit = null;
+              if (keep && v && v !== p.body) MW.write(r, "progress-edit", { progressId: p.id, body: v }); else MW.redraw();
+            };
+            ta.addEventListener("keydown", function (e) {
+              if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finish(false); }
+              else if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); finish(true); }
+            });
+            ta.addEventListener("blur", function () { finish(true); });
+            li.appendChild(ta);
+            setTimeout(function () { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 0);
+          } else li.appendChild(el("div", "tx", p.body));
+          if (p.mine && MW.pedit !== p.id) {
+            var acts = el("div", "mwpacts");
+            if (MW.pdel === p.id) {
+              acts.appendChild(document.createTextNode("Delete this entry? "));
+              var yes = el("button", "danger sure", "Yes, delete it"); yes.type = "button";
+              yes.addEventListener("click", function () { MW.pdel = null; MW.write(r, "progress-delete", { progressId: p.id }); });
+              var keep = el("button", "sure", "Keep it"); keep.type = "button";
+              keep.addEventListener("click", function () { MW.pdel = null; MW.redraw(); });
+              acts.appendChild(yes); acts.appendChild(keep);
+            } else {
+              var ed = el("button", null, "Edit"); ed.type = "button";
+              ed.addEventListener("click", function () { MW.pedit = p.id; MW.pdel = null; MW.redraw(); });
+              var dl = el("button", "danger", "Delete"); dl.type = "button";
+              dl.addEventListener("click", function () { MW.pdel = p.id; MW.pedit = null; MW.redraw(); });
+              acts.appendChild(ed); acts.appendChild(dl);
+            }
+            li.appendChild(acts);
+          }
           ol.appendChild(li);
         });
         box.appendChild(ol);

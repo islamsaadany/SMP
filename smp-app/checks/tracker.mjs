@@ -68,7 +68,14 @@ import { usePools } from "../lib/db.ts";
 import { SCHEMA } from "../db/schema-name.mjs";
 import { PLATFORM_TABLES } from "../lib/schema-check.ts";
 import { serve } from "../modules/tracker/index.ts";
-import { trackerDocument, whenText, listBody } from "../modules/tracker/page.ts";
+import { trackerDocument as trackerDocument0, whenText, listBody as listBody0 } from "../modules/tracker/page.ts";
+/* §726: the page carries the list as each view draws it, and every task's
+   panel, in inert templates after the list; the string checks read the list
+   in view, so the spare copies are taken out first (the templates are
+   checked on their own, below) */
+const liveOnly = (html) => html.replace(/<div class="vtpls" hidden>[\s\S]*?<!--\/vtpls-->/g, "");
+const trackerDocument = async (...a) => liveOnly(await trackerDocument0(...a));
+const listBody = (...a) => { const o = listBody0(...a); return { ...o, body: liveOnly(o.body), full: o.body }; };
 import { barInks, barVars, contrastOf } from "../lib/branding.ts";
 import {
   STATUSES, STATUS_WORD, VIEWS, VIEW_WORD, GROUPS, GROUP_WORD, FORMATS, FORMAT_WORD, isFormat, isStatus, isView, isGroup, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
@@ -977,6 +984,18 @@ try {
        list is told apart by the count's own words, which only This week's
        carries "on this week". */
     const tabOn = () => pg.evaluate("(document.querySelector('.cats a[aria-current=\"true\"]') || {}).textContent || ''");
+    /* §726: and asks the server nothing — the view rides in the page */
+    const rows726 = () => pg.evaluate("document.querySelectorAll('#body .card.cbot .row[data-id]').length");
+    const weekRows726 = await rows726();
+    let asked726 = 0; const c726 = (rq) => { if (["fetch", "xhr", "document"].includes(rq.resourceType())) asked726++; };
+    pg.on("request", c726);
+    await pg.locator('.cats a[href*="view=mine"]').click(); await settle();
+    const mineRows726 = await rows726(), head726 = (await pg.locator(".ctop .chd .ccnt").textContent()).trim(), url726 = new URL(pg.url()).searchParams.get("view");
+    await pg.evaluate("history.back()"); await settle();
+    const backRows726 = await rows726();
+    pg.off("request", c726);
+    check("a view opens at once — no request to the server, the list and the head's count those of the view, the address following, and Back the same (§726)",
+      asked726 === 0 && mineRows726 < weekRows726 && head726 === String(mineRows726) && url726 === "mine" && backRows726 === weekRows726, JSON.stringify({ asked726, weekRows726, mineRows726, head726, url726, backRows726 }));
     await pg.locator('.cats a[href*="view=all"]').click(); await settle();
     const allAt = { url: new URL(pg.url()).searchParams.get("view"), body: await pg.evaluate("document.body.getAttribute('data-view')"), tab: await tabOn(), count: await pg.locator("#count").textContent() };
     check("a press on All filters the list in place, with no page loaded (§566)",

@@ -75,14 +75,14 @@ export const APP_JS = `(function () {
       var d = r.querySelector(".rdots > .more"); if (d) d.classList.remove("lit");
     });
     if (!id) return true;
-    var r = tpl.previousElementSibling;
-    while (r && !(r.classList.contains("row") && r.getAttribute("data-id") === id)) r = r.previousElementSibling;
-    if (r) {
-      r.classList.add("on");
-      r.querySelectorAll('[data-act=more]').forEach(function (m) { m.setAttribute("aria-expanded", "true"); if (m.matches("button.more")) m.classList.add("on"); });
-      var d2 = r.querySelector(".rdots > .more"); if (d2) d2.classList.add("lit");
-    }
-    tpl.parentNode.insertBefore(tpl.content.cloneNode(true), tpl);
+    /* §726: the panels ride together after the views; the row is the one
+       on the list in view */
+    var r = document.querySelector('#body .card.cbot .row[data-id="' + id + '"]');
+    if (!r) return false;
+    r.classList.add("on");
+    r.querySelectorAll('[data-act=more]').forEach(function (m) { m.setAttribute("aria-expanded", "true"); if (m.matches("button.more")) m.classList.add("on"); });
+    var d2 = r.querySelector(".rdots > .more"); if (d2) d2.classList.add("lit");
+    r.parentNode.insertBefore(tpl.content.cloneNode(true), r.nextSibling);
     var o = document.querySelector('#body .open[data-id="' + id + '"]');
     if (o && histOpen.has(id)) drawHist(o, true); else if (o && tabOf[id]) setTab(o, tabOf[id]);
     sizeAll();
@@ -912,18 +912,44 @@ export const APP_JS = `(function () {
     document.querySelectorAll(".cats a[href]").forEach(function (o) {
       if (viewOf(o.href) === v) o.setAttribute("aria-current", "true"); else o.removeAttribute("aria-current");
     });
+    var was = B.getAttribute("data-view") || "week";
     B.setAttribute("data-view", v);
     var u = new URL(location.href);
     u.searchParams.set("view", v); u.searchParams.delete("open");
     history.pushState(null, "", u);
-    pressed = null; refetch();
+    pressed = null;
+    if (!showView(v, was)) refetch();
   });
   window.addEventListener("popstate", function () {
     var v = new URLSearchParams(location.search).get("view") || "week";
-    if (v === (B.getAttribute("data-view") || "week")) return;
+    var was = B.getAttribute("data-view") || "week";
+    if (v === was) return;
     B.setAttribute("data-view", v);
-    pressed = null; refetch();
+    pressed = null;
+    if (!showView(v, was)) refetch();
   });
+  /* §726 A VIEW OPENS AT ONCE: the page carries each list view drawn by the
+     server in a <template class="vtpl">; a press puts that copy in place of
+     the list — the count, the hidden count line, the sections' done rows
+     unfolded where they were, a search still sifting. False when either end
+     is the weekly check (a meeting, read from the server) or there is no
+     copy, and the caller reads the list. */
+  function showView(v, was) {
+    if (v === "check" || was === "check") return false;
+    var tpl = document.querySelector('template.vtpl[data-view="' + v + '"]'), cur = document.querySelector("#body .card.cbot");
+    if (!tpl || !cur) return false;
+    cur.parentNode.replaceChild(tpl.content.cloneNode(true), cur);
+    document.querySelectorAll(".cats a[href]").forEach(function (o) {
+      if (viewOf(o.href) === v) o.setAttribute("aria-current", "true"); else o.removeAttribute("aria-current");
+    });
+    var c = document.querySelector(".ctop .chd .ccnt"); if (c) c.textContent = tpl.getAttribute("data-n") || "0";
+    var cnt = document.getElementById("count"); if (cnt) cnt.textContent = tpl.getAttribute("data-count") || "";
+    document.querySelectorAll(".sec").forEach(function (sec) { if (shown.has(sec.getAttribute("data-key"))) sec.classList.add("showdone"); });
+    fresh.forEach(function (id) { var r = document.querySelector('#body .row[data-id="' + id + '"]'); if (r) r.classList.add("fresh"); });
+    setOpen(null);
+    countWas = null; sift();
+    return true;
+  }
 
   /* RENAME IN PLACE: a double-click on the name turns it into a box; Enter
      or leaving the box renames, Escape puts the name back. A single click

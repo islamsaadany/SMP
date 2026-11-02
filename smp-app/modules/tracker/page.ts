@@ -1569,7 +1569,27 @@ function topicMenu(t: Topic): string {
 /* THE LIST, THE MASTHEAD AND THE COUNT — the part of the page a press
    redraws. trackerDocument() wraps it once; the api answers a press with it
    again. */
+/* §726 A VIEW OPENS AT ONCE (Islam: "on clicking the filters at the top of
+   the internal tracker it feels like the whole list reloads"): the page
+   carries the list as each of the four views draws it, in an inert
+   <template class="vtpl"> apiece, and a press on a view puts that copy in
+   place — no trip to the server. Each is drawn by the one renderer below
+   (§53.5), so a view's sections, counts and folded done rows are the
+   server's. Every task's opened panel rides once, after them (§719), and
+   is put after its row wherever the row is. The weekly check is a meeting,
+   not a list: it is read from the server as before. */
+const LIST_VIEWS: View[] = ["week", "all", "mine", "undated"];
 export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
+  const out = listOne(L, p, today);
+  if (p.ask.view === "check" || !L.actions.length || out.card == null) return out;
+  const views = LIST_VIEWS.map((v) => {
+    const o = v === p.ask.view ? out : listOne({ ...L, open: null }, { ...p, ask: { ...p.ask, view: v, q: "" } }, today);
+    return '<template class="vtpl" data-view="' + v + '" data-n="' + (o.n || 0) + '" data-count="' + esc(o.count) + '">' + o.card + "</template>";
+  }).join("");
+  const panels = L.actions.map((a) => '<template class="otpl" data-id="' + esc(a.id) + '">' + openPanel(a, L, p.who, today) + "</template>").join("");
+  return { ...out, body: out.body + '<div class="vtpls" hidden>' + views + panels + "</div><!--/vtpls-->" };
+}
+function listOne(L: Loaded, p: PageArgs, today: string): ListOut & { card?: string; n?: number } {
   const here = clientHref(p.slug, "tracker", "");
   const q = String(p.ask.q || "").trim().slice(0, 120);
   const view: View = p.ask.view;
@@ -1614,12 +1634,11 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     const open = g.rows.filter((a) => a.status !== "done");
     const late = open.filter((a) => !!a.due && isLate(a.due, today)).length;
     const done = g.rows.length - open.length;
-    /* §719: every row carries its opened panel in a <template> — inert, not
+    /* §719, §726: every task's opened panel rides in a <template> — inert, not
        on the page — and a press on the name puts it in place at once; the
        server is asked nothing. The one the address opens is drawn as well. */
-    const rows = g.rows.map((a) => { const pan = openPanel(a, L, p.who, today);
-      return row(a, L, p.who, today, dates, a.id === L.open, group, false, view) + (a.id === L.open ? pan : "") +
-        '<template class="otpl" data-id="' + esc(a.id) + '">' + pan + "</template>"; }).join("");
+    const rows = g.rows.map((a) => row(a, L, p.who, today, dates, a.id === L.open, group, false, view) +
+      (a.id === L.open ? openPanel(a, L, p.who, today) : "")).join("");
     const t = group === "topic" && g.key !== "none" ? L.topics.find((x) => x.id === g.key) || null : null;
     const quiet = group === "topic" && g.key === "none";
     /* THE SECTION'S OWN LINE (§656): under a topic's rows with the topic
@@ -1694,8 +1713,9 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     : !shown.length
       ? '<div class="none"><b>Nothing ' + (q ? "matches" : "here") + '.</b>' + (q ? "Try another word, or " : "Add one on the line above, or ") + '<a href="' + esc(viewHref("all")) + '">see all of them</a>.</div>'
       : "";
-  return { body: pinned(masthead(p, today, all, sum, L, { inner: tools + counted, shown: shown.length, find: all.length ? find : "" })) +
-    '<div class="card cbot cards"><div class="list">' + secs + "</div>" + none + "</div>", count, open: L.open };
+  const card = '<div class="card cbot cards"><div class="list">' + secs + "</div>" + none + "</div>";
+  return { body: pinned(masthead(p, today, all, sum, L, { inner: tools + counted, shown: shown.length, find: all.length ? find : "" })) + card,
+    count, open: L.open, card, n: shown.length };
 }
 
 /* What stays at the top while the list scrolls (§565): one wrapper, so the

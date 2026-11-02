@@ -341,7 +341,7 @@ const count = (h, re) => (h.match(re) || []).length;
    move has nothing in any of them and gets ONE — its next-week card, because
    the write line in it is the something. A card over nothing is never drawn,
    which is why the count is four and not six. */
-/* THE CHECK IS A MEETING (§701): the tasks of the three weeks down the left,
+/* THE CHECK IS A MEETING (§706): the tasks of the three weeks down the left,
    one task open on the right. */
 const picks = (chk.match(/data-act="pick-task" data-id="[^"]*"/g) || []).map((x) => x.slice(30, -1)).join(" ");
 check("the meeting lists the three weeks' tasks on the left — this week's, then last week's finished, then next week's — and nothing older",
@@ -463,7 +463,7 @@ const pDraw = (view) => listBody(pLoaded, { slug: "c", tenantId: "t", tenantName
   ask: { view, q: "", open: "p", group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY).body;
 const pOpen = pDraw("all"), pChk = pDraw("check");
 const openPart = (pOpen.match(/<div class="open" data-id="p" data-tab="p">[\s\S]*?<ul class="hist" hidden>[\s\S]*?<\/ul><\/div>/) || [""])[0];
-/* THE OPENED TASK IS TABBED (§701, option D): Progress open first, then
+/* THE OPENED TASK IS TABBED (§706, option D): Progress open first, then
    Description and History, and Delete at the end of the tabs. */
 check("the opened task has three tabs — Progress (open first), Description, History — and Delete at their end",
   /data-act="ptab" data-tab="p" aria-selected="true">Progress <span class="n">2<\/span><\/button>/.test(openPart) &&
@@ -1338,7 +1338,7 @@ try {
     const rights = await pg.locator(".row .tcwrap").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().right)));
     check("...and the column lines up down the list, whatever the week beside it says", rights.length > 1 && new Set(rights).size === 1, JSON.stringify(rights));
     if (process.env.SMP_SHOT2) await pg.screenshot({ path: process.env.SMP_SHOT2 });
-    /* THE MEETING, PRESSED (§701): the check opens on the first task, a press
+    /* THE MEETING, PRESSED (§706): the check opens on the first task, a press
        on the left opens another on the right (on the address, no reload), a
        status button writes the status, Save and next writes what was typed
        and opens the next one, counting the one left as gone through, and the

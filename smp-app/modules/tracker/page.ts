@@ -309,7 +309,7 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 .team button.on::after,.topics button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
 .topics{min-width:190px}
 .topics .tnew{display:block;width:100%;border:0;border-top:1px solid var(--line);margin-top:3px;padding:7px 9px 5px;background:transparent;color:var(--ink);font:400 13.5px/1.4 var(--font);outline:none}
-/* THE STATUS IS A DOT AND ITS WORD (2026-11-02, §701; the quiet list of
+/* THE STATUS IS A DOT AND ITS WORD (2026-11-02, §706; the quiet list of
    design-mockups/internal-tracker/2026-11-02_actions-quiet-list.html): grey
    Not started, yellow In progress, green Done, the word in the row's own
    ink. The tinted pill of §699–§700 went with the quiet list: one colour
@@ -334,7 +334,7 @@ span.st.prog{padding:0 6px}
 select.st.prog{padding:0 18px 0 22px}
 .st.done{color:var(--ink-2);background-color:transparent}
 select.st option{color:var(--ink);background:var(--surface)}
-/* a status dot on its own (§701): the meeting list and its status buttons */
+/* a status dot on its own (§706): the meeting list and its status buttons */
 .dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--d0)}
 .dot.d1{background:var(--d1)}.dot.d2{background:var(--good)}
 /* the arrow that expands a row for its notes and history, and folds it */
@@ -538,7 +538,7 @@ const LOOK = `
 .cbot .blk .row.chk{padding:9px 14px}
 .cbot .none{padding:16px 14px 12px}
 @media (max-width:760px){.cbot .open{padding-left:14px}.cbot .foot{padding-left:14px}}
-/* THE QUIET LIST (2026-11-02, §701; design-mockups/internal-tracker/
+/* THE QUIET LIST (2026-11-02, §706; design-mockups/internal-tracker/
    2026-11-02_actions-quiet-list.html). No stripes: rows parted by a
    hairline, a dot and a word for the status, and one control on the right
    — the ⋯ that opens the task. */
@@ -548,7 +548,7 @@ const LOOK = `
 .row .more svg{width:16px;height:16px}
 .row .more.on{background:var(--surface);color:var(--ink)}
 
-/* THE OPENED TASK, TABBED (§701, option D) */
+/* THE OPENED TASK, TABBED (§706, option D) */
 .open{display:block;grid-template-columns:none;grid-column:auto}
 .cbot .open{grid-column:1/-1}
 .ptab.histlink{margin:0 0 -1px;padding:9px 12px 10px;font:600 13.5px/1 var(--font)}
@@ -582,7 +582,7 @@ const LOOK = `
 .open textarea.desc:hover{border-color:var(--line);background:var(--surface)}
 .open textarea.desc:focus{border-color:var(--carry);background:var(--surface);outline:none}
 
-/* THE WEEKLY CHECK AS A MEETING (§701) */
+/* THE WEEKLY CHECK AS A MEETING (§706) */
 .pin:has(+ .meetwrap) .card.ctop,.pin:has(+ .meetwrap) .card.ctop.solo{border-radius:12px}
 .meetwrap{padding-top:14px}
 .meet{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:14px;align-items:start}
@@ -936,7 +936,7 @@ function taskTabs(a: Action, L: Loaded, who: Who, today: string, live: boolean):
     : '<div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>") + "</div>";
   return tabs + prog + desc + '<ul class="hist" hidden>' + hist + "</ul>";
 }
-/* THE OPENED TASK, TABBED (2026-11-02, §701; option D of
+/* THE OPENED TASK, TABBED (2026-11-02, §706; option D of
    design-mockups/internal-tracker/2026-11-02_opened-task-options.html).
    Islam: "the part in the opened task ... are a bit clumsy". Three tabs —
    Progress first: the box with Add beside it, the entries on a timeline
@@ -1042,7 +1042,7 @@ function topicPick(L: Loaded): string {
     '<input class="tnew" placeholder="New topic…" aria-label="New topic" maxlength="120"></span></span>';
 }
 
-/* THE WEEKLY CHECK AS A MEETING (2026-11-02, §701; option 2 of
+/* THE WEEKLY CHECK AS A MEETING (2026-11-02, §706; option 2 of
    design-mockups/internal-tracker/2026-11-01_weekly-check-rethink.html).
    Islam: "I like the meeting mode for the weekly check". The check is a
    meeting that goes through tasks one at a time, so the page does the same:
@@ -1395,7 +1395,7 @@ function pinned(html: string): string {
 
 /* A press's answer: the list read again under the tenant and drawn by the
    same function — never a second renderer (§53.5). */
-/* ON THE CHECK SOMETHING IS ALWAYS BEING TALKED ABOUT (§701): with no task
+/* ON THE CHECK SOMETHING IS ALWAYS BEING TALKED ABOUT (§706): with no task
    picked, the meeting opens on the first of this week's. */
 async function loadFor(c: Q, p: PageArgs, today: string): Promise<Loaded> {
   const L = await load(c, p.ask.open);

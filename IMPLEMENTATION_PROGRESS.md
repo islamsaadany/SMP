@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-02 — The Weekly check as a meeting; the main list quiet; the opened task tabbed (§701).** The check lists every task on the left and opens one at a time on the right with its status as three buttons, Previous, Carry and Save and next, and a gone-through count. The main list loses its stripes and pills: a status dot and word, one ⋯ per row. An opened task has Progress (Add beside the box, entries on a timeline), Description (click to edit) and History tabs, Delete at the end. Banner and Actions heading unchanged.
+**2026-11-02 — The Weekly check as a meeting; the main list quiet; the opened task tabbed (§706).** The check lists every task on the left and opens one at a time on the right with its status as three buttons, Previous, Carry and Save and next, and a gone-through count. The main list loses its stripes and pills: a status dot and word, one ⋯ per row. An opened task has Progress (Add beside the box, entries on a timeline), Description (click to edit) and History tabs, Delete at the end. Banner and Actions heading unchanged.
 
 **2026-11-01 — The Weekly check as topic cards (§700).** Each topic is its own card under a grey band with its number, bold name, counts and a done bar; This week is a pale blue strip; status pills and Carry are only as wide as their words. Islam's picks: heading A, layout 3.
 

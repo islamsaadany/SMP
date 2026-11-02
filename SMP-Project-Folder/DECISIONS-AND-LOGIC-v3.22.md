@@ -70723,7 +70723,7 @@ Islam, of the built §699 page: *"the differntion of the topics is not clear aga
 
 **§699 and §700 MERGED TO `main`** 2026-11-01, Islam: *"merge to main"*. `main` had not moved since §698 (`82d0320`), so the merge is a fast-forward: no renumbering and no second record to join. The tracker module is drawn on the server, so no built shell or service worker changes with it; `generated-in-step` and `release-stamp` all clear. No migrations; nobody signed out.
 
-## §701 — The Weekly check as a meeting; the main list quiet; the opened task tabbed (2026-11-02)
+## §706 — The Weekly check as a meeting; the main list quiet; the opened task tabbed (2026-11-02; §701 on the branch, renumbered at the merge: main took §701–§705)
 
 Islam, of the built §700: *"this is still not good looking or usable. let's think of other ways"*. Three ways drawn (`design-mockups/internal-tracker/2026-11-01_weekly-check-rethink.html`); Islam: *"I like the meeting mode for the weekly check. but let's keep the quiet list ... in the main list of actions"*; the main list drawn (`2026-11-02_actions-quiet-list.html`), with *"take care not to change the top banner size ... and the word actions"*; the opened task drawn four ways (`2026-11-02_opened-task-options.html`); Islam: *"go with D, build it all"*. His answers for D: the description read as text and clicked to edit; History a plain list; Delete at the end of the tabs.
 

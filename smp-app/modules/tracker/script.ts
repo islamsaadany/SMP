@@ -160,7 +160,7 @@ export const APP_JS = `(function () {
   var sizes = !(window.CSS && CSS.supports && CSS.supports("field-sizing", "content"));
   function size(t) { if (!sizes || !t) return; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }
   function sizeAll() { document.querySelectorAll("textarea.desc, .prog textarea").forEach(size); }
-  /* THE OPENED TASK'S TABS (§701): Progress, Description, History — one
+  /* THE OPENED TASK'S TABS (§706): Progress, Description, History — one
      shown at a time, by data-tab on the panel; the History tab is §657's
      history link, so it keeps its act and its unfolding. Which tab a task
      was left on rides across the swaps that follow. */
@@ -701,7 +701,7 @@ export const APP_JS = `(function () {
       var o7 = b.closest(".open"), t7 = b.getAttribute("data-tab") || "p";
       if (o7) { setTab(o7, t7); histOpen.delete(id); tabOf[id] = t7; if (t7 === "d") { var d7 = o7.querySelector("textarea.desc"); if (d7 && !d7.value) d7.focus(); } }
     } else if (act === "pick-task") {
-      /* THE MEETING (§701): the task pressed on the left opens on the right */
+      /* THE MEETING (§706): the task pressed on the left opens on the right */
       var pk = b.getAttribute("data-id");
       if (pk && pk !== openId()) { setOpen(pk); pressed = null; refetch(); }
     } else if (act === "set-status") {

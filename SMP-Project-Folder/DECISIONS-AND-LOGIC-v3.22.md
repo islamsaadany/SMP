@@ -70926,3 +70926,5 @@ Islam, of §713's Tracker menu: *"change topic looks like handing to someone sho
 **Asked** (Islam): "in the my tasks make open in tracker before rename so rename becomes the last in all lists". My tasks and Home now read Week · Owner · Open in Tracker · Rename · Delete; the Tracker reads Week · Owner · Topic · Rename · Delete. Mockup redrawn.
 
 **Checked**: `checks/shell.mjs` 553 ok / 11 failed — main's own (§653 comes and goes); §713's check now wants Open in Tracker third, Rename fourth. Shell cache `smp-shell-v7.51-rename-last`.
+
+**§716–§718 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.

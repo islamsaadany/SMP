@@ -98,6 +98,27 @@ svg{display:block}
 .C .entries{margin-top:12px}
 .C [role="tabpanel"]{max-width:760px}
 
+/* D — tabs (C) + B's timeline for progress only; Add beside the box */
+.D .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px;align-items:center}
+.D .tabs button[role="tab"]{border:0;background:none;padding:8px 12px 9px;font:600 13.5px/1 var(--font);color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;gap:6px;align-items:center}
+.D .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
+.D .tabs .n{font-size:11.5px;background:var(--surface-2);border-radius:999px;padding:2px 6px;color:var(--ink-2)}
+.D .tabs .sp{flex:1}
+.D [role="tabpanel"]{max-width:760px}
+.D .compose{display:flex;gap:8px;align-items:flex-start}
+.D .compose .box{flex:1;min-width:0;min-height:38px;padding:8px 11px}
+.D .compose .btn{height:38px;padding:0 16px;flex:none}
+.D .tl{list-style:none;margin:10px 0 0;padding:0 0 0 18px;position:relative}
+.D .tl::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.D .tl li{position:relative;padding:0 0 12px}
+.D .tl li:last-child{padding-bottom:0}
+.D .tl li::before{content:"";position:absolute;left:-18px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--blue)}
+.D .tl .wk{font:600 12px/1.4 var(--font);color:var(--ink-3)}
+.D .tl .tx{font-size:14px}
+.D .desc{font-size:14px;padding:8px 11px;margin:0 -11px;border-radius:8px;border:1px solid transparent;cursor:text}
+.D .desc:hover{border-color:var(--line);background:var(--surface)}
+.D .hint{font-size:12.5px;color:var(--ink-3);margin:6px 0 0}
+
 @media (max-width:800px){
   .task{grid-template-columns:22px minmax(0,1fr) 28px}.task>.cell,.task>.status{display:none}
   .det{grid-column:1/-1}
@@ -199,10 +220,50 @@ svg{display:block}
   </div>
 </section>
 
+<section class="opt D">
+  <h2>D · Tabs, with the progress timeline</h2>
+  <p class="d">The tabs of C. <b>Progress</b> opens first: the box with <b>Add</b> beside it, and the updates on B's timeline right under it, history left out. <b>Description</b> is plain text you click to edit. <b>History</b> is the plain list. Delete stays at the end of the tabs.</p>
+  <div class="card">
+    <div class="task on">
+      <span class="tick"></span>
+      <div><div class="nm"><b>2027 Budget – P&amp;L up to CM</b><span class="tag">Budget</span></div><div class="upd"><b>This week</b> · Draft sent to the CFO, comments due Wednesday</div></div>
+      <span class="cell">This week</span><span class="cell">Aley</span><span class="status"><span class="dot"></span>In progress</span>
+      <span class="chev"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"/></svg></span>
+      <div class="det">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" aria-selected="true" data-tab="p">Progress <span class="n">2</span></button>
+          <button type="button" role="tab" aria-selected="false" data-tab="d">Description</button>
+          <button type="button" role="tab" aria-selected="false" data-tab="h">History <span class="n">4</span></button>
+          <span class="sp"></span><button type="button" class="link danger" style="padding:0 4px">Delete</button>
+        </div>
+        <div role="tabpanel" data-panel="p">
+          <div class="compose"><textarea class="box" id="d-prog" rows="1" placeholder="What happened this week?" aria-label="Progress"></textarea><button type="button" class="btn pri">Add</button></div>
+          <ol class="tl">
+            <li><div class="wk">This week · Aley</div><div class="tx">Draft sent to the CFO, comments due Wednesday</div></li>
+            <li><div class="wk">Last week · Aley</div><div class="tx">Template agreed with Finance</div></li>
+          </ol>
+        </div>
+        <div role="tabpanel" data-panel="d" hidden>
+          <div class="desc" id="d-desc" tabindex="0" role="button" aria-label="Edit the description">P&amp;L down to contribution margin for each business line, in the 2027 template.</div>
+        </div>
+        <div role="tabpanel" data-panel="h" hidden><ul class="hist">
+          <li><time>Mon 2 Nov</time><span>Islam moved it to In progress</span></li>
+          <li><time>Thu 29 Oct</time><span>Aley wrote progress</span></li>
+          <li><time>Wed 28 Oct</time><span>Islam set the topic to Budget</span></li>
+          <li><time>Tue 27 Oct</time><span>Islam made it, for Aley, due this week</span></li></ul></div>
+      </div>
+    </div>
+    <div class="below">Update the timeline with Akeed</div>
+  </div>
+</section>
+
 </div>
 <script>
-document.querySelectorAll('.C [role=tab]').forEach(t=>t.addEventListener('click',()=>{
-  document.querySelectorAll('.C [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===t)));
-  document.querySelectorAll('.C [role=tabpanel]').forEach(p=>p.hidden=p.dataset.panel!==t.dataset.tab);
-}));
+['.C','.D'].forEach(o=>document.querySelectorAll(o+' [role=tab]').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll(o+' [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===t)));
+  document.querySelectorAll(o+' [role=tabpanel]').forEach(p=>p.hidden=p.dataset.panel!==t.dataset.tab);
+})));
+/* D: the description reads as text; a click turns it into a box, leaving it turns it back */
+(function(){const d=document.getElementById('d-desc');function edit(){const ta=document.createElement('textarea');ta.className='box';ta.id='d-desc-edit';ta.value=d.textContent;ta.setAttribute('aria-label','Description');d.replaceWith(ta);ta.focus();ta.addEventListener('blur',()=>{d.textContent=ta.value;ta.replaceWith(d);});}
+d.addEventListener('click',edit);d.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();edit();}});})();
 </script>

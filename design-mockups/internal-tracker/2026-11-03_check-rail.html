@@ -90,25 +90,43 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .more{display:flex;gap:14px;margin-top:18px;font-size:13px;color:var(--ink-3)}
 .foot{display:flex;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--line-2);flex-wrap:wrap;color:var(--ink-3);font-weight:500}
 .foot .r{margin-left:auto}
+/* ---------- the merged box (Islam: A's timeline, the add inside the box,
+   Save and next on the "Progress so far" row) ---------- */
+.m .in{display:flex;align-items:center;gap:8px;margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3);font-size:15px}
+.m .in .ad{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font:600 13px/1 var(--font);color:var(--ink-2);border:1px solid var(--line);border-radius:7px;padding:5px 9px}
+.m .in .ad kbd{font:500 11px/1 var(--font);color:var(--ink-3)}
+.m .chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.m .ph2{display:flex;align-items:center;gap:10px;margin-top:20px}
+.m .ph2 .h{font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.m .ph2 .sv2{margin-left:auto;background:var(--navy);color:#fff;border-radius:8px;padding:8px 16px;font-weight:600;display:inline-flex;align-items:center;gap:10px}
+.m .ph2 .sv2 kbd{font:500 11px/1 var(--font);opacity:.7}
+.m .tlq{list-style:none;margin:12px 0 0 6px;padding:0 0 0 18px;border-left:1px solid var(--line-2);display:grid;gap:12px}
+.m .tlq li{position:relative}
+.m .tlq li::before{content:"";position:absolute;left:-22px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.m .tlq li.now::before{background:var(--blue)}
+.m .tlq .bd{font-size:14.5px}
+.m .tlq .sub{font-size:12.5px;color:var(--ink-3)}
+.m .tlq li.now .sub b{color:var(--blue);font-weight:600}
+.m .tlq .sub b{font-weight:400}
 @media (max-width:820px){.meet{grid-template-columns:1fr}}
 </style>
 <div class="pg">
   <div class="vs" role="group" aria-label="Which version">
     <button type="button" data-v="0" aria-pressed="false">Before</button>
-    <button type="button" data-v="1" aria-pressed="true">A · quiet list</button>
-    <button type="button" data-v="2" aria-pressed="false">B · walk-through</button>
+    <button type="button" data-v="1" aria-pressed="false">A · quiet list</button>
+    <button type="button" data-v="2" aria-pressed="true">B · walk-through (chosen)</button>
   </div>
   <div class="note" id="note"></div>
   <div class="meet"><div id="rail"></div>
-    <div class="box">
+    <div class="box m">
       <div class="eb">Functions · Islam · This week</div>
       <h2>Review the two HR projects &amp; Launch Retention Analytics</h2>
-      <div class="q"><div class="ph">What happened this week?</div>
-        <div class="bar2"><span class="chip"><i class="dot ns"></i>Not started</span><span class="chip on"><i class="dot"></i>In progress</span><span class="chip"><i class="dot dn"></i>Done</span><span class="sv">Save and next</span></div></div>
-      <div class="tlh">Progress so far</div>
-      <ul class="tl">
-        <li><div class="wk">This week</div><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="by">Islam</div></li>
-        <li class="old"><div class="wk old">Last week</div><div class="bd">had a meeting this week and postponed to next week</div><div class="by">Islam</div></li>
+      <div class="in">What happened this week?<span class="ad">Add <kbd>↵</kbd></span></div>
+      <div class="chips"><span class="chip"><i class="dot ns"></i>Not started</span><span class="chip on"><i class="dot"></i>In progress</span><span class="chip"><i class="dot dn"></i>Done</span></div>
+      <div class="ph2"><span class="h">Progress so far</span><span class="sv2">Save and next <kbd>Ctrl ↵</kbd></span></div>
+      <ul class="tlq">
+        <li class="now"><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="sub">Islam · <b>this week</b></div></li>
+        <li><div class="bd">had a meeting this week and postponed to next week</div><div class="sub">Islam · <b>last week</b></div></li>
       </ul>
       <div class="more"><span>Description</span><span>History (5)</span><span>⋯</span></div>
       <div class="foot"><span>← Previous</span><span>Carry to next week</span><span class="r">Skip →</span></div>
@@ -131,7 +149,7 @@ const R={
    T.map((t,i)=>'<div class="it'+(i===0?' on':'')+(i===1||i===2?' gone':'')+'">'+dot(t[1])+'<span>'+t[0]+'</span>'+(i===1||i===2?'<span class="ck">✓</span>':'')+'</div>').join('')+
    '<div class="lks"><span>1 done last week ›</span><span class="add">+ Next week\'s action</span></div>'+
    '<div class="th"><h3>Reporting</h3><span class="n">1</span></div><div class="it">'+dot('p')+'<span>Monthly reporting pack</span></div><div class="lks"><span class="add">+ Next week\'s action</span></div></div>'},
- 2:{note:'<p><b>B, walk-through.</b> The rail becomes the meeting\'s checklist. Each topic heading shows how far the meeting has got, "2 of 9", with a thin bar. Each task has a circle: empty until talked about, filled once gone through; the one on screen has a blue ring. The status moves to the right box only (where you set it), so the rail has one job: where are we. Last week and next week fold into the same two links as A.</p><p>Best for running the meeting; the status at a glance moves off the rail.</p>',
+ 2:{note:'<p><b>B, walk-through.</b> The rail becomes the meeting\'s checklist. Each topic heading shows how far the meeting has got, "2 of 9", with a thin bar. Each task has a circle: empty until talked about, filled once gone through; the one on screen has a blue ring. The status moves to the right box only (where you set it), so the rail has one job: where are we. Last week and next week fold into the same two links as A.</p><p>Chosen, beside the agreed box.</p>',
   html:()=>'<div class="rail r2"><div class="th"><div class="t1"><h3>Functions</h3><span class="n">2 of 9</span></div><div class="bar"><i style="width:22%"></i></div></div>'+
    T.map((t,i)=>'<div class="it'+(i===0?' on':'')+(i===1||i===2?' gone':'')+'"><i class="c">'+(i===1||i===2?'✓':'')+'</i><span>'+t[0]+'</span></div>').join('')+
    '<div class="lks"><span>1 done last week ›</span><span class="add">+ Next week\'s action</span></div>'+
@@ -142,5 +160,5 @@ function show(v){
  document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(v))));
 }
 document.querySelectorAll('[data-v]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
-show(1);
+show(2);
 </script>

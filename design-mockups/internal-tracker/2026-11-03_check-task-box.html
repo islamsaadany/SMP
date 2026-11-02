@@ -110,12 +110,31 @@ svg{display:block}
 .c .tl .by u{text-decoration:underline;text-underline-offset:2px}
 .c .more{margin-top:18px}
 .c .tlh{margin-top:18px;font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+/* ---------- the merged box (Islam: A's timeline, the add inside the box,
+   Save and next on the "Progress so far" row) ---------- */
+.m .in{display:flex;align-items:center;gap:8px;margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3);font-size:15px}
+.m .in .ad{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font:600 13px/1 var(--font);color:var(--ink-2);border:1px solid var(--line);border-radius:7px;padding:5px 9px}
+.m .in .ad kbd{font:500 11px/1 var(--font);color:var(--ink-3)}
+.m .chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.m .ph2{display:flex;align-items:center;gap:10px;margin-top:20px}
+.m .ph2 .h{font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.m .ph2 .sv2{margin-left:auto;background:var(--navy);color:#fff;border-radius:8px;padding:8px 16px;font-weight:600;display:inline-flex;align-items:center;gap:10px}
+.m .ph2 .sv2 kbd{font:500 11px/1 var(--font);opacity:.7}
+.m .tlq{list-style:none;margin:12px 0 0 6px;padding:0 0 0 18px;border-left:1px solid var(--line-2);display:grid;gap:12px}
+.m .tlq li{position:relative}
+.m .tlq li::before{content:"";position:absolute;left:-22px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.m .tlq li.now::before{background:var(--blue)}
+.m .tlq .bd{font-size:14.5px}
+.m .tlq .sub{font-size:12.5px;color:var(--ink-3)}
+.m .tlq li.now .sub b{color:var(--blue);font-weight:600}
+.m .tlq .sub b{font-weight:400}
 @media (max-width:600px){.box{padding:18px}.a .sv{margin-left:0}}
 </style>
 <div class="pg">
   <div class="vs" role="group" aria-label="Which version">
+    <button type="button" data-v="m" aria-pressed="true">Agreed</button>
     <button type="button" data-v="before" aria-pressed="false">Before</button>
-    <button type="button" data-v="a" aria-pressed="true">A · one quiet column</button>
+    <button type="button" data-v="a" aria-pressed="false">A · one quiet column</button>
     <button type="button" data-v="b" aria-pressed="false">B · the update first</button>
     <button type="button" data-v="c" aria-pressed="false">C · B with the timeline</button>
   </div>
@@ -136,7 +155,21 @@ svg{display:block}
     <div class="keys"><kbd>↑</kbd> <kbd>↓</kbd> move through the list · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> save and next</div>
   </div>
 
-  <div class="box a" id="v-a">
+  <div class="box bb m" id="v-m">
+    <div class="eb">Functions · Islam · This week</div>
+    <h2>Review the two HR projects &amp; Launch Retention Analytics</h2>
+    <div class="in">What happened this week?<span class="ad">Add <kbd>↵</kbd></span></div>
+    <div class="chips"><span class="chip"><i class="dot ns"></i>Not started</span><span class="chip on"><i class="dot"></i>In progress</span><span class="chip"><i class="dot dn"></i>Done</span></div>
+    <div class="ph2"><span class="h">Progress so far</span><span class="sv2">Save and next <kbd>Ctrl ↵</kbd></span></div>
+    <ul class="tlq">
+      <li class="now"><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="sub">Islam · <b>this week</b></div></li>
+      <li><div class="bd">had a meeting this week and postponed to next week</div><div class="sub">Islam · <b>last week</b></div></li>
+    </ul>
+    <div class="more"><span>Description</span><span>History (5)</span><span>⋯</span></div>
+    <div class="foot"><span class="lk">← Previous</span><span class="lk">Carry to next week</span><span class="lk r">Skip →</span></div>
+  </div>
+
+  <div class="box a" id="v-a" hidden>
     <div class="top"><h2>Review the two HR projects &amp; Launch Retention Analytics</h2><span class="kb">⋯</span></div>
     <div class="meta"><span>Functions</span><i class="sd"></i><span>Islam</span><i class="sd"></i><span>This week</span><i class="sd"></i><span class="stp"><i class="dot"></i>In progress ▾</span></div>
     <div class="tabs"><span class="on">Progress<i>2</i></span><span>Description</span><span>History<i>5</i></span></div>
@@ -180,15 +213,16 @@ svg{display:block}
 </div>
 <script>
 const NOTES={
+ m:'<p><b>Agreed.</b> B\'s update-first box with A\'s timeline. The box takes the line, with <b>Add ↵</b> inside it; the status chips sit under it; <b>Save and next</b> stands on the "Progress so far" row, beside what it saves into. The timeline is A\'s: small dots, blue for this week, the words first and the writer and week under them in grey; no Edit or Delete here. Previous, Carry to next week and Skip are plain links at the foot.</p>',
  before:'<p><b>Today.</b> A gold topic, a big title, the owner and week, a large three-way status switch, tabs with Delete in red at their end, a box with its own Add button, every entry carrying Edit and Delete, three big buttons and a keyboard line. Each piece is useful, but they all speak at once.</p>',
  a:'<p><b>A, one quiet column (recommended).</b> The title leads. One grey line under it holds topic · owner · week · status, with the status a dot and its word that opens Not started / In progress / Done, as on the rows. Delete moves into the ⋯ beside the title. The tabs are plain words. The box takes Enter, so there\'s no Add button. Entries are a quiet timeline and show Edit and Delete only when you point at one. Previous and Carry to next week are plain links; <b>Save and next</b> is the one button, with its shortcut inside it.</p>',
  b:'<p><b>B, the update first.</b> Built for the meeting: one big box for "What happened this week?", with the status as three small chips and <b>Save and next</b> right under it. The last two entries sit below as a short read. Description and History step back to small links. Previous, Carry to next week and Skip are plain links at the foot.</p><p>Faster to run a meeting with; less room to read a long history.</p>',
  c:'<p><b>C, B with the timeline.</b> The same update-first box, but the earlier entries sit on the timeline you had before, under "Progress so far": the week on top (this week in blue), the words, then the writer in small grey, along a thin line. Every entry is shown, not just the last two. No Edit or Delete here: an entry is put right from the task itself, out of the meeting.</p>'};
 function show(v){
- ['before','a','b','c'].forEach(k=>document.getElementById('v-'+k).hidden=k!==v);
+ ['m','before','a','b','c'].forEach(k=>document.getElementById('v-'+k).hidden=k!==v);
  document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));
  document.getElementById('note').innerHTML=NOTES[v];
 }
 document.querySelectorAll('[data-v]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
-show('a');
+show('m');
 </script>

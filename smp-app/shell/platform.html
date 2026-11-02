@@ -1723,6 +1723,40 @@
   .mwlist .mwrow:hover{ box-shadow:none }
   .mwlist .mwsec:last-child .mwrow:last-child{ border-bottom:0 }
   .mwsearch{ width:170px; padding:5px 10px; font-size:13px }
+  /* §725 MY TASKS' BAR IS THE TRACKER'S QUIET BAR (§723): no tile, the count
+     a plain figure, the views (By date · By client) as plain words right
+     after it, Search an icon that opens its box, Done and Show small words */
+  .mwcardhd{ padding:12px 16px 10px; gap:6px 10px }
+  .mwcardhd .hocic, .mwcardhd .sp{ display:none }
+  .mwcardhd h2{ font-size:18px }
+  .mwcardhd .hocnt{ background:none; padding:0; font-size:14px; font-weight:500; color:var(--ink-3) }
+  .hosort.mwviews{ margin-right:auto; margin-left:6px }
+  [data-home] .hosort.mwviews{ margin:0 }
+  .hosort.mwviews .sw{ border:0; background:none; padding:0; gap:2px }
+  .hosort.mwviews button{ font-size:13.5px; font-weight:400; color:var(--ink-3); padding:4px 10px; border-radius:7px }
+  .hosort.mwviews button:hover{ color:var(--ink); background:var(--surface-2) }
+  .hosort.mwviews button[aria-pressed="true"]{ background:var(--surface-2); color:var(--ink); font-weight:600; box-shadow:none }
+  .mwfind{ display:flex; align-items:center; gap:6px; height:32px; border:1px solid transparent; border-radius:8px; padding:0 8px; color:var(--ink-3); cursor:pointer }
+  .mwfind:hover{ background:var(--surface-2) }
+  .mwfind svg{ width:15px; height:15px; flex:none }
+  .mwfind .mwsearch{ border:0; background:none; outline:none; padding:0; box-shadow:none; color:var(--ink); font-size:13.5px }
+  .mwfind:not(:focus-within):has(.mwsearch:placeholder-shown) .mwsearch{ width:0 }
+  .mwfind:focus-within, .mwfind:has(.mwsearch:not(:placeholder-shown)){ border-color:var(--line); background:var(--surface); cursor:auto }
+  .mwword{ position:relative }
+  .mwwordb{ border:0; background:none; padding:8px; border-radius:8px; font-family:inherit; font-size:13.5px; color:var(--ink-3); cursor:pointer; white-space:nowrap }
+  .mwwordb b{ color:var(--ink-2); font-weight:600; margin-left:3px }
+  .mwwordb .car{ margin-left:4px; font-size:11px }
+  .mwwordb:hover, .mwwordb[aria-expanded="true"]{ background:var(--surface-2) }
+  .mwwordb:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:1px }
+  .mwwordm{ position:absolute; right:0; top:36px; z-index:30; min-width:160px; background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    box-shadow:0 10px 28px rgba(20,28,43,.16); padding:4px; display:grid }
+  .mwwordm button{ display:flex; align-items:center; border:0; background:none; text-align:left; padding:6px 10px; border-radius:7px; font-family:inherit;
+    font-size:13.5px; color:var(--ink); cursor:pointer; white-space:nowrap }
+  .mwwordm button:hover, .mwwordm button:focus-visible{ background:var(--surface-2); outline:none }
+  .mwwordm button[aria-pressed="true"]{ font-weight:700 }
+  .mwwordm button[aria-pressed="true"]::after{ content:""; width:6px; height:6px; border-radius:50%; background:var(--amber-tx); margin-left:auto; padding-left:0 }
+  .mwcardhd .mwwho{ font-size:13.5px; color:var(--ink-3) }
+  .mwcardhd .mwwho select{ border:0; background:none; font-weight:600; color:var(--ink-2); margin-left:2px }
   /* Show sits in a white header now, not on the navy */
   .mwcardhd .mwwho{ color:var(--ink-3); font-size:12px }
   .mwcardhd .mwwho select{ color:var(--ink); border:1px solid var(--line); background:var(--surface); padding:4px 24px 4px 9px; margin-left:6px; font-size:12.5px }

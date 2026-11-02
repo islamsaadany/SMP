@@ -56,7 +56,9 @@ export const APP_JS = `(function () {
     history.replaceState(null, "", u);
   }
   function ask() {
-    return { view: B.getAttribute("data-view") || "week", q: B.getAttribute("data-q") || "",
+    /* §724: the server is never asked to narrow by words — the list comes
+       whole and the search box sifts it in place (sift, below) */
+    return { view: B.getAttribute("data-view") || "week", q: "",
       group: B.getAttribute("data-group") || "owner", dates: B.getAttribute("data-dates") || "weeks", open: openId() };
   }
   /* §719 OPENS AT ONCE: the page carries each row's opened panel in a
@@ -169,6 +171,7 @@ export const APP_JS = `(function () {
     drawWalk();
     sizeAll();
     if (s && k && k.srch) s.value = k.srch;
+    countWas = null; sift();
     if (k && k.panel) showPanel(true);
     if (k && k.focus) {
       if (k.focus.srch) { if (s) s.focus(); }
@@ -588,6 +591,52 @@ export const APP_JS = `(function () {
   document.addEventListener("pointerdown", function (e) {
     if (dateBox && e.target !== dateBox.inp) dateBox.back();
   });
+
+  /* §724 SEARCH AS YOU TYPE (Islam: "the search bar should filter the
+     tasks … rather than finish and click enter to filter"): each letter
+     hides the rows whose name, topic, latest note and owner don't hold the
+     words (a section's own name counts for its rows, as on My tasks); a
+     section left with nothing is hidden; the count in the head follows;
+     Enter does nothing more. The list is the page's own — no trip to the
+     server. */
+  var countWas = null;
+  function sift() {
+    var s = document.querySelector(".ctop .find .srch");
+    var q = s ? s.value.trim().toLowerCase() : "";
+    var shownN = 0;
+    document.querySelectorAll("#body .list .sec").forEach(function (sec) {
+      var h = sec.querySelector(".sh h3"), secName = h ? h.textContent.toLowerCase() : "", any = false;
+      sec.querySelectorAll(".row[data-id]").forEach(function (r) {
+        var words = [".t", ".meta", ".who .wn"].map(function (sel) { var x = r.querySelector(sel); return x ? x.textContent : ""; }).join(" ").toLowerCase();
+        var hit = !q || words.indexOf(q) >= 0 || secName.indexOf(q) >= 0;
+        r.hidden = !hit;
+        var o = r.nextElementSibling;
+        if (o && o.classList.contains("open")) o.hidden = !hit;
+        if (hit) { any = true; if (getComputedStyle(r).display !== "none") shownN++; }
+      });
+      sec.hidden = !!q && !any;
+    });
+    var c = document.querySelector(".ctop .chd .ccnt");
+    if (c) {
+      if (!q) { if (countWas !== null) c.textContent = countWas; countWas = null; }
+      else { if (countWas === null) countWas = c.textContent; c.textContent = String(shownN); }
+    }
+    var none = document.getElementById("siftnone"), list = document.querySelector("#body .list");
+    if (q && !shownN && list) {
+      if (!none) { none = document.createElement("div"); none.id = "siftnone"; none.className = "none"; list.parentNode.insertBefore(none, list.nextSibling); }
+      none.innerHTML = "<b>Nothing matches.</b>Try another word.";
+    } else if (none) none.remove();
+  }
+  document.addEventListener("input", function (e) { if (e.target.classList && e.target.classList.contains("srch")) sift(); });
+  document.addEventListener("search", function (e) { if (e.target.classList && e.target.classList.contains("srch")) sift(); }, true);
+  document.addEventListener("submit", function (e) { if (e.target.closest && e.target.closest(".find")) { e.preventDefault(); sift(); } });
+  /* a link that still carries q= (an old bookmark) was narrowed by the
+     server: read the whole list once and sift it here */
+  if (B.getAttribute("data-q")) {
+    B.setAttribute("data-q", "");
+    var u0 = new URL(location.href); u0.searchParams.delete("q"); history.replaceState(null, "", u0);
+    refetch();
+  }
 
   document.addEventListener("click", function (e) {
     pressed = e.target;

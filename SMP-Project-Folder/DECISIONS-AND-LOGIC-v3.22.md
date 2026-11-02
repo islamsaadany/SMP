@@ -70976,3 +70976,15 @@ Nothing it does is gone; it is quieter:
 **Checked**: `checks/tracker.mjs` **364 passed, 0 failed** — new: no tile, no "Show", Search shut in the head's row and opening on a press with the cursor in it, "Group: Owner"; the add line's three §707 checks rewritten (chips out on a click, kept while typing). Looked at on the real page. Tracker-only; `checks/shell.mjs` not re-run (it reads none of this).
 
 **§722–§723 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §724 — The Tracker's search narrows as you type (2026-11-03)
+
+**Asked** (Islam): "the search bar should filter the tasks or even show them like the quick jump rather than finish and click enter to filter" — "ok build both". Each letter hides the rows whose name, topic, latest note and owner don't hold the words (a section's own name counts for its rows, as on My tasks); a section left with nothing is hidden; the head's count follows the rows shown; a word that matches nothing says "Nothing matches" in place; clearing brings every row back; Enter does nothing more. The server is no longer asked to narrow by words (`ask().q` is empty); an old link carrying `q=` is read whole once and sifted. Filtering the list in place was chosen over a quick-jump list: the rows keep their status, week and ⋯.
+
+**Checked**: `checks/tracker.mjs` **367 passed, 0 failed** — new: narrows as you type with the count following and no request; nothing-matches said in place; clearing restores.
+
+## §725 — My tasks' bar is the Tracker's quiet bar (2026-11-03)
+
+**Asked** (Islam): "show me My tasks top bar match the tracker before and after" → `design-mockups/home/2026-11-03_my-tasks-bar.html` → "ok for the mockup … build both". My tasks' card head: no tile; "Open tasks" 18px, the count a plain figure; Sort by as plain words right after it, **By date · By client**, the chosen one on soft grey; Search an icon whose box opens on a press (still filters as you type); **Done: Hide ▾** a small word opening Hide / Last week / Last 30 days; an admin's **Show:** a quiet word-select at the end. Home's Your tasks card shares the sort control, so it reads By date · By client too; it keeps its tile, as its sibling cards (Your clients, Track Record) do.
+
+**Checked**: `checks/shell.mjs` — new §725 check (no tile, the two words, the search box shut and opening on a press, Done a small word); the Done checks press the word then the choice; the sort words read By date / By client. Shell cache `smp-shell-v7.54-quiet-my-tasks-bar`. (Run result added below when it lands.)

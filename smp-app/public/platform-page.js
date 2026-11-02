@@ -2895,7 +2895,7 @@
       var pick = null;
       if (j.people && j.people.length > 1) {
         pick = el("label", "mwwho");
-        pick.appendChild(document.createTextNode("Show"));
+        pick.appendChild(document.createTextNode("Show:"));
         var sel = el("select");
         sel.setAttribute("data-workwho", "");
         j.people.forEach(function (p) {
@@ -3127,14 +3127,20 @@
         got.forEach(function (r) { sec.appendChild(mwRow(r, statuses, act)); });
         list.appendChild(sec);
       };
-      if (pick) hd.appendChild(pick);
+      /* §725 THE TRACKER'S QUIET BAR (design-mockups/home/
+         2026-11-03_my-tasks-bar.html): the views after the count, then
+         Search as an icon that opens, then the small words Done and Show */
       hd.appendChild(sortSwitch(function () { draw(); find(); }));
-      hd.appendChild(hoSwitch("Done", [["hide", "Hide"], ["week", "Last week"], ["month", "30 days"]], TDONE.show, function (v) {
+      var findW = el("label", "mwfind");
+      findW.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+      findW.appendChild(search);
+      hd.appendChild(findW);
+      hd.appendChild(mwWord("Done", [["hide", "Hide"], ["week", "Last week"], ["month", "Last 30 days", "30 days"]], TDONE.show, function (v) {
         TDONE.show = v;
         try { localStorage.setItem("smp.tasks.done", v); } catch (e) { /* this device only */ }
         draw(); find();
       }));
-      hd.appendChild(search);
+      if (pick) hd.appendChild(pick);
       card.appendChild(list);
       body.appendChild(card);
       draw();
@@ -3188,12 +3194,64 @@
     w.appendChild(sw);
     return w;
   }
+  /* §725 (Islam: "My tasks top bar match the tracker"): Sort by reads as
+     the Tracker's views do — plain words, the chosen one on a soft grey —
+     "By date · By client", on My tasks and on Home's Your tasks */
   function sortSwitch(onChange) {
-    return hoSwitch("Sort by", [["date", "Date"], ["client", "Client"]], TSORT.by, function (v) {
+    var w = hoSwitch("Sort by", [["date", "By date"], ["client", "By client"]], TSORT.by, function (v) {
       TSORT.by = v;
       try { localStorage.setItem("smp.tasks.sort", v); } catch (e) { /* this device only */ }
       onChange();
     });
+    w.classList.add("mwviews");
+    if (w.firstChild && w.firstChild.nodeType === 3) w.removeChild(w.firstChild);
+    return w;
+  }
+  /* §725: a small word that opens its choices — "Done: Hide ▾", as the
+     Tracker's "Group: Owner ▾"; each choice keeps data-sort and aria-pressed */
+  function mwWord(word, opts, on, pick) {
+    var w = el("span", "mwword");
+    var b = el("button", "mwwordb");
+    b.type = "button";
+    b.setAttribute("aria-haspopup", "menu");
+    b.setAttribute("aria-expanded", "false");
+    var cur = el("b");
+    b.appendChild(document.createTextNode(word + ": "));
+    b.appendChild(cur);
+    b.appendChild(el("span", "car", "\u25BE"));
+    var m = el("span", "mwwordm");
+    m.setAttribute("role", "menu");
+    m.hidden = true;
+    var shut = function () { m.hidden = true; b.setAttribute("aria-expanded", "false"); };
+    var set = function (v) {
+      opts.forEach(function (o) { if (o[0] === v) cur.textContent = o[2] || o[1]; });
+      m.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x.getAttribute("data-sort") === v)); });
+    };
+    opts.forEach(function (o) {
+      var x = el("button", null, o[1]);
+      x.type = "button";
+      x.setAttribute("role", "menuitemradio");
+      x.setAttribute("data-sort", o[0]);
+      x.addEventListener("click", function (e) {
+        e.stopPropagation();
+        shut();
+        if (x.getAttribute("aria-pressed") === "true") return;
+        set(o[0]);
+        pick(o[0]);
+      });
+      m.appendChild(x);
+    });
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      m.hidden = !m.hidden;
+      b.setAttribute("aria-expanded", String(!m.hidden));
+    });
+    document.addEventListener("click", function () { if (!m.hidden) shut(); });
+    w.addEventListener("keydown", function (e) { if (e.key === "Escape" && !m.hidden) { shut(); b.focus(); } });
+    w.appendChild(b);
+    w.appendChild(m);
+    set(on);
+    return w;
   }
   var HOCL = { show: "mine" };
   /* My tasks' Show done: hide, the last week or the last 30 days, kept on this device */

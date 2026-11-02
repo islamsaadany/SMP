@@ -3215,6 +3215,14 @@ await section("4 · Forefront's own pages", async () => {
         font: h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : "" }; });
     check(mwc.cards === 1 && mwc.secs === 3 && mwc.title === "Open tasks" && mwc.count === "3" && mwc.ctl && /^[\d.]+px solid$/.test(mwc.rule) && parseFloat(mwc.rule) >= 1 && /Internal Tracker/.test(mwc.sub) && mwc.font === "Georgia 700",
       "\u2026in one card titled Open tasks (Georgia bold) with its filters in its header, the groups labelled over a grey rule, under Home's band", JSON.stringify(mwc));
+    /* §725 MY TASKS' BAR IS THE TRACKER'S QUIET BAR */
+    const bar725 = await page.evaluate(() => { const h = document.querySelector(".mwcardhd"), ic = h && h.querySelector(".hocic"), s = h && h.querySelector(".mwfind .mwsearch"), d = h && h.querySelector(".mwwordb");
+      return h ? { tile: !!ic && getComputedStyle(ic).display !== "none", views: Array.from(h.querySelectorAll(".mwviews button")).map((b) => b.textContent), srchW: s ? Math.round(s.getBoundingClientRect().width) : -1,
+        done: d ? d.textContent.replace(/\s+/g, " ").trim() : "", order: Array.from(h.children).filter((x) => getComputedStyle(x).display !== "none").map((x) => x.className || x.tagName) } : null; });
+    check(!!bar725 && !bar725.tile && bar725.views.join("|") === "By date|By client" && bar725.srchW === 0 && /^Done: Hide/.test(bar725.done),
+      "\u2026its bar is the Tracker's quiet bar: no tile, By date \u00b7 By client as plain words, Search an icon with its box shut, Done a small word (\u00a7725)", JSON.stringify(bar725));
+    await page.click(".mwcardhd .mwfind svg");
+    check((await page.evaluate("Math.round(document.querySelector('.mwcardhd .mwsearch').getBoundingClientRect().width)")) > 100, "\u2026a press on the search icon opens its box (\u00a7725)", "");
     await page.fill(".mwsearch", "far off");
     const found = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwrow")).filter((r) => !r.hidden).map((r) => r.querySelector(".t").textContent));
     check(JSON.stringify(found) === JSON.stringify(["MW far off"]), "\u2026and its search finds a task by its words", JSON.stringify(found));
@@ -3234,14 +3242,14 @@ await section("4 · Forefront's own pages", async () => {
       return sec ? { h: sec.querySelector(".mwsh h2").textContent, rows: Array.from(sec.querySelectorAll(".mwrow .t")).map((t) => t.textContent) } : null; });
     check((await doneOf()) === null && !!(await page.$('.mwcardhd button[data-sort="hide"][aria-pressed="true"]')),
       "\u2026finished tasks are hidden until asked for", "");
-    await page.click('.mwcardhd button[data-sort="week"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="week"]');
     const dw = await doneOf();
     check(!!dw && dw.h === "Done in the last week" && dw.rows.includes("MW finished") && !dw.rows.includes("MW done in the month") && !dw.rows.includes("MW not mine"),
       "\u2026Show done \u00b7 Last week lists the one finished this week, under its own heading, not the older one, and never somebody else's", JSON.stringify(dw));
-    await page.click('.mwcardhd button[data-sort="month"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="month"]');
     const dm = await doneOf();
     check(!!dm && dm.h === "Done in the last 30 days" && JSON.stringify(dm.rows) === JSON.stringify(["MW finished", "MW done in the month"]), "\u2026and 30 days lists it and the one three weeks back, newest first", JSON.stringify(dm));
-    await page.click('.mwcardhd button[data-sort="hide"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="hide"]');
     check((await doneOf()) === null, "\u2026and Hide puts them away again", "");
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
@@ -3398,7 +3406,7 @@ await section("4 · Forefront's own pages", async () => {
     const h1 = await home();
     check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Track Record"]),
       "Home draws your clients, your tasks and the Track Record, each a card with its header inside it (spec 068, 069)", JSON.stringify(h1.heads));
-    check(h1.tabs === 0 && h1.sort === "Date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
+    check(h1.tabs === 0 && h1.sort === "By date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
       "\u2026its tasks are one list by date, the late one first in the alarm, then the one due now; the far one is left to My tasks", JSON.stringify(h1));
     check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)) && !h1.industry,
       "\u2026the client you have a seat on is one line with a door into each module, and no industry or seat", JSON.stringify(h1.clients));
@@ -3577,11 +3585,11 @@ await section("4 · Forefront's own pages", async () => {
     /* SORT BY CLIENT, in the same card, kept on the device */
     await page.click('[data-home="tasks"] .hosort button[data-sort="client"]');
     const hc = await home();
-    check(hc.sort === "Client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
+    check(hc.sort === "By client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
       "\u2026Sort by Client groups the same tasks under the client, late first", JSON.stringify(hc));
     await page.reload({ waitUntil: "networkidle" });
     await page.waitForSelector('[data-home="tasks"] .hogrp', { timeout: 8000 }).catch(() => {});
-    check((await home()).sort === "Client", "\u2026and the choice is kept after a reload", (await home()).sort);
+    check((await home()).sort === "By client", "\u2026and the choice is kept after a reload", (await home()).sort);
     await page.click('[data-home="tasks"] .hosort button[data-sort="date"]');
     await page.click('[data-home="tasks"] .holink');
     await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});

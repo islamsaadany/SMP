@@ -1020,6 +1020,23 @@ try {
     await pg.locator(".ctop .chd .find svg").click();
     check("...a press on the search icon opens its box, under the cursor (§723)", (await pg.evaluate("Math.round(document.querySelector('.ctop .chd .find .srch').getBoundingClientRect().width)")) > 100 &&
       (await pg.evaluate("document.activeElement && document.activeElement.classList.contains('srch')")));
+    /* §724 SEARCH AS YOU TYPE: the rows narrow with each letter, the head's
+       count follows, nothing is asked of the server; clearing brings all back */
+    const vis724 = () => pg.evaluate("Array.from(document.querySelectorAll('#body .list .row[data-id]')).filter(function(r){return r.offsetParent!==null}).map(function(r){return r.querySelector('.t').textContent.trim()})");
+    const before724 = await vis724();
+    const word724 = (before724[0] || "").split(/\s+/).sort((x, y) => y.length - x.length)[0] || "";
+    let asked724 = 0; const c724 = (rq) => { if (rq.resourceType() === "fetch" || rq.resourceType() === "xhr" || rq.resourceType() === "document") asked724++; };
+    pg.on("request", c724);
+    await pg.locator(".ctop .chd .find .srch").pressSequentially(word724, { delay: 20 }); await pg.waitForTimeout(150);
+    const after724 = await vis724(), cnt724 = (await pg.locator(".ctop .chd .ccnt").textContent()).trim();
+    pg.off("request", c724);
+    check("Search narrows the list as you type, the count following, with no trip to the server (§724)",
+      before724.length > 1 && after724.length >= 1 && after724.length < before724.length && after724.every((t) => t.toLowerCase().includes(word724.toLowerCase())) && cnt724 === String(after724.length) && asked724 === 0,
+      JSON.stringify({ word724, before724, after724, cnt724, asked724 }));
+    await pg.locator(".ctop .chd .find .srch").fill("zzzq"); await pg.waitForTimeout(100);
+    check("...a word that matches nothing says so in place (§724)", (await pg.locator("#siftnone").isVisible()) && /Nothing matches/.test(await pg.locator("#siftnone").innerText()));
+    await pg.locator(".ctop .chd .find .srch").fill(""); await pg.waitForTimeout(100);
+    check("...and clearing it brings every row back (§724)", (await vis724()).length === before724.length && (await pg.locator("#siftnone").count()) === 0);
     await pg.keyboard.press("Escape"); await pg.locator("body").click({ position: { x: 5, y: 5 } }).catch(() => {});
     check("the menu is hidden until the dots are pressed", !(await pg.locator(".setmenu").isVisible()));
     await pg.locator("[data-act=settings]").click();

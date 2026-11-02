@@ -54,7 +54,6 @@ const brk = () => process.env.SMP_BREAK || "";
 function brkCss(): string {
   const b = brk();
   if (b === "card-jumps") return ".tile{min-height:0}";                                         /* §356.16 put back */
-  if (b === "details-always") return ".addrow .tpk,.addrow .when,.addrow .who,.addrow .st,.addrow .more{visibility:visible}";
   if (b === "week-auto") return ".row{grid-template-columns:20px minmax(0,1fr) 132px auto 64px 128px 26px}"; /* §503 put back: the week sized by its words */
   if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
   if (b === "narrow-rename") return ".tn2.editing .t{flex:0 1 auto}";                       /* §565 put back: the box sized by an input's default */
@@ -632,6 +631,89 @@ const LOOK = `
 .keys kbd{font:600 11px/1 var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:2px 5px;background:var(--surface)}
 .mnone{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;color:var(--ink-3)}
 @media (max-width:860px){.meet{grid-template-columns:minmax(0,1fr)}.cbot .open{padding-left:14px}}
+/* THE QUIET LIST, MATCHED TO ITS MOCKUP (2026-11-02, §707;
+   design-mockups/internal-tracker/2026-11-02_actions-quiet-list.html). */
+/* the write line, search and Group by on one row under the card head */
+.ctop .tools.qt{display:flex;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.tools.qt .write{flex:1 1 380px;min-width:0;border:0}
+.tools.qt .addrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:0 6px 0 12px;min-height:40px;background:var(--surface)}
+.tools.qt .addrow:focus-within{border-color:var(--carry)}
+.tools.qt .addrow .tn{flex:1;min-width:0}
+.tools.qt .addrow input.new{font-size:14.5px}
+.tools.qt .addrow .tpk,.tools.qt .addrow .when,.tools.qt .addrow .who{visibility:visible;margin:0;padding:5px 8px;border-radius:6px;background:var(--surface-2);font:600 12.5px/1 var(--font);color:var(--ink-2);white-space:nowrap}
+.tools.qt .addrow .tpk .tw,.tools.qt .addrow .when .wk,.tools.qt .addrow .who .wn{text-decoration:none}
+.tools.qt .addrow .tpk.set{color:var(--gold)}
+.tools.qt .addrow .tpk:hover,.tools.qt .addrow .when:hover,.tools.qt .addrow .who:hover,.tools.qt .addrow .on{background:var(--line)}
+.tools.qt .addrow .st{display:none}
+.tools.qt .addrow .more{visibility:visible;width:24px;height:24px}
+.tools.qt .find{flex:0 0 190px;height:40px;border:1px solid var(--line);border-radius:9px;padding:0 10px;gap:7px}
+.tools.qt .find:focus-within{border-color:var(--carry)}
+.tools.qt .find .go{display:none}
+.tools.qt .find input{font-size:14px}
+.tools.qt .dots{margin:0;align-self:center}
+.tools.qt .dots>button{height:40px;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:var(--surface);font:500 13.5px/1 var(--font);color:var(--ink-2)}
+.tools.qt .dots>button b{color:var(--ink);font-weight:600;margin-left:4px}
+.tools.qt .dots>button svg{display:none}
+.tools.qt .dots>button:hover,.tools.qt .dots>button.on{background:var(--surface-2);color:var(--ink-2)}
+.tools.qt .setmenu{top:44px}
+/* the group heading: its number in gold, the name bold, the counts, the + Add at the right */
+.cbot .list .sh{display:flex;align-items:center;gap:10px;padding:14px 16px 8px;border-bottom:1px solid var(--line);background:none}
+.cbot .list .sh .ix{display:inline;font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.cbot .list .sh h3{font:700 15.5px/1.25 var(--font);letter-spacing:0;text-transform:none;color:var(--ink)}
+.cbot .list .sh.quiet h3{color:var(--ink-2);font-style:italic}
+.cbot .list .sh .meta{font:500 13px/1.3 var(--font);color:var(--ink-2)}
+.cbot .list .sh .end{margin-left:auto;display:flex;align-items:center;gap:14px;font:500 12.5px/1 var(--font);color:var(--ink-3)}
+.addto{border:0;background:none;padding:4px 0;color:var(--carry);font:600 13px/1 var(--font);cursor:pointer;white-space:nowrap}
+.addto b{font-weight:600}
+.addto:hover,.addto:focus-visible{text-decoration:underline;outline:none}
+/* the row */
+.cbot .list .row:not(.chk){grid-template-columns:22px minmax(0,1fr) 110px 70px 118px 28px;grid-template-areas:none;gap:4px 14px;align-items:start;padding:11px 16px;border-bottom:1px solid var(--line-2)}
+.cbot .list .row:not(.chk) .tick{margin-top:2px}
+.cbot .row .tn2{display:block;min-width:0}
+.row .nm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.row .nm .t{font:500 15px/1.35 var(--font);color:var(--ink);cursor:pointer;border-radius:4px}
+/* renaming, the name takes the whole line: its tags step aside (§565) */
+.tn2.editing .nm>:not(.t){display:none}
+.tn2.editing .nm .t{flex:1 1 auto}
+.tn2.editing .nm .t input.ttl{width:100%;margin:-4px 0}
+.row .nm .t:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.row .nm .t:focus-visible{outline:2px solid var(--carry);outline-offset:2px}
+.row.done .nm .t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line)}
+.row .nm .tcol{justify-self:auto;max-width:none}
+.row .nm .tc{font:600 11.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border:0;border-radius:999px;padding:4px 8px}
+.row .nm .tc::before{display:none}
+.row .nm .tc.add{display:none}
+.row .nm .tcwrap .topics{left:0;right:auto;top:26px}
+.ltag{font:600 11.5px/1 var(--font);color:var(--bad);background:var(--bad-bg);border-radius:4px;padding:3px 6px;white-space:nowrap}
+.cbot .row .last{font-size:13px;margin-top:2px}
+.cbot .list .row:not(.chk) .when,.cbot .list .row:not(.chk) .who{padding-top:3px;font:500 13px/1.3 var(--font)}
+.cbot .list .row:not(.chk) .when.late{font-weight:600}
+.cbot .list .row:not(.chk) .st{margin-top:-1px}
+/* the row's one control: ⋯, a menu */
+.rdots{position:relative;justify-self:end}
+.rdots>.more{width:28px;height:28px;border-radius:7px;margin-top:-3px}
+.rdots>.more svg{width:16px;height:16px}
+.rdots>.more.on,.rdots>.more[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
+.rdots .tmenu{top:30px;right:0;min-width:210px;display:grid;gap:0;padding:4px}
+.rdots .tmenu button{padding:8px 10px;font:400 14px/1.3 var(--font);gap:9px}
+.rdots .tmenu button svg{width:14px;height:14px;color:var(--ink-3);flex:none}
+.rdots .tmenu .danger,.rdots .tmenu .danger svg{color:var(--bad)}
+.rdots .tmenu .sep{display:block;border-top:1px solid var(--line-2);margin:4px 2px}
+.rdots .tmenu .acts{display:grid}
+.rdots .tmenu .sure{padding:6px 10px;gap:6px}
+.rdots .tmenu .sure .go{padding:6px 10px;font-size:13px}
+/* N done › at the group's foot */
+.cbot .list .foot{padding:9px 16px 9px 52px;border-bottom:1px solid var(--line-2)}
+.cbot .list .foot button{display:inline-flex;align-items:center;gap:6px;font:600 13px/1 var(--font);color:var(--ink-3)}
+.cbot .list .foot button svg{width:12px;height:12px}
+.cbot .open{padding-left:52px}
+@media (max-width:760px){
+  .cbot .list .row:not(.chk){grid-template-columns:22px auto auto minmax(0,1fr) 28px;grid-template-areas:"tick t t t more" ". when who st st";gap:6px 12px}
+  .cbot .list .row:not(.chk) .tick{grid-area:tick}.cbot .list .row:not(.chk) .tn2{grid-area:t}.cbot .list .row:not(.chk) .rdots{grid-area:more}
+  .cbot .list .row:not(.chk) .when{grid-area:when;display:block}.cbot .list .row:not(.chk) .who{grid-area:who;display:block}.cbot .list .row:not(.chk) .st{grid-area:st}
+  .tools.qt .find{flex:1 1 100%}.tools.qt .addrow .tpk,.tools.qt .addrow .when,.tools.qt .addrow .who{display:none}
+  .cbot .open{padding-left:14px}.cbot .list .foot{padding-left:16px}
+}
 `;
 
 /* What the script needs to know rides on <body>: the two addresses it talks
@@ -745,9 +827,9 @@ export function weeksList(today: string, due: string | null): string {
 /* The when cell for a row somebody may change: as weeks, the word with the
    picker behind it; as exact dates, the day, which a press turns into a date
    box in place (the script). */
-function whenCell(a: Action, today: string, dates: Format, live: boolean): string {
+function whenCell(a: Action, today: string, dates: Format, live: boolean, text?: string): string {
   const w = whenText(a, today, dates);
-  const word = w.week ? '<span class="wk">' + esc(w.text) + "</span>" : esc(w.text);
+  const word = text != null ? esc(text) : w.week ? '<span class="wk">' + esc(w.text) + "</span>" : esc(w.text);
   if (!live || a.status === "done") return '<span class="when' + (w.late ? " late" : "") + '">' + word + "</span>";
   if (dates === "weeks")
     return '<span class="when' + (w.late ? " late" : "") + ' pick" role="button" tabindex="0" data-act="due" data-due="' + esc(a.due || "") + '" aria-haspopup="listbox" aria-expanded="false" title="Change the week">' +
@@ -780,6 +862,8 @@ const CARET = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4
 const DOTS3 = '<svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>';
 const LINES = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const RIGHT = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const TAG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 2.5h5l6 6-5 5-6-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="5.5" cy="5.5" r="1" fill="currentColor"/></svg>';
+const BIN = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 
 /* THE ROW (§497): tick · the name, with its topic beside it unless the list
    is grouped by topic (the heading says it then, §87) · when · owner · the
@@ -787,6 +871,7 @@ const RIGHT = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5
 function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opened: boolean, group: Group, chk = false): string {
   const live = brk() === "who-everyone" ? true : mayChange(a, who);
   const late = a.status !== "done" && !!a.due && isLate(a.due, today);
+  if (!chk) return quietRow(a, L, live, late, today, dates, opened, group);
   return '<div class="row' + (chk ? " chk" : "") + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
     '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
     (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
@@ -798,6 +883,48 @@ function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opene
     (chk ? carryCell(a, today, live) : "") +
     '<button class="more' + (opened ? " on" : "") + '" type="button" data-act="more" aria-expanded="' + opened + '" aria-label="' + (opened ? "Close the details" : "Details and progress") + '" title="' + (opened ? "Close the details" : "Details and progress") + '">' + DOTS3 + "</button>" +
     "</div>";
+}
+
+/* THE QUIET ROW (2026-11-02, §707; design-mockups/internal-tracker/
+   2026-11-02_actions-quiet-list.html, matched exactly at Islam's word:
+   "match the mockup exactly"). Tick · the name, which OPENS the task, with
+   its topic as a small tag and, when late, how late as a red tag · the week
+   it is due (a late one says the week it was due, in red) · the owner · the
+   status as a dot and its word · ⋯, a menu: Details and progress, Rename,
+   Change topic, Delete. The name no longer renames on a double-click — a
+   single click opens — so Rename is the menu's. A row with no topic shows
+   no tag; Change topic opens the same list the tag does. */
+function lateTag(a: Action, today: string): string {
+  const n = carriedWeeks(a.firstDue || a.due, today);
+  return '<span class="ltag">' + (n ? n + " w late" : "Late") + "</span>";
+}
+function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: string, dates: Format, opened: boolean, group: Group): string {
+  const del = live
+    ? '<span class="sep"></span><span class="acts"><button type="button" role="menuitem" class="danger" data-act="delete-ask">' + BIN + "Delete</button>" +
+      '<span class="sure" hidden>Delete this action? <button type="button" class="go danger" data-act="delete">Yes, delete it</button>' +
+      '<button type="button" class="go" data-act="delete-no">Keep it</button></span></span>'
+    : "";
+  const menu = '<span class="rdots"><button class="more' + (opened ? " on" : "") + '" type="button" data-act="row-menu" aria-haspopup="menu" aria-expanded="false" aria-label="More for this action" title="More">' + DOTS3 + "</button>" +
+    '<span class="tmenu" role="menu" hidden>' +
+    '<button type="button" role="menuitem" data-act="more">' + LINES + (opened ? "Close the details" : "Details and progress") + "</button>" +
+    (live ? '<button type="button" role="menuitem" data-act="rename-start">' + PEN + "Rename</button>" : "") +
+    (live && group !== "topic" ? '<button type="button" role="menuitem" data-act="topic-start">' + TAG + "Change topic</button>" : "") +
+    del + "</span></span>";
+  return '<div class="row' + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
+    '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
+    (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
+    '<div class="tn2"><div class="nm"><span class="t" role="button" tabindex="0" data-act="more"' + (live ? ' data-rename="1"' : "") + ' aria-expanded="' + opened + '" title="' + (opened ? "Close the details" : "Open the details") + '">' + esc(a.title) + "</span>" +
+    topicCell(a, L, live, group) + (late ? lateTag(a, today) : "") + "</div>" + lastLine(a, L, today) + "</div>" +
+    quietWhen(a, today, dates, live) + whoCell(a, L, live) + statusPill(a, live) + menu + "</div>";
+}
+/* The week a late row was due, in red, rather than how late (the tag on
+   the name says that): Last week, then the week's own word. */
+function quietWhen(a: Action, today: string, dates: Format, live: boolean): string {
+  const w = whenText(a, today, dates);
+  if (!w.late || !a.due) return whenCell(a, today, dates, live);
+  const lastWeek = sameWeek(a.due, addDays(weekOf(today).from, -7));
+  const word = dates === "weeks" ? (lastWeek ? "Last week" : weekWord(a.due, today)) : readableDay(a.due, today);
+  return whenCell(a, today, dates, live, word);
 }
 
 /* ON THE CHECK THE WHEN CELL SAYS ONLY WHAT THE CARD CANNOT (§87, §532).
@@ -1200,8 +1327,8 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
     VIEWS.map((v) => '<a href="' + esc(viewHref(v)) + '"' + (v === view ? ' aria-current="true"' : "") + ">" + esc(VIEW_WORD[v]) + "</a>").join("") +
     "</nav></span>";
   return band + '<div class="card ctop' + (o.solo ? " solo" : "") + '">' +
-    cardHead({ esc, icon: "tasks", title: "Actions", count: o.shown == null ? null : o.shown, right: views + settings + (o.find || "") }) +
-    (o.inner || "") + "</div>";
+    cardHead({ esc, icon: "tasks", title: "Actions", count: o.shown == null ? null : o.shown, right: views + (o.inner && o.inner.includes("<!--settings-->") ? "" : settings + (o.find || "")) }) +
+    (o.inner || "").replace("<!--settings-->", settings) + "</div>";
 }
 
 /* ══ THE TOPICS PANEL (§533) ═══════════════════════════════════════════
@@ -1317,22 +1444,11 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     const rows = g.rows.map((a) => row(a, L, p.who, today, dates, a.id === L.open, group) + (a.id === L.open ? openPanel(a, L, p.who, today) : "")).join("");
     const t = group === "topic" && g.key !== "none" ? L.topics.find((x) => x.id === g.key) || null : null;
     const quiet = group === "topic" && g.key === "none";
-    let head = "";
-    if (g.label != null) {
-      const all4 = t ? all.filter((a) => a.topicId === t.id) : [];
-      const allDone = all4.filter((a) => a.status === "done").length;
-      head = '<div class="grp sh' + (quiet ? " quiet" : "") + '" data-key="' + esc(g.key) + '">' +
-        '<span class="ix">' + (quiet ? "&mdash;" : String(++ix).padStart(2, "0")) + "</span>" +
-        "<h3>" + esc(g.label) + "</h3>" +
-        '<span class="meta">' + open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") + "</span>" +
-        '<span class="end">' + (t ? (t.closed ? '<span class="shut">Closed</span>' : "") + allDone + " of " + all4.length + " done" + topicMenu(t) : "") + "</span></div>" +
-        (t ? '<div class="meter"><i style="width:' + (all4.length ? Math.round(allDone * 100 / all4.length) : 0) + '%"></i></div>' : "");
-    }
     /* THE SECTION'S OWN LINE (§656): under a topic's rows with the topic
-       fixed, under a person's with the owner fixed; hidden until the foot's
-       "+ Add …" opens it, so the action is written where it will land. The
-       break puts §497's way back — the press fills the line at the TOP and
-       scrolls there — which must turn checks/tracker.mjs red (§94.5). */
+       fixed, under a person's with the owner fixed; hidden until the
+       heading's "+ Add …" opens it, so the action is written where it will
+       land. The break puts §497's way back — the press fills the line at the
+       TOP and scrolls there — which must turn checks/tracker.mjs red (§94.5). */
     const atTop = brk() === "add-at-top";
     const who4 = group === "owner" && me && !atTop ? g.key : "";
     const who4Name = who4 ? L.short.get(who4) || L.names.get(who4) || who4 : "";
@@ -1342,9 +1458,21 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
         ? writeLine({ key: "o:" + who4, topic: null, owner: who4, due: thu, label: "Write the next action for " + who4Name, hidden: true }, L, me, meShort, today, dates)
         : "";
     const addWord = t ? "Add to " + esc(t.name) : who4 ? "Add for " + esc(who4Name) : "";
-    const foot = (done ? '<button type="button" data-act="show-done">' + done + " done &rsaquo;</button>" : "") +
-      (line ? '<button type="button" data-act="add-here" data-line="' + esc(t ? "t:" + t.id : "o:" + who4) + '"><b>+</b> ' + addWord + "</button>"
-        : t && !t.closed && me ? '<button type="button" data-act="add-to-topic" data-topic="' + esc(t.id) + '" data-name="' + esc(t.name) + '"><b>+</b> Add to ' + esc(t.name) + "</button>" : "");
+    /* the "+ Add …" at the heading's right (§707, the mockup's place) */
+    const addBtn = line ? '<button type="button" class="addto" data-act="add-here" data-line="' + esc(t ? "t:" + t.id : "o:" + who4) + '"><b>+</b> ' + addWord + "</button>"
+      : t && !t.closed && me ? '<button type="button" class="addto" data-act="add-to-topic" data-topic="' + esc(t.id) + '" data-name="' + esc(t.name) + '"><b>+</b> Add to ' + esc(t.name) + "</button>" : "";
+    let head = "";
+    if (g.label != null) {
+      const all4 = t ? all.filter((a) => a.topicId === t.id) : [];
+      const allDone = all4.filter((a) => a.status === "done").length;
+      head = '<div class="grp sh' + (quiet ? " quiet" : "") + '" data-key="' + esc(g.key) + '">' +
+        '<span class="ix">' + (quiet ? "&mdash;" : String(++ix).padStart(2, "0")) + "</span>" +
+        "<h3>" + esc(g.label) + "</h3>" +
+        '<span class="meta">' + open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") + "</span>" +
+        '<span class="end">' + (t ? (t.closed ? '<span class="shut">Closed</span>' : "") + allDone + " of " + all4.length + " done" : "") + addBtn + (t ? topicMenu(t) : "") + "</span></div>";
+    }
+    /* a list grouped by nothing has no heading, so its "+ Add" stays at the foot */
+    const foot = (done ? '<button type="button" data-act="show-done">' + done + " done " + RIGHT + "</button>" : "") + (g.label == null ? addBtn : "");
     return '<div class="sec" data-key="' + esc(g.key) + '">' + head + rows + line + (foot ? '<div class="foot">' + foot + "</div>" : "") + "</div>";
   }).join("");
 
@@ -1372,7 +1500,9 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     '<input class="srch" type="search" name="q" value="' + esc(q) + '" placeholder="Search" aria-label="Search actions">' +
     '<button class="go" type="submit">Search</button>' +
     '<span class="cnt" id="count">' + esc(count) + "</span></form>";
-  const tools = '<div class="tools' + (all.length ? "" : " solo") + '"><div class="write">' + addrow + "</div></div>";
+  /* THE WRITE LINE, SEARCH AND GROUP BY ON ONE ROW (§707, the mockup's
+     row); the card head keeps Actions and the views. */
+  const tools = '<div class="tools qt' + (all.length ? "" : " solo") + '"><div class="write">' + addrow + "</div>" + (all.length ? find : "") + "<!--settings--></div>";
   /* NO COUNT LINE UNDER THE ADD LINE (§566). Islam: *"remove the small 14
      action line under the add action as it's already existing in the navy
      large panel"*. It went with its search figure too, said and agreed. The
@@ -1383,7 +1513,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     : !shown.length
       ? '<div class="none"><b>Nothing ' + (q ? "matches" : "here") + '.</b>' + (q ? "Try another word, or " : "Add one on the line above, or ") + '<a href="' + esc(viewHref("all")) + '">see all of them</a>.</div>'
       : "";
-  return { body: pinned(masthead(p, today, all, sum, L, { find: all.length ? find : "", inner: tools + counted, shown: shown.length })) +
+  return { body: pinned(masthead(p, today, all, sum, L, { inner: tools + counted, shown: shown.length })) +
     '<div class="card cbot"><div class="list">' + secs + "</div>" + none + "</div>", count, open: L.open };
 }
 

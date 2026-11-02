@@ -31,7 +31,6 @@
      SMP_BREAK=week-of-year   node checks/tracker.mjs   # must go red (§356.16)
      SMP_BREAK=card-count     node checks/tracker.mjs   # must go red (§356.16)
      SMP_BREAK=card-jumps     node checks/tracker.mjs   # must go red (§356.16)
-     SMP_BREAK=details-always node checks/tracker.mjs   # must go red (§356.16)
      SMP_BREAK=wide-names     node checks/tracker.mjs   # must go red (§356.16)
      SMP_BREAK=full-names     node checks/tracker.mjs   # must go red (§565)
      SMP_BREAK=band-scrolls   node checks/tracker.mjs   # must go red (§565)
@@ -430,7 +429,7 @@ check("...its foot's + Add to Budget opens THAT line, and nothing on the page fi
 check("...the closed topic has no line and no + Add", !/class="addrow/.test(t3sec) && !/data-act="add-here"/.test(t3sec) && t3sec.length > 0);
 check("grouped by Owner, Islam's section carries its line, hidden, the OWNER fixed as a plain name and the topic a pick",
   count(meSec, /class="addrow chk"/g) === 1 && /class="addrow chk" data-due="2026-09-17" data-owner="islam" data-line="o:islam" hidden>/.test(meSec) &&
-  /data-line="o:islam" hidden>[\s\S]*?class="tpk"[\s\S]*?class="who" title="Whose it is"><span class="wn">Islam<\/span><\/span>/.test(meSec) && !/data-line="o:islam"[\s\S]*?class="who pick"[\s\S]*?class="foot"/.test(meSec),
+  /data-line="o:islam" hidden>[\s\S]*?class="tpk"[\s\S]*?class="who" title="Whose it is"><span class="wn">Islam<\/span><\/span>/.test(meSec) && !/class="who pick"/.test((meSec.match(/<div class="addrow chk"[^>]*data-line="o:islam"[\s\S]*?data-act="add-note"[\s\S]*?<\/button><\/div>/) || ["class=\"who pick\""])[0]),
   (meSec.match(/class="addrow chk"[^>]*/g) || []).join(" | "));
 check("...and its foot says + Add for Islam", /data-act="add-here" data-line="o:islam"><b>\+<\/b> Add for Islam</.test(meSec));
 check("the page's own line at the top still stands, once, on both groupings — for an action under nobody and nothing in particular",
@@ -836,7 +835,7 @@ try {
   const searched = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "zzz", open: null, group: "owner" }, who: NORAN, today: TODAY });
   check("a search that finds nothing says so and offers the way back", /Nothing matches/.test(searched) && /see all of them/.test(searched));
   const empty = await trackerDocument({ slug: "x", tenantId: B, tenantName: "RHI", have: ["strategy", "tracker"], ask: { view: "week", q: "", open: null, group: "owner" }, who: { personKey: "omar", seat: "super" }, today: TODAY });
-  check("an empty client is only the next empty line and one sentence — no search over nothing", /Write the first action for RHI and press Enter/.test(empty) && /Nothing on the list for RHI yet/.test(empty) && /class="tools solo"/.test(empty) && !/class="find"/.test(empty));
+  check("an empty client is only the next empty line and one sentence — no search over nothing", /Write the first action for RHI and press Enter/.test(empty) && /Nothing on the list for RHI yet/.test(empty) && /class="tools qt solo"/.test(empty) && !/class="find"/.test(empty));
   const noDb = await trackerDocument({ slug: "x", tenantId: "not-a-tenant-id", tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "week", q: "", open: null, group: "owner" }, who: NORAN });
   check("a list that could not be read says so, and is not drawn as empty (§35)", /could not be read/.test(noDb) && !/Nothing on the list/.test(noDb) && !/id="add"/.test(noDb));
 
@@ -1035,9 +1034,11 @@ try {
        names one line. */
     const addBox = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();return Math.round(r.left)+','+Math.round(r.width)})()");
     const restBox = await addBox(".write .addrow .tn");
-    check("the add line holds its details back until something is typed", !(await pg.locator(".write .addrow .when").isVisible()) &&
-      !(await pg.locator(".write .addrow .who").isVisible()) &&
-      !(await pg.locator(".write .addrow [data-act=add-note]").isVisible()));
+    /* THE QUIET LIST DRAWS THE LINE'S DETAILS FROM THE START (§707, the
+       mockup): the topic, the week and the owner as small chips beside the
+       box, nothing typed yet. */
+    check("the add line shows its topic, week and owner as chips from the start", (await pg.locator(".write .addrow .when").isVisible()) &&
+      (await pg.locator(".write .addrow .who").isVisible()) && (await pg.locator(".write .addrow .tpk").isVisible()));
     check("...and they are still drawn, so their place is held", (await pg.locator(".write .addrow .when").count()) === 1 &&
       (await pg.evaluate("document.querySelector('.write .addrow .when').getBoundingClientRect().width")) > 0);
     await pg.locator("#add").fill("x");
@@ -1152,9 +1153,8 @@ try {
        details held back again, and the week and owner back to their defaults
        — read off the line rather than off the screen, because with nothing
        typed there is deliberately nothing on the screen to read (§356.16). */
-    check("...the line is cleared back to This week and me, with the note and the details held back again", (await pg.locator("#add").inputValue()) === "" &&
+    check("...the line is cleared back to This week and me, with the note folded", (await pg.locator("#add").inputValue()) === "" &&
       (await pg.evaluate("document.getElementById('addnote').value")) === "" && !(await pg.locator("#addnote").isVisible()) &&
-      !(await pg.locator(".write .addrow .when").isVisible()) && !(await pg.locator(".write .addrow [data-act=add-note]").isVisible()) &&
       (await pg.locator(".write .addrow").getAttribute("data-due")) === thu && (await pg.locator(".write .addrow").getAttribute("data-owner")) === "noran" &&
       (await pg.evaluate("document.querySelector('.write .addrow .when .wk').textContent")) === "This week");
     /* Due NEXT week it is not on This week (inView), so it is read under All. */
@@ -1258,7 +1258,11 @@ try {
     const when = await pg.locator(row + "[data-act=due]").innerText();
     /* Its FIRST date was this week (given at birth), so it is late by a day
        and carried nought: the word alone, then the day (§5's rule). */
-    check("a date last week reads 'Late · <day>' — carried from the FIRST date, which was this week — and never 'carried'", when === "Late · " + readableDay(lastWeek, real) && !/carried/.test(when), when);
+    /* §707: the cell says the day it was due, in red; how late is the tag on
+       the name — carried from the FIRST date, which was this week, so the
+       word alone. */
+    check("a date last week reads its day in red, and the name carries 'Late' — carried from the FIRST date, which was this week — never 'carried'",
+      when === readableDay(lastWeek, real) && (await pg.locator(row + ".when.late").count()) === 1 && (await pg.locator(row + ".ltag").innerText()) === "Late" && !/carried/.test(when), when);
     await pg.locator(row + "[data-act=due]").click();
     await pg.locator(row + "input.dt").press("Escape");
     check("Escape puts the word back and writes nothing", (await pg.locator(row + "[data-act=due]").count()) === 1 &&
@@ -1268,13 +1272,13 @@ try {
     check("a press elsewhere on the page puts the word back too", (await pg.locator(row + "input.dt").count()) === 0 && (await pg.locator(row + "[data-act=due]").count()) === 1);
     await pg.locator("[data-act=settings]").click();
     await pg.locator('.setmenu [data-act=set-dates][data-value="weeks"]').click(); await settle();
-    check("back to weeks, a late row says only how late — the word, no day", (await pg.locator(row + ".when").innerText()) === "Late" && await stayed(), await pg.locator(row + ".when").innerText());
-    /* RENAME IN PLACE: a double-click on the name, Enter renames; Escape
-       puts the name back and writes nothing; a single click does nothing. */
-    await pg.locator(row + ".t").click();
-    check("a single click on the name opens no box", (await pg.locator(row + "input.ttl").count()) === 0);
-    await pg.locator(row + ".t").dblclick();
-    check("a double-click turns the name into a box in place", (await pg.locator(row + "input.ttl").count()) === 1);
+    check("back to weeks, a late row's cell says the week it was due — Last week, in red — and the tag on its name how late", (await pg.locator(row + ".when").innerText()) === "Last week" && (await pg.locator(row + ".when.late").count()) === 1 && (await pg.locator(row + ".ltag").innerText()) === "Late" && await stayed(), await pg.locator(row + ".when").innerText());
+    /* RENAME FROM THE ⋯ (§707): a single click on the name opens the task,
+       so Rename is the row menu's; the name becomes a box in place, Enter
+       renames, Escape puts the name back and writes nothing. */
+    const renameRow = async () => { await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(row + "[data-act=rename-start]").click(); };
+    await renameRow();
+    check("Rename in the row's ⋯ turns the name into a box in place, and opens nothing", (await pg.locator(row + "input.ttl").count()) === 1 && (await pg.locator(".open").count()) === 0);
     /* THE BOX TAKES THE NAME'S WHOLE SPACE (§565): measured against the cell
        the name sits in, not against a number, so the claim survives the
        column being resized. Narrowed, it was an input's default — about a
@@ -1289,7 +1293,7 @@ try {
     await pg.locator(row + "input.ttl").press("Enter"); await settle();
     check("Enter renames it, in the database and on the row", (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" &&
       (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday");
-    await pg.locator(row + ".t").dblclick();
+    await renameRow();
     await pg.locator(row + "input.ttl").fill("zzz");
     await pg.locator(row + "input.ttl").press("Escape");
     check("Escape puts the name back and writes nothing", (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday" &&
@@ -1330,13 +1334,7 @@ try {
        add line offers, and a pick or a new name is written at once — read
        back from Postgres, never off the row (§96). The double-click only
        renames now. Both ends (§94.2): set, then taken off again. */
-    const tcBox = (await pg.locator(row + ".tcwrap").count()) ? await pg.locator(row + ".tcwrap").boundingBox() : null, whenBox = await pg.locator(row + ".when").boundingBox(), nameBox = await pg.locator(row + ".tn2").boundingBox();
-    check("a row with no topic says \"+ Add a topic\" in its own column, between the name and the week",
-      (await pg.locator(row + ".tcwrap .tc.add").count()) === 1 && (await pg.locator(row + ".tcwrap .tw").innerText()) === "+ Add a topic" &&
-      !!tcBox && !!whenBox && !!nameBox && tcBox.x + tcBox.width <= whenBox.x + 1 && tcBox.x >= nameBox.x + nameBox.width - 1 && whenBox.x - (tcBox.x + tcBox.width) <= 24,
-      JSON.stringify({ tcBox, whenBox }));
-    const rights = await pg.locator(".row .tcwrap").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().right)));
-    check("...and the column lines up down the list, whatever the week beside it says", rights.length > 1 && new Set(rights).size === 1, JSON.stringify(rights));
+    check("a row with no topic carries no tag on its name (§707)", (await pg.locator(row + ".tc:not(.add)").count()) === 0 && !(await pg.locator(row + ".tc.add").isVisible()));
     if (process.env.SMP_SHOT2) await pg.screenshot({ path: process.env.SMP_SHOT2 });
     /* THE MEETING, PRESSED (§706): the check opens on the first task, a press
        on the left opens another on the right (on the address, no reload), a
@@ -1374,23 +1372,23 @@ try {
     for (const e of mWas) await asTenant(A, (c) => deleteProgress(c, e.id));
     await asTenant(A, (c) => setStatus(c, mTask, mSt0, "noran"));
     await pg.goto(base + "?view=all"); await settle(); await pg.evaluate("window.__stay = 1");
-    await pg.locator(row + ".t").dblclick();
-    check("the double-click only renames — no topic choice stands beside the name box", (await pg.locator(row + "input.ttl").count()) === 1 && (await pg.locator(row + ".tn2 select").count()) === 0);
+    await renameRow();
+    check("Rename only renames — no topic choice stands beside the name box", (await pg.locator(row + "input.ttl").count()) === 1 && (await pg.locator(row + ".tn2 select").count()) === 0);
     await pg.locator(row + "input.ttl").press("Escape");
     /* Degrades rather than dying (§215): on a build with no topic cell the
        presses below would each wait thirty seconds for nothing. */
-    if ((await pg.locator(row + ".tcwrap").count()) !== 1) check("pressing \"+ Add a topic\" — but there is no topic cell on the row to press", false);
+    if ((await pg.locator(row + ".tcwrap").count()) !== 1) check("Change topic — but there is no topic cell on the row to open", false);
     else {
-    await pg.locator(row + ".tcwrap").click();
-    check("pressing it opens the topic list, the open topics and No topic", await pg.locator(row + ".tcwrap .topics").isVisible() &&
+    await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(row + "[data-act=topic-start]").click();
+    check("Change topic in the row's ⋯ opens the topic list, the open topics and No topic", await pg.locator(row + ".tcwrap .topics").isVisible() &&
       (await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic="' + roomTopic.id + '"]').count()) === 1 && (await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic=""]').count()) === 1);
     await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic="' + roomTopic.id + '"]').click(); await settle();
     check("...and a pick puts the action under that topic, the name unchanged, the tag reading it, without a reload", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === roomTopic.id &&
       (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" && (await pg.locator(row + ".tcwrap .tc:not(.add) .tw").innerText()) === "Facilities" && await stayed());
     await pg.locator(row + ".tcwrap").click();
     await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic=""]').click(); await settle();
-    check("...and No topic takes it off again, back to \"+ Add a topic\"", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === null && (await pg.locator(row + ".tcwrap .tc.add").count()) === 1);
-    await pg.locator(row + ".tcwrap").click();
+    check("...and No topic takes it off again, the tag gone from the name", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === null && (await pg.locator(row + ".tc:not(.add)").count()) === 0);
+    await pg.locator(row + "[data-act=row-menu]").click(); await pg.locator(row + "[data-act=topic-start]").click();
     await pg.locator(row + ".tcwrap .tnew").fill("Venue hunt");
     await pg.locator(row + ".tcwrap .tnew").press("Enter"); await settle();
     const madeTopic = (await asTenant(A, (c) => listTopics(c))).find((x) => x.name === "Venue hunt");
@@ -1402,9 +1400,9 @@ try {
     /* THE ARROW opens the row in place for its notes and history, on the
        address, and folds it again; no Title box; the history is small type
        in a box that scrolls — measured as PAINT, not read off a class. */
-    await pg.locator(row + "[data-act=more]").click(); await settle();
-    check("the arrow opens the row in place, on the address, without a reload", pg.url().includes("open=" + born.id) &&
-      (await pg.locator(".open textarea[data-act=notes]").count()) === 1 && (await pg.locator(row + "[data-act=more]").getAttribute("aria-expanded")) === "true" && await stayed(), pg.url());
+    await pg.locator(row + ".t").click(); await settle();
+    check("the name opens the row in place, on the address, without a reload (§707)", pg.url().includes("open=" + born.id) &&
+      (await pg.locator(".open textarea[data-act=notes]").count()) === 1 && (await pg.locator(row + ".t").getAttribute("aria-expanded")) === "true" && await stayed(), pg.url());
     check("...with no Title box and no With", (await pg.locator(".open input.ttl").count()) === 0 && !/With/.test(await pg.locator(".open").innerText()));
     const histCss = await pg.evaluate("(function(){var h=document.querySelector('.hist');var c=getComputedStyle(h);return c.fontSize+' '+c.overflowY+' '+c.maxHeight})()");
     check("the history is small type in a box that scrolls", histCss === "11.5px auto 118px", histCss);
@@ -1440,7 +1438,7 @@ try {
     check("Delete on my entry asks first", await pg.locator(".open .pe .sure").isVisible() && (await asTenant(A, (c) => progressOf(c, born.id))).length === 1);
     await pg.locator(".open .pe [data-act=progress-delete]").click(); await settle();
     check("...and Yes removes it, the line under the name with it", (await asTenant(A, (c) => progressOf(c, born.id))).length === 0 && (await pg.locator(row + ".last").count()) === 0 && await stayed());
-    await pg.locator(row + "[data-act=more]").click(); await settle();
+    await pg.locator(row + ".t").click(); await settle();
     check("the arrow again folds it, and the address forgets it", (await pg.locator(".open").count()) === 0 && !pg.url().includes("open=") && await stayed(), pg.url());
     /* GROUP BY, from the dots: drawn again in place, remembered by this
        browser (a cookie the page reads on the next visit). */
@@ -1530,7 +1528,7 @@ try {
     await pg.goto(base); await settle();
     await pg.evaluate("window.__stay = 1");
     /* DELETE asks in place — No keeps it, Yes removes it (§95, §273.3). */
-    await pg.locator(row + "[data-act=more]").click(); await settle();
+    await pg.locator(row + ".t").click(); await settle();
     check("the question is not drawn until Delete is pressed", !(await pg.locator(".open .sure").isVisible()));
     await pg.locator(".open [data-act=delete-ask]").click();
     check("Delete asks first, in the row, and is not a browser dialog", await pg.locator(".open .sure").isVisible());

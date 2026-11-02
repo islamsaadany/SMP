@@ -499,7 +499,7 @@ export const APP_JS = `(function () {
       w.classList.remove("on"); w.setAttribute("aria-expanded", "false");
       var t = w.querySelector(".team, .weeks, .topics"); if (t) t.hidden = true;
     });
-    document.querySelectorAll(".dots > button.on, .tdots > button.on").forEach(function (d) {
+    document.querySelectorAll(".dots > button.on, .tdots > button.on, .rdots > button.on").forEach(function (d) {
       if (d === except) return;
       d.classList.remove("on"); d.setAttribute("aria-expanded", "false");
       var m = d.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = true;
@@ -565,7 +565,7 @@ export const APP_JS = `(function () {
   document.addEventListener("click", function (e) {
     pressed = e.target;
     var b = e.target.closest("[data-act]");
-    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots")) closePops(null);
+    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots, .rdots")) closePops(null);
     if (!b) return;
     var act = b.getAttribute("data-act"), id = rowOf(b), ar = inAdd(b);
     if (act === "tick") {
@@ -744,9 +744,23 @@ export const APP_JS = `(function () {
       post({ act: "progress-delete", progressId: entryOf(b) });
     } else if (act === "add-note") {
       if (noteIsOpen(ar)) foldNote(ar); else openNote(ar);
+    } else if (act === "row-menu") {
+      /* THE ROW'S ⋯ (§707): Details and progress, Rename, Change topic, Delete */
+      toggleSettings(b);
+    } else if (act === "rename-start") {
+      closePops(null);
+      var rt = b.closest(".row") && b.closest(".row").querySelector(".t[data-rename]");
+      if (rt) startRename(rt);
+    } else if (act === "topic-start") {
+      closePops(null);
+      var rp = b.closest(".row") && b.closest(".row").querySelector(".tpk");
+      if (rp) togglePop(rp, ".topics");
     } else if (act === "more") {
       /* Open this row (and only this row), or fold it if it is the open one;
-         the address carries which, and the list is read again. */
+         the address carries which, and the list is read again. The name
+         opens it too (§707) — but not while it is being renamed. */
+      if (e.target.closest("input")) return;
+      closePops(null);
       var next = openId() === id ? null : id;
       setOpen(next);
       refetch();
@@ -824,8 +838,18 @@ export const APP_JS = `(function () {
      or leaving the box renames, Escape puts the name back. A single click
      does nothing, so a row can still be read without a box opening under
      the pointer. */
+  /* ON THE LIST A SINGLE CLICK ON THE NAME OPENS THE TASK (§707), so the
+     list renames from its ⋯ — Rename — and the double-click stays on the
+     meeting's own title, which opens nothing. */
   document.addEventListener("dblclick", function (e) {
-    var t = e.target.closest(".t[data-rename]");
+    var t = e.target.closest(".mopen .t[data-rename]");
+    if (t) startRename(t);
+  });
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if ((e.key === "Enter" || e.key === " ") && t && t.matches && t.matches(".row .t[role=button]")) { e.preventDefault(); t.click(); }
+  });
+  function startRename(t) {
     if (!t || t.querySelector("input")) return;
     var tn = t.closest(".tn2"), id = rowOf(t), was = t.textContent;
     var inp = document.createElement("input");
@@ -850,7 +874,7 @@ export const APP_JS = `(function () {
       else if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
     });
     inp.addEventListener("blur", function () { finish(true); });
-  });
+  }
 
   /* Saved when you leave the box (§35), and only when it changed. */
   document.addEventListener("focusout", function (e) {

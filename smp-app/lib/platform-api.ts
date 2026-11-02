@@ -187,6 +187,16 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       .map((row) => ({ key: row.key, name: row.name, kind: row.kind })) });
   }
 
+  /* JUMP TO (§701, §703, lib/jump.ts): whether this client's settings are
+     this person's to read, and the console's two gated sections — the rules
+     the cards and the console's own column ask. */
+  if (action === "jump") {
+    const row = body && body.client ? await clientByKey(pool, body.client) : null;
+    return ok({ canConfig: !!(row && FF.mayReadConfig(world, account, row)),
+      /* §703: the console's two gated sections, as its own column gates them */
+      canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
+  }
+
   if (action === "cards") {
     const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
     const shown: ClientRow[] = FF.visibleClients(world, account, all);

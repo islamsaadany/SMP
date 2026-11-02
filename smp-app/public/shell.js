@@ -1151,13 +1151,178 @@
   ];
 
   /** @param {World} w @param {Person|null|undefined} person @param {string} area @param {string} target @returns {Grant} */
+  /* ── THE LADDER (§704; design-mockups/roles-and-access) ─────────────────
+     Islam, 2026-10-31: *"it's more of levels of visibility … everyone set on a
+     level can see his level or see the bigger level(s) one by one"*, *"take
+     care seeing doesn't mean reporting. a person can see the sibling
+     directions but can only report his"*, and after the measured comparison
+     of the two rules on every Raya seat, 2026-11-01: *"Apply the ladder."*
+
+     SO A ROLE ANSWERS TWO QUESTIONS, AND ONLY ONE OF THEM IS A SETTING.
+       · WHAT IT WRITES is what it holds, by rule: a unit's owner and
+         custodian, a function's head and custodian and a capability's owner
+         enter and submit for that place; a pillar's, a project's or a
+         direction's owner, and a contributor, enter their own lines in it
+         (bounded by OWN_LINES_ONLY, unchanged). The plan itself, the cycle
+         and Setup stay the office's (mayAuthorPage, neverOffered).
+       · HOW FAR UP IT READS is the one setting: own piece · own unit or
+         function · own division · the top. Each level holds everything on
+         it — reading your unit is reading its sibling pillars — and plan and
+         figures go together, so a unit's Strategy and Reporting can no
+         longer be read apart.
+
+     STORED IN THE ACCESS MAP IT ALREADY HAD, so no table moves and the server
+     reads it through the same `w.access`: three rows per role, each `view`
+     or `none` — a_reach_place, a_reach_div, a_reach_top — the level being the
+     highest one on. A role with none of the three stored reads its shipped
+     level (LADDER_DEFAULT), the levels every role had before (§704's own
+     measurement). The part owners' row reads §517's half eye as its level
+     until the row is set: "part" is own piece, absent is the whole place.
+
+     A PERSON CAN BE MOVED ONE LEVEL, up or down from their role
+     (`person.reach`, +1 or -1, on the register's own record) — an exception,
+     never a second table. The office (super, smoteam) is not on the ladder:
+     it reads and writes everything, as its own rows of the map say. */
+  var REACH = { place: "a_reach_place", div: "a_reach_div", top: "a_reach_top", pen: "a_pen" };
+  var REACH_KEYS = [REACH.place, REACH.div, REACH.top];
+  /* the page areas the ladder answers for; any other area (a module's own,
+     `always`) is asked of the map exactly as before */
+  var LADDER_AREAS = ["unit", "unit_strat", "fn", "fn_strat", "a_group", "a_cycle", "a_setup"];
+  var PEN_ROLES = ["owner", "custodian", "fnhead", "capowner"];
+  var LINE_PEN_ROLES = ["powner", "plowner", "dirowner", "contrib"];
+  /* THE PEN IS A SWITCH ON THE ROLE'S OWN LEVEL (Islam, 2026-11-01: "the view
+     approach is not clickable for on and off and the same for the editing").
+     On, the role enters and submits what it holds; off, it reads it. Stored as
+     one more row of the map (`a_pen`, edit or none). Shipped as the platform
+     already behaved: a place's holders write, a piece's holders and a
+     contributor read until the office turns their pen on. */
+  function penOn(w, roleKey) {
+    var row = ((w && w.access) || {})[roleKey];
+    if (row && Object.prototype.hasOwnProperty.call(row, REACH.pen)) return row[REACH.pen] === "edit";
+    return PEN_ROLES.indexOf(roleKey) > -1;
+  }
+  var LADDER_DEFAULT = { gceo: 3, cceo: 2, owner: 1, fnhead: 1, custodian: 1,
+    powner: 1, plowner: 1, dirowner: 1, capowner: 1, contrib: 1, employee: 0 };
+  /* the lowest level a role can be set to: a holder of a whole place always
+     reads it; a CEO holds a level, not a piece */
+  var LADDER_MIN = { owner: 1, fnhead: 1, custodian: 1 };
+  /* A CEO HOLDS A LEVEL, NOT A PIECE: the Group CEO stands only on the top,
+     a Division head on their division or the top — and either can be turned
+     off, to nothing (Islam, 2026-11-01: "on the company level and division I
+     can't click off the view option"). Between nothing and where they stand
+     there is no level for them, so a setting there reads as nothing. */
+  var LADDER_STAND = { gceo: 3, cceo: 2 };
+  function ladderStored(w, roleKey) {
+    var row = ((w && w.access) || {})[roleKey];
+    var has = function (k) { return !!row && Object.prototype.hasOwnProperty.call(row, k); };
+    if (!REACH_KEYS.some(has)) {
+      var d = LADDER_DEFAULT[roleKey];
+      if (d == null) return 0;
+      if (isPartRole(roleKey) && dirScopePart(w && w.group)) return 0;
+      return d;
+    }
+    var on = function (k) { return has(k) && row[k] !== "none"; };
+    return on(REACH.top) ? 3 : on(REACH.div) ? 2 : on(REACH.place) ? 1 : 0;
+  }
+  function reachMove(person) {
+    var m = person ? Number(person.reach) : 0;
+    return m === 1 || m === -1 ? m : 0;
+  }
+  /* The level a person reads at through one role: the role's, moved by
+     theirs, kept between the role's floor and the top, and stepping over a
+     division level the client does not have. */
+  function ladderLevel(w, person, roleKey) {
+    if (isOfficeRole(roleKey)) return 3;
+    var mv = reachMove(person), lv = ladderStored(w, roleKey) + mv;
+    if (lv === 2 && !midExists(w && w.group, w && w.companies)) lv = mv > 0 ? 3 : 1;
+    var lo = LADDER_MIN[roleKey] != null ? LADDER_MIN[roleKey] : 0;
+    lv = Math.max(lo, Math.min(3, lv));
+    if (LADDER_STAND[roleKey] != null && lv < LADDER_STAND[roleKey]) lv = 0;
+    return lv;
+  }
+  /* where a seat stands: its place, a capability read as the function (or
+     the top) that holds it, as capHolderTarget reads every capability */
+  function seatPlace(w, r) {
+    var at = String((r && r.at) || "group");
+    return boxRef(at).kind === "cap" ? capHolderTarget(w, at) : at;
+  }
+  function divisionOf(w, place) {
+    var r = boxRef(place), cs = (w && w.companies) || {}, live = function (ck) {
+      return !!ck && !!cs[ck] && cs[ck].active !== false ? ck : null; };
+    if (r.kind === "mid") return live(r.key);
+    if (r.kind === "fn") return live(((w.functions || {})[r.key] || {}).company);
+    if (r.kind === "top" || r.kind !== "bu") return null;
+    return live(((w.units || {})[r.key] || {}).company);
+  }
+  /* Does this seat read that target? The top reads everything; a division
+     level reads the division's page and every unit and function in it; any
+     level reads the seat's own place — at "own piece" the place's pages are
+     open and its lists hold only the person's own (pieceOnlyAt, the page's
+     part filter). The floor holds no piece, so its "own piece" is nothing. */
+  function ladderReads(w, person, r, target) {
+    var lv = ladderLevel(w, person, r.role);
+    if (lv >= 3) return true;
+    if ((r.role === NO_ROLE || LADDER_STAND[r.role] != null) && lv < 1) return false;
+    var t = capHolderTarget(w, target), p = seatPlace(w, r);
+    if (t === p) return true;
+    if (lv >= 2) {
+      var d = divisionOf(w, p);
+      if (d && (t === "co:" + d || divisionOf(w, t) === d)) return true;
+    }
+    return false;
+  }
+  /* One seat's grant on one area, the ladder's answer for every role but the
+     office's. Asked by grantIn and by rolesAtState, so "may they" and "which
+     role let them" cannot disagree (§53.5). */
+  function seatGrant(w, person, r, area, target) {
+    if (LADDER_AREAS.indexOf(area) < 0 || isOfficeRole(r.role)) {
+      if (!companyAllows(w, r, target)) return "none";
+      return grantFor(w, r.role, areaFor(area, w, r, target));
+    }
+    if (area === "a_cycle" || area === "a_setup") return "none";
+    /* the group's own pages are about the top or a division, whatever page
+       they are drawn beside: read as the top unless a division is named */
+    if (area === "a_group" && boxRef(target).kind !== "mid") target = "group";
+    /* any page family: a pillars function reports on the unit's pages, a
+       unit planning in projects on the function's */
+    if ((area === "unit" || area === "fn") && roleOwns(w, r, target) &&
+        (PEN_ROLES.indexOf(r.role) > -1 || LINE_PEN_ROLES.indexOf(r.role) > -1) && penOn(w, r.role)) return "edit";
+    return ladderReads(w, person, r, target) ? "view" : "none";
+  }
+  /* AT "OWN PIECE" ON A PLACE: the page is open and its lists are narrowed to
+     what the person holds. True only when every seat that reaches the place
+     reaches it at level 0 — a second seat that reads the whole place (its
+     owner's, a division's, the top's) opens it whole. */
+  function pieceOnlyAt(w, person, place) {
+    if (!person || !w) return false;
+    var t = capHolderTarget(w, String(place || "")), rs = rolesOrFloor(w, person), any = false;
+    for (var i = 0; i < rs.length; i++) {
+      var r = rs[i];
+      if (isOfficeRole(r.role) || PEN_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, t)) return false;
+      var lv = ladderLevel(w, person, r.role), p = seatPlace(w, r);
+      if (lv >= 3) return false;
+      if (lv >= 2) { var d = divisionOf(w, p); if (d && (t === "co:" + d || divisionOf(w, t) === d)) return false; }
+      if (p === t) { if (lv >= 1) return false; any = true; }
+    }
+    return any;
+  }
+  /* Is this pillar, direction or project the person's: its owner or its
+     custodian, or named on any of its rows — the same `namedOn` every role
+     here is derived with. */
+  function holdsItem(w, person, it) {
+    if (!it || !person) return false;
+    if (namedOn({ owner: it.owner }, person) || (it.custodian && namedOn({ owner: it.custodian }, person))) return true;
+    return ["measures", "tactics", "milestones", "deliverables", "outcomes"].some(function (k) {
+      return Array.isArray(it[k]) && it[k].some(function (row) { return namedOn(row, person); });
+    });
+  }
+
   function grantIn(w, person, area, target) {
     if (area === "always") return "view";
     var rs = rolesOrFloor(w, person);
     /** @type {Grant} */ var best = "none";
     for (var i = 0; i < rs.length; i++) {
-      if (!companyAllows(w, rs[i], target)) continue;
-      var g = grantFor(w, rs[i].role, areaFor(area, w, rs[i], target));
+      var g = seatGrant(w, person, rs[i], area, target);
       if (STATE_RANK[g] > STATE_RANK[best]) best = g;
     }
     return best;
@@ -4180,8 +4345,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      about who a bounded role is (§53.5). */
   function rolesAtState(w, person, area, target, state) {
     return rolesOrFloor(w, person).filter(function (r) {
-      if (!companyAllows(w, r, target)) return false;
-      return grantFor(w, r.role, areaFor(area, w, r, target)) === state;
+      return seatGrant(w, person, r, area, target) === state;   /* §704: the ladder's, as grantIn asks */
     }).map(function (r) { return r.role; });
   }
   function editingRoles(w, person, area, target) {
@@ -5243,10 +5407,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   var DIR_SCOPE = "dirScope";
   function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
   function partOnly(w, person) {
-    if (!person || !w || !dirScopePart(w.group)) return false;
+    if (!person || !w) return false;
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
       if (!isPartRole(rs[i].role)) return false;
+      /* §704: narrowed when the part owners' level is "own piece" — which is
+         what §517's half eye reads as until the row is set */
+      if (ladderLevel(w, person, rs[i].role) > 0) return false;
       holds = true;
     }
     return holds;
@@ -5928,6 +6095,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
+    /* §704: the ladder */
+    REACH: REACH, LADDER_DEFAULT: LADDER_DEFAULT, LADDER_MIN: LADDER_MIN, LADDER_STAND: LADDER_STAND,
+    ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove, penOn: penOn,
+    ladderReads: ladderReads, pieceOnlyAt: pieceOnlyAt, holdsItem: holdsItem, divisionOf: divisionOf,
     neverOffered: neverOffered,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
@@ -14548,6 +14719,16 @@ function rowAtRisk(x){
 function needsNote(x){
   return rowAtRisk(x) && !(x.obj.note && x.obj.note.trim());
 }
+/* §705: THE WORD THE TAG SAYS — the band's own label ("Off track") when the
+   row owes a note, "" when it does not. One reader for every note box, so the
+   tag, the red edge and Submit's refusal cannot disagree about which rows owe
+   one (§53.5). Replaces §576's lock, which shut every other box on the page
+   until the note was written; Islam, 2026-11-02: *"don't stop a person from
+   entering the numbers"*. The box now says it is owed and nothing is shut. */
+function noteWant(x){
+  if (!needsNote(x)) return "";
+  return bandOf(rowReads(x)).label || "Off track";
+}
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
 /* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§105) ────────────────────
@@ -14922,46 +15103,6 @@ function noteMayWrite(subject, x){
   if (plansInObjectives(t)) return canReportFnRow(holderTarget(t), null, x.obj);
   /* `capReportBody`: a capability's own objectives belong to no project. */
   return canReportFnWhole(holderCodeOwner(c));
-}
-/* THE SUBJECTS ONE REPORTING PAGE DRAWS: its own, and on the company's the
-   capabilities reported in its own section (\u00a7520.8 \u2014 `capsHere()`, the same
-   narrowing that section is drawn from). */
-function noteLockSubjects(target){
-  var t = String(target || ""), out = [t];
-  if (t === "group" && holderSubject(t) === "group" && SMPRules.capExists(GROUP) &&
-      typeof capsHere === "function")
-    capsHere().forEach(function(c){ out.push("cap:" + c.id); });
-  return out;
-}
-/* The lock for one page: the Reporting page of `target`, or My reporting
-   (`mine`). NULL when nothing is red, so every caller asks one truthy
-   question. A breakdown's cells share their row's note (\u00a7343), so its row is
-   one entry however many of its figures are red. A report already closed
-   (submitted or parked, \u00a7220) has no open box to shut. */
-function noteLockOf(target, mine){
-  if (!REVIEW || REVIEW.state !== "open") return null;
-  var rows = [], ids = {};
-  var take = function(x, subj){
-    var id = x.noteId || x.id;
-    if (ids[id]) return;
-    ids[id] = true;
-    rows.push(Object.assign({ subj: subj }, x));
-  };
-  if (mine) {
-    /* \u00a7576: on My reporting the owner writes the note on their own red rows
-       (Islam's call) \u2014 asked through the gate their figure is entered by. */
-    myLineRows().forEach(function(r){
-      if (needsNote(r) && canEnterLine(r.target, r, "mine")) take(r, r.target);
-    });
-  } else if (target) {
-    noteLockSubjects(target).forEach(function(s){
-      if (reportClosed(s)) return;
-      subjectAsked(s).forEach(function(x){
-        if (needsNote(x) && noteMayWrite(s, x)) take(x, s);
-      });
-    });
-  }
-  return rows.length ? { rows: rows, ids: ids, mine: !!mine } : null;
 }
 /* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
    Islam, from his own tenant: the report would not submit because something
@@ -17685,6 +17826,14 @@ function partFilter(u){
   if (u && u.topLayer && partOnly()) {
     var w = world(), v = viewer();
     pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
+  }
+  /* §704: "OWN PIECE" ON A UNIT OR A FUNCTION. The ladder's lowest level,
+     where the place's pages are open and its lists hold only what the person
+     holds — the half eye's narrowing, carried from the top's own plan to
+     every place, and asked of the one rule both sides read. */
+  else if (u && !u.topLayer && u.ukey && SMPRules.pieceOnlyAt(world(), viewer(), u.ukey)) {
+    var w2 = world(), v2 = viewer();
+    pf = function(p){ return SMPRules.holdsItem(w2, v2, p); };
   }
   if (!pf) return hf;
   if (!hf) return pf;
@@ -32113,12 +32262,26 @@ function textOr(page, value, cls, setter){
 /* §576: `subj` is the subject the row belongs to, written as `data-repu` the
    way `repEntry` writes it — My reporting draws rows from several units, so
    the note's handler must resolve the row against ITS unit rather than the
-   page it is standing on (§345). Absent everywhere else, as before. */
+   page it is standing on (§345). Absent everywhere else, as before.
+
+   §705: `want` IS THE BAND'S WORD, NOT A BOOLEAN (`noteWant`): "" when the
+   row owes nothing, "Off track" when it does — and then the box wears a TAG
+   above it, "Note needed · off track", and asks in the prompt's own words.
+   The tag is drawn here, by the one builder every note box comes through,
+   so the unit's table, a capability's and My reporting cannot drift apart
+   on it (§53.5). It replaces §576's lock (a bar, every other box shut, the
+   cursor steered); the mockup Islam approved, design-mockups/note-tag/
+   2026-11-02_tag-on-the-note-box.html, option A. The prompt is grey and never
+   stored: Islam wanted words in the box so the person feels something is
+   owed, and real text there would have been saved as the note and let Submit
+   through on "No justification". */
+var NOTE_PROMPT = "No justification yet \u2014 why, and what is being done";
 function noteBox(hook, id, value, want, subj){
-  return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
+  return (want ? '<span class="notetag">Note needed \u00b7 ' + esc(String(want).toLowerCase()) + '</span>' : '') +
+    '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
     '="' + esc(id) + '"' + (subj ? ' data-repu="' + esc(subj) + '"' : '') +
     ' rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
-    (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
+    (want ? NOTE_PROMPT : "Note, if there is one") + '">' +
     esc(value || "") + '</textarea>';
 }
 /* AND THE OTHER HALF: A LINE BREAK SOMEBODY TYPED HAS TO SURVIVE BEING READ
@@ -32131,8 +32294,16 @@ function noteBox(hook, id, value, want, subj){
    ONE BUILDER, because there are six places that print a stored note and a
    class added at five of them is the drift this exists to stop (§53.5,
    §104.7). `tight` is the margin the cell wants, not a second kind of note. */
-function noteRead(note, tight){
-  if (!note) return "";
+/* §705: AND A RED ROW WITH NO NOTE, READ BY SOMEBODY WHO CANNOT WRITE IT,
+   SAYS SO. `need` is `needsNote(row)`, asked by the caller that has the row;
+   where it is true and nothing is written the cell reads "Needs justification"
+   in red — the platform's word, never stored, so a reader is not left with a
+   blank beside a red figure. Islam, 2026-11-02: *"make the red is Needs
+   justification"*. */
+var NOTE_NEED = "Needs justification";
+function noteRead(note, tight, need){
+  if (!note) return need ? '<span class="why notetext needjust"' + (tight ? ' style="margin:0"' : '') +
+    '>' + NOTE_NEED + '</span>' : "";
   return '<span class="why notetext"' + (tight ? ' style="margin:0"' : '') + '>' +
     esc(note) + '</span>';
 }
@@ -35126,30 +35297,12 @@ function renderFocusBoard(){
    is not fixed from this page, so the chip is a door to where it is (§16.7 —
    a count that cannot take you to what it counts makes work; a door that
    admits what it cannot do is not the same fault). */
-/* ── §576: THE BAR THAT SAYS WHICH NOTE COMES FIRST ────────────────────
-   `NOTELOCK` is worked out by paint() before the render (`noteLockOf`), and
-   while it holds a row THIS bar is drawn in the "to finish" bar's place — the
-   mockup Islam approved: one bar, naming the row, and Go to it. Drawn for
-   whoever is locked, not only for whoever may submit, because a bounded
-   reporter and a tactic's owner are locked too and are the people most in
-   need of being told why every box went grey. It names the FIRST row and
-   counts the rest, so the person is never handed a list to work out. */
-var NOTELOCK = null;
-function noteLockBar(){
-  var lk = NOTELOCK;
-  if (!lk) return "";
-  var x = lk.rows[0], n = lk.rows.length;
-  var name = String((x.obj && x.obj.name) || "").trim() || "A figure";
-  var band = bandOf(rowReads(x)).label || "Off track";
-  return '<div class="lockbar" data-notelock="1" role="status">' +
-    '<span><b>' + esc(name) + ' is ' + esc(band.toLowerCase()) + '.</b> ' +
-    'Write its note before entering anything else.' +
-    (n > 1 ? ' <span class="lockn">1 of ' + n + '</span>' : '') + '</span>' +
-    '<button type="button" class="lockgo" data-notego="1">Go to it</button></div>';
-}
+/* §705: §576's lock bar stood here — drawn in this bar's place while a red
+   figure held the page. The lock went (the tag on the note box says what is
+   owed, `noteBox`), so this bar is the only one again and counts the note
+   among what is left, as it did before §576. */
 function reportBar(target){
   var t = String(target || "");
-  if (NOTELOCK) return noteLockBar();
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
   if (!REVIEW || REVIEW.state !== "open" || reportClosed(t)) return "";
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
@@ -35364,8 +35517,8 @@ function renderReport(u, opt){
   };
   var noteCell = function(x){
     return canEnterNote(u.ukey, x)
-      ? noteBox("note", x.id, x.obj.note, needsNote(x))
-      : noteRead(x.obj.note, true);
+      ? noteBox("note", x.id, x.obj.note, noteWant(x))
+      : noteRead(x.obj.note, true, needsNote(x));
   };
   var doneOf = function(list){
     var n = 0;
@@ -36074,7 +36227,7 @@ function capsShown(subject) {
   var target = holderTarget(subject);
   if (isCapTarget(target)) {
     var one = capById(capKeyOf(target));
-    return one ? [one] : [];
+    return one ? pieceHolders(target, [one]) : [];
   }
   /* §334: ONE HOLDER, SO THERE IS NOTHING LEFT TO ORDER. §310 sorted this
      list so a project owner met their own capability first; since §326 a
@@ -36085,8 +36238,22 @@ function capsShown(subject) {
      their project rather than a function page with nothing of theirs on it. */
   /* §405: a business unit that does not plan in pillars holds its own work
      exactly as a function does — one holder, addressed `u:<key>`. */
-  if (isUnitHolderId(target)) return unitHolders(subjKey(target));
-  return fnHolders(target.slice(3));
+  var hs = isUnitHolderId(target) ? unitHolders(subjKey(target)) : fnHolders(target.slice(3));
+  return pieceHolders(target, hs);
+}
+/* §704: AT "OWN PIECE" a holder is drawn with only the person's own projects
+   — one door, so Performance, Projects and Reporting narrow together. A
+   reading view: the holder's other fields are its own (the prototype), and
+   the projects are the same objects, so a figure reported lands where it
+   always did. Nobody who edits a plan is ever at own piece (the office reads
+   everything), so nothing adds to this list. */
+function pieceHolders(target, hs){
+  var place = isUnitHolderId(target) ? subjKey(target) : target;
+  if (!SMPRules.pieceOnlyAt(world(), viewer(), place)) return hs;
+  var w = world(), v = viewer();
+  return hs.map(function(c){
+    return Object.create(c, { projects: { value: (c.projects || []).filter(function(p){ return SMPRules.holdsItem(w, v, p); }), enumerable: true } });
+  });
 }
 /* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
    halves differ we say which and why). Projects, Reporting and Performance
@@ -36628,7 +36795,7 @@ function capKOTable(c){
            which is the honest pair: what they said, and what it scores. */
         var sc = measureScore(m);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
-          noteRead(m.note) + '</td>' +
+          noteRead(m.note, false, needsNote({ kind:"objective", obj:m })) + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -36654,7 +36821,7 @@ function projPerformanceBody(p, fk){
     var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
     return '<tr' + (notDue && !has ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + lateNote(when, done) +
-        noteRead(o.note) + '</td>' +
+        noteRead(o.note, false, !notDue && needsNote({ kind:(d ? "deliverable" : "outcome"), obj:o })) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + got + '</td>' +
@@ -37368,7 +37535,7 @@ function fnObjPerfTables(fk){
     var v = msReads(a), quiet = !dueThisCycle(a.due) && !a.status;
     return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
-      '<td>' + esc(a.name) + noteRead(a.note) + '</td>' +
+      '<td>' + esc(a.name) + noteRead(a.note, false, dueThisCycle(a.due) && needsNote({ kind:"action", obj:a })) + '</td>' +
       '<td class="cc">' + esc(a.owner || "—") + '</td>' +
       '<td class="cc">' + dxDate(a.due, a.status === "done") + '</td>' +
       '<td class="cc">' + (quiet ? notDueCell() : msPill(a)) + '</td>' +
@@ -37407,7 +37574,7 @@ function fnObjReportBody(fk){
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, mayR, m.name) + '</td>' +
       '<td class="cc">' + (has ? '<span class="fixedval">' + pct(measureScore(m)) + '</span>'
                                : '<span class="fixedval">&mdash;</span>') + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, mayR) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"objective", obj:m }, mayR) + '</td></tr>';
   }).join("");
   var aRows = SMPRules.shown(fnActions(fk)).map(function(a, i){
     var notDue = !dueThisCycle(a.due), quiet = notDue && !a.status;
@@ -37420,7 +37587,7 @@ function fnObjReportBody(fk){
         ? capPctBox(a, mayA, a.name) + (statusPending(a) ? needsPct() : "")
         : (a.status ? '<b>' + msReads(a) + '%</b>'
                     : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
-      '<td class="notecol">' + capNoteBox(a, mayA) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"action", obj:a, asked:!notDue }, mayA) + '</td></tr>';
   }).join("");
   return (kRows ? '<h4 class="mini">Objectives</h4>' +
       miniTable(["#","Objective","Dir.","Target","Reported","Progress","Note"], kRows) : "") +
@@ -37446,9 +37613,7 @@ function renderFnObjReport(fk){
      shut. */
   REPORT_CHROME = repChrome(target, c.done, c.total, pctDone, mayAll, subd, parked,
                             submitWhyShort(target), ownStateChip(target));
-  /* §576: this format draws no "to finish" bar, so the lock's bar goes where
-     the others put it — above the tables. */
-  return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
+  return '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
 /* §598.1: a function's projects or objectives page shows the plan as it
@@ -37609,13 +37774,23 @@ function capPctBox(x, may, label){
 }
 /* THROUGH `noteBox` (§271), or the two halves of one product's reporting go on
    being fine differently (§53.5, A15): the fault this fixes was on both pages
-   and a fix to one of them is how they drift. This side asks for no note, so
-   `want` is false and the placeholder is the quiet one — which is a difference
-   in what is OWED, not in the control. */
-function capNoteBox(x, may){
+   and a fix to one of them is how they drift.
+   §705: handed the ROW (`{kind, obj}`, the shape `rowReads` understands) and
+   not the object, so this side asks the same question a unit's note cell
+   asks — `noteWant` for the tag and the prompt, `needsNote` for the red
+   "Needs justification" where the person may not write. Before §705 it passed
+   `want:false` always (§279's recorded not-done) and §576's lock patched the
+   owed box after the paint; now the builder knows.
+   `asked` IS PART OF THE ROW, as `fnReportItems` carries it: a milestone or
+   outcome whose date has not come is red on its own figure and owed by
+   nobody — Submit does not ask for it (`fnAskedItems`), so the tag must not
+   either, or the page would tag four rows where the gate counts one. The
+   caller passes the same answer its "Not due" cell is drawn from. */
+function capNoteBox(row, may){
+  var owed = row.asked !== false && needsNote(row);
   return may
-    ? noteBox("cnote", x.id, x.note, false)
-    : noteRead(x.note, true);
+    ? noteBox("cnote", row.obj.id, row.obj.note, owed ? noteWant(row) : "")
+    : noteRead(row.obj.note, true, owed);
 }
 function capPickBox(x, may, opts, val){
   if (!may) return '<span class="mono">' + (val ? esc(val) : "\u2014") + '</span>';
@@ -37674,7 +37849,7 @@ function projReportBody(p, subject){
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + ent + '</td>' +
       '<td class="cc">' + pcell + '</td>' +
-      '<td class="notecol">' + capNoteBox(o, mayR) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:(d ? "deliverable" : "outcome"), obj:o, asked:!notDue }, mayR) + '</td></tr>';
   }).join("");
   var mRows = p.milestones.map(function(m, i){
     var notDue = !dueThisCycle(m.finish), quiet = notDue && !m.status;
@@ -37687,7 +37862,7 @@ function projReportBody(p, subject){
         ? capPctBox(m, mayM, m.name) + (statusPending(m) ? needsPct() : "")
         : (m.status ? '<b>' + msReads(m) + '%</b>'
                     : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, mayM) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"milestone", obj:m, asked:!notDue }, mayM) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
@@ -37724,7 +37899,7 @@ function capReportBody(c){
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
       '<td class="num">' + repTargetCell(m) + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"objective", obj:m }, may) + '</td></tr>';
   }).join("");
   var sel = railPick(c);
   var koBlock = c.keyObjectives.length
@@ -40144,144 +40319,226 @@ function accessMerged(row, col){
            value: vals.length === 1 ? vals[0] : null, mixed: vals.length > 1 };
 }
 
-function renderAccess(){
-  /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
-     A grant cannot express this: the SMO team holds `a_setup` at edit, which
-     is what lets them run every other Setup page — and editing THIS page is
-     editing who may edit this page, so anybody who can is a Super user
-     whatever their row says. The page stays READABLE to them: knowing what
-     everyone may do is part of running the office, and §37's rules are shown
-     to everyone who can open the page. */
-  var editable = grant("c_access") === "edit" && mayEditAccess();
-  /* §516.1: the second layer's row exists only where the client HAS a
-     second layer — Islam: "a client with no second layer has no second layer
-     row". Asked of midExists(), the one answer the set-up flow and the
-     Structure step already ask (§53.5). */
-  var COLS = SMPRules.ACCESS_COLS, ROWS = SMPRules.ACCESS_ROWS.filter(function(r){
-    return !r.mid || midExists(); });
+/* ── ROLES & ACCESS AS A LADDER (§704; design-mockups/roles-and-access) ──
+   Islam: *"it's more of levels of visibility … everyone set on a level can
+   see his level or see the bigger level(s) one by one"*, *"seeing doesn't
+   mean reporting"*, and, after the two rules were measured side by side on
+   every Raya seat, *"Apply the ladder."* So each role is one line: what it
+   ENTERS AND SUBMITS — a fact of what it holds, written as words, never a
+   control — and HOW FAR UP IT READS, the one control: own piece · own unit or
+   function · own division · the top, in the client's own words, the division
+   only where the client has one. The pen marks the level a role writes on (a switch), the eye every
+   level it reads; a level the role cannot stand on is struck through.
 
-  /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
-     (Islam, 2026-08-22: "remove all the descriptions from the headers and just
-     make it appear on hovering"). The notes are lists, and stacked under the
-     labels they made the HEAD of the table taller than its body. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §516) ──
-     Plan and Reporting are two answers about the same box, so the box's name
-     is written ONCE above them. Built off the `pair`/`col` fields the columns
-     carry — the header is derived from the same list the cells walk, so a
-     column cannot appear in one and not the other. */
-  var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
-  var hi = 0;
-  while (hi < COLS.length) {
-    var hc = COLS[hi];
-    if (!hc.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' +
-        esc(hc.label + " — " + hc.note) + '">' + esc(hc.label) + '</th>';
-      hi++;
-      continue;
+   The office's two rows are not on the ladder (they read and write
+   everything); the Copilot column and the reading-window switch stay as they
+   were. Under the table, one person can be moved a level up or down from
+   their role — an exception kept on the person, never a second table. */
+var ACC_EXC_PICK = null;
+function ladderWords(){
+  var top = String(labelWord("topword", "group") || "group").trim().toLowerCase();
+  var div = String(labelWord("division", "group") || "division").trim().toLowerCase();
+  return ["Own piece", buExists() ? "Own unit or function" : "Own function", "Own " + div, "The " + top];
+}
+var LADDER_ROW = {
+  gceo:      { held: null, says: "Nothing — holds no piece" },
+  cceo:      { held: null, says: "Nothing — holds no piece" },
+  owner:     { held: 1, says: "Their unit’s or function’s figures, and its submission" },
+  custodian: { held: 1, says: "What they keep, as its owner would" },
+  part:      { held: 0, says: "The lines of their own pillar, project, direction or capability" },
+  contrib:   { held: 0, says: "The lines that name them" }
+};
+LADDER_ROW[SMPRules.ACCESS_ROWS.filter(function(r){ return r.floor; })[0].key] = { held: null, floor: true, says: "Nothing" };
+function ladderLevels(){ return midExists() ? [0, 1, 2, 3] : [0, 1, 3]; }
+function ladderCell(r, editable){
+  var info = LADDER_ROW[r.key] || {}, words = ladderWords(), role = r.of[0], levels = ladderLevels();
+  var lv = SMPRules.ladderStored(world(), role);
+  if (lv === 2 && !midExists()) lv = 1;
+  var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = false;
+  /* a CEO stands only from their level up, and can be turned off to nothing */
+  var stand = SMPRules.LADDER_STAND[role];
+  if (stand != null) { lo = stand; if (lv < stand) lv = 0; }
+  var pen = info.held != null && SMPRules.penOn(world(), role);
+  /* the level a press on the lit one steps down to: the next one below that
+     the client has, never under the role's floor */
+  var below = function(i){ var k = levels.indexOf(i); return k > 0 && levels[k - 1] >= lo ? levels[k - 1] : stand != null ? 0 : null; };
+  return '<span class="ladder' + (editable ? '' : ' ro') + '" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + levels.map(function(i){
+    var struck = i < lo && !(info.floor && i === 0);
+    var word = info.floor && i === 0 ? "Nothing" : words[i];
+    /* the role's own level carries the pen switch: on, it enters and submits
+       what it holds; off, it reads it */
+    if (!struck && info.held === i) {
+      return '<button type="button" class="' + (pen ? 'pen' : 'eye') + '"' + (editable ? ' data-pen="' + esc(r.key) + '|' + (pen ? 'off' : 'on') + '"' : ' disabled') +
+        ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + pen + '" title="' + (pen ? 'Enters and submits here — press to make it read only' : 'Reads only here — press to let them enter and submit') + '">' +
+        (pen ? ICON_PEN : ICON_EYE) + esc(word) + '</button>';
     }
-    var span = 0;
-    while (hi + span < COLS.length && COLS[hi + span].pair === hc.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(hc.pair) +
-      '">' + esc(hc.pair) + '</th>';
-    for (var hj = 0; hj < span; hj++) {
-      var hb = COLS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.label + " — " + hb.note) +
-        '">' + esc(hb.col) + '</th>';
-    }
-    hi += span;
-  }
-  /* ── THE COPILOT COLUMN (Islam, 2026-10-01, from the signed-off
-     design-mockups/copilot-access/2026-10-01_copilot-column.html) ──────
-     Last, and only where the client has the Copilot: the served document
-     stamps its area (`data-copilot-area`, MODULE_DEF's own declaration), so
-     over file:// and on a client without it there is no column to write to
-     nothing (§61). The office's two rows carry the eye and the pen through
-     the module cell's own writer (§359.5: the default is an ABSENCE, edit);
-     every other row is a dash by RULE — "office only for now" — because the
-     api refuses a client's own person whatever the map holds, and a toggle
-     that changes nothing is decoration (§42). Both office rows are a single
-     role each on the merged table (§516), so the cell names that role. */
-  var COPA = copilotArea();
-  if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
-  var head = headTop + "</tr>" + headSub + "</tr>";
-
-  /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
-     Employee stopped being one: nobody grants it, and it was drawn as a chip
-     claiming somebody held something they did not. What it decided is still
-     a real question — what somebody on the register with NO role may open —
-     so it is still a row here, labelled as the state it is, and editable: a
-     client who wants people with no role to see nothing sets it to none and
-     can see that they have. */
-  var differ = [];
-  var body = ROWS.map(function(r){
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      COLS.map(function(c){
-        var m = accessMerged(r, c);
-        if (!m.pairs.length) return stateCell(r.of[0], c.areas[0], editable, m.why || "Cannot come up for this role.");
-        var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
-        var opt = { attr: "data-acm", target: target, value: m.value,
-                    ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: ACC_WHAT[c.key] || c.label } };
-        if (c.key === "plan") opt.states = ["view", "fill", "edit"];
-        if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
-        if (m.mixed) {
-          differ.push(accessRowName(r) + " · " + (c.col ? c.pair + ": " + c.col : c.label));
-          opt.mixed = true;
-          opt.title = "These differ underneath: " + m.pairs.map(function(p){
-            return accessRoleName(p.role) + " in " + accessAreaLabel(p.area).toLowerCase().replace(/^own /, "own ") +
-              " — " + ACC_WORD[p.v];
-          }).join("; ") + "." + (editable ? " Press a state to give them all that one." : "");
-        }
-        return stateCell(r.of[0], c.areas[0], editable, null, opt);
-      }).join("") +
-      (COPA ? (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])
-        ? stateCell(r.of[0], COPA.key, editable, null, {
-            value: moduleGrantFor(r.of[0], COPA), states: ["view", "edit"],
-            attr: "data-mac", shipped: COPA.shipped || "none",
-            ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: COPA.label || COPA.key } })
-        : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
+    var lit = !struck && i <= lv && (info.held == null ? (info.floor ? i >= 1 : true) : i > info.held);
+    var nil = info.floor && i === 0 && lv === 0;
+    var to = lit && i === lv ? below(i) : i;
+    if (info.floor && lit && i === lv && to === null) to = 0;
+    var can = editable && !struck && !fixed && to !== null && !nil;
+    return '<button type="button" class="' + (struck ? "off" : lit ? "eye" : nil ? "nil" : "") + '"' + (can ? ' data-lad="' + esc(r.key) + '|' + to + '"' : ' disabled') +
+      ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + lit + '"' +
+      (struck ? ' title="Not a level this role stands on"' : lit && i === lv && can ? ' title="Press to stop reading at this level"' : '') + '>' +
+      (lit ? ICON_EYE : '') + esc(word) + '</button>';
+  }).join("") + '</span>';
+}
+/* A person's own level: the highest any of their roles reads at, moved by
+   their exception — what the navigation will actually give them. */
+function personReadsAt(p){
+  var w = world(), rs = SMPRules.personRoles(w, p).map(function(x){ return x.role; });
+  if (!rs.length) rs = ["employee"];
+  return rs.reduce(function(m, k){ return Math.max(m, SMPRules.isOfficeRole(k) ? 3 : SMPRules.ladderLevel(w, p, k)); }, 0);
+}
+function accessExceptions(editable){
+  var words = ladderWords(), w = world();
+  var moved = PEOPLE.filter(function(p){ return SMPRules.reachMove(p) !== 0 || p.key === ACC_EXC_PICK; });
+  var rows = moved.map(function(p){
+    var mv = SMPRules.reachMove(p), now = personReadsAt(p);
+    var at = function(m){ var o = p.reach; if (m) p.reach = m; else delete p.reach; var v = personReadsAt(p); if (o == null) delete p.reach; else p.reach = o; return v; };
+    var asRole = at(0), down = at(-1) < asRole, up = at(1) > asRole;
+    var b = function(m, label, ok){ return '<button type="button" class="seg' + (mv === m ? ' on' : '') + '"' +
+      (mv === m ? '' : editable && ok ? ' data-reachp="' + esc(p.key) + '|' + m + '"' : ' disabled') + ' aria-pressed="' + (mv === m) + '">' + label + '</button>'; };
+    var roles = SMPRules.personRoleKeys(w, p).map(accessRoleName).join(", ") || "no role";
+    return '<div class="acexrow"><span class="acexwho"><b>' + esc(p.name || p.key) + '</b><span>' + esc(roles) + '</span></span>' +
+      '<span class="segsw">' + b(-1, "One lower", down) + b(0, "As the role", true) + b(1, "One higher", up) + '</span>' +
+      '<span class="acexnow">Reads up to <b>' + esc(words[Math.min(3, now)] || "") + '</b></span></div>';
   }).join("");
-
-  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§516). Its
-     hover says which pairs and what each holds; this line says that there is
-     something to decide at all, because a cell with nothing lit is easy to
-     read as "no access" from across the room. A status, not a description
-     (1b-ii), and drawn only while there is one. */
-  var differLine = differ.length
-    ? '<p class="acdiffer"><b>' + differ.length + (differ.length === 1 ? ' cell holds' : ' cells hold') +
-      ' different answers underneath</b> — ' + differ.map(esc).join(", ") +
-      '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
-    : '';
-
-  /* WHERE A READER'S SEAT LANDS (§687; Islam's A of the round-4 mockup):
-     the line above the matrix, because the matrix under it is exactly what
-     the rule reads to decide who is a reader — not the office, holding no
-     piece, granted edit or fill nowhere (reading.js readerSeat). Pressed by
-     whoever edits the matrix; kept on the client's structure as an absence
-     for the window (SMPRules.readersOpen). */
+  var pick = editable ? '<label class="acexpick"><span>Move one person</span><select data-reachpick><option value="">Choose a person…</option>' +
+    PEOPLE.filter(function(p){ return personActive(p) && !SMPRules.isOffice(w, p) && SMPRules.reachMove(p) === 0 && p.key !== ACC_EXC_PICK; })
+      .map(function(p){ return '<option value="' + esc(p.key) + '">' + esc(p.name || p.key) + '</option>'; }).join("") + '</select></label>' : '';
+  if (!rows && !editable) return "";
+  return '<div class="acex"><h3>Exceptions</h3>' + (rows || '<p class="acexnone">Nobody reads differently from their role.</p>') + pick + '</div>';
+}
+/* ── §704, REFINED (Islam, 2026-11-01) ────────────────────────────────
+   *"the copilot has the old icons. and the owner is just owner — is that the
+   capability owner or function or direction or what? the description column
+   needs to be useful to the SMO team to adjust"*, and of the switch above
+   the table, *"make the button better as well"*. So:
+     · every row names the roles it covers, in this client's words (a row
+       covering one role is titled by it — "Function head" at El Abd);
+     · the middle column says what the row's settings MEAN now — what the
+       role sees, what it writes, what it does not see — and changes with
+       every press, instead of a fixed phrase;
+     · the Copilot cell is the ladder's own eye and pen;
+     · the first-screen switch is its own settings row with a plain label,
+       the people it applies to today, and what it never changes. */
+var W_TXT = function(k, which){ return String(labelWord(k, which || "group") || "").trim(); };
+function accWords(){
+  var place = buExists() ? "business unit or function" : "function";
+  var places = buExists() ? "business units and functions" : "functions";
+  return { place: place, places: places, div: (W_TXT("division") || "division").toLowerCase(), top: (W_TXT("topword") || "group").toLowerCase() };
+}
+function accCovers(r){
+  var u = buExists() ? W_TXT("unitword") || "Business unit" : null;
+  var caps = (GROUP.capabilities || []).some(function(c){ return c && c.active !== false; });
+  var projects = FUNCTION_KEYS.some(function(k){ return FUNCTIONS[k] && fnPlansInProjects(FUNCTIONS[k]); });
+  switch (r.key) {
+    case "owner": return (u ? [u + " owner"] : []).concat(["Function head"]);
+    case "custodian": return (u ? [u + " custodian"] : []).concat(["Function custodian"], caps ? ["Capability custodian"] : []);
+    case "part": return (u ? [(W_TXT("pillar") || "Pillar") + " owner"] : [])
+      .concat(projects ? [(W_TXT("project") || "Project") + " owner"] : [], topHasPlan() ? ["Direction owner"] : [], caps ? [(W_TXT("capability") || "Capability") + " owner"] : []);
+    case "contrib": return ["Named on a measure, tactic or milestone"];
+    default: return r.floor ? ["On the register, holding nothing"] : [];
+  }
+}
+function accTitle(r){ var cv = accCovers(r); return cv.length === 1 && !r.floor && r.key !== "contrib" ? cv[0] : accessRowName(r); }
+function accRoleCell(r){
+  var cv = accCovers(r), single = cv.length === 1 && !r.floor && r.key !== "contrib";
+  return '<td class="rolecell"><b>' + esc(accTitle(r)) + '</b><span class="why">' + matrixRoleHeads(r) + '</span>' +
+    (cv.length && !single ? '<span class="accov">' + cv.map(function(x){ return '<span>' + esc(x) + '</span>'; }).join("") + '</span>' : '') + '</td>';
+}
+/* What this row's settings mean, now — the sentence the SMO team adjusts by. */
+function accMeaning(r){
+  var w = accWords(), info = LADDER_ROW[r.key] || {}, role = r.of[0];
+  var lv = SMPRules.ladderStored(world(), role), stand = SMPRules.LADDER_STAND[role];
+  if (lv === 2 && !midExists()) lv = 1;
+  if (stand != null && lv < stand) lv = 0;
+  var pen = info.held != null && SMPRules.penOn(world(), role);
+  var everything = "Everything in the " + w.top + ".";
+  var sees;
+  if (info.floor) sees = lv === 0 ? "Nothing." : lv === 1 ? "The " + w.place + " they are attached to." : lv === 2 ? "Their own " + w.div + " and everything in it." : everything;
+  else if (stand != null) sees = lv === 0 ? "Nothing." : lv === 3 ? everything : "Their own " + w.div + ": its page and every " + w.place + " in it.";
+  else sees = lv === 0 ? "Only their own piece inside their " + w.place + "." :
+    lv === 1 ? "Their own " + w.place + " in full: every piece in it, its plan and its figures." :
+    lv === 2 ? "Every " + w.place + " in their " + w.div + ", and the " + w.div + "’s page." : everything;
+  var writes = info.held == null ? "Nothing. They hold no piece."
+    : pen ? "Enters and submits " + ({ owner: (buExists() ? "their unit’s or function’s" : "their function’s") + " figures, and its report", custodian: "what they keep, as its owner would",
+        part: "the lines of their own piece", contrib: "the lines that name them" }[r.key] || "what they hold") + "."
+    : "Nothing. Reads only until the pen is on.";
+  var hides = [];
+  if (!(lv === 0 && (stand != null || info.floor)) && lv < 3) {
+    if (lv === 0) hides.push("the other pieces beside theirs");
+    if (lv <= 1) hides.push("other " + w.places);
+    if (lv === 2) hides.push("other " + w.div + "s");
+    hides.push("the " + w.top + "’s own pages");
+  }
+  return '<td class="acmeans"><span><b>Sees</b> ' + esc(sees) + '</span><span><b>Writes</b> ' + esc(writes) + '</span>' +
+    (hides.length ? '<span class="acno">Does not see ' + esc(hides.join(", ")) + '.</span>' : '') + '</td>';
+}
+/* The Copilot cell in the ladder's own terms: the eye reads it, the pen uses
+   it. Pressing a lit one turns it off; the writer is the module's own
+   (`data-mac`, "role|area|state|shipped"). Office only, by rule. */
+function accCopilotCell(r, editable, COPA){
+  var office = r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]);
+  if (!office) return '<td class="accop"><span class="acdash" title="Office only for now.">Office only</span></td>';
+  var v = moduleGrantFor(r.of[0], COPA), sh = COPA.shipped || "none", role = r.of[0];
+  var to = function(st){ return role + '|' + COPA.key + '|' + st + '|' + sh; };
+  var eyeOn = v === "view" || v === "edit", penOn = v === "edit";
+  var who = accessRowName(r) + " · " + matrixRoleHeads(r);
+  return '<td class="accop"><span class="ladder' + (editable ? '' : ' ro') + '">' +
+    '<button type="button" class="' + (eyeOn ? 'eye' : '') + '"' + (editable ? ' data-mac="' + esc(to(eyeOn ? "none" : "view")) + '"' : ' disabled') +
+      ' data-askwho="' + esc(who) + '" data-askwhat="' + esc(COPA.label || "the Copilot") + '" data-askfrom="' + esc(v) + '" aria-pressed="' + eyeOn + '">' + ICON_EYE + 'Reads</button>' +
+    '<button type="button" class="' + (penOn ? 'pen' : '') + '"' + (editable ? ' data-mac="' + esc(to(penOn ? "view" : "edit")) + '"' : ' disabled') +
+      ' data-askwho="' + esc(who) + '" data-askwhat="' + esc(COPA.label || "the Copilot") + '" data-askfrom="' + esc(v) + '" aria-pressed="' + penOn + '">' + ICON_PEN + 'Uses</button>' +
+    '</span></td>';
+}
+var ICON_WINDOW = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h6.2c.5 0 .8.3.8.8v10.2c0-.6-.4-1-1-1H3zM17 4.5h-6.2c-.5 0-.8.3-.8.8v10.2c0-.6.4-1 1-1H17z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+var ICON_BENCH = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 7.5h14M8 7.5v9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+function accLanding(editable, ROWS){
   var rdOn = SMPRules.readersOpen(GROUP);
-  var readersLine = '<div class="acreaders"><b>Readers land in</b>' +
-    (editable
-      ? '<span class="segsw" role="group" aria-label="Where a reader\u2019s seat lands at sign-in">' +
-          '<button type="button" class="seg' + (rdOn ? ' on' : '') + '" data-readers="window" aria-pressed="' + rdOn + '">the reading window</button>' +
-          '<button type="button" class="seg' + (rdOn ? '' : ' on') + '" data-readers="workbench" aria-pressed="' + (!rdOn) + '">the workbench</button>' +
-        '</span>'
-      : '<span class="acrdnow">' + (rdOn ? 'the reading window' : 'the workbench') + '</span>') +
-    '<span class="acrdwhy">A reader: no unit, function, capability, project or direction of their own, and nothing to edit. ' +
-      (rdOn ? 'They open in the window on sign-in, with the workbench a press of Exit away.' : 'Everybody opens on the workbench; Read on the bar still opens the window.') + '</span></div>';
-
+  var who = ROWS.filter(function(r){
+    var info = LADDER_ROW[r.key] || {};
+    return !(r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])) && (info.held == null || !SMPRules.penOn(world(), r.of[0]));
+  }).map(accTitle);
+  var opt = function(on, key, icon, word){
+    return '<button type="button" class="acland-opt' + (on ? ' on' : '') + '"' + (editable && !on ? ' data-readers="' + key + '"' : (editable ? '' : ' disabled')) +
+      ' aria-pressed="' + on + '">' + icon + '<span>' + word + '</span></button>';
+  };
+  return '<div class="acland"><div class="acland-txt"><b>First screen for people who can change nothing</b>' +
+      '<span>Today: ' + esc(who.join(", ") || "nobody") + '. This decides where they open on sign-in, never what they can see.</span></div>' +
+    '<div class="acland-sw" role="group" aria-label="First screen for people who can change nothing">' +
+      opt(rdOn, "window", ICON_WINDOW, "Reading window") + opt(!rdOn, "workbench", ICON_BENCH, "Workbench") + '</div></div>';
+}
+function renderAccess(){
+  /* Editing this page is editing who may edit it, so it is the Super user's
+     whatever any row says; it stays readable to whoever can open it. */
+  var editable = grant("c_access") === "edit" && mayEditAccess();
+  var ROWS = SMPRules.ACCESS_ROWS.filter(function(r){ return !r.mid || midExists(); });
+  var COPA = copilotArea();
+  var office = ROWS.filter(function(r){ return r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]); });
+  var rest = ROWS.filter(function(r){ return office.indexOf(r) < 0; });
+  var head = '<tr><th>Role</th><th>Sees up to · writes</th><th>What this means</th>' + (COPA ? '<th>' + esc(COPA.label || "Copilot") + '</th>' : '') + '</tr>';
+  var officeRows = office.map(function(r){
+    return '<tr class="acoffice">' + accRoleCell(r) + '<td><span class="acall">Sees and edits everything, by rule</span></td>' +
+      '<td class="acmeans"><span>Runs the platform: the plan, the cycle, Setup.</span></td>' + (COPA ? accCopilotCell(r, editable, COPA) : '') + '</tr>';
+  }).join("");
+  var body = rest.map(function(r){
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + accRoleCell(r) + '<td class="acladder">' + ladderCell(r, editable) + '</td>' + accMeaning(r) +
+      (COPA ? accCopilotCell(r, editable, COPA) : '') + '</tr>';
+  }).join("");
+  var mine = SMPRules.personRoleKeys(world(), viewer()).map(accessRoleName).join(", ");
+  var roLine = editable ? '' : '<p class="acro"><b>Read only.</b> You are on this client as ' + esc(mine || "no seat") +
+    '. Only the Super user changes who reads and writes what.</p>';
   return section("", "Roles & access",
       null,
-      readersLine + differLine +
-      '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
-      '<div class="chart-legend" style="margin-top:12px">' +
-        '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-view">' + ICON_HALFEYE + '</i> may read their part only (Part owner)</span>' +
-        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Plan only)</span>' +
-        '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
-        '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
-        (differ.length ? '<span><i class="st st-mixed">differs</i> answers differ underneath</span>' : '') +
-        '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
-      '</div>');
+      roLine +
+      '<div class="cfg acgrid acgrid-ladder"><table><thead>' + head + '</thead><tbody>' + officeRows + body + '</tbody></table></div>' +
+      '<p class="acladderkey"><span>' + ICON_EYE + ' sees — press a level to see up to it, the last lit one to step down</span>' +
+        '<span>' + ICON_PEN + ' enters and submits — a switch on the role’s own level</span>' +
+        '<span>Struck through: not a level this role can stand on.</span></p>' +
+      accLanding(editable, ROWS) +
+      accessExceptions(editable));
 }
 /* THE TWO ESSAYS ARE GONE FROM THE PAGE (Islam, 2026-08-22, on this table:
    "the design is poor"). "Own is not a setting" and "Three things are rules"
@@ -46034,8 +46291,9 @@ function renderMyLines(){
        has one, as the figure sets' page does (§16.7). */
     var noteOf = function(r){
       return rowAtRisk(r) && canEnterLine(r.target, r, "mine")
-        ? noteBox("note", r.id, r.obj.note, needsNote(r), r.target)
-        : (r.obj.note ? noteRead(r.obj.note, true) : '<span class="nobody">&mdash;</span>');
+        ? noteBox("note", r.id, r.obj.note, noteWant(r), r.target)
+        : (r.obj.note || needsNote(r) ? noteRead(r.obj.note, true, needsNote(r))
+                                      : '<span class="nobody">&mdash;</span>');
     };
     var body = '<table class="cfg"><thead><tr>' +
         '<th style="width:26%">' + L1("tactic") + '</th><th style="width:18%">What it produced</th>' +
@@ -46092,7 +46350,7 @@ function renderMyLines(){
         (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
     (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
       'This is a record until the SMO opens the next one.</div>') +
-    noteLockBar() + chips + blocks +
+    chips + blocks +
     '<div class="note"><b>You enter the figure, and its note when it is red; the unit submits.</b> ' +
       'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
 }
@@ -56304,7 +56562,9 @@ var READING = (function () {
      directions alone and the capabilities have the tab above; where it
      answers no, one list, as the box itself is. */
   function directions(key, caps) {
-    var u = planOf(key), items = SMPRules.shown(itemsNow(u));
+    /* §704: at "own piece" the person's own alone, as the page narrows it */
+    var u = planOf(key), pf = typeof partFilter === "function" ? partFilter(u) : null, items = SMPRules.shown(itemsNow(u));
+    if (pf) items = items.filter(pf);
     if (boxSplit(u)) items = items.filter(function (it) { return !!SMPRules.pillarIsCap(it) === !!caps; });
     var word = caps ? L1("capability").toLowerCase() : "direction";
     if (!items.length) return '<p class="rnone">No ' + esc(word) + 's this year.</p>';
@@ -78100,9 +78360,14 @@ var SYNC = (function () {
          single rail never shows a second Roles & access. Access is
          `c_access` — the same door as Strategy's matrix, readable to the
          office and written by the Super user alone (§89). */
-      { k:"access", ac:"c_access", grp:"access", mod:"insights", label:"Roles & access", glyph:"⚿", find:"permissions roles who can open insights library grant",
-        when: function(){ return moduleWord() === "insights"; },
-        render:renderModuleAccess },
+      /* §702: INSIGHTS' ROLES & ACCESS IS GONE. Islam: *"the choice made when
+         posting do the job. no need for the roles and access in the
+         insights."* Who reads a report is chosen when it is posted (the
+         departments it goes to, or everyone), so a second gate on opening
+         the library was a second place to look. Insights now declares no
+         area (lib/modules.ts) and its Setup is the Landing line alone.
+         renderModuleAccess stays in config-render.js for the next module
+         that declares an area. */
       { k:"landing", ac:"c_landing", grp:"landing", mod:"insights", label:"Landing line", glyph:"▤", find:"landing line welcome screen what insights says row sentence",
         when: function(){ return moduleWord() === "insights" && inOffice(); },
         render:renderLandingLine },
@@ -81099,15 +81364,6 @@ var SYNC = (function () {
        It holds the TARGET rather than a boolean, so it can never open
        somebody else's report. */
     if (def && def.k === "report") REPORTING = current;
-    /* §576: AND WHETHER A RED FIGURE HOLDS THIS PAGE. Worked out ONCE per
-       paint, before the render, because two halves read it — the bar the
-       renderers draw in the "to finish" bar's place, and `noteLockApply()`
-       after the paint, which shuts every other box — and two answers to one
-       question inside one frame is how a bar comes to name a row whose boxes
-       are open (§53.5). */
-    NOTELOCK = (def && typeof noteLockOf === "function" &&
-                (def.k === "report" || def.k === MY_TAB.k))
-      ? noteLockOf(def.k === "report" ? REPORTING : null, def.k === MY_TAB.k) : null;
     var body;
     try {
       body = (current === "group" || current === "setup" || current === "manage")
@@ -81486,10 +81742,6 @@ var SYNC = (function () {
        ones a bound field did not rebuild — a second listener on a survivor
        would step twice on one Enter (§24, §47.2). */
     if (typeof repKeys === "function") repKeys();
-    /* §576: AND WHILE A RED FIGURE HOLDS THE PAGE, every box but its row's
-       shuts — after the marks and the keys, because it reads the same
-       controls they annotate and only switches some of them off. */
-    noteLockApply();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -81530,7 +81782,6 @@ var SYNC = (function () {
     putScrollsIn(document.getElementById("panel"), _keep.boxes);
     if (_keep.y) window.scrollTo(0, _keep.y);
     putFocus(_keep.focus);
-    noteLockFocus(_keep.focus);
     positionRowMenu();
     focusOpenMenu();
     /* ── AND THE DIALOG, IF ONE IS OPEN (§116.6) ─────────────────────
@@ -82054,131 +82305,11 @@ var SYNC = (function () {
      forgets to add to the day a seventh box kind arrives). */
   var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
     "[data-cpct],[data-note],[data-cnote]";
-  /* ── §576: THE LOCK, APPLIED TO WHAT THE PAINT DREW ─────────────────
-     `NOTELOCK` (paint(), from `noteLockOf`) names the rows whose note is
-     owed; every reporting box that answers any OTHER row is switched off
-     here, along with the subject's own cycle note. In ONE place over the
-     same list the walk and the keys read (`REP_BOXES`), never at the eight
-     builders — a box kind added tomorrow is locked by being a box (§104.7).
-
-     `disabled`, not `aria-disabled`: the person must not be able to type, and
-     a shut box that still takes a keystroke is a lock in name only. The hover
-     says why. A locked row's note joins the tab path even where its builder
-     took it out (§528, and a capability's note always), because it is now the
-     one box the page is asking for. */
-  function repBoxRow(el){
-    var d = el.dataset;
-    return d.rep != null ? d.rep : d.crep != null ? d.crep : d.cpick != null ? d.cpick
-         : d.cpct != null ? d.cpct : d.note != null ? d.note : d.cnote;
-  }
-  function noteLockApply(){
-    if (!NOTELOCK) return;
-    var x = NOTELOCK.rows[0];
-    var why = "Write the note on " +
-      (String((x.obj && x.obj.name) || "").trim() || "the red figure") + " first";
-    document.querySelectorAll(REP_BOXES + ",[data-unote]").forEach(function(el){
-      var id = el.dataset.unote != null ? null : repBoxRow(el);
-      if (id != null && NOTELOCK.ids[id]) {
-        if (el.dataset.note != null || el.dataset.cnote != null) {
-          el.classList.add("lockhere");
-          el.removeAttribute("tabindex");
-          /* §576.2: in the wanted note's own words (`noteBox`). A capability's
-             box is always drawn with the quiet "Note, if there is one", which
-             the bar above it contradicts. */
-          if (!el.value) el.placeholder = "Why, and what is being done";
-        }
-        return;
-      }
-      el.disabled = true;
-      el.setAttribute("title", why);
-      /* The figure's box wears its unit beside it; the wrapper is what reads
-         as the box, so it is the wrapper that greys. */
-      (el.closest(".entry") || el).classList.add("lockshut");
-    });
-  }
-  /* The first owed note that is ON THE SCREEN, in the bar's order. */
-  function noteLockNote(){
-    if (!NOTELOCK) return null;
-    var notes = [].slice.call(document.querySelectorAll("[data-note],[data-cnote]"));
-    for (var i = 0; i < NOTELOCK.rows.length; i++) {
-      var id = NOTELOCK.rows[i].noteId || NOTELOCK.rows[i].id;
-      for (var j = 0; j < notes.length; j++) if (repBoxRow(notes[j]) === id) return notes[j];
-    }
-    return null;
-  }
-  /* WHEN THE BOX SOMEBODY WAS IN HAS JUST SHUT, the cursor goes to the note.
-     That is the moment this exists for: a red figure typed and Tab pressed
-     lands in the NEXT row's box, which the commit's paint has just greyed, and
-     the browser drops a disabled box's focus on the body. Only then — a paint
-     that left the focus somewhere live (a rail button, the row's own figure)
-     is somebody doing something else, and the page does not take it away. */
-  /* A reporting box has just committed. Heard in the CAPTURE phase, so it is
-     set before the box's own handler runs the paint that reads it — the
-     focus the paint keeps (`_keep.focus`) is already gone by then on a Tab,
-     because Chromium fires `change` as the focus leaves. A page that merely
-     OPENS with a red row does not move anybody's cursor; typing does. */
-  var NOTELOCK_TYPED = false;
-  document.addEventListener("change", function(e){
-    if (e.target && e.target.matches && e.target.matches(REP_BOXES)) NOTELOCK_TYPED = true;
-  }, true);
-  /* §576.2: AND WHETHER THE COMMIT WAS A KEY. Tab or Enter is somebody
-     moving on through the report; a mouse press is somebody choosing where
-     to go, and that choice is left alone. */
-  var NOTELOCK_KEYED = false;
-  document.addEventListener("keydown", function(e){
-    NOTELOCK_KEYED = e.key === "Tab" || e.key === "Enter";
-  }, true);
-  document.addEventListener("mousedown", function(){ NOTELOCK_KEYED = false; }, true);
-  /* Is this control the locked row's own — its figure or its note? */
-  function noteLockOwn(el){
-    if (!NOTELOCK || !el || !el.matches || !el.matches(REP_BOXES)) return false;
-    var id = repBoxRow(el);
-    return id != null && !!NOTELOCK.ids[id];
-  }
-  function noteLockFocus(kept){
-    var typed = NOTELOCK_TYPED, keyed = NOTELOCK_KEYED;
-    NOTELOCK_TYPED = false;
-    if (!NOTELOCK || !(kept || typed)) return;
-    var go = function(){
-      if (!NOTELOCK) return;
-      var a = document.activeElement;
-      /* §576.2: A TAB FROM A RED FIGURE ENDS IN THE NOTE, wherever the
-         browser's own step put it. The step is taken AFTER the commit's paint
-         and picks the next control it can still reach — on My reporting, with
-         every other line shut, that is Save draft, and the line below left it
-         there: measured, the cursor on Save draft in 2 Tabs of 12, and
-         note-lock.py's own Tab red 1 run in 4. Only a key does this; a press
-         somewhere live is still somebody doing something else. */
-      if (a && a !== document.body && !a.disabled &&
-          !(typed && keyed && !noteLockOwn(a))) return;
-      var n = noteLockNote();
-      if (n) n.focus();
-    };
-    go();
-    /* AND ONCE MORE AFTER THE BROWSER'S OWN STEP. A Tab commits the figure
-       (`change`, whose paint runs inside the keypress) and only THEN moves the
-       focus — to the box it had picked before the paint replaced it, which is
-       detached, so the focus falls on the body after this paint has already
-       returned. Measured on the build before §576 too: Tab out of a figure
-       has always left the cursor nowhere. Queued, it lands in the note. */
-    setTimeout(go, 0);
-  }
-  /* GO TO IT: the place the first owed note is in, opened the way the bar's
-     chips open one (`repGoTo`) — its rail, its capability on the company's
-     page, every band on My reporting — and then the note itself, lit. */
-  function noteGo(){
-    if (!NOTELOCK) return;
-    var x = NOTELOCK.rows[0], pl = x.place || {};
-    if (NOTELOCK.mine) {
-      if (MYLINEF && MYLINEF !== x.target) MYLINEF = "";
-    } else {
-      if (REPORTING === "group" && String(x.subj || "").indexOf("cap:") === 0)
-        TOPCAP = String(x.subj).slice(4);
-      if (pl.rail) RAIL[pl.rail] = pl.code;
-    }
-    paint();
-    setTimeout(function(){ var n = noteLockNote(); if (n) gapLight(n); }, 0);
-  }
+  /* §705: §576's lock lived here — `noteLockApply` shut every reporting box
+     but the red row's after each paint, and `noteLockFocus`/`noteGo` steered
+     the cursor to the owed note. Gone at Islam's word (*"don't stop a person
+     from entering the numbers"*): the owed note is said by the tag `noteBox`
+     draws, and nothing is shut or steered. */
   function repMarkControls(){
     document.querySelectorAll(".repwalk").forEach(function(el){
       el.classList.remove("repwalk");
@@ -82247,8 +82378,6 @@ var SYNC = (function () {
     }, 0);
   }
   function repWalk(){
-    /* §576: and Alt+Enter is the lock's Go to it while it holds. */
-    if (NOTELOCK) { noteGo(); return; }
     var chips = repChips(), i = -1, a;
     for (a = 0; a < chips.length; a++)
       if (chips[a].dataset.rkey === REPWALK_KEY) { i = a; break; }
@@ -82353,9 +82482,6 @@ var SYNC = (function () {
      there is genuinely nothing to point at and nothing is better than a guess
      at which row took its place. */
   function repStep(key, by){
-    /* §576: while a red figure holds the page, the next place is its note. */
-    var owed = noteLockNote();
-    if (owed) { gapLight(owed); return; }
     var els = repTypedBoxes(), i, here = null;
     for (i = 0; i < els.length; i++) if (repKeyOf(els[i]) === key) { here = i; break; }
     if (here == null) return;
@@ -82878,6 +83004,57 @@ var SYNC = (function () {
           : accessImpact(d.askfrom, to, d.askwhat || "this"),
         go: function(){ go(); paint(); askSaved(findCell); } });
     }
+    /* §704: THE LADDER. A press sets how far up every role on the row reads,
+       as the three reach rows of the map — the place, the division, the top,
+       each view or none — and clears §517's half eye, which the part owners'
+       row read as its level only until the row was set. */
+    document.querySelectorAll("[data-lad]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.lad.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], lv = +p[1];
+        if (!row) return;
+        var words = ladderWords();
+        askFirst(b, { title: b.dataset.askwho || "This role",
+          body: lv === 0 && row.floor ? "Will read <b>nothing</b> unless they hold something."
+            : "Will read up to <b>" + esc(words[lv]) + "</b>. What they enter and submit does not change.",
+          go: function(){
+            var R = SMPRules.REACH;
+            row.of.forEach(function(k){
+              var a = (ACCESS[k] = ACCESS[k] || {});
+              a[R.place] = lv >= 1 ? "view" : "none";
+              a[R.div] = lv >= 2 ? "view" : "none";
+              a[R.top] = lv >= 3 ? "view" : "none";
+            });
+            if (row.key === "part") delete GROUP[SMPRules.DIR_SCOPE];
+            paint(); askSaved(function(){ var x = document.querySelector('[data-lad^="' + p[0] + '|"]'); return x && x.closest("td"); });
+          } });
+      });
+    });
+    /* §704: the pen, a switch on the role's own level (`a_pen`, edit or none). */
+    document.querySelectorAll("[data-pen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pen.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], on = p[1] === "on";
+        if (!row) return;
+        askFirst(b, { title: b.dataset.askwho || "This role",
+          body: on ? "Will <b>enter and submit</b> what they hold." : "Will <b>read only</b> what they hold, and enter nothing.",
+          go: function(){
+            row.of.forEach(function(k){ (ACCESS[k] = ACCESS[k] || {})[SMPRules.REACH.pen] = on ? "edit" : "none"; });
+            paint(); askSaved(function(){ var x = document.querySelector('[data-pen^="' + p[0] + '|"]'); return x && x.closest("td"); });
+          } });
+      });
+    });
+    /* One person moved a level from their role (person.reach, +1 or -1). */
+    document.querySelectorAll("[data-reachp]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.reachp.split("|"), who = PEOPLE.filter(function(x){ return x.key === p[0]; })[0], mv = +p[1];
+        if (!who) return;
+        askFirst(b, { title: who.name || who.key,
+          body: mv === 0 ? "Will read <b>as their role</b> again." : "Will read <b>one level " + (mv > 0 ? "higher" : "lower") + "</b> than their role. What they enter and submit does not change.",
+          go: function(){ if (mv) who.reach = mv; else delete who.reach; if (!mv && ACC_EXC_PICK === who.key) ACC_EXC_PICK = null; paint(); askSaved(function(){ return document.querySelector(".acex"); }); } });
+      });
+    });
+    document.querySelectorAll("[data-reachpick]").forEach(function(sel){
+      sel.addEventListener("change", function(){ ACC_EXC_PICK = sel.value || null; paint(); });
+    });
     function accessPartCell(){ var x = document.querySelector("[data-dirscope]"); return x && x.closest("td"); }
     document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -87864,11 +88041,6 @@ var SYNC = (function () {
         return;
       }
       if (ev.target.closest("[data-repnext]")) repWalk();
-    });
-    /* §576: the lock's own bar, drawn in that bar's place while a red figure
-       holds the page — one button, and it goes to the note that is owed. */
-    document.querySelectorAll("[data-notego]").forEach(function(b){
-      b.addEventListener("click", function(){ noteGo(); });
     });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never

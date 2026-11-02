@@ -135,7 +135,7 @@
     /* NO ZEBRA in this language — rows separate on hover instead, and the
        columns are divided by hairlines. The token stays because a hundred
        rules read it; it just resolves to the surface it sits on. */
-    --zebra:#F6F8FB; --zebra-focus:#FFFBEB;
+    --zebra:#F6F8FB; --zebra-focus:#FFFBEB; --zebra-bad:#FBF1EF;
     --over-bg:#EEF2FF; --over-line:#C7D2FE;
     --on-fill:#FFFFFF;
   }
@@ -156,7 +156,7 @@
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
     --panel:#060B16; --panel-ink:#E8EDF5;
-    --zebra:#182339; --zebra-focus:#2E2510;
+    --zebra:#182339; --zebra-focus:#2E2510; --zebra-bad:#2E1616;
     --over-bg:#1E1B3A; --over-line:#3F3A72;
     --on-fill:#0B1120;
   }
@@ -218,7 +218,7 @@
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
     --panel:#16325C; --panel-ink:#FFFFFF;
-    --zebra:#F5F7FA; --zebra-focus:#FDFAF1;
+    --zebra:#F5F7FA; --zebra-focus:#FDFAF1; --zebra-bad:#FBF1EF;
     --over-bg:#FBF6E9; --over-line:#E8D9AE;
     --on-fill:#FFFFFF;
   }
@@ -243,7 +243,7 @@
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
     --panel:#0E1014; --panel-ink:#EAF0FA;
-    --zebra:#212630; --zebra-focus:#2A2720;
+    --zebra:#212630; --zebra-focus:#2A2720; --zebra-bad:#33201E;
     --over-bg:#332C16; --over-line:#4A3F1E;
     --on-fill:#14161A;
   }
@@ -5913,6 +5913,89 @@ html[data-client-settings] .viewer { display:none; }
 .acreaders .acrdwhy { flex:1 1 320px; font-size:12.5px; color:var(--ink-3); }
 
 
+/* ── ROLES & ACCESS AS A LADDER (§704) ─────────────────────────────────── */
+.acgrid-ladder td.acsays { font-size:13px; color:var(--ink-2); }
+.acgrid-ladder td.acladder { white-space:nowrap; }
+.cfg.acgrid.acgrid-ladder table { width:auto; max-width:100%; table-layout:auto; min-width:0; }
+.cfg.acgrid.acgrid-ladder th:first-child, .cfg.acgrid.acgrid-ladder td.rolecell { width:auto; }
+.acgrid-ladder { overflow-x:auto; }
+.ladder { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface); }
+.ladder button { display:inline-flex; flex-direction:row; align-items:center; gap:0; width:auto; min-width:0; margin:0;
+  font:inherit; font-size:12.5px; font-weight:600; line-height:1.2; color:var(--ink-3); background:none; border:0; border-radius:0;
+  border-right:1px solid var(--line-soft, var(--line)); padding:6px 10px; cursor:pointer; white-space:nowrap; }
+.ladder button:last-child { border-right:0; }
+.ladder button:disabled { cursor:default; }
+.ladder button:not(:disabled):hover { color:var(--ink); background:var(--surface-2); }
+.ladder button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.ladder button b { margin-right:5px; }
+.ladder button.off { color:var(--line); text-decoration:line-through; }
+.ladder button.pen { background:var(--good-bg); color:var(--good); }
+.ladder button.eye { background:var(--panel); color:var(--panel-ink); }
+.ladder button.nil { background:var(--surface-2); color:var(--ink); }
+.acall { font-size:13px; font-weight:600; color:var(--ink-2); }
+.acladderkey { margin:10px 0 0; font-size:12.5px; color:var(--ink-3); }
+.acladderkey b { color:var(--ink-2); }
+.acex { margin-top:18px; border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--surface); display:grid; gap:8px; }
+.acex h3 { margin:0; font-size:13.5px; }
+.acexrow { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:6px 0; border-top:1px solid var(--line-soft, var(--line)); }
+.acexwho { min-width:220px; } .acexwho b { display:block; } .acexwho span { font-size:12px; color:var(--ink-3); }
+.acexnow { font-size:12.5px; color:var(--ink-3); } .acexnow b { color:var(--ink); }
+.acexnone { margin:0; font-size:13px; color:var(--ink-3); }
+.acexpick { display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-3); }
+.acexpick select { font:inherit; font-size:13px; padding:4px 8px; border:1px solid var(--line); border-radius:7px; background:var(--surface); color:var(--ink); }
+.acex .segsw button:disabled { color:var(--line); cursor:default; }
+/* §704: the ladder is one control on one line; the settings tables' cell cap
+   (.cfg table td, 150px with an ellipsis) would cut it, so it is lifted here */
+.cfg.acgrid.acgrid-ladder td { max-width:none; overflow:visible; text-overflow:clip; }
+.cfg.acgrid.acgrid-ladder td.acsays { white-space:normal; }
+:root[data-theme="dark"] .ladder button.eye { background:var(--ink-2); color:var(--ground); }
+/* §704: each column as wide as what it holds, with a little room around */
+.cfg.acgrid.acgrid-ladder th, .cfg.acgrid.acgrid-ladder td { padding-left:14px; padding-right:14px; }
+.cfg.acgrid.acgrid-ladder th:first-child, .cfg.acgrid.acgrid-ladder td.rolecell { width:auto; white-space:nowrap; }
+.cfg.acgrid.acgrid-ladder td.acsays { width:auto; max-width:280px; white-space:normal; }
+.cfg.acgrid.acgrid-ladder th:last-child, .cfg.acgrid.acgrid-ladder td:last-child { width:auto; }
+.ladder.ro button { cursor:default; }
+.ladder.ro button:not(.pen):not(.eye):not(.nil) { background:none; }
+.acro { margin:0 0 10px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); font-size:13px; color:var(--ink-2); }
+.acro b { color:var(--ink); }
+/* §704: the platform's own eye and pen in the ladder */
+.ladder button svg { width:14px; height:14px; margin-right:5px; flex:none; }
+.acladderkey { display:flex; flex-wrap:wrap; gap:6px 18px; }
+.acladderkey span { display:inline-flex; align-items:center; gap:5px; }
+.acladderkey svg { width:14px; height:14px; }
+.acsays .acoff { display:block; margin-top:2px; font-size:12px; font-weight:600; color:var(--bad, var(--ink-3)); }
+/* ── §704 refined: named rows, the live meaning, Copilot as eye and pen,
+   and the first-screen switch as its own settings row ─────────────────── */
+.cfg.acgrid.acgrid-ladder table { width:100%; }
+.cfg.acgrid.acgrid-ladder th { white-space:nowrap; }
+.cfg.acgrid.acgrid-ladder td { vertical-align:top; padding-top:11px; padding-bottom:11px; }
+.cfg.acgrid.acgrid-ladder td.rolecell { white-space:normal; min-width:150px; max-width:220px; }
+.cfg.acgrid.acgrid-ladder td.rolecell .why { display:block; margin-top:1px; }
+.accov { display:flex; flex-wrap:wrap; gap:3px; margin-top:6px; }
+.accov span { font-size:11.5px; font-weight:600; line-height:1.5; color:var(--ink-2); background:var(--surface-2); border-radius:999px; padding:0 8px; white-space:nowrap; }
+.cfg.acgrid.acgrid-ladder td.acmeans { white-space:normal; min-width:260px; max-width:380px; font-size:13px; color:var(--ink-2); line-height:1.45; }
+.acmeans span { display:block; }
+.acmeans span + span { margin-top:3px; }
+.acmeans b { color:var(--ink); font-weight:700; margin-right:4px; }
+.acmeans .acno { color:var(--ink-3); }
+.cfg.acgrid.acgrid-ladder td.accop { white-space:nowrap; }
+.acdash { font-size:12.5px; color:var(--ink-3); }
+tr.acoffice td { background:var(--surface-2); }
+.acland { display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; margin-top:16px; padding:14px 16px;
+  border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.acland-txt { flex:1 1 320px; min-width:0; display:grid; gap:2px; }
+.acland-txt b { font-size:14px; color:var(--ink); }
+.acland-txt span { font-size:13px; color:var(--ink-3); }
+.acland-sw { display:inline-flex; gap:8px; }
+.acland-opt { display:inline-flex; align-items:center; gap:8px; font:inherit; font-size:13.5px; font-weight:600; cursor:pointer;
+  padding:9px 14px; border-radius:9px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); }
+.acland-opt svg { width:18px; height:18px; }
+.acland-opt:not(.on):not(:disabled):hover { border-color:var(--ink-3); color:var(--ink); }
+.acland-opt.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); cursor:default; }
+.acland-opt:disabled:not(.on) { cursor:default; opacity:.6; }
+.acland-opt:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.cfg.acgrid.acgrid-ladder td.acmeans b { display:inline; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -7111,29 +7194,19 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      note does not float in the middle of a cell beside a one-line figure. */
   .notefld{width:100%;max-width:none;text-align:left;font-size:13px;vertical-align:top}
   .notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
-  /* §576: A RED FIGURE HOLDS THE PAGE — the mockup Islam approved
-     (design-mockups/note-first/). The bar takes the "to finish" bar's place;
-     every other box greys and will not take typing; the owed note is ringed.
+  /* §705: THE TAG ON THE OWED NOTE BOX — the mockup Islam approved
+     (design-mockups/note-tag/2026-11-02_tag-on-the-note-box.html, option A):
+     a small red label above the box, a dot before it, reading "Note needed ·
+     off track". Above rather than over the box, so it never covers what is
+     typed. Replaces §576's lock bar, ring and greyed boxes, which stood here.
      Tokens only, so the dark theme carries it with nothing added. */
-  .lockbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;
-    width:fit-content;max-width:100%;margin:0 0 10px;padding:10px 14px;
-    border:1px solid var(--bad);border-radius:var(--r);background:var(--bad-bg);
-    color:var(--ink);font-size:var(--fs-body)}
-  .lockbar b{color:var(--bad-tx)}
-  .lockbar .lockn{color:var(--ink-3);font-size:var(--fs-small);white-space:nowrap}
-  .lockbar .lockgo{font:inherit;font-weight:600;font-size:13px;padding:5px 14px;
-    border:1px solid var(--bad);border-radius:6px;background:var(--surface);
-    color:var(--bad-tx);cursor:pointer;white-space:nowrap}
-  .lockbar .lockgo:hover{background:var(--bad-bg)}
-  .lockbar .lockgo:focus-visible{outline:2px solid var(--bad);outline-offset:2px}
-  .notefld.lockhere{outline:3px solid var(--bad);outline-offset:1px}
-  /* §576.2: A CAPABILITY'S PANE PINS ITS PROJECT BAND with a strip of page
-     ground 24px tall above it (`.pane > .pband::before`), and at the bar's
-     10px that strip painted over the bar's bottom edge — found by looking at
-     cap6, the one page the worked example opens locked. 26px because the
-     bar's own 10px collapses into it. Spaced where the bar meets that pane
-     and nowhere else, so no other page moves. */
-  .lockbar + .capbody{margin-top:26px}
+  .notetag{display:inline-flex;align-items:center;gap:6px;margin:0 0 5px;
+    font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--bad-tx);white-space:nowrap}
+  .notetag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);flex:none}
+  /* And the read side (§705): a red row nobody has explained, read by somebody
+     who may not write the note, says "Needs justification" in the same red. */
+  td .needjust, .needjust{color:var(--bad-tx);font-weight:600}  /* `td .why` sets the grey; this outranks it */
   /* And the break survives being read (§271, §161.3): `pre-line` keeps the
      newlines somebody typed and wraps everything else. On the READ-ONLY note
      wherever it is printed — never on `.why` at large, which is the page's
@@ -7171,13 +7244,6 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .entry .field{border:0;width:78px;border-radius:0}
   .entry .field:focus-visible{outline:none}
   .entry:focus-within{outline:2px solid var(--gold);outline-offset:1px}
-  /* §576: a box shut by the note lock — after `.entry.filled`, and naming it,
-     because a box that already holds a figure would otherwise stay green and
-     read as open. */
-  .lockshut, .entry.lockshut, .entry.filled.lockshut{opacity:.45;cursor:not-allowed;
-    background:var(--surface-2);border-color:var(--line)}
-  .entry.lockshut .field, .entry.filled.lockshut .field,
-  .entry.lockshut .unitsuf{background:transparent;cursor:not-allowed}
   .unitsuf{display:flex;align-items:center;padding:0 9px;background:var(--surface-2);
     border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;
     color:var(--ink-3);white-space:nowrap}
@@ -7247,7 +7313,11 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   /* Rows that already say something keep saying it. */
   .board tbody tr.alt td { background:var(--surface-2); }
   tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
-  tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
+  /* §705: a TOKEN, not the light pink it was written as — in the dark theme
+     that literal drew a light row across a dark table, and the tag the note
+     box now wears could not be read on it (2.0:1, measured). Light keeps the
+     exact colour it had; dark takes its own red wash. */
+  tbody tr.wantnote:nth-child(even) > td { background:var(--zebra-bad); }
 
   /* §414: SEVERAL OUTCOMES PER TACTIC. A sub-line wears its tactic's stripe
      rather than its own position's — the tactic's shared cells span it, so a

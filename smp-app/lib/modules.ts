@@ -207,17 +207,14 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
      unbuilt and is still the honest answer. */
   portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: true,  areas: [], lines: [NOTHING] },
   insights:  { label: "Insights",  note: "Research, analytics and market reports",           built: true,
-    /* ONE AREA, because there is one thing to be granted: opening the
-       library. Per-item visibility is spec 046 decision #15's deferral —
-       *whole module, for now* — and a second area for it now would be a
-       column nobody could fill (§61). The shipped state is a DEFAULT and not
-       a floor: a library Forefront chose to publish to a client is for that
-       client, and their Super user narrows it on the table the day there is
-       one; an absent key falls back here, because absent means *not answered
-       yet* and never *no* (§30.2). */
-    areas: [{ key: "a_insights", label: "Insights",
-              note: "Open the library and download what is in it",
-              states: ["view", "none"], shipped: "view" }],
+    /* NO AREA (§702). It had one — a_insights, opening the library, granted
+       per role on Insights' own Roles & access page. Islam: *"the choice made
+       when posting do the job. no need for the roles and access in the
+       insights."* Each report is posted to chosen departments or to everyone
+       (lib/library.ts `seen`), and that is the whole of who reads what: the
+       module opens for everybody the door lets in, as Strategy and Portfolio
+       do. A grant stored under a_insights before today is no longer read. */
+    areas: [],
     lines: INSIGHTS_LINES, mark: INSIGHTS_MARK },
   /* FFPROCESS, CARRIED IN WHOLE (2026-10-01): process maps, RACI, authority
      matrices and governance, with its own design under SMP's top bar. The

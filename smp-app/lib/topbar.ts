@@ -35,7 +35,7 @@
    before the body paints, from the same `smp.theme` key Strategy reads — the
    same browser, so the same choice. */
 import { createHash } from "node:crypto";
-import { NAVSKEL_SCRIPT } from "./navskel.ts";
+import { NAVSKEL_FILE } from "./navskel.ts";
 import { barExtras, readingLink, type ProcessesRead } from "./bar-extras.ts";
 import type { ModuleKey } from "./modules.ts";
 import { MODULE_DEF, moduleMenu, clientHref, DEFAULT_MODULE } from "./modules.ts";
@@ -399,7 +399,7 @@ export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/t
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
 })();
-` + NAVSKEL_SCRIPT;   /* §620: the press draws the next page's shape (lib/navskel.ts) */
+` + NAVSKEL_FILE;   /* §620: the press draws the next page's shape (lib/navskel.ts); §701: Jump to and the offline strip */
 
 /* The script is a file, never inline: the shell's policy is `script-src
    'self'` (lib/shell.ts SHELL_CSP), so an inline handler would render

@@ -3806,8 +3806,14 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
   check(/javascript|ecmascript/i.test(r.headers.get("content-type") || ""), "…as JavaScript, or the browser refuses it", r.headers.get("content-type"));
   check(body.includes('addEventListener("push"') && body.includes('addEventListener("notificationclick"'),
         "…and it carries the notification half (Phase G's row: a push cannot arrive without it)");
-  check(!/addEventListener\("fetch"/.test(body),
-        "…and NO fetch handler: nothing here is served from disk (the plan's line 47, kept)");
+  /* §701: ONE fetch handler, for page loads alone, answering SMP's own
+     offline page when the network fails — and still nothing on disk (the
+     plan's line 47, kept): it never opens a cache. */
+  const fetchAt = body.indexOf('addEventListener("fetch"');
+  const handler = fetchAt < 0 ? "" : body.slice(fetchAt, body.indexOf("\n});", fetchAt));
+  check(fetchAt >= 0 && /mode !== "navigate"/.test(handler) && !/caches/.test(handler),
+        "…and its one fetch handler answers page loads only, and opens no cache (§701; the plan's line 47, kept)");
+  check((body.match(/addEventListener\("fetch"/g) || []).length === 1, "…and there is only the one");
 
   /* THE BOTH-ENDS HALF (§94.2): it is not enough that the frozen caches are
      gone — a build that served no worker at all would satisfy that. So the
@@ -3842,6 +3848,15 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
   const after = await page.evaluate(() => caches.keys());
   check(after.length === 0, "…and a navigation under it stores nothing", JSON.stringify(after));
+
+  /* §701: AND A PAGE LOAD WITH NO CONNECTION IS SMP'S OWN OFFLINE PAGE, not
+     the browser's error — answered by the worker, so still nothing stored. */
+  await ctx.setOffline(true);
+  await page.goto(BASE + "/raya-trade/strategy").catch(() => {});
+  const off = await page.evaluate(() => ({ h: (document.querySelector("h1") || {}).textContent || "", retry: !!document.getElementById("retry") })).catch(() => ({ h: "", retry: false }));
+  await ctx.setOffline(false);
+  check(off.h === "You're offline" && off.retry, "a page load with no connection shows SMP's own offline page, with Try again (§701)", JSON.stringify(off));
+  check((await page.evaluate(() => caches.keys())).length === 0, "…and showing it stored nothing");
 
   /* AND THE HALF THE WORKER IS FOR ON AN IPHONE (§26): a push is only ever
      delivered to a platform that has been ADDED TO A HOME SCREEN, which

@@ -1,0 +1,209 @@
+<title>Jump To and Offline</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: one scene at a time over a sample Strategy page; the new parts are outlined in purple. Platform tokens as in the other mockups. */
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--hl:#E8EEF7;--good:#2E6B45;--goodbg:#E6F2EA;--attn:#B45309;--attnbg:#FFF4E5;--new:#7A3E9D;--newbg:#F4ECF9;--scrim:rgba(23,27,34,.45);--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--hl:#24324A;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2410;--new:#C9A0E6;--newbg:#2A1F33;--scrim:rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--hl:#24324A;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2410;--new:#C9A0E6;--newbg:#2A1F33;--scrim:rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top h1{font-size:17px;margin:0}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:5px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--navink);font-weight:600}
+.lead{font-size:13px;color:var(--ink-2);max-width:80ch;margin:0}
+.lead b{color:var(--ink)}
+.tag{display:inline-block;font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--new);background:var(--newbg);border-radius:4px;padding:1px 6px;vertical-align:middle}
+.new{box-shadow:0 0 0 2px var(--new)}
+
+/* the sample screen */
+.screen{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground);min-height:560px;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:10px;background:var(--nav);color:var(--navink);padding:8px 14px;flex-wrap:wrap}
+.bar .brand{font-weight:700;letter-spacing:.02em}
+.bar .mods{display:flex;gap:2px;flex-wrap:wrap}
+.bar .mods span{padding:3px 9px;border-radius:5px;font-size:13px;opacity:.8}
+.bar .mods span.on{background:rgba(255,255,255,.14);opacity:1;font-weight:600}
+.bar .sp{flex:1}
+.jumpbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:var(--navink);border-radius:6px;padding:3px 6px 3px 9px;font-size:13px;min-width:200px;border-radius:6px}
+.jumpbtn kbd{margin-left:auto}
+.ava{width:26px;height:26px;border-radius:50%;background:var(--goldfill);color:#1C1F25;font-weight:700;font-size:11px;display:grid;place-items:center}
+kbd{font:600 11px/1 var(--sans);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:2px 5px;background:var(--surface);color:var(--ink-2)}
+.jumpbtn kbd{background:transparent;color:var(--navink);border-color:rgba(255,255,255,.35)}
+.subnav{display:flex;gap:4px;padding:6px 14px;background:var(--surface);border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+.subnav span{padding:3px 8px;border-radius:5px;color:var(--ink-2)}
+.subnav span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.page{padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;flex:1;align-content:start}
+.page h2{grid-column:1/-1;margin:0;font-size:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.card h3{margin:0 0 6px;font-size:13.5px}
+.card p{margin:0;font-size:13px;color:var(--ink-2)}
+.field{border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;background:var(--surface);margin-top:6px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 12px;font-weight:600;font-size:13px}
+.btn.solid{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.btn.held{opacity:.5;cursor:not-allowed}
+
+/* jump to */
+.scrim{position:absolute;inset:0;background:var(--scrim);display:flex;justify-content:center;align-items:flex-start;padding:48px 12px 12px}
+.pal{width:min(560px,100%);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:470px;overflow:hidden}
+.q{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.q svg{flex:none;color:var(--ink-3)}
+.q input{flex:1;border:0;outline:0;background:transparent;font-size:15px;min-width:0}
+.res{overflow-y:auto;padding:6px;flex:1}
+.grp{font:700 10.5px/1.4 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--gold);padding:8px 8px 4px}
+.it{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;text-align:left;padding:7px 9px;border-radius:6px;font-size:14px}
+.it .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it .nm mark{background:transparent;color:var(--gold);text-decoration:underline;text-underline-offset:2px}
+.it .wh{margin-left:auto;font-size:12.5px;color:var(--ink-3);white-space:nowrap;padding-left:8px}
+.it.sel{background:var(--hl)}
+.empty{padding:22px 12px;text-align:center;color:var(--ink-3);font-size:13.5px}
+.pfoot{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:8px 14px;border-top:1px solid var(--line);background:var(--surface-2);font-size:12px;color:var(--ink-3)}
+.pfoot .sp{flex:1}
+.opened{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:6px 12px;border-radius:6px;font-size:13px;white-space:nowrap}
+
+/* offline */
+.offpage{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 16px;background:var(--ground)}
+.offbox{max-width:420px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.offbox .ic{width:64px;height:64px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3)}
+.offbox h2{margin:4px 0 0;font-size:20px}
+.offbox p{margin:0;color:var(--ink-2);font-size:14px}
+.offbox .small{font-size:12.5px;color:var(--ink-3)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--attn);margin-right:6px;vertical-align:middle}
+.strip{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:13px;flex-wrap:wrap}
+.strip.off{background:var(--attnbg);color:var(--ink);border-bottom:1px solid var(--line)}
+.strip.on{background:var(--goodbg);color:var(--ink);border-bottom:1px solid var(--line)}
+.strip .sp{flex:1}
+.strip .linkbu{border:0;background:none;padding:0;text-decoration:underline;font-size:13px;font-weight:600}
+.heldtip{font-size:12px;color:var(--ink-3);margin-top:4px}
+.scene{display:none}.scene.on{display:block}
+@media (max-width:640px){.bar .mods{display:none}.jumpbtn{min-width:0}.jumpbtn .lbl{display:none}.it .wh{display:none}.scrim{padding-top:16px}}
+@media (prefers-reduced-motion:no-preference){.pal{animation:pop .14s ease-out}@keyframes pop{from{transform:translateY(-6px);opacity:.6}}}
+</style>
+
+<div class="top">
+  <h1>Jump to, and the offline page</h1>
+  <div class="seg" role="group" aria-label="Scene">
+    <button type="button" data-s="jump" aria-pressed="true">1 · Jump to</button>
+    <button type="button" data-s="off">2 · No internet on opening</button>
+    <button type="button" data-s="lost">3 · Lost while working</button>
+    <button type="button" data-s="back">4 · Back online</button>
+  </div>
+</div>
+<p class="lead" id="lead"></p>
+
+<div class="screen" id="screen">
+  <div class="strip off new" id="stripOff" hidden><span class="dot"></span><b>You're offline.</b> What you see may be out of date, and nothing can be saved until the connection is back. <span class="sp"></span><button type="button" class="linkbu" id="retry2">Try again</button></div>
+  <div class="strip on new" id="stripOn" hidden><b>Back online.</b> Saving works again. <span class="sp"></span></div>
+  <div class="bar" id="bar">
+    <span class="brand">SMP</span>
+    <div class="mods"><span class="on">Strategy</span><span>Internal Tracker</span><span>Meeting Notes</span><span>Processes</span><span>Insights</span></div>
+    <span class="sp"></span>
+    <button type="button" class="jumpbtn new" id="openJump"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="lbl">Jump to…</span><kbd id="kbdHint">Ctrl K</kbd></button>
+    <span class="ava" aria-hidden="true">ME</span>
+  </div>
+  <div class="subnav" id="subnav"><span>Foundation</span><span>Analysis</span><span class="on">Directions</span><span>Capabilities</span><span>Overall performance</span><span>Reporting</span></div>
+  <div class="page" id="page">
+    <h2>Logistics · Directions</h2>
+    <div class="card"><h3>Grow contract logistics</h3><p>Measures 3 · Tactics 5 · Owner Hazem Roushdy</p><div class="field">Target: 18% of revenue by Q4</div></div>
+    <div class="card"><h3>Cut cost per shipment</h3><p>Measures 2 · Tactics 4 · Owner Hazem Roushdy</p><div class="field">Target: EGP 41 per shipment</div></div>
+    <div class="card"><h3>Open two cross-dock hubs</h3><p>Measures 2 · Tactics 3 · Owner Sherif Adel</p><div class="field" id="editField">Target: 2 hubs live by September</div><div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><button type="button" class="btn solid" id="saveBtn">Save</button><span class="heldtip" id="heldTip" hidden>Held until you're back online. What you typed stays here.</span></div></div>
+  </div>
+  <div class="offpage" id="offpage" hidden>
+    <div class="offbox new" style="border-radius:12px;padding:24px 20px;background:var(--surface)">
+      <div class="ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8.8a15 15 0 0 1 4.2-2.6M9.6 5.2A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 5.2-2.6M14.4 10.2A10 10 0 0 1 19 12.5M8.5 16.1a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/><path d="m3 3 18 18"/></svg></div>
+      <h2>You're offline</h2>
+      <p>SMP can't reach the internet, so it can't load your latest figures. Nothing you saved is lost.</p>
+      <p class="small">This page reopens by itself when the connection is back.</p>
+      <div style="display:flex;gap:8px;margin-top:6px"><button type="button" class="btn solid" id="retry">Try again</button></div>
+      <p class="small" id="retryMsg" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="scrim" id="scrim" hidden>
+    <div class="pal new" role="dialog" aria-label="Jump to">
+      <div class="q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="qin" type="text" autocomplete="off" placeholder="Jump to a module, page or setting…" aria-label="Jump to"><kbd>Esc</kbd></div>
+      <div class="res" id="res" role="listbox"></div>
+      <div class="pfoot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move</span><span><kbd>Enter</kbd> to open</span><span><kbd>Esc</kbd> to close</span><span class="sp"></span><span id="kbdFoot">Ctrl K from any page</span></div>
+    </div>
+  </div>
+  <div class="opened" id="opened" hidden></div>
+</div>
+
+<script>
+const LEADS={
+ jump:'<b>Jump to.</b> Press <kbd>Ctrl K</kbd> (<kbd>⌘K</kbd> on a Mac) on any page, or the box in the top bar. It lists each module once, the Setup pages, and the console\'s own sections: Home, My tasks, Clients, Track Record, Frameworks and the rest. Nothing inside a module is listed: its own tabs reach those. Type to narrow it down, use the arrows and Enter to open. It only lists what your role can open, so a client\'s own person sees only their modules. <b>Try it below.</b>',
+
+ off:'<b>No internet when you open SMP.</b> Instead of the browser\'s own error, a calm page in SMP\'s look. Try again checks at once, and the page reloads by itself when the connection returns.',
+ lost:'<b>The connection drops while you work.</b> The page stays as it is, with a strip at the top. Save is held and says why. What you typed stays in the box.',
+ back:'<b>The connection returns.</b> The strip turns green for a few seconds, then goes away. Save works again.'
+};
+const P=(n,w)=>({n,w});
+const DATA=[
+ ["Modules",[P("Strategy","Module"),P("Internal Tracker","Module"),P("Meeting Notes","Module"),P("Processes","Module"),P("Insights","Module"),P("Portfolio","Module")]],
+ ["Setup",[P("Profile","Setup · Client"),P("The shape","Setup · Client"),P("Business units","Setup · Client"),P("Functions","Setup · Client"),P("Capabilities","Setup · Client"),P("Official BU list","Setup · Client"),P("Client register","Setup · Client"),P("Roles & access","Setup · Strategy"),P("Landing line","Setup · Strategy"),P("Figure sets","Setup · Strategy"),P("Focus measures","Setup · Strategy"),P("Scoring bands","Setup · Strategy"),P("Revenue drivers","Setup · Strategy"),P("Planning & reporting","Setup · Strategy"),P("Platform Inbox","Setup · Strategy"),P("History","Setup · Strategy"),P("Roles & access","Setup · Insights"),P("Landing line","Setup · Insights")]],
+ ["Console",[P("Home","Console"),P("My tasks","Console"),P("Clients","Console"),P("Consultants","Console"),P("Who sees what","Console"),P("Track Record","Console"),P("Frameworks","Console"),P("Copilot","Console"),P("History","Console")]]
+];
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let flat=[],sel=0,scene="jump";
+const mac=/Mac|iPhone|iPad/.test(navigator.platform||"");
+if(mac){$("#kbdHint").textContent="⌘K";$("#kbdFoot").textContent="⌘K from any page";}
+
+function render(){
+  const q=$("#qin").value.trim().toLowerCase();
+  let html="";flat=[];
+  for(const [g,items] of DATA){
+    const hits=items.filter(i=>!q||i.n.toLowerCase().includes(q)||i.w.toLowerCase().includes(q));
+    if(!hits.length)continue;
+    html+='<div class="grp">'+esc(g)+'</div>';
+    for(const i of hits){
+      let nm=esc(i.n);
+      if(q){const k=i.n.toLowerCase().indexOf(q);if(k>=0)nm=esc(i.n.slice(0,k))+"<mark>"+esc(i.n.slice(k,k+q.length))+"</mark>"+esc(i.n.slice(k+q.length));}
+      html+='<button type="button" class="it" role="option" data-i="'+flat.length+'"><span class="nm">'+nm+'</span><span class="wh">'+esc(i.w)+'</span></button>';
+      flat.push(i);
+    }
+  }
+  $("#res").innerHTML=html||'<div class="empty">Nothing called “'+esc(q)+'”. Try part of a module, page or setting name.</div>';
+  sel=Math.min(sel,Math.max(flat.length-1,0));mark();
+}
+function mark(){document.querySelectorAll(".it").forEach(b=>{const on=+b.dataset.i===sel;b.classList.toggle("sel",on);b.setAttribute("aria-selected",on);if(on)b.scrollIntoView({block:"nearest"});});}
+function openPal(){$("#scrim").hidden=false;$("#qin").value="";sel=0;render();$("#qin").focus();}
+function closePal(){$("#scrim").hidden=true;}
+function go(i){const it=flat[i];if(!it)return;closePal();const o=$("#opened");o.textContent="Would open: "+it.n+" ("+it.w+")";o.hidden=false;clearTimeout(go.t);go.t=setTimeout(()=>o.hidden=true,2200);}
+$("#openJump").onclick=openPal;
+$("#qin").oninput=()=>{sel=0;render();};
+$("#qin").onkeydown=e=>{
+  if(e.key==="ArrowDown"){e.preventDefault();sel=Math.min(sel+1,flat.length-1);mark();}
+  else if(e.key==="ArrowUp"){e.preventDefault();sel=Math.max(sel-1,0);mark();}
+  else if(e.key==="Enter"){e.preventDefault();go(sel);}
+  else if(e.key==="Escape"){closePal();$("#openJump").focus();}
+};
+$("#res").onclick=e=>{const b=e.target.closest(".it");if(b)go(+b.dataset.i);};
+$("#res").onmousemove=e=>{const b=e.target.closest(".it");if(b&&+b.dataset.i!==sel){sel=+b.dataset.i;mark();}};
+$("#scrim").onclick=e=>{if(e.target.id==="scrim")closePal();};
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"&&scene==="jump"){e.preventDefault();openPal();}});
+$("#retry").onclick=()=>{$("#retryMsg").textContent="Checked just now. Still no connection.";};
+$("#retry2").onclick=()=>{};
+$("#saveBtn").onclick=()=>{};
+
+function show(s){
+  scene=s;
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===s));
+  $("#lead").innerHTML=LEADS[s];
+  closePal();$("#opened").hidden=true;$("#retryMsg").textContent="";
+  const off=s==="off";
+  $("#offpage").hidden=!off;$("#page").hidden=off;$("#subnav").hidden=off;$("#bar").hidden=off;
+  $("#stripOff").hidden=s!=="lost";$("#stripOn").hidden=s!=="back";
+  $("#saveBtn").classList.toggle("held",s==="lost");$("#heldTip").hidden=s!=="lost";
+  if(s==="jump")openPal();
+}
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>show(b.dataset.s));
+show("jump");
+</script>

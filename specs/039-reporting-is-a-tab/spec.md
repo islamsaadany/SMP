@@ -211,3 +211,14 @@ approved: *"build the note lock"*.
   the lock's, asserted as 2b, and its bar is measured over a figure still to
   enter); `checks/report-keys.py` explains the red row its §8 makes before §9
   and §10 measure an unheld page.
+
+**§705 (2026-11-02) — the lock went.** Islam: *"don't stop a person from
+entering the numbers"*. Nothing is disabled or greyed and no bar takes this
+one's place. The red row's note box wears a tag, **Note needed · off track**,
+keeps its red edge and asks *"No justification yet — why, and what is being
+done"* (a placeholder, never stored); the "to finish" bar counts the note
+again; Submit's rule is unchanged. Read by somebody who may not write it, the
+empty cell says **Needs justification** in red. Mockup
+`design-mockups/note-tag/2026-11-02_tag-on-the-note-box.html`, option A.
+Checked: `checks/note-tag.py` (replaces `note-lock.py`); `report-blockers.py`
+2b rewritten for the new state.

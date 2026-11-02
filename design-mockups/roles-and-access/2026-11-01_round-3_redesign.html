@@ -1,0 +1,311 @@
+<title>Roles &amp; access redesign</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<!-- Islam, 2026-11-01, of the built ladder: "the copilot has the old icons. and
+     the owner is just owner — is that the capability owner or function or
+     direction or what? the description column needs to be useful to the SMO
+     team to adjust. and finally can't you think of better designs for this
+     page? use proper ui and ux skills for that". Three designs over one shared
+     set of example settings: a press in any of them redraws all three. -->
+<style>
+/* Layout: the platform's own setup page — navy panel, gold rule, one settings surface per design. */
+:root{
+  --ground:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --line:#D5DBE4; --line-soft:#E5E9F0;
+  --ink:#151A22; --ink-2:#3F4856; --ink-3:#647080;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B8C5D9;
+  --gold:#C9A24D; --gold-deep:#8A6B22;
+  --good:#2E7D5B; --good-bg:#E3F0E9; --warn:#9A6B00; --warn-bg:#FBF1D9; --bad:#B04434;
+  --sans:'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ground:#13161B; --surface:#1B2028; --surface-2:#232A34; --line:#323B47; --line-soft:#29313C;
+  --ink:#E8ECF2; --ink-2:#B5BECA; --ink-3:#8F9AA8; --panel:#0E1420; --panel-ink:#EAF0FA; --panel-quiet:#97A4B8;
+  --gold:#D9B665; --gold-deep:#D9B665; --good:#63BA90; --good-bg:#1A3027; --warn:#E0B649; --warn-bg:#33290F; --bad:#DB776B; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --ground:#13161B; --surface:#1B2028; --surface-2:#232A34; --line:#323B47; --line-soft:#29313C;
+  --ink:#E8ECF2; --ink-2:#B5BECA; --ink-3:#8F9AA8; --panel:#0E1420; --panel-ink:#EAF0FA; --panel-quiet:#97A4B8;
+  --gold:#D9B665; --gold-deep:#D9B665; --good:#63BA90; --good-bg:#1A3027; --warn:#E0B649; --warn-bg:#33290F; --bad:#DB776B; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+button:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-block:26px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:30px}
+.head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px 20px}
+.head>div{flex:1 1 520px;min-width:0}
+h1{margin:0;font-size:22px;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:78ch}
+.ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 13px;font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--panel-ink)}
+section{display:grid;gap:10px;min-width:0}
+.ph{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ph b.k{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep);letter-spacing:.08em}
+h2{margin:0;font-size:17px}
+.ph p{margin:0;color:var(--ink-3);font-size:13.5px}
+.cap{margin:0;font-size:13.5px;color:var(--ink-2);max-width:86ch}.cap b{color:var(--ink)}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:12px;min-width:0}
+.pagehead{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line-soft)}
+.pagehead h3{margin:0;font-size:16px;flex:1}
+.who{font-size:12.5px;color:var(--ink-3)}
+svg.i{width:15px;height:15px;flex:none}
+/* shared bits */
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{font-size:11.5px;font-weight:600;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:1px 8px;white-space:nowrap}
+.count{font-size:12px;color:var(--ink-3)}
+.levels{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.levels button{display:inline-flex;align-items:center;gap:5px;border:0;border-right:1px solid var(--line-soft);background:none;padding:6px 10px;font-size:12.5px;font-weight:600;color:var(--ink-3);cursor:pointer;white-space:nowrap}
+.levels button:last-child{border-right:0}
+.levels button.on{background:var(--panel);color:var(--panel-ink)}
+.levels button.home{background:var(--surface-2);color:var(--ink)}
+.levels button:disabled{cursor:default;color:var(--line);text-decoration:line-through}
+.levels button.home:disabled{color:var(--ink);text-decoration:none;background:var(--surface-2)}
+.levels button:not(:disabled):not(.on):hover{color:var(--ink);background:var(--surface-2)}
+.sw{display:inline-flex;align-items:center;gap:8px;border:0;background:none;padding:2px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-2)}
+.sw .t{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;flex:none;transition:background .15s}
+.sw .t::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:left .15s}
+.sw[aria-checked="true"] .t{background:var(--good)}
+.sw[aria-checked="true"] .t::after{left:16px}
+.sw:disabled{cursor:default;opacity:.55}
+.dash{color:var(--ink-3);font-size:13px}
+.means{font-size:13px;color:var(--ink-2);display:grid;gap:3px}
+.means b{color:var(--ink);font-weight:600}
+.means .no{color:var(--ink-3)}
+.flash{animation:fl .7s ease}
+@keyframes fl{from{background:color-mix(in srgb,var(--gold) 22%,transparent)}to{background:transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}.sw .t,.sw .t::after{transition:none}}
+.office{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:12px 18px;border-bottom:1px solid var(--line-soft);font-size:13.5px;color:var(--ink-2)}
+.office b{color:var(--ink)}
+.landing{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 18px;border-top:1px solid var(--line-soft);font-size:13.5px;color:var(--ink-2)}
+.landing b{color:var(--ink)}
+.landing .seg button{font-size:12.5px}
+/* A: the table */
+.scroll{overflow-x:auto}
+table.a{border-collapse:collapse;width:100%;font-size:13.5px;min-width:980px}
+table.a th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:9px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.a td{padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+table.a td.r b{display:block;font-weight:700}
+table.a td.r{width:230px}
+table.a td.m{width:330px}
+/* B: cards with an upright ladder */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;padding:16px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:12px;align-content:start;min-width:0}
+.card h4{margin:0;font-size:15px;display:flex;align-items:baseline;gap:8px;justify-content:space-between}
+.card .row2{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+.rungs{display:grid;gap:3px;min-width:150px}
+.rung{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:7px;padding:5px 9px;background:var(--surface);font-size:12.5px;font-weight:600;color:var(--ink-3);cursor:pointer;text-align:left}
+.rung.on{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.rung.home{background:var(--good-bg);color:var(--good);border-color:transparent}
+.rung.homeoff{background:var(--surface-2);color:var(--ink);border-color:transparent}
+.rung:disabled{cursor:default;color:var(--line);text-decoration:line-through}
+.rung .sp{flex:1}
+/* C: list and detail */
+.split{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr)}
+@media (max-width:820px){.split{grid-template-columns:1fr}}
+.list{border-right:1px solid var(--line-soft);display:grid;align-content:start}
+.list button{display:grid;gap:2px;text-align:left;border:0;border-bottom:1px solid var(--line-soft);background:none;padding:10px 14px;cursor:pointer}
+.list button b{font-size:14px}
+.list button span{font-size:12px;color:var(--ink-3)}
+.list button[aria-current="true"]{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--gold)}
+.detail{padding:16px 18px;display:grid;gap:14px;min-width:0}
+.detail h4{margin:0;font-size:17px}
+.field{display:grid;gap:6px}
+.field>label,.field>.lb{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.preview{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pnav{background:var(--panel);color:var(--panel-ink);display:flex;flex-wrap:wrap;gap:4px 6px;padding:8px 12px;font-size:13px;font-weight:600;border-bottom:3px solid var(--gold)}
+.pnav span{padding:3px 8px;border-radius:6px;background:color-mix(in srgb,var(--panel-ink) 12%,transparent)}
+.pnav .none{background:none;color:var(--panel-quiet);font-weight:500}
+.pitems{padding:10px 12px;display:grid;gap:6px;background:var(--ground)}
+.pit{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px}
+.pit .c{font:700 11px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep)}
+.pit .sp{flex:1}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px}
+.tag.w{background:var(--good-bg);color:var(--good)}.tag.r{background:var(--surface-2);color:var(--ink-3)}
+.pit.hid{border-style:dashed;color:var(--ink-3);background:none}
+</style>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Roles &amp; access, three ways</h1>
+      <p class="lede">Each design answers the same three things for every role: who is in it, how far up they see, and whether they enter and submit what they hold. The sentence under each role says what the settings mean in plain words, and changes as you press. The settings are shared, so a press in one design shows in all three.</p>
+    </div>
+    <div class="ctl">
+      <span class="seg" id="client"><button data-c="abd" aria-pressed="true">El Abd</button><button data-c="raya" aria-pressed="false">Raya</button></span>
+      <span class="seg" id="theme"><button data-t="light" aria-pressed="true">Light</button><button data-t="dark" aria-pressed="false">Dark</button></span>
+    </div>
+  </div>
+
+  <section>
+    <div class="ph"><b class="k">A</b><h2>The table, made readable</h2><p>closest to today; one row per role</p></div>
+    <div class="frame" id="A"></div>
+    <p class="cap"><b>What changes from the built page.</b> Each row names the roles it covers in this client's words, so "Owner" reads "Function head" at El Abd. Seeing and writing are two controls: the level buttons for seeing, a switch for entering and submitting. The Copilot is a switch too, in the same style. The office's two seats move to one line above the table, since nothing about them can be set. The last column says what the row's settings mean, including what the role does not see.</p>
+  </section>
+
+  <section>
+    <div class="ph"><b class="k">B</b><h2>Cards with an upright ladder</h2><p>the levels drawn as a ladder, top at the top</p></div>
+    <div class="frame" id="B"></div>
+    <p class="cap"><b>Why a card.</b> Each role gets room for its meaning, and the ladder stands upright so "higher" means higher. The green rung is where the role works; the navy rungs above it are what it reads. Press a rung to read up to it, or press the top lit rung to step down.</p>
+  </section>
+
+  <section>
+    <div class="ph"><b class="k">C</b><h2>Pick a role, see what it gets</h2><p>a list on the left, the settings and a live preview on the right</p></div>
+    <div class="frame" id="C"></div>
+    <p class="cap"><b>Why a preview.</b> The SMO team adjusts a role by looking at what a real person in it would get: the navigation row they would see and the items they would enter or only read. It takes more space, and it shows one role at a time.</p>
+  </section>
+
+  <p class="cap"><b>My pick is A</b>, with C's preview opening from a row when you want to check one. A is scannable across all roles at once, which is what an SMO team does when it reviews access, and it keeps today's page where people already look for it.</p>
+</div>
+<script>
+(function () {
+  var EYE = '<svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M1.7 10S4.8 5 10 5s8.3 5 8.3 5-3.1 5-8.3 5-8.3-5-8.3-5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="10" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+  var PEN = '<svg class="i" viewBox="0 0 20 20" aria-hidden="true"><path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  /* the two clients, in their own words */
+  var C = {
+    abd: { top: "company", place: "function", places: "functions", piece: "direction or capability", div: "division",
+      levels: ["Own piece", "Own function", "Own division", "The company"],
+      office: [["Super user", 2], ["SMO team", 3]],
+      sample: { navAll: ["Production", "Sales", "Finance", "Supply"], navDiv: ["Production", "Supply"], home: "Production",
+        items: [["PRD01", "Raise line output by 15%", "Hesham"], ["PRD02", "Halve changeover time", "Omar"], ["PRD03", "Lean capability", "Mai"]], mine: 1 },
+      rows: [
+        { k: "gceo", name: "Company CEO", covers: ["Company CEO"], n: 0, stand: 3, lv: 3 },
+        { k: "cceo", name: "Division head", covers: ["Division head"], n: 0, stand: 2, lv: 2 },
+        { k: "owner", name: "Function head", covers: ["Function head"], n: 0, held: 1, lv: 1, pen: true, writes: "the function's figures, and submits its report" },
+        { k: "cust", name: "Custodian", covers: ["Function custodian", "Capability custodian"], n: 0, held: 1, lv: 1, pen: true, writes: "what they keep, as its owner would" },
+        { k: "part", name: "Part owner", covers: ["Direction owner", "Capability owner", "Project owner"], n: 7, held: 0, lv: 1, pen: false, writes: "the lines of their own direction, capability or project" },
+        { k: "contrib", name: "Contributor", covers: ["Named on a measure, tactic or milestone"], n: 0, held: 0, lv: 1, pen: false, writes: "the lines that name them" },
+        { k: "floor", name: "Everyone else", covers: ["On the register, holding nothing"], n: 0, floor: true, lv: 0 }
+      ] },
+    raya: { top: "group", place: "unit or function", places: "units and functions", piece: "pillar, project or direction", div: "division",
+      levels: ["Own piece", "Own unit or function", "Own division", "The group"],
+      office: [["Super user", 1], ["SMO team", 0]],
+      sample: { navAll: ["Mobile", "Retail Stores", "B2B Ecomm", "Consumer Electronics", "Online Shop", "Care", "…"], navDiv: ["Mobile", "Consumer Electronics", "IT Dist."], home: "Mobile",
+        items: [["MOB01", "Digital & data-driven operations", "Ramy"], ["MOB02", "Channel preference & development", "Hany"], ["MOB03", "Portfolio & value chain expansion", "Dina"], ["MOB04", "Asset-light regional expansion", "Karim"]], mine: 0 },
+      rows: [
+        { k: "gceo", name: "Group CEO", covers: ["Group CEO"], n: 1, stand: 3, lv: 3 },
+        { k: "cceo", name: "Division head", covers: ["Division head"], n: 2, stand: 2, lv: 2 },
+        { k: "owner", name: "Owner", covers: ["Business unit owner", "Function head"], n: 16, held: 1, lv: 1, pen: true, writes: "the unit's or function's figures, and submits its report" },
+        { k: "cust", name: "Custodian", covers: ["Unit custodian", "Function custodian", "Capability custodian"], n: 12, held: 1, lv: 1, pen: true, writes: "what they keep, as its owner would" },
+        { k: "part", name: "Part owner", covers: ["Pillar owner", "Project owner", "Direction owner", "Capability owner"], n: 24, held: 0, lv: 1, pen: false, writes: "the lines of their own pillar, project or direction" },
+        { k: "contrib", name: "Contributor", covers: ["Named on a measure, tactic or milestone"], n: 0, held: 0, lv: 1, pen: false, writes: "the lines that name them" },
+        { k: "floor", name: "Everyone else", covers: ["On the register, holding nothing"], n: 1, floor: true, lv: 0 }
+      ] }
+  };
+  var ST = { c: "abd", pick: { abd: "part", raya: "part" }, land: "window", copilot: { super: true, smo: true }, flash: null };
+  var cl = function () { return C[ST.c]; };
+  var rowOf = function (k) { return cl().rows.filter(function (r) { return r.k === k; })[0]; };
+
+  /* plain words for what a row's settings mean */
+  function meaning(r) {
+    var c = cl(), sees, writes, hides = [];
+    if (r.floor) {
+      sees = r.lv === 0 ? "Nothing." : r.lv === 1 ? "The " + c.place + " they are attached to." : r.lv === 2 ? "Their own " + c.div + " and everything in it." : "Everything in the " + c.top + ".";
+    } else if (r.stand != null) {
+      sees = r.lv === 0 ? "Nothing." : r.lv === 3 ? "Everything in the " + c.top + "." : "Their own " + c.div + ": its page and every " + c.place + " in it.";
+    } else {
+      sees = r.lv === 0 ? "Only their own " + c.piece + " inside their " + c.place + "." :
+        r.lv === 1 ? "Their own " + c.place + " in full: every " + c.piece + " in it, its plan and its figures." :
+        r.lv === 2 ? "Every " + c.place + " in their " + c.div + ", and the " + c.div + "'s page." : "Everything in the " + c.top + ".";
+    }
+    if (r.lv < 3) hides.push("the " + c.top + "'s own pages");
+    if (!r.floor && r.stand == null && r.lv === 0) hides.unshift("the other " + c.piece.split(" or ")[0] + "s beside theirs");
+    if (r.lv >= 1 && r.lv < 2 && !(r.stand != null)) hides.unshift("other " + c.places);
+    if (r.lv === 2) hides.unshift("other " + c.div + "s");
+    writes = r.held == null ? "Nothing. They hold no piece." : r.pen ? "Enters and submits " + r.writes + "." : "Nothing. Reads only until the pen is on.";
+    return '<div class="means"><span><b>Sees</b> ' + esc(sees) + '</span><span><b>Writes</b> ' + esc(writes) + '</span>' +
+      (r.lv === 0 && (r.stand != null || r.floor) ? '' : hides.length ? '<span class="no">Does not see ' + esc(hides.join(", ")) + '.</span>' : '') + '</div>';
+  }
+  /* a press on a level: read up to it, or the top lit one steps down */
+  function pressLevel(r, i) {
+    var lo = r.stand != null ? r.stand : r.held != null ? r.held : 0;
+    if (i === r.lv) { var down = i - 1; if (down === 2 && false) down = 1; r.lv = r.stand != null ? (down < r.stand ? 0 : down) : Math.max(lo, down); if (r.floor && i === 1) r.lv = 0; }
+    else r.lv = i;
+    ST.flash = r.k; draw();
+  }
+  function levelsCtl(r) {
+    var c = cl();
+    return '<span class="levels" role="group" aria-label="' + esc(r.name) + ' sees up to">' + c.levels.map(function (w, i) {
+      var struck = r.stand != null ? i < r.stand : r.held != null ? i < r.held : false;
+      if (r.floor && i === 0) return '<button type="button" class="' + (r.lv === 0 ? "home" : "") + '" data-lv="' + r.k + '|0">Nothing</button>';
+      var home = r.held === i, lit = !struck && i <= r.lv && (r.held == null ? (r.floor ? i >= 1 : true) : i > r.held);
+      return '<button type="button" class="' + (home ? "home" : lit ? "on" : "") + '"' + (struck || home ? ' disabled' : '') + ' data-lv="' + r.k + '|' + i + '" aria-pressed="' + lit + '">' + (lit || home ? EYE : '') + esc(w) + '</button>';
+    }).join("") + '</span>';
+  }
+  function penCtl(r) {
+    if (r.held == null) return '<span class="dash">Holds no piece</span>';
+    return '<button type="button" class="sw" role="switch" aria-checked="' + r.pen + '" data-pen="' + r.k + '"><span class="t"></span>' + PEN + (r.pen ? "Enters and submits" : "Reads only") + '</button>';
+  }
+  function officeLine() {
+    var c = cl();
+    return '<div class="office"><b>The office</b><span>' + c.office.map(function (o) { return esc(o[0]) + ' <span class="count">' + o[1] + ' ' + (o[1] === 1 ? "person" : "people") + '</span>'; }).join(" · ") + '</span><span>Sees and edits everything, by rule.</span>' +
+      '<span class="ctl"><button type="button" class="sw" role="switch" aria-checked="' + ST.copilot.super + '" data-cop="super"><span class="t"></span>Copilot for the Super user</button>' +
+      '<button type="button" class="sw" role="switch" aria-checked="' + ST.copilot.smo + '" data-cop="smo"><span class="t"></span>Copilot for the SMO team</button></span></div>';
+  }
+  function landingLine() {
+    var ro = cl().rows.filter(function (r) { return r.held == null || r.pen === false; }).map(function (r) { return r.name; });
+    return '<div class="landing"><b>First screen for people who can change nothing</b><span class="seg" id="land"><button data-land="window" aria-pressed="' + (ST.land === "window") + '">Reading window</button><button data-land="bench" aria-pressed="' + (ST.land === "bench") + '">Workbench</button></span>' +
+      '<span>Today that is: ' + esc(ro.join(", ")) + '. It changes where they open, never what they can see.</span></div>';
+  }
+  function head(r, tag) {
+    return '<' + tag + '>' + esc(r.name) + '</' + tag + '><span class="count">' + (r.n ? r.n + (r.n === 1 ? " person" : " people") : "nobody yet") + '</span>' +
+      '<div class="chips">' + r.covers.map(function (x) { return '<span class="chip">' + esc(x) + '</span>'; }).join("") + '</div>';
+  }
+  function drawA() {
+    var c = cl();
+    document.getElementById("A").innerHTML = '<div class="pagehead"><h3>Roles &amp; access</h3><span class="who">El Abd · Setup</span></div>' + officeLine() +
+      '<div class="scroll"><table class="a"><thead><tr><th>Role</th><th>Sees up to</th><th>Their own part</th><th>What this means</th></tr></thead><tbody>' +
+      c.rows.map(function (r) {
+        return '<tr class="' + (ST.flash === r.k ? "flash" : "") + '"><td class="r">' + head(r, "b") + '</td><td>' + levelsCtl(r) + '</td><td>' + penCtl(r) + '</td><td class="m">' + meaning(r) + '</td></tr>';
+      }).join("") + '</tbody></table></div>' + landingLine();
+    document.querySelector("#A .who").textContent = (ST.c === "abd" ? "El Abd" : "Raya") + " · Setup";
+  }
+  function drawB() {
+    var c = cl();
+    document.getElementById("B").innerHTML = '<div class="pagehead"><h3>Roles &amp; access</h3><span class="who">' + (ST.c === "abd" ? "El Abd" : "Raya") + ' · Setup</span></div>' + officeLine() +
+      '<div class="cards">' + c.rows.map(function (r) {
+        var rungs = c.levels.map(function (w, i) { return i; }).reverse().map(function (i) {
+          var w = r.floor && i === 0 ? "Nothing" : c.levels[i];
+          var struck = r.stand != null ? i < r.stand : r.held != null ? i < r.held : false;
+          var home = r.held === i, lit = !struck && i <= r.lv && (r.held == null ? (r.floor ? i >= 1 : true) : i > r.held);
+          if (r.floor && i === 0) return '<button type="button" class="rung ' + (r.lv === 0 ? "homeoff" : "") + '" data-lv="' + r.k + '|0">' + w + '</button>';
+          return '<button type="button" class="rung ' + (home ? (r.pen ? "home" : "homeoff") : lit ? "on" : "") + '"' + (struck ? " disabled" : "") + ' data-' + (home ? 'pen' : 'lv') + '="' + r.k + (home ? '' : '|' + i) + '">' +
+            (home ? (r.pen ? PEN : EYE) : lit ? EYE : '') + '<span>' + esc(w) + '</span><span class="sp"></span>' + (home ? '<span style="font-size:11px">' + (r.pen ? "writes" : "reads") + '</span>' : '') + '</button>';
+        }).join("");
+        return '<div class="card' + (ST.flash === r.k ? " flash" : "") + '"><div>' + head(r, "h4") + '</div><div class="row2"><div class="rungs">' + rungs + '</div>' + meaning(r) + '</div></div>';
+      }).join("") + '</div>' + landingLine();
+  }
+  function drawC() {
+    var c = cl(), r = rowOf(ST.pick[ST.c]) || c.rows[0], s = c.sample;
+    var nav = r.lv === 0 && (r.stand != null || r.floor) ? [] : r.lv >= 3 ? s.navAll : r.lv === 2 ? s.navDiv : [s.home];
+    var items = s.items.map(function (it, i) {
+      var mine = r.held != null && (r.held === 1 || i === s.mine), show = r.lv >= 1 || mine;
+      if (!nav.length) return "";
+      if (!show) return '<div class="pit hid"><span class="c">' + it[0] + '</span><span class="sp">Not shown at this level</span></div>';
+      var w = mine && r.pen;
+      return '<div class="pit"><span class="c">' + it[0] + '</span><span class="sp">' + esc(it[1]) + '</span><span class="count">' + esc(it[2]) + '</span><span class="tag ' + (w ? "w" : "r") + '">' + (w ? PEN + "Enters" : EYE + "Reads") + '</span></div>';
+    }).join("");
+    document.getElementById("C").innerHTML = '<div class="pagehead"><h3>Roles &amp; access</h3><span class="who">' + (ST.c === "abd" ? "El Abd" : "Raya") + ' · Setup</span></div>' + officeLine() +
+      '<div class="split"><div class="list">' + c.rows.map(function (x) {
+        return '<button type="button" data-pick="' + x.k + '" aria-current="' + (x.k === r.k) + '"><b>' + esc(x.name) + '</b><span>' + esc(x.covers.join(" · ")) + '</span><span>' + (x.lv === 0 && (x.stand != null || x.floor) ? "Sees nothing" : "Sees up to " + esc(c.levels[x.lv]).toLowerCase()) + (x.held != null ? (x.pen ? " · enters and submits" : " · reads only") : "") + '</span></button>';
+      }).join("") + '</div><div class="detail' + (ST.flash === r.k ? " flash" : "") + '"><div>' + head(r, "h4") + '</div>' +
+      '<div class="field"><span class="lb">Sees up to</span>' + levelsCtl(r) + '</div>' +
+      '<div class="field"><span class="lb">Their own part</span>' + penCtl(r) + '</div>' + meaning(r) +
+      '<div class="field"><span class="lb">What a person in this role gets</span><div class="preview"><div class="pnav">' + (nav.length ? nav.map(function (n) { return '<span>' + esc(n) + '</span>'; }).join("") : '<span class="none">Nothing to open</span>') + '</div>' +
+      (nav.length ? '<div class="pitems">' + items + '</div>' : '') + '</div></div></div></div>' + landingLine();
+  }
+  function draw() { drawA(); drawB(); drawC(); ST.flash = null; }
+  document.addEventListener("click", function (e) {
+    var b;
+    if ((b = e.target.closest("[data-lv]")) && !b.disabled) { var p = b.getAttribute("data-lv").split("|"); pressLevel(rowOf(p[0]), +p[1]); return; }
+    if ((b = e.target.closest("[data-pen]"))) { var r = rowOf(b.getAttribute("data-pen")); if (r.held != null) { r.pen = !r.pen; ST.flash = r.k; draw(); } return; }
+    if ((b = e.target.closest("[data-cop]"))) { var k = b.getAttribute("data-cop"); ST.copilot[k] = !ST.copilot[k]; draw(); return; }
+    if ((b = e.target.closest("[data-land]"))) { ST.land = b.getAttribute("data-land"); draw(); return; }
+    if ((b = e.target.closest("[data-pick]"))) { ST.pick[ST.c] = b.getAttribute("data-pick"); draw(); return; }
+    if ((b = e.target.closest("[data-c]"))) { ST.c = b.getAttribute("data-c"); [].forEach.call(document.querySelectorAll("#client button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); }); draw(); return; }
+    if ((b = e.target.closest("[data-t]"))) { document.documentElement.setAttribute("data-theme", b.getAttribute("data-t")); [].forEach.call(document.querySelectorAll("#theme button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); }); }
+  });
+  try { if (matchMedia("(prefers-color-scheme: dark)").matches) { [].forEach.call(document.querySelectorAll("#theme button"), function (x) { x.setAttribute("aria-pressed", String(x.getAttribute("data-t") === "dark")); }); } } catch (e) {}
+  draw();
+})();
+</script>

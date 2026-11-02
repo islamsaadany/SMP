@@ -100,6 +100,16 @@ svg{display:block}
 .bb .foot{display:flex;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--line-2);flex-wrap:wrap}
 .bb .lk{color:var(--ink-3);padding:6px 8px;border-radius:7px;font-weight:500}
 .bb .lk.r{margin-left:auto}
+/* ---------- C: B, its earlier entries on the timeline ---------- */
+.c .tl{margin-top:14px;gap:14px;border-left-width:2px}
+.c .tl li::before{left:-30px;top:5px;width:11px;height:11px;border-width:2px}
+.c .tl li.old::before{border-color:var(--ink-3)}
+.c .tl .wk{font-size:13.5px}
+.c .tl .bd{font-size:14.5px}
+.c .tl .by{font-size:13px;gap:10px}
+.c .tl .by u{text-decoration:underline;text-underline-offset:2px}
+.c .more{margin-top:18px}
+.c .tlh{margin-top:18px;font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
 @media (max-width:600px){.box{padding:18px}.a .sv{margin-left:0}}
 </style>
 <div class="pg">
@@ -107,6 +117,7 @@ svg{display:block}
     <button type="button" data-v="before" aria-pressed="false">Before</button>
     <button type="button" data-v="a" aria-pressed="true">A · one quiet column</button>
     <button type="button" data-v="b" aria-pressed="false">B · the update first</button>
+    <button type="button" data-v="c" aria-pressed="false">C · B with the timeline</button>
   </div>
   <div class="note" id="note"></div>
 
@@ -150,14 +161,31 @@ svg{display:block}
     <div class="more"><span>Description</span><span>History (5)</span><span>⋯</span></div>
     <div class="foot"><span class="lk">← Previous</span><span class="lk">Carry to next week</span><span class="lk r">Skip →</span></div>
   </div>
+
+  <div class="box bb c" id="v-c" hidden>
+    <div class="eb">Functions · Islam · This week</div>
+    <h2>Review the two HR projects &amp; Launch Retention Analytics</h2>
+    <div class="q">
+      <div class="ph">What happened this week?</div>
+      <div class="bar"><span class="chip"><i class="dot ns"></i>Not started</span><span class="chip on"><i class="dot"></i>In progress</span><span class="chip"><i class="dot dn"></i>Done</span><span class="sv">Save and next</span></div>
+    </div>
+    <div class="tlh">Progress so far</div>
+    <ul class="tl">
+      <li><div class="wk">This week</div><div class="bd">Trying to meet this week Wednesday still didn't commit</div><div class="by"><b>Islam</b><u>Edit</u><u class="r">Delete</u></div></li>
+      <li class="old"><div class="wk old">Last week</div><div class="bd">had a meeting this week and postponed to next week</div><div class="by"><b>Islam</b><u>Edit</u><u class="r">Delete</u></div></li>
+    </ul>
+    <div class="more"><span>Description</span><span>History (5)</span><span>⋯</span></div>
+    <div class="foot"><span class="lk">← Previous</span><span class="lk">Carry to next week</span><span class="lk r">Skip →</span></div>
+  </div>
 </div>
 <script>
 const NOTES={
  before:'<p><b>Today.</b> A gold topic, a big title, the owner and week, a large three-way status switch, tabs with Delete in red at their end, a box with its own Add button, every entry carrying Edit and Delete, three big buttons and a keyboard line. Each piece is useful, but they all speak at once.</p>',
  a:'<p><b>A, one quiet column (recommended).</b> The title leads. One grey line under it holds topic · owner · week · status, with the status a dot and its word that opens Not started / In progress / Done, as on the rows. Delete moves into the ⋯ beside the title. The tabs are plain words. The box takes Enter, so there\'s no Add button. Entries are a quiet timeline and show Edit and Delete only when you point at one. Previous and Carry to next week are plain links; <b>Save and next</b> is the one button, with its shortcut inside it.</p>',
- b:'<p><b>B, the update first.</b> Built for the meeting: one big box for "What happened this week?", with the status as three small chips and <b>Save and next</b> right under it. The last two entries sit below as a short read. Description and History step back to small links. Previous, Carry to next week and Skip are plain links at the foot.</p><p>Faster to run a meeting with; less room to read a long history.</p>'};
+ b:'<p><b>B, the update first.</b> Built for the meeting: one big box for "What happened this week?", with the status as three small chips and <b>Save and next</b> right under it. The last two entries sit below as a short read. Description and History step back to small links. Previous, Carry to next week and Skip are plain links at the foot.</p><p>Faster to run a meeting with; less room to read a long history.</p>',
+ c:'<p><b>C, B with the timeline.</b> The same update-first box, but the earlier entries sit on the timeline you had before, under "Progress so far": the week on top (this week in blue), the words, then the writer with Edit and Delete, along a thin line. Every entry is shown, not just the last two, so nothing is a press away.</p>'};
 function show(v){
- ['before','a','b'].forEach(k=>document.getElementById('v-'+k).hidden=k!==v);
+ ['before','a','b','c'].forEach(k=>document.getElementById('v-'+k).hidden=k!==v);
  document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));
  document.getElementById('note').innerHTML=NOTES[v];
 }

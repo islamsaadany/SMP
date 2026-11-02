@@ -2513,12 +2513,46 @@
     sec.querySelector(".mwsh .meta").textContent = (all - done) + " open" + (done ? " · " + done + " done" : "");
   }
 
-  /* ONE ROW, from the server's row and nothing else: the tick, the action,
-     its client, its week, its status, and the way into that client's
-     Tracker. `act(r, status, via, row)` is the press. */
+  /* ONE ROW, from the server's row and nothing else (§709, the Tracker's
+     quiet row): the tick; the name, which opens the task HERE; under it the
+     client (when the list is by date) and the latest update; the week only
+     when it is the exception; the status as a dot and its word; ⋯. `act(r,
+     status, via, row)` is the tick's and the status's press; the rest is
+     MW's, set by drawMyWork. */
+  var MW = { open: null, tab: {}, detail: {}, loading: {}, menu: null, sub: null, renaming: null,
+    write: null, redraw: null, said: null };
+  var MW_DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>';
+  var MW_I = {
+    lines: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    pen: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+    cal: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    hand: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    out: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 3h4v4M13 3 7.5 8.5M12 9.5V13H3V4h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    bin: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
+  };
+  function mwKey(r) { return r.client + ":" + r.id; }
+  function mwTrackerHref(r) { return "/" + r.client + "/tracker?view=all&open=" + encodeURIComponent(r.id); }
+  /* the opened task's details, read once and again after every write */
+  function mwLoad(r) {
+    var key = mwKey(r);
+    if (MW.detail[key] || MW.loading[key]) return;
+    MW.loading[key] = true;
+    post({ action: "workDetail", client: r.client, id: r.id }).then(function (j) {
+      delete MW.loading[key];
+      MW.detail[key] = j.ok ? j.detail : { error: j.error || "Could not read this task." };
+      if (MW.redraw) MW.redraw();
+    }).catch(function () { delete MW.loading[key]; MW.detail[key] = { error: "Could not reach the server." }; if (MW.redraw) MW.redraw(); });
+  }
+  function mwToggle(r) {
+    var key = mwKey(r);
+    MW.open = MW.open === key ? null : key;
+    MW.menu = null; MW.sub = null;
+    if (MW.open) mwLoad(r);
+    MW.redraw();
+  }
   function mwRow(r, statuses, act) {
-    var done = r.status === "done";
-    var row = el("div", "mwrow" + (done ? " done" : "") + (r.late ? " late" : ""));
+    var done = r.status === "done", key = mwKey(r), open = MW.open === key;
+    var row = el("div", "mwrow" + (done ? " done" : "") + (r.late ? " late" : "") + (open ? " on" : ""));
     row.setAttribute("data-client", r.client);
     row.setAttribute("data-id", r.id);
     row.setAttribute("data-status", r.status);
@@ -2534,13 +2568,47 @@
     if (r.canChange) tick.addEventListener("click", function () { act(r, done ? (r.was || "not_started") : "done", "tick", row); });
     else tick.disabled = true;
     row.appendChild(tick);
-    row.appendChild(el("span", "t", r.title || "(untitled)"));
-    var cl = el("span", "mwcl");
-    cl.title = r.clientName;
-    cl.appendChild(el("i", null, r.clientName));
-    row.appendChild(cl);
-    row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.when));
+    var main = el("div", "mwmain");
+    if (MW.renaming === key) {
+      var box = el("span", "t"), inp = el("input");
+      inp.value = r.title || "";
+      inp.setAttribute("aria-label", "Rename the action");
+      inp.maxLength = 200;
+      var settled = false;
+      var finish = function (keep) {
+        if (settled) return; settled = true;
+        var v = inp.value.replace(/\s+/g, " ").trim();
+        MW.renaming = null;
+        if (keep && v && v !== r.title) MW.write(r, "rename", { title: v }); else MW.redraw();
+      };
+      inp.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); finish(true); }
+        else if (e.key === "Escape") { e.preventDefault(); finish(false); }
+      });
+      inp.addEventListener("blur", function () { finish(true); });
+      box.appendChild(inp);
+      main.appendChild(box);
+      setTimeout(function () { inp.focus(); inp.select(); }, 0);
+    } else {
+      var t = el("button", "t", r.title || "(untitled)");
+      t.type = "button";
+      t.title = r.title || "";
+      t.setAttribute("aria-expanded", String(open));
+      t.addEventListener("click", function () { mwToggle(r); });
+      main.appendChild(t);
+    }
+    var bits = [];
+    if (TSORT.by !== "client") { var cl = el("span", "mwcl", r.clientName); bits.push(cl); }
+    if (r.last) { var up = el("span", "up"); up.appendChild(el("b", null, r.last.week)); up.appendChild(document.createTextNode(" · " + r.last.body)); bits.push(up); }
+    if (bits.length) {
+      var meta = el("div", "mwmeta");
+      bits.forEach(function (b, i) { if (i) meta.appendChild(el("span", "sep")); meta.appendChild(b); });
+      main.appendChild(meta);
+    }
+    row.appendChild(main);
+    row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.cell != null ? r.cell : r.when));
     var st = el("span", "mwst" + (r.status === "in_progress" ? " prog" : done ? " done" : "") + (r.canChange ? " live" : ""));
+    st.appendChild(el("span", "mwdot"));
     if (r.canChange) {
       var sel = el("select");
       sel.setAttribute("aria-label", "Status: " + (r.title || ""));
@@ -2556,18 +2624,152 @@
       st.appendChild(el("span", null, r.statusWord));
     }
     row.appendChild(st);
-    var link = el("a", "mwgo");
-    link.href = "/" + r.client + "/tracker";
-    link.title = "Open " + r.clientName + "’s Tracker";
-    link.setAttribute("aria-label", link.title);
-    link.innerHTML = MW_GO;
-    row.appendChild(link);
-    row.addEventListener("click", function (e) {
-      if (e.target.closest(".mwtick, .mwst.live, .mwgo")) return;
-      location.assign("/" + r.client + "/tracker");
-    });
+    var mn = el("span", "mwmenu");
+    var kb = el("button", "mwkb");
+    kb.type = "button";
+    kb.innerHTML = MW_DOTS;
+    kb.setAttribute("aria-haspopup", "menu");
+    kb.setAttribute("aria-expanded", String(MW.menu === key));
+    kb.setAttribute("aria-label", "More for " + (r.title || "this task"));
+    kb.addEventListener("click", function () { MW.menu = MW.menu === key ? null : key; MW.sub = null; MW.redraw(); });
+    mn.appendChild(kb);
+    if (MW.menu === key) mn.appendChild(mwMenu(r));
+    row.appendChild(mn);
+    if (open) row.appendChild(mwDetail(r));
     return row;
   }
+  /* THE ⋯ (§709): Details and progress · Rename · Change the week · Hand to
+     someone else · Open in the client's Tracker · Delete — the last behind
+     its question, the week and the people read with the task's details */
+  function mwMenu(r) {
+    var key = mwKey(r), pop = el("div", "mwpop"), d = MW.detail[key];
+    pop.setAttribute("role", "menu");
+    var item = function (icon, word, fn, cls) {
+      var b = el("button", cls || null);
+      b.type = "button";
+      b.setAttribute("role", "menuitem");
+      b.innerHTML = icon || "";
+      b.appendChild(document.createTextNode(word));
+      b.addEventListener("click", function (e) { e.stopPropagation(); fn(); });
+      pop.appendChild(b);
+      return b;
+    };
+    if (MW.sub === "week" || MW.sub === "hand") {
+      if (!d || d.error) { pop.appendChild(el("p", "wait", d && d.error ? d.error : "Reading…")); mwLoad(r); return pop; }
+      if (MW.sub === "week") d.weeks.forEach(function (w) {
+        var b = item("", w.word, function () { MW.write(r, "due", { due: w.day }); }, w.on ? "on" : null);
+        b.appendChild(el("small", null, w.days));
+      });
+      else d.team.forEach(function (p) {
+        var b = item("", p.name, function () { MW.write(r, "owner", { ownerKey: p.key }); });
+        if (p.me) b.appendChild(el("small", null, "you"));
+      });
+      return pop;
+    }
+    if (MW.sub === "del") {
+      var sure = el("div", "sure");
+      sure.appendChild(document.createTextNode("Delete this action from " + r.clientName + "’s Tracker?"));
+      var two = el("div");
+      var yes = el("button", "danger", "Yes, delete it"); yes.type = "button";
+      yes.addEventListener("click", function (e) { e.stopPropagation(); MW.write(r, "delete", {}); });
+      var no2 = el("button", null, "Keep it"); no2.type = "button";
+      no2.addEventListener("click", function (e) { e.stopPropagation(); MW.sub = null; MW.redraw(); });
+      two.appendChild(yes); two.appendChild(no2); sure.appendChild(two); pop.appendChild(sure);
+      return pop;
+    }
+    item(MW_I.lines, MW.open === key ? "Close the details" : "Details and progress", function () { mwToggle(r); });
+    if (r.canChange) {
+      item(MW_I.pen, "Rename", function () { MW.renaming = key; MW.menu = null; MW.redraw(); });
+      if (r.status !== "done") item(MW_I.cal, "Change the week", function () { MW.sub = "week"; mwLoad(r); MW.redraw(); });
+      item(MW_I.hand, "Hand to someone else", function () { MW.sub = "hand"; mwLoad(r); MW.redraw(); });
+    }
+    var go = el("a");
+    go.href = mwTrackerHref(r);
+    go.setAttribute("role", "menuitem");
+    go.innerHTML = MW_I.out;
+    go.appendChild(document.createTextNode("Open in " + r.clientName + "’s Tracker"));
+    pop.appendChild(go);
+    if (r.canChange) {
+      pop.appendChild(el("hr"));
+      item(MW_I.bin, "Delete", function () { MW.sub = "del"; MW.redraw(); }, "danger");
+    }
+    return pop;
+  }
+  /* THE OPENED TASK (§709, the Tracker's option D): Progress — the box with
+     Add beside it and the entries on a timeline; Description — text, written
+     by clicking into it and saved on leaving; History; and Open in the
+     client's Tracker at the end of the tabs, the press this row used to be. */
+  function mwDetail(r) {
+    var key = mwKey(r), d = MW.detail[key], box = el("div", "mwdet");
+    if (!d) { box.appendChild(el("p", "muted", "Reading…")); mwLoad(r); return box; }
+    if (d.error) { box.appendChild(el("p", "err", d.error)); return box; }
+    var tab = MW.tab[key] || "p";
+    var tabs = el("div", "mwtabs");
+    tabs.setAttribute("role", "tablist");
+    [["p", "Progress", d.progress.length], ["d", "Description", 0], ["h", "History", d.history.length]].forEach(function (x) {
+      var b = el("button", "mwtab", x[1]);
+      b.type = "button";
+      b.setAttribute("role", "tab");
+      b.setAttribute("data-tab", x[0]);
+      b.setAttribute("aria-selected", String(tab === x[0]));
+      if (x[2]) b.appendChild(el("span", "n", String(x[2])));
+      b.addEventListener("click", function () { MW.tab[key] = x[0]; MW.redraw(); });
+      tabs.appendChild(b);
+    });
+    tabs.appendChild(el("span", "sp"));
+    var go = el("a", "mwopen", "Open in " + r.clientName + "’s Tracker →");
+    go.href = mwTrackerHref(r);
+    tabs.appendChild(go);
+    box.appendChild(tabs);
+    if (tab === "p") {
+      if (d.canWrite) {
+        var cp = el("div", "mwcompose"), inp = el("input"), add = el("button", null, "Add");
+        inp.id = "mwp-" + r.id;
+        inp.placeholder = "What happened this week?";
+        inp.setAttribute("aria-label", "Progress on " + (r.title || "this task"));
+        inp.maxLength = 2000;
+        add.type = "button";
+        var send = function () { var v = inp.value.trim(); if (!v) { inp.focus(); return; } inp.disabled = true; MW.write(r, "progress", { body: v }); };
+        add.addEventListener("click", send);
+        inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); send(); } });
+        cp.appendChild(inp); cp.appendChild(add); box.appendChild(cp);
+      }
+      if (!d.progress.length) box.appendChild(el("p", "none", "Nothing written yet."));
+      else {
+        var ol = el("ol", "mwtl");
+        d.progress.forEach(function (p) {
+          var li = el("li");
+          li.appendChild(el("div", "wk" + (p.now ? " now" : ""), p.week + " · " + p.by + (p.edited ? " · edited" : "")));
+          li.appendChild(el("div", "tx", p.body));
+          ol.appendChild(li);
+        });
+        box.appendChild(ol);
+      }
+    } else if (tab === "d") {
+      if (d.canChange) {
+        var ta = el("textarea", "mwdesc");
+        ta.rows = 1;
+        ta.value = d.description || "";
+        ta.placeholder = "What the task is. Click to write it.";
+        ta.setAttribute("aria-label", "Description of " + (r.title || "this task"));
+        ta.maxLength = 5000;
+        ta.addEventListener("blur", function () { if (ta.value !== (d.description || "")) MW.write(r, "notes", { description: ta.value }); });
+        box.appendChild(ta);
+      } else box.appendChild(el("p", d.description ? null : "none", d.description || "No description."));
+    } else {
+      var ul = el("ul", "mwhist");
+      d.history.forEach(function (h) { var li = el("li"); li.appendChild(el("time", null, h.day)); li.appendChild(el("span", null, h.text)); ul.appendChild(li); });
+      box.appendChild(ul);
+    }
+    return box;
+  }
+  /* a press anywhere but a menu closes the menu */
+  document.addEventListener("click", function (e) {
+    if (MW.menu && !(e.target.closest && e.target.closest(".mwmenu"))) { MW.menu = null; MW.sub = null; if (MW.redraw) MW.redraw(); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && MW.menu) { MW.menu = null; MW.sub = null; if (MW.redraw) MW.redraw(); }
+  });
 
   /* A WRITE-UP ON MY WORK (spec 067 §8): the row's own look, a book where
      the tick is and "Case study" where the status is. It carries NO control
@@ -2580,13 +2782,19 @@
     mk.title = "An assignment to write up";
     mk.innerHTML = NAV_ICON.memory;
     row.appendChild(mk);
+    /* the row's own shape since §709: the name, the client under it */
+    var main = el("div", "mwmain");
     var t = el("span", "t", "Write up the assignment · ");
     t.appendChild(el("b", null, r.name));
-    row.appendChild(t);
-    var cl = el("span", "mwcl");
-    cl.title = r.clientName;
-    cl.appendChild(el("i", null, r.clientName));
-    row.appendChild(cl);
+    main.appendChild(t);
+    if (TSORT.by !== "client") {
+      var meta = el("div", "mwmeta");
+      var cl = el("span", "mwcl", r.clientName);
+      cl.title = r.clientName;
+      meta.appendChild(cl);
+      main.appendChild(meta);
+    }
+    row.appendChild(main);
     row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.when));
     var st = el("span", "mwst prog");
     st.appendChild(el("span", null, "Track Record"));
@@ -2740,12 +2948,46 @@
 
       var list = el("div");
       list.setAttribute("data-grid", "mywork");
+      /* §709: the opened task and the ⋯ write through the Tracker's own rules
+         (workWrite), and the list is drawn again from the server's answer —
+         a hand-over or a delete takes the row off; anything else swaps it */
+      MW.said = said;
+      MW.redraw = function () { if (TAB !== "mywork") return; draw(); find(); };
+      MW.write = function (r, op, extra) {
+        var key = mwKey(r), q = { action: "workWrite", client: r.client, id: r.id, op: op };
+        Object.keys(extra || {}).forEach(function (k) { q[k] = extra[k]; });
+        post(q).then(function (a) {
+          if (!a.ok) { said.textContent = a.error || "That did not save. Nothing was changed — try again."; said.hidden = false; MW.redraw(); return; }
+          said.hidden = true;
+          MW.menu = null; MW.sub = null; MW.renaming = null;
+          delete MW.detail[key];
+          var at = rows.indexOf(r), dat = doneRows.indexOf(r);
+          if (a.gone) {
+            if (at >= 0) rows.splice(at, 1);
+            if (dat >= 0) doneRows.splice(dat, 1);
+            if (MW.open === key) MW.open = null;
+          } else if (a.row) {
+            a.row.was = r.was;
+            if (at >= 0) rows[at] = a.row;
+            if (dat >= 0) doneRows[dat] = a.row;
+          }
+          mwCount(m.strip, rows.concat(cases));
+          setCnt();
+          MW.redraw();
+          if (op === "progress") { var pn = document.getElementById("mwp-" + r.id); if (pn) pn.focus(); }
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          said.textContent = "Could not reach the server. Nothing was changed — try again."; said.hidden = false; MW.redraw();
+        });
+      };
       /* A GROUP'S LABEL (A2): its name (Late in red), how many are open, and
          by client a way straight into that client's Internal Tracker, over a
          grey rule the card's whole width. */
       var head = function (sec, n, name, late, client) {
         if (late) sec.classList.add("late");
         var sh = el("div", "mwsh");
+        /* by client, the client's initials before its name (§709) */
+        if (client) sh.appendChild(el("span", "mwav", String(name.textContent || "").split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0]; }).join("").toUpperCase()));
         sh.appendChild(name);
         sh.appendChild(el("span", "meta"));
         if (client) {

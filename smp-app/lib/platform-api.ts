@@ -9,7 +9,7 @@
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
 import { landingFactsFor } from "./landing-facts.ts";
-import { myWork, tallyMark, setWorkStatus, writeUps } from "./my-work.ts";
+import { myWork, tallyMark, setWorkStatus, writeUps, workDetail, workWrite } from "./my-work.ts";
 import { isOffice, type Who } from "./tracker.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
@@ -315,6 +315,23 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     if (!door.ok) return no(404, "That client is not available.");
     const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) }, String((body && body.id) || ""), body && body.status);
     return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
+  }
+
+  /* ── A TASK OPENED, OR WRITTEN TO, ON MY TASKS (§709) ────────────────
+     The same door as workStatus above (door.ts resolveTenant), then the
+     Tracker's own reads and writes under the Tracker's own rules
+     (lib/my-work.ts workDetail, workWrite). */
+  if (action === "workDetail" || action === "workWrite") {
+    const door = await resolveTenant(pool, me, String((body && body.client) || ""));
+    if (!door.ok) return no(404, "That client is not available.");
+    const who = { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) };
+    const id = String((body && body.id) || "");
+    if (action === "workDetail") {
+      const d = await workDetail(door.tenant, who, id);
+      return d.ok ? ok({ detail: d.detail }) : no(d.status, d.why);
+    }
+    const w = await workWrite(door.tenant, who, id, body && body.op, (body || {}) as Record<string, unknown>);
+    return w.ok ? ok({ row: w.row, gone: w.gone }) : no(w.status, w.why);
   }
 
   /* ── Forefront's own people ── */

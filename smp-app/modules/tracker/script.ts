@@ -138,6 +138,8 @@ export const APP_JS = `(function () {
        unfolded where it was unfolded (§657) */
     if (k && k.prog) k.prog.forEach(function (st) { var b = progBox(st.id); if (b) b.value = st.val; });
     histOpen.forEach(function (id) { var o = document.querySelector('.open[data-id="' + id + '"]'); if (o) drawHist(o, true); });
+    Object.keys(tabOf).forEach(function (id) { var o = document.querySelector('.open[data-id="' + id + '"]'); if (o && !histOpen.has(id)) setTab(o, tabOf[id]); });
+    drawWalk();
     sizeAll();
     if (s && k && k.srch) s.value = k.srch;
     if (k && k.panel) showPanel(true);
@@ -158,10 +160,20 @@ export const APP_JS = `(function () {
   var sizes = !(window.CSS && CSS.supports && CSS.supports("field-sizing", "content"));
   function size(t) { if (!sizes || !t) return; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }
   function sizeAll() { document.querySelectorAll("textarea.desc, .prog textarea").forEach(size); }
-  function drawHist(o, on) {
-    var b = o.querySelector("[data-act=hist]"), h = o.querySelector(".hist"); if (!b || !h) return;
-    h.hidden = !on; b.classList.toggle("on", !!on); b.setAttribute("aria-expanded", String(!!on));
+  /* THE OPENED TASK'S TABS (§706): Progress, Description, History — one
+     shown at a time, by data-tab on the panel; the History tab is §657's
+     history link, so it keeps its act and its unfolding. Which tab a task
+     was left on rides across the swaps that follow. */
+  function setTab(o, t) {
+    o.setAttribute("data-tab", t);
+    o.querySelectorAll("[role=tab]").forEach(function (x) { x.setAttribute("aria-selected", String(x.getAttribute("data-tab") === t)); });
+    var b = o.querySelector("[data-act=hist]"), h = o.querySelector(".hist");
+    if (h) h.hidden = t !== "h";
+    if (b) { b.classList.toggle("on", t === "h"); b.setAttribute("aria-expanded", String(t === "h")); }
+    if (t === "d") sizeAll();
   }
+  function drawHist(o, on) { setTab(o, on ? "h" : "p"); }
+  var tabOf = {};
   /* A PRESS SHOWS AT ONCE (§671, rule 1d). Every handler below notes the
      control under the hand in "pressed", and a request made from it marks
      the row, panel or line that control sits in busy — dimmed, and taking no
@@ -216,6 +228,44 @@ export const APP_JS = `(function () {
     request("GET", LIST + "?view=" + encodeURIComponent(a.view) + "&q=" + encodeURIComponent(a.q) +
       "&group=" + encodeURIComponent(a.group) + "&dates=" + encodeURIComponent(a.dates) + (a.open ? "&open=" + encodeURIComponent(a.open) : ""), null, k || keep(), null, quiet);
   }
+  /* THE MEETING'S ORDER is the list on the left, top to bottom. Save and next
+     writes what is in the progress box (if anything) and opens the next
+     task in the same answer; the task left is counted as gone through — on
+     this browser, for today, which is the meeting's length. */
+  function meetIds() { return Array.prototype.map.call(document.querySelectorAll(".mlist .mi[data-id]"), function (x) { return x.getAttribute("data-id"); }); }
+  var WALK = "smp.tracker.walk";
+  function walked() {
+    try { var j = JSON.parse(sessionStorage.getItem(WALK) || "{}"); return j.day === new Date().toDateString() ? j.ids || [] : []; } catch (x) { return []; }
+  }
+  function walk(id) {
+    var ids = walked(); if (ids.indexOf(id) < 0) ids.push(id);
+    try { sessionStorage.setItem(WALK, JSON.stringify({ day: new Date().toDateString(), ids: ids })); } catch (x) {}
+  }
+  function drawWalk() {
+    var w = document.querySelector(".walk"); if (!w) return;
+    var ids = meetIds(), done = walked(), n = 0;
+    document.querySelectorAll(".mlist .mi[data-id]").forEach(function (x) { var on = done.indexOf(x.getAttribute("data-id")) >= 0; x.classList.toggle("rev", on); if (on) n++; });
+    var wn = w.querySelector(".wn"), i = w.querySelector(".bar i");
+    if (wn) wn.textContent = n + " of " + ids.length + " gone through";
+    if (i) i.style.width = (ids.length ? Math.round(100 * n / ids.length) : 0) + "%";
+  }
+  function stepTask(dir, save) {
+    var ids = meetIds(), panel = document.querySelector(".mopen"), cur = panel ? panel.getAttribute("data-id") : openId();
+    var i = ids.indexOf(cur), nx = ids[Math.max(0, Math.min(ids.length - 1, (i < 0 ? 0 : i) + dir))];
+    if (save && dir > 0 && cur) walk(cur);
+    var pn = save && dir > 0 && panel ? panel.querySelector(".pnew") : null;
+    if (pn && !pn.disabled && pn.value.replace(/\s+/g, "")) { if (nx) setOpen(nx); addProgress(pn); return; }
+    if (!nx || nx === cur) { drawWalk(); return; }
+    setOpen(nx); pressed = null; refetch();
+  }
+  document.addEventListener("keydown", function (e) {
+    if (!document.querySelector(".meet")) return;
+    var t = e.target, typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT");
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.stopPropagation(); stepTask(1, true); return; }
+    if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !typing && !(t.closest && t.closest(".weeks, .team, .topics, .setmenu, .tmenu"))) {
+      e.preventDefault(); stepTask(e.key === "ArrowDown" ? 1 : -1, false);
+    }
+  }, true);
   function rowOf(el) { var r = el.closest(".row, .open, .pline"); return r ? r.getAttribute("data-id") : null; }
   function entryOf(el) { var e = el.closest(".pe"); return e ? e.getAttribute("data-pid") : null; }
   function inAdd(el) { return el.closest(".addrow"); }
@@ -449,7 +499,7 @@ export const APP_JS = `(function () {
       w.classList.remove("on"); w.setAttribute("aria-expanded", "false");
       var t = w.querySelector(".team, .weeks, .topics"); if (t) t.hidden = true;
     });
-    document.querySelectorAll(".dots > button.on, .tdots > button.on").forEach(function (d) {
+    document.querySelectorAll(".dots > button.on, .tdots > button.on, .rdots > button.on").forEach(function (d) {
       if (d === except) return;
       d.classList.remove("on"); d.setAttribute("aria-expanded", "false");
       var m = d.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = true;
@@ -515,7 +565,7 @@ export const APP_JS = `(function () {
   document.addEventListener("click", function (e) {
     pressed = e.target;
     var b = e.target.closest("[data-act]");
-    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots")) closePops(null);
+    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots, .rdots")) closePops(null);
     if (!b) return;
     var act = b.getAttribute("data-act"), id = rowOf(b), ar = inAdd(b);
     if (act === "tick") {
@@ -646,7 +696,21 @@ export const APP_JS = `(function () {
       /* THE HISTORY UNFOLDS IN PLACE (§657), and stays unfolded across the
          swaps that follow while the row is open. */
       var o = b.closest(".open"), on3 = !b.classList.contains("on");
-      if (o) { drawHist(o, on3); if (on3) histOpen.add(id); else histOpen.delete(id); }
+      if (o) { drawHist(o, on3); delete tabOf[id]; if (on3) histOpen.add(id); else histOpen.delete(id); }
+    } else if (act === "ptab") {
+      var o7 = b.closest(".open"), t7 = b.getAttribute("data-tab") || "p";
+      if (o7) { setTab(o7, t7); histOpen.delete(id); tabOf[id] = t7; if (t7 === "d") { var d7 = o7.querySelector("textarea.desc"); if (d7 && !d7.value) d7.focus(); } }
+    } else if (act === "pick-task") {
+      /* THE MEETING (§706): the task pressed on the left opens on the right */
+      var pk = b.getAttribute("data-id");
+      if (pk && pk !== openId()) { setOpen(pk); pressed = null; refetch(); }
+    } else if (act === "set-status") {
+      if (b.getAttribute("aria-pressed") === "true") return;
+      var sv = b.getAttribute("data-value");
+      if (sv === "done") fresh.add(id);
+      post({ act: "status", id: id, status: sv });
+    } else if (act === "step") {
+      stepTask(Number(b.getAttribute("data-dir")) || 1, true);
     } else if (act === "progress-go") {
       var pb = b.closest(".pbox"), pn = pb ? pb.querySelector(".pnew") : null;
       if (pn && !pn.disabled) addProgress(pn);
@@ -680,9 +744,30 @@ export const APP_JS = `(function () {
       post({ act: "progress-delete", progressId: entryOf(b) });
     } else if (act === "add-note") {
       if (noteIsOpen(ar)) foldNote(ar); else openNote(ar);
+    } else if (act === "row-menu") {
+      /* THE ROW'S ⋯ (§707): Details and progress, Rename, Change topic, Delete */
+      toggleSettings(b);
+    } else if (act === "rename-start") {
+      closePops(null);
+      var rt = b.closest(".row") && b.closest(".row").querySelector(".t[data-rename]");
+      if (rt) startRename(rt);
+    } else if (act === "week-start" || act === "who-start") {
+      /* §708: the week a row due this week no longer shows, and the owner a
+         card per owner no longer shows, are opened from the ⋯ — the same
+         pickers, pressed for the hand */
+      closePops(null);
+      var rw = b.closest(".row"), pk2 = rw && rw.querySelector(act === "week-start" ? ".when.pick" : ".who.pick");
+      if (pk2) pk2.click();
+    } else if (act === "topic-start") {
+      closePops(null);
+      var rp = b.closest(".row") && b.closest(".row").querySelector(".tpk");
+      if (rp) togglePop(rp, ".topics");
     } else if (act === "more") {
       /* Open this row (and only this row), or fold it if it is the open one;
-         the address carries which, and the list is read again. */
+         the address carries which, and the list is read again. The name
+         opens it too (§707) — but not while it is being renamed. */
+      if (e.target.closest("input")) return;
+      closePops(null);
       var next = openId() === id ? null : id;
       setOpen(next);
       refetch();
@@ -716,6 +801,7 @@ export const APP_JS = `(function () {
      the bar is every module's and its height is its own business, so the
      offset is read off it now and again whenever it changes. */
   sizeAll();
+  drawWalk();
   var tb = document.querySelector(".tb");
   function barFoot() { if (tb) document.documentElement.style.setProperty("--tbh", tb.offsetHeight + "px"); }
   barFoot();
@@ -759,8 +845,18 @@ export const APP_JS = `(function () {
      or leaving the box renames, Escape puts the name back. A single click
      does nothing, so a row can still be read without a box opening under
      the pointer. */
+  /* ON THE LIST A SINGLE CLICK ON THE NAME OPENS THE TASK (§707), so the
+     list renames from its ⋯ — Rename — and the double-click stays on the
+     meeting's own title, which opens nothing. */
   document.addEventListener("dblclick", function (e) {
-    var t = e.target.closest(".t[data-rename]");
+    var t = e.target.closest(".mopen .t[data-rename]");
+    if (t) startRename(t);
+  });
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if ((e.key === "Enter" || e.key === " ") && t && t.matches && t.matches(".row .t[role=button]")) { e.preventDefault(); t.click(); }
+  });
+  function startRename(t) {
     if (!t || t.querySelector("input")) return;
     var tn = t.closest(".tn2"), id = rowOf(t), was = t.textContent;
     var inp = document.createElement("input");
@@ -785,7 +881,7 @@ export const APP_JS = `(function () {
       else if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
     });
     inp.addEventListener("blur", function () { finish(true); });
-  });
+  }
 
   /* Saved when you leave the box (§35), and only when it changed. */
   document.addEventListener("focusout", function (e) {

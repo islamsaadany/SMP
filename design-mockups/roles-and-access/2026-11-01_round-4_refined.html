@@ -1,0 +1,244 @@
+<title>Roles &amp; access, refined</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<!-- Islam, 2026-11-01, of the built ladder page: (1) "the copilot has the old
+     icons"; (2) "the owner is just owner — is that the capability owner or
+     function or direction or what?"; (3) "the description column needs to be
+     useful to the smo team to adjust"; (4) "refine the current design"; and
+     (5) "the button readers land in make the button better as well". The
+     built page, refined on exactly those five points; nothing else moves. -->
+<style>
+/* Layout: the platform's Setup page as built — one table, the ladder in its middle, the first-screen row under it. */
+:root{
+  --ground:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --line:#D5DBE4; --line-soft:#E5E9F0;
+  --ink:#151A22; --ink-2:#3F4856; --ink-3:#647080;
+  --panel:#16325C; --panel-ink:#FFFFFF; --gold:#C9A24D; --gold-deep:#8A6B22;
+  --good:#2E7D5B; --good-bg:#E3F0E9;
+  --sans:'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ground:#13161B; --surface:#1B2028; --surface-2:#232A34; --line:#323B47; --line-soft:#29313C;
+  --ink:#E8ECF2; --ink-2:#B5BECA; --ink-3:#8F9AA8; --panel:#0E1420; --panel-ink:#EAF0FA; --gold:#D9B665; --gold-deep:#D9B665;
+  --good:#63BA90; --good-bg:#1A3027; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --ground:#13161B; --surface:#1B2028; --surface-2:#232A34; --line:#323B47; --line-soft:#29313C;
+  --ink:#E8ECF2; --ink-2:#B5BECA; --ink-3:#8F9AA8; --panel:#0E1420; --panel-ink:#EAF0FA; --gold:#D9B665; --gold-deep:#D9B665;
+  --good:#63BA90; --good-bg:#1A3027; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1280px;margin:0 auto;padding-block:24px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+.head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px 20px}
+.head>div{flex:1 1 480px;min-width:0}
+h1{margin:0;font-size:21px}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:80ch;font-size:14px}
+.notes{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:3px;font-size:13.5px;color:var(--ink-2)}
+.notes b{color:var(--ink)}
+.notes .n{display:inline-block;min-width:20px;font-weight:700;color:var(--gold-deep)}
+.ctl{display:flex;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 13px;font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--panel-ink)}
+.page{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:grid;gap:14px;min-width:0}
+.page h2{margin:0;font-size:20px;padding-bottom:8px;border-bottom:1px solid var(--line-soft)}
+.scroll{overflow-x:auto;border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:13.5px}
+thead th{background:var(--panel);color:var(--panel-ink);text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:9px 14px;white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+tr.office td{background:var(--surface-2)}
+td.role{min-width:160px;max-width:230px}
+td.role b{display:block;font-weight:700}
+.count{font-size:12px;color:var(--ink-3)}
+.cov{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.cov span{font-size:11.5px;font-weight:600;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:0 8px;white-space:nowrap}
+tr.office .cov span{background:var(--surface)}
+td.lad{white-space:nowrap}
+.ladder{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.ladder button{display:inline-flex;align-items:center;gap:5px;border:0;border-right:1px solid var(--line-soft);background:none;padding:6px 10px;font-size:12.5px;font-weight:600;color:var(--ink-3);cursor:pointer;white-space:nowrap}
+.ladder button:last-child{border-right:0}
+.ladder button svg{width:14px;height:14px;flex:none}
+.ladder button.eye{background:var(--panel);color:var(--panel-ink)}
+.ladder button.pen{background:var(--good-bg);color:var(--good)}
+.ladder button.nil{background:var(--surface-2);color:var(--ink)}
+.ladder button.off{color:var(--line);text-decoration:line-through;cursor:default}
+.ladder button:not(.off):not(.eye):not(.pen):hover{color:var(--ink);background:var(--surface-2)}
+:root[data-theme="dark"] .ladder button.eye{background:var(--ink-2);color:var(--ground)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ladder button.eye{background:var(--ink-2);color:var(--ground)}}
+td.means{min-width:280px;max-width:400px;font-size:13px;color:var(--ink-2);line-height:1.45}
+td.means span{display:block}
+td.means span+span{margin-top:3px}
+td.means b{color:var(--ink);margin-right:4px}
+td.means .no{color:var(--ink-3)}
+.all{font-size:13px;font-weight:600;color:var(--ink-2)}
+.only{font-size:12.5px;color:var(--ink-3)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--ink-3)}
+.key span{display:inline-flex;align-items:center;gap:5px}
+.key svg{width:14px;height:14px}
+.land{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding:14px 16px;border:1px solid var(--line);border-radius:10px}
+.land .t{flex:1 1 320px;min-width:0;display:grid;gap:2px}
+.land .t b{font-size:14px}
+.land .t span{font-size:13px;color:var(--ink-3)}
+.land .sw{display:inline-flex;gap:8px;flex-wrap:wrap}
+.land .sw button{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;cursor:pointer;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2)}
+.land .sw button svg{width:18px;height:18px}
+.land .sw button[aria-pressed="true"]{background:var(--panel);color:var(--panel-ink);border-color:var(--panel);cursor:default}
+.land .sw button:not([aria-pressed="true"]):hover{border-color:var(--ink-3);color:var(--ink)}
+.flash{animation:fl .7s ease}
+@keyframes fl{from{background:color-mix(in srgb,var(--gold) 22%,transparent)}to{background:transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}}
+.ask{position:fixed;z-index:5;max-width:300px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(15,23,42,.18);padding:12px 14px;font-size:13px;display:grid;gap:8px}
+.ask b{font-size:13.5px}
+.ask .acts{display:flex;gap:8px}
+.ask .acts button{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:5px 10px;font-size:12.5px;font-weight:600;cursor:pointer}
+.ask .acts .yes{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+</style>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>Roles &amp; access, refined</h1>
+      <p class="lede">The page as it is built, with your five comments applied and nothing else changed. Press anything: levels, the pen, the Copilot cells and the first-screen buttons all work here, with the same confirmation box the platform shows. The dashed outlines mark what changed.</p>
+      <ul class="notes">
+        <li><span class="n">1</span><b>Copilot</b> uses the table's own eye (reads) and pen (uses), and a lit one turns off when pressed.</li>
+        <li><span class="n">2</span><b>Each row names who it covers</b> in the client's words. A row covering one role is titled by it: at El Abd, Owner reads Function head.</li>
+        <li><span class="n">3</span><b>What this means</b> describes the row's current settings in plain words: what it sees, what it writes, what it does not see. It changes as you press.</li>
+        <li><span class="n">4</span><b>The office rows</b> sit on a shaded band and read "Sees and edits everything, by rule", since nothing about them can be set except the Copilot.</li>
+        <li><span class="n">5</span><b>The first-screen switch</b> is its own row: a plain title, two labelled buttons with icons, who it applies to today, and what it never changes.</li>
+      </ul>
+    </div>
+    <div class="ctl">
+      <span class="seg" id="client"><button data-c="abd" aria-pressed="true">El Abd</button><button data-c="raya" aria-pressed="false">Raya</button></span>
+      <span class="seg" id="theme"><button data-t="light" aria-pressed="true">Light</button><button data-t="dark" aria-pressed="false">Dark</button></span>
+    </div>
+  </div>
+  <div class="page" id="page"></div>
+</div>
+<script>
+(function () {
+  var EYE = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M1.7 10S4.8 5 10 5s8.3 5 8.3 5-3.1 5-8.3 5-8.3-5-8.3-5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="10" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+  var PEN = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  var WIN = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h6.2c.5 0 .8.3.8.8v10.2c0-.6-.4-1-1-1H3zM17 4.5h-6.2c-.5 0-.8.3-.8.8v10.2c0-.6.4-1 1-1H17z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+  var BENCH = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 7.5h14M8 7.5v9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var C = {
+    abd: { top: "company", place: "function", places: "functions", div: "division",
+      levels: ["Own piece", "Own function", "Own division", "The company"],
+      rows: [
+        { k: "super", name: "Super user", n: 2, office: true, cop: "edit" },
+        { k: "smo", name: "SMO team", n: 3, office: true, cop: "edit" },
+        { k: "gceo", name: "Company CEO", n: 0, stand: 3, lv: 3 },
+        { k: "cceo", name: "Division head", n: 0, stand: 2, lv: 2 },
+        { k: "owner", name: "Owner", covers: ["Function head"], n: 0, held: 1, lv: 1, pen: true },
+        { k: "cust", name: "Custodian", covers: ["Function custodian", "Capability custodian"], n: 0, held: 1, lv: 1, pen: true },
+        { k: "part", name: "Part owner", covers: ["Direction owner", "Capability owner", "Project owner"], n: 7, held: 0, lv: 1, pen: false },
+        { k: "contrib", name: "Contributor", covers: ["Named on a measure, tactic or milestone"], n: 0, held: 0, lv: 1, pen: false, many: true },
+        { k: "floor", name: "Everyone else", covers: ["On the register, holding nothing"], n: 0, floor: true, lv: 0, many: true }
+      ] },
+    raya: { top: "group", place: "business unit or function", places: "business units and functions", div: "division",
+      levels: ["Own piece", "Own unit or function", "Own division", "The group"],
+      rows: [
+        { k: "super", name: "Super user", n: 1, office: true, cop: "edit" },
+        { k: "smo", name: "SMO team", n: 0, office: true, cop: "edit" },
+        { k: "gceo", name: "Group CEO", n: 1, stand: 3, lv: 3 },
+        { k: "cceo", name: "Division head", n: 2, stand: 2, lv: 2 },
+        { k: "owner", name: "Owner", covers: ["Business unit owner", "Function head"], n: 16, held: 1, lv: 1, pen: true },
+        { k: "cust", name: "Custodian", covers: ["Business unit custodian", "Function custodian", "Capability custodian"], n: 12, held: 1, lv: 1, pen: true },
+        { k: "part", name: "Part owner", covers: ["Pillar owner", "Project owner", "Capability owner"], n: 24, held: 0, lv: 1, pen: false },
+        { k: "contrib", name: "Contributor", covers: ["Named on a measure, tactic or milestone"], n: 0, held: 0, lv: 1, pen: false, many: true },
+        { k: "floor", name: "Everyone else", covers: ["On the register, holding nothing"], n: 1, floor: true, lv: 0, many: true }
+      ] }
+  };
+  var ST = { c: "abd", land: "window", flash: null, ask: null };
+  var cl = function () { return C[ST.c]; };
+  var rowOf = function (k) { return cl().rows.filter(function (r) { return r.k === k; })[0]; };
+  var title = function (r) { return r.covers && r.covers.length === 1 && !r.many ? r.covers[0] : r.name; };
+  var writesWhat = { owner: "their function's figures, and its report", cust: "what they keep, as its owner would", part: "the lines of their own piece", contrib: "the lines that name them" };
+  function meaning(r) {
+    var c = cl(), sees, writes, hides = [], every = "Everything in the " + c.top + ".";
+    if (r.floor) sees = r.lv === 0 ? "Nothing." : r.lv === 1 ? "The " + c.place + " they are attached to." : r.lv === 2 ? "Their own " + c.div + " and everything in it." : every;
+    else if (r.stand != null) sees = r.lv === 0 ? "Nothing." : r.lv === 3 ? every : "Their own " + c.div + ": its page and every " + c.place + " in it.";
+    else sees = r.lv === 0 ? "Only their own piece inside their " + c.place + "." : r.lv === 1 ? "Their own " + c.place + " in full: every piece in it, its plan and its figures." : r.lv === 2 ? "Every " + c.place + " in their " + c.div + ", and the " + c.div + "'s page." : every;
+    writes = r.held == null ? "Nothing. They hold no piece." : r.pen ? "Enters and submits " + (ST.c === "raya" && r.k === "owner" ? "their unit's or function's figures, and its report" : writesWhat[r.k]) + "." : "Nothing. Reads only until the pen is on.";
+    if (!(r.lv === 0 && (r.stand != null || r.floor)) && r.lv < 3) {
+      if (r.lv === 0) hides.push("the other pieces beside theirs");
+      if (r.lv <= 1) hides.push("other " + c.places);
+      if (r.lv === 2) hides.push("other " + c.div + "s");
+      hides.push("the " + c.top + "'s own pages");
+    }
+    return '<span><b>Sees</b>' + esc(sees) + '</span><span><b>Writes</b>' + esc(writes) + '</span>' + (hides.length ? '<span class="no">Does not see ' + esc(hides.join(", ")) + '.</span>' : '');
+  }
+  function ladder(r) {
+    var c = cl(), lo = r.stand != null ? r.stand : r.held != null ? r.held : 0;
+    return '<span class="ladder">' + [0, 1, 2, 3].map(function (i) {
+      var word = r.floor && i === 0 ? "Nothing" : c.levels[i];
+      var struck = r.stand != null ? i < r.stand : r.held != null ? i < r.held : false;
+      if (struck) return '<button type="button" class="off" disabled>' + esc(word) + '</button>';
+      if (r.held === i) return '<button type="button" class="' + (r.pen ? "pen" : "eye") + '" data-pen="' + r.k + '" title="' + (r.pen ? "Enters and submits here; press to make it read only" : "Reads only here; press to let them enter and submit") + '">' + (r.pen ? PEN : EYE) + esc(word) + '</button>';
+      if (r.floor && i === 0) return '<button type="button" class="' + (r.lv === 0 ? "nil" : "") + '" data-lv="' + r.k + '|0">Nothing</button>';
+      var lit = i <= r.lv && (r.held == null ? (r.floor ? i >= 1 : true) : i > r.held);
+      return '<button type="button" class="' + (lit ? "eye" : "") + '" data-lv="' + r.k + '|' + i + '">' + (lit ? EYE : "") + esc(word) + '</button>';
+    }).join("") + '</span>';
+  }
+  function copilot(r) {
+    if (!r.office) return '<span class="only">Office only</span>';
+    var eyeOn = r.cop === "view" || r.cop === "edit", penOn = r.cop === "edit";
+    return '<span class="ladder flag"><button type="button" class="' + (eyeOn ? "eye" : "") + '" data-cop="' + r.k + '|eye">' + EYE + 'Reads</button><button type="button" class="' + (penOn ? "pen" : "") + '" data-cop="' + r.k + '|pen">' + PEN + 'Uses</button></span>';
+  }
+  function draw() {
+    var c = cl();
+    var ro = c.rows.filter(function (r) { return !r.office && (r.held == null || !r.pen); }).map(title);
+    document.getElementById("page").innerHTML = '<h2>Roles &amp; access</h2>' +
+      '<div class="scroll"><table><thead><tr><th>Role</th><th>Sees up to · writes</th><th>What this means</th><th>Copilot</th></tr></thead><tbody>' +
+      c.rows.map(function (r) {
+        var cov = r.covers && !(r.covers.length === 1 && !r.many) ? '<span class="cov' + (r.k === "owner" || r.k === "cust" || r.k === "part" ? " flag" : "") + '">' + r.covers.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join("") + '</span>' : '';
+        return '<tr class="' + (r.office ? "office" : "") + (ST.flash === r.k ? " flash" : "") + '"><td class="role"><b class="' + (title(r) !== r.name ? "flag" : "") + '">' + esc(title(r)) + '</b><span class="count">' + (r.n ? r.n + (r.n === 1 ? " person" : " people") : "nobody yet") + '</span>' + cov + '</td>' +
+          '<td class="lad">' + (r.office ? '<span class="all">Sees and edits everything, by rule</span>' : ladder(r)) + '</td>' +
+          '<td class="means' + (r.office ? '' : '') + '">' + (r.office ? '<span>Runs the platform: the plan, the cycle, Setup.</span>' : meaning(r)) + '</td>' +
+          '<td>' + copilot(r) + '</td></tr>';
+      }).join("") + '</tbody></table></div>' +
+      '<div class="key"><span>' + EYE + 'sees: press a level to see up to it, the last lit one to step down</span><span>' + PEN + 'enters and submits: a switch on the role\'s own level</span><span>Struck through: not a level this role can stand on.</span></div>' +
+      '<div class="land flag"><div class="t"><b>First screen for people who can change nothing</b><span>Today: ' + esc(ro.join(", ") || "nobody") + '. This decides where they open on sign-in, never what they can see.</span></div>' +
+      '<div class="sw"><button type="button" data-land="window" aria-pressed="' + (ST.land === "window") + '">' + WIN + 'Reading window</button><button type="button" data-land="bench" aria-pressed="' + (ST.land === "bench") + '">' + BENCH + 'Workbench</button></div></div>';
+    ST.flash = null;
+  }
+  /* the platform's asking box, beside the control */
+  function ask(btn, who, body, go) {
+    closeAsk();
+    var box = document.createElement("div"); box.className = "ask";
+    box.innerHTML = '<b>' + esc(who) + '</b><span>' + body + '</span><div class="acts"><button type="button" class="yes">Change it</button><button type="button" class="no">Keep as it was</button></div>';
+    document.body.appendChild(box);
+    var r = btn.getBoundingClientRect(), w = Math.min(300, innerWidth - 24);
+    box.style.left = Math.max(12, Math.min(innerWidth - w - 12, r.left)) + "px"; box.style.top = Math.min(innerHeight - 140, r.bottom + 8) + "px";
+    box.querySelector(".yes").onclick = function () { closeAsk(); go(); };
+    box.querySelector(".no").onclick = closeAsk;
+    ST.ask = box;
+  }
+  function closeAsk() { if (ST.ask) { ST.ask.remove(); ST.ask = null; } }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) { if (ST.ask && !ST.ask.contains(e.target)) closeAsk(); return; }
+    if (ST.ask && ST.ask.contains(b)) return;
+    var r, p;
+    if (b.dataset.lv) {
+      p = b.dataset.lv.split("|"); r = rowOf(p[0]); var i = +p[1], to = i;
+      if (i === r.lv && i !== 0) { to = r.stand != null ? (i - 1 < r.stand ? 0 : i - 1) : Math.max(r.held != null ? r.held : 0, i - 1); if (r.floor && i === 1) to = 0; }
+      if (to === r.lv) return;
+      var w = to === 0 && (r.stand != null || r.floor) ? "<b>nothing</b>" : "up to <b>" + esc(cl().levels[to]) + "</b>";
+      ask(b, title(r), "Will see " + w + ". What they enter and submit does not change.", function () { r.lv = to; ST.flash = r.k; draw(); });
+      return;
+    }
+    if (b.dataset.pen) { r = rowOf(b.dataset.pen); ask(b, title(r), r.pen ? "Will <b>read only</b> what they hold, and enter nothing." : "Will <b>enter and submit</b> what they hold.", function () { r.pen = !r.pen; ST.flash = r.k; draw(); }); return; }
+    if (b.dataset.cop) {
+      p = b.dataset.cop.split("|"); r = rowOf(p[0]);
+      var next = p[1] === "eye" ? (r.cop === "none" ? "view" : "none") : (r.cop === "edit" ? "view" : "edit");
+      ask(b, title(r) + " · Copilot", next === "none" ? "Will not see the <b>Copilot</b>." : next === "view" ? "Will <b>read</b> the Copilot and not use it." : "Will <b>use</b> the Copilot.", function () { r.cop = next; ST.flash = r.k; draw(); });
+      return;
+    }
+    if (b.dataset.land) { ST.land = b.dataset.land; draw(); return; }
+    if (b.dataset.c) { ST.c = b.dataset.c; [].forEach.call(document.querySelectorAll("#client button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); }); closeAsk(); draw(); return; }
+    if (b.dataset.t) { document.documentElement.setAttribute("data-theme", b.dataset.t); [].forEach.call(document.querySelectorAll("#theme button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); }); }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAsk(); });
+  draw();
+})();
+</script>

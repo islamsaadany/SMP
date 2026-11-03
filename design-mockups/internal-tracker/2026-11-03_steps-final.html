@@ -109,6 +109,32 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .tile{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--gold-bg);color:var(--gold);font-size:14px}
 .views{display:flex;gap:2px;margin-left:6px}.views span{padding:4px 10px;border-radius:7px;color:var(--ink-3);font-size:13.5px}.views span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
 .mrow{display:grid;grid-template-columns:22px minmax(0,1fr) 124px 28px;gap:2px 14px;align-items:center;padding:10px 16px;border-top:1px solid var(--line-2)}
+.waiting{margin:8px 0 2px;padding:8px 12px;border-radius:9px;background:var(--blue-bg);color:var(--ink-2);font-size:13px}
+.waiting b{color:var(--ink);font-weight:500}
+.waiting button{border:0;background:none;padding:0 0 0 6px;color:var(--blue);font-weight:600;font-size:13px}
+.slinks{display:flex;gap:16px;margin-top:6px;padding-left:6px}
+.slinks button{border:0;background:none;padding:0;color:var(--blue);font-size:13px}
+.slinks button[data-editsteps]{color:var(--ink-3)}
+.mwadd{display:flex;align-items:center;gap:10px;margin:10px 16px 12px;border:1px solid var(--line-2);border-radius:9px;padding:0 12px;background:var(--ground)}
+.mwadd:focus-within{background:var(--surface);border-color:var(--line)}
+.mwadd .pl{color:var(--ink-3)}
+.mwadd input{flex:1;min-width:0;border:0;background:none;outline:none;padding:9px 0;font-size:14.5px}
+.mwadd .chips2{display:none;gap:6px;align-items:center}
+.mwadd:focus-within .chips2{display:flex}
+.mwadd select,.chip2{border:0;background:var(--surface-2);border-radius:6px;padding:3px 8px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.mrow.fresh{background:var(--good-bg)}
+.newtask{margin-left:8px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600;color:var(--ink)}
+.newtask:hover{border-color:var(--blue);color:var(--blue)}
+.scrim{position:fixed;inset:0;background:rgba(20,28,43,.35);z-index:40}
+.pop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:41;width:min(460px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 60px rgba(20,28,43,.3);padding:18px 20px;display:grid;gap:12px}
+.poph{display:flex;align-items:center}.poph h3{margin:0;font-size:17px}.poph .x{margin-left:auto;border:0;background:none;font-size:20px;color:var(--ink-3)}
+.pop label{display:grid;gap:4px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.pop label small{font-weight:400;color:var(--ink-3)}
+.pop input,.pop select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px;background:var(--surface);color:var(--ink);font-weight:400}
+.pop .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.popf{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.go2{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 14px;font-weight:600}
+.go2.pri{background:var(--navy);border-color:var(--navy);color:#fff}
 .offer{margin:8px 0 2px;padding:8px 12px;border-radius:9px;background:var(--blue-bg);color:var(--ink-2);font-size:13px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .offer b{color:var(--ink);font-weight:600}
 .offer .go{border:1px solid var(--blue);background:var(--surface);color:var(--blue);border-radius:7px;padding:2px 10px;font-weight:600;font-size:12.5px}
@@ -148,7 +174,8 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 <div class="toast" id="toast" hidden></div>
 <script>
 const TODAY_WEEKS=[['This week','1 – 5 Nov'],['Next week','8 – 12 Nov'],['W3 Nov','15 – 19 Nov'],['W4 Nov','22 – 26 Nov'],['W1 Dec','29 Nov – 3 Dec']];
-const fresh=()=>({w:'tracker',tab:'s',st:'ns',notYet:false,open:-1,ren:-1,offer:-1,box:'',addOpen:false,more:false,
+const fresh=()=>({w:'tracker',tab:'s',st:'ns',notYet:false,open:-1,ren:-1,box:'',auto:[],edited:false,addOpen:false,more:false,stepAdd:false,
+ extra:[],pop:false,addFocus:false,
  now:[],
  before:[['Agreed the BU list with Finance; templates next.','Mohamed','last week'],['Templates drafted for Retail and Wholesale; two units still to send their data.','Mohamed','W4 Oct'],
   ['Met the BU heads one by one; most agree on one main measure each.','Mohamed','W3 Oct'],['Shortlist of measures shared with Islam for a first look.','Mohamed','W2 Oct']],
@@ -169,42 +196,68 @@ function stepsHtml(compact){
   const late=!s.d&&s.wk==='Last week';
   const list='<span class="swl" role="listbox"'+(S.open===i?'':' hidden')+'>'+TODAY_WEEKS.map(w=>'<button type="button" data-due="'+w[0]+'" data-i="'+i+'" class="'+(s.wk===w[0]?'on':'')+'"><b>'+w[0]+'</b><small>'+w[1]+'</small></button>').join('')+'<button type="button" data-due="" data-i="'+i+'">No week</button></span>';
   return '<li class="sline'+(s.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" aria-pressed="'+s.d+'" aria-label="'+(s.d?'Untick':'Tick')+': '+esc(s.n)+'">'+(s.d?'✓':'')+'</button>'+
-   '<span class="snm" data-ren="'+i+'" role="button" tabindex="0">'+(S.ren===i?'<input id="renbox" value="'+esc(s.n)+'" aria-label="Rename the step">':esc(s.n))+'</span>'+
-   '<span class="swk"><button type="button" class="chip'+(s.wk?' set':'')+(late?' late':'')+'" data-wk="'+i+'">'+(s.wk||'+ week')+'</button>'+list+'</span>'+
+   '<span class="snm"'+(compact?'':' data-ren="'+i+'" role="button" tabindex="0"')+'>'+(S.ren===i?'<input id="renbox" value="'+esc(s.n)+'" aria-label="Rename the step">':esc(s.n))+'</span>'+
+   (compact?(s.wk?'<span class="chip set'+(late?' late':'')+'">'+s.wk+'</span>':''):'<span class="swk"><button type="button" class="chip'+(s.wk?' set':'')+(late?' late':'')+'" data-wk="'+i+'">'+(s.wk||'+ week')+'</button>'+list+'</span>')+
    (compact?'':'<span class="stools"><button type="button" data-mv="'+i+'" data-dir="-1" aria-label="Move up"'+(i===0?' disabled':'')+'>↑</button><button type="button" data-mv="'+i+'" data-dir="1" aria-label="Move down"'+(i===n-1?' disabled':'')+'>↓</button><button type="button" data-del="'+i+'" aria-label="Remove the step">×</button></span>')+'</li>';
  }).join('');
  const ask=n&&done()===n&&S.st!=='dn'&&!S.notYet?'<div class="sdone">All steps are ticked. Mark the task Done? <button type="button" class="go" data-markdone>Mark Done</button><button type="button" class="go quiet" data-notyet>Not yet</button></div>':'';
- return (n?'<ul class="stl">'+lis+'</ul>':(compact?'':'<p class="opt">Break the task into steps if it helps plan it — optional.</p>'))+offerHtml()+'<div class="sadd"><span>+</span><input id="addstep" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'+ask;
+ const waiting=!compact&&S.box?'<div class="waiting">Waiting in this week\'s update: <b>'+esc(S.box)+'</b> <button type="button" data-goprog>Open ›</button></div>':'';
+ if(compact){
+  /* 3 · in the weekly check: tick, and add the odd step behind a link; the
+     rest of the planning is the task's own Steps tab */
+  return (n?'<ul class="stl">'+lis+'</ul>':'')+
+   (S.stepAdd?'<div class="sadd"><span>+</span><input id="addstep" placeholder="Add a step and press Enter" aria-label="Add a step"></div>':'')+
+   '<div class="slinks">'+(S.stepAdd?'':'<button type="button" data-stepadd>+ Add a step</button>')+(n?'<button type="button" data-editsteps>Edit steps ›</button>':'')+'</div>'+ask;
+ }
+ return (n?'<ul class="stl">'+lis+'</ul>':'<p class="opt">Break the task into steps if it helps plan it — optional.</p>')+waiting+'<div class="sadd"><span>+</span><input id="addstep" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'+ask;
 }
 const TITLE='Develop a key measure per business unit';
 function trackerRow(on){return '<div class="row'+(on?' on':'')+'"><span class="tick'+(S.st==='dn'?' dn':'')+'"></span><div class="tn"><button type="button" class="t">'+TITLE+'</button><div class="meta"><span>Functions</span>'+(S.steps.length?'<i class="sd"></i>'+stc():'')+'<i class="sd"></i><span class="up">Agreed the BU list with Finance; templates next</span></div></div><span class="wk">This week</span><span class="st"><span class="dot '+ST[S.st][1]+'"></span>'+ST[S.st][0]+'</span><span class="kb">⋯</span></div>'}
+function extraRows(home){return S.extra.map(x=>'<div class="mrow fresh"><span class="tick"></span><div class="tn"><span class="t" style="font-size:'+(home?14:15)+'px">'+esc(x.t)+'</span><div class="meta"><span>'+esc(x.c)+'</span></div></div><span class="st"><span class="dot ns"></span>Not started</span><span class="kb">⋯</span></div>').join('')}
+function popHtml(){return S.pop?'<div class="scrim" data-popclose></div><div class="pop" role="dialog" aria-modal="true" aria-labelledby="poph"><div class="poph"><h3 id="poph">New task</h3><button type="button" class="x" data-popclose aria-label="Close">×</button></div>'+
+ '<label>Task<input id="ptitle" placeholder="What needs doing"></label>'+
+ '<div class="two"><label>Client<select id="pclient"><option>Raya Trade</option><option>Elabd</option><option>RHI</option></select></label><label>Week<select id="pweek"><option>This week</option><option>Next week</option><option>W3 Nov</option><option>W4 Nov</option><option>No date</option></select></label></div>'+
+ '<div class="two"><label><span>Topic <small>optional</small></span><select><option>No topic</option><option>Functions</option><option>Reporting</option><option>Units</option></select></label><label>Owner<select><option>Me</option><option>Mohamed</option><option>Noran</option><option>Omar</option></select></label></div>'+
+ '<div class="popf"><button type="button" class="go2" data-popclose>Cancel</button><button type="button" class="go2 pri" data-popcreate>Create</button></div></div>':''}
 function mwRow(home){return '<div class="mrow"><span class="tick'+(S.st==='dn'?' dn':'')+'"></span><div class="tn"><span class="t" style="font-size:'+(home?14:15)+'px">'+TITLE+'</span><div class="meta"><span>Raya Trade</span>'+(S.steps.length?'<i class="sd"></i>'+stc():'')+'<i class="sd"></i><span class="up">Agreed the BU list with Finance; templates next</span></div></div><span class="st"><span class="dot '+ST[S.st][1]+'"></span>'+ST[S.st][0]+'</span><span class="kb">⋯</span></div>'}
 const V={
- tracker:{note:'<p><b>Ticking a step offers it to this week\'s update</b> (Add · Edit · No) — here too; Edit takes you to the Progress tab with the words in the box. Steps are optional: a task without any says so on its Steps tab.</p><p><b>The Tracker, the opened task.</b> Its tabs read Progress · <b>Steps</b> (ticked of all) · Description · History. Tick a step; type a line and press Enter to add one; press a step\'s words to rename it (Enter keeps it, Escape puts it back); press its week to choose one (a week passed undone reads red); point at a step for ↑ ↓ and ×. The row above says how far the steps have got. <b>Try:</b> tick the first step and the task moves to In progress; tick them all and it asks whether to mark it Done.</p>',
+ tracker:{note:'<p><b>Ticking a step writes "Done: …" into this week\'s update</b>, as if you typed it — here it waits in the Progress tab\'s box (a line under the steps says so, <b>Open ›</b> takes you there), nothing saved until you press Enter. Untick and its words come back out. Steps are optional: a task without any says so on its Steps tab.</p><p><b>The Tracker, the opened task.</b> Its tabs read Progress · <b>Steps</b> (ticked of all) · Description · History. Tick a step; type a line and press Enter to add one; press a step\'s words to rename it (Enter keeps it, Escape puts it back); press its week to choose one (a week passed undone reads red); point at a step for ↑ ↓ and ×. The row above says how far the steps have got. <b>Try:</b> tick the first step and the task moves to In progress; tick them all and it asks whether to mark it Done.</p>',
   html:()=>'<div class="card"><div class="hd"><span class="av">MO</span><h2>Mohamed</h2><span class="m">3 open</span></div>'+trackerRow(true)+
    '<div class="open"><div class="tabs"><button type="button" data-tab="p" class="'+(S.tab==='p'?'on':'')+'">Progress<i>'+(S.before.length+S.now.length)+'</i></button><button type="button" data-tab="s" class="'+(S.tab==='s'?'on':'')+'">Steps'+(S.steps.length?'<i>'+done()+' of '+S.steps.length+'</i>':'')+'</button><button type="button" data-tab="d">Description</button><button type="button" data-tab="h">History<i>5</i></button></div>'+
    (S.tab==='s'?stepsHtml(false):S.tab==='p'?'<div class="in2"><input id="wkbox" placeholder="What happened this week?" value="'+esc(S.box)+'" aria-label="What happened this week"><span class="ek">Enter</span></div>'+(S.now.length?'<ul class="tlq">'+S.now.map(n=>'<li class="now"><div class="bd">'+esc(n)+'</div><div class="sub">Mohamed · <b>this week</b></div></li>').join('')+'</ul>':'')+timeline():'<p class="pe">…</p>')+'</div>'+
    '<div class="row"><span class="tick"></span><div class="tn"><span class="t">Finance Adjust Project that is missing Milestones</span><div class="meta"><span>Functions</span><i class="sd"></i><span class="up">Got the revenue drivers from Hussain</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span><span class="kb">⋯</span></div></div>'},
- check:{note:'<p><b>The Tracker, the weekly check</b> — the whole box, with this week\'s note (once written), the steps, and the timeline before this week (the latest two, the rest behind Show N earlier), so its real height shows. <b>Steps are optional:</b> a task without any shows only <b>+ Add steps</b> (try "A task with no steps"). <b>Tick a step</b> and the box offers it to this week\'s update: <b>Add</b> writes "Done: …" as this week\'s note, <b>Edit</b> puts it in the box to reword first, <b>No</b> lets it go.</p><p>The rest, as before: The box lists the steps between the status row and the progress, with the add line, so the meeting ticks what was finished as it talks; ticking here is the same tick as in the task. (↑ ↓ and × stay in the opened task.)</p>',
+ check:{note:'<p><b>The Tracker, the weekly check</b> — the whole box, with this week\'s note (once written), the steps, and the timeline before this week (the latest two, the rest behind Show N earlier), so its real height shows.</p><p><b>Tick a step</b> and "Done: …" is written into the box at the top, as if typed, the cursor at its end — reword it if you like; Enter (or Save and next) saves it. Several ticks join into one line; an untick takes its words back out. <b>Steps here are for the review:</b> tick, and add the odd step behind <b>+ Add a step</b>; renaming, weeks, order and removal are planning, in the task\'s own Steps tab (<b>Edit steps ›</b>). <b>Steps are optional:</b> a task without any shows only <b>+ Add steps</b> (try "A task with no steps").</p>',
   html:()=>'<div class="meet"><div class="rail"><div class="rh">Functions<span>0 of 9</span></div><div class="it on"><i></i>'+TITLE+'</div><div class="it"><i></i>Finance Adjust Project that is missing…</div><div class="it"><i></i>Confirm IT Project updates with IT…</div><div class="it"><i></i>Transformation Project Refinement</div></div>'+
    '<div class="card box"><div class="eb">Functions · Mohamed · This week</div><h3>'+TITLE+'</h3>'+wroteHtml()+boxHtml()+
    '<div class="rw">'+['ns','ip','dn'].map(k=>'<button type="button" class="ch'+(S.st===k?' on':'')+'" data-st="'+k+'"><span class="dot '+ST[k][1]+'"></span>'+ST[k][0]+'</button>').join('')+'<button type="button" class="sv">Save and next</button></div>'+
-   (S.steps.length||S.stepsOpen?'<div class="msh">Steps'+(S.steps.length?' <span>'+done()+' of '+S.steps.length+'</span>':'')+'</div>'+stepsHtml(true):'<button type="button" class="addsteps" data-addsteps>+ Add steps</button>')+
+   (S.steps.length||S.stepAdd?'<div class="msh">Steps'+(S.steps.length?' <span>'+done()+' of '+S.steps.length+'</span>':'')+'</div>'+stepsHtml(true):'<button type="button" class="addsteps" data-stepadd>+ Add steps</button>')+
    '<div class="msh">'+(S.now.length?'Before this week':'Progress so far')+'</div>'+timeline()+
    '<div class="mm"><span>Description</span><span>History (5)</span><span>⋯</span></div><div class="ft"><span>← Previous</span><span class="r">Skip →</span></div></div></div>'},
- mytasks:{note:'<p><b>My tasks.</b> The row says how far the steps have got — the thin bar and <b>N of M steps</b> — between the client and the latest note; a task without steps shows nothing extra. Tick steps in the other views and come back.</p>',
-  html:()=>'<div class="card"><div class="hochd"><h2 class="ser" style="margin:0">Open tasks</h2><span class="cnt">2</span><div class="views"><span class="on">By date</span><span>By client</span></div></div><div class="sh">This week <span>2 open</span></div>'+mwRow(false)+
+ mytasks:{note:'<p><b>My tasks — add a task as a line</b>, as on the Tracker: type it and press Enter; click into the line and its <b>client</b> (needed: a task lives in one client\'s Tracker), week, topic and owner come out. Try it — the new task lands in the list.</p><p><b>My tasks.</b> The row says how far the steps have got — the thin bar and <b>N of M steps</b> — between the client and the latest note; a task without steps shows nothing extra. Tick steps in the other views and come back.</p>',
+  html:()=>'<div class="card"><div class="hochd"><h2 class="ser" style="margin:0">Open tasks</h2><span class="cnt">'+(2+S.extra.length)+'</span><div class="views"><span class="on">By date</span><span>By client</span></div></div>'+
+   '<div class="mwadd"><span class="pl">+</span><input id="mwadd" placeholder="Add a task and press Enter" aria-label="Add a task"><span class="chips2"><select id="mwclient" aria-label="Client"><option>Raya Trade</option><option>Elabd</option><option>RHI</option></select><span class="chip2">This week</span><span class="chip2">Topic</span><span class="chip2">Me</span></span></div>'+
+   '<div class="sh">This week <span>'+(2+S.extra.length)+' open</span></div>'+extraRows(false)+mwRow(false)+
    '<div class="mrow"><span class="tick"></span><div class="tn"><span class="t">Finance Adjust Project that is missing Milestones</span><div class="meta"><span>Raya Trade</span><i class="sd"></i><span class="up">Got the revenue drivers from Hussain</span></div></div><span class="st"><span class="dot"></span>In progress</span><span class="kb">⋯</span></div></div>'},
- home:{note:'<p><b>Home, Your tasks.</b> The same row, in Home\'s half-width card: the steps count on the grey line under the name.</p>',
-  html:()=>'<div style="max-width:560px"><div class="card"><div class="hochd"><span class="tile">☰</span><h2 class="ser" style="margin:0">Your tasks</h2><span class="cnt">2</span><div class="views" style="margin-left:auto"><span class="on">By date</span><span>By client</span></div></div><div class="sh">This week <span>2</span></div>'+mwRow(true)+
+ home:{note:'<p><b>Home — + New task</b> in the card\'s head opens a small pop-up: the task, its client, week, topic (optional) and owner (you by default), then <b>Create</b>. Escape or Cancel closes it. Try it.</p><p><b>Home, Your tasks.</b> The same row, in Home\'s half-width card: the steps count on the grey line under the name.</p>',
+  html:()=>'<div style="max-width:620px"><div class="card"><div class="hochd"><span class="tile">☰</span><h2 class="ser" style="margin:0">Your tasks</h2><span class="cnt">'+(2+S.extra.length)+'</span><div class="views" style="margin-left:auto"><span class="on">By date</span><span>By client</span></div><button type="button" class="newtask" data-newtask>+ New task</button></div><div class="sh">This week <span>'+(2+S.extra.length)+'</span></div>'+extraRows(true)+mwRow(true)+
    '<div class="mrow"><span class="tick"></span><div class="tn"><span class="t" style="font-size:14px">Finance Adjust Project that is missing Milestones</span><div class="meta"><span>Raya Trade</span><i class="sd"></i><span class="up">Got the revenue drivers from Hussain</span></div></div><span class="st"><span class="dot"></span>In progress</span><span class="kb">⋯</span></div></div></div>'}};
 function draw(){
- document.getElementById('stage').innerHTML=V[S.w].html();
+ document.getElementById('stage').innerHTML=V[S.w].html()+popHtml();
  document.getElementById('note').innerHTML=V[S.w].note;
  document.querySelectorAll('[data-w]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.w===S.w)));
  const r=document.getElementById('renbox');if(r){r.focus();r.select()}
 }
-function tick(i){const s=S.steps[i];s.d=!s.d;if(s.d&&S.st==='ns'){S.st='ip';toast('First step ticked — the task is now In progress')}if(!s.d){S.notYet=false;if(S.offer===i)S.offer=-1}else S.offer=i;draw()}
+/* 1 · a tick writes "Done: <step>" into this week's box, as if typed —
+   several join in one line; an untick takes its own words back out while
+   the box has not been edited by hand; nothing is saved until Enter (or
+   Save and next) */
+function fillBox(){S.box=S.auto.length?'Done: '+S.auto.join('; '):''}
+function tick(i){const s=S.steps[i];s.d=!s.d;
+ if(s.d&&S.st==='ns'){S.st='ip';toast('First step ticked — the task is now In progress')}
+ if(s.d){ if(!S.edited){S.auto.push(s.n);fillBox()} else S.box=S.box+(S.box.trim()?'; ':'')+'Done: '+s.n; if(S.now.length)S.addOpen=true; }
+ else { S.notYet=false; if(!S.edited){S.auto=S.auto.filter(x=>x!==s.n);fillBox()} }
+ draw();
+ const b=document.getElementById('wkbox');if(b&&s.d&&S.w==='check'){b.focus();b.setSelectionRange(b.value.length,b.value.length)}}
 /* a ticked step offered to this week's update */
 function offerHtml(){
  if(S.offer<0||!S.steps[S.offer])return '';
@@ -232,13 +285,15 @@ document.addEventListener('click',e=>{
  const du=e.target.closest('[data-due]');if(du){S.steps[+du.dataset.i].wk=du.dataset.due;S.open=-1;draw();return}
  const mv=e.target.closest('[data-mv]');if(mv){const i=+mv.dataset.mv,j=i+(+mv.dataset.dir);if(j>=0&&j<S.steps.length){[S.steps[i],S.steps[j]]=[S.steps[j],S.steps[i]];draw()}return}
  const dl=e.target.closest('[data-del]');if(dl){S.steps.splice(+dl.dataset.del,1);draw();toast('Step removed');return}
- const of=e.target.closest('[data-offer]');if(of){const txt='Done: '+S.steps[S.offer].n;
-  if(of.dataset.offer==='add'){S.now.push(txt);S.offer=-1;toast('Added to this week\'s update');draw()}
-  else if(of.dataset.offer==='edit'){S.box=txt;S.offer=-1;S.addOpen=true;if(S.w==='tracker')S.tab='p';draw();const b=document.getElementById('wkbox');if(b){b.focus();b.setSelectionRange(b.value.length,b.value.length)}}
-  else{S.offer=-1;draw()}return}
+ if(e.target.closest('[data-goprog]')){S.tab='p';draw();const b=document.getElementById('wkbox');if(b){b.focus();b.setSelectionRange(b.value.length,b.value.length)}return}
+ if(e.target.closest('[data-stepadd]')){S.stepAdd=true;draw();const a=document.getElementById('addstep');if(a)a.focus();return}
+ if(e.target.closest('[data-editsteps]')){S.w='tracker';S.tab='s';draw();toast('The task\'s Steps tab — rename, set weeks, reorder, remove');return}
+ if(e.target.closest('[data-newtask]')){S.pop=true;draw();const n=document.getElementById('ptitle');if(n)n.focus();return}
+ if(e.target.closest('[data-popclose]')){S.pop=false;draw();return}
+ if(e.target.closest('[data-popcreate]')){const t=document.getElementById('ptitle').value.trim();if(!t){document.getElementById('ptitle').focus();return}
+  S.extra.push({t,c:document.getElementById('pclient').value,w:document.getElementById('pweek').value});S.pop=false;draw();toast('Added to '+S.extra[S.extra.length-1].c+'\'s Tracker');return}
  if(e.target.closest('[data-addweek]')){S.addOpen=true;draw();const b=document.getElementById('wkbox');if(b)b.focus();return}
  if(e.target.closest('[data-more]')){S.more=!S.more;draw();return}
- if(e.target.closest('[data-addsteps]')){S.stepsOpen=true;draw();const a=document.getElementById('addstep');if(a)a.focus();return}
  if(e.target.closest('[data-markdone]')){S.st='dn';draw();toast('Task marked Done');return}
  if(e.target.closest('[data-notyet]')){S.notYet=true;draw();return}
  const st=e.target.closest('[data-st]');if(st){S.st=st.dataset.st;draw();return}
@@ -246,12 +301,14 @@ document.addEventListener('click',e=>{
  if(S.open>=0&&!e.target.closest('.swk')){S.open=-1;draw()}
 });
 document.addEventListener('keydown',e=>{
- if(e.target.id==='wkbox'&&e.key==='Enter'&&e.target.value.trim()){S.now.push(e.target.value.trim());S.box='';S.addOpen=false;draw();toast('Written to this week');return}
+ if(e.target.id==='wkbox'&&e.key==='Enter'&&e.target.value.trim()){S.now.push(e.target.value.trim());S.box='';S.auto=[];S.edited=false;S.addOpen=false;draw();toast('Written to this week');return}
+ if(e.target.id==='mwadd'&&e.key==='Enter'&&e.target.value.trim()){S.extra.push({t:e.target.value.trim(),c:document.getElementById('mwclient').value,w:'This week'});draw();toast('Added to '+S.extra[S.extra.length-1].c+'\'s Tracker');const a=document.getElementById('mwadd');if(a)a.focus();return}
+ if(e.key==='Escape'&&S.pop){S.pop=false;draw();return}
  if(e.target.id==='addstep'&&e.key==='Enter'&&e.target.value.trim()){S.steps.push({n:e.target.value.trim(),wk:'',d:false});S.notYet=false;draw();const a=document.getElementById('addstep');if(a)a.focus();return}
  if(e.target.id==='renbox'){if(e.key==='Enter'){const v=e.target.value.trim();if(v)S.steps[S.ren].n=v;S.ren=-1;draw()}else if(e.key==='Escape'){S.ren=-1;draw()}return}
  const rn=e.target.closest&&e.target.closest('[data-ren]');if(rn&&(e.key==='Enter'||e.key===' ')){e.preventDefault();S.ren=+rn.dataset.ren;draw()}
 });
-document.addEventListener('input',e=>{if(e.target.id==='wkbox')S.box=e.target.value});
+document.addEventListener('input',e=>{if(e.target.id==='wkbox'){S.box=e.target.value;S.edited=true}});
 document.addEventListener('focusout',e=>{if(e.target.id==='renbox'){setTimeout(()=>{if(S.ren>=0&&document.activeElement&&document.activeElement.id!=='renbox'){const v=e.target.value.trim();if(v)S.steps[S.ren].n=v;S.ren=-1;draw()}},0)}});
 draw();
 </script>

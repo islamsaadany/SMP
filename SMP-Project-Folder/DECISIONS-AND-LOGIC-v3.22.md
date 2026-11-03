@@ -71093,3 +71093,5 @@ Nothing it does is gone; it is quieter:
 **Reported** (Islam): "on clicking the tasks on the rail it takes very long to appear on the right." A press on the rail read the whole meeting again from the server. Now every task on the rail rides in the page with its box, drawn by the one `meetPanel` (§53.5), in an inert `<template class="mtpl">` (after the meeting, ending `<!--/mtpls-->`); a press on the rail, the arrow keys and Skip put that copy in place (`meetShow`) — the rail marks it, a folded week holding it opens, the address follows — with no trip to the server. Save and next, a status press and every other write still go to the server, and the meeting is drawn again from its answer. The string checks read the meeting in view (`liveOnly` strips the copies).
 
 **Checked**: `checks/tracker.mjs` **374 passed, 0 failed** — new: a press on the rail asks the server nothing; seen RED with the swap taken out (1 request).
+
+**§734 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)

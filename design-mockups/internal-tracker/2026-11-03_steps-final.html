@@ -73,8 +73,11 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .swl button:hover{background:var(--surface-2)}
 .swl button.on{font-weight:700}
 .swl small{margin-left:auto;color:var(--ink-3);font-size:12px}
-.stools{display:none;gap:2px;flex:none}
-.sline:hover .stools,.sline:focus-within .stools{display:inline-flex}
+/* the order and remove buttons keep their room and only fade in, so nothing
+   moves under the pointer on its way to the week */
+.stools{display:inline-flex;gap:2px;flex:none;opacity:0;transition:opacity .12s}
+.sline:hover .stools,.sline:focus-within .stools{opacity:1}
+@media (hover:none){.stools{opacity:1}}
 .stools button{border:0;background:none;width:24px;height:24px;border-radius:6px;color:var(--ink-3);font-size:13px}
 .stools button:hover:not(:disabled){background:var(--line-2);color:var(--ink)}
 .stools button:disabled{opacity:.35;cursor:default}
@@ -174,7 +177,7 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 <div class="toast" id="toast" hidden></div>
 <script>
 const TODAY_WEEKS=[['This week','1 – 5 Nov'],['Next week','8 – 12 Nov'],['W3 Nov','15 – 19 Nov'],['W4 Nov','22 – 26 Nov'],['W1 Dec','29 Nov – 3 Dec']];
-const fresh=()=>({w:'tracker',tab:'s',st:'ns',notYet:false,open:-1,ren:-1,box:'',auto:[],edited:false,addOpen:false,more:false,stepAdd:false,
+const fresh=()=>({w:'tracker',tab:'p',st:'ns',notYet:false,open:-1,ren:-1,box:'',auto:[],edited:false,addOpen:false,more:false,stepAdd:false,
  extra:[],pop:false,addFocus:false,
  now:[],
  before:[['Agreed the BU list with Finance; templates next.','Mohamed','last week'],['Templates drafted for Retail and Wholesale; two units still to send their data.','Mohamed','W4 Oct'],
@@ -201,7 +204,7 @@ function stepsHtml(compact){
    (compact?'':'<span class="stools"><button type="button" data-mv="'+i+'" data-dir="-1" aria-label="Move up"'+(i===0?' disabled':'')+'>↑</button><button type="button" data-mv="'+i+'" data-dir="1" aria-label="Move down"'+(i===n-1?' disabled':'')+'>↓</button><button type="button" data-del="'+i+'" aria-label="Remove the step">×</button></span>')+'</li>';
  }).join('');
  const ask=n&&done()===n&&S.st!=='dn'&&!S.notYet?'<div class="sdone">All steps are ticked. Mark the task Done? <button type="button" class="go" data-markdone>Mark Done</button><button type="button" class="go quiet" data-notyet>Not yet</button></div>':'';
- const waiting=!compact&&S.box?'<div class="waiting">Waiting in this week\'s update: <b>'+esc(S.box)+'</b> <button type="button" data-goprog>Open ›</button></div>':'';
+ const waiting=false&&S.box?'<div class="waiting">Waiting in this week\'s update: <b>'+esc(S.box)+'</b> <button type="button" data-goprog>Open ›</button></div>':'';
  if(compact){
   /* 3 · in the weekly check: tick, and add the odd step behind a link; the
      rest of the planning is the task's own Steps tab */
@@ -209,7 +212,7 @@ function stepsHtml(compact){
    (S.stepAdd?'<div class="sadd"><span>+</span><input id="addstep" placeholder="Add a step and press Enter" aria-label="Add a step"></div>':'')+
    '<div class="slinks">'+(S.stepAdd?'':'<button type="button" data-stepadd>+ Add a step</button>')+(n?'<button type="button" data-editsteps>Edit steps ›</button>':'')+'</div>'+ask;
  }
- return (n?'<ul class="stl">'+lis+'</ul>':'<p class="opt">Break the task into steps if it helps plan it — optional.</p>')+waiting+'<div class="sadd"><span>+</span><input id="addstep" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'+ask;
+ return (n?'<ul class="stl">'+lis+'</ul>':'<p class="opt">Break the task into steps if it helps plan it.</p>')+'<div class="sadd"><span>+</span><input id="addstep" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'+ask;
 }
 const TITLE='Develop a key measure per business unit';
 function trackerRow(on){return '<div class="row'+(on?' on':'')+'"><span class="tick'+(S.st==='dn'?' dn':'')+'"></span><div class="tn"><button type="button" class="t">'+TITLE+'</button><div class="meta"><span>Functions</span>'+(S.steps.length?'<i class="sd"></i>'+stc():'')+'<i class="sd"></i><span class="up">Agreed the BU list with Finance; templates next</span></div></div><span class="wk">This week</span><span class="st"><span class="dot '+ST[S.st][1]+'"></span>'+ST[S.st][0]+'</span><span class="kb">⋯</span></div>'}
@@ -221,10 +224,15 @@ function popHtml(){return S.pop?'<div class="scrim" data-popclose></div><div cla
  '<div class="popf"><button type="button" class="go2" data-popclose>Cancel</button><button type="button" class="go2 pri" data-popcreate>Create</button></div></div>':''}
 function mwRow(home){return '<div class="mrow"><span class="tick'+(S.st==='dn'?' dn':'')+'"></span><div class="tn"><span class="t" style="font-size:'+(home?14:15)+'px">'+TITLE+'</span><div class="meta"><span>Raya Trade</span>'+(S.steps.length?'<i class="sd"></i>'+stc():'')+'<i class="sd"></i><span class="up">Agreed the BU list with Finance; templates next</span></div></div><span class="st"><span class="dot '+ST[S.st][1]+'"></span>'+ST[S.st][0]+'</span><span class="kb">⋯</span></div>'}
 const V={
- tracker:{note:'<p><b>Ticking a step writes "Done: …" into this week\'s update</b>, as if you typed it — here it waits in the Progress tab\'s box (a line under the steps says so, <b>Open ›</b> takes you there), nothing saved until you press Enter. Untick and its words come back out. Steps are optional: a task without any says so on its Steps tab.</p><p><b>The Tracker, the opened task.</b> Its tabs read Progress · <b>Steps</b> (ticked of all) · Description · History. Tick a step; type a line and press Enter to add one; press a step\'s words to rename it (Enter keeps it, Escape puts it back); press its week to choose one (a week passed undone reads red); point at a step for ↑ ↓ and ×. The row above says how far the steps have got. <b>Try:</b> tick the first step and the task moves to In progress; tick them all and it asks whether to mark it Done.</p>',
+ tracker:{note:'<p><b>One place:</b> the opened task\'s Progress shows the <b>steps</b> first, then <b>this week\'s box</b>, then the timeline <b>before this week</b> — so a tick writes "Done: …" into the box you can see, and the earlier progress is right there. No Steps tab.</p><p><b>The Tracker, the opened task.</b> Its tabs read Progress · Description · History. Tick a step; type a line and press Enter to add one; press a step\'s words to rename it (Enter keeps it, Escape puts it back); press its week to choose one (a week passed undone reads red); point at a step for ↑ ↓ and × — they keep their room and only fade in, so the week button never moves as you reach for it. The row above says how far the steps have got. <b>Try:</b> tick the first step and the task moves to In progress; tick them all and it asks whether to mark it Done.</p>',
   html:()=>'<div class="card"><div class="hd"><span class="av">MO</span><h2>Mohamed</h2><span class="m">3 open</span></div>'+trackerRow(true)+
-   '<div class="open"><div class="tabs"><button type="button" data-tab="p" class="'+(S.tab==='p'?'on':'')+'">Progress<i>'+(S.before.length+S.now.length)+'</i></button><button type="button" data-tab="s" class="'+(S.tab==='s'?'on':'')+'">Steps'+(S.steps.length?'<i>'+done()+' of '+S.steps.length+'</i>':'')+'</button><button type="button" data-tab="d">Description</button><button type="button" data-tab="h">History<i>5</i></button></div>'+
-   (S.tab==='s'?stepsHtml(false):S.tab==='p'?'<div class="in2"><input id="wkbox" placeholder="What happened this week?" value="'+esc(S.box)+'" aria-label="What happened this week"><span class="ek">Enter</span></div>'+(S.now.length?'<ul class="tlq">'+S.now.map(n=>'<li class="now"><div class="bd">'+esc(n)+'</div><div class="sub">Mohamed · <b>this week</b></div></li>').join('')+'</ul>':'')+timeline():'<p class="pe">…</p>')+'</div>'+
+   '<div class="open"><div class="tabs"><button type="button" data-tab="p" class="'+(S.tab!=='d'&&S.tab!=='h'?'on':'')+'">Progress<i>'+(S.before.length+S.now.length)+'</i></button><button type="button" data-tab="d" class="'+(S.tab==='d'?'on':'')+'">Description</button><button type="button" data-tab="h" class="'+(S.tab==='h'?'on':'')+'">History<i>5</i></button></div>'+
+   (S.tab==='d'||S.tab==='h'?'<p class="pe">…</p>':
+    /* steps, then this week's box, then the timeline — one place */
+    '<div class="msh" style="margin-top:4px">Steps'+(S.steps.length?' <span>'+done()+' of '+S.steps.length+'</span>':' <span>optional</span>')+'</div>'+stepsHtml(false)+
+    '<div class="msh">This week</div><div class="in2"><input id="wkbox" placeholder="What happened this week?" value="'+esc(S.box)+'" aria-label="What happened this week"><span class="ek">Enter</span></div>'+
+    (S.now.length?'<ul class="tlq">'+S.now.map(n=>'<li class="now"><div class="bd">'+esc(n)+'</div><div class="sub">Mohamed · <b>this week</b></div></li>').join('')+'</ul>':'')+
+    '<div class="msh">Before this week</div>'+timeline())+'</div>'+
    '<div class="row"><span class="tick"></span><div class="tn"><span class="t">Finance Adjust Project that is missing Milestones</span><div class="meta"><span>Functions</span><i class="sd"></i><span class="up">Got the revenue drivers from Hussain</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span><span class="kb">⋯</span></div></div>'},
  check:{note:'<p><b>The Tracker, the weekly check</b> — the whole box, with this week\'s note (once written), the steps, and the timeline before this week (the latest two, the rest behind Show N earlier), so its real height shows.</p><p><b>Tick a step</b> and "Done: …" is written into the box at the top, as if typed, the cursor at its end — reword it if you like; Enter (or Save and next) saves it. Several ticks join into one line; an untick takes its words back out. <b>Steps here are for the review:</b> tick, and add the odd step behind <b>+ Add a step</b>; renaming, weeks, order and removal are planning, in the task\'s own Steps tab (<b>Edit steps ›</b>). <b>Steps are optional:</b> a task without any shows only <b>+ Add steps</b> (try "A task with no steps").</p>',
   html:()=>'<div class="meet"><div class="rail"><div class="rh">Functions<span>0 of 9</span></div><div class="it on"><i></i>'+TITLE+'</div><div class="it"><i></i>Finance Adjust Project that is missing…</div><div class="it"><i></i>Confirm IT Project updates with IT…</div><div class="it"><i></i>Transformation Project Refinement</div></div>'+
@@ -257,7 +265,7 @@ function tick(i){const s=S.steps[i];s.d=!s.d;
  if(s.d){ if(!S.edited){S.auto.push(s.n);fillBox()} else S.box=S.box+(S.box.trim()?'; ':'')+'Done: '+s.n; if(S.now.length)S.addOpen=true; }
  else { S.notYet=false; if(!S.edited){S.auto=S.auto.filter(x=>x!==s.n);fillBox()} }
  draw();
- const b=document.getElementById('wkbox');if(b&&s.d&&S.w==='check'){b.focus();b.setSelectionRange(b.value.length,b.value.length)}}
+ const b=document.getElementById('wkbox');if(b&&s.d){b.focus();b.setSelectionRange(b.value.length,b.value.length)}}
 /* a ticked step offered to this week's update */
 function offerHtml(){
  if(S.offer<0||!S.steps[S.offer])return '';
@@ -287,7 +295,7 @@ document.addEventListener('click',e=>{
  const dl=e.target.closest('[data-del]');if(dl){S.steps.splice(+dl.dataset.del,1);draw();toast('Step removed');return}
  if(e.target.closest('[data-goprog]')){S.tab='p';draw();const b=document.getElementById('wkbox');if(b){b.focus();b.setSelectionRange(b.value.length,b.value.length)}return}
  if(e.target.closest('[data-stepadd]')){S.stepAdd=true;draw();const a=document.getElementById('addstep');if(a)a.focus();return}
- if(e.target.closest('[data-editsteps]')){S.w='tracker';S.tab='s';draw();toast('The task\'s Steps tab — rename, set weeks, reorder, remove');return}
+ if(e.target.closest('[data-editsteps]')){S.w='tracker';S.tab='p';draw();toast('The opened task — rename, set weeks, reorder, remove');return}
  if(e.target.closest('[data-newtask]')){S.pop=true;draw();const n=document.getElementById('ptitle');if(n)n.focus();return}
  if(e.target.closest('[data-popclose]')){S.pop=false;draw();return}
  if(e.target.closest('[data-popcreate]')){const t=document.getElementById('ptitle').value.trim();if(!t){document.getElementById('ptitle').focus();return}

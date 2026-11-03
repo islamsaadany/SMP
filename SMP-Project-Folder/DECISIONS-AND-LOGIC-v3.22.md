@@ -71143,3 +71143,11 @@ Nothing it does is gone; it is quieter:
 **Checked**: `checks/tracker.mjs` **378 passed, 0 failed** — new: 160px pushed in above the meeting after it settled, the rail's room still ends at the screen's foot, and again when it is taken out; seen RED with the two watchers off (the room overshooting the foot by 112px).
 
 **§740 MERGED TO `main`** 2026-11-03, Islam: *"Merge"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+## §741 — The cause found: the page is zoomed; the meeting is now one screen tall by layout (2026-11-03)
+
+**Reported** (Islam): "same issue" after §740, with a reading taken in his browser's console (`maxH: "none"`, taken with the console docked, which narrowed the page into the phone rule — a reading of a different state, said so). **The cause, found in the test browser by printing each layer's height**: every module page is shown at **80% on a computer** (`lib/topbar.ts`: `@media (min-width:1000px){html{zoom:.8}}`), and under that zoom `100vh`/`100dvh` is 80% of the window — so every one of §736–§740 left a fifth of the screen at the foot (160px on an 800px window; ~the strip on Islam's screen), whatever it measured. The checks for §736–§740 compared numbers drawn on two different scales and passed regardless. The page's own window height is `--winh` (topbar.ts: `calc(100vh / .8)`), made for exactly this.
+
+**The fix**: in the meeting, where the two columns stand side by side (≥861px wide, ≥601px tall), the page is a column exactly `--winh` tall — the top bar, the said line, the pinned band and bar, then the meeting taking all that is left (flex: 1; its row `minmax(0, 1fr)`) — and the rail and the box are held to that row (`max-height: 100%`), each as tall as its words and scrolling inside itself only past that. **Nothing is measured.** The measured rule stays as the fallback where `:has` is unknown, now on `--winh` and with the measured start converted into the page's own pixels.
+
+**Checked**: `checks/tracker.mjs` **378 passed, 0 failed** — §736/§737, §738 and §740's checks rewritten to compare like with like (the meeting row's foot against the window, both on screen; the rail inside the row; the page not scrolling); **seen RED with `100dvh` put back** (the row ending at 627px of 800, 787 of 1000) — the gap Islam saw.

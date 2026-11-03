@@ -1475,14 +1475,16 @@ try {
       return { pin: pn ? getComputedStyle(pn).position : "", over: o.scrollHeight - o.clientHeight, room: innerHeight, h: o.offsetHeight }; });
     /* §737: the room is measured — each box may reach the foot of the screen,
        and scrolls inside itself only when taller than that */
-    const room737 = await pg.evaluate(() => { const r = document.querySelector(".mlist"), o = document.querySelector(".mopen"), cs = getComputedStyle(r);
-      return { ov: cs.overflowY, foot: Math.round(r.getBoundingClientRect().top + parseFloat(cs.maxHeight)), ih: innerHeight, boxOver: o.scrollHeight - o.clientHeight, boxFoot: Math.round(o.getBoundingClientRect().bottom) }; });
+    /* §741: the meeting's row is the room — it ends at the screen's foot, the
+       rail is held inside it, and the page itself does not scroll */
+    const room737 = await pg.evaluate(() => { const r = document.querySelector(".mlist"), o = document.querySelector(".mopen"), cs = getComputedStyle(r), mt = document.querySelector(".meet");
+      return { ov: cs.overflowY, foot: Math.round(mt.getBoundingClientRect().bottom), railFoot: Math.round(r.getBoundingClientRect().bottom), ih: innerHeight, boxOver: o.scrollHeight - o.clientHeight, boxFoot: Math.round(o.getBoundingClientRect().bottom), pageScroll: document.documentElement.scrollHeight - innerHeight }; });
     check("in the meeting the band and the check's bar stay pinned; the rail and the box may reach the foot of the screen, and scroll inside themselves only when taller than that (§736, §737)",
-      fit735.pin === "sticky" && room737.ov === "auto" && room737.foot >= room737.ih - 24 && room737.foot <= room737.ih && (room737.boxOver <= 1 || room737.boxFoot >= room737.ih - 24), JSON.stringify({ fit735, room737 }));
+      fit735.pin === "sticky" && room737.ov === "auto" && room737.foot >= room737.ih - 24 && room737.foot <= room737.ih && room737.railFoot <= room737.foot + 1 && room737.pageScroll <= 1 && (room737.boxOver <= 1 || room737.boxFoot >= room737.ih - 24), JSON.stringify({ fit735, room737 }));
     /* §738: a taller window — the rail's room follows it to the new foot */
     const vp738 = pg.viewportSize();
     await pg.setViewportSize({ width: vp738.width, height: vp738.height + 200 }); await pg.waitForTimeout(150);
-    const tall738 = await pg.evaluate(() => { const r = document.querySelector(".mlist"); return { foot: Math.round(r.getBoundingClientRect().top + parseFloat(getComputedStyle(r).maxHeight)), ih: innerHeight }; });
+    const tall738 = await pg.evaluate(() => ({ foot: Math.round(document.querySelector(".meet").getBoundingClientRect().bottom), ih: innerHeight }));
     await pg.setViewportSize(vp738); await pg.waitForTimeout(150);
     check("...and when the window is made taller, the room follows it to the new foot (§738)", tall738.foot >= tall738.ih - 24 && tall738.foot <= tall738.ih, JSON.stringify(tall738));
     /* §740: something above the boxes changing after the page has settled
@@ -1492,9 +1494,9 @@ try {
       const d = document.createElement("div"); d.style.height = "160px"; d.id = "late740";
       const m = document.querySelector(".meetwrap") || document.querySelector(".meet"); m.parentNode.insertBefore(d, m);
       await new Promise((r) => setTimeout(r, 120)); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      const r = document.querySelector(".mlist"), foot = Math.round(r.getBoundingClientRect().top + parseFloat(getComputedStyle(r).maxHeight));
+      const foot = Math.round(document.querySelector(".meet").getBoundingClientRect().bottom);
       d.remove(); await new Promise((r2) => setTimeout(r2, 120));
-      const r3 = document.querySelector(".mlist"), back = Math.round(r3.getBoundingClientRect().top + parseFloat(getComputedStyle(r3).maxHeight));
+      const back = Math.round(document.querySelector(".meet").getBoundingClientRect().bottom);
       return { foot, back, ih: innerHeight };
     });
     check("...and when something above the boxes changes after the page has settled, the start is measured again and the rail still ends at the screen's foot (§740)",

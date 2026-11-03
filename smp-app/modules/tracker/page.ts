@@ -774,8 +774,37 @@ const LOOK = `
    height is the browser's own (100dvh, 100vh where it is not known), so a
    window made taller or shorter after the measure is followed at once —
    nothing waits on a resize event, nothing goes stale */
-.meet .mlist,.meet .mopen{max-height:calc(100vh - var(--meettop,280px) - 16px);max-height:calc(100dvh - var(--meettop,280px) - 16px);overflow:auto;overscroll-behavior:contain}
+.meet .mlist,.meet .mopen{max-height:calc(var(--winh,100vh) - var(--meettop,280px) - 16px);overflow:auto;overscroll-behavior:contain}
 @media (max-width:760px),(max-height:600px){.meet .mlist,.meet .mopen{max-height:none;overflow:visible}}
+/* §741 THE MEETING IS ONE SCREEN TALL, LAID OUT BY THE BROWSER (Islam, of the
+   rail on his own screen, three times: "the left rail is not extended to the
+   end of the screen"). §736–§740 measured where the boxes start and took the
+   rest from 100dvh; a measure is one more thing that can be wrong on a screen
+   nobody here can see. So where the two columns stand side by side, the page
+   in the meeting is a column exactly the screen's height — the top bar, the
+   said line, the pinned band and bar, then the meeting taking ALL that is
+   left (flex: 1) — and the rail and the box are held to the meeting's row
+   (max-height: 100%), each as tall as its words and scrolling inside itself
+   only past that. Nothing is measured. The measured rule above stays as the
+   fallback where :has is unknown.
+   THE CAUSE, FOUND (§741): every module page is zoomed to 80% on a computer
+   (lib/topbar.ts), and under that zoom 100vh/100dvh is 80% of the window —
+   so each of §736–§740 left a fifth of the screen at the foot, whatever it
+   measured. The window's height is --winh, the page's own pixels. */
+@media (min-width:861px) and (min-height:601px){
+  /* THE WINDOW'S HEIGHT IN THE PAGE'S OWN PIXELS (lib/topbar.ts: a computer
+     shows the modules at 80%, and under that zoom 100vh is only 80% of the
+     window — the very strip §736–§740 kept leaving at the foot) */
+  body:has(.meetwrap .meet){height:var(--winh,100vh);display:flex;flex-direction:column;overflow:hidden;margin:0}
+  body:has(.meetwrap .meet)>*:not(main){flex:none}
+  body:has(.meetwrap .meet)>main.pg{flex:1 1 auto;min-height:0;width:100%;box-sizing:border-box;display:flex;flex-direction:column;padding-bottom:16px}
+  body:has(.meetwrap .meet)>main.pg>.said{flex:none}
+  body:has(.meetwrap .meet)>main.pg>#body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+  body:has(.meetwrap .meet) #body>.pin{flex:none}
+  body:has(.meetwrap .meet) #body>.meetwrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+  body:has(.meetwrap .meet) .meetwrap>.meet{flex:1 1 auto;min-height:0;grid-template-rows:minmax(0,1fr)}
+  body:has(.meetwrap .meet) .meet .mlist,body:has(.meetwrap .meet) .meet .mopen{max-height:100%}
+}
 /* §733: a link in a note, read short — a small tag named after its site */
 .lktag{display:inline-flex;align-items:center;gap:4px;color:var(--carry);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:.88em;line-height:1.55;vertical-align:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .lktag:hover,.lktag:focus-visible{background:var(--wk);outline:none}

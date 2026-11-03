@@ -955,7 +955,10 @@ export const APP_JS = `(function () {
     /* §738: only where they start is measured; the height to the screen's
        foot is the stylesheet's (100dvh), so it follows the window itself */
     var mt = document.querySelector(".meet");
-    if (mt) document.documentElement.style.setProperty("--meettop", Math.round(mt.getBoundingClientRect().top + window.scrollY) + "px");
+    /* §741: in the page's own pixels — the page is zoomed (80% on a
+       computer), and a box's place on screen is in the screen's */
+    var zm = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    if (mt) document.documentElement.style.setProperty("--meettop", Math.round((mt.getBoundingClientRect().top + window.scrollY) / zm) + "px");
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(barFoot);
   /* §740 (Islam: "on my screen still the left rail is not extended to the end

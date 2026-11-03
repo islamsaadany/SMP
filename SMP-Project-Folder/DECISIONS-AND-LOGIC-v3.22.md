@@ -71101,3 +71101,5 @@ Nothing it does is gone; it is quieter:
 **Reported** (Islam): "no need to have a scrolling in the right box unless it's getting outside the page which is not the case now." The box's height was capped at the screen less the pinned band and bar (§733), and in the meeting that pinned block is tall, so an ordinary box overflowed. In the meeting the band and bar are no longer pinned (`.pin:has(+ .meetwrap){position:static}`) — they scroll away — so the box sticks under the top bar alone with the screen's height, and scrolls inside itself only when it truly doesn't fit.
 
 **Checked**: `checks/tracker.mjs` **375 passed, 0 failed** — new: in the meeting the pin is not sticky, and a box that fits the screen has nothing to scroll.
+
+**§735 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)

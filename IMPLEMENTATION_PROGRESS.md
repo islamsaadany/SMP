@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — The weekly check, second pass; links read short (§733).** Always carries; this week's note in the box's place; the box sticky; links as small site tags everywhere notes show. Tracker 373/0; shell run pending.
+
 **2026-11-03 — The weekly check, cleaned (§732).** The agreed box, rail B (a checklist), and Save and next carries an unfinished task of this week unless kept. Tracker 371/0.
 
 **2026-11-03 — Every "are you sure" asks the same way (§731), merged to `main` 2026-11-03 on Islam's word; production has served it (worker stamp 4e89c5cf → 019fc015).** Islam's rules from a delete-dialog picture, held everywhere: the question in the title, what really happens in the body, Cancel left, the act right in its own words (no Yes/No/OK), red only for what destroys (the cycle buttons stay red on his word), × and Escape. The Processes module's four browser boxes replaced by its own dialog; 26 button pairs turned round; 17 "Yes, …"/"No" labels reworded; red off six Restore/Close buttons. New `checks/confirm-buttons.py` 879/0, proved red 32 ways on the before-copies; typecheck clean; test:processes 228/0; shell v7.54. Notes/Tracker/shell browser checks not re-run here (no served stack).

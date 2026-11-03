@@ -172,6 +172,7 @@ export const APP_JS = `(function () {
     sizeAll();
     if (s && k && k.srch) s.value = k.srch;
     countWas = null; sift();
+    if (tb) barFoot();
     if (k && k.panel) showPanel(true);
     if (k && k.focus) {
       if (k.focus.srch) { if (s) s.focus(); }
@@ -286,20 +287,10 @@ export const APP_JS = `(function () {
       if (pg) pg.textContent = k + " of " + all.length;
       if (bi) bi.style.width = (all.length ? Math.round(100 * k / all.length) : 0) + "%";
     });
-    keptDraw();
   }
-  /* §732 SAVE AND NEXT CARRIES: an unfinished task of this week (or late)
-     goes on to next week with Save and next, unless "Keep it this week" was
-     pressed — remembered by task for the rest of the meeting, so a redraw
-     (a status press) does not undo the choice. */
-  var kept = new Set();
-  function keptDraw() {
-    var p = document.querySelector(".mopen[data-carry]"); if (!p) return;
-    var id = p.getAttribute("data-id"), keep = kept.has(id), l = p.querySelector(".cyl");
-    p.setAttribute("data-carry", keep ? "0" : "1");
-    if (l) l.innerHTML = keep ? 'Stays this week &middot; <button type="button" class="cyk" data-act="carry-keep">Move to next week</button>'
-      : 'Moves to next week &middot; <button type="button" class="cyk" data-act="carry-keep">Keep it this week</button>';
-  }
+  /* §733 SAVE AND NEXT CARRIES, always: an unfinished task of this week (or
+     late) that may be changed goes on to next week with the save (the box
+     says so with data-carry); the week over the name keeps one here. */
   function stepTask(dir, save) {
     var ids = meetIds(), panel = document.querySelector(".mopen"), cur = panel ? panel.getAttribute("data-id") : openId();
     var i = ids.indexOf(cur), nx = ids[Math.max(0, Math.min(ids.length - 1, (i < 0 ? 0 : i) + dir))];
@@ -821,9 +812,10 @@ export const APP_JS = `(function () {
     } else if (act === "skip") {
       /* Skip moves on without saving, carrying or counting (§732) */
       stepTask(1, false);
-    } else if (act === "carry-keep") {
-      var kp = b.closest(".mopen"), kid = kp && kp.getAttribute("data-id");
-      if (kid) { if (kept.has(kid)) kept.delete(kid); else kept.add(kid); keptDraw(); }
+    } else if (act === "madd") {
+      /* §733: this week's note is written; "+ Add to this week" opens the box */
+      var ab = b.closest(".mopen"), abx = ab && ab.querySelector(".pbox.mq");
+      if (abx) { abx.hidden = false; b.hidden = true; var ai = abx.querySelector(".pnew"); if (ai) ai.focus(); }
     } else if (act === "mshow") {
       /* the box's Description, History and ⋯, folded until pressed (§732) */
       var mo = b.closest(".mopen"), w8 = b.getAttribute("data-w");
@@ -841,7 +833,9 @@ export const APP_JS = `(function () {
          saves, Escape puts them back. The server stamps it edited. */
       var li = b.closest(".pe"), txt = li ? li.querySelector(".ptxt") : null, pid = entryOf(b);
       if (!li || !txt || li.querySelector("textarea")) return;
-      var was3 = txt.textContent, ta = document.createElement("textarea");
+      /* §733: the words as written — a link is drawn as a short tag, so the
+         drawn text is not what was stored */
+      var was3 = txt.getAttribute("data-raw") != null ? txt.getAttribute("data-raw") : txt.textContent, ta = document.createElement("textarea");
       ta.value = was3; ta.maxLength = 2000; ta.setAttribute("aria-label", "Edit the entry"); ta.rows = 2;
       txt.hidden = true; txt.parentNode.insertBefore(ta, txt);
       ta.focus(); size(ta);
@@ -930,10 +924,15 @@ export const APP_JS = `(function () {
   sizeAll();
   drawWalk();
   var tb = document.querySelector(".tb");
-  function barFoot() { if (tb) document.documentElement.style.setProperty("--tbh", tb.offsetHeight + "px"); }
+  function barFoot() {
+    if (tb) document.documentElement.style.setProperty("--tbh", tb.offsetHeight + "px");
+    /* §733: the meeting's box sticks under the pinned band and bar */
+    var pn = document.querySelector(".pin");
+    document.documentElement.style.setProperty("--pinh", (pn && getComputedStyle(pn).position === "sticky" ? pn.offsetHeight : 0) + "px");
+  }
   barFoot();
   if (tb && typeof ResizeObserver === "function") new ResizeObserver(barFoot).observe(tb);
-  else window.addEventListener("resize", barFoot);
+  window.addEventListener("resize", barFoot);
 
   /* THE VIEWS ARE FILTERS, NOT PAGES (§566). Islam: "they need to be filters
      not other pages that take me to another loading page they should act

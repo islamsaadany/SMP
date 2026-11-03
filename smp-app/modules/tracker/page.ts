@@ -29,6 +29,7 @@
    control the server refuses is never drawn. */
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopBar } from "../../lib/topbar.ts";
 import { withTenant } from "../../lib/tenant.ts";
+import { withLinks } from "../../lib/links.ts";
 import { BAR_DEFAULT, barFor, barVars } from "../../lib/branding.ts";
 import { CARD_LOOK_CSS, bandHtml, cardHead } from "../../lib/card-look.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
@@ -746,6 +747,22 @@ const LOOK = `
 .mopen .mhist{margin-top:12px}
 .mopen .macts{margin-top:18px;padding-top:12px;border-top:1px solid var(--line-2)}
 .mopen .keys{display:none}
+/* §733: this week's note in the empty box's place */
+.mopen .mwrote{border:1px solid var(--line-2);background:var(--ground);border-radius:10px;padding:10px 14px}
+.mopen .mwrote .h{font:600 12px/1.3 var(--font);color:var(--carry)}
+.mopen .mwrote .bd{font:400 14.5px/1.45 var(--font);color:var(--ink);margin-top:2px;overflow-wrap:anywhere}
+.mopen .mwrote .by{font:400 12.5px/1.4 var(--font);color:var(--ink-3)}
+.mopen .mwrote .madd{border:0;background:none;padding:0;margin-top:6px;font:400 12.5px/1.4 var(--font);color:var(--carry);cursor:pointer}
+.mopen .mwrote .madd:hover{text-decoration:underline;text-underline-offset:2px}
+.mopen .mwrote + .pbox.mq{margin-top:8px}
+/* §733: the box stays in view beside the rail while the rail scrolls; one
+   taller than the screen scrolls inside itself */
+.meet .mopen{position:sticky;top:calc(var(--tbh,41px) + var(--pinh,0px) + 12px);max-height:calc(100vh - var(--tbh,41px) - var(--pinh,0px) - 24px);overflow:auto}
+@media (max-width:760px),(max-height:600px){.meet .mopen{position:static;max-height:none;overflow:visible}}
+/* §733: a link in a note, read short — a small tag named after its site */
+.lktag{display:inline-flex;align-items:center;gap:4px;color:var(--carry);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:.88em;line-height:1.55;vertical-align:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.lktag:hover,.lktag:focus-visible{background:var(--wk);outline:none}
+.lktag svg{width:.85em;height:.85em;flex:none}
 /* §732: the check's count line under the bar, in the quiet bar's own voice */
 .ctop .counted.ck{font:400 12.5px/1.4 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3);padding:0 16px 12px}
 .ctop .counted.ck .left{color:var(--ink-2)}
@@ -1247,7 +1264,7 @@ function lastLine(a: Action, L: Loaded, today: string): string {
   const w = entryWeek(p.at, today);
   /* §722 (Islam: "a date popup appear on hovering over the task no need"):
      no tooltip with the note's day and time */
-  return '<div class="last"><span class="lw' + (w.now ? " now" : "") + '"><b>' + esc(w.word) + "</b> &middot; </span>" + esc(oneLine(p.body)) + "</div>";
+  return '<div class="last"><span class="lw' + (w.now ? " now" : "") + '"><b>' + esc(w.word) + "</b> &middot; </span>" + withLinks(oneLine(p.body), esc) + "</div>";
 }
 /* THE PROGRESS BOX (§657): one line and Enter, on the opened row and under
    every open row of this week on the check — one box, two places (§53.5).
@@ -1265,7 +1282,7 @@ function progressList(L: Loaded, who: Who, today: string): string {
     const w = entryWeek(p.at, today);
     const mine = mayChangeProgress(p, who);
     return '<li class="pe" data-pid="' + esc(p.id) + '"><span class="wk' + (w.now ? " now" : "") + '" title="' + esc(w.full) + '">' + esc(w.word) + "</span>" +
-      '<div class="pb"><div class="ptxt">' + esc(p.body) + "</div>" +
+      '<div class="pb"><div class="ptxt" data-raw="' + esc(p.body) + '">' + withLinks(p.body, esc) + "</div>" +
       '<div class="by"><span>' + esc(name(p.by)) + "</span>" + (p.editedAt ? '<span class="ed">edited</span>' : "") +
       (mine ? '<button type="button" data-act="progress-edit">Edit</button><button type="button" class="danger" data-act="progress-delete-ask">Delete</button>' +
         '<span class="sure" hidden>Delete this entry? <button type="button" class="go" data-act="progress-delete-no">Keep it</button>' +
@@ -1553,15 +1570,26 @@ function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format)
     ? '<div class="seg" role="group" aria-label="Status">' + STATUSES.map((s) =>
         '<button type="button" data-act="set-status" data-value="' + s + '" aria-pressed="' + (a.status === s) + '"><span class="' + dotOf(s) + '"></span>' + esc(STATUS_WORD[s]) + "</button>").join("") + "</div>"
     : '<div class="seg ro">' + statusPill(a, false) + "</div>";
+  /* §733: Save and next ALWAYS carries an unfinished task of this week (or
+     late) that the viewer may change — no "Keep it this week" line; the week
+     in the grey line over the name is the way to keep one here */
   const carry = live && brk() !== "no-carry" && mayCarry(a, today);
   const name = (k: string) => L.short.get(k) || L.names.get(k) || k;
-  const tl = P.pr.length
-    ? '<ul class="mtl">' + P.pr.map((e) => { const w = entryWeek(e.at, today);
-        return '<li' + (w.now ? ' class="now"' : "") + '><div class="bd">' + esc(e.body) + '</div><div class="sub">' + esc(name(e.by)) + " &middot; <b>" + esc(w.word.toLowerCase()) + "</b></div></li>"; }).join("") + "</ul>"
-    : '<p class="mnil">Nothing written yet.</p>';
-  const box = who.personKey
-    ? '<div class="pbox mq"><input class="pnew" data-act="progress-new" placeholder="What happened this week?" aria-label="Progress on ' + esc(a.title) + '" maxlength="' + PROGRESS_MAX + '"><span class="ek" aria-hidden="true">Enter</span></div>'
+  /* §733: THIS WEEK'S NOTE STANDS WHERE THE EMPTY BOX WOULD — who wrote it,
+     and "+ Add to this week" to open the box under it; the timeline below
+     starts from last week. No note yet this week: the box, as before. */
+  const nowNotes = P.pr.filter((e) => entryWeek(e.at, today).now);
+  const before = nowNotes.length ? P.pr.filter((e) => !entryWeek(e.at, today).now) : P.pr;
+  const tl = before.length
+    ? '<ul class="mtl">' + before.map((e) => { const w = entryWeek(e.at, today);
+        return '<li' + (w.now ? ' class="now"' : "") + '><div class="bd">' + withLinks(e.body, esc) + '</div><div class="sub">' + esc(name(e.by)) + " &middot; <b>" + esc(w.word.toLowerCase()) + "</b></div></li>"; }).join("") + "</ul>"
+    : '<p class="mnil">' + (nowNotes.length ? "Nothing before this week." : "Nothing written yet.") + "</p>";
+  const input = '<div class="pbox mq"' + (nowNotes.length ? " hidden" : "") + '><input class="pnew" data-act="progress-new" placeholder="' + (nowNotes.length ? "Add to this week…" : "What happened this week?") + '" aria-label="Progress on ' + esc(a.title) + '" maxlength="' + PROGRESS_MAX + '"><span class="ek" aria-hidden="true">Enter</span></div>';
+  const wrote = nowNotes.length
+    ? '<div class="mwrote"><div class="h">This week</div>' + nowNotes.map((e) => '<div class="bd">' + withLinks(e.body, esc) + '</div><div class="by">' + esc(name(e.by)) + "</div>").join("") +
+      (who.personKey ? '<button type="button" class="madd" data-act="madd">+ Add to this week</button>' : "") + "</div>"
     : "";
+  const box = wrote + (who.personKey ? input : "");
   const desc = '<div class="mdesc" hidden>' + (live
     ? '<textarea class="desc" data-act="notes" aria-label="Description" maxlength="5000" rows="2" placeholder="What the task is. Click to write it.">' + esc(a.description) + "</textarea>"
     : '<div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>") + "</div>";
@@ -1576,8 +1604,7 @@ function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format)
     '<h3 class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</h3>" +
     box +
     '<div class="mrow">' + chips + '<button type="button" class="mbtn pri" data-act="step" data-dir="1">Save and next <kbd>Ctrl &crarr;</kbd></button></div>' +
-    (carry ? '<div class="cyl">Moves to next week &middot; <button type="button" class="cyk" data-act="carry-keep">Keep it this week</button></div>' : "") +
-    '<div class="mph">Progress so far</div>' + tl + more + desc + hist +
+    '<div class="mph">' + (nowNotes.length ? "Before this week" : "Progress so far") + "</div>" + tl + more + desc + hist +
     '<div class="macts"><button type="button" class="mlk" data-act="step" data-dir="-1">&larr; Previous</button><span class="sp"></span>' +
     '<button type="button" class="mlk" data-act="skip">Skip &rarr;</button></div></div>';
 }

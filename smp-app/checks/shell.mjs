@@ -3349,17 +3349,23 @@ await section("4 · Forefront's own pages", async () => {
       return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), path: location.pathname } : null; });
     check(!!det && det.tabs.join("|") === "Progress|Description|History" && det.open && det.path === "/platform",
       "\u2026a press on a task's name opens it here, in the Tracker's three tabs, Open in its Tracker beside them (\u00a7709)", JSON.stringify(det));
-    await page.fill("#mwp-" + firstId, "Written from My tasks").catch(() => {});
+    await page.fill("#mwp-" + firstId, "Written from My tasks, see https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1").catch(() => {});
     await page.click(".mwrow.on .mwcompose button").catch(() => {});
     await page.waitForSelector(".mwrow.on .mwtl li", { timeout: 8000 }).catch(() => {});
     const wrote = (await owner.query("SELECT body FROM tracker_progress WHERE action_id = $1", [firstId])).rows.map((x) => x.body);
-    check(wrote.includes("Written from My tasks") && /Written from My tasks/.test(await page.locator(".mwrow.on .mwtl").textContent().catch(() => "")),
+    check(wrote.some((x) => /^Written from My tasks/.test(x)) && /Written from My tasks/.test(await page.locator(".mwrow.on .mwtl").textContent().catch(() => "")),
       "\u2026and a line of progress written there is the Tracker's own entry, drawn on its timeline", JSON.stringify(wrote));
     /* §728: the row's quiet line — the name heavier than the line, the
        client plain, and no "This week" in front of this week's note */
     const q728 = await page.evaluate((id) => { const r = document.querySelector('.mwrow[data-id="' + id + '"]'); if (!r) return null;
       const t = r.querySelector(".t"), up = r.querySelector(".mwmeta .up"), cl = r.querySelector(".mwmeta .mwcl");
       return { name: t ? +getComputedStyle(t).fontWeight : 0, up: up ? up.textContent : "", cl: cl ? +getComputedStyle(cl).fontWeight : 400 }; }, firstId);
+    /* §733: the link in it reads as a small tag, on the timeline and on the row's line */
+    const lk733 = await page.evaluate((id) => { const r = document.querySelector('.mwrow[data-id="' + id + '"]');
+      const t = document.querySelector(".mwrow.on .mwtl a.lktag") || document.querySelector(".mwdet .mwtl a.lktag"), u = r && r.querySelector(".mwmeta a.lktag");
+      return { tl: t ? t.textContent + " " + t.getAttribute("href") : "", row: u ? u.textContent : "" }; }, firstId);
+    check(lk733.tl === "Google Sheets https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1" && lk733.row === "Google Sheets",
+      "\u2026a link in the note reads as a small Google Sheets tag, on the timeline and on the row's line (\u00a7733)", JSON.stringify(lk733));
     check(!!q728 && q728.name >= 600 && q728.cl <= 400 && /^Written from My tasks/.test(q728.up),
       "\u2026and the row's line is the Tracker's quiet one: the name heavier, the client plain, no \"This week\" in front of this week's note (\u00a7728)", JSON.stringify(q728));
     /* §712: YOUR OWN ENTRY IS EDITED AND DELETED HERE TOO — Edit turns it into

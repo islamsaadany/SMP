@@ -1846,6 +1846,11 @@
   .mwmeta .sep{ width:1px; height:11px; background:var(--line); flex:none }
   .mwmeta .up{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0 }
   .mwmeta .up b{ font-weight:600; color:var(--ink-2) }
+  /* §733: a link in a note, read short — a small tag named after its site */
+  .lktag{ display:inline-flex; align-items:center; gap:4px; color:var(--mw-blue); text-decoration:none; border:1px solid var(--line); border-radius:6px;
+    padding:0 6px; font-size:.88em; line-height:1.55; vertical-align:1px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis }
+  .lktag:hover, .lktag:focus-visible{ background:var(--surface-2); outline:none }
+  .lktag svg{ width:.85em; height:.85em; flex:none }
   /* §728 THE NAME LEADS, AS ON THE TRACKER (§721): the name a step heavier;
      the line one grey, the client a plain word, a small dot between */
   .mwlist .mwrow .t, .mwhome .mwrow .t{ font-weight:600 }

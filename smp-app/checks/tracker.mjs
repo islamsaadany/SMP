@@ -69,6 +69,7 @@ import { SCHEMA } from "../db/schema-name.mjs";
 import { PLATFORM_TABLES } from "../lib/schema-check.ts";
 import { serve } from "../modules/tracker/index.ts";
 import { trackerDocument as trackerDocument0, whenText, listBody as listBody0 } from "../modules/tracker/page.ts";
+import { withLinks, siteName } from "../lib/links.ts";
 /* §726: the page carries the list as each view draws it, and every task's
    panel, in inert templates after the list; the string checks read the list
    in view, so the spare copies are taken out first (the templates are
@@ -358,12 +359,20 @@ check("...and with nothing picked it opens on the first of this week's, marked o
   /class="mi now" data-act="pick-task" data-id="p" aria-current="true"/.test(chk) && count(chk, /data-act="pick-task" data-id="[^"]*" aria-current="true"/g) === 1 && /<div class="open mopen" data-id="p" data-tab="p"(?: data-carry="1")?>/.test(chk), (chk.match(/<button type="button" class="mi[^>]*>/g) || []).join(" | ") + " || " + ((chk.match(/<div class="open mopen[^>]*>/) || [""])[0]));
 check("...the task on the right carries its status as three buttons, the current one pressed",
   /data-act="set-status" data-value="not_started" aria-pressed="true"/.test(chk) && count(chk, /data-act="set-status"/g) === 3);
-/* §732: no Carry button — Save and next carries the task on screen when it
-   is open and this week's, and says so under the button, with the way to
-   keep it here; drawn once, on the task open, which is this week's */
-check("...Save and next will carry the open task, this week's, to next week — said once under the button, with Keep it this week, and no Carry button (§732)",
-  count(chk, /data-act="carry"/g) === 0 && count(chk, /class="cyl"/g) === 1 && /data-id="p" data-tab="p" data-carry="1"[\s\S]*?Moves to next week[\s\S]*?data-act="carry-keep"/.test(chk),
-  count(chk, /class="cyl"/g) + " lines");
+/* §732, §733: no Carry button and no "Keep it this week" line — Save and
+   next carries the task on screen when it is open and this week's, which
+   the box carries as data-carry */
+check("...Save and next will carry the open task, this week's, to next week — no Carry button, no keep line (§732, §733)",
+  count(chk, /data-act="carry"/g) === 0 && count(chk, /class="cyl"/g) === 0 && /data-id="p" data-tab="p" data-carry="1"/.test(chk),
+  count(chk, /data-carry="1"/g) + " carried");
+/* §733 LINKS READ SHORT: an address becomes a small tag named after its
+   site, the rest escaped, a sentence's closing stop left out of the link */
+{
+  const L1 = withLinks('Done: https://docs.google.com/spreadsheets/d/1zNp/edit?gid=1#gid=1. See <this> & https://acme.sharepoint.com/x and https://drive.google.com/f', (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"));
+  check("a link in a note reads as a small tag named after its site, opening in a new tab with the full address on hover; the words around it escaped (§733)",
+    /^Done: <a class="lktag" href="https:\/\/docs\.google\.com\/spreadsheets\/d\/1zNp\/edit\?gid=1#gid=1" target="_blank" rel="noopener noreferrer" title="[^"]+">.*?Google Sheets<\/a>\. See &lt;this&gt; &amp; /.test(L1) &&
+    />SharePoint<\/a>/.test(L1) && />Google Drive<\/a>$/.test(L1) && siteName("https://www.example.org/a") === "example.org", L1.slice(0, 400));
+}
 check("...and a topic with nothing in these three weeks still gets its section and its write line",
   /class="sec" data-key="t2"/.test(chk) && /Write next week&#39;s action for Office move/.test(chk) &&
   /Nothing on this topic in these three weeks/.test(chk));
@@ -1443,18 +1452,25 @@ try {
     const at731 = order731.indexOf(await pg.locator(".mopen").getAttribute("data-id"));
     await pg.locator(".mopen .mph").click(); await pg.keyboard.press("ArrowUp"); await settle();
     check("the arrow keys walk the list", at731 > 0 && (await pg.locator(".mopen").getAttribute("data-id")) === order731[at731 - 1] && await stayed(), JSON.stringify({ at731, order731 }));
-    /* §732: Keep it this week stops the carry — the next Save and next writes
-       and moves on, the task's week untouched */
-    const kTask = await pg.locator(".mopen").getAttribute("data-id");
-    const kHad = await asTenant(A, (c) => oneAction(c, kTask));
-    if (await pg.locator(".mopen .cyl").count()) {
-      await pg.locator(".mopen [data-act=carry-keep]").click();
-      const kSaid = await pg.locator(".mopen .cyl").innerText();
-      await pg.locator(".mopen [data-act=step][data-dir='1']").click(); await settle();
-      const kNow = await asTenant(A, (c) => oneAction(c, kTask));
-      check("...Keep it this week stops the carry: it says Stays this week, and Save and next leaves the week as it was (§732)",
-        /^Stays this week/.test(kSaid) && kNow.due === kHad.due, JSON.stringify({ kSaid, was: kHad.due, now: kNow.due }));
-    } else check("...Keep it this week — but the task arrived at has no carry line to keep", false, kTask);
+    /* §733: THIS WEEK'S NOTE STANDS WHERE THE EMPTY BOX WOULD — back on the
+       task just written to, the note is in the box's place, the box shut
+       behind "+ Add to this week", which opens it */
+    await pg.locator('.mlist .mi[data-id="' + mTask + '"]').evaluate((b) => { const f = b.closest(".mf"); if (f) f.hidden = false; });
+    await pg.locator('.mlist .mi[data-id="' + mTask + '"]').click(); await settle();
+    const w733 = await pg.evaluate(() => { const o = document.querySelector(".mopen"), w = o && o.querySelector(".mwrote"), bx = o && o.querySelector(".pbox.mq");
+      return { wrote: w ? w.innerText : "", shut: !!bx && bx.hidden, head: (o && o.querySelector(".mph") || {}).textContent || "" }; });
+    await pg.locator(".mopen [data-act=madd]").click();
+    const open733 = await pg.evaluate(() => { const bx = document.querySelector(".mopen .pbox.mq"); return !!bx && !bx.hidden && document.activeElement === bx.querySelector(".pnew"); });
+    check("...back on it, this week's note stands where the empty box was — the box shut behind + Add to this week, which opens it; the timeline from last week (§733)",
+      /Talked through at the check\./.test(w733.wrote) && w733.shut && w733.head === "Before this week" && open733, JSON.stringify({ w733, open733 }));
+    /* §733: the box stays in view while the rail scrolls (sticky under the
+       pinned band), and a link in a note shows as a small tag */
+    const stick733 = await pg.evaluate(() => getComputedStyle(document.querySelector(".mopen")).position);
+    await asTenant(A, (c) => addProgress(c, mTask, "Sheet is here https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1.", "noran"));
+    await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
+    const tag733 = await pg.evaluate(() => { const a = document.querySelector(".mopen .mwrote a.lktag"); return a ? { t: a.textContent, href: a.getAttribute("href"), tgt: a.target } : null; });
+    check("the box stays in view beside the rail (sticky), and a link in this week's note reads as a small Google Sheets tag opening the full address in a new tab (§733)",
+      stick733 === "sticky" && !!tag733 && tag733.t === "Google Sheets" && tag733.href === "https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1" && tag733.tgt === "_blank", JSON.stringify({ stick733, tag733 }));
     /* put the action back as it was: the walk-through above is not what the
        presses after it are about */
     const mWas = await asTenant(A, (c) => progressOf(c, mTask));

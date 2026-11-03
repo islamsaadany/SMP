@@ -2531,6 +2531,41 @@
     bin: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
   };
   function mwKey(r) { return r.client + ":" + r.id; }
+  /* §733 LINKS IN A NOTE READ SHORT: each http(s) address drawn as a small
+     tag named after its site, opening in a new tab, the full address on
+     hover; the words stored as typed. The Tracker's rule is lib/links.ts —
+     the same site names, kept here as the console draws its own rows. */
+  function mwSite(href) {
+    var u; try { u = new URL(href); } catch (e) { return "Link"; }
+    var h = u.hostname.toLowerCase().replace(/^www\./, ""), p = u.pathname;
+    if (h === "docs.google.com") return p.indexOf("/spreadsheets") === 0 ? "Google Sheets" : p.indexOf("/presentation") === 0 ? "Google Slides" : p.indexOf("/forms") === 0 ? "Google Forms" : "Google Docs";
+    if (h === "drive.google.com") return "Google Drive";
+    if (/\.sharepoint\.com$/.test(h)) return "SharePoint";
+    if (h === "onedrive.live.com" || h === "1drv.ms") return "OneDrive";
+    if (h === "teams.microsoft.com") return "Teams";
+    if (h === "miro.com") return "Miro";
+    if (h === "notion.so" || /\.notion\.site$/.test(h)) return "Notion";
+    return h || "Link";
+  }
+  var MW_LINK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  function mwLinks(host, text) {
+    var s = String(text || ""), re = /https?:\/\/[^\s<>"']+/g, m, at = 0;
+    while ((m = re.exec(s))) {
+      var url = m[0], tr = url.match(/[.,;:!?)\]]+$/);
+      if (tr) url = url.slice(0, -tr[0].length);
+      if (m.index > at) host.appendChild(document.createTextNode(s.slice(at, m.index)));
+      var a = el("a", "lktag");
+      a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = url;
+      a.innerHTML = MW_LINK;
+      a.appendChild(document.createTextNode(mwSite(url)));
+      a.addEventListener("click", function (e) { e.stopPropagation(); });
+      host.appendChild(a);
+      at = m.index + url.length;
+      re.lastIndex = at;
+    }
+    if (at < s.length) host.appendChild(document.createTextNode(s.slice(at)));
+    return host;
+  }
   /* §720: View in Tracker shows the task in its Tracker, lit — it does not open it */
   function mwTrackerHref(r) { return "/" + r.client + "/tracker?view=all&show=" + encodeURIComponent(r.id); }
   /* the opened task's details, read once and again after every write */
@@ -2620,7 +2655,7 @@
     if (TSORT.by !== "client") { var cl = el("span", "mwcl", r.clientName); bits.push(cl); }
     /* §728 THE TRACKER'S QUIET LINE (§721): the note's week said only when it
        is not this week, so "Last week" still flags a task nobody has touched */
-    if (r.last) { var up = el("span", "up"); if (!r.last.now) { up.appendChild(el("b", null, r.last.week)); up.appendChild(document.createTextNode(" · ")); } up.appendChild(document.createTextNode(r.last.body)); bits.push(up); }
+    if (r.last) { var up = el("span", "up"); if (!r.last.now) { up.appendChild(el("b", null, r.last.week)); up.appendChild(document.createTextNode(" · ")); } mwLinks(up, r.last.body); bits.push(up); }
     if (bits.length) {
       var meta = el("div", "mwmeta");
       bits.forEach(function (b, i) { if (i) meta.appendChild(el("span", "sep")); meta.appendChild(b); });
@@ -2811,7 +2846,7 @@
             ta.addEventListener("blur", function () { finish(true); });
             li.appendChild(ta);
             setTimeout(function () { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 0);
-          } else li.appendChild(el("div", "tx", p.body));
+          } else li.appendChild(mwLinks(el("div", "tx"), p.body));
           if (p.mine && MW.pedit !== p.id) {
             var acts = el("div", "mwpacts");
             if (MW.pdel === p.id) {

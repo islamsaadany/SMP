@@ -32,7 +32,7 @@ import {
   shape, todayIn, weekOf, addDays, isLate, carriedWeeks, lateWord, weekWord, weekLabel, readableDay, STATUS_WORD, STATUSES,
   isStatus, isOffice, mayChange, oneAction, setStatus, ONLY_CHANGE, type Action, type Who,
   sameWeek, weekOptions, calendarDay, oneLine, setFields, deleteAction, isOfficeRow, officeRows, shortNames, namesOf,
-  progressOf, addProgress, latestProgress, eventsOf, type Progress,
+  progressOf, addProgress, latestProgress, eventsOf, type Progress, stepTally,
   oneProgress, editProgress, deleteProgress, mayChangeProgress, ONLY_WRITER,
 } from "./tracker.ts";
 
@@ -54,6 +54,8 @@ export type WorkRow = {
   cell: string;
   /* the latest progress line, for the row's quiet line (§709) */
   last: { week: string; body: string; now: boolean } | null;
+  /* §743: the task's steps, ticked of all — null for a task without steps */
+  steps: { n: number; d: number } | null;
 };
 export type ClientTally = { open: number; late: number };
 
@@ -96,7 +98,7 @@ function cellOf(a: Action, today: string): string {
   if (isLate(a.due, today)) { const n = carriedWeeks(a.firstDue || a.due, today); return n ? n + " w late" : "Late"; }
   return a.due <= weekOf(today).to ? "" : weekWord(a.due, today);
 }
-function rowOf(t: Client, a: Action, today: string, who: Who | null, last: Progress | null = null): WorkRow {
+function rowOf(t: Client, a: Action, today: string, who: Who | null, last: Progress | null = null, steps: { n: number; d: number } | null = null): WorkRow {
   const done = a.status === "done";
   const late = !done && isLate(a.due, today);
   return {
@@ -109,6 +111,7 @@ function rowOf(t: Client, a: Action, today: string, who: Who | null, last: Progr
     cell: cellOf(a, today),
     /* §728: now — written this week, so the row's quiet line leaves the week out */
     last: last ? { week: entryWeekWord(last.at, today), body: oneLine(last.body), now: sameWeek(last.at ? todayIn(new Date(last.at)) : today, today) } : null,
+    steps: steps && steps.n ? steps : null,
   };
 }
 
@@ -133,8 +136,8 @@ export async function openOn(t: Client, email: string, personKey: string | null,
         "to_char(done_at AT TIME ZONE 'Africa/Cairo', 'YYYY-MM-DD') AS done_day FROM tracker_actions " +
         "WHERE " + (everyone ? "$1::text IS NOT NULL" : "owner_key = $1") +
         " AND (status <> 'done' OR done_at >= now() - interval '30 days') ORDER BY due ASC NULLS FIRST, created_at ASC", [key]);
-      const latest = await latestProgress(c);
-      return r.rows.map((row) => { const a = shape(row); return rowOf(t, a, today, viewer, latest.get(a.id) || null); });
+      const latest = await latestProgress(c), tally = await stepTally(c);
+      return r.rows.map((row) => { const a = shape(row); return rowOf(t, a, today, viewer, latest.get(a.id) || null, tally.get(a.id) || null); });
     });
   } catch (e) {
     console.error("my work on " + t.key + ":", (e as Error).message);
@@ -229,7 +232,7 @@ export async function setWorkStatus(t: Client, who: Who, id: string, status: unk
     if (!mayChange(cur, who) && process.env.SMP_BREAK !== "mywork-press-anyone") return { ok: false, status: 403, why: ONLY_CHANGE };
     await setStatus(c, id, status, who.personKey || "");
     const a = await oneAction(c, id);
-    return a ? { ok: true, row: rowOf(t, a, today, who, (await latestProgress(c)).get(id) || null) } : gone;
+    return a ? { ok: true, row: rowOf(t, a, today, who, (await latestProgress(c)).get(id) || null, (await stepTally(c)).get(id) || null) } : gone;
   });
 }
 
@@ -346,7 +349,7 @@ export async function workWrite(t: Client, who: Who, id: string, op: unknown, bo
       }
     }
     const a = await oneAction(c, id);
-    return a ? { ok: true, row: rowOf(t, a, today, who, (await latestProgress(c)).get(id) || null), gone: false } : GONE;
+    return a ? { ok: true, row: rowOf(t, a, today, who, (await latestProgress(c)).get(id) || null, (await stepTally(c)).get(id) || null), gone: false } : GONE;
   });
 }
 

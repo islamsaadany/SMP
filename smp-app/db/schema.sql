@@ -1143,6 +1143,26 @@ CREATE TABLE tracker_progress (
 );
 CREATE INDEX tracker_progress_action ON tracker_progress (tenant_id, action_id, at);
 
+-- STEPS (§743): a task broken into lines — the words, an optional week (a
+-- day, as the task's own), whether and when ticked, and its place in the
+-- task's order. No owner: the task's owner manages its steps. Goes with its
+-- action. Migration 037 on a database already up.
+CREATE TABLE tracker_steps (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  action_id uuid NOT NULL,
+  title text NOT NULL,
+  due date,
+  done_at timestamptz,
+  pos integer NOT NULL DEFAULT 0,
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, action_id) REFERENCES tracker_actions (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT tracker_steps_title CHECK (btrim(title) <> '')
+);
+CREATE INDEX tracker_steps_action ON tracker_steps (tenant_id, action_id, pos);
+
 -- ── MEETING NOTES (spec 055) ─────────────────────────────────────────────
 -- One meeting, one note, kept in the client's own room: the note, and one row
 -- per send of its minutes — who, when, whether it was an update, who it went

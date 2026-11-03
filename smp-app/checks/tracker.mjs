@@ -83,7 +83,7 @@ import {
   lateWord, readableDay, weekLabel, inView, summary, mayChange, shape, oneLine, shortNames, todayIn, thursdayOf, weekNumber, weekWord, weekOptions, weekDays, sameWeek,
   CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay,
   officeRows, listActions, oneAction, addAction, addTopic, oneTopic, listTopics, deleteTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
-  progressOf, addProgress, latestProgress, mayChangeProgress, deleteProgress,
+  progressOf, addProgress, latestProgress, mayChangeProgress, deleteProgress, stepsOf,
 } from "../lib/tracker.ts";
 import { registerNames } from "../lib/people.ts";
 
@@ -744,6 +744,38 @@ try {
   check("Noran edits her own, and it is stamped edited", pEdit.status === 200 && (await asTenant(A, (c) => progressOf(c, host.id)))[0].body === "Finance sent four of six; Ops' two by Thursday." && !!(await asTenant(A, (c) => progressOf(c, host.id)))[0].editedAt);
   check("...and deletes it", (await call(A, NORAN, ["api"], { act: "progress-delete", progressId: pid })).status === 200 && (await asTenant(A, (c) => progressOf(c, host.id))).length === 0);
   check("an entry no longer there is a 404 in words", (await call(A, NORAN, ["api"], { act: "progress-delete", progressId: pid })).status === 404);
+  /* §743 STEPS, at the server — whoever may change the task (here Islam, its
+     owner) adds, renames, dates, orders, ticks and removes them; somebody who
+     may not (Noran, on Islam's task) is refused and nothing is written; the
+     first tick on a task not started moves it to In progress; read back from
+     Postgres (§96) */
+  const sHost = await asTenant(A, (c) => addAction(c, { title: "steps host", ownerKey: "islam", by: "islam", due: thursdayOf(todayIn()) }));
+  const s1 = await call(A, ISLAM, ["api"], { act: "step-add", id: sHost.id, title: "  Collect the BU list  " });
+  await call(A, ISLAM, ["api"], { act: "step-add", id: sHost.id, title: "Draft the measures" });
+  const sNo = await call(A, NORAN, ["api"], { act: "step-add", id: sHost.id, title: "Not hers to add" });
+  const st0 = await asTenant(A, (c) => stepsOf(c, sHost.id));
+  check("the task's owner adds steps, stored trimmed and in order; somebody who may not change the task is refused and nothing is written (§743)",
+    s1.status === 200 && sNo.status === 403 && st0.map((x) => x.title).join("|") === "Collect the BU list|Draft the measures", JSON.stringify({ s1: s1.status, sNo: sNo.status, st0: st0.map((x) => x.title) }));
+  const sEmpty = await call(A, ISLAM, ["api"], { act: "step-add", id: sHost.id, title: "   " });
+  check("...an empty step is refused in words", sEmpty.status === 400 && /few words/.test(sEmpty.text));
+  await call(A, ISLAM, ["api"], { act: "step-tick", stepId: st0[0].id, done: true });
+  const afterTick = await asTenant(A, (c) => oneAction(c, sHost.id));
+  check("...the first tick on a task not started moves it to In progress by itself (§743)", afterTick.status === "in_progress", afterTick.status);
+  await call(A, ISLAM, ["api"], { act: "step-rename", stepId: st0[1].id, title: "Draft one measure per unit" });
+  await call(A, ISLAM, ["api"], { act: "step-due", stepId: st0[1].id, due: thursdayOf(todayIn()) });
+  await call(A, ISLAM, ["api"], { act: "step-move", stepId: st0[1].id, dir: -1 });
+  const st1 = await asTenant(A, (c) => stepsOf(c, sHost.id));
+  check("...renamed, given a week, and moved up the order (§743)",
+    st1.map((x) => x.title).join("|") === "Draft one measure per unit|Collect the BU list" && st1[0].due === thursdayOf(todayIn()) && st1[1].done === true, JSON.stringify(st1));
+  const tickAll = await call(A, ISLAM, ["api"], { act: "step-tick", stepId: st1[0].id, done: true });
+  check("...all ticked, the task is NOT marked Done by itself, and the page asks (§743)",
+    (await asTenant(A, (c) => oneAction(c, sHost.id))).status === "in_progress" && /data-act=\\?"steps-done/.test(tickAll.text), (await asTenant(A, (c) => oneAction(c, sHost.id))).status);
+  await call(A, ISLAM, ["api"], { act: "step-tick", stepId: st1[0].id, done: false });
+  await call(A, ISLAM, ["api"], { act: "step-delete", stepId: st1[1].id });
+  const st2 = await asTenant(A, (c) => stepsOf(c, sHost.id));
+  check("...unticked, and one removed (§743)", st2.length === 1 && st2[0].done === false, JSON.stringify(st2));
+  check("...a step no longer there is a 404 in words", (await call(A, ISLAM, ["api"], { act: "step-tick", stepId: st1[1].id, done: true })).status === 404);
+  await asTenant(A, (c) => deleteAction(c, sHost.id));
   await asTenant(A, (c) => deleteAction(c, host.id));
   check("...while a client's own person is refused a topic", (await call(A, HEND, ["api"], { act: "topic-new", name: "sneak" })).status === 403);
   check("somebody with no membership at all is turned away", (await call(A, { personKey: null, seat: null }, [], null)).status === 403);
@@ -1531,6 +1563,34 @@ try {
     check("an update list shows this week's and the latest two before it, the rest behind Show N earlier, which opens them — in the meeting's box and in the opened task (§739)",
       m739.shown === 2 && /^Show 2 earlier/.test(m739.link) && m739b.shown === 4 && m739b.link === "Show fewer" && o739.all === 6 && o739.shown === 4 && /^Show 2 earlier/.test(o739.link),
       JSON.stringify({ m739, m739b, o739 }));
+    /* §743 STEPS, pressed: the Steps tab of the opened task — two added with
+       Enter (the tab stays open, the cursor stays in the line), one ticked;
+       the row says 1 of 2 steps; in the weekly check the box lists them and
+       ticking the last asks whether to mark the task Done, "Not yet" folding
+       the question. Read back from Postgres (§96). */
+    await pg.goto(base + "?view=all&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
+    await pg.locator(".open [data-act=ptab][data-tab=s]").click();
+    await pg.locator(".open .snew").fill("Step one"); await pg.locator(".open .snew").press("Enter"); await settle();
+    const tab743 = await pg.evaluate(() => { const o = document.querySelector(".open"); return { tab: o && o.getAttribute("data-tab"), focus: !!document.activeElement && document.activeElement.classList.contains("snew") }; });
+    await pg.locator(".open .snew").fill("Step two"); await pg.locator(".open .snew").press("Enter"); await settle();
+    const sDb = await asTenant(A, (c) => stepsOf(c, mTask));
+    await pg.locator(".open .sline >> nth=0").locator(".scb").click(); await settle();
+    const rowSteps = ((await pg.locator('.row[data-id="' + mTask + '"] .stc').textContent().catch(() => "")) || "").trim();
+    if (process.env.SMP_SHOT4) await pg.screenshot({ path: process.env.SMP_SHOT4 + "-tab.png" });
+    check("the opened task's Steps tab takes steps with Enter — the tab stays open, the cursor in the line — and a tick shows on the row as 1 of 2 steps (§743)",
+      sDb.map((x) => x.title).join("|") === "Step one|Step two" && tab743.tab === "s" && tab743.focus && rowSteps === "1 of 2 steps" && (await asTenant(A, (c) => stepsOf(c, mTask)))[0].done,
+      JSON.stringify({ tab743, steps: sDb.map((x) => x.title), rowSteps }));
+    await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
+    const inBox = await pg.locator(".mopen .msteps .sline").count();
+    await pg.locator(".mopen .msteps .sline >> nth=1").locator(".scb").click(); await settle();
+    const ask743 = await pg.locator(".mopen .sdone").isVisible().catch(() => false);
+    if (process.env.SMP_SHOT4) await pg.screenshot({ path: process.env.SMP_SHOT4 + "-check.png" });
+    await pg.locator(".mopen [data-act=steps-notyet]").click().catch(() => {});
+    const folded743 = !(await pg.locator(".mopen .sdone").isVisible().catch(() => false));
+    check("...in the weekly check the box lists the steps; ticking the last asks whether to mark the task Done, and Not yet folds the question (§743)",
+      inBox === 2 && ask743 && folded743 && (await asTenant(A, (c) => stepsOf(c, mTask))).every((x) => x.done) && (await asTenant(A, (c) => oneAction(c, mTask))).status !== "done",
+      JSON.stringify({ inBox, ask743, folded743 }));
+    await owner("DELETE FROM tracker_steps WHERE action_id = $1", [mTask]);
     await pg.goto(base + "?view=check"); await settle(); await pg.evaluate("window.__stay = 1");
     /* put the action back as it was: the walk-through above is not what the
        presses after it are about */

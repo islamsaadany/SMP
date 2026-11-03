@@ -71163,3 +71163,16 @@ Nothing it does is gone; it is quieter:
 **Checked**: `checks/tracker.mjs` **379 passed, 0 failed** — new: the bar's client menu carries `data-module="tracker"`.
 
 **§742 MERGED TO `main`** 2026-11-03, Islam: *"merge"*. Fast-forward; main had not moved. (`checks/shell.mjs` not re-run: the change is the module pages' bar, which the console does not draw.)
+
+## §743 — Steps inside a task (2026-11-03)
+
+**Asked** (Islam): "how shall we add sub tasks for the task? what do you suggest? as sometimes we have a long task and breaking it down would help in planning" → suggested STEPS (a light checklist in the task) over full sub-tasks (rows of their own, doubling the weekly check and raising "is a parent Done while a child is late?") → mockup `design-mockups/internal-tracker/2026-11-03_task-steps.html` → "show me with previous progress points or shall we split them to 2 tabs?" (A one tab / B a tab of its own) → **"go with B, but remove the owner for now. the task already has an owner he shall manage the steps"**.
+
+- **Stored** in `tracker_steps` (migration 037; schema.sql for a fresh database): the task, the words, an optional week (a day, as the task's own), when ticked, its place in the order; fenced by row-level security like progress. No owner. Steps go with their task.
+- **Who**: whoever may change the task (`mayChange`, asked of the stored task) adds, renames, dates, orders, ticks and removes its steps; anybody else is refused in words and nothing is written.
+- **The opened task (B)**: tabs Progress · **Steps** (ticked of all) · Description · History. A step: a tick; its words (pressed, a box in place: Enter saves, Escape puts back); an optional week (a small list of weeks; a week passed undone reads red); and, on hover, ↑ ↓ and × for the order and removal. "Add a step and press Enter" at the foot; the tab stays open and the cursor stays in the line after each press.
+- **The row** (the Tracker's, and My tasks' and Home's): the quiet line says how far the steps have got — a thin bar and "2 of 5 steps"; nothing for a task without steps. Steps never become rows of their own.
+- **The weekly check**: the box lists the steps between the status row and the timeline, with the add line, so the meeting ticks them as it talks.
+- **The first tick** on a task Not started moves it to In progress (the server's, with the tick). **All ticked**, the list asks "Mark the task Done?" (Mark Done · Not yet) — it never marks it Done by itself; Not yet keeps the question folded for that task.
+
+**Checked**: `checks/tracker.mjs` **388 passed, 0 failed** — new: at the server, the owner adds (trimmed, in order), somebody who may not is refused and nothing is written, an empty step refused, the first tick moves the task to In progress, rename/week/move read back, all ticked does not make it Done and the page asks, untick and remove, a gone step is a 404; in the browser, the Steps tab takes steps with Enter (the tab stays, the cursor stays), a tick shows "1 of 2 steps" on the row, the weekly check's box lists them, ticking the last asks and Not yet folds it. `checks/shell.mjs` — new: a My tasks row with steps says "1 of 2 steps". Migration 037 applied to the local test databases with `db/apply.mjs` (deploy applies it on production). Shell cache `smp-shell-v7.62-steps`. (Shell run result below when it lands.)

@@ -1846,6 +1846,10 @@
   .mwmeta .sep{ width:1px; height:11px; background:var(--line); flex:none }
   .mwmeta .up{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0 }
   .mwmeta .up b{ font-weight:600; color:var(--ink-2) }
+  /* §743: steps on the row */
+  .mwmeta .stc{ display:inline-flex; align-items:center; gap:5px; color:var(--ink-2); white-space:nowrap; flex:none }
+  .mwmeta .stc i{ display:inline-block; width:28px; height:4px; border-radius:2px; background:var(--line-soft); overflow:hidden; position:relative }
+  .mwmeta .stc i b{ position:absolute; top:0; bottom:0; left:0; background:var(--good) }
   /* §733: a link in a note, read short — a small tag named after its site */
   .lktag{ display:inline-flex; align-items:center; gap:4px; color:var(--mw-blue); text-decoration:none; border:1px solid var(--line); border-radius:6px;
     padding:0 6px; font-size:.88em; line-height:1.55; vertical-align:1px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis }

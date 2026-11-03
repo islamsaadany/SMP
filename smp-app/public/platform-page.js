@@ -2653,6 +2653,14 @@
     }
     var bits = [];
     if (TSORT.by !== "client") { var cl = el("span", "mwcl", r.clientName); bits.push(cl); }
+    /* §743: the task's steps, as on the Tracker's row — a thin bar and "2 of 5 steps" */
+    if (r.steps && r.steps.n) {
+      var sc = el("span", "stc");
+      sc.title = r.steps.d + " of " + r.steps.n + " steps ticked";
+      var bar = el("i"), fill = el("b"); fill.style.width = Math.round(100 * r.steps.d / r.steps.n) + "%"; bar.appendChild(fill);
+      sc.appendChild(bar); sc.appendChild(document.createTextNode(r.steps.d + " of " + r.steps.n + " steps"));
+      bits.push(sc);
+    }
     /* §728 THE TRACKER'S QUIET LINE (§721): the note's week said only when it
        is not this week, so "Last week" still flags a task nobody has touched */
     if (r.last) { var up = el("span", "up"); if (!r.last.now) { up.appendChild(el("b", null, r.last.week)); up.appendChild(document.createTextNode(" · ")); } mwLinks(up, r.last.body); bits.push(up); }

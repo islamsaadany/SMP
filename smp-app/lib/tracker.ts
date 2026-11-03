@@ -540,6 +540,73 @@ export async function progressOf(c: Q, actionId: string): Promise<Progress[]> {
   const r = await c.query("SELECT " + PCOLS + " FROM tracker_progress WHERE action_id = $1 ORDER BY at DESC, id DESC", [actionId]);
   return r.rows.map(shapeProgress);
 }
+/* STEPS (§743). Islam: "how shall we add sub tasks for the task? … breaking
+   it down would help in planning" → "go with B, but remove the owner for
+   now. the task already has an owner he shall manage the steps". A step is a
+   line of its task: the words, an optional week (a day, as the task's own
+   week is stored), ticked or not, and its place in the task's order. Steps
+   are the task's — whoever may change the task may change its steps (§42,
+   asked of the stored task by the module). Read for every task in one query,
+   as the progress is (§719), so the page carries them. */
+export const STEP_MAX = 300;
+export type Step = { id: string; actionId: string; title: string; due: string | null; done: boolean; pos: number };
+const SCOLS = "id, action_id, title, to_char(due, 'YYYY-MM-DD') AS due, done_at, pos";
+function shapeStep(r: Record<string, any>): Step {
+  return { id: str(r.id), actionId: str(r.action_id), title: str(r.title), due: r.due ? str(r.due) : null, done: !!r.done_at, pos: Number(r.pos) || 0 };
+}
+export async function stepsByAction(c: Q): Promise<Map<string, Step[]>> {
+  const r = await c.query("SELECT " + SCOLS + " FROM tracker_steps ORDER BY action_id, pos, at, id");
+  const m = new Map<string, Step[]>();
+  for (const x of r.rows as any[]) { const p = shapeStep(x); if (!m.has(p.actionId)) m.set(p.actionId, []); m.get(p.actionId)!.push(p); }
+  return m;
+}
+export async function stepsOf(c: Q, actionId: string): Promise<Step[]> {
+  const r = await c.query("SELECT " + SCOLS + " FROM tracker_steps WHERE action_id = $1 ORDER BY pos, at, id", [actionId]);
+  return r.rows.map(shapeStep);
+}
+/* how many steps each task has and how many are ticked — for the rows of
+   My tasks and Home, which say "2 of 5 steps" (§743) */
+export async function stepTally(c: Q): Promise<Map<string, { n: number; d: number }>> {
+  const r = await c.query("SELECT action_id, count(*)::int AS n, count(done_at)::int AS d FROM tracker_steps GROUP BY action_id");
+  return new Map((r.rows as any[]).map((x) => [str(x.action_id), { n: Number(x.n) || 0, d: Number(x.d) || 0 }]));
+}
+export async function oneStep(c: Q, id: string): Promise<Step | null> {
+  const r = await c.query("SELECT " + SCOLS + " FROM tracker_steps WHERE id = $1", [id]);
+  return r.rows[0] ? shapeStep(r.rows[0]) : null;
+}
+/* a new step goes to the end of the task's order */
+export async function addStep(c: Q, actionId: string, title: string, by: string): Promise<Step> {
+  const t = trimmed(title).slice(0, STEP_MAX);
+  if (!t) throw new Error("a step needs a few words");
+  const r = await c.query(
+    "INSERT INTO tracker_steps (action_id, title, by_key, pos) VALUES ($1, $2, $3, (SELECT COALESCE(MAX(pos), 0) + 1 FROM tracker_steps WHERE action_id = $1)) RETURNING " + SCOLS,
+    [actionId, t, by]);
+  return shapeStep(r.rows[0]);
+}
+export async function renameStep(c: Q, id: string, title: string): Promise<void> {
+  const t = trimmed(title).slice(0, STEP_MAX);
+  if (!t) throw new Error("a step needs a few words");
+  await c.query("UPDATE tracker_steps SET title = $2 WHERE id = $1", [id, t]);
+}
+export async function tickStep(c: Q, id: string, done: boolean): Promise<void> {
+  await c.query("UPDATE tracker_steps SET done_at = CASE WHEN $2 THEN COALESCE(done_at, now()) ELSE NULL END WHERE id = $1", [id, done]);
+}
+export async function setStepDue(c: Q, id: string, due: string | null): Promise<void> {
+  await c.query("UPDATE tracker_steps SET due = $2 WHERE id = $1", [id, due]);
+}
+/* one place up or down the task's order: the step and its neighbour swap */
+export async function moveStep(c: Q, id: string, dir: -1 | 1): Promise<void> {
+  const s = await oneStep(c, id); if (!s) return;
+  const all = await stepsOf(c, s.actionId);
+  const i = all.findIndex((x) => x.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= all.length) return;
+  /* positions written fresh as 1..n, so steps added at the same position never tie */
+  const order = all.map((x) => x.id); [order[i], order[j]] = [order[j], order[i]];
+  for (let k = 0; k < order.length; k++) await c.query("UPDATE tracker_steps SET pos = $2 WHERE id = $1", [order[k], k + 1]);
+}
+export async function deleteStep(c: Q, id: string): Promise<void> {
+  await c.query("DELETE FROM tracker_steps WHERE id = $1", [id]);
+}
 export async function oneProgress(c: Q, id: string): Promise<Progress | null> {
   const r = await c.query("SELECT " + PCOLS + " FROM tracker_progress WHERE id = $1", [id]);
   return r.rows[0] ? shapeProgress(r.rows[0]) : null;

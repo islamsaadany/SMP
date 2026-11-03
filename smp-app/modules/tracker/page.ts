@@ -38,7 +38,7 @@ import {
   FORMATS, FORMAT_WORD, todayIn, weekOf, weekLabel, readableDay, isLate, carriedWeeks, lateWord, inView, summary, mayChange,
   thursdayOf, weekWord, sameWeek, weekOptions, weekDays, weekInMonth,
   type CheckWeek, CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay, topicShown,
-  officeRows, namesOf, shortNames, listActions, eventsByAction, progressByAction, listTopics, type Topic,
+  officeRows, namesOf, shortNames, listActions, eventsByAction, progressByAction, stepsByAction, type Step, listTopics, type Topic,
   type Progress, latestProgress, mayChangeProgress, PROGRESS_MAX, addDays, oneLine,
 } from "../../lib/tracker.ts";
 
@@ -609,7 +609,50 @@ const LOOK = `
 .ptabs .sp{flex:1}
 .ptabs .acts{padding:0;font-size:13px}
 .open .tp{max-width:780px}
-.open:not([data-tab="p"]) .tp-p,.open:not([data-tab="d"]) .tp-d{display:none}
+.open:not([data-tab="p"]) .tp-p,.open:not([data-tab="d"]) .tp-d,.open:not([data-tab="s"]) .tp-s{display:none}
+/* §743 STEPS */
+.stc{display:inline-flex;align-items:center;gap:5px;color:var(--ink-2);white-space:nowrap;flex:none}
+.stc i{display:inline-block;width:28px;height:4px;border-radius:2px;background:var(--line-2);overflow:hidden;position:relative}
+.stc i b{position:absolute;inset:0 auto 0 0;background:var(--good)}
+.stl{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:2px}
+.sline{display:flex;align-items:center;gap:10px;padding:5px 6px;border-radius:7px;position:relative}
+.sline:hover{background:var(--surface-2)}
+.scb{width:18px;height:18px;flex:none;border:1.5px solid var(--line);border-radius:5px;background:var(--surface);display:grid;place-items:center;color:#fff;font:700 11px/1 var(--font);padding:0;cursor:pointer}
+.scb:disabled{cursor:default}
+.sline.done .scb{background:var(--good);border-color:var(--good)}
+.snm{flex:1;min-width:0;font:400 14px/1.4 var(--font);color:var(--ink);overflow-wrap:anywhere}
+.snm[role=button]{cursor:text}
+.sline.done .snm{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line)}
+.snm input{width:100%;font-size:inherit;font-family:inherit;line-height:inherit;border:1px solid var(--carry);border-radius:6px;padding:2px 6px;background:var(--surface);color:var(--ink)}
+.sline .chip{font:400 12px/1.4 var(--font);color:var(--ink-3);border:1px dashed var(--line);border-radius:6px;padding:1px 7px;background:none;white-space:nowrap;cursor:pointer}
+.sline .chip.set{border-style:solid;color:var(--ink-2)}
+.sline .chip.late{color:var(--bad);border-color:var(--bad)}
+.sline span.chip{cursor:default}
+.swk{position:relative;flex:none}
+.swl{position:absolute;right:0;top:26px;z-index:14;display:grid;min-width:200px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(20,28,43,.16);padding:4px}
+.swl[hidden]{display:none}
+.swl button{display:flex;align-items:center;gap:8px;border:0;background:none;text-align:left;padding:6px 10px;border-radius:7px;font:400 13.5px/1.2 var(--font);color:var(--ink);cursor:pointer}
+.swl button:hover{background:var(--surface-2)}
+.swl button.on{font-weight:700}
+.swl small{margin-left:auto;color:var(--ink-3);font-size:12px}
+.stools{display:none;gap:2px;flex:none}
+.sline:hover .stools,.sline:focus-within .stools{display:inline-flex}
+.stools button{border:0;background:none;width:24px;height:24px;border-radius:6px;color:var(--ink-3);cursor:pointer;font-size:13px}
+.stools button:hover:not(:disabled){background:var(--line-2);color:var(--ink)}
+.stools button:disabled{opacity:.35;cursor:default}
+.stools .danger:hover{color:var(--bad)}
+.sadd{display:flex;align-items:center;gap:10px;padding:5px 6px;color:var(--ink-3)}
+.sadd span{width:18px;text-align:center;flex:none}
+.sadd input{flex:1;min-width:0;border:0;border-bottom:1px dashed var(--line);background:none;outline:none;padding:3px 0;font:400 14px/1.4 var(--font);color:var(--ink)}
+.sadd input:focus{border-bottom-color:var(--carry)}
+.open .sadd input.snew{border:0;border-bottom:1px dashed var(--line);border-radius:0;box-shadow:none;background:none;padding:3px 0;height:auto}
+.open .sadd input.snew:focus{border-bottom:1px solid var(--carry);outline:none}
+.sdone{margin-top:10px;padding:9px 12px;border-radius:9px;background:var(--done-bg);color:var(--good);font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sdone .go{border:1px solid var(--good);background:var(--surface);color:var(--good);border-radius:7px;padding:3px 10px;font:600 12.5px/1.2 var(--font);cursor:pointer}
+.sdone .go.quiet{border:0;background:none;color:var(--ink-3);font-weight:400}
+.mopen .msteps{margin-top:18px}
+.mopen .msh{font:600 12px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.mopen .msh .c{font-weight:500;letter-spacing:0;text-transform:none}
 .open .pbox{border:0;padding:0;background:none;gap:8px;align-items:stretch}
 .open .pbox input{border:1px solid var(--line);border-radius:8px;padding:8px 11px;background:var(--surface);height:38px}
 .open .pbox input:focus{border-color:var(--carry)}
@@ -1024,7 +1067,9 @@ export type Loaded = { office: Person[]; names: Map<string, string>; short: Map<
   /* §657: the opened row's progress entries, and the latest entry of every row */
   progress: Progress[]; latest: Map<string, Progress>;
   /* §719: every row's history and progress, for the panels the page carries */
-  eventsBy?: Map<string, Event[]>; progressBy?: Map<string, Progress[]> };
+  eventsBy?: Map<string, Event[]>; progressBy?: Map<string, Progress[]>;
+  /* §743: every task's steps */
+  stepsBy?: Map<string, Step[]> };
 
 /* ONE READ FOR THE PAGE AND FOR A PRESS. An opened row that is no longer on
    the list (deleted, or another client's id on a pasted link) is read as
@@ -1039,7 +1084,7 @@ export async function load(c: Q, openId: string | null): Promise<Loaded> {
   const open = openId && actions.some((a) => a.id === openId) ? openId : null;
   const eventsBy = await eventsByAction(c), progressBy = await progressByAction(c);
   return { office, names, short, actions, events: open ? eventsBy.get(open) || [] : [], open, topics: await listTopics(c),
-    progress: open ? progressBy.get(open) || [] : [], latest: await latestProgress(c), eventsBy, progressBy };
+    progress: open ? progressBy.get(open) || [] : [], latest: await latestProgress(c), eventsBy, progressBy, stepsBy: await stepsByAction(c) };
 }
 
 const statusPill = (a: Action, live: boolean): string => {
@@ -1230,7 +1275,7 @@ function quietRow(a: Action, L: Loaded, live: boolean, late: boolean, today: str
     '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
     (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
     '<div class="tn2"><div class="nm"><span class="t" role="button" tabindex="0" data-act="more"' + (live ? ' data-rename="1"' : "") + ' aria-expanded="' + opened + '" title="' + esc(a.title) + '">' + esc(a.title) + "</span></div>" +
-    '<div class="meta">' + topicCell(a, L, live, group) + (a.topicId && group !== "topic" && last ? '<span class="msep" aria-hidden="true"></span>' : "") + last + "</div></div>" +
+    '<div class="meta">' + topicCell(a, L, live, group) + stepsMeta(a, L, !!(a.topicId && group !== "topic")) + (((a.topicId && group !== "topic") || stepCount(a, L)) && last ? '<span class="msep" aria-hidden="true"></span>' : "") + last + "</div></div>" +
     quietWhen(a, today, dates, live, view) + (byOwner ? "" : whoCell(a, L, live)) + statusPill(a, live) + menu + "</div>";
 }
 /* THE WEEK CELL SAYS THE EXCEPTION (§708): a late row how late, in red; a
@@ -1390,6 +1435,7 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
   const n = (k: number) => k ? ' <span class="n">' + k + "</span>" : "";
   const tabs = '<div class="ptabs" role="tablist">' +
     '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="p" aria-selected="true">Progress' + n(L.progress.length) + "</button>" +
+    '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="s" aria-selected="false">Steps' + stepsTabCount(a, L) + "</button>" +
     '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="d" aria-selected="false">Description</button>' +
     '<button type="button" role="tab" class="ptab histlink" data-act="hist" data-tab="h" aria-selected="false" aria-expanded="false">History' + n(L.events.length) + "</button>" +
     '<span class="sp"></span>' +
@@ -1402,7 +1448,59 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
   const desc = '<div class="tp tp-d">' + (live
     ? '<textarea class="desc" data-act="notes" aria-label="Description" maxlength="5000" rows="1" placeholder="What the task is. Click to write it.">' + esc(a.description) + "</textarea>"
     : '<div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>") + "</div>";
-  return tabs + prog + desc + '<ul class="hist" hidden>' + hist + "</ul>";
+  return tabs + prog + '<div class="tp tp-s">' + stepsBlock(a, L, live, today, false) + "</div>" + desc + '<ul class="hist" hidden>' + hist + "</ul>";
+}
+/* ══ STEPS (§743) ══════════════════════════════════════════════════════
+   Islam: "how shall we add sub tasks for the task? … breaking it down would
+   help in planning" → design-mockups/internal-tracker/2026-11-03_task-steps.html,
+   "go with B, but remove the owner for now. the task already has an owner he
+   shall manage the steps". A task's steps: a Steps tab in the opened task
+   (B), the count on the row's quiet line, and the list in the weekly check's
+   box, where the meeting ticks them. Each step: a tick, its words (pressed,
+   a box in place), an optional week (a week passed undone reads red), and,
+   for whoever may change the task, up/down and remove. The first tick on a
+   task not started moves it to In progress (the server's); all ticked, the
+   list ASKS whether to mark the task Done — it never does so by itself. */
+function stepsOfTask(a: Action, L: Loaded): Step[] { return (L.stepsBy && L.stepsBy.get(a.id)) || []; }
+function stepCount(a: Action, L: Loaded): number { return stepsOfTask(a, L).length; }
+function stepsTabCount(a: Action, L: Loaded): string {
+  const all = stepsOfTask(a, L);
+  return all.length ? ' <span class="n">' + all.filter((x) => x.done).length + " of " + all.length + "</span>" : "";
+}
+/* the row's quiet line: a thin bar and "2 of 5 steps"; nothing for a task without steps */
+function stepsMeta(a: Action, L: Loaded, afterTopic: boolean): string {
+  const all = stepsOfTask(a, L); if (!all.length) return "";
+  const d = all.filter((x) => x.done).length;
+  return (afterTopic ? '<span class="msep" aria-hidden="true"></span>' : "") +
+    '<span class="stc" title="' + d + " of " + all.length + ' steps ticked"><i><b style="width:' + Math.round(100 * d / all.length) + '%"></b></i>' + d + " of " + all.length + " steps</span>";
+}
+function stepsBlock(a: Action, L: Loaded, live: boolean, today: string, compact: boolean): string {
+  const all = stepsOfTask(a, L);
+  const d = all.filter((x) => x.done).length;
+  const thisWk = weekOf(today).from;
+  const lis = all.map((st, i) => {
+    const late = !st.done && !!st.due && st.due < thisWk;
+    const wk = st.due ? weekWord(st.due, today) : "";
+    const week = live
+      ? '<span class="swk"><button type="button" class="chip' + (st.due ? " set" : "") + (late ? " late" : "") + '" data-act="step-week" aria-haspopup="listbox" aria-expanded="false">' + (wk ? esc(wk) : "+ week") + "</button>" +
+        '<span class="swl" role="listbox" hidden>' + weekOptions(today).map((w) => '<button type="button" role="option" data-act="step-due" data-day="' + w.to + '"' + (st.due && sameWeek(st.due, w.to) ? ' class="on"' : "") + "><b>" + esc(w.word) + "</b><small>" + esc(w.days) + "</small></button>").join("") +
+        '<button type="button" role="option" data-act="step-due" data-day="">No week</button></span></span>'
+      : st.due ? '<span class="chip set' + (late ? " late" : "") + '">' + esc(wk) + "</span>" : "";
+    const tools = live && !compact
+      ? '<span class="stools"><button type="button" data-act="step-move" data-dir="-1" aria-label="Move up"' + (i === 0 ? " disabled" : "") + ">&uarr;</button>" +
+        '<button type="button" data-act="step-move" data-dir="1" aria-label="Move down"' + (i === all.length - 1 ? " disabled" : "") + ">&darr;</button>" +
+        '<button type="button" class="danger" data-act="step-delete" aria-label="Remove the step">&times;</button></span>'
+      : "";
+    return '<li class="sline' + (st.done ? " done" : "") + '" data-sid="' + esc(st.id) + '">' +
+      '<button type="button" class="scb" data-act="step-tick" aria-pressed="' + st.done + '" aria-label="' + (st.done ? "Untick" : "Tick") + ": " + esc(st.title) + '"' + (live ? "" : " disabled") + ">" + (st.done ? "&#10003;" : "") + "</button>" +
+      '<span class="snm"' + (live ? ' data-act="step-rename" role="button" tabindex="0" title="Press to rename"' : "") + ">" + esc(st.title) + "</span>" + week + tools + "</li>";
+  }).join("");
+  const add = live ? '<div class="sadd"><span aria-hidden="true">+</span><input class="snew" data-act="step-new" placeholder="Add a step and press Enter" aria-label="Add a step to ' + esc(a.title) + '" maxlength="300"></div>' : "";
+  const ask = live && all.length && d === all.length && a.status !== "done"
+    ? '<div class="sdone">All steps are ticked. Mark the task Done? <button type="button" class="go" data-act="steps-done">Mark Done</button><button type="button" class="go quiet" data-act="steps-notyet">Not yet</button></div>' : "";
+  const none = !all.length && !live ? '<p class="mnil">No steps.</p>' : "";
+  return (compact ? '<div class="msh">Steps' + (all.length ? ' <span class="c">' + d + " of " + all.length + "</span>" : "") + "</div>" : "") +
+    (all.length ? '<ul class="stl">' + lis + "</ul>" : "") + none + add + ask;
 }
 /* THE OPENED TASK, TABBED (2026-11-02, §706; option D of
    design-mockups/internal-tracker/2026-11-02_opened-task-options.html).
@@ -1680,6 +1778,7 @@ function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format)
     '<h3 class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</h3>" +
     box +
     '<div class="mrow">' + chips + '<button type="button" class="mbtn pri" data-act="step" data-dir="1">Save and next <kbd>Ctrl &crarr;</kbd></button></div>' +
+    (live || stepCount(a, L) ? '<div class="msteps">' + stepsBlock(a, L, live, today, true) + "</div>" : "") +
     '<div class="mph">' + (nowNotes.length ? "Before this week" : "Progress so far") + "</div>" + tl + more + desc + hist +
     '<div class="macts"><button type="button" class="mlk" data-act="step" data-dir="-1">&larr; Previous</button><span class="sp"></span>' +
     '<button type="button" class="mlk" data-act="skip">Skip &rarr;</button></div></div>';

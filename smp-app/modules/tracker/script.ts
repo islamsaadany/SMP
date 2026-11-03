@@ -173,6 +173,7 @@ export const APP_JS = `(function () {
     if (s && k && k.srch) s.value = k.srch;
     countWas = null; sift();
     if (tb) barFoot();
+    stepsAfterSwap();
     if (k && k.panel) showPanel(true);
     if (k && k.focus) {
       if (k.focus.srch) { if (s) s.focus(); }
@@ -483,6 +484,48 @@ export const APP_JS = `(function () {
      drawn again with it at the top, the box empty and still under the
      cursor for the next one. Escape clears it. The key and the Enter button
      beside the box (§678) do the same one thing. */
+  /* §743: after a step press the page is drawn again — the task's Steps tab
+     stays open (tabOf), the add line keeps the cursor, and "Not yet" keeps
+     the Done question folded for that task */
+  var stepBack = null, notYet = new Set();
+  function stepsAfterSwap() {
+    notYet.forEach(function (tid) { document.querySelectorAll('.open[data-id="' + tid + '"] .sdone').forEach(function (x) { x.hidden = true; }); });
+    if (!stepBack) return;
+    var o = document.querySelector('#body .open[data-id="' + stepBack + '"]');
+    stepBack = null;
+    var ni = o && o.querySelector(".snew");
+    if (ni && (o.getAttribute("data-tab") === "s" || o.classList.contains("mopen"))) ni.focus();
+  }
+  function stepRename(el, tid) {
+    if (el.querySelector("input")) return;
+    var sl = el.closest(".sline"), sid = sl && sl.getAttribute("data-sid"), was = el.textContent;
+    var inp = document.createElement("input"); inp.value = was; inp.maxLength = 300; inp.setAttribute("aria-label", "Rename the step");
+    el.textContent = ""; el.appendChild(inp); inp.focus(); inp.select();
+    var done = false, finish = function (keep) {
+      if (done) return; done = true;
+      var v = inp.value.replace(/\s+/g, " ").trim();
+      if (keep && v && v !== was) { stepBack = tid; post({ act: "step-rename", stepId: sid, title: v }); }
+      else el.textContent = was;
+    };
+    inp.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
+      else if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); finish(false); }
+    });
+    inp.addEventListener("blur", function () { finish(true); });
+  }
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (!t || !t.classList) return;
+    if (t.classList.contains("snew") && e.key === "Enter") {
+      e.preventDefault();
+      var v = t.value.replace(/\s+/g, " ").trim(), tid = rowOf(t);
+      if (!v || !tid) return;
+      stepBack = tid; t.disabled = true;
+      post({ act: "step-add", id: tid, title: v }, null, function (j) { if (!j) { t.disabled = false; t.focus(); } });
+    } else if (t.classList.contains("snm") && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault(); stepRename(t, rowOf(t));
+    }
+  });
   function addProgress(t) {
     var v = t.value.replace(/\\s+/g, " ").trim(), id = rowOf(t);
     if (!v || !id) { t.focus(); return; }
@@ -569,6 +612,8 @@ export const APP_JS = `(function () {
       var m = d.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = true;
     });
     var tp = panelEl(); if (tp && !tp.hidden) tp.hidden = true;
+    /* §743: a step's week list */
+    document.querySelectorAll(".swl").forEach(function (x) { if (!except || !except.contains || !x.parentNode.contains(except)) x.hidden = true; });
   }
   /* THE TOPICS PANEL (§533) hangs where the settings menu hangs, off the same
      ⋯, and only one of the two is ever open: "Topics" shuts the menu and
@@ -678,7 +723,7 @@ export const APP_JS = `(function () {
     var fd = e.target.closest && e.target.closest(".chd .find");
     if (fd && !e.target.closest("input, button")) { var si = fd.querySelector(".srch"); if (si) si.focus(); }
     var b = e.target.closest("[data-act]");
-    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots, .rdots")) closePops(null);
+    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots, .rdots, .swk")) closePops(null);
     if (!b) return;
     var act = b.getAttribute("data-act"), id = rowOf(b), ar = inAdd(b);
     if (act === "tick") {
@@ -827,6 +872,26 @@ export const APP_JS = `(function () {
     } else if (act === "skip") {
       /* Skip moves on without saving, carrying or counting (§732) */
       stepTask(1, false);
+    } else if (act === "step-tick" || act === "step-move" || act === "step-delete" || act === "step-due") {
+      /* §743 STEPS: each press is the server's; the list comes back drawn */
+      var sl = b.closest(".sline"), sid = sl && sl.getAttribute("data-sid");
+      if (!sid) return;
+      stepBack = id;
+      if (act === "step-tick") post({ act: "step-tick", stepId: sid, done: b.getAttribute("aria-pressed") !== "true" });
+      else if (act === "step-move") post({ act: "step-move", stepId: sid, dir: Number(b.getAttribute("data-dir")) || 1 });
+      else if (act === "step-delete") post({ act: "step-delete", stepId: sid });
+      else post({ act: "step-due", stepId: sid, due: b.getAttribute("data-day") || null });
+    } else if (act === "step-week") {
+      var wl = b.parentNode.querySelector(".swl"), on8 = wl && wl.hidden;
+      document.querySelectorAll(".swl").forEach(function (x) { x.hidden = true; });
+      document.querySelectorAll("[data-act=step-week]").forEach(function (x) { x.setAttribute("aria-expanded", "false"); });
+      if (wl && on8) { wl.hidden = false; b.setAttribute("aria-expanded", "true"); }
+    } else if (act === "step-rename") {
+      stepRename(b, id);
+    } else if (act === "steps-done") {
+      post({ act: "status", id: id, status: "done" });
+    } else if (act === "steps-notyet") {
+      notYet.add(id); var sd = b.closest(".sdone"); if (sd) sd.hidden = true;
     } else if (act === "pmore") {
       /* §739: the earlier updates open in place, and fold again */
       var pl = b.previousElementSibling, on9 = b.getAttribute("aria-expanded") !== "true";

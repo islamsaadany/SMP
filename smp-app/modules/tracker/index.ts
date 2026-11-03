@@ -34,6 +34,7 @@ import {
   oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange, thursdayOf, todayIn,
   oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic, mayCarry, nextWeekDay, ONLY_CHANGE,
   oneProgress, addProgress, editProgress, deleteProgress, mayChangeProgress, ONLY_WRITER, trimmed,
+  oneStep, addStep, renameStep, tickStep, setStepDue, moveStep, deleteStep, stepsOf,
 } from "../../lib/tracker.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
@@ -191,6 +192,39 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     else if (kind === "topic-delete") await deleteTopic(c, t.id);
     else return refused(400, "Not something this list does.");
     return out(200, { ok: true, topicId: t.id });
+  }
+
+  /* STEPS (§743): a task's lines, changed by whoever may change the task
+     (§42, asked of the stored task). The FIRST tick on a task not started
+     moves it to In progress by itself — the work has begun; the last tick
+     never marks it Done (the page asks). */
+  if (kind.startsWith("step-")) {
+    const st = kind === "step-add" ? null : await oneStep(c, String(b.stepId || ""));
+    if (kind !== "step-add" && !st) return refused(404, "That step is not on this task any more.");
+    const task = await oneAction(c, kind === "step-add" ? String(b.id || "") : st!.actionId);
+    if (!task) return refused(404, "That action is not on this client's list any more.");
+    if (!mayChange(task, who)) return refused(403, ONLY);
+    if (kind === "step-add") {
+      if (!trimmed(b.title)) return refused(400, "A step needs a few words.");
+      await addStep(c, task.id, String(b.title), by);
+    } else if (kind === "step-rename") {
+      if (!trimmed(b.title)) return refused(400, "A step needs a few words.");
+      await renameStep(c, st!.id, String(b.title));
+    } else if (kind === "step-tick") {
+      const done = !!b.done;
+      await tickStep(c, st!.id, done);
+      if (done && task.status === "not_started") await setStatus(c, task.id, "in_progress", by);
+    } else if (kind === "step-due") {
+      const due = b.due == null || b.due === "" ? null : calendarDay(b.due);
+      if (b.due && !due) return refused(400, "That is not a date this list can read.");
+      await setStepDue(c, st!.id, due);
+    } else if (kind === "step-move") {
+      await moveStep(c, st!.id, Number(b.dir) < 0 ? -1 : 1);
+    } else if (kind === "step-delete") {
+      await deleteStep(c, st!.id);
+    } else return refused(400, "Not something this list does.");
+    const all = await stepsOf(c, task.id);
+    return out(200, { ok: true, id: task.id, steps: all.length, done: all.filter((x) => x.done).length });
   }
 
   /* PROGRESS (§657): anybody past the gate writes an entry on any action;

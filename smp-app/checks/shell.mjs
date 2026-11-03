@@ -3180,6 +3180,9 @@ await section("4 · Forefront's own pages", async () => {
   await ta("MW late one", "smo", -14, "in_progress");
   await ta("MW this week", "smo", 0, "not_started");
   await ta("MW far off", "smo", 30, "not_started");
+  /* §743: two steps on one task, one ticked — the row says 1 of 2 steps */
+  await owner.query("INSERT INTO tracker_steps (tenant_id, action_id, title, pos, done_at) SELECT $1, id, 'First step', 1, now() FROM tracker_actions WHERE tenant_id = $1 AND title = 'MW far off'", [tenantId]);
+  await owner.query("INSERT INTO tracker_steps (tenant_id, action_id, title, pos) SELECT $1, id, 'Second step', 2 FROM tracker_actions WHERE tenant_id = $1 AND title = 'MW far off'", [tenantId]);
   await ta("MW finished", "smo", -3, "done");
   /* when each was finished, as the Tracker stamps it: one this week, one
      three weeks ago (for My tasks' Show done, round three) */
@@ -3235,6 +3238,9 @@ await section("4 · Forefront's own pages", async () => {
       "\u2026the Done menu is shut until pressed, and a hover greys the first row as it does the others (\u00a7729)", JSON.stringify({ menu729, hov729 }));
     await page.click(".mwcardhd .mwfind svg");
     check((await page.evaluate("Math.round(document.querySelector('.mwcardhd .mwsearch').getBoundingClientRect().width)")) > 100, "\u2026a press on the search icon opens its box (\u00a7725)", "");
+    /* §743: a task's steps on its row, as the Tracker's */
+    const st743 = await page.evaluate(() => { const r = Array.from(document.querySelectorAll(".mwlist .mwrow")).find((x) => /MW far off/.test(x.textContent)); const s = r && r.querySelector(".mwmeta .stc"); return s ? s.textContent : ""; });
+    check(st743 === "1 of 2 steps", "\u2026a task with steps says how far they have got on its row \u2014 1 of 2 steps (\u00a7743)", st743);
     await page.fill(".mwsearch", "far off");
     const found = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwrow")).filter((r) => !r.hidden).map((r) => r.querySelector(".t").textContent));
     check(JSON.stringify(found) === JSON.stringify(["MW far off"]), "\u2026and its search finds a task by its words", JSON.stringify(found));

@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-03 — Two updates before this week, everywhere (§739).** The rest behind Show N earlier, in the Tracker, the weekly check, My tasks and Home. Tracker 377/0; shell run pending.
+**2026-11-03 — Two updates before this week, everywhere (§739).** The rest behind Show N earlier, in the Tracker, the weekly check, My tasks and Home. Tracker 377/0; shell 562 ok / main's 11.
 
 **2026-11-03 — The meeting's room follows the window itself (§738).** Only the top is measured; the height is 100dvh's. Tracker 376/0.
 

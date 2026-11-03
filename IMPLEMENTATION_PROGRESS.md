@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-03 — The weekly check, second pass; links read short (§733).** Always carries; this week's note in the box's place; the box sticky; links as small site tags everywhere notes show. Tracker 373/0; shell run pending.
+**2026-11-03 — The weekly check, second pass; links read short (§733).** Always carries; this week's note in the box's place; the box sticky; links as small site tags everywhere notes show. Tracker 373/0; shell 562 ok / main's 10.
 
 **2026-11-03 — The weekly check, cleaned (§732).** The agreed box, rail B (a checklist), and Save and next carries an unfinished task of this week unless kept. Tracker 371/0.
 

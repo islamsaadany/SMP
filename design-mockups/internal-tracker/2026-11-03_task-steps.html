@@ -70,6 +70,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 .hint .x{border:0;background:none;color:var(--ink-3);font-weight:400}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:9px;padding:9px 16px;font-size:13.5px}
 .prog-h{margin-top:16px}
+.tlq{list-style:none;margin:12px 0 0 6px;padding:0 0 0 18px;border-left:1px solid var(--line-2);display:grid;gap:10px}
+.tlq li{position:relative}
+.tlq li::before{content:"";position:absolute;left:-22px;top:7px;width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.tlq li.now::before{background:var(--blue)}
+.tlq .wk{font-size:12px;font-weight:600;color:var(--ink-3)}.tlq .wk.now{color:var(--blue)}
+.tlq .bd{font-size:14px}.tlq .by{font-size:12px;color:var(--ink-3)}
+.pm{border:0;background:none;padding:0;margin:8px 0 0 24px;font-size:12.5px;color:var(--blue)}
+.tb2 button{border:0;background:none;padding:4px 10px;border-radius:7px;color:var(--ink-3);font-size:13.5px}
+.tb2 button.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.tb2 i{font-style:normal;color:var(--ink-3);font-weight:400;margin-left:3px}
 .pe{font-size:14px;color:var(--ink-2)}.pe small{color:var(--ink-3)}
 /* check box */
 .box{padding:22px 26px}
@@ -84,7 +94,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 </style>
 <div class="pg">
   <div class="vs" role="group" aria-label="Where">
-    <button type="button" data-w="open" aria-pressed="true">The opened task</button>
+    <button type="button" data-w="open" aria-pressed="true">A · one tab, steps above progress</button>
+    <button type="button" data-w="tabs" aria-pressed="false">B · Steps as a tab of its own</button>
     <button type="button" data-w="list" aria-pressed="false">The row in the list</button>
     <button type="button" data-w="check" aria-pressed="false">The weekly check</button>
   </div>
@@ -93,7 +104,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 </div>
 <div class="toast" id="toast" hidden></div>
 <script>
-const S={w:'open',st:'ns',hint:true,steps:[
+const S={w:'open',st:'ns',hint:true,tab:'p',more:false,steps:[
  {n:'Collect last year\'s plan and the BU list from Finance',wk:'W4 Oct',who:'Mohamed',d:false},
  {n:'Draft one key measure per business unit',wk:'This week',who:'Mohamed',d:false},
  {n:'Review the draft with Islam',wk:'Next week',who:'Islam',d:false},
@@ -109,19 +120,34 @@ function steps(compact){
   '<div class="addst"><span></span><span>+</span><input id="add" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'+
   (done()===S.steps.length&&S.st!=='dn'&&S.hint?'<div class="hint">All steps are ticked. Mark the task Done? <button type="button" data-done>Mark Done</button><button type="button" class="x" data-nohint>Not yet</button></div>':'');
 }
+/* the progress, as built (§733, §739): this week's note, the box, the latest two
+   before this week, the rest behind Show N earlier */
+const PR=[['Agreed the BU list with Finance; templates next.','Mohamed','last week'],['Templates drafted for Retail and Wholesale.','Mohamed','W4 Oct'],
+ ['Met the BU heads one by one.','Mohamed','W3 Oct'],['Shortlist of measures shared with Islam.','Mohamed','W2 Oct'],['Kick-off with the BU heads.','Islam','W1 Oct']];
+function progress(){
+ const shown=S.more?PR:PR.slice(0,2);
+ return '<div class="in">What happened this week?</div>'+
+  '<ul class="tlq"><li class="now"><div class="wk now">This week</div><div class="bd">Drafted measures for 6 of 9 units; two still waiting on data.</div><div class="by">Mohamed</div></li>'+
+  shown.map(p=>'<li><div class="wk">'+p[2][0].toUpperCase()+p[2].slice(1)+'</div><div class="bd">'+p[0]+'</div><div class="by">'+p[1]+'</div></li>').join('')+'</ul>'+
+  '<button type="button" class="pm" data-more>'+(S.more?'Show fewer':'Show '+(PR.length-2)+' earlier ›')+'</button>';
+}
 function row(on){
  const n=S.steps.length,d=done();
  return '<div class="row'+(on?' on':'')+'"><span class="tick"></span><div class="tn"><span class="t">Develop a key measure per business unit</span><div class="meta"><span>Functions</span><i class="sd"></i><span class="stp"><i><b style="width:'+Math.round(100*d/n)+'%"></b></i>'+d+' of '+n+' steps</span><i class="sd"></i><span>Agreed the BU list with Finance; templates next</span></div></div><span class="wk">This week</span><span class="st"><span class="dot '+ST[S.st][1]+'"></span>'+ST[S.st][0]+'</span><span class="kb">⋯</span></div>';
 }
 const V={
- open:{note:'<p><b>The opened task.</b> <b>Steps</b> sit above Progress: tick one when it is done; type a line and Enter to add one; press a step\'s words to rename it; drag the handle to reorder; a step\'s <b>week</b> and <b>owner</b> are optional (dashed until set), and a step\'s week that has passed undone reads red. <b>Tick the first step</b> on a task Not started and it moves to In progress by itself. <b>Tick the last one</b> and it asks whether to mark the task Done — it never does so on its own.</p>',
+ open:{note:'<p><b>A, one tab — steps above progress.</b> Everything in one place: the steps first, then the progress box and its timeline (this week\'s note, the latest two before it, the rest behind Show N earlier). Fine for a few steps; with many steps the timeline sits further down. <b>Steps</b> sit above Progress: tick one when it is done; type a line and Enter to add one; press a step\'s words to rename it; drag the handle to reorder; a step\'s <b>week</b> and <b>owner</b> are optional (dashed until set), and a step\'s week that has passed undone reads red. <b>Tick the first step</b> on a task Not started and it moves to In progress by itself. <b>Tick the last one</b> and it asks whether to mark the task Done — it never does so on its own.</p>',
   html:()=>'<div class="card"><div class="hd"><span class="av">MO</span><h2>Mohamed</h2><span class="m">3 open</span></div>'+row(true)+
    '<div class="open"><div class="tabs"><span class="on">Progress 2</span><span>Description</span><span>History 5</span></div>'+
    '<div class="sec-h">Steps <span class="c">'+done()+' of '+S.steps.length+'</span></div>'+steps(false)+
-   '<div class="sec-h prog-h">Progress</div><div class="in">What happened this week?</div><p class="pe">Agreed the BU list with Finance; templates next. <small>Mohamed · last week</small></p></div></div>'},
+   '<div class="sec-h prog-h">Progress</div>'+progress()+'</div></div>'},
  list:{note:'<p><b>The row in the list.</b> The grey line under the name says how far the steps have got — a thin bar and <b>2 of 5 steps</b> — next to the topic and the latest note. A task with no steps shows nothing extra. Steps never become rows of their own: the Tracker, My tasks and Home stay lists of tasks.</p>',
   html:()=>'<div class="card"><div class="hd"><span class="av">MO</span><h2>Mohamed</h2><span class="m">3 open</span></div>'+row(false)+
    '<div class="row"><span class="tick"></span><div class="tn"><span class="t">Finance Adjust Project that is missing Milestones</span><div class="meta"><span>Functions</span><i class="sd"></i><span>Got the revenue drivers from Hussain</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span><span class="kb">⋯</span></div></div>'},
+ tabs:{note:'<p><b>B, Steps as a tab of its own.</b> The opened task\'s tabs read <b>Progress · Steps (done of all) · Description · History</b>; each shows one thing at a time, so neither the steps nor the timeline pushes the other down. The weekly check keeps the steps in its box (see "The weekly check").</p>',
+  html:()=>'<div class="card"><div class="hd"><span class="av">MO</span><h2>Mohamed</h2><span class="m">3 open</span></div>'+row(true)+
+   '<div class="open"><div class="tabs tb2"><button type="button" data-tab="p" class="'+(S.tab==='p'?'on':'')+'">Progress <i>6</i></button><button type="button" data-tab="s" class="'+(S.tab==='s'?'on':'')+'">Steps <i>'+done()+' of '+S.steps.length+'</i></button><button type="button" data-tab="d">Description</button><button type="button" data-tab="h">History <i>5</i></button></div>'+
+   (S.tab==='s'?steps(false):S.tab==='p'?progress():'<p class="pe">…</p>')+'</div></div>'},
  check:{note:'<p><b>The weekly check.</b> The box shows the steps between the update and the timeline, compact (the week only where set), so the meeting can tick what was finished as it talks. Ticking here is the same tick as in the task.</p>',
   html:()=>'<div class="card box"><div class="eb">Functions · Mohamed · This week</div><h3>Develop a key measure per business unit</h3><div class="in">What happened this week?</div>'+
    '<div class="rw"><span class="ch'+(S.st==='ns'?' on':'')+'"><span class="dot ns"></span>Not started</span><span class="ch'+(S.st==='ip'?' on':'')+'"><span class="dot"></span>In progress</span><span class="ch'+(S.st==='dn'?' on':'')+'"><span class="dot dn"></span>Done</span><span class="sv">Save and next</span></div>'+
@@ -134,6 +160,8 @@ function draw(){
 }
 document.addEventListener('click',e=>{
  const w=e.target.closest('[data-w]');if(w){S.w=w.dataset.w;draw();return}
+ const tb=e.target.closest('[data-tab]');if(tb){S.tab=tb.dataset.tab;draw();return}
+ if(e.target.closest('[data-more]')){S.more=!S.more;draw();return}
  const c=e.target.closest('.cb');if(c){const s=S.steps[+c.dataset.i];s.d=!s.d;
   if(s.d&&S.st==='ns'){S.st='ip';toast('First step ticked — the task is now In progress')}
   draw();return}

@@ -757,14 +757,14 @@ const LOOK = `
 .mopen .mwrote + .pbox.mq{margin-top:8px}
 /* §733: the box stays in view beside the rail while the rail scrolls; one
    taller than the screen scrolls inside itself */
-/* §735 (Islam: "no need to have a scrolling in the right box unless it's
-   getting outside the page"): in the meeting the band and the bar are not
-   pinned — they scroll away — so the box sticks under the top bar alone and
-   has the screen's height; it scrolls inside itself only when it truly
-   does not fit */
-.pin:has(+ .meetwrap){position:static}
-.meet .mopen{position:sticky;top:calc(var(--tbh,41px) + var(--pinh,0px) + 12px);max-height:calc(100vh - var(--tbh,41px) - var(--pinh,0px) - 24px);overflow:auto}
-@media (max-width:760px),(max-height:600px){.meet .mopen{position:static;max-height:none;overflow:visible}}
+/* §736 (Islam: "the top banner and the banner of the weekly check needs to
+   be fixed as well .. the only scrolling is the left rail"; §735's unpinned
+   band taken back): the band and the check's bar stay pinned; under them the
+   rail scrolls inside itself and the box stands beside it, both in the
+   height that is left — the page itself does not scroll. The box scrolls
+   inside itself only when it is taller than that room. */
+.meet .mlist,.meet .mopen{position:sticky;top:calc(var(--tbh,41px) + var(--pinh,0px) + 12px);max-height:calc(100vh - var(--tbh,41px) - var(--pinh,0px) - 24px);overflow:auto;overscroll-behavior:contain}
+@media (max-width:760px),(max-height:600px){.meet .mlist,.meet .mopen{position:static;max-height:none;overflow:visible}}
 /* §733: a link in a note, read short — a small tag named after its site */
 .lktag{display:inline-flex;align-items:center;gap:4px;color:var(--carry);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:.88em;line-height:1.55;vertical-align:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .lktag:hover,.lktag:focus-visible{background:var(--wk);outline:none}

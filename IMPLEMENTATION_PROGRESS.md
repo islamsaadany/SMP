@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — In the meeting only the rail scrolls (§736).** The band and bar pinned again (§735 taken back); the rail scrolls in itself, the box beside it. Tracker 375/0.
+
 **2026-11-03 — The meeting's box scrolls only when it does not fit (§735).** The band scrolls away in the meeting. Tracker 375/0.
 
 **2026-11-03 — A task opens at once in the weekly check (§734).** Every rail task's box rides in the page. Tracker 374/0 (new check seen red).

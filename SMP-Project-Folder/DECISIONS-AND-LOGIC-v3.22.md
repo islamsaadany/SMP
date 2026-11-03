@@ -71103,3 +71103,9 @@ Nothing it does is gone; it is quieter:
 **Checked**: `checks/tracker.mjs` **375 passed, 0 failed** — new: in the meeting the pin is not sticky, and a box that fits the screen has nothing to scroll.
 
 **§735 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+## §736 — In the meeting only the rail scrolls (2026-11-03)
+
+**Reported** (Islam): "something was broken the top banner and the banner of the weekly check needs to be fixed as well .. the only scrolling is the left rail." §735 had unpinned the band in the meeting so the box would have the screen's height; that was the wrong trade. Taken back: the band and the check's bar stay pinned, and under them **the rail scrolls inside itself** while the box stands beside it, both sticky in the height that is left (`.meet .mlist, .meet .mopen`: `max-height: calc(100vh − top bar − pin − 24px)`, `overflow: auto`, `overscroll-behavior: contain`) — the page itself does not scroll. The box scrolls inside itself only when it is taller than that room (a short screen with a long history open). Static on a narrow or short screen, where the pin is too.
+
+**Checked**: `checks/tracker.mjs` **375 passed, 0 failed** — §735's check rewritten: the pin sticky in the meeting, the rail sticky and scrolling in itself with a height cap, the box scrolling only when taller than the room. Looked at on the real page.

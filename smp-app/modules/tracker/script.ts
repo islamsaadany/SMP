@@ -958,6 +958,18 @@ export const APP_JS = `(function () {
     if (mt) document.documentElement.style.setProperty("--meettop", Math.round(mt.getBoundingClientRect().top + window.scrollY) + "px");
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(barFoot);
+  /* §740 (Islam: "on my screen still the left rail is not extended to the end
+     of the screen"): production served §738, yet the rail stopped ~160px
+     short — the place the boxes start had been measured before something
+     above them settled (a line said and cleared, the band's type arriving).
+     So the start is measured again whenever the page settles or anything in
+     it changes: on load, when the body changes size, and after any change
+     to the page's content — one measure per frame at most. */
+  var fitQueued = false;
+  function fitSoon() { if (fitQueued) return; fitQueued = true; requestAnimationFrame(function () { fitQueued = false; barFoot(); }); }
+  window.addEventListener("load", fitSoon);
+  if (typeof ResizeObserver === "function") new ResizeObserver(fitSoon).observe(document.body);
+  if (typeof MutationObserver === "function") new MutationObserver(fitSoon).observe(document.body, { childList: true, subtree: true, characterData: true });
   barFoot();
   if (tb && typeof ResizeObserver === "function") new ResizeObserver(barFoot).observe(tb);
   window.addEventListener("resize", barFoot);

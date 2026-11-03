@@ -1485,6 +1485,20 @@ try {
     const tall738 = await pg.evaluate(() => { const r = document.querySelector(".mlist"); return { foot: Math.round(r.getBoundingClientRect().top + parseFloat(getComputedStyle(r).maxHeight)), ih: innerHeight }; });
     await pg.setViewportSize(vp738); await pg.waitForTimeout(150);
     check("...and when the window is made taller, the room follows it to the new foot (§738)", tall738.foot >= tall738.ih - 24 && tall738.foot <= tall738.ih, JSON.stringify(tall738));
+    /* §740: something above the boxes changing after the page has settled
+       (here 160px pushed in over the meeting) — the start is measured again,
+       so the rail still ends at the screen's foot */
+    const late740 = await pg.evaluate(async () => {
+      const d = document.createElement("div"); d.style.height = "160px"; d.id = "late740";
+      const m = document.querySelector(".meetwrap") || document.querySelector(".meet"); m.parentNode.insertBefore(d, m);
+      await new Promise((r) => setTimeout(r, 120)); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const r = document.querySelector(".mlist"), foot = Math.round(r.getBoundingClientRect().top + parseFloat(getComputedStyle(r).maxHeight));
+      d.remove(); await new Promise((r2) => setTimeout(r2, 120));
+      const r3 = document.querySelector(".mlist"), back = Math.round(r3.getBoundingClientRect().top + parseFloat(getComputedStyle(r3).maxHeight));
+      return { foot, back, ih: innerHeight };
+    });
+    check("...and when something above the boxes changes after the page has settled, the start is measured again and the rail still ends at the screen's foot (§740)",
+      late740.foot >= late740.ih - 24 && late740.foot <= late740.ih && late740.back >= late740.ih - 24 && late740.back <= late740.ih, JSON.stringify(late740));
     await asTenant(A, (c) => addProgress(c, mTask, "Sheet is here https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1.", "noran"));
     await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
     const tag733 = await pg.evaluate(() => { const a = document.querySelector(".mopen .mwrote a.lktag"); return a ? { t: a.textContent, href: a.getAttribute("href"), tgt: a.target } : null; });

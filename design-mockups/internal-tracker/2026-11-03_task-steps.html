@@ -1,0 +1,147 @@
+<title>Task Steps</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Steps inside a task — Islam: "how shall we add sub tasks for the task? …
+   sometimes we have a long task and breaking it down would help in
+   planning". Steps are a light checklist in the task, each with an optional
+   week and owner; the task stays the unit for status, week, carry and the
+   weekly check. Shown on the row, in the opened task and in the weekly
+   check's box. Example task; the ticks and the add line work. */
+:root{--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F3F5F8;--surface:#FFF;--surface-2:#EDF0F5;
+  --blue:#1F5FBF;--blue-bg:#EAF2FB;--navy:#22304F;--bad:#B23025;--good:#2F6B4F;--good-bg:#E3F2EA;--d0:#8A97AB;--d1:#E0B300;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--bad:#E8776B;--good:#63BE96;--good-bg:#1B2C26;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--bad:#E8776B;--good:#63BE96;--good-bg:#1B2C26;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.pg{max-width:980px;margin:0 auto;padding-block:24px 48px;display:grid;gap:14px}
+.vs{display:inline-flex;flex-wrap:wrap;background:var(--surface-2);border-radius:8px;padding:3px;justify-self:start}
+.vs button{border:0;background:none;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--ink-2)}
+.vs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0;max-width:86ch}
+.note b{color:var(--ink)}.note p{margin:0}.note p+p{margin-top:6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--d1);flex:none;display:inline-block}.dot.ns{background:var(--d0)}.dot.dn{background:var(--good)}
+/* row */
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.av{width:34px;height:34px;border-radius:50%;background:var(--surface-2);color:var(--blue);display:grid;place-items:center;font:700 12px/1 var(--font)}
+.hd h2{font-size:17px;margin:0}.hd .m{color:var(--ink-3)}
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 92px 120px 28px;gap:2px 14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.row.on{background:var(--blue-bg)}
+.row:last-child{border-bottom:0}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px}
+.tn{min-width:0}
+.t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px;font-weight:600}
+.meta{font-size:12.5px;color:var(--ink-3);display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden}
+.meta .sd{width:3px;height:3px;border-radius:50%;background:var(--ink-3);opacity:.7;flex:none}
+.meta .stp{display:inline-flex;align-items:center;gap:5px;color:var(--ink-2)}
+.meta .stp i{display:inline-block;width:28px;height:4px;border-radius:2px;background:var(--line-2);overflow:hidden;position:relative}
+.meta .stp i b{position:absolute;inset:0 auto 0 0;background:var(--good)}
+.wk{font-size:13px;color:var(--ink-3)}
+.st{display:flex;gap:7px;align-items:center;font:600 13px/1 var(--font);color:var(--ink-2)}
+.kb{color:var(--ink-3);text-align:center}
+/* opened task */
+.open{padding:14px 18px 18px 52px;border-bottom:1px solid var(--line-2);background:var(--surface)}
+.tabs{display:flex;gap:4px;margin-bottom:12px}
+.tabs span{padding:4px 10px;border-radius:7px;color:var(--ink-3);font-size:13.5px}.tabs span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.sec-h{display:flex;align-items:baseline;gap:8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:4px 0 6px}
+.sec-h .c{font-weight:500;letter-spacing:0;text-transform:none}
+/* steps */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.sp{display:grid;grid-template-columns:14px 20px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:5px 6px;border-radius:7px}
+.sp:hover{background:var(--surface-2)}
+.sp .grip{color:var(--ink-3);opacity:0;font-size:11px;cursor:grab;user-select:none}
+.sp:hover .grip{opacity:.8}
+.cb{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;background:var(--surface);display:grid;place-items:center;color:#fff;font-size:11px;padding:0}
+.sp.done .cb{background:var(--good);border-color:var(--good)}
+.sp .nm{min-width:0;overflow-wrap:anywhere}
+.sp.done .nm{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line)}
+.chip{font-size:12px;color:var(--ink-3);border:1px dashed var(--line);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.chip.set{border-style:solid;color:var(--ink-2)}
+.chip.late{color:var(--bad);border-color:var(--bad)}
+.addst{display:grid;grid-template-columns:14px 20px minmax(0,1fr);gap:8px;align-items:center;padding:5px 6px;color:var(--ink-3)}
+.addst input{border:0;border-bottom:1px dashed var(--line);background:none;outline:none;padding:3px 0;font-size:14px}
+.addst input:focus{border-bottom-color:var(--blue)}
+.hint{margin:10px 0 0;padding:9px 12px;border-radius:9px;background:var(--good-bg);color:var(--good);font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hint button{border:1px solid var(--good);background:var(--surface);color:var(--good);border-radius:7px;padding:3px 10px;font-weight:600;font-size:12.5px}
+.hint .x{border:0;background:none;color:var(--ink-3);font-weight:400}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:9px;padding:9px 16px;font-size:13.5px}
+.prog-h{margin-top:16px}
+.pe{font-size:14px;color:var(--ink-2)}.pe small{color:var(--ink-3)}
+/* check box */
+.box{padding:22px 26px}
+.eb{font-size:12.5px;color:var(--ink-3)}
+.box h3{margin:2px 0 14px;font-size:20px}
+.in{border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3)}
+.rw{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px}
+.ch{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;color:var(--ink-2)}
+.ch.on{border-color:var(--ink-2);color:var(--ink);font-weight:600}
+.sv{margin-left:auto;background:var(--navy);color:#fff;border-radius:8px;padding:8px 16px;font-weight:600}
+@media (max-width:700px){.row{grid-template-columns:20px minmax(0,1fr) 28px}.wk,.st{display:none}.open{padding-left:18px}.sp{grid-template-columns:20px minmax(0,1fr);}.sp .grip,.sp .chip{display:none}}
+</style>
+<div class="pg">
+  <div class="vs" role="group" aria-label="Where">
+    <button type="button" data-w="open" aria-pressed="true">The opened task</button>
+    <button type="button" data-w="list" aria-pressed="false">The row in the list</button>
+    <button type="button" data-w="check" aria-pressed="false">The weekly check</button>
+  </div>
+  <div class="note" id="note"></div>
+  <div id="stage"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+const S={w:'open',st:'ns',hint:true,steps:[
+ {n:'Collect last year\'s plan and the BU list from Finance',wk:'W4 Oct',who:'Mohamed',d:false},
+ {n:'Draft one key measure per business unit',wk:'This week',who:'Mohamed',d:false},
+ {n:'Review the draft with Islam',wk:'Next week',who:'Islam',d:false},
+ {n:'Agree the measures with each BU head',wk:'W3 Nov',who:'',d:false},
+ {n:'Load the agreed measures into Strategy',wk:'',who:'',d:false}]};
+const ST={ns:['Not started','ns'],ip:['In progress',''],dn:['Done','dn']};
+const done=()=>S.steps.filter(s=>s.d).length;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2400)}
+function steps(compact){
+ return '<ul class="steps">'+S.steps.map((s,i)=>'<li class="sp'+(s.d?' done':'')+'"><span class="grip" aria-hidden="true">⋮⋮</span><button type="button" class="cb" data-i="'+i+'" aria-label="'+(s.d?'Untick':'Tick')+' '+s.n.replace(/"/g,'')+'">'+(s.d?'✓':'')+'</button><span class="nm">'+s.n+'</span>'+
+  (compact?'':'<span class="chip'+(s.wk?' set':'')+(s.wk==='W4 Oct'&&!s.d?' late':'')+'">'+(s.wk||'+ week')+'</span><span class="chip'+(s.who?' set':'')+'">'+(s.who||'+ owner')+'</span>')+
+  (compact&&s.wk?'<span class="chip set">'+s.wk+'</span>':'')+(compact?'<span></span>':'')+'</li>').join('')+'</ul>'+
+  '<div class="addst"><span></span><span>+</span><input id="add" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'+
+  (done()===S.steps.length&&S.st!=='dn'&&S.hint?'<div class="hint">All steps are ticked. Mark the task Done? <button type="button" data-done>Mark Done</button><button type="button" class="x" data-nohint>Not yet</button></div>':'');
+}
+function row(on){
+ const n=S.steps.length,d=done();
+ return '<div class="row'+(on?' on':'')+'"><span class="tick"></span><div class="tn"><span class="t">Develop a key measure per business unit</span><div class="meta"><span>Functions</span><i class="sd"></i><span class="stp"><i><b style="width:'+Math.round(100*d/n)+'%"></b></i>'+d+' of '+n+' steps</span><i class="sd"></i><span>Agreed the BU list with Finance; templates next</span></div></div><span class="wk">This week</span><span class="st"><span class="dot '+ST[S.st][1]+'"></span>'+ST[S.st][0]+'</span><span class="kb">⋯</span></div>';
+}
+const V={
+ open:{note:'<p><b>The opened task.</b> <b>Steps</b> sit above Progress: tick one when it is done; type a line and Enter to add one; press a step\'s words to rename it; drag the handle to reorder; a step\'s <b>week</b> and <b>owner</b> are optional (dashed until set), and a step\'s week that has passed undone reads red. <b>Tick the first step</b> on a task Not started and it moves to In progress by itself. <b>Tick the last one</b> and it asks whether to mark the task Done — it never does so on its own.</p>',
+  html:()=>'<div class="card"><div class="hd"><span class="av">MO</span><h2>Mohamed</h2><span class="m">3 open</span></div>'+row(true)+
+   '<div class="open"><div class="tabs"><span class="on">Progress 2</span><span>Description</span><span>History 5</span></div>'+
+   '<div class="sec-h">Steps <span class="c">'+done()+' of '+S.steps.length+'</span></div>'+steps(false)+
+   '<div class="sec-h prog-h">Progress</div><div class="in">What happened this week?</div><p class="pe">Agreed the BU list with Finance; templates next. <small>Mohamed · last week</small></p></div></div>'},
+ list:{note:'<p><b>The row in the list.</b> The grey line under the name says how far the steps have got — a thin bar and <b>2 of 5 steps</b> — next to the topic and the latest note. A task with no steps shows nothing extra. Steps never become rows of their own: the Tracker, My tasks and Home stay lists of tasks.</p>',
+  html:()=>'<div class="card"><div class="hd"><span class="av">MO</span><h2>Mohamed</h2><span class="m">3 open</span></div>'+row(false)+
+   '<div class="row"><span class="tick"></span><div class="tn"><span class="t">Finance Adjust Project that is missing Milestones</span><div class="meta"><span>Functions</span><i class="sd"></i><span>Got the revenue drivers from Hussain</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span><span class="kb">⋯</span></div></div>'},
+ check:{note:'<p><b>The weekly check.</b> The box shows the steps between the update and the timeline, compact (the week only where set), so the meeting can tick what was finished as it talks. Ticking here is the same tick as in the task.</p>',
+  html:()=>'<div class="card box"><div class="eb">Functions · Mohamed · This week</div><h3>Develop a key measure per business unit</h3><div class="in">What happened this week?</div>'+
+   '<div class="rw"><span class="ch'+(S.st==='ns'?' on':'')+'"><span class="dot ns"></span>Not started</span><span class="ch'+(S.st==='ip'?' on':'')+'"><span class="dot"></span>In progress</span><span class="ch'+(S.st==='dn'?' on':'')+'"><span class="dot dn"></span>Done</span><span class="sv">Save and next</span></div>'+
+   '<div class="sec-h" style="margin-top:18px">Steps <span class="c">'+done()+' of '+S.steps.length+'</span></div>'+steps(true)+
+   '<div class="sec-h prog-h">Before this week</div><p class="pe">Agreed the BU list with Finance; templates next. <small>Mohamed · last week</small></p></div>'}};
+function draw(){
+ document.getElementById('stage').innerHTML=V[S.w].html();
+ document.getElementById('note').innerHTML=V[S.w].note;
+ document.querySelectorAll('[data-w]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.w===S.w)));
+}
+document.addEventListener('click',e=>{
+ const w=e.target.closest('[data-w]');if(w){S.w=w.dataset.w;draw();return}
+ const c=e.target.closest('.cb');if(c){const s=S.steps[+c.dataset.i];s.d=!s.d;
+  if(s.d&&S.st==='ns'){S.st='ip';toast('First step ticked — the task is now In progress')}
+  draw();return}
+ if(e.target.closest('[data-done]')){S.st='dn';toast('Task marked Done');draw();return}
+ if(e.target.closest('[data-nohint]')){S.hint=false;draw()}
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&e.target.id==='add'&&e.target.value.trim()){S.steps.push({n:e.target.value.trim(),wk:'',who:'',d:false});S.hint=true;draw();const a=document.getElementById('add');if(a)a.focus()}
+});
+draw();
+</script>

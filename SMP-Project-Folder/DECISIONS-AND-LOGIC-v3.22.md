@@ -71151,3 +71151,5 @@ Nothing it does is gone; it is quieter:
 **The fix**: in the meeting, where the two columns stand side by side (≥861px wide, ≥601px tall), the page is a column exactly `--winh` tall — the top bar, the said line, the pinned band and bar, then the meeting taking all that is left (flex: 1; its row `minmax(0, 1fr)`) — and the rail and the box are held to that row (`max-height: 100%`), each as tall as its words and scrolling inside itself only past that. **Nothing is measured.** The measured rule stays as the fallback where `:has` is unknown, now on `--winh` and with the measured start converted into the page's own pixels.
 
 **Checked**: `checks/tracker.mjs` **378 passed, 0 failed** — §736/§737, §738 and §740's checks rewritten to compare like with like (the meeting row's foot against the window, both on screen; the rail inside the row; the page not scrolling); **seen RED with `100dvh` put back** (the row ending at 627px of 800, 787 of 1000) — the gap Islam saw.
+
+**§741 MERGED TO `main`** 2026-11-03, Islam: *"merge"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)

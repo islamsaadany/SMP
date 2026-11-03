@@ -488,13 +488,51 @@ export const APP_JS = `(function () {
      stays open (tabOf), the add line keeps the cursor, and "Not yet" keeps
      the Done question folded for that task */
   var stepBack = null, notYet = new Set();
+  /* §744 A TICK WRITES INTO THIS WEEK'S BOX (Islam: "once you click it, it
+     should be added automatically to the what happened this week box as if
+     I'm writing something and the person can adjust before pressing
+     enter"): "Done: <step>" goes into the task's progress box, the cursor at
+     its end; several ticks join in one line; an untick takes its own words
+     back out while the box has not been typed in by hand. Nothing is saved
+     until Enter (or Save and next). The box keeps its words across the
+     redraw the tick brings (keep(), §657). */
+  var autoBox = {}, boxFocus = null;
+  function tickToBox(tid, name, on) {
+    var pn = progBox(tid); if (!pn || !name) return;
+    var a = autoBox[tid] || (autoBox[tid] = { names: [], edited: false });
+    if (pn.value && !a.names.length) a.edited = true;
+    if (on) {
+      if (!a.edited) { a.names.push(name); pn.value = "Done: " + a.names.join("; "); }
+      else pn.value = pn.value + (pn.value.trim() ? "; " : "") + "Done: " + name;
+      boxFocus = tid;
+    } else if (!a.edited) {
+      a.names = a.names.filter(function (x) { return x !== name; });
+      pn.value = a.names.length ? "Done: " + a.names.join("; ") : "";
+    }
+  }
+  document.addEventListener("input", function (e) {
+    var t = e.target; if (!t || !t.classList || !t.classList.contains("pnew")) return;
+    var tid = rowOf(t); if (tid) { var a = autoBox[tid] || (autoBox[tid] = { names: [], edited: false }); a.edited = true; }
+  });
   function stepsAfterSwap() {
     notYet.forEach(function (tid) { document.querySelectorAll('.open[data-id="' + tid + '"] .sdone').forEach(function (x) { x.hidden = true; }); });
+    /* §744: a box the meeting had folded behind "+ Add to this week" opens
+       when a tick has written into it, and the cursor goes to its end */
+    document.querySelectorAll("#body .mopen .pbox.mq[hidden]").forEach(function (bx) {
+      var pi = bx.querySelector(".pnew");
+      if (pi && pi.value) { bx.hidden = false; var ad = bx.closest(".mopen").querySelector("[data-act=madd]"); if (ad) ad.hidden = true; }
+    });
+    if (boxFocus) {
+      var fb = progBox(boxFocus); boxFocus = null;
+      if (fb) { fb.focus(); fb.setSelectionRange(fb.value.length, fb.value.length); }
+      stepBack = null;
+      return;
+    }
     if (!stepBack) return;
     var o = document.querySelector('#body .open[data-id="' + stepBack + '"]');
     stepBack = null;
     var ni = o && o.querySelector(".snew");
-    if (ni && (o.getAttribute("data-tab") === "s" || o.classList.contains("mopen"))) ni.focus();
+    if (ni) ni.focus();
   }
   function stepRename(el, tid) {
     if (el.querySelector("input")) return;
@@ -529,6 +567,7 @@ export const APP_JS = `(function () {
   function addProgress(t) {
     var v = t.value.replace(/\\s+/g, " ").trim(), id = rowOf(t);
     if (!v || !id) { t.focus(); return; }
+    delete autoBox[id];
     var k = keep();
     k.prog = k.prog.filter(function (st) { return st.id !== id; });
     k.focus = { prog: id };
@@ -877,7 +916,11 @@ export const APP_JS = `(function () {
       var sl = b.closest(".sline"), sid = sl && sl.getAttribute("data-sid");
       if (!sid) return;
       stepBack = id;
-      if (act === "step-tick") post({ act: "step-tick", stepId: sid, done: b.getAttribute("aria-pressed") !== "true" });
+      if (act === "step-tick") {
+        var on7 = b.getAttribute("aria-pressed") !== "true", nm7 = sl.querySelector(".snm");
+        tickToBox(id, nm7 ? nm7.textContent : "", on7);
+        post({ act: "step-tick", stepId: sid, done: on7 });
+      }
       else if (act === "step-move") post({ act: "step-move", stepId: sid, dir: Number(b.getAttribute("data-dir")) || 1 });
       else if (act === "step-delete") post({ act: "step-delete", stepId: sid });
       else post({ act: "step-due", stepId: sid, due: b.getAttribute("data-day") || null });
@@ -888,6 +931,10 @@ export const APP_JS = `(function () {
       if (wl && on8) { wl.hidden = false; b.setAttribute("aria-expanded", "true"); }
     } else if (act === "step-rename") {
       stepRename(b, id);
+    } else if (act === "sadd-open") {
+      /* §744: the weekly check's add line, behind its link */
+      var sa = b.closest(".msteps, .open"), sx = sa && sa.querySelector(".sadd");
+      if (sx) { sx.hidden = false; b.hidden = true; var si2 = sx.querySelector(".snew"); if (si2) si2.focus(); }
     } else if (act === "steps-done") {
       post({ act: "status", id: id, status: "done" });
     } else if (act === "steps-notyet") {

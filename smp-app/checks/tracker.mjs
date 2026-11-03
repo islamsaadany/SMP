@@ -500,7 +500,7 @@ check("the opened task has three tabs — Progress (open first), Description, Hi
 check("...Description holds the same stored text in a box under its own tab, and the word Notes is gone",
   /<div class="tp tp-d"><textarea class="desc" data-act="notes" aria-label="Description"/.test(openPart) && !/>Notes</.test(openPart));
 check("...and Progress carries ONE box with Add beside it, the entries right under it",
-  count(openPart, /class="pnew" data-act="progress-new"/g) === 1 && /<div class="tp tp-p"><div class="pbox">[\s\S]*?data-act="progress-go"[^>]*>Add<\/button><\/div><ul class="prog">/.test(openPart));
+  count(openPart, /class="pnew" data-act="progress-new"/g) === 1 && /<div class="tp tp-p">(?:<div class="psec">[\s\S]*?<\/div><div class="psh">This week<\/div>)?<div class="pbox">[\s\S]*?data-act="progress-go"[^>]*>Add<\/button><\/div><ul class="prog">/.test(openPart));
 check("the entries read newest first, the week in front — This week in the alarm's colour, then Last week — the writer's name under each, and the edited one says so",
   /<li class="pe" data-pid="e2"><span class="wk now" title="[^"]*">This week<\/span>[\s\S]*?Finance sent[\s\S]*?<span>Noran<\/span>[\s\S]*?<li class="pe" data-pid="e1"><span class="wk" title="[^"]*">Last week<\/span>[\s\S]*?Template agreed[\s\S]*?<span>Islam<\/span><span class="ed">edited<\/span>/.test(openPart),
   (openPart.match(/<li class="pe"[\s\S]*?<\/li>/g) || []).join("\n").slice(0, 600));
@@ -1569,24 +1569,34 @@ try {
        ticking the last asks whether to mark the task Done, "Not yet" folding
        the question. Read back from Postgres (§96). */
     await pg.goto(base + "?view=all&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
-    await pg.locator(".open [data-act=ptab][data-tab=s]").click();
     await pg.locator(".open .snew").fill("Step one"); await pg.locator(".open .snew").press("Enter"); await settle();
     const tab743 = await pg.evaluate(() => { const o = document.querySelector(".open"); return { tab: o && o.getAttribute("data-tab"), focus: !!document.activeElement && document.activeElement.classList.contains("snew") }; });
     await pg.locator(".open .snew").fill("Step two"); await pg.locator(".open .snew").press("Enter"); await settle();
     const sDb = await asTenant(A, (c) => stepsOf(c, mTask));
     await pg.locator(".open .sline >> nth=0").locator(".scb").click(); await settle();
     const rowSteps = ((await pg.locator('.row[data-id="' + mTask + '"] .stc').textContent().catch(() => "")) || "").trim();
+    /* §744: the tick wrote "Done: Step one" into this week's box, the cursor in it, nothing saved */
+    const box744 = await pg.evaluate(() => { const b = document.querySelector(".open .pnew"); return b ? { v: b.value, focus: document.activeElement === b } : null; });
+    const saved744 = (await asTenant(A, (c) => progressOf(c, mTask))).some((x) => /^Done: Step one/.test(x.body));
     if (process.env.SMP_SHOT4) await pg.screenshot({ path: process.env.SMP_SHOT4 + "-tab.png" });
-    check("the opened task's Steps tab takes steps with Enter — the tab stays open, the cursor in the line — and a tick shows on the row as 1 of 2 steps (§743)",
-      sDb.map((x) => x.title).join("|") === "Step one|Step two" && tab743.tab === "s" && tab743.focus && rowSteps === "1 of 2 steps" && (await asTenant(A, (c) => stepsOf(c, mTask)))[0].done,
+    check("the opened task's Progress takes steps with Enter, above this week's box — the cursor stays in the line — and a tick shows on the row as 1 of 2 steps (§743, §744)",
+      sDb.map((x) => x.title).join("|") === "Step one|Step two" && tab743.tab === "p" && tab743.focus && rowSteps === "1 of 2 steps" && (await asTenant(A, (c) => stepsOf(c, mTask)))[0].done,
       JSON.stringify({ tab743, steps: sDb.map((x) => x.title), rowSteps }));
+    check("...and the tick wrote \"Done: Step one\" into this week's box, the cursor at its end, nothing saved until Enter (§744)",
+      !!box744 && box744.v === "Done: Step one" && box744.focus && !saved744, JSON.stringify({ box744, saved744 }));
     await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
     const inBox = await pg.locator(".mopen .msteps .sline").count();
     await pg.locator(".mopen .msteps .sline >> nth=1").locator(".scb").click(); await settle();
     const ask743 = await pg.locator(".mopen .sdone").isVisible().catch(() => false);
+    /* §744: in the meeting this week's box was folded behind "+ Add to this
+       week" (notes already written); the tick opened it with its words */
+    const mbox744 = await pg.evaluate(() => { const b = document.querySelector(".mopen .pnew"), bx = b && b.closest(".pbox"); return b ? { v: b.value, shown: !!bx && !bx.hidden } : null; });
+    const links744 = await pg.evaluate(() => ({ add: !!document.querySelector(".mopen .slinks [data-act=sadd-open]"), edit: !!document.querySelector(".mopen .slinks a[href*='open=']"), addLine: !!document.querySelector(".mopen .sadd:not([hidden])"), rename: !!document.querySelector(".mopen [data-act=step-rename]"), week: !!document.querySelector(".mopen [data-act=step-week]") }));
     if (process.env.SMP_SHOT4) await pg.screenshot({ path: process.env.SMP_SHOT4 + "-check.png" });
     await pg.locator(".mopen [data-act=steps-notyet]").click().catch(() => {});
     const folded743 = !(await pg.locator(".mopen .sdone").isVisible().catch(() => false));
+    check("...in the weekly check the tick opens this week's box with \"Done: Step two\" in it; the steps are for the review — the add line behind + Add a step, Edit steps to the task, no renaming or weeks here (§744)",
+      !!mbox744 && mbox744.v === "Done: Step two" && mbox744.shown && links744.add && links744.edit && !links744.addLine && !links744.rename && !links744.week, JSON.stringify({ mbox744, links744 }));
     check("...in the weekly check the box lists the steps; ticking the last asks whether to mark the task Done, and Not yet folds the question (§743)",
       inBox === 2 && ask743 && folded743 && (await asTenant(A, (c) => stepsOf(c, mTask))).every((x) => x.done) && (await asTenant(A, (c) => oneAction(c, mTask))).status !== "done",
       JSON.stringify({ inBox, ask743, folded743 }));

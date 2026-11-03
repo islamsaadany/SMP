@@ -635,8 +635,11 @@ const LOOK = `
 .swl button:hover{background:var(--surface-2)}
 .swl button.on{font-weight:700}
 .swl small{margin-left:auto;color:var(--ink-3);font-size:12px}
-.stools{display:none;gap:2px;flex:none}
-.sline:hover .stools,.sline:focus-within .stools{display:inline-flex}
+/* §744: the order and remove buttons keep their room and only fade in, so
+   nothing moves under the pointer on its way to the week */
+.stools{display:inline-flex;gap:2px;flex:none;opacity:0;transition:opacity .12s}
+.sline:hover .stools,.sline:focus-within .stools{opacity:1}
+@media (hover:none){.stools{opacity:1}}
 .stools button{border:0;background:none;width:24px;height:24px;border-radius:6px;color:var(--ink-3);cursor:pointer;font-size:13px}
 .stools button:hover:not(:disabled){background:var(--line-2);color:var(--ink)}
 .stools button:disabled{opacity:.35;cursor:default}
@@ -647,6 +650,14 @@ const LOOK = `
 .sadd input:focus{border-bottom-color:var(--carry)}
 .open .sadd input.snew{border:0;border-bottom:1px dashed var(--line);border-radius:0;box-shadow:none;background:none;padding:3px 0;height:auto}
 .open .sadd input.snew:focus{border-bottom:1px solid var(--carry);outline:none}
+.slinks{display:flex;gap:16px;align-items:center;padding:4px 6px 0}
+.slinks button,.slinks a{border:0;background:none;padding:0;font:400 13px/1.4 var(--font);color:var(--carry);cursor:pointer;text-decoration:none}
+.slinks a{color:var(--ink-3)}
+.slinks button:hover,.slinks a:hover{text-decoration:underline;text-underline-offset:2px}
+.psec{margin:0 0 14px}
+.psh{font:600 12px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:2px 0 6px}
+.psh .c{font-weight:500;letter-spacing:0;text-transform:none}
+.sopt{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
 .sdone{margin-top:10px;padding:9px 12px;border-radius:9px;background:var(--done-bg);color:var(--good);font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .sdone .go{border:1px solid var(--good);background:var(--surface);color:var(--good);border-radius:7px;padding:3px 10px;font:600 12.5px/1.2 var(--font);cursor:pointer}
 .sdone .go.quiet{border:0;background:none;color:var(--ink-3);font-weight:400}
@@ -1435,8 +1446,7 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
   const n = (k: number) => k ? ' <span class="n">' + k + "</span>" : "";
   const tabs = '<div class="ptabs" role="tablist">' +
     '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="p" aria-selected="true">Progress' + n(L.progress.length) + "</button>" +
-    '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="s" aria-selected="false">Steps' + stepsTabCount(a, L) + "</button>" +
-    '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="d" aria-selected="false">Description</button>' +
+        '<button type="button" role="tab" class="ptab" data-act="ptab" data-tab="d" aria-selected="false">Description</button>' +
     '<button type="button" role="tab" class="ptab histlink" data-act="hist" data-tab="h" aria-selected="false" aria-expanded="false">History' + n(L.events.length) + "</button>" +
     '<span class="sp"></span>' +
     (live ? '<span class="acts"><button type="button" class="danger" data-act="delete-ask">Delete</button>' +
@@ -1444,11 +1454,19 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
       '<button type="button" class="go danger" data-act="delete">Delete it</button></span></span>' : "") + "</div>";
   /* anybody past the gate writes progress (§657); somebody the register has
      not placed yet has no name to write it under (§313.32) */
-  const prog = '<div class="tp tp-p">' + (who.personKey ? progressBox(a, "What happened this week?") : "") + progressList(L, who, today) + "</div>";
+  /* §744 (Islam: "the view of the steps over the progress in one place is
+     better … when I click on the steps the note is added to the progress
+     without opening another thing, and seeing previous progress in the same
+     time is good"): Progress holds the steps first, then this week's box,
+     then the entries — no Steps tab of its own */
+  const stepsHere = live || stepCount(a, L)
+    ? '<div class="psec"><div class="psh">Steps' + (stepCount(a, L) ? ' <span class="c">' + stepsOfTask(a, L).filter((x) => x.done).length + " of " + stepCount(a, L) + "</span>" : ' <span class="c">optional</span>') + "</div>" + stepsBlock(a, L, live, today, false) + "</div>"
+    : "";
+  const prog = '<div class="tp tp-p">' + stepsHere + (stepsHere ? '<div class="psh">This week</div>' : "") + (who.personKey ? progressBox(a, "What happened this week?") : "") + progressList(L, who, today) + "</div>";
   const desc = '<div class="tp tp-d">' + (live
     ? '<textarea class="desc" data-act="notes" aria-label="Description" maxlength="5000" rows="1" placeholder="What the task is. Click to write it.">' + esc(a.description) + "</textarea>"
     : '<div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>") + "</div>";
-  return tabs + prog + '<div class="tp tp-s">' + stepsBlock(a, L, live, today, false) + "</div>" + desc + '<ul class="hist" hidden>' + hist + "</ul>";
+  return tabs + prog + desc + '<ul class="hist" hidden>' + hist + "</ul>";
 }
 /* ══ STEPS (§743) ══════════════════════════════════════════════════════
    Islam: "how shall we add sub tasks for the task? … breaking it down would
@@ -1463,10 +1481,6 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
    list ASKS whether to mark the task Done — it never does so by itself. */
 function stepsOfTask(a: Action, L: Loaded): Step[] { return (L.stepsBy && L.stepsBy.get(a.id)) || []; }
 function stepCount(a: Action, L: Loaded): number { return stepsOfTask(a, L).length; }
-function stepsTabCount(a: Action, L: Loaded): string {
-  const all = stepsOfTask(a, L);
-  return all.length ? ' <span class="n">' + all.filter((x) => x.done).length + " of " + all.length + "</span>" : "";
-}
 /* the row's quiet line: a thin bar and "2 of 5 steps"; nothing for a task without steps */
 function stepsMeta(a: Action, L: Loaded, afterTopic: boolean): string {
   const all = stepsOfTask(a, L); if (!all.length) return "";
@@ -1481,7 +1495,7 @@ function stepsBlock(a: Action, L: Loaded, live: boolean, today: string, compact:
   const lis = all.map((st, i) => {
     const late = !st.done && !!st.due && st.due < thisWk;
     const wk = st.due ? weekWord(st.due, today) : "";
-    const week = live
+    const week = live && !compact
       ? '<span class="swk"><button type="button" class="chip' + (st.due ? " set" : "") + (late ? " late" : "") + '" data-act="step-week" aria-haspopup="listbox" aria-expanded="false">' + (wk ? esc(wk) : "+ week") + "</button>" +
         '<span class="swl" role="listbox" hidden>' + weekOptions(today).map((w) => '<button type="button" role="option" data-act="step-due" data-day="' + w.to + '"' + (st.due && sameWeek(st.due, w.to) ? ' class="on"' : "") + "><b>" + esc(w.word) + "</b><small>" + esc(w.days) + "</small></button>").join("") +
         '<button type="button" role="option" data-act="step-due" data-day="">No week</button></span></span>'
@@ -1493,14 +1507,21 @@ function stepsBlock(a: Action, L: Loaded, live: boolean, today: string, compact:
       : "";
     return '<li class="sline' + (st.done ? " done" : "") + '" data-sid="' + esc(st.id) + '">' +
       '<button type="button" class="scb" data-act="step-tick" aria-pressed="' + st.done + '" aria-label="' + (st.done ? "Untick" : "Tick") + ": " + esc(st.title) + '"' + (live ? "" : " disabled") + ">" + (st.done ? "&#10003;" : "") + "</button>" +
-      '<span class="snm"' + (live ? ' data-act="step-rename" role="button" tabindex="0" title="Press to rename"' : "") + ">" + esc(st.title) + "</span>" + week + tools + "</li>";
+      '<span class="snm"' + (live && !compact ? ' data-act="step-rename" role="button" tabindex="0" title="Press to rename"' : "") + ">" + esc(st.title) + "</span>" + week + tools + "</li>";
   }).join("");
-  const add = live ? '<div class="sadd"><span aria-hidden="true">+</span><input class="snew" data-act="step-new" placeholder="Add a step and press Enter" aria-label="Add a step to ' + esc(a.title) + '" maxlength="300"></div>' : "";
+  /* §744: in the weekly check the steps are for the review — tick, and add
+     the odd step behind a link; renaming, weeks, order and removal are
+     planning, in the opened task ("Edit steps") */
+  const add = live ? '<div class="sadd"' + (compact ? " hidden" : "") + '><span aria-hidden="true">+</span><input class="snew" data-act="step-new" placeholder="Add a step and press Enter" aria-label="Add a step to ' + esc(a.title) + '" maxlength="300"></div>' : "";
+  const links = compact && live
+    ? '<div class="slinks"><button type="button" data-act="sadd-open">' + (all.length ? "+ Add a step" : "+ Add steps") + "</button>" +
+      (all.length ? '<a href="?view=all&amp;open=' + encodeURIComponent(a.id) + '">Edit steps &rsaquo;</a>' : "") + "</div>"
+    : "";
   const ask = live && all.length && d === all.length && a.status !== "done"
     ? '<div class="sdone">All steps are ticked. Mark the task Done? <button type="button" class="go" data-act="steps-done">Mark Done</button><button type="button" class="go quiet" data-act="steps-notyet">Not yet</button></div>' : "";
-  const none = !all.length && !live ? '<p class="mnil">No steps.</p>' : "";
-  return (compact ? '<div class="msh">Steps' + (all.length ? ' <span class="c">' + d + " of " + all.length + "</span>" : "") + "</div>" : "") +
-    (all.length ? '<ul class="stl">' + lis + "</ul>" : "") + none + add + ask;
+  const none = !all.length ? (live && !compact ? '<p class="sopt">Break the task into steps if it helps plan it.</p>' : "") : "";
+  return (compact && all.length ? '<div class="msh">Steps <span class="c">' + d + " of " + all.length + "</span></div>" : "") +
+    (all.length ? '<ul class="stl">' + lis + "</ul>" : "") + none + add + links + ask;
 }
 /* THE OPENED TASK, TABBED (2026-11-02, §706; option D of
    design-mockups/internal-tracker/2026-11-02_opened-task-options.html).

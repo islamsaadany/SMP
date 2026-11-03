@@ -3704,7 +3704,8 @@ await section("4 · Forefront's own pages", async () => {
       await page.fill("[data-mwadd]", "MW added by the line");
       await page.press("[data-mwadd]", "Enter");
       await page.waitForFunction(() => Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), null, { timeout: 8000 }).catch(() => {});
-      const line744 = await page.evaluate(() => ({ row: Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), focus: document.activeElement && document.activeElement.hasAttribute("data-mwadd") }));
+      await page.waitForFunction(() => document.activeElement && document.activeElement.hasAttribute("data-mwadd"), null, { timeout: 3000 }).catch(() => {});
+      const line744 = await page.evaluate(() => ({ row: Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), focus: document.activeElement && document.activeElement.hasAttribute("data-mwadd"), on: document.activeElement ? document.activeElement.tagName + "." + document.activeElement.className : "" }));
       const db744 = await stored744("MW added by the line");
       check(line744.row && line744.focus && !!db744 && !!db744.due && !!db744.owner_key,
         "\u2026Enter stores it in that client's Tracker as one's own, this week, the row comes in and the line is ready for the next (\u00a7744)", JSON.stringify({ line744, db744 }));

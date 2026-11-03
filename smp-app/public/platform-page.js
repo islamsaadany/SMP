@@ -3562,8 +3562,15 @@
   function mwAddFocus() {
     if (!WORK.refocusAdd) return;
     WORK.refocusAdd = false;
-    var i = document.querySelector("[data-mwadd]");
-    if (i) i.focus();
+    /* the tab may be drawn aside and swapped in a moment later (§400.2):
+       the cursor goes in once the line is on the page */
+    var n = 0;
+    var put = function () {
+      var i = document.querySelector("[data-mwadd]");
+      if (i && i.isConnected) { i.focus(); return; }
+      if (++n < 40) setTimeout(put, 50);
+    };
+    put();
   }
   function hoLink(words, press) {
     var a = el("button", "holink", words);

@@ -109,6 +109,28 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .tile{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--gold-bg);color:var(--gold);font-size:14px}
 .views{display:flex;gap:2px;margin-left:6px}.views span{padding:4px 10px;border-radius:7px;color:var(--ink-3);font-size:13.5px}.views span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
 .mrow{display:grid;grid-template-columns:22px minmax(0,1fr) 124px 28px;gap:2px 14px;align-items:center;padding:10px 16px;border-top:1px solid var(--line-2)}
+.offer{margin:8px 0 2px;padding:8px 12px;border-radius:9px;background:var(--blue-bg);color:var(--ink-2);font-size:13px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.offer b{color:var(--ink);font-weight:600}
+.offer .go{border:1px solid var(--blue);background:var(--surface);color:var(--blue);border-radius:7px;padding:2px 10px;font-weight:600;font-size:12.5px}
+.offer .go.quiet{border:0;background:none;color:var(--ink-3);font-weight:400}
+.opt{margin:4px 0 2px;font-size:13px;color:var(--ink-3)}
+.addsteps{display:block;margin-top:14px;border:0;background:none;padding:0;color:var(--blue);font-size:13px}
+.in2{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--surface)}
+.in2:focus-within{border-color:var(--blue)}
+.in2 input{flex:1;min-width:0;border:0;outline:none;background:none;padding:10px 0;font-size:15px}
+.in2 .ek{font-size:11.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:3px 6px}
+.wrote{border:1px solid var(--line-2);background:var(--ground);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.wrote .h{font-size:12px;font-weight:600;color:var(--blue)}
+.wrote .bd{font-size:14.5px;margin-top:2px}.wrote .by{font-size:12.5px;color:var(--ink-3)}
+.wrote .madd{border:0;background:none;padding:0;margin-top:6px;font-size:12.5px;color:var(--blue)}
+.tlq{list-style:none;margin:12px 0 0 6px;padding:0 0 0 18px;border-left:1px solid var(--line-2);display:grid;gap:10px}
+.tlq li{position:relative}
+.tlq li::before{content:"";position:absolute;left:-22px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.tlq li.now::before{background:var(--blue)}
+.tlq .bd{font-size:14.5px}.tlq .sub{font-size:12.5px;color:var(--ink-3)}.tlq li.now .sub b{color:var(--blue)}
+.pm{border:0;background:none;padding:0;margin:8px 0 0 24px;font-size:12.5px;color:var(--blue)}
+.mm{display:flex;gap:14px;margin-top:16px;font-size:13px;color:var(--ink-3)}
+.ft{display:flex;margin-top:16px;padding-top:12px;border-top:1px solid var(--line-2);color:var(--ink-3);font-weight:500}.ft .r{margin-left:auto}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:9px;padding:9px 16px;font-size:13.5px}
 @media (max-width:760px){.row{grid-template-columns:20px minmax(0,1fr) 28px}.wk,.st{display:none}.open{padding-left:16px}.meet{grid-template-columns:1fr}.mrow{grid-template-columns:22px minmax(0,1fr) 28px}.mrow .st{display:none}}
 </style>
@@ -120,13 +142,17 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
     <button type="button" data-w="home" aria-pressed="false">Home</button>
   </div>
   <div class="note" id="note"></div>
-  <button type="button" class="reset" id="reset">Start over</button>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="reset" id="reset">Start over</button><button type="button" class="reset" id="nosteps">A task with no steps</button></div>
   <div id="stage"></div>
 </div>
 <div class="toast" id="toast" hidden></div>
 <script>
 const TODAY_WEEKS=[['This week','1 – 5 Nov'],['Next week','8 – 12 Nov'],['W3 Nov','15 – 19 Nov'],['W4 Nov','22 – 26 Nov'],['W1 Dec','29 Nov – 3 Dec']];
-const fresh=()=>({w:'tracker',tab:'s',st:'ns',notYet:false,open:-1,ren:-1,steps:[
+const fresh=()=>({w:'tracker',tab:'s',st:'ns',notYet:false,open:-1,ren:-1,offer:-1,box:'',addOpen:false,more:false,
+ now:[],
+ before:[['Agreed the BU list with Finance; templates next.','Mohamed','last week'],['Templates drafted for Retail and Wholesale; two units still to send their data.','Mohamed','W4 Oct'],
+  ['Met the BU heads one by one; most agree on one main measure each.','Mohamed','W3 Oct'],['Shortlist of measures shared with Islam for a first look.','Mohamed','W2 Oct']],
+ steps:[
  {n:'Collect last year\'s plan and the BU list from Finance',wk:'Last week',d:false},
  {n:'Draft one key measure per business unit',wk:'This week',d:false},
  {n:'Review the draft with Islam',wk:'Next week',d:false},
@@ -148,23 +174,24 @@ function stepsHtml(compact){
    (compact?'':'<span class="stools"><button type="button" data-mv="'+i+'" data-dir="-1" aria-label="Move up"'+(i===0?' disabled':'')+'>↑</button><button type="button" data-mv="'+i+'" data-dir="1" aria-label="Move down"'+(i===n-1?' disabled':'')+'>↓</button><button type="button" data-del="'+i+'" aria-label="Remove the step">×</button></span>')+'</li>';
  }).join('');
  const ask=n&&done()===n&&S.st!=='dn'&&!S.notYet?'<div class="sdone">All steps are ticked. Mark the task Done? <button type="button" class="go" data-markdone>Mark Done</button><button type="button" class="go quiet" data-notyet>Not yet</button></div>':'';
- return (n?'<ul class="stl">'+lis+'</ul>':'')+'<div class="sadd"><span>+</span><input id="addstep" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'+ask;
+ return (n?'<ul class="stl">'+lis+'</ul>':(compact?'':'<p class="opt">Break the task into steps if it helps plan it — optional.</p>'))+offerHtml()+'<div class="sadd"><span>+</span><input id="addstep" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'+ask;
 }
 const TITLE='Develop a key measure per business unit';
 function trackerRow(on){return '<div class="row'+(on?' on':'')+'"><span class="tick'+(S.st==='dn'?' dn':'')+'"></span><div class="tn"><button type="button" class="t">'+TITLE+'</button><div class="meta"><span>Functions</span>'+(S.steps.length?'<i class="sd"></i>'+stc():'')+'<i class="sd"></i><span class="up">Agreed the BU list with Finance; templates next</span></div></div><span class="wk">This week</span><span class="st"><span class="dot '+ST[S.st][1]+'"></span>'+ST[S.st][0]+'</span><span class="kb">⋯</span></div>'}
 function mwRow(home){return '<div class="mrow"><span class="tick'+(S.st==='dn'?' dn':'')+'"></span><div class="tn"><span class="t" style="font-size:'+(home?14:15)+'px">'+TITLE+'</span><div class="meta"><span>Raya Trade</span>'+(S.steps.length?'<i class="sd"></i>'+stc():'')+'<i class="sd"></i><span class="up">Agreed the BU list with Finance; templates next</span></div></div><span class="st"><span class="dot '+ST[S.st][1]+'"></span>'+ST[S.st][0]+'</span><span class="kb">⋯</span></div>'}
 const V={
- tracker:{note:'<p><b>The Tracker, the opened task.</b> Its tabs read Progress · <b>Steps</b> (ticked of all) · Description · History. Tick a step; type a line and press Enter to add one; press a step\'s words to rename it (Enter keeps it, Escape puts it back); press its week to choose one (a week passed undone reads red); point at a step for ↑ ↓ and ×. The row above says how far the steps have got. <b>Try:</b> tick the first step and the task moves to In progress; tick them all and it asks whether to mark it Done.</p>',
+ tracker:{note:'<p><b>Ticking a step offers it to this week\'s update</b> (Add · Edit · No) — here too; Edit takes you to the Progress tab with the words in the box. Steps are optional: a task without any says so on its Steps tab.</p><p><b>The Tracker, the opened task.</b> Its tabs read Progress · <b>Steps</b> (ticked of all) · Description · History. Tick a step; type a line and press Enter to add one; press a step\'s words to rename it (Enter keeps it, Escape puts it back); press its week to choose one (a week passed undone reads red); point at a step for ↑ ↓ and ×. The row above says how far the steps have got. <b>Try:</b> tick the first step and the task moves to In progress; tick them all and it asks whether to mark it Done.</p>',
   html:()=>'<div class="card"><div class="hd"><span class="av">MO</span><h2>Mohamed</h2><span class="m">3 open</span></div>'+trackerRow(true)+
-   '<div class="open"><div class="tabs"><button type="button" data-tab="p" class="'+(S.tab==='p'?'on':'')+'">Progress<i>3</i></button><button type="button" data-tab="s" class="'+(S.tab==='s'?'on':'')+'">Steps'+(S.steps.length?'<i>'+done()+' of '+S.steps.length+'</i>':'')+'</button><button type="button" data-tab="d">Description</button><button type="button" data-tab="h">History<i>5</i></button></div>'+
-   (S.tab==='s'?stepsHtml(false):S.tab==='p'?'<div class="in">What happened this week?</div><p class="pe">Agreed the BU list with Finance; templates next. <small>Mohamed · last week</small></p>':'<p class="pe">…</p>')+'</div>'+
+   '<div class="open"><div class="tabs"><button type="button" data-tab="p" class="'+(S.tab==='p'?'on':'')+'">Progress<i>'+(S.before.length+S.now.length)+'</i></button><button type="button" data-tab="s" class="'+(S.tab==='s'?'on':'')+'">Steps'+(S.steps.length?'<i>'+done()+' of '+S.steps.length+'</i>':'')+'</button><button type="button" data-tab="d">Description</button><button type="button" data-tab="h">History<i>5</i></button></div>'+
+   (S.tab==='s'?stepsHtml(false):S.tab==='p'?'<div class="in2"><input id="wkbox" placeholder="What happened this week?" value="'+esc(S.box)+'" aria-label="What happened this week"><span class="ek">Enter</span></div>'+(S.now.length?'<ul class="tlq">'+S.now.map(n=>'<li class="now"><div class="bd">'+esc(n)+'</div><div class="sub">Mohamed · <b>this week</b></div></li>').join('')+'</ul>':'')+timeline():'<p class="pe">…</p>')+'</div>'+
    '<div class="row"><span class="tick"></span><div class="tn"><span class="t">Finance Adjust Project that is missing Milestones</span><div class="meta"><span>Functions</span><i class="sd"></i><span class="up">Got the revenue drivers from Hussain</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span><span class="kb">⋯</span></div></div>'},
- check:{note:'<p><b>The Tracker, the weekly check.</b> The box lists the steps between the status row and the progress, with the add line, so the meeting ticks what was finished as it talks; ticking here is the same tick as in the task. (↑ ↓ and × stay in the opened task.)</p>',
+ check:{note:'<p><b>The Tracker, the weekly check</b> — the whole box, with this week\'s note (once written), the steps, and the timeline before this week (the latest two, the rest behind Show N earlier), so its real height shows. <b>Steps are optional:</b> a task without any shows only <b>+ Add steps</b> (try "A task with no steps"). <b>Tick a step</b> and the box offers it to this week\'s update: <b>Add</b> writes "Done: …" as this week\'s note, <b>Edit</b> puts it in the box to reword first, <b>No</b> lets it go.</p><p>The rest, as before: The box lists the steps between the status row and the progress, with the add line, so the meeting ticks what was finished as it talks; ticking here is the same tick as in the task. (↑ ↓ and × stay in the opened task.)</p>',
   html:()=>'<div class="meet"><div class="rail"><div class="rh">Functions<span>0 of 9</span></div><div class="it on"><i></i>'+TITLE+'</div><div class="it"><i></i>Finance Adjust Project that is missing…</div><div class="it"><i></i>Confirm IT Project updates with IT…</div><div class="it"><i></i>Transformation Project Refinement</div></div>'+
-   '<div class="card box"><div class="eb">Functions · Mohamed · This week</div><h3>'+TITLE+'</h3><div class="in">What happened this week?</div>'+
+   '<div class="card box"><div class="eb">Functions · Mohamed · This week</div><h3>'+TITLE+'</h3>'+wroteHtml()+boxHtml()+
    '<div class="rw">'+['ns','ip','dn'].map(k=>'<button type="button" class="ch'+(S.st===k?' on':'')+'" data-st="'+k+'"><span class="dot '+ST[k][1]+'"></span>'+ST[k][0]+'</button>').join('')+'<button type="button" class="sv">Save and next</button></div>'+
-   '<div class="msh">Steps'+(S.steps.length?' <span>'+done()+' of '+S.steps.length+'</span>':'')+'</div>'+stepsHtml(true)+
-   '<div class="msh">Before this week</div><p class="pe">Agreed the BU list with Finance; templates next. <small>Mohamed · last week</small></p></div></div>'},
+   (S.steps.length||S.stepsOpen?'<div class="msh">Steps'+(S.steps.length?' <span>'+done()+' of '+S.steps.length+'</span>':'')+'</div>'+stepsHtml(true):'<button type="button" class="addsteps" data-addsteps>+ Add steps</button>')+
+   '<div class="msh">'+(S.now.length?'Before this week':'Progress so far')+'</div>'+timeline()+
+   '<div class="mm"><span>Description</span><span>History (5)</span><span>⋯</span></div><div class="ft"><span>← Previous</span><span class="r">Skip →</span></div></div></div>'},
  mytasks:{note:'<p><b>My tasks.</b> The row says how far the steps have got — the thin bar and <b>N of M steps</b> — between the client and the latest note; a task without steps shows nothing extra. Tick steps in the other views and come back.</p>',
   html:()=>'<div class="card"><div class="hochd"><h2 class="ser" style="margin:0">Open tasks</h2><span class="cnt">2</span><div class="views"><span class="on">By date</span><span>By client</span></div></div><div class="sh">This week <span>2 open</span></div>'+mwRow(false)+
    '<div class="mrow"><span class="tick"></span><div class="tn"><span class="t">Finance Adjust Project that is missing Milestones</span><div class="meta"><span>Raya Trade</span><i class="sd"></i><span class="up">Got the revenue drivers from Hussain</span></div></div><span class="st"><span class="dot"></span>In progress</span><span class="kb">⋯</span></div></div>'},
@@ -177,16 +204,41 @@ function draw(){
  document.querySelectorAll('[data-w]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.w===S.w)));
  const r=document.getElementById('renbox');if(r){r.focus();r.select()}
 }
-function tick(i){const s=S.steps[i];s.d=!s.d;if(s.d&&S.st==='ns'){S.st='ip';toast('First step ticked — the task is now In progress')}if(!s.d)S.notYet=false;draw()}
+function tick(i){const s=S.steps[i];s.d=!s.d;if(s.d&&S.st==='ns'){S.st='ip';toast('First step ticked — the task is now In progress')}if(!s.d){S.notYet=false;if(S.offer===i)S.offer=-1}else S.offer=i;draw()}
+/* a ticked step offered to this week's update */
+function offerHtml(){
+ if(S.offer<0||!S.steps[S.offer])return '';
+ return '<div class="offer">Add <b>“Done: '+esc(S.steps[S.offer].n)+'”</b> to what happened this week? <button type="button" class="go" data-offer="add">Add</button><button type="button" class="go" data-offer="edit">Edit</button><button type="button" class="go quiet" data-offer="no">No</button></div>';
+}
+/* this week's note(s) and the timeline before it (§733, §739) */
+function wroteHtml(){
+ return S.now.length?'<div class="wrote"><div class="h">This week</div>'+S.now.map(n=>'<div class="bd">'+esc(n)+'</div><div class="by">Mohamed</div>').join('')+'<button type="button" class="madd" data-addweek>+ Add to this week</button></div>':'';
+}
+function boxHtml(){
+ return (!S.now.length||S.addOpen)?'<div class="in2"><input id="wkbox" placeholder="'+(S.now.length?'Add to this week…':'What happened this week?')+'" value="'+esc(S.box)+'" aria-label="What happened this week"><span class="ek">Enter</span></div>':'';
+}
+function timeline(){
+ const shown=S.more?S.before:S.before.slice(0,2);
+ return '<ul class="tlq">'+shown.map(p=>'<li><div class="bd">'+esc(p[0])+'</div><div class="sub">'+p[1]+' · '+p[2]+'</div></li>').join('')+'</ul>'+
+  (S.before.length>2?'<button type="button" class="pm" data-more>'+(S.more?'Show fewer':'Show '+(S.before.length-2)+' earlier ›')+'</button>':'');
+}
 document.addEventListener('click',e=>{
  const w=e.target.closest('[data-w]');if(w){S.w=w.dataset.w;S.open=-1;S.ren=-1;draw();return}
  if(e.target.closest('#reset')){S=fresh();draw();toast('Back to the start');return}
+ if(e.target.closest('#nosteps')){const w=S.w;S=fresh();S.w=w;S.steps=[];draw();toast('A task with no steps');return}
  const tb=e.target.closest('[data-tab]');if(tb){S.tab=tb.dataset.tab;draw();return}
  const tk=e.target.closest('[data-tick]');if(tk){tick(+tk.dataset.tick);return}
  const wk=e.target.closest('[data-wk]');if(wk){const i=+wk.dataset.wk;S.open=S.open===i?-1:i;draw();return}
  const du=e.target.closest('[data-due]');if(du){S.steps[+du.dataset.i].wk=du.dataset.due;S.open=-1;draw();return}
  const mv=e.target.closest('[data-mv]');if(mv){const i=+mv.dataset.mv,j=i+(+mv.dataset.dir);if(j>=0&&j<S.steps.length){[S.steps[i],S.steps[j]]=[S.steps[j],S.steps[i]];draw()}return}
  const dl=e.target.closest('[data-del]');if(dl){S.steps.splice(+dl.dataset.del,1);draw();toast('Step removed');return}
+ const of=e.target.closest('[data-offer]');if(of){const txt='Done: '+S.steps[S.offer].n;
+  if(of.dataset.offer==='add'){S.now.push(txt);S.offer=-1;toast('Added to this week\'s update');draw()}
+  else if(of.dataset.offer==='edit'){S.box=txt;S.offer=-1;S.addOpen=true;if(S.w==='tracker')S.tab='p';draw();const b=document.getElementById('wkbox');if(b){b.focus();b.setSelectionRange(b.value.length,b.value.length)}}
+  else{S.offer=-1;draw()}return}
+ if(e.target.closest('[data-addweek]')){S.addOpen=true;draw();const b=document.getElementById('wkbox');if(b)b.focus();return}
+ if(e.target.closest('[data-more]')){S.more=!S.more;draw();return}
+ if(e.target.closest('[data-addsteps]')){S.stepsOpen=true;draw();const a=document.getElementById('addstep');if(a)a.focus();return}
  if(e.target.closest('[data-markdone]')){S.st='dn';draw();toast('Task marked Done');return}
  if(e.target.closest('[data-notyet]')){S.notYet=true;draw();return}
  const st=e.target.closest('[data-st]');if(st){S.st=st.dataset.st;draw();return}
@@ -194,10 +246,12 @@ document.addEventListener('click',e=>{
  if(S.open>=0&&!e.target.closest('.swk')){S.open=-1;draw()}
 });
 document.addEventListener('keydown',e=>{
+ if(e.target.id==='wkbox'&&e.key==='Enter'&&e.target.value.trim()){S.now.push(e.target.value.trim());S.box='';S.addOpen=false;draw();toast('Written to this week');return}
  if(e.target.id==='addstep'&&e.key==='Enter'&&e.target.value.trim()){S.steps.push({n:e.target.value.trim(),wk:'',d:false});S.notYet=false;draw();const a=document.getElementById('addstep');if(a)a.focus();return}
  if(e.target.id==='renbox'){if(e.key==='Enter'){const v=e.target.value.trim();if(v)S.steps[S.ren].n=v;S.ren=-1;draw()}else if(e.key==='Escape'){S.ren=-1;draw()}return}
  const rn=e.target.closest&&e.target.closest('[data-ren]');if(rn&&(e.key==='Enter'||e.key===' ')){e.preventDefault();S.ren=+rn.dataset.ren;draw()}
 });
+document.addEventListener('input',e=>{if(e.target.id==='wkbox')S.box=e.target.value});
 document.addEventListener('focusout',e=>{if(e.target.id==='renbox'){setTimeout(()=>{if(S.ren>=0&&document.activeElement&&document.activeElement.id!=='renbox'){const v=e.target.value.trim();if(v)S.steps[S.ren].n=v;S.ren=-1;draw()}},0)}});
 draw();
 </script>

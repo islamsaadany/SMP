@@ -3384,6 +3384,20 @@ await section("4 · Forefront's own pages", async () => {
     const leftE = (await owner.query("SELECT count(*)::int AS n FROM tracker_progress WHERE action_id = $1", [firstId])).rows[0].n;
     check(/Delete this entry\?/.test(asked) && leftE === 0, "\u2026and deleted there, asked first", asked + " · left " + leftE);
     await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
+    /* §739: TWO BEFORE THIS WEEK — four older updates put in, then a line
+       written here (which reads the task again): this week's line and the
+       latest two before it show, the rest behind Show N earlier, which opens them */
+    for (let k = 1; k <= 4; k++) await owner.query("INSERT INTO tracker_progress (tenant_id, action_id, body, by_key, at) VALUES ($1, $2, $3, 'smo', now() - ($4 || ' days')::interval)", [tenantId, firstId, "Older update " + k, String(7 * k)]);
+    await page.fill("#mwp-" + firstId, "This week's line").catch(() => {});
+    await page.click(".mwrow.on .mwcompose button").catch(() => {});
+    await page.waitForFunction(() => document.querySelectorAll(".mwrow.on .mwtl li").length >= 5, null, { timeout: 8000 }).catch(() => {});
+    const vis739 = () => page.evaluate(() => Array.from(document.querySelectorAll(".mwrow.on .mwtl li")).filter((x) => !x.hidden).length);
+    const t739 = { all: await page.locator(".mwrow.on .mwtl li").count(), shown: await vis739(), link: ((await page.locator(".mwrow.on .mwpmore").textContent().catch(() => "")) || "").trim() };
+    await page.click(".mwrow.on .mwpmore").catch(() => {});
+    const t739b = { shown: await vis739(), link: ((await page.locator(".mwrow.on .mwpmore").textContent().catch(() => "")) || "").trim() };
+    check(t739.all === 5 && t739.shown === 3 && /^Show 2 earlier/.test(t739.link) && t739b.shown === 5 && t739b.link === "Show fewer",
+      "\u2026an opened task shows this week's line and the latest two before it, the rest behind Show N earlier, which opens them (\u00a7739)", JSON.stringify({ t739, t739b }));
+    await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
     /* §713: THE ⋯ — Change the week and Hand to someone else first, each a
        small list opened by HOVER beside the menu; Details and progress gone;
        Rename third */

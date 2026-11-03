@@ -827,6 +827,12 @@ export const APP_JS = `(function () {
     } else if (act === "skip") {
       /* Skip moves on without saving, carrying or counting (§732) */
       stepTask(1, false);
+    } else if (act === "pmore") {
+      /* §739: the earlier updates open in place, and fold again */
+      var pl = b.previousElementSibling, on9 = b.getAttribute("aria-expanded") !== "true";
+      if (pl) pl.querySelectorAll(".pold").forEach(function (x) { x.hidden = !on9; });
+      b.setAttribute("aria-expanded", String(on9));
+      b.textContent = on9 ? "Show fewer" : "Show " + b.getAttribute("data-n") + " earlier \u203a";
     } else if (act === "madd") {
       /* §733: this week's note is written; "+ Add to this week" opens the box */
       var ab = b.closest(".mopen"), abx = ab && ab.querySelector(".pbox.mq");

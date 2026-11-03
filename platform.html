@@ -1925,6 +1925,8 @@
   .mwtl li::before{ content:""; position:absolute; left:-20px; top:4px; width:12px; height:12px; border-radius:50%; background:var(--surface); border:2px solid var(--mw-blue); box-sizing:border-box }
   .mwtl .wk{ font-size:12px; font-weight:600; color:var(--ink-3) }
   .mwtl .wk.now{ color:var(--mw-blue) }
+  .mwpmore{ border:0; background:none; padding:0; margin:8px 0 0 20px; font-family:inherit; font-size:12.5px; color:var(--mw-blue); cursor:pointer }
+  .mwpmore:hover{ text-decoration:underline; text-underline-offset:2px }
   .mwtl .tx{ font-size:14px; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere }
   .mwdet .none{ margin:10px 0 0; color:var(--ink-3); font-size:13px }
   /* §712: Edit and Delete under your own entry, as in the Tracker */
@@ -5046,8 +5048,15 @@
       if (!d.progress.length) box.appendChild(el("p", "none", "Nothing written yet."));
       else {
         var ol = el("ol", "mwtl");
+        /* §739 TWO BEFORE THIS WEEK (Islam: "make before this week only 2
+           entries and it applies to all, the full story … is an exception in
+           any view"): this week's entries, then the latest two before it; the
+           rest behind "Show N earlier", kept open per task while it is open */
+        if (!MW.allp) MW.allp = {};
+        var nb = 0, extra = 0, allOn = !!MW.allp[key];
         d.progress.forEach(function (p) {
           var li = el("li");
+          if (!p.now && ++nb > 2) { extra++; if (!allOn) li.hidden = true; }
           li.appendChild(el("div", "wk" + (p.now ? " now" : ""), p.week + " · " + p.by + (p.edited ? " · edited" : "")));
           /* YOUR OWN ENTRY: Edit turns it into a box in place (Enter or
              leaving saves, Escape puts it back); Delete asks first (§712) —
@@ -5094,6 +5103,12 @@
           ol.appendChild(li);
         });
         box.appendChild(ol);
+        if (extra) {
+          var more = el("button", "mwpmore", allOn ? "Show fewer" : "Show " + extra + " earlier \u203a");
+          more.type = "button";
+          more.addEventListener("click", function () { MW.allp[key] = !allOn; MW.redraw(); });
+          box.appendChild(more);
+        }
       }
     } else if (tab === "d") {
       if (d.canChange) {

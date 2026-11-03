@@ -780,6 +780,9 @@ const LOOK = `
 .lktag{display:inline-flex;align-items:center;gap:4px;color:var(--carry);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:.88em;line-height:1.55;vertical-align:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .lktag:hover,.lktag:focus-visible{background:var(--wk);outline:none}
 .lktag svg{width:.85em;height:.85em;flex:none}
+/* §739: the earlier updates, behind their link */
+.pmore{border:0;background:none;padding:0;margin:8px 0 0 24px;font:400 12.5px/1.4 var(--font);color:var(--carry);cursor:pointer}
+.pmore:hover,.pmore:focus-visible{text-decoration:underline;text-underline-offset:2px;outline:none}
 /* §732: the check's count line under the bar, in the quiet bar's own voice */
 .ctop .counted.ck{font:400 12.5px/1.4 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3);padding:0 16px 12px}
 .ctop .counted.ck .left{color:var(--ink-2)}
@@ -1295,17 +1298,31 @@ function progressBox(a: Action, label: string): string {
 function progressList(L: Loaded, who: Who, today: string): string {
   const name = (k: string) => L.short.get(k) || L.names.get(k) || k;
   if (!L.progress.length) return '<div class="pnone">Nothing written yet. The first line goes in at the next review.</div>';
+  let nb = 0, extra = 0;
   return '<ul class="prog">' + L.progress.map((p) => {
     const w = entryWeek(p.at, today);
     const mine = mayChangeProgress(p, who);
-    return '<li class="pe" data-pid="' + esc(p.id) + '"><span class="wk' + (w.now ? " now" : "") + '" title="' + esc(w.full) + '">' + esc(w.word) + "</span>" +
+    /* §739: this week's, then the latest two before it; the rest folded */
+    const old = !w.now && ++nb > EARLIER_SHOWN;
+    if (old) extra++;
+    return '<li class="pe' + (old ? " pold" : "") + '" data-pid="' + esc(p.id) + '"' + (old ? " hidden" : "") + '><span class="wk' + (w.now ? " now" : "") + '" title="' + esc(w.full) + '">' + esc(w.word) + "</span>" +
       '<div class="pb"><div class="ptxt" data-raw="' + esc(p.body) + '">' + withLinks(p.body, esc) + "</div>" +
       '<div class="by"><span>' + esc(name(p.by)) + "</span>" + (p.editedAt ? '<span class="ed">edited</span>' : "") +
       (mine ? '<button type="button" data-act="progress-edit">Edit</button><button type="button" class="danger" data-act="progress-delete-ask">Delete</button>' +
         '<span class="sure" hidden>Delete this entry? <button type="button" class="go" data-act="progress-delete-no">Keep it</button>' +
         '<button type="button" class="go danger" data-act="progress-delete">Delete it</button></span>' : "") +
       "</div></div></li>";
-  }).join("") + "</ul>";
+  }).join("") + "</ul>" + earlierLink(extra);
+}
+/* §739 TWO BEFORE THIS WEEK, EVERYWHERE (Islam: "make before this week only 2
+   entries and it applies to all, the full story you are talking about is an
+   exception in any view"): an update list shows this week's entries and the
+   latest two before this week; the rest wait behind "Show N earlier ›",
+   which opens them in place ("Show fewer" folds them). The same in the
+   opened task, the weekly check's box, and My tasks' and Home's opened task. */
+const EARLIER_SHOWN = 2;
+function earlierLink(extra: number): string {
+  return extra ? '<button type="button" class="pmore" data-act="pmore" data-n="' + extra + '" aria-expanded="false">Show ' + extra + " earlier &rsaquo;</button>" : "";
 }
 const RIGHT_SM = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -1607,9 +1624,12 @@ function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format)
      starts from last week. No note yet this week: the box, as before. */
   const nowNotes = P.pr.filter((e) => entryWeek(e.at, today).now);
   const before = nowNotes.length ? P.pr.filter((e) => !entryWeek(e.at, today).now) : P.pr;
+  let nb = 0;
   const tl = before.length
     ? '<ul class="mtl">' + before.map((e) => { const w = entryWeek(e.at, today);
-        return '<li' + (w.now ? ' class="now"' : "") + '><div class="bd">' + withLinks(e.body, esc) + '</div><div class="sub">' + esc(name(e.by)) + " &middot; <b>" + esc(w.word.toLowerCase()) + "</b></div></li>"; }).join("") + "</ul>"
+        const old = !w.now && ++nb > EARLIER_SHOWN;
+        return '<li class="' + (w.now ? "now" : "") + (old ? " pold" : "") + '"' + (old ? " hidden" : "") + '><div class="bd">' + withLinks(e.body, esc) + '</div><div class="sub">' + esc(name(e.by)) + " &middot; <b>" + esc(w.word.toLowerCase()) + "</b></div></li>"; }).join("") + "</ul>" +
+      earlierLink(Math.max(0, nb - EARLIER_SHOWN))
     : '<p class="mnil">' + (nowNotes.length ? "Nothing before this week." : "Nothing written yet.") + "</p>";
   const input = '<div class="pbox mq"' + (nowNotes.length ? " hidden" : "") + '><input class="pnew" data-act="progress-new" placeholder="' + (nowNotes.length ? "Add to this week…" : "What happened this week?") + '" aria-label="Progress on ' + esc(a.title) + '" maxlength="' + PROGRESS_MAX + '"><span class="ek" aria-hidden="true">Enter</span></div>';
   const wrote = nowNotes.length

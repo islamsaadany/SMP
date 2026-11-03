@@ -1493,6 +1493,20 @@ try {
        foot), so the box needs no sticking to stay in view */
     check("the box stays in view beside the rail, and a link in this week's note reads as a small Google Sheets tag opening the full address in a new tab (§733, §737)",
       !!stick733 && !!tag733 && tag733.t === "Google Sheets" && tag733.href === "https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1" && tag733.tgt === "_blank", JSON.stringify({ stick733, tag733 }));
+    /* §739: two before this week, the rest behind Show N earlier — in the
+       meeting's box and in the opened task; four older entries put in */
+    for (let k = 1; k <= 4; k++) await owner("INSERT INTO tracker_progress (tenant_id, action_id, body, by_key, at) VALUES ($4, $1, $2, 'noran', now() - ($3 || ' days')::interval)", [mTask, "Older update " + k, String(7 * k), A]);
+    await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
+    const vis739 = (sel) => pg.evaluate((q) => Array.from(document.querySelectorAll(q)).filter((x) => x.offsetParent !== null).length, sel);
+    const m739 = { shown: await vis739(".mopen .mtl li"), link: (await pg.locator(".mopen .pmore").textContent().catch(() => "")).trim() };
+    await pg.locator(".mopen .pmore").click();
+    const m739b = { shown: await vis739(".mopen .mtl li"), link: (await pg.locator(".mopen .pmore").textContent()).trim() };
+    await pg.goto(base + "?view=all&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
+    const o739 = { shown: await vis739(".open .prog .pe"), all: await pg.locator(".open .prog .pe").count(), link: (await pg.locator(".open .pmore").textContent().catch(() => "")).trim() };
+    check("an update list shows this week's and the latest two before it, the rest behind Show N earlier, which opens them — in the meeting's box and in the opened task (§739)",
+      m739.shown === 2 && /^Show 2 earlier/.test(m739.link) && m739b.shown === 4 && m739b.link === "Show fewer" && o739.all === 6 && o739.shown === 4 && /^Show 2 earlier/.test(o739.link),
+      JSON.stringify({ m739, m739b, o739 }));
+    await pg.goto(base + "?view=check"); await settle(); await pg.evaluate("window.__stay = 1");
     /* put the action back as it was: the walk-through above is not what the
        presses after it are about */
     const mWas = await asTenant(A, (c) => progressOf(c, mTask));

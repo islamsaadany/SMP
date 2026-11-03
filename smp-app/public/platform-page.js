@@ -2820,8 +2820,15 @@
       if (!d.progress.length) box.appendChild(el("p", "none", "Nothing written yet."));
       else {
         var ol = el("ol", "mwtl");
+        /* §739 TWO BEFORE THIS WEEK (Islam: "make before this week only 2
+           entries and it applies to all, the full story … is an exception in
+           any view"): this week's entries, then the latest two before it; the
+           rest behind "Show N earlier", kept open per task while it is open */
+        if (!MW.allp) MW.allp = {};
+        var nb = 0, extra = 0, allOn = !!MW.allp[key];
         d.progress.forEach(function (p) {
           var li = el("li");
+          if (!p.now && ++nb > 2) { extra++; if (!allOn) li.hidden = true; }
           li.appendChild(el("div", "wk" + (p.now ? " now" : ""), p.week + " · " + p.by + (p.edited ? " · edited" : "")));
           /* YOUR OWN ENTRY: Edit turns it into a box in place (Enter or
              leaving saves, Escape puts it back); Delete asks first (§712) —
@@ -2868,6 +2875,12 @@
           ol.appendChild(li);
         });
         box.appendChild(ol);
+        if (extra) {
+          var more = el("button", "mwpmore", allOn ? "Show fewer" : "Show " + extra + " earlier \u203a");
+          more.type = "button";
+          more.addEventListener("click", function () { MW.allp[key] = !allOn; MW.redraw(); });
+          box.appendChild(more);
+        }
       }
     } else if (tab === "d") {
       if (d.canChange) {

@@ -3372,6 +3372,9 @@ await section("4 · Forefront's own pages", async () => {
        a box, Enter saves it (read back from Postgres); Delete asks first,
        and Yes removes it */
     await page.click(".mwrow.on .mwpacts button >> text=Edit").catch(() => {});
+    /* the box puts the cursor at the end a moment after it opens; typing
+       before that lands appends instead of replacing — wait for it (§739 run) */
+    await page.waitForFunction(() => { const t = document.activeElement; return !!t && t.classList.contains("mwpedit") && t.selectionStart === t.value.length; }, null, { timeout: 4000 }).catch(() => {});
     await page.fill(".mwrow.on .mwpedit", "Edited from My tasks").catch(() => {});
     await page.press(".mwrow.on .mwpedit", "Enter").catch(() => {});
     await page.waitForFunction(() => /Edited from My tasks/.test((document.querySelector(".mwrow.on .mwtl") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});

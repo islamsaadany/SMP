@@ -73,6 +73,18 @@ button{cursor:pointer}
 .mtop .t{flex:1;min-width:0}
 .why{font-size:12.5px;color:var(--ink-3);margin:2px 0 0;max-width:80ch}
 @media (max-width:640px){.row{grid-template-columns:20px minmax(0,1fr);}.row .wk,.row .st{display:none}.open{padding-left:16px}}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.col{display:grid;gap:8px;min-width:0}
+.lab{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.lab.aft{color:var(--blue)}
+.cmp .row{grid-template-columns:20px minmax(0,1fr) 84px}
+.cmp .row .st{display:none}
+.cmp .open{padding-left:16px}
+.opt{font-size:12.5px;color:var(--ink-3);margin:2px 0 4px}
+.links{display:flex;gap:14px;font-size:12.5px}
+.links a,.links button{color:var(--blue);background:none;border:0;padding:0;text-decoration:none;font-weight:500}
+.mark{outline:2px dashed var(--d1);outline-offset:2px;border-radius:6px}
+@media (max-width:760px){.cmp{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <div class="pg">
@@ -87,67 +99,69 @@ button{cursor:pointer}
       <button type="button" data-m="some" aria-pressed="false">Task with steps</button>
     </div>
   </div>
+  <label style="font-size:13px;color:var(--ink-2);display:flex;gap:6px;align-items:center"><input type="checkbox" id="marks" checked> Outline what changes</label>
   <div class="note" id="note"></div>
   <div id="stage"></div>
 </div>
 <script>
-const S={v:"tracker",steps:[],adding:false,box:""};
+const S={v:"tracker",steps:[],add:{before:false,after:false},box:{before:"",after:""},marks:true};
 const SOME=[{t:"Draft the function list",d:true},{t:"Review with Mohamed",d:false,w:"This week"},{t:"Send to the client",d:false}];
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const NOTES={
- tracker:'<p><b>Tracker, the opened task.</b> Without steps, Progress opens with a small grey <b>Steps +</b> and then the box, as before steps existed. No "optional", no hint line, no "This week" label. Press <b>+</b>: the add line opens with the cursor in it. Enter adds a step and keeps the line open for the next. Escape, or leaving it empty, closes it.</p><p>With steps, the heading reads <b>Steps 1 of 3 +</b>, the list sits under it, and only then does <b>This week</b> get its label, because there are now two things to tell apart. A tick still writes "Done: &lt;step&gt;" into the box.</p>',
- check:'<p><b>Weekly check.</b> A task without steps shows <b>nothing</b> about steps. The box is status, the timeline and this week\'s note, as it was before steps. Adding steps is planning, so it happens in the opened task.</p><p>With steps, the same heading, <b>Steps 1 of 3 +</b>, then the list (tick only) and <b>Edit ›</b> at the right to open the task in the Tracker. The + adds the odd step met in the meeting.</p>',
- mytasks:'<p><b>My tasks, the opened task.</b> Today it shows no steps at all. Proposed: the same quiet <b>Steps +</b> as the Tracker, so the two opened tasks read alike. With steps, tick them here too, and the tick writes into the box. Renaming, weeks and order stay in the Tracker.</p><p><b>The rows</b> (Tracker, My tasks, Home) stay as built: nothing for a task without steps, "1 of 3 steps" with the thin bar when it has them.</p>'};
-function heading(compact){
-  const n=S.steps.length,d=S.steps.filter(x=>x.d).length;
-  return '<div class="ssh'+(n?'':' none')+'">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+
-    '<button type="button" class="plus" data-add aria-label="Add a step" title="Add a step">+</button>'+
-    (compact&&n?'<a class="edit" href="#">Edit ›</a>':'')+'</div>';
-}
-function list(compact){
-  const lis=S.steps.map((s,i)=>'<li class="sline'+(s.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" aria-pressed="'+s.d+'" aria-label="Tick: '+esc(s.t)+'">'+(s.d?'✓':'')+'</button><span class="snm">'+esc(s.t)+'</span>'+(s.w&&!compact?'<span class="chip">'+esc(s.w)+'</span>':'')+'</li>').join('');
-  const add=S.adding?'<div class="sadd"><span>+</span><input id="snew" placeholder="Add a step and press Enter" aria-label="Add a step"></div>':'';
-  return (lis?'<ul class="stl">'+lis+'</ul>':'')+add;
-}
-function box(){return '<div class="box"><textarea id="pbox" rows="1" placeholder="What happened this week?" aria-label="What happened this week?">'+esc(S.box)+'</textarea><button type="button">Add</button></div>'}
+ tracker:'<p><b>Tracker, the opened task.</b> Before: a task without steps carries a STEPS heading marked "optional", a hint line, an open add line and a "This week" label, which is four extra lines on every task. After: one small grey <b>Steps +</b>, then the box. Press + to open the add line; Enter adds and keeps it open; Escape or leaving it empty closes it.</p><p>With steps, both look much alike. The difference is that the add line hides behind the + after, and the count sits in the heading. Dashed outlines mark what changes; switch them off above.</p>',
+ check:'<p><b>Weekly check.</b> Before: every task box without steps shows a "+ Add steps" link. After: nothing about steps until a task has them.</p><p>With steps, before has a separate "+ Add a step · Edit steps ›" line under the list. After folds both into the heading: <b>Steps 1 of 3 +</b> and <b>Edit ›</b> on the right.</p>',
+ mytasks:'<p><b>My tasks, the opened task.</b> Before: steps are not shown here at all, only the count on the row. After: the same quiet <b>Steps +</b> as the Tracker, and with steps you can tick them here too (the tick writes into the box). Renaming, weeks and order stay in the Tracker.</p><p>The rows themselves are the same before and after: nothing without steps, "1 of 3 steps" with the thin bar with them.</p>'};
+const M=(on,html)=>on&&S.marks?'<div class="mark">'+html+'</div>':html;
+function cnt(){return [S.steps.filter(x=>x.d).length,S.steps.length]}
+function lis(compact,k){return S.steps.map((st,i)=>'<li class="sline'+(st.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" data-k="'+k+'" aria-pressed="'+st.d+'" aria-label="Tick: '+esc(st.t)+'">'+(st.d?'✓':'')+'</button><span class="snm">'+esc(st.t)+'</span>'+(!compact?(st.w?'<span class="chip">'+esc(st.w)+'</span>':(k==='before'?'<span class="chip">+ week</span>':'')):'')+'</li>').join('')}
+function addLine(k){return '<div class="sadd"><span>+</span><input class="snew" data-k="'+k+'" placeholder="Add a step and press Enter" aria-label="Add a step"></div>'}
+function box(k){return '<div class="box"><textarea class="pbox" data-k="'+k+'" rows="1" placeholder="What happened this week?" aria-label="What happened this week?">'+esc(S.box[k])+'</textarea><button type="button">Add</button></div>'}
 const TL='<ul class="tl"><li><b>Last week</b>Agreed the function list scope with the GM.</li><li><b>W4 Oct</b>Kick-off; collected the current org chart.</li></ul>';
-function row(meta){
-  const n=S.steps.length,d=S.steps.filter(x=>x.d).length;
+function row(meta){const [d,n]=cnt();
   const sc=n?'<span class="sd"></span><span class="stc"><i><b style="width:'+Math.round(100*d/n)+'%"></b></i>'+d+' of '+n+' steps</span>':'';
-  return '<div class="row on"><span class="tick"></span><div style="min-width:0"><div class="t">Function list for the new structure</div><div class="meta">'+(meta||'<span>Mohamed</span>')+sc+'<span class="sd"></span><span class="up">Agreed the scope with the GM</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span></div>';
-}
-function opened(){
-  const n=S.steps.length;
-  return '<div class="open"><div class="tabs"><span class="on">Progress</span><span>Description</span><span>History</span></div>'+
-    heading(false)+list(false)+(n?'<div class="psh">This week</div>':'<div style="height:6px"></div>')+box()+TL+'</div>';
-}
+  return '<div class="row on"><span class="tick"></span><div style="min-width:0"><div class="t">Function list for the new structure</div><div class="meta">'+(meta||'<span>Mohamed</span>')+sc+'<span class="sd"></span><span class="up">Agreed the scope with the GM</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span></div>'}
+const tabs='<div class="tabs"><span class="on">Progress</span><span>Description</span><span>History</span></div>';
+/* the opened task: before = as built (§744), after = proposed */
+function openedBefore(){const [d,n]=cnt();
+  return '<div class="open">'+tabs+M(true,'<div class="psh" style="margin-top:0">Steps <span style="text-transform:none;letter-spacing:0;font-weight:500">'+(n?d+' of '+n:'optional')+'</span></div>'+(n?'<ul class="stl">'+lis(false,'before')+'</ul>':'<p class="opt">Break the task into steps if it helps plan it.</p>')+addLine('before')+'<div class="psh">This week</div>')+box('before')+TL+'</div>'}
+function headAfter(compact){const [d,n]=cnt();
+  return '<div class="ssh">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+'<button type="button" class="plus" data-add="after" aria-label="Add a step" title="Add a step">+</button>'+(compact&&n?'<a class="edit" href="#" data-edit>Edit ›</a>':'')+'</div>'}
+function openedAfter(){const [d,n]=cnt();
+  return '<div class="open">'+tabs+M(true,headAfter(false)+(n?'<ul class="stl">'+lis(false,'after')+'</ul>':'')+(S.add.after?addLine('after'):'')+(n?'<div class="psh">This week</div>':''))+(n?'':'<div style="height:6px"></div>')+box('after')+TL+'</div>'}
+function openedMyBefore(){return '<div class="open">'+tabs+box('before')+TL+'</div>'}
+function card(h,inner){return '<div class="card"><div class="hd"><h2>'+h+'</h2></div>'+inner+'</div>'}
+function mbox(k,steps){return '<div class="meet"><div class="mbox"><div class="mtop"><span class="t">Function list for the new structure</span><span class="wk">This week</span></div>'+steps+box(k)+TL+'</div></div>'}
 const V={
- tracker:()=>'<div class="card"><div class="hd"><h2>Raya Trade · Internal Tracker</h2></div>'+row()+opened()+'<div class="row"><span class="tick"></span><div><div class="t">Job descriptions, first batch</div><div class="meta"><span>Noran</span><span class="sd"></span><span class="up">Six of twelve drafted</span></div></div><span class="wk">Next week</span><span class="st"><span class="dot"></span>In progress</span></div></div>',
- check:()=>{const n=S.steps.length;return '<div class="card"><div class="hd"><h2>Weekly check · Raya Trade</h2></div><div class="meet"><div class="mbox"><div class="mtop"><span class="t">Function list for the new structure</span><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span></div>'+
-   (n||S.adding?heading(true)+list(true):'')+box()+TL+'</div>'+(n?'':'<p class="why">Nothing about steps in this box: the task has none. Switch to "Task with steps" to see them appear.</p>')+'</div></div>'},
- mytasks:()=>'<div class="card"><div class="hd"><h2>Open tasks</h2></div>'+row('<span>Raya Trade</span>')+opened()+'</div>'
+ tracker:{before:()=>card('Raya Trade · Tracker',row()+openedBefore()),after:()=>card('Raya Trade · Tracker',row()+openedAfter())},
+ check:{
+  before:()=>{const [d,n]=cnt();return card('Weekly check',mbox('before',M(true,(n?'<div class="ssh">Steps <span class="c">'+d+' of '+n+'</span></div><ul class="stl">'+lis(true,'before')+'</ul>':'')+(S.add.before?addLine('before'):'')+'<div class="links"><button type="button" data-add="before">'+(n?'+ Add a step':'+ Add steps')+'</button>'+(n?'<a href="#" data-edit>Edit steps ›</a>':'')+'</div>')))},
+  after:()=>{const [d,n]=cnt();return card('Weekly check',mbox('after',(n||S.add.after?M(true,headAfter(true)+(n?'<ul class="stl">'+lis(true,'after')+'</ul>':'')+(S.add.after?addLine('after'):'')):'')))}},
+ mytasks:{before:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedMyBefore()),after:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedAfter())}
 };
 function draw(){
   document.getElementById('note').innerHTML=NOTES[S.v];
-  document.getElementById('stage').innerHTML=V[S.v]();
+  document.getElementById('stage').innerHTML='<div class="cmp"><div class="col"><div class="lab">Before · as built</div>'+V[S.v].before()+'</div><div class="col"><div class="lab aft">After · proposed</div>'+V[S.v].after()+'</div></div>';
   document.querySelectorAll('#views button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.v));
   document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.m==='some')===(S.steps.length>0)));
-  const i=document.getElementById('snew'); if(i) i.focus();
+  document.getElementById('marks').checked=S.marks;
+  if(S.focus){const i=document.querySelector('.snew[data-k="'+S.focus+'"]');if(i)i.focus();S.focus=null}
 }
-function toBox(t,on){const w='Done: '+t;let parts=S.box?S.box.split('; '):[];if(on){if(!parts.includes(w))parts.push(w)}else parts=parts.filter(p=>p!==w);S.box=parts.join('; ')}
+function toBox(k,t,on){const w='Done: '+t;let parts=S.box[k]?S.box[k].split('; '):[];if(on){if(!parts.includes(w))parts.push(w)}else parts=parts.filter(p=>p!==w);S.box[k]=parts.join('; ')}
 document.addEventListener('click',e=>{
-  const v=e.target.closest('[data-v]'); if(v){S.v=v.dataset.v;S.adding=false;draw();return}
-  const m=e.target.closest('[data-m]'); if(m){S.steps=m.dataset.m==='some'?SOME.map(x=>({...x})):[];S.adding=false;S.box='';draw();return}
-  if(e.target.closest('[data-add]')){S.adding=true;draw();return}
-  const t=e.target.closest('[data-tick]'); if(t){const s=S.steps[+t.dataset.tick];s.d=!s.d;toBox(s.t,s.d);S.adding=false;draw();return}
-  if(e.target.closest('.edit')){e.preventDefault();S.v='tracker';draw();return}
+  const v=e.target.closest('[data-v]'); if(v){S.v=v.dataset.v;S.add={before:false,after:false};draw();return}
+  const m=e.target.closest('[data-m]'); if(m){S.steps=m.dataset.m==='some'?SOME.map(x=>({...x})):[];S.add={before:false,after:false};S.box={before:'',after:''};draw();return}
+  const a=e.target.closest('[data-add]'); if(a){S.add[a.dataset.add]=true;S.focus=a.dataset.add;draw();return}
+  const t=e.target.closest('[data-tick]'); if(t){const st=S.steps[+t.dataset.tick];st.d=!st.d;toBox(t.dataset.k,st.t,st.d);draw();return}
+  if(e.target.closest('[data-edit]')){e.preventDefault();S.v='tracker';draw();return}
 });
+document.addEventListener('change',e=>{if(e.target.id==='marks'){S.marks=e.target.checked;draw()}});
 document.addEventListener('keydown',e=>{
-  if(e.target.id!=='snew')return;
-  if(e.key==='Enter'&&e.target.value.trim()){S.steps.push({t:e.target.value.trim(),d:false});draw();}
-  else if(e.key==='Escape'){S.adding=false;draw();}
+  if(!e.target.classList||!e.target.classList.contains('snew'))return;
+  const k=e.target.dataset.k;
+  if(e.key==='Enter'&&e.target.value.trim()){S.steps.push({t:e.target.value.trim(),d:false});S.focus=k;draw()}
+  else if(e.key==='Escape'&&k==='after'){S.add.after=false;draw()}
 });
-document.addEventListener('focusout',e=>{if(e.target.id==='snew'&&!e.target.value.trim()){setTimeout(()=>{if(document.activeElement&&document.activeElement.id==='snew')return;if(S.adding){S.adding=false;draw()}},120)}});
-document.addEventListener('input',e=>{if(e.target.id==='pbox')S.box=e.target.value});
+document.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('snew')&&e.target.dataset.k==='after'&&!e.target.value.trim()){setTimeout(()=>{const a=document.activeElement;if(a&&a.classList&&a.classList.contains('snew')&&a.dataset.k==='after')return;if(S.add.after){S.add.after=false;draw()}},150)}});
+document.addEventListener('input',e=>{if(e.target.classList.contains('pbox'))S.box[e.target.dataset.k]=e.target.value});
 draw();
 </script>

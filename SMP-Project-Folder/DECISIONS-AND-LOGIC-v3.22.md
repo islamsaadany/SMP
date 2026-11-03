@@ -71153,3 +71153,11 @@ Nothing it does is gone; it is quieter:
 **Checked**: `checks/tracker.mjs` **378 passed, 0 failed** — §736/§737, §738 and §740's checks rewritten to compare like with like (the meeting row's foot against the window, both on screen; the rail inside the row; the page not scrolling); **seen RED with `100dvh` put back** (the row ending at 627px of 800, 787 of 1000) — the gap Islam saw.
 
 **§741 MERGED TO `main`** 2026-11-03, Islam: *"merge"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+**§741 confirmed** (Islam): "it works now, the rail reaches the bottom".
+
+## §742 — Another client opens on the module in view (2026-11-03)
+
+**Asked** (Islam): "when I shift from client to client when they have the same module let's go there like from elabd to raya from internal tracker to internal tracker if not similar modules exist we land on strategy as normal." The bar's client menu (`lib/topbar.ts`) now carries the module in view (`data-module`) and links each other client to `/<client>/<that module>`. Nothing in the bar has to know the other client's modules: a module the other client does not have, or that this person may not open there, is already answered by the door's own redirect to that client's Strategy — `app/(platform)/[slug]/[...rest]/route.ts` (an unknown module word and a shut module answer identically, §320.5) and the Processes layout (`redirect(clientHref(slug, DEFAULT_MODULE, ""))`). Only the module is carried, not the page within it (a view, an opened task), so the other client opens on the module's own first page.
+
+**Checked**: `checks/tracker.mjs` **379 passed, 0 failed** — new: the bar's client menu carries `data-module="tracker"`.

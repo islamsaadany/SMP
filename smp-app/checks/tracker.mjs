@@ -365,6 +365,15 @@ check("...the task on the right carries its status as three buttons, the current
 check("...Save and next will carry the open task, this week's, to next week — no Carry button, no keep line (§732, §733)",
   count(chk, /data-act="carry"/g) === 0 && count(chk, /class="cyl"/g) === 0 && /data-id="p" data-tab="p" data-carry="1"/.test(chk),
   count(chk, /data-carry="1"/g) + " carried");
+/* §742: the bar's client menu carries the module in view, so another client
+   opens on the Tracker too (one without it, or shut to this person, is the
+   door's own redirect to its Strategy) */
+{
+  const { topBarHtml } = await import("../lib/topbar.ts");
+  const doc742 = topBarHtml({ slug: "x", tenantName: "Raya Trade", module: "tracker", have: ["strategy", "tracker"], consultant: true });
+  check("the bar's client menu carries the module in view — another client opens on the Tracker, else the door sends it to Strategy (§742)",
+    /data-clients="x" data-module="tracker"/.test(doc742), (doc742.match(/data-clients="[^"]*"[^>]*/) || [""])[0]);
+}
 /* §733 LINKS READ SHORT: an address becomes a small tag named after its
    site, the rest escaped, a sentence's closing stop left out of the link */
 {

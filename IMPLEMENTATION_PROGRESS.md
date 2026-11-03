@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — Another client opens on the module in view (§742).** The client menu carries the module; the door sends a client without it to Strategy. Tracker 379/0.
+
 **2026-11-03 — The cause found: the page is zoomed to 80% on a computer; the meeting is now one screen tall by layout (§741).** --winh, not 100vh; nothing measured. Tracker 378/0 (checks rewritten, seen red with 100dvh).
 
 **2026-11-03 — The meeting's start is measured again whenever the page changes (§740).** Production ran §738; the start had been measured before the page settled. Tracker 378/0 (new check seen red).

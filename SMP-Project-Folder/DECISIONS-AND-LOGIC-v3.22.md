@@ -71085,3 +71085,5 @@ Nothing it does is gone; it is quieter:
 **Checked**: `checks/tracker.mjs` **373 passed, 0 failed** — new: no keep line, the carry flag on the box; withLinks (the tag, the site names, escaping, the trailing stop); back on a task written to this week, the note in the box's place, the box shut behind + Add to this week, which opens it, the timeline "Before this week"; the box sticky and a real note's link a Google Sheets tag opening the full address in a new tab. `checks/shell.mjs`: My tasks' note now carries a link, which reads as the tag on the timeline and on the row's line. Shell cache `smp-shell-v7.60-links-short`. (Shell run result below when it lands.)
 
 **§733 shell run**: 562 ok / 10 failed — main's own; the §733 link check and the §712/§728 checks ok.
+
+**§733 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.

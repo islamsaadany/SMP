@@ -74,7 +74,7 @@ import { withLinks, siteName } from "../lib/links.ts";
    panel, in inert templates after the list; the string checks read the list
    in view, so the spare copies are taken out first (the templates are
    checked on their own, below) */
-const liveOnly = (html) => html.replace(/<div class="vtpls" hidden>[\s\S]*?<!--\/vtpls-->/g, "");
+const liveOnly = (html) => html.replace(/<div class="vtpls" hidden>[\s\S]*?<!--\/vtpls-->/g, "").replace(/<div class="mtpls" hidden>[\s\S]*?<!--\/mtpls-->/g, "");
 const trackerDocument = async (...a) => liveOnly(await trackerDocument0(...a));
 const listBody = (...a) => { const o = listBody0(...a); return { ...o, body: liveOnly(o.body), full: o.body }; };
 import { barInks, barVars, contrastOf } from "../lib/branding.ts";
@@ -1426,7 +1426,11 @@ try {
     check("the check opens as a meeting: the tasks down the left, the first one open on the right", mIds.length >= 3 && firstOpen === mIds[0] && mIds.indexOf(born.id) > 0 && mIds.indexOf(born.id) < mIds.length - 1, JSON.stringify({ mIds, firstOpen, born: born.id }));
     /* the action this run made, which the person pressing may change (§42) */
     const mTask = born.id, mAt = mIds.indexOf(mTask), mSt0 = (await asTenant(A, (c) => oneAction(c, mTask))).status, mDue0 = (await asTenant(A, (c) => oneAction(c, mTask))).due;
+    let asked734 = 0; const c734 = (rq) => { if (["fetch", "xhr", "document"].includes(rq.resourceType())) asked734++; };
+    pg.on("request", c734);
     await pg.locator('.mlist .mi[data-id="' + mTask + '"]').click(); await settle();
+    pg.off("request", c734);
+    check("...and at once: the press asks the server nothing, the box was already in the page (§734)", asked734 === 0, String(asked734));
     check("...a press on a task on the left opens it on the right, on the address, without a reload",
       (await pg.locator(".mopen").getAttribute("data-id")) === mTask && pg.url().includes("open=" + mTask) &&
       (await pg.locator('.mlist .mi[data-id="' + mTask + '"]').getAttribute("aria-current")) === "true" && await stayed(), pg.url());

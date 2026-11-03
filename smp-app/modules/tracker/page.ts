@@ -1538,12 +1538,22 @@ function meetingView(L: Loaded, p: PageArgs, today: string, dates: Format): { ht
   }).join("");
   const sel = selId ? L.actions.find((a) => a.id === selId) || null : null;
   const panel = sel ? meetPanel(sel, L, p.who, today, dates) : '<div class="mnone">Nothing to go through: no task is due in these three weeks.</div>';
+  /* §734 A TASK OPENS AT ONCE IN THE MEETING (Islam: "on clicking the tasks
+     on the rail it takes very long to appear on the right"): every task on
+     the rail rides with its box, drawn by the one meetPanel (§53.5), in an
+     inert <template class="mtpl">; a press on the rail, or the arrow keys
+     or Skip, puts that copy in place — no trip to the server. A write still
+     goes to the server and the meeting is drawn again from its answer. */
+  const onRail = groups.flatMap((g) => [...g.now, ...g.last, ...g.next]);
+  const tpls = L.eventsBy && L.progressBy
+    ? '<div class="mtpls" hidden>' + onRail.map((a) => '<template class="mtpl" data-id="' + esc(a.id) + '">' + meetPanel(a, L, p.who, today, dates) + "</template>").join("") + "</div><!--/mtpls-->"
+    : "";
   /* HOW FAR THROUGH THE MEETING YOU ARE: the topics, and the ones whose next
      week is still empty — which is the question the check exists to answer. */
   const toWrite = topics.filter((t) => !shown.some((a) => a.topicId === t.id && checkWeek(a, today) === "next")).length;
   const tail = toWrite + " still to write for next week";
   return {
-    html: groups.length ? '<div class="meet"><div class="mlist">' + list + '<div class="walk"><span class="wn"></span><div class="bar"><i></i></div></div></div>' + panel + "</div>" : "",
+    html: groups.length ? '<div class="meet"><div class="mlist">' + list + '<div class="walk"><span class="wn"></span><div class="bar"><i></i></div></div></div>' + panel + "</div>" + tpls : "",
     count: plural(topics.length, "topic", "topics") + " · " + tail,
     countHtml: plural(topics.length, "topic", "topics") + " &middot; " + (toWrite ? '<span class="left">' + tail + "</span>" : "all written for next week"),
   };

@@ -291,6 +291,20 @@ export const APP_JS = `(function () {
   /* §733 SAVE AND NEXT CARRIES, always: an unfinished task of this week (or
      late) that may be changed goes on to next week with the save (the box
      says so with data-carry); the week over the name keeps one here. */
+  /* §734: put a task's box in place from the page's own copy (mtpl) — the
+     rail marks it, a folded week holding it opens, the address follows.
+     False when there is no copy, and the caller reads the meeting. */
+  function meetShow(id) {
+    var tpl = id ? document.querySelector('template.mtpl[data-id="' + id + '"]') : null, cur = document.querySelector(".meet .mopen");
+    if (!tpl || !cur) return false;
+    cur.parentNode.replaceChild(tpl.content.cloneNode(true), cur);
+    document.querySelectorAll(".mlist .mi[data-id]").forEach(function (x) { x.setAttribute("aria-current", String(x.getAttribute("data-id") === id)); });
+    var it = document.querySelector('.mlist .mi[data-id="' + id + '"]'), fo = it && it.closest(".mf");
+    if (fo && fo.hidden) fo.hidden = false;
+    setOpen(id);
+    drawWalk(); sizeAll();
+    return true;
+  }
   function stepTask(dir, save) {
     var ids = meetIds(), panel = document.querySelector(".mopen"), cur = panel ? panel.getAttribute("data-id") : openId();
     var i = ids.indexOf(cur), nx = ids[Math.max(0, Math.min(ids.length - 1, (i < 0 ? 0 : i) + dir))];
@@ -305,6 +319,7 @@ export const APP_JS = `(function () {
       return;
     }
     if (!nx || nx === cur) { drawWalk(); return; }
+    if (meetShow(nx)) return;
     setOpen(nx); pressed = null; refetch();
   }
   document.addEventListener("keydown", function (e) {
@@ -801,7 +816,7 @@ export const APP_JS = `(function () {
     } else if (act === "pick-task") {
       /* THE MEETING (§706): the task pressed on the left opens on the right */
       var pk = b.getAttribute("data-id");
-      if (pk && pk !== openId()) { setOpen(pk); pressed = null; refetch(); }
+      if (pk && pk !== openId() && !meetShow(pk)) { setOpen(pk); pressed = null; refetch(); }
     } else if (act === "set-status") {
       if (b.getAttribute("aria-pressed") === "true") return;
       var sv = b.getAttribute("data-value");

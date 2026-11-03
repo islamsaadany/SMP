@@ -1,0 +1,153 @@
+<title>Quiet Steps</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Steps made quiet (proposal after §744). The team runs tasks without steps,
+   so a task without them shows only a small "Steps +" in the opened task,
+   and nothing at all in the weekly check or on the row. The + opens the add
+   line; Escape or leaving it empty closes it again. Example task. */
+:root{--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F3F5F8;--surface:#FFF;--surface-2:#EDF0F5;
+  --blue:#1F5FBF;--blue-bg:#EAF2FB;--good:#2F6B4F;--good-bg:#E3F2EA;--d1:#E0B300;--d0:#8A97AB;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--serif:Georgia,"Times New Roman",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--blue:#8FB4F0;--blue-bg:#16263A;--good:#63BE96;--good-bg:#1B2C26;--d1:#E8C547;--d0:#7D889B;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--blue:#8FB4F0;--blue-bg:#16263A;--good:#63BE96;--good-bg:#1B2C26;--d1:#E8C547;--d0:#7D889B;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.pg{max-width:980px;margin:0 auto;padding-block:24px 60px;display:grid;gap:14px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.vs{display:inline-flex;flex-wrap:wrap;background:var(--surface-2);border-radius:8px;padding:3px}
+.vs button{border:0;background:none;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--ink-2)}
+.vs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0;max-width:92ch}
+.note b{color:var(--ink)}.note p{margin:0}.note p+p{margin-top:6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.hd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.hd h2{font:700 17px/1.2 var(--serif);margin:0}
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 90px 110px;gap:2px 14px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line-2)}
+.row.on{background:var(--blue-bg)}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px}
+.t{font-size:15px;font-weight:600}
+.meta{font-size:12.5px;color:var(--ink-3);display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden}
+.meta .sd{width:3px;height:3px;border-radius:50%;background:var(--ink-3);opacity:.7;flex:none}
+.meta .up{overflow:hidden;text-overflow:ellipsis}
+.stc{display:inline-flex;align-items:center;gap:5px;color:var(--ink-2);flex:none}
+.stc i{display:inline-block;width:28px;height:4px;border-radius:2px;background:var(--line-2);overflow:hidden;position:relative}
+.stc i b{position:absolute;inset:0 auto 0 0;background:var(--good)}
+.wk{font-size:13px;color:var(--ink-3)}
+.st{display:flex;gap:7px;align-items:center;font:600 13px/1 var(--font);color:var(--ink-2)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--d1);display:inline-block}
+.open{padding:12px 18px 18px 50px;border-bottom:1px solid var(--line-2)}
+.tabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--line-2)}
+.tabs span{padding:6px 12px 8px;color:var(--ink-3);font-size:13.5px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs span.on{color:var(--ink);font-weight:600;border-bottom-color:var(--blue)}
+/* the quiet heading: Steps, its count when there are any, and + */
+.ssh{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);min-height:24px}
+.ssh .c{text-transform:none;letter-spacing:0;font-weight:500}
+.plus{width:22px;height:22px;border-radius:6px;border:1px solid transparent;background:none;color:var(--ink-3);display:grid;place-items:center;font-size:16px;line-height:1;padding:0}
+.plus:hover{border-color:var(--line);color:var(--blue);background:var(--surface)}
+.ssh .edit{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500;color:var(--blue);text-decoration:none;font-size:12.5px}
+.ssh.none{opacity:.85}
+.stl{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:1px}
+.sline{display:flex;align-items:center;gap:10px;padding:4px 6px;border-radius:7px}
+.sline:hover{background:var(--surface-2)}
+.scb{width:16px;height:16px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);padding:0;display:grid;place-items:center;font-size:11px;color:#fff;flex:none}
+.sline.done .scb{background:var(--good);border-color:var(--good)}
+.sline.done .snm{color:var(--ink-3);text-decoration:line-through}
+.snm{flex:1;min-width:0}
+.chip{font-size:12px;color:var(--ink-3);background:var(--surface-2);border-radius:999px;padding:1px 8px}
+.sadd{display:flex;align-items:center;gap:8px;padding:4px 6px;margin-top:2px}
+.sadd span{color:var(--ink-3)}
+.sadd input{flex:1;min-width:0;border:0;border-bottom:1px solid var(--line);background:none;outline:none;padding:4px 0}
+.sadd input:focus{border-bottom-color:var(--blue)}
+.psh{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 6px}
+.box{display:flex;gap:8px;align-items:flex-start}
+.box textarea{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px 10px;resize:none;background:var(--surface);min-height:38px}
+.box button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px}
+.tl{list-style:none;margin:12px 0 0;padding:0 0 0 12px;border-left:2px solid var(--line-2);display:grid;gap:8px;font-size:13.5px}
+.tl b{display:block;font-size:12px;color:var(--ink-3);font-weight:600}
+.meet{display:grid;gap:12px;padding:14px 16px}
+.mbox{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:10px}
+.mtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mtop .t{flex:1;min-width:0}
+.why{font-size:12.5px;color:var(--ink-3);margin:2px 0 0;max-width:80ch}
+@media (max-width:640px){.row{grid-template-columns:20px minmax(0,1fr);}.row .wk,.row .st{display:none}.open{padding-left:16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="pg">
+  <div class="bar">
+    <div class="vs" id="views" role="group" aria-label="View">
+      <button type="button" data-v="tracker" aria-pressed="true">Tracker · opened task</button>
+      <button type="button" data-v="check" aria-pressed="false">Weekly check</button>
+      <button type="button" data-v="mytasks" aria-pressed="false">My tasks · opened task</button>
+    </div>
+    <div class="vs" id="mode" role="group" aria-label="Example">
+      <button type="button" data-m="none" aria-pressed="true">Task without steps</button>
+      <button type="button" data-m="some" aria-pressed="false">Task with steps</button>
+    </div>
+  </div>
+  <div class="note" id="note"></div>
+  <div id="stage"></div>
+</div>
+<script>
+const S={v:"tracker",steps:[],adding:false,box:""};
+const SOME=[{t:"Draft the function list",d:true},{t:"Review with Mohamed",d:false,w:"This week"},{t:"Send to the client",d:false}];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const NOTES={
+ tracker:'<p><b>Tracker, the opened task.</b> Without steps, Progress opens with a small grey <b>Steps +</b> and then the box, as before steps existed. No "optional", no hint line, no "This week" label. Press <b>+</b>: the add line opens with the cursor in it. Enter adds a step and keeps the line open for the next. Escape, or leaving it empty, closes it.</p><p>With steps, the heading reads <b>Steps 1 of 3 +</b>, the list sits under it, and only then does <b>This week</b> get its label, because there are now two things to tell apart. A tick still writes "Done: &lt;step&gt;" into the box.</p>',
+ check:'<p><b>Weekly check.</b> A task without steps shows <b>nothing</b> about steps. The box is status, the timeline and this week\'s note, as it was before steps. Adding steps is planning, so it happens in the opened task.</p><p>With steps, the same heading, <b>Steps 1 of 3 +</b>, then the list (tick only) and <b>Edit ›</b> at the right to open the task in the Tracker. The + adds the odd step met in the meeting.</p>',
+ mytasks:'<p><b>My tasks, the opened task.</b> Today it shows no steps at all. Proposed: the same quiet <b>Steps +</b> as the Tracker, so the two opened tasks read alike. With steps, tick them here too, and the tick writes into the box. Renaming, weeks and order stay in the Tracker.</p><p><b>The rows</b> (Tracker, My tasks, Home) stay as built: nothing for a task without steps, "1 of 3 steps" with the thin bar when it has them.</p>'};
+function heading(compact){
+  const n=S.steps.length,d=S.steps.filter(x=>x.d).length;
+  return '<div class="ssh'+(n?'':' none')+'">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+
+    '<button type="button" class="plus" data-add aria-label="Add a step" title="Add a step">+</button>'+
+    (compact&&n?'<a class="edit" href="#">Edit ›</a>':'')+'</div>';
+}
+function list(compact){
+  const lis=S.steps.map((s,i)=>'<li class="sline'+(s.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" aria-pressed="'+s.d+'" aria-label="Tick: '+esc(s.t)+'">'+(s.d?'✓':'')+'</button><span class="snm">'+esc(s.t)+'</span>'+(s.w&&!compact?'<span class="chip">'+esc(s.w)+'</span>':'')+'</li>').join('');
+  const add=S.adding?'<div class="sadd"><span>+</span><input id="snew" placeholder="Add a step and press Enter" aria-label="Add a step"></div>':'';
+  return (lis?'<ul class="stl">'+lis+'</ul>':'')+add;
+}
+function box(){return '<div class="box"><textarea id="pbox" rows="1" placeholder="What happened this week?" aria-label="What happened this week?">'+esc(S.box)+'</textarea><button type="button">Add</button></div>'}
+const TL='<ul class="tl"><li><b>Last week</b>Agreed the function list scope with the GM.</li><li><b>W4 Oct</b>Kick-off; collected the current org chart.</li></ul>';
+function row(meta){
+  const n=S.steps.length,d=S.steps.filter(x=>x.d).length;
+  const sc=n?'<span class="sd"></span><span class="stc"><i><b style="width:'+Math.round(100*d/n)+'%"></b></i>'+d+' of '+n+' steps</span>':'';
+  return '<div class="row on"><span class="tick"></span><div style="min-width:0"><div class="t">Function list for the new structure</div><div class="meta">'+(meta||'<span>Mohamed</span>')+sc+'<span class="sd"></span><span class="up">Agreed the scope with the GM</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span></div>';
+}
+function opened(){
+  const n=S.steps.length;
+  return '<div class="open"><div class="tabs"><span class="on">Progress</span><span>Description</span><span>History</span></div>'+
+    heading(false)+list(false)+(n?'<div class="psh">This week</div>':'<div style="height:6px"></div>')+box()+TL+'</div>';
+}
+const V={
+ tracker:()=>'<div class="card"><div class="hd"><h2>Raya Trade · Internal Tracker</h2></div>'+row()+opened()+'<div class="row"><span class="tick"></span><div><div class="t">Job descriptions, first batch</div><div class="meta"><span>Noran</span><span class="sd"></span><span class="up">Six of twelve drafted</span></div></div><span class="wk">Next week</span><span class="st"><span class="dot"></span>In progress</span></div></div>',
+ check:()=>{const n=S.steps.length;return '<div class="card"><div class="hd"><h2>Weekly check · Raya Trade</h2></div><div class="meet"><div class="mbox"><div class="mtop"><span class="t">Function list for the new structure</span><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span></div>'+
+   (n||S.adding?heading(true)+list(true):'')+box()+TL+'</div>'+(n?'':'<p class="why">Nothing about steps in this box: the task has none. Switch to "Task with steps" to see them appear.</p>')+'</div></div>'},
+ mytasks:()=>'<div class="card"><div class="hd"><h2>Open tasks</h2></div>'+row('<span>Raya Trade</span>')+opened()+'</div>'
+};
+function draw(){
+  document.getElementById('note').innerHTML=NOTES[S.v];
+  document.getElementById('stage').innerHTML=V[S.v]();
+  document.querySelectorAll('#views button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.v));
+  document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.m==='some')===(S.steps.length>0)));
+  const i=document.getElementById('snew'); if(i) i.focus();
+}
+function toBox(t,on){const w='Done: '+t;let parts=S.box?S.box.split('; '):[];if(on){if(!parts.includes(w))parts.push(w)}else parts=parts.filter(p=>p!==w);S.box=parts.join('; ')}
+document.addEventListener('click',e=>{
+  const v=e.target.closest('[data-v]'); if(v){S.v=v.dataset.v;S.adding=false;draw();return}
+  const m=e.target.closest('[data-m]'); if(m){S.steps=m.dataset.m==='some'?SOME.map(x=>({...x})):[];S.adding=false;S.box='';draw();return}
+  if(e.target.closest('[data-add]')){S.adding=true;draw();return}
+  const t=e.target.closest('[data-tick]'); if(t){const s=S.steps[+t.dataset.tick];s.d=!s.d;toBox(s.t,s.d);S.adding=false;draw();return}
+  if(e.target.closest('.edit')){e.preventDefault();S.v='tracker';draw();return}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.id!=='snew')return;
+  if(e.key==='Enter'&&e.target.value.trim()){S.steps.push({t:e.target.value.trim(),d:false});draw();}
+  else if(e.key==='Escape'){S.adding=false;draw();}
+});
+document.addEventListener('focusout',e=>{if(e.target.id==='snew'&&!e.target.value.trim()){setTimeout(()=>{if(document.activeElement&&document.activeElement.id==='snew')return;if(S.adding){S.adding=false;draw()}},120)}});
+document.addEventListener('input',e=>{if(e.target.id==='pbox')S.box=e.target.value});
+draw();
+</script>

@@ -757,6 +757,12 @@ const LOOK = `
 .mopen .mwrote + .pbox.mq{margin-top:8px}
 /* §733: the box stays in view beside the rail while the rail scrolls; one
    taller than the screen scrolls inside itself */
+/* §735 (Islam: "no need to have a scrolling in the right box unless it's
+   getting outside the page"): in the meeting the band and the bar are not
+   pinned — they scroll away — so the box sticks under the top bar alone and
+   has the screen's height; it scrolls inside itself only when it truly
+   does not fit */
+.pin:has(+ .meetwrap){position:static}
 .meet .mopen{position:sticky;top:calc(var(--tbh,41px) + var(--pinh,0px) + 12px);max-height:calc(100vh - var(--tbh,41px) - var(--pinh,0px) - 24px);overflow:auto}
 @media (max-width:760px),(max-height:600px){.meet .mopen{position:static;max-height:none;overflow:visible}}
 /* §733: a link in a note, read short — a small tag named after its site */

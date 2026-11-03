@@ -1470,6 +1470,12 @@ try {
     /* §733: the box stays in view while the rail scrolls (sticky under the
        pinned band), and a link in a note shows as a small tag */
     const stick733 = await pg.evaluate(() => getComputedStyle(document.querySelector(".mopen")).position);
+    /* §735: the band does not pin in the meeting, and a box that fits the
+       screen does not scroll inside itself */
+    const fit735 = await pg.evaluate(() => { const o = document.querySelector(".mopen"), pn = document.querySelector(".pin");
+      return { pin: pn ? getComputedStyle(pn).position : "", over: o.scrollHeight - o.clientHeight, room: innerHeight, h: o.offsetHeight }; });
+    check("in the meeting the band scrolls away, and the box scrolls inside itself only when it is taller than the screen (§735)",
+      fit735.pin !== "sticky" && (fit735.h + 80 > fit735.room || fit735.over <= 1), JSON.stringify(fit735));
     await asTenant(A, (c) => addProgress(c, mTask, "Sheet is here https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1.", "noran"));
     await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
     const tag733 = await pg.evaluate(() => { const a = document.querySelector(".mopen .mwrote a.lktag"); return a ? { t: a.textContent, href: a.getAttribute("href"), tgt: a.target } : null; });

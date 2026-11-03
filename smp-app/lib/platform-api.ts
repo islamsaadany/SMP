@@ -9,8 +9,9 @@
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
 import { landingFactsFor } from "./landing-facts.ts";
-import { myWork, tallyMark, setWorkStatus, writeUps, workDetail, workWrite } from "./my-work.ts";
-import { isOffice, type Who } from "./tracker.ts";
+import { myWork, tallyMark, setWorkStatus, writeUps, workDetail, workWrite, addFactsOn, workAdd } from "./my-work.ts";
+import { isOffice, weekOptions, type Who } from "./tracker.ts";
+import { todayIn } from "./day.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -315,6 +316,34 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     if (!door.ok) return no(404, "That client is not available.");
     const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) }, String((body && body.id) || ""), body && body.status);
     return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
+  }
+
+  /* ── ADD A TASK FROM MY TASKS OR HOME (§744) ──────────────────────────
+     What each client offers the add line and the pop-up (its open topics, its
+     office team), asked of every client this person may open and holds an
+     office seat on — the same reach as My tasks' rows (§583); and the add
+     itself, through the same door as workDetail and the Tracker's own rules
+     (lib/my-work.ts workAdd). */
+  if (action === "workAddFacts") {
+    const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
+    const shown: ClientRow[] = FF.visibleClients(world, account, all).filter((row: ClientRow) => FF.mayOpenClient(world, account, row));
+    const leads = await leadsOf(pool, me.id);
+    const out: unknown[] = [];
+    for (const row of shown) {
+      const st = seatAt(me, world.mine as Membership[], row.id);
+      if (!isOffice(st.seat)) continue;
+      const f = await addFactsOn(row as never, { seat: st.seat, personKey: st.personKey, lead: leads.has(row.id) });
+      if (f) out.push(f);
+    }
+    const today = todayIn();
+    return ok({ clients: out, weeks: weekOptions(today).map((w: { word: string; days: string; to: string }) => ({ word: w.word, days: w.days, day: w.to })) });
+  }
+  if (action === "workAdd") {
+    const door = await resolveTenant(pool, me, String((body && body.client) || ""));
+    if (!door.ok) return no(404, "That client is not available.");
+    const who = { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) };
+    const r = await workAdd(door.tenant, who, (body || {}) as Record<string, unknown>);
+    return r.ok ? ok({ id: r.id }) : no(r.status, r.why);
   }
 
   /* ── EVERY TASK'S DETAILS AT ONCE (§728) ──────────────────────────────

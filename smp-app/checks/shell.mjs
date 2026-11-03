@@ -3683,6 +3683,51 @@ await section("4 · Forefront's own pages", async () => {
     } finally {
       await owner.query("DELETE FROM tenants WHERE key = 'plan-top'");
     }
+    /* §744 ADD A TASK: My tasks' line (type, Enter; its client and week come
+       out on focus) and Home's + New task pop-up, each stored in the client's
+       Tracker as one's own, this week by default */
+    {
+      const tkey = (await owner.query("SELECT key FROM tenants WHERE id = $1", [tenantId])).rows[0].key;
+      const stored744 = (t) => owner.query("SELECT owner_key, to_char(due, 'YYYY-MM-DD') AS due FROM tracker_actions WHERE tenant_id = $1 AND title = $2", [tenantId, t]).then((r) => r.rows[0] || null);
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+      await page.waitForSelector("body.ready", { timeout: 8000 }).catch(() => {});
+      await page.locator("#nav button", { hasText: "My tasks" }).click();
+      await page.waitForSelector("[data-mwadd]", { timeout: 8000 }).catch(() => {});
+      const shut744 = await page.evaluate(() => { const c = document.querySelector(".mwadd .mwaddc"); return c ? getComputedStyle(c).display : "gone"; });
+      await page.click("[data-mwadd]");
+      await page.waitForSelector('.mwadd select[data-add="client"] option', { state: "attached", timeout: 5000 }).catch(() => {});
+      const open744 = await page.evaluate(() => { const c = document.querySelector(".mwadd .mwaddc"); return c ? { d: getComputedStyle(c).display, n: c.querySelectorAll("select").length, wk: (c.querySelector('[data-add="week"] option:checked') || {}).textContent || "", own: (c.querySelector('[data-add="owner"] option:checked') || {}).textContent || "" } : null; });
+      check(shut744 === "none" && !!open744 && open744.d === "flex" && open744.n === 4 && open744.wk === "This week" && open744.own === "Me",
+        "My tasks has an add line; a click opens its client, week (this week), topic and owner (Me) (\u00a7744)", JSON.stringify({ shut744, open744 }));
+      await page.selectOption('.mwadd select[data-add="client"]', tkey).catch(() => {});
+      await page.fill("[data-mwadd]", "MW added by the line");
+      await page.press("[data-mwadd]", "Enter");
+      await page.waitForFunction(() => Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), null, { timeout: 8000 }).catch(() => {});
+      const line744 = await page.evaluate(() => ({ row: Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), focus: document.activeElement && document.activeElement.hasAttribute("data-mwadd") }));
+      const db744 = await stored744("MW added by the line");
+      check(line744.row && line744.focus && !!db744 && !!db744.due && !!db744.owner_key,
+        "\u2026Enter stores it in that client's Tracker as one's own, this week, the row comes in and the line is ready for the next (\u00a7744)", JSON.stringify({ line744, db744 }));
+      await page.locator("#nav button", { hasText: "Home" }).click();
+      await page.waitForSelector("[data-newtask]", { timeout: 8000 }).catch(() => {});
+      await page.click("[data-newtask]");
+      await page.waitForSelector(".ntpop", { timeout: 4000 }).catch(() => {});
+      const pop744 = await page.evaluate(() => { const p = document.querySelector(".ntpop"); return p ? { labels: Array.from(p.querySelectorAll("label > span")).map((s) => s.textContent.trim()), focus: document.activeElement && document.activeElement.getAttribute("data-add") } : null; });
+      await page.keyboard.press("Escape");
+      const gone744 = await page.evaluate(() => !document.querySelector(".ntpop") && !document.querySelector(".ntscrim"));
+      check(!!pop744 && pop744.labels.join("|") === "Task|Client|Week|Topic optional|Owner" && pop744.focus === "title" && gone744,
+        "Home's + New task opens a pop-up \u2014 Task, Client, Week, Topic (optional), Owner \u2014 and Escape closes it (\u00a7744)", JSON.stringify({ pop744, gone744 }));
+      await page.click("[data-newtask]");
+      await page.waitForSelector(".ntpop", { timeout: 4000 }).catch(() => {});
+      await page.selectOption('.ntpop select[data-add="client"]', tkey).catch(() => {});
+      await page.fill('.ntpop [data-add="title"]', "MW added by the pop-up");
+      await page.selectOption('.ntpop select[data-add="week"]', "");
+      await page.click(".ntpop [data-create]");
+      await page.waitForFunction(() => !document.querySelector(".ntpop"), null, { timeout: 8000 }).catch(() => {});
+      const db744b = await stored744("MW added by the pop-up");
+      check(!!db744b && db744b.due === null && !(await page.$(".ntpop")),
+        "\u2026Create stores it (No date chosen: no week) and closes the pop-up (\u00a7744)", JSON.stringify(db744b));
+    }
   } finally {
     await owner.query("DELETE FROM tracker_actions WHERE tenant_id = $1", [tenantId]);
     await owner.query("UPDATE tenants SET modules = $1 WHERE id = $2", [JSON.stringify(was), tenantId]);

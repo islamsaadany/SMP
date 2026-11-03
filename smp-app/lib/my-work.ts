@@ -34,6 +34,7 @@ import {
   sameWeek, weekOptions, calendarDay, oneLine, setFields, deleteAction, isOfficeRow, officeRows, shortNames, namesOf,
   progressOf, addProgress, latestProgress, eventsOf, type Progress, stepTally,
   oneProgress, editProgress, deleteProgress, mayChangeProgress, ONLY_WRITER,
+  addAction, listTopics, oneTopic, thursdayOf,
 } from "./tracker.ts";
 
 export type Bucket = "late" | "week" | "later";
@@ -355,6 +356,48 @@ export async function workWrite(t: Client, who: Who, id: string, op: unknown, bo
 
 /* The card's line — "3 open · 1 late", nothing when nothing is open (§368:
    a mark is what is outstanding). */
+/* §744 A TASK ADDED FROM MY TASKS OR HOME (Islam: "my tasks and home should
+   have the ability to add a new task … my tasks can add it as a line but
+   home … a pop-up"). A task lives in one client's Tracker, so the console
+   first asks what each client offers — its open topics and its office team
+   (the owner, you by default) — and then adds it through the Tracker's own
+   addAction, under the Tracker's own rules: somebody on the office's seats
+   owns it, a topic is one the client holds, the week a day this list reads. */
+export type AddFacts = { key: string; name: string; topics: { id: string; name: string }[]; team: { key: string; name: string; me: boolean }[] };
+export async function addFactsOn(t: Client, who: Who): Promise<AddFacts | null> {
+  if (!modulesFor(t.modules).includes("tracker" as never) || !isOffice(who.seat)) return null;
+  try {
+    return await withTenant(t.id, async (c: PoolClient) => {
+      const topics = (await listTopics(c)).filter((x) => !x.closed).map((x) => ({ id: x.id, name: x.name }));
+      const office = await officeRows(c);
+      const short = shortNames(office.map((p) => ({ key: p.key, name: p.name })));
+      const team = office.map((p) => ({ key: p.key, name: short.get(p.key) || p.name, me: p.key === who.personKey }));
+      return { key: t.key, name: t.name, topics, team };
+    });
+  } catch (e) { console.error("addFacts", t.key, e); return null; }
+}
+export async function workAdd(t: Client, who: Who, body: Record<string, unknown>, now: Date = new Date()): Promise<{ ok: true; id: string } | { ok: false; status: number; why: string }> {
+  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Internal Tracker." };
+  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "Only the office adds to a client's Internal Tracker." };
+  const title = oneLine(body.title);
+  if (!title) return { ok: false, status: 400, why: "A task needs a few words." };
+  const today = todayIn(now);
+  let due: string | null;
+  if (body.due === undefined) due = thursdayOf(today);
+  else if (body.due === null || body.due === "") due = null;
+  else { due = calendarDay(body.due); if (!due) return { ok: false, status: 400, why: "That is not a date this list can read." }; }
+  return withTenant(t.id, async (c: PoolClient) => {
+    const by = who.personKey || "";
+    const ownerKey = String(body.ownerKey || by);
+    if (!ownerKey) return { ok: false as const, status: 400, why: "You are not on this client's register yet, so nothing can be owned by you here." };
+    if (!(await isOfficeRow(c, ownerKey))) return { ok: false as const, status: 400, why: "A task is owned by somebody on the office's seats." };
+    let topicId: string | null = null;
+    if (body.topicId) { const tp = await oneTopic(c, String(body.topicId)); if (!tp) return { ok: false as const, status: 400, why: "That topic is not on this client's list any more." }; topicId = tp.id; }
+    const row = await addAction(c, { title, ownerKey, by, due, topicId });
+    return { ok: true as const, id: row.id };
+  });
+}
+
 export function tallyMark(t: ClientTally | undefined): { mark: string; alarm: boolean; tip: string } | null {
   if (!t || !t.open) return null;
   return { mark: t.open + " open" + (t.late ? " · " + t.late + " late" : ""), alarm: t.late > 0,

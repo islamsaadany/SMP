@@ -1723,6 +1723,30 @@
   .mwlist .mwrow:hover{ box-shadow:none }
   .mwlist .mwsec:last-child .mwrow:last-child{ border-bottom:0 }
   .mwsearch{ width:170px; padding:5px 10px; font-size:13px }
+  /* §744 ADD A TASK: My tasks' line (type and Enter; its client, week, topic
+     and owner come out on focus) and Home's + New task pop-up — design-mockups/
+     internal-tracker/2026-11-03_steps-final.html */
+  .mwadd{ display:flex; align-items:center; gap:10px; margin:10px 14px 12px; border:1px solid var(--line-soft); border-radius:9px; padding:0 12px; background:var(--ground) }
+  .mwadd:focus-within{ background:var(--surface); border-color:var(--line) }
+  .mwadd .pl{ color:var(--ink-3) }
+  .mwadd input{ flex:1; min-width:0; border:0; background:none; outline:none; padding:9px 0; font-family:inherit; font-size:14.5px; color:var(--ink) }
+  .mwadd .mwaddc{ display:none; gap:6px; align-items:center; flex-wrap:wrap }
+  .mwadd:focus-within .mwaddc{ display:flex }
+  .mwadd select{ border:0; background:var(--surface-2); border-radius:6px; padding:3px 6px; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--ink-2); max-width:150px }
+  .mwadd[aria-busy="true"]{ opacity:.6 }
+  .newtask{ border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:5px 10px; font-family:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer }
+  .newtask:hover{ border-color:var(--mw-blue, #2563eb); color:var(--mw-blue, #2563eb) }
+  .ntscrim{ position:fixed; inset:0; background:rgba(20,28,43,.35); z-index:60 }
+  .ntpop{ position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:61; width:min(460px, calc(100vw - 32px)); background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:14px; box-shadow:0 24px 60px rgba(20,28,43,.3); padding:18px 20px; display:grid; gap:12px }
+  .ntpop .poph{ display:flex; align-items:center }
+  .ntpop .poph h3{ margin:0; font-size:17px }
+  .ntpop .poph .x{ margin-left:auto; border:0; background:none; font-size:20px; color:var(--ink-3); cursor:pointer }
+  .ntpop label{ display:grid; gap:4px; font-size:12.5px; font-weight:600; color:var(--ink-2) }
+  .ntpop label small{ font-weight:400; color:var(--ink-3) }
+  .ntpop input, .ntpop select{ border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-family:inherit; font-size:14px; background:var(--surface); color:var(--ink); font-weight:400 }
+  .ntpop .two{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+  .ntpop .popf{ display:flex; justify-content:flex-end; gap:8px; margin-top:4px }
+  .ntpop .err{ margin:0 }
   /* §725 MY TASKS' BAR IS THE TRACKER'S QUIET BAR (§723): no tile, the count
      a plain figure, the views (By date · By client) as plain words right
      after it, Search an icon that opens its box, Done and Show small words */

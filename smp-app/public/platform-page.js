@@ -2999,7 +2999,9 @@
       }
       var noneOpen = (j.who && !j.who.self ? j.who.name + " has" : "You have") + " no open actions in any client's Tracker.";
       if (!rows.length && !cases.length && !doneRows.length) {
+        if (!j.who || j.who.self) body.appendChild(mwAddLine(said));
         body.appendChild(el("p", "muted", noneOpen));
+        mwAddFocus();
         return;
       }
 
@@ -3039,6 +3041,8 @@
       };
       search.addEventListener("input", find);
       card.appendChild(hd);
+      /* §744 the add line, on one's own list only */
+      if (!j.who || j.who.self) card.appendChild(mwAddLine(said));
 
       /* A PRESS IS ANSWERED BEFORE THE ROW CHANGES (§124): the row holds
          (aria-busy) until the server's write lands, and is then drawn again
@@ -3219,6 +3223,7 @@
       if (pick) hd.appendChild(pick);
       card.appendChild(list);
       body.appendChild(card);
+      mwAddFocus();
       draw();
       setCnt();
       mwPrefetch(rows.concat(doneRows));
@@ -3392,6 +3397,173 @@
     card.appendChild(body);
     host.appendChild(card);
     return { card: card, head: hd, body: body, count: function (n) { cnt.textContent = String(n); cnt.hidden = false; } };
+  }
+  /* ── ADD A TASK (§744) ─────────────────────────────────────────────
+     Islam, 2026-11-03: "my tasks and home should have the ability to add a
+     new task … my tasks can add it as a line but home … a pop up". What each
+     client offers (open topics, office team) and the weeks are read once
+     (workAddFacts) and kept for the page; the add goes through the Tracker's
+     own rules (workAdd). The client last added to is kept on this device. */
+  var ADDF = null;
+  function addFacts() {
+    if (!ADDF) ADDF = post({ action: "workAddFacts" }).then(function (j) { if (!j || !j.ok) { ADDF = null; throw new Error((j && j.error) || "Could not read your clients."); } return j; });
+    return ADDF;
+  }
+  function addLastClient(set) {
+    try { if (set) localStorage.setItem("smp.add.client", set); return localStorage.getItem("smp.add.client") || ""; } catch (e) { return set || ""; }
+  }
+  function addOpt(sel, value, words, on) {
+    var o = el("option", null, words);
+    o.value = value;
+    if (on) o.selected = true;
+    sel.appendChild(o);
+  }
+  /* the client's selects (topic, owner) follow the client chosen */
+  function addFill(f, cl, topic, owner) {
+    topic.textContent = ""; owner.textContent = "";
+    addOpt(topic, "", "No topic", true);
+    var c = (f.clients || []).filter(function (x) { return x.key === cl; })[0];
+    if (!c) return;
+    c.topics.forEach(function (t) { addOpt(topic, t.id, t.name, false); });
+    c.team.forEach(function (p) { addOpt(owner, p.key, p.me ? "Me" : p.name, p.me); });
+  }
+  function addSelects(f, wrap, lab) {
+    var mk = function (name) { var s = el("select"); s.setAttribute("aria-label", name); s.setAttribute("data-add", name.toLowerCase()); return s; };
+    var client = mk("Client"), week = mk("Week"), topic = mk("Topic"), owner = mk("Owner");
+    var last = addLastClient();
+    var keys = (f.clients || []).map(function (c) { return c.key; });
+    (f.clients || []).forEach(function (c) { addOpt(client, c.key, c.name, c.key === last); });
+    if (keys.indexOf(last) < 0 && keys.length) client.value = keys[0];
+    (f.weeks || []).forEach(function (w, i) { addOpt(week, w.day, w.word, i === 0); });
+    addOpt(week, "", "No date", false);
+    addFill(f, client.value, topic, owner);
+    client.addEventListener("change", function () { addFill(f, client.value, topic, owner); });
+    [["Client", client], ["Week", week], ["Topic", topic], ["Owner", owner]].forEach(function (x) { wrap.appendChild(lab ? lab(x[0], x[1]) : x[1]); });
+    return { client: client, week: week, topic: topic, owner: owner,
+      body: function (title) { return { action: "workAdd", client: client.value, title: title, due: week.value, topicId: topic.value || undefined, ownerKey: owner.value || undefined }; } };
+  }
+  /* MY TASKS: a line under the card's head */
+  function mwAddLine(said) {
+    var line = el("div", "mwadd");
+    line.appendChild(el("span", "pl", "+"));
+    var inp = el("input");
+    inp.placeholder = "Add a task and press Enter";
+    inp.setAttribute("aria-label", "Add a task");
+    inp.setAttribute("data-mwadd", "");
+    line.appendChild(inp);
+    var chips = el("span", "mwaddc");
+    line.appendChild(chips);
+    var sel = null;
+    addFacts().then(function (f) {
+      if (!(f.clients || []).length) { line.hidden = true; return; }
+      sel = addSelects(f, chips, null);
+    }).catch(function () { line.hidden = true; });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || !sel || line.getAttribute("aria-busy") === "true") return;
+      var t = inp.value.trim();
+      if (!t) return;
+      line.setAttribute("aria-busy", "true");
+      post(sel.body(t)).then(function (a) {
+        line.removeAttribute("aria-busy");
+        if (!a.ok) { said.textContent = a.error || "That did not save — try again."; said.hidden = false; return; }
+        addLastClient(sel.client.value);
+        WORK.refocusAdd = true;
+        go("mywork");
+      }).catch(function (e2) {
+        line.removeAttribute("aria-busy");
+        if (String(e2.message) === "sign in") return;
+        said.textContent = "Could not reach the server. Nothing was added — try again."; said.hidden = false;
+      });
+    });
+    return line;
+  }
+  /* HOME: + New task opens a small pop-up; Create, Cancel, Escape */
+  function hoNewTask(after) {
+    var b = el("button", "newtask", "+ New task");
+    b.type = "button";
+    b.setAttribute("data-newtask", "");
+    b.addEventListener("click", function () {
+      addFacts().then(function (f) { ntOpen(f, b, after); }).catch(function () { /* nothing to add to */ });
+    });
+    return b;
+  }
+  function ntOpen(f, opener, after) {
+    var scrim = el("div", "ntscrim"), pop = el("div", "ntpop");
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-modal", "true");
+    pop.setAttribute("aria-labelledby", "nth");
+    var hd = el("div", "poph"), h = el("h3", null, "New task");
+    h.id = "nth";
+    var x = el("button", "x", "×");
+    x.type = "button"; x.setAttribute("aria-label", "Close");
+    hd.appendChild(h); hd.appendChild(x);
+    pop.appendChild(hd);
+    var lab = function (words, ctl, small) {
+      var l = el("label");
+      var sp = el("span", null, words);
+      if (small) { sp.appendChild(document.createTextNode(" ")); sp.appendChild(el("small", null, small)); }
+      l.appendChild(sp); l.appendChild(ctl);
+      return l;
+    };
+    var title = el("input");
+    title.placeholder = "What needs doing";
+    title.setAttribute("data-add", "title");
+    pop.appendChild(lab("Task", title));
+    var held = el("div");
+    var sel = addSelects(f, held, function (w, c) { return lab(w, c, w === "Topic" ? "optional" : ""); });
+    var labs = held.children;
+    var r1 = el("div", "two"), r2 = el("div", "two");
+    r1.appendChild(labs[0]); r1.appendChild(labs[0]);
+    r2.appendChild(labs[0]); r2.appendChild(labs[0]);
+    pop.appendChild(r1); pop.appendChild(r2);
+    var said = el("p", "err");
+    said.hidden = true;
+    pop.appendChild(said);
+    var ft = el("div", "popf");
+    var cancel = el("button", "btn", "Cancel"), create = el("button", "btn solid", "Create");
+    cancel.type = "button"; create.type = "button";
+    create.setAttribute("data-create", "");
+    ft.appendChild(cancel); ft.appendChild(create);
+    pop.appendChild(ft);
+    var close = function () {
+      document.removeEventListener("keydown", esc, true);
+      scrim.remove(); pop.remove();
+      if (opener) opener.focus();
+    };
+    var esc = function (e) { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); } };
+    document.addEventListener("keydown", esc, true);
+    scrim.addEventListener("click", close);
+    x.addEventListener("click", close);
+    cancel.addEventListener("click", close);
+    var make = function () {
+      var t = title.value.trim();
+      if (!t) { title.focus(); return; }
+      if (create.disabled) return;
+      create.disabled = true;
+      post(sel.body(t)).then(function (a) {
+        create.disabled = false;
+        if (!a.ok) { said.textContent = a.error || "That did not save — try again."; said.hidden = false; return; }
+        addLastClient(sel.client.value);
+        close();
+        if (after) after();
+      }).catch(function (e) {
+        create.disabled = false;
+        if (String(e.message) === "sign in") return;
+        said.textContent = "Could not reach the server. Nothing was added — try again."; said.hidden = false;
+      });
+    };
+    create.addEventListener("click", make);
+    title.addEventListener("keydown", function (e) { if (e.key === "Enter") make(); });
+    document.body.appendChild(scrim);
+    document.body.appendChild(pop);
+    title.focus();
+  }
+  /* after an add, the line is ready for the next one */
+  function mwAddFocus() {
+    if (!WORK.refocusAdd) return;
+    WORK.refocusAdd = false;
+    var i = document.querySelector("[data-mwadd]");
+    if (i) i.focus();
   }
   function hoLink(words, press) {
     var a = el("button", "holink", words);
@@ -3615,6 +3787,9 @@
     var cc = hoCard(top, "Your clients", NAV_ICON.clients, "clients");
     cc.head.appendChild(hoLink("All clients →", function () { go("clients", "row"); }));
     var tc = hoCard(top, "Your tasks", HO_TASKS, "tasks");
+    addFacts().then(function (f) {
+      if ((f.clients || []).length && TAB === "home") tc.head.appendChild(hoNewTask(function () { go("home"); }));
+    }).catch(function () { /* no client to add to: no button */ });
     var sc = hoCard(page, "Track Record", NAV_ICON.memory, "cases");
     sc.card.classList.add("hosec");
     sc.head.appendChild(hoLink("Track Record →", function () { go("memory", "row"); }));

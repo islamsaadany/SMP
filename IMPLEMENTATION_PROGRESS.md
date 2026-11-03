@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — Steps over progress, a tick fills the week's box, add a task from My tasks and Home (§744).** Steps sit over This week in the opened task (no Steps tab); a tick writes "Done: <step>" into the box; the weekly check's steps are review-only; My tasks has an add line and Home a + New task pop-up (workAddFacts, workAdd). Tracker 390/0.
+
 **2026-11-03 — Steps inside a task (§743).** A Steps tab in the opened task, the count on the row (Tracker, My tasks, Home), the steps in the weekly check; first tick → In progress; all ticked asks Done. Migration 037. Tracker 388/0; shell 563 ok / main's 11.
 
 **2026-11-03 — Another client opens on the module in view (§742).** The client menu carries the module; the door sends a client without it to Strategy. Tracker 379/0.

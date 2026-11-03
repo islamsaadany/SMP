@@ -1479,6 +1479,12 @@ try {
       return { ov: cs.overflowY, foot: Math.round(r.getBoundingClientRect().top + parseFloat(cs.maxHeight)), ih: innerHeight, boxOver: o.scrollHeight - o.clientHeight, boxFoot: Math.round(o.getBoundingClientRect().bottom) }; });
     check("in the meeting the band and the check's bar stay pinned; the rail and the box may reach the foot of the screen, and scroll inside themselves only when taller than that (§736, §737)",
       fit735.pin === "sticky" && room737.ov === "auto" && room737.foot >= room737.ih - 24 && room737.foot <= room737.ih && (room737.boxOver <= 1 || room737.boxFoot >= room737.ih - 24), JSON.stringify({ fit735, room737 }));
+    /* §738: a taller window — the rail's room follows it to the new foot */
+    const vp738 = pg.viewportSize();
+    await pg.setViewportSize({ width: vp738.width, height: vp738.height + 200 }); await pg.waitForTimeout(150);
+    const tall738 = await pg.evaluate(() => { const r = document.querySelector(".mlist"); return { foot: Math.round(r.getBoundingClientRect().top + parseFloat(getComputedStyle(r).maxHeight)), ih: innerHeight }; });
+    await pg.setViewportSize(vp738); await pg.waitForTimeout(150);
+    check("...and when the window is made taller, the room follows it to the new foot (§738)", tall738.foot >= tall738.ih - 24 && tall738.foot <= tall738.ih, JSON.stringify(tall738));
     await asTenant(A, (c) => addProgress(c, mTask, "Sheet is here https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1.", "noran"));
     await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
     const tag733 = await pg.evaluate(() => { const a = document.querySelector(".mopen .mwrote a.lktag"); return a ? { t: a.textContent, href: a.getAttribute("href"), tgt: a.target } : null; });

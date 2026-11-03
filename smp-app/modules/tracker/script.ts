@@ -946,9 +946,12 @@ export const APP_JS = `(function () {
     document.documentElement.style.setProperty("--pinh", (pn && getComputedStyle(pn).position === "sticky" ? pn.offsetHeight : 0) + "px");
     /* §737: the meeting's two boxes get the room from where they start to
        the foot of the screen, measured on the page, so they reach it */
+    /* §738: only where they start is measured; the height to the screen's
+       foot is the stylesheet's (100dvh), so it follows the window itself */
     var mt = document.querySelector(".meet");
-    if (mt) document.documentElement.style.setProperty("--meeth", Math.max(320, Math.floor(window.innerHeight - (mt.getBoundingClientRect().top + window.scrollY) - 16)) + "px");
+    if (mt) document.documentElement.style.setProperty("--meettop", Math.round(mt.getBoundingClientRect().top + window.scrollY) + "px");
   }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(barFoot);
   barFoot();
   if (tb && typeof ResizeObserver === "function") new ResizeObserver(barFoot).observe(tb);
   window.addEventListener("resize", barFoot);

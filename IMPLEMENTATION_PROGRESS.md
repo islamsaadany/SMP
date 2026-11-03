@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-03 — The meeting's room follows the window itself (§738).** Only the top is measured; the height is 100dvh's. Tracker 376/0.
+
 **2026-11-03 — The meeting's two boxes reach the foot of the screen (§737).** The room is measured; inner scroll only when taller than it. Tracker 375/0.
 
 **2026-11-03 — In the meeting only the rail scrolls (§736).** The band and bar pinned again (§735 taken back); the rail scrolls in itself, the box beside it. Tracker 375/0.

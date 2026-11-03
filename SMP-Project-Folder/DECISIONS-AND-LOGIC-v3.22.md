@@ -71119,3 +71119,9 @@ Nothing it does is gone; it is quieter:
 **Checked**: `checks/tracker.mjs` **375 passed, 0 failed** — the §736 check now asks that the rail's cap ends at the screen's foot (within 24px) and that the box scrolls only when taller than the room; §733's check no longer asks for sticky. Looked at on the real page.
 
 **§737 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+## §738 — The meeting's room follows the window itself (2026-11-03)
+
+**Reported** (Islam): "the left rail has space under the rail in the page but the rail is not extended to the page why is that?" — on the live page the rail stopped ~170px above the screen's foot. In the test browser §737's measure was right on load, on a resize and when the check was opened from the list; the live screen's rail matched a window ~170px shorter than the one it was in, so the measured height had gone stale (taken while the window was shorter, and not taken again). Made robust rather than chased: only where the two boxes START is measured (`--meettop`, on load, every redraw, resize, and once the fonts are in); the height to the foot is the stylesheet's own — `calc(100dvh − --meettop − 16px)` (100vh where dvh is unknown) — so any change of the window's height is followed at once, with nothing waiting on an event.
+
+**Checked**: `checks/tracker.mjs` **376 passed, 0 failed** — new: the window made 200px taller, the rail's room reaches the new foot.

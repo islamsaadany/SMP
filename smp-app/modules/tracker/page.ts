@@ -766,11 +766,15 @@ const LOOK = `
 /* §737 (Islam: "the right box shouldn't have an inner scroll unless it's
    getting out of the screen and same for the left … as long we have space in
    the page the banner should fit the page height"): the room is MEASURED —
-   from where the two boxes start to the foot of the screen (--meeth, set by
+   from where the two boxes start to the foot of the screen (--meettop, §738, set by
    the script) — not worked out from the pin's height, which counted the
    pin's own padding and left a strip of page unused. Each box is as tall as
    it needs up to that room; only a taller one scrolls inside itself. */
-.meet .mlist,.meet .mopen{max-height:var(--meeth,calc(100vh - 280px));overflow:auto;overscroll-behavior:contain}
+/* §738: only where the boxes START is measured (--meettop); the screen's
+   height is the browser's own (100dvh, 100vh where it is not known), so a
+   window made taller or shorter after the measure is followed at once —
+   nothing waits on a resize event, nothing goes stale */
+.meet .mlist,.meet .mopen{max-height:calc(100vh - var(--meettop,280px) - 16px);max-height:calc(100dvh - var(--meettop,280px) - 16px);overflow:auto;overscroll-behavior:contain}
 @media (max-width:760px),(max-height:600px){.meet .mlist,.meet .mopen{max-height:none;overflow:visible}}
 /* §733: a link in a note, read short — a small tag named after its site */
 .lktag{display:inline-flex;align-items:center;gap:4px;color:var(--carry);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:.88em;line-height:1.55;vertical-align:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}

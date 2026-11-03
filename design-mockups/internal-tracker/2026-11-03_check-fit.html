@@ -1,0 +1,110 @@
+<title>Weekly Check Fit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* How the weekly check fills the screen. Islam: "the right box shouldn't
+   have an inner scroll unless it's getting out of the screen and same for
+   the left as well. as long we have space in the page the banner should fit
+   the page height". Each frame is a screen; the band and the check's bar
+   are pinned at its top. Example tasks. */
+:root{--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F3F5F8;--surface:#FFF;--surface-2:#EDF0F5;
+  --blue:#1F5FBF;--blue-bg:#EAF2FB;--navy:#22304F;--band:#1B2B4F;--gold:#E8B04A;--bad:#B23025;--good:#2F6B4F;--d0:#8A97AB;--d1:#E0B300;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--band:#16233F;--bad:#E8776B;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--band:#16233F;--bad:#E8776B;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--surface-2);color:var(--ink);font:400 14px/1.5 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.pg{max-width:1180px;margin:0 auto;padding-block:24px 48px;display:grid;gap:14px}
+.vs{display:inline-flex;flex-wrap:wrap;background:var(--surface);border-radius:8px;padding:3px;justify-self:start;border:1px solid var(--line)}
+.vs button{border:0;background:none;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--ink-2)}
+.vs button[aria-pressed="true"]{background:var(--surface-2);color:var(--ink);font-weight:600}
+.note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0;max-width:90ch}
+.note b{color:var(--ink)}.note p{margin:0}.note p+p{margin-top:6px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cap{font-size:12.5px;font-weight:600;color:var(--ink-2);margin:0 0 6px}
+/* a screen */
+.scr{height:560px;border:2px solid var(--ink-3);border-radius:10px;background:var(--ground);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.scr .tb{height:22px;background:var(--surface);border-bottom:1px solid var(--line);flex:none}
+.scr .band{margin:8px 10px 0;height:48px;border-radius:8px;background:var(--band);color:#fff;padding:7px 12px;flex:none;font-size:11px}
+.scr .band b{display:block;font:600 14px/1.2 Georgia,serif}
+.scr .bar{margin:8px 10px 0;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--ink-3);flex:none}
+.scr .bar b{color:var(--ink);font:700 12px/1 Georgia,serif;margin-left:6px}
+.scr .bar .bk{color:var(--blue);font-weight:600}
+.scr .meet{display:grid;grid-template-columns:40% 1fr;gap:8px;margin:8px 10px 10px;min-height:0;align-items:start}
+.rail,.box{background:var(--surface);border:1px solid var(--line);border-radius:9px;overflow:auto;font-size:11px}
+.rail .h{display:flex;font-weight:600;color:var(--ink-2);padding:7px 9px 2px}.rail .h span{margin-left:auto;font-weight:400;color:var(--ink-3)}
+.rail .tbar{height:2px;background:var(--line-2);margin:3px 9px 4px}
+.rail .it{display:flex;gap:6px;align-items:center;padding:3px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail .it i{width:9px;height:9px;border:1px solid var(--line);border-radius:50%;flex:none}
+.rail .it.on{background:var(--blue-bg)}.rail .it.on i{border:3px solid var(--blue)}
+.box{padding:10px 12px}
+.box .eb{color:var(--ink-3);font-size:10px}
+.box h4{margin:2px 0 6px;font-size:13px;line-height:1.25}
+.box .in{border:1px solid var(--line);border-radius:6px;padding:5px 7px;color:var(--ink-3)}
+.box .row{display:flex;gap:4px;align-items:center;margin-top:6px}
+.box .ch{border:1px solid var(--line);border-radius:999px;padding:1px 6px;font-size:10px}
+.box .sv{margin-left:auto;background:var(--navy);color:#fff;border-radius:5px;padding:3px 8px;font-size:10px;font-weight:600}
+.box .ph{margin-top:8px;font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--ink-3)}
+.box .e{border-left:1px solid var(--line-2);margin:4px 0 0 3px;padding-left:8px}
+.box .e div{margin-bottom:5px}
+.box .e small{display:block;color:var(--ink-3);font-size:9.5px}
+.box .ft{display:flex;border-top:1px solid var(--line-2);margin-top:6px;padding-top:5px;color:var(--ink-3)}.box .ft span:last-child{margin-left:auto}
+.gap{position:absolute;left:10px;right:10px;border:1.5px dashed var(--bad);border-radius:6px;display:grid;place-items:center;color:var(--bad);font-size:11px;font-weight:600;background:color-mix(in srgb,var(--bad) 6%,transparent)}
+.sb{position:absolute;width:5px;border-radius:3px;background:var(--ink-3);opacity:.55}
+@media (max-width:820px){.pair{grid-template-columns:1fr}}
+</style>
+<div class="pg">
+  <div class="vs" role="group" aria-label="How much is on the task">
+    <button type="button" data-c="short" aria-pressed="true">A task that fits</button>
+    <button type="button" data-c="long" aria-pressed="false">A task with a long history</button>
+  </div>
+  <div class="note" id="note"></div>
+  <div class="pair">
+    <div><p class="cap">Today</p><div class="scr" id="s1"></div></div>
+    <div><p class="cap">Proposed</p><div class="scr" id="s2"></div></div>
+  </div>
+</div>
+<script>
+const S={c:'short'};
+const T=['Review the two HR projects & Launch Retention Analytics','Finance Adjust Project that is missing Milestones','Confirm IT Project updates with IT Function head','Transformation Project Refinement','Transformation project Confirmation (Mostafa)','Reporting for Supply Chain (AbdelAzim)','Finance Reporting','CX one Project that Has 8 deliverables dropped','Risk Team (Mena with Men3em) we need to align'];
+const T2=['Develop Monthly reports across Units','Board pack template','KPI dictionary review','Dashboards for Retail','Data owners list'];
+function rail(){
+ const it=(t,on)=>'<div class="it'+(on?' on':'')+'"><i></i>'+t+'</div>';
+ return '<div class="h">Functions<span>0 of 9</span></div><div class="tbar"></div>'+T.map((t,i)=>it(t,i===4)).join('')+
+  '<div class="h" style="margin-top:6px">Reporting<span>0 of 5</span></div><div class="tbar"></div>'+T2.map(t=>it(t,false)).join('')+
+  '<div class="h" style="margin-top:6px">Units<span>0 of 3</span></div><div class="tbar"></div>'+['Logistics Strategy Revamp','UNITS plan require refinement','Units KPIs'].map(t=>it(t,false)).join('');
+}
+function box(){
+ const n=S.c==='long'?9:1;
+ let e='';for(let i=0;i<n;i++)e+='<div>'+(i?'Followed up with the BU heads on the measures; two still open.':'Sent him to book a meeting, to review with him the directions, not yet responsive')+'<small>Omar · '+(i?'W'+(4-i%4)+' Oct':'last week')+'</small></div>';
+ return '<div class="eb">Functions · Omar · This week</div><h4>Transformation project Confirmation (Mostafa)</h4><div class="in">What happened this week?</div>'+
+  '<div class="row"><span class="ch">Not started</span><span class="ch">In progress</span><span class="ch">Done</span><span class="sv">Save and next</span></div>'+
+  '<div class="ph">PROGRESS SO FAR</div><div class="e">'+e+'</div><div class="ft"><span>← Previous</span><span>Skip →</span></div>';
+}
+function screen(id,mode){
+ const s=document.getElementById(id);
+ s.innerHTML='<div class="tb"></div><div class="band">THIS WEEK · 1 – 5 NOV<b>Internal Tracker</b></div><div class="bar"><span class="bk">‹ Back to the list</span><b>Weekly check</b> &nbsp;This week · 1 – 5 Nov</div>'+
+  '<div class="meet"><div class="rail">'+rail()+'</div><div class="box">'+box()+'</div></div>';
+ const meet=s.querySelector('.meet'),r=s.querySelector('.rail'),b=s.querySelector('.box');
+ const top=meet.getBoundingClientRect().top-s.getBoundingClientRect().top;
+ const room=s.clientHeight-top-10;
+ const cap=mode==='today'?room-70:room;   /* today: the cap was worked out short of the screen */
+ r.style.maxHeight=cap+'px';b.style.maxHeight=cap+'px';
+ if(mode==='today'){
+  const g=document.createElement('div');g.className='gap';g.style.top=(top+cap+4)+'px';g.style.height=(room-cap-2)+'px';g.textContent='Unused';s.appendChild(g);
+ }
+ [r,b].forEach(el=>{ if(el.scrollHeight>el.clientHeight+1){const sb=document.createElement('div');sb.className='sb';const rb=el.getBoundingClientRect(),sr=s.getBoundingClientRect();sb.style.left=(rb.right-sr.left-8)+'px';sb.style.top=(rb.top-sr.top+6)+'px';sb.style.height=Math.max(30,(el.clientHeight*el.clientHeight/el.scrollHeight)-12)+'px';s.appendChild(sb);} });
+}
+const NOTES={
+ short:'<p><b>A task that fits.</b> <b>Today</b> the rail and the box stop short of the screen\'s foot (the red strip, unused), so the box gets a scroll it does not need. <b>Proposed</b>: the room is measured from where the two boxes start to the foot of the screen. The box is only as tall as its content, so it has no inner scroll. The rail, longer than the room, reaches the foot and scrolls inside itself. The band and the check\'s bar stay pinned at the top; the page itself does not scroll.</p>',
+ long:'<p><b>A task with a long history.</b> Proposed: the box grows to the foot of the screen and only then scrolls inside itself, as the rail does. Today it would start scrolling sooner, above the unused strip.</p>'};
+function draw(){
+ screen('s1','today');screen('s2','new');
+ document.getElementById('note').innerHTML=NOTES[S.c];
+ document.querySelectorAll('[data-c]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===S.c)));
+}
+document.addEventListener('click',e=>{const c=e.target.closest('[data-c]');if(c){S.c=c.dataset.c;draw()}});
+window.addEventListener('resize',draw);
+draw();
+</script>

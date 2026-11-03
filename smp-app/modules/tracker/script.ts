@@ -944,6 +944,10 @@ export const APP_JS = `(function () {
     /* §733: the meeting's box sticks under the pinned band and bar */
     var pn = document.querySelector(".pin");
     document.documentElement.style.setProperty("--pinh", (pn && getComputedStyle(pn).position === "sticky" ? pn.offsetHeight : 0) + "px");
+    /* §737: the meeting's two boxes get the room from where they start to
+       the foot of the screen, measured on the page, so they reach it */
+    var mt = document.querySelector(".meet");
+    if (mt) document.documentElement.style.setProperty("--meeth", Math.max(320, Math.floor(window.innerHeight - (mt.getBoundingClientRect().top + window.scrollY) - 16)) + "px");
   }
   barFoot();
   if (tb && typeof ResizeObserver === "function") new ResizeObserver(barFoot).observe(tb);

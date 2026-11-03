@@ -1473,14 +1473,20 @@ try {
     /* §736: the band and the bar stay pinned; the rail scrolls in itself */
     const fit735 = await pg.evaluate(() => { const o = document.querySelector(".mopen"), pn = document.querySelector(".pin");
       return { pin: pn ? getComputedStyle(pn).position : "", over: o.scrollHeight - o.clientHeight, room: innerHeight, h: o.offsetHeight }; });
-    const rail736 = await pg.evaluate(() => { const r = document.querySelector(".mlist"), cs = getComputedStyle(r); return { ov: cs.overflowY, pos: cs.position, mh: cs.maxHeight }; });
-    check("in the meeting the band and the check's bar stay pinned, the rail scrolls inside itself, and the box scrolls only when taller than the room left (§736)",
-      fit735.pin === "sticky" && rail736.ov === "auto" && rail736.pos === "sticky" && rail736.mh !== "none" && (fit735.over <= 1 || fit735.h >= fit735.room - 300), JSON.stringify({ fit735, rail736 }));
+    /* §737: the room is measured — each box may reach the foot of the screen,
+       and scrolls inside itself only when taller than that */
+    const room737 = await pg.evaluate(() => { const r = document.querySelector(".mlist"), o = document.querySelector(".mopen"), cs = getComputedStyle(r);
+      return { ov: cs.overflowY, foot: Math.round(r.getBoundingClientRect().top + parseFloat(cs.maxHeight)), ih: innerHeight, boxOver: o.scrollHeight - o.clientHeight, boxFoot: Math.round(o.getBoundingClientRect().bottom) }; });
+    check("in the meeting the band and the check's bar stay pinned; the rail and the box may reach the foot of the screen, and scroll inside themselves only when taller than that (§736, §737)",
+      fit735.pin === "sticky" && room737.ov === "auto" && room737.foot >= room737.ih - 24 && room737.foot <= room737.ih && (room737.boxOver <= 1 || room737.boxFoot >= room737.ih - 24), JSON.stringify({ fit735, room737 }));
     await asTenant(A, (c) => addProgress(c, mTask, "Sheet is here https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1.", "noran"));
     await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
     const tag733 = await pg.evaluate(() => { const a = document.querySelector(".mopen .mwrote a.lktag"); return a ? { t: a.textContent, href: a.getAttribute("href"), tgt: a.target } : null; });
-    check("the box stays in view beside the rail (sticky), and a link in this week's note reads as a small Google Sheets tag opening the full address in a new tab (§733)",
-      stick733 === "sticky" && !!tag733 && tag733.t === "Google Sheets" && tag733.href === "https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1" && tag733.tgt === "_blank", JSON.stringify({ stick733, tag733 }));
+    /* §737: the page no longer scrolls in the meeting (the rail and the box
+       scroll inside themselves within the room measured to the screen's
+       foot), so the box needs no sticking to stay in view */
+    check("the box stays in view beside the rail, and a link in this week's note reads as a small Google Sheets tag opening the full address in a new tab (§733, §737)",
+      !!stick733 && !!tag733 && tag733.t === "Google Sheets" && tag733.href === "https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1" && tag733.tgt === "_blank", JSON.stringify({ stick733, tag733 }));
     /* put the action back as it was: the walk-through above is not what the
        presses after it are about */
     const mWas = await asTenant(A, (c) => progressOf(c, mTask));

@@ -763,8 +763,15 @@ const LOOK = `
    rail scrolls inside itself and the box stands beside it, both in the
    height that is left — the page itself does not scroll. The box scrolls
    inside itself only when it is taller than that room. */
-.meet .mlist,.meet .mopen{position:sticky;top:calc(var(--tbh,41px) + var(--pinh,0px) + 12px);max-height:calc(100vh - var(--tbh,41px) - var(--pinh,0px) - 24px);overflow:auto;overscroll-behavior:contain}
-@media (max-width:760px),(max-height:600px){.meet .mlist,.meet .mopen{position:static;max-height:none;overflow:visible}}
+/* §737 (Islam: "the right box shouldn't have an inner scroll unless it's
+   getting out of the screen and same for the left … as long we have space in
+   the page the banner should fit the page height"): the room is MEASURED —
+   from where the two boxes start to the foot of the screen (--meeth, set by
+   the script) — not worked out from the pin's height, which counted the
+   pin's own padding and left a strip of page unused. Each box is as tall as
+   it needs up to that room; only a taller one scrolls inside itself. */
+.meet .mlist,.meet .mopen{max-height:var(--meeth,calc(100vh - 280px));overflow:auto;overscroll-behavior:contain}
+@media (max-width:760px),(max-height:600px){.meet .mlist,.meet .mopen{max-height:none;overflow:visible}}
 /* §733: a link in a note, read short — a small tag named after its site */
 .lktag{display:inline-flex;align-items:center;gap:4px;color:var(--carry);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:.88em;line-height:1.55;vertical-align:1px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .lktag:hover,.lktag:focus-visible{background:var(--wk);outline:none}

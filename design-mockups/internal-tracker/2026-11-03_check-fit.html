@@ -22,6 +22,9 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0;max-width:90ch}
 .note b{color:var(--ink)}.note p{margin:0}.note p+p{margin-top:6px}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.sl{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;justify-self:start;flex-wrap:wrap}
+.sl input{accent-color:var(--blue);width:220px;max-width:100%}
+.sl small{color:var(--ink-3)}
 .cap{font-size:12.5px;font-weight:600;color:var(--ink-2);margin:0 0 6px}
 /* a screen */
 .scr{height:560px;border:2px solid var(--ink-3);border-radius:10px;background:var(--ground);overflow:hidden;display:flex;flex-direction:column;position:relative}
@@ -59,14 +62,15 @@ button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
     <button type="button" data-c="short" aria-pressed="true">A task that fits</button>
     <button type="button" data-c="long" aria-pressed="false">A task with a long history</button>
   </div>
+  <label class="sl">Window height <input type="range" id="wh" min="460" max="760" value="560" aria-label="Window height"> <span id="whv">560px</span> <small>— drag after the page has loaded</small></label>
   <div class="note" id="note"></div>
   <div class="pair">
-    <div><p class="cap">Today</p><div class="scr" id="s1"></div></div>
-    <div><p class="cap">Proposed</p><div class="scr" id="s2"></div></div>
+    <div><p class="cap" id="c1">Today</p><div class="scr" id="s1"></div></div>
+    <div><p class="cap" id="c2">Proposed</p><div class="scr" id="s2"></div></div>
   </div>
 </div>
 <script>
-const S={c:'short'};
+const S={c:'short',h:560,loadH:560};
 const T=['Review the two HR projects & Launch Retention Analytics','Finance Adjust Project that is missing Milestones','Confirm IT Project updates with IT Function head','Transformation Project Refinement','Transformation project Confirmation (Mostafa)','Reporting for Supply Chain (AbdelAzim)','Finance Reporting','CX one Project that Has 8 deliverables dropped','Risk Team (Mena with Men3em) we need to align'];
 const T2=['Develop Monthly reports across Units','Board pack template','KPI dictionary review','Dashboards for Retail','Data owners list'];
 function rail(){
@@ -89,17 +93,27 @@ function screen(id,mode){
  const meet=s.querySelector('.meet'),r=s.querySelector('.rail'),b=s.querySelector('.box');
  const top=meet.getBoundingClientRect().top-s.getBoundingClientRect().top;
  const room=s.clientHeight-top-10;
- const cap=mode==='today'?room-70:room;   /* today: the cap was worked out short of the screen */
+ /* today (§737): the room was measured once, on load — a window made
+    taller afterwards keeps the old, shorter room. Proposed (§738): the
+    height follows the window itself. */
+ const loadRoom=S.loadH-top-10;
+ const cap=mode==='today'?Math.min(loadRoom,room):room;
  r.style.maxHeight=cap+'px';b.style.maxHeight=cap+'px';
- if(mode==='today'){
+ if(mode==='today'&&room-cap>4){
   const g=document.createElement('div');g.className='gap';g.style.top=(top+cap+4)+'px';g.style.height=(room-cap-2)+'px';g.textContent='Unused';s.appendChild(g);
  }
  [r,b].forEach(el=>{ if(el.scrollHeight>el.clientHeight+1){const sb=document.createElement('div');sb.className='sb';const rb=el.getBoundingClientRect(),sr=s.getBoundingClientRect();sb.style.left=(rb.right-sr.left-8)+'px';sb.style.top=(rb.top-sr.top+6)+'px';sb.style.height=Math.max(30,(el.clientHeight*el.clientHeight/el.scrollHeight)-12)+'px';s.appendChild(sb);} });
 }
-const NOTES={
+const NOTES0={
  short:'<p><b>A task that fits.</b> <b>Today</b> the rail and the box stop short of the screen\'s foot (the red strip, unused), so the box gets a scroll it does not need. <b>Proposed</b>: the room is measured from where the two boxes start to the foot of the screen. The box is only as tall as its content, so it has no inner scroll. The rail, longer than the room, reaches the foot and scrolls inside itself. The band and the check\'s bar stay pinned at the top; the page itself does not scroll.</p>',
  long:'<p><b>A task with a long history.</b> Proposed: the box grows to the foot of the screen and only then scrolls inside itself, as the rail does. Today it would start scrolling sooner, above the unused strip.</p>'};
+const NOTES={short:'<p>Drag <b>Window height</b> up, as when a window is made taller after the page has loaded (a panel closed, the window maximised). <b>Before</b>, the room was measured once and kept, so the rail and the box stop short (the red strip). <b>Now</b>, only where they start is measured and the height follows the window, so they reach its foot. Each still scrolls inside itself only when its content is taller than the room.</p>',long:'<p>The same with a long history: <b>now</b> the box grows with the window to its foot before it scrolls inside itself.</p>'};
+document.getElementById('wh').addEventListener('input',e=>{S.h=+e.target.value;draw()});
 function draw(){
+ document.querySelectorAll('.scr').forEach(x=>x.style.height=S.h+'px');
+ document.getElementById('whv').textContent=S.h+'px';
+ document.getElementById('c1').textContent='Before (§737): measured once, on load';
+ document.getElementById('c2').textContent='Now (§738): follows the window';
  screen('s1','today');screen('s2','new');
  document.getElementById('note').innerHTML=NOTES[S.c];
  document.querySelectorAll('[data-c]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===S.c)));

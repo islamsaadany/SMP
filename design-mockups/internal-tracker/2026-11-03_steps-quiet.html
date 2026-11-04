@@ -118,8 +118,8 @@ const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const NOTES={
  tracker:'<p><b>Tracker, the opened task: where steps are planned.</b> Without steps: one small <b>+ Add steps</b>, grey words with a blue +. Press it: the Steps title, the add line (cursor in it) and the "This week" label appear; Escape, or leaving it empty, closes it again.</p><p>With steps: as built, the title and count, the list (tick, press the words to rename, a week chip, ↑ ↓ × on hover) and the <b>Add a step and press Enter</b> line always open under it.</p>',
  check:'<p><b>Weekly check: for checking together.</b> Ticks only. A task without steps shows nothing about them; with steps, the list to tick. A tick writes "Done: &lt;step&gt;" into this week\'s box.</p>',
- mytasks:'<p><b>My tasks, the opened task: for checking your own work.</b> The Tracker\'s look (title, count, list, each step\'s week) with ticks only: no add, no rename, no week change, no order. A task without steps shows nothing about them. A tick writes "Done: &lt;step&gt;" into the box. To change steps, "View in … Tracker →" beside the tabs opens the task where they are planned.</p>',
- home:'<p><b>Home, the opened task: for quick updates.</b> Before (on the branch today) Home\'s opened task carries My tasks\' steps. After: no steps here at all, only this week\'s box and the timeline. The row still says "1 of 3 steps", and + New task stays in the card\'s head.</p><p>So: the <b>Tracker</b> plans; <b>My tasks</b> and the <b>weekly check</b> tick; <b>Home</b> updates and adds tasks.</p>'};
+ mytasks:'<p><b>My tasks, the opened task: planning, the same as the Tracker.</b> Without steps: one small <b>+ Add steps</b> (grey words, a blue +); press it and the Steps title and the add line appear. With steps: the title and count, the list (tick, press the words to rename, a week chip, ↑ ↓ × on hover) and the <b>Add a step and press Enter</b> line open under it. A tick writes "Done: &lt;step&gt;" into the box.</p>',
+ home:'<p><b>Home, the opened task: for quick updates.</b> Before (on the branch today) Home\'s opened task carries My tasks\' steps. After: no steps here at all, only this week\'s box and the timeline. The row still says "1 of 3 steps", and + New task stays in the card\'s head.</p><p>So: the <b>Tracker</b> and <b>My tasks</b> plan; the <b>weekly check</b> ticks; <b>Home</b> updates and adds tasks.</p>'};
 const M=(on,html)=>on&&S.marks?'<div class="mark">'+html+'</div>':html;
 function cnt(){return [S.steps.filter(x=>x.d).length,S.steps.length]}
 function lis(compact,k){return S.steps.map((st,i)=>'<li class="sline'+(st.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" data-k="'+k+'" aria-pressed="'+st.d+'" aria-label="Tick: '+esc(st.t)+'">'+(st.d?'✓':'')+'</button><span class="snm">'+esc(st.t)+'</span>'+(!compact?(st.w?'<span class="chip">'+esc(st.w)+'</span>':'<span class="chip">+ week</span>')+'<span class="tools"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button><button type="button" aria-label="Remove">×</button></span>':'')+'</li>').join('')}
@@ -137,8 +137,8 @@ function openedBefore(){const [d,n]=cnt();
    consistent"). No steps: a small "+ Add steps". Pressed, or with steps: the
    Steps title, the list, and "+ Add a step" under it; the review places add
    "Edit steps ›" to open the task in the Tracker. */
-/* PROPOSED (Islam, 2026-11-04): planning in the Tracker; My tasks and the
-   weekly check only tick; Home has no steps. The Tracker: "+ Add steps"
+/* PROPOSED (Islam, 2026-11-04): planning in the Tracker and My tasks (the
+   same view); the weekly check only ticks; Home has no steps. The Tracker: "+ Add steps"
    (grey words, blue +) for a task without; with steps, the add line stays
    open under the list. */
 function lisView(k){return S.steps.map((st,i)=>'<li class="sline'+(st.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" data-k="'+k+'" aria-pressed="'+st.d+'" aria-label="Tick: '+esc(st.t)+'">'+(st.d?'✓':'')+'</button><span class="snm">'+esc(st.t)+'</span>'+(st.w?'<span class="chip">'+esc(st.w)+'</span>':'')+'</li>').join('')}
@@ -146,7 +146,6 @@ function stepsAfter(place){const [d,n]=cnt(),open=S.add.after;
   const title='<div class="ssh">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+'</div>';
   if(place==='home')return '';
   if(place==='check')return n?title+'<ul class="stl">'+lis(true,'after')+'</ul>':'';
-  if(place==='mytasks')return n?title+'<ul class="stl">'+lisView('after')+'</ul>':'';
   if(!n&&!open)return '<div class="links"><button type="button" class="q" data-add="after"><b>+</b> Add steps</button></div>';
   return title+(n?'<ul class="stl">'+lis(false,'after')+'</ul>':'')+addLine('after');
 }

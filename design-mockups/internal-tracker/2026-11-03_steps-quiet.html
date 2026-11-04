@@ -108,9 +108,9 @@ const S={v:"tracker",steps:[],add:{before:false,after:false},box:{before:"",afte
 const SOME=[{t:"Draft the function list",d:true},{t:"Review with Mohamed",d:false,w:"This week"},{t:"Send to the client",d:false}];
 const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const NOTES={
- tracker:'<p><b>Tracker, the opened task.</b> Before: a task without steps carries a STEPS heading marked "optional", a hint line, an open add line and a "This week" label, which is four extra lines on every task. After: one small grey <b>Steps +</b>, then the box. Press + to open the add line; Enter adds and keeps it open; Escape or leaving it empty closes it.</p><p>With steps, both look much alike. The difference is that the add line hides behind the + after, and the count sits in the heading. Dashed outlines mark what changes; switch them off above.</p>',
- check:'<p><b>Weekly check.</b> Before: every task box without steps shows a "+ Add steps" link. After: nothing about steps until a task has them.</p><p>With steps, before has a separate "+ Add a step · Edit steps ›" line under the list. After folds both into the heading: <b>Steps 1 of 3 +</b> and <b>Edit ›</b> on the right.</p>',
- mytasks:'<p><b>My tasks, the opened task.</b> Before: steps are not shown here at all, only the count on the row. After: the same quiet <b>Steps +</b> as the Tracker, and with steps you can tick them here too (the tick writes into the box). Renaming, weeks and order stay in the Tracker.</p><p>The rows themselves are the same before and after: nothing without steps, "1 of 3 steps" with the thin bar with them.</p>'};
+ tracker:'<p><b>Tracker, the opened task.</b> Before: a task without steps carries "Steps optional", a hint line, an open add line and a "This week" label. After: one small <b>+ Add steps</b> above the box, the same link as the weekly check. Press it: the <b>Steps</b> title and the add line appear, cursor in it. Enter adds and keeps the line open; Escape, or leaving it empty, closes it (and with no steps added, it goes back to the link).</p><p>With steps: the title with its count, the list, then <b>+ Add a step</b> under it. Only here, the planning place, do steps carry a week, a rename and the order.</p>',
+ check:'<p><b>Weekly check.</b> Kept as you asked: <b>+ Add steps</b> when a task has none. Press it and it opens exactly as in the Tracker.</p><p>With steps: the title with its count, the list (tick only), then <b>+ Add a step · Edit steps ›</b> under it. The only change from what is built is that the add line opens in the same way as everywhere else.</p>',
+ mytasks:'<p><b>My tasks, the opened task.</b> Before: no steps here at all. After: the weekly check\'s look, line for line. <b>+ Add steps</b> when there are none; with steps, tick them (the tick writes "Done: …" into the box), <b>+ Add a step</b>, and <b>Edit steps ›</b> to the Tracker.</p><p>So there are two kinds of place with one look. The Tracker is where steps are planned (weeks, rename, order). The weekly check and My tasks are where they are reviewed (tick, add the odd one). The rows are unchanged: nothing without steps, "1 of 3 steps" with them.</p>'};
 const M=(on,html)=>on&&S.marks?'<div class="mark">'+html+'</div>':html;
 function cnt(){return [S.steps.filter(x=>x.d).length,S.steps.length]}
 function lis(compact,k){return S.steps.map((st,i)=>'<li class="sline'+(st.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" data-k="'+k+'" aria-pressed="'+st.d+'" aria-label="Tick: '+esc(st.t)+'">'+(st.d?'✓':'')+'</button><span class="snm">'+esc(st.t)+'</span>'+(!compact?(st.w?'<span class="chip">'+esc(st.w)+'</span>':(k==='before'?'<span class="chip">+ week</span>':'')):'')+'</li>').join('')}
@@ -124,19 +124,28 @@ const tabs='<div class="tabs"><span class="on">Progress</span><span>Description<
 /* the opened task: before = as built (§744), after = proposed */
 function openedBefore(){const [d,n]=cnt();
   return '<div class="open">'+tabs+M(true,'<div class="psh" style="margin-top:0">Steps <span style="text-transform:none;letter-spacing:0;font-weight:500">'+(n?d+' of '+n:'optional')+'</span></div>'+(n?'<ul class="stl">'+lis(false,'before')+'</ul>':'<p class="opt">Break the task into steps if it helps plan it.</p>')+addLine('before')+'<div class="psh">This week</div>')+box('before')+TL+'</div>'}
-function headAfter(compact){const [d,n]=cnt();
-  return '<div class="ssh">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+'<button type="button" class="plus" data-add="after" aria-label="Add a step" title="Add a step">+</button>'+(compact&&n?'<a class="edit" href="#" data-edit>Edit ›</a>':'')+'</div>'}
-function openedAfter(){const [d,n]=cnt();
-  return '<div class="open">'+tabs+M(true,headAfter(false)+(n?'<ul class="stl">'+lis(false,'after')+'</ul>':'')+(S.add.after?addLine('after'):'')+(n?'<div class="psh">This week</div>':''))+(n?'':'<div style="height:6px"></div>')+box('after')+TL+'</div>'}
+/* AFTER: one pattern in all three places (Islam, 2026-11-04: "simple but
+   consistent"). No steps: a small "+ Add steps". Pressed, or with steps: the
+   Steps title, the list, and "+ Add a step" under it; the review places add
+   "Edit steps ›" to open the task in the Tracker. */
+function stepsAfter(place){const [d,n]=cnt(),open=S.add.after;
+  const review=place!=='tracker';
+  if(!n&&!open)return '<div class="links"><button type="button" data-add="after">+ Add steps</button></div>';
+  return '<div class="ssh">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+'</div>'+
+    (n?'<ul class="stl">'+lis(review,'after')+'</ul>':'')+(open?addLine('after'):'')+
+    (open?'':'<div class="links"><button type="button" data-add="after">+ Add a step</button>'+(review&&n?'<a href="#" data-edit>Edit steps ›</a>':'')+'</div>');
+}
+function openedAfter(place){const [d,n]=cnt(),shown=n||S.add.after;
+  return '<div class="open">'+tabs+M(true,stepsAfter(place)+(shown?'<div class="psh">This week</div>':''))+'<div style="height:6px"></div>'+box('after')+TL+'</div>'}
 function openedMyBefore(){return '<div class="open">'+tabs+box('before')+TL+'</div>'}
 function card(h,inner){return '<div class="card"><div class="hd"><h2>'+h+'</h2></div>'+inner+'</div>'}
 function mbox(k,steps){return '<div class="meet"><div class="mbox"><div class="mtop"><span class="t">Function list for the new structure</span><span class="wk">This week</span></div>'+steps+box(k)+TL+'</div></div>'}
 const V={
- tracker:{before:()=>card('Raya Trade · Tracker',row()+openedBefore()),after:()=>card('Raya Trade · Tracker',row()+openedAfter())},
+ tracker:{before:()=>card('Raya Trade · Tracker',row()+openedBefore()),after:()=>card('Raya Trade · Tracker',row()+openedAfter('tracker'))},
  check:{
   before:()=>{const [d,n]=cnt();return card('Weekly check',mbox('before',M(true,(n?'<div class="ssh">Steps <span class="c">'+d+' of '+n+'</span></div><ul class="stl">'+lis(true,'before')+'</ul>':'')+(S.add.before?addLine('before'):'')+'<div class="links"><button type="button" data-add="before">'+(n?'+ Add a step':'+ Add steps')+'</button>'+(n?'<a href="#" data-edit>Edit steps ›</a>':'')+'</div>')))},
-  after:()=>{const [d,n]=cnt();return card('Weekly check',mbox('after',(n||S.add.after?M(true,headAfter(true)+(n?'<ul class="stl">'+lis(true,'after')+'</ul>':'')+(S.add.after?addLine('after'):'')):'')))}},
- mytasks:{before:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedMyBefore()),after:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedAfter())}
+  after:()=>card('Weekly check',mbox('after',M(true,stepsAfter('check'))))},
+ mytasks:{before:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedMyBefore()),after:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedAfter('mytasks'))}
 };
 function draw(){
   document.getElementById('note').innerHTML=NOTES[S.v];

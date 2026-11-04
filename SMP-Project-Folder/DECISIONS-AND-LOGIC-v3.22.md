@@ -71239,3 +71239,5 @@ Now a send that fails on the line, or that the page stops waiting for (§472), *
 
 **§748 shell run**: 571 ok / 10 failed — all main's own (Copilot box and rails, §94.8, §475, §490.2, the Copilot settings row); every §745–§748 check green.
 
+
+**§745–§748 merged to main** (Islam: "merge"), renumbered from §743–§746 (main took §743 and §744). On the merged tree: tracker 393/0; shell 572 ok / 10 failed, all main's own (Copilot box and rails, §94.8, §475, §490.2, the Copilot settings row). Production release 7fc4764a4600e14b confirmed live.

@@ -1040,3 +1040,38 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 /* §698 S14 — a draft that failed, named, in the chat */
 .copmsg.ai.copbad .copbody { border-left-color:var(--bad); }
 .copmsg.ai.copbad .copbody > b:first-child { color:var(--bad-tx); }
+
+/* §745 — THE COPILOT IN ONE WINDOW. The method as a strip above the pane,
+   each step saying where the place stands, the next one outlined; the
+   rail's area tags and filter chips; the start screen's focus line and the
+   other areas folded under its cards. */
+.copstrip { display:flex; gap:6px; flex-wrap:wrap; align-items:stretch; margin:0 0 8px; }
+.copstep { flex:1 1 128px; min-width:0; display:flex; flex-direction:column; gap:1px; text-align:left; padding:6px 10px;
+  border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); cursor:pointer; font:inherit; }
+.copstep:hover { border-color:var(--gold); }
+.copstep:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+.copstep .copstepk { font:700 10px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+.copstep b { font-size:13px; font-weight:700; }
+.copstep small { font-size:11.5px; color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copstep.on { border-left:3px solid var(--good); }
+.copstep.on small { color:var(--good-tx); }
+.copstep.wip { border-left:3px solid var(--attn, var(--gold)); }
+.copstep.wip small { color:var(--attn-tx, var(--gold-deep)); }
+.copstep.saved { border-left:3px solid var(--line); }
+.copstep.next { box-shadow:0 0 0 2px var(--panel, var(--ink)); }
+.copstep.next .copstepk { color:var(--ink); }
+.copstep.side { flex:0 1 150px; border-style:dashed; }
+.copstep[aria-current="true"] { background:var(--surface-2); }
+.copatag { display:inline-block; width:max-content; align-self:flex-start; margin:0 0 2px; padding:0 5px; border-radius:4px; background:var(--surface-2);
+  font:700 9.5px/1.6 var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--ink-2); vertical-align:1px; }
+.copachips { display:flex; flex-wrap:wrap; gap:4px; padding:0 8px 6px; }
+.copachip { border:1px solid var(--line); background:var(--surface); border-radius:12px; padding:0 8px; font:inherit; font-size:11.5px; color:var(--ink-2); cursor:pointer; }
+.copachip[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); }
+.copfocus { display:flex; gap:8px; align-items:baseline; justify-content:center; flex-wrap:wrap; }
+.copfocusk { font:700 11px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink); }
+.copareas { width:100%; }
+.copareas > summary { cursor:pointer; color:var(--ink-2); font-size:var(--fs-small, 12.5px); text-align:center; }
+.copmorecards { margin-top:8px; }
+.copareacard .coppd { color:var(--ink-3); }
+.copachip { font-size:11px; line-height:1.6; }
+.copareacard .coptag { display:block; }

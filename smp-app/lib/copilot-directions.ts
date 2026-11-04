@@ -264,18 +264,23 @@ export function dirsText(s: Dirs, fnName: (k: string) => string, ownerName: (k: 
 export async function nextDirsVersion(c: Q, chat: { place: string; section: string }, s: Dirs, placeWord: string): Promise<number> {
   const r = await c.query(
     "SELECT coalesce(max(v.n), 0) + 1 AS n FROM copilot_deliverables d LEFT JOIN copilot_versions v ON v.deliverable_id = d.id " +
-    "WHERE d.place = $1 AND d.section = $2 AND lower(d.title) = lower($3)", [chat.place, chat.section, dirsTitle(s, placeWord)]);
+    "WHERE d.place = $1 AND d.section = $2 AND lower(d.title) IN (lower($3), lower($4))", [chat.place, chat.section, dirsTitle(s, placeWord), dirsTitleWas(s, placeWord)]);
   return Number(r.rows[0]?.n) || 1;
 }
 export const dirsTitle = (s: Dirs, placeWord: string) =>
+  ((s.mode === "capabilities" ? "Capabilities — " : "Pillars/Directions — ") + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
+/* §745 — the area is called Pillars/Directions now (Islam: "Directions make it
+   Pillars/Directions"); a version saved under the old name goes on as the
+   same deliverable, which takes the new name with its next version. */
+export const dirsTitleWas = (s: Dirs, placeWord: string) =>
   ((s.mode === "capabilities" ? "Capabilities — " : "Directions — ") + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
 export async function saveDirs(c: Q, chat: { id: string; place: string; section: Section; title: string }, s: Dirs, placeWord: string, fnName: (k: string) => string, by: string, ownerName: (k: string) => string = fnName) {
   const title = dirsTitle(s, placeWord);
   const body = { text: dirsText(s, fnName, ownerName), directions: s.mode === "directions" ? goes(s) : [], capabilities: s.mode === "capabilities" || s.withCaps ? kept(s) : [] };
   const note = "Built in “" + chat.title + "”";
-  const hit = await c.query("SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) ORDER BY created_at DESC LIMIT 1",
-    [chat.place, chat.section, title]);
-  if (hit.rows[0]) { const id = str(hit.rows[0].id); return { deliverableId: id, n: await addVersion(c as any, id, { body, note, by }), title }; }
+  const hit = await c.query("SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) IN (lower($3), lower($4)) ORDER BY created_at DESC LIMIT 1",
+    [chat.place, chat.section, title, dirsTitleWas(s, placeWord)]);
+  if (hit.rows[0]) { const id = str(hit.rows[0].id); await c.query("UPDATE copilot_deliverables SET title = $2 WHERE id = $1", [id, title]); return { deliverableId: id, n: await addVersion(c as any, id, { body, note, by }), title }; }
   const id = await newDeliverable(c as any, { place: chat.place, section: chat.section, title, type: s.mode, kind: "promotable",
     approach: s.mode === "capabilities" ? "Capabilities" : "Urgency × Importance × Ease", body, note, by, chatId: chat.id, chatTitle: chat.title });
   return { deliverableId: id, n: 1, title };

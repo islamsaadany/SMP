@@ -366,7 +366,10 @@
      document (COPILOT.shown); `everywhere` because, like the reports, being
      able to open it is never a reason to be offered a destination (§383).
      Declared once and referenced four times, the file's own idiom. */
-  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true,
+  /* §745 — `oneWindow`: the Copilot's areas still route the address
+     (…/copilot/directions), but their row is not drawn; the Copilot draws
+     the method as its own strip (Islam: "they need 1 window"). */
+  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true, oneWindow:true,
                   when: function(){ return COPILOT.shown(); },
                   sections: function(){ return COPILOT.sections(); } };
 
@@ -3829,6 +3832,9 @@
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
+    /* §745 — the TAB, kept before `def` becomes a section (below): its
+       one-window flag decides whether its sections draw a row. */
+    var tabDef = def;
     /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§121.1). Twenty
        lines down, a page with sections reassigns `def` to whichever section is
        open — so reading the name after that gives the SECTION's: Figure sets
@@ -4128,7 +4134,11 @@
        Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length && (secs.length > 1 || tailHTML)) {
+    /* §745 — `allowed()` hands back copies of the tab definitions, so the
+       one-window flag is read off the Copilot's own definition by its key,
+       and off the TAB, not the section `def` has become by here. */
+    var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
+    if (!railed && !oneWin && secs && secs.length && (secs.length > 1 || tailHTML)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;

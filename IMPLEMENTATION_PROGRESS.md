@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-04 — The Copilot in one window; Tactical Plans and Pillars/Directions (§745).** No area tabs: the method is a strip above the pane saying where the place stands and which step is next; one rail holds every area's chats and deliverables, tagged, with chips to narrow it; one start screen with the focus area's cards and the others folded beneath. Execution is called Tactical Plans and Directions Pillars/Directions; old versions go on as the same deliverables. Mockup `design-mockups/copilot-layout/2026-11-04_one-window.html`.
+
 **2026-11-04 — A free chat whose line drops watches for its answer (§744).** Islam's chat stuck after ERR_NETWORK_CHANGED: the server had the message and went on answering, but the page read the chat once, too early. Now it says the connection dropped, watches for up to three minutes, and draws the answer when it lands; the text goes back in the box only if the message never arrived.
 **2026-11-04 — Viewing as somebody opens where their own sign-in would (§743), merged to `main` on Islam's word.** A reader viewed as — Aliaa at El Abd — now lands in the reading window, as their own sign-in does; anybody who can change something lands on the workbench.
 **2026-11-03 — Another client opens on the module in view (§742).** The client menu carries the module; the door sends a client without it to Strategy. Tracker 379/0.

@@ -237,16 +237,20 @@ export function execText(s: Exec): string {
 export async function nextExecVersion(c: Q, chat: { place: string; section: string }, placeWord: string): Promise<number> {
   const r = await c.query(
     "SELECT coalesce(max(v.n), 0) + 1 AS n FROM copilot_deliverables d LEFT JOIN copilot_versions v ON v.deliverable_id = d.id " +
-    "WHERE d.place = $1 AND d.section = $2 AND lower(d.title) = lower($3)", [chat.place, chat.section, execTitle(placeWord)]);
+    "WHERE d.place = $1 AND d.section = $2 AND lower(d.title) IN (lower($3), lower($4))", [chat.place, chat.section, execTitle(placeWord), execTitleWas(placeWord)]);
   return Number(r.rows[0]?.n) || 1;
 }
-export const execTitle = (placeWord: string) => ("Execution — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
+/* §745 — the area is called Tactical Plans now (Islam: "make execution named
+   Tactical Plans"); a version saved as Execution goes on as the same
+   deliverable, which takes the new name with its next version. */
+export const execTitle = (placeWord: string) => ("Tactical Plans — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
+export const execTitleWas = (placeWord: string) => ("Execution — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
 export async function saveExec(c: Q, chat: { id: string; place: string; title: string }, s: Exec, placeWord: string, by: string) {
   const title = execTitle(placeWord);
   const body = { text: execText(s), period: s.period, items: s.items };
   const note = "Built in “" + chat.title + "”";
-  const hit = await c.query("SELECT id FROM copilot_deliverables WHERE place = $1 AND section = 'execution' AND lower(title) = lower($2) ORDER BY created_at DESC LIMIT 1", [chat.place, title]);
-  if (hit.rows[0]) { const id = str(hit.rows[0].id); return { deliverableId: id, n: await addVersion(c as any, id, { body, note, by }), title }; }
+  const hit = await c.query("SELECT id FROM copilot_deliverables WHERE place = $1 AND section = 'execution' AND lower(title) IN (lower($2), lower($3)) ORDER BY created_at DESC LIMIT 1", [chat.place, title, execTitleWas(placeWord)]);
+  if (hit.rows[0]) { const id = str(hit.rows[0].id); await c.query("UPDATE copilot_deliverables SET title = $2 WHERE id = $1", [id, title]); return { deliverableId: id, n: await addVersion(c as any, id, { body, note, by }), title }; }
   const id = await newDeliverable(c as any, { place: chat.place, section: "execution", title, type: "execution", kind: "promotable",
     approach: "Measures and tactics for the plan period", body, note, by, chatId: chat.id, chatTitle: chat.title });
   return { deliverableId: id, n: 1, title };

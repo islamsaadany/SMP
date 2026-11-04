@@ -66246,9 +66246,9 @@ var COPILOT = (function(){
     { k:"foundation", label:"Foundation" },
     { k:"analysis",   label:"Analysis" },
     { k:"compete",    label:"Competitive Discipline" },
-    { k:"directions", label:"Directions" },
+    { k:"directions", label:"Pillars/Directions" },
     { k:"capabilities", label:"Capabilities" },
-    { k:"execution",  label:"Execution" },
+    { k:"execution",  label:"Tactical Plans" },
     { k:"advisory",   label:"Advisory" }
   ];
   /* What is open, per place and section, so walking to another section and
@@ -66380,7 +66380,8 @@ var COPILOT = (function(){
   function renderPane(){
     setTimeout(function(){ loadList(false); }, 0);
     var shut = railFolded();
-    return '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
+    return '<div class="copstrip" data-cop-stripbar>' + stripHtml() + '</div>' +
+      '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-home aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
       '<aside class="coprails" data-cop-rails>' + railsInner() +
@@ -66400,7 +66401,7 @@ var COPILOT = (function(){
      foot, where anyone may Restore and only the Super user may Delete, and
      Delete asks once more in its row (§62 — never a browser dialog, §95). */
   var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>';
-  function archView(){ return !!ARCH[key()]; }
+  function archView(){ return !!ARCH[place()]; }
   /* §475 option A (Islam, 2 Oct: "A ok"): the hide control sits at the
      start of the Chats header rather than on a row of its own above the
      rails, so an open rail spends no line on it. */
@@ -66419,7 +66420,7 @@ var COPILOT = (function(){
      every other area's is its workflow, whose own ways (a SWOT's notes and
      templates) live inside it. */
   var WORKFLOW_WORD = { foundation:"Foundation workflow", analysis:"SWOT workflow", compete:"Competitive Discipline workflow",
-    directions:"Directions workflow", capabilities:"Capabilities workflow", execution:"Execution workflow", advisory:"Advisory workflow" };
+    directions:"Pillars/Directions workflow", capabilities:"Capabilities workflow", execution:"Tactical Plans workflow", advisory:"Advisory workflow" };
   var STARTS = {
     analysis: ["SWOT, step by step", "The internal, micro and macro analyses, then the SWOT."],
     compete: ["Score the value disciplines", "Market and internal factors, then the value proposition."],
@@ -66428,7 +66429,7 @@ var COPILOT = (function(){
     execution: ["Build from the Directions", "The period, then measures and tactics drafted for each of the plan’s Directions and Capabilities. What the plan holds is shown on the cards and replaced on Apply."],
     advisory: ["Bring a decision", "A few questions, then a decision brief."]
   };
-  var STARTTEXT = {};            /* place|section → what is half typed in the start box */
+  var STARTTEXT = {}, MOREOPEN = {};            /* place|section → what is half typed in the start box */
   /* §640 THE BOX TAKES THE MATERIAL (Islam: "don't you think that uploading
      raw notes or importing a finished foundation is a form of free chat?";
      design-mockups/copilot-start/2026-10-25_box-takes-material.html, signed
@@ -66480,8 +66481,15 @@ var COPILOT = (function(){
              the card is pressed as one, and the grid opens as before. */
           (s === "analysis" ? '<span class="copways" data-cop-ways>' + ["Guided questions", "Template", "Ready reports", "Deep research"].map(function(w){ return '<span class="copway">' + w + '</span>'; }).join("") + '</span>' +
             '<span class="copwaysk">Pick one or more per area at the next step.</span>' : '') + '</button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]));
+    var nx = nextStep();
+    var others = here().filter(function(x){ return x.k !== s; });
+    var focus = '<div class="copfocus"><span class="copfocusk">' + (s === nx ? "Next step · " : "") + E(stripWord(s)) + '</span><span class="copm">' + E(areaState(s).says || "") + '</span></div>';
+    var more = '<details class="copareas"' + (MOREOPEN[place()] !== false ? ' open' : '') + ' data-cop-areas><summary>Other areas</summary><div class="coppaths copstartcards copmorecards">' +
+      others.map(function(x){ var a = areaState(x.k), c = x.k === "foundation" ? ["Build or refine the Foundation", ""] : STARTS[x.k] || [WORKFLOW_WORD[x.k] || stripWord(x.k), ""];
+        return '<button type="button" class="coppcard copareacard" data-cop-area-card="' + x.k + '">' + icon(x.k === "foundation" ? PATH_CARDS[0].i : PLANMARK) + '<span class="coppt"><span class="coptag">' + E(stripWord(x.k)) + (x.k === nx ? ' · next step' : '') + '</span>' + E(c[0]) + '</span>' +
+          '<span class="coppd">' + E(a.says || "") + '</span></button>'; }).join("") + '</div></details>';
     return '<div class="copstart" data-cop-startscreen>' +
-      '<h2 class="copstarth">What would you like to do with ' + E(area) + '?</h2>' +
+      '<h2 class="copstarth">What would you like to do with ' + E(placeWord()) + '’s strategy?</h2>' +
       '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything, attach your notes, or paste ' + E(BOXWORK[s] || "finished work") + '…" aria-label="Ask the Copilot, attach notes or paste work — this starts a free chat">' + E(STARTTEXT[key()] || "") + '</textarea>' +
         /* §683 — Send is not there until something is typed, on the start
            screen as in every chat (§652; Islam: "as we agreed, across all
@@ -66491,8 +66499,8 @@ var COPILOT = (function(){
         '<input type="file" hidden data-cop-startfile accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
         '<span class="cophint">Word, PDF or Excel · or paste · Enter sends</span></div>' +
       '<p class="copstartk">Typing, attaching or pasting here starts a free chat.</p>' +
-      '<div class="copor">or start step by step</div>' + unfinishedHtml() +
-      '<div class="coppaths copstartcards">' + cards + '</div></div>';
+      '<div class="copor">or start step by step</div>' + unfinishedHtml() + focus +
+      '<div class="coppaths copstartcards">' + cards + '</div>' + more + '</div>';
   }
   function chatsFoot(){
     var l = list();
@@ -66501,15 +66509,15 @@ var COPILOT = (function(){
     return '<button type="button" class="coparch" data-cop-archview>Archived &middot; ' + (l.archived || []).length + '</button>';
   }
   function chatsHtml(){
-    var l = list();
+    var l = allList();
     if (!l) return '<div class="copnone">Asking…</div>';
     if (l.failed) return '<div class="copnone">The chats could not be read just now. Nothing has been lost. ' +
       '<button type="button" class="linkbu" data-cop-retry>Try again</button></div>';
-    var arch = archView(), rows = arch ? (l.archived || []) : l.chats;
+    var arch = archView(), rows = (arch ? (l.archived || []) : l.chats).filter(function(c){ return !railF() || c._sec === railF(); });
     var head = arch && canEdit() ? '<div class="copnote">' + (l.mayDelete ? "Restore brings a chat back. Delete removes it for good."
       : "Restore brings a chat back. Only the Super user can delete.") + '</div>' : '';
     var o = OPEN[key()] || {};
-    if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : "No chats here yet.") + '</div>';
+    if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : railF() ? "No " + stripWord(railF()) + " chats here yet." : "No chats here yet.") + '</div>';
     return head + rows.map(function(c){
       var on = o.kind === "chat" && o.id === c.id;
       if (ASKDEL === c.id) return '<div class="coprow ask" data-cop-row="' + E(c.id) + '"><span class="copt">' + E(c.title) + '</span>' +
@@ -66523,24 +66531,25 @@ var COPILOT = (function(){
           : '<button type="button" role="menuitem" data-cop-rename="' + E(c.id) + '">Rename</button>' +
             '<button type="button" role="menuitem" data-cop-archive="' + E(c.id) + '">Archive</button>') + '</div>' : '';
       return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
-        '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '"' + (on ? ' aria-current="true"' : '') + '>' +
-          '<span class="copt">' + E(c.title) + '</span>' +
+        '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '" data-cop-chat-sec="' + E(c._sec) + '"' + (on ? ' aria-current="true"' : '') + '>' +
+          areaTag(c._sec) + '<span class="copt">' + E(c.title) + '</span>' +
           '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + (c.guided ? ' · Guided' : '') + (c.free ? ' · Free chat' : '') + (function(){ var sp = (l.swotProgress || {})[c.id]; return sp ? ' · ' + sp.done + ' of ' + sp.of + ' done' : ''; })() + '</span></button>' +
         (!canEdit() ? '' : '<button type="button" class="copdots" data-cop-menu="' + E(c.id) + '" aria-haspopup="menu" aria-expanded="' + (MENU === c.id) +
           '" aria-label="Actions for ' + E(c.title) + '" title="Rename, archive…">' + DOTS + '</button>' + menu) + '</div>';
     }).join("");
   }
   function delivsHtml(){
-    var l = list();
+    var l = allList();
     if (!l) return '<div class="copnone">Asking…</div>';
     if (l.failed) return '<div class="copnone">—</div>';
-    if (!l.deliverables.length) return '<div class="copnone">Nothing saved here yet.</div>';
+    var dl = l.deliverables.filter(function(d){ return !railF() || d._sec === railF(); });
+    if (!dl.length) return '<div class="copnone">Nothing saved here yet.</div>';
     var o = OPEN[key()] || {};
-    return l.deliverables.map(function(d){
+    return dl.map(function(d){
       var on = o.kind === "deliv" && o.id === d.id;
-      return '<button type="button" class="copitem' + (on ? " on" : "") + '" data-cop-deliv="' + E(d.id) + '"' +
+      return '<button type="button" class="copitem' + (on ? " on" : "") + '" data-cop-deliv="' + E(d.id) + '" data-cop-deliv-sec="' + E(d._sec) + '"' +
         (on ? ' aria-current="true"' : '') + '>' +
-        '<span class="copt">' + E(d.title) + '</span>' +
+        areaTag(d._sec) + '<span class="copt">' + E(d.title) + '</span>' +
         '<span class="copm">' + kindWord(d.kind) + ' · v' + E(d.latest) + ' · ' + E(when(d.latestAt)) + '</span></button>';
     }).join("");
   }
@@ -66553,10 +66562,10 @@ var COPILOT = (function(){
      stepped over. The same line sits on a version's page under On the plan. */
   var NEXTOF = {
     analysis:   { k:"compete",    t:"Competitive Discipline — score the value disciplines from this SWOT." },
-    compete:    { k:"directions", t:"Directions — suggest and score them from the SWOT and this discipline." },
-    directions: { k:"execution",  t:"Execution — measures and tactics for each of them, by quarter." },
+    compete:    { k:"directions", t:"Pillars/Directions — suggest and score them from the SWOT and this discipline." },
+    directions: { k:"execution",  t:"Tactical Plans — measures and tactics for each of them, by quarter." },
     execution:  { k:"advisory",   t:"The plan is complete for the period; its tabs show it. Bring a decision to Advisory when one comes." },
-    advisory:   { k:"directions", t:"Put the decision to work in the plan’s Directions, or bring another decision." }
+    advisory:   { k:"directions", t:"Put the decision to work in the plan’s Pillars/Directions, or bring another decision." }
   };
   function nextOf(sec){
     var seen = {}, n = NEXTOF[sec];
@@ -66571,8 +66580,16 @@ var COPILOT = (function(){
   function sectionLabel(k){ for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === k) return SECTIONS[i].label; return k; }
   /* Walk to a section of the Copilot in this place: its start screen, or a
      deliverable of it (S10 opens the saved Directions version from Execution). */
+  /* open a chat or deliverable that lives in another area: the window moves there */
+  function openIn(sec, kind, id){
+    if (typeof CURSEC === "undefined") { openItem(kind, id); return; }
+    AREA_CHOSEN[place()] = true; CURSEC.copilot = sec; SHEET = ""; MENU = null; ASKDEL = null;
+    OPEN[place() + "|" + sec] = { kind: kind, id: id }; PANE = null;
+    if (typeof paint === "function") paint(); else draw();
+  }
   function goSection(k, delivId){
     if (typeof CURSEC === "undefined") return;
+    AREA_CHOSEN[place()] = true;
     CURSEC.copilot = k; SHEET = ""; MENU = null; ASKDEL = null; SAY = "";
     var kk = place() + "|" + k;
     if (delivId) OPEN[kk] = { kind: "deliv", id: delivId }; else delete OPEN[kk];
@@ -68196,6 +68213,7 @@ var COPILOT = (function(){
     /* A redraw while a card is a text box (§513) puts the cursor back where
        it was; the text itself is CARDPEN's. */
     var ae = document.activeElement, penAt = ae && ae.matches && ae.matches("[data-cop-pentext]") ? [ae.selectionStart, ae.selectionEnd] : null;
+    var st = document.querySelector("[data-cop-stripbar]"); if (st) st.innerHTML = stripHtml();
     var rl = document.querySelector("[data-cop-rails]"); if (rl) rl.innerHTML = railsInner();
     var m = document.querySelector("[data-cop-main]"); if (m) m.innerHTML = mainHtml();
     syncRail();
@@ -68841,7 +68859,7 @@ var COPILOT = (function(){
   }
   function railsInner(){
     return allChatsLink() + '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
-        '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
+        chipsHtml() + '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
         '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
       '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh"><span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +
         '<div class="coplist" data-cop-delivs>' + delivsHtml() + '</div></section>' +
@@ -68864,7 +68882,119 @@ var COPILOT = (function(){
         if (pool.some(function(r){ return r && String(r.id).toLowerCase() === DEEP.id; })) { OPEN[k] = { kind: DEEP.kind, id: DEEP.id }; DEEP = null; }
       }
       if (askedFor === k) { draw(); openIfNeeded(); }
+      loadAll(!!force);
     }, function(){ LISTS[k] = { failed: true }; if (askedFor === k) draw(); });
+  }
+  /* §745 — THE COPILOT IN ONE WINDOW (Islam: "the copilot with a split by
+     area is a bit confusing for the team, they need 1 window"; the signed-off
+     design-mockups/copilot-layout/2026-11-04_one-window.html, "build the one
+     window"). The area tabs go; every area's chats and deliverables stand in
+     one rail, tagged; the method is a strip above with where the place
+     stands. Each area's list is still its own ask, so nothing on the server
+     moves; the rail merges them. */
+  var ALLASK = {};
+  function loadAll(force){
+    var p = place(), want = here().map(function(s){ return s.k; }).filter(function(s){ return force || !LISTS[p + "|" + s] || LISTS[p + "|" + s].failed; });
+    if (!want.length) { autoFocus(); return; }
+    var left = want.length, tick = function(){ if (--left === 0) { deepAcross(); autoFocus(); draw(); } };
+    want.forEach(function(s){
+      var k = p + "|" + s; if (ALLASK[k] && !force) { tick(); return; } ALLASK[k] = true;
+      getJ("list", ["place=" + encodeURIComponent(p), "section=" + encodeURIComponent(s)]).then(function(x){
+        delete ALLASK[k];
+        if (x.st === 200 && x.j && x.j.ok) LISTS[k] = { chats: x.j.chats || [], archived: x.j.archived || [], mayDelete: !!x.j.mayDelete, deliverables: x.j.deliverables || [], swotProgress: x.j.swotProgress || {} };
+        else if (!LISTS[k]) LISTS[k] = { failed: true };
+        tick();
+      }, function(){ delete ALLASK[k]; tick(); });
+    });
+  }
+  /* the rail's view: every area's list of this place, each row marked with its area */
+  function allList(){
+    var p = place(), cur = LISTS[key()], out = { chats: [], archived: [], deliverables: [], swotProgress: {}, mayDelete: !!(cur && cur.mayDelete), failed: !!(cur && cur.failed) };
+    if (!cur) return null;
+    here().forEach(function(s){
+      var l = LISTS[p + "|" + s.k]; if (!l || l.failed) return;
+      (l.chats || []).forEach(function(c){ out.chats.push(Object.assign({ _sec: s.k }, c)); });
+      (l.archived || []).forEach(function(c){ out.archived.push(Object.assign({ _sec: s.k }, c)); });
+      (l.deliverables || []).forEach(function(d){ out.deliverables.push(Object.assign({ _sec: s.k }, d)); });
+      Object.keys(l.swotProgress || {}).forEach(function(id){ out.swotProgress[id] = l.swotProgress[id]; });
+      if (l.mayDelete) out.mayDelete = true;
+    });
+    var at = function(x){ return String(x.last || x.latestAt || x.at || ""); };
+    out.chats.sort(function(a, b){ return at(b) < at(a) ? -1 : at(b) > at(a) ? 1 : 0; });
+    out.archived.sort(function(a, b){ return at(b) < at(a) ? -1 : at(b) > at(a) ? 1 : 0; });
+    out.deliverables.sort(function(a, b){ return at(b) < at(a) ? -1 : at(b) > at(a) ? 1 : 0; });
+    return out;
+  }
+  /* the area a chat or deliverable lives in, from the lists */
+  function secOf(id, kind){
+    var p = place(), hs = here();
+    for (var i = 0; i < hs.length; i++) { var l = LISTS[p + "|" + hs[i].k]; if (!l || l.failed) continue;
+      var pool = kind === "deliv" ? (l.deliverables || []) : (l.chats || []).concat(l.archived || []);
+      if (pool.some(function(r){ return r && String(r.id) === String(id); })) return hs[i].k; }
+    return "";
+  }
+  /* a deep link to a chat of another area than the address names */
+  function deepAcross(){
+    if (!DEEP) return;
+    var s = secOf(DEEP.id, DEEP.kind === "deliv" ? "deliv" : "chat"); if (!s) return;
+    OPEN[place() + "|" + s] = { kind: DEEP.kind, id: DEEP.id }; DEEP = null; AREA_CHOSEN[place()] = true;
+    if (s !== section()) { CURSEC.copilot = s; PANE = null; if (typeof paint === "function") paint(); }
+  }
+  /* WHERE THE PLACE STANDS, area by area, read off the lists: on the plan,
+     in progress, saved, or not started — and the next step, the first of the
+     method's areas not on the plan. Advisory stands beside the plan. */
+  var STRIPWORD = { analysis: "SWOT" };
+  function stripWord(k){ return STRIPWORD[k] || sectionLabel(k); }
+  /* the rail is narrow: its tags and chips use the short words */
+  var SHORTWORD = { analysis: "SWOT", compete: "Discipline", directions: "Pillars", execution: "Tactical Plans" };
+  function shortWord(k){ return SHORTWORD[k] || stripWord(k); }
+  function areaTag(k){ return k ? '<span class="copatag">' + E(shortWord(k)) + '</span>' : ''; }
+  function areaState(k){
+    var l = LISTS[place() + "|" + k]; if (!l || l.failed) return { st: "", says: "" };
+    var prog = l.swotProgress || {}, open = (l.chats || []).filter(function(c){ var sp = prog[c.id]; return sp && sp.of > 0 && sp.done < sp.of; })[0];
+    if (k === "advisory") { var n = (l.deliverables || []).length; return { st: open ? "wip" : "", says: open ? "A question in progress" : n ? n + (n === 1 ? " brief" : " briefs") : "No briefs yet" }; }
+    var on = (l.deliverables || []).filter(function(d){ return d.applied && d.applied.n; })[0], saved = (l.deliverables || [])[0];
+    if (open) { var sp = prog[open.id]; return { st: "wip", says: "In progress · " + sp.done + " of " + sp.of + " done" }; }
+    if (on) return { st: "on", says: "v" + on.applied.n + " on the plan" };
+    if (saved) return { st: "saved", says: "v" + saved.latest + " saved · not on the plan" };
+    return { st: "", says: "Not started" };
+  }
+  function nextStep(){
+    var hs = here().map(function(s){ return s.k; }).filter(function(k){ return k !== "advisory"; });
+    for (var i = 0; i < hs.length; i++) if (areaState(hs[i]).st !== "on") return hs[i];
+    return "";
+  }
+  function stripHtml(){
+    if (!shown()) return "";
+    var nx = nextStep(), cur = section(), n = 0;
+    return here().map(function(s){
+      var a = areaState(s.k), side = s.k === "advisory"; if (!side) n++;
+      var k = side ? "Beside the plan" : (s.k === nx ? "Next · step " : "Step ") + n;
+      return '<button type="button" class="copstep' + (a.st ? " " + a.st : "") + (s.k === nx ? " next" : "") + (side ? " side" : "") + '" data-cop-strip="' + s.k + '"' + (s.k === cur ? ' aria-current="true"' : '') + '>' +
+        '<span class="copstepk">' + E(k) + '</span><b>' + E(stripWord(s.k)) + '</b><small>' + E(a.says || "…") + '</small></button>';
+    }).join("");
+  }
+  /* the rail's filter, per place: every area, or one */
+  var RAILF = {};
+  function railF(){ return RAILF[place()] || ""; }
+  function chipsHtml(){
+    if (archView()) return "";
+    return '<div class="copachips" data-cop-chips><button type="button" class="copachip" data-cop-chip="" aria-pressed="' + !railF() + '">All</button>' +
+      here().map(function(s){ return '<button type="button" class="copachip" data-cop-chip="' + s.k + '" aria-pressed="' + (railF() === s.k) + '" title="' + E(stripWord(s.k)) + '">' + E(shortWord(s.k)) + '</button>'; }).join("") + '</div>';
+  }
+  /* WHICH AREA THE WINDOW OPENS ON: the one the address names, or the one
+     the person chose this visit; otherwise, once the lists are in, the next
+     step. */
+  var AREA_CHOSEN = {}, AREA_FROM_URL = /\/copilot\/[a-z]/.test(String(location.pathname || ""));
+  function autoFocus(){
+    var p = place();
+    if (AREA_FROM_URL) { AREA_CHOSEN[p] = true; AREA_FROM_URL = false; }
+    if (AREA_CHOSEN[p]) return;
+    var ready = here().every(function(s){ return LISTS[p + "|" + s.k]; }); if (!ready) return;
+    AREA_CHOSEN[p] = true;
+    if (OPEN[key()] || DEEP) return;
+    var nx = nextStep();
+    if (nx && nx !== section() && typeof CURSEC !== "undefined") { CURSEC.copilot = nx; PANE = null; if (typeof paint === "function") paint(); else draw(); }
   }
   function openIfNeeded(){
     var o = OPEN[key()];
@@ -69406,7 +69536,7 @@ var COPILOT = (function(){
   function dvProgress(id){
     var l = list(); if (l && l.swotProgress && PANE && PANE.dirsTodo) l.swotProgress[id] = { done: PANE.dirsDone, of: PANE.dirsTodo.length };
   }
-  function dvTitle(mode){ return (mode === "capabilities" ? "Capabilities — " : "Directions — ") + placeWord(); }
+  function dvTitle(mode){ return (mode === "capabilities" ? "Capabilities — " : "Pillars/Directions — ") + placeWord(); }
   function dvFns(){
     var ks = []; try { ks = typeof activeFunctionKeys === "function" ? activeFunctionKeys() : []; } catch (e) { ks = []; }
     return ks.map(function(k){ return { key: k, name: (FUNCTIONS[k] && FUNCTIONS[k].name) || k, head: (FUNCTIONS[k] && FUNCTIONS[k].head) || "" }; });
@@ -70122,7 +70252,7 @@ var COPILOT = (function(){
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
     var todo = PANE.execTodo || [], done = PANE.execDone || 0;
     var chat = '<div class="copchat copfchat copswchat copexchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
-      '<div class="copfhead"><b><span class="copfname">' + E(c.title || "Execution — " + placeWord()) + '</span><small> · ' + E(exStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the items") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
+      '<div class="copfhead"><b><span class="copfname">' + E(c.title || "Tactical Plans — " + placeWord()) + '</span><small> · ' + E(exStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the items") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
       '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + exMsgs(s, ed, busyHere) + work + '</div></div>' +
       (!canEdit() ? VIEWONLY
         : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
@@ -70136,10 +70266,10 @@ var COPILOT = (function(){
        Apply is named and opened, rather than sending the person to choose again. */
     if (!s.items.length) {
       var dsv = PANE.execDirsSaved;
-      return dsv ? aiMsg('<b>' + E(dsv.title) + ' v' + E(dsv.n) + '</b> is saved but not on the plan yet, so there is nothing here to plan for. Apply it to the plan first; then a new Execution chat reads the Directions and Capabilities from there.' +
+      return dsv ? aiMsg('<b>' + E(dsv.title) + ' v' + E(dsv.n) + '</b> is saved but not on the plan yet, so there is nothing here to plan for. Apply it to the plan first; then a new Tactical Plans chat reads the Directions and Capabilities from there.' +
           '<div class="copopts"><button type="button" class="copbtn solid" data-cop-go-deliv="' + E(dsv.id) + '" data-cop-go="directions">Open ' + E(dsv.title) + ' v' + E(dsv.n) + '</button><span class="copm">The version page, where Apply to plan is.</span></div>')
         : aiMsg('The plan has no Directions or Capabilities yet, and none are saved in the Copilot. Choose them first.' +
-          '<div class="copopts"><button type="button" class="copbtn solid" data-cop-go="directions">Open Directions</button><span class="copm">The Directions start screen, in this place.</span></div>');
+          '<div class="copopts"><button type="button" class="copbtn solid" data-cop-go="directions">Open Pillars/Directions</button><span class="copm">The Pillars/Directions start screen, in this place.</span></div>');
     }
     out.push(exPeriodAsk(ed && (!s.period || !!EXPICK[id])));
     if (!s.period) return out.join("");
@@ -70162,7 +70292,7 @@ var COPILOT = (function(){
   }
   function exPaneHtml(s, ed, busyHere){
     var w = PANE.execWords || {}, id = PANE.chat.id, vn = s.saved ? s.saved.n : (PANE.execNextVersion || 1);
-    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E("Execution — " + placeWord()) + ' v' + E(vn) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</span>' +
+    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E("Tactical Plans — " + placeWord()) + ' v' + E(vn) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</span>' +
       '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
     var body;
     if (!s.items.length) body = '<p class="copnote">Nothing to draft — the plan holds no Directions or Capabilities' + (PANE.execDirsSaved ? '. ' + E(PANE.execDirsSaved.title) + ' v' + E(PANE.execDirsSaved.n) + ' is saved and waits for Apply.' : ', and none are saved.') + '</p>';
@@ -70306,7 +70436,7 @@ var COPILOT = (function(){
     return false;
   }
   function exNew(road){
-    act({ act:"newExecution", place: place(), title: "Execution — " + placeWord(), items: exItems(), road: road || "build" }, function(j){
+    act({ act:"newExecution", place: place(), title: "Tactical Plans — " + placeWord(), items: exItems(), road: road || "build" }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       exView(j);
@@ -70651,8 +70781,14 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-showdraft]"))) { if (PANE && PANE.chat) PANELPICK[PANE.chat.id] = b.getAttribute("data-cop-showdraft"); SHEET = "draft"; draw(); return; }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
-    if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
-    if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
+    if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; var cid = b.getAttribute("data-cop-chat"), cs = b.getAttribute("data-cop-chat-sec") || secOf(cid, "chat");
+      if (cs && cs !== section()) { openIn(cs, "chat", cid); return; } openItem("chat", cid); return; }
+    if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; var did1 = b.getAttribute("data-cop-deliv"), ds = b.getAttribute("data-cop-deliv-sec") || secOf(did1, "deliv");
+      if (ds && ds !== section()) { openIn(ds, "deliv", did1); return; } openItem("deliv", did1); return; }
+    if ((b = hit(ev, "[data-cop-strip]"))) { var sk = b.getAttribute("data-cop-strip"); RAILF[place()] = railF() === sk && section() === sk && !OPEN[key()] ? "" : sk; AREA_CHOSEN[place()] = true; goSection(sk); return; }
+    if ((b = hit(ev, "[data-cop-chip]"))) { RAILF[place()] = b.getAttribute("data-cop-chip"); draw(); return; }
+    if ((b = hit(ev, "[data-cop-areas] > summary"))) { var dm = b.parentNode; MOREOPEN[place()] = !dm.open; return; }
+    if ((b = hit(ev, "[data-cop-area-card]"))) { AREA_CHOSEN[place()] = true; goSection(b.getAttribute("data-cop-area-card")); return; }
     if ((b = hit(ev, "[data-cop-go]"))) { goSection(b.getAttribute("data-cop-go"), b.getAttribute("data-cop-go-deliv") || ""); return; }
     /* §538: the hold moved from `disabled` to `aria-disabled` so its reason
        could be read, and `b.disabled` goes false the moment it does — a guard
@@ -70770,7 +70906,7 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-menu]"))) { var mid2 = b.getAttribute("data-cop-menu"); MENU = MENU === mid2 ? null : mid2; ASKDEL = null; draw(); return; }
-    if ((b = hit(ev, "[data-cop-archview]"))) { ARCH[key()] = !archView(); MENU = null; ASKDEL = null; RENAME = null; draw(); return; }
+    if ((b = hit(ev, "[data-cop-archview]"))) { ARCH[place()] = !archView(); MENU = null; ASKDEL = null; RENAME = null; draw(); return; }
     if ((b = hit(ev, "[data-cop-rename]"))) { MENU = null; RENAME = b.getAttribute("data-cop-rename"); draw(); return; }
     if ((b = hit(ev, "[data-cop-archive]"))) {
       var aid = b.getAttribute("data-cop-archive"); MENU = null;
@@ -70782,7 +70918,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-restore-chat]"))) {
       var rcid = b.getAttribute("data-cop-restore-chat"); MENU = null;
       act({ act:"restoreChat", id:rcid }, function(){
-        SAY = "Restored to the chats."; ARCH[key()] = false;
+        SAY = "Restored to the chats."; ARCH[place()] = false;
         if (PANE && PANE.chat && PANE.chat.id === rcid) PANE.chat.archived = "";
         loadList(true); });
       return;
@@ -77880,7 +78016,10 @@ var SYNC = (function () {
      document (COPILOT.shown); `everywhere` because, like the reports, being
      able to open it is never a reason to be offered a destination (§383).
      Declared once and referenced four times, the file's own idiom. */
-  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true,
+  /* §745 — `oneWindow`: the Copilot's areas still route the address
+     (…/copilot/directions), but their row is not drawn; the Copilot draws
+     the method as its own strip (Islam: "they need 1 window"). */
+  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true, oneWindow:true,
                   when: function(){ return COPILOT.shown(); },
                   sections: function(){ return COPILOT.sections(); } };
 
@@ -81343,6 +81482,9 @@ var SYNC = (function () {
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
+    /* §745 — the TAB, kept before `def` becomes a section (below): its
+       one-window flag decides whether its sections draw a row. */
+    var tabDef = def;
     /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§121.1). Twenty
        lines down, a page with sections reassigns `def` to whichever section is
        open — so reading the name after that gives the SECTION's: Figure sets
@@ -81642,7 +81784,11 @@ var SYNC = (function () {
        Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length && (secs.length > 1 || tailHTML)) {
+    /* §745 — `allowed()` hands back copies of the tab definitions, so the
+       one-window flag is read off the Copilot's own definition by its key,
+       and off the TAB, not the section `def` has become by here. */
+    var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
+    if (!railed && !oneWin && secs && secs.length && (secs.length > 1 || tailHTML)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;

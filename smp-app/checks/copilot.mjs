@@ -1143,7 +1143,7 @@ try {
     const hf = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, HEND);
     check("a client's own person cannot save it", hf.st === 403);
     const fin = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
-    check("saving makes version 1 of Directions — Mobile", fin.st === 200 && fin.j.saved?.n === 1 && fin.j.saved?.title === "Directions \u2014 Mobile" && fin.j.dirsDone === 4, String(JSON.stringify(fin.j)).slice(0, 200));
+    check("saving makes version 1 of Pillars/Directions — Mobile (§745)", fin.st === 200 && fin.j.saved?.n === 1 && fin.j.saved?.title === "Pillars/Directions \u2014 Mobile" && fin.j.dirsDone === 4, String(JSON.stringify(fin.j)).slice(0, 200));
     const vrow = fin.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [fin.j.saved.deliverableId]))).rows : [];
     check("...the version holds the chosen Directions and kept Capabilities, owners by name",
       vrow.length === 1 && vrow[0].body.directions.length === chosen.length && vrow[0].body.capabilities.length === 2 && /Commercial/.test(vrow[0].body.text) && /48\/64/.test(vrow[0].body.text),
@@ -1185,7 +1185,7 @@ try {
        rather than send the person to choose what they chose. */
     const x0 = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution, empty", items: [] }, NORAN);
     check("§694 an Execution chat with no items names the saved Directions version waiting for Apply",
-      x0.st === 200 && x0.j.exec?.items.length === 0 && x0.j.execDirsSaved && x0.j.execDirsSaved.title === "Directions \u2014 Mobile" && x0.j.execDirsSaved.n >= 1 && /^[0-9a-f-]{36}$/.test(x0.j.execDirsSaved.id),
+      x0.st === 200 && x0.j.exec?.items.length === 0 && x0.j.execDirsSaved && x0.j.execDirsSaved.title === "Pillars/Directions \u2014 Mobile" && x0.j.execDirsSaved.n >= 1 && /^[0-9a-f-]{36}$/.test(x0.j.execDirsSaved.id),
       String(JSON.stringify(x0.j.execDirsSaved)));
     check("§694 …and a chat with items carries none", xn.j.execDirsSaved === null);
     check("the office starts one: the plan's items, the period asked first, a to-do of period + items + save",
@@ -1213,7 +1213,7 @@ try {
     const xhf = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, HEND);
     check("a client's own person cannot save it", xhf.st === 403);
     const xf = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, NORAN);
-    check("saving makes version 1 of Execution — Mobile", xf.st === 200 && xf.j.saved?.n === 1 && xf.j.saved?.title === "Execution \u2014 Mobile" && xf.j.execDone === 4, String(JSON.stringify(xf.j)).slice(0, 200));
+    check("saving makes version 1 of Tactical Plans — Mobile (§745)", xf.st === 200 && xf.j.saved?.n === 1 && xf.j.saved?.title === "Tactical Plans \u2014 Mobile" && xf.j.execDone === 4, String(JSON.stringify(xf.j)).slice(0, 200));
     const xv = xf.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [xf.j.saved.deliverableId]))).rows : [];
     check("...the version holds the period and both items", xv.length === 1 && xv[0].body.period?.m1 === 7 && xv[0].body.items.length === 2 && /PLAN PERIOD: Jul\u2013Dec 2026/.test(xv[0].body.text), String(JSON.stringify(xv)).slice(0, 300));
     const xafter = await call("POST", "api", { act: "execPeriod", id: xid, choice: "full" }, NORAN);

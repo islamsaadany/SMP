@@ -1,0 +1,289 @@
+<title>My Tasks Working</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* My tasks behaving as the Internal Tracker now does (§706–§708), clickable:
+   a press on a task's name opens it in place — Progress (Add beside the box,
+   the entries on a timeline), Description (text, click to write), History —
+   with Open in the client's Tracker beside the tabs; ⋯ holds the rest.
+   Sort by Date or Client is remembered on this browser. Example tasks. */
+:root{
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-late:#FF9B8F;
+  --ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--line:#D6DCE5;--line-soft:#E6EAF0;--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--zebra:#F5F7FA;
+  --amber:#F5A623;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;--good:#1B6E4E;--bad:#B23025;--bad-bg:#FBEDEB;
+  --d0:#8A97AB;--d1:#E0B300;--wk:#EAF2FB;--wk-ink:#1F4E86;--blue:#1F5FBF;--sel:#F0F5FD;--navy:#1F3158;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--serif:Georgia,"Times New Roman",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;
+  --ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--line:#333A45;--line-soft:#2A303A;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--zebra:#212630;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--bad:#E8776B;--bad-bg:#33211F;--d0:#7D889B;--d1:#E8C547;--wk:#16263A;--wk-ink:#9CC3EE;--blue:#8FB4F0;--sel:#1B2638;--navy:#3A5794;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;
+  --ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--line:#333A45;--line-soft:#2A303A;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--zebra:#212630;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--bad:#E8776B;--bad-bg:#33211F;--d0:#7D889B;--d1:#E8C547;--wk:#16263A;--wk-ink:#9CC3EE;--blue:#8FB4F0;--sel:#1B2638;--navy:#3A5794;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+svg{display:block}
+.pg{max-width:1040px;margin:0 auto;padding-block:16px 64px}
+.note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:8px;padding:10px 14px;margin:0 0 14px;max-width:86ch}
+.note b{color:var(--ink)}
+
+.mwmast{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:12px;min-height:113px;padding:16px 22px 17px;margin:0 0 16px;display:flex;flex-direction:column;justify-content:flex-end}
+.mwmast::after{content:"";position:absolute;width:210px;height:210px;right:-20px;top:-70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07)}
+.mwtop{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.mwwk{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 7px}
+.mwmast h1{margin:0;font:700 24px/1.15 var(--serif)}
+.pgsub{margin:4px 0 0;color:var(--ff-quiet);font-size:13px}
+.mwstrip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.mwstrip div{text-align:right}.mwstrip b{display:block;font-size:22px;font-weight:600;line-height:1}
+.mwstrip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px}
+.mwstrip .late b{color:var(--ff-late)}
+
+.hocard{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.hochd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px}
+.hocic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--amber-tx)}
+.hocic svg{width:17px;height:17px}
+.hochd h2{margin:0;font:700 19px/1.15 var(--serif)}
+.hocnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.hochd .sp{flex:1}
+.hosort{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3)}
+.sw{display:inline-flex;background:var(--surface-2);border-radius:7px;padding:2px}
+.sw button{border:0;background:none;padding:4px 8px;border-radius:5px;font-size:12px;color:var(--ink-2)}
+.sw button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.mwsearch{width:170px;padding:5px 10px;font-size:13px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+
+.groups{display:grid;gap:12px;margin-top:12px}
+.gc{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.gh{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);border-radius:11px 11px 0 0}
+.gh h3{margin:0;font:700 15.5px/1.2 var(--font)}
+.gh .meta{font:500 13px/1.2 var(--font);color:var(--ink-2)}
+.gh .meta b{color:var(--bad);font-weight:600}
+.gh .lk{margin-left:auto;color:var(--blue);font:600 13px/1 var(--font);text-decoration:none}
+.gc.late .gh h3{color:var(--bad)}
+.gc.week .gh{background:var(--wk)}
+.gc.week .gh h3{color:var(--wk-ink)}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--wk);color:var(--wk-ink);font:700 12px/1 var(--font);flex:none}
+
+.row{display:grid;grid-template-columns:22px minmax(0,1fr) 100px 124px 28px;gap:2px 14px;align-items:center;padding:10px 16px;border-top:1px solid var(--line-soft)}
+.gh+.row{border-top:0}
+.row.on{background:var(--sel)}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;background:var(--surface);padding:0;display:grid;place-items:center}
+.row.late .tick{border-color:var(--bad)}
+.tick.on{background:var(--good);border-color:var(--good)}
+.tick svg{width:12px;height:12px}
+.main{min-width:0}
+.t{display:block;max-width:100%;text-align:left;border:0;background:none;padding:0;font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.t:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.row.done .t{color:var(--ink-3);text-decoration:line-through}
+.t input{width:100%;font-size:15px;border:1px solid var(--blue);border-radius:6px;padding:2px 6px}
+.meta2{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-3);margin-top:2px;min-width:0}
+.meta2 .cl{font-weight:600;color:var(--ink-2);white-space:nowrap}
+.meta2 .sep{width:1px;height:11px;background:var(--line);flex:none}
+.meta2 .up{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.meta2 .up b{font-weight:600;color:var(--ink-2)}
+.wc{justify-self:end;font:600 12.5px/1 var(--font);white-space:nowrap;color:var(--ink-3)}
+.wc.red{color:var(--bad)}
+.st{position:relative;display:inline-flex;align-items:center;justify-self:start}
+.st .dot{position:absolute;left:7px;pointer-events:none}
+.st select{appearance:none;-webkit-appearance:none;border:0;background:transparent;border-radius:6px;padding:4px 18px 4px 22px;font:600 13px/1.3 var(--font);color:var(--ink-2);cursor:pointer}
+.st select:hover{background:var(--surface-2)}
+.st::after{content:"";position:absolute;right:6px;top:50%;margin-top:-2px;border:4px solid transparent;border-top-color:var(--ink-3);border-bottom:0;pointer-events:none}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--d0);flex:none}.dot.d1{background:var(--d1)}.dot.d2{background:var(--good)}
+.menu{position:relative;justify-self:end}
+.kebab{border:0;background:none;color:var(--ink-3);width:28px;height:28px;border-radius:7px;display:grid;place-items:center}
+.kebab:hover,.kebab[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
+.kebab svg{width:16px;height:16px}
+.pop{position:absolute;right:0;top:30px;z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(20,28,43,.16);padding:4px;min-width:230px}
+.pop button,.pop a{display:flex;gap:9px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;font-size:14px;color:var(--ink);text-decoration:none}
+.pop button:hover,.pop a:hover{background:var(--surface-2)}
+.pop svg{width:14px;height:14px;color:var(--ink-3);flex:none}
+.pop hr{border:0;border-top:1px solid var(--line-soft);margin:4px 2px}
+.pop .danger,.pop .danger svg{color:var(--bad)}
+.pop .sure{padding:6px 10px;font-size:13px;color:var(--ink-2);display:grid;gap:6px}
+.pop .sure div{display:flex;gap:6px}
+.pop .sure button{width:auto;border:1px solid var(--line);padding:5px 10px}
+.pop .sure .danger{border-color:var(--bad)}
+.weeks{min-width:200px}
+.weeks button small{margin-left:auto;color:var(--ink-3);font-size:12px}
+.weeks button.on{font-weight:700}
+
+/* the opened task (the tracker's option D) */
+.det{grid-column:2/-1;margin-top:8px}
+.ptabs{display:flex;align-items:center;gap:2px;border-bottom:1px solid var(--line);margin:0 0 12px;flex-wrap:wrap}
+.ptab{border:0;background:none;padding:9px 12px 10px;font:600 13.5px/1 var(--font);color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;display:inline-flex;gap:6px;align-items:center}
+.ptab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
+.ptab .n{font:600 11.5px/1 var(--font);background:var(--surface-2);border-radius:999px;padding:3px 6px;color:var(--ink-2)}
+.ptabs .sp{flex:1}
+.ptabs .open{color:var(--blue);font:600 13px/1 var(--font);text-decoration:none;padding:4px 2px}
+.compose{display:flex;gap:8px;max-width:760px}
+.compose input{flex:1;min-width:0;height:38px;border:1px solid var(--line);border-radius:8px;padding:0 11px;background:var(--surface)}
+.compose input:focus{border-color:var(--blue);outline:none}
+.compose button{height:38px;padding:0 16px;border:0;border-radius:8px;background:var(--navy);color:#fff;font-weight:600}
+.tl{list-style:none;margin:10px 0 0;padding:0 0 0 20px;position:relative;max-width:760px}
+.tl::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.tl li{position:relative;padding:0 0 12px}
+.tl li:last-child{padding-bottom:0}
+.tl li::before{content:"";position:absolute;left:-20px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--blue)}
+.tl .wk{font:600 12px/1.4 var(--font);color:var(--ink-3)}
+.tl .wk.now{color:var(--blue)}
+.tl .tx{font-size:14px}
+.none{color:var(--ink-3);font-size:13px;margin:10px 0 0}
+.desc{width:100%;max-width:760px;border:1px solid transparent;border-radius:8px;background:transparent;padding:8px 11px;margin:0 -11px;font-size:14px;line-height:1.55;resize:none;min-height:40px;field-sizing:content}
+.desc:hover{border-color:var(--line);background:var(--surface)}
+.desc:focus{border-color:var(--blue);background:var(--surface);outline:none}
+.hist{list-style:none;margin:0;padding:0;font-size:12.5px;color:var(--ink-2);max-width:760px}
+.hist li{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:5px 0;border-bottom:1px solid var(--line-soft)}
+.hist time{color:var(--ink-3)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:9px;padding:10px 16px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+@media (max-width:760px){
+  .row{grid-template-columns:22px auto minmax(0,1fr) 28px;grid-template-areas:"tk m m mn" ". wc st st" ". d d d";row-gap:4px}
+  .row .tick{grid-area:tk}.row .main{grid-area:m}.row .menu{grid-area:mn}.row .wc{grid-area:wc;justify-self:start}.row .st{grid-area:st}.row .det{grid-area:d}
+  .mwsearch{width:100%}.mwstrip{gap:14px}
+}
+</style>
+
+<div class="pg">
+  <p class="note"><b>Try it:</b> press a task's name to open it here (and again to fold it) · the tabs · write a line of progress and press Add · the description · the status · the tick · the ⋯ (Change the week, Hand to someone else, Rename, Delete) · <b>Open in … Tracker</b> beside the tabs is the old press, kept · Sort by is remembered when you come back. Nothing here is saved: these are example tasks.</p>
+  <header class="mwmast"><div class="mwtop"><div><div class="mwwk">This week · 1 – 5 Nov</div><h1>My tasks</h1><p class="pgsub">Your actions across every client's Internal Tracker.</p></div>
+    <div class="mwstrip"><div><b id="kOpen">8</b><span>Open</span></div><div class="late"><b id="kLate">2</b><span>Late</span></div><div><b id="kWeek">4</b><span>Due this week</span></div><div><b id="kDone">0</b><span>Done this week</span></div></div></div></header>
+  <div class="hocard"><div class="hochd"><span class="hocic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 4h7M6 8h7M6 12h7M2.5 4h.01M2.5 8h.01M2.5 12h.01"/></svg></span><h2>Open tasks</h2><span class="hocnt" id="cnt">8</span><span class="sp"></span>
+    <span class="hosort">Sort by <span class="sw" role="group" aria-label="Sort by"><button type="button" data-sort="date">Date</button><button type="button" data-sort="client">Client</button></span></span>
+    <span class="hosort">Done <span class="sw"><button type="button" aria-pressed="true">Hide</button><button type="button" aria-pressed="false">Last week</button><button type="button" aria-pressed="false">30 days</button></span></span>
+    <input class="mwsearch" id="q" type="search" placeholder="Search tasks" aria-label="Search tasks"></div></div>
+  <div class="groups" id="groups"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const I={
+ dots:'<svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>',
+ check:'<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg>',
+ lines:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7"/></svg>',
+ pen:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 13l1-3 7-7 2 2-7 7z"/></svg>',
+ cal:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/></svg>',
+ hand:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.5"/><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"/></svg>',
+ bin:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5"/></svg>',
+ out:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h4v4M13 3 7.5 8.5M12 9.5V13H3V4h3.5"/></svg>'};
+const ST={not_started:'Not started',in_progress:'In progress',done:'Done'};
+const DOT={not_started:'dot',in_progress:'dot d1',done:'dot d2'};
+const WEEKS=[['week','This week','1 – 5 Nov'],['next','Next week','8 – 12 Nov'],['w3','W3 Nov','15 – 19 Nov'],['w4','W4 Nov','22 – 26 Nov']];
+const TEAM={'Raya Trade':['Islam','Mohamed','Omar','Noran'],'El Abd':['Islam','Sara','Omar'],'Nile Foods':['Islam','Mohamed','Aley']};
+/* example tasks of one person across three clients */
+let T=[
+ {id:1,t:'Logitics Strategy Revamp',c:'Raya Trade',wk:'late',late:'2 w late',st:'not_started',desc:'Rebuild the logistics strategy around the two new warehouses.',prog:[],hist:[['Mon 19 Oct','Islam made it, due W3 Oct'],['Mon 26 Oct','carried to Last week (was W3 Oct)']]},
+ {id:2,t:'Send the revised scorecard to the CEO office',c:'El Abd',wk:'late',late:'1 w late',st:'in_progress',desc:'',prog:[['Last week','Waiting on Finance numbers for Q3','Islam']],hist:[['Tue 27 Oct','Islam made it, due Last week'],['Wed 28 Oct','Not started → In progress']]},
+ {id:3,t:'HR project we want to review the two projects & Develop the 3rd Project Retention Analytics',c:'Raya Trade',wk:'week',st:'in_progress',desc:'Two projects reviewed with HR; the third is Retention Analytics.',prog:[['Last week','had a meeting this week and postponed to next week','Islam']],hist:[['Mon 26 Oct','Islam made it, due This week']]},
+ {id:4,t:'Finance Adjust Project that is missing MIlestones',c:'Raya Trade',wk:'week',st:'in_progress',desc:'',prog:[],hist:[['Mon 2 Nov','Islam made it, due This week']]},
+ {id:5,t:'Draft the Q4 town-hall agenda',c:'El Abd',wk:'week',st:'not_started',desc:'',prog:[],hist:[['Mon 2 Nov','Sara made it, for Islam, due This week']]},
+ {id:6,t:'UNITS plan require refinement, since there are redundancy',c:'Nile Foods',wk:'week',st:'in_progress',desc:'',prog:[['This week','The link of BUs plans review is: https://docs.google.com/spreadsheets/d/1x9AbCdEf/edit','Islam']],hist:[['Mon 2 Nov','Mohamed made it, for Islam, due This week']]},
+ {id:7,t:'Close the Q3 performance pack for the board',c:'Nile Foods',wk:'next',st:'not_started',desc:'',prog:[],hist:[['Tue 3 Nov','Islam made it, due Next week']]},
+ {id:8,t:'Map the shared services KPIs',c:'El Abd',wk:'w3',st:'not_started',desc:'',prog:[['Last week','First draft with HR and IT','Islam']],hist:[['Wed 28 Oct','Islam made it, due W3 Nov']]}];
+let S={sort:'date',open:null,tab:{},menu:null,sub:null,renaming:null,q:''};
+try{const v=localStorage.getItem('smp.tasks.sort');if(v==='client'||v==='date')S.sort=v}catch(e){}
+const bucket=a=>a.wk==='late'?'late':a.wk==='week'?'week':'later';
+const HEAD={late:'Late',week:'This week',later:'Next week and later'};
+const ini=s=>s.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2200)}
+function weekCell(a){if(a.st==='done')return '<span class="wc">Done</span>';if(a.wk==='late')return '<span class="wc red">'+a.late+'</span>';if(a.wk==='week')return '<span class="wc"></span>';return '<span class="wc">'+WEEKS.find(w=>w[0]===a.wk)[1]+'</span>'}
+function menu(a){
+ if(S.menu!==a.id)return '';
+ if(S.sub==='week')return '<div class="pop weeks" role="listbox">'+WEEKS.map(w=>'<button type="button" data-week="'+w[0]+'" class="'+(a.wk===w[0]?'on':'')+'">'+w[1]+'<small>'+w[2]+'</small></button>').join('')+'</div>';
+ if(S.sub==='hand')return '<div class="pop" role="listbox">'+TEAM[a.c].map(n=>'<button type="button" data-hand="'+n+'">'+n+(n==='Islam'?' <small style="margin-left:auto;color:var(--ink-3)">you</small>':'')+'</button>').join('')+'</div>';
+ if(S.sub==='del')return '<div class="pop"><div class="sure">Delete this action from '+a.c+'\'s Tracker?<div><button type="button" class="danger" data-del="yes">Yes, delete it</button><button type="button" data-del="no">Keep it</button></div></div></div>';
+ return '<div class="pop" role="menu">'+
+  '<button type="button" data-act="toggle">'+I.lines+(S.open===a.id?'Close the details':'Details and progress')+'</button>'+
+  '<button type="button" data-act="rename">'+I.pen+'Rename</button>'+
+  (a.st!=='done'?'<button type="button" data-act="week">'+I.cal+'Change the week</button>':'')+
+  '<button type="button" data-act="hand">'+I.hand+'Hand to someone else</button>'+
+  '<a href="#" data-act="go">'+I.out+'Open in '+a.c+'\'s Tracker</a>'+
+  '<hr><button type="button" class="danger" data-act="del">'+I.bin+'Delete</button></div>';
+}
+function details(a){
+ if(S.open!==a.id)return '';
+ const tab=S.tab[a.id]||'p';
+ const tabs='<div class="ptabs" role="tablist">'+
+  '<button type="button" class="ptab" role="tab" data-tab="p" aria-selected="'+(tab==='p')+'">Progress'+(a.prog.length?' <span class="n">'+a.prog.length+'</span>':'')+'</button>'+
+  '<button type="button" class="ptab" role="tab" data-tab="d" aria-selected="'+(tab==='d')+'">Description</button>'+
+  '<button type="button" class="ptab" role="tab" data-tab="h" aria-selected="'+(tab==='h')+'">History <span class="n">'+a.hist.length+'</span></button>'+
+  '<span class="sp"></span><a href="#" class="open" data-act="go">Open in '+a.c+'\'s Tracker →</a></div>';
+ let body='';
+ if(tab==='p')body='<div class="compose"><input id="pn-'+a.id+'" placeholder="What happened this week?" aria-label="Progress"><button type="button" data-act="add">Add</button></div>'+
+  (a.prog.length?'<ol class="tl">'+a.prog.map(p=>'<li><div class="wk'+(p[0]==='This week'?' now':'')+'">'+p[0]+' · '+p[2]+'</div><div class="tx">'+esc(p[1])+'</div></li>').join('')+'</ol>':'<p class="none">Nothing written yet.</p>');
+ if(tab==='d')body='<textarea class="desc" id="ds-'+a.id+'" rows="1" aria-label="Description" placeholder="What the task is. Click to write it.">'+esc(a.desc)+'</textarea>';
+ if(tab==='h')body='<ul class="hist">'+a.hist.slice().reverse().map(h=>'<li><time>'+h[0]+'</time><span>'+esc(h[1])+'</span></li>').join('')+'</ul>';
+ return '<div class="det">'+tabs+body+'</div>';
+}
+function row(a,showClient){
+ const last=a.prog[0];
+ const bits=[];if(showClient)bits.push('<span class="cl">'+a.c+'</span>');if(last)bits.push('<span class="up"><b>'+last[0]+'</b> · '+esc(last[1])+'</span>');
+ const name=S.renaming===a.id?'<span class="t"><input id="rn" value="'+esc(a.t)+'" aria-label="Rename the action"></span>':'<button type="button" class="t" data-act="toggle" aria-expanded="'+(S.open===a.id)+'" title="'+esc(a.t)+'">'+esc(a.t)+'</button>';
+ return '<div class="row'+(a.wk==='late'&&a.st!=='done'?' late':'')+(a.st==='done'?' done':'')+(S.open===a.id?' on':'')+'" data-id="'+a.id+'">'+
+  '<button type="button" class="tick'+(a.st==='done'?' on':'')+'" data-act="tick" role="checkbox" aria-checked="'+(a.st==='done')+'" aria-label="Mark done">'+(a.st==='done'?I.check:'')+'</button>'+
+  '<div class="main">'+name+(bits.length?'<div class="meta2">'+bits.join('<span class="sep"></span>')+'</div>':'')+'</div>'+
+  weekCell(a)+
+  '<span class="st"><span class="'+DOT[a.st]+'"></span><select data-act="status" aria-label="Status">'+Object.keys(ST).map(k=>'<option value="'+k+'"'+(k===a.st?' selected':'')+'>'+ST[k]+'</option>').join('')+'</select></span>'+
+  '<span class="menu"><button type="button" class="kebab" data-act="menu" aria-haspopup="menu" aria-expanded="'+(S.menu===a.id)+'" aria-label="More for this task">'+I.dots+'</button>'+menu(a)+'</span>'+
+  details(a)+'</div>';
+}
+function draw(){
+ document.querySelectorAll('[data-sort]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sort===S.sort)));
+ const vis=T.filter(a=>a.st!=='done'||a.justDone).filter(a=>!S.q||(a.t+' '+a.c).toLowerCase().includes(S.q));
+ let html='';
+ if(S.sort==='date'){
+  html=['late','week','later'].map(b=>{const xs=vis.filter(a=>bucket(a)===b);if(!xs.length)return '';
+   return '<section class="gc '+b+'"><div class="gh"><h3>'+HEAD[b]+'</h3><span class="meta">'+xs.filter(a=>a.st!=='done').length+' open</span></div>'+xs.map(a=>row(a,true)).join('')+'</section>'}).join('');
+ }else{
+  const cs=[...new Set(vis.map(a=>a.c))].sort((x,y)=>vis.filter(a=>a.c===y&&a.wk==='late').length-vis.filter(a=>a.c===x&&a.wk==='late').length||x.localeCompare(y));
+  html=cs.map(c=>{const xs=vis.filter(a=>a.c===c),l=xs.filter(a=>a.wk==='late'&&a.st!=='done').length;
+   return '<section class="gc"><div class="gh"><span class="av">'+ini(c)+'</span><h3>'+c+'</h3><span class="meta">'+xs.filter(a=>a.st!=='done').length+' open'+(l?' · <b>'+l+' late</b>':'')+'</span><a href="#" class="lk" data-go="'+c+'">Internal Tracker →</a></div>'+xs.map(a=>row(a,false)).join('')+'</section>'}).join('');
+ }
+ document.getElementById('groups').innerHTML=html||'<p class="none">Nothing matches.</p>';
+ const open=T.filter(a=>a.st!=='done');
+ document.getElementById('cnt').textContent=open.length;document.getElementById('kOpen').textContent=open.length;
+ document.getElementById('kLate').textContent=open.filter(a=>a.wk==='late').length;document.getElementById('kWeek').textContent=open.filter(a=>a.wk==='week').length;
+ document.getElementById('kDone').textContent=T.filter(a=>a.st==='done').length;
+ const rn=document.getElementById('rn');if(rn){rn.focus();rn.select()}
+}
+const find=id=>T.find(a=>a.id==id);
+document.addEventListener('click',e=>{
+ const s=e.target.closest('[data-sort]');
+ if(s){S.sort=s.dataset.sort;try{localStorage.setItem('smp.tasks.sort',S.sort)}catch(x){}draw();return}
+ const g=e.target.closest('[data-go]');if(g){e.preventDefault();toast('Opens '+g.dataset.go+'\'s Internal Tracker');return}
+ const r=e.target.closest('.row');const a=r&&find(r.dataset.id);
+ const b=e.target.closest('[data-act],[data-tab],[data-week],[data-hand],[data-del]');
+ if(!b||!a){if(S.menu){S.menu=null;S.sub=null;draw()}return}
+ const d=b.dataset;
+ if(d.tab){S.tab[a.id]=d.tab;draw();return}
+ if(d.week){a.wk=d.week;a.late=null;a.hist.push(['Tue 3 Nov','carried to '+WEEKS.find(w=>w[0]===d.week)[1]]);S.menu=null;S.sub=null;draw();toast('Moved to '+WEEKS.find(w=>w[0]===d.week)[1]);return}
+ if(d.hand){S.menu=null;S.sub=null;if(d.hand!=='Islam'){a.hist.push(['Tue 3 Nov','handed to '+d.hand+' (was Islam)']);T=T.filter(x=>x!==a);toast('Handed to '+d.hand+' — it leaves your list')}draw();return}
+ if(d.del){if(d.del==='yes'){T=T.filter(x=>x!==a);toast('Deleted')}S.menu=null;S.sub=null;draw();return}
+ const act=d.act;
+ if(act==='status')return;
+ if(act==='toggle'){if(S.renaming===a.id)return;S.open=S.open===a.id?null:a.id;S.menu=null;S.sub=null}
+ else if(act==='menu'){S.menu=S.menu===a.id?null:a.id;S.sub=null}
+ else if(act==='tick'){const done=a.st==='done';a.hist.push(['Tue 3 Nov',done?'Done → '+ST[a.was||'not_started']:ST[a.st]+' → Done']);if(!done){a.was=a.st;a.st='done';a.justDone=true}else{a.st=a.was||'not_started';a.justDone=false}}
+ else if(act==='week'){S.sub='week'}
+ else if(act==='hand'){S.sub='hand'}
+ else if(act==='del'){S.sub='del'}
+ else if(act==='rename'){S.renaming=a.id;S.menu=null}
+ else if(act==='go'){e.preventDefault();S.menu=null;toast('Opens '+a.c+'\'s Internal Tracker on this task');}
+ else if(act==='add'){const i=document.getElementById('pn-'+a.id);const v=i&&i.value.trim();if(!v){i&&i.focus();return}a.prog.unshift(['This week',v,'Islam']);a.hist.push(['Tue 3 Nov','Islam wrote progress']);draw();const n=document.getElementById('pn-'+a.id);if(n)n.focus();return}
+ draw();
+});
+document.addEventListener('change',e=>{const s=e.target.closest('select[data-act=status]');if(!s)return;const a=find(s.closest('.row').dataset.id);a.hist.push(['Tue 3 Nov',ST[a.st]+' → '+ST[s.value]]);if(s.value==='done'){a.was=a.st;a.justDone=true}a.st=s.value;draw()});
+document.addEventListener('keydown',e=>{
+ if(e.target.id==='rn'){const a=find(e.target.closest('.row').dataset.id);if(e.key==='Enter'){const v=e.target.value.trim();if(v&&v!==a.t){a.hist.push(['Tue 3 Nov','renamed to “'+v+'”']);a.t=v}S.renaming=null;draw()}if(e.key==='Escape'){S.renaming=null;draw()}return}
+ if(e.target.id&&e.target.id.startsWith('pn-')&&e.key==='Enter'){e.target.closest('.det').querySelector('[data-act=add]').click()}
+ if(e.key==='Escape'&&S.menu){S.menu=null;S.sub=null;draw()}
+});
+document.addEventListener('focusout',e=>{
+ if(e.target.id==='rn'){const a=find(e.target.closest('.row').dataset.id);const v=e.target.value.trim();if(v&&v!==a.t)a.t=v;S.renaming=null;setTimeout(draw,0)}
+ if(e.target.id&&e.target.id.startsWith('ds-')){const a=find(e.target.id.slice(3));if(e.target.value!==a.desc){a.desc=e.target.value;toast('Description saved')}}
+});
+document.getElementById('q').addEventListener('input',e=>{S.q=e.target.value.trim().toLowerCase();draw()});
+draw();
+</script>

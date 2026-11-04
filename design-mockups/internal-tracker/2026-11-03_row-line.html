@@ -1,0 +1,116 @@
+<title>Tracker Row Line</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* The line under a task's name (topic · last progress) on the Internal
+   Tracker, before and after. Islam: "make part under the task name topic and
+   last progress to be hidden and appear on hover … make the task obvious".
+   A = quieter line, always there (recommended). B = Islam's hover idea, kept
+   for a phone by showing it always where there is no hover. Example tasks. */
+:root{--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--ink-4:#8A929E;--line:#D6DCE5;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EFF2F6;
+  --bad:#B23025;--d0:#8A97AB;--d1:#E0B300;--blue:#1F5FBF;--amber-tx:#9C5D08;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--ink-4:#79828F;--line:#333A45;--line-2:#2A303A;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--bad:#E8776B;--d0:#7D889B;--d1:#E8C547;--blue:#8FB4F0;--amber-tx:#F5A623;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--ink-4:#79828F;--line:#333A45;--line-2:#2A303A;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--bad:#E8776B;--d0:#7D889B;--d1:#E8C547;--blue:#8FB4F0;--amber-tx:#F5A623;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+.pg{max-width:960px;margin:0 auto;padding-block:24px 48px;display:grid;gap:14px}
+.sw{display:inline-flex;flex-wrap:wrap;background:var(--surface-2);border-radius:8px;padding:3px;justify-self:start}
+.sw button{border:0;background:none;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--ink-2)}
+.sw button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.sw button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0;max-width:75ch}
+.note b{color:var(--ink)}
+.note p{margin:0}.note p+p{margin-top:6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.av{width:34px;height:34px;border-radius:50%;background:var(--surface-2);color:var(--blue);display:grid;place-items:center;font:700 12px/1 var(--font)}
+.hd h2{font-size:17px;margin:0}.hd .n{color:var(--ink-3)}
+.hd .add{margin-left:auto;color:var(--blue);font-weight:600;font-size:14px}
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 92px 120px 28px;gap:2px 14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.row:last-child{border-bottom:0}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;background:none}
+.tn{min-width:0}
+.t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px;font-weight:500;color:var(--ink)}
+.meta{display:flex;align-items:baseline;gap:8px;min-width:0;font-size:13px;color:var(--ink-3);white-space:nowrap}
+.meta .tp{color:var(--ink-2);font-weight:600}
+.meta .sep{width:1px;height:12px;background:var(--line);align-self:center}
+.meta .pr{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.meta .pr b{color:var(--ink-2);font-weight:600}
+.wk{font-size:13px;color:var(--ink-3)}.wk.late{color:var(--bad);font-weight:600}
+.st{display:flex;gap:7px;align-items:center;font:600 13px/1 var(--font);color:var(--ink-2)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--d1)}.dot.ns{background:var(--d0)}
+.kb{width:28px;height:28px;border:0;border-radius:7px;background:none;color:var(--ink-3);display:grid;place-items:center}
+.kb svg{width:16px;height:16px}
+
+/* AFTER A — the name leads: a step heavier; the line a step smaller and one
+   grey; the topic a plain word; "This week" said only when it is not */
+.A .t{font-weight:600}
+.A .meta{font-size:12.5px;color:var(--ink-4);gap:6px}
+.A .meta .tp{color:var(--ink-3);font-weight:400}
+.A .meta .sep{width:3px;height:3px;border-radius:50%;background:var(--ink-4)}
+.A .meta .pr b{color:var(--ink-3);font-weight:400}
+.A .meta .pr b.fresh{display:none}
+
+/* AFTER B — the name alone; the line keeps its room (no jump) and shows
+   on hover or keyboard focus; on a phone or tablet it is always there */
+.B .t{font-weight:600}
+.B .meta{font-size:12.5px;color:var(--ink-4);gap:6px;opacity:0;transition:opacity .12s}
+.B .meta .tp{color:var(--ink-3);font-weight:400}
+.B .meta .sep{width:3px;height:3px;border-radius:50%;background:var(--ink-4)}
+.B .meta .pr b{color:var(--ink-3);font-weight:400}
+.B .meta .pr b.fresh{display:none}
+.B .row:hover .meta,.B .row:focus-within .meta{opacity:1}
+@media (hover:none){.B .meta{opacity:1}}
+@media (prefers-reduced-motion:reduce){.B .meta{transition:none}}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.legend div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--ink-2)}
+.legend b{display:block;color:var(--ink);margin-bottom:2px}
+@media (max-width:700px){.row{grid-template-columns:20px minmax(0,1fr) 28px}.wk,.st{display:none}}
+</style>
+<div class="pg">
+  <div class="sw" role="group" aria-label="Which version">
+    <button type="button" id="v-before" data-v="before" aria-pressed="false">Before</button>
+    <button type="button" id="v-a" data-v="A" aria-pressed="true">After A · quieter line</button>
+    <button type="button" id="v-b" data-v="B" aria-pressed="false">After B · line on hover</button>
+  </div>
+  <div class="note" id="note"></div>
+  <div class="card" id="card">
+    <div class="hd"><span class="av">IS</span><h2>Islam Saadany</h2><span class="n">3 open</span><span class="add">+ Add for Islam</span></div>
+    <div class="row"><button class="tick" type="button" aria-label="Mark done"></button>
+      <div class="tn"><span class="t">HR project we want to review the two projects &amp; Develop the 3rd Project Retention Approach</span>
+        <div class="meta"><span class="tp">Functions</span><span class="sep"></span><span class="pr"><b class="fresh">This week</b> <span class="fresh-dot">·</span> Trying to meet this week Wednesday, still didn't commit</span></div></div>
+      <span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span>
+      <button class="kb" type="button" aria-label="More for this task"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></button></div>
+    <div class="row"><button class="tick" type="button" aria-label="Mark done"></button>
+      <div class="tn"><span class="t">Finance Adjust Project that is missing Milestones</span>
+        <div class="meta"><span class="tp">Finance</span><span class="sep"></span><span class="pr"><b>Last week</b> · Had a meeting and postponed to next week</span></div></div>
+      <span class="wk late">2 w late</span><span class="st"><span class="dot"></span>In progress</span>
+      <button class="kb" type="button" aria-label="More for this task"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></button></div>
+    <div class="row"><button class="tick" type="button" aria-label="Mark done"></button>
+      <div class="tn"><span class="t">Logistics Strategy Revamp</span>
+        <div class="meta"><span class="tp">Supply chain</span></div></div>
+      <span class="wk">Next week</span><span class="st"><span class="dot ns"></span>Not started</span>
+      <button class="kb" type="button" aria-label="More for this task"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></button></div>
+  </div>
+  <div class="legend">
+    <div><b>Before</b>Name and line close in weight; topic in bold; "This week" before the progress reads like the due week beside it.</div>
+    <div><b>After A (recommended)</b>Name a step heavier, line a step lighter and smaller, topic plain. "This week" is dropped when the note is fresh; "Last week" stays, so a stale task still shows.</div>
+    <div><b>After B</b>Only the names show; rest the pointer on a task (or tab to it) for its line. Space is kept so rows don't jump. A phone has no hover, so there the line always shows.</div>
+  </div>
+</div>
+<script>
+const NOTES={
+ before:'<p><b>Today.</b> The line under the name carries the topic (bold) and the last progress with the week it was written. The "This week" in the line is when the note was written; the "This week" column on the right is when the task is due. Side by side they read as a repeat.</p>',
+ A:'<p><b>After A, quieter line (recommended).</b> The name is a step heavier, and the line is a step smaller, one grey, with a plain topic. The week of the note shows only when it is not this week, so <b>Last week</b> flags a task nobody has touched.</p><p>Everything stays readable at a glance, on a phone too.</p>',
+ B:'<p><b>After B, line on hover.</b> Only the names show. Rest the pointer on a task (or reach it with Tab) and its line appears; the row keeps the room for it, so nothing jumps.</p><p>The cost: in a review you can\'t scan the latest notes down the list, and a phone or tablet has no hover, so there the line always shows.</p>'};
+function show(v){
+ document.getElementById('card').className='card'+(v==='before'?'':' '+v);
+ document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));
+ document.getElementById('note').innerHTML=NOTES[v];
+ document.querySelectorAll('.fresh-dot').forEach(d=>d.hidden=v!=='before');
+}
+document.querySelectorAll('[data-v]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+show('A');
+</script>

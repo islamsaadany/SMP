@@ -70790,6 +70790,379 @@ No seat lost a pen it had. **One thing the comparison page did not show:** it me
 **§704 MERGED TO `main`, 2026-11-01, on Islam's word (*"merge to main"*).** `main` had taken §693–§703 meanwhile, including a §699 of its own, so the ladder was renumbered §699 → §704 on the branch before the merge (its code comments had also cited §693, renumbered with it). The sources merged clean; the two records were joined and the built files rebuilt on the merged tree. Checked again there: the access surface moves by the same 3,287 grants against the pre-ladder baseline; the Roles & access page's levels, pen, Copilot cells and first-screen switch all press and save on the single-file platform and the served shell; part owners at own piece see their own pillar in the workbench and the reading window; the rule tests, the type check and both gates read as on main.
 
 
+## §705 — The note lock goes; the owed note is said on its own box (2026-11-02)
+
+Islam: *"let's remove the feature that dims the whole plan until the note of non achieveing number is not there and let's replace it by a clear tag or note on the text box to be obvious but don't stop a person from entering hte numbers"*. §576's lock — a red figure with no note disabled and greyed every other reporting box on the page, put its own bar in the "to finish" bar's place and steered the cursor to the note — is gone. Mockup first (CLAUDE rule 1c): `design-mockups/note-tag/2026-11-02_tag-on-the-note-box.html`, Mobile's real Reporting page today and proposed, the tag three ways; Islam: *"ok with A"*, then on the words: a prompt in the box so the person feels something is owed — put to him that stored text would be saved as the note and let Submit through, so it is a grey placeholder — *"ok with your recommendation but make the red is Needs justficiation"*.
+
+**What the page does now.** Nothing is disabled and nothing greys; every figure box takes typing while a note is owed. The red row's note box wears a tag above it, **Note needed · off track** (the band's own word, `noteWant` in `config-data.js`: "" on a row that owes nothing), keeps its red edge, and asks *"No justification yet — why, and what is being done"* (`NOTE_PROMPT`, a placeholder, never stored). The box is drawn by the one builder every note box comes through (`noteBox`, `group-render.js`), so the unit's table, a capability's and My reporting carry the same tag; `capNoteBox` now takes the ROW (`{kind, obj, asked}`) rather than the object, so a capability's note asks the same question a unit's does — and `asked` is part of it, because a milestone or outcome whose date has not come is red on its own figure and owed by nobody (measured: four tagged on cap6 where Submit counts one, before `asked` reached the builder). The "to finish" bar is the only bar again and counts the note among what is left, as it did before §576. Submit's rule is untouched: a red figure still needs its note (§105, §221).
+
+**The read side.** Where a red row's note is read by somebody who may not write it — the Group CEO on Mobile's page, a direction's owner, the Performance tables — the empty cell says **Needs justification** in red (`noteRead(note, tight, need)`, `NOTE_NEED`): the platform's word, never stored. Not on a row whose date has not come.
+
+**What went.** `noteLockOf`, `noteLockSubjects`, `NOTELOCK`, `noteLockBar`, the paint-time computation, `noteLockApply` (the disabling), `noteLockFocus`/`noteGo`/the Tab-and-Enter steering, Alt+Enter's and Enter's redirect to the owed note, the `.lockbar`/`.lockshut`/`.lockhere` rules. `REP_BOXES` stays (the walk and the keys read it). §382's note half on My reporting (the owner writes the note on their own red rows) and the server's `lineNote` stay as §576.1 made them.
+
+**One token, flagged.** `tr.wantnote` even rows were washed with a literal light pink (`#FBF1EF`), which in the dark theme drew a light row across a dark table and left the tag unreadable on it (2.0:1, measured). It is `--zebra-bad` now: light keeps the exact colour; dark takes the theme's red wash (`--bad-bg`'s value). A dark-theme fix outside the ask, said here rather than slipped in.
+
+**CHECKED.** `note-tag.py`, new (replaces `note-lock.py`, deleted): the rule; typed on Mobile's Reporting (no box disabled, no lock bar, the "to finish" bar counting the note, the tag in the mockup's words, the prompt, the box red and in the tab path, nothing stored; another figure typed and stored while the note is owed; the tag readable in light and dark; the note written takes the tag and the bar away); cap6's own red rows (every asked row tagged with the prompt, nothing shut, a not-due red row not tagged); the Group CEO reading Mobile's red row as "Needs justification" in red, no box, readable in both themes; My reporting as a tactic's owner who does not run the unit (the Note column, the box on their own red row only, tagged, nothing shut, the note landing on the right tactic in Mobile). **26 ok; red 11 on the build before.** `report-blockers.py` 2b rewritten for the new state (this bar counting the note, nothing disabled, the chip landing in the tagged note), green; its 10 other reds are `main`'s own (same ten on the unchanged tree). Green: `report-keys`, `submit-gate`, `report-note-wrap`, `reported-note`, `capability-report-column`, `fn-report-gate`; `my-reporting` red 1 as on `main`; `direction-part` red 43 as on `main` (its comments renumbered). `built-in-step` all good; the served copies regenerated (`platform.css`, `shell.js`, `sw.js`, `asset-stamps.json`); `release-stamp` clear; `generated-in-step` red on `authorize.cjs`'s carry, which this change does not touch. Rollback copies under `ui-versions/note-tag/`.
+
+**§705 MERGED TO `main`, 2026-11-02, on Islam's word (*"merge to main"*).** `main` had not moved since §704, the branch's own base, so the merge is a fast-forward and the checks are the ones recorded above. Pages only; no save is judged differently, so no forced sign-out. The served copies and the shipped file were rebuilt on the branch and travel with it.
+
+## §706 — The Weekly check as a meeting; the main list quiet; the opened task tabbed (2026-11-02; §701 on the branch, renumbered at the merge: main took §701–§705)
+
+Islam, of the built §700: *"this is still not good looking or usable. let's think of other ways"*. Three ways drawn (`design-mockups/internal-tracker/2026-11-01_weekly-check-rethink.html`); Islam: *"I like the meeting mode for the weekly check. but let's keep the quiet list ... in the main list of actions"*; the main list drawn (`2026-11-02_actions-quiet-list.html`), with *"take care not to change the top banner size ... and the word actions"*; the opened task drawn four ways (`2026-11-02_opened-task-options.html`); Islam: *"go with D, build it all"*. His answers for D: the description read as text and clicked to edit; History a plain list; Delete at the end of the tabs.
+
+**The banner and the Actions card head are untouched** — they match the other modules.
+
+**The Weekly check is a meeting.** Left, every topic and its tasks as a status dot and a name: this week's, then last week's finished under *Last week*, then next week's under *Next week* with the topic's own write line (§532 — the line is the meeting's purpose and stays). Topics with something in the three weeks first, then No topic, then the quiet ones (*Nothing on this topic in these three weeks.*, §61's fuller sentence now its hover). Inside a topic each week stands by owner (§695). Right, the one task being talked about — it IS the opened task (`?open=`), so a link opens the meeting on it, and with none picked the page opens on the first of this week's (`loadFor`, so its progress and history are read with it): the topic, the name (double-click renames), owner and week as on a row, the status as three buttons for the same act, the tabbed details below, and **Previous · Carry to next week · Save and next**. Save and next writes what is in the progress box, if anything, and opens the next task in the same answer. **N of M gone through** counts the tasks left with Save and next, on this browser for today (sessionStorage) — it is the meeting's progress, not the client's data, so it is never stored. ↑/↓ walk the list; Ctrl+Enter is Save and next. The week cards, the per-row progress box under every row (§657's `.pline`) and the pill stripes are gone with it.
+
+**The main list is quiet.** No stripes; rows parted by a hairline; the status a dot and its word (grey, yellow, green) instead of §699's tinted pill; the row's one control on the right is ⋯, which opens the task (it was the arrow). The topic column, the week and owner picks, the add line, search and Group by are as they were.
+
+**The opened task is tabbed** (option D): **Progress** first — the box with **Add** beside it and the entries right under it on a timeline; **Description**, which reads as text and becomes a box when clicked (saved on leaving, as before); **History**, §657's list, its tab being the old history link; **Delete** at the end of the tabs, behind its question. The topic choice left the panel: the row's topic column sets it (§503). Which tab a task was left on rides across the swaps.
+
+**Checked**: `checks/tracker.mjs` **359 passed, 1 failed** — the one is the rename-box width red recorded at §699, unchanged. The check-view and opened-task checks were rewritten for the new markup, and the meeting is now pressed in a real browser: opens on the first task, a press on the left opens another on the address without a reload, a status button writes the status, Save and next writes the typed line on that task and opens the next, the count and tick move, ↑ walks back; the run puts the action back as it found it. The breaks that touch this code — `check-unsorted`, `no-carry`, `carry-anything`, `check-last-open`, `progress-anyone`, `who-everyone` — each still go red **on their own assertions** (read, not counted: the standing red would have made every one look red). Drawn in Chromium light, dark and at 390px and looked at. `generated-in-step` and `release-stamp` all clear; nothing in the tracker from `tsc`. Snapshots: `ui-versions/tracker-page/2026-11-02_before-meeting-mode-quiet-list.ts`, `ui-versions/tracker-script/2026-11-02_before-meeting-mode-quiet-list.ts`.
+
+**§706 MERGED TO `main`** 2026-11-02, Islam: *"merge to main"*. `main` had taken §701–§705 while this was in flight, so this branch's §701 became §706 before the merge (code comments, checks and both records). The two record files were COMBINED, never picked: main's §701–§705 kept as written, §706 after them; the progress file with §706 on top. No file outside the records was touched by both sides. **RE-RUN ON THE MERGED TREE**: `checks/tracker.mjs` **359 passed, 1 failed** — the standing rename-box width red (§699); `release-stamp` all clear; nothing in the tracker from `tsc`. **`generated-in-step` is red on `authorize.cjs`** (frozen 140597 bytes, carried 141193), and it is **`origin/main`'s**: red identically on a clean checkout of `origin/main` (`6a9b746`), and neither file differs between that and this merge. Left as main's (§303), flagged. No migrations; nobody signed out.
+
+## §707 — The main list matched to its mockup (2026-11-02)
+
+Islam, with a picture of `design-mockups/internal-tracker/2026-11-02_actions-quiet-list.html` beside the built §706: *"it's not what was implemented now in the main list the tasks are not opening as we agreed or anything what is going on?"* He was right: §706 restyled the existing row rather than building the drawn one, and did not say where it differed. Told in five points; Islam: *"go ahead, match the mockup exactly"*.
+
+**Built, as drawn**: the **name opens the task** (a click or Enter on it; `?open=`, as before). **⋯ is a menu** — Details and progress, Rename, Change topic, Delete (behind its question). The **topic is a tag after the name**, nothing when there is none (Change topic opens the same list); **late is a red tag** after it — *N w late*, or *Late* when carried nought — and the week cell then says the **week it was due, in red** (*Last week*, else the week's own word; the day, as exact dates). **Group headings** are the number in gold, the name bold, the counts, and **+ Add for … / + Add to …** at the right (it was at the foot; a list grouped by nothing keeps it at the foot); *N done ›* stays at the foot. The **write line, Search and Group by share one row** under the card head, the line's **Topic · week · owner shown as chips from the start** (§356.16's *details arrive with the first letter* is reversed by the drawing; its `details-always` break is retired with it). The banner and the Actions card head are untouched, as Islam asked at §706.
+
+**What moved because a single click now opens**: the name no longer renames on a double-click — **Rename is the ⋯'s**; the meeting's own title (§706) keeps its double-click, since it opens nothing. Renaming, the name's tags step aside so the box takes the whole line — which **cleared §699's standing red** (*the box is as wide as the space the name has*, 297 against a 300 floor, then 365 against 406 with the tags beside it).
+
+**Kept, said**: the group headings name people as the list always has (*Islam Saadany*); the mockup's first names were its own sample. The add line's note arrow stays at its end.
+
+**Checked**: `checks/tracker.mjs` **359 passed, 0 failed** — rewritten where the drawing changed the claim (rename through the ⋯; Change topic through the ⋯; the name opens; the week cell and the late tag; the chips from the start; the line's place in an owner's section), never where it did not. Drawn in Chromium at 1240px — the list, the ⋯ menu open, a task opened — and at 390px, and looked at. `tsc`: nothing in the tracker. Snapshots: `ui-versions/tracker-page/2026-11-02_before-quiet-list-exact.ts`, `ui-versions/tracker-script/2026-11-02_before-quiet-list-exact.ts`.
+
+**THE BREAKS, ALL 36 RUN, AND TWO HAD GONE QUIET.** Every `check:tracker:red` break was run against this build, each counted by its own FAIL lines over a green baseline (0 failed, so a red is the break's and not the standing one). 34 reddened. **`week-auto` and `narrow-rename` did not** — both were CSS written against §503's and §565's selectors, which the quiet row's rules now outrank, so the break changed nothing; and `week-auto` had also lost its assertion, because the topic column's line-up check it reddened went with the column. Both breaks now name the quiet row's selectors, and a check says **the week column lines up down the list** — measured where the words start, since a week that can be pressed wears a padded box pulled out by the same padding, and within 1px. The first draft measured the OWNER column, and the break left it standing: the name column takes up what the week gives, so it is the week that moves. Both reddened since, on their own lines. **`details-always` is retired** with §356.16's hidden details. On the merge, `main` had not moved: a fast-forward, §707 kept.
+
+## §708 — A card per owner, and rows that say only what the card and the view do not (2026-11-03)
+
+Islam, with a picture of the built §707 on the office's real rows: *"still looks messy how do you think we can make it cleaner? is a card per owner might do the jb like we tried earlier for the topic?"* Said back: a card per owner parts the people, but the mess is inside the rows — the owner on every row of a list grouped by owner, *This week* on every row of the This week view, a long name wrapping and pushing its topic onto a line of its own, updates with links running the page's width. Drawn three ways (`design-mockups/internal-tracker/2026-11-03_owner-cards.html`; its *Now* was drawn wrong at first and Islam caught it — a missing wrapper, fixed and republished); Islam: *"go with B, build it"*.
+
+**Built (B)**: the list's lower card gives up its frame and **every group is a card** (§700's way for topics, now for whatever the list is grouped by; grouped by nothing, one card). Grouped by owner, the card's heading is the person's **initials in a circle**, the name, the counts and **+ Add for …**; other groupings keep their gold number. The card head above stands alone, fully rounded; the banner and Actions are untouched. **The row**: the name on **one line**, cut with … (the whole of it on hover and when opened); under it **one quiet line** — the topic, a hairline, the latest update — or nothing. The **week cell says only the exception**: how late, in red (*2 w late*, *Late* when carried nought), or a week that is not the view's own; on **This week a row due this week says nothing**. **Grouped by owner the owner column goes** — the card says whose. The **late tag on the name** (§707) went with it: the week cell says it. Two things the row no longer shows are still one press away in the **⋯: Change the week** (the same week picker) and, grouped by owner, **Hand to someone else** (the same team list).
+
+**Retired, said**: `week-auto` (§503) — a week sized by its words cannot move anything now that the week is a right-aligned exception in a fixed column and the name takes up the difference, so the line-up check it reddened (added at §707) measured nothing and both went. `narrow-rename` re-aimed at the one-line name, and reddens again on its own line.
+
+**Checked**: `checks/tracker.mjs` **358 passed, 0 failed**; rewritten where B changed the claim (the owner behind the ⋯, Hand to someone else, the week cell's exceptions, the headings with initials, a row's own markup read to the next row), never where it did not. Drawn in Chromium with a long name and an update holding a link — the list, the ⋯ open, a phone — and looked at; a stray gold dot before the topic on the quiet line, left from the §707 tag, taken off. Snapshots: `ui-versions/tracker-page/2026-11-03_before-owner-cards.ts`, `ui-versions/tracker-script/2026-11-03_before-owner-cards.ts`.
+
+**§708 — THE BREAKS, ALL 35, AND THE MERGE.** Every `check:tracker:red` break run against this build over a green baseline (358/0), each counted by its own FAIL lines: **all 35 reddened**, `narrow-rename` among them after its re-aim. **MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. `main` had not moved since §707: a fast-forward, §708 kept. No migrations; nobody signed out.
+
+## §709 — My tasks as the Internal Tracker now is: a card per group, the quiet row, and a task opened in place (2026-11-03)
+
+Islam, while §708's breaks ran: *"how can [we] refine the my tasks page based on our changes that we've done [in] the internal tracker to look the same"*; of the first drawing (`design-mockups/home/2026-11-03_my-tasks-like-tracker.html`): *"by client or by date is a default and the platform remembers the last choice by the user. the question is about what you changed? ... how about the clicking on the task what does it do ... show me a working mockup"*; of the working one (`2026-11-03_my-tasks-working.html`): *"go ahead, build it"*.
+
+**What changed, said plainly**: a press on a task used to LEAVE My tasks for the client's whole Tracker. It now **opens the task in place**, as the Tracker opens it (§706's option D): **Progress** — the box with Add beside it, the entries on a timeline; **Description** — text, written by clicking into it, saved on leaving; **History**; and **Open in the client's Tracker →** at the end of the tabs, the old press kept one step away (it now lands on that task, `?view=all&open=`). The row's **⋯**: Details and progress, Rename, Change the week, Hand to someone else, Open in the client's Tracker, Delete (behind its question). The tick and the status are as they were (`workStatus`).
+
+**The look** (§708's): the card head (Open tasks, Sort by, Done, Search) stands alone and **every group is a card** — Late in red, This week on the pale blue, Next week and later; by client, the client's initials, its name, its counts and *Internal Tracker →*; Show done a green card. **The row**: the name on one line (whole on hover); under it the client (by date) and the latest update; the week cell only the exception (*2 w late*, a later week, *Done …*; a row this week says nothing); the status a dot and its word; ⋯. Write-ups (spec 069) keep their own row, reshaped to the same columns. **Sort by stays as it was**: Date unless the person chose Client, remembered on their browser (Islam's point — no change).
+
+**The server**: two platform actions through the same door as `workStatus` (door.ts `resolveTenant`): **`workDetail`** — the task's description, its entries (each marked whether the person looking wrote it), its history in the Tracker's words, and, where they may change it, the office on that client and the weeks ahead; **`workWrite`** — progress, notes, due, owner, rename, delete, each judged exactly as `modules/tracker/index.ts` judges it, against the stored row (§42): progress by anybody past the gate with a name on the register, the rest by `mayChange`. A hand-over takes the row off the list it was on and a delete off everyone's; the answer says so (`gone`) and otherwise carries the row drawn by the list's own reader. `WorkRow` gains `cell` (the exception word) and `last` (the latest entry), read with `latestProgress` per client. Shell **`smp-shell-v7.44-my-tasks-like-tracker`**.
+
+**Checked**: `checks/shell.mjs` **548 ok, 11 failed** — and the 11 are **`origin/main`'s, identical**, measured by putting main's nine files back in this tree, building, and running it (546 ok, 11 failed, the same eleven lines: the chat box's three, the rail, the plan cards, the SWOT rails and to-do, Copilot's settings row, the console count). Rewritten where the drawing changed the claim: rows unstriped and each group a card (was: rows alternate grey); a press on the name opens the task HERE in three tabs, a line of progress written there is read back from Postgres as the Tracker's own entry, and *Open in its Tracker* goes to the Tracker (was: the row opens the Tracker). Drawn on the real console in Chromium — the list with a task opened, the ⋯, Change the week's list, dark, a phone — and looked at; two faults found that way and fixed: the old *every span in the status cell is 128 × 26* rule made the dot a yellow bar and blanked the grey one, and the card clipped the ⋯. `tsc` clean for the files touched; `release-stamp` all clear. Snapshot: `ui-versions/platform/2026-11-03_before-my-tasks-like-tracker.html`.
+
+**§709 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. `main` had not moved since §708: a fast-forward, §709 kept, shell `smp-shell-v7.44-my-tasks-like-tracker` (unique in `sw.js`'s history). `generated-in-step`'s one red is `authorize.cjs`, `origin/main`'s since §706 and untouched here. No migrations; nobody signed out.
+
+
+## §710 — Jump to's box folds with the console's column (2026-11-02; §704 on the branch, renumbered at the merge: main took §704–§709)
+
+Islam, with a picture of the console's column folded to icons: *"check this glitch"*. The Jump to box (§701) kept its 190px and its words when the « button narrowed the column to 64px (§601, `html[data-rail="1"]`), so it ran out over the page beside it. Under that mark, from 1000px as §601's own rules are, `lib/jump-script.ts` now draws it as its glass alone, 38px, centred like every other row of the folded column, with *Jump to… (Ctrl K)* on hover; unfolded it is as before. Checked in a browser on the built console: folded, the box sits inside the column (box 10–40px, column 0–51px at the page's 0.8) and still opens the window; unfolded, the full box. `checks/jump.mjs` 23 ok. Picture: `design-mockups/jump-to-offline/built/8-console-folded.png`.
+
+**§710 MERGED TO `main`** 2026-11-02, Islam: *"merge to main"*. `main` had moved to §709 and was merged into the branch first (recorded above); it has not moved since, so this is a fast-forward. No migrations; nobody signed out.
+
+## §711 — Home's Your tasks carries My tasks' row: a task opened in the card (2026-11-03; §710 on the branch, renumbered at the merge: main took §710)
+
+Islam: *"now refine the home page tasks the same way"*; drawn working (`design-mockups/home/2026-11-03_home-tasks-working.html`, its *Now* from a screenshot of the real Home); *"go ahead, build it"*.
+
+**Built**: Home's card keeps its place, size, header (Sort by, *All tasks →*) and its rule — what is late or due this week, nothing later. **Its rows ARE My tasks' rows** (`mwRow`, `mwCaseRow`, §709), not a second drawing (§53.5): a press on a task's name opens it **in the card** — Progress, Description, History, *Open in the client's Tracker →* — where it used to leave Home for the Tracker; the ⋯, the tick and the status are My tasks'; every write is `workStatus` or `workWrite`. A row whose week moves past this one, handed on or deleted leaves Home. By date the rows sit under two quiet strips — **Late** in red, **This week** on the pale blue; by client under each client's initials and name. `hoTask` and Home's own tick handler are gone with it; the rows keep the classes Home always had (`.hotask`, `.hogrp` with `data-group`) so a reader of Home finds what it found. Shell **`smp-shell-v7.45-home-tasks-like-tracker`**.
+
+**Checked**: `checks/shell.mjs` **550 ok, 11 failed** — the 11 being `origin/main`'s, the same lines §709 measured; Home's existing checks (rows, late, count, groups, the tick both ways, Sort by Client kept after a reload, All tasks) pass unchanged on the new rows, and two are new: *a press on a task's name on Home opens it in the card, in the Tracker's three tabs* and *pressed again it folds*. Drawn on the real Home in Chromium and looked at. Snapshot: `ui-versions/platform/2026-11-03_before-home-tasks-like-tracker.html`.
+
+**§711 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. `main` had taken §710 (Jump to's box folds with the console's column) while this was in flight, so this branch's §710 became §711 before the merge (comments, a check's words, both records). The record files COMBINED, never picked; no other file was touched by both sides. Shell `smp-shell-v7.45-home-tasks-like-tracker` (main's was still v7.44). **Re-run on the merged tree**: `checks/shell.mjs` **550 ok, 11 failed**, the eleven `origin/main`'s; `release-stamp` all clear; `generated-in-step` red only on `authorize.cjs`, main's. No migrations; nobody signed out.
+
+## §712 — Your own progress entry edited or deleted on My tasks and Home too (2026-11-03)
+
+Islam: *"enable me to edit my progress notes or remove it in all views"*. The Tracker already offered it — on the opened row and on the meeting's panel, under the writer's own entry (§657) — and My tasks and Home (§709, §711) drew the entries with no way to change them. Now they carry the Tracker's two words under the writer's own entry: **Edit** turns it into a box in place (Enter or leaving saves, Escape puts it back; the entry then reads *edited*), **Delete** asks first (*Delete this entry? Yes, delete it · Keep it*). Written through `workWrite` ops `progress-edit` and `progress-delete`, judged as the Tracker's api judges them: the stored entry, which must be this action's, and `mayChangeProgress` — the writer alone (§42). Shell **`smp-shell-v7.46-progress-edit-everywhere`**.
+
+**Checked**: `checks/shell.mjs` **552 ok, 11 failed** (the eleven `origin/main`'s) — two new: an entry written on My tasks is edited in place there and read back from Postgres with `edited_at` set; and deleted there, asked first, the row gone from Postgres. Snapshot: `ui-versions/platform/2026-11-03_before-progress-edit.html`.
+
+## §713 — The task's ⋯ reordered: Change the week and Hand to someone else first, each a small list (2026-11-03)
+
+Islam, with a picture of My tasks' ⋯: *"for change the week make it open a small list and for hand to someone open a small list with the rest of the team and change the week and hand to someone should be on the top of the list and remove details and progress it's already there by clicking on the task and rename come third"*; drawn (`design-mockups/home/2026-11-03_task-menu.html`); *"ok noting that the sub lists open on hovering not click right?"* — on hover, and on a press too for a hand with no hover (a phone), said.
+
+**Built, on My tasks, Home and the Internal Tracker alike**: **Change the week ›** and **Hand to someone else ›** first, each opening a small list BESIDE the menu — on hover, on focus, or on a press — the weeks ahead (from this week; a late action's own week is past and not offered, as the Tracker's picker has it), and **the rest of the office on that client, the owner left out**; then **Rename**; then *Open in the client's Tracker* (My tasks, Home) or *Change topic* (the Tracker); then **Delete**. **Details and progress is gone** — a press on the name opens the task — except on a row the person looking may not change, where it is the menu's only word. On the Tracker the lists carry the acts the row's own pickers carry (`pick-week`, `pick-owner`), so one handler answers both (§53.5); on the console they write through `workWrite` as before; `workDetail`'s team now marks the owner. Shell **`smp-shell-v7.47-task-menu`**.
+
+**Found by looking, not by the checks**: the Tracker's first build of the lists sat indented and tall — the class name chosen for them (`msub`) was already the meeting list's small Last week / Next week heading (§706), and its padding landed on the menu. Renamed `rmsub` / `rmside` / `rmh`, and the meeting's own `msub` put back (a first rename caught it too; `checks/tracker.mjs` §2c, which reads it, went green again).
+
+**Checked**: `checks/tracker.mjs` **358 passed, 0 failed** — Hand to someone else opens the rest of the team, first names only, the owner left out, compact to its widest line (the heading counted), and a pick hands it on, read back from Postgres. `checks/shell.mjs` **553 ok, 11 failed** (the eleven `origin/main`'s) — new: the ⋯ starts with Change the week and Hand to someone else, the week list opens on HOVER, Rename third, no Details and progress. Drawn in Chromium (the Tracker's ⋯ with each list open) and looked at. Snapshots: `ui-versions/platform/2026-11-03_before-menu-reorder.html`, `ui-versions/tracker-page/2026-11-03_before-menu-reorder.ts`, `ui-versions/tracker-script/2026-11-03_before-menu-reorder.ts`.
+
+## §714 — Change topic is the ⋯'s third small list: the topics, No topic, New topic… (2026-11-03)
+
+Islam, of §713's Tracker menu: *"change topic looks like handing to someone should come above rename. but how can we make the list the current topics and add new?"* Said back in a line and built: on the Internal Tracker's ⋯, **Change topic ›** moves above Rename, after Hand to someone else, and opens a small list like the two above it — on hover, focus or a press: **the open topics** (and a closed one the action still carries, so marked), the one it holds marked; **No topic**; and **New topic…**, typed in place and made and set on Enter (the server finding it if the name exists, §497). The list carries the buttons and box the row's own topic tag opens (`pick-topic`, `.tnew`), so the one handler answers both (§53.5). Grouped by topic it is not offered — the heading says the topic. My tasks and Home have no topics of their own to move between, so their ⋯ is unchanged.
+
+**Checked**: `checks/tracker.mjs` **358 passed, 0 failed** — rewritten where §714 moved the press: Change topic in the ⋯ is a small list after Hand to someone else and before Rename, holding the open topics, No topic and New topic…; a pick puts the action under the topic and the tag reads it; New topic… makes it and sets it in one press — every claim read back from Postgres. Drawn in Chromium and looked at.
+
+## §715 — The ⋯'s three small lists are named Week, Owner, Topic (2026-11-03)
+
+**Asked** (Islam): "change hand it to someone else to Change Owner .. just like the others", then "make it Week, Owner, Topic … no need for change". The three items that open a small list now carry one word each — **Week**, **Owner**, **Topic** — in the Tracker's ⋯ and in My tasks and Home (Topic is Tracker only). The lists themselves are unchanged; the owner list's heading reads **New owner** (was "Hand to"). Rename and Delete keep their names: they act, they don't open a list. Supersedes the labels named in §713 and §714.
+
+**Checked**: `checks/tracker.mjs` **358 passed, 0 failed**; `checks/shell.mjs` 553 ok / 11 failed — the same 11 that fail on main (§653 plan cards among them, which comes and goes). Shell cache `smp-shell-v7.48-week-owner-topic`.
+
+**§712–§715 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §716 — The ⋯ says "Open in Tracker" on one line (2026-11-03)
+
+**Asked** (Islam): "Open in Raya … it's taking 2 lines, can we figure out a way to open the tracker in a simpler way". On My tasks and Home the ⋯ item now reads **Open in Tracker** — the client's name is already on the row — with the full "Open in <client>'s Tracker" as its tooltip. Same place, same press. The opened task's tab row keeps its longer link: it has the room. Mockup `design-mockups/home/2026-11-03_task-menu.html` redrawn to the built menu (Week, Owner, Topic on hover; Open in Tracker).
+
+**Checked**: `checks/shell.mjs` 554 ok / 10 failed — main's own (§713's check now also wants Open in Tracker fourth). Shell cache `smp-shell-v7.49-open-in-tracker`.
+
+## §717 — The task ⋯ is compact (2026-11-03)
+
+**Asked** (Islam): "make the list more compact", then of the Internal Tracker "a bit too tight, give it some slack". The ⋯ on My tasks, Home and the Tracker: items 6px 10px at 13.5px (were 8px 10px at 14px), one line each; the small lists beside it 150px at least (were 210px). The menu's width: My tasks and Home hug their words (Open in Tracker sets it); the Tracker's, which has no long item, keeps 170px so it isn't pinched — the two come out alike. The delete question wraps at 240px. Mockup redrawn.
+
+**Checked**: `checks/tracker.mjs` **358 passed, 0 failed**; `checks/shell.mjs` 554 ok / 10 failed — main's own. Shell cache `smp-shell-v7.50-compact-menu`.
+
+## §718 — Rename is last before Delete on every task ⋯ (2026-11-03)
+
+**Asked** (Islam): "in the my tasks make open in tracker before rename so rename becomes the last in all lists". My tasks and Home now read Week · Owner · Open in Tracker · Rename · Delete; the Tracker reads Week · Owner · Topic · Rename · Delete. Mockup redrawn.
+
+**Checked**: `checks/shell.mjs` 553 ok / 11 failed — main's own (§653 comes and goes); §713's check now wants Open in Tracker third, Rename fourth. Shell cache `smp-shell-v7.51-rename-last`.
+
+**§716–§718 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §719 — A Tracker task opens at once; its ⋯ opens on one press (2026-11-03)
+
+**Asked** (Islam): "opening the task loads and takes time it should open momentarily like our main rules … when I press the 3 dots I need 2 click to open it while it should open on 1 click".
+
+**Opens at once.** Opening a task used to read the whole list again from the server, because only the opened task's progress and history were read. Now the page reads every task's progress and history in one query each (`eventsByAction`, `progressByAction` in `lib/tracker.ts`) and carries each task's opened panel in an inert `<template class="otpl">` after its row. A press on the name puts a copy in place and folds the one open — nothing is asked of the server; the address still carries `open=`. Writes inside the panel post and redraw as before. A list with no templates (the meeting) still reads the list.
+
+**One press.** The opened row's ⋯ was drawn with `.on`, the class that means "its menu is open", so the first press shut a menu that wasn't showing. The opened row's ⋯ is now lit with `.lit`.
+
+**Checked**: `checks/tracker.mjs` **360 passed, 0 failed** — two new checks (no request on opening; the ⋯ opens on one press on an opened task), both seen RED with the fixes taken out. `checks/shell.mjs` 553 ok / 11 failed — main's own. Shell cache `smp-shell-v7.52-open-at-once`.
+
+## §720 — View in Tracker shows the task, it doesn't open it (2026-11-03)
+
+**Asked** (Islam): "when I click open in tracker it opens the task details in the tracker while it should just show it in tracker without opening it we can make it view in tracker to be more clear". On My tasks and Home the ⋯ item reads **View in Tracker** (the opened task's link: **View in <client>'s Tracker →**). It links with `show=<id>`, not `open=`: the Tracker brings that row to the middle of the screen and lights it for 2.6 s (`.row.shown`, a pale wash of the Tracker's blue), unfolding its section's done rows if it is done, and drops `show=` from the address so a reload is the plain list. Nothing is opened.
+
+Also drawn for Islam, not built: `design-mockups/internal-tracker/2026-11-03_row-line.html` — the line under a task's name, before and two afters (A quieter, recommended; B on hover). The "This week" in that line is when the last note was written, not when the task is due.
+
+**Checked**: `checks/tracker.mjs` **361 passed, 0 failed** (new: show= lights the row in view, opens nothing, the address forgets it). `checks/shell.mjs`: §713's check wants View in Tracker; the link's address carries show=, not open=. Shell cache `smp-shell-v7.53-view-in-tracker`.
+
+**§720 shell run**: 553 ok / 11 failed — the same 11 as main; both §720 checks ok.
+
+## §721 — On the Tracker the task's name leads; the line under it is quieter (2026-11-03)
+
+**Asked** (Islam): "go with A, build it" — option A of `design-mockups/internal-tracker/2026-11-03_row-line.html`. On the Tracker's rows (the card list): the name is a step heavier (600); the line under it is one grey (`--ink-3`) at 12.5px, the topic a plain word (400, was 600 in `--ink-2`), a small dot between topic and note (was a hairline); and the note's week is said only when it isn't this week — the markup carries `<span class="lw now">` and the card list hides it — so "Last week ·" still flags a task nobody has touched. The title on hover still gives the note's day and time.
+
+**Checked**: `checks/tracker.mjs` **362 passed, 0 failed** — new: the name heavier than the line, topic plain, no "This week" in front of this week's note; the markup check updated for the `lw` span. Tracker-only CSS and markup, so `checks/shell.mjs` was not re-run.
+
+**§719–§721 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §722 — No date popup on a Tracker row's line (2026-11-03)
+
+**Asked** (Islam): "a date popup appear on hovering over the task no need". The line under a Tracker task's name had a `title` with the note's day and time; it's gone. The opened task's progress entries keep theirs on the week word. Also drawn, not built: `design-mockups/internal-tracker/2026-11-03_top-bar.html` — the Tracker's top bar before, A (one quiet bar, recommended) and B (the bar off the card).
+
+**Checked**: `checks/tracker.mjs` **362 passed, 0 failed** (the markup check no longer expects the title). Tracker-only.
+
+## §723 — The Tracker's top bar is one quiet bar (2026-11-03)
+
+**Asked** (Islam): "for the top bar how we make it simpler and cleaner as it's functional but taking the focus somehow from the tasks itself", then "go with A, build it" — option A of `design-mockups/internal-tracker/2026-11-03_top-bar.html`.
+
+Nothing it does is gone; it is quieter:
+- **Head row**: no icon tile; "Actions" 18px; the count a plain grey figure (was a pill); the views right after it as plain words, the chosen one on a soft grey (no "Show" label, no boxed switch); then **Search as an icon** whose box opens on a press (it stays open while it holds words); then **"Group: Owner ▾"**, a small word opening the same menu (Group by, Dates as, Topics). On the weekly check, where there's no grouping, the button is still the ⋯.
+- **Add line**: one slim row, "+ Add an action and press Enter" on a pale ground; its topic, week and owner come out once it is clicked into, typed in, or picked (`data-picked`), and the note arrow with them. (Reverses §707's "chips from the start".)
+- **No gold rule** under the card; a plain line.
+- Search and Group moved up from the add line's row into the head's row (`masthead` takes them as `find`; the tools row is the add line alone).
+
+**Checked**: `checks/tracker.mjs` **364 passed, 0 failed** — new: no tile, no "Show", Search shut in the head's row and opening on a press with the cursor in it, "Group: Owner"; the add line's three §707 checks rewritten (chips out on a click, kept while typing). Looked at on the real page. Tracker-only; `checks/shell.mjs` not re-run (it reads none of this).
+
+**§722–§723 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §724 — The Tracker's search narrows as you type (2026-11-03)
+
+**Asked** (Islam): "the search bar should filter the tasks or even show them like the quick jump rather than finish and click enter to filter" — "ok build both". Each letter hides the rows whose name, topic, latest note and owner don't hold the words (a section's own name counts for its rows, as on My tasks); a section left with nothing is hidden; the head's count follows the rows shown; a word that matches nothing says "Nothing matches" in place; clearing brings every row back; Enter does nothing more. The server is no longer asked to narrow by words (`ask().q` is empty); an old link carrying `q=` is read whole once and sifted. Filtering the list in place was chosen over a quick-jump list: the rows keep their status, week and ⋯.
+
+**Checked**: `checks/tracker.mjs` **367 passed, 0 failed** — new: narrows as you type with the count following and no request; nothing-matches said in place; clearing restores.
+
+## §725 — My tasks' bar is the Tracker's quiet bar (2026-11-03)
+
+**Asked** (Islam): "show me My tasks top bar match the tracker before and after" → `design-mockups/home/2026-11-03_my-tasks-bar.html` → "ok for the mockup … build both". My tasks' card head: no tile; "Open tasks" 18px, the count a plain figure; Sort by as plain words right after it, **By date · By client**, the chosen one on soft grey; Search an icon whose box opens on a press (still filters as you type); **Done: Hide ▾** a small word opening Hide / Last week / Last 30 days; an admin's **Show:** a quiet word-select at the end. Home's Your tasks card shares the sort control, so it reads By date · By client too; it keeps its tile, as its sibling cards (Your clients, Track Record) do.
+
+**Checked**: `checks/shell.mjs` — new §725 check (no tile, the two words, the search box shut and opening on a press, Done a small word); the Done checks press the word then the choice; the sort words read By date / By client. Shell cache `smp-shell-v7.54-quiet-my-tasks-bar`. (Run result added below when it lands.)
+
+**§725 shell run**: 555 ok / 11 failed — the same 11 as main; both §725 checks ok, the Done and sort checks ok.
+
+## §726 — A Tracker view opens at once (2026-11-03)
+
+**Asked** (Islam): "on clicking the filters at the top of the internal tracker it feels like the whole list reloads I things that's not the right behavior" → "1. ok". The page now carries the list as each of the four list views (This week, All, Mine, Undated) draws it, each in an inert `<template class="vtpl" data-view data-n data-count>`, all drawn by the one renderer (`listOne`, §53.5) so sections, counts and folded done rows are the server's. A press on a view swaps that copy in place of the list: the tab, the head's count, the hidden count line, unfolded sections and fresh rows carried over, a search still sifting (§724); the address follows by pushState and Back works the same way. Every task's opened panel now rides once after the views (`template.otpl`) and is put after its row in whatever view is showing (§719 moved). The weekly check, a meeting, is still read from the server. The string checks in `checks/tracker.mjs` read the list in view (`liveOnly` strips the copies, which end at `<!--/vtpls-->`).
+
+**Checked**: `checks/tracker.mjs` **368 passed, 0 failed** — new: a view press makes no request, shows the view's rows with the head's count matching, the address follows, Back the same; seen RED with the swap taken out (2 requests).
+
+## §727 — The weekly check is a button, not a view (2026-11-03)
+
+**Asked** (Islam): "the weekly check is actually an action and shouldn't be sitting with the filters" → mockup `design-mockups/internal-tracker/2026-11-03_weekly-check-button.html` → "I like the weekly check in mockup" … "ok for the 3". The views are This week · All · Mine · Undated. **Start weekly check** — outlined, a clipboard in the Tracker's blue — sits at the bar's end. Inside the check the bar reads **← Back to the list** · **Weekly check** · its week (no views, no search; the ⋯ stays for Dates as and Topics). Back returns to the list view the check was opened from (kept on this browser for the session), else This week. Both go the way the views do (no page load; the check is read from the server, §726).
+
+**Checked**: `checks/tracker.mjs` **369 passed, 0 failed** — new: the four views only, the button opens the check with its bar, Back returns to the view it came from, no page load.
+
+## §728 — My tasks and Home: the Tracker's quiet line, and a task opens at once (2026-11-03)
+
+**Asked** (Islam): "in the my tasks and home page shouldn't we make the 2nd list quieter like the tracker … check what needs to match up between the 3 areas" → "ok for the 3". The comparison found two things left to match (the line under the name, and opening a task); the rest already matched (search as you type, sort instant, the ⋯, one-press ⋯). My tasks and Home share one row (`mwRow`), so both change together.
+
+- **The quiet line (§721's)**: the name 600 (was 500); the line one grey with the client a plain word (was 600 in `--ink-2`), a small dot between (was a hairline), the note's week said only when it isn't this week — `lib/my-work.ts` now sends `last.now`, so "Last week ·" still flags a task nobody has touched. The topic is not added: these lists run across clients, so the client says more.
+- **Opens at once (§719's rule)**: a new `workDetails` action reads every listed task's details in one call — each through the same door and `workDetail` read, one client's door once, a task that can't be read saying why in its own place. My tasks and Home ask for it as soon as the list is drawn (`mwPrefetch`), so a press on a name finds the details already there; a press before they land waits as before and is drawn when they do.
+
+**Checked**: `checks/tracker.mjs` **369 passed, 0 failed**. `checks/shell.mjs` — new: opening a task asks the server nothing, its tabs there at once; the row's line is the quiet one (name ≥600, client plain, no "This week" in front of this week's note). Shell cache `smp-shell-v7.55-tasks-quiet-instant`. (Run result below when it lands.)
+
+**§728 shell run**: 558 ok / 10 failed — main's own; both §728 checks ok.
+
+**§724–§728 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §729 — My tasks' Done menu stood open; Home's rows hovered only in the middle (2026-11-03)
+
+**Reported** (Islam): "this list is appearing and not closing"; "in the home page tasks the middle task only gets grey background when I hover above it". Both were the cascade:
+- The Done menu (`.mwwordm`, §725) set `display:grid`, which beats `[hidden]` (§93.11 — the console has no blanket `[hidden]` rule), so it was always drawn. `.mwwordm[hidden]{display:none}`.
+- The odd rows' reset (`.mwlist .mwrow:nth-child(odd of .mwrow){background:none}`, and Home's) outweighs `.mwrow:hover` and `.mwrow.on`, so rows 1, 3, 5… never greyed on hover nor took the opened tint — on Home's three rows, only the middle one did. The hover and `.on` rules now carry the same `:nth-child(odd of …)` weight.
+
+**Checked**: `checks/shell.mjs` — new: the Done menu is shut at rest and after a choice; a hover greys the first row. Shell cache `smp-shell-v7.56-menu-hover-fix`. (Run result below when it lands.)
+
+## §730 — A task's name is never cut on My tasks and Home (2026-11-03)
+
+**Asked** (Islam): "for the home page tasks some of the task names or the notes below is trimmed do you think we make it appear on hovering?" Answered: not on hover (a tooltip is the popup §722 took away and a phone has no hover; a row that grows under the pointer jumps). Instead: the name is never cut — a long name wraps onto a second line — and the note line stays one line, cut, its whole a press away in the opened task (which opens at once, §728). "ok do it for both home and my tasks". One rule (`.mwlist .mwrow .t`), Home's rows being `.mwlist.mwhome`.
+
+**Checked**: `checks/shell.mjs` — new: the name wraps (white-space normal, no ellipsis), the note line stays one line. Shell cache `smp-shell-v7.57-names-wrap`. (Run result below when it lands; it covers §729 too.)
+
+**§729–§730 shell run**: 560 ok / 11 failed — main's own (§653 comes and goes); the three new checks ok.
+
+**§729–§730 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §731 — Every "are you sure" asks the same way (2026-11-03)
+
+**Asked** (Islam), from a picture of a delete dialog — *Delete file? · This will permanently delete "Project brief.pdf". This action cannot be undone. · Cancel | Delete file* — *"a nice concept for all are you sure boxes with the name and verb of the action and the description tells what really happen with a dismiss button and action on the right bright and the cancel on the left. what do you think about this as a best practice?"*, then *"ok for all … we need to check all the buttons in the app and fix them according to these rules"*, then *"go, keep the cycle buttons red"*.
+
+**The rules, as now held everywhere a question is asked:**
+1. The title is the question with the verb and the thing in it — *Delete the function?*, never *Are you sure?*
+2. The body says what really happens and names the thing; "cannot be undone" only where it is true.
+3. Cancel on the left, the act on the right, the act carrying its own verb — *Delete it*, *Clear the plan*, *Send it* — never *Yes*, *No*, *OK*.
+4. Red only for what destroys or cannot be walked back. **The three cycle acts stay red on Islam's word** (*Open the cycle*, *Reopen the cycle*, *Start the revision*): reopening a closed cycle is the one act the product cannot walk back.
+5. An × and Escape both mean Cancel. Never the browser's own box (§95 — it can be silenced for good on another site).
+
+**What was already right**: the main app's dialogs (§95, §273.3, §534, §325 and their kin) — every browser confirm() had already gone, the titles ask with the verb, the bodies say what goes and what stays, Cancel is left and the red act right. The audit read every `<button>` in the sources, the Notes and Tracker modules and the Processes module's pages: **four groups broke the rules.**
+
+**Fixed:**
+- **The Processes module's four browser boxes** — retire a process, clear scores on several processes, clear a step's flag, name a new process from a step — now go through the module's own dialog, `confirm-dialog.tsx` (new, beside the Delete-a-process dialog it is shaped on): title, body, × and Escape, focus on Cancel (or on the field, for the naming one), Cancel left, the act right, red when it destroys. The naming dialog takes Enter as the act.
+- **Button order, 26 places** where the act sat left of Cancel: the builder's *Archive it* and *Finish building*; Chat's *Send*; the register's row Save, Unassign, the unit and person and company *Clear*s, the password *Set it* rows, the name picker's *The unit enters it*, the next cycle's *Open this cycle*, the claim's *Move it*; the Copilot's *Delete*, *Save to …*, *Save to the card*, *Save as vN*, *Save the changes*; the group page's *Save draft*; the leaving strip (*Keep editing · Discard changes · Apply and continue*); the welcome's *Start the round*; Notes' *Send them* and *Delete it*; the Tracker's four *Delete it*s. Cancel-words (*Keep it*, *Not yet*, *Not now*, *Leave it*, *Keep editing*) kept their words and moved left.
+- **"Yes, …" and "No", 17 buttons**, now the act's own words: *Archive it*, *Clear every plan* / *Clear the progress*, *Clear the plan*, *Delete for good* (the register's No/Yes pair), *Retire the company* / *Restore the company*, *Delete the function*, *Remove the copy*, *Send it*, *Send them*, *Delete it* ×5, and the Copilot's *Choose <discipline>* (was *Yes, <discipline>*).
+- **Red taken off six buttons that do not destroy**: *Close* after a merge; *Restore this unit* / *Restore this person* / *Restore this company* / *Reinstate this function* and the company dialog's *Restore* — the one button whose red was a fixed class whether it retired or restored; now the class rides the retiring half only.
+
+**Not in the main app's language**: Islam — *"my app is not bilingual"*. True of the main app; the Processes module carried in from FFProcess (§459) has its Arabic, and that is the only place direction matters. Nothing changed about it.
+
+**Checked**: `checks/confirm-buttons.py` (new, no browser, no database) reads every `<button>` in 35 files and holds the five rules — no Yes/No/OK, Cancel first in every pair, no red on Restore/Reinstate/plain Close, no window.confirm/prompt/alert in the Processes pages, the module's dialog present — **879 checks all good**, and **proved able to fail: 32 red** against the saved before-copies of five of the files. `built-in-step.py` all good after the rebuild; `public/shell.js` regenerated (5,508,077 bytes) and parses; `sw.js` **v7.53 → v7.54-confirm-buttons**, one `const SHELL`, `node --check` clean; `npm run typecheck` clean (after `prisma generate` for both schemas and `next typegen`, which this container had not run); `npm run test:processes` **228 passed, 0 failed**. `qa.py` walked the built file as every viewer: its ERRORS list holds only the two recorded PEOPLE-workbook lines (§303's stale pair, `xlsx.js` not in this diff) and **no console error on any page**. `checks/notes.mjs` and `checks/shell.mjs` had the old words in a title and a selector and carry the new ones; they, and `checks/tracker.mjs`, need the served stack and a database, which this container does not have — **not re-run here**, said rather than claimed (§54.5). Every edited file snapshotted under `ui-versions/` first.
+
+**§731 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. `main` had moved under the branch (§724–§730, the Tracker and My tasks round), so this branch's §724 was **renumbered §731 first** (§264.3) in all its spellings; the three record files COMBINED, never picked (§318.7); `sw.js` rebuilt from main's with this branch's one line re-applied, **v7.57-names-wrap → v7.58-confirm-buttons**, one `const SHELL`, `node --check` clean; `public/shell.js`, `public/sw.js` and `asset-stamps.json` regenerated from the merged sources. **Re-run on the merged tree** (§365): `confirm-buttons.py` 879/0, `built-in-step` all good, `typecheck` clean, `test:processes` 228/0. **PRODUCTION HAS SERVED THIS COMMIT**, read off the live site and not the dashboard (§91.5): the served worker's release stamp **`4e89c5cf` → `019fc015`**, `shell.js` **5,507,816 → 5,508,077 bytes**, both matching the generated copies to the byte, and the served shell carries *Delete for good*. The branch was pushed past the merge only then (§91).
+
+## §732 — The weekly check, cleaned: the box, the rail, and Save and next carries (2026-11-03)
+
+**Asked** (Islam): "this box needs cleaning suggest for me a quieter clean options" → `design-mockups/internal-tracker/2026-11-03_check-task-box.html` (worked through to the agreed box: B's update-first box with A's timeline, a quiet Enter in the box, Save and next on the status row, the writer quiet, no Edit or Delete) and "suggest cleaner options for the side rail" → `2026-11-03_check-rail.html` ("for the side rail I like B"). Then: "if someone has a task that is in progress and he adds a note automatically it will be carried to next week so why do we need a carry to next week button?" — it was not so (a note never moved the week); now it is, by Save and next. "go with under save, build it".
+
+**The box** (`meetPanel`): topic · owner · week one grey line over the name (the owner and week still the row's own pickers); "What happened this week?" with a quiet Enter in it; the status as three chips and **Save and next** (Ctrl ↵ inside it) on one row; under Save, **Moves to next week · Keep it this week** on an unfinished task of this week (or late) that the viewer may change — Save and next carries it (the same `carry` act, so the alarm is not reset, §532); "Keep it this week" turns it to **Stays this week · Move to next week**, remembered per task for the meeting. **Progress so far** on a quiet timeline (small dots, blue for this week, the words then the writer and week in grey; no Edit or Delete — §712's are the task's own, outside the meeting). Description · History · ⋯ (Delete) folded behind quiet links. ← Previous · Skip → (moves on without saving, carrying or counting). The Carry button and the keyboard line are gone.
+
+**The rail** (`meetingView`): each topic a small grey heading with how far the meeting has got through its week ("2 of 9", from the walk) and a thin bar; no gold numbers, no open/late counts; each task a circle — empty, filled ✓ once gone through, a blue ring on the one on screen — and its name, no status dot; last week's finished work and next week's (with its write line) folded behind **N done last week ›** and **+ Next week's action** / **Next week (n)**, drawn open when the task on screen is in them; the topic's ⋯ on hover. The count line under the bar in the quiet bar's voice.
+
+**Checked**: `checks/tracker.mjs` **371 passed, 0 failed** — new: the carry said once under Save with Keep it this week and no Carry button; Save and next carried the task (read back); Keep it this week stops the carry; the arrow keys walk the list in its order after the carry; the meeting's checks kept (the order, the pressed status, Save and next writing and moving on, gone through). Looked at on the real page.
+
+**§732 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. `main` had moved under the branch — another session's "Every are you sure asks the same way", recorded as §731 — so this was written as §731 here and renumbered §732, and main was merged into the branch first (the Tracker page merged cleanly; only the two records needed joining). Re-checked after the merge (below).
+
+**§732 after merging main**: `checks/tracker.mjs` **371 passed, 0 failed** on the merged tree; the box's Delete question now asks §731's way (Keep it, then Delete it in red).
+
+## §733 — The weekly check, second pass; links in notes read short (2026-11-03)
+
+**Asked** (Islam): "1. why do we need move to next week and keep it in this week? 2. If the owner of the task already added a progress note this week, should we have the text box of what happened this week? 3. on scrolling the page to click on a task on the left rail the right box needs to be sticky" and "if someone add a link can we have it as a short link? shall we do this automatic or the link is added separately" → mockup `design-mockups/internal-tracker/2026-11-03_check-box-v2.html` → "go with the small tag, build it".
+
+1. **Save and next always carries** an unfinished task of this week (or late) that the viewer may change; the "Moves to next week · Keep it this week" line (§732) is gone. The rare one to keep here: the week in the grey line over the name (the row's own picker).
+2. **This week's note stands where the empty box would**: "This week", the words, who wrote them, and **+ Add to this week**, which opens the box ("Add to this week…"); the timeline below reads **Before this week** and starts from last week. No note yet this week: the box, as before.
+3. **The box stays in view**: `position: sticky` under the pinned band and bar (the script measures the pin into `--pinh`), scrolling inside itself when taller than the screen; static on a narrow or short screen, where the pin is too.
+4. **Links read short, automatically** (`lib/links.ts` `withLinks`; the console's `mwLinks`, the same site names): every http(s) address in a progress note is drawn as a small tag named after its site — Google Sheets, Google Docs, Google Slides, Google Forms, Google Drive, SharePoint, OneDrive, Teams, Miro, Notion, else the site's address — opening in a new tab, the full address on hover; a sentence's closing stop is left out of the link. The stored words are unchanged: the Tracker's in-place edit reads them from `data-raw`, My tasks' from the entry itself. Drawn on the Tracker's row line, opened task and meeting box, and on My tasks' and Home's row line and opened task.
+
+**Checked**: `checks/tracker.mjs` **373 passed, 0 failed** — new: no keep line, the carry flag on the box; withLinks (the tag, the site names, escaping, the trailing stop); back on a task written to this week, the note in the box's place, the box shut behind + Add to this week, which opens it, the timeline "Before this week"; the box sticky and a real note's link a Google Sheets tag opening the full address in a new tab. `checks/shell.mjs`: My tasks' note now carries a link, which reads as the tag on the timeline and on the row's line. Shell cache `smp-shell-v7.60-links-short`. (Shell run result below when it lands.)
+
+**§733 shell run**: 562 ok / 10 failed — main's own; the §733 link check and the §712/§728 checks ok.
+
+**§733 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §734 — A task opens at once in the weekly check (2026-11-03)
+
+**Reported** (Islam): "on clicking the tasks on the rail it takes very long to appear on the right." A press on the rail read the whole meeting again from the server. Now every task on the rail rides in the page with its box, drawn by the one `meetPanel` (§53.5), in an inert `<template class="mtpl">` (after the meeting, ending `<!--/mtpls-->`); a press on the rail, the arrow keys and Skip put that copy in place (`meetShow`) — the rail marks it, a folded week holding it opens, the address follows — with no trip to the server. Save and next, a status press and every other write still go to the server, and the meeting is drawn again from its answer. The string checks read the meeting in view (`liveOnly` strips the copies).
+
+**Checked**: `checks/tracker.mjs` **374 passed, 0 failed** — new: a press on the rail asks the server nothing; seen RED with the swap taken out (1 request).
+
+**§734 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+## §735 — The meeting's box scrolls only when it does not fit (2026-11-03)
+
+**Reported** (Islam): "no need to have a scrolling in the right box unless it's getting outside the page which is not the case now." The box's height was capped at the screen less the pinned band and bar (§733), and in the meeting that pinned block is tall, so an ordinary box overflowed. In the meeting the band and bar are no longer pinned (`.pin:has(+ .meetwrap){position:static}`) — they scroll away — so the box sticks under the top bar alone with the screen's height, and scrolls inside itself only when it truly doesn't fit.
+
+**Checked**: `checks/tracker.mjs` **375 passed, 0 failed** — new: in the meeting the pin is not sticky, and a box that fits the screen has nothing to scroll.
+
+**§735 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+## §736 — In the meeting only the rail scrolls (2026-11-03)
+
+**Reported** (Islam): "something was broken the top banner and the banner of the weekly check needs to be fixed as well .. the only scrolling is the left rail." §735 had unpinned the band in the meeting so the box would have the screen's height; that was the wrong trade. Taken back: the band and the check's bar stay pinned, and under them **the rail scrolls inside itself** while the box stands beside it, both sticky in the height that is left (`.meet .mlist, .meet .mopen`: `max-height: calc(100vh − top bar − pin − 24px)`, `overflow: auto`, `overscroll-behavior: contain`) — the page itself does not scroll. The box scrolls inside itself only when it is taller than that room (a short screen with a long history open). Static on a narrow or short screen, where the pin is too.
+
+**Checked**: `checks/tracker.mjs` **375 passed, 0 failed** — §735's check rewritten: the pin sticky in the meeting, the rail sticky and scrolling in itself with a height cap, the box scrolling only when taller than the room. Looked at on the real page.
+
+**§736 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+## §737 — The meeting's two boxes reach the foot of the screen (2026-11-03)
+
+**Asked** (Islam): "the right box shouldn't have an inner scroll unless it's getting out of the screen and same for the left as well. as long we have space in the page the banner should fit the page height" → "show me mockup before fixing" (`design-mockups/internal-tracker/2026-11-03_check-fit.html`) → "build it". §736 capped the rail and the box at the screen less the pin's height, but the pin's height counts its own padding, so the cap fell some 55–90px short of the screen's foot and an ordinary box got a scroll it didn't need. Now the room is MEASURED: the script sets `--meeth` to the distance from where the two boxes start to the foot of the screen (less 16px), on load, on every redraw and on resize. Each box is as tall as its content up to that room and scrolls inside itself only beyond it; the band and the check's bar stay pinned; the page itself does not scroll, so the box needs no sticking.
+
+**Checked**: `checks/tracker.mjs` **375 passed, 0 failed** — the §736 check now asks that the rail's cap ends at the screen's foot (within 24px) and that the box scrolls only when taller than the room; §733's check no longer asks for sticky. Looked at on the real page.
+
+**§737 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+## §738 — The meeting's room follows the window itself (2026-11-03)
+
+**Reported** (Islam): "the left rail has space under the rail in the page but the rail is not extended to the page why is that?" — on the live page the rail stopped ~170px above the screen's foot. In the test browser §737's measure was right on load, on a resize and when the check was opened from the list; the live screen's rail matched a window ~170px shorter than the one it was in, so the measured height had gone stale (taken while the window was shorter, and not taken again). Made robust rather than chased: only where the two boxes START is measured (`--meettop`, on load, every redraw, resize, and once the fonts are in); the height to the foot is the stylesheet's own — `calc(100dvh − --meettop − 16px)` (100vh where dvh is unknown) — so any change of the window's height is followed at once, with nothing waiting on an event.
+
+**Checked**: `checks/tracker.mjs` **376 passed, 0 failed** — new: the window made 200px taller, the rail's room reaches the new foot.
+
+## §739 — Two updates before this week, everywhere (2026-11-03)
+
+**Asked** (Islam): "for the task with long history I think we can only show the last 4 updates and the rest through show more" → mockup `design-mockups/internal-tracker/2026-11-03_check-box-v3.html` → "make before this week only 2 entries and it applies to all, the full story you are talking about is an exception in any view." Every list of written updates shows this week's entries and the **latest two before this week**; the rest wait behind **Show N earlier ›**, which opens them in place (**Show fewer** folds them): the Tracker's opened task (`progressList`), the weekly check's box (`meetPanel`, under "Before this week" / "Progress so far", this week's note standing above in its own place), and My tasks' and Home's opened task (`mwDetail`, kept open per task while it is open). One number, `EARLIER_SHOWN = 2` (the console's copy: the `> 2` in `mwDetail`). History, the automatic record, is unchanged.
+
+**Checked**: `checks/tracker.mjs` **377 passed, 0 failed** — new: four older updates put in; the meeting's box shows two before this week with "Show 2 earlier", which opens all four; the opened task shows this week's two and two older of six, with "Show 2 earlier". `checks/shell.mjs` — new: My tasks' opened task shows this week's line and two older of five, "Show 2 earlier" opening all. Shell cache `smp-shell-v7.61-two-earlier`. (Shell run result below when it lands.)
+
+**§739 shell run**: 562 ok / 11 failed — main's own (§653 comes and goes); the §739 check ok. A first run hit a race in §712's check (the edit box sets its cursor a moment after opening; typing before it lands appended) — the check now waits for the cursor; the second run had §712 ok.
+
+**§738–§739 MERGED TO `main`** 2026-11-03, Islam: *"merge to main"*. Fast-forward; main had not moved.
+
+## §740 — The meeting's start is measured again whenever the page changes (2026-11-03)
+
+**Reported** (Islam): "on my screen still the left rail is not extended to the end of the screen why is that issue not being resolved?" Checked first that it was not an old copy: production's worker release stamp (`e71220da208f34ac`) matched this build to the letter, and the Tracker's script is served `no-store`, so the live page ran §738. The rail still stopped ~160px short — so the measured START of the two boxes (`--meettop`) was larger than where they finally stood: it had been taken before something above them settled (a line said then cleared, the band's type arriving), and §738 only measured again on a redraw, a resize or the fonts. Now it is measured again whenever the page settles or anything in it changes: on `load`, when the body changes size (ResizeObserver) and after any change to the page's content (MutationObserver) — at most once a frame. Measuring only writes a value on `<html>`, which none of those watch, so it cannot loop.
+
+**Checked**: `checks/tracker.mjs` **378 passed, 0 failed** — new: 160px pushed in above the meeting after it settled, the rail's room still ends at the screen's foot, and again when it is taken out; seen RED with the two watchers off (the room overshooting the foot by 112px).
+
+**§740 MERGED TO `main`** 2026-11-03, Islam: *"Merge"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+## §741 — The cause found: the page is zoomed; the meeting is now one screen tall by layout (2026-11-03)
+
+**Reported** (Islam): "same issue" after §740, with a reading taken in his browser's console (`maxH: "none"`, taken with the console docked, which narrowed the page into the phone rule — a reading of a different state, said so). **The cause, found in the test browser by printing each layer's height**: every module page is shown at **80% on a computer** (`lib/topbar.ts`: `@media (min-width:1000px){html{zoom:.8}}`), and under that zoom `100vh`/`100dvh` is 80% of the window — so every one of §736–§740 left a fifth of the screen at the foot (160px on an 800px window; ~the strip on Islam's screen), whatever it measured. The checks for §736–§740 compared numbers drawn on two different scales and passed regardless. The page's own window height is `--winh` (topbar.ts: `calc(100vh / .8)`), made for exactly this.
+
+**The fix**: in the meeting, where the two columns stand side by side (≥861px wide, ≥601px tall), the page is a column exactly `--winh` tall — the top bar, the said line, the pinned band and bar, then the meeting taking all that is left (flex: 1; its row `minmax(0, 1fr)`) — and the rail and the box are held to that row (`max-height: 100%`), each as tall as its words and scrolling inside itself only past that. **Nothing is measured.** The measured rule stays as the fallback where `:has` is unknown, now on `--winh` and with the measured start converted into the page's own pixels.
+
+**Checked**: `checks/tracker.mjs` **378 passed, 0 failed** — §736/§737, §738 and §740's checks rewritten to compare like with like (the meeting row's foot against the window, both on screen; the rail inside the row; the page not scrolling); **seen RED with `100dvh` put back** (the row ending at 627px of 800, 787 of 1000) — the gap Islam saw.
+
+**§741 MERGED TO `main`** 2026-11-03, Islam: *"merge"*. Fast-forward; main had not moved. (Tracker-only; `checks/shell.mjs` not re-run.)
+
+**§741 confirmed** (Islam): "it works now, the rail reaches the bottom".
+
+## §742 — Another client opens on the module in view (2026-11-03)
+
+**Asked** (Islam): "when I shift from client to client when they have the same module let's go there like from elabd to raya from internal tracker to internal tracker if not similar modules exist we land on strategy as normal." The bar's client menu (`lib/topbar.ts`) now carries the module in view (`data-module`) and links each other client to `/<client>/<that module>`. Nothing in the bar has to know the other client's modules: a module the other client does not have, or that this person may not open there, is already answered by the door's own redirect to that client's Strategy — `app/(platform)/[slug]/[...rest]/route.ts` (an unknown module word and a shut module answer identically, §320.5) and the Processes layout (`redirect(clientHref(slug, DEFAULT_MODULE, ""))`). Only the module is carried, not the page within it (a view, an opened task), so the other client opens on the module's own first page.
+
+**Checked**: `checks/tracker.mjs` **379 passed, 0 failed** — new: the bar's client menu carries `data-module="tracker"`.
+
+**§742 MERGED TO `main`** 2026-11-03, Islam: *"merge"*. Fast-forward; main had not moved. (`checks/shell.mjs` not re-run: the change is the module pages' bar, which the console does not draw.)
 ## §743 — Viewing as somebody opens where their own sign-in would, the reading window included (2026-11-04)
 
 Islam, viewing El Abd as Aliaa Abolnaga (Marketing, no role): *"aliaa is an employee and is landing on the workbench not the read as agreed"*. Her own sign-in lands right — a seat that can change nothing opens in the reading window (§687), measured on the worked example's no-role seat: offered and opened on the company wherever *Everyone else* reads anything. What did not was **Viewing as**: the window was offered at sign-in only (sync.js), and switching people (`switchViewer`, shell.html) never asked, so a view-as always landed on the workbench — against §237's own rule that a view-as session starts where that person's session would. Now the switch closes any window the last person had open, paints, and offers the window for the person now viewed (`READING.offer(person, true)`; the second argument skips only the deep-address check, since the address belongs to the office's own sign-in). Driven: Group CFO (holds nothing) → the reading window on the group; Ashraf Laithy (unit owner) → the workbench; back to the Group CFO → the window; the Group CEO (a reader) → the window; the Super user → the workbench. Behaviour only, nothing drawn differently, so no mockup (1c); aligned in chat first (1b). Rollback copies under ui-versions/view-as/.

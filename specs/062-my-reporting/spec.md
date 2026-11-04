@@ -197,9 +197,13 @@ the submission stays the unit's.
   (`rowAtRisk`, so it stays once written and can be corrected), the row's note
   read-only everywhere else. The box carries `data-repu`, and the note's
   handler resolves the row against its own unit, as the figure's does.
-- **The lock**: while one of the owner's rows is red with no note, every
-  other box on My reporting shuts and the lock's bar names the row
-  (`noteLockOf(null, true)`). A red row they cannot explain locks nothing.
+- **The lock** (§576; gone in §705): while one of the owner's rows was red
+  with no note, every other box on My reporting shut and the lock's bar named
+  the row. Since §705 nothing shuts: the owner's red row wears the tag
+  **Note needed · off track** on its note box, which asks *"No justification
+  yet — why, and what is being done"*; a red row they cannot explain reads
+  **Needs justification** instead of a dash. The Note column, the box on their
+  own red rows and the server's `lineNote` are as §576 made them.
 - **The server**: the note on an owned line is `lineNote`, neither the
   figure's `lineReporting` nor the unit's alone — the owner's, **or** the
   unit's, judged for anybody but the owner exactly as the unit's own note is.

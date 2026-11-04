@@ -2758,8 +2758,8 @@ var CHAT = (function(){
               'placeholder="Write to them…"></textarea>' +
           "</div>" +
           '<div class="chnew-acts">' +
-            '<button class="chsend" type="button" data-chnewsend="1">Send</button>' +
             '<button class="chnew-x" type="button" data-chnewcancel="1">Cancel</button>' +
+            '<button class="chsend" type="button" data-chnewsend="1">Send</button>' +
           "</div>" +
           '<div class="chnote" id="chnewnote">' +
             "They will see it in the corner, get a box on their screen if they " +

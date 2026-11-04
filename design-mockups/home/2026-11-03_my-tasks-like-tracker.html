@@ -1,0 +1,182 @@
+<title>My Tasks Refresh</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* My tasks (the console's first tab) as built — drawn from shell/platform.html's
+   own rules (.mwmast, .hocard, .mwlist, .mwrow, .mwst) — and the same page
+   carrying what the Internal Tracker became (§706–§708): a card per group,
+   the name on one line with one quiet line under it, the status as a dot
+   and its word, the week only when it is the exception. */
+:root{
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-late:#FF9B8F;
+  --ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--line:#D6DCE5;--line-soft:#E6EAF0;--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--zebra:#F5F7FA;
+  --amber:#F5A623;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;--good:#1B6E4E;--bad:#B23025;--bad-bg:#FBEDEB;
+  --d0:#8A97AB;--d1:#E0B300;--wk:#EAF2FB;--wk-ink:#1F4E86;--blue:#1F5FBF;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--serif:Georgia,"Times New Roman",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;
+  --ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--line:#333A45;--line-soft:#2A303A;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--zebra:#212630;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--bad:#E8776B;--bad-bg:#33211F;--d0:#7D889B;--d1:#E8C547;--wk:#16263A;--wk-ink:#9CC3EE;--blue:#8FB4F0;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;
+  --ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--line:#333A45;--line-soft:#2A303A;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--zebra:#212630;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--bad:#E8776B;--bad-bg:#33211F;--d0:#7D889B;--d1:#E8C547;--wk:#16263A;--wk-ink:#9CC3EE;--blue:#8FB4F0;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+svg{display:block}
+.pick{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.pick .in{max-width:1040px;margin:0 auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pick button{font:600 13px/1 var(--font);padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.pick button[aria-pressed="true"]{background:var(--ff);color:#fff;border-color:var(--ff)}
+.pg{max-width:1040px;margin:0 auto;padding-block:16px 56px}
+.why{font-size:14px;color:var(--ink-2);margin:0 0 14px;max-width:80ch}
+.why b{color:var(--ink)}
+
+/* the band, as built */
+.mwmast{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:12px;min-height:113px;padding:16px 22px 17px;margin:0 0 16px;display:flex;flex-direction:column;justify-content:flex-end}
+.mwmast::after{content:"";position:absolute;width:210px;height:210px;right:-20px;top:-70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07)}
+.mwtop{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.mwwk{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 7px}
+.mwmast h1{margin:0;font:700 24px/1.15 var(--serif)}
+.pgsub{margin:4px 0 0;color:var(--ff-quiet);font-size:13px}
+.mwstrip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.mwstrip div{text-align:right}.mwstrip b{display:block;font-size:22px;font-weight:600;line-height:1}
+.mwstrip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px}
+.mwstrip .late b{color:var(--ff-late)}
+/* the card head, as built */
+.hocard{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.hochd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.hocic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--amber-tx)}
+.hocic svg{width:17px;height:17px}
+.hochd h2{margin:0;font:700 19px/1.15 var(--serif)}
+.hocnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.hochd .sp{flex:1}
+.hosort{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3)}
+.hosort .sw{display:inline-flex;background:var(--surface-2);border-radius:7px;padding:2px}
+.hosort .sw span{padding:4px 8px;border-radius:5px;font-size:12px;color:var(--ink-2)}
+.hosort .sw span.on{background:var(--surface);color:var(--ink);font-weight:600}
+.mwsearch{width:170px;padding:5px 10px;font-size:13px;border:1px solid var(--line);border-radius:7px;color:var(--ink-3)}
+
+/* NOW — the groups labelled inside one card, zebra rows */
+.now .mwsh{display:flex;align-items:baseline;gap:8px;padding:14px 14px 7px;border-bottom:2px solid var(--line)}
+.now .mwsh h2{margin:0;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;line-height:1.4;color:var(--ink-3)}
+.now .late .mwsh h2{color:var(--bad)}
+.now .mwsh .meta{font-size:11.5px;font-weight:600;color:var(--ink-3)}
+.now .mwsh .sp{flex:1}
+.now .mwsh .lk{font-size:12px;font-weight:600;color:var(--amber-tx)}
+.now .mwrow{display:grid;grid-template-columns:20px minmax(0,1fr) 160px 108px 128px 26px;gap:12px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line-soft)}
+.now .mwrow:nth-child(odd of .mwrow){background:var(--zebra)}
+.now .mwtick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px}
+.now .late .mwtick{border-color:var(--bad)}
+.now .t{font-size:15px;line-height:1.35}
+.now .mwcl{justify-self:end;display:inline-flex;align-items:center;gap:6px;max-width:160px;font-size:12.5px;font-weight:500;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 10px;white-space:nowrap}
+.now .mwcl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.now .mwcl i{font-style:normal;overflow:hidden;text-overflow:ellipsis}
+.now .mwwhen{font-size:13px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.now .mwwhen.late{color:var(--bad);font-weight:600}
+.now .mwst{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.now .mwst::before{content:"";width:12px;height:2px;background:currentColor}
+.now .mwst.prog{color:var(--amber-tx)}
+.now .go{color:var(--ink-3);width:26px;height:26px;display:grid;place-items:center}
+.now .go svg{width:14px;height:14px}
+
+/* PROPOSED — a card per group, the tracker's quiet row */
+.pr .groups{display:grid;gap:12px;margin-top:12px}
+.pr .gc{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pr .gh{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.pr .gh h3{margin:0;font:700 15.5px/1.2 var(--font)}
+.pr .gh .meta{font:500 13px/1.2 var(--font);color:var(--ink-2)}
+.pr .gh .meta b{color:var(--bad);font-weight:600}
+.pr .gh .lk{margin-left:auto;color:var(--blue);font:600 13px/1 var(--font)}
+.pr .gc.late .gh h3{color:var(--bad)}
+.pr .gc.week .gh{background:var(--wk)}
+.pr .gc.week .gh h3{color:var(--wk-ink)}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--wk);color:var(--wk-ink);font:700 12px/1 var(--font);flex:none}
+.pr .row{display:grid;grid-template-columns:22px minmax(0,1fr) 100px 118px 28px;gap:2px 14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.pr .row:last-child{border-bottom:0}
+.pr .row:hover{background:var(--zebra)}
+.pr .tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px}
+.pr .row.late .tick{border-color:var(--bad)}
+.pr .main{min-width:0}
+.pr .t{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr .meta2{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-3);margin-top:2px;min-width:0}
+.pr .meta2 .cl{font-weight:600;color:var(--ink-2);white-space:nowrap}
+.pr .meta2 .sep{width:1px;height:11px;background:var(--line);flex:none}
+.pr .meta2 .up{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pr .meta2 .up b{font-weight:600;color:var(--ink-2)}
+.pr .wc{justify-self:end;font:600 12.5px/1 var(--font);white-space:nowrap;color:var(--ink-3)}
+.pr .wc.red{color:var(--bad)}
+.pr .st{display:flex;gap:7px;align-items:center;font:600 13px/1.3 var(--font);color:var(--ink-2)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--d0);flex:none}.dot.d1{background:var(--d1)}
+.pr .go{justify-self:end;color:var(--ink-3);width:28px;height:28px;display:grid;place-items:center;border-radius:7px}
+.pr .row:hover .go{color:var(--ink);background:var(--surface-2)}
+.pr .go svg{width:14px;height:14px}
+@media (max-width:760px){
+  .now .mwrow{grid-template-columns:20px minmax(0,1fr) 26px}.now .mwcl,.now .mwwhen,.now .mwst{display:none}
+  .pr .row{grid-template-columns:22px auto minmax(0,1fr) 28px;grid-template-areas:"tk m m go" ". wc st st";row-gap:4px}
+  .pr .row .tick{grid-area:tk}.pr .row .main{grid-area:m}.pr .row .go{grid-area:go}.pr .row .wc{grid-area:wc;justify-self:start}.pr .row .st{grid-area:st}
+  .mwsearch{width:100%}.mwstrip{gap:14px}
+}
+</style>
+
+<div class="pick"><div class="in"><b style="margin-right:6px">My tasks</b>
+  <button type="button" data-v="now" aria-pressed="false">Now</button>
+  <button type="button" data-v="date" aria-pressed="true">Proposed · by Date</button>
+  <button type="button" data-v="client" aria-pressed="false">Proposed · by Client</button>
+</div></div>
+<div class="pg">
+  <p class="why" id="why"></p>
+  <header class="mwmast"><div class="mwtop"><div><div class="mwwk">This week · 1 – 5 Nov</div><h1>My tasks</h1><p class="pgsub">Your actions across every client's Internal Tracker.</p></div>
+    <div class="mwstrip"><div><b>8</b><span>Open</span></div><div class="late"><b>2</b><span>Late</span></div><div><b>4</b><span>Due this week</span></div><div><b>1</b><span>Done this week</span></div></div></div></header>
+  <div id="view"></div>
+</div>
+
+<script>
+const GO='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>';
+const TASKS='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 4h7M6 8h7M6 12h7M2.5 4h.01M2.5 8h.01M2.5 12h.01"/></svg>';
+/* a person's own kind of week across clients */
+const R=[
+ {t:'Logitics Strategy Revamp',c:'Raya Trade',b:'late',when:'Late 2 w',late:'2 w late',st:'ns'},
+ {t:'Send the revised scorecard to the CEO office',c:'El Abd',b:'late',when:'Late 1 w',late:'1 w late',st:'p',u:['Last week','Waiting on Finance numbers for Q3']},
+ {t:'HR project we want to review the two projects & Develop the 3rd Project Retention Analytics',c:'Raya Trade',b:'week',when:'This week',st:'p',u:['Last week','had a meeting this week and postponed to next week']},
+ {t:'Finance Adjust Project that is missing MIlestones',c:'Raya Trade',b:'week',when:'This week',st:'p'},
+ {t:'Draft the Q4 town-hall agenda',c:'El Abd',b:'week',when:'This week',st:'ns'},
+ {t:'UNITS plan require refinement, since there are redundancy',c:'Nile Foods',b:'week',when:'This week',st:'p',u:['This week','The link of BUs plans review is: https://docs.google.com/spreadsheets/d/1x9…']},
+ {t:'Close the Q3 performance pack for the board',c:'Nile Foods',b:'later',when:'Next week',wk:'Next week',st:'ns'},
+ {t:'Map the shared services KPIs',c:'El Abd',b:'later',when:'W3 Nov',wk:'W3 Nov',st:'ns'}];
+const HEAD={late:'Late',week:'This week',later:'Next week and later'};
+const ST={ns:'Not started',p:'In progress'};
+const hd='<div class="hocard"><div class="hochd"><span class="hocic">'+TASKS+'</span><h2>Open tasks</h2><span class="hocnt">8</span><span class="sp"></span>'+
+ '<span class="hosort">Sort by <span class="sw"><span class="on S1">Date</span><span class="S2">Client</span></span></span><span class="hosort">Done <span class="sw"><span class="on">Hide</span><span>Last week</span><span>30 days</span></span></span><span class="mwsearch">Search tasks</span></div>';
+const byClient=()=>{const m={};R.forEach(r=>{(m[r.c]=m[r.c]||[]).push(r)});return Object.keys(m).sort((a,b)=>m[b].filter(r=>r.b==='late').length-m[a].filter(r=>r.b==='late').length||a.localeCompare(b)).map(k=>({k,rows:m[k]}))};
+const sortHd=v=>hd.replace('<span class="on S1">Date</span><span class="S2">Client</span>',v==='client'?'<span>Date</span><span class="on">Client</span>':'<span class="on">Date</span><span>Client</span>');
+function now(){
+ const row=r=>'<div class="mwrow"><span class="mwtick"></span><span class="t">'+r.t+'</span><span class="mwcl"><i>'+r.c+'</i></span><span class="mwwhen'+(r.b==='late'?' late':'')+'">'+r.when+'</span><span class="mwst'+(r.st==='p'?' prog':'')+'">'+ST[r.st]+'</span><span class="go">'+GO+'</span></div>';
+ return '<div class="now">'+sortHd('date')+['late','week','later'].map(b=>{const xs=R.filter(r=>r.b===b);return '<section class="'+(b==='late'?'late':'')+'"><div class="mwsh"><h2>'+HEAD[b]+'</h2><span class="meta">'+xs.length+'</span></div>'+xs.map(row).join('')+'</section>'}).join('')+'</div></div>';
+}
+/* the tracker's quiet row: the name on one line; under it the client (when the
+   list is by date) and the latest update; the week only when it is the exception */
+function prow(r,showClient){
+ const wc=r.late?'<span class="wc red">'+r.late+'</span>':r.wk?'<span class="wc">'+r.wk+'</span>':'<span class="wc"></span>';
+ const bits=[];if(showClient)bits.push('<span class="cl">'+r.c+'</span>');if(r.u)bits.push('<span class="up"><b>'+r.u[0]+'</b> · '+r.u[1]+'</span>');
+ return '<div class="row'+(r.late?' late':'')+'"><span class="tick"></span><div class="main"><div class="t" title="'+r.t.replace(/"/g,'&quot;')+'">'+r.t+'</div>'+
+  (bits.length?'<div class="meta2">'+bits.join('<span class="sep"></span>')+'</div>':'')+'</div>'+wc+'<span class="st"><span class="dot'+(r.st==='p'?' d1':'')+'"></span>'+ST[r.st]+'</span><span class="go" title="Open in the client\'s Tracker">'+GO+'</span></div>';
+}
+function byDate(){
+ return '<div class="pr">'+sortHd('date')+'</div><div class="groups">'+['late','week','later'].map(b=>{const xs=R.filter(r=>r.b===b);
+  return '<div class="gc '+b+'"><div class="gh"><h3>'+HEAD[b]+'</h3><span class="meta">'+xs.length+' open</span></div>'+xs.map(r=>prow(r,true)).join('')+'</div>'}).join('')+'</div></div>';
+}
+function byCl(){
+ return '<div class="pr">'+sortHd('client')+'</div><div class="groups">'+byClient().map(g=>{const l=g.rows.filter(r=>r.b==='late').length;
+  return '<div class="gc"><div class="gh"><span class="av">'+g.k.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()+'</span><h3>'+g.k+'</h3><span class="meta">'+g.rows.length+' open'+(l?' · <b>'+l+' late</b>':'')+'</span><span class="lk">Internal Tracker →</span></div>'+g.rows.map(r=>prow(r,false)).join('')+'</div>'}).join('')+'</div></div>';
+}
+const WHY={
+ now:'<b>Now, as built.</b> One card; the groups are small grey capitals over a rule; rows striped; the client a pill with a gold dot; the status in the tracker\'s old look (capitals and a dash); a long name wraps.',
+ date:'<b>Proposed, by Date.</b> The band and the card\'s head (Show, Sort by, Done, Search) stay. Each group is a card — <b>Late</b> in red, <b>This week</b> on the tracker\'s pale blue, <b>Next week and later</b> — and each row is the Internal Tracker\'s: the name on one line, under it the client and the latest update, the week only when it is the exception (how late, or a later week; a row this week says nothing, its card does), the status as a dot and its word, and the arrow that opens it in the client\'s Tracker.',
+ client:'<b>Proposed, by Client.</b> The same, one card per client — its initials, its name, its counts and <b>Internal Tracker →</b> — so the client drops off each row\'s quiet line and the week cell says late or a later week.'};
+function show(v){document.getElementById('view').innerHTML=v==='now'?now():v==='date'?byDate():byCl();document.getElementById('why').innerHTML=WHY[v];
+ document.querySelectorAll('.pick button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));}
+document.querySelectorAll('.pick button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+show('date');
+</script>

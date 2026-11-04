@@ -1196,29 +1196,19 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      note does not float in the middle of a cell beside a one-line figure. */
   .notefld{width:100%;max-width:none;text-align:left;font-size:13px;vertical-align:top}
   .notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
-  /* §576: A RED FIGURE HOLDS THE PAGE — the mockup Islam approved
-     (design-mockups/note-first/). The bar takes the "to finish" bar's place;
-     every other box greys and will not take typing; the owed note is ringed.
+  /* §705: THE TAG ON THE OWED NOTE BOX — the mockup Islam approved
+     (design-mockups/note-tag/2026-11-02_tag-on-the-note-box.html, option A):
+     a small red label above the box, a dot before it, reading "Note needed ·
+     off track". Above rather than over the box, so it never covers what is
+     typed. Replaces §576's lock bar, ring and greyed boxes, which stood here.
      Tokens only, so the dark theme carries it with nothing added. */
-  .lockbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;
-    width:fit-content;max-width:100%;margin:0 0 10px;padding:10px 14px;
-    border:1px solid var(--bad);border-radius:var(--r);background:var(--bad-bg);
-    color:var(--ink);font-size:var(--fs-body)}
-  .lockbar b{color:var(--bad-tx)}
-  .lockbar .lockn{color:var(--ink-3);font-size:var(--fs-small);white-space:nowrap}
-  .lockbar .lockgo{font:inherit;font-weight:600;font-size:13px;padding:5px 14px;
-    border:1px solid var(--bad);border-radius:6px;background:var(--surface);
-    color:var(--bad-tx);cursor:pointer;white-space:nowrap}
-  .lockbar .lockgo:hover{background:var(--bad-bg)}
-  .lockbar .lockgo:focus-visible{outline:2px solid var(--bad);outline-offset:2px}
-  .notefld.lockhere{outline:3px solid var(--bad);outline-offset:1px}
-  /* §576.2: A CAPABILITY'S PANE PINS ITS PROJECT BAND with a strip of page
-     ground 24px tall above it (`.pane > .pband::before`), and at the bar's
-     10px that strip painted over the bar's bottom edge — found by looking at
-     cap6, the one page the worked example opens locked. 26px because the
-     bar's own 10px collapses into it. Spaced where the bar meets that pane
-     and nowhere else, so no other page moves. */
-  .lockbar + .capbody{margin-top:26px}
+  .notetag{display:inline-flex;align-items:center;gap:6px;margin:0 0 5px;
+    font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--bad-tx);white-space:nowrap}
+  .notetag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);flex:none}
+  /* And the read side (§705): a red row nobody has explained, read by somebody
+     who may not write the note, says "Needs justification" in the same red. */
+  td .needjust, .needjust{color:var(--bad-tx);font-weight:600}  /* `td .why` sets the grey; this outranks it */
   /* And the break survives being read (§271, §161.3): `pre-line` keeps the
      newlines somebody typed and wraps everything else. On the READ-ONLY note
      wherever it is printed — never on `.why` at large, which is the page's
@@ -1256,13 +1246,6 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .entry .field{border:0;width:78px;border-radius:0}
   .entry .field:focus-visible{outline:none}
   .entry:focus-within{outline:2px solid var(--gold);outline-offset:1px}
-  /* §576: a box shut by the note lock — after `.entry.filled`, and naming it,
-     because a box that already holds a figure would otherwise stay green and
-     read as open. */
-  .lockshut, .entry.lockshut, .entry.filled.lockshut{opacity:.45;cursor:not-allowed;
-    background:var(--surface-2);border-color:var(--line)}
-  .entry.lockshut .field, .entry.filled.lockshut .field,
-  .entry.lockshut .unitsuf{background:transparent;cursor:not-allowed}
   .unitsuf{display:flex;align-items:center;padding:0 9px;background:var(--surface-2);
     border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;
     color:var(--ink-3);white-space:nowrap}
@@ -1332,7 +1315,11 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   /* Rows that already say something keep saying it. */
   .board tbody tr.alt td { background:var(--surface-2); }
   tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
-  tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
+  /* §705: a TOKEN, not the light pink it was written as — in the dark theme
+     that literal drew a light row across a dark table, and the tag the note
+     box now wears could not be read on it (2.0:1, measured). Light keeps the
+     exact colour it had; dark takes its own red wash. */
+  tbody tr.wantnote:nth-child(even) > td { background:var(--zebra-bad); }
 
   /* §414: SEVERAL OUTCOMES PER TACTIC. A sub-line wears its tactic's stripe
      rather than its own position's — the tactic's shared cells span it, so a

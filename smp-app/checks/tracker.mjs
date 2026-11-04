@@ -500,7 +500,7 @@ check("the opened task has three tabs — Progress (open first), Description, Hi
 check("...Description holds the same stored text in a box under its own tab, and the word Notes is gone",
   /<div class="tp tp-d"><textarea class="desc" data-act="notes" aria-label="Description"/.test(openPart) && !/>Notes</.test(openPart));
 check("...and Progress carries ONE box with Add beside it, the entries right under it",
-  count(openPart, /class="pnew" data-act="progress-new"/g) === 1 && /<div class="tp tp-p">(?:<div class="psec">[\s\S]*?<\/div><div class="psh">This week<\/div>)?<div class="pbox">[\s\S]*?data-act="progress-go"[^>]*>Add<\/button><\/div><ul class="prog">/.test(openPart));
+  count(openPart, /class="pnew" data-act="progress-new"/g) === 1 && /<div class="tp tp-p">(?:<div class="psec[^"]*">[\s\S]*?<\/div><div class="psh pthis"[^>]*>This week<\/div>)?<div class="pbox">[\s\S]*?data-act="progress-go"[^>]*>Add<\/button><\/div><ul class="prog">/.test(openPart));
 check("the entries read newest first, the week in front — This week in the alarm's colour, then Last week — the writer's name under each, and the edited one says so",
   /<li class="pe" data-pid="e2"><span class="wk now" title="[^"]*">This week<\/span>[\s\S]*?Finance sent[\s\S]*?<span>Noran<\/span>[\s\S]*?<li class="pe" data-pid="e1"><span class="wk" title="[^"]*">Last week<\/span>[\s\S]*?Template agreed[\s\S]*?<span>Islam<\/span><span class="ed">edited<\/span>/.test(openPart),
   (openPart.match(/<li class="pe"[\s\S]*?<\/li>/g) || []).join("\n").slice(0, 600));
@@ -1569,9 +1569,30 @@ try {
        ticking the last asks whether to mark the task Done, "Not yet" folding
        the question. Read back from Postgres (§96). */
     await pg.goto(base + "?view=all&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
+    /* §745 QUIET: a task without steps shows only "+ Add steps" (grey words,
+       a blue +) — no title, no hint, no add line, no This week label; pressed,
+       the title and the add line come out, the cursor in it */
+    const vis745 = (sel) => pg.evaluate((q) => { const e = document.querySelector(q); return !!e && !e.closest("[hidden]") && e.getClientRects().length > 0; }, sel);
+    const quiet745 = { link: ((await pg.locator(".open .psec .slinks button").textContent().catch(() => "")) || "").replace(/\s+/g, " ").trim(),
+      title: await vis745(".open .psec .psh"), line: await vis745(".open .psec .sadd"), wk: await vis745(".open .pthis"), hint: await pg.locator(".open .sopt").count(),
+      colors: await pg.evaluate(() => { const b = document.querySelector(".open .slinks button"), p = b && b.querySelector("b"); return b && p ? [getComputedStyle(b).color, getComputedStyle(p).color] : []; }) };
+    await pg.locator(".open .psec [data-act=sadd-open]").click();
+    const opened745 = { title: await vis745(".open .psec .psh"), line: await vis745(".open .psec .sadd"), wk: await vis745(".open .pthis"), link: await vis745(".open .psec .slinks"),
+      focus: await pg.evaluate(() => !!document.activeElement && document.activeElement.classList.contains("snew")) };
+    await pg.keyboard.press("Escape");
+    const shut745 = { title: await vis745(".open .psec .psh"), line: await vis745(".open .psec .sadd"), link: await vis745(".open .psec .slinks") };
+    check("a task without steps shows only + Add steps (grey words, a blue +); pressed, the Steps title and the add line come out with the cursor in it; Escape puts the link back (§745)",
+      quiet745.link === "+ Add steps" && !quiet745.title && !quiet745.line && !quiet745.wk && quiet745.hint === 0 && quiet745.colors.length === 2 && quiet745.colors[0] !== quiet745.colors[1] &&
+      opened745.title && opened745.line && opened745.wk && !opened745.link && opened745.focus && !shut745.title && !shut745.line && shut745.link,
+      JSON.stringify({ quiet745, opened745, shut745 }));
+    await pg.locator(".open .psec [data-act=sadd-open]").click();
     await pg.locator(".open .snew").fill("Step one"); await pg.locator(".open .snew").press("Enter"); await settle();
     const tab743 = await pg.evaluate(() => { const o = document.querySelector(".open"); return { tab: o && o.getAttribute("data-tab"), focus: !!document.activeElement && document.activeElement.classList.contains("snew") }; });
     await pg.locator(".open .snew").fill("Step two"); await pg.locator(".open .snew").press("Enter"); await settle();
+    /* §745: with steps, Escape shuts the line and "+ Add a step" comes back under the list, the title stays */
+    await pg.keyboard.press("Escape");
+    const after745 = { link: ((await pg.locator(".open .psec .slinks button").textContent().catch(() => "")) || "").replace(/\s+/g, " ").trim(), title: await vis745(".open .psec .psh"), line: await vis745(".open .psec .sadd") };
+    check("...with steps, the title stays and + Add a step waits under the list (§745)", after745.link === "+ Add a step" && after745.title && !after745.line, JSON.stringify(after745));
     const sDb = await asTenant(A, (c) => stepsOf(c, mTask));
     await pg.locator(".open .sline >> nth=0").locator(".scb").click(); await settle();
     const rowSteps = ((await pg.locator('.row[data-id="' + mTask + '"] .stc').textContent().catch(() => "")) || "").trim();
@@ -1595,12 +1616,16 @@ try {
     if (process.env.SMP_SHOT4) await pg.screenshot({ path: process.env.SMP_SHOT4 + "-check.png" });
     await pg.locator(".mopen [data-act=steps-notyet]").click().catch(() => {});
     const folded743 = !(await pg.locator(".mopen .sdone").isVisible().catch(() => false));
-    check("...in the weekly check the tick opens this week's box with \"Done: Step two\" in it; the steps are for the review — the add line behind + Add a step, Edit steps to the task, no renaming or weeks here (§744)",
-      !!mbox744 && mbox744.v === "Done: Step two" && mbox744.shown && links744.add && links744.edit && !links744.addLine && !links744.rename && !links744.week, JSON.stringify({ mbox744, links744 }));
+    check("...in the weekly check the tick opens this week's box with \"Done: Step two\" in it; the steps there are ticked only — no add, no Edit steps, no renaming or weeks: the owner plans them (§744, §745)",
+      !!mbox744 && mbox744.v === "Done: Step two" && mbox744.shown && !links744.add && !links744.edit && !links744.addLine && !links744.rename && !links744.week, JSON.stringify({ mbox744, links744 }));
     check("...in the weekly check the box lists the steps; ticking the last asks whether to mark the task Done, and Not yet folds the question (§743)",
       inBox === 2 && ask743 && folded743 && (await asTenant(A, (c) => stepsOf(c, mTask))).every((x) => x.done) && (await asTenant(A, (c) => oneAction(c, mTask))).status !== "done",
       JSON.stringify({ inBox, ask743, folded743 }));
     await owner("DELETE FROM tracker_steps WHERE action_id = $1", [mTask]);
+    /* §745: in the weekly check a task without steps says nothing about them */
+    await pg.goto(base + "?view=check&open=" + mTask); await settle(); await pg.evaluate("window.__stay = 1");
+    const none745 = await pg.evaluate(() => ({ steps: document.querySelectorAll(".mopen .msteps, .mopen .slinks, .mopen .sadd").length }));
+    check("...and in the weekly check a task without steps shows nothing about them (§745)", none745.steps === 0, JSON.stringify(none745));
     await pg.goto(base + "?view=check"); await settle(); await pg.evaluate("window.__stay = 1");
     /* put the action back as it was: the walk-through above is not what the
        presses after it are about */

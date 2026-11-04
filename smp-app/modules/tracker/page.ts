@@ -651,13 +651,13 @@ const LOOK = `
 .open .sadd input.snew{border:0;border-bottom:1px dashed var(--line);border-radius:0;box-shadow:none;background:none;padding:3px 0;height:auto}
 .open .sadd input.snew:focus{border-bottom:1px solid var(--carry);outline:none}
 .slinks{display:flex;gap:16px;align-items:center;padding:4px 6px 0}
-.slinks button,.slinks a{border:0;background:none;padding:0;font:400 13px/1.4 var(--font);color:var(--carry);cursor:pointer;text-decoration:none}
-.slinks a{color:var(--ink-3)}
-.slinks button:hover,.slinks a:hover{text-decoration:underline;text-underline-offset:2px}
+.slinks button{border:0;background:none;padding:0;font:400 13px/1.4 var(--font);color:var(--ink-3);cursor:pointer}
+.slinks button b{color:var(--carry);font-weight:600;margin-right:2px}
+.slinks button:hover{color:var(--carry)}
+.psec.empty{margin-bottom:8px}
 .psec{margin:0 0 14px}
 .psh{font:600 12px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:2px 0 6px}
 .psh .c{font-weight:500;letter-spacing:0;text-transform:none}
-.sopt{margin:2px 0 0;font-size:13px;color:var(--ink-3)}
 .sdone{margin-top:10px;padding:9px 12px;border-radius:9px;background:var(--done-bg);color:var(--good);font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .sdone .go{border:1px solid var(--good);background:var(--surface);color:var(--good);border-radius:7px;padding:3px 10px;font:600 12.5px/1.2 var(--font);cursor:pointer}
 .sdone .go.quiet{border:0;background:none;color:var(--ink-3);font-weight:400}
@@ -1459,10 +1459,17 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
      without opening another thing, and seeing previous progress in the same
      time is good"): Progress holds the steps first, then this week's box,
      then the entries — no Steps tab of its own */
-  const stepsHere = live || stepCount(a, L)
-    ? '<div class="psec"><div class="psh">Steps' + (stepCount(a, L) ? ' <span class="c">' + stepsOfTask(a, L).filter((x) => x.done).length + " of " + stepCount(a, L) + "</span>" : ' <span class="c">optional</span>') + "</div>" + stepsBlock(a, L, live, today, false) + "</div>"
+  /* §745 QUIET STEPS (Islam, 2026-11-04: "the team is already using the task
+     management without steps so it should be quiet … simple but
+     consistent"): a task without steps shows one small "+ Add steps" (grey
+     words, a blue +); pressed, the Steps title and the add line come out.
+     The title and "This week" are drawn only when there are steps to tell
+     apart from the box. */
+  const nSteps = stepCount(a, L);
+  const stepsHere = live || nSteps
+    ? '<div class="psec' + (nSteps ? "" : " empty") + '"><div class="psh"' + (nSteps ? "" : " hidden") + ">Steps" + (nSteps ? ' <span class="c">' + stepsOfTask(a, L).filter((x) => x.done).length + " of " + nSteps + "</span>" : "") + "</div>" + stepsBlock(a, L, live, today, false) + "</div>"
     : "";
-  const prog = '<div class="tp tp-p">' + stepsHere + (stepsHere ? '<div class="psh">This week</div>' : "") + (who.personKey ? progressBox(a, "What happened this week?") : "") + progressList(L, who, today) + "</div>";
+  const prog = '<div class="tp tp-p">' + stepsHere + (stepsHere ? '<div class="psh pthis"' + (nSteps ? "" : " hidden") + ">This week</div>" : "") + (who.personKey ? progressBox(a, "What happened this week?") : "") + progressList(L, who, today) + "</div>";
   const desc = '<div class="tp tp-d">' + (live
     ? '<textarea class="desc" data-act="notes" aria-label="Description" maxlength="5000" rows="1" placeholder="What the task is. Click to write it.">' + esc(a.description) + "</textarea>"
     : '<div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>") + "</div>";
@@ -1512,16 +1519,17 @@ function stepsBlock(a: Action, L: Loaded, live: boolean, today: string, compact:
   /* §744: in the weekly check the steps are for the review — tick, and add
      the odd step behind a link; renaming, weeks, order and removal are
      planning, in the opened task ("Edit steps") */
-  const add = live ? '<div class="sadd"' + (compact ? " hidden" : "") + '><span aria-hidden="true">+</span><input class="snew" data-act="step-new" placeholder="Add a step and press Enter" aria-label="Add a step to ' + esc(a.title) + '" maxlength="300"></div>' : "";
-  const links = compact && live
-    ? '<div class="slinks"><button type="button" data-act="sadd-open">' + (all.length ? "+ Add a step" : "+ Add steps") + "</button>" +
-      (all.length ? '<a href="?view=all&amp;open=' + encodeURIComponent(a.id) + '">Edit steps &rsaquo;</a>' : "") + "</div>"
+  /* §745: the weekly check only ticks (the owner plans the steps, in the
+     Tracker or in My tasks); the add line waits behind "+ Add steps" /
+     "+ Add a step" — grey words, a blue + */
+  const add = live && !compact ? '<div class="sadd" hidden><span aria-hidden="true">+</span><input class="snew" data-act="step-new" placeholder="Add a step and press Enter" aria-label="Add a step to ' + esc(a.title) + '" maxlength="300"></div>' : "";
+  const links = live && !compact
+    ? '<div class="slinks"><button type="button" data-act="sadd-open"><b aria-hidden="true">+</b> ' + (all.length ? "Add a step" : "Add steps") + "</button></div>"
     : "";
   const ask = live && all.length && d === all.length && a.status !== "done"
     ? '<div class="sdone">All steps are ticked. Mark the task Done? <button type="button" class="go" data-act="steps-done">Mark Done</button><button type="button" class="go quiet" data-act="steps-notyet">Not yet</button></div>' : "";
-  const none = !all.length ? (live && !compact ? '<p class="sopt">Break the task into steps if it helps plan it.</p>' : "") : "";
   return (compact && all.length ? '<div class="msh">Steps <span class="c">' + d + " of " + all.length + "</span></div>" : "") +
-    (all.length ? '<ul class="stl">' + lis + "</ul>" : "") + none + add + links + ask;
+    (all.length ? '<ul class="stl">' + lis + "</ul>" : "") + add + links + ask;
 }
 /* THE OPENED TASK, TABBED (2026-11-02, §706; option D of
    design-mockups/internal-tracker/2026-11-02_opened-task-options.html).
@@ -1799,7 +1807,7 @@ function meetPanel(a: Action, L: Loaded, who: Who, today: string, dates: Format)
     '<h3 class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</h3>" +
     box +
     '<div class="mrow">' + chips + '<button type="button" class="mbtn pri" data-act="step" data-dir="1">Save and next <kbd>Ctrl &crarr;</kbd></button></div>' +
-    (live || stepCount(a, L) ? '<div class="msteps">' + stepsBlock(a, L, live, today, true) + "</div>" : "") +
+    (stepCount(a, L) ? '<div class="msteps">' + stepsBlock(a, L, live, today, true) + "</div>" : "") +
     '<div class="mph">' + (nowNotes.length ? "Before this week" : "Progress so far") + "</div>" + tl + more + desc + hist +
     '<div class="macts"><button type="button" class="mlk" data-act="step" data-dir="-1">&larr; Previous</button><span class="sp"></span>' +
     '<button type="button" class="mlk" data-act="skip">Skip &rarr;</button></div></div>';

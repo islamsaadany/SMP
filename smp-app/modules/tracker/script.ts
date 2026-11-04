@@ -525,15 +525,43 @@ export const APP_JS = `(function () {
     if (boxFocus) {
       var fb = progBox(boxFocus); boxFocus = null;
       if (fb) { fb.focus(); fb.setSelectionRange(fb.value.length, fb.value.length); }
-      stepBack = null;
+      stepBack = null; addBack = false;
       return;
     }
     if (!stepBack) return;
     var o = document.querySelector('#body .open[data-id="' + stepBack + '"]');
     stepBack = null;
-    var ni = o && o.querySelector(".snew");
-    if (ni) ni.focus();
+    /* after an add, the line stays open for the next step */
+    if (o && addBack) stepsOpen(o.querySelector(".psec"), true);
+    addBack = false;
   }
+  /* §745 THE ADD LINE OPENS AND SHUTS: + Add steps (or + Add a step)
+     opens it, with the Steps title and This week's label when the task had
+     none; Escape, or leaving it empty, puts the link back */
+  var addBack = false;
+  function stepsOpen(sec, on) {
+    if (!sec) return;
+    var sx = sec.querySelector(".sadd"), lk = sec.querySelector(".slinks"), empty = sec.classList.contains("empty");
+    if (!sx) return;
+    sx.hidden = !on;
+    if (lk) lk.hidden = on;
+    if (empty) {
+      var h = sec.querySelector(".psh"), tw = sec.parentNode && sec.parentNode.querySelector(".pthis");
+      if (h) h.hidden = !on;
+      if (tw) tw.hidden = !on;
+    }
+    var si = sx.querySelector(".snew");
+    if (on && si) si.focus();
+    if (!on && si) si.value = "";
+  }
+  document.addEventListener("focusout", function (e) {
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains("snew") || t.disabled) return;
+    setTimeout(function () {
+      if (!t.isConnected || document.activeElement === t || t.value.trim() || t.disabled) return;
+      stepsOpen(t.closest(".psec"), false);
+    }, 150);
+  });
   function stepRename(el, tid) {
     if (el.querySelector("input")) return;
     var sl = el.closest(".sline"), sid = sl && sl.getAttribute("data-sid"), was = el.textContent;
@@ -554,11 +582,14 @@ export const APP_JS = `(function () {
   document.addEventListener("keydown", function (e) {
     var t = e.target;
     if (!t || !t.classList) return;
-    if (t.classList.contains("snew") && e.key === "Enter") {
+    if (t.classList.contains("snew") && e.key === "Escape") {
+      e.preventDefault(); e.stopPropagation();
+      stepsOpen(t.closest(".psec"), false);
+    } else if (t.classList.contains("snew") && e.key === "Enter") {
       e.preventDefault();
       var v = t.value.replace(/\s+/g, " ").trim(), tid = rowOf(t);
       if (!v || !tid) return;
-      stepBack = tid; t.disabled = true;
+      stepBack = tid; addBack = true; t.disabled = true;
       post({ act: "step-add", id: tid, title: v }, null, function (j) { if (!j) { t.disabled = false; t.focus(); } });
     } else if (t.classList.contains("snm") && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault(); stepRename(t, rowOf(t));
@@ -932,9 +963,8 @@ export const APP_JS = `(function () {
     } else if (act === "step-rename") {
       stepRename(b, id);
     } else if (act === "sadd-open") {
-      /* §744: the weekly check's add line, behind its link */
-      var sa = b.closest(".msteps, .open"), sx = sa && sa.querySelector(".sadd");
-      if (sx) { sx.hidden = false; b.hidden = true; var si2 = sx.querySelector(".snew"); if (si2) si2.focus(); }
+      /* §745: "+ Add steps" brings out the Steps title and the add line */
+      stepsOpen(b.closest(".psec"), true);
     } else if (act === "steps-done") {
       post({ act: "status", id: id, status: "done" });
     } else if (act === "steps-notyet") {

@@ -71208,3 +71208,13 @@ Nothing it does is gone; it is quieter:
 **Checked**: `checks/tracker.mjs` **393 passed, 0 failed** — new: the quiet link (grey words, blue +), pressing it brings the title, line and This week label with the cursor in the line, Escape puts the link back; with steps the title stays and + Add a step waits under the list; the weekly check has no add, no Edit steps; a task without steps shows nothing in the check. `checks/shell.mjs` section 4 **110 ok, 0 failed** — new: My tasks' opened task shows only + Add steps, opens the title and line, Enter stores a step and keeps the line, Escape leaves + Add a step; a tick is stored (In progress) and writes "Done: Line step" into the box, focused, unsaved. Shell cache `smp-shell-v7.64-quietsteps`.
 
 **§745 shell run**: 569 ok / 11 failed — all main's own (Copilot box and rails, §94.8, §475, §490.2, §653's plan card, the Copilot settings row); every §743/§744/§745 check green. Mockup brought to what is built (Islam: "mockup first").
+
+## §746 — Steps by place: the Tracker and My tasks plan, the weekly check ticks, Home has none (2026-11-04)
+
+**Asked** (Islam), on the §745 mockup: "in the tracker opened task with tasks with steps let's keep the add step and press enter option" → "1. Tracker in task without steps proposed is good, task with steps as built is good 2. weekly check is ok 3. my tasks I believe they should match the internal tracker … I'm just leaving planning to the tracker and my tasks and weekly is just for check as agreed. and the home is just for quick updates or adding a task" → (a misreading of mine — My tasks drawn tick-only — corrected on "didn't we say that my tasks should be like the tracker?") → mockup `design-mockups/internal-tracker/2026-11-03_steps-quiet.html` → **"build it"**.
+
+- **Tracker and My tasks — planning, one view**: a task without steps shows only "+ Add steps" (grey words, a blue +), which brings out the title and the add line; once a task has steps, the **"Add a step and press Enter" line stays open** under the list (Escape only clears it) — no "+ Add a step" link. Tick, rename, week, ↑ ↓ ×.
+- **Weekly check — checking**: ticks only (§745, unchanged).
+- **Home — quick updates and adding a task**: no steps in its opened task; this week's box and the timeline; the row keeps "N of M steps"; + New task stays.
+
+**Checked**: `checks/tracker.mjs` **393 passed, 0 failed** (with steps: the line stays open, no link). `checks/shell.mjs` section 4 **111 ok, 0 failed** — new: My tasks' line stays open once there are steps; Home's opened task has no steps and its row keeps the count. Shell cache `smp-shell-v7.65-stepsplaces`.

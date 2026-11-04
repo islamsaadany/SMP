@@ -3725,11 +3725,12 @@ await section("4 · Forefront's own pages", async () => {
       const a745 = await page.evaluate(() => ({ step: Array.from(document.querySelectorAll(".mwrow.on .mwsnm")).map((x) => x.textContent), focus: !!document.activeElement && document.activeElement.hasAttribute("data-snew"), count: ((document.querySelector(".mwrow.on .mwmeta .stc") || {}).textContent || "") }));
       const sdb745 = (await owner.query("SELECT s.title, s.done_at IS NOT NULL AS done FROM tracker_steps s JOIN tracker_actions a ON a.id = s.action_id WHERE a.tenant_id = $1 AND a.title = 'MW added by the line'", [tenantId])).rows;
       await page.keyboard.press("Escape");
-      await page.waitForSelector(".mwrow.on [data-sadd]", { timeout: 3000 }).catch(() => {});
-      const e745 = ((await page.locator(".mwrow.on [data-sadd]").textContent().catch(() => "")) || "").replace(/\s+/g, " ").trim();
+      await page.waitForTimeout(400);
+      /* §746: with steps the line stays open, no link */
+      const e745 = await page.evaluate(() => ({ line: !!document.querySelector(".mwrow.on [data-snew]"), link: !!document.querySelector(".mwrow.on [data-sadd]") }));
       check(!!q745 && q745.link === "+ Add steps" && !q745.title && !q745.wk && q745.cols.length === 2 && q745.cols[0] !== q745.cols[1] && o745.focus && o745.title &&
-        a745.step.join("|") === "Line step" && a745.focus && sdb745.length === 1 && e745 === "+ Add a step",
-        "My tasks' opened task: a task without steps shows only + Add steps; pressed, the title and line come out, Enter stores a step and keeps the line, Escape leaves + Add a step (\u00a7745)", JSON.stringify({ q745, o745, a745, sdb745, e745 }));
+        a745.step.join("|") === "Line step" && a745.focus && sdb745.length === 1 && e745.line && !e745.link,
+        "My tasks' opened task, as the Tracker's: a task without steps shows only + Add steps; pressed, the title and line come out, Enter stores a step and keeps the line, which stays open once there are steps (\u00a7745, \u00a7746)", JSON.stringify({ q745, o745, a745, sdb745, e745 }));
       await page.click(".mwrow.on .mwsline .mwscb");
       await page.waitForFunction(() => { const i = document.querySelector(".mwrow.on .mwcompose input"); return i && i.value === "Done: Line step" && document.activeElement === i && !!document.querySelector(".mwrow.on .mwsline.done"); }, null, { timeout: 8000 }).catch(() => {});
       const t745 = await page.evaluate(() => { const i = document.querySelector(".mwrow.on .mwcompose input"); return { v: i ? i.value : null, focus: document.activeElement === i, done: !!document.querySelector(".mwrow.on .mwsline.done"), wk: Array.from(document.querySelectorAll(".mwrow.on .mwssh")).some((x) => x.textContent === "This week") }; });
@@ -3738,6 +3739,14 @@ await section("4 · Forefront's own pages", async () => {
         "\u2026a tick there is stored (the task moves to In progress) and writes \"Done: Line step\" into this week's box, the cursor in it, nothing saved (\u00a7745)", JSON.stringify({ t745, tdb745 }));
       await page.locator("#nav button", { hasText: "Home" }).click();
       await page.waitForSelector("[data-newtask]", { timeout: 8000 }).catch(() => {});
+      /* §746: Home is for quick updates — its opened task has no steps; the row keeps its count */
+      await page.waitForFunction(() => Array.from(document.querySelectorAll('[data-home="tasks"] .mwrow .t')).some((t) => t.textContent === "MW added by the line"), null, { timeout: 8000 }).catch(() => {});
+      const hrows746 = await page.evaluate(() => Array.from(document.querySelectorAll('[data-home="tasks"] .mwrow .t, [data-home="tasks"] .t')).map((t) => t.textContent).slice(0, 8));
+      /* (it may still be open from My tasks — the open task is shared — so a press can fold it) */
+      if (!(await page.$('[data-home="tasks"] .mwrow.on .mwtabs'))) await page.locator('[data-home="tasks"] .mwrow .t', { hasText: "MW added by the line" }).click({ timeout: 5000 }).catch(() => {});
+      await page.waitForSelector('[data-home="tasks"] .mwrow.on .mwtabs', { timeout: 8000 }).catch(() => {});
+      const h746 = await page.evaluate(() => { const r = document.querySelector('[data-home="tasks"] .mwrow.on'); return r ? { steps: !!r.querySelector("[data-steps]"), box: !!r.querySelector(".mwcompose input"), count: ((r.querySelector(".mwmeta .stc") || {}).textContent || "") } : null; });
+      check(!!h746 && !h746.steps && h746.box && h746.count === "1 of 1 steps", "Home's opened task has no steps \u2014 this week's box only; the row keeps its count (\u00a7746)", JSON.stringify({ h746, hrows746 }));
       await page.click("[data-newtask]");
       await page.waitForSelector(".ntpop", { timeout: 4000 }).catch(() => {});
       const pop744 = await page.evaluate(() => { const p = document.querySelector(".ntpop"); return p ? { labels: Array.from(p.querySelectorAll("label > span")).map((s) => s.textContent.trim()), focus: document.activeElement && document.activeElement.getAttribute("data-add") } : null; });

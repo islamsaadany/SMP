@@ -1589,10 +1589,10 @@ try {
     await pg.locator(".open .snew").fill("Step one"); await pg.locator(".open .snew").press("Enter"); await settle();
     const tab743 = await pg.evaluate(() => { const o = document.querySelector(".open"); return { tab: o && o.getAttribute("data-tab"), focus: !!document.activeElement && document.activeElement.classList.contains("snew") }; });
     await pg.locator(".open .snew").fill("Step two"); await pg.locator(".open .snew").press("Enter"); await settle();
-    /* §745: with steps, Escape shuts the line and "+ Add a step" comes back under the list, the title stays */
+    /* §746: with steps the add line stays open under them (Escape only clears it); no link */
     await pg.keyboard.press("Escape");
-    const after745 = { link: ((await pg.locator(".open .psec .slinks button").textContent().catch(() => "")) || "").replace(/\s+/g, " ").trim(), title: await vis745(".open .psec .psh"), line: await vis745(".open .psec .sadd") };
-    check("...with steps, the title stays and + Add a step waits under the list (§745)", after745.link === "+ Add a step" && after745.title && !after745.line, JSON.stringify(after745));
+    const after745 = { links: await pg.locator(".open .psec .slinks").count(), title: await vis745(".open .psec .psh"), line: await vis745(".open .psec .sadd") };
+    check("...with steps, the title stays and the add line stays open under the list, no link (§746)", after745.links === 0 && after745.title && after745.line, JSON.stringify(after745));
     const sDb = await asTenant(A, (c) => stepsOf(c, mTask));
     await pg.locator(".open .sline >> nth=0").locator(".scb").click(); await settle();
     const rowSteps = ((await pg.locator('.row[data-id="' + mTask + '"] .stc').textContent().catch(() => "")) || "").trim();

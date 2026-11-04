@@ -543,6 +543,8 @@ export const APP_JS = `(function () {
     if (!sec) return;
     var sx = sec.querySelector(".sadd"), lk = sec.querySelector(".slinks"), empty = sec.classList.contains("empty");
     if (!sx) return;
+    /* with steps the line stays open (§746): Escape only clears it */
+    if (!on && !empty) { var sv = sx.querySelector(".snew"); if (sv) sv.value = ""; return; }
     sx.hidden = !on;
     if (lk) lk.hidden = on;
     if (empty) {

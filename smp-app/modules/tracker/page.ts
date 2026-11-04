@@ -1522,9 +1522,12 @@ function stepsBlock(a: Action, L: Loaded, live: boolean, today: string, compact:
   /* §745: the weekly check only ticks (the owner plans the steps, in the
      Tracker or in My tasks); the add line waits behind "+ Add steps" /
      "+ Add a step" — grey words, a blue + */
-  const add = live && !compact ? '<div class="sadd" hidden><span aria-hidden="true">+</span><input class="snew" data-act="step-new" placeholder="Add a step and press Enter" aria-label="Add a step to ' + esc(a.title) + '" maxlength="300"></div>' : "";
-  const links = live && !compact
-    ? '<div class="slinks"><button type="button" data-act="sadd-open"><b aria-hidden="true">+</b> ' + (all.length ? "Add a step" : "Add steps") + "</button></div>"
+  const add = live && !compact ? '<div class="sadd"' + (all.length ? "" : " hidden") + '><span aria-hidden="true">+</span><input class="snew" data-act="step-new" placeholder="Add a step and press Enter" aria-label="Add a step to ' + esc(a.title) + '" maxlength="300"></div>' : "";
+  /* §746 (Islam: "task with steps as built is good"): once a task has
+     steps the add line stays open under them; the link is for a task
+     without any */
+  const links = live && !compact && !all.length
+    ? '<div class="slinks"><button type="button" data-act="sadd-open"><b aria-hidden="true">+</b> Add steps</button></div>'
     : "";
   const ask = live && all.length && d === all.length && a.status !== "done"
     ? '<div class="sdone">All steps are ticked. Mark the task Done? <button type="button" class="go" data-act="steps-done">Mark Done</button><button type="button" class="go quiet" data-act="steps-notyet">Not yet</button></div>' : "";

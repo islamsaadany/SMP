@@ -2816,7 +2816,11 @@
     }
   }
   function mwSteps(r, d, key) {
-    var all = d.steps || [], live = !!d.canChange, open = !!MW.sadd[key];
+    /* §746: Home is for quick updates and adding tasks — no steps in its
+       opened task (the row keeps its count); with steps the add line stays
+       open under them, as in the Tracker */
+    if (TAB === "home") return null;
+    var all = d.steps || [], live = !!d.canChange, open = !!MW.sadd[key] || all.length > 0;
     if (!all.length && !live) return null;
     var sec = el("div", "mwsteps");
     sec.setAttribute("data-steps", "");
@@ -2904,9 +2908,14 @@
             if (!v || ni.disabled) return;
             ni.disabled = true;
             mwStepWrite(r, "step-add", { title: v }, "add");
-          } else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); MW.sadd[key] = false; MW.redraw(); }
+          } else if (e.key === "Escape") {
+            e.preventDefault(); e.stopPropagation();
+            if (all.length) { ni.value = ""; return; }
+            MW.sadd[key] = false; MW.redraw();
+          }
         });
         ni.addEventListener("blur", function () {
+          if (all.length) return;
           setTimeout(function () { if (!ni.isConnected || ni.disabled || ni.value.trim() || document.activeElement === ni) return; MW.sadd[key] = false; MW.redraw(); }, 150);
         });
         line.appendChild(ni);
@@ -2916,7 +2925,7 @@
         lk.type = "button";
         lk.setAttribute("data-sadd", "");
         lk.appendChild(el("b", null, "+"));
-        lk.appendChild(document.createTextNode(" " + (all.length ? "Add a step" : "Add steps")));
+        lk.appendChild(document.createTextNode(" Add steps"));
         lk.addEventListener("click", function () { MW.sadd[key] = true; MW.focus = "add"; MW.redraw(); });
         sec.appendChild(lk);
       }
@@ -2966,7 +2975,7 @@
       var stepsAt = mwSteps(r, d, key);
       if (stepsAt) box.appendChild(stepsAt);
       if (d.canWrite) {
-        if ((d.steps || []).length || MW.sadd[key]) box.appendChild(el("div", "mwssh", "This week"));
+        if (stepsAt && ((d.steps || []).length || MW.sadd[key])) box.appendChild(el("div", "mwssh", "This week"));
         var cp = el("div", "mwcompose"), inp = el("input"), add = el("button", null, "Add");
         inp.id = "mwp-" + r.id;
         /* a tick's "Done: <step>" and anything typed stay through a redraw */

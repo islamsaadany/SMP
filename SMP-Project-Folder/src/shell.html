@@ -4348,6 +4348,9 @@
        (§173): every navigation ends in a paint, so one line covers a door
        added tomorrow and there is no list of handlers to keep up to date. */
     rememberWhere();
+    /* §746 — the Copilot on the plan (layout B): its button beside Edit and its
+       panel follow every paint, as the page's own parts do. */
+    if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }

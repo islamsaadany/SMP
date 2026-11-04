@@ -1075,3 +1075,30 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copareacard .coppd { color:var(--ink-3); }
 .copachip { font-size:11px; line-height:1.6; }
 .copareacard .coptag { display:block; }
+
+/* §746 — THREE LAYOUTS TO COMPARE LIVE: the switch above the pane; A's
+   start screen (one box, suggestions); B's button beside Edit and its panel
+   on the right of the Strategy tab, the plan narrowing beside it. */
+.coplayout { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin:0 0 8px; font-size:12.5px; }
+.coplayoutk { font:700 10.5px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-right:2px; }
+.copchoice { border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:1px 10px; font:inherit; font-size:12px; color:var(--ink-2); cursor:pointer; }
+.copchoice[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); font-weight:600; }
+.coplayout .copm { color:var(--ink-3); }
+.copsuggest { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.copstartchat { margin-top:clamp(24px, 12vh, 110px); }
+.copBbtn { display:inline-flex; align-items:center; gap:6px; margin-right:8px; border:1px solid var(--gold); background:var(--surface); color:var(--gold-deep, var(--gold)); border-radius:16px; padding:4px 12px; font:600 12.5px/1.2 var(--sans); cursor:pointer; }
+.copBbtn:hover { border-color:var(--gold-deep, var(--gold)); }
+.copBbtn[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); }
+body.copB-open #mainwrap { margin-right:560px; }
+#copPanel { position:fixed; right:0; bottom:0; width:550px; z-index:40; display:flex; flex-direction:column; background:var(--surface); border-left:1px solid var(--line); box-shadow:-6px 0 18px rgba(16,24,40,.08); }
+#copPanel .copPhead { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+#copPanel .copPhead small { display:block; color:var(--ink-3); font-size:12px; }
+#copPanel .copPseg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-left:auto; }
+#copPanel .copPseg button { border:0; background:var(--surface); padding:3px 10px; font:inherit; font-size:12px; color:var(--ink-2); cursor:pointer; }
+#copPanel .copPseg button[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); font-weight:600; }
+#copPanel .copPx { margin-left:auto; border:0; background:none; font-size:20px; line-height:1; color:var(--ink-3); cursor:pointer; }
+#copPanel .copPseg + .copPx { margin-left:4px; }
+#copPanel .copPbody { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; padding:8px; }
+#copPanel .copstrip:empty { display:none; }
+#copPanel .coppane { height:auto !important; flex:1 1 auto; min-height:0; }
+#copPanel .copnone { padding:16px; color:var(--ink-2); }

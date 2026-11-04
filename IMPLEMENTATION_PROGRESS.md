@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-04 — Three layouts to compare live (§746).** A switch above the Copilot: the one window (§745, the default), A — one chat with suggestions that opens the work when it is asked for — and B — ✦ Copilot beside Edit on the Strategy tab, opening the Copilot in a panel on the part in view, the plan narrowing beside it. Same workflows in all three; chosen per browser.
+
 **2026-11-04 — The Copilot in one window; Tactical Plans and Pillars/Directions (§745).** No area tabs: the method is a strip above the pane saying where the place stands and which step is next; one rail holds every area's chats and deliverables, tagged, with chips to narrow it; one start screen with the focus area's cards and the others folded beneath. Execution is called Tactical Plans and Directions Pillars/Directions; old versions go on as the same deliverables. Mockup `design-mockups/copilot-layout/2026-11-04_one-window.html`.
 
 **2026-11-04 — A free chat whose line drops watches for its answer (§744).** Islam's chat stuck after ERR_NETWORK_CHANGED: the server had the message and went on answering, but the page read the chat once, too early. Now it says the connection dropped, watches for up to three minutes, and draws the answer when it lands; the text goes back in the box only if the message never arrived.

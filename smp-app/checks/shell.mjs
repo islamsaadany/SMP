@@ -3082,6 +3082,85 @@ await section("3o · the Copilot in one window: the strip, one rail of every are
   }
 });
 
+await section("3p · three layouts to compare live: one window, A one chat, B on the plan (§746)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/layouts-" + n + ".png" }); };
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    await page.waitForSelector("[data-cop-layoutbar]", { timeout: 15000 });
+    const sw = await page.evaluate(() => ({ btns: Array.from(document.querySelectorAll("[data-cop-layout]")).map((b) => [b.getAttribute("data-cop-layout"), b.getAttribute("aria-pressed")]), strip: document.querySelectorAll("[data-cop-strip]").length }));
+    check(sw.btns.length === 3 && sw.btns[0][1] === "true" && sw.strip >= 5, "§746 the Copilot offers three layouts to compare; the one window is the default, its strip drawn", JSON.stringify(sw));
+    /* A — one chat */
+    await page.click('[data-cop-layout="chat"]');
+    await page.waitForSelector("[data-cop-suggestions]", { timeout: 10000 });
+    const a = await page.evaluate(() => ({ strip: document.querySelectorAll("[data-cop-strip]").length, chips: document.querySelectorAll("[data-cop-chip]").length, sug: Array.from(document.querySelectorAll("[data-cop-suggest]")).map((b) => b.textContent), cards: document.querySelectorAll(".copstart > .copstartcards .coppcard").length, stored: localStorage.getItem("smp.copilot.layout") }));
+    await shot("a-start");
+    check(a.strip === 0 && a.chips === 0 && a.cards === 0 && a.sug.length >= 4 && a.stored === "chat", "§746 A: no strip, no chips, no area cards — one box and suggestions read off where the place stands", JSON.stringify(a));
+    /* said: "let's do the SWOT" opens the SWOT's work */
+    await page.fill("[data-cop-starttext]", "Let's do the SWOT");
+    await page.press("[data-cop-starttext]", "Enter");
+    await page.waitForFunction(() => CURSEC.copilot === "analysis" && !!document.querySelector(".copsw-grid, [data-cop-sw-start], [data-cop-sw-method], .copswpane, .copswchat"), null, { timeout: 15000 }).catch(() => {});
+    const a2 = await page.evaluate(() => ({ sec: CURSEC.copilot, sw: !!document.querySelector(".copswchat, .copswpane, [data-cop-sw-start]") }));
+    const swRow = (await asTenant(tenantId, (c) => c.query("select section, extra ? 'swot' as swot from copilot_chats order by created_at desc limit 1"))).rows[0];
+    await shot("a-swot");
+    check(a2.sec === "analysis" && a2.sw && swRow && swRow.section === "analysis" && swRow.swot === true, "§746 A: saying “let's do the SWOT” opens the SWOT's own work, not a free chat", JSON.stringify({ a2, swRow }));
+    /* a question about an area is a conversation in that area */
+    await page.locator("[data-cop-home]:visible").first().click();
+    await page.waitForSelector("[data-cop-suggestions]", { timeout: 10000 });
+    await page.fill("[data-cop-starttext]", "Which of our pillars matters most next year?");
+    await page.press("[data-cop-starttext]", "Enter");
+    await page.waitForSelector("[data-cop-text]", { timeout: 15000 }).catch(() => {});
+    const fr = (await asTenant(tenantId, (c) => c.query("select section, extra->>'free' as free from copilot_chats order by created_at desc limit 1"))).rows[0];
+    check(fr && fr.section === "directions" && fr.free === "true", "§746 A: a question about an area is a conversation kept in that area", JSON.stringify(fr));
+    /* B — on the plan */
+    await page.click('[data-cop-layout="plan"]');
+    await page.waitForSelector("[data-cop-suggestions]", { timeout: 10000 }).catch(() => {});
+    await open("/raya-trade/strategy/mobile/strategy/swot");
+    await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});
+    const bb = await page.evaluate(() => { const b = document.querySelector("[data-cop-panelbtn]"); return b ? { t: b.textContent, inRow: !!b.closest("#secrow-in"), panel: !!document.getElementById("copPanel") } : null; });
+    check(!!bb && /Copilot/.test(bb.t) && bb.inRow && !bb.panel, "§746 B: the Strategy tab carries ✦ Copilot beside Edit, the panel shut", JSON.stringify(bb));
+    await page.click("[data-cop-panelbtn]");
+    await page.waitForSelector("#copPanel [data-cop-pane]", { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(800);
+    const bp = await page.evaluate(() => { const p = document.getElementById("copPanel"), m = document.getElementById("mainwrap"); return p ? { sec: CURSEC.copilot, start: !!p.querySelector("[data-cop-startscreen]"), part: (p.querySelector(".copPhead small") || {}).textContent || "",
+      beside: m ? m.getBoundingClientRect().right <= p.getBoundingClientRect().left + 2 : false, swot: !!document.querySelector("#mainwrap .swotgrid, #mainwrap [data-swot], #mainwrap") } : null; });
+    await shot("b-swot-open");
+    check(!!bp && bp.sec === "analysis" && bp.start && /SWOT/.test(bp.part) && bp.beside, "§746 B: pressed on the SWOT, the Copilot opens in a panel beside it, on the SWOT, and the page narrows rather than hides under it", JSON.stringify(bp));
+    /* a chat opened in the panel works there, the page beside it */
+    if (await page.$("#copPanel [data-cop-unfinished] [data-cop-chat]")) {
+      await page.click("#copPanel [data-cop-unfinished] [data-cop-chat]");
+      await page.waitForSelector("#copPanel .copswchat, #copPanel [data-cop-msgs]", { timeout: 15000 }).catch(() => {});
+      const bc = await page.evaluate(() => ({ chat: !!document.querySelector("#copPanel .copswchat, #copPanel [data-cop-msgs]"), strat: CURSEC.strategy, sub: currentSub, swotOnPage: /Strengths|STRENGTHS/i.test((document.getElementById("mainwrap") || {}).textContent || "") }));
+      await shot("b-swot-chat");
+      check(bc.chat && bc.strat === "swot" && bc.sub === "strategy" && bc.swotOnPage, "§746 B: the SWOT chat opens inside the panel, the SWOT still on the page beside it", JSON.stringify(bc));
+    }
+    /* the panel follows the part: Plan, and its switch to Tactical Plans */
+    await page.click('[data-sub2="plan"]');
+    await page.waitForFunction(() => CURSEC.copilot === "directions" && !!document.querySelector("#copPanel [data-cop-pane]"), null, { timeout: 10000 }).catch(() => {});
+    const bf = await page.evaluate(() => ({ sec: CURSEC.copilot, seg: Array.from(document.querySelectorAll("#copPanel [data-cop-panelarea]")).map((b) => b.textContent) }));
+    check(bf.sec === "directions" && bf.seg.join("|") === "Pillars/Directions|Tactical Plans", "§746 B: moved to Plan, the panel follows, on Pillars/Directions, with Tactical Plans one press away", JSON.stringify(bf));
+    await page.click('#copPanel [data-cop-panelarea="execution"]');
+    await page.waitForFunction(() => CURSEC.copilot === "execution", null, { timeout: 8000 }).catch(() => {});
+    const be = await page.evaluate(() => ({ sec: CURSEC.copilot, card: (document.querySelector("#copPanel .copstart [data-cop-newchat]") || {}).textContent || "" }));
+    await shot("b-plan-tactical");
+    check(be.sec === "execution" && /Build from the Directions/.test(be.card), "§746 B: …and its Tactical Plans start screen, in the panel", JSON.stringify(be));
+    await page.click("[data-cop-panelclose]"); await page.waitForTimeout(300);
+    check(!(await page.$("#copPanel")) && !(await page.evaluate(() => document.body.classList.contains("copB-open"))), "§746 B: × closes the panel and the page takes its width back");
+    await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.layout"); } catch (e) {} });
+    check(!errs.length, "no page errors", errs.join(" | "));
+  } finally {
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, keep);
+    try { await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.layout"); } catch (e) {} }); } catch (e) {}
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
 await section("3n · the Advisory chat: one question at a time, counted, proceed, the brief, the save (§496)", async () => {
   const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/adv-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off mockup

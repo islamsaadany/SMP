@@ -12,6 +12,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **2026-11-03 — Steps inside a task (§745).** A Steps tab in the opened task, the count on the row (Tracker, My tasks, Home), the steps in the weekly check; first tick → In progress; all ticked asks Done. Migration 037. Tracker 388/0; shell 563 ok / main's 11.
 
+**2026-11-04 — A free chat whose line drops watches for its answer (§744).** Islam's chat stuck after ERR_NETWORK_CHANGED: the server had the message and went on answering, but the page read the chat once, too early. Now it says the connection dropped, watches for up to three minutes, and draws the answer when it lands; the text goes back in the box only if the message never arrived.
+**2026-11-04 — Viewing as somebody opens where their own sign-in would (§743), merged to `main` on Islam's word.** A reader viewed as — Aliaa at El Abd — now lands in the reading window, as their own sign-in does; anybody who can change something lands on the workbench.
+
 **2026-11-03 — Another client opens on the module in view (§742).** The client menu carries the module; the door sends a client without it to Strategy. Tracker 379/0.
 
 **2026-11-03 — The cause found: the page is zoomed to 80% on a computer; the meeting is now one screen tall by layout (§741).** --winh, not 100vh; nothing measured. Tracker 378/0 (checks rewritten, seen red with 100dvh).

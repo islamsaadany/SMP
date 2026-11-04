@@ -1420,11 +1420,20 @@
   function switchViewer(key, after){
     var go = function(){
       leaveModes();
+      /* §743: VIEWING AS SOMEBODY OPENS WHERE THEIR SIGN-IN WOULD (§237's
+         rule, carried to the reading window). Islam: *"aliaa is an employee
+         and is landing on the workbench not the read as agreed"* — the
+         window was offered at sign-in only, so a view-as always landed on
+         the workbench. The window the last person had open closes first; a
+         reader's seat then opens it again, anybody else stays on the
+         workbench. */
+      try { if (READING.isOpen()) READING.close(); } catch (e) {}
       VIEWER = key;
       var sel = document.getElementById("asWho");
       if (sel) sel.value = VIEWER;
       current = null; currentSub = null;
       paint(); window.scrollTo(0, 0);
+      try { READING.offer(viewer(), true); } catch (e) {}
       if (after) after();
     };
     if (typeof SYNC === "undefined" || !SYNC.saveNow) return go();

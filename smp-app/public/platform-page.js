@@ -2653,7 +2653,7 @@
     }
     var bits = [];
     if (TSORT.by !== "client") { var cl = el("span", "mwcl", r.clientName); bits.push(cl); }
-    /* §743: the task's steps, as on the Tracker's row — a thin bar and "2 of 5 steps" */
+    /* §745: the task's steps, as on the Tracker's row — a thin bar and "2 of 5 steps" */
     if (r.steps && r.steps.n) {
       var sc = el("span", "stc");
       sc.title = r.steps.d + " of " + r.steps.n + " steps ticked";
@@ -2790,7 +2790,7 @@
      Add beside it and the entries on a timeline; Description — text, written
      by clicking into it and saved on leaving; History; and Open in the
      client's Tracker at the end of the tabs, the press this row used to be. */
-  /* ── STEPS IN MY TASKS' OPENED TASK (§745) ────────────────────────
+  /* ── STEPS IN MY TASKS' OPENED TASK (§747) ────────────────────────
      Islam, 2026-11-04: "simple but consistent" — the Tracker's opened task,
      line for line: a task without steps shows one small "+ Add steps" (grey
      words, a blue +); pressed, the Steps title and the add line come out
@@ -2816,7 +2816,7 @@
     }
   }
   function mwSteps(r, d, key) {
-    /* §746: Home is for quick updates and adding tasks — no steps in its
+    /* §748: Home is for quick updates and adding tasks — no steps in its
        opened task (the row keeps its count); with steps the add line stays
        open under them, as in the Tracker */
     if (TAB === "home") return null;
@@ -2948,7 +2948,7 @@
   }
   function mwDetail(r) {
     var key = mwKey(r), d = MW.detail[key], box = el("div", "mwdet");
-    /* §745 after a write the task is read again behind what was shown, so the
+    /* §747 after a write the task is read again behind what was shown, so the
        opened task does not blink to Reading… on every tick */
     if (!d && MW.prev[key] && !MW.prev[key].error) { mwLoad(r); d = MW.prev[key]; }
     if (!d) { box.appendChild(el("p", "muted", "Reading…")); mwLoad(r); return box; }
@@ -3206,7 +3206,7 @@
       };
       search.addEventListener("input", find);
       card.appendChild(hd);
-      /* §744 the add line, on one's own list only */
+      /* §746 the add line, on one's own list only */
       if (!j.who || j.who.self) card.appendChild(mwAddLine(said));
 
       /* A PRESS IS ANSWERED BEFORE THE ROW CHANGES (§124): the row holds
@@ -3563,7 +3563,7 @@
     host.appendChild(card);
     return { card: card, head: hd, body: body, count: function (n) { cnt.textContent = String(n); cnt.hidden = false; } };
   }
-  /* ── ADD A TASK (§744) ─────────────────────────────────────────────
+  /* ── ADD A TASK (§746) ─────────────────────────────────────────────
      Islam, 2026-11-03: "my tasks and home should have the ability to add a
      new task … my tasks can add it as a line but home … a pop up". What each
      client offers (open topics, office team) and the weeks are read once

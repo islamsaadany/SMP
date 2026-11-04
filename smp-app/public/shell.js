@@ -56972,12 +56972,14 @@ var READING = (function () {
     }
     return true;
   }
-  function offer(person) {
+  function offer(person, viewAs) {
     /* the client's own switch first (Structure step, SMPRules.readersOpen) */
     if (!SMPRules.readersOpen(GROUP)) return false;
     if (!readerSeat(person)) return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
-    try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {}
+    /* a deep address is the sign-in's own page; Viewing as somebody is a
+       sign-in as them (§237), so it lands where theirs would (§743) */
+    if (!viewAs) { try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {} }
     /* §692: on the first subject this seat reaches — the company where it
        reaches the company, its one unit or function where that is all */
     return !!open(null);
@@ -78917,11 +78919,20 @@ var SYNC = (function () {
   function switchViewer(key, after){
     var go = function(){
       leaveModes();
+      /* §743: VIEWING AS SOMEBODY OPENS WHERE THEIR SIGN-IN WOULD (§237's
+         rule, carried to the reading window). Islam: *"aliaa is an employee
+         and is landing on the workbench not the read as agreed"* — the
+         window was offered at sign-in only, so a view-as always landed on
+         the workbench. The window the last person had open closes first; a
+         reader's seat then opens it again, anybody else stays on the
+         workbench. */
+      try { if (READING.isOpen()) READING.close(); } catch (e) {}
       VIEWER = key;
       var sel = document.getElementById("asWho");
       if (sel) sel.value = VIEWER;
       current = null; currentSub = null;
       paint(); window.scrollTo(0, 0);
+      try { READING.offer(viewer(), true); } catch (e) {}
       if (after) after();
     };
     if (typeof SYNC === "undefined" || !SYNC.saveNow) return go();

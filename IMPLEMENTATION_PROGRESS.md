@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-04 — Viewing as somebody opens where their own sign-in would (§743), on the branch.** A reader viewed as — Aliaa at El Abd — now lands in the reading window, as their own sign-in does; anybody who can change something lands on the workbench.
+
 **2026-11-01 — Roles & access is a ladder (§704), merged to `main` on Islam's word.** What a role holds it writes, by rule; one setting per role says how far up it reads — own piece · own unit or function · own division · the top, in the client's own levels — and one person can be moved a level. Stored as three rows per role in the existing access map, no migration; the screen and the server ask the same rule. Measured on all 33 worked-example seats: holders no longer read the group's and divisions' pages, Division heads no longer read the functions, the eye sets how far each role reads and the pen is a switch on its own level, shipped as today (holders of a place write, piece owners and contributors read until turned on); nobody loses a pen.
 **2026-11-01 — Jump to reaches the console's sections (§703), merged to `main` 2026-11-01 on Islam's word.** Islam: *"the jump should take me as well to the other modules like my tasks, the track record the frameworks or clients"*. For Forefront's people, Jump to lists Home, My tasks, Clients, Track Record, Frameworks, Copilot and History, plus Consultants and Who sees what for those allowed to open them. Checked: `checks/jump.mjs` green (23 ok).
 

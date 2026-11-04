@@ -642,12 +642,14 @@ var READING = (function () {
     }
     return true;
   }
-  function offer(person) {
+  function offer(person, viewAs) {
     /* the client's own switch first (Structure step, SMPRules.readersOpen) */
     if (!SMPRules.readersOpen(GROUP)) return false;
     if (!readerSeat(person)) return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
-    try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {}
+    /* a deep address is the sign-in's own page; Viewing as somebody is a
+       sign-in as them (§237), so it lands where theirs would (§743) */
+    if (!viewAs) { try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {} }
     /* §692: on the first subject this seat reaches — the company where it
        reaches the company, its one unit or function where that is all */
     return !!open(null);

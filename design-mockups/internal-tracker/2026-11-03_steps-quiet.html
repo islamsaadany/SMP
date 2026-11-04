@@ -100,6 +100,7 @@ button{cursor:pointer}
       <button type="button" data-v="tracker" aria-pressed="true">Tracker · opened task</button>
       <button type="button" data-v="check" aria-pressed="false">Weekly check</button>
       <button type="button" data-v="mytasks" aria-pressed="false">My tasks · opened task</button>
+      <button type="button" data-v="home" aria-pressed="false">Home · opened task</button>
     </div>
     <div class="vs" id="mode" role="group" aria-label="Example">
       <button type="button" data-m="none" aria-pressed="true">Task without steps</button>
@@ -115,9 +116,10 @@ const S={v:"tracker",steps:[],add:{before:false,after:false},box:{before:"",afte
 const SOME=[{t:"Draft the function list",d:true},{t:"Review with Mohamed",d:false,w:"This week"},{t:"Send to the client",d:false}];
 const esc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const NOTES={
- tracker:'<p><b>Tracker, the opened task.</b> Before: "Steps optional", a hint line, an open add line and a "This week" label on every task. After: one small <b>+ Add steps</b>, grey words with a blue + (the words turn blue on hover). Press it: the <b>Steps</b> title, the add line (cursor in it) and the "This week" label appear. Enter adds and keeps the line open; Escape, or leaving it empty, closes it.</p><p>With steps: the title and its count, the list, then <b>+ Add a step</b>. Each step: tick, press the words to rename, a week chip, and ↑ ↓ × fading in on hover.</p>',
- check:'<p><b>Weekly check.</b> Ticks only. A task without steps shows nothing about them. With steps, the list to tick, with no add line, no Edit steps, no rename or week. The owner plans steps in the Tracker or in My tasks. A step that comes up in the meeting goes into the week\'s note.</p><p>A tick still writes "Done: &lt;step&gt;" into this week\'s box.</p>',
- mytasks:'<p><b>My tasks, the opened task.</b> Before: no steps here at all. After: the Tracker\'s opened task, line for line: <b>+ Add steps</b> when there are none; with steps, tick, rename, a week, ↑ ↓ ×, and <b>+ Add a step</b>. A tick writes "Done: &lt;step&gt;" into the box, saved only with it.</p><p>So there are two kinds of place. The Tracker and My tasks are where steps are planned. The weekly check is where they are ticked. The rows are unchanged: nothing without steps, "1 of 3 steps" with them.</p>'};
+ tracker:'<p><b>Tracker, the opened task: where steps are planned.</b> Without steps: one small <b>+ Add steps</b>, grey words with a blue +. Press it: the Steps title, the add line (cursor in it) and the "This week" label appear; Escape, or leaving it empty, closes it again.</p><p>With steps: as built, the title and count, the list (tick, press the words to rename, a week chip, ↑ ↓ × on hover) and the <b>Add a step and press Enter</b> line always open under it.</p>',
+ check:'<p><b>Weekly check: for checking together.</b> Ticks only. A task without steps shows nothing about them; with steps, the list to tick. A tick writes "Done: &lt;step&gt;" into this week\'s box.</p>',
+ mytasks:'<p><b>My tasks, the opened task: for checking your own work.</b> The Tracker\'s look (title, count, list, each step\'s week) with ticks only: no add, no rename, no week change, no order. A task without steps shows nothing about them. A tick writes "Done: &lt;step&gt;" into the box. To change steps, "View in … Tracker →" beside the tabs opens the task where they are planned.</p>',
+ home:'<p><b>Home, the opened task: for quick updates.</b> Before (on the branch today) Home\'s opened task carries My tasks\' steps. After: no steps here at all, only this week\'s box and the timeline. The row still says "1 of 3 steps", and + New task stays in the card\'s head.</p><p>So: the <b>Tracker</b> plans; <b>My tasks</b> and the <b>weekly check</b> tick; <b>Home</b> updates and adds tasks.</p>'};
 const M=(on,html)=>on&&S.marks?'<div class="mark">'+html+'</div>':html;
 function cnt(){return [S.steps.filter(x=>x.d).length,S.steps.length]}
 function lis(compact,k){return S.steps.map((st,i)=>'<li class="sline'+(st.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" data-k="'+k+'" aria-pressed="'+st.d+'" aria-label="Tick: '+esc(st.t)+'">'+(st.d?'✓':'')+'</button><span class="snm">'+esc(st.t)+'</span>'+(!compact?(st.w?'<span class="chip">'+esc(st.w)+'</span>':'<span class="chip">+ week</span>')+'<span class="tools"><button type="button" aria-label="Move up">↑</button><button type="button" aria-label="Move down">↓</button><button type="button" aria-label="Remove">×</button></span>':'')+'</li>').join('')}
@@ -135,17 +137,26 @@ function openedBefore(){const [d,n]=cnt();
    consistent"). No steps: a small "+ Add steps". Pressed, or with steps: the
    Steps title, the list, and "+ Add a step" under it; the review places add
    "Edit steps ›" to open the task in the Tracker. */
-/* AS BUILT (§745): the planning places (Tracker, My tasks) — grey words with
-   a blue +; the weekly check ticks only and is silent without steps */
+/* PROPOSED (Islam, 2026-11-04): planning in the Tracker; My tasks and the
+   weekly check only tick; Home has no steps. The Tracker: "+ Add steps"
+   (grey words, blue +) for a task without; with steps, the add line stays
+   open under the list. */
+function lisView(k){return S.steps.map((st,i)=>'<li class="sline'+(st.d?' done':'')+'"><button type="button" class="scb" data-tick="'+i+'" data-k="'+k+'" aria-pressed="'+st.d+'" aria-label="Tick: '+esc(st.t)+'">'+(st.d?'✓':'')+'</button><span class="snm">'+esc(st.t)+'</span>'+(st.w?'<span class="chip">'+esc(st.w)+'</span>':'')+'</li>').join('')}
 function stepsAfter(place){const [d,n]=cnt(),open=S.add.after;
-  if(place==='check')return n?'<div class="ssh">Steps <span class="c">'+d+' of '+n+'</span></div><ul class="stl">'+lis(true,'after')+'</ul>':'';
+  const title='<div class="ssh">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+'</div>';
+  if(place==='home')return '';
+  if(place==='check')return n?title+'<ul class="stl">'+lis(true,'after')+'</ul>':'';
+  if(place==='mytasks')return n?title+'<ul class="stl">'+lisView('after')+'</ul>':'';
   if(!n&&!open)return '<div class="links"><button type="button" class="q" data-add="after"><b>+</b> Add steps</button></div>';
-  return '<div class="ssh">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+'</div>'+
-    (n?'<ul class="stl">'+lis(false,'after')+'</ul>':'')+(open?addLine('after'):'')+
-    (open?'':'<div class="links"><button type="button" class="q" data-add="after"><b>+</b> Add a step</button></div>');
+  return title+(n?'<ul class="stl">'+lis(false,'after')+'</ul>':'')+addLine('after');
 }
-function openedAfter(place){const [d,n]=cnt(),shown=n||S.add.after;
-  return '<div class="open">'+tabs+M(true,stepsAfter(place)+(shown?'<div class="psh">This week</div>':''))+'<div style="height:6px"></div>'+box('after')+TL+'</div>'}
+function openedAfter(place){const x=stepsAfter(place),shown=x&&(cnt()[1]||S.add.after);
+  return '<div class="open">'+tabs+(x?M(true,x+(shown?'<div class="psh">This week</div>':'')):'')+'<div style="height:6px"></div>'+box('after')+TL+'</div>'}
+/* what the branch has for Home today: My tasks' planning view (§745) */
+function homeBefore(){const [d,n]=cnt(),open=S.add.before;
+  const x=(!n&&!open)?'<div class="links"><button type="button" class="q" data-add="before"><b>+</b> Add steps</button></div>':
+    '<div class="ssh">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+'</div>'+(n?'<ul class="stl">'+lis(false,'before')+'</ul>':'')+(open?addLine('before'):'<div class="links"><button type="button" class="q" data-add="before"><b>+</b> Add a step</button></div>');
+  return '<div class="open">'+tabs+M(true,x)+'<div style="height:6px"></div>'+box('before')+TL+'</div>'}
 function openedMyBefore(){return '<div class="open">'+tabs+box('before')+TL+'</div>'}
 function card(h,inner){return '<div class="card"><div class="hd"><h2>'+h+'</h2></div>'+inner+'</div>'}
 function mbox(k,steps){return '<div class="meet"><div class="mbox"><div class="mtop"><span class="t">Function list for the new structure</span><span class="wk">This week</span></div>'+steps+box(k)+TL+'</div></div>'}
@@ -154,7 +165,8 @@ const V={
  check:{
   before:()=>{const [d,n]=cnt();return card('Weekly check',mbox('before',M(true,(n?'<div class="ssh">Steps <span class="c">'+d+' of '+n+'</span></div><ul class="stl">'+lis(true,'before')+'</ul>':'')+(S.add.before?addLine('before'):'')+'<div class="links"><button type="button" data-add="before">'+(n?'+ Add a step':'+ Add steps')+'</button>'+(n?'<a href="#" data-edit>Edit steps ›</a>':'')+'</div>')))},
   after:()=>{const x=stepsAfter('check');return card('Weekly check',mbox('after',x?M(true,x):''))}},
- mytasks:{before:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedMyBefore()),after:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedAfter('mytasks'))}
+ mytasks:{before:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedMyBefore()),after:()=>card('Open tasks',row('<span>Raya Trade</span>')+openedAfter('mytasks'))},
+ home:{before:()=>card('Your tasks',row('<span>Raya Trade</span>')+homeBefore()),after:()=>card('Your tasks',row('<span>Raya Trade</span>')+openedAfter('home'))}
 };
 function draw(){
   document.getElementById('note').innerHTML=NOTES[S.v];
@@ -177,9 +189,9 @@ document.addEventListener('keydown',e=>{
   if(!e.target.classList||!e.target.classList.contains('snew'))return;
   const k=e.target.dataset.k;
   if(e.key==='Enter'&&e.target.value.trim()){S.steps.push({t:e.target.value.trim(),d:false});S.focus=k;draw()}
-  else if(e.key==='Escape'&&k==='after'){S.add.after=false;draw()}
+  else if(e.key==='Escape'&&k==='after'&&!S.steps.length){S.add.after=false;draw()}
 });
-document.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('snew')&&e.target.dataset.k==='after'&&!e.target.value.trim()){setTimeout(()=>{const a=document.activeElement;if(a&&a.classList&&a.classList.contains('snew')&&a.dataset.k==='after')return;if(S.add.after){S.add.after=false;draw()}},150)}});
+document.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('snew')&&e.target.dataset.k==='after'&&!e.target.value.trim()){setTimeout(()=>{const a=document.activeElement;if(a&&a.classList&&a.classList.contains('snew')&&a.dataset.k==='after')return;if(S.add.after&&!S.steps.length){S.add.after=false;draw()}},150)}});
 document.addEventListener('input',e=>{if(e.target.classList.contains('pbox'))S.box[e.target.dataset.k]=e.target.value});
 draw();
 </script>

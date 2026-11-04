@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-04 — My tasks' add line at the foot of the list (§749).** Under the last group instead of between the card's head and its rows. Shell section 4 112/0.
+
 **2026-11-04 — Steps by place (§748), merged to `main` on Islam's word with §745–§747** (renumbered from §743–§746 at the merge: main took §743 and §744; migration 037 applies on deploy). The Tracker and My tasks plan steps in one view (the add line stays open once a task has steps); the weekly check ticks; Home has no steps in its opened task. Tracker 393/0; shell section 4 111/0.
 
 **2026-11-04 — Quiet steps, one pattern (§747).** A task without steps shows only "+ Add steps" (grey words, blue +) in the Tracker's and My tasks' opened task; pressed, the title and add line come out. My tasks plans steps like the Tracker (workWrite step ops). The weekly check only ticks. Tracker 393/0; shell section 4 110/0.

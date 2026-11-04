@@ -3164,8 +3164,8 @@
       }
       var noneOpen = (j.who && !j.who.self ? j.who.name + " has" : "You have") + " no open actions in any client's Tracker.";
       if (!rows.length && !cases.length && !doneRows.length) {
-        if (!j.who || j.who.self) body.appendChild(mwAddLine(said));
         body.appendChild(el("p", "muted", noneOpen));
+        if (!j.who || j.who.self) body.appendChild(mwAddLine(said));
         mwAddFocus();
         return;
       }
@@ -3206,8 +3206,6 @@
       };
       search.addEventListener("input", find);
       card.appendChild(hd);
-      /* §746 the add line, on one's own list only */
-      if (!j.who || j.who.self) card.appendChild(mwAddLine(said));
 
       /* A PRESS IS ANSWERED BEFORE THE ROW CHANGES (§124): the row holds
          (aria-busy) until the server's write lands, and is then drawn again
@@ -3387,6 +3385,11 @@
       }));
       if (pick) hd.appendChild(pick);
       card.appendChild(list);
+      /* §746 the add line, on one's own list only — under the tasks, never
+         between the card's head and its rows (§749, Islam: "add task should
+         come at the bottom, it's very strange to be splitting the title part
+         from the tasks itself") */
+      if (!j.who || j.who.self) card.appendChild(mwAddLine(said));
       body.appendChild(card);
       mwAddFocus();
       draw();

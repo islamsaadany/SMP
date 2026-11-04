@@ -71241,3 +71241,11 @@ Now a send that fails on the line, or that the page stops waiting for (§472), *
 
 
 **§745–§748 merged to main** (Islam: "merge"), renumbered from §743–§746 (main took §743 and §744). On the merged tree: tracker 393/0; shell 572 ok / 10 failed, all main's own (Copilot box and rails, §94.8, §475, §490.2, the Copilot settings row). Production release 7fc4764a4600e14b confirmed live.
+
+## §749 — My tasks' add line at the foot of the list (2026-11-04)
+
+**Asked** (Islam, with a screenshot of My tasks): "I believe add task should come at the bottom it's very strange to be splitting the title part from the tasks itself".
+
+- The "+ Add a task and press Enter" line moves from under the card's head to the **foot of the list**, under the last group, the last thing in the card. Drawn as a quiet dashed box the groups' width and corners (solid while you type in it). With no open tasks it comes after the "no open actions" line. The chips (client, week, topic, owner) and the rest work as before (§746).
+
+**Checked**: `checks/shell.mjs` section 4 **112 ok, 0 failed** — new: the add line is the card's last element and sits below the last group. Shell cache `smp-shell-v7.67-add-at-foot`.

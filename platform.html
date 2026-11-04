@@ -1725,8 +1725,8 @@
   /* §746 ADD A TASK: My tasks' line (type and Enter; its client, week, topic
      and owner come out on focus) and Home's + New task pop-up — design-mockups/
      internal-tracker/2026-11-03_steps-final.html */
-  .mwadd{ display:flex; align-items:center; gap:10px; margin:10px 14px 12px; border:1px solid var(--line-soft); border-radius:9px; padding:0 12px; background:var(--ground) }
-  .mwadd:focus-within{ background:var(--surface); border-color:var(--line) }
+  .mwadd{ display:flex; align-items:center; gap:10px; margin:12px 0 0; border:1px dashed var(--line); border-radius:12px; padding:2px 16px; background:var(--surface) }
+  .mwadd:focus-within{ border-style:solid; border-color:var(--line) }
   .mwadd .pl{ color:var(--ink-3) }
   .mwadd input{ flex:1; min-width:0; border:0; background:none; outline:none; padding:9px 0; font-family:inherit; font-size:14.5px; color:var(--ink) }
   .mwadd .mwaddc{ display:none; gap:6px; align-items:center; flex-wrap:wrap }
@@ -5449,8 +5449,8 @@
       }
       var noneOpen = (j.who && !j.who.self ? j.who.name + " has" : "You have") + " no open actions in any client's Tracker.";
       if (!rows.length && !cases.length && !doneRows.length) {
-        if (!j.who || j.who.self) body.appendChild(mwAddLine(said));
         body.appendChild(el("p", "muted", noneOpen));
+        if (!j.who || j.who.self) body.appendChild(mwAddLine(said));
         mwAddFocus();
         return;
       }
@@ -5491,8 +5491,6 @@
       };
       search.addEventListener("input", find);
       card.appendChild(hd);
-      /* §746 the add line, on one's own list only */
-      if (!j.who || j.who.self) card.appendChild(mwAddLine(said));
 
       /* A PRESS IS ANSWERED BEFORE THE ROW CHANGES (§124): the row holds
          (aria-busy) until the server's write lands, and is then drawn again
@@ -5672,6 +5670,11 @@
       }));
       if (pick) hd.appendChild(pick);
       card.appendChild(list);
+      /* §746 the add line, on one's own list only — under the tasks, never
+         between the card's head and its rows (§749, Islam: "add task should
+         come at the bottom, it's very strange to be splitting the title part
+         from the tasks itself") */
+      if (!j.who || j.who.self) card.appendChild(mwAddLine(said));
       body.appendChild(card);
       mwAddFocus();
       draw();

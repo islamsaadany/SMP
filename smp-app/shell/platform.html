@@ -1726,8 +1726,8 @@
   /* §746 ADD A TASK: My tasks' line (type and Enter; its client, week, topic
      and owner come out on focus) and Home's + New task pop-up — design-mockups/
      internal-tracker/2026-11-03_steps-final.html */
-  .mwadd{ display:flex; align-items:center; gap:10px; margin:10px 14px 12px; border:1px solid var(--line-soft); border-radius:9px; padding:0 12px; background:var(--ground) }
-  .mwadd:focus-within{ background:var(--surface); border-color:var(--line) }
+  .mwadd{ display:flex; align-items:center; gap:10px; margin:12px 0 0; border:1px dashed var(--line); border-radius:12px; padding:2px 16px; background:var(--surface) }
+  .mwadd:focus-within{ border-style:solid; border-color:var(--line) }
   .mwadd .pl{ color:var(--ink-3) }
   .mwadd input{ flex:1; min-width:0; border:0; background:none; outline:none; padding:9px 0; font-family:inherit; font-size:14.5px; color:var(--ink) }
   .mwadd .mwaddc{ display:none; gap:6px; align-items:center; flex-wrap:wrap }

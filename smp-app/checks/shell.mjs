@@ -3711,6 +3711,12 @@ await section("4 · Forefront's own pages", async () => {
       await page.locator("#nav button", { hasText: "My tasks" }).click();
       await page.waitForSelector("[data-mwadd]", { timeout: 8000 }).catch(() => {});
       const shut744 = await page.evaluate(() => { const c = document.querySelector(".mwadd .mwaddc"); return c ? getComputedStyle(c).display : "gone"; });
+      /* §749 the add line sits under the tasks, the last thing in the card — never between its head and its rows */
+      const foot749 = await page.evaluate(() => { const card = document.querySelector(".mwlist"), add = card && card.querySelector(".mwadd"), secs = card ? card.querySelectorAll(".mwsec") : [];
+        const last = secs.length ? secs[secs.length - 1] : null;
+        return { last: !!add && card.lastElementChild === add, below: !!add && !!last && add.getBoundingClientRect().top >= last.getBoundingClientRect().bottom }; });
+      if (process.env.SMP_SHOT749) await page.screenshot({ path: process.env.SMP_SHOT749, fullPage: false });
+      check(foot749.last && foot749.below, "My tasks' add line is at the foot of the list, under the last group (\u00a7749)", JSON.stringify(foot749));
       await page.click("[data-mwadd]");
       await page.waitForSelector('.mwadd select[data-add="client"] option', { state: "attached", timeout: 5000 }).catch(() => {});
       const open744 = await page.evaluate(() => { const c = document.querySelector(".mwadd .mwaddc"); return c ? { d: getComputedStyle(c).display, n: c.querySelectorAll("select").length, wk: (c.querySelector('[data-add="week"] option:checked') || {}).textContent || "", own: (c.querySelector('[data-add="owner"] option:checked') || {}).textContent || "" } : null; });

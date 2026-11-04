@@ -276,7 +276,7 @@ var COPILOT = (function(){
     var nx = nextStep();
     var others = here().filter(function(x){ return x.k !== s; });
     var focus = '<div class="copfocus"><span class="copfocusk">' + (s === nx ? "Next step · " : "") + E(stripWord(s)) + '</span><span class="copm">' + E(areaState(s).says || "") + '</span></div>';
-    var more = '<details class="copareas"' + (MOREOPEN[place()] !== false ? ' open' : '') + ' data-cop-areas><summary>Other areas</summary><div class="coppaths copstartcards copmorecards">' +
+    var more = '<details class="copareas"' + (MOREOPEN[place()] !== false ? ' open' : '') + ' data-cop-areas><summary>Other areas</summary><div class="coppaths copareacards">' +
       others.map(function(x){ var a = areaState(x.k), c = x.k === "foundation" ? ["Build or refine the Foundation", ""] : STARTS[x.k] || [WORKFLOW_WORD[x.k] || stripWord(x.k), ""];
         return '<button type="button" class="coppcard copareacard" data-cop-area-card="' + x.k + '">' + icon(x.k === "foundation" ? PATH_CARDS[0].i : PLANMARK) + '<span class="coppt"><span class="coptag">' + E(stripWord(x.k)) + (x.k === nx ? ' · next step' : '') + '</span>' + E(c[0]) + '</span>' +
           '<span class="coppd">' + E(a.says || "") + '</span></button>'; }).join("") + '</div></details>';

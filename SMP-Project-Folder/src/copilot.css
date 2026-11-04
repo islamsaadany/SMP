@@ -1071,7 +1071,7 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copfocusk { font:700 11px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink); }
 .copareas { width:100%; }
 .copareas > summary { cursor:pointer; color:var(--ink-2); font-size:var(--fs-small, 12.5px); text-align:center; }
-.copmorecards { margin-top:8px; }
+.copareacards { grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); margin-top:8px; }
 .copareacard .coppd { color:var(--ink-3); }
 .copachip { font-size:11px; line-height:1.6; }
 .copareacard .coptag { display:block; }

@@ -1383,7 +1383,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const was4 = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
     await page.locator("[data-cop-home]:visible").first().click();
     await page.waitForSelector('.copstart [data-cop-road="plan"]', { timeout: 10000 });
-    const pc = await page.evaluate(() => { const c = document.querySelector('.copstart [data-cop-road="plan"]'); const all = Array.from(document.querySelectorAll(".copstart .coppcard"));
+    const pc = await page.evaluate(() => { const c = document.querySelector('.copstart [data-cop-road="plan"]'); const all = Array.from(document.querySelectorAll(".copstart > .copstartcards .coppcard"));
       return { first: all[0] === c, t: c.querySelector(".coppt").textContent, meta: (c.querySelector(".copmeta") || {}).textContent || "", tag: (c.querySelector(".coptag") || {}).textContent || "", n: all.length }; });
     check(pc.first && /Start from the existing plan/.test(pc.t) && /On the plan today/.test(pc.tag) && /Foundation · \d+ parts/.test(pc.meta) && pc.n === 3,
       "§653 Start from the existing plan is the start screen's first card of three, marked On the plan today, saying what it holds", JSON.stringify(pc));
@@ -1490,7 +1490,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        roads, so Start fresh goes straight to the years. */
     await page.locator("[data-cop-home]:visible").first().click();
     await page.waitForSelector(".copstart [data-cop-road]", { timeout: 10000 });
-    const roads = await page.evaluate(() => Array.from(document.querySelectorAll(".copstart .coppcard")).map((b) => ({ k: b.dataset.copRoad, rec: b.classList.contains("rec"),
+    const roads = await page.evaluate(() => Array.from(document.querySelectorAll(".copstart > .copstartcards .coppcard")).map((b) => ({ k: b.dataset.copRoad, rec: b.classList.contains("rec"),
       t: b.querySelector(".coppt").textContent, d: (b.querySelector(".coppd") || {}).textContent || "" })));
     const box0 = await page.evaluate(() => ({ box: !!document.querySelector(".copstart [data-cop-starttext]"), clip: !!document.querySelector(".copstart [data-cop-startattach]"), above: (() => { const b = document.querySelector(".copstart .copbox"), c = document.querySelector(".copstart .coppcard"); return b && c ? b.getBoundingClientRect().bottom <= c.getBoundingClientRect().top : false; })() }));
     check(roads.map((r) => r.k).join() === "plan,guided,template" && !roads.some((r) => r.rec || /Recommended/i.test(r.t)) &&
@@ -2390,7 +2390,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
        box to just ask, then the area's workflow as a card under it. */
     await page.waitForSelector(".copstart [data-cop-starttext]", { timeout: 10000 });
     const st = await page.evaluate(() => { const b = document.querySelector(".copstart .copbox"), c = document.querySelector(".copstart .coppcard");
-      return { head: (document.querySelector(".copstarth") || {}).textContent || "", cards: Array.from(document.querySelectorAll(".copstart .coppcard .coppt")).map((x) => x.textContent),
+      return { head: (document.querySelector(".copstarth") || {}).textContent || "", cards: Array.from(document.querySelectorAll(".copstart > .copstartcards .coppcard .coppt")).map((x) => x.textContent),
         wf: !!document.querySelector(".copstart [data-cop-newchat]"), above: b && c ? b.getBoundingClientRect().bottom <= c.getBoundingClientRect().top : false,
         menu: !!document.querySelector(".copnewmenu, [data-cop-newfree]"), w: b ? Math.round(parseFloat(getComputedStyle(document.querySelector(".copstart")).width)) : 0 }; });
     if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/start-screen.png" });

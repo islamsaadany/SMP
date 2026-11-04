@@ -2,222 +2,241 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
-/* Layout: the platform's place bar, then ONE Copilot window — the method strip across the top, the chats rail on the left (every area, tagged), the start screen or the open chat on the right. No area tabs. */
-:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--attn:#B45309;--attnbg:#FFF4E5;--new:#7A3E9D;--newbg:#F4ECF9;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2410;--new:#C9A0E6;--newbg:#2A1F33;color-scheme:dark}}
-:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2410;--new:#C9A0E6;--newbg:#2A1F33;color-scheme:dark}
+/* Layout: the platform's bars, then the Copilot as built in §745 — the method strip across the top, the rail of every area on the left, the start screen or the open chat (chat | work | to-do) on the right. */
+:root{--ground:#F3F5F8;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--attn:#B45309;--attnbg:#FFF4E5;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2410;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2410;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:8px}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
 .top{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
 .top h1{font-size:17px;margin:0}
 .top .hint{color:var(--ink-3);font-size:13px}
-.bar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px}
-.bar .tabs{display:flex;gap:14px}
-.bar .tabs span{color:var(--ink-2)}
-.bar .tabs b{border-bottom:2px solid var(--goldfill);padding-bottom:2px}
-.gone{font-size:12px;color:var(--ink-3)}
-.gone s{color:var(--ink-3)}
-.win{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0}
-/* the method strip */
-.strip{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch}
-.step{flex:1 1 130px;min-width:0;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--surface);text-align:left;display:flex;flex-direction:column;gap:1px}
+.navbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--nav);color:var(--navink);border-radius:8px;padding:8px 14px;font-size:13px}
+.navbar b{border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.navbar span{opacity:.85}
+.tabs{display:flex;gap:18px;align-items:center;padding:4px 6px;font-size:13.5px;color:var(--ink-2)}
+.tabs .rep{background:#A6512A;color:#fff;border-radius:6px;padding:3px 10px}
+.tabs b{color:var(--ink);border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+/* the strip */
+.strip{display:flex;gap:6px;flex-wrap:wrap}
+.step{flex:1 1 128px;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.step:hover{border-color:var(--gold)}
 .step .k{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
 .step b{font-size:13px}
-.step small{font-size:11.5px;color:var(--ink-3)}
-.step.on small{color:var(--good)}
-.step.on{border-left:3px solid var(--good)}
-.step.wip{border-left:3px solid var(--attn)}
-.step.wip small{color:var(--attn)}
-.step.next{box-shadow:0 0 0 2px var(--nav)}
-.step.next .k{color:var(--nav)}
-:root[data-theme="dark"] .step.next .k{color:var(--gold)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .step.next .k{color:var(--gold)}}
+.step small{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step.on{border-left:3px solid var(--good)}.step.on small{color:var(--good)}
+.step.wip{border-left:3px solid var(--attn)}.step.wip small{color:var(--attn)}
+.step.next{box-shadow:0 0 0 2px var(--nav)}.step.next .k{color:var(--ink)}
 .step.side{flex:0 1 150px;border-style:dashed}
 .step[aria-current="true"]{background:var(--surface-2)}
-.body{display:grid;grid-template-columns:230px minmax(0,1fr);gap:8px;min-height:520px}
+.body{display:grid;grid-template-columns:170px minmax(0,1fr);gap:8px;min-height:560px}
 @media (max-width:860px){.body{grid-template-columns:minmax(0,1fr)}.rail{order:2}}
-.rail{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.rail .h{display:flex;align-items:center;gap:6px;font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
-.rail .h .sp{flex:1}
-.newc{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font:600 12px/1.5 var(--sans);text-transform:none;letter-spacing:0;color:var(--ink)}
-.chips{display:flex;flex-wrap:wrap;gap:4px}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:0 8px;font-size:11.5px;color:var(--ink-2)}
+.rail{display:flex;flex-direction:column;gap:8px;min-width:0}
+.box1{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;min-width:0}
+.rh{display:flex;align-items:center;gap:6px;padding:8px;font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.rh .sp{flex:1}
+.newc{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:1px 7px;font:600 12px/1.5 var(--sans);text-transform:none;letter-spacing:0;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;padding:0 8px 6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:0 7px;font-size:11px;line-height:1.6;color:var(--ink-2)}
 .chip[aria-pressed="true"]{background:var(--nav);color:var(--navink);border-color:var(--nav)}
-.row{background:var(--surface);border:1px solid transparent;border-left:3px solid var(--line);padding:6px 8px;border-radius:4px;text-align:left;display:flex;flex-direction:column;gap:1px;width:100%}
-.row:hover{border-color:var(--line)}
-.row[aria-current="true"]{border-left-color:var(--goldfill);background:var(--surface)}
-.row .t{font-weight:600;font-size:12.5px}
+.row{background:var(--surface);border:0;border-top:1px solid var(--line);border-left:3px solid transparent;padding:6px 8px;text-align:left;display:flex;flex-direction:column;gap:1px;width:100%}
+.row[aria-current="true"]{border-left-color:var(--goldfill)}
+.atag{align-self:flex-start;font:700 9.5px/1.6 var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:0 5px;border-radius:4px;background:var(--surface-2);color:var(--ink-2)}
+.row .t{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .row small{color:var(--ink-3);font-size:11.5px}
-.atag{display:inline-block;font:700 9.5px/1.5 var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:0 5px;border-radius:4px;background:var(--surface-2);color:var(--ink-2);margin-right:4px}
-.rail .sub{margin-top:6px}
+.rf{padding:6px 8px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-2)}
 .main{border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0;display:flex;flex-direction:column}
-.start{padding:22px 16px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
+.start{padding:28px 16px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
 .start h2{margin:0;font-size:18px;text-wrap:balance}
-.box{width:min(600px,100%);border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:left;color:var(--ink-3);font-size:13px;min-height:54px}
-.or{color:var(--ink-3);font-size:12.5px}
+.ask{width:min(600px,100%);border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:left;color:var(--ink-3);font-size:13px;min-height:58px}
+.under{width:min(600px,100%);display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--ink-3)}
+.clip{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:1px 8px;font-size:12px;color:var(--ink)}
+.or{width:min(600px,100%);display:flex;align-items:center;gap:10px;color:var(--ink-3);font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.or::before,.or::after{content:"";flex:1;border-top:1px solid var(--line)}
 .warn{display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:min(600px,100%);border:1px solid var(--line);border-left:3px solid var(--attn);border-radius:8px;padding:8px 12px;background:var(--attnbg);font-size:13px;text-align:left}
 .warn .sp{flex:1}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;width:min(760px,100%)}
-.pcard{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
-.pcard b{font-size:13.5px}
-.pcard small{color:var(--ink-3)}
-.pcard.next{box-shadow:0 0 0 2px var(--nav)}
-.pcard .ptag{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
-.pcard.next .ptag{color:var(--nav)}
-:root[data-theme="dark"] .pcard.next .ptag{color:var(--gold)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pcard.next .ptag{color:var(--gold)}}
-.morecards{width:min(760px,100%);text-align:left}
-.morecards summary{cursor:pointer;color:var(--ink-2);font-size:12.5px}
-.chat{display:grid;grid-template-columns:minmax(300px,5fr) minmax(0,4fr);flex:1;min-height:0}
+.focus{font:700 11px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.focus small{font:400 12px/1.4 var(--sans);letter-spacing:0;text-transform:none;color:var(--ink-3);margin-left:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;width:min(600px,100%)}
+.pcard{display:grid;grid-template-columns:22px minmax(0,1fr);column-gap:10px;row-gap:4px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px}
+.pcard:hover{border-color:var(--gold)}
+.pcard svg{width:20px;height:20px;color:var(--gold);grid-row:1/3}
+.pcard .t{font-weight:700;font-size:13.5px}
+.pcard .d{grid-column:2;font-size:12.5px;color:var(--ink-2)}
+.pcard .tag{display:block;font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.pcard.plan{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.pcard .meta{grid-column:2;font-size:11.5px;color:var(--gold)}
+details{width:min(600px,100%)}
+summary{cursor:pointer;color:var(--ink-2);font-size:12.5px}
+details .cards{margin-top:8px;width:100%}
+/* the open chat: chat | work | to-do */
+.chat{display:grid;grid-template-columns:minmax(260px,5fr) minmax(0,4fr) 150px;gap:8px;padding:8px;flex:1;min-height:0}
+@media (max-width:1100px){.chat{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.todo{display:none}}
 @media (max-width:860px){.chat{grid-template-columns:minmax(0,1fr)}.work{display:none}}
-.conv{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0}
-.chead{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.chead b{font-size:13.5px}
+.conv,.work,.todo{border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;min-width:0}
+.work{background:var(--surface-2)}
+.chead{display:flex;align-items:baseline;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:13px}
+.chead b{font-size:13px}
 .chead small{color:var(--ink-3)}
-.chead .sp{flex:1}
-.msgs{padding:12px;display:flex;flex-direction:column;gap:10px;flex:1}
+.msgs{padding:10px;display:flex;flex-direction:column;gap:10px;flex:1}
 .who{font-size:11px;color:var(--ink-3);margin-bottom:2px}
-.ai{border-left:3px solid var(--goldfill);padding:4px 10px;max-width:70ch}
-.me{align-self:flex-end;max-width:80%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
-.compose{padding:8px 12px 10px;border-top:1px solid var(--line)}
-.compose .box{width:100%;min-height:38px}
-.work{display:flex;flex-direction:column;background:var(--surface-2);min-width:0}
-.whead{padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface);font-size:13px}
-.wbody{padding:10px;display:flex;flex-direction:column;gap:8px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12.5px}
-.card h3{margin:0 0 4px;font-size:13px}
-.next2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:8px 12px;background:var(--surface);margin-top:6px}
+.ai{border-left:3px solid var(--goldfill);padding:2px 10px;font-size:13px}
+.me{align-self:flex-end;max-width:85%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:13px}
+.opt{display:inline-block;margin-top:6px;border:1px solid var(--nav);background:var(--nav);color:var(--navink);border-radius:14px;padding:2px 12px;font-size:12.5px;font-weight:600}
+.next2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:8px 12px;background:var(--surface);margin-top:6px;font-size:12.5px}
 .next2 .k{font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
 .next2 .sp{flex:1}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 10px;font-weight:600;font-size:12.5px}
 .btn.solid{background:var(--nav);color:var(--navink);border-color:var(--nav)}
-.linkbu{border:0;background:none;color:var(--nav);text-decoration:underline;padding:0;font-size:12.5px}
-:root[data-theme="dark"] .linkbu{color:var(--gold)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .linkbu{color:var(--gold)}}
-.notes{font-size:13px;color:var(--ink-2);max-width:80ch;margin:0;padding-left:18px}
+.compose{padding:8px 10px;border-top:1px solid var(--line)}
+.compose div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink-3);font-size:13px}
+.wbody{padding:8px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12.5px}
+.card h3{margin:0 0 6px;font-size:13px}
+.card li{margin:2px 0}
+.foot{display:flex;gap:8px;align-items:center;padding:8px 10px;border-top:1px solid var(--line);background:var(--surface);font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.foot .sp{flex:1}
+.todo{font-size:12px;padding:8px 10px;gap:6px}
+.todo h4{margin:0;font-size:13px}
+.todo li{list-style:none;display:flex;gap:6px;align-items:flex-start;margin:3px 0}
+.todo ul{margin:0;padding:0}
+.dot{width:9px;height:9px;border-radius:50%;border:1px solid var(--line);margin-top:4px;flex:none}
+.dot.done{background:var(--good);border-color:var(--good)}
+.notes{font-size:13px;color:var(--ink-2);max-width:82ch;margin:4px 0 0;padding-left:18px}
 .notes li{margin:3px 0}
 .notes b{color:var(--ink)}
-.dim{color:var(--ink-3)}
 </style>
 
 <div class="top">
-  <h1>The Copilot in one window</h1>
-  <span class="hint">working mockup · press the strip, the rail, the cards</span>
+  <h1>The Copilot in one window — as built</h1>
+  <span class="hint">§745 · working mockup · press the strip, the rail, the chips and the cards</span>
 </div>
 
-<div class="bar">
-  <b>Mobile</b>
-  <div class="tabs"><span>Strategy</span><span>Performance</span><span>Reporting</span><b>Copilot</b></div>
-  <span class="gone">The row under it today — <s>Foundation · Analysis · Competitive Discipline · Directions · Execution · Advisory</s> — goes.</span>
-</div>
+<div class="navbar"><span>Group</span><span>Units</span><b>Mobile</b><span>Retail Stores</span><span>B2B Ecomm</span><span>Logistics</span></div>
+<div class="tabs"><span>Strategy</span><span>Performance</span><span class="rep">Reporting</span><b>Copilot</b></div>
 
-<div class="win">
-  <!-- the method strip -->
-  <div class="strip" id="strip"></div>
-
-  <div class="body">
-    <aside class="rail">
-      <div class="h">Chats <span class="sp"></span><button class="newc" id="newc">+ New chat</button></div>
+<div class="strip" id="strip"></div>
+<div class="body">
+  <aside class="rail">
+    <div class="box1">
+      <div class="rh">Chats <span class="sp"></span><button class="newc" data-home>+ New chat</button></div>
       <div class="chips" id="chips"></div>
-      <div id="rows" style="display:flex;flex-direction:column;gap:6px"></div>
-      <div class="h sub">Deliverables</div>
-      <div id="dels" style="display:flex;flex-direction:column;gap:6px"></div>
-    </aside>
-    <section class="main" id="main"></section>
-  </div>
+      <div id="rows"></div>
+      <div class="rf">Archived · 0</div>
+    </div>
+    <div class="box1">
+      <div class="rh">Deliverables</div>
+      <div id="dels"></div>
+    </div>
+  </aside>
+  <section class="main" id="main"></section>
 </div>
 
 <ul class="notes">
-  <li><b>What goes:</b> the area tabs. <b>What stays:</b> every area's chat, exactly as it works now — open a Directions chat and it is the Directions split you know.</li>
-  <li><b>The strip</b> is the method in order, each step saying where Mobile stands; the next step is outlined. Pressing a step filters the rail to that area and offers its start card. Advisory sits apart: it is not a step of the plan.</li>
-  <li><b>The rail</b> holds every chat in this place, newest first, each with its area tag and progress; the chips filter it. Deliverables the same.</li>
-  <li><b>+ New chat</b> opens the one start screen: the free-chat box, an unfinished chat if there is one, the next step as the first card, and the other areas one fold below.</li>
-  <li><b>After Apply</b> the Next line (§694) opens the next step's card in the same window — no tab to find.</li>
+  <li><b>No area tabs.</b> The row under Copilot is gone; the address still names the area, so links keep landing where they point.</li>
+  <li><b>The strip</b> says where Mobile stands in each area, read off its chats and deliverables, and outlines the next step: the first area not on the plan.</li>
+  <li><b>The rail</b> holds every area, tagged in a short word; the chips narrow it. A chat of another area opens the window there.</li>
+  <li><b>New names:</b> Tactical Plans (was Execution) and Pillars/Directions (was Directions). A version saved under the old name continues as the same deliverable.</li>
 </ul>
 
 <script>
 (function(){
+  var ICON = { plan:'<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>', chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/>', doc:'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>' };
+  var svg = function(k){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">' + ICON[k] + '</svg>'; };
   var AREAS = [
-    { k:"foundation", w:"Foundation", tag:"Foundation", st:"on", says:"v3 on the plan", card:"Refine the Foundation", d:"Purpose, vision, values and the years — start from what is on the plan." },
-    { k:"analysis", w:"SWOT", tag:"SWOT", st:"on", says:"v2 on the plan", card:"SWOT, step by step", d:"The internal, micro and macro analyses, then the SWOT." },
-    { k:"compete", w:"Competitive Discipline", tag:"Discipline", st:"on", says:"Best Total Cost · on the plan", card:"Score the value disciplines", d:"Market and internal factors, then the value proposition." },
-    { k:"directions", w:"Directions", tag:"Directions", st:"wip", says:"In progress · 3 of 4 done", card:"Suggest and score Directions", d:"From the SWOT and the discipline, scored Urgency × Importance × Ease." },
-    { k:"execution", w:"Execution", tag:"Execution", st:"", says:"Not started", card:"Build from the Directions", d:"The period, then measures and tactics for each Direction and Capability." },
-    { k:"advisory", w:"Advisory", tag:"Advisory", st:"", says:"2 briefs", card:"Bring a decision", d:"A few questions, then a decision brief.", side:true }
+    { k:"foundation", w:"Foundation", s:"Foundation", st:"on", says:"v3 on the plan" },
+    { k:"analysis", w:"SWOT", s:"SWOT", st:"on", says:"v2 on the plan" },
+    { k:"compete", w:"Competitive Discipline", s:"Discipline", st:"on", says:"v1 on the plan" },
+    { k:"directions", w:"Pillars/Directions", s:"Pillars", st:"wip", says:"In progress · 2 of 4 done" },
+    { k:"execution", w:"Tactical Plans", s:"Tactical Plans", st:"", says:"Not started" },
+    { k:"advisory", w:"Advisory", s:"Advisory", st:"", says:"1 brief", side:true }
   ];
+  var CARDS = {
+    foundation: [{ i:"plan", plan:true, tag:"On the plan today", t:"Start from the existing plan", d:"Load what is on the plan and change any part. The plan moves only on Apply.", m:"Mobile’s Foundation · 4 parts" },
+      { i:"chat", t:"Answer guided questions", d:"I ask you a few questions and draft your Foundation from your answers." }, { i:"doc", t:"Use a template", d:"Download an interview template, fill it in, and upload it back." }],
+    analysis: [{ i:"plan", plan:true, tag:"On the plan today", t:"Start from the existing plan", d:"Load what is on the plan and change any part.", m:"Mobile’s Analysis · 15 lines" }, { i:"chat", t:"SWOT, step by step", d:"The internal, micro and macro analyses, then the SWOT." }],
+    compete: [{ i:"plan", plan:true, tag:"On the plan today", t:"Start from the existing plan", d:"Load the discipline and the values the plan holds as the table. Score anew to check the choice.", m:"Best Total Cost · 3 values" }, { i:"chat", t:"Score the value disciplines", d:"Market and internal factors, then the value proposition." }],
+    directions: [{ i:"plan", plan:true, tag:"On the plan today", t:"Start from the existing plan", d:"Load what is on the plan and change any part.", m:"Mobile’s Pillars/Directions · 4 Directions" }, { i:"chat", t:"Suggest and score Directions", d:"From the SWOT and the discipline, scored Urgency × Importance × Ease." }],
+    execution: [{ i:"plan", plan:true, tag:"On the plan today", t:"Refine the existing execution", d:"Load the measures and tactics the plan holds, on each card, and change any part; a draft adds to them.", m:"2 items with measures · 2 without" }, { i:"chat", t:"Build from the Directions", d:"The period, then measures and tactics drafted for each of the plan’s Directions and Capabilities." }],
+    advisory: [{ i:"chat", t:"Bring a decision", d:"A few questions, then a decision brief." }]
+  };
   var CHATS = [
-    { id:"c1", a:"directions", t:"Directions — Mobile", m:"Islam · 2 h ago · 3 of 4 done", open:true },
+    { id:"c1", a:"directions", t:"Pillars/Directions — Mobile", m:"Islam · 2 h ago · 2 of 4 done", wip:true },
     { id:"c2", a:"compete", t:"Competitive Discipline — Mobile", m:"Noran · yesterday · 5 of 5 done" },
-    { id:"c3", a:"advisory", t:"Youth plan pricing", m:"Omar · 2 days ago · Saved" },
+    { id:"c3", a:"advisory", t:"Youth plan pricing", m:"Omar · 2 days ago · 3 of 3 done" },
     { id:"c4", a:"analysis", t:"SWOT — Mobile", m:"Islam · last week · 5 of 5 done" },
-    { id:"c5", a:"foundation", t:"Foundation — Mobile", m:"Islam · 3 weeks ago · Saved" }
+    { id:"c5", a:"foundation", t:"Foundation — Mobile", m:"Islam · 3 weeks ago" }
   ];
   var DELS = [
-    { a:"compete", t:"Competitive Discipline — Mobile", m:"v1 · on the plan" },
-    { a:"analysis", t:"SWOT — Mobile", m:"v2 · on the plan" },
-    { a:"advisory", t:"Youth plan pricing", m:"v1 · stays in the Copilot" },
-    { a:"foundation", t:"Foundation — Mobile", m:"v3 · on the plan" }
+    { a:"compete", t:"Competitive Discipline — Mobile", m:"Can go on the plan · v1" },
+    { a:"analysis", t:"SWOT — Mobile", m:"Can go on the plan · v2" },
+    { a:"advisory", t:"Youth plan pricing", m:"Stays in the Copilot · v1" },
+    { a:"foundation", t:"Foundation — Mobile", m:"Can go on the plan · v3" }
   ];
-  var NEXT = "directions", FILTER = "", OPEN = "";
+  var SEC = "directions", FILTER = "", OPEN = "", MORE = true;
+  var NEXT = "directions";
   var by = function(k){ return AREAS.filter(function(a){ return a.k === k; })[0]; };
   var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); };
-
   function strip(){
-    document.getElementById("strip").innerHTML = AREAS.map(function(a, i){
-      var cls = "step" + (a.st === "on" ? " on" : a.st === "wip" ? " wip" : "") + (a.k === NEXT ? " next" : "") + (a.side ? " side" : "");
-      var k = a.side ? "Beside the plan" : (a.k === NEXT ? "Next · step " : "Step ") + (i + 1);
-      return '<button class="' + cls + '" data-area="' + a.k + '"' + (FILTER === a.k ? ' aria-current="true"' : '') + '><span class="k">' + k + '</span><b>' + esc(a.w) + '</b><small>' + esc(a.says) + '</small></button>';
+    var n = 0;
+    document.getElementById("strip").innerHTML = AREAS.map(function(a){
+      if (!a.side) n++;
+      var k = a.side ? "Beside the plan" : (a.k === NEXT ? "Next · step " : "Step ") + n;
+      return '<button class="step' + (a.st ? " " + a.st : "") + (a.k === NEXT ? " next" : "") + (a.side ? " side" : "") + '" data-strip="' + a.k + '"' + (a.k === SEC ? ' aria-current="true"' : '') + '><span class="k">' + k + '</span><b>' + esc(a.w) + '</b><small>' + esc(a.says) + '</small></button>';
     }).join("");
   }
   function rail(){
-    document.getElementById("chips").innerHTML = ['<button class="chip" data-filter="" aria-pressed="' + (FILTER === "") + '">All</button>'].concat(AREAS.map(function(a){
-      return '<button class="chip" data-filter="' + a.k + '" aria-pressed="' + (FILTER === a.k) + '">' + esc(a.tag) + '</button>'; })).join("");
+    document.getElementById("chips").innerHTML = '<button class="chip" data-chip="" aria-pressed="' + !FILTER + '">All</button>' + AREAS.map(function(a){ return '<button class="chip" data-chip="' + a.k + '" aria-pressed="' + (FILTER === a.k) + '" title="' + esc(a.w) + '">' + esc(a.s) + '</button>'; }).join("");
     var rows = CHATS.filter(function(c){ return !FILTER || c.a === FILTER; });
     document.getElementById("rows").innerHTML = rows.length ? rows.map(function(c){
-      return '<button class="row" data-chat="' + c.id + '"' + (OPEN === c.id ? ' aria-current="true"' : '') + '><span class="t"><span class="atag">' + esc(by(c.a).tag) + '</span>' + esc(c.t) + '</span><small>' + esc(c.m) + '</small></button>'; }).join("")
-      : '<div class="dim" style="font-size:12px">No ' + esc(by(FILTER).tag) + ' chats here yet.</div>';
+      return '<button class="row" data-chat="' + c.id + '"' + (OPEN === c.id ? ' aria-current="true"' : '') + '><span class="atag">' + esc(by(c.a).s) + '</span><span class="t">' + esc(c.t) + '</span><small>' + esc(c.m) + '</small></button>'; }).join("")
+      : '<div class="rf" style="border:0">No ' + esc(by(FILTER).w) + ' chats here yet.</div>';
     var ds = DELS.filter(function(d){ return !FILTER || d.a === FILTER; });
-    document.getElementById("dels").innerHTML = ds.length ? ds.map(function(d){
-      return '<div class="row"><span class="t"><span class="atag">' + esc(by(d.a).tag) + '</span>' + esc(d.t) + '</span><small>' + esc(d.m) + '</small></div>'; }).join("") : '<div class="dim" style="font-size:12px">Nothing saved here yet.</div>';
+    document.getElementById("dels").innerHTML = ds.length ? ds.map(function(d){ return '<div class="row"><span class="atag">' + esc(by(d.a).s) + '</span><span class="t">' + esc(d.t) + '</span><small>' + esc(d.m) + '</small></div>'; }).join("") : '<div class="rf" style="border:0">Nothing saved here yet.</div>';
   }
-  function cardHtml(a, next){
-    return '<button class="pcard' + (next ? " next" : "") + '" data-start="' + a.k + '"><span class="ptag">' + (next ? "Next step · " : "") + esc(a.w) + '</span><b>' + esc(a.card) + '</b><small>' + esc(a.d) + '</small></button>';
-  }
+  function card(c){ return '<button class="pcard' + (c.plan ? " plan" : "") + '" data-newchat="' + SEC + '">' + svg(c.i) + '<span class="t">' + (c.tag ? '<span class="tag">' + esc(c.tag) + '</span>' : '') + esc(c.t) + '</span><span class="d">' + esc(c.d) + '</span>' + (c.m ? '<span class="meta">' + esc(c.m) + '</span>' : '') + '</button>'; }
   function start(){
-    var focus = FILTER ? by(FILTER) : by(NEXT), unf = CHATS.filter(function(c){ return c.open && (!FILTER || c.a === FILTER); })[0];
-    var others = AREAS.filter(function(a){ return a !== focus; });
+    var a = by(SEC), unf = CHATS.filter(function(c){ return c.wip && c.a === SEC; })[0];
+    var others = AREAS.filter(function(x){ return x.k !== SEC; });
     return '<div class="start"><h2>What would you like to do with Mobile’s strategy?</h2>' +
-      '<div class="box">Ask anything, attach your notes, or paste finished work — this starts a free chat…</div>' +
+      '<div class="ask">Ask anything, attach your notes, or paste your ' + (SEC === "directions" ? "Directions" : SEC === "execution" ? "plan" : "work") + '…</div>' +
+      '<div class="under"><span class="clip">📎 Attach notes</span>Word, PDF or Excel · or paste · Enter sends</div>' +
+      '<div style="font-size:12px;color:var(--ink-3)">Typing, attaching or pasting here starts a free chat.</div>' +
       '<div class="or">or start step by step</div>' +
-      (unf ? '<div class="warn"><span><b>' + esc(unf.t) + '</b> is 3 of 4 done, last touched 2 h ago.</span><span class="sp"></span><button class="btn solid" data-chat="' + unf.id + '">Continue it</button></div>' : '') +
-      '<div class="cards">' + cardHtml(focus, focus.k === NEXT && !FILTER) + (focus.k === "directions" ? '<button class="pcard" data-start="directions"><span class="ptag">On the plan today · Directions</span><b>Start from the existing plan</b><small>Load the 4 Directions the plan holds and change any part.</small></button>' : '') + '</div>' +
-      '<details class="morecards"' + (FILTER ? '' : ' open') + '><summary>Other areas</summary><div class="cards" style="margin-top:8px">' + others.map(function(a){ return cardHtml(a, false); }).join("") + '</div></details></div>';
+      (unf ? '<div class="warn"><span><b>' + esc(unf.t) + '</b> is 2 of 4 done, last touched 2 h ago.</span><span class="sp"></span><button class="btn solid" data-chat="' + unf.id + '">Continue it</button><span style="font-size:12px;color:var(--ink-3)">or start another below</span></div>' : '') +
+      '<div class="focus">' + (SEC === NEXT ? "Next step · " : "") + esc(a.w) + '<small>' + esc(a.says) + '</small></div>' +
+      '<div class="cards">' + CARDS[SEC].map(card).join("") + '</div>' +
+      '<details' + (MORE ? ' open' : '') + ' id="more"><summary>Other areas</summary><div class="cards">' + others.map(function(x){
+        var c = CARDS[x.k].filter(function(y){ return !y.plan; })[0];
+        return '<button class="pcard" data-area="' + x.k + '">' + svg("plan") + '<span class="t"><span class="tag">' + esc(x.w) + (x.k === NEXT ? " · next step" : "") + '</span>' + esc(c.t) + '</span><span class="d">' + esc(x.says) + '</span></button>'; }).join("") + '</div></details></div>';
   }
   function chat(id){
-    var c = CHATS.filter(function(x){ return x.id === id; })[0], a = by(c.a);
-    var body = {
-      directions: ['<div class="me">Start from the existing ones</div><div class="ai"><div class="who">Copilot</div>The plan’s 4 Directions are on the table, marked. Change any score on the right, tick what goes ahead, then <b>Go ahead</b>.</div>',
-        '<div class="card"><h3>The Directions</h3>Grow the SME segment · 48 · Sales<br>Rebuild the app’s onboarding · 45 · Product<br>Enter the prepaid data market · 36 · Marketing<br>Open two more flagship stores · 12</div>'],
-      compete: ['<div class="ai"><div class="who">Copilot</div><b>v1</b> is on the plan.<div class="next2"><span class="k">Next</span><span>Directions — suggest and score them from the SWOT and this discipline.</span><span class="sp"></span><button class="btn solid" data-start="directions">Open Directions</button></div></div>',
-        '<div class="card"><h3>The table · Best Total Cost</h3>Lowest cost per GB · Simple plans · Self-service first</div>'],
-      advisory: ['<div class="ai"><div class="who">Copilot</div>Saved as <b>Youth plan pricing v1</b>; it stays in the Copilot.</div>', '<div class="card"><h3>The brief</h3>Pricing of the youth plan · 4 questions · 1 assumed</div>'],
-      analysis: ['<div class="ai"><div class="who">Copilot</div><b>v2</b> is on the plan.</div>', '<div class="card"><h3>The SWOT</h3>Strengths 4 · Weaknesses 3 · Opportunities 5 · Threats 3</div>'],
-      foundation: ['<div class="ai"><div class="who">Copilot</div>Saved as <b>Foundation — Mobile v3</b>; it is on the plan.</div>', '<div class="card"><h3>The Foundation</h3>Purpose · Vision · Mission · Values · Promise · Years</div>']
+    var c = CHATS.filter(function(x){ return x.id === id; })[0];
+    var V = {
+      directions: { step:"The Directions", msgs:'<div class="me">Start from the existing ones</div><div class="ai"><div class="who">Copilot</div>The plan’s Directions are on the table, marked. <b>1 of them carries no scores</b>: score it to tick it, or leave it unticked — it stays on the plan as it is.</div><div class="ai"><div class="who">Copilot</div>Here are <b>6</b> possible Directions, scored out of 64, on the right. Tick what goes ahead — then <b>Go ahead</b>, under the table.</div>',
+        work:'<div class="card"><h3>The Directions <span style="font-weight:400;color:var(--ink-3)">6 offered · 3 ticked</span></h3><ul style="margin:0;padding-left:16px"><li>Grow the SME segment · 48 · Sales ✓</li><li>Rebuild the app’s onboarding · 45 · Product ✓</li><li>Enter the prepaid data market · 36 ✓</li><li>Open two more flagship stores · unscored</li></ul><div style="margin-top:8px"><span class="btn">Go ahead with the 3 ticked</span></div></div>',
+        todo:[["Start",1],["The Directions",1],["Go ahead",0],["Save",0]], foot:"v2 in progress" },
+      compete: { step:"Saved", msgs:'<div class="ai"><div class="who">Copilot</div><b>v1</b> is on the plan.<div class="next2"><span class="k">Next</span><span>Pillars/Directions — suggest and score them from the SWOT and this discipline.</span><span class="sp"></span><button class="btn solid" data-area="directions">Open Pillars/Directions</button></div></div>',
+        work:'<div class="card"><h3>The table · Best Total Cost</h3>Lowest cost per GB · Simple plans · Self-service first</div>', todo:[["Score",1],["Discipline",1],["Values",1],["Table",1],["Save",1]], foot:"v1 saved · v1 on the plan" },
+      advisory: { step:"Saved", msgs:'<div class="ai"><div class="who">Copilot</div>Saved as <b>Youth plan pricing v1</b>; it stays in the Copilot.</div>', work:'<div class="card"><h3>The brief</h3>Pricing of the youth plan · 3 questions · 1 assumed</div>', todo:[["Question",1],["Answers",1],["Brief",1]], foot:"v1 saved · stays in the Copilot" },
+      analysis: { step:"Saved", msgs:'<div class="ai"><div class="who">Copilot</div><b>v2</b> is on the plan.<div class="next2"><span class="k">Next</span><span>Competitive Discipline — score the value disciplines from this SWOT.</span><span class="sp"></span><button class="btn solid" data-area="compete">Open Competitive Discipline</button></div></div>', work:'<div class="card"><h3>The SWOT</h3>Strengths 4 · Weaknesses 3 · Opportunities 5 · Threats 3</div>', todo:[["Methods",1],["Analyses",1],["SWOT",1],["Save",1]], foot:"v2 saved · v2 on the plan" },
+      foundation: { step:"Saved", msgs:'<div class="ai"><div class="who">Copilot</div>Saved as <b>Foundation — Mobile v3</b>; it is on the plan.</div>', work:'<div class="card"><h3>The Foundation</h3>Purpose · Vision · Mission · Values · Promise · Years</div>', todo:[["Years",1],["The parts",1],["Check",1],["Save",1]], foot:"v3 saved · v3 on the plan" }
     }[c.a];
-    return '<div class="chat"><div class="conv"><div class="chead"><span class="atag">' + esc(a.tag) + '</span><b>' + esc(c.t) + '</b><small>· ' + esc(c.m.split(" · ").slice(-1)[0]) + '</small><span class="sp"></span><button class="linkbu" data-home>All of Mobile’s Copilot</button></div>' +
-      '<div class="msgs">' + body[0] + '</div><div class="compose"><div class="box">Ask here…</div></div></div>' +
-      '<div class="work"><div class="whead"><b>' + esc(c.t) + '</b> · the work, as today</div><div class="wbody">' + body[1] + '</div></div></div>';
+    return '<div class="chat"><div class="conv"><div class="chead"><b>' + esc(c.t) + '</b><small>· ' + esc(V.step) + '</small></div><div class="msgs">' + V.msgs + '</div><div class="compose"><div>Ask here…</div></div></div>' +
+      '<div class="work"><div class="chead"><b>' + esc(c.t) + '</b><small>· the work</small></div><div class="wbody">' + V.work + '</div><div class="foot"><span>' + esc(V.foot) + '</span><span class="sp"></span><span class="btn">Save</span><span class="btn solid">Apply to plan</span></div></div>' +
+      '<div class="todo"><h4>To-do</h4><ul>' + V.todo.map(function(x){ return '<li><span class="dot' + (x[1] ? " done" : "") + '"></span>' + esc(x[0]) + '</li>'; }).join("") + '</ul></div></div>';
   }
   function draw(){ strip(); rail(); document.getElementById("main").innerHTML = OPEN ? chat(OPEN) : start(); }
   document.addEventListener("click", function(e){
     var b = e.target.closest("button,summary"); if (!b) return;
-    if (b.hasAttribute("data-area")) { var k = b.getAttribute("data-area"); FILTER = FILTER === k ? "" : k; OPEN = ""; draw(); return; }
-    if (b.hasAttribute("data-filter")) { FILTER = b.getAttribute("data-filter"); draw(); return; }
-    if (b.hasAttribute("data-chat")) { OPEN = b.getAttribute("data-chat"); draw(); return; }
-    if (b.hasAttribute("data-home") || b.id === "newc") { OPEN = ""; draw(); return; }
-    if (b.hasAttribute("data-start")) { FILTER = b.getAttribute("data-start"); OPEN = ""; draw(); window.scrollTo(0, 0); return; }
+    if (b.tagName === "SUMMARY") { MORE = !b.parentNode.open; return; }
+    if (b.hasAttribute("data-strip")) { var k = b.getAttribute("data-strip"); FILTER = FILTER === k && SEC === k && !OPEN ? "" : k; SEC = k; OPEN = ""; draw(); return; }
+    if (b.hasAttribute("data-chip")) { FILTER = b.getAttribute("data-chip"); draw(); return; }
+    if (b.hasAttribute("data-chat")) { var c = CHATS.filter(function(x){ return x.id === b.getAttribute("data-chat"); })[0]; SEC = c.a; OPEN = c.id; draw(); return; }
+    if (b.hasAttribute("data-home")) { OPEN = ""; draw(); return; }
+    if (b.hasAttribute("data-area")) { SEC = b.getAttribute("data-area"); OPEN = ""; draw(); window.scrollTo(0, 0); return; }
   });
   draw();
 })();

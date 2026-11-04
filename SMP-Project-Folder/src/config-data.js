@@ -6279,6 +6279,16 @@ function rowAtRisk(x){
 function needsNote(x){
   return rowAtRisk(x) && !(x.obj.note && x.obj.note.trim());
 }
+/* §705: THE WORD THE TAG SAYS — the band's own label ("Off track") when the
+   row owes a note, "" when it does not. One reader for every note box, so the
+   tag, the red edge and Submit's refusal cannot disagree about which rows owe
+   one (§53.5). Replaces §576's lock, which shut every other box on the page
+   until the note was written; Islam, 2026-11-02: *"don't stop a person from
+   entering the numbers"*. The box now says it is owed and nothing is shut. */
+function noteWant(x){
+  if (!needsNote(x)) return "";
+  return bandOf(rowReads(x)).label || "Off track";
+}
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
 /* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§105) ────────────────────
@@ -6653,46 +6663,6 @@ function noteMayWrite(subject, x){
   if (plansInObjectives(t)) return canReportFnRow(holderTarget(t), null, x.obj);
   /* `capReportBody`: a capability's own objectives belong to no project. */
   return canReportFnWhole(holderCodeOwner(c));
-}
-/* THE SUBJECTS ONE REPORTING PAGE DRAWS: its own, and on the company's the
-   capabilities reported in its own section (\u00a7520.8 \u2014 `capsHere()`, the same
-   narrowing that section is drawn from). */
-function noteLockSubjects(target){
-  var t = String(target || ""), out = [t];
-  if (t === "group" && holderSubject(t) === "group" && SMPRules.capExists(GROUP) &&
-      typeof capsHere === "function")
-    capsHere().forEach(function(c){ out.push("cap:" + c.id); });
-  return out;
-}
-/* The lock for one page: the Reporting page of `target`, or My reporting
-   (`mine`). NULL when nothing is red, so every caller asks one truthy
-   question. A breakdown's cells share their row's note (\u00a7343), so its row is
-   one entry however many of its figures are red. A report already closed
-   (submitted or parked, \u00a7220) has no open box to shut. */
-function noteLockOf(target, mine){
-  if (!REVIEW || REVIEW.state !== "open") return null;
-  var rows = [], ids = {};
-  var take = function(x, subj){
-    var id = x.noteId || x.id;
-    if (ids[id]) return;
-    ids[id] = true;
-    rows.push(Object.assign({ subj: subj }, x));
-  };
-  if (mine) {
-    /* \u00a7576: on My reporting the owner writes the note on their own red rows
-       (Islam's call) \u2014 asked through the gate their figure is entered by. */
-    myLineRows().forEach(function(r){
-      if (needsNote(r) && canEnterLine(r.target, r, "mine")) take(r, r.target);
-    });
-  } else if (target) {
-    noteLockSubjects(target).forEach(function(s){
-      if (reportClosed(s)) return;
-      subjectAsked(s).forEach(function(x){
-        if (needsNote(x) && noteMayWrite(s, x)) take(x, s);
-      });
-    });
-  }
-  return rows.length ? { rows: rows, ids: ids, mine: !!mine } : null;
 }
 /* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
    Islam, from his own tenant: the report would not submit because something
@@ -9416,6 +9386,14 @@ function partFilter(u){
   if (u && u.topLayer && partOnly()) {
     var w = world(), v = viewer();
     pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
+  }
+  /* §704: "OWN PIECE" ON A UNIT OR A FUNCTION. The ladder's lowest level,
+     where the place's pages are open and its lists hold only what the person
+     holds — the half eye's narrowing, carried from the top's own plan to
+     every place, and asked of the one rule both sides read. */
+  else if (u && !u.topLayer && u.ukey && SMPRules.pieceOnlyAt(world(), viewer(), u.ukey)) {
+    var w2 = world(), v2 = viewer();
+    pf = function(p){ return SMPRules.holdsItem(w2, v2, p); };
   }
   if (!pf) return hf;
   if (!hf) return pf;

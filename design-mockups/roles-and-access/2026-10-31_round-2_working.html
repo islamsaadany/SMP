@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roles &amp; access, working</title>
+<!-- Islam, 2026-10-31: "can you show me a working mockup where I press and see
+     the impact somehow". Round 1 drawn live: press a level on a role and the
+     preview shows what one person in that role sees and submits. -->
+<style>
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-2:#0F2546;--navy-ink:#FFFFFF;--navy-quiet:#B7C4D8;--gold:#C9A24D;--gold-deep:#8A6B22;--good:#2E7D5B;--good-bg:#E4F0EA;--sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#1E2A3E;--navy-2:#0F1622;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--gold:#D9B665;--gold-deep:#C9A24D;--good:#5FB68C;--good-bg:#1B3129;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.wrap{max-width:1400px;margin:0 auto;padding:22px 20px 60px}
+.head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+h1{margin:0;font-size:21px;font-weight:700;flex:1}
+.lede{margin:0 0 16px;color:var(--ink-2);max-width:90ch;font-size:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 14px;font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--navy-ink)}
+.seg button:disabled{color:var(--line);cursor:default}
+.pgtheme{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--surface);color:var(--ink-2);font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.pgtheme svg{width:14px;height:14px}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.card > h2{margin:0;padding:14px 18px 2px;font-size:15px}
+.card > .sub{margin:0;padding:0 18px 10px;font-size:12.5px;color:var(--ink-3)}
+table.ac{border-collapse:collapse;width:100%;font-size:13.5px}
+table.ac th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:6px 12px;border-bottom:1px solid var(--line)}
+table.ac td{padding:8px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+table.ac tr.grp td{background:var(--surface-2);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:5px 12px}
+table.ac tr.sel td{background:color-mix(in srgb,var(--gold) 10%,transparent)}
+table.ac td.role b{display:block;font-weight:600}table.ac td.role span{font-size:12px;color:var(--ink-3)}
+table.ac td.rep{color:var(--ink-2);font-size:13px}
+.lad{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.lad button{border:0;border-right:1px solid var(--line-soft);background:none;padding:5px 10px;font-size:12px;font-weight:600;color:var(--ink-3);cursor:pointer;white-space:nowrap}
+.lad button:last-child{border-right:0}
+.lad button:hover:not(:disabled){color:var(--ink);background:var(--surface-2)}
+.lad button:disabled{cursor:default}
+.lad button.off{color:var(--line);text-decoration:line-through}
+.lad button.pen{background:var(--good-bg);color:var(--good)}
+.lad button.eye{background:var(--navy);color:var(--navy-ink)}
+.lad button b{margin-right:4px}
+.word{font-size:13px;font-weight:600;color:var(--ink-2)}
+/* preview */
+.pv{position:sticky;top:12px}
+.pvhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px 10px}
+.pvhead label{font-size:12px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.pvhead select{font:inherit;font-size:13.5px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
+.ovr{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-3)}
+.ovr .seg button{padding:4px 10px;font-size:12px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 18px 12px}
+.fact{border:1px solid var(--line-soft);border-radius:9px;padding:8px 10px;background:var(--ground)}
+.fact em{display:block;font-style:normal;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.fact b{display:block;font-size:13.5px;font-weight:600;margin-top:2px}
+.screen{margin:0 18px 18px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.nav{background:var(--navy-2);color:var(--navy-quiet);display:flex;align-items:center;gap:4px;padding:0 10px;min-height:42px;font-size:13px;font-weight:600;overflow:hidden}
+.nav .top{padding:6px 9px;color:var(--navy-ink);white-space:nowrap}
+.nav .sep{flex:none;width:1px;height:20px;background:rgba(255,255,255,.16);margin:0 5px}
+.nav .sw{display:inline-flex;background:rgba(255,255,255,.12);border-radius:7px;padding:2px;gap:2px;flex:none}
+.nav .sw button{border:0;background:none;padding:4px 10px;border-radius:5px;color:var(--navy-ink);opacity:.75;cursor:pointer;font-weight:700;font-size:12.5px}
+.nav .sw button.on{background:rgba(255,255,255,.22);opacity:1}
+.nav .sw.one button{cursor:default;opacity:1;background:none}
+.nav .names{display:flex;gap:2px;overflow:hidden}
+.nav .names button{border:0;background:none;padding:6px 10px;border-radius:6px;color:var(--navy-ink);opacity:.82;cursor:pointer;white-space:nowrap;font-weight:600;font-size:13px}
+.nav .names button.on{background:rgba(255,255,255,.18);opacity:1}
+.nav .none{padding:0 8px;font-weight:500;opacity:.8}
+.tabs{display:flex;gap:2px;padding:0 14px;background:var(--navy);border-bottom:3px solid var(--gold)}
+.tabs span{padding:7px 11px 6px;font-size:12.5px;font-weight:600;color:var(--navy-quiet);border-radius:7px 7px 0 0}.tabs span.on{background:var(--ground);color:var(--ink)}
+.plan{padding:12px 14px;display:grid;gap:7px;min-height:150px}
+.plan h4{margin:0 0 2px;font-size:13px;color:var(--ink-2)}
+.it{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:13px}
+.it .code{font:700 11px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep)}
+.it .who{font-size:12px;color:var(--ink-3);white-space:nowrap}
+.it .b{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.it .b.s{background:var(--good-bg);color:var(--good)}.it .b.r{background:var(--surface-2);color:var(--ink-3)}
+.it.mine{border-color:var(--gold)}
+.hid{font-size:12.5px;color:var(--ink-3);padding:8px 12px;border:1px dashed var(--line);border-radius:8px}
+.empty{font-size:13px;color:var(--ink-3);padding:8px 2px}
+.flash{animation:fl .6s ease}
+@keyframes fl{from{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)}to{box-shadow:0 0 0 0 transparent}}
+.legend{font-size:12.5px;color:var(--ink-3);padding:0 18px 12px}
+.legend b{color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>Roles &amp; access — press a level, see the impact</h1>
+    <span class="seg" id="client"><button data-c="raya" aria-pressed="true">Raya · group</button><button data-c="abd" aria-pressed="false">El Abd · company</button></span>
+    <button class="pgtheme" id="pgtheme" type="button"></button>
+  </div>
+  <p class="lede">Press any level on a role to move how far up it reads; the preview switches to a person in that role and redraws what they reach. ✎ is where they enter and submit, fixed by what they hold. ◉ is what they read. The preview can also move one person a level up or down from the role.</p>
+  <div class="grid">
+    <div class="card"><h2>Roles &amp; access</h2><p class="sub" id="levelsline"></p><table class="ac" id="ac"></table></div>
+    <div class="card pv" id="pv"></div>
+  </div>
+</div>
+<script>
+(function () {
+  /* ── the two clients ── */
+  var C = {
+    raya: { top: "Raya Trade", topWord: "Group", levels: ["Own piece", "Own unit or function", "Own division", "The group"],
+      divs: { dist: { name: "Distribution", subs: ["mob", "ce", "itd", "fin"] }, b2c: { name: "B2C", subs: ["ret", "onl", "care", "hr", "mkt"] } },
+      subs: {
+        mob: { kind: "unit", name: "Mobile", code: "MOB", word: "Directions", items: [["Grow the smartphone channel", "Ahmed"], ["Open the accessories line", "Hany"], ["Cut dead stock by a third", "Dina"], ["Dealer service in 48 hours", "Karim"]] },
+        ce: { kind: "unit", name: "Consumer Electronics", code: "CE", word: "Directions", items: [["Win two new brands", "Sameh"], ["Lift TV share to 18%", "Nadia"], ["Shorten the order cycle", "Walid"]] },
+        itd: { kind: "unit", name: "IT Dist.", code: "ITD", word: "Directions", items: [["Cloud resale line", "Yasser"], ["Enterprise accounts up 30%", "Rania"]] },
+        ret: { kind: "unit", name: "Retail", code: "RET", word: "Directions", items: [["Twelve new stores", "Hossam F."], ["Basket size up 10%", "Rana"], ["Stock accuracy at 98%", "Mohab"]] },
+        onl: { kind: "unit", name: "Online", code: "ONL", word: "Directions", items: [["Conversion to 3%", "Sherif"], ["Next-day delivery in Cairo", "Lina"]] },
+        care: { kind: "unit", name: "Care", code: "CAR", word: "Directions", items: [["Repairs in five days", "Mostafa"], ["NPS above 50", "Heba"]] },
+        fin: { kind: "fn", name: "Finance", code: "FIN", word: "Projects", items: [["Debt utilisation report automation", "Tarek"], ["Credit facility consolidation", "Fayad"], ["Five-day month-end close", "Hala"]] },
+        hr: { kind: "fn", name: "HR", code: "HR", word: "Projects", items: [["Key-role succession map", "Noran"], ["One grading structure", "Aya"]] },
+        mkt: { kind: "fn", name: "Marketing", code: "MKT", word: "Projects", items: [["Brand audit and positioning", "Yara"], ["One loyalty programme", "Omar"]] }
+      },
+      roles: [
+        ["g", "Holding a level, not a piece"],
+        { k: "gceo", label: "Group CEO", rep: "nothing — holds no piece", ceo: true, off: [0, 1, 2], up: 3 },
+        { k: "cceo", label: "Company CEO", rep: "nothing — holds no piece", ceo: true, off: [0, 1], up: 2 },
+        ["g", "Holding a unit or a function"],
+        { k: "uowner", label: "Unit owner", sub: "the unit's head", rep: "the unit's figures", held: 1, up: 2 },
+        { k: "fnhead", label: "Function head", rep: "the function's figures and projects", held: 1, up: 3 },
+        ["g", "Holding a piece of a plan"],
+        { k: "powner", label: "Project owner", rep: "the project's milestones and deliverables", held: 0, up: 1 },
+        { k: "dirowner", label: "Direction owner", rep: "the direction's measures and tactics", held: 0, up: 1 },
+        { k: "contrib", label: "Contributor", rep: "the lines assigned to him", held: 0, up: 1 },
+        ["g", "Keeping figures for someone else"],
+        { k: "cust", label: "Custodian", sub: "of a unit, a function or a piece", rep: "whatever they keep, as its owner would", cust: true, up: 0 }
+      ],
+      people: [
+        { n: "Samir — Group CEO", r: "gceo" },
+        { n: "Laila — Company CEO, Distribution", r: "cceo", div: "dist" },
+        { n: "Ashraf — Unit owner, Mobile", r: "uowner", s: "mob" },
+        { n: "Hossam — Function head, Finance", r: "fnhead", s: "fin" },
+        { n: "Tarek — Project owner, FIN01", r: "powner", s: "fin", i: 0 },
+        { n: "Hany — Direction owner, MOB02", r: "dirowner", s: "mob", i: 1 },
+        { n: "Nadia — Contributor, CE02", r: "contrib", s: "ce", i: 1 },
+        { n: "Mona — Custodian of Mobile", r: "cust", s: "mob" },
+        { n: "Rana — Custodian of RET02", r: "cust", s: "ret", i: 1 }
+      ] },
+    abd: { top: "El Abd", topWord: "Company", levels: ["Own piece", "Own function", "The company"], divs: {},
+      subs: {
+        prod: { kind: "fn", name: "Production", code: "PRD", word: "Directions", items: [["Raise line output by 15%", "Hesham"], ["Halve changeover time", "Omar"], ["Lean capability", "Mai", "cap"]] },
+        sales: { kind: "fn", name: "Sales", code: "SAL", word: "Directions", items: [["Forty new outlets", "Karim"], ["Ramadan season plan", "Dalia"], ["Key-account capability", "Ayman", "cap"]] },
+        fin: { kind: "fn", name: "Finance", code: "FIN", word: "Directions", items: [["Cost per kilo down 8%", "Sara"], ["Cash cycle under 40 days", "Tamer"]] }
+      },
+      roles: [
+        ["g", "Holding a level, not a piece"],
+        { k: "ceo", label: "CEO", rep: "nothing — holds no piece", ceo: true, off: [0, 1], up: 2 },
+        ["g", "Holding a function"],
+        { k: "fnhead", label: "Function head", rep: "the function's figures", held: 1, up: 1 },
+        ["g", "Holding a piece of a plan"],
+        { k: "dirowner", label: "Direction owner", rep: "the direction's measures and tactics", held: 0, up: 1 },
+        { k: "capowner", label: "Capability owner", rep: "the capability's measures and tactics", held: 0, up: 1 },
+        { k: "contrib", label: "Contributor", rep: "the lines assigned to him", held: 0, up: 1 },
+        ["g", "Keeping figures for someone else"],
+        { k: "cust", label: "Custodian", sub: "of a function or a piece", rep: "whatever they keep, as its owner would", cust: true, up: 0 }
+      ],
+      people: [
+        { n: "Ahmed — CEO", r: "ceo" },
+        { n: "Hesham — Function head, Production", r: "fnhead", s: "prod" },
+        { n: "Omar — Direction owner, PRD02", r: "dirowner", s: "prod", i: 1 },
+        { n: "Mai — Capability owner, PRD03", r: "capowner", s: "prod", i: 2 },
+        { n: "Dalia — Contributor, SAL02", r: "contrib", s: "sales", i: 1 },
+        { n: "Sara — Custodian of Finance", r: "cust", s: "fin" }
+      ] }
+  };
+  var ST = { c: "raya", up: {}, ovr: {}, who: {}, view: {} };
+  Object.keys(C).forEach(function (k) {
+    ST.up[k] = {}; C[k].roles.forEach(function (r) { if (r.k) ST.up[k][r.k] = r.up; });
+    ST.ovr[k] = {}; ST.who[k] = 5 % C[k].people.length; ST.view[k] = null;
+  });
+  ST.who.abd = 2;
+  var cl = function () { return C[ST.c]; };
+  var roleOf = function (k) { return cl().roles.filter(function (r) { return r.k === k; })[0]; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  function divOf(s) { var d = null; Object.keys(cl().divs).forEach(function (k) { if (cl().divs[k].subs.indexOf(s) >= 0) d = k; }); return d; }
+  var TOP = function () { return cl().levels.length - 1; };
+
+  /* the person's held level, and how far they read (role setting + their own move) */
+  function heldOf(p) { var r = roleOf(p.r); if (r.ceo) return null; if (r.cust) return p.i != null ? 0 : 1; return r.held; }
+  function readOf(p) {
+    var r = roleOf(p.r), base = ST.up[ST.c][p.r] + (ST.ovr[ST.c][p.n] || 0), h = heldOf(p);
+    var lo = r.ceo ? Math.min.apply(null, [0, 1, 2, 3].filter(function (i) { return i <= TOP() && (r.off || []).indexOf(i) < 0; })) : (h == null ? 0 : h);
+    return Math.max(lo, Math.min(TOP(), Math.max(base, r.cust ? h : base)));
+  }
+  /* which subjects, and whether all of a subject or only the person's own piece */
+  function reach(p) {
+    var L = readOf(p), all = Object.keys(cl().subs), d = p.div || (p.s ? divOf(p.s) : null);
+    if (L >= TOP()) return { subs: all, L: L };
+    if (L === 2 && d) return { subs: cl().divs[d].subs.slice(), L: L };
+    return { subs: p.s ? [p.s] : [], L: L, onlyPiece: L === 0 };
+  }
+  function submits(p, s, i) {
+    if (!p.s || p.s !== s) return false;
+    return p.i == null ? true : p.i === i;
+  }
+
+  /* ── the table ── */
+  function ladder(role) {
+    var L = cl().levels, up = ST.up[ST.c][role.k], held = role.cust ? 0 : role.held;
+    return '<span class="lad">' + L.map(function (name, i) {
+      var off = (role.off || []).indexOf(i) >= 0 || (!role.ceo && !role.cust && i < held);
+      var cls = off ? "off" : (!role.ceo && i === held) ? "pen" : (i <= up && (role.ceo || i > held)) ? "eye" : "";
+      var label = role.cust && i === 0 ? "What they keep" : name;
+      var mark = cls === "pen" ? "<b>✎</b>" : cls === "eye" ? "<b>◉</b>" : "";
+      return '<button type="button" class="' + cls + '" data-role="' + role.k + '" data-lv="' + i + '"' + (off ? " disabled" : "") + ' title="' + (off ? "" : "Reads up to: " + esc(label)) + '">' + mark + esc(label) + '</button>';
+    }).join("") + '</span>';
+  }
+  function table() {
+    var sel = cl().people[ST.who[ST.c]].r;
+    document.getElementById("levelsline").textContent = cl().top + "’s levels, bottom to top: " + cl().levels.join(" · ") + ".";
+    document.getElementById("ac").innerHTML = '<thead><tr><th style="width:190px">Role</th><th style="width:200px">Enters and submits</th><th>✎ works on · ◉ reads</th></tr></thead><tbody>' +
+      '<tr class="grp"><td colspan="3">The office</td></tr>' +
+      '<tr><td class="role"><b>Super user · SMO team</b></td><td class="rep">everything</td><td><span class="word">everything, by rule</span></td></tr>' +
+      cl().roles.map(function (r) {
+        if (Array.isArray(r)) return '<tr class="grp"><td colspan="3">' + esc(r[1]) + '</td></tr>';
+        return '<tr' + (r.k === sel ? ' class="sel"' : '') + '><td class="role"><b>' + esc(r.label) + '</b>' + (r.sub ? '<span>' + esc(r.sub) + '</span>' : '') + '</td><td class="rep">' + esc(r.rep) + '</td><td>' + ladder(r) + '</td></tr>';
+      }).join("") +
+      '<tr class="grp"><td colspan="3">Holding nothing</td></tr><tr><td class="role"><b>Employee</b><span>on the register, no seat</span></td><td class="rep">nothing</td><td><span class="word">nothing</span></td></tr></tbody>';
+  }
+
+  /* ── the preview ── */
+  function preview(flash) {
+    var p = cl().people[ST.who[ST.c]], R = reach(p), r = roleOf(p.r), L = R.L, levels = cl().levels, units, fns;
+    var held = heldOf(p), ov = ST.ovr[ST.c][p.n] || 0;
+    /* a move that would change nothing is not offered */
+    var asRole = (function () { var o = ST.ovr[ST.c][p.n]; ST.ovr[ST.c][p.n] = 0; var v = readOf(p); ST.ovr[ST.c][p.n] = o; return v; })();
+    var canDown = (function () { var o = ST.ovr[ST.c][p.n]; ST.ovr[ST.c][p.n] = -1; var v = readOf(p); ST.ovr[ST.c][p.n] = o; return v < asRole; })();
+    var canUp = (function () { var o = ST.ovr[ST.c][p.n]; ST.ovr[ST.c][p.n] = 1; var v = readOf(p); ST.ovr[ST.c][p.n] = o; return v > asRole; })();
+    if ((ov < 0 && !canDown) || (ov > 0 && !canUp)) { ov = 0; ST.ovr[ST.c][p.n] = 0; L = readOf(p); R = reach(p); }
+    units = R.subs.filter(function (s) { return cl().subs[s].kind === "unit"; }); fns = R.subs.filter(function (s) { return cl().subs[s].kind === "fn"; });
+    var view = ST.view[ST.c]; if (R.subs.indexOf(view) < 0) view = ST.view[ST.c] = (p.s && R.subs.indexOf(p.s) >= 0) ? p.s : R.subs[0] || null;
+    var kind = view ? cl().subs[view].kind : "unit";
+    var subm = p.s ? (p.i != null ? cl().subs[p.s].code + String(p.i + 1).padStart(2, "0") + " — " + cl().subs[p.s].items[p.i][0] : "all of " + cl().subs[p.s].name) : "nothing";
+    var h = '<div class="pvhead"><label for="who">Preview as</label><select id="who">' + cl().people.map(function (x, i) { return '<option value="' + i + '"' + (i === ST.who[ST.c] ? " selected" : "") + '>' + esc(x.n) + '</option>'; }).join("") + '</select>' +
+      '<span class="ovr">This person:<span class="seg" id="ovr"><button data-o="-1" aria-pressed="' + (ov < 0) + '"' + (canDown ? '' : ' disabled') + '>One lower</button><button data-o="0" aria-pressed="' + (ov === 0) + '">As the role</button><button data-o="1" aria-pressed="' + (ov > 0) + '"' + (canUp ? '' : ' disabled') + '>One higher</button></span></span></div>' +
+      '<div class="facts' + (flash ? " flash" : "") + '">' +
+      '<div class="fact"><em>✎ Submits</em><b>' + esc(subm) + '</b></div>' +
+      '<div class="fact"><em>◉ Reads up to</em><b>' + esc(r.cust && L === held ? "What they keep" : levels[L]) + (ov ? " (moved " + (ov > 0 ? "up" : "down") + ")" : "") + '</b></div>' +
+      '<div class="fact"><em>First sign-in</em><b>' + (held == null ? "Reading window" : "Workbench") + '</b></div></div>';
+    /* the navigation row, as this person would have it */
+    var nav = '<div class="nav">';
+    if (L >= TOP() || (r.ceo && L === TOP())) nav += '<span class="top">' + esc(cl().topWord) + ' ▾</span><span class="sep"></span>';
+    else if (L === 2 && (p.div || divOf(p.s))) nav += '<span class="top">' + esc(cl().divs[p.div || divOf(p.s)].name) + '</span><span class="sep"></span>';
+    if (units.length && fns.length) nav += '<span class="sw">' + ["unit", "fn"].map(function (k) { return '<button data-kind="' + k + '" class="' + (k === kind ? "on" : "") + '">' + (k === "unit" ? "Units" : "Functions") + '</button>'; }).join("") + '</span><span class="sep"></span>';
+    var list = (units.length && fns.length) ? (kind === "unit" ? units : fns) : R.subs;
+    nav += list.length ? '<div class="names">' + list.map(function (s) { return '<button data-sub="' + s + '" class="' + (s === view ? "on" : "") + '">' + esc(cl().subs[s].name) + '</button>'; }).join("") + '</div>' : '<span class="none">Nothing to reach</span>';
+    nav += '</div>';
+    var plan = '';
+    if (view) {
+      var S = cl().subs[view], shown = 0, hidden = 0;
+      plan += '<h4>' + esc(S.name) + ' — ' + esc(S.word) + '</h4>';
+      S.items.forEach(function (it, i) {
+        if (R.onlyPiece && !(p.s === view && (p.i == null || p.i === i))) { hidden++; return; }
+        var mine = submits(p, view, i); shown++;
+        plan += '<div class="it' + (mine ? " mine" : "") + '"><span class="code">' + S.code + String(i + 1).padStart(2, "0") + '</span><span>' + esc(it[0]) + (it[2] === "cap" ? ' <span style="color:var(--ink-3);font-size:12px">· capability</span>' : '') + '</span><span class="who">' + esc(it[1]) + '</span><span class="b ' + (mine ? "s" : "r") + '">' + (mine ? "✎ Submits" : "◉ Reads") + '</span></div>';
+      });
+      if (hidden) plan += '<div class="hid">' + hidden + ' more ' + S.word.toLowerCase() + ' in ' + esc(S.name) + ' — beyond this person’s reading edge</div>';
+    } else plan = '<p class="empty">Nothing reached. This seat opens on nothing until a level is set.</p>';
+    h += '<div class="screen">' + nav + '<div class="tabs"><span class="on">Strategy</span><span>Performance</span><span>Reporting</span></div><div class="plan">' + plan + '</div></div>' +
+      '<p class="legend"><b>' + R.subs.length + '</b> of ' + Object.keys(cl().subs).length + ' units and functions reached. Press another name in the row to read it; the ✎ never leaves what the person holds.</p>';
+    document.getElementById("pv").innerHTML = h;
+  }
+  function draw(flash) { table(); preview(flash); }
+
+  /* ── presses ── */
+  document.getElementById("ac").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-role]"); if (!b || b.disabled) return;
+    var k = b.getAttribute("data-role"); ST.up[ST.c][k] = +b.getAttribute("data-lv");
+    /* show the impact on a person in that role */
+    var cur = cl().people[ST.who[ST.c]];
+    if (cur.r !== k) { var i = cl().people.findIndex(function (x) { return x.r === k; }); if (i >= 0) { ST.who[ST.c] = i; ST.view[ST.c] = null; } }
+    draw(true);
+  });
+  document.getElementById("pv").addEventListener("change", function (e) { if (e.target.id === "who") { ST.who[ST.c] = +e.target.value; ST.view[ST.c] = null; draw(true); } });
+  document.getElementById("pv").addEventListener("click", function (e) {
+    var o = e.target.closest("[data-o]"); if (o) { ST.ovr[ST.c][cl().people[ST.who[ST.c]].n] = +o.getAttribute("data-o"); draw(true); return; }
+    var s = e.target.closest("[data-sub]"); if (s) { ST.view[ST.c] = s.getAttribute("data-sub"); preview(false); return; }
+    var k = e.target.closest("[data-kind]"); if (k) { var p = cl().people[ST.who[ST.c]], R = reach(p); ST.view[ST.c] = R.subs.filter(function (x) { return cl().subs[x].kind === k.getAttribute("data-kind"); })[0]; preview(false); }
+  });
+  document.getElementById("client").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-c]"); if (!b) return; ST.c = b.getAttribute("data-c");
+    [].forEach.call(this.querySelectorAll("button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    draw(false);
+  });
+
+  /* ── theme ── */
+  var pg = "light";
+  try { var t = localStorage.getItem("smp.theme"); if (t === "light" || t === "dark") pg = t; else if (matchMedia("(prefers-color-scheme: dark)").matches) pg = "dark"; } catch (e) {}
+  var SUN = '<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>', MOON = '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>';
+  function theme() { document.documentElement.setAttribute("data-theme", pg); document.getElementById("pgtheme").innerHTML = '<svg viewBox="0 0 20 20">' + (pg === "light" ? SUN : MOON) + '</svg>' + (pg === "light" ? "View in dark" : "View in light"); }
+  document.getElementById("pgtheme").addEventListener("click", function () { pg = pg === "light" ? "dark" : "light"; try { localStorage.setItem("smp.theme", pg); } catch (e) {} theme(); });
+  theme(); draw(false);
+})();
+</script>
+</body>
+</html>

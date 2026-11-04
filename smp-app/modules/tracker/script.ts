@@ -56,8 +56,37 @@ export const APP_JS = `(function () {
     history.replaceState(null, "", u);
   }
   function ask() {
-    return { view: B.getAttribute("data-view") || "week", q: B.getAttribute("data-q") || "",
+    /* §724: the server is never asked to narrow by words — the list comes
+       whole and the search box sifts it in place (sift, below) */
+    return { view: B.getAttribute("data-view") || "week", q: "",
       group: B.getAttribute("data-group") || "owner", dates: B.getAttribute("data-dates") || "weeks", open: openId() };
+  }
+  /* §719 OPENS AT ONCE: the page carries each row's opened panel in a
+     <template class="otpl"> after the row; opening is putting a copy in place
+     (and folding the one open), with no trip to the server. False when this
+     list carries no panels (the meeting), and the caller reads the list. */
+  function openHere(id) {
+    var tpl = id ? document.querySelector('template.otpl[data-id="' + id + '"]') : null;
+    if (!document.querySelector("template.otpl") || (id && !tpl)) return false;
+    document.querySelectorAll("#body .open[data-id]").forEach(function (o) { o.remove(); });
+    document.querySelectorAll("#body .row.on").forEach(function (r) {
+      r.classList.remove("on");
+      r.querySelectorAll('[data-act=more]').forEach(function (m) { m.setAttribute("aria-expanded", "false"); if (m.matches("button.more")) m.classList.remove("on"); });
+      var d = r.querySelector(".rdots > .more"); if (d) d.classList.remove("lit");
+    });
+    if (!id) return true;
+    /* §726: the panels ride together after the views; the row is the one
+       on the list in view */
+    var r = document.querySelector('#body .card.cbot .row[data-id="' + id + '"]');
+    if (!r) return false;
+    r.classList.add("on");
+    r.querySelectorAll('[data-act=more]').forEach(function (m) { m.setAttribute("aria-expanded", "true"); if (m.matches("button.more")) m.classList.add("on"); });
+    var d2 = r.querySelector(".rdots > .more"); if (d2) d2.classList.add("lit");
+    r.parentNode.insertBefore(tpl.content.cloneNode(true), r.nextSibling);
+    var o = document.querySelector('#body .open[data-id="' + id + '"]');
+    if (o && histOpen.has(id)) drawHist(o, true); else if (o && tabOf[id]) setTab(o, tabOf[id]);
+    sizeAll();
+    return true;
   }
   function remember(name, value) {
     try { document.cookie = name + "=" + encodeURIComponent(value) + "; path=" + location.pathname + "; max-age=31536000; samesite=lax"; } catch (x) {}
@@ -138,8 +167,12 @@ export const APP_JS = `(function () {
        unfolded where it was unfolded (§657) */
     if (k && k.prog) k.prog.forEach(function (st) { var b = progBox(st.id); if (b) b.value = st.val; });
     histOpen.forEach(function (id) { var o = document.querySelector('.open[data-id="' + id + '"]'); if (o) drawHist(o, true); });
+    Object.keys(tabOf).forEach(function (id) { var o = document.querySelector('.open[data-id="' + id + '"]'); if (o && !histOpen.has(id)) setTab(o, tabOf[id]); });
+    drawWalk();
     sizeAll();
     if (s && k && k.srch) s.value = k.srch;
+    countWas = null; sift();
+    if (tb) barFoot();
     if (k && k.panel) showPanel(true);
     if (k && k.focus) {
       if (k.focus.srch) { if (s) s.focus(); }
@@ -158,10 +191,20 @@ export const APP_JS = `(function () {
   var sizes = !(window.CSS && CSS.supports && CSS.supports("field-sizing", "content"));
   function size(t) { if (!sizes || !t) return; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }
   function sizeAll() { document.querySelectorAll("textarea.desc, .prog textarea").forEach(size); }
-  function drawHist(o, on) {
-    var b = o.querySelector("[data-act=hist]"), h = o.querySelector(".hist"); if (!b || !h) return;
-    h.hidden = !on; b.classList.toggle("on", !!on); b.setAttribute("aria-expanded", String(!!on));
+  /* THE OPENED TASK'S TABS (§706): Progress, Description, History — one
+     shown at a time, by data-tab on the panel; the History tab is §657's
+     history link, so it keeps its act and its unfolding. Which tab a task
+     was left on rides across the swaps that follow. */
+  function setTab(o, t) {
+    o.setAttribute("data-tab", t);
+    o.querySelectorAll("[role=tab]").forEach(function (x) { x.setAttribute("aria-selected", String(x.getAttribute("data-tab") === t)); });
+    var b = o.querySelector("[data-act=hist]"), h = o.querySelector(".hist");
+    if (h) h.hidden = t !== "h";
+    if (b) { b.classList.toggle("on", t === "h"); b.setAttribute("aria-expanded", String(t === "h")); }
+    if (t === "d") sizeAll();
   }
+  function drawHist(o, on) { setTab(o, on ? "h" : "p"); }
+  var tabOf = {};
   /* A PRESS SHOWS AT ONCE (§671, rule 1d). Every handler below notes the
      control under the hand in "pressed", and a request made from it marks
      the row, panel or line that control sits in busy — dimmed, and taking no
@@ -216,6 +259,77 @@ export const APP_JS = `(function () {
     request("GET", LIST + "?view=" + encodeURIComponent(a.view) + "&q=" + encodeURIComponent(a.q) +
       "&group=" + encodeURIComponent(a.group) + "&dates=" + encodeURIComponent(a.dates) + (a.open ? "&open=" + encodeURIComponent(a.open) : ""), null, k || keep(), null, quiet);
   }
+  /* THE MEETING'S ORDER is the list on the left, top to bottom. Save and next
+     writes what is in the progress box (if anything) and opens the next
+     task in the same answer; the task left is counted as gone through — on
+     this browser, for today, which is the meeting's length. */
+  function meetIds() { return Array.prototype.map.call(document.querySelectorAll(".mlist .mi[data-id]"), function (x) { return x.getAttribute("data-id"); }); }
+  var WALK = "smp.tracker.walk";
+  function walked() {
+    try { var j = JSON.parse(sessionStorage.getItem(WALK) || "{}"); return j.day === new Date().toDateString() ? j.ids || [] : []; } catch (x) { return []; }
+  }
+  function walk(id) {
+    var ids = walked(); if (ids.indexOf(id) < 0) ids.push(id);
+    try { sessionStorage.setItem(WALK, JSON.stringify({ day: new Date().toDateString(), ids: ids })); } catch (x) {}
+  }
+  function drawWalk() {
+    var w = document.querySelector(".walk"); if (!w) return;
+    var ids = meetIds(), done = walked(), n = 0;
+    document.querySelectorAll(".mlist .mi[data-id]").forEach(function (x) { var on = done.indexOf(x.getAttribute("data-id")) >= 0; x.classList.toggle("rev", on); if (on) n++; });
+    var wn = w.querySelector(".wn"), i = w.querySelector(".bar i");
+    if (wn) wn.textContent = n + " of " + ids.length + " gone through";
+    if (i) i.style.width = (ids.length ? Math.round(100 * n / ids.length) : 0) + "%";
+    /* §732: each topic says how far the meeting has got through its week */
+    document.querySelectorAll(".mlist .sec").forEach(function (sec) {
+      var all = sec.querySelectorAll(".mi.now[data-id]"), k = 0;
+      all.forEach(function (x) { if (done.indexOf(x.getAttribute("data-id")) >= 0) k++; });
+      var pg = sec.querySelector(".mprog"), bi = sec.querySelector(".tbar i");
+      if (pg) pg.textContent = k + " of " + all.length;
+      if (bi) bi.style.width = (all.length ? Math.round(100 * k / all.length) : 0) + "%";
+    });
+  }
+  /* §733 SAVE AND NEXT CARRIES, always: an unfinished task of this week (or
+     late) that may be changed goes on to next week with the save (the box
+     says so with data-carry); the week over the name keeps one here. */
+  /* §734: put a task's box in place from the page's own copy (mtpl) — the
+     rail marks it, a folded week holding it opens, the address follows.
+     False when there is no copy, and the caller reads the meeting. */
+  function meetShow(id) {
+    var tpl = id ? document.querySelector('template.mtpl[data-id="' + id + '"]') : null, cur = document.querySelector(".meet .mopen");
+    if (!tpl || !cur) return false;
+    cur.parentNode.replaceChild(tpl.content.cloneNode(true), cur);
+    document.querySelectorAll(".mlist .mi[data-id]").forEach(function (x) { x.setAttribute("aria-current", String(x.getAttribute("data-id") === id)); });
+    var it = document.querySelector('.mlist .mi[data-id="' + id + '"]'), fo = it && it.closest(".mf");
+    if (fo && fo.hidden) fo.hidden = false;
+    setOpen(id);
+    drawWalk(); sizeAll();
+    return true;
+  }
+  function stepTask(dir, save) {
+    var ids = meetIds(), panel = document.querySelector(".mopen"), cur = panel ? panel.getAttribute("data-id") : openId();
+    var i = ids.indexOf(cur), nx = ids[Math.max(0, Math.min(ids.length - 1, (i < 0 ? 0 : i) + dir))];
+    if (save && dir > 0 && cur) walk(cur);
+    var pn = save && dir > 0 && panel ? panel.querySelector(".pnew") : null;
+    var carry = save && dir > 0 && panel && panel.getAttribute("data-carry") === "1";
+    var wrote = !!(pn && !pn.disabled && pn.value.replace(/\\s+/g, ""));
+    if (wrote || carry) {
+      if (nx) setOpen(nx);
+      if (wrote) addProgress(pn);
+      if (carry) { pressed = null; post({ act: "carry", id: cur }); }
+      return;
+    }
+    if (!nx || nx === cur) { drawWalk(); return; }
+    if (meetShow(nx)) return;
+    setOpen(nx); pressed = null; refetch();
+  }
+  document.addEventListener("keydown", function (e) {
+    if (!document.querySelector(".meet")) return;
+    var t = e.target, typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT");
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.stopPropagation(); stepTask(1, true); return; }
+    if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !typing && !(t.closest && t.closest(".weeks, .team, .topics, .setmenu, .tmenu"))) {
+      e.preventDefault(); stepTask(e.key === "ArrowDown" ? 1 : -1, false);
+    }
+  }, true);
   function rowOf(el) { var r = el.closest(".row, .open, .pline"); return r ? r.getAttribute("data-id") : null; }
   function entryOf(el) { var e = el.closest(".pe"); return e ? e.getAttribute("data-pid") : null; }
   function inAdd(el) { return el.closest(".addrow"); }
@@ -449,7 +563,7 @@ export const APP_JS = `(function () {
       w.classList.remove("on"); w.setAttribute("aria-expanded", "false");
       var t = w.querySelector(".team, .weeks, .topics"); if (t) t.hidden = true;
     });
-    document.querySelectorAll(".dots > button.on, .tdots > button.on").forEach(function (d) {
+    document.querySelectorAll(".dots > button.on, .tdots > button.on, .rdots > button.on").forEach(function (d) {
       if (d === except) return;
       d.classList.remove("on"); d.setAttribute("aria-expanded", "false");
       var m = d.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = true;
@@ -512,10 +626,59 @@ export const APP_JS = `(function () {
     if (dateBox && e.target !== dateBox.inp) dateBox.back();
   });
 
+  /* §724 SEARCH AS YOU TYPE (Islam: "the search bar should filter the
+     tasks … rather than finish and click enter to filter"): each letter
+     hides the rows whose name, topic, latest note and owner don't hold the
+     words (a section's own name counts for its rows, as on My tasks); a
+     section left with nothing is hidden; the count in the head follows;
+     Enter does nothing more. The list is the page's own — no trip to the
+     server. */
+  var countWas = null;
+  function sift() {
+    var s = document.querySelector(".ctop .find .srch");
+    var q = s ? s.value.trim().toLowerCase() : "";
+    var shownN = 0;
+    document.querySelectorAll("#body .list .sec").forEach(function (sec) {
+      var h = sec.querySelector(".sh h3"), secName = h ? h.textContent.toLowerCase() : "", any = false;
+      sec.querySelectorAll(".row[data-id]").forEach(function (r) {
+        var words = [".t", ".meta", ".who .wn"].map(function (sel) { var x = r.querySelector(sel); return x ? x.textContent : ""; }).join(" ").toLowerCase();
+        var hit = !q || words.indexOf(q) >= 0 || secName.indexOf(q) >= 0;
+        r.hidden = !hit;
+        var o = r.nextElementSibling;
+        if (o && o.classList.contains("open")) o.hidden = !hit;
+        if (hit) { any = true; if (getComputedStyle(r).display !== "none") shownN++; }
+      });
+      sec.hidden = !!q && !any;
+    });
+    var c = document.querySelector(".ctop .chd .ccnt");
+    if (c) {
+      if (!q) { if (countWas !== null) c.textContent = countWas; countWas = null; }
+      else { if (countWas === null) countWas = c.textContent; c.textContent = String(shownN); }
+    }
+    var none = document.getElementById("siftnone"), list = document.querySelector("#body .list");
+    if (q && !shownN && list) {
+      if (!none) { none = document.createElement("div"); none.id = "siftnone"; none.className = "none"; list.parentNode.insertBefore(none, list.nextSibling); }
+      none.innerHTML = "<b>Nothing matches.</b>Try another word.";
+    } else if (none) none.remove();
+  }
+  document.addEventListener("input", function (e) { if (e.target.classList && e.target.classList.contains("srch")) sift(); });
+  document.addEventListener("search", function (e) { if (e.target.classList && e.target.classList.contains("srch")) sift(); }, true);
+  document.addEventListener("submit", function (e) { if (e.target.closest && e.target.closest(".find")) { e.preventDefault(); sift(); } });
+  /* a link that still carries q= (an old bookmark) was narrowed by the
+     server: read the whole list once and sift it here */
+  if (B.getAttribute("data-q")) {
+    B.setAttribute("data-q", "");
+    var u0 = new URL(location.href); u0.searchParams.delete("q"); history.replaceState(null, "", u0);
+    refetch();
+  }
+
   document.addEventListener("click", function (e) {
     pressed = e.target;
+    /* §723: Search is an icon in the bar; a press on it opens its box */
+    var fd = e.target.closest && e.target.closest(".chd .find");
+    if (fd && !e.target.closest("input, button")) { var si = fd.querySelector(".srch"); if (si) si.focus(); }
     var b = e.target.closest("[data-act]");
-    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots")) closePops(null);
+    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots, .rdots")) closePops(null);
     if (!b) return;
     var act = b.getAttribute("data-act"), id = rowOf(b), ar = inAdd(b);
     if (act === "tick") {
@@ -646,7 +809,43 @@ export const APP_JS = `(function () {
       /* THE HISTORY UNFOLDS IN PLACE (§657), and stays unfolded across the
          swaps that follow while the row is open. */
       var o = b.closest(".open"), on3 = !b.classList.contains("on");
-      if (o) { drawHist(o, on3); if (on3) histOpen.add(id); else histOpen.delete(id); }
+      if (o) { drawHist(o, on3); delete tabOf[id]; if (on3) histOpen.add(id); else histOpen.delete(id); }
+    } else if (act === "ptab") {
+      var o7 = b.closest(".open"), t7 = b.getAttribute("data-tab") || "p";
+      if (o7) { setTab(o7, t7); histOpen.delete(id); tabOf[id] = t7; if (t7 === "d") { var d7 = o7.querySelector("textarea.desc"); if (d7 && !d7.value) d7.focus(); } }
+    } else if (act === "pick-task") {
+      /* THE MEETING (§706): the task pressed on the left opens on the right */
+      var pk = b.getAttribute("data-id");
+      if (pk && pk !== openId() && !meetShow(pk)) { setOpen(pk); pressed = null; refetch(); }
+    } else if (act === "set-status") {
+      if (b.getAttribute("aria-pressed") === "true") return;
+      var sv = b.getAttribute("data-value");
+      if (sv === "done") fresh.add(id);
+      post({ act: "status", id: id, status: sv });
+    } else if (act === "step") {
+      stepTask(Number(b.getAttribute("data-dir")) || 1, true);
+    } else if (act === "skip") {
+      /* Skip moves on without saving, carrying or counting (§732) */
+      stepTask(1, false);
+    } else if (act === "pmore") {
+      /* §739: the earlier updates open in place, and fold again */
+      var pl = b.previousElementSibling, on9 = b.getAttribute("aria-expanded") !== "true";
+      if (pl) pl.querySelectorAll(".pold").forEach(function (x) { x.hidden = !on9; });
+      b.setAttribute("aria-expanded", String(on9));
+      b.textContent = on9 ? "Show fewer" : "Show " + b.getAttribute("data-n") + " earlier \u203a";
+    } else if (act === "madd") {
+      /* §733: this week's note is written; "+ Add to this week" opens the box */
+      var ab = b.closest(".mopen"), abx = ab && ab.querySelector(".pbox.mq");
+      if (abx) { abx.hidden = false; b.hidden = true; var ai = abx.querySelector(".pnew"); if (ai) ai.focus(); }
+    } else if (act === "mshow") {
+      /* the box's Description, History and ⋯, folded until pressed (§732) */
+      var mo = b.closest(".mopen"), w8 = b.getAttribute("data-w");
+      var tgt = mo && (w8 === "desc" ? mo.querySelector(".mdesc") : w8 === "hist" ? mo.querySelector(".mhist") : b.parentNode.querySelector(".mmenu"));
+      if (tgt) { tgt.hidden = !tgt.hidden; b.setAttribute("aria-expanded", String(!tgt.hidden)); if (w8 === "desc" && !tgt.hidden) { var dd = tgt.querySelector("textarea"); if (dd) dd.focus(); } }
+    } else if (act === "mfold") {
+      /* last week's finished work and next week's, behind their links (§732) */
+      var sc = b.closest(".sec"), fo = sc && sc.querySelector('.mf[data-f="' + b.getAttribute("data-f") + '"]');
+      if (fo) { fo.hidden = !fo.hidden; b.setAttribute("aria-expanded", String(!fo.hidden)); }
     } else if (act === "progress-go") {
       var pb = b.closest(".pbox"), pn = pb ? pb.querySelector(".pnew") : null;
       if (pn && !pn.disabled) addProgress(pn);
@@ -655,7 +854,9 @@ export const APP_JS = `(function () {
          saves, Escape puts them back. The server stamps it edited. */
       var li = b.closest(".pe"), txt = li ? li.querySelector(".ptxt") : null, pid = entryOf(b);
       if (!li || !txt || li.querySelector("textarea")) return;
-      var was3 = txt.textContent, ta = document.createElement("textarea");
+      /* §733: the words as written — a link is drawn as a short tag, so the
+         drawn text is not what was stored */
+      var was3 = txt.getAttribute("data-raw") != null ? txt.getAttribute("data-raw") : txt.textContent, ta = document.createElement("textarea");
       ta.value = was3; ta.maxLength = 2000; ta.setAttribute("aria-label", "Edit the entry"); ta.rows = 2;
       txt.hidden = true; txt.parentNode.insertBefore(ta, txt);
       ta.focus(); size(ta);
@@ -680,12 +881,38 @@ export const APP_JS = `(function () {
       post({ act: "progress-delete", progressId: entryOf(b) });
     } else if (act === "add-note") {
       if (noteIsOpen(ar)) foldNote(ar); else openNote(ar);
+    } else if (act === "row-menu") {
+      /* THE ROW'S ⋯ (§707): Details and progress, Rename, Change topic, Delete */
+      toggleSettings(b);
+    } else if (act === "rename-start") {
+      closePops(null);
+      var rt = b.closest(".row") && b.closest(".row").querySelector(".t[data-rename]");
+      if (rt) startRename(rt);
+    } else if (act === "sub-open") {
+      /* §713: a press opens the small list beside the ⋯ for a hand with no
+         hover (the stylesheet opens it on hover and on focus); one at a time */
+      var ms = b.closest(".rmsub"), was = ms && ms.classList.contains("on");
+      if (ms) { ms.parentNode.querySelectorAll(".rmsub.on").forEach(function (x) { x.classList.remove("on"); }); ms.classList.toggle("on", !was); }
+    } else if (act === "week-start" || act === "who-start") {
+      /* §708: the week a row due this week no longer shows, and the owner a
+         card per owner no longer shows, are opened from the ⋯ — the same
+         pickers, pressed for the hand */
+      closePops(null);
+      var rw = b.closest(".row"), pk2 = rw && rw.querySelector(act === "week-start" ? ".when.pick" : ".who.pick");
+      if (pk2) pk2.click();
+    } else if (act === "topic-start") {
+      closePops(null);
+      var rp = b.closest(".row") && b.closest(".row").querySelector(".tpk");
+      if (rp) togglePop(rp, ".topics");
     } else if (act === "more") {
       /* Open this row (and only this row), or fold it if it is the open one;
-         the address carries which, and the list is read again. */
+         the address carries which, and the list is read again. The name
+         opens it too (§707) — but not while it is being renamed. */
+      if (e.target.closest("input")) return;
+      closePops(null);
       var next = openId() === id ? null : id;
       setOpen(next);
-      refetch();
+      if (!openHere(next)) refetch();
     } else if (act === "delete-ask") {
       b.hidden = true; var s = b.parentNode.querySelector(".sure"); if (s) s.hidden = false;
     } else if (act === "delete-no") {
@@ -716,11 +943,39 @@ export const APP_JS = `(function () {
      the bar is every module's and its height is its own business, so the
      offset is read off it now and again whenever it changes. */
   sizeAll();
+  drawWalk();
   var tb = document.querySelector(".tb");
-  function barFoot() { if (tb) document.documentElement.style.setProperty("--tbh", tb.offsetHeight + "px"); }
+  function barFoot() {
+    if (tb) document.documentElement.style.setProperty("--tbh", tb.offsetHeight + "px");
+    /* §733: the meeting's box sticks under the pinned band and bar */
+    var pn = document.querySelector(".pin");
+    document.documentElement.style.setProperty("--pinh", (pn && getComputedStyle(pn).position === "sticky" ? pn.offsetHeight : 0) + "px");
+    /* §737: the meeting's two boxes get the room from where they start to
+       the foot of the screen, measured on the page, so they reach it */
+    /* §738: only where they start is measured; the height to the screen's
+       foot is the stylesheet's (100dvh), so it follows the window itself */
+    var mt = document.querySelector(".meet");
+    /* §741: in the page's own pixels — the page is zoomed (80% on a
+       computer), and a box's place on screen is in the screen's */
+    var zm = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    if (mt) document.documentElement.style.setProperty("--meettop", Math.round((mt.getBoundingClientRect().top + window.scrollY) / zm) + "px");
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(barFoot);
+  /* §740 (Islam: "on my screen still the left rail is not extended to the end
+     of the screen"): production served §738, yet the rail stopped ~160px
+     short — the place the boxes start had been measured before something
+     above them settled (a line said and cleared, the band's type arriving).
+     So the start is measured again whenever the page settles or anything in
+     it changes: on load, when the body changes size, and after any change
+     to the page's content — one measure per frame at most. */
+  var fitQueued = false;
+  function fitSoon() { if (fitQueued) return; fitQueued = true; requestAnimationFrame(function () { fitQueued = false; barFoot(); }); }
+  window.addEventListener("load", fitSoon);
+  if (typeof ResizeObserver === "function") new ResizeObserver(fitSoon).observe(document.body);
+  if (typeof MutationObserver === "function") new MutationObserver(fitSoon).observe(document.body, { childList: true, subtree: true, characterData: true });
   barFoot();
   if (tb && typeof ResizeObserver === "function") new ResizeObserver(barFoot).observe(tb);
-  else window.addEventListener("resize", barFoot);
+  window.addEventListener("resize", barFoot);
 
   /* THE VIEWS ARE FILTERS, NOT PAGES (§566). Islam: "they need to be filters
      not other pages that take me to another loading page they should act
@@ -731,10 +986,12 @@ export const APP_JS = `(function () {
      did not run, still opens it as before. */
   function viewOf(href) { return new URL(href, location.href).searchParams.get("view"); }
   document.addEventListener("click", function (e) {
-    var t = e.target.closest && e.target.closest(".cats a[href]");
+    /* §727: Start weekly check and Back to the list go the same way */
+    var t = e.target.closest && e.target.closest(".cats a[href], a.wcgo[href], a.wcback[href]");
     if (!t || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     /*%TABS%*/
     var v = viewOf(t.href);
+    if (t.classList.contains("wcback")) { try { v = sessionStorage.getItem("smp.tracker.lastview") || v; } catch (x) {} }
     if (!v) return;
     e.preventDefault();
     closePops(null);
@@ -742,25 +999,62 @@ export const APP_JS = `(function () {
     document.querySelectorAll(".cats a[href]").forEach(function (o) {
       if (viewOf(o.href) === v) o.setAttribute("aria-current", "true"); else o.removeAttribute("aria-current");
     });
+    var was = B.getAttribute("data-view") || "week";
+    if (v === "check" && was !== "check") { try { sessionStorage.setItem("smp.tracker.lastview", was); } catch (x) {} }
     B.setAttribute("data-view", v);
     var u = new URL(location.href);
     u.searchParams.set("view", v); u.searchParams.delete("open");
     history.pushState(null, "", u);
-    pressed = null; refetch();
+    pressed = null;
+    if (!showView(v, was)) refetch();
   });
   window.addEventListener("popstate", function () {
     var v = new URLSearchParams(location.search).get("view") || "week";
-    if (v === (B.getAttribute("data-view") || "week")) return;
+    var was = B.getAttribute("data-view") || "week";
+    if (v === was) return;
     B.setAttribute("data-view", v);
-    pressed = null; refetch();
+    pressed = null;
+    if (!showView(v, was)) refetch();
   });
+  /* §726 A VIEW OPENS AT ONCE: the page carries each list view drawn by the
+     server in a <template class="vtpl">; a press puts that copy in place of
+     the list — the count, the hidden count line, the sections' done rows
+     unfolded where they were, a search still sifting. False when either end
+     is the weekly check (a meeting, read from the server) or there is no
+     copy, and the caller reads the list. */
+  function showView(v, was) {
+    if (v === "check" || was === "check") return false;
+    var tpl = document.querySelector('template.vtpl[data-view="' + v + '"]'), cur = document.querySelector("#body .card.cbot");
+    if (!tpl || !cur) return false;
+    cur.parentNode.replaceChild(tpl.content.cloneNode(true), cur);
+    document.querySelectorAll(".cats a[href]").forEach(function (o) {
+      if (viewOf(o.href) === v) o.setAttribute("aria-current", "true"); else o.removeAttribute("aria-current");
+    });
+    var c = document.querySelector(".ctop .chd .ccnt"); if (c) c.textContent = tpl.getAttribute("data-n") || "0";
+    var cnt = document.getElementById("count"); if (cnt) cnt.textContent = tpl.getAttribute("data-count") || "";
+    document.querySelectorAll(".sec").forEach(function (sec) { if (shown.has(sec.getAttribute("data-key"))) sec.classList.add("showdone"); });
+    fresh.forEach(function (id) { var r = document.querySelector('#body .row[data-id="' + id + '"]'); if (r) r.classList.add("fresh"); });
+    setOpen(null);
+    countWas = null; sift();
+    return true;
+  }
 
   /* RENAME IN PLACE: a double-click on the name turns it into a box; Enter
      or leaving the box renames, Escape puts the name back. A single click
      does nothing, so a row can still be read without a box opening under
      the pointer. */
+  /* ON THE LIST A SINGLE CLICK ON THE NAME OPENS THE TASK (§707), so the
+     list renames from its ⋯ — Rename — and the double-click stays on the
+     meeting's own title, which opens nothing. */
   document.addEventListener("dblclick", function (e) {
-    var t = e.target.closest(".t[data-rename]");
+    var t = e.target.closest(".mopen .t[data-rename]");
+    if (t) startRename(t);
+  });
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if ((e.key === "Enter" || e.key === " ") && t && t.matches && t.matches(".row .t[role=button]")) { e.preventDefault(); t.click(); }
+  });
+  function startRename(t) {
     if (!t || t.querySelector("input")) return;
     var tn = t.closest(".tn2"), id = rowOf(t), was = t.textContent;
     var inp = document.createElement("input");
@@ -785,7 +1079,7 @@ export const APP_JS = `(function () {
       else if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
     });
     inp.addEventListener("blur", function () { finish(true); });
-  });
+  }
 
   /* Saved when you leave the box (§35), and only when it changed. */
   document.addEventListener("focusout", function (e) {
@@ -796,5 +1090,23 @@ export const APP_JS = `(function () {
     pressed = c;
     post({ act: "notes", id: id, description: v });
   });
+
+  /* §720 VIEW IN TRACKER (Islam: "it should just show it in tracker without
+     opening it"): My tasks and Home link here with show=<id>. The row is
+     brought to the middle of the screen and lit for a moment — not opened;
+     its section unfolds its done rows if it is one. The address forgets
+     show= so a reload is the plain list. */
+  (function () {
+    var u = new URL(location.href), sid = u.searchParams.get("show");
+    if (!sid) return;
+    u.searchParams.delete("show"); history.replaceState(null, "", u);
+    var r = document.querySelector('.row[data-id="' + sid.replace(/"/g, "") + '"]');
+    if (!r) return;
+    var sec = r.closest(".sec");
+    if (sec && r.classList.contains("done")) { sec.classList.add("showdone"); shown.add(sec.getAttribute("data-key")); }
+    r.scrollIntoView({ block: "center" });
+    r.classList.add("shown");
+    setTimeout(function () { r.classList.remove("shown"); }, 2600);
+  })();
 })();
 `;

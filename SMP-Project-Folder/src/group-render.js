@@ -1450,8 +1450,8 @@ function arrangeBtn(scope, unitKey){
    which is exactly why the button had to be honest about what it does. */
 function draftBtns(){
   return '<span class="repdraft">' +
-    '<button class="editbtn" data-repsave="1">Save draft</button>' +
     '<button class="linkbu" data-repcancel="1">Cancel</button>' +
+    '<button class="editbtn" data-repsave="1">Save draft</button>' +
     '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
     '</span>';
 }
@@ -4157,12 +4157,26 @@ function textOr(page, value, cls, setter){
 /* §576: `subj` is the subject the row belongs to, written as `data-repu` the
    way `repEntry` writes it — My reporting draws rows from several units, so
    the note's handler must resolve the row against ITS unit rather than the
-   page it is standing on (§345). Absent everywhere else, as before. */
+   page it is standing on (§345). Absent everywhere else, as before.
+
+   §705: `want` IS THE BAND'S WORD, NOT A BOOLEAN (`noteWant`): "" when the
+   row owes nothing, "Off track" when it does — and then the box wears a TAG
+   above it, "Note needed · off track", and asks in the prompt's own words.
+   The tag is drawn here, by the one builder every note box comes through,
+   so the unit's table, a capability's and My reporting cannot drift apart
+   on it (§53.5). It replaces §576's lock (a bar, every other box shut, the
+   cursor steered); the mockup Islam approved, design-mockups/note-tag/
+   2026-11-02_tag-on-the-note-box.html, option A. The prompt is grey and never
+   stored: Islam wanted words in the box so the person feels something is
+   owed, and real text there would have been saved as the note and let Submit
+   through on "No justification". */
+var NOTE_PROMPT = "No justification yet \u2014 why, and what is being done";
 function noteBox(hook, id, value, want, subj){
-  return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
+  return (want ? '<span class="notetag">Note needed \u00b7 ' + esc(String(want).toLowerCase()) + '</span>' : '') +
+    '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
     '="' + esc(id) + '"' + (subj ? ' data-repu="' + esc(subj) + '"' : '') +
     ' rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
-    (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
+    (want ? NOTE_PROMPT : "Note, if there is one") + '">' +
     esc(value || "") + '</textarea>';
 }
 /* AND THE OTHER HALF: A LINE BREAK SOMEBODY TYPED HAS TO SURVIVE BEING READ
@@ -4175,8 +4189,16 @@ function noteBox(hook, id, value, want, subj){
    ONE BUILDER, because there are six places that print a stored note and a
    class added at five of them is the drift this exists to stop (§53.5,
    §104.7). `tight` is the margin the cell wants, not a second kind of note. */
-function noteRead(note, tight){
-  if (!note) return "";
+/* §705: AND A RED ROW WITH NO NOTE, READ BY SOMEBODY WHO CANNOT WRITE IT,
+   SAYS SO. `need` is `needsNote(row)`, asked by the caller that has the row;
+   where it is true and nothing is written the cell reads "Needs justification"
+   in red — the platform's word, never stored, so a reader is not left with a
+   blank beside a red figure. Islam, 2026-11-02: *"make the red is Needs
+   justification"*. */
+var NOTE_NEED = "Needs justification";
+function noteRead(note, tight, need){
+  if (!note) return need ? '<span class="why notetext needjust"' + (tight ? ' style="margin:0"' : '') +
+    '>' + NOTE_NEED + '</span>' : "";
   return '<span class="why notetext"' + (tight ? ' style="margin:0"' : '') + '>' +
     esc(note) + '</span>';
 }
@@ -7170,30 +7192,12 @@ function renderFocusBoard(){
    is not fixed from this page, so the chip is a door to where it is (§16.7 —
    a count that cannot take you to what it counts makes work; a door that
    admits what it cannot do is not the same fault). */
-/* ── §576: THE BAR THAT SAYS WHICH NOTE COMES FIRST ────────────────────
-   `NOTELOCK` is worked out by paint() before the render (`noteLockOf`), and
-   while it holds a row THIS bar is drawn in the "to finish" bar's place — the
-   mockup Islam approved: one bar, naming the row, and Go to it. Drawn for
-   whoever is locked, not only for whoever may submit, because a bounded
-   reporter and a tactic's owner are locked too and are the people most in
-   need of being told why every box went grey. It names the FIRST row and
-   counts the rest, so the person is never handed a list to work out. */
-var NOTELOCK = null;
-function noteLockBar(){
-  var lk = NOTELOCK;
-  if (!lk) return "";
-  var x = lk.rows[0], n = lk.rows.length;
-  var name = String((x.obj && x.obj.name) || "").trim() || "A figure";
-  var band = bandOf(rowReads(x)).label || "Off track";
-  return '<div class="lockbar" data-notelock="1" role="status">' +
-    '<span><b>' + esc(name) + ' is ' + esc(band.toLowerCase()) + '.</b> ' +
-    'Write its note before entering anything else.' +
-    (n > 1 ? ' <span class="lockn">1 of ' + n + '</span>' : '') + '</span>' +
-    '<button type="button" class="lockgo" data-notego="1">Go to it</button></div>';
-}
+/* §705: §576's lock bar stood here — drawn in this bar's place while a red
+   figure held the page. The lock went (the tag on the note box says what is
+   owed, `noteBox`), so this bar is the only one again and counts the note
+   among what is left, as it did before §576. */
 function reportBar(target){
   var t = String(target || "");
-  if (NOTELOCK) return noteLockBar();
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
   if (!REVIEW || REVIEW.state !== "open" || reportClosed(t)) return "";
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
@@ -7408,8 +7412,8 @@ function renderReport(u, opt){
   };
   var noteCell = function(x){
     return canEnterNote(u.ukey, x)
-      ? noteBox("note", x.id, x.obj.note, needsNote(x))
-      : noteRead(x.obj.note, true);
+      ? noteBox("note", x.id, x.obj.note, noteWant(x))
+      : noteRead(x.obj.note, true, needsNote(x));
   };
   var doneOf = function(list){
     var n = 0;
@@ -8118,7 +8122,7 @@ function capsShown(subject) {
   var target = holderTarget(subject);
   if (isCapTarget(target)) {
     var one = capById(capKeyOf(target));
-    return one ? [one] : [];
+    return one ? pieceHolders(target, [one]) : [];
   }
   /* §334: ONE HOLDER, SO THERE IS NOTHING LEFT TO ORDER. §310 sorted this
      list so a project owner met their own capability first; since §326 a
@@ -8129,8 +8133,22 @@ function capsShown(subject) {
      their project rather than a function page with nothing of theirs on it. */
   /* §405: a business unit that does not plan in pillars holds its own work
      exactly as a function does — one holder, addressed `u:<key>`. */
-  if (isUnitHolderId(target)) return unitHolders(subjKey(target));
-  return fnHolders(target.slice(3));
+  var hs = isUnitHolderId(target) ? unitHolders(subjKey(target)) : fnHolders(target.slice(3));
+  return pieceHolders(target, hs);
+}
+/* §704: AT "OWN PIECE" a holder is drawn with only the person's own projects
+   — one door, so Performance, Projects and Reporting narrow together. A
+   reading view: the holder's other fields are its own (the prototype), and
+   the projects are the same objects, so a figure reported lands where it
+   always did. Nobody who edits a plan is ever at own piece (the office reads
+   everything), so nothing adds to this list. */
+function pieceHolders(target, hs){
+  var place = isUnitHolderId(target) ? subjKey(target) : target;
+  if (!SMPRules.pieceOnlyAt(world(), viewer(), place)) return hs;
+  var w = world(), v = viewer();
+  return hs.map(function(c){
+    return Object.create(c, { projects: { value: (c.projects || []).filter(function(p){ return SMPRules.holdsItem(w, v, p); }), enumerable: true } });
+  });
 }
 /* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
    halves differ we say which and why). Projects, Reporting and Performance
@@ -8672,7 +8690,7 @@ function capKOTable(c){
            which is the honest pair: what they said, and what it scores. */
         var sc = measureScore(m);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
-          noteRead(m.note) + '</td>' +
+          noteRead(m.note, false, needsNote({ kind:"objective", obj:m })) + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -8698,7 +8716,7 @@ function projPerformanceBody(p, fk){
     var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
     return '<tr' + (notDue && !has ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + lateNote(when, done) +
-        noteRead(o.note) + '</td>' +
+        noteRead(o.note, false, !notDue && needsNote({ kind:(d ? "deliverable" : "outcome"), obj:o })) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + got + '</td>' +
@@ -9412,7 +9430,7 @@ function fnObjPerfTables(fk){
     var v = msReads(a), quiet = !dueThisCycle(a.due) && !a.status;
     return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
-      '<td>' + esc(a.name) + noteRead(a.note) + '</td>' +
+      '<td>' + esc(a.name) + noteRead(a.note, false, dueThisCycle(a.due) && needsNote({ kind:"action", obj:a })) + '</td>' +
       '<td class="cc">' + esc(a.owner || "—") + '</td>' +
       '<td class="cc">' + dxDate(a.due, a.status === "done") + '</td>' +
       '<td class="cc">' + (quiet ? notDueCell() : msPill(a)) + '</td>' +
@@ -9451,7 +9469,7 @@ function fnObjReportBody(fk){
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, mayR, m.name) + '</td>' +
       '<td class="cc">' + (has ? '<span class="fixedval">' + pct(measureScore(m)) + '</span>'
                                : '<span class="fixedval">&mdash;</span>') + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, mayR) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"objective", obj:m }, mayR) + '</td></tr>';
   }).join("");
   var aRows = SMPRules.shown(fnActions(fk)).map(function(a, i){
     var notDue = !dueThisCycle(a.due), quiet = notDue && !a.status;
@@ -9464,7 +9482,7 @@ function fnObjReportBody(fk){
         ? capPctBox(a, mayA, a.name) + (statusPending(a) ? needsPct() : "")
         : (a.status ? '<b>' + msReads(a) + '%</b>'
                     : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
-      '<td class="notecol">' + capNoteBox(a, mayA) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"action", obj:a, asked:!notDue }, mayA) + '</td></tr>';
   }).join("");
   return (kRows ? '<h4 class="mini">Objectives</h4>' +
       miniTable(["#","Objective","Dir.","Target","Reported","Progress","Note"], kRows) : "") +
@@ -9490,9 +9508,7 @@ function renderFnObjReport(fk){
      shut. */
   REPORT_CHROME = repChrome(target, c.done, c.total, pctDone, mayAll, subd, parked,
                             submitWhyShort(target), ownStateChip(target));
-  /* §576: this format draws no "to finish" bar, so the lock's bar goes where
-     the others put it — above the tables. */
-  return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
+  return '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
 /* §598.1: a function's projects or objectives page shows the plan as it
@@ -9653,13 +9669,23 @@ function capPctBox(x, may, label){
 }
 /* THROUGH `noteBox` (§271), or the two halves of one product's reporting go on
    being fine differently (§53.5, A15): the fault this fixes was on both pages
-   and a fix to one of them is how they drift. This side asks for no note, so
-   `want` is false and the placeholder is the quiet one — which is a difference
-   in what is OWED, not in the control. */
-function capNoteBox(x, may){
+   and a fix to one of them is how they drift.
+   §705: handed the ROW (`{kind, obj}`, the shape `rowReads` understands) and
+   not the object, so this side asks the same question a unit's note cell
+   asks — `noteWant` for the tag and the prompt, `needsNote` for the red
+   "Needs justification" where the person may not write. Before §705 it passed
+   `want:false` always (§279's recorded not-done) and §576's lock patched the
+   owed box after the paint; now the builder knows.
+   `asked` IS PART OF THE ROW, as `fnReportItems` carries it: a milestone or
+   outcome whose date has not come is red on its own figure and owed by
+   nobody — Submit does not ask for it (`fnAskedItems`), so the tag must not
+   either, or the page would tag four rows where the gate counts one. The
+   caller passes the same answer its "Not due" cell is drawn from. */
+function capNoteBox(row, may){
+  var owed = row.asked !== false && needsNote(row);
   return may
-    ? noteBox("cnote", x.id, x.note, false)
-    : noteRead(x.note, true);
+    ? noteBox("cnote", row.obj.id, row.obj.note, owed ? noteWant(row) : "")
+    : noteRead(row.obj.note, true, owed);
 }
 function capPickBox(x, may, opts, val){
   if (!may) return '<span class="mono">' + (val ? esc(val) : "\u2014") + '</span>';
@@ -9718,7 +9744,7 @@ function projReportBody(p, subject){
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + ent + '</td>' +
       '<td class="cc">' + pcell + '</td>' +
-      '<td class="notecol">' + capNoteBox(o, mayR) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:(d ? "deliverable" : "outcome"), obj:o, asked:!notDue }, mayR) + '</td></tr>';
   }).join("");
   var mRows = p.milestones.map(function(m, i){
     var notDue = !dueThisCycle(m.finish), quiet = notDue && !m.status;
@@ -9731,7 +9757,7 @@ function projReportBody(p, subject){
         ? capPctBox(m, mayM, m.name) + (statusPending(m) ? needsPct() : "")
         : (m.status ? '<b>' + msReads(m) + '%</b>'
                     : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, mayM) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"milestone", obj:m, asked:!notDue }, mayM) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
@@ -9768,7 +9794,7 @@ function capReportBody(c){
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
       '<td class="num">' + repTargetCell(m) + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"objective", obj:m }, may) + '</td></tr>';
   }).join("");
   var sel = railPick(c);
   var koBlock = c.keyObjectives.length

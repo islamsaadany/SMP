@@ -515,6 +515,27 @@ const PCOLS = "id, action_id, body, by_key, at, edited_at";
 function shapeProgress(r: Record<string, any>): Progress {
   return { id: str(r.id), actionId: str(r.action_id), body: str(r.body), by: str(r.by_key), at: str(r.at), editedAt: r.edited_at ? str(r.edited_at) : null };
 }
+/* §719 (Islam: "opening the task loads and takes time it should open
+   momentarily"): every row's history and progress in one read each, so the
+   page carries each task's opened panel and opening it asks nothing. */
+export async function eventsByAction(c: Q): Promise<Map<string, Event[]>> {
+  const r = await c.query(
+    "SELECT action_id, kind, from_status, to_status, by_key, at, detail FROM tracker_events ORDER BY at DESC, id DESC");
+  const m = new Map<string, Event[]>();
+  for (const x of r.rows as any[]) {
+    const k = str(x.action_id);
+    if (!m.has(k)) m.set(k, []);
+    m.get(k)!.push({ kind: str(x.kind), from: x.from_status || null, to: x.to_status || null, by: str(x.by_key), at: str(x.at),
+      detail: x.detail && typeof x.detail === "object" ? x.detail : {} });
+  }
+  return m;
+}
+export async function progressByAction(c: Q): Promise<Map<string, Progress[]>> {
+  const r = await c.query("SELECT " + PCOLS + " FROM tracker_progress ORDER BY at DESC, id DESC");
+  const m = new Map<string, Progress[]>();
+  for (const x of r.rows as any[]) { const p = shapeProgress(x); if (!m.has(p.actionId)) m.set(p.actionId, []); m.get(p.actionId)!.push(p); }
+  return m;
+}
 export async function progressOf(c: Q, actionId: string): Promise<Progress[]> {
   const r = await c.query("SELECT " + PCOLS + " FROM tracker_progress WHERE action_id = $1 ORDER BY at DESC, id DESC", [actionId]);
   return r.rows.map(shapeProgress);

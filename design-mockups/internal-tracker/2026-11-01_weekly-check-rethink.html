@@ -1,0 +1,281 @@
+<title>Weekly Check Rethink</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>
+/* Three ways to run the weekly check, each clickable with the same tasks:
+   1 a quiet one-line list, 2 a meeting mode that walks one task at a time,
+   3 a board by status. Tokens are the tracker's, plus the pale blue. */
+:root{
+  --bar:#1F3158;--bar-ink:#FFF;--bar-quiet:#C6D2E5;--bar-accent:#E3A64A;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E9EDF3;--ground:#F5F7FA;--surface:#FFF;--surface-2:#EEF1F6;
+  --gold:#9C5D08;--bad:#B23025;--bad-bg:#FBECEA;--good:#1B6E4E;--good-bg:#DCF0E5;
+  --ns:#2B3A55;--ns-bg:#E3E8EF;--yel:#6B4E00;--yel-bg:#FFF0A8;--yel-dot:#E0B300;--ns-dot:#8A97AB;
+  --blue:#1F5FBF;--wk:#EAF2FB;--wk-line:#B9D3EF;--wk-ink:#1F4E86;--sel:#F0F5FD;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#272D39;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--bad:#E8776B;--bad-bg:#3A2322;--good:#63BE96;--good-bg:#1B2C26;
+  --ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--yel-dot:#E8C547;--ns-dot:#7D889B;
+  --blue:#8FB4F0;--wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;--sel:#1B2638;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#272D39;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--bad:#E8776B;--bad-bg:#3A2322;--good:#63BE96;--good-bg:#1B2C26;
+  --ns:#DDE3EC;--ns-bg:#2A3140;--yel:#FFE07A;--yel-bg:#3D3410;--yel-dot:#E8C547;--ns-dot:#7D889B;
+  --blue:#8FB4F0;--wk:#16263A;--wk-line:#2D4A6E;--wk-ink:#9CC3EE;--sel:#1B2638;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button,textarea,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+svg{display:block}
+
+.pick{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.pick .in{max-width:1040px;margin:0 auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pick b{font-weight:600;margin-right:6px}
+.pick button{font:600 13.5px/1 var(--font);padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.pick button[aria-pressed="true"]{background:var(--bar);color:#fff;border-color:var(--bar)}
+.pg{max-width:1040px;margin:0 auto;padding-block:16px 56px}
+.why{margin:0 0 14px;font-size:14px;color:var(--ink-2);max-width:80ch}
+.why b{color:var(--ink)}
+
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px;margin:0 0 14px;box-shadow:inset 0 -3px 0 var(--bar-accent);display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.mast h1{margin:0;font:600 24px/1.15 var(--serif)}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.tile{text-align:right}.tile b{display:block;font:600 22px/1 var(--font)}
+.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px}
+.tile.lt b{color:#F2A091}
+.chd{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 14px;flex-wrap:wrap}
+.chd h2{margin:0;font:600 17px/1.2 var(--serif);flex:1}
+.views{display:flex;background:var(--surface-2);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap}
+.views span{font:500 13px/1 var(--font);padding:6px 9px;border-radius:6px;color:var(--ink-2)}
+.views span.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(20,28,43,.08)}
+
+/* shared bits */
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--ns-dot)}
+.dot.prog{background:var(--yel-dot)}.dot.done{background:var(--good)}
+.late{display:inline-flex;align-items:center;font:600 11.5px/1 var(--font);color:var(--bad);background:var(--bad-bg);border-radius:4px;padding:3px 6px;white-space:nowrap}
+.who{font:500 13px/1.3 var(--font);color:var(--ink-2);white-space:nowrap}
+.av{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font:700 10.5px/1 var(--font);background:var(--surface-2);color:var(--ink-2);flex:none}
+.upd{font-size:13px;color:var(--ink-3)}
+.upd b{font-weight:600;color:var(--ink-2)}
+.empty-upd{font-size:13px;color:var(--ink-3);font-style:italic}
+.thead{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.thead .ix{font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.thead h3{margin:0;font:700 16px/1.25 var(--font)}
+.thead .meta{font:500 13px/1.3 var(--font);color:var(--ink-2)}
+.thead .meta .bad{color:var(--bad);font-weight:600}
+.thead .end{margin-left:auto;display:flex;align-items:center;gap:10px;font:500 12.5px/1 var(--font);color:var(--ink-3)}
+.mtr{width:64px;height:5px;border-radius:3px;background:var(--line);overflow:hidden}.mtr i{display:block;height:100%;background:var(--good)}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 14px}
+
+/* ── 1 · QUIET LIST ── */
+.q .task{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;gap:6px 14px;align-items:start;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.q .task:last-of-type{border-bottom:0}
+.q .tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;background:var(--surface);margin-top:2px;padding:0}
+.q .tick.on{background:var(--good);border-color:var(--good)}
+.q .nm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.q .nm .t{font-weight:500}
+.q .sub{grid-column:2/3;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.q .addu{background:none;border:0;padding:0;font:600 13px/1.4 var(--font);color:var(--blue)}
+.q .status{display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:6px;font:600 13px/1.2 var(--font);color:var(--ink-2);white-space:nowrap}
+.q .status:hover{background:var(--surface-2)}
+.q .meta-r{display:flex;align-items:center;gap:14px;justify-content:flex-end;min-width:200px}
+.q .kebab{border:0;background:none;color:var(--ink-3);width:28px;height:28px;border-radius:7px;display:grid;place-items:center;margin-top:-4px}
+.q .kebab:hover{background:var(--surface-2);color:var(--ink)}
+.q .kebab svg{width:16px;height:16px}
+.q .editor{grid-column:2/-1;display:flex;gap:8px;align-items:flex-start;margin-top:4px}
+.q .editor textarea{flex:1;min-width:0;min-height:56px;border:1px solid var(--blue);border-radius:8px;padding:8px 10px;font-size:14px;background:var(--surface);resize:vertical;outline:none}
+.btn{font:600 13px/1 var(--font);border-radius:7px;padding:8px 12px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.btn.pri{background:var(--bar);border-color:var(--bar);color:#fff}
+.btn.ghost{border-color:transparent;color:var(--ink-2)}
+.menu{position:relative}
+.menu .pop{position:absolute;right:0;top:30px;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(20,28,43,.16);padding:4px;min-width:200px}
+.menu .pop button{display:flex;gap:8px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;font-size:14px}
+.menu .pop button:hover{background:var(--surface-2)}
+.menu .pop svg{width:14px;height:14px;color:var(--blue)}
+.q .next{display:flex;align-items:center;gap:10px;padding:11px 16px;border-top:1px dashed var(--line);font-size:13.5px;color:var(--ink-2);flex-wrap:wrap;border-radius:0 0 12px 12px;background:var(--ground)}
+.q .next .lab{font-weight:700;color:var(--ink)}
+.q .next .add{margin-left:auto;background:none;border:0;padding:0;color:var(--blue);font-weight:600}
+
+/* ── 2 · MEETING MODE ── */
+.mm{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);gap:14px;align-items:start}
+.mm .list{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mm .grp{padding:10px 14px 6px;font:700 12.5px/1.2 var(--font);color:var(--ink);display:flex;gap:8px;align-items:center;border-top:1px solid var(--line-2)}
+.mm .grp:first-child{border-top:0}
+.mm .grp .ix{color:var(--gold);font-weight:600}
+.mm .grp .c{margin-left:auto;font-weight:500;color:var(--ink-3)}
+.mm .it{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:none;padding:9px 14px;border-left:3px solid transparent}
+.mm .it:hover{background:var(--surface-2)}
+.mm .it[aria-current="true"]{background:var(--sel);border-left-color:var(--blue)}
+.mm .it .t{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mm .it .ok{color:var(--good);font:600 12px/1 var(--font)}
+.mm .walk{padding:10px 14px;border-top:1px solid var(--line);font:500 12.5px/1.3 var(--font);color:var(--ink-3)}
+.mm .walk .bar{height:5px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}.mm .walk .bar i{display:block;height:100%;background:var(--blue)}
+.mm .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px;position:sticky;top:70px}
+.mm .crumb{font:600 12.5px/1 var(--font);color:var(--gold);margin:0 0 8px}
+.mm .panel h3{margin:0 0 10px;font:600 21px/1.25 var(--serif);text-wrap:balance}
+.mm .facts{display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:13.5px;color:var(--ink-2);margin-bottom:18px}
+.mm .facts span{display:inline-flex;gap:7px;align-items:center}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:7px;padding:8px 13px;font:600 13.5px/1 var(--font);color:var(--ink-2);display:inline-flex;gap:7px;align-items:center}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(20,28,43,.12)}
+.lbl{display:block;font:600 13px/1.3 var(--font);color:var(--ink);margin:18px 0 6px}
+.mm textarea{width:100%;min-height:92px;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14.5px;background:var(--surface);resize:vertical}
+.mm textarea:focus{border-color:var(--blue);outline:none}
+.mm .hist{margin:14px 0 0;padding:0;list-style:none;font-size:13.5px}
+.mm .hist li{display:grid;grid-template-columns:80px 1fr;gap:10px;padding:7px 0;border-top:1px solid var(--line-2);color:var(--ink-2)}
+.mm .hist li b{font:600 12px/1.6 var(--font);color:var(--ink-3)}
+.mm .acts{display:flex;gap:10px;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.mm .acts .sp{flex:1}
+.mm .acts .btn svg{width:14px;height:14px}
+.mm .acts .btn{display:inline-flex;gap:7px;align-items:center}
+.mm .keys{font-size:12px;color:var(--ink-3);margin-top:10px}
+.mm kbd{font:600 11px/1 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:2px 5px;background:var(--surface)}
+
+/* ── 3 · BOARD ── */
+.bd .cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:12px}
+.bd .col{background:var(--ground);border-radius:10px;padding:8px;min-height:90px}
+.bd .col.nx{background:transparent;border:1.5px dashed var(--line)}
+.bd .ch{display:flex;align-items:center;gap:7px;font:700 12.5px/1 var(--font);padding:4px 4px 9px;color:var(--ink-2)}
+.bd .ch .n{margin-left:auto;font-weight:600;color:var(--ink-3)}
+.bd .card{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:10px 11px;margin:0 0 8px;box-shadow:0 1px 2px rgba(20,28,43,.05)}
+.bd .card .t{font-size:14px;font-weight:500;line-height:1.35}
+.bd .card .ft{display:flex;align-items:center;gap:8px;margin-top:9px}
+.bd .card .ft .sp{flex:1}
+.bd .card .upd{margin-top:6px;font-size:12.5px}
+.bd .mv{border:1px solid var(--line);background:var(--surface);border-radius:6px;width:26px;height:24px;display:grid;place-items:center;color:var(--ink-3);padding:0}
+.bd .mv:hover{border-color:var(--blue);color:var(--blue)}
+.bd .mv svg{width:12px;height:12px}
+.bd .addn{width:100%;border:0;background:none;color:var(--blue);font:600 13px/1 var(--font);padding:8px 4px;text-align:left}
+
+@media (max-width:800px){
+  .mm{grid-template-columns:1fr}.mm .panel{position:static}
+  .bd .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .q .task{grid-template-columns:22px minmax(0,1fr) auto}.q .meta-r{grid-column:2/3;justify-content:flex-start;min-width:0}
+  .strip{gap:14px}
+}
+@media (max-width:480px){.bd .cols{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.view{animation:in .22s ease-out}@keyframes in{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:none}}}
+</style>
+
+<div class="pick"><div class="in"><b>Weekly check</b>
+  <button type="button" id="b1" data-v="1" aria-pressed="true">1 · Quiet list</button>
+  <button type="button" id="b2" data-v="2" aria-pressed="false">2 · Meeting mode</button>
+  <button type="button" id="b3" data-v="3" aria-pressed="false">3 · Board</button>
+</div></div>
+
+<div class="pg">
+  <p class="why" id="why"></p>
+  <div class="mast"><div><p class="wkof">This week · 1 – 5 Nov</p><h1>Internal Tracker</h1></div>
+    <div class="strip"><div class="tile"><b id="kOpen">7</b><span>Open</span></div><div class="tile lt"><b>3</b><span>Late</span></div><div class="tile"><b>2</b><span>Due</span></div><div class="tile"><b id="kDone">0</b><span>Done this week</span></div></div></div>
+  <div class="chd"><h2>Actions</h2><div class="views"><span>This week</span><span>All</span><span>Mine</span><span>Undated</span><span class="on">Weekly check</span></div></div>
+  <div id="view"></div>
+</div>
+
+<script>
+const I={
+ arrow:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>',
+ dots:'<svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>',
+ check:'<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg>',
+ note:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 4h10M3 8h10M3 12h6"/></svg>',
+ left:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg>',
+ right:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 10.5 8 6 12.5"/></svg>'};
+const ST={ns:'Not started',prog:'In progress',done:'Done'};
+/* Example tasks, written the way the office writes them. */
+const T=[
+ {ix:'01',name:'Budget',done:0,total:5,next:[],tasks:[
+  {id:'a',t:'2027 Budget – P&L up to CM',who:'Aley',st:'prog',last:'Draft sent to the CFO, comments due Wednesday',lw:'Last week'},
+  {id:'b',t:'Update the timeline with Akeed',who:'Momen',late:'1 w late',st:'prog'},
+  {id:'c',t:'Follow up on the cost submissions',who:'Momen',late:'1 w late',st:'ns',last:'Two of five departments submitted',lw:'Last week'}]},
+ {ix:'02',name:'Communication',done:0,total:2,next:['Send the town-hall invite · Sara'],tasks:[
+  {id:'d',t:'Draft the Q4 town-hall agenda',who:'Sara',st:'ns'},
+  {id:'e',t:'Refresh the intranet strategy page',who:'Omar',late:'2 w late',st:'prog',last:'Waiting on the new org chart',lw:'2 weeks ago'}]},
+ {ix:'03',name:'HR & People',done:1,total:3,next:['Share the retention cut · Islam'],tasks:[
+  {id:'f',t:'Retention analytics: first cut',who:'Islam',st:'prog'},
+  {id:'g',t:'Close the two open HR projects',who:'Islam',st:'done',last:'Both signed off',lw:'This week'}]}];
+const all=()=>T.flatMap(t=>t.tasks.map(a=>Object.assign(a,{topic:t})));
+const ini=n=>n.slice(0,2).toUpperCase();
+const meta=t=>{const o=t.tasks.filter(a=>a.st!=='done').length,l=t.tasks.filter(a=>a.late&&a.st!=='done').length;return o+' open'+(l?' · <span class="bad">'+l+' late</span>':'')};
+const head=t=>'<div class="thead"><span class="ix">'+t.ix+'</span><h3>'+t.name+'</h3><span class="meta">'+meta(t)+'</span><span class="end">'+t.tasks.filter(a=>a.st==='done').length+' of '+t.tasks.length+' done<span class="mtr"><i style="width:'+Math.round(100*t.tasks.filter(a=>a.st==='done').length/t.tasks.length)+'%"></i></span></span></div>';
+let state={v:1,cur:'a',open:null,menu:null};
+
+/* 1 — one line per task; the update is a link that opens a box; carry lives in the ⋯ menu */
+function quiet(){
+ return '<div class="view q">'+T.map(t=>'<div class="tcard">'+head(t)+t.tasks.map(a=>
+  '<div class="task"><button type="button" class="tick'+(a.st==='done'?' on':'')+'" data-tick="'+a.id+'" aria-label="Mark done">'+(a.st==='done'?I.check:'')+'</button>'+
+  '<div><div class="nm"><span class="t">'+a.t+'</span>'+(a.late&&a.st!=='done'?'<span class="late">'+a.late+'</span>':'')+'</div>'+
+  (state.open===a.id?'':'<div class="sub">'+(a.last?'<span class="upd"><b>'+a.lw+'</b> · '+a.last+'</span>':'<span class="empty-upd">No update yet</span>')+
+   (a.st!=='done'?'<button type="button" class="addu" data-open="'+a.id+'">Add this week\'s update</button>':'')+'</div>')+'</div>'+
+  '<div class="meta-r"><span class="who">'+a.who+'</span><button type="button" class="status" data-cycle="'+a.id+'" title="Change status"><span class="dot '+a.st+'"></span>'+ST[a.st]+'</button></div>'+
+  '<div class="menu"><button type="button" class="kebab" data-menu="'+a.id+'" aria-label="More for this task" aria-expanded="'+(state.menu===a.id)+'">'+I.dots+'</button>'+
+   (state.menu===a.id?'<div class="pop" role="menu"><button type="button" role="menuitem">'+I.arrow+'Carry to next week</button><button type="button" role="menuitem">'+I.note+'Notes and history</button></div>':'')+'</div>'+
+  (state.open===a.id?'<div class="editor"><textarea id="u-'+a.id+'" placeholder="What happened this week?" aria-label="This week\'s update"></textarea><button type="button" class="btn pri" data-close="1">Save</button><button type="button" class="btn ghost" data-close="1">Cancel</button></div>':'')+
+  '</div>').join('')+
+  '<div class="next"><span class="lab">Next week</span>'+(t.next.length?t.next.join(', '):'Nothing written yet')+'<button type="button" class="add">+ Write next week\'s action</button></div></div>').join('')+'</div>';
+}
+
+/* 2 — the meeting walks one task at a time: list on the left, the task on the right */
+function meeting(){
+ const xs=all(),a=xs.find(x=>x.id===state.cur)||xs[0],i=xs.indexOf(a),reviewed=xs.filter(x=>x.rev).length;
+ return '<div class="view mm"><div class="list">'+T.map(t=>'<div class="grp"><span class="ix">'+t.ix+'</span>'+t.name+'<span class="c">'+meta(t).replace(/<[^>]+>/g,'')+'</span></div>'+
+   t.tasks.map(x=>'<button type="button" class="it" data-cur="'+x.id+'" aria-current="'+(x.id===a.id)+'"><span class="dot '+x.st+'"></span><span class="t">'+x.t+'</span>'+(x.rev?'<span class="ok">✓</span>':x.late&&x.st!=='done'?'<span class="late">'+x.late.replace(' late','')+'</span>':'')+'</button>').join('')).join('')+
+  '<div class="walk">'+reviewed+' of '+xs.length+' gone through<div class="bar"><i style="width:'+Math.round(100*reviewed/xs.length)+'%"></i></div></div></div>'+
+  '<div class="panel"><p class="crumb">'+a.topic.ix+' · '+a.topic.name+'</p><h3>'+a.t+'</h3>'+
+  '<div class="facts"><span><span class="av">'+ini(a.who)+'</span>'+a.who+'</span>'+(a.late&&a.st!=='done'?'<span class="late">'+a.late+'</span>':'<span>Due this week</span>')+'</div>'+
+  '<div class="seg" role="group" aria-label="Status">'+Object.keys(ST).map(k=>'<button type="button" data-set="'+k+'" aria-pressed="'+(a.st===k)+'"><span class="dot '+k+'"></span>'+ST[k]+'</button>').join('')+'</div>'+
+  '<label class="lbl" for="mmu">What happened this week?</label><textarea id="mmu" placeholder="One or two lines for the record"></textarea>'+
+  (a.last?'<ul class="hist"><li><b>'+a.lw+'</b><span>'+a.last+'</span></li></ul>':'')+
+  '<div class="acts"><button type="button" class="btn" data-step="-1">'+I.left+'Previous</button><button type="button" class="btn">'+I.arrow+'Carry to next week</button><span class="sp"></span><button type="button" class="btn pri" data-step="1">Save and next'+I.right+'</button></div>'+
+  '<div class="keys"><kbd>↑</kbd> <kbd>↓</kbd> move through the list · <kbd>Ctrl</kbd> + <kbd>Enter</kbd> save and next</div></div></div>';
+}
+
+/* 3 — per topic, a board by status; the arrows move a card along; Next week is the last column */
+function board(){
+ const cols=[['ns','Not started'],['prog','In progress'],['done','Done'],['next','Next week']];
+ return '<div class="view bd">'+T.map(t=>'<div class="tcard">'+head(t)+'<div class="cols">'+cols.map(([k,n])=>{
+  const items=k==='next'?t.tasks.filter(a=>a.st==='next'):t.tasks.filter(a=>a.st===k);
+  return '<div class="col'+(k==='next'?' nx':'')+'"><div class="ch">'+(k!=='next'?'<span class="dot '+k+'"></span>':'')+n+'<span class="n">'+(items.length+(k==='next'?t.next.length:0))+'</span></div>'+
+   items.map(a=>'<div class="card"><div class="t">'+a.t+'</div>'+(a.last?'<div class="upd"><b>'+a.lw+'</b> · '+a.last+'</div>':'')+
+    '<div class="ft"><span class="av" title="'+a.who+'">'+ini(a.who)+'</span>'+(a.late&&a.st!=='done'&&k!=='next'?'<span class="late">'+a.late+'</span>':'')+'<span class="sp"></span>'+
+    (k!=='ns'?'<button type="button" class="mv" data-mv="'+a.id+'" data-d="-1" aria-label="Move back">'+I.left+'</button>':'')+(k!=='next'?'<button type="button" class="mv" data-mv="'+a.id+'" data-d="1" aria-label="Move on">'+I.right+'</button>':'')+'</div></div>').join('')+
+   (k==='next'?t.next.map(x=>'<div class="card"><div class="t">'+x.split(' · ')[0]+'</div><div class="ft"><span class="av">'+ini(x.split(' · ')[1])+'</span></div></div>').join('')+'<button type="button" class="addn">+ Write next week\'s action</button>':'')+'</div>'}).join('')+'</div></div>').join('')+'</div>';
+}
+
+const WHY={
+ 1:'<b>Quiet list.</b> One line per task. The last update shows as text under the name, and the box opens only when you press <b>Add this week\'s update</b>. Late is a small red tag on the name. Status is a coloured dot with its word (press it to change). Carry and notes sit behind the ⋯ menu, so each row has one control on the right instead of three.',
+ 2:'<b>Meeting mode.</b> The check is a meeting that goes through tasks one at a time, so the page does the same. The list on the left shows every task with a status dot. The chosen task fills the right: status as three buttons, one box for this week\'s update, last week\'s line under it, and Carry, Previous and <b>Save and next</b> at the bottom. A counter shows how far through the meeting you are.',
+ 3:'<b>Board.</b> Each topic is a row of four columns: Not started, In progress, Done, Next week. A task is a small card with its owner\'s initials, a late tag and its last update. The arrows move a card to the next column, and carrying a task means moving it into Next week.'};
+function draw(){
+ document.getElementById('view').innerHTML=state.v==1?quiet():state.v==2?meeting():board();
+ document.getElementById('why').innerHTML=WHY[state.v];
+ document.querySelectorAll('.pick button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v==state.v)));
+ document.getElementById('kDone').textContent=all().filter(a=>a.st==='done').length;
+ if(state.open){const ta=document.getElementById('u-'+state.open);if(ta)ta.focus();}
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;const d=b.dataset;const find=id=>all().find(a=>a.id===id);
+ if(d.v){state.v=+d.v;state.open=state.menu=null;}
+ else if(d.open){state.open=d.open;state.menu=null;}
+ else if(d.close){state.open=null;}
+ else if(d.menu){state.menu=state.menu===d.menu?null:d.menu;}
+ else if(d.tick){const a=find(d.tick);a.st=a.st==='done'?'ns':'done';}
+ else if(d.cycle){const a=find(d.cycle);a.st={ns:'prog',prog:'done',done:'ns'}[a.st];}
+ else if(d.cur){state.cur=d.cur;}
+ else if(d.set){const a=find(state.cur);a.st=d.set;}
+ else if(d.step){const xs=all(),i=xs.findIndex(x=>x.id===state.cur);if(+d.step>0)xs[i].rev=true;state.cur=xs[Math.max(0,Math.min(xs.length-1,i+ +d.step))].id;}
+ else if(d.mv){const a=find(d.mv),o=['ns','prog','done','next'];a.st=o[Math.max(0,Math.min(3,o.indexOf(a.st)+ +d.d))];}
+ else if(!b.closest('.menu')){state.menu=null;} else return;
+ draw();
+});
+document.addEventListener('keydown',e=>{
+ if(state.v!=2)return;const xs=all(),i=xs.findIndex(x=>x.id===state.cur);
+ if(e.key==='ArrowDown'&&e.target.tagName!=='TEXTAREA'){state.cur=xs[Math.min(xs.length-1,i+1)].id;e.preventDefault();draw();}
+ if(e.key==='ArrowUp'&&e.target.tagName!=='TEXTAREA'){state.cur=xs[Math.max(0,i-1)].id;e.preventDefault();draw();}
+ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){xs[i].rev=true;state.cur=xs[Math.min(xs.length-1,i+1)].id;e.preventDefault();draw();}
+});
+draw();
+</script>

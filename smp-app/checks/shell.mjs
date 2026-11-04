@@ -3231,6 +3231,26 @@ await section("4 · Forefront's own pages", async () => {
         font: h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : "" }; });
     check(mwc.cards === 1 && mwc.secs === 3 && mwc.title === "Open tasks" && mwc.count === "3" && mwc.ctl && /^[\d.]+px solid$/.test(mwc.rule) && parseFloat(mwc.rule) >= 1 && /Internal Tracker/.test(mwc.sub) && mwc.font === "Georgia 700",
       "\u2026in one card titled Open tasks (Georgia bold) with its filters in its header, the groups labelled over a grey rule, under Home's band", JSON.stringify(mwc));
+    /* §725 MY TASKS' BAR IS THE TRACKER'S QUIET BAR */
+    const bar725 = await page.evaluate(() => { const h = document.querySelector(".mwcardhd"), ic = h && h.querySelector(".hocic"), s = h && h.querySelector(".mwfind .mwsearch"), d = h && h.querySelector(".mwwordb");
+      return h ? { tile: !!ic && getComputedStyle(ic).display !== "none", views: Array.from(h.querySelectorAll(".mwviews button")).map((b) => b.textContent), srchW: s ? Math.round(s.getBoundingClientRect().width) : -1,
+        done: d ? d.textContent.replace(/\s+/g, " ").trim() : "", order: Array.from(h.children).filter((x) => getComputedStyle(x).display !== "none").map((x) => x.className || x.tagName) } : null; });
+    check(!!bar725 && !bar725.tile && bar725.views.join("|") === "By date|By client" && bar725.srchW === 0 && /^Done: Hide/.test(bar725.done),
+      "\u2026its bar is the Tracker's quiet bar: no tile, By date \u00b7 By client as plain words, Search an icon with its box shut, Done a small word (\u00a7725)", JSON.stringify(bar725));
+    /* §729: the Done menu is shut until pressed (an author display had beaten
+       [hidden], so it stood open); and a hover greys the FIRST row too (the
+       odd rows' background:none had outweighed the hover) */
+    const menu729 = await page.evaluate(() => { const m = document.querySelector(".mwcardhd .mwwordm"); return m ? getComputedStyle(m).display : "gone"; });
+    await page.hover(".mwlist .mwrow >> nth=0");
+    const hov729 = await page.evaluate(() => { const r = document.querySelector(".mwlist .mwrow"); return r ? getComputedStyle(r).backgroundColor : ""; });
+    /* §730: a name is never cut — it wraps; the note line stays one line */
+    const wrap730 = await page.evaluate(() => { const t = document.querySelector(".mwlist .mwrow .t"), up = document.querySelector(".mwlist .mwmeta .up");
+      return { ws: t ? getComputedStyle(t).whiteSpace : "", tov: t ? getComputedStyle(t).textOverflow : "", up: up ? getComputedStyle(up).whiteSpace : "nowrap" }; });
+    check(wrap730.ws === "normal" && wrap730.tov !== "ellipsis" && wrap730.up === "nowrap", "\u2026a task's name is never cut, it wraps; the note line under it stays one line (\u00a7730)", JSON.stringify(wrap730));
+    check(menu729 === "none" && !/rgba\(0, 0, 0, 0\)|transparent/.test(hov729),
+      "\u2026the Done menu is shut until pressed, and a hover greys the first row as it does the others (\u00a7729)", JSON.stringify({ menu729, hov729 }));
+    await page.click(".mwcardhd .mwfind svg");
+    check((await page.evaluate("Math.round(document.querySelector('.mwcardhd .mwsearch').getBoundingClientRect().width)")) > 100, "\u2026a press on the search icon opens its box (\u00a7725)", "");
     await page.fill(".mwsearch", "far off");
     const found = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwrow")).filter((r) => !r.hidden).map((r) => r.querySelector(".t").textContent));
     check(JSON.stringify(found) === JSON.stringify(["MW far off"]), "\u2026and its search finds a task by its words", JSON.stringify(found));
@@ -3238,23 +3258,27 @@ await section("4 · Forefront's own pages", async () => {
     /* ROUND THREE (2026-10-24): rows alternate light grey and white, grey
        first; and Show done brings the finished tasks back, the last week by
        default of the two (Islam: "last week is the important one") */
-    const zebra = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwsec:not(.done)")).map((sec) =>
-      Array.from(sec.querySelectorAll(".mwrow")).map((r) => getComputedStyle(r).backgroundColor)));
-    const z0 = zebra.length ? zebra[0][0] : "";
-    check(zebra.length === 3 && z0 && !/rgba\(0, 0, 0, 0\)|transparent/.test(z0) && zebra.every((g) => g[0] === z0),
-      "\u2026each group's rows start light grey (the alternation restarts under each group)", JSON.stringify(zebra));
+    /* §709 (Islam: "go ahead, build it", the working mockup): every group is a
+       card of its own — its own frame and rounded corners — and the rows are
+       not striped any more, the Tracker's quiet row */
+    const cards = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwsec:not(.done)")).map((sec) => {
+      const c = getComputedStyle(sec), r = sec.querySelector(".mwrow");
+      return { radius: parseFloat(c.borderTopLeftRadius), border: c.borderTopStyle, row: r ? getComputedStyle(r).backgroundColor : "" }; }));
+    check(cards.length === 3 && cards.every((g) => g.radius >= 8 && g.border === "solid" && /rgba\(0, 0, 0, 0\)|transparent/.test(g.row)),
+      "\u2026each group is a card of its own, its rows unstriped (\u00a7709)", JSON.stringify(cards));
     const doneOf = () => page.evaluate(() => { const sec = document.querySelector(".mwlist .mwsec.done");
       return sec ? { h: sec.querySelector(".mwsh h2").textContent, rows: Array.from(sec.querySelectorAll(".mwrow .t")).map((t) => t.textContent) } : null; });
     check((await doneOf()) === null && !!(await page.$('.mwcardhd button[data-sort="hide"][aria-pressed="true"]')),
       "\u2026finished tasks are hidden until asked for", "");
-    await page.click('.mwcardhd button[data-sort="week"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="week"]');
     const dw = await doneOf();
     check(!!dw && dw.h === "Done in the last week" && dw.rows.includes("MW finished") && !dw.rows.includes("MW done in the month") && !dw.rows.includes("MW not mine"),
       "\u2026Show done \u00b7 Last week lists the one finished this week, under its own heading, not the older one, and never somebody else's", JSON.stringify(dw));
-    await page.click('.mwcardhd button[data-sort="month"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="month"]');
     const dm = await doneOf();
     check(!!dm && dm.h === "Done in the last 30 days" && JSON.stringify(dm.rows) === JSON.stringify(["MW finished", "MW done in the month"]), "\u2026and 30 days lists it and the one three weeks back, newest first", JSON.stringify(dm));
-    await page.click('.mwcardhd button[data-sort="hide"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="hide"]');
+    check((await page.evaluate(() => getComputedStyle(document.querySelector(".mwcardhd .mwwordm")).display)) === "none", "\u2026and the Done menu shuts once a choice is pressed (\u00a7729)", "");
     check((await doneOf()) === null, "\u2026and Hide puts them away again", "");
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
@@ -3321,9 +3345,94 @@ await section("4 · Forefront's own pages", async () => {
     /* the made state put back for the card below: three open, one late */
     await owner.query("UPDATE tracker_actions SET status = $2, done_at = NULL, first_due = due WHERE id = $1", [ids["MW late one"], "in_progress"]);
     await owner.query("UPDATE tracker_actions SET status = $2, done_at = NULL, first_due = due WHERE id = $1", [ids["MW far off"], "not_started"]);
+    /* §709: A PRESS ON A TASK'S NAME OPENS IT HERE — the Tracker's three tabs,
+       with Open in its Tracker beside them — and a line of progress written
+       there is the Tracker's own entry, read back from Postgres (§96); the
+       way into the client's Tracker is that link, and it still goes there. */
+    const firstId = await page.locator(".mwrow >> nth=0").getAttribute("data-id");
+    /* §728: the details were read with the list, so the press asks nothing,
+       and the tabs are there at once */
+    await page.waitForFunction(() => { const r = document.querySelector(".mwrow"); return !!r; }, null, { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+    let asked728 = 0; const c728 = (rq) => { const d = rq.postData() || ""; if (/"action":"workDetails?"/.test(d)) asked728++; };
+    page.on("request", c728);
     await page.click(".mwrow .t >> nth=0");
+    const now728 = await page.evaluate(() => !!document.querySelector(".mwrow.on .mwdet .mwtabs"));
+    page.off("request", c728);
+    check(asked728 === 0 && now728, "\u2026a task opens at once: its details came with the list, the press asks the server nothing (\u00a7728)", JSON.stringify({ asked728, now728 }));
+    await page.waitForSelector(".mwrow.on .mwdet .mwtabs", { timeout: 8000 }).catch(() => {});
+    const det = await page.evaluate(() => { const r = document.querySelector(".mwrow.on");
+      return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), path: location.pathname } : null; });
+    check(!!det && det.tabs.join("|") === "Progress|Description|History" && det.open && det.path === "/platform",
+      "\u2026a press on a task's name opens it here, in the Tracker's three tabs, Open in its Tracker beside them (\u00a7709)", JSON.stringify(det));
+    await page.fill("#mwp-" + firstId, "Written from My tasks, see https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1").catch(() => {});
+    await page.click(".mwrow.on .mwcompose button").catch(() => {});
+    await page.waitForSelector(".mwrow.on .mwtl li", { timeout: 8000 }).catch(() => {});
+    const wrote = (await owner.query("SELECT body FROM tracker_progress WHERE action_id = $1", [firstId])).rows.map((x) => x.body);
+    check(wrote.some((x) => /^Written from My tasks/.test(x)) && /Written from My tasks/.test(await page.locator(".mwrow.on .mwtl").textContent().catch(() => "")),
+      "\u2026and a line of progress written there is the Tracker's own entry, drawn on its timeline", JSON.stringify(wrote));
+    /* §728: the row's quiet line — the name heavier than the line, the
+       client plain, and no "This week" in front of this week's note */
+    const q728 = await page.evaluate((id) => { const r = document.querySelector('.mwrow[data-id="' + id + '"]'); if (!r) return null;
+      const t = r.querySelector(".t"), up = r.querySelector(".mwmeta .up"), cl = r.querySelector(".mwmeta .mwcl");
+      return { name: t ? +getComputedStyle(t).fontWeight : 0, up: up ? up.textContent : "", cl: cl ? +getComputedStyle(cl).fontWeight : 400 }; }, firstId);
+    /* §733: the link in it reads as a small tag, on the timeline and on the row's line */
+    const lk733 = await page.evaluate((id) => { const r = document.querySelector('.mwrow[data-id="' + id + '"]');
+      const t = document.querySelector(".mwrow.on .mwtl a.lktag") || document.querySelector(".mwdet .mwtl a.lktag"), u = r && r.querySelector(".mwmeta a.lktag");
+      return { tl: t ? t.textContent + " " + t.getAttribute("href") : "", row: u ? u.textContent : "" }; }, firstId);
+    check(lk733.tl === "Google Sheets https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1" && lk733.row === "Google Sheets",
+      "\u2026a link in the note reads as a small Google Sheets tag, on the timeline and on the row's line (\u00a7733)", JSON.stringify(lk733));
+    check(!!q728 && q728.name >= 600 && q728.cl <= 400 && /^Written from My tasks/.test(q728.up),
+      "\u2026and the row's line is the Tracker's quiet one: the name heavier, the client plain, no \"This week\" in front of this week's note (\u00a7728)", JSON.stringify(q728));
+    /* §712: YOUR OWN ENTRY IS EDITED AND DELETED HERE TOO — Edit turns it into
+       a box, Enter saves it (read back from Postgres); Delete asks first,
+       and Yes removes it */
+    await page.click(".mwrow.on .mwpacts button >> text=Edit").catch(() => {});
+    /* the box puts the cursor at the end a moment after it opens; typing
+       before that lands appends instead of replacing — wait for it (§739 run) */
+    await page.waitForFunction(() => { const t = document.activeElement; return !!t && t.classList.contains("mwpedit") && t.selectionStart === t.value.length; }, null, { timeout: 4000 }).catch(() => {});
+    await page.fill(".mwrow.on .mwpedit", "Edited from My tasks").catch(() => {});
+    await page.press(".mwrow.on .mwpedit", "Enter").catch(() => {});
+    await page.waitForFunction(() => /Edited from My tasks/.test((document.querySelector(".mwrow.on .mwtl") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
+    const edited = (await owner.query("SELECT body, edited_at FROM tracker_progress WHERE action_id = $1", [firstId])).rows;
+    check(edited.length === 1 && edited[0].body === "Edited from My tasks" && !!edited[0].edited_at, "\u2026and my own entry is edited in place there, saved as the Tracker saves it (\u00a7712)", JSON.stringify(edited));
+    await page.click(".mwrow.on .mwpacts button >> text=Delete").catch(() => {});
+    const asked = (await page.locator(".mwrow.on .mwpacts").textContent().catch(() => "")) || "";
+    await page.click(".mwrow.on .mwpacts button >> text=Delete it").catch(() => {});
+    await page.waitForSelector(".mwrow.on .mwdet .none", { timeout: 8000 }).catch(() => {});
+    const leftE = (await owner.query("SELECT count(*)::int AS n FROM tracker_progress WHERE action_id = $1", [firstId])).rows[0].n;
+    check(/Delete this entry\?/.test(asked) && leftE === 0, "\u2026and deleted there, asked first", asked + " · left " + leftE);
+    await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
+    /* §739: TWO BEFORE THIS WEEK — four older updates put in, then a line
+       written here (which reads the task again): this week's line and the
+       latest two before it show, the rest behind Show N earlier, which opens them */
+    for (let k = 1; k <= 4; k++) await owner.query("INSERT INTO tracker_progress (tenant_id, action_id, body, by_key, at) VALUES ($1, $2, $3, 'smo', now() - ($4 || ' days')::interval)", [tenantId, firstId, "Older update " + k, String(7 * k)]);
+    await page.fill("#mwp-" + firstId, "This week's line").catch(() => {});
+    await page.click(".mwrow.on .mwcompose button").catch(() => {});
+    await page.waitForFunction(() => document.querySelectorAll(".mwrow.on .mwtl li").length >= 5, null, { timeout: 8000 }).catch(() => {});
+    const vis739 = () => page.evaluate(() => Array.from(document.querySelectorAll(".mwrow.on .mwtl li")).filter((x) => !x.hidden).length);
+    const t739 = { all: await page.locator(".mwrow.on .mwtl li").count(), shown: await vis739(), link: ((await page.locator(".mwrow.on .mwpmore").textContent().catch(() => "")) || "").trim() };
+    await page.click(".mwrow.on .mwpmore").catch(() => {});
+    const t739b = { shown: await vis739(), link: ((await page.locator(".mwrow.on .mwpmore").textContent().catch(() => "")) || "").trim() };
+    check(t739.all === 5 && t739.shown === 3 && /^Show 2 earlier/.test(t739.link) && t739b.shown === 5 && t739b.link === "Show fewer",
+      "\u2026an opened task shows this week's line and the latest two before it, the rest behind Show N earlier, which opens them (\u00a7739)", JSON.stringify({ t739, t739b }));
+    await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
+    /* §713: THE ⋯ — Change the week and Hand to someone else first, each a
+       small list opened by HOVER beside the menu; Details and progress gone;
+       Rename third */
+    await page.click(".mwrow:not(.on) .mwkb >> nth=0").catch(() => {});
+    await page.waitForSelector(".mwpop .mwsubb", { timeout: 8000 }).catch(() => {});
+    const order = await page.evaluate(() => Array.from(document.querySelectorAll(".mwpop > .mwsubw > button, .mwpop > button, .mwpop > a")).map((b) => b.textContent.replace("›", "").trim()));
+    await page.hover(".mwpop .mwsubw:first-child > button").catch(() => {});
+    await page.waitForTimeout(300);
+    const weeks = await page.evaluate(() => { const s = document.querySelector(".mwpop .mwsubw:first-child > .mwside"); return s && getComputedStyle(s).display !== "none" ? s.querySelectorAll("button").length : 0; });
+    check(order[0] === "Week" && order[1] === "Owner" && order[2] === "View in Tracker" && order[3] === "Rename" && !order.includes("Details and progress") && weeks >= 4,
+      "\u2026the \u22ef starts with Week and Owner, each a list that opens on hover; then View in Tracker on one short line, Rename last before Delete (\u00a7713, \u00a7716, \u00a7718, \u00a7720); no Details and progress", JSON.stringify({ order, weeks }));
+    await page.keyboard.press("Escape");
+    const viewHref = await page.getAttribute(".mwrow.on .mwopen", "href").catch(() => "");
+    await page.click(".mwrow.on .mwopen");
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
-    check(path() === "/raya-trade/tracker", "\u2026and a row opens that client's Tracker", path());
+    check(path() === "/raya-trade/tracker" && /[?&]show=/.test(viewHref) && !/[?&]open=/.test(viewHref), "\u2026and View in its Tracker goes to that client's Tracker to show the task, not open it (\u00a7720)", path() + " " + viewHref);
     await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
     /* §620: arriving shows the tab's SAVED copy first, marked and inert, then
        the latest — the card is read off the latest, never the saved one */
@@ -3365,7 +3474,7 @@ await section("4 · Forefront's own pages", async () => {
     const h1 = await home();
     check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Track Record"]),
       "Home draws your clients, your tasks and the Track Record, each a card with its header inside it (spec 068, 069)", JSON.stringify(h1.heads));
-    check(h1.tabs === 0 && h1.sort === "Date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
+    check(h1.tabs === 0 && h1.sort === "By date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
       "\u2026its tasks are one list by date, the late one first in the alarm, then the one due now; the far one is left to My tasks", JSON.stringify(h1));
     check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)) && !h1.industry,
       "\u2026the client you have a seat on is one line with a door into each module, and no industry or seat", JSON.stringify(h1.clients));
@@ -3529,14 +3638,26 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForSelector('.hotask[data-id="' + lateId + '"]:not(.done)', { timeout: 8000 }).catch(() => {});
     check((await stored("MW late one")) === "in_progress" && (await home()).count === "2",
       "\u2026and unticking puts it back as it was", await stored("MW late one"));
+    /* §711: HOME'S ROW IS MY TASKS' ROW — a press on a task's name opens it in
+       the card, in the Tracker's three tabs with Open in its Tracker, and
+       Home stays where it is; pressed again, it folds */
+    await page.click('[data-home="tasks"] .mwrow[data-id="' + lateId + '"] .t');
+    await page.waitForSelector('[data-home="tasks"] .mwrow.on .mwtabs', { timeout: 8000 }).catch(() => {});
+    const hopen = await page.evaluate(() => { const r = document.querySelector('[data-home="tasks"] .mwrow.on');
+      return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), hash: location.hash } : null; });
+    check(!!hopen && hopen.tabs.join("|") === "Progress|Description|History" && hopen.open && hopen.hash !== "#mywork",
+      "\u2026a press on a task's name on Home opens it in the card, in the Tracker's three tabs (\u00a7711)", JSON.stringify(hopen));
+    if (process.env.SHOTDIR) await page.screenshot({ path: process.env.SHOTDIR + "/home-new.png", fullPage: true });
+    await page.click('[data-home="tasks"] .mwrow.on .t').catch(() => {});
+    check(!(await page.locator('[data-home="tasks"] .mwrow.on').count()), "\u2026and pressed again it folds");
     /* SORT BY CLIENT, in the same card, kept on the device */
     await page.click('[data-home="tasks"] .hosort button[data-sort="client"]');
     const hc = await home();
-    check(hc.sort === "Client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
+    check(hc.sort === "By client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
       "\u2026Sort by Client groups the same tasks under the client, late first", JSON.stringify(hc));
     await page.reload({ waitUntil: "networkidle" });
     await page.waitForSelector('[data-home="tasks"] .hogrp', { timeout: 8000 }).catch(() => {});
-    check((await home()).sort === "Client", "\u2026and the choice is kept after a reload", (await home()).sort);
+    check((await home()).sort === "By client", "\u2026and the choice is kept after a reload", (await home()).sort);
     await page.click('[data-home="tasks"] .hosort button[data-sort="date"]');
     await page.click('[data-home="tasks"] .holink');
     await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});
@@ -3822,8 +3943,14 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
   check(/javascript|ecmascript/i.test(r.headers.get("content-type") || ""), "…as JavaScript, or the browser refuses it", r.headers.get("content-type"));
   check(body.includes('addEventListener("push"') && body.includes('addEventListener("notificationclick"'),
         "…and it carries the notification half (Phase G's row: a push cannot arrive without it)");
-  check(!/addEventListener\("fetch"/.test(body),
-        "…and NO fetch handler: nothing here is served from disk (the plan's line 47, kept)");
+  /* §701: ONE fetch handler, for page loads alone, answering SMP's own
+     offline page when the network fails — and still nothing on disk (the
+     plan's line 47, kept): it never opens a cache. */
+  const fetchAt = body.indexOf('addEventListener("fetch"');
+  const handler = fetchAt < 0 ? "" : body.slice(fetchAt, body.indexOf("\n});", fetchAt));
+  check(fetchAt >= 0 && /mode !== "navigate"/.test(handler) && !/caches/.test(handler),
+        "…and its one fetch handler answers page loads only, and opens no cache (§701; the plan's line 47, kept)");
+  check((body.match(/addEventListener\("fetch"/g) || []).length === 1, "…and there is only the one");
 
   /* THE BOTH-ENDS HALF (§94.2): it is not enough that the frozen caches are
      gone — a build that served no worker at all would satisfy that. So the
@@ -3858,6 +3985,15 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
   const after = await page.evaluate(() => caches.keys());
   check(after.length === 0, "…and a navigation under it stores nothing", JSON.stringify(after));
+
+  /* §701: AND A PAGE LOAD WITH NO CONNECTION IS SMP'S OWN OFFLINE PAGE, not
+     the browser's error — answered by the worker, so still nothing stored. */
+  await ctx.setOffline(true);
+  await page.goto(BASE + "/raya-trade/strategy").catch(() => {});
+  const off = await page.evaluate(() => ({ h: (document.querySelector("h1") || {}).textContent || "", retry: !!document.getElementById("retry") })).catch(() => ({ h: "", retry: false }));
+  await ctx.setOffline(false);
+  check(off.h === "You're offline" && off.retry, "a page load with no connection shows SMP's own offline page, with Try again (§701)", JSON.stringify(off));
+  check((await page.evaluate(() => caches.keys())).length === 0, "…and showing it stored nothing");
 
   /* AND THE HALF THE WORKER IS FOR ON AN IPHONE (§26): a push is only ever
      delivered to a platform that has been ADDED TO A HOME SCREEN, which

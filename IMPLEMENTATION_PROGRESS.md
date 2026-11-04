@@ -5,6 +5,99 @@ describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **2026-11-04 — A free chat whose line drops watches for its answer (§744).** Islam's chat stuck after ERR_NETWORK_CHANGED: the server had the message and went on answering, but the page read the chat once, too early. Now it says the connection dropped, watches for up to three minutes, and draws the answer when it lands; the text goes back in the box only if the message never arrived.
+**2026-11-04 — Viewing as somebody opens where their own sign-in would (§743), merged to `main` on Islam's word.** A reader viewed as — Aliaa at El Abd — now lands in the reading window, as their own sign-in does; anybody who can change something lands on the workbench.
+**2026-11-03 — Another client opens on the module in view (§742).** The client menu carries the module; the door sends a client without it to Strategy. Tracker 379/0.
+
+**2026-11-03 — The cause found: the page is zoomed to 80% on a computer; the meeting is now one screen tall by layout (§741).** --winh, not 100vh; nothing measured. Tracker 378/0 (checks rewritten, seen red with 100dvh).
+
+**2026-11-03 — The meeting's start is measured again whenever the page changes (§740).** Production ran §738; the start had been measured before the page settled. Tracker 378/0 (new check seen red).
+
+**2026-11-03 — Two updates before this week, everywhere (§739).** The rest behind Show N earlier, in the Tracker, the weekly check, My tasks and Home. Tracker 377/0; shell 562 ok / main's 11.
+
+**2026-11-03 — The meeting's room follows the window itself (§738).** Only the top is measured; the height is 100dvh's. Tracker 376/0.
+
+**2026-11-03 — The meeting's two boxes reach the foot of the screen (§737).** The room is measured; inner scroll only when taller than it. Tracker 375/0.
+
+**2026-11-03 — In the meeting only the rail scrolls (§736).** The band and bar pinned again (§735 taken back); the rail scrolls in itself, the box beside it. Tracker 375/0.
+
+**2026-11-03 — The meeting's box scrolls only when it does not fit (§735).** The band scrolls away in the meeting. Tracker 375/0.
+
+**2026-11-03 — A task opens at once in the weekly check (§734).** Every rail task's box rides in the page. Tracker 374/0 (new check seen red).
+
+**2026-11-03 — The weekly check, second pass; links read short (§733).** Always carries; this week's note in the box's place; the box sticky; links as small site tags everywhere notes show. Tracker 373/0; shell 562 ok / main's 10.
+
+**2026-11-03 — The weekly check, cleaned (§732).** The agreed box, rail B (a checklist), and Save and next carries an unfinished task of this week unless kept. Tracker 371/0.
+
+**2026-11-03 — Every "are you sure" asks the same way (§731), merged to `main` 2026-11-03 on Islam's word; production has served it (worker stamp 4e89c5cf → 019fc015).** Islam's rules from a delete-dialog picture, held everywhere: the question in the title, what really happens in the body, Cancel left, the act right in its own words (no Yes/No/OK), red only for what destroys (the cycle buttons stay red on his word), × and Escape. The Processes module's four browser boxes replaced by its own dialog; 26 button pairs turned round; 17 "Yes, …"/"No" labels reworded; red off six Restore/Close buttons. New `checks/confirm-buttons.py` 879/0, proved red 32 ways on the before-copies; typecheck clean; test:processes 228/0; shell v7.54. Notes/Tracker/shell browser checks not re-run here (no served stack).
+
+**2026-11-03 — A task's name is never cut on My tasks and Home (§730).** It wraps; the note line stays one line. Shell run pending.
+
+**2026-11-03 — My tasks' Done menu shut; Home's rows hover all alike (§729).** Two cascade faults. Shell run pending.
+
+**2026-11-03 — My tasks and Home: the Tracker's quiet line; a task opens at once (§728).** workDetails read with the list. Tracker 369/0; shell run pending.
+
+**2026-11-03 — The weekly check is a button, not a view (§727).** Start weekly check at the bar's end; ← Back to the list inside. Tracker 369/0.
+
+**2026-11-03 — A Tracker view opens at once (§726).** Each view rides in the page; a press swaps it in, no request. Tracker 368/0 (new check seen red). §725 shell 555 ok / main's 11.
+
+**2026-11-03 — Tracker search narrows as you type (§724); My tasks' bar is the Tracker's quiet bar (§725).** Tracker 367/0; shell run pending.
+
+**2026-11-03 — The Tracker's top bar is one quiet bar (§723).** No tile, plain count and views, Search an icon, "Group: Owner", slim add line with chips on click, no gold rule. Tracker 364/0.
+
+**2026-11-03 — No date popup on a Tracker row's line (§722).** Top-bar mockup drawn (A/B), not built. Tracker 362/0.
+
+**2026-11-03 — The Tracker task's name leads; the line under it is quieter (§721).** Option A: name 600, line one grey, topic plain, "This week" dropped, "Last week" kept. Tracker 362/0.
+
+**2026-11-03 — View in Tracker shows the task, lit, without opening it (§720).** My tasks/Home link with show=; the Tracker scrolls to the row and lights it. Row-line mockup drawn (A/B), not built.
+
+**2026-11-03 — A Tracker task opens at once; its ⋯ opens on one press (§719).** Every task's panel rides in the page; no trip to the server. Tracker 360/0 (2 new, seen red); shell 553 ok / main's 11.
+
+**2026-11-03 — Rename last before Delete on every task ⋯ (§718).** My tasks/Home: Week · Owner · Open in Tracker · Rename · Delete. Shell 553 ok / main's 11.
+
+**2026-11-03 — The task ⋯ is compact (§717).** Tighter rows, 13.5px, side lists 150px; the Tracker keeps 170px so it matches My tasks. Tracker 358/0; shell 554 ok / main's 10.
+
+**2026-11-03 — The ⋯ says Open in Tracker, one line (§716).** The client is already on the row; the full name is the tooltip. Mockup redrawn to the built menu. Shell 554 ok / main's 10.
+
+**2026-11-03 — The ⋯ lists are named Week, Owner, Topic (§715).** One word each, no "Change"; the owner list is headed New owner. Tracker 358/0; shell 553 ok / main's 11.
+
+**2026-11-03 — Change topic is a small list in the Tracker's ⋯ (§714).** After Hand to someone else, before Rename: the open topics, No topic, and New topic… made and set on Enter.
+
+**2026-11-03 — The task's ⋯ reordered (§713).** Change the week and Hand to someone else first, each a small list beside the menu (hover or press; the hand-over list is the rest of the team); Rename third; Details and progress gone. On My tasks, Home and the Internal Tracker.
+
+**2026-11-03 — Your own progress entry edited or deleted on My tasks and Home too (§712).** Edit and Delete under the writer's own entry, as the Tracker has them; Delete asks first.
+
+**2026-11-03 — Home's Your tasks carries My tasks' row (§711).** A press on a task opens it in the card (Progress, Description, History, Open in its Tracker); the ⋯, tick and status as on My tasks; Late and This week as quiet strips. The card's place, size, header and its late-and-this-week rule unchanged.
+
+**2026-11-02 — Jump to's box folds with the console's column (§710), merged to `main` 2026-11-02 on Islam's word.** Islam: *"check this glitch"*. With the console's column folded to icons, the box now shows as its magnifying glass alone inside the column, instead of spilling over the page. Checked in a browser; `checks/jump.mjs` green.
+
+**2026-11-03 — My tasks as the Internal Tracker now is (§709).** A press on a task opens it in place — Progress (Add beside the box, a timeline), Description, History, and Open in its Tracker beside them; ⋯ holds Rename, Change the week, Hand to someone else, Open in its Tracker, Delete. Every group a card; the Tracker's quiet row. Sort by unchanged (remembered). New platform actions workDetail and workWrite under the Tracker's own rules.
+
+**2026-11-03 — A card per owner, and quieter rows (§708).** Every group of the main list is a card (owners with their initials); a row is the name on one line and one quiet line of topic and latest update; the week cell shows only the exception (late, or another week); grouped by owner the owner column goes, with Hand to someone else and Change the week in the ⋯.
+
+**2026-11-02 — The main list matched to its mockup (§707).** The name opens the task; ⋯ is a menu (Details and progress, Rename, Change topic, Delete); topic and lateness are tags on the name, a late row's week in red; bold group headings with + Add at the right; the write line, Search and Group by on one row, its chips always shown. Banner and Actions heading unchanged.
+
+**2026-11-02 — The Weekly check as a meeting; the main list quiet; the opened task tabbed (§706).** The check lists every task on the left and opens one at a time on the right with its status as three buttons, Previous, Carry and Save and next, and a gone-through count. The main list loses its stripes and pills: a status dot and word, one ⋯ per row. An opened task has Progress (Add beside the box, entries on a timeline), Description (click to edit) and History tabs, Delete at the end. Banner and Actions heading unchanged.
+
+**2026-11-02 — The note lock goes; the red row asks for its note on the box (§705), merged to `main` on Islam's word.** Islam: remove the feature that dims the whole plan until the note is written, put a clear tag on the box instead, and never stop a person entering numbers. Nothing is greyed or shut any more. A red figure's note box wears "Note needed · off track" above it, stays red, and asks "No justification yet — why, and what is being done" (a grey prompt, never saved); the "to finish" bar counts the note again; Submit still waits for it. Where the note is only read — the Group CEO, a direction owner, the Performance tables — a red row with no note says "Needs justification" in red. Mockup approved first (option A); one dark-theme fix flagged (the red row's wash was a light-mode colour). Checked: the new `note-tag` check 26 ok (red 11 on the build before), `report-blockers` 2b rewritten and green, the neighbours green, the shipped file in step. Merged as a fast-forward: `main` had not moved since §704.
+
+**2026-11-01 — Roles & access is a ladder (§704), merged to `main` on Islam's word.** What a role holds it writes, by rule; one setting per role says how far up it reads — own piece · own unit or function · own division · the top, in the client's own levels — and one person can be moved a level. Stored as three rows per role in the existing access map, no migration; the screen and the server ask the same rule. Measured on all 33 worked-example seats: holders no longer read the group's and divisions' pages, Division heads no longer read the functions, the eye sets how far each role reads and the pen is a switch on its own level, shipped as today (holders of a place write, piece owners and contributors read until turned on); nobody loses a pen.
+
+**2026-11-01 — Jump to reaches the console's sections (§703), merged to `main` 2026-11-01 on Islam's word.** Islam: *"the jump should take me as well to the other modules like my tasks, the track record the frameworks or clients"*. For Forefront's people, Jump to lists Home, My tasks, Clients, Track Record, Frameworks, Copilot and History, plus Consultants and Who sees what for those allowed to open them. Checked: `checks/jump.mjs` green (23 ok).
+
+**2026-11-01 — Insights has no Roles & access page any more (§702), merged to `main` 2026-11-01 on Islam's word.** Islam: *"the choice made when posting do the job. no need for the roles and access in the insights."* Insights opens for everybody the client's door lets in; who reads each report is chosen when it is posted (departments, or everyone). Its Setup is the Landing line alone. A role a client had shut out of Insights before today is let in again. Checked: the module and door checks rewritten to the new rule and green (228 and 121 ok), Jump to green.
+
+**2026-11-01 — Jump to and the offline page (§701), merged to `main` 2026-11-01 on Islam's word.** Renumbered from §699 (main took §699–§700). On the merged tree the build, the type check and `checks/jump.mjs` are green; the Tracker's check has one red line that `main` alone has too.
+
+**2026-11-01 — Jump to lists modules, Setup and the console only (§701, round three).** Islam: *"no need for internal parts of the modules. and for the console the same thing"*. The Tracker's views and Processes' sections are gone, and the console is one entry (Forefront's people only) instead of its tabs. Jump to now offers each module once, Setup's pages, and the console. Checked: `checks/jump.mjs` 22 ok, 0 failed, its break red.
+
+**2026-11-01 — Jump to and the offline page, built (§701).** Islam: *"build it"*. **Jump to**: Ctrl K (⌘K on a Mac) on any page, or the Jump to box on Strategy's bar, every module's bar and the console's column, opens a window listing the modules (Strategy as one entry), the other modules' pages (the Tracker's views, Processes' sections), Setup's pages and the console's tabs; typing narrows it, arrows and Enter open one. The server decides the list from the door's own answers: a client's own person is offered no Setup, no console, and not the office's Tracker and Notes. Left out on purpose: "<module> settings" for the Tracker, Notes, Portfolio and Processes, which have no Setup pages and land on a Strategy page (the top bar's own menu does the same today). **Offline**: the platform's worker answers a page load that cannot reach the network with SMP's own offline page (Try again, reopens by itself), still storing nothing; a page that loses the connection shows an amber strip that moves the page down, holds Save, Submit, Send and Apply with a bubble saying why, then turns green when the connection returns. Checked: a new check, `checks/jump.mjs`, 23 ok in a browser against the built app, and its break red; the type check clean on every file touched. The platform's big check: 547 ok, 10 failed, all ten in the Copilot and Settings layout this change does not touch (the known ten); its worker section green, including the new offline-page lines. The page-move check: 17 ok, 2 failed, and the same two fail on the version before this change. Not tested: Processes (no Processes database here), and a real phone.
+
+**2026-11-01 — Jump to and the offline page, drawn, nothing built.** Islam, of two features in the HR ERP platform: *"the jump to concept and the page that shows that you are offline if there is no internet"*, then *"do the mockup, include all pages"*. **Jump to**: Ctrl K (⌘K on a Mac) on any page, or a box in the top bar, opens a search window listing the modules, every page of the other modules (Internal Tracker, Meeting Notes, Processes, Insights, Portfolio), all of Setup and the console, narrowed by typing, arrows and Enter to open, and only what the person's role can open. **Offline**: opening SMP with no internet shows SMP's own offline page with Try again, reloading by itself when the connection returns; losing the connection mid-page shows an amber strip at the top, Save is held and says why, and a green Back online strip follows. Page: https://claude.ai/artifact/Pc2T7CqKkc99smqD5DGah8 (private until shared), file `design-mockups/jump-to-offline/2026-11-01_jump-to-and-offline.html`. Checked at laptop and phone width: no script errors, no sideways scroll. Second round, on Islam's word: Strategy's own tabs, units, functions and people taken out, since Strategy's own row already reaches them; Strategy stays as one entry. Waiting on Islam's word.
+
+**2026-11-01 — The Weekly check as topic cards (§700).** Each topic is its own card under a grey band with its number, bold name, counts and a done bar; This week is a pale blue strip; status pills and Carry are only as wide as their words. Islam's picks: heading A, layout 3.
+
+**2026-11-01 — The Weekly check reads clearly (§699).** Each status is a coloured pill (Not started slate, In progress yellow, Done green, one size); Carry to next week is a plain button with a blue arrow, no longer gold like In progress; the *What happened?* box sits under its task as one block, with THIS WEEK in front. Islam picked option C of four and the box layout from the mockup.
+
 
 **2026-10-31 — Small ways back (§698), the Copilot stress test's third batch.** A used SWOT change can be put back (one step) and used again. The held tick on an unscored plan Direction says leaving it unticked keeps it. Apply is held, in words, if a chat's place ever differs from the page's. A failed draft in Execution names its item and offers draft again, Draft all left, or skip. Not built: switching a guided Foundation chat to the template (the template road is a plain chat with no generated file to fill). Mockup `design-mockups/copilot-layout/2026-10-31_small-ways-back.html`.
 

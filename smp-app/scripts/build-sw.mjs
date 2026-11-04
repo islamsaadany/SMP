@@ -28,6 +28,11 @@
    drift a word at a time (§53.5; the discipline scripts/build-shell.mjs
    already uses on build.py's own list).
 
+   §701 ADDS ONE THING AND STORES NOTHING: a fetch handler for PAGE LOADS
+   alone, which hands the network's answer straight back and, only when the
+   network fails, answers SMP's own offline page — a string in this file, not
+   a copy of anybody's page. Its own note is at OFFLINE_PAGE below.
+
    AND IT IS WHAT CLEARS THE FROZEN CACHES (§91). A browser returning after
    the cutover holds the old worker AND its `smp-shell-*` cache. This one
    deletes EVERY cache on activate and claims its clients, so no returning
@@ -81,13 +86,99 @@ must(!/addEventListener\("fetch"/.test(carried), "the carried half holds a fetch
    reason the stamp is: every generator that writes those files has run. */
 writeFileSync(join(here, "..", "shell", "asset-stamps.json"), JSON.stringify(assetStamps(), null, 2) + "\n");
 
+/* ── THE OFFLINE PAGE (§701) ───────────────────────────────────────────────
+   Islam: *"the page that shows that you are offline if there is no
+   internet"*, drawn in design-mockups/jump-to-offline/ and approved. Opening
+   the platform with no connection showed the browser's own error, because
+   nothing of ours had loaded to say anything else.
+
+   THE RULE ABOVE STANDS: NOTHING IS STORED. The page is a string in this
+   file, answered by the worker itself when a PAGE LOAD (`mode: navigate`)
+   fails to reach the network — never a copy of a page, never a cache, so
+   there is nobody's platform on disk to be served to the next person (Phase
+   J, stop point C). Every other request, /api/* included, is not touched at
+   all: the handler returns before `respondWith` and the browser does what it
+   would do with no worker present.
+
+   NAVIGATION PRELOAD, so a worker with a fetch handler does not make every
+   page load wait for the worker to wake: the browser starts the request in
+   parallel and the handler hands that answer straight back.
+
+   The page says what happened, that nothing saved is lost, offers Try again,
+   and reloads by itself when the connection returns (the `online` event, and
+   a light check every ten seconds for the browsers that do not fire it). A
+   reload that still fails lands here again, which is the right answer. */
+const OFFLINE_PAGE = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>You're offline — Strategy Management Platform</title>
+<meta name="theme-color" content="#16325C">
+<style>
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink2:#414A58;--ink3:#636C79;--btn:#16325C;--btnink:#FFFFFF;--amber:#F5A623;--navy:#0F2C69;--focus:#C9A24D}
+@media (prefers-color-scheme:dark){:root{--ground:#14161A;--surface:#1C1F25;--surface2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink2:#B4BCC8;--ink3:#949DAA;--btn:#D9B665;--btnink:#14161A;--focus:#D9B665;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 "Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+main{width:min(420px,100%);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:28px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.mk{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--amber);color:var(--navy)}
+.ic{width:64px;height:64px;border-radius:50%;background:var(--surface2);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink3);margin-top:6px}
+h1{margin:4px 0 0;font-size:21px;text-wrap:balance}
+p{margin:0;color:var(--ink2)}
+.small{font-size:13px;color:var(--ink3)}
+button{margin-top:6px;font-family:inherit;font-size:14px;font-weight:600;line-height:1;background:var(--btn);color:var(--btnink);border:0;border-radius:7px;padding:9px 18px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style></head>
+<body><main>
+<span class="mk" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span>
+<span class="ic" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8.8a15 15 0 0 1 4.2-2.6M9.6 5.2A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 5.2-2.6M14.4 10.2A10 10 0 0 1 19 12.5M8.5 16.1a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/><path d="m3 3 18 18"/></svg></span>
+<h1>You're offline</h1>
+<p>SMP can't reach the internet, so it can't load your latest figures. Nothing you saved is lost.</p>
+<p class="small">This page reopens by itself when the connection is back.</p>
+<button type="button" id="retry">Try again</button>
+<p class="small" id="said" role="status" aria-live="polite"></p>
+</main>
+<script>
+(function () {
+  var busy = false;
+  function check(byHand) {
+    if (busy) return; busy = true;
+    fetch("/favicon.svg?online=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (r.ok) location.reload(); else throw 0; })
+      .catch(function () { if (byHand) document.getElementById("said").textContent = "Checked just now. Still no connection."; })
+      .then(function () { busy = false; });
+  }
+  document.getElementById("retry").addEventListener("click", function () { check(true); });
+  window.addEventListener("online", function () { check(false); });
+  setInterval(function () { check(false); }, 10000);
+})();
+</script>
+</body></html>
+`;
+const OFFLINE_HALF =
+  "/* §701 — SMP's own offline page, for a page load that cannot reach the\n" +
+  "   network. Written here, never stored (scripts/build-sw.mjs). */\n" +
+  "const OFFLINE_PAGE = " + JSON.stringify(OFFLINE_PAGE) + ";\n" +
+  "self.addEventListener(\"fetch\", (e) => {\n" +
+  "  if (e.request.mode !== \"navigate\" || e.request.method !== \"GET\") return;\n" +
+  "  e.respondWith((async () => {\n" +
+  "    try {\n" +
+  "      const pre = await e.preloadResponse;\n" +
+  "      if (pre) return pre;\n" +
+  "      return await fetch(e.request);\n" +
+  "    } catch (x) {\n" +
+  "      return new Response(OFFLINE_PAGE, { status: 503, headers: { \"Content-Type\": \"text/html; charset=utf-8\", \"Cache-Control\": \"no-store\" } });\n" +
+  "    }\n" +
+  "  })());\n" +
+  "});\n" +
+  "\n";
+
 const head =
   "/* GENERATED by scripts/build-sw.mjs from the frozen sw.js. Do not edit here.\n" +
   "   Spec 043 Phase J, stop point C: the notification half of the frozen worker,\n" +
   "   carried verbatim below; the caching half dropped, because the new platform\n" +
   "   document is server-rendered and per person, so a cached copy is one\n" +
-  "   person's page served to the next. This worker STORES NOTHING and has no\n" +
-  "   fetch handler at all — the browser goes to the network for everything. */\n" +
+  "   person's page served to the next. This worker STORES NOTHING. Its one\n" +
+  "   fetch handler (§701) touches page loads alone, and only when the network\n" +
+  "   fails: then it answers SMP's own offline page, written into this file. */\n" +
   "\n" +
   /* THE RELEASE STAMP (§397): the line that makes /sw.js differ between two
      releases, which is the only way an open tab learns of one and is offered
@@ -107,12 +198,13 @@ const head =
   "  e.waitUntil(\n" +
   "    caches.keys()\n" +
   "      .then((ks) => Promise.all(ks.map((k) => caches.delete(k))))\n" +
+  "      .then(() => self.registration.navigationPreload ? self.registration.navigationPreload.enable().catch(() => {}) : null)\n" +
   "      .then(() => self.clients.claim())\n" +
   "  );\n" +
   "});\n" +
-  "\n";
+  "\n" + OFFLINE_HALF;
 
 mkdirSync(join(here, "..", "public"), { recursive: true });
 const out = join(here, "..", "public", "sw.js");
 writeFileSync(out, head + carried);
-console.log("wrote public/sw.js —", statSync(out).size, "bytes;", carried.split("\n").length, "lines carried verbatim from sw.js, the caching half dropped");
+console.log("wrote public/sw.js —", statSync(out).size, "bytes;", carried.split("\n").length, "lines carried verbatim from sw.js, the caching half dropped, the offline page added (§701)");

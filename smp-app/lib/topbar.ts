@@ -35,7 +35,7 @@
    before the body paints, from the same `smp.theme` key Strategy reads — the
    same browser, so the same choice. */
 import { createHash } from "node:crypto";
-import { NAVSKEL_SCRIPT } from "./navskel.ts";
+import { NAVSKEL_FILE } from "./navskel.ts";
 import { barExtras, readingLink, type ProcessesRead } from "./bar-extras.ts";
 import type { ModuleKey } from "./modules.ts";
 import { MODULE_DEF, moduleMenu, clientHref, DEFAULT_MODULE } from "./modules.ts";
@@ -142,7 +142,9 @@ export function topBarHtml(t: TopBar): string {
       '<a class="tbff tbmark" href="/platform" aria-label="Home" title="Home">' + STAR + "</a>" +
       '<span class="tbbar" aria-hidden="true"></span>' +
       '<details class="tbstep tbclient"><summary><span>' + esc(t.tenantName) + "</span>" + DOWN + "</summary>" +
-        '<div class="tbmenu" role="menu" data-clients="' + esc(t.slug) + '">' +
+        /* §742: the module in view rides on the menu, so another client opens
+           on the same module (data-module) */
+        '<div class="tbmenu" role="menu" data-clients="' + esc(t.slug) + '" data-module="' + esc(here) + '">' +
           '<div class="tbquiet">Reading your clients…</div><div class="tbrule" role="separator"></div>' +
           item("All clients", "/platform#clients", false) + "</div></details>" + sep +
       '<details class="tbstep tbmod"><summary><span>' + esc(MODULE_DEF[here].label) + "</span>" + DOWN + "</summary>" +
@@ -372,11 +374,18 @@ export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/t
     /* The other clients, asked once, as the trail in Strategy asks (§401). */
     var cm = bar.querySelector("[data-clients]");
     if (cm) {
-      var slug = cm.getAttribute("data-clients");
+      var slug = cm.getAttribute("data-clients"), mod = cm.getAttribute("data-module") || "";
+      /* §742 (Islam: "when I shift from client to client when they have the
+         same module let's go there … if not, we land on Strategy as normal"):
+         another client opens on the module in view. One the other client
+         does not have, or this person may not open there, is answered by the
+         door's own redirect to that client's Strategy (route.ts: a shut
+         module and an absent one answer identically), so nothing here has to
+         know the other client's modules. */
       var fill = function (list) {
         var others = list.filter(function (x) { return x.key !== slug; });
         var h = others.length
-          ? others.map(function (x) { return '<a role="menuitem" href="/' + esc(x.key) + '">' + esc(x.name) + "</a>"; }).join("")
+          ? others.map(function (x) { return '<a role="menuitem" href="/' + esc(x.key) + (mod && /^[a-z]+$/.test(mod) ? "/" + mod : "") + '">' + esc(x.name) + "</a>"; }).join("")
           : '<div class="tbquiet">No other clients</div>';
         var q = cm.querySelector(".tbquiet");
         if (q) q.outerHTML = h;
@@ -399,7 +408,7 @@ export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/t
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
 })();
-` + NAVSKEL_SCRIPT;   /* §620: the press draws the next page's shape (lib/navskel.ts) */
+` + NAVSKEL_FILE;   /* §620: the press draws the next page's shape (lib/navskel.ts); §701: Jump to and the offline strip */
 
 /* The script is a file, never inline: the shell's policy is `script-src
    'self'` (lib/shell.ts SHELL_CSP), so an inline handler would render

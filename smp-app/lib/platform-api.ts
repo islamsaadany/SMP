@@ -9,7 +9,7 @@
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
 import { landingFactsFor } from "./landing-facts.ts";
-import { myWork, tallyMark, setWorkStatus, writeUps } from "./my-work.ts";
+import { myWork, tallyMark, setWorkStatus, writeUps, workDetail, workWrite } from "./my-work.ts";
 import { isOffice, type Who } from "./tracker.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
@@ -187,6 +187,16 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       .map((row) => ({ key: row.key, name: row.name, kind: row.kind })) });
   }
 
+  /* JUMP TO (§701, §703, lib/jump.ts): whether this client's settings are
+     this person's to read, and the console's two gated sections — the rules
+     the cards and the console's own column ask. */
+  if (action === "jump") {
+    const row = body && body.client ? await clientByKey(pool, body.client) : null;
+    return ok({ canConfig: !!(row && FF.mayReadConfig(world, account, row)),
+      /* §703: the console's two gated sections, as its own column gates them */
+      canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
+  }
+
   if (action === "cards") {
     const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
     const shown: ClientRow[] = FF.visibleClients(world, account, all);
@@ -305,6 +315,46 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     if (!door.ok) return no(404, "That client is not available.");
     const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) }, String((body && body.id) || ""), body && body.status);
     return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
+  }
+
+  /* ── EVERY TASK'S DETAILS AT ONCE (§728) ──────────────────────────────
+     Islam: "opening the task … should open momentarily". My tasks and Home
+     ask for the details of every task on the list in one call as soon as
+     the list is drawn, so a press on a name opens it with nothing to wait
+     for. Each task goes through the same door and the same read as
+     workDetail below (one client's door once); one that can't be read says
+     why, in its own place, and the others are unaffected. */
+  if (action === "workDetails") {
+    const items = Array.isArray(body && body.items) ? (body.items as unknown[]).slice(0, 300) : [];
+    const doors = new Map<string, Awaited<ReturnType<typeof resolveTenant>>>();
+    const leads = await leadsOf(pool, me.id);
+    const details: unknown[] = [];
+    for (const it of items as { client?: unknown; id?: unknown }[]) {
+      const client = String((it && it.client) || ""), id = String((it && it.id) || "");
+      if (!doors.has(client)) doors.set(client, await resolveTenant(pool, me, client));
+      const door = doors.get(client)!;
+      if (!door.ok) { details.push({ error: "That client is not available." }); continue; }
+      const d = await workDetail(door.tenant, { seat: door.seat, personKey: door.personKey, lead: leads.has(door.tenant.id) }, id);
+      details.push(d.ok ? d.detail : { error: d.why });
+    }
+    return ok({ details });
+  }
+
+  /* ── A TASK OPENED, OR WRITTEN TO, ON MY TASKS (§709) ────────────────
+     The same door as workStatus above (door.ts resolveTenant), then the
+     Tracker's own reads and writes under the Tracker's own rules
+     (lib/my-work.ts workDetail, workWrite). */
+  if (action === "workDetail" || action === "workWrite") {
+    const door = await resolveTenant(pool, me, String((body && body.client) || ""));
+    if (!door.ok) return no(404, "That client is not available.");
+    const who = { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) };
+    const id = String((body && body.id) || "");
+    if (action === "workDetail") {
+      const d = await workDetail(door.tenant, who, id);
+      return d.ok ? ok({ detail: d.detail }) : no(d.status, d.why);
+    }
+    const w = await workWrite(door.tenant, who, id, body && body.op, (body || {}) as Record<string, unknown>);
+    return w.ok ? ok({ row: w.row, gone: w.gone }) : no(w.status, w.why);
   }
 
   /* ── Forefront's own people ── */

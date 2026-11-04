@@ -1,0 +1,231 @@
+<title>Actions Quiet List</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>
+/* The tracker's main list (This week · All · Mine · Undated) in the quiet
+   style: one line per task, the last update as text under the name, one
+   control on the right. Same tokens as the Weekly check rethink. */
+:root{
+  --bar:#1F3158;--bar-ink:#FFF;--bar-quiet:#C6D2E5;--bar-accent:#E3A64A;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E9EDF3;--ground:#F5F7FA;--surface:#FFF;--surface-2:#EEF1F6;
+  --gold:#9C5D08;--bad:#B23025;--bad-bg:#FBECEA;--good:#1B6E4E;--yel-dot:#E0B300;--ns-dot:#8A97AB;
+  --blue:#1F5FBF;--sel:#F0F5FD;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--serif:'Source Serif 4',Georgia,serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#272D39;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--bad:#E8776B;--bad-bg:#3A2322;--good:#63BE96;--yel-dot:#E8C547;--ns-dot:#7D889B;--blue:#8FB4F0;--sel:#1B2638;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#272D39;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--bad:#E8776B;--bad-bg:#3A2322;--good:#63BE96;--yel-dot:#E8C547;--ns-dot:#7D889B;--blue:#8FB4F0;--sel:#1B2638;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+svg{display:block}
+.pg{max-width:1040px;margin:0 auto;padding-block:20px 56px}
+
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px;margin:0 0 14px;box-shadow:inset 0 -3px 0 var(--bar-accent);display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.mast h1{margin:0;font:600 24px/1.15 var(--serif)}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.tile{text-align:right}.tile b{display:block;font:600 22px/1 var(--font)}
+.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px}
+.tile.lt b{color:#F2A091}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.chd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.chd h2{margin:0;font:600 17px/1.2 var(--serif);flex:1}
+.views{display:flex;background:var(--surface-2);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap}
+.views button{border:0;background:none;font:500 13px/1 var(--font);padding:7px 10px;border-radius:6px;color:var(--ink-2)}
+.views button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(20,28,43,.08)}
+
+/* the tool row: the write line, search, group by */
+.tools{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.add{flex:1 1 380px;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:0 6px 0 12px;height:40px;background:var(--surface);min-width:0}
+.add:focus-within{border-color:var(--blue)}
+.add svg{width:15px;height:15px;color:var(--gold);flex:none}
+.add input{flex:1;min-width:0;border:0;outline:none;background:none;font-size:14.5px}
+.add .opt{border:0;background:var(--surface-2);border-radius:6px;padding:5px 8px;font:600 12.5px/1 var(--font);color:var(--ink-2);white-space:nowrap}
+.find{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:9px;padding:0 10px;height:40px;width:190px;color:var(--ink-3)}
+.find input{border:0;outline:none;background:none;width:100%;font-size:14px}
+.find svg{width:14px;height:14px}
+.grpby{position:relative}
+.grpby>button{height:40px;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:0 12px;font:500 13.5px/1 var(--font);color:var(--ink-2);display:flex;gap:6px;align-items:center}
+.grpby>button b{color:var(--ink)}
+.pop{position:absolute;right:0;top:44px;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(20,28,43,.16);padding:4px;min-width:190px}
+.pop button{display:flex;gap:8px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;font-size:14px}
+.pop button:hover{background:var(--surface-2)}
+.pop button.on{font-weight:600}
+.pop button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
+.pop svg{width:14px;height:14px;color:var(--ink-3)}
+.pop hr{border:0;border-top:1px solid var(--line-2);margin:4px 2px}
+.pop .danger{color:var(--bad)}
+
+/* the group heading */
+.gh{display:flex;align-items:center;gap:10px;padding:14px 16px 8px;border-bottom:1px solid var(--line)}
+.gh .ix{font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.gh h3{margin:0;font:700 15.5px/1.25 var(--font)}
+.gh .meta{font:500 13px/1.3 var(--font);color:var(--ink-2)}
+.gh .meta .bad{color:var(--bad);font-weight:600}
+.gh .addto{margin-left:auto;border:0;background:none;color:var(--blue);font:600 13px/1 var(--font);padding:4px 0}
+
+/* the quiet row */
+.task{display:grid;grid-template-columns:22px minmax(0,1fr) 110px 70px 118px 28px;gap:4px 14px;align-items:start;padding:11px 16px;border-bottom:1px solid var(--line-2)}
+.task.on{background:var(--sel)}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;background:var(--surface);margin-top:2px;padding:0;display:grid;place-items:center}
+.tick.on{background:var(--good);border-color:var(--good)}
+.tick svg{width:12px;height:12px}
+.nm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.nm .t{font-weight:500;background:none;border:0;padding:0;text-align:left;cursor:pointer}
+.nm .t:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.done .nm .t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line)}
+.tag{font:600 11.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:4px 8px;white-space:nowrap}
+.late{font:600 11.5px/1 var(--font);color:var(--bad);background:var(--bad-bg);border-radius:4px;padding:3px 6px;white-space:nowrap}
+.upd{font-size:13px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upd b{font-weight:600;color:var(--ink-2)}
+.cell{font:500 13px/1.3 var(--font);color:var(--ink-2);white-space:nowrap;padding-top:3px;background:none;border:0;text-align:left;border-radius:6px}
+.cell.pk{padding:3px 6px;margin:0 -6px}
+.cell.pk:hover{background:var(--surface-2)}
+.cell.red{color:var(--bad);font-weight:600}
+.status{display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:3px 6px;margin:0 -6px;border-radius:6px;font:600 13px/1.3 var(--font);color:var(--ink-2);white-space:nowrap;justify-self:start}
+.status:hover{background:var(--surface-2)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--ns-dot)}
+.dot.prog{background:var(--yel-dot)}.dot.done{background:var(--good)}
+.menu{position:relative}
+.kebab{border:0;background:none;color:var(--ink-3);width:28px;height:28px;border-radius:7px;display:grid;place-items:center;margin-top:-3px}
+.kebab:hover,.kebab[aria-expanded="true"]{background:var(--surface-2);color:var(--ink)}
+.kebab svg{width:16px;height:16px}
+.menu .pop{top:30px}
+.folded{display:flex;gap:6px;align-items:center;padding:9px 16px 9px 52px;border:0;background:none;color:var(--ink-3);font:600 13px/1 var(--font);width:100%;text-align:left;border-bottom:1px solid var(--line-2)}
+.folded svg{width:12px;height:12px}
+
+/* the opened task: details under the row, one panel */
+.det{grid-column:2/-1;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;margin-top:10px;padding:14px 0 4px;border-top:1px solid var(--line-2)}
+.det .lab{font:600 12.5px/1.3 var(--font);color:var(--ink);margin:0 0 6px}
+.det textarea{width:100%;min-height:60px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px;background:var(--surface);resize:vertical}
+.det textarea:focus{border-color:var(--blue);outline:none}
+.det ul{list-style:none;margin:8px 0 0;padding:0;font-size:13.5px}
+.det li{display:grid;grid-template-columns:78px 1fr;gap:10px;padding:6px 0;border-top:1px solid var(--line-2);color:var(--ink-2)}
+.det li b{font:600 12px/1.6 var(--font);color:var(--ink-3)}
+.det .row2{display:flex;gap:8px;margin-top:8px}
+.btn{font:600 13px/1 var(--font);border-radius:7px;padding:8px 12px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.btn.pri{background:var(--bar);border-color:var(--bar);color:#fff}
+.hl{border:0;background:none;padding:0;color:var(--ink-3);font:600 12.5px/1 var(--font);margin-top:10px}
+
+@media (max-width:800px){
+  .task{grid-template-columns:22px minmax(0,1fr) 28px;grid-template-areas:"tk nm mn" ". mt mt"}
+  .task>.tick{grid-area:tk}.task>.main{grid-area:nm}.task>.menu{grid-area:mn}
+  .task>.cell,.task>.status{display:none}
+  .task .mob{display:flex!important;grid-area:mt;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+  .det{grid-template-columns:1fr;grid-column:1/-1}
+  .find{width:100%}.strip{gap:14px}
+  .add .opt{display:none}
+}
+.mob{display:none}
+</style>
+
+<div class="pg">
+  <div class="mast"><div><p class="wkof">This week · 2 – 6 Nov</p><h1>Internal Tracker</h1></div>
+    <div class="strip"><div class="tile"><b>9</b><span>Open</span></div><div class="tile lt"><b>3</b><span>Late</span></div><div class="tile"><b>4</b><span>Due</span></div><div class="tile"><b id="kDone">1</b><span>Done this week</span></div></div></div>
+
+  <div class="card">
+    <div class="chd"><h2>Actions</h2><div class="views" id="views"></div></div>
+    <div class="tools">
+      <label class="add"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5 13.5 5 6 12.5 3 13l.5-3z"/></svg>
+        <input id="addline" placeholder="Write the next action and press Enter" aria-label="New action">
+        <button type="button" class="opt" title="Which topic">Topic</button><button type="button" class="opt" title="Which week">This week</button><button type="button" class="opt" title="Whose it is">Islam</button></label>
+      <label class="find"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg><input id="search" placeholder="Search" aria-label="Search actions"></label>
+      <div class="grpby"><button type="button" id="gb" aria-haspopup="menu" aria-expanded="false">Group by <b id="gbw">Owner</b></button><div class="pop" id="gbpop" hidden></div></div>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+const I={
+ check:'<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg>',
+ dots:'<svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>',
+ right:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 10.5 8 6 12.5"/></svg>',
+ pen:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5 13.5 5 6 12.5 3 13l.5-3z"/></svg>',
+ note:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 4h10M3 8h10M3 12h6"/></svg>',
+ tagI:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2.5 2.5h5l6 6-5 5-6-6z"/><circle cx="5.5" cy="5.5" r="1" fill="currentColor"/></svg>',
+ bin:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5"/></svg>'};
+const ST={ns:'Not started',prog:'In progress',done:'Done'};
+/* Example actions, written the way the office writes them. */
+let A=[
+ {id:1,t:'2027 Budget – P&L up to CM',topic:'Budget',who:'Aley',when:'This week',st:'prog',upd:['This week','Draft sent to the CFO, comments due Wednesday']},
+ {id:2,t:'Update the timeline with Akeed',topic:'Budget',who:'Momen',when:'Last week',late:'1 w late',st:'prog'},
+ {id:3,t:'Follow up on the cost submissions',topic:'Budget',who:'Momen',when:'Last week',late:'1 w late',st:'ns',upd:['Last week','Two of five departments submitted']},
+ {id:4,t:'Draft the Q4 town-hall agenda',topic:'Communication',who:'Sara',when:'Thu 5 Nov',st:'ns'},
+ {id:5,t:'Refresh the intranet strategy page',topic:'Communication',who:'Omar',when:'2 weeks ago',late:'2 w late',st:'prog',upd:['2 weeks ago','Waiting on the new org chart']},
+ {id:6,t:'Retention analytics: first cut',topic:'HR & People',who:'Islam',when:'This week',st:'prog'},
+ {id:7,t:'Close the two open HR projects',topic:'HR & People',who:'Islam',when:'Done Mon',st:'done',upd:['This week','Both signed off']},
+ {id:8,t:'Book the board room for the review',topic:null,who:'Sara',when:'Wed 4 Nov',st:'ns'},
+ {id:9,t:'Send the outcome to the managers',topic:null,who:'Islam',when:'Next week',st:'ns'}];
+const VIEWS=['This week','All','Mine','Undated','Weekly check'];
+let S={view:'This week',group:'Owner',open:1,menu:null,showDone:{},gb:false,q:''};
+const ini=x=>x;
+
+function rows(){
+ let xs=A.slice();
+ if(S.view==='This week')xs=xs.filter(a=>a.when!=='Next week');
+ if(S.view==='Mine')xs=xs.filter(a=>a.who==='Islam');
+ if(S.view==='Undated')xs=[];
+ if(S.q)xs=xs.filter(a=>a.t.toLowerCase().includes(S.q.toLowerCase()));
+ return xs;
+}
+function key(a){return S.group==='Owner'?a.who:S.group==='Topic'?(a.topic||'No topic'):S.group==='Status'?ST[a.st]:S.group==='Due date'?(a.late?'Late':a.when==='Next week'?'Next week':'This week'):'all';}
+function row(a){
+ const open=S.open===a.id;
+ const tagCell=S.group==='Topic'?'':(a.topic?'<span class="tag">'+a.topic+'</span>':'');
+ return '<div class="task'+(a.st==='done'?' done':'')+(open?' on':'')+'">'+
+  '<button type="button" class="tick'+(a.st==='done'?' on':'')+'" data-tick="'+a.id+'" role="checkbox" aria-checked="'+(a.st==='done')+'" aria-label="Mark done">'+(a.st==='done'?I.check:'')+'</button>'+
+  '<div class="main" style="min-width:0"><div class="nm"><button type="button" class="t" data-open="'+a.id+'" aria-expanded="'+open+'">'+a.t+'</button>'+tagCell+(a.late&&a.st!=='done'?'<span class="late">'+a.late+'</span>':'')+'</div>'+
+   (a.upd?'<div class="upd"><b>'+a.upd[0]+'</b> · '+a.upd[1]+'</div>':'')+
+   '<div class="mob"><span>'+a.when+'</span><span>'+a.who+'</span><span style="display:inline-flex;gap:6px;align-items:center"><span class="dot '+a.st+'"></span>'+ST[a.st]+'</span></div></div>'+
+  '<button type="button" class="cell pk'+(a.late&&a.st!=='done'?' red':'')+'" title="Which week">'+a.when+'</button>'+
+  '<button type="button" class="cell pk" title="Whose it is">'+a.who+'</button>'+
+  '<button type="button" class="status" data-cycle="'+a.id+'" title="Change status"><span class="dot '+a.st+'"></span>'+ST[a.st]+'</button>'+
+  '<div class="menu"><button type="button" class="kebab" data-menu="'+a.id+'" aria-label="More for this action" aria-expanded="'+(S.menu===a.id)+'">'+I.dots+'</button>'+
+   (S.menu===a.id?'<div class="pop" role="menu"><button type="button" role="menuitem" data-open="'+a.id+'">'+I.note+'Details and progress</button><button type="button" role="menuitem">'+I.pen+'Rename</button><button type="button" role="menuitem">'+I.tagI+'Change topic</button><hr><button type="button" role="menuitem" class="danger">'+I.bin+'Delete</button></div>':'')+'</div>'+
+  (open?'<div class="det"><div><p class="lab">Description</p><textarea id="d-'+a.id+'" aria-label="Description">'+(a.id===1?'P&L down to contribution margin for each business line, in the 2027 template.':'')+'</textarea>'+
+    '<button type="button" class="hl">History ›</button></div>'+
+    '<div><p class="lab">Progress</p><textarea id="p-'+a.id+'" placeholder="What happened this week?" aria-label="Progress" style="min-height:44px"></textarea><div class="row2"><button type="button" class="btn pri">Add</button></div>'+
+    (a.upd?'<ul><li><b>'+a.upd[0]+'</b><span>'+a.upd[1]+' · '+a.who+'</span></li></ul>':'')+'</div></div>':'')+
+  '</div>';
+}
+function draw(){
+ document.getElementById('views').innerHTML=VIEWS.map(v=>'<button type="button" data-view="'+v+'" aria-pressed="'+(S.view===v)+'">'+v+'</button>').join('');
+ document.getElementById('gbw').textContent=S.group;
+ const pop=document.getElementById('gbpop');pop.hidden=!S.gb;document.getElementById('gb').setAttribute('aria-expanded',String(S.gb));
+ pop.innerHTML=['Owner','Topic','Status','Due date','None'].map(g=>'<button type="button" data-group="'+g+'" class="'+(S.group===g?'on':'')+'">'+g+'</button>').join('')+'<hr><button type="button">Dates as weeks</button>';
+ const xs=rows();
+ if(!xs.length){document.getElementById('list').innerHTML='<p style="padding:20px 16px;color:var(--ink-3);margin:0">Nothing here. Every action has a week.</p>';return;}
+ const groups=[];xs.forEach(a=>{const k=key(a);let g=groups.find(x=>x.k===k);if(!g)groups.push(g={k,rows:[]});g.rows.push(a)});
+ document.getElementById('list').innerHTML=groups.map((g,i)=>{
+  const open=g.rows.filter(a=>a.st!=='done'),done=g.rows.filter(a=>a.st==='done'),late=open.filter(a=>a.late).length;
+  const head=S.group==='None'?'':'<div class="gh"><span class="ix">'+String(i+1).padStart(2,'0')+'</span><h3>'+g.k+'</h3><span class="meta">'+open.length+' open'+(late?' · <span class="bad">'+late+' late</span>':'')+'</span><button type="button" class="addto">+ Add for '+g.k+'</button></div>';
+  return head+open.map(row).join('')+(done.length?(S.showDone[g.k]?done.map(row).join(''):'<button type="button" class="folded" data-fold="'+g.k+'">'+done.length+' done '+I.right+'</button>'):'');
+ }).join('');
+ document.getElementById('kDone').textContent=A.filter(a=>a.st==='done').length;
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');const d=b?b.dataset:{};const f=id=>A.find(a=>a.id==id);
+ if(b&&d.view){S.view=d.view==='Weekly check'?S.view:d.view;}
+ else if(b&&b.id==='gb'){S.gb=!S.gb;}
+ else if(b&&d.group){S.group=d.group;S.gb=false;}
+ else if(b&&d.open){S.open=S.open==d.open?null:+d.open;S.menu=null;}
+ else if(b&&d.menu){S.menu=S.menu==d.menu?null:+d.menu;}
+ else if(b&&d.tick){const a=f(d.tick);a.st=a.st==='done'?'ns':'done';}
+ else if(b&&d.cycle){const a=f(d.cycle);a.st={ns:'prog',prog:'done',done:'ns'}[a.st];}
+ else if(b&&d.fold){S.showDone[d.fold]=true;}
+ else if(!e.target.closest('.menu,.grpby')){if(!S.menu&&!S.gb)return;S.menu=null;S.gb=false;}
+ else return;
+ draw();
+});
+document.getElementById('search').addEventListener('input',e=>{S.q=e.target.value;draw();});
+draw();
+</script>

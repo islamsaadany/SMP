@@ -71218,3 +71218,5 @@ Nothing it does is gone; it is quieter:
 - **Home — quick updates and adding a task**: no steps in its opened task; this week's box and the timeline; the row keeps "N of M steps"; + New task stays.
 
 **Checked**: `checks/tracker.mjs` **393 passed, 0 failed** (with steps: the line stays open, no link). `checks/shell.mjs` section 4 **111 ok, 0 failed** — new: My tasks' line stays open once there are steps; Home's opened task has no steps and its row keeps the count. Shell cache `smp-shell-v7.65-stepsplaces`.
+
+**§746 shell run**: 571 ok / 10 failed — all main's own (Copilot box and rails, §94.8, §475, §490.2, the Copilot settings row); every §743–§746 check green.

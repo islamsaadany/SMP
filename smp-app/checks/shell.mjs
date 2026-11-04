@@ -2396,7 +2396,8 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/start-screen.png" });
     /* §653: Mobile's plan holds a SWOT, so Start from the existing plan is
        the first card, then the workflow's. */
-    check(/Mobile/.test(st.head) && /Analysis/.test(st.head) && st.cards.length === 2 && /Start from the existing plan/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
+    /* §745 — one window: the heading names the place's strategy; the area is the focus line's */
+    check(/Mobile/.test(st.head) && /strategy/.test(st.head) && st.cards.length === 2 && /Start from the existing plan/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
       "§639, §653 the area opens on its start screen: a box to just ask, the plan card first and the SWOT workflow as a card under it, no menu, at the reading width", JSON.stringify(st));
     /* §691 — the SWOT's four ways in, said on its card as chips that are words, not buttons */
     const ways = await page.evaluate(() => ({ chips: Array.from(document.querySelectorAll(".copstart [data-cop-newchat] .copway")).map((x) => x.textContent), btns: document.querySelectorAll(".copstart [data-cop-newchat] button").length,

@@ -2426,6 +2426,22 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     const row = (await asTenant(tenantId, (c) => c.query("select c.section, c.extra, (select string_agg(m.body, '|' order by m.id) from copilot_messages m where m.chat_id = c.id and m.who = 'person') said from copilot_chats c order by c.created_at desc limit 1"))).rows[0];
     check(row && row.section === "analysis" && row.extra && row.extra.free === true && row.said === "Which weakness hurts us most?",
       "…kept in its area, marked free, with what was typed as its first message, said once", JSON.stringify(row));
+    /* §699 — THE LINE DROPS WHILE THE ANSWER IS WRITTEN (Islam's
+       ERR_NETWORK_CHANGED): the message reaches the server and is answered,
+       but the page's request is cut off. The page watches and shows the answer. */
+    const ai0 = await page.$$eval("[data-cop-msgs] .copmsg.ai", (a) => a.length);
+    const cut = async (route) => { const req = route.request(); if (req.method() === "POST" && /"act":"say"/.test(req.postData() || "")) { await route.fetch().catch(() => {}); await route.abort("internetdisconnected"); } else await route.continue(); };
+    await page.route("**/*", cut);
+    await page.fill("[data-cop-text]", "And the second weakness?");
+    await page.press("[data-cop-text]", "Enter");
+    await page.waitForFunction(() => /Watching for it/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const watching = await page.evaluate(() => (document.querySelector(".copsay") || {}).textContent || "");
+    await page.unroute("**/*", cut);
+    await page.waitForFunction((n) => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length > n, ai0, { timeout: 30000 }).catch(() => {});
+    const after = await page.evaluate(() => ({ ai: document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length, say: (document.querySelector(".copsay") || {}).textContent || "", box: (document.querySelector("[data-cop-text]") || {}).value || "" }));
+    check(/connection dropped/.test(watching) && after.ai > ai0 && !/Watching/.test(after.say) && after.box === "",
+      "§699 when the line drops while the answer is written, the page says so, watches, and shows the answer when it lands — what was typed is not put back to be sent twice", JSON.stringify({ watching, after, ai0 }));
+    errs = errs.filter((e) => !/ERR_INTERNET_DISCONNECTED|net::ERR_FAILED|Failed to fetch|NetworkError/i.test(e));
     await page.locator("[data-cop-home]:visible").first().click();
     check(!!(await page.$("[data-cop-startscreen]")), "§639 + New chat brings the start screen back");
     /* §640 THE BOX TAKES THE MATERIAL: notes picked there open a free chat

@@ -70249,10 +70249,39 @@ var COPILOT = (function(){
          the server, so it is not put back in the box — sending it again would
          say it twice; the chat is read again instead, and an answer that
          arrives later is there the next time it is opened. */
-      if (err && err.timedOut) { SAY = "This is taking too long, so the page stopped waiting. If the answer arrives, it will be here when you open this chat again."; openItem("chat", id); return; }
-      SAY = "The server could not be reached. What you typed is back in the box — try again.";
-      if (forced == null) DRAFT[id] = text; openItem("chat", id);
+      /* §699 — THE CONNECTION DROPPED (Islam's screenshot: ERR_NETWORK_CHANGED
+         on "assume all for me and go ahead with all pillars", and the chat sat
+         there). The server goes on writing the answer when the page loses the
+         line, so the page watches for it rather than reading the chat once,
+         at once, while the answer is still being written. */
+      watchAnswer(id, text, forced == null, !!(err && err.timedOut));
     });
+  }
+  var WATCH = {};
+  function watchAnswer(id, text, putBack, timedOut){
+    var tries = 0, MAX = 36, stop = function(){ delete WATCH[id]; };
+    WATCH[id] = true;
+    SAY = timedOut ? "This is taking a while, so the page stopped waiting on the line — it is watching for the answer instead."
+      : "The connection dropped while the answer was being written. Watching for it here — nothing was lost.";
+    draw();
+    var look = function(){
+      if (!WATCH[id]) return;
+      tries++;
+      getJ("chat", ["id=" + encodeURIComponent(id), "placeWord=" + encodeURIComponent(placeWord())]).then(function(x){
+        if (!WATCH[id]) return;
+        var ms = x.st === 200 && x.j && x.j.ok ? (x.j.messages || []) : null;
+        var head = function(s){ return String(s || "").replace(/\s+/g, " ").trim().slice(0, 60); };
+        var mine = ms ? ms.map(function(m){ return m.who !== "ai" && head(m.body) === head(text); }).lastIndexOf(true) : -1;
+        var answered = ms && mine >= 0 && ms.slice(mine + 1).some(function(m){ return m.who === "ai"; });
+        if (answered) { stop(); SAY = ""; if (OPEN[key()] && OPEN[key()].id === id) openItem("chat", id); else draw(); loadList(true); return; }
+        if (tries >= MAX) { stop();
+          SAY = ms && mine < 0 ? "The message did not reach the server. What you typed is back in the box — try again." : "No answer came. Ask again when you are ready — your message is kept.";
+          if (ms && mine < 0 && putBack) DRAFT[id] = text;
+          if (OPEN[key()] && OPEN[key()].id === id) openItem("chat", id); else draw(); return; }
+        setTimeout(look, 5000);
+      }, function(){ if (WATCH[id]) setTimeout(look, 5000); });
+    };
+    setTimeout(look, 3000);
   }
 
   /* A FILE, read in the browser only as far as its size and name; the server

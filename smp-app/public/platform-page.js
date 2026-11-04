@@ -2520,7 +2520,7 @@
      status, via, row)` is the tick's and the status's press; the rest is
      MW's, set by drawMyWork. */
   var MW = { open: null, tab: {}, detail: {}, loading: {}, menu: null, sub: null, renaming: null, pedit: null, pdel: null,
-    write: null, redraw: null, said: null };
+    write: null, redraw: null, said: null, prev: {}, sadd: {}, srename: null, draft: {}, auto: {}, focus: null };
   var MW_DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>';
   var MW_I = {
     lines: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
@@ -2790,8 +2790,158 @@
      Add beside it and the entries on a timeline; Description — text, written
      by clicking into it and saved on leaving; History; and Open in the
      client's Tracker at the end of the tabs, the press this row used to be. */
+  /* ── STEPS IN MY TASKS' OPENED TASK (§745) ────────────────────────
+     Islam, 2026-11-04: "simple but consistent" — the Tracker's opened task,
+     line for line: a task without steps shows one small "+ Add steps" (grey
+     words, a blue +); pressed, the Steps title and the add line come out
+     (Enter adds and keeps it open; Escape, or leaving it empty, shuts it).
+     With steps: the title and its count, the list, "+ Add a step" under it.
+     Whoever may change the task plans them here as in the Tracker — tick,
+     rename (press the words), a week, ↑ ↓ ×; a tick writes "Done: <step>"
+     into this week's box, saved only with it. */
+  function mwStepWrite(r, op, extra, then) {
+    MW.focus = then || null;
+    MW.write(r, op, extra);
+  }
+  function mwTickToBox(key, name, on) {
+    var a = MW.auto[key] || (MW.auto[key] = { names: [], edited: false });
+    var cur = MW.draft[key] || "";
+    if (on) {
+      if (a.names.indexOf(name) < 0) a.names.push(name);
+      var add = "Done: " + name;
+      MW.draft[key] = cur ? (cur.indexOf(add) >= 0 ? cur : cur + "; " + add) : add;
+    } else {
+      a.names = a.names.filter(function (n) { return n !== name; });
+      if (!a.edited) MW.draft[key] = cur.split("; ").filter(function (p) { return p !== "Done: " + name; }).join("; ");
+    }
+  }
+  function mwSteps(r, d, key) {
+    var all = d.steps || [], live = !!d.canChange, open = !!MW.sadd[key];
+    if (!all.length && !live) return null;
+    var sec = el("div", "mwsteps");
+    sec.setAttribute("data-steps", "");
+    if (all.length || open) {
+      var h = el("div", "mwssh", "Steps");
+      if (all.length) h.appendChild(el("span", "c", all.filter(function (x) { return x.done; }).length + " of " + all.length));
+      sec.appendChild(h);
+    }
+    if (all.length) {
+      var ul = el("ul", "mwsl");
+      all.forEach(function (st, i) {
+        var li = el("li", "mwsline" + (st.done ? " done" : ""));
+        li.setAttribute("data-sid", st.id);
+        var cb = el("button", "mwscb", st.done ? "✓" : "");
+        cb.type = "button";
+        cb.setAttribute("aria-pressed", String(st.done));
+        cb.setAttribute("aria-label", (st.done ? "Untick: " : "Tick: ") + st.title);
+        if (!live) cb.disabled = true;
+        cb.addEventListener("click", function () {
+          mwTickToBox(key, st.title, !st.done);
+          mwStepWrite(r, "step-tick", { stepId: st.id, done: !st.done }, d.canWrite ? "box" : null);
+        });
+        li.appendChild(cb);
+        if (MW.srename === st.id) {
+          var ri = el("input", "mwsren");
+          ri.value = st.title; ri.maxLength = 300; ri.setAttribute("aria-label", "Rename the step");
+          var done2 = false, fin = function (keep) {
+            if (done2) return; done2 = true; MW.srename = null;
+            var v = ri.value.replace(/\s+/g, " ").trim();
+            if (keep && v && v !== st.title) mwStepWrite(r, "step-rename", { stepId: st.id, title: v }); else MW.redraw();
+          };
+          ri.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") { e.preventDefault(); fin(true); }
+            else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); fin(false); }
+          });
+          ri.addEventListener("blur", function () { fin(true); });
+          li.appendChild(ri);
+          setTimeout(function () { ri.focus(); ri.select(); }, 0);
+        } else {
+          var nm = el("span", "mwsnm", st.title);
+          if (live) {
+            nm.setAttribute("role", "button"); nm.tabIndex = 0; nm.title = "Press to rename";
+            var ren = function () { MW.srename = st.id; MW.redraw(); };
+            nm.addEventListener("click", ren);
+            nm.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ren(); } });
+          }
+          li.appendChild(nm);
+        }
+        if (live) {
+          var wk = el("select", "mwswk" + (st.due ? " set" : "") + (st.late ? " late" : ""));
+          wk.setAttribute("aria-label", "Week of the step");
+          var o0 = el("option", null, st.due ? "No week" : "+ week"); o0.value = ""; wk.appendChild(o0);
+          var hit = false;
+          (d.stepWeeks || []).forEach(function (w) { var o = el("option", null, w.word + " · " + w.days); o.value = w.day; if (st.due === w.day) { o.selected = true; hit = true; } wk.appendChild(o); });
+          if (st.due && !hit) { var ox = el("option", null, st.week); ox.value = st.due; ox.selected = true; wk.appendChild(ox); }
+          wk.addEventListener("change", function () { mwStepWrite(r, "step-due", { stepId: st.id, due: wk.value }); });
+          li.appendChild(wk);
+          var tl = el("span", "mwstools");
+          [["↑", "Move up", -1], ["↓", "Move down", 1]].forEach(function (x) {
+            var b = el("button", null, x[0]); b.type = "button"; b.setAttribute("aria-label", x[1]);
+            if ((x[2] < 0 && i === 0) || (x[2] > 0 && i === all.length - 1)) b.disabled = true;
+            b.addEventListener("click", function () { mwStepWrite(r, "step-move", { stepId: st.id, dir: x[2] }); });
+            tl.appendChild(b);
+          });
+          var del = el("button", "danger", "×"); del.type = "button"; del.setAttribute("aria-label", "Remove the step");
+          del.addEventListener("click", function () { mwStepWrite(r, "step-delete", { stepId: st.id }); });
+          tl.appendChild(del);
+          li.appendChild(tl);
+        } else if (st.due) li.appendChild(el("span", "mwswk set" + (st.late ? " late" : ""), st.week));
+        ul.appendChild(li);
+      });
+      sec.appendChild(ul);
+    }
+    if (live) {
+      if (open) {
+        var line = el("div", "mwsadd"), ni = el("input");
+        line.appendChild(el("span", null, "+"));
+        ni.placeholder = "Add a step and press Enter"; ni.maxLength = 300;
+        ni.setAttribute("aria-label", "Add a step to " + (r.title || "this task"));
+        ni.setAttribute("data-snew", "");
+        ni.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            var v = ni.value.replace(/\s+/g, " ").trim();
+            if (!v || ni.disabled) return;
+            ni.disabled = true;
+            mwStepWrite(r, "step-add", { title: v }, "add");
+          } else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); MW.sadd[key] = false; MW.redraw(); }
+        });
+        ni.addEventListener("blur", function () {
+          setTimeout(function () { if (!ni.isConnected || ni.disabled || ni.value.trim() || document.activeElement === ni) return; MW.sadd[key] = false; MW.redraw(); }, 150);
+        });
+        line.appendChild(ni);
+        sec.appendChild(line);
+      } else {
+        var lk = el("button", "mwslink");
+        lk.type = "button";
+        lk.setAttribute("data-sadd", "");
+        lk.appendChild(el("b", null, "+"));
+        lk.appendChild(document.createTextNode(" " + (all.length ? "Add a step" : "Add steps")));
+        lk.addEventListener("click", function () { MW.sadd[key] = true; MW.focus = "add"; MW.redraw(); });
+        sec.appendChild(lk);
+      }
+    }
+    /* where the cursor goes once the list is drawn again */
+    if (MW.focus) {
+      var want = MW.focus;
+      setTimeout(function () {
+        if (MW.focus !== want) return;
+        var t = want === "add" ? sec.querySelector("[data-snew]") : document.getElementById("mwp-" + r.id);
+        if (!t || !t.isConnected) return;
+        /* drawn first from what was shown, then from the fresh read: the
+           cursor is put back each time until the fresh one is on screen */
+        if (MW.detail[key]) MW.focus = null;
+        t.focus();
+        if (want === "box" && t.setSelectionRange) t.setSelectionRange(t.value.length, t.value.length);
+      }, 0);
+    }
+    return sec;
+  }
   function mwDetail(r) {
     var key = mwKey(r), d = MW.detail[key], box = el("div", "mwdet");
+    /* §745 after a write the task is read again behind what was shown, so the
+       opened task does not blink to Reading… on every tick */
+    if (!d && MW.prev[key] && !MW.prev[key].error) { mwLoad(r); d = MW.prev[key]; }
     if (!d) { box.appendChild(el("p", "muted", "Reading…")); mwLoad(r); return box; }
     if (d.error) { box.appendChild(el("p", "err", d.error)); return box; }
     var tab = MW.tab[key] || "p";
@@ -2813,14 +2963,20 @@
     tabs.appendChild(go);
     box.appendChild(tabs);
     if (tab === "p") {
+      var stepsAt = mwSteps(r, d, key);
+      if (stepsAt) box.appendChild(stepsAt);
       if (d.canWrite) {
+        if ((d.steps || []).length || MW.sadd[key]) box.appendChild(el("div", "mwssh", "This week"));
         var cp = el("div", "mwcompose"), inp = el("input"), add = el("button", null, "Add");
         inp.id = "mwp-" + r.id;
+        /* a tick's "Done: <step>" and anything typed stay through a redraw */
+        inp.value = MW.draft[key] || "";
+        inp.addEventListener("input", function () { MW.draft[key] = inp.value; if (MW.auto[key]) MW.auto[key].edited = true; });
         inp.placeholder = "What happened this week?";
         inp.setAttribute("aria-label", "Progress on " + (r.title || "this task"));
         inp.maxLength = 2000;
         add.type = "button";
-        var send = function () { var v = inp.value.trim(); if (!v) { inp.focus(); return; } inp.disabled = true; MW.write(r, "progress", { body: v }); };
+        var send = function () { var v = inp.value.trim(); if (!v) { inp.focus(); return; } inp.disabled = true; delete MW.draft[key]; delete MW.auto[key]; MW.write(r, "progress", { body: v }); };
         add.addEventListener("click", send);
         inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); send(); } });
         cp.appendChild(inp); cp.appendChild(add); box.appendChild(cp);
@@ -3109,7 +3265,7 @@
           if (!a.ok) { said.textContent = a.error || "That did not save. Nothing was changed — try again."; said.hidden = false; MW.redraw(); return; }
           said.hidden = true;
           MW.menu = null; MW.sub = null; MW.renaming = null;
-          delete MW.detail[key];
+          MW.prev[key] = MW.detail[key]; delete MW.detail[key];
           var at = rows.indexOf(r), dat = doneRows.indexOf(r);
           if (a.gone) {
             if (at >= 0) rows.splice(at, 1);
@@ -3671,7 +3827,7 @@
           if (!a.ok) { said.textContent = a.error || "That did not save. Nothing was changed — try again."; said.hidden = false; draw(); return; }
           said.hidden = true;
           MW.menu = null; MW.sub = null; MW.renaming = null;
-          delete MW.detail[key];
+          MW.prev[key] = MW.detail[key]; delete MW.detail[key];
           if (a.gone || (a.row && a.row.bucket !== "late" && a.row.bucket !== "week")) {
             /* handed on, deleted, or moved past this week: it leaves Home */
             list = list.filter(function (x) { return x[2] !== r; });

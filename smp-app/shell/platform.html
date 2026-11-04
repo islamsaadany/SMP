@@ -1944,6 +1944,35 @@
   .mwtabs .mwopen{ font-size:13px; font-weight:600; color:var(--mw-blue); text-decoration:none; padding:4px 2px }
   .mwtabs .mwopen:hover{ text-decoration:underline }
   .mwcompose{ display:flex; gap:8px; max-width:780px }
+  /* §745 steps in the opened task, as the Tracker draws them */
+  .mwsteps{ display:grid; gap:2px; margin:0 0 10px; max-width:780px }
+  .mwssh{ font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin:2px 0 4px }
+  .mwssh .c{ font-weight:500; letter-spacing:0; text-transform:none; margin-left:6px }
+  .mwsl{ list-style:none; margin:0; padding:0; display:grid; gap:1px }
+  .mwsline{ display:flex; align-items:center; gap:10px; padding:4px 6px; border-radius:7px }
+  .mwsline:hover{ background:var(--surface-2) }
+  .mwscb{ width:16px; height:16px; flex:none; border:1.5px solid var(--line); border-radius:4px; background:var(--surface); padding:0; display:grid; place-items:center; font-size:11px; line-height:1; color:#fff; cursor:pointer }
+  .mwsline.done .mwscb{ background:var(--good); border-color:var(--good) }
+  .mwsline.done .mwsnm{ color:var(--ink-3); text-decoration:line-through }
+  .mwsnm{ flex:1; min-width:0; font-size:14px; cursor:text }
+  .mwsren{ flex:1; min-width:0; border:0; border-bottom:1px solid var(--mw-blue); background:none; outline:none; padding:2px 0; font-family:inherit; font-size:14px; color:var(--ink) }
+  .mwswk{ border:0; background:var(--surface-2); border-radius:999px; padding:1px 8px; font-family:inherit; font-size:12px; color:var(--ink-3); max-width:150px; cursor:pointer }
+  .mwswk.set{ color:var(--ink-2) }
+  .mwswk.late{ color:var(--bad) }
+  .mwstools{ display:inline-flex; gap:2px; opacity:0; transition:opacity .15s }
+  .mwsline:hover .mwstools, .mwsline:focus-within .mwstools{ opacity:1 }
+  .mwstools button{ border:0; background:none; width:22px; height:22px; border-radius:5px; color:var(--ink-3); cursor:pointer; font-size:13px }
+  .mwstools button:hover:not(:disabled){ background:var(--surface); color:var(--ink) }
+  .mwstools button.danger:hover{ color:var(--bad) }
+  .mwstools button:disabled{ opacity:.35; cursor:default }
+  .mwsadd{ display:flex; align-items:center; gap:10px; padding:4px 6px; color:var(--ink-3) }
+  .mwsadd span{ width:16px; text-align:center; flex:none }
+  .mwsadd input{ flex:1; min-width:0; border:0; border-bottom:1px dashed var(--line); background:none; outline:none; padding:3px 0; font-family:inherit; font-size:14px; color:var(--ink) }
+  .mwsadd input:focus{ border-bottom:1px solid var(--mw-blue) }
+  .mwslink{ justify-self:start; border:0; background:none; padding:2px 6px; font-family:inherit; font-size:13px; color:var(--ink-3); cursor:pointer }
+  .mwslink b{ color:var(--mw-blue); font-weight:600 }
+  .mwslink:hover{ color:var(--mw-blue) }
+  @media (prefers-reduced-motion:reduce){ .mwstools{ transition:none } }
   .mwcompose input{ flex:1; min-width:0; height:38px; border:1px solid var(--line); border-radius:8px; padding:0 11px; background:var(--surface); color:var(--ink); font:inherit; font-size:14px }
   .mwcompose input:focus{ border-color:var(--mw-blue); outline:none }
   .mwcompose button{ height:38px; padding:0 16px; border:0; border-radius:8px; background:var(--mw-navy); color:#fff; font:inherit; font-size:13px; font-weight:600; cursor:pointer }

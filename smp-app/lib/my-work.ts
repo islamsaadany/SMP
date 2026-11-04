@@ -35,6 +35,7 @@ import {
   progressOf, addProgress, latestProgress, eventsOf, type Progress, stepTally,
   oneProgress, editProgress, deleteProgress, mayChangeProgress, ONLY_WRITER,
   addAction, listTopics, oneTopic, thursdayOf,
+  stepsOf, oneStep, addStep, renameStep, tickStep, setStepDue, moveStep, deleteStep,
 } from "./tracker.ts";
 
 export type Bucket = "late" | "week" | "later";
@@ -250,6 +251,8 @@ export type WorkDetail = { ok: true; detail: {
   id: string; description: string; canChange: boolean; canWrite: boolean;
   progress: { id: string; week: string; now: boolean; body: string; by: string; mine: boolean; edited: boolean }[];
   history: { day: string; text: string }[];
+  steps: { id: string; title: string; done: boolean; due: string | null; week: string; late: boolean }[];
+  stepWeeks: { day: string; word: string; days: string }[];
   team: { key: string; name: string; me: boolean; owner: boolean }[];
   weeks: { day: string; word: string; days: string; on: boolean }[];
 } } | { ok: false; status: number; why: string };
@@ -290,6 +293,11 @@ export async function workDetail(t: Client, who: Who, id: string, now: Date = ne
       history: hist,
       team: live ? office.map((p) => ({ key: p.key, name: sn(p.key), me: p.key === who.personKey, owner: p.key === a.ownerKey })) : [],
       weeks: live ? weekOptions(today).map((w) => ({ day: w.to, word: w.word, days: w.days, on: !!a.due && sameWeek(a.due, w.to) })) : [],
+      /* §745 the task's steps, as the Tracker's opened task draws them: a
+         week passed undone reads late */
+      steps: (await stepsOf(c, id)).map((st) => ({ id: st.id, title: st.title, done: st.done, due: st.due,
+        week: st.due ? weekWord(st.due, today) : "", late: !st.done && !!st.due && st.due < weekOf(today).from })),
+      stepWeeks: live ? weekOptions(today).map((w) => ({ day: w.to, word: w.word, days: w.days })) : [],
     } };
   });
 }
@@ -302,11 +310,13 @@ export async function workDetail(t: Client, who: Who, id: string, now: Date = ne
    client's Super user. A hand-over takes the row off this person's list and
    a delete takes it off everyone's; the answer says so (gone), and otherwise
    carries the row drawn again by the list's own reader. */
-export type WorkOp = "progress" | "progress-edit" | "progress-delete" | "notes" | "due" | "owner" | "rename" | "delete";
+export type WorkOp = "progress" | "progress-edit" | "progress-delete" | "notes" | "due" | "owner" | "rename" | "delete"
+  | "step-add" | "step-rename" | "step-tick" | "step-due" | "step-move" | "step-delete";
 export type WorkWrite2 = { ok: true; row: WorkRow | null; gone: boolean } | { ok: false; status: number; why: string };
 export async function workWrite(t: Client, who: Who, id: string, op: unknown, body: Record<string, unknown>, now: Date = new Date()): Promise<WorkWrite2> {
   const g = gate(t, who); if (g) return g;
-  if (!["progress", "progress-edit", "progress-delete", "notes", "due", "owner", "rename", "delete"].includes(String(op))) return { ok: false, status: 400, why: "Not something this list does." };
+  if (!["progress", "progress-edit", "progress-delete", "notes", "due", "owner", "rename", "delete",
+    "step-add", "step-rename", "step-tick", "step-due", "step-move", "step-delete"].includes(String(op))) return { ok: false, status: 400, why: "Not something this list does." };
   if (!UUID.test(id)) return GONE;
   const today = todayIn(now);
   const by = who.personKey || "";
@@ -347,6 +357,29 @@ export async function workWrite(t: Client, who: Who, id: string, op: unknown, bo
       } else if (op === "delete") {
         await deleteAction(c, id);
         return { ok: true, row: null, gone: true };
+      } else if (op === "step-add") {
+        /* §745 STEPS FROM MY TASKS: the Tracker's own step acts
+           (modules/tracker/index.ts), by whoever may change the task; a
+           step named must be this task's; the first tick on a task Not
+           started moves it to In progress */
+        if (!oneLine(body.title)) return { ok: false, status: 400, why: "A step needs a few words." };
+        await addStep(c, id, String(body.title), by);
+      } else {
+        const st = await oneStep(c, String(body.stepId || ""));
+        if (!st || st.actionId !== id) return { ok: false, status: 404, why: "That step is not on this task any more." };
+        if (op === "step-rename") {
+          if (!oneLine(body.title)) return { ok: false, status: 400, why: "A step needs a few words." };
+          await renameStep(c, st.id, String(body.title));
+        } else if (op === "step-tick") {
+          const done = !!body.done;
+          await tickStep(c, st.id, done);
+          if (done && cur.status === "not_started") await setStatus(c, id, "in_progress", by);
+        } else if (op === "step-due") {
+          const due = body.due == null || body.due === "" ? null : calendarDay(body.due);
+          if (body.due && !due) return { ok: false, status: 400, why: "That is not a date this list can read." };
+          await setStepDue(c, st.id, due);
+        } else if (op === "step-move") await moveStep(c, st.id, Number(body.dir) < 0 ? -1 : 1);
+        else if (op === "step-delete") await deleteStep(c, st.id);
       }
     }
     const a = await oneAction(c, id);

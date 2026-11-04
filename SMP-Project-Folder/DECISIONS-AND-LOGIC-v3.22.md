@@ -70695,7 +70695,7 @@ The last batch of the stress test (§694, §697). Islam: *"start batch 3"*, then
 
 **§698 MERGED TO `main`** 2026-10-31, Islam: *"merge to main"*. `main` had not moved since §697, so the merge is a fast-forward: no renumbering, no second record to join, and the builds and suites are the ones recorded above — then `5162336b..768084c6`. No migrations; nobody signed out. With it the Copilot stress test (§694, §697, §698) is built, but for S4.
 
-## §699 — A free chat whose line drops watches for its answer (2026-11-04)
+## §744 — A free chat whose line drops watches for its answer (2026-11-04; §699 on the branch, renumbered at the merge: main took §699–§743)
 
 Islam, with a screenshot of a free chat in Logistics' Execution: *"assume all for me and go ahead with all pillars"* sat under the last answer with nothing after it — *"the chat got stuck"* — and then the browser's own line, *"Failed to load resource: net::ERR_NETWORK_CHANGED"*. The connection changed (Wi-Fi, VPN) while the answer was being written. The message had reached the server, which is kept before the model is asked (§472), and the server goes on writing the answer after the page loses the line. But the page treated a dropped line as *the server could not be reached*: it read the chat once, at once — while the answer was still being written — showed the message with no answer, and put the text back in the box, so sending again would have said it twice.
 

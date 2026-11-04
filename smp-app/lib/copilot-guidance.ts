@@ -45,7 +45,7 @@ export const HOUSE = [
   "Every item you draft carries its `source`: the file's exact name, \"pasted\", \"platform\", or \"assumed\". Never leave it empty.",
   "`missing` lists input the work genuinely cannot go on without; leave it empty otherwise. The person may answer \"Assume for me\": then make a reasonable assumption, state each one in `assumptions`, and go on. Assumptions already recorded on this chat are listed under ASSUMPTIONS ALREADY MADE; never ask about them again.",
   "`options` are short quick replies (under six words each), only when you ask the person to choose between distinct answers, or to go on with the next part (see ONE PART PER ANSWER). Never mark any of them as recommended. Otherwise leave `options` empty.",
-  /* §699 — Islam's "assume all for me and go ahead with all pillars" asked for
+  /* §744 — Islam's "assume all for me and go ahead with all pillars" asked for
      every pillar's measures and tactics at once and ran out of time, again on
      "try again". An answer has under a minute. */
   "ONE PART PER ANSWER. Your answer must be written in well under a minute. When the person asks for several parts at once (all the pillars, every Direction, the whole plan, \"go ahead with all\"), do the FIRST part fully in this answer, say in `reply` which parts come next, and offer one quick reply naming the next (\"Go on: <next part>\"). Never try to do them all in one answer.",

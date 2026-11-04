@@ -4305,7 +4305,7 @@ var COPILOT = (function(){
          the server, so it is not put back in the box — sending it again would
          say it twice; the chat is read again instead, and an answer that
          arrives later is there the next time it is opened. */
-      /* §699 — THE CONNECTION DROPPED (Islam's screenshot: ERR_NETWORK_CHANGED
+      /* §744 — THE CONNECTION DROPPED (Islam's screenshot: ERR_NETWORK_CHANGED
          on "assume all for me and go ahead with all pillars", and the chat sat
          there). The server goes on writing the answer when the page loses the
          line, so the page watches for it rather than reading the chat once,

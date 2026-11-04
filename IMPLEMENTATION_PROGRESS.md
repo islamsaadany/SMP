@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-04 — A free chat whose line drops watches for its answer (§699).** Islam's chat stuck after ERR_NETWORK_CHANGED: the server had the message and went on answering, but the page read the chat once, too early. Now it says the connection dropped, watches for up to three minutes, and draws the answer when it lands; the text goes back in the box only if the message never arrived.
+**2026-11-04 — A free chat whose line drops watches for its answer (§744).** Islam's chat stuck after ERR_NETWORK_CHANGED: the server had the message and went on answering, but the page read the chat once, too early. Now it says the connection dropped, watches for up to three minutes, and draws the answer when it lands; the text goes back in the box only if the message never arrived.
 
 **2026-10-31 — Small ways back (§698), the Copilot stress test's third batch.** A used SWOT change can be put back (one step) and used again. The held tick on an unscored plan Direction says leaving it unticked keeps it. Apply is held, in words, if a chat's place ever differs from the page's. A failed draft in Execution names its item and offers draft again, Draft all left, or skip. Not built: switching a guided Foundation chat to the template (the template road is a plain chat with no generated file to fill). Mockup `design-mockups/copilot-layout/2026-10-31_small-ways-back.html`.
 

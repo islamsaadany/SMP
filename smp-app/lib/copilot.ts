@@ -105,6 +105,9 @@ export const MAX_TITLE = 160;
 export const NO_KEY =
   "The Copilot's AI is not switched on for this platform: no key is set. What you typed is kept with this chat, and it will be answered here once the key is added.";
 export function failedLine(why: string): string {
+  /* §699 — a time-out on a big ask fails the same way every time it is
+     sent again; the line says what does work: one part at a time. */
+  if (/did not answer in time/.test(String(why || ""))) return "That was too much to answer in one go, so the Copilot ran out of time. Your message is kept — ask for one part at a time (one pillar, one Direction), or say \u201cstart with the first\u201d and it will take them in turn.";
   return "The Copilot could not answer just now (" + oneLine(why).slice(0, 200) + "). Your message is kept — send it again to retry.";
 }
 

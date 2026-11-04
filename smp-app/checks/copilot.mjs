@@ -40,6 +40,7 @@ import {
   chatsOn, newChat, messagesOf, recordSaid, recordAnswer, deliverablesOn, newDeliverable, versionsOf, addVersion, restoreVersion,
   isSaveAsk, isBareEnhance, draftText, claimsDraft, NO_DRAFT,
   partMemo,
+  failedLine,
 } from "../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
 import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.ts";
@@ -149,6 +150,11 @@ check("each section's guidance carries the house rules; the roads only where the
   /Copilot settings › Templates \(Porter's Five Forces/.test(guidanceFor("analysis", "", ["Porter's Five Forces"])) &&
   /FOREFRONT'S METHOD FOR THIS SECTION[\s\S]*Rule one/.test(guidanceFor("analysis", "## SWOT\n\nRule one", [])) &&
   !/WAYS TO START/.test(guidanceFor("directions")));
+/* §699 — a big ask runs out of time: the guidance says one part per answer, offering to go on, in a free chat as in a workflow; a time-out says what does work */
+check("§699 the free chat's guidance takes one part per answer and offers to go on with the next",
+  /ONE PART PER ANSWER[\s\S]*do the FIRST part fully[\s\S]*Go on: <next part>/.test(guidanceFor("execution", "", [], "Talk first.")) && /ONE PART PER ANSWER/.test(guidanceFor("execution")));
+check("§699 a time-out says to ask one part at a time; any other failure still says to send it again",
+  /too much to answer in one go/.test(failedLine("the assistant did not answer in time")) && /one part at a time/.test(failedLine("the assistant did not answer in time")) && /send it again/.test(failedLine("the assistant could not be reached")));
 /* §493: How we compete — the one scoring function (§94.8). */
 {
   const all = (fs, sc) => Object.fromEntries(fs.map((f) => [f.id, sc]));

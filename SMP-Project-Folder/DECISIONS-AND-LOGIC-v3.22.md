@@ -71206,3 +71206,5 @@ Nothing it does is gone; it is quieter:
 - **Rows** unchanged: nothing without steps, "N of M steps" with them.
 
 **Checked**: `checks/tracker.mjs` **393 passed, 0 failed** — new: the quiet link (grey words, blue +), pressing it brings the title, line and This week label with the cursor in the line, Escape puts the link back; with steps the title stays and + Add a step waits under the list; the weekly check has no add, no Edit steps; a task without steps shows nothing in the check. `checks/shell.mjs` section 4 **110 ok, 0 failed** — new: My tasks' opened task shows only + Add steps, opens the title and line, Enter stores a step and keeps the line, Escape leaves + Add a step; a tick is stored (In progress) and writes "Done: Line step" into the box, focused, unsaved. Shell cache `smp-shell-v7.64-quietsteps`.
+
+**§745 shell run**: 569 ok / 11 failed — all main's own (Copilot box and rails, §94.8, §475, §490.2, §653's plan card, the Copilot settings row); every §743/§744/§745 check green. Mockup brought to what is built (Islam: "mockup first").

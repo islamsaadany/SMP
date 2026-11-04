@@ -610,7 +610,7 @@ const LOOK = `
 .ptabs .acts{padding:0;font-size:13px}
 .open .tp{max-width:780px}
 .open:not([data-tab="p"]) .tp-p,.open:not([data-tab="d"]) .tp-d,.open:not([data-tab="s"]) .tp-s{display:none}
-/* §743 STEPS */
+/* §745 STEPS */
 .stc{display:inline-flex;align-items:center;gap:5px;color:var(--ink-2);white-space:nowrap;flex:none}
 .stc i{display:inline-block;width:28px;height:4px;border-radius:2px;background:var(--line-2);overflow:hidden;position:relative}
 .stc i b{position:absolute;inset:0 auto 0 0;background:var(--good)}
@@ -635,7 +635,7 @@ const LOOK = `
 .swl button:hover{background:var(--surface-2)}
 .swl button.on{font-weight:700}
 .swl small{margin-left:auto;color:var(--ink-3);font-size:12px}
-/* §744: the order and remove buttons keep their room and only fade in, so
+/* §746: the order and remove buttons keep their room and only fade in, so
    nothing moves under the pointer on its way to the week */
 .stools{display:inline-flex;gap:2px;flex:none;opacity:0;transition:opacity .12s}
 .sline:hover .stools,.sline:focus-within .stools{opacity:1}
@@ -1079,7 +1079,7 @@ export type Loaded = { office: Person[]; names: Map<string, string>; short: Map<
   progress: Progress[]; latest: Map<string, Progress>;
   /* §719: every row's history and progress, for the panels the page carries */
   eventsBy?: Map<string, Event[]>; progressBy?: Map<string, Progress[]>;
-  /* §743: every task's steps */
+  /* §745: every task's steps */
   stepsBy?: Map<string, Step[]> };
 
 /* ONE READ FOR THE PAGE AND FOR A PRESS. An opened row that is no longer on
@@ -1454,12 +1454,12 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
       '<button type="button" class="go danger" data-act="delete">Delete it</button></span></span>' : "") + "</div>";
   /* anybody past the gate writes progress (§657); somebody the register has
      not placed yet has no name to write it under (§313.32) */
-  /* §744 (Islam: "the view of the steps over the progress in one place is
+  /* §746 (Islam: "the view of the steps over the progress in one place is
      better … when I click on the steps the note is added to the progress
      without opening another thing, and seeing previous progress in the same
      time is good"): Progress holds the steps first, then this week's box,
      then the entries — no Steps tab of its own */
-  /* §745 QUIET STEPS (Islam, 2026-11-04: "the team is already using the task
+  /* §747 QUIET STEPS (Islam, 2026-11-04: "the team is already using the task
      management without steps so it should be quiet … simple but
      consistent"): a task without steps shows one small "+ Add steps" (grey
      words, a blue +); pressed, the Steps title and the add line come out.
@@ -1475,7 +1475,7 @@ function taskTabsWith(a: Action, L: Loaded, who: Who, today: string, live: boole
     : '<div class="ro">' + (a.description ? esc(a.description).replace(/\n/g, "<br>") : "&mdash;") + "</div>") + "</div>";
   return tabs + prog + desc + '<ul class="hist" hidden>' + hist + "</ul>";
 }
-/* ══ STEPS (§743) ══════════════════════════════════════════════════════
+/* ══ STEPS (§745) ══════════════════════════════════════════════════════
    Islam: "how shall we add sub tasks for the task? … breaking it down would
    help in planning" → design-mockups/internal-tracker/2026-11-03_task-steps.html,
    "go with B, but remove the owner for now. the task already has an owner he
@@ -1516,14 +1516,14 @@ function stepsBlock(a: Action, L: Loaded, live: boolean, today: string, compact:
       '<button type="button" class="scb" data-act="step-tick" aria-pressed="' + st.done + '" aria-label="' + (st.done ? "Untick" : "Tick") + ": " + esc(st.title) + '"' + (live ? "" : " disabled") + ">" + (st.done ? "&#10003;" : "") + "</button>" +
       '<span class="snm"' + (live && !compact ? ' data-act="step-rename" role="button" tabindex="0" title="Press to rename"' : "") + ">" + esc(st.title) + "</span>" + week + tools + "</li>";
   }).join("");
-  /* §744: in the weekly check the steps are for the review — tick, and add
+  /* §746: in the weekly check the steps are for the review — tick, and add
      the odd step behind a link; renaming, weeks, order and removal are
      planning, in the opened task ("Edit steps") */
-  /* §745: the weekly check only ticks (the owner plans the steps, in the
+  /* §747: the weekly check only ticks (the owner plans the steps, in the
      Tracker or in My tasks); the add line waits behind "+ Add steps" /
      "+ Add a step" — grey words, a blue + */
   const add = live && !compact ? '<div class="sadd"' + (all.length ? "" : " hidden") + '><span aria-hidden="true">+</span><input class="snew" data-act="step-new" placeholder="Add a step and press Enter" aria-label="Add a step to ' + esc(a.title) + '" maxlength="300"></div>' : "";
-  /* §746 (Islam: "task with steps as built is good"): once a task has
+  /* §748 (Islam: "task with steps as built is good"): once a task has
      steps the add line stays open under them; the link is for a task
      without any */
   const links = live && !compact && !all.length

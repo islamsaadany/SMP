@@ -71164,7 +71164,7 @@ Nothing it does is gone; it is quieter:
 
 **§742 MERGED TO `main`** 2026-11-03, Islam: *"merge"*. Fast-forward; main had not moved. (`checks/shell.mjs` not re-run: the change is the module pages' bar, which the console does not draw.)
 
-## §743 — Steps inside a task (2026-11-03)
+## §745 — Steps inside a task (2026-11-03)
 
 **Asked** (Islam): "how shall we add sub tasks for the task? what do you suggest? as sometimes we have a long task and breaking it down would help in planning" → suggested STEPS (a light checklist in the task) over full sub-tasks (rows of their own, doubling the weekly check and raising "is a parent Done while a child is late?") → mockup `design-mockups/internal-tracker/2026-11-03_task-steps.html` → "show me with previous progress points or shall we split them to 2 tabs?" (A one tab / B a tab of its own) → **"go with B, but remove the owner for now. the task already has an owner he shall manage the steps"**.
 
@@ -71177,11 +71177,11 @@ Nothing it does is gone; it is quieter:
 
 **Checked**: `checks/tracker.mjs` **388 passed, 0 failed** — new: at the server, the owner adds (trimmed, in order), somebody who may not is refused and nothing is written, an empty step refused, the first tick moves the task to In progress, rename/week/move read back, all ticked does not make it Done and the page asks, untick and remove, a gone step is a 404; in the browser, the Steps tab takes steps with Enter (the tab stays, the cursor stays), a tick shows "1 of 2 steps" on the row, the weekly check's box lists them, ticking the last asks and Not yet folds it. `checks/shell.mjs` — new: a My tasks row with steps says "1 of 2 steps". Migration 037 applied to the local test databases with `db/apply.mjs` (deploy applies it on production). Shell cache `smp-shell-v7.62-steps`. (Shell run result below when it lands.)
 
-**§743 shell run**: 563 ok / 11 failed — main's own (§653 comes and goes); the §743 row check and §728/§739 ok.
+**§745 shell run**: 563 ok / 11 failed — main's own (§653 comes and goes); the §745 row check and §728/§739 ok.
 
-## §744 — Steps over progress, a tick fills the week's box, review-only steps in the check, add a task from My tasks and Home (2026-11-03)
+## §746 — Steps over progress, a tick fills the week's box, review-only steps in the check, add a task from My tasks and Home (2026-11-03)
 
-**Asked** (Islam), on the §743 mockups: "steps needs to be optional and when someone click a step in a week he gets the option for it to get into what happened this week" → "1. the add to this week … added automatically to the what happened this week box … 2. my tasks and home should have the ability to add a new task … my tasks can add it as a line but home … a pop up .. 3. … weekly check … add step part? … think with me" → "go ahead" → "1. when I go to click on adding a week the other buttons get in place … 2. … view of the steps over the progress in one place is better in the tracker" → mockup `design-mockups/internal-tracker/2026-11-03_steps-final.html` → **"build it"**.
+**Asked** (Islam), on the §745 mockups: "steps needs to be optional and when someone click a step in a week he gets the option for it to get into what happened this week" → "1. the add to this week … added automatically to the what happened this week box … 2. my tasks and home should have the ability to add a new task … my tasks can add it as a line but home … a pop up .. 3. … weekly check … add step part? … think with me" → "go ahead" → "1. when I go to click on adding a week the other buttons get in place … 2. … view of the steps over the progress in one place is better in the tracker" → mockup `design-mockups/internal-tracker/2026-11-03_steps-final.html` → **"build it"**.
 
 - **One place in the opened task**: the Steps tab is gone; the Progress tab shows Steps (or "optional" when there are none) over This week and the timeline. A step's hover tools (↑ ↓ ×) fade in without moving anything — the week chip stays where it is.
 - **A tick writes "Done: <step>"** into the task's "What happened this week?" box (several joined with "; "); an untick takes its own words out again unless the box was typed in since. Nothing is saved until Enter / Save and next, as for anything typed there.
@@ -71192,9 +71192,9 @@ Nothing it does is gone; it is quieter:
 
 **Checked**: `checks/tracker.mjs` **390 passed, 0 failed** — updated for one place (no Steps tab), new: a tick puts "Done: Step one" in the box, focused and unsaved; the weekly check box gets "Done: Step two"; its links. `checks/shell.mjs` — new: the add line's chips shut until a click, then client/week (This week)/topic/owner (Me); Enter stores it this week as one's own, the row comes in and the line keeps the cursor; Home's pop-up has Task|Client|Week|Topic optional|Owner, Escape closes it, Create with No date stores it with no week. Shell cache `smp-shell-v7.63-addtask`.
 
-**§744 shell run**: 567 ok / 11 failed — 10 main's own (Copilot box and rails, §94.8, §475, §490.2, the Copilot settings row; §653's plan card comes and goes) and the add line's cursor, which landed a moment after the row came in: the line now takes it once the redrawn list is on the page, and the check waits for it. Section 4 run again on its own: **108 ok, 0 failed**, all four §744 checks green.
+**§746 shell run**: 567 ok / 11 failed — 10 main's own (Copilot box and rails, §94.8, §475, §490.2, the Copilot settings row; §653's plan card comes and goes) and the add line's cursor, which landed a moment after the row came in: the line now takes it once the redrawn list is on the page, and the check waits for it. Section 4 run again on its own: **108 ok, 0 failed**, all four §746 checks green.
 
-## §745 — Quiet steps, one pattern (2026-11-04)
+## §747 — Quiet steps, one pattern (2026-11-04)
 
 **Asked** (Islam): "for the steps if there is not steps it should be quiet … the team is already using the task management without steps so it should be quiet" → mockup `design-mockups/internal-tracker/2026-11-03_steps-quiet.html` (before / after per view) → "for the weekly check keep the small add steps button … for the tracker opened task … the same small add steps button … and when pressed the title appears … and same for my tasks. I'm trying to make things simple but consistent" → asked: blue, or grey with a blue +? and in the weekly check, add and edit, or leave it to the person's own My tasks? → recommended grey words with a blue +, and the weekly check ticks only (the owner plans the steps; a step met in the meeting goes into the week's note) → **"go ahead"**.
 
@@ -71207,16 +71207,16 @@ Nothing it does is gone; it is quieter:
 
 **Checked**: `checks/tracker.mjs` **393 passed, 0 failed** — new: the quiet link (grey words, blue +), pressing it brings the title, line and This week label with the cursor in the line, Escape puts the link back; with steps the title stays and + Add a step waits under the list; the weekly check has no add, no Edit steps; a task without steps shows nothing in the check. `checks/shell.mjs` section 4 **110 ok, 0 failed** — new: My tasks' opened task shows only + Add steps, opens the title and line, Enter stores a step and keeps the line, Escape leaves + Add a step; a tick is stored (In progress) and writes "Done: Line step" into the box, focused, unsaved. Shell cache `smp-shell-v7.64-quietsteps`.
 
-**§745 shell run**: 569 ok / 11 failed — all main's own (Copilot box and rails, §94.8, §475, §490.2, §653's plan card, the Copilot settings row); every §743/§744/§745 check green. Mockup brought to what is built (Islam: "mockup first").
+**§747 shell run**: 569 ok / 11 failed — all main's own (Copilot box and rails, §94.8, §475, §490.2, §653's plan card, the Copilot settings row); every §745/§746/§747 check green. Mockup brought to what is built (Islam: "mockup first").
 
-## §746 — Steps by place: the Tracker and My tasks plan, the weekly check ticks, Home has none (2026-11-04)
+## §748 — Steps by place: the Tracker and My tasks plan, the weekly check ticks, Home has none (2026-11-04)
 
-**Asked** (Islam), on the §745 mockup: "in the tracker opened task with tasks with steps let's keep the add step and press enter option" → "1. Tracker in task without steps proposed is good, task with steps as built is good 2. weekly check is ok 3. my tasks I believe they should match the internal tracker … I'm just leaving planning to the tracker and my tasks and weekly is just for check as agreed. and the home is just for quick updates or adding a task" → (a misreading of mine — My tasks drawn tick-only — corrected on "didn't we say that my tasks should be like the tracker?") → mockup `design-mockups/internal-tracker/2026-11-03_steps-quiet.html` → **"build it"**.
+**Asked** (Islam), on the §747 mockup: "in the tracker opened task with tasks with steps let's keep the add step and press enter option" → "1. Tracker in task without steps proposed is good, task with steps as built is good 2. weekly check is ok 3. my tasks I believe they should match the internal tracker … I'm just leaving planning to the tracker and my tasks and weekly is just for check as agreed. and the home is just for quick updates or adding a task" → (a misreading of mine — My tasks drawn tick-only — corrected on "didn't we say that my tasks should be like the tracker?") → mockup `design-mockups/internal-tracker/2026-11-03_steps-quiet.html` → **"build it"**.
 
 - **Tracker and My tasks — planning, one view**: a task without steps shows only "+ Add steps" (grey words, a blue +), which brings out the title and the add line; once a task has steps, the **"Add a step and press Enter" line stays open** under the list (Escape only clears it) — no "+ Add a step" link. Tick, rename, week, ↑ ↓ ×.
-- **Weekly check — checking**: ticks only (§745, unchanged).
+- **Weekly check — checking**: ticks only (§747, unchanged).
 - **Home — quick updates and adding a task**: no steps in its opened task; this week's box and the timeline; the row keeps "N of M steps"; + New task stays.
 
 **Checked**: `checks/tracker.mjs` **393 passed, 0 failed** (with steps: the line stays open, no link). `checks/shell.mjs` section 4 **111 ok, 0 failed** — new: My tasks' line stays open once there are steps; Home's opened task has no steps and its row keeps the count. Shell cache `smp-shell-v7.65-stepsplaces`.
 
-**§746 shell run**: 571 ok / 10 failed — all main's own (Copilot box and rails, §94.8, §475, §490.2, the Copilot settings row); every §743–§746 check green.
+**§748 shell run**: 571 ok / 10 failed — all main's own (Copilot box and rails, §94.8, §475, §490.2, the Copilot settings row); every §745–§748 check green.

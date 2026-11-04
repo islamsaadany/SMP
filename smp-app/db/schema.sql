@@ -1143,7 +1143,7 @@ CREATE TABLE tracker_progress (
 );
 CREATE INDEX tracker_progress_action ON tracker_progress (tenant_id, action_id, at);
 
--- STEPS (§743): a task broken into lines — the words, an optional week (a
+-- STEPS (§745): a task broken into lines — the words, an optional week (a
 -- day, as the task's own), whether and when ticked, and its place in the
 -- task's order. No owner: the task's owner manages its steps. Goes with its
 -- action. Migration 037 on a database already up.

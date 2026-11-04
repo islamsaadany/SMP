@@ -1,7 +1,7 @@
 <title>Quiet Steps</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* Steps made quiet (proposal after §744). The team runs tasks without steps,
+/* Steps made quiet (proposal after §746). The team runs tasks without steps,
    so a task without them shows only a small "Steps +" in the opened task,
    and nothing at all in the weekly check or on the row. The + opens the add
    line; Escape or leaving it empty closes it again. Example task. */
@@ -130,7 +130,7 @@ function row(meta){const [d,n]=cnt();
   const sc=n?'<span class="sd"></span><span class="stc"><i><b style="width:'+Math.round(100*d/n)+'%"></b></i>'+d+' of '+n+' steps</span>':'';
   return '<div class="row on"><span class="tick"></span><div style="min-width:0"><div class="t">Function list for the new structure</div><div class="meta">'+(meta||'<span>Mohamed</span>')+sc+'<span class="sd"></span><span class="up">Agreed the scope with the GM</span></div></div><span class="wk">This week</span><span class="st"><span class="dot"></span>In progress</span></div>'}
 const tabs='<div class="tabs"><span class="on">Progress</span><span>Description</span><span>History</span></div>';
-/* the opened task: before = as built (§744), after = proposed */
+/* the opened task: before = as built (§746), after = proposed */
 function openedBefore(){const [d,n]=cnt();
   return '<div class="open">'+tabs+M(true,'<div class="psh" style="margin-top:0">Steps <span style="text-transform:none;letter-spacing:0;font-weight:500">'+(n?d+' of '+n:'optional')+'</span></div>'+(n?'<ul class="stl">'+lis(false,'before')+'</ul>':'<p class="opt">Break the task into steps if it helps plan it.</p>')+addLine('before')+'<div class="psh">This week</div>')+box('before')+TL+'</div>'}
 /* AFTER: one pattern in all three places (Islam, 2026-11-04: "simple but
@@ -151,7 +151,7 @@ function stepsAfter(place){const [d,n]=cnt(),open=S.add.after;
 }
 function openedAfter(place){const x=stepsAfter(place),shown=x&&(cnt()[1]||S.add.after);
   return '<div class="open">'+tabs+(x?M(true,x+(shown?'<div class="psh">This week</div>':'')):'')+'<div style="height:6px"></div>'+box('after')+TL+'</div>'}
-/* what the branch has for Home today: My tasks' planning view (§745) */
+/* what the branch has for Home today: My tasks' planning view (§747) */
 function homeBefore(){const [d,n]=cnt(),open=S.add.before;
   const x=(!n&&!open)?'<div class="links"><button type="button" class="q" data-add="before"><b>+</b> Add steps</button></div>':
     '<div class="ssh">Steps'+(n?' <span class="c">'+d+' of '+n+'</span>':'')+'</div>'+(n?'<ul class="stl">'+lis(false,'before')+'</ul>':'')+(open?addLine('before'):'<div class="links"><button type="button" class="q" data-add="before"><b>+</b> Add a step</button></div>');

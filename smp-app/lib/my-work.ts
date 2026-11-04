@@ -56,7 +56,7 @@ export type WorkRow = {
   cell: string;
   /* the latest progress line, for the row's quiet line (§709) */
   last: { week: string; body: string; now: boolean } | null;
-  /* §743: the task's steps, ticked of all — null for a task without steps */
+  /* §745: the task's steps, ticked of all — null for a task without steps */
   steps: { n: number; d: number } | null;
 };
 export type ClientTally = { open: number; late: number };
@@ -293,7 +293,7 @@ export async function workDetail(t: Client, who: Who, id: string, now: Date = ne
       history: hist,
       team: live ? office.map((p) => ({ key: p.key, name: sn(p.key), me: p.key === who.personKey, owner: p.key === a.ownerKey })) : [],
       weeks: live ? weekOptions(today).map((w) => ({ day: w.to, word: w.word, days: w.days, on: !!a.due && sameWeek(a.due, w.to) })) : [],
-      /* §745 the task's steps, as the Tracker's opened task draws them: a
+      /* §747 the task's steps, as the Tracker's opened task draws them: a
          week passed undone reads late */
       steps: (await stepsOf(c, id)).map((st) => ({ id: st.id, title: st.title, done: st.done, due: st.due,
         week: st.due ? weekWord(st.due, today) : "", late: !st.done && !!st.due && st.due < weekOf(today).from })),
@@ -358,7 +358,7 @@ export async function workWrite(t: Client, who: Who, id: string, op: unknown, bo
         await deleteAction(c, id);
         return { ok: true, row: null, gone: true };
       } else if (op === "step-add") {
-        /* §745 STEPS FROM MY TASKS: the Tracker's own step acts
+        /* §747 STEPS FROM MY TASKS: the Tracker's own step acts
            (modules/tracker/index.ts), by whoever may change the task; a
            step named must be this task's; the first tick on a task Not
            started moves it to In progress */
@@ -389,7 +389,7 @@ export async function workWrite(t: Client, who: Who, id: string, op: unknown, bo
 
 /* The card's line — "3 open · 1 late", nothing when nothing is open (§368:
    a mark is what is outstanding). */
-/* §744 A TASK ADDED FROM MY TASKS OR HOME (Islam: "my tasks and home should
+/* §746 A TASK ADDED FROM MY TASKS OR HOME (Islam: "my tasks and home should
    have the ability to add a new task … my tasks can add it as a line but
    home … a pop-up"). A task lives in one client's Tracker, so the console
    first asks what each client offers — its open topics and its office team

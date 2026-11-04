@@ -318,7 +318,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
   }
 
-  /* ── ADD A TASK FROM MY TASKS OR HOME (§744) ──────────────────────────
+  /* ── ADD A TASK FROM MY TASKS OR HOME (§746) ──────────────────────────
      What each client offers the add line and the pop-up (its open topics, its
      office team), asked of every client this person may open and holds an
      office seat on — the same reach as My tasks' rows (§583); and the add

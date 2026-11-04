@@ -540,7 +540,7 @@ export async function progressOf(c: Q, actionId: string): Promise<Progress[]> {
   const r = await c.query("SELECT " + PCOLS + " FROM tracker_progress WHERE action_id = $1 ORDER BY at DESC, id DESC", [actionId]);
   return r.rows.map(shapeProgress);
 }
-/* STEPS (§743). Islam: "how shall we add sub tasks for the task? … breaking
+/* STEPS (§745). Islam: "how shall we add sub tasks for the task? … breaking
    it down would help in planning" → "go with B, but remove the owner for
    now. the task already has an owner he shall manage the steps". A step is a
    line of its task: the words, an optional week (a day, as the task's own
@@ -565,7 +565,7 @@ export async function stepsOf(c: Q, actionId: string): Promise<Step[]> {
   return r.rows.map(shapeStep);
 }
 /* how many steps each task has and how many are ticked — for the rows of
-   My tasks and Home, which say "2 of 5 steps" (§743) */
+   My tasks and Home, which say "2 of 5 steps" (§745) */
 export async function stepTally(c: Q): Promise<Map<string, { n: number; d: number }>> {
   const r = await c.query("SELECT action_id, count(*)::int AS n, count(done_at)::int AS d FROM tracker_steps GROUP BY action_id");
   return new Map((r.rows as any[]).map((x) => [str(x.action_id), { n: Number(x.n) || 0, d: Number(x.d) || 0 }]));

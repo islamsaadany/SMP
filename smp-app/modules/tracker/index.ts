@@ -194,7 +194,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, topicId: t.id });
   }
 
-  /* STEPS (§743): a task's lines, changed by whoever may change the task
+  /* STEPS (§745): a task's lines, changed by whoever may change the task
      (§42, asked of the stored task). The FIRST tick on a task not started
      moves it to In progress by itself — the work has begun; the last tick
      never marks it Done (the page asks). */

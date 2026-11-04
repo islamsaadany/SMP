@@ -484,11 +484,11 @@ export const APP_JS = `(function () {
      drawn again with it at the top, the box empty and still under the
      cursor for the next one. Escape clears it. The key and the Enter button
      beside the box (§678) do the same one thing. */
-  /* §743: after a step press the page is drawn again — the task's Steps tab
+  /* §745: after a step press the page is drawn again — the task's Steps tab
      stays open (tabOf), the add line keeps the cursor, and "Not yet" keeps
      the Done question folded for that task */
   var stepBack = null, notYet = new Set();
-  /* §744 A TICK WRITES INTO THIS WEEK'S BOX (Islam: "once you click it, it
+  /* §746 A TICK WRITES INTO THIS WEEK'S BOX (Islam: "once you click it, it
      should be added automatically to the what happened this week box as if
      I'm writing something and the person can adjust before pressing
      enter"): "Done: <step>" goes into the task's progress box, the cursor at
@@ -516,7 +516,7 @@ export const APP_JS = `(function () {
   });
   function stepsAfterSwap() {
     notYet.forEach(function (tid) { document.querySelectorAll('.open[data-id="' + tid + '"] .sdone').forEach(function (x) { x.hidden = true; }); });
-    /* §744: a box the meeting had folded behind "+ Add to this week" opens
+    /* §746: a box the meeting had folded behind "+ Add to this week" opens
        when a tick has written into it, and the cursor goes to its end */
     document.querySelectorAll("#body .mopen .pbox.mq[hidden]").forEach(function (bx) {
       var pi = bx.querySelector(".pnew");
@@ -535,7 +535,7 @@ export const APP_JS = `(function () {
     if (o && addBack) stepsOpen(o.querySelector(".psec"), true);
     addBack = false;
   }
-  /* §745 THE ADD LINE OPENS AND SHUTS: + Add steps (or + Add a step)
+  /* §747 THE ADD LINE OPENS AND SHUTS: + Add steps (or + Add a step)
      opens it, with the Steps title and This week's label when the task had
      none; Escape, or leaving it empty, puts the link back */
   var addBack = false;
@@ -543,7 +543,7 @@ export const APP_JS = `(function () {
     if (!sec) return;
     var sx = sec.querySelector(".sadd"), lk = sec.querySelector(".slinks"), empty = sec.classList.contains("empty");
     if (!sx) return;
-    /* with steps the line stays open (§746): Escape only clears it */
+    /* with steps the line stays open (§748): Escape only clears it */
     if (!on && !empty) { var sv = sx.querySelector(".snew"); if (sv) sv.value = ""; return; }
     sx.hidden = !on;
     if (lk) lk.hidden = on;
@@ -684,7 +684,7 @@ export const APP_JS = `(function () {
       var m = d.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = true;
     });
     var tp = panelEl(); if (tp && !tp.hidden) tp.hidden = true;
-    /* §743: a step's week list */
+    /* §745: a step's week list */
     document.querySelectorAll(".swl").forEach(function (x) { if (!except || !except.contains || !x.parentNode.contains(except)) x.hidden = true; });
   }
   /* THE TOPICS PANEL (§533) hangs where the settings menu hangs, off the same
@@ -945,7 +945,7 @@ export const APP_JS = `(function () {
       /* Skip moves on without saving, carrying or counting (§732) */
       stepTask(1, false);
     } else if (act === "step-tick" || act === "step-move" || act === "step-delete" || act === "step-due") {
-      /* §743 STEPS: each press is the server's; the list comes back drawn */
+      /* §745 STEPS: each press is the server's; the list comes back drawn */
       var sl = b.closest(".sline"), sid = sl && sl.getAttribute("data-sid");
       if (!sid) return;
       stepBack = id;
@@ -965,7 +965,7 @@ export const APP_JS = `(function () {
     } else if (act === "step-rename") {
       stepRename(b, id);
     } else if (act === "sadd-open") {
-      /* §745: "+ Add steps" brings out the Steps title and the add line */
+      /* §747: "+ Add steps" brings out the Steps title and the add line */
       stepsOpen(b.closest(".psec"), true);
     } else if (act === "steps-done") {
       post({ act: "status", id: id, status: "done" });

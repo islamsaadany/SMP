@@ -505,8 +505,8 @@ await A.page.click("button:text-is('Clear entries…')");
 await A.page.click("[aria-label='Clear entries'] label:text-is('Risk') input");
 await A.page.click("button:text-is('Untick all')");
 await A.page.click("input[aria-label='Clear Hire to Retire']");
-A.page.once("dialog", (d) => d.accept());
 await A.page.click("button:text-is('Clear the selected')");
+await A.page.click("[data-ffp-confirm] button:text-is('Clear them')");
 await A.page.waitForSelector("[role=status]:has-text('Cleared 1')", { timeout: 20000 });
 const cl = Object.fromEntries((await q(ffp, 'select code, "priorityRisk" r, "priorityImportance" i from processes where "workspaceId"=$1', [S])).map((r) => [r.code, r]));
 check(cl["P5.1"].r == null && cl["P5.1"].i === 5 && cl["P1.1"].r === 5, "Clear entries empties only the kind picked, on only the processes ticked", JSON.stringify(cl["P5.1"]) + JSON.stringify(cl["P1.1"]));
@@ -620,8 +620,9 @@ check(fsr.some((r) => r[ci("Step")] === "Raise the invoice" && r[ci("Flagged")] 
 check((await T.get("/api/ffp/export/priorities/" + S + "/flagged-steps")).status() === 403, "…and a client's own person cannot download it");
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
 await A.page.locator("button:has-text('Steps inside')").first().click();
-A.page.once("dialog", (d) => d.accept("Approve the credit limit"));
-await A.page.click("button:text-is('Make it a process')");
+await A.page.click("tr button:text-is('Make it a process')");
+await A.page.fill("[data-ffp-confirm] input", "Approve the credit limit");
+await A.page.click("[data-ffp-confirm] button:text-is('Make it a process')");
 await A.page.waitForSelector("[role=status]:has-text('Made')", { timeout: 20000 });
 const np = (await q(ffp, 'select p.code, p."priorityImportance" i, p."priorityRisk" r, p."parentProcessId" pp, p."branchFromStepId" b, s."priorityFlagged" f from processes p join process_steps s on s.id=p."branchFromStepId" where p."workspaceId"=$1 and p."branchFromStepId"=$2', [S, decStep]))[0];
 check(!!np && np.pp === P1 && np.b === decStep && np.i === 5 && np.r === 4 && np.f === false, "making it a process creates a sub-process branching from the step, carries the scores, and keeps the step as the link", JSON.stringify(np));
@@ -654,6 +655,17 @@ check(after6 === 3, "Confirm creates the real step", String(after6));
 
 const sopHtml = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P1)).text();
 check(/Back to picker/.test(sopHtml) && /\/processes\/export/.test(sopHtml), "the SOP page has a Back to picker link");
+
+/* ── a way back to the process library from inside a process; the report's step narrative lists every step ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P1 + "/map", { waitUntil: "networkidle" });
+const libHref = await A.page.locator("a:has-text('Back to process library')").first().getAttribute("href");
+check(!!libHref && libHref.endsWith("/" + S + "/processes/processes"), "inside a process there is a Back to process library link to the list", libHref);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P1, { waitUntil: "networkidle" });
+check((await A.page.$$("a:has-text('Back to process library')")).length >= 1, "…on the process page too");
+await q(ffp, `update workspaces set "reportArrangement"=$2::jsonb where id=$1`, [S, JSON.stringify({ version: 1, pack: [], sections: [{ id: "exec", on: false }, { id: "map", on: true }, { id: "raci", on: false }, { id: "gov", on: false }], blocks: [{ id: "scope", on: true, sec: "map" }, { id: "diagram", on: true, sec: "map" }, { id: "narr", on: true, sec: "map" }] })]);
+const repN = await (await A.get("/" + S + "/processes/reports?ids=" + P1)).text();
+check(/Step narrative/.test(repN) && /Check the customer/.test(repN) && /Approve the credit limit/.test(repN) && /No detail recorded for this step yet/.test(repN) && /Open the file/.test(repN), "with only Scope, Workflow and Step narrative chosen, the narrative lists every step, and says so for one with no detail");
+await q(ffp, `update workspaces set "reportArrangement"=NULL where id=$1`, [S]);
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

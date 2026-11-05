@@ -168,6 +168,7 @@ export const ar: Messages = {
       tiles: { steps: "الخطوات", gaps: "الفجوات", ready: "الجاهزية", read: (v: number | null) => (v ? `قرأ الإصدار ${v}` : "قرأها") },
       saved: "كل تغيير يُحفظ فور إجرائه",
       exit: "احفظ واخرج",
+      library: "العودة إلى مكتبة العمليات",
       strip: {
         sentBack: "أُعيدت",
         sentBackLine: (who: string | null, note: string) => `أعادها ${who || "المعتمِد"}: «${note}» أجرِ التغيير ثم أرسلها مجدداً من دورة الحياة.`,

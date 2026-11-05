@@ -167,6 +167,7 @@ export const en = {
       tiles: { steps: "Steps", gaps: "Gaps", ready: "Ready", read: (v: number | null) => (v ? `Have read v${v}` : "Have read it") },
       saved: "All changes save as you make them",
       exit: "Save and exit",
+      library: "Back to process library",
       strip: {
         sentBack: "Sent back",
         sentBackLine: (who: string | null, note: string) => `${who || "The approver"} sent it back: “${note}” Make the change, then send it again from Lifecycle.`,

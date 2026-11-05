@@ -2,10 +2,11 @@
    Spec 043 Phase J, stop point C: the notification half of the frozen worker,
    carried verbatim below; the caching half dropped, because the new platform
    document is server-rendered and per person, so a cached copy is one
-   person's page served to the next. This worker STORES NOTHING and has no
-   fetch handler at all — the browser goes to the network for everything. */
+   person's page served to the next. This worker STORES NOTHING. Its one
+   fetch handler (§701) touches page loads alone, and only when the network
+   fails: then it answers SMP's own offline page, written into this file. */
 
-/* release fe68a605f478ccec — changes whenever a file a tab holds changes (§397) */
+/* release b10872e290acdfb7 — changes whenever a file a tab holds changes (§397) */
 
 self.addEventListener("install", () => self.skipWaiting());
 
@@ -18,8 +19,25 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
       .then((ks) => Promise.all(ks.map((k) => caches.delete(k))))
+      .then(() => self.registration.navigationPreload ? self.registration.navigationPreload.enable().catch(() => {}) : null)
       .then(() => self.clients.claim())
   );
+});
+
+/* §701 — SMP's own offline page, for a page load that cannot reach the
+   network. Written here, never stored (scripts/build-sw.mjs). */
+const OFFLINE_PAGE = "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>You're offline — Strategy Management Platform</title>\n<meta name=\"theme-color\" content=\"#16325C\">\n<style>\n:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink2:#414A58;--ink3:#636C79;--btn:#16325C;--btnink:#FFFFFF;--amber:#F5A623;--navy:#0F2C69;--focus:#C9A24D}\n@media (prefers-color-scheme:dark){:root{--ground:#14161A;--surface:#1C1F25;--surface2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink2:#B4BCC8;--ink3:#949DAA;--btn:#D9B665;--btnink:#14161A;--focus:#D9B665;color-scheme:dark}}\n*{box-sizing:border-box}\nhtml,body{height:100%}\nbody{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 \"Source Sans 3\",system-ui,-apple-system,\"Segoe UI\",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}\nmain{width:min(420px,100%);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:28px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}\n.mk{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--amber);color:var(--navy)}\n.ic{width:64px;height:64px;border-radius:50%;background:var(--surface2);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink3);margin-top:6px}\nh1{margin:4px 0 0;font-size:21px;text-wrap:balance}\np{margin:0;color:var(--ink2)}\n.small{font-size:13px;color:var(--ink3)}\nbutton{margin-top:6px;font-family:inherit;font-size:14px;font-weight:600;line-height:1;background:var(--btn);color:var(--btnink);border:0;border-radius:7px;padding:9px 18px;cursor:pointer}\nbutton:focus-visible{outline:2px solid var(--focus);outline-offset:2px}\n</style></head>\n<body><main>\n<span class=\"mk\" aria-hidden=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/></svg></span>\n<span class=\"ic\" aria-hidden=\"true\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M2 8.8a15 15 0 0 1 4.2-2.6M9.6 5.2A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 5.2-2.6M14.4 10.2A10 10 0 0 1 19 12.5M8.5 16.1a5 5 0 0 1 7 0\"/><circle cx=\"12\" cy=\"19.5\" r=\"1\" fill=\"currentColor\"/><path d=\"m3 3 18 18\"/></svg></span>\n<h1>You're offline</h1>\n<p>SMP can't reach the internet, so it can't load your latest figures. Nothing you saved is lost.</p>\n<p class=\"small\">This page reopens by itself when the connection is back.</p>\n<button type=\"button\" id=\"retry\">Try again</button>\n<p class=\"small\" id=\"said\" role=\"status\" aria-live=\"polite\"></p>\n</main>\n<script>\n(function () {\n  var busy = false;\n  function check(byHand) {\n    if (busy) return; busy = true;\n    fetch(\"/favicon.svg?online=\" + Date.now(), { cache: \"no-store\" })\n      .then(function (r) { if (r.ok) location.reload(); else throw 0; })\n      .catch(function () { if (byHand) document.getElementById(\"said\").textContent = \"Checked just now. Still no connection.\"; })\n      .then(function () { busy = false; });\n  }\n  document.getElementById(\"retry\").addEventListener(\"click\", function () { check(true); });\n  window.addEventListener(\"online\", function () { check(false); });\n  setInterval(function () { check(false); }, 10000);\n})();\n</script>\n</body></html>\n";
+self.addEventListener("fetch", (e) => {
+  if (e.request.mode !== "navigate" || e.request.method !== "GET") return;
+  e.respondWith((async () => {
+    try {
+      const pre = await e.preloadResponse;
+      if (pre) return pre;
+      return await fetch(e.request);
+    } catch (x) {
+      return new Response(OFFLINE_PAGE, { status: 503, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+    }
+  })());
 });
 
 /* ══ A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ═══════════════════════════

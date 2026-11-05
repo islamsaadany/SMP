@@ -7,7 +7,6 @@ import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { hasSufficientAccess } from "@/ffp/lib/domain/access-control";
 import { loadPlan, loadPriorityRows } from "@/ffp/lib/data/priorities";
 import { planEditable } from "@/ffp/lib/domain/priorities";
-import { WorkspacePageHeader } from "../workspace-page-header";
 import { ScoreTable } from "./score-table";
 import { RankView } from "./rank-view";
 import { PlanBoard } from "./plan-board";
@@ -63,12 +62,8 @@ export default async function PrioritiesPage(props: PageProps<"/[slug]/processes
   const base = `/${workspaceId}/processes/priorities`;
 
   return (
-    <main className="w-full px-6 py-8">
+    <main className="w-full">
       <div className="w-full">
-        {/* The client logo sits in the left margin at the top, so only the banner steps aside for it; the working table below uses the full width. */}
-        <div className="xl:ms-[17rem]">
-        <WorkspacePageHeader title="Deep-dive priorities" subtitle={`${rows.length} high-level process${rows.length === 1 ? "" : "es"}. Which ones do we take deep next: full steps, RACI, controls and an SOP?`} />
-        </div>
         <nav aria-label="Steps" className="mb-4 grid overflow-hidden rounded-xl border border-slate-200 bg-white sm:grid-cols-4">
           {STEPS.map((s) => (
             <Link

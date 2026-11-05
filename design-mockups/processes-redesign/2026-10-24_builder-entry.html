@@ -1,0 +1,798 @@
+<title>Into the Builder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: how the Strategy Office gets into the separate builder and back out, drawn as clickable screens.
+   Palette and type: SMP's Forefront tokens and Source Sans 3, as in the other process mockups. */
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA; --head:#E4E9F0;
+  --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C; --focus:#8A6B22; --stone:#16325C;
+  --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+  --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+  --over-bg:#FBF6E9; --over-line:#D9C489;
+  --bar:#16325C; --bar-ink:#FFFFFF; --bar-quiet:#B9C2CE; --bar-accent:#E8A33A; --bar-late:#FF9B8F; --bar-hover:rgba(255,255,255,.1);
+  --scrim:rgba(10,14,22,.45); --shadow:0 10px 28px rgba(15,23,42,.16);
+  --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630; --head:#2C333E;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630; --head:#2C333E;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--over-bg)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+p,ul,ol{margin:0}
+[hidden]{display:none!important}
+
+/* drawing band */
+.mk{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--over-bg);border-bottom:1px dashed var(--over-line)}
+.mk-in{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.mk-tag{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);border:1px dashed var(--gold-deep);border-radius:4px;padding:1px 6px}
+.mk-id{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-right:auto}
+.mk-id b{font-size:14px}
+.mk-id span{font-size:12px;color:var(--ink-2)}
+.mk-sw{display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--over-line);border-radius:8px;flex-wrap:wrap;align-items:center}
+.mk-sw>span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);padding:0 6px}
+.mk-sw button{border:0;background:none;border-radius:6px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.mk-sw button.on{background:var(--panel);color:var(--panel-ink)}
+.doc{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 60px}
+.intro{font-size:13.5px;color:var(--ink-2);max-width:92ch;margin-bottom:12px}
+.intro b{color:var(--ink)}
+
+/* product frame */
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;overflow:clip;background:var(--ground)}
+/* the tab bar stays in place on scroll (agreed 24 Oct); it sits under the drawing band here, under SMP's top bar in the product */
+.vtbar{position:sticky;top:calc(var(--stick,0px) + env(safe-area-inset-top,0px));z-index:20;background:var(--ground);margin:0 -24px 14px;padding:6px 24px;transition:box-shadow .15s}
+.vtbar.stuck{box-shadow:0 1px 0 var(--line),0 8px 12px -10px rgba(15,23,42,.35)}
+.vtbar .vt{margin:0}
+#vtsub{margin-top:6px}
+#vtsub .sv{margin:0}
+@media (max-width:640px){.vtbar{margin:0 -12px 12px;padding:6px 12px}}
+
+.tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;min-height:40px}
+.tb .brand{font-weight:600;font-size:14px}
+.tb .read{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--surface-2)}
+.tb .who{margin-left:auto;font-size:12.5px;color:var(--ink-3)}
+.tb .seat{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--gold);color:var(--gold-deep);background:var(--over-bg);border-radius:4px;padding:1px 6px}
+.tb .out{border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+@media (max-width:620px){.tb .who{display:none}.tb{padding:0 12px}}
+.pg{padding:20px 24px 28px}
+@media (max-width:640px){.pg{padding:14px 12px 22px}}
+
+/* the masthead (Internal Tracker), actions top right */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 18px;margin:0 0 14px;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mrow{display:flex;align-items:stretch;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.mside{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:14px}
+.wkof{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.mast h1{font-size:24px;font-weight:600;line-height:1.15;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.msub{font-size:13px;color:var(--bar-quiet);margin-top:5px}
+.msub b{color:var(--bar-ink);font-weight:600}
+.mstrip{display:flex;gap:22px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.mtile{text-align:right;min-height:48px}
+.mtile b{display:block;font-size:22px;font-weight:600;line-height:1}
+.mtile span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.mtile.late b{color:var(--bar-late)}
+.macts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bq{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:500;color:var(--bar-quiet);padding:6px 9px;border-radius:7px;background:none;border:0}
+.bq:hover{background:var(--bar-hover);color:var(--bar-ink)}
+.bq.on{background:var(--bar-hover);color:var(--bar-ink)}
+.bgold{background:var(--bar-accent);color:var(--bar);border:0;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:700}
+.tog{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.35);border-radius:99px;padding:4px 10px 4px 5px;background:none;color:var(--bar-ink);font-size:13px;font-weight:600}
+.tog i{width:30px;height:18px;border-radius:99px;background:rgba(255,255,255,.25);position:relative;transition:background .15s}
+.tog i::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .15s}
+.tog[aria-pressed="true"] i{background:var(--bar-accent)}
+.tog[aria-pressed="true"] i::after{left:14px}
+.pill{display:inline-flex;font-size:11.5px;font-weight:600;border-radius:99px;padding:1px 9px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good-tx)}
+.pill.attn{background:var(--attn-bg);color:var(--attn-tx)}
+@media (max-width:640px){.mast{padding:14px 14px 16px}.mtile{text-align:left}.mstrip{gap:14px}.mside{align-items:flex-start}}
+
+/* view tabs: buttons (style 2), with an office group */
+.vt{display:inline-flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:100%;margin:0 0 14px;flex-wrap:wrap;align-items:center}
+.vt button{border:0;background:none;border-radius:7px;padding:8px 16px;font-size:14.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;display:inline-flex;gap:7px;align-items:baseline}
+.vt button.on{background:var(--panel);color:var(--panel-ink)}
+.vt .ct{font-size:12px;font-weight:600;color:var(--ink-3)}
+.vt button.on .ct{color:var(--bar-quiet)}
+.vt .ct.bad{color:var(--bad-tx)}
+.vt .grp{display:inline-flex;align-items:center;gap:2px;margin-left:6px;padding-left:8px;border-left:1px solid var(--line)}
+.vt .grp>span{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);padding:0 6px 0 2px}
+@media (max-width:640px){.vt button{padding:7px 11px;font-size:14px}.vt .grp{flex-basis:100%;flex-wrap:wrap;margin:2px 0 0;padding:4px 0 0;border-left:0;border-top:1px solid var(--line)}}
+
+/* shared blocks */
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.lbl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.note{font-size:12.5px;color:var(--ink-3)}
+.code{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--stone)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.chip.gold{border-color:var(--gold);background:var(--over-bg);color:var(--gold-deep)}
+.chip.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad-tx)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.btn:hover{border-color:var(--gold);color:var(--ink)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--on-accent);font-weight:700}
+.btn.dash{border-style:dashed}
+.ph{border:1px dashed var(--line);border-radius:8px;padding:22px 18px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
+.ph b{display:block;font-size:15px;color:var(--ink);margin-bottom:4px}
+
+/* the flow, with an edit toolbar */
+.ftool{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+.ftool .sp{flex:1}
+.agrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;align-items:start}
+@media (max-width:1180px){.agrid{grid-template-columns:minmax(0,1fr)}}
+.lanes-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.lanes{position:relative;display:grid;grid-template-columns:104px repeat(7,minmax(108px,1fr));grid-template-rows:repeat(4,96px);min-width:860px}
+.lane-bg{grid-column:1/-1;border-top:1px solid var(--line-soft)}
+.lane-bg.z{background:var(--zebra)}
+.lane-l{grid-column:1;display:flex;align-items:center;padding:10px 12px;background:var(--surface-2);border-right:1px solid var(--line);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);position:sticky;left:0;z-index:3}
+.st{position:relative;z-index:2;align-self:center;justify-self:center;width:102px;text-align:left;border:1.5px solid var(--field-line);background:var(--surface);border-radius:8px;padding:6px 9px}
+.st .n{display:block;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-3)}
+.st b{display:block;font-size:12.5px;line-height:1.25}
+.st.dec{border-style:dashed;border-color:var(--stone)}
+.st.ends{border-radius:99px;width:96px;text-align:center;background:var(--surface-2)}
+.st.on{box-shadow:0 0 0 3px var(--gold)}
+.st .gap{position:absolute;top:-9px;right:-7px;width:18px;height:18px;border-radius:50%;background:var(--bad);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+.reading .st .gap{display:none}
+svg.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
+svg.edges path{fill:none;stroke:var(--ink-3);stroke-width:1.5}
+svg.edges .ah{fill:var(--ink-3)}
+svg.edges rect{fill:var(--surface)}
+svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
+.drawer{padding:12px 14px;display:grid;gap:10px}
+.drawer h3{font-size:16px}
+.dl{display:grid;grid-template-columns:90px minmax(0,1fr);gap:5px 10px;font-size:13px;margin:0}
+.dl dt{color:var(--ink-3);font-size:12.5px}
+.dl dd{margin:0}
+.fld{display:grid;gap:3px}
+.fld>span{font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.fld input,.fld select{border:1px solid var(--field-line);border-radius:6px;background:var(--surface);padding:5px 8px;font-size:13px;width:100%}
+.fld .row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.chg{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-deep)}
+.from{font-size:12px;border-left:3px solid var(--gold);background:var(--over-bg);padding:6px 9px;border-radius:0 6px 6px 0;color:var(--ink-2)}
+.ctl{font-size:12.5px;color:var(--ink-2)}
+.ctl.bad{color:var(--bad-tx);font-weight:600}
+
+/* RACI grid */
+.raci-wrap{overflow-x:auto}
+.raci{width:100%;border-collapse:collapse;min-width:640px}
+.raci th{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);text-align:center;padding:8px 6px;border-bottom:1px solid var(--line);background:var(--head)}
+.raci tbody tr:nth-child(even) td{background:var(--zebra)}
+.raci th:first-child{text-align:left;padding-left:14px}
+.raci td{border-top:1px solid var(--line-soft);text-align:center;padding:7px 6px;font-size:13px}
+.raci td:first-child{text-align:left;padding-left:14px;font-weight:600}
+.raci td.gaprow{color:var(--bad-tx)}
+.rc{display:inline-grid;place-items:center;width:28px;height:26px;border-radius:5px;border:1px solid var(--line);font-weight:800;font-size:12.5px;background:var(--surface);color:var(--ink-3)}
+.rc.R{background:var(--surface-2);color:var(--ink)}
+.rc.A{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.rc.C,.rc.I{color:var(--ink-2)}
+.rc.empty{border-style:dashed}
+
+/* separate builder (C) */
+.bld{display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.bld{grid-template-columns:minmax(0,1fr)}}
+.rail{padding:8px;display:grid;gap:2px;position:sticky;top:calc(var(--stick,0px) + 12px)}
+.rail button{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;border:0;background:none;border-radius:6px;padding:8px 10px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.rail button:hover{background:var(--surface-2)}
+.rail button.on{background:var(--panel);color:var(--panel-ink)}
+.rail .dot{width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}
+.rail .dot.bad{background:var(--bad)}
+.rail .dot.q{background:var(--line)}
+@media (max-width:900px){.rail{position:static;grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto}}
+.bld .agrid{grid-template-columns:minmax(0,1fr) 270px}
+.bld .lanes{grid-template-columns:96px repeat(7,minmax(90px,1fr));min-width:726px}
+.bld .st{width:86px}
+.bld .st.ends{width:84px}
+@media (max-width:1180px){.bld .agrid{grid-template-columns:minmax(0,1fr)}}
+.bh{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:10px}
+.bh h2{font-size:18px}
+
+/* looking as Hend: what she never sees */
+.as-hend .office-only{display:none!important}
+.hend-note{display:none}
+.as-hend .hend-note{display:block}
+
+/* the note under each option */
+.verdict{margin-top:14px;border:1px dashed var(--over-line);background:var(--over-bg);border-radius:10px;padding:12px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.verdict{grid-template-columns:1fr}}
+.verdict h4{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:4px}
+.verdict ul{padding-left:16px;font-size:13px;color:var(--ink-2);display:grid;gap:3px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);color:var(--panel-ink);font-size:13px;padding:9px 14px;border-radius:8px;box-shadow:var(--shadow);z-index:60;max-width:min(560px,calc(100% - 32px))}
+
+/* option C: the office's side menu beside the home */
+#homewrap.side{display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;align-items:start}
+#homemain{min-width:0}
+@media (max-width:900px){#homewrap.side{grid-template-columns:minmax(0,1fr)}}
+.rail .ct{font-size:11.5px;font-weight:700;background:var(--bar-accent);color:#16325C;border-radius:99px;padding:0 7px;line-height:18px}
+
+/* the office sections */
+.sv{display:inline-flex;gap:2px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;margin:0 0 12px;flex-wrap:wrap;max-width:100%}
+.sv button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.sv button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(15,23,42,.14)}
+.kp{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.kp div{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;min-width:104px}
+.kp b{display:block;font-size:18px;line-height:1.15}
+.kp span{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.kp .bad b{color:var(--bad-tx)}
+.tw{overflow-x:auto}
+.t{width:100%;border-collapse:collapse}
+.t th{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--head);white-space:nowrap}
+.t td{padding:9px 12px;border-top:1px solid var(--line-soft);font-size:13px;vertical-align:middle}
+.t th+th,.t td+td{border-left:1px solid var(--line-soft)}
+.t tbody tr:nth-child(even) td{background:var(--zebra)}
+.dots{letter-spacing:1px;color:var(--stone);font-size:12px;white-space:nowrap}
+.dots i{font-style:normal;color:var(--line)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.col{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 12px}
+.col h4{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px}
+.card{border:1px solid var(--line);border-left:3px solid var(--stone);border-radius:6px;padding:7px 9px;margin-top:6px;font-size:13px;background:var(--surface)}
+.card small{display:block;color:var(--ink-3);font-size:11.5px}
+.chain{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:10px;overflow-x:auto;padding-bottom:4px}
+.chain .col h4{border-bottom:3px solid var(--gold);padding-bottom:5px}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+.blk{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:12px 14px;min-width:0}
+.blk .lbl{display:block;margin-bottom:6px}
+.calrow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px;font-size:13px;padding:2px 0}
+.aspects{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chk{display:flex;gap:7px;align-items:flex-start;font-size:13px;padding:3px 0}
+.chk small{display:block;font-size:11.5px;color:var(--ink-3)}
+.rk{display:grid;grid-template-columns:24px minmax(120px,230px) minmax(0,1fr) 34px;gap:10px;align-items:center;padding:5px 0;font-size:13px}
+.rk .bar{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.rk .bar i{display:block;height:100%}
+.mil{display:grid;gap:14px}
+.mrow2{display:grid;grid-template-columns:minmax(120px,210px) minmax(0,1fr);gap:10px;align-items:start;font-size:13px}
+.rail2{display:flex;overflow-x:auto;padding:6px 0 2px}
+.rail2 span{flex:1 0 74px;border-top:2px solid var(--line);position:relative;height:30px}
+.rail2 span::before{content:"";position:absolute;left:0;top:-7px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--field-line)}
+.rail2 span.m::before{background:var(--gold);border-color:var(--gold-deep)}
+.rail2 span em{position:absolute;left:0;top:9px;font-style:normal;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.tree ul{list-style:none;padding-left:18px;margin:0;border-left:1px solid var(--line)}
+.tree>ul{border-left:0;padding-left:0}
+.tree li{padding:3px 0 3px 12px;position:relative;font-size:13px}
+.tree li::before{content:"";position:absolute;left:0;top:14px;width:9px;border-top:1px solid var(--line)}
+.tree>ul>li{padding-left:0}
+.tree>ul>li::before{display:none}
+.tree span{color:var(--ink-3);font-size:12px}
+.row3{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.row3 .btn:disabled{opacity:.5;cursor:not-allowed}
+.logo{width:64px;height:40px;border:1px dashed var(--line);border-radius:6px;display:grid;place-items:center;font-size:11px;color:var(--ink-3)}
+.sw{display:flex;gap:12px;margin-top:10px;font-size:12.5px;flex-wrap:wrap}
+.sw span{display:inline-flex;gap:6px;align-items:center}
+.sw i{width:16px;height:16px;border-radius:4px;display:inline-block}
+.rail .subnav{display:grid;gap:1px;margin:2px 0 6px 12px;padding-left:8px;border-left:2px solid var(--gold)}
+.rail .subnav button{font-size:12.5px;padding:5px 8px}
+.rail .subnav button.on{background:var(--surface-2);color:var(--ink)}
+
+/* the four questions still open, and what each answer adds */
+.openq{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:0 0 14px}
+.oqh{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.oq{background:var(--surface);border:1px solid var(--over-line);border-radius:10px;padding:12px 14px;display:grid;gap:8px;align-content:start}
+.oq h3{font-size:14.5px;display:flex;gap:8px;align-items:baseline}
+.oq h3 i{font-style:normal;font-weight:800;color:var(--gold-deep)}
+.oq p{font-size:12.5px;color:var(--ink-2)}
+.oq .ch{display:flex;flex-wrap:wrap;gap:4px}
+.oq .ch button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 9px;font-size:12.5px;font-weight:600;color:var(--ink-2);display:inline-flex;gap:5px;align-items:baseline}
+.oq .ch button.on{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.oq .ch .r{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-deep)}
+.oq .ch button.on .r{color:var(--bar-accent)}
+.oq .now{font-size:12.5px;color:var(--ink);background:var(--over-bg);border-radius:6px;padding:6px 8px}
+.mk6{display:inline-flex;gap:2px}
+.mk6 i{width:17px;height:17px;border-radius:4px;border:1px solid var(--line);font-style:normal;font-size:9.5px;font-weight:800;display:grid;place-items:center;color:var(--ink-3);background:var(--surface)}
+.mk6 i.on{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.pg,.mast{position:relative}
+.tpick{background:none;border:0;padding:0;font:inherit;color:inherit;display:inline-flex;gap:6px;align-items:center;cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.45)}
+.tpick i{font-style:normal;font-size:15px;color:var(--bar-accent)}
+.pmenu{position:absolute;left:20px;top:80px;z-index:25;width:min(340px,calc(100% - 40px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:8px;display:grid;gap:4px}
+.pmenu input{border:1px solid var(--field-line);border-radius:6px;padding:6px 9px;font-size:13px;width:100%;background:var(--surface);color:var(--ink)}
+.pmenu .pl{max-height:260px;overflow:auto;display:grid}
+.pmenu .pl button{display:flex;gap:8px;text-align:left;border:0;background:none;border-radius:6px;padding:6px 8px;font-size:13px;color:var(--ink)}
+.pmenu .pl button:hover,.pmenu .pl button.on{background:var(--surface-2)}
+.bld.wrail{grid-template-columns:200px 190px minmax(0,1fr)}
+.bld.wrail.fold{grid-template-columns:52px 190px minmax(0,1fr)}
+@media (max-width:1180px){.bld.wrail,.bld.wrail.fold{grid-template-columns:minmax(0,1fr)}}
+.rail button.on .code{color:var(--bar-accent)}
+.prail .code{font-size:11px}
+.prail .ph2{display:flex;justify-content:space-between;align-items:baseline;padding:2px 6px 6px}
+.prail .unfold{justify-content:center;font-size:16px;padding:8px 0}
+.aip{position:absolute;right:24px;z-index:22;width:min(360px,calc(100% - 48px));background:var(--surface);border:1px solid var(--gold);border-radius:10px;box-shadow:var(--shadow);padding:12px 14px;display:grid;gap:10px}
+.aip h3{font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.aif{border-top:1px solid var(--line-soft);padding-top:8px;display:grid;gap:5px;font-size:13px}
+.aif b{font-size:11.5px;color:var(--ink-3);font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+@media (max-width:640px){.aip{right:12px;width:calc(100% - 24px)}}
+
+/* the way out of the builder: under the band, top right, held in view */
+.exitbar{position:sticky;top:calc(var(--stick,0px) + env(safe-area-inset-top,0px));z-index:20;background:var(--ground);margin:0 -24px 14px;padding:6px 24px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.exitb{font-size:13.5px;padding:6px 13px;border-color:var(--field-line);color:var(--ink)}
+.exitb span{font-size:14px;margin-left:2px}
+.xbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--field-line);background:var(--surface);font-size:16px;line-height:1;color:var(--ink);display:grid;place-items:center}
+.xbtn:hover{border-color:var(--gold)}
+.bld .rail{top:calc(var(--stick,0px) + 60px)}
+@media (max-width:640px){.exitbar{margin:0 -12px 12px;padding:6px 12px}}
+
+/* getting in and out */
+.tb button.read{border:0;cursor:pointer}
+@media (max-width:620px){.tb .out{display:none}}
+.wkof button{background:none;border:0;padding:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.door{outline:3px solid var(--bar-accent);outline-offset:3px;animation:door 1.1s ease-in-out 3}
+@keyframes door{50%{outline-color:transparent}}
+@media (prefers-reduced-motion:reduce){.door{animation:none}}
+.pstrip{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;border:1px solid var(--gold);background:var(--over-bg);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13.5px}
+.pstrip b{color:var(--gold-deep);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.pstrip .btn{margin-left:auto}
+.trow{display:grid;grid-template-columns:100px minmax(0,1fr) auto;gap:6px 14px;align-items:center;padding:12px 16px;border-top:1px solid var(--line-soft)}
+.trow:first-child{border-top:0}
+.trow .t{font-size:13.5px}
+.trow .t b{font-weight:700}
+.trow .t small{display:block;font-size:12px;color:var(--ink-3)}
+.trow blockquote{margin:6px 0 0;padding:5px 9px;border-left:3px solid var(--gold);background:var(--over-bg);font-size:13px;color:var(--ink-2)}
+.trow .chip{justify-self:start}
+@media (max-width:640px){.trow{grid-template-columns:minmax(0,1fr)}.trow .btn{justify-self:start}}
+.ptab{width:100%;border-collapse:collapse}
+.ptab th{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:0;border-bottom:1px solid var(--line);background:var(--head);white-space:nowrap}
+.ptab th>span{display:block;padding:9px 14px}
+.ptab th button{display:flex;gap:6px;align-items:center;width:100%;background:none;border:0;padding:9px 14px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;text-align:left}
+.ptab th button:hover{color:var(--ink)}
+.ptab th button i{font-style:normal;font-size:11px;color:var(--ink-3)}
+.ptab th[aria-sort] button i{color:var(--gold-deep)}
+.ptab td{padding:10px 14px;border-top:1px solid var(--line-soft);vertical-align:middle;font-size:13.5px}
+.ptab th+th,.ptab td+td{border-left:1px solid var(--line-soft)}
+.ptab tbody tr:nth-child(even) td{background:var(--zebra)}
+.ptab .pn{background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--ink);border-bottom:1px solid transparent;cursor:pointer}
+.ptab .pn:hover{border-bottom-color:var(--gold)}
+.ptab .gaps{color:var(--bad-tx);font-weight:600}
+.tbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:10px}
+.srch{position:relative;flex:0 1 380px;min-width:220px}
+.srch input{width:100%;border:1px solid var(--field-line);border-radius:6px;background:var(--surface);padding:7px 10px 7px 32px;font-size:13.5px}
+.srch::before{content:"";position:absolute;left:11px;top:50%;width:10px;height:10px;border:2px solid var(--ink-3);border-radius:50%;transform:translateY(-62%)}
+.srch::after{content:"";position:absolute;left:21px;top:58%;width:6px;height:2px;background:var(--ink-3);transform:rotate(45deg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.empty{padding:18px 16px;font-size:13.5px;color:var(--ink-2)}
+@media (max-width:760px){.ptab thead{display:none}.ptab,.ptab tbody,.ptab tr,.ptab td{display:block;width:100%}.ptab tr{padding:10px 12px;border-top:1px solid var(--line-soft)}.ptab tr:first-child{border-top:0}.ptab td{border:0!important;padding:2px 0}.ptab tbody tr:nth-child(even){background:var(--zebra)}.ptab tbody tr:nth-child(even) td{background:none}}
+.pill.q{background:var(--surface-2);color:var(--ink-2)}
+.pill.bad{background:var(--bad-bg);color:var(--bad-tx)}
+.vt .ct.hot,.vt button.on .ct.hot{background:var(--bar-accent);color:#16325C;border-radius:99px;padding:0 7px;line-height:18px;font-weight:700}
+</style>
+
+<div class="mk"><div class="mk-in">
+  <div class="mk-id"><span class="mk-tag">Mockup</span><b>Getting into the builder, and back out</b><span>Agreed 24 Oct: the office builds in a separate builder. Nothing is built. Sample data invented for Raya Trade.</span></div>
+  <div class="mk-sw" role="group" aria-label="Show a way in"><span>Show me</span><button type="button" data-door="1">1 · Top bar</button><button type="button" data-door="2">2 · From a process page</button><button type="button" data-door="3">3 · From a suggestion</button><button type="button" data-door="back">Way back out</button></div>
+</div></div>
+
+<div class="doc">
+  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back. On the builder home, every office section and its views are filled in; scroll down any of them and the tab bar stays in place. A section’s numbers sit in boxes under the tabs, and its own views stay with the tabs as you scroll. The way out of the builder is <b>Save and exit</b>, at the top right just under the band.</p>
+
+  <div class="openq" id="openq"></div>
+
+  <div class="frame" id="frame">
+    <div class="tb"><span class="brand">Raya Trade</span><button class="read" type="button" id="tb-proc" data-go="home">Processes</button><span class="who">Mona Farag</span><span class="seat">Strategy Office</span><span class="out">Sign out</span></div>
+    <div class="pg">
+      <div class="pstrip" id="pstrip" hidden><b>Preview</b><span>Draft v4 as Hend Mourad will read it once it is published. Nothing here is live.</span><button class="btn gold" type="button" data-go="builder">Back to the builder</button></div>
+      <header class="mast">
+        <div class="mrow">
+          <div style="min-width:0">
+            <p class="wkof" id="m-eyebrow"></p>
+            <h1 id="m-title"></h1>
+            <p class="msub" id="m-sub"></p>
+          </div>
+          <div class="mside">
+            <div class="macts" id="m-acts"></div>
+            <div class="mstrip" id="m-tiles"></div>
+          </div>
+        </div>
+        <div class="pmenu" id="pmenu" hidden></div>
+      </header>
+      <aside class="aip" id="aip" aria-label="Check with AI" hidden></aside>
+      <div class="exitbar" id="exitbar" hidden></div>
+      <div class="vtbar" id="vtbar"><div class="vt" id="vt" role="tablist" aria-label="Views"></div><div id="vtsub" hidden></div></div>
+
+      <div id="homewrap"><nav class="box rail" id="hside" aria-label="Office menu" hidden></nav><div id="homemain">
+      <section data-screen="home-handle" hidden><div class="box" id="handle"></div></section>
+      <section data-screen="home-all" hidden>
+        <div class="tbar"><label class="srch"><span class="sr">Search processes</span><input type="search" id="q" placeholder="Search by code, name, owner or state" autocomplete="off"></label><span class="note" id="qcount"></span></div>
+        <div class="box" style="overflow:hidden"><table class="ptab" id="alltab"><thead><tr><th data-col="name"><button type="button" data-sort="name">Process <i></i></button></th><th data-col="owner"><button type="button" data-sort="owner">Owner <i></i></button></th><th data-col="state"><button type="button" data-sort="state">Where it is <i></i></button></th><th data-col="ready"><button type="button" data-sort="ready">Ready <i></i></button></th><th data-col="gaps"><button type="button" data-sort="gaps">Gaps <i></i></button></th><th><span><span class="sr">Open</span></span></th></tr></thead><tbody id="all"></tbody></table><p class="empty" id="qempty" hidden></p></div>
+      </section>
+      <section data-screen="home-sec" hidden><div id="secwrap"></div></section>
+      </div></div>
+      <section data-screen="builder" hidden>
+        <div class="bld" id="bld">
+          <nav class="box rail prail" id="prail" aria-label="Processes" hidden></nav>
+          <nav class="box rail" id="rail" aria-label="Builder sections"></nav>
+          <div id="bmain"></div>
+        </div>
+      </section>
+      <section data-screen="read" hidden><div id="slot-read"></div></section>
+
+      <div hidden id="park">
+        <div id="flowblock">
+          <div class="ftool" id="ftool"><button class="btn" type="button" data-toast="Adds a step after the one selected.">+ Step</button><button class="btn" type="button" data-toast="Adds a decision with two ways out.">+ Decision</button><button class="btn" type="button" data-toast="Click two steps to join them.">Connect two steps</button><button class="btn" type="button" data-toast="Undoes the last change.">Undo</button><span class="sp"></span><span class="note">Saved as you type · 2 gaps</span></div>
+          <div class="agrid">
+            <div class="lanes-wrap"><div class="lanes" id="lanes">
+              <div class="lane-bg" style="grid-row:1"></div><div class="lane-bg z" style="grid-row:2"></div><div class="lane-bg" style="grid-row:3"></div><div class="lane-bg z" style="grid-row:4"></div>
+              <div class="lane-l" style="grid-row:1">Sales coordinator</div><div class="lane-l" style="grid-row:2">Credit controller</div><div class="lane-l" style="grid-row:3">Logistics coordinator</div><div class="lane-l" style="grid-row:4">Billing clerk</div>
+              <button type="button" class="st ends" id="s0" style="grid-row:1;grid-column:2"><span class="n">START</span><b>Order received</b></button>
+              <button type="button" class="st" id="s1" data-step="1" style="grid-row:1;grid-column:3"><span class="n">STEP 1</span><b>Confirm order</b></button>
+              <button type="button" class="st dec" id="s2" data-step="2" style="grid-row:2;grid-column:4"><span class="n">STEP 2</span><b>Credit check</b></button>
+              <button type="button" class="st" id="s3" data-step="3" style="grid-row:1;grid-column:5"><span class="n">STEP 3</span><b>Ask for prepayment</b><span class="gap" title="No one accountable">!</span></button>
+              <button type="button" class="st" id="s4" data-step="4" style="grid-row:3;grid-column:6"><span class="n">STEP 4</span><b>Deliver</b><span class="gap" title="Risk with no control">!</span></button>
+              <button type="button" class="st" id="s5" data-step="5" style="grid-row:4;grid-column:7"><span class="n">STEP 5</span><b>Invoice</b></button>
+              <button type="button" class="st" id="s6" data-step="6" style="grid-row:2;grid-column:8"><span class="n">STEP 6</span><b>Collect payment</b></button>
+              <svg class="edges" id="edges" aria-hidden="true"></svg>
+            </div></div>
+            <aside class="box drawer" id="drawer" aria-live="polite"></aside>
+          </div>
+        </div>
+        <div id="raciblock" class="box raci-wrap"><table class="raci" id="raci"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="verdict" id="tabnote" style="margin-bottom:12px"></div>
+  <div class="verdict">
+    <div><h4>Ways in</h4><ul><li><b>Processes in the top bar.</b> An office seat lands in the builder, on All processes, with To handle as the second tab; a client’s own person lands on My processes. The seat decides, so there is no switch to forget. SMP works this way today.</li><li><b>From any process page.</b> Office seats see “Open in builder” at the top right; staff never do.</li><li><b>From a suggestion or a returned approval.</b> The button opens the builder on the right process, with a draft started and the step selected.</li></ul></div>
+    <div><h4>Way back out</h4><ul><li><b>Save and exit</b> sits at the top right, just under the band, and stays in view as you scroll. It takes you back to where you came from</li><li><b>Preview as manager</b> shows the draft exactly as the owner will read it, under a gold strip with “Back to the builder”</li><li><b>Open the staff view</b> on the builder home opens Processes as client staff see it today</li></ul></div>
+    <div><h4>Not chosen</h4><ul><li>A Read / Build switch in the top bar for office seats: one more thing to forget, and the seat already says who builds</li><li>A second “Process builder” entry in the top bar: two doors to one module, and client staff would ask why they cannot open it</li></ul></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const ROLES = ['Sales coordinator', 'Credit controller', 'Logistics coordinator', 'Billing clerk', 'Finance manager', 'CFO'];
+  const STEPS = [
+    { n: 1, t: 'Confirm order', who: 'Sales coordinator', acts: ['Check the order against the quote', 'Confirm prices, quantities and the delivery date', 'Enter the order in the ERP'], raci: ['R', '', '', '', 'A', ''], appr: '', time: '', risk: null },
+    { n: 2, t: 'Credit check', who: 'Credit controller', dec: true, acts: ['Add this order to the customer’s balance', 'Compare it with the credit limit'], raci: ['I', 'R', '', '', 'A', 'C'], appr: 'At or above $250,000 the CFO approves', time: '1 day, then the Finance manager', risk: ['Goods released over the limit', 'The ERP blocks orders over the limit'] },
+    { n: 3, t: 'Ask for prepayment', who: 'Sales coordinator', acts: ['Send the pro-forma invoice', 'Chase until it is paid or cancelled'], raci: ['R', 'I', '', '', '', ''], appr: '', time: '5 days, then the Commercial manager', risk: null, gap: 'No one is accountable for this step' },
+    { n: 4, t: 'Deliver', who: 'Logistics coordinator', acts: ['Pick and pack', 'Deliver, and photograph the signed proof in the app'], inForce: ['Pick and pack', 'Deliver and bring back signed proof of delivery'], changed: 1, raci: ['I', '', 'R', '', 'A', ''], appr: '', time: '', risk: ['Proof of delivery missing', null], gap: 'A risk with no control' },
+    { n: 5, t: 'Invoice', who: 'Billing clerk', acts: ['Raise the invoice from the signed proof', 'Send it to the customer'], raci: ['', 'I', '', 'R', 'A', ''], appr: '', time: '2 days after delivery', risk: ['Invoice sent with the wrong price', 'Price list signed off before use'] },
+    { n: 6, t: 'Collect payment', who: 'Credit controller', acts: ['Match receipts to invoices', 'Chase overdue invoices every week'], raci: ['', 'R', '', 'C', 'A', ''], appr: '', time: '', risk: null },
+  ];
+  const HANDLE = [
+    { kind: 'Suggestion', code: 'ORD100', name: 'Order-to-Cash', text: 'Hend Mourad suggested a change to step 4, Deliver · 23 Oct', quote: 'Since August the warehouse sends the proof of delivery by photo, not paper.', act: 'Start a draft from this', go: 'builder', msg: 'Draft v4 started from Hend’s suggestion; step 4 is selected.', id: 'door3' },
+    { kind: 'Returned', code: 'PRO100', name: 'Procure-to-Pay', text: 'Yara Kamal sent v3 back · 22 Oct', quote: 'The $50,000 rule needs a deputy for when the Finance manager is away.', act: 'Open in builder', toast: 'Opens Procure-to-Pay in the builder, on its Authority section.' },
+    { kind: 'Gaps', code: 'ORD102', name: 'Customer credit setup', text: 'Being drawn · 4 of 6 marks missing: RACI, authority, controls, SOP version', act: 'Open in builder', toast: 'Opens Customer credit setup in the builder, on its Map.' },
+  ];
+  // [code, name, owner, pill, state, gaps, rank, readiness marks, deep dive]: rank orders "Where it is" by what needs the office first
+  const ALL = [
+    ['ORD100', 'Order-to-Cash', 'Hend Mourad', 'good', 'In force · v2 · draft v4 open', 2, 4, [1, 1, 1, 1, 0, 1], true],
+    ['ORD101', 'Returns & refunds', 'Salma Adel', 'attn', 'Waiting for approval', 0, 3, [1, 1, 0, 0, 0, 0], true],
+    ['ORD102', 'Customer credit setup', 'Hend Mourad', 'q', 'Being drawn', 4, 5, [1, 1, 0, 0, 0, 0], true],
+    ['PRO100', 'Procure-to-Pay', 'Karim Fouad', 'bad', 'Returned by the approver', 1, 1, [1, 1, 1, 1, 0, 0], true],
+    ['CRE100', 'Credit & Collections', 'Hala Mansour', 'good', 'In force · v1.1', 0, 7, [1, 1, 1, 1, 1, 1], true],
+    ['REC100', 'Record-to-Report', 'Hala Mansour', 'good', 'In force · v2.0', 0, 7, [1, 1, 1, 1, 1, 1], true],
+    ['NEW100', 'New Store Opening', 'Amr Hassan', 'bad', 'Review late', 0, 2, [1, 1, 1, 1, 1, 1], true],
+    ['STO100', 'Store Cash Handling', 'Amr Hassan', 'good', 'In force · v1.0', 0, 7, [1, 1, 1, 1, 1, 1], true],
+    ['PRI100', 'Pricing & Promotions', 'Omar Fathy', 'q', 'Being drawn', 3, 5, [1, 0, 0, 0, 0, 0], false],
+    ['LOG100', 'Logistics & Last-mile', 'Karim Fouad', 'q', 'Being drawn', 2, 5, [1, 0, 0, 0, 0, 0], false],
+    ['INV100', 'Inventory & Stock Count', 'Karim Fouad', 'q', 'Being drawn', 3, 5, [1, 1, 0, 1, 0, 0], true],
+    ['HIR100', 'Hire-to-Retire', 'Laila Zaki', 'q', 'Being drawn', 4, 5, [1, 0, 0, 0, 0, 0], false],
+    ['CUS100', 'Customer Complaints', 'Nour Samir', 'q', 'Not started', 0, 6, [0, 0, 0, 0, 0, 0], false],
+  ];
+  const SECTS = [['map', 'Map', 'bad'], ['raci', 'RACI', 'bad'], ['authority', 'Authority', ''], ['controls', 'Risks & controls', 'bad'], ['quality', 'Quality', ''], ['life', 'Lifecycle', 'q']];
+  const SECT_PH = { authority: ['Authority', 'Who may approve what, and up to which amount.'], controls: ['Risks & controls', 'Every risk, its control, the evidence and the last test.'], quality: ['Quality', 'Measures, non-conformances and corrective actions.'], life: ['Lifecycle', 'Draft, review, approval, publish, and every version.'] };
+  const tiles = (t) => t.map(([n, l, c]) => '<div class="mtile ' + (c || '') + '"><b>' + n + '</b><span>' + l + '</span></div>').join('');
+  const BAND = {
+    home: { eyebrow: 'Raya Trade · Processes · Builder', title: 'Process builder', sub: 'Strategy Office · <b>13</b> processes · <b>2</b> drafts open · you see every process, in every state',
+      acts: '<button class="bq" type="button" data-toast="Opens Processes as client staff see it: My processes, To do, Map. That is the landing mockup.">Open the staff view</button><button class="bgold" type="button" data-toast="Starts a new process: name, owner, area. Its code is made for you.">New process</button>',
+      tiles: tiles([['1', 'Suggestion', 'hot'], ['1', 'Returned', 'late'], ['2', 'Drafts', ''], ['19', 'Gaps', 'late']]) },
+    builder: { eyebrow: 'Raya Trade · Processes › <button type="button" data-go="home">Builder</button> › ORD100', title: 'Order-to-Cash <span class="pill good">In force · v2</span><span class="pill attn">Draft v4</span>', sub: 'Draft v4 started 24 Oct from Hend Mourad’s suggestion on step 4 · Owner <b>Hend Mourad</b> · Approver <b>Yara Kamal</b>',
+      acts: '<button class="bq" type="button" id="doorback" data-go="preview">Preview as manager</button><button class="bgold" type="button" data-toast="Sends draft v4 to Yara Kamal for approval.">Send for approval</button>',
+      tiles: tiles([['6', 'Steps', ''], ['2', 'Gaps', 'late'], ['4/6', 'Marks', ''], ['1', 'Suggestion', '']]) },
+    read: { eyebrow: 'Raya Trade · Processes › ORD100 · Finance', title: 'Order-to-Cash <span class="pill good">In force · v2</span>', sub: 'Owner <b>Hend Mourad</b> · Approver <b>Yara Kamal</b> · the page staff read; you see it as the office',
+      acts: '<button class="bq" type="button" data-toast="Downloads the SOP.">Download SOP</button><button class="bq" type="button" data-toast="Prints the page.">Print</button><button class="bgold" type="button" id="door2" data-go="builder">Open in builder</button>',
+      tiles: tiles([['6', 'Steps', ''], ['4/5', 'Have read it', ''], ['1', 'Risk, no control', 'late'], ['19', 'Days to review', '']]) },
+    preview: { eyebrow: 'Raya Trade · Processes › ORD100 · Finance', title: 'Order-to-Cash <span class="pill attn">v4 · preview</span>', sub: 'Owner <b>Hend Mourad</b> · Approver <b>Yara Kamal</b>',
+      acts: '<button class="bq" type="button" data-toast="Preview: the buttons do nothing here.">Download SOP</button><button class="bq" type="button" data-toast="Preview: the buttons do nothing here.">Print</button><button class="bgold" type="button" data-toast="Preview: the buttons do nothing here.">Suggest a change</button>',
+      tiles: tiles([['6', 'Steps', ''], ['0/5', 'Have read it', ''], ['1', 'Risk, no control', 'late'], ['365', 'Days to review', '']]) },
+  };
+  let FROM = 'home', OTAB = 'a', NUMS = 'boxes', VIEWS = 'stick', FLASH = null, SCREEN = 'home', TAB = 'all', RVIEW = 'flow', SECT = 'map', SEL = 4, DOOR = null;
+
+  $('#handle').innerHTML = HANDLE.map((h) => '<div class="trow"><span class="chip ' + (h.kind === 'Suggestion' ? 'gold' : h.kind === 'Returned' ? 'bad' : '') + '">' + h.kind + '</span><div class="t"><span class="code">' + h.code + '</span> <b>' + esc(h.name) + '</b><small>' + esc(h.text) + '</small>' + (h.quote ? '<blockquote>' + esc(h.quote) + '</blockquote>' : '') + '</div>' +
+    '<button class="btn' + (h.go ? ' gold' : '') + '" type="button"' + (h.id ? ' id="' + h.id + '"' : '') + (h.go ? ' data-go="' + h.go + '" data-msg="' + esc(h.msg) + '"' : ' data-toast="' + esc(h.toast) + '"') + '>' + esc(h.act) + '</button></div>').join('');
+  let SORT = 'name', DIR = 1;
+  const KEY = { name: (r) => r[1], owner: (r) => r[2], state: (r) => r[6], gaps: (r) => r[5], ready: (r) => r[7].reduce((a, b) => a + b, 0) };
+  function renderAll() {
+    const q = $('#q').value.trim().toLowerCase();
+    const rows = ALL.filter((r) => !q || [r[0], r[1], r[2], r[4]].join(' ').toLowerCase().indexOf(q) >= 0)
+      .sort((a, b) => { const x = KEY[SORT](a), y = KEY[SORT](b); return (typeof x === 'number' ? x - y : x.localeCompare(y)) * DIR || a[1].localeCompare(b[1]); });
+    $('#all').innerHTML = rows.map((r) => { const [c, n, o, k, st, g] = r; return '<tr><td><span class="code">' + c + '</span> <button class="pn" type="button" data-row="' + c + '">' + esc(n) + '</button></td><td>' + esc(o) + '</td><td><span class="pill ' + k + '">' + esc(st) + '</span></td><td>' + marksCell(r) + '</td><td class="' + (g ? 'gaps' : 'note') + '">' + (g || '—') + '</td><td><button class="btn" type="button" data-row="' + c + '">Open in builder</button></td></tr>'; }).join('');
+    $$('#alltab th[data-col]').forEach((th) => { const on = th.dataset.col === SORT; if (on) th.setAttribute('aria-sort', DIR > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort'); th.querySelector('i').textContent = on ? (DIR > 0 ? '↑' : '↓') : '↕'; });
+    $('#qcount').textContent = q ? rows.length + ' of ' + ALL.length + ' processes' : ALL.length + ' processes · click a heading to sort';
+    $('#qempty').hidden = rows.length > 0;
+    $('#qempty').textContent = 'No process matches “' + $('#q').value.trim() + '”. Search looks at the code, name, owner and state.';
+  }
+  $('#q').addEventListener('input', renderAll);
+  $('#raci').innerHTML = '<thead><tr><th>Step</th>' + ROLES.map((r) => '<th>' + esc(r) + '</th>').join('') + '</tr></thead><tbody>' +
+    STEPS.map((s) => '<tr><td class="' + (s.gap && /accountable/.test(s.gap) ? 'gaprow' : '') + '">' + s.n + ' · ' + esc(s.t) + (s.gap && /accountable/.test(s.gap) ? ' <span class="chip bad">No A</span>' : '') + '</td>' + s.raci.map((v) => '<td><button type="button" class="rc ' + (v || 'empty') + '" data-toast="Cycles through R, A, C, I and empty.">' + (v || '') + '</button></td>').join('') + '</tr>').join('') + '</tbody>';
+
+  function drawer() {
+    const s = STEPS.find((x) => x.n === SEL);
+    $$('.st').forEach((b) => b.classList.toggle('on', b.dataset.step === String(SEL)));
+    if (SCREEN !== 'builder') {
+      const acts = SCREEN === 'read' && s.inForce ? s.inForce : s.acts;
+      $('#drawer').innerHTML = '<span class="note" style="font-family:var(--mono);font-weight:700">STEP ' + s.n + '</span><h3>' + esc(s.t) + '</h3><dl class="dl"><dt>Done by</dt><dd>' + esc(s.who) + '</dd>' + (s.appr ? '<dt>Approval</dt><dd>' + esc(s.appr) + '</dd>' : '') + (s.time ? '<dt>Time limit</dt><dd>' + esc(s.time) + '</dd>' : '') + '</dl><ul style="padding-left:18px;font-size:13px">' + acts.map((a) => '<li>' + esc(a) + '</li>').join('') + '</ul>' +
+        (s.risk ? (s.risk[1] ? '<p class="ctl">Control: ' + esc(s.risk[1]) + '</p>' : '<p class="ctl bad">“' + esc(s.risk[0]) + '” has no control</p>') : '');
+      return;
+    }
+    const raciChips = s.raci.map((v, i) => v ? '<span class="chip' + (v === 'A' ? ' gold' : '') + '">' + v + ' · ' + esc(ROLES[i]) + '</span>' : '').join('');
+    $('#drawer').innerHTML = '<span class="note" style="font-family:var(--mono);font-weight:700">STEP ' + s.n + ' · EDITING</span>' +
+      (s.n === 4 ? '<p class="from">From Hend Mourad, 23 Oct: “Since August the warehouse sends the proof of delivery by photo.”</p>' : '') +
+      '<label class="fld"><span>Step</span><input value="' + esc(s.t) + '"></label>' +
+      '<label class="fld"><span>Done by</span><select>' + ROLES.map((r) => '<option' + (r === s.who ? ' selected' : '') + '>' + esc(r) + '</option>').join('') + '</select></label>' +
+      '<div class="fld"><span>What they do</span>' + s.acts.map((a, i) => '<input value="' + esc(a) + '">' + (s.changed === i ? '<span class="chg">Changed in v4</span>' : '')).join('') + '<div class="row"><button class="btn dash" type="button" data-toast="Adds a line.">+ Add a line</button></div></div>' +
+      '<div class="fld"><span>Who is involved</span><div class="row">' + raciChips + '<button class="btn dash" type="button" data-toast="Picks a role and R, A, C or I.">+</button></div>' + (s.gap && /accountable/.test(s.gap) ? '<span class="ctl bad">' + esc(s.gap) + '</span>' : '') + '</div>' +
+      '<div class="fld"><span>Approval and time limit</span><div class="row">' + (s.appr ? '<span class="chip">' + esc(s.appr) + '</span>' : '<button class="btn dash" type="button" data-toast="Writes an approval rule as a sentence.">+ Approval rule</button>') + (s.time ? '<span class="chip">' + esc(s.time) + '</span>' : '<button class="btn dash" type="button" data-toast="Sets how long the step may take.">+ Time limit</button>') + '</div></div>' +
+      '<div class="fld"><span>Risk and control</span>' + (s.risk ? '<div class="row"><span class="chip">' + esc(s.risk[0]) + '</span>' + (s.risk[1] ? '<span class="chip">' + esc(s.risk[1]) + '</span>' : '<button class="btn gold" type="button" data-toast="Adds a control for this risk.">+ Add a control</button>') + '</div>' : '<div class="row"><button class="btn dash" type="button" data-toast="Adds a risk to this step.">+ Add a risk</button></div>') + '</div>';
+  }
+
+  const EDGES = [['s0', 's1'], ['s1', 's2'], ['s2', 's4', 'within limit'], ['s2', 's3', 'over limit'], ['s3', 's4', 'once paid'], ['s4', 's5'], ['s5', 's6']];
+  function arrows() {
+    const L = $('#lanes'), svg = $('#edges'); if (!L || !L.offsetParent) return;
+    const o = L.getBoundingClientRect(); let out = '<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="ah" d="M0 0 8 4 0 8z"/></marker></defs>', lab = '';
+    EDGES.forEach(([f, t, l]) => {
+      const a = document.getElementById(f).getBoundingClientRect(), b = document.getElementById(t).getBoundingClientRect();
+      const sx = a.right - o.left, sy = a.top - o.top + a.height / 2, ex = b.left - o.left - 2, ey = b.top - o.top + b.height / 2, mx = Math.round(sx + Math.min(24, (ex - sx) / 2));
+      out += '<path d="' + (Math.abs(sy - ey) < 2 ? 'M' + sx + ' ' + sy + 'H' + ex : 'M' + sx + ' ' + sy + 'H' + mx + 'V' + ey + 'H' + ex) + '" marker-end="url(#ah)"/>';
+      if (l) { const x = mx + 5, y = (sy + ey) / 2 + 4, w = l.length * 5.7 + 8; lab += '<rect x="' + (x - 3) + '" y="' + (y - 11) + '" width="' + w + '" height="15" rx="3"/><text x="' + x + '" y="' + y + '">' + l + '</text>'; }
+    });
+    svg.innerHTML = out + lab;
+  }
+
+  const HOME_TABS = {
+    a: [['all', 'All processes', '13'], ['handle', 'To handle', '3', 'hot'], ['landscape', 'Landscape', ''], ['priorities', 'Priorities', ''], ['governance', 'Governance', ''], ['org', 'Org & roles', ''], ['export', 'Export', ''], ['settings', 'Settings', '']],
+    b: [['all', 'All processes', '13'], ['handle', 'To handle', '3', 'hot'], ['landscape', 'Landscape', ''], ['priorities', 'Priorities', ''], ['governance', 'Governance', ''], ['org', 'Org & roles', '']],
+  };
+  const SIDE = [['all', 'All processes'], ['handle', 'To handle', '3'], ['landscape', 'Landscape'], ['priorities', 'Priorities'], ['governance', 'Governance'], ['org', 'Org & roles'], ['export', 'Export'], ['settings', 'Settings']];
+  /* ── the office sections, filled in so the three arrangements can be judged on full pages ── */
+  const nameOf = (c) => (ALL.find((r) => r[0] === c) || [c, c])[1];
+  const pn = (c) => '<span class="code">' + c + '</span> ' + esc(nameOf(c));
+  const pill = (k, t) => '<span class="pill ' + k + '">' + esc(t) + '</span>';
+  const dots = (v) => '<span class="dots" aria-label="' + v + ' of 5">' + '●'.repeat(v) + '<i>' + '●'.repeat(5 - v) + '</i></span>';
+  const tbl = (head, rows) => '<div class="box tw" style="overflow:hidden"><table class="t"><thead><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + rows.map((r) => '<tr>' + r.map((c) => '<td>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+  const kp = (items) => '<div class="kp">' + items.map(([n, l, c, id]) => '<div class="' + (c || '') + '"><b' + (id ? ' id="' + id + '"' : '') + '>' + n + '</b><span>' + l + '</span></div>').join('') + '</div>';
+
+  const CHAIN = [['Order intake', [['Receive the order', 'ORD100'], ['Confirm the order', 'ORD100'], ['Check credit', 'CRE100'], ['Set the price', 'PRI100']]], ['Fulfilment', [['Buy stock', 'PRO100'], ['Count stock', 'INV100'], ['Pick and pack', 'ORD100'], ['Deliver', 'LOG100']]], ['Billing & cash', [['Invoice', 'ORD100'], ['Collect payment', 'CRE100'], ['Pay suppliers', 'PRO100'], ['Bank store cash', 'STO100']]], ['Close & report', [['Close the month', 'REC100'], ['Report to the board', 'REC100']]]];
+  const LINKS = [['PRI100', ['ORD100']], ['ORD100', ['LOG100', 'CRE100', 'REC100']], ['PRO100', ['INV100', 'REC100']], ['INV100', ['REC100']], ['LOG100', []], ['CRE100', ['REC100']], ['STO100', ['REC100']], ['NEW100', ['STO100', 'HIR100']], ['REC100', []], ['HIR100', []], ['CUS100', ['ORD101']]];
+  const MIL = [['ORD100', [['Order received'], ['Confirm'], ['Credit check', 1], ['Prepayment'], ['Deliver', 1], ['Invoice'], ['Collect', 1]]], ['PRO100', [['Request'], ['Approve', 1], ['Order'], ['Receive', 1], ['Match'], ['Pay', 1]]], ['REC100', [['Close books', 1], ['Reconcile'], ['Review'], ['Report', 1]]], ['STO100', [['Count', 1], ['Record'], ['Bank', 1]]]];
+  const W = { imp: 35, risk: 40, cx: 25 };
+  // [code, department, importance, complexity, risk, why, decision]
+  const PRIO = [['ORD100', 'Finance', 5, 4, 4, 'Every sale runs through it; one gap in delivery proof', 'W1'], ['PRO100', 'Supply Chain', 4, 4, 4, 'Approval levels unclear above $50,000', 'W1'], ['INV100', 'Supply Chain', 4, 5, 3, 'Stock counts disagree with the books', 'W1'], ['CRE100', 'Finance', 4, 3, 4, 'Write-offs signed by one person', 'W1'], ['PRI100', 'Commercial', 5, 3, 3, 'Margin impact, but it works today', 'W2'], ['NEW100', 'Retail', 4, 3, 3, 'Review is late; four openings next year', 'W2'], ['REC100', 'Finance', 4, 3, 3, 'Close is on time; written down once', 'W2'], ['LOG100', 'Supply Chain', 3, 3, 3, 'Waits for Order-to-Cash to settle', 'W2'], ['STO100', 'Retail', 3, 2, 4, 'Cash differences small but frequent', 'LATER'], ['HIR100', 'HR', 3, 3, 2, 'Handled by HR, low risk', 'LATER'], ['CUS100', 'Care', 3, 2, 2, 'Handled well by the call centre', 'HIGH']];
+  const sc = (r) => Math.round((r[2] * W.imp + r[4] * W.risk + r[3] * W.cx) / 5);
+  const ranked = PRIO.slice().sort((a, b) => sc(b) - sc(a));
+  const DEC = { W1: 'Wave 1', W2: 'Wave 2', LATER: 'Later', HIGH: 'Stays high-level' };
+  const RISKS = [['Customer credit exposure above appetite', 'Risk & controls', 'High', 'High', 'High', 'Mitigating', 'Hend Mourad'], ['Stock shrinkage in stores', 'Risk & controls', 'Medium', 'High', 'High', 'Open', 'Karim Fouad'], ['Supplier paid twice', 'Risk & controls', 'Low', 'High', 'Medium', 'Mitigating', 'Hala Mansour'], ['Board decisions without a written mandate', 'Board structure', 'Medium', 'Medium', 'Medium', 'Open', 'Tarek Samy'], ['Customer data shared without consent', 'Data integrity', 'Low', 'Critical', 'High', 'Open', 'No owner yet'], ['Late month-end close', '—', 'Medium', 'Low', 'Low', 'Accepted', 'Hala Mansour'], ['Cash shortfall at store close', '—', 'Low', 'Low', 'Low', 'Closed', 'Amr Hassan']];
+  const lvl = (l) => pill(l === 'High' ? 'bad' : l === 'Medium' ? 'attn' : 'q', l);
+  const POLS = [['Risk Management Policy', 'Risk & controls', 'Published', '1 Sep 2026', '1 Sep 2027', '3 of 5'], ['Board Charter', 'Board structure', 'Draft', '—', '—', '—'], ['Code of Conduct', 'Ethics', 'In review', '—', '—', '—'], ['Data Protection Policy', 'Data integrity', 'Approved', '—', '—', '—']];
+  const stage = (s) => pill(s === 'Published' || s === 'Approved' ? 'good' : s === 'In review' ? 'attn' : 'q', s);
+  const CTLS = [['ORD100', '2 · Credit check', 'Goods released over the limit', 'The ERP blocks orders over the limit', ['good', 'Passed · Aug 2026']], ['ORD100', '4 · Deliver', 'Proof of delivery missing', '', ['bad', 'No control']], ['ORD100', '5 · Invoice', 'Invoice sent with the wrong price', 'Price list signed off before use', ['q', 'Not tested']], ['PRO100', '5 · Match', 'Supplier paid twice', 'Three-way match before payment', ['good', 'Passed · Jul 2026']], ['INV100', '3 · Count', 'Stock shrinkage', 'Second count signed by the supervisor', ['bad', 'Failed · Sep 2026']], ['STO100', '1 · Count', 'Cash shortfall at close', 'Two people count the till', ['good', 'Passed · Jun 2026']]];
+  const CK = [['Give internal audit a line to the audit committee', 'Immediate', 'Yara Kamal', '15 Oct', false, true], ['Name a second owner for the three high risks', 'Immediate', 'Tarek Samy', '15 Nov', false], ['Publish the risk management policy', 'Near-term', 'Hala Mansour', '30 Sep', true], ['Run a yearly risk workshop with every unit head', 'Long-term', 'No owner yet', '', false]];
+  const ACTIV = [['23 Oct', 'Hend Mourad suggested a change to Order-to-Cash, step 4'], ['22 Oct', 'Yara Kamal sent Procure-to-Pay v3 back'], ['20 Oct', 'Credit & Collections v1.1 published'], ['15 Oct', 'Checklist item went overdue: a line from internal audit to the audit committee'], ['12 Oct', 'Risk & controls assessment generated'], ['9 Oct', 'NC-07 raised on Order-to-Cash: wrong price on 4 invoices']];
+  const PEOPLE = [['Yara Kamal', 'CFO', '—'], ['Tarek Samy', 'Chief operating officer', '—'], ['Hend Mourad', 'Finance manager', 'Yara Kamal'], ['Hala Mansour', 'Finance manager', 'Yara Kamal'], ['Karim Fouad', 'Supply chain manager', 'Tarek Samy'], ['Omar Fathy', 'Commercial manager', 'Tarek Samy'], ['Amr Hassan', 'Retail operations manager', 'Tarek Samy'], ['Nour Samir', 'Customer service lead', 'Tarek Samy'], ['Laila Zaki', 'HR business partner', 'Tarek Samy'], ['Salma Adel', 'Credit controller', 'Hend Mourad'], ['Sherif Adel', 'Accounts payable clerk', 'Hala Mansour'], ['Dina Shawky', 'Billing clerk', 'Hend Mourad'], ['Dalia Sabry', 'Sales coordinator', 'Omar Fathy'], ['Nadia Fouad', 'Sales coordinator', 'Omar Fathy'], ['Mai Sobhy', 'Logistics coordinator', 'Karim Fouad'], ['Ramy Behairy', 'Warehouse supervisor', 'Karim Fouad'], ['Kareem Hafez', 'Inventory controller', 'Karim Fouad'], ['Heba Salem', 'Procurement officer', 'Karim Fouad'], ['Rania Fahmy', 'Customer service agent', 'Nour Samir'], ['Mostafa Deif', 'Store manager', 'Amr Hassan'], ['Amaka Eze', 'Accountant', 'Hala Mansour']];
+  const ROLEUSE = { 'Finance manager': 7, 'Credit controller': 3, 'Sales coordinator': 3, CFO: 4, 'Billing clerk': 2, 'Logistics coordinator': 2, 'Procurement officer': 2, 'Accounts payable clerk': 2, 'Store manager': 2, 'Inventory controller': 2, 'Warehouse supervisor': 2 };
+  const mail = (n) => n.toLowerCase().replace(/[^a-z]+/g, '.') + '@rayatrade.example';
+  function orgTree(mgr) { const kids = PEOPLE.filter((p) => p[2] === mgr); return kids.length ? '<ul>' + kids.map((p) => '<li><b>' + esc(p[0]) + '</b> <span>' + esc(p[1]) + '</span>' + orgTree(p[0]) + '</li>').join('') + '</ul>' : ''; }
+  let EXP = ['ORD100', 'PRO100', 'CRE100', 'REC100'];
+
+  const SUBV = { landscape: 'chain', priorities: 'score', governance: 'attention', org: 'people' };
+  const SECS = {
+    landscape: { title: 'Landscape', sub: 'How Raya Trade’s processes fit together: today’s Value chain and Helicopter views in one place.', kp: () => [['13', 'Processes'], ['4', 'Phases'], ['14', 'Activities'], ['11', 'Hand-overs']],
+      views: [['chain', 'Value chain'], ['cards', 'Hand-overs'], ['milestones', 'Milestones']],
+      body: (v) => v === 'chain' ? '<div class="chain">' + CHAIN.map(([ph, acts]) => '<div class="col"><h4>' + ph + '<span class="note">' + acts.length + '</span></h4>' + acts.map(([a, c]) => '<div class="card">' + esc(a) + '<small>' + pn(c) + '</small></div>').join('') + '</div>').join('') + '</div>'
+        : v === 'cards' ? '<div class="cols">' + LINKS.map(([c, to]) => { const from = LINKS.filter((l) => l[1].indexOf(c) >= 0).map((l) => l[0]); return '<div class="col"><b>' + pn(c) + '</b><p class="note" style="margin-top:4px">' + (from.length ? 'Picks up from ' + from.map(nameOf).join(', ') : 'Starts here') + '</p><p class="note">' + (to.length ? 'Hands over to ' + to.map(nameOf).join(', ') : 'Ends here') + '</p></div>'; }).join('') + '</div>'
+        : '<div class="box" style="padding:14px 16px"><div class="mil">' + MIL.map(([c, st]) => '<div class="mrow2"><div>' + pn(c) + '</div><div class="rail2">' + st.map(([l, m]) => '<span class="' + (m ? 'm' : '') + '"><em>' + esc(l) + '</em></span>').join('') + '</div></div>').join('') + '</div><p class="note" style="margin-top:10px">Gold marks a milestone step.</p></div>' },
+    priorities: { title: 'Deep-dive priorities', sub: 'Which processes the office takes deep next: full steps, RACI, controls and an SOP.', kp: () => [['11/11', 'Scored'], ['4', 'Wave 1'], ['4', 'Wave 2'], ['Draft', 'The plan']],
+      views: [['score', '1 · Score'], ['rank', '2 · Rank'], ['plan', '3 · Plan'], ['signoff', '4 · Sign-off']],
+      body: (v) => v === 'score' ? '<div class="blk" style="margin-bottom:12px"><span class="lbl">What counts, and how much</span><p style="font-size:13px">Importance <b>35%</b> · Risk if it goes wrong <b>40%</b> · Complexity <b>25%</b> · the team runs <b>4</b> deep dives at once</p></div>' + tbl(['Rank', 'Process', 'Department', 'Importance', 'Complexity', 'Risk', 'Score', 'Why', 'Decision'], ranked.map((r, i) => [String(i + 1), pn(r[0]), esc(r[1]), dots(r[2]), dots(r[3]), dots(r[4]), '<b>' + sc(r) + '</b>', esc(r[5]), esc(DEC[r[6]])]))
+        : v === 'rank' ? '<div class="box" style="padding:12px 16px">' + ranked.map((r, i) => '<div class="rk"><b>' + (i + 1) + '</b><span>' + pn(r[0]) + '</span><span class="bar"><i style="width:' + sc(r) + '%;background:' + (r[6] === 'W1' ? 'var(--gold)' : 'var(--stone)') + '"></i></span><b>' + sc(r) + '</b></div>').join('') + '<p class="note" style="margin-top:6px">Gold: Wave 1. Score out of 100, from the weights on Score.</p></div>'
+        : v === 'plan' ? '<div class="cols">' + ['W1', 'W2', 'LATER', 'HIGH'].map((k) => { const rs = ranked.filter((r) => r[6] === k); return '<div class="col"><h4>' + DEC[k] + '<span class="note">' + rs.length + (k === 'W1' ? ' of 4' : '') + '</span></h4>' + rs.map((r) => '<div class="card">' + pn(r[0]) + '<small>Score ' + sc(r) + ' · ' + esc(r[1]) + '</small></div>').join('') + '</div>'; }).join('') + '</div>'
+        : '<div class="two2"><div class="blk"><span class="lbl">The page the client signs</span><p style="font-size:14px;margin-bottom:6px"><b>Deep-dive plan for Raya Trade</b></p><p class="note">Wave 1 starts now: Order-to-Cash, Procure-to-Pay, Inventory & Stock Count, Credit & Collections. Wave 2 follows: Pricing & Promotions, New Store Opening, Record-to-Report, Logistics & Last-mile.</p><p class="note" style="margin-top:6px">Weights: importance 35%, risk 40%, complexity 25%.</p></div><div class="blk"><span class="lbl">Where it is</span><p>' + pill('q', 'Draft') + ' Not sent yet</p><div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn gold" type="button" data-toast="Sends the plan to Yara Kamal, CFO, for sign-off. Scores lock while she has it.">Send to Yara Kamal for sign-off</button><button class="btn" type="button" data-toast="Opens the one-page plan as the client will read it.">Preview the page</button></div></div></div>' },
+    governance: { title: 'Governance', sub: 'The assessment, risks, policies, and the controls that come from each process.', kp: () => [['3', 'High risks', 'bad'], ['6', 'Open risks'], ['4', 'Policies'], ['1/4', 'Checklist done'], ['1', 'Overdue', 'bad']],
+      views: [['attention', 'Needs attention'], ['assessment', 'Assessment'], ['risks', 'Risks'], ['policies', 'Policies'], ['controls', 'Controls'], ['activity', 'Activity']],
+      body: (v) => v === 'attention' ? '<div class="two2"><div class="blk"><span class="lbl">Process review calendar</span>' + [['Overdue', 'bad-tx', [['20 Sep 2026', 'NEW100']]], ['Next 30 days', 'attn-tx', [['10 Nov', 'STO100'], ['12 Nov', 'ORD100']]], ['Later', 'ink-2', [['14 Mar 2027', 'REC100'], ['20 Oct 2027', 'CRE100']]]].map(([h, c, rs]) => '<h4 style="font-size:12px;margin:8px 0 4px;color:var(--' + c + ')">' + h + ' · ' + rs.length + '</h4>' + rs.map(([d, cd]) => '<div class="calrow"><span class="note">' + d + '</span><span>' + pn(cd) + '</span></div>').join('')).join('') + '</div><div class="blk"><span class="lbl">Overdue on the checklist</span>' + CK.filter((c) => c[5]).map((c) => '<p style="font-size:13.5px"><b>' + esc(c[0]) + '</b></p><p class="note">' + esc(c[2]) + ' · was due ' + c[3] + '</p>').join('') + '</div></div>'
+        : v === 'assessment' ? '<div class="aspects">' + ['Board structure', 'Risk & controls', 'Ethics', 'Compensation', 'ESG', 'Data integrity', 'Accessibility'].map((a, i) => '<button type="button" class="btn' + (i === 1 ? ' gold' : '') + '" data-toast="Shows the assessment for ' + a + '.">' + a + '</button>').join('') + '</div><div class="two2" style="margin-bottom:12px"><div class="blk"><span class="lbl">Executive summary · Risk & controls</span><p style="font-size:13px">Risk owners are named for the main processes, but treatment actions are often late. Finance alone reviews the risk register each month. Three high risks sit with one person. Internal audit reports to the CFO rather than to the audit committee.</p><p class="note" style="margin-top:6px">Generated 12 Oct with AI help</p></div><div class="blk"><span class="lbl">Governing policy</span><p style="font-size:13.5px"><b>Risk Management Policy</b> ' + stage('Published') + '</p><p class="note">Effective 1 Sep 2026 · approved by Yara Kamal</p></div></div><div class="cols">' + ['Immediate', 'Near-term', 'Long-term'].map((w) => { const rs = CK.filter((c) => c[1] === w); return '<div class="col"><h4>' + w + '<span class="note">' + rs.length + '</span></h4>' + rs.map((c) => '<label class="chk"><input type="checkbox"' + (c[4] ? ' checked' : '') + '> <span>' + esc(c[0]) + '<small>' + esc(c[2]) + (c[3] ? ' · due ' + c[3] : '') + '</small></span></label>').join('') + '</div>'; }).join('') + '</div>'
+        : v === 'risks' ? tbl(['Risk', 'Aspect', 'Likelihood', 'Impact', 'Level', 'Status', 'Owner'], RISKS.map((r) => [esc(r[0]), esc(r[1]), r[2], r[3], lvl(r[4]), esc(r[5]), esc(r[6])]))
+        : v === 'policies' ? tbl(['Policy', 'Governs', 'Stage', 'Effective', 'Review due', 'Read by'], POLS.map((p) => ['<b>' + esc(p[0]) + '</b>', esc(p[1]), stage(p[2]), p[3], p[4], p[5]]))
+        : v === 'controls' ? tbl(['Process', 'Step', 'Risk', 'Control', 'Last test'], CTLS.map((c) => [pn(c[0]), esc(c[1]), esc(c[2]), c[3] ? esc(c[3]) : '<span class="ctl bad">None yet</span>', pill(c[4][0], c[4][1])]))
+        : '<div class="box">' + ACTIV.map(([d, t]) => '<div class="trow" style="grid-template-columns:70px minmax(0,1fr)"><span class="note">' + d + '</span><span class="t">' + esc(t) + '</span></div>').join('') + '</div>' },
+    org: { title: 'Org & roles', sub: 'The roles and people every map, RACI and authority rule uses. People come from the client’s People register.', kp: () => [['21', 'People'], ['19', 'Roles'], ['20', 'From the register']],
+      views: [['people', 'People'], ['roles', 'Roles'], ['chart', 'Chart']],
+      body: (v) => v === 'people' ? tbl(['Name', 'Email', 'Role', 'Reports to'], PEOPLE.map(([n, r, m]) => ['<b>' + esc(n) + '</b>' + (n === 'Amaka Eze' ? ' <span class="chip">Added here</span>' : ''), n === 'Amaka Eze' ? '<span class="note">—</span>' : esc(mail(n)), esc(r), esc(m)]))
+        : v === 'roles' ? tbl(['Role', 'People', 'Used in'], PEOPLE.map((p) => p[1]).filter((r, i, a) => a.indexOf(r) === i).map((r) => ['<b>' + esc(r) + '</b>', esc(PEOPLE.filter((p) => p[1] === r).map((p) => p[0]).join(', ')), (ROLEUSE[r] || 1) + ' process' + ((ROLEUSE[r] || 1) > 1 ? 'es' : '')]))
+        : '<div class="box tree" style="padding:12px 16px">' + orgTree('—') + '</div>' },
+    export: { title: 'Export', sub: 'Pick processes and build the SOP pack: the company, a summary, the org structure, then each process.', kp: () => [[String(EXP.length), 'Ticked', '', 'expn'], ['13', 'Processes']], views: [],
+      body: () => '<div class="two2"><div class="blk"><span class="lbl">Pack sections</span>' + ['Cover', 'Contents', 'Executive summary', 'Org structure', 'The processes', 'Appendix: glossary'].map((p) => '<label class="chk"><input type="checkbox" checked> <span>' + p + '</span></label>').join('') + '<span class="lbl" style="margin-top:10px">Inside each process</span>' + ['Executive summary', 'Process map & narrative', 'RACI & authority', 'Governance, controls & metrics'].map((p, i) => '<label class="chk"><input type="checkbox" checked> <span>' + (i + 1) + '.0 ' + p + '</span></label>').join('') + '</div><div><div class="box tw" style="overflow:hidden"><table class="t"><thead><tr><th><input type="checkbox" id="expall" aria-label="Tick all"></th><th>Process</th><th>Where it is</th></tr></thead><tbody>' + ALL.map((r) => '<tr><td><input type="checkbox" class="expck" value="' + r[0] + '" aria-label="Include ' + esc(r[1]) + '"' + (EXP.indexOf(r[0]) >= 0 ? ' checked' : '') + '></td><td>' + pn(r[0]) + '</td><td>' + pill(r[3], r[4]) + '</td></tr>').join('') + '</tbody></table></div><div class="row3"><button class="btn gold" type="button" data-toast="Opens the report as a clean, printable document.">Preview report</button><button class="btn" type="button" data-toast="Opens the SOP for the ticked processes.">SOP</button><button class="btn" type="button" id="expcheck" data-toast="Reads the ticked processes end to end and lists the gaps.">Check end to end</button></div><p class="note" id="expnote" style="margin-top:6px"></p></div></div>' },
+    settings: { title: 'Settings', sub: 'The workspace profile and branding, the governance profile and the categories. Admins only.', kp: null, views: [],
+      body: () => '<div class="two2"><div class="blk"><span class="lbl">Client logo and colours</span><div style="display:flex;gap:10px;align-items:center"><div class="logo">No logo</div><button class="btn" type="button" data-toast="Uploads a logo, under 300 KB.">Upload logo</button></div><div class="sw">' + [['#0F6B63', 'Primary'], ['#3E7F8F', 'Secondary'], ['#C9A24D', 'Tertiary']].map(([c, l]) => '<span><i style="background:' + c + '"></i>' + l + '</span>').join('') + '</div><p class="note" style="margin-top:6px">Used on the report and the SOP.</p></div><div class="blk"><span class="lbl">Client profile</span><dl class="dl"><dt>Industry</dt><dd>Retail & distribution</dd><dt>About</dt><dd>Distribution and retail group with stores and a business-to-business arm.</dd></dl><p class="note" style="margin-top:6px">Helps Check with AI and the drafts suit this client.</p></div><div class="blk"><span class="lbl">Governance profile</span><dl class="dl"><dt>Size</dt><dd>Mid-market</dd><dt>Jurisdiction</dt><dd>Egypt</dd></dl><p class="note" style="margin-top:6px">Grounds every governance assessment.</p></div><div class="blk"><span class="lbl">Categories</span><div style="display:flex;flex-wrap:wrap;gap:5px">' + ['Finance', 'Supply Chain', 'Retail', 'Commercial', 'Care', 'HR'].map((c) => '<span class="chip">' + c + '</span>').join('') + '</div><p class="note" style="margin-top:6px">Shown as Department on Priorities and the list.</p></div><div class="blk"><span class="lbl">Language</span><p style="font-size:13px">English · العربية</p><p class="note" style="margin-top:6px">Each person’s own choice.</p></div><div class="blk"><span class="lbl">Who opens Processes</span><p style="font-size:13px">The Strategy Office builds. A client’s own people see only what is published, and what waits for them.</p></div></div>' },
+  };
+  const PHONE = window.matchMedia('(max-width: 640px)');
+  const svHtml = (k) => '<div class="sv" role="tablist" aria-label="' + SECS[k].title + ' views">' + SECS[k].views.map(([vk, l]) => '<button type="button" role="tab" class="' + (vk === SUBV[k] ? 'on' : '') + '" aria-selected="' + (vk === SUBV[k]) + '" data-subv="' + vk + '">' + l + '</button>').join('') + '</div>';
+  function secHtml(k) {
+    const S2 = SECS[k];
+    const sw = S2.views.length && OTAB !== 'c' && (VIEWS !== 'stick' || PHONE.matches) ? svHtml(k) : '';
+    return (S2.kp && NUMS !== 'band' ? kp(S2.kp()) : '') + sw + S2.body(SUBV[k]);
+  }
+  function notes() {
+    return [['Agreed 24 Oct · office sections', ['All eight are tabs, in one row', 'The tab bar stays in place as you scroll, on every page of the module']],
+      ['A section’s page', ['No title: the highlighted tab says where you are, and the section’s one-line description sits in the band', 'Its numbers sit in boxes under the tabs; its own views stay under the tab bar as you scroll, except on a phone', 'The darker table header stays in Processes for now']],
+      ['Building one process', ['Readiness marks on every process: the Ready column', 'People, Compliance and Connections stay in the menu, saying “Nothing recorded yet” until they have content', 'Another process: the picker on its name in the band', 'Check with AI is its own item in the menu', 'The way out: Save and exit, top right under the band, back to where you came from']]];
+  }
+  function expUpdate() {
+    const n = EXP.length, b = $('#expcheck'), note = $('#expnote');
+    if (!b) return;
+    $('#expn').textContent = n;
+    b.disabled = n < 1 || n > 12;
+    note.textContent = n < 1 ? 'Tick at least one process.' : n > 12 ? 'The check reads up to 12 processes at a time and ' + n + ' are ticked. Untick ' + (n - 12) + ' to run it.' : 'The check is optional, and a warning only: the report opens either way.';
+    note.style.color = n > 12 ? 'var(--attn-tx)' : '';
+    note.style.fontWeight = n > 12 ? '600' : '';
+    $('#expall').checked = n === ALL.length;
+  }
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'expall') { EXP = e.target.checked ? ALL.map((r) => r[0]) : []; $$('.expck').forEach((c) => { c.checked = e.target.checked; }); expUpdate(); }
+    else if (e.target.classList.contains('expck')) { EXP = $$('.expck').filter((c) => c.checked).map((c) => c.value); expUpdate(); }
+  });
+  /* ── the four questions from the 23 Oct prototype that are still open, each switchable ── */
+  const QS = { etabs: 'on', marks: 'all', switch: 'picker', ai: 'section', exit: 'save' };
+  let PICK = false, RAILOPEN = false, AIOPEN = false;
+  const OQ = [];  // every question is answered; the last was the way out: "C", Save and exit
+  const AIF = [['Step 4 · Deliver', '“Proof of delivery missing” has no control.', 'Add a control', 'Adds “Photo of the signed proof checked before invoicing” as the control on step 4.'], ['Step 3 · Ask for prepayment', 'No one is accountable for this step.', 'Make the Finance manager accountable', 'Sets the Finance manager as accountable on step 3.'], ['Between steps 5 and 6', 'Nothing says what happens when a customer disputes an invoice.', 'Add as a step', 'Adds “Handle a disputed invoice” after step 5, done by the Credit controller.']];
+  const aiFindings = () => AIF.map(([w, tx, a, r]) => '<div class="aif"><b>' + w + '</b><span>' + esc(tx) + '</span><div><button class="btn gold" type="button" data-toast="' + esc(r) + '">' + esc(a) + '</button></div></div>').join('');
+  const sects = () => SECTS.concat(QS.etabs === 'on' ? [['people', 'People', 'q'], ['compliance', 'Compliance', 'q'], ['connections', 'Connections', 'q']] : []).concat(QS.ai === 'section' ? [['ai', 'Check with AI', '']] : []);
+  const plist = (q) => ALL.filter((r) => !q || (r[0] + ' ' + r[1]).toLowerCase().indexOf(q.toLowerCase()) >= 0).map((r) => '<button type="button" class="' + (r[0] === 'ORD100' ? 'on' : '') + '" data-pk="' + r[0] + '"><span class="code">' + r[0] + '</span> ' + esc(r[1]) + '</button>').join('') || '<p class="note" style="padding:6px 8px">No process matches.</p>';
+  const marksCell = (r) => QS.marks === 'deep' && !r[8] ? '<span class="chip">High-level</span>' : '<span class="mk6" title="Map, RACI, Authority, Controls, SOP, Approved">' + ['M', 'R', 'A', 'C', 'S', '✓'].map((L, i) => '<i class="' + (r[7][i] ? 'on' : '') + '">' + L + '</i>').join('') + '</span>';
+  function renderOQ() {
+    $('#openq').hidden = !OQ.length;
+    if (!OQ.length) return;
+    $('#openq').innerHTML = '<div class="oqh"><span class="lbl">One question still open</span><span class="note">Pick an answer; the page jumps to the builder and outlines the way out.</span></div>' + OQ.map(([k, h, p, opts], i) => {
+      const cur = opts.find((o) => o[0] === QS[k]);
+      return '<div class="oq"><h3><i>' + (i + 1) + '</i>' + h + '</h3><p>' + p + '</p><div class="ch" role="group" aria-label="' + h + '">' + opts.map(([v, l, rec]) => '<button type="button" class="' + (QS[k] === v ? 'on' : '') + '" aria-pressed="' + (QS[k] === v) + '" data-q="' + k + '" data-v="' + v + '">' + l + (rec ? '<span class="r">Recommended</span>' : '') + '</button>').join('') + '</div><div class="now">' + cur[3] + '</div></div>';
+    }).join('');
+  }
+  function jump(k) {
+    if (k === 'exit') { SCREEN = 'builder'; FLASH = '#exitbtn'; }
+    render();
+  }
+  document.addEventListener('input', (e) => { if (e.target.id === 'psearch') $('#plist').innerHTML = plist(e.target.value.trim()); });
+  const DOORS = { 1: ['home', '#tb-proc'], 2: ['read', '#door2'], 3: ['home', '#door3'], back: ['builder', '#exitbtn'] };
+  function render() {
+    const s = SCREEN, b = BAND[s];
+    $('#pstrip').hidden = s !== 'preview';
+    $('#m-eyebrow').innerHTML = b.eyebrow; $('#m-title').innerHTML = b.title; $('#m-sub').innerHTML = b.sub; $('#m-acts').innerHTML = b.acts; $('#m-tiles').innerHTML = b.tiles;
+    if (s === 'home') $('#m-acts').innerHTML = '<button class="bq" type="button" data-toast="Opens Processes as client staff see it: My processes, To do, Map. That is the landing mockup.">Open the staff view</button>' + (OTAB === 'b' ? '<button class="bq' + (TAB === 'export' ? ' on' : '') + '" type="button" data-tab="export">Export</button><button class="bq' + (TAB === 'settings' ? ' on' : '') + '" type="button" data-tab="settings">Settings</button>' : '') + '<button class="bgold" type="button" data-toast="Starts a new process: name, owner, area. Its code is made for you.">New process</button>';
+    const side = s === 'home' && OTAB === 'c';
+    $('#homewrap').classList.toggle('side', side);
+    $('#hside').hidden = !side;
+    if (side) $('#hside').innerHTML = SIDE.map(([k, l, n]) => '<button type="button" class="' + (k === TAB ? 'on' : '') + '" data-hside="' + k + '">' + l + (n ? '<span class="ct">' + n + '</span>' : '') + '</button>' + (k === TAB && SECS[k] && SECS[k].views.length ? '<div class="subnav">' + SECS[k].views.map(([vk, vl]) => '<button type="button" class="' + (vk === SUBV[k] ? 'on' : '') + '" data-subv="' + vk + '">' + vl + '</button>').join('') + '</div>' : '')).join('');
+    if (s === 'home' && SECS[TAB]) { $('#m-eyebrow').innerHTML = 'Raya Trade · Processes · Builder › ' + SECS[TAB].title; $('#m-sub').textContent = SECS[TAB].sub; }
+    if (s === 'home' && TAB === 'handle') $('#m-sub').textContent = 'Suggestions from owners, drafts the approver sent back, and processes with gaps.';
+    if (s === 'home' && SECS[TAB] && SECS[TAB].kp && NUMS === 'band') $('#m-tiles').innerHTML = SECS[TAB].kp().map(([n, l, c, id]) => '<div class="mtile ' + (c === 'bad' ? 'late' : '') + '"><b' + (id ? ' id="' + id + '"' : '') + '>' + n + '</b><span>' + l + '</span></div>').join('');
+    $$('[data-nums]').forEach((b) => b.classList.toggle('on', b.dataset.nums === NUMS));
+    $$('[data-views]').forEach((b) => b.classList.toggle('on', b.dataset.views === VIEWS));
+    const subOn = s === 'home' && SECS[TAB] && SECS[TAB].views.length && VIEWS === 'stick' && !PHONE.matches;
+    $('#vtsub').innerHTML = subOn ? svHtml(TAB) : '';
+    $('#vtsub').hidden = !subOn;
+    if (s === 'builder') {
+      if (QS.switch === 'picker') $('#m-title').innerHTML = '<button type="button" class="tpick" data-picker aria-haspopup="listbox" aria-expanded="' + PICK + '">Order-to-Cash <i>▾</i></button><span class="pill good">In force · v2</span><span class="pill attn">Draft v4</span>';
+      $('#m-acts').innerHTML = (QS.ai === 'panel' ? '<button class="bq' + (AIOPEN ? ' on' : '') + '" type="button" data-ai>Check with AI</button>' : '') + b.acts;
+    }
+    $('#exitbar').hidden = s !== 'builder';
+    if (s === 'builder') $('#exitbar').innerHTML = '<span class="note">All changes saved · 10:42 · draft v4</span>' + (QS.exit === 'x' ? '<button type="button" class="xbtn" id="exitbtn" data-exit aria-label="Exit builder" title="Exit builder">✕</button>' : QS.exit === 'save' ? '<button type="button" class="btn gold" id="exitbtn" data-exit>Save and exit</button>' : '<button type="button" class="btn exitb" id="exitbtn" data-exit>Exit builder <span aria-hidden="true">✕</span></button>');
+    const pkOn = s === 'builder' && QS.switch === 'picker' && PICK;
+    $('#pmenu').hidden = !pkOn;
+    if (pkOn) $('#pmenu').innerHTML = '<input id="psearch" type="search" placeholder="Find a process" aria-label="Find a process" autocomplete="off"><div class="pl" id="plist" role="listbox">' + plist('') + '</div>';
+    const aiOn = s === 'builder' && QS.ai === 'panel' && AIOPEN;
+    $('#aip').hidden = !aiOn;
+    if (aiOn) { $('#aip').innerHTML = '<h3>Check with AI <button class="lnk" type="button" data-aiclose>Close</button></h3><p class="note">Order-to-Cash, draft v4. Suggestions only: nothing changes until you add one.</p>' + aiFindings(); const mast = document.querySelector('.mast'); $('#aip').style.top = (mast.offsetTop + mast.offsetHeight + 10) + 'px'; }
+    renderOQ();
+    $('#tabnote').innerHTML = notes().map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
+    const tabs = s === 'home' ? (side ? [] : HOME_TABS[OTAB]) : s === 'builder' ? [] : [['flow', 'Flow', ''], ['steps', 'Steps', '6'], ['summary', 'Summary', '']];
+    const cur = s === 'home' ? TAB : RVIEW;
+    $('#vt').hidden = !tabs.length;
+    $('#vtbar').hidden = !tabs.length;
+    $('#vt').innerHTML = tabs.map(([k, l, n, c]) => '<button type="button" role="tab" class="' + (k === cur ? 'on' : '') + '" aria-selected="' + (k === cur) + '" data-tab="' + k + '">' + l + (n ? ' <span class="ct ' + (c || '') + '">' + n + '</span>' : '') + '</button>').join('');
+    const scr = s === 'home' ? (SECS[TAB] ? 'home-sec' : 'home-' + TAB) : s === 'builder' ? 'builder' : 'read';
+    if (scr === 'home-sec') { $('#secwrap').innerHTML = secHtml(TAB); expUpdate(); }
+    if (scr === 'home-all') renderAll();
+    $$('[data-screen]').forEach((v) => { v.hidden = v.dataset.screen !== scr; });
+    const fb = $('#flowblock'), rb = $('#raciblock'), park = $('#park');
+    park.appendChild(fb); park.appendChild(rb);
+    if (s === 'builder') {
+      const list = sects(); if (!list.some((x) => x[0] === SECT)) SECT = 'map';
+      $('#rail').innerHTML = list.map(([k, l, c]) => '<button type="button" class="' + (k === SECT ? 'on' : '') + '" data-sect="' + k + '">' + l + '<span class="dot ' + c + '"></span></button>').join('');
+      const m = $('#bmain');
+      if (SECT === 'map') { m.innerHTML = '<div class="bh"><h2>Map</h2><span class="note">Draft v4 · 2 gaps</span></div>'; m.appendChild(fb); }
+      else if (SECT === 'raci') { m.innerHTML = '<div class="bh"><h2>RACI</h2><span class="note">1 step with no one accountable</span></div>'; m.appendChild(rb); }
+      else if (SECT === 'ai') m.innerHTML = '<div class="bh"><h2>Check with AI</h2><span class="note">Draft v4 · suggestions only: nothing changes until you add one</span></div><div class="box" style="padding:4px 14px 12px">' + aiFindings() + '</div>';
+      else if (['people', 'compliance', 'connections'].indexOf(SECT) >= 0) m.innerHTML = '<div class="bh"><h2>' + list.find((x) => x[0] === SECT)[1] + '</h2></div><div class="ph"><b>Nothing recorded yet</b>There is no way to fill this in yet, so it says the same on every process.</div>';
+      else m.innerHTML = '<div class="bh"><h2>' + SECT_PH[SECT][0] + '</h2></div><div class="ph">' + SECT_PH[SECT][1] + ' As in the full prototype.</div>';
+      const railOn = QS.switch === 'rail', fold = railOn && SECT === 'map' && !RAILOPEN;
+      $('#bld').className = 'bld' + (railOn ? ' wrail' : '') + (fold ? ' fold' : '');
+      $('#prail').hidden = !railOn;
+      if (railOn) $('#prail').innerHTML = fold ? '<button type="button" class="unfold" data-rail title="Show the list of processes" aria-label="Show the list of processes">☰</button>' : '<div class="ph2"><span class="lbl">Processes</span>' + (SECT === 'map' ? '<button type="button" class="lnk" data-rail>Fold</button>' : '') + '</div>' + ALL.map((r) => '<button type="button" class="' + (r[0] === 'ORD100' ? 'on' : '') + '" data-pk="' + r[0] + '"><span><span class="code">' + r[0] + '</span> ' + esc(r[1]) + '</span></button>').join('');
+    } else if (s !== 'home') $('#slot-read').appendChild(fb);
+    fb.classList.toggle('reading', s !== 'builder');
+    $('#ftool').hidden = s !== 'builder';
+    drawer();
+    $$('.door').forEach((e) => e.classList.remove('door'));
+    if (DOOR) { const el = $(DOORS[DOOR][1]); DOOR = null; if (el) { el.classList.add('door'); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }
+    if (FLASH) { const el = $(FLASH); FLASH = null; if (el) { el.classList.add('door'); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }
+    requestAnimationFrame(arrows);
+  }
+
+  let tt;
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 3000); }
+  document.addEventListener('click', (e) => {
+    const so = e.target.closest('[data-sort]');
+    if (so) { const k = so.dataset.sort; if (SORT === k) DIR = -DIR; else { SORT = k; DIR = k === 'gaps' ? -1 : 1; } renderAll(); return; }
+    const t = e.target, dr = t.closest('[data-door]'), go = t.closest('[data-go]'), tab = t.closest('[data-tab]'), row = t.closest('[data-row]'), sc = t.closest('[data-sect]'), st = t.closest('.st[data-step]'), tst = t.closest('[data-toast]');
+    if (dr) { const d = dr.dataset.door; FROM = 'home'; SCREEN = DOORS[d][0]; TAB = d === '3' ? 'handle' : 'all'; RVIEW = 'flow'; SECT = 'map'; SEL = 4; DOOR = d; render(); return; }
+    if (go) { if (go.dataset.go === 'builder' && SCREEN !== 'preview') FROM = SCREEN === 'read' ? 'read' : 'home'; SCREEN = go.dataset.go; if (SCREEN === 'home') TAB = 'all'; if (SCREEN === 'builder') { SECT = 'map'; SEL = 4; } RVIEW = 'flow'; render(); if (go.dataset.msg) toast(go.dataset.msg); return; }
+    if (PICK && !t.closest('#pmenu') && !t.closest('[data-picker]')) { PICK = false; $('#pmenu').hidden = true; }
+    const qb = t.closest('[data-q]');
+    if (qb) { QS[qb.dataset.q] = qb.dataset.v; jump(qb.dataset.q); return; }
+    if (t.closest('[data-picker]')) { PICK = !PICK; render(); if (PICK) $('#psearch').focus(); return; }
+    const pk = t.closest('[data-pk]');
+    if (pk) { PICK = false; if (pk.dataset.pk !== 'ORD100') { const nm2 = ALL.find((r) => r[0] === pk.dataset.pk)[1], sn = (sects().find((x) => x[0] === SECT) || ['', 'Map'])[1]; toast('Opens ' + nm2 + ' in the builder, on ' + sn + ', the section you were on.'); } render(); return; }
+    if (t.closest('[data-rail]')) { RAILOPEN = !RAILOPEN; render(); return; }
+    if (t.closest('[data-ai]')) { AIOPEN = !AIOPEN; render(); return; }
+    if (t.closest('[data-aiclose]')) { AIOPEN = false; render(); return; }
+    if (t.closest('[data-exit]')) { SCREEN = FROM; if (FROM === 'home') TAB = 'all'; RVIEW = 'flow'; render(); toast((FROM === 'read' ? 'Back on the process page.' : 'Back on All processes.') + ' Draft v4 is saved and waits in the builder.'); return; }
+    const nm = t.closest('[data-nums]'), vw = t.closest('[data-views]');
+    if (nm || vw) { if (nm) NUMS = nm.dataset.nums; if (vw) VIEWS = vw.dataset.views; SCREEN = 'home'; if (!SECS[TAB] || !SECS[TAB].views.length) TAB = 'governance'; FLASH = nm ? (NUMS === 'band' ? '#m-tiles' : '#secwrap .kp') : (VIEWS === 'stick' ? '#vtsub .sv' : '#secwrap .sv'); render(); return; }
+    const ot = t.closest('[data-otab]'), hs = t.closest('[data-hside]');
+    if (ot) { OTAB = ot.dataset.otab; SCREEN = 'home'; render(); return; }
+    if (hs) { TAB = hs.dataset.hside; render(); return; }
+    const sv = t.closest('[data-subv]');
+    if (sv) { SUBV[TAB] = sv.dataset.subv; render(); return; }
+    if (tab) { const k = tab.dataset.tab; if (k === 'steps' || k === 'summary') { toast('As on the process page mockup.'); return; } if (SCREEN === 'home') TAB = k; else RVIEW = k; render(); return; }
+    if (row) { if (row.dataset.row === 'ORD100') { SCREEN = 'builder'; SECT = 'map'; SEL = 4; render(); } else toast('Opens ' + row.dataset.row + ' in the builder.'); return; }
+    if (sc) { SECT = sc.dataset.sect; render(); return; }
+    if (st) { SEL = Number(st.dataset.step); drawer(); return; }
+    if (tst) { toast(tst.dataset.toast); return; }
+  });
+  window.addEventListener('resize', () => requestAnimationFrame(arrows));
+  PHONE.addEventListener('change', render);
+  render();
+})();
+</script>
+<script>
+/* keeps the tab bar just under the drawing band, and marks it once it is holding on */
+(function () {
+  const mk = document.querySelector('.mk'), bar = document.querySelector('.vtbar');
+  if (!bar) return;
+  const top = () => (mk ? mk.getBoundingClientRect().height : 0);
+  const place = () => document.documentElement.style.setProperty('--stick', top() + 'px');
+  const mark = () => bar.classList.toggle('stuck', window.scrollY > 0 && bar.getBoundingClientRect().top <= top() + 1);
+  place(); mark();
+  window.addEventListener('resize', () => { place(); mark(); });
+  window.addEventListener('scroll', mark, { passive: true });
+})();
+</script>

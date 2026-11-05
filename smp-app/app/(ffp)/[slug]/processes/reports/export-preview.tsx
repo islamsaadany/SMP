@@ -5,7 +5,7 @@ import { documentControl } from "@/ffp/lib/domain/document-control";
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Source_Serif_4 } from "next/font/google";
-import { StaticOrgChart } from "../(shell)/org/chart/static-org-chart";
+import { StaticOrgChart } from "./static-org-chart";
 import { PrintedProcessMap } from "./printed-map/printed-process-map";
 import "./printed-map/printed-map.css";
 import { StaticMilestoneRails } from "../(shell)/helicopter/static-milestone-rails";

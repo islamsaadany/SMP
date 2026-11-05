@@ -29,7 +29,7 @@ import type { ServeArgs } from "../registry.ts";
    through the same clauses the list itself is read through. */
 export async function serve(a: ServeArgs): Promise<Response> {
   return new Response(shellDocument(a.tenantName, a.module, moduleMenu(a.have),
-      null, null, null, await libraryStampFor(a.tenantId, a.seat, a.personKey, a.have),
+      null, null, null, a.library !== undefined ? a.library : await libraryStampFor(a.tenantId, a.seat, a.personKey, a.have),
       copilotStampFor(a.have, a.seat)),
     { status: 200, headers: shellHeaders() });
 }

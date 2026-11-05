@@ -122,20 +122,27 @@ await section("1 · the registry is the super user's (Islam: \"registry is from 
   check(r.status === 400 && /before/i.test(r.j.error || ""), "…and one that ends before it starts", JSON.stringify(r.j));
   r = await cs(boss, { action: "assign", client: "nobody-at-all", name: "Ghost", kind: "planning", started: "2025-01", lead: writerId });
   check(r.status === 400 && /client/i.test(r.j.error || ""), "…and a client that does not exist", JSON.stringify(r.j));
+  /* THE PLANNED MAN-DAYS (§696): a whole number of days or nothing — a
+     fraction, a negative and a word are refused in words */
+  for (const bad of [-3, 12.5, "forty"]) {
+    r = await cs(boss, { action: "assign", client: "raya-trade", name: "X", kind: "planning", started: "2025-01", lead: writerId, plannedDays: bad });
+    check(r.status === 400 && /whole number of days/.test(r.j.error || ""), "planned man-days of " + JSON.stringify(bad) + " is refused in words", JSON.stringify(r.j));
+  }
   r = await cs(boss, { action: "assign", client: "raya-trade", name: "Strategy build 2025", kind: "planning", started: "2025-01", ended: LAST_MONTH,
-    lead: writerId, team: [readerId, "00000000-0000-0000-0000-000000000000"] });
-  check(r.status === 200 && r.j.id, "the super user adds one: name, type, months, lead and team", JSON.stringify(r.j));
+    lead: writerId, team: [readerId, "00000000-0000-0000-0000-000000000000"], plannedDays: "40" });
+  check(r.status === 200 && r.j.id, "the super user adds one: name, type, months, planned man-days, lead and team", JSON.stringify(r.j));
   caseId = r.j.id;
-  const row = (await owner.query("SELECT state, writer_id, lead_id, kind, our_team FROM case_studies WHERE id = $1", [caseId])).rows[0];
+  const row = (await owner.query("SELECT state, writer_id, lead_id, kind, our_team, planned_days FROM case_studies WHERE id = $1", [caseId])).rows[0];
   check(row && row.state === "running" && !row.writer_id && row.lead_id === writerId && row.kind === "planning", "…stored with its type and lead, nothing written yet", JSON.stringify(row));
+  check(row && row.planned_days === 40, "…and the 40 planned man-days, as a number (§696)", JSON.stringify(row && row.planned_days));
   check(row && row.our_team.map((p) => p.id).join() === [writerId, readerId].join(), "…the lead on the team first, a made-up consultant dropped", JSON.stringify(row && row.our_team));
   r = await cs(reader, { action: "registry" });
   const mine = (r.j.assignments || []).find((a) => a.id === caseId);
-  check(r.status === 200 && mine && mine.lead.name === "Islam Writer" && mine.team.length === 2 && r.j.canOpen === false,
-    "every consultant reads the registry for the Clients page, the lead and team named", JSON.stringify(mine).slice(0, 200));
-  r = await cs(boss, { action: "assign", id: caseId, client: "raya-trade", name: "Strategy build 2025", kind: "planning", started: "2025-01", ended: LAST_MONTH, lead: writerId, team: [] });
-  const t2 = (await owner.query("SELECT our_team FROM case_studies WHERE id = $1", [caseId])).rows[0].our_team;
-  check(r.status === 200 && t2.length === 1, "the super user changes one in place", JSON.stringify(t2));
+  check(r.status === 200 && mine && mine.lead.name === "Islam Writer" && mine.team.length === 2 && mine.plannedDays === 40 && r.j.canOpen === false,
+    "every consultant reads the registry for the Clients page, the lead, team and planned man-days named", JSON.stringify(mine).slice(0, 200));
+  r = await cs(boss, { action: "assign", id: caseId, client: "raya-trade", name: "Strategy build 2025", kind: "planning", started: "2025-01", ended: LAST_MONTH, lead: writerId, team: [], plannedDays: "" });
+  const t2 = (await owner.query("SELECT our_team, planned_days FROM case_studies WHERE id = $1", [caseId])).rows[0];
+  check(r.status === 200 && t2.our_team.length === 1 && t2.planned_days === null, "the super user changes one in place — an emptied man-days box stores nothing, not 0", JSON.stringify(t2));
 });
 
 await section("2 · a past client, then its assignment", async () => {

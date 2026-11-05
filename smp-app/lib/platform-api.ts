@@ -9,8 +9,9 @@
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
 import { landingFactsFor } from "./landing-facts.ts";
-import { myWork, tallyMark, setWorkStatus, writeUps } from "./my-work.ts";
-import { isOffice, type Who } from "./tracker.ts";
+import { myWork, tallyMark, setWorkStatus, writeUps, workDetail, workWrite, addFactsOn, workAdd } from "./my-work.ts";
+import { isOffice, weekOptions, type Who } from "./tracker.ts";
+import { todayIn } from "./day.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -18,8 +19,8 @@ import { join } from "node:path";
 import crypto from "node:crypto";
 import type { SessionUser } from "./auth.ts";
 import { hashPassword } from "./auth.ts";
-import { resolveTenant, seatAt, type Tenant, type Membership } from "./door.ts";
-import { withTenant } from "./tenant.ts";
+import { resolveTenant, seatAt, leadsOf, type Tenant, type Membership } from "./door.ts";
+import { withTenant, mapLimit } from "./tenant.ts";
 import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
 import * as LIB from "./library.ts";
@@ -127,7 +128,14 @@ async function logAct(c: Q, who: Account, on: ClientRow | Tenant | null, what: s
   } catch (e) { console.error("[platform] recording " + what + ":", (e as Error).message); }
 }
 
-/* What a card says — every number read, never stored (constitution V). */
+/* What a card says — every number read, never stored (constitution V).
+   ONE TRANSACTION PER CLIENT (§669): this opened three — the counts, then
+   the graph for the module marks, then the library rows — one after the
+   other, for every client on the page, and the page waited for them all in
+   turn. The same reads, on one connection, in the same order; and the
+   console asks a few clients at once (mapLimit, below) rather than one at a
+   time. What a card says did not change. */
+const CLIENTS_AT_ONCE = 4;
 async function factsFor(t: ClientRow) {
   try {
     return await withTenant(t.id, async (c) => {
@@ -141,8 +149,7 @@ async function factsFor(t: ClientRow) {
       const top = process.env.SMP_BREAK === "company-plan-unseen" ? 0 : Number((await c.query(
         "SELECT CASE WHEN jsonb_typeof(extra->'items') = 'array' THEN jsonb_array_length(extra->'items') ELSE 0 END AS n FROM org")).rows[0]?.n || 0);
       const cyc = (await c.query("SELECT name, locked FROM cycle")).rows[0] || null;
-      return { units, planned: pillars + top > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
-    }).then(async (f) => {
+      const f = { units, planned: pillars + top > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
       /* the facts a module's MARK is made of (§368) — read through the ONE
          reader that also serves the Landing line page's preview, as somebody
          who sees everything, which the console is.
@@ -151,7 +158,7 @@ async function factsFor(t: ClientRow) {
          reader is the quietest kind of fault (§294.2). `landingFactsFor`
          still returns them for its other caller, the Setup page's stamp. */
       const have = modulesFor(t.modules);
-      const { facts } = await landingFactsFor(t.id, have, { place: null, seesAll: true });
+      const { facts } = await landingFactsFor(t.id, have, { place: null, seesAll: true }, await readState(c), c);
       return { ...f, landing: facts };
     });
   } catch (e) {
@@ -181,15 +188,25 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       .map((row) => ({ key: row.key, name: row.name, kind: row.kind })) });
   }
 
+  /* JUMP TO (§701, §703, lib/jump.ts): whether this client's settings are
+     this person's to read, and the console's two gated sections — the rules
+     the cards and the console's own column ask. */
+  if (action === "jump") {
+    const row = body && body.client ? await clientByKey(pool, body.client) : null;
+    return ok({ canConfig: !!(row && FF.mayReadConfig(world, account, row)),
+      /* §703: the console's two gated sections, as its own column gates them */
+      canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
+  }
+
   if (action === "cards") {
     const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
     const shown: ClientRow[] = FF.visibleClients(world, account, all);
     const cards = [];
     /* the Tracker row's mark is YOUR open actions there (§400) — read once
        for every client through the same reader My work uses */
-    const work = await myWork(shown, world.mine, account.email);
-    for (const row of shown) {
-      const facts = await factsFor(row);
+    const [work, factsAll] = await Promise.all([myWork(shown, world.mine, account.email), mapLimit(shown, CLIENTS_AT_ONCE, factsFor)]);
+    for (let i = 0; i < shown.length; i++) {
+      const row = shown[i], facts = factsAll[i];
       /* `square` is what Home's small square draws (§629): the client's own
          icon, else its mark if the mark is not wide, else nothing — and
          nothing means initials. Worked out here, by the same rule the Brand
@@ -269,11 +286,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        too: the client must be one the console lets them open, and the door's
        own answer for who they are there (door.ts seatAt) must be an office
        seat — the Tracker's gate. The row then asks the Tracker's rule. */
+    const leads = await leadsOf(pool, me.id);   /* the clients I lead an assignment on (§695) */
     const viewerOn = (t: { key: string }): Who | null => {
       const row = shown.find((r) => r.key === t.key);
       if (!row || !FF.mayOpenClient(world, account, row)) return null;
       const s = seatAt(me, world.mine as Membership[], row.id);
-      return isOffice(s.seat) ? { seat: s.seat, personKey: s.personKey } : null;
+      return isOffice(s.seat) ? { seat: s.seat, personKey: s.personKey, lead: leads.has(row.id) } : null;
     };
     const w = await myWork(shown, whoWorld.mine, whoAcc.email, { viewerOn });
     const people = account.is_admin
@@ -296,8 +314,76 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
   if (action === "workStatus") {
     const door = await resolveTenant(pool, me, String((body && body.client) || ""));
     if (!door.ok) return no(404, "That client is not available.");
-    const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey }, String((body && body.id) || ""), body && body.status);
+    const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) }, String((body && body.id) || ""), body && body.status);
     return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
+  }
+
+  /* ── ADD A TASK FROM MY TASKS OR HOME (§746) ──────────────────────────
+     What each client offers the add line and the pop-up (its open topics, its
+     office team), asked of every client this person may open and holds an
+     office seat on — the same reach as My tasks' rows (§583); and the add
+     itself, through the same door as workDetail and the Tracker's own rules
+     (lib/my-work.ts workAdd). */
+  if (action === "workAddFacts") {
+    const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
+    const shown: ClientRow[] = FF.visibleClients(world, account, all).filter((row: ClientRow) => FF.mayOpenClient(world, account, row));
+    const leads = await leadsOf(pool, me.id);
+    const out: unknown[] = [];
+    for (const row of shown) {
+      const st = seatAt(me, world.mine as Membership[], row.id);
+      if (!isOffice(st.seat)) continue;
+      const f = await addFactsOn(row as never, { seat: st.seat, personKey: st.personKey, lead: leads.has(row.id) });
+      if (f) out.push(f);
+    }
+    const today = todayIn();
+    return ok({ clients: out, weeks: weekOptions(today).map((w: { word: string; days: string; to: string }) => ({ word: w.word, days: w.days, day: w.to })) });
+  }
+  if (action === "workAdd") {
+    const door = await resolveTenant(pool, me, String((body && body.client) || ""));
+    if (!door.ok) return no(404, "That client is not available.");
+    const who = { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) };
+    const r = await workAdd(door.tenant, who, (body || {}) as Record<string, unknown>);
+    return r.ok ? ok({ id: r.id }) : no(r.status, r.why);
+  }
+
+  /* ── EVERY TASK'S DETAILS AT ONCE (§728) ──────────────────────────────
+     Islam: "opening the task … should open momentarily". My tasks and Home
+     ask for the details of every task on the list in one call as soon as
+     the list is drawn, so a press on a name opens it with nothing to wait
+     for. Each task goes through the same door and the same read as
+     workDetail below (one client's door once); one that can't be read says
+     why, in its own place, and the others are unaffected. */
+  if (action === "workDetails") {
+    const items = Array.isArray(body && body.items) ? (body.items as unknown[]).slice(0, 300) : [];
+    const doors = new Map<string, Awaited<ReturnType<typeof resolveTenant>>>();
+    const leads = await leadsOf(pool, me.id);
+    const details: unknown[] = [];
+    for (const it of items as { client?: unknown; id?: unknown }[]) {
+      const client = String((it && it.client) || ""), id = String((it && it.id) || "");
+      if (!doors.has(client)) doors.set(client, await resolveTenant(pool, me, client));
+      const door = doors.get(client)!;
+      if (!door.ok) { details.push({ error: "That client is not available." }); continue; }
+      const d = await workDetail(door.tenant, { seat: door.seat, personKey: door.personKey, lead: leads.has(door.tenant.id) }, id);
+      details.push(d.ok ? d.detail : { error: d.why });
+    }
+    return ok({ details });
+  }
+
+  /* ── A TASK OPENED, OR WRITTEN TO, ON MY TASKS (§709) ────────────────
+     The same door as workStatus above (door.ts resolveTenant), then the
+     Tracker's own reads and writes under the Tracker's own rules
+     (lib/my-work.ts workDetail, workWrite). */
+  if (action === "workDetail" || action === "workWrite") {
+    const door = await resolveTenant(pool, me, String((body && body.client) || ""));
+    if (!door.ok) return no(404, "That client is not available.");
+    const who = { seat: door.seat, personKey: door.personKey, lead: (await leadsOf(pool, me.id)).has(door.tenant.id) };
+    const id = String((body && body.id) || "");
+    if (action === "workDetail") {
+      const d = await workDetail(door.tenant, who, id);
+      return d.ok ? ok({ detail: d.detail }) : no(d.status, d.why);
+    }
+    const w = await workWrite(door.tenant, who, id, body && body.op, (body || {}) as Record<string, unknown>);
+    return w.ok ? ok({ row: w.row, gone: w.gone }) : no(w.status, w.why);
   }
 
   /* ── Forefront's own people ── */

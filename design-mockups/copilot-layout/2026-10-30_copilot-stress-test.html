@@ -1,0 +1,141 @@
+<title>Copilot Stress Test</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column; findings grouped by what goes wrong for the person, each with where, what happens, the fix and its weight. */
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldbg:#FBF1DE;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--bad:#B91C1C;--badbg:#FBE9E9;--attn:#B45309;--attnbg:#FDF1E3;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldbg:#2E2717;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--bad:#F5A3A3;--badbg:#3A1E1E;--attn:#FCD34D;--attnbg:#3A2A14;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldbg:#2E2717;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--bad:#F5A3A3;--badbg:#3A1E1E;--attn:#FCD34D;--attnbg:#3A2A14;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-size:26px;margin:0;text-wrap:balance}
+h2{font-size:19px;margin:18px 0 0}
+h2 small{display:block;font-size:13.5px;font-weight:400;color:var(--ink-3)}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:80ch}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.tile b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.tile span{color:var(--ink-3);font-size:13px}
+.f{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;display:grid;grid-template-columns:72px minmax(0,1fr);gap:4px 14px}
+.f .id{font:700 12px/1.4 var(--sans);color:var(--ink-3);grid-row:1/span 5;padding-top:3px}
+.f .t{font-size:16px;font-weight:700}
+.f .w{color:var(--ink-3);font-size:12.5px}
+.f p{margin:0;color:var(--ink-2);max-width:85ch}
+.f p b{color:var(--ink)}
+.sev{display:inline-block;font:700 10.5px/1.6 var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:0 7px;border-radius:8px;margin-right:6px;vertical-align:middle}
+.sev.high{background:var(--badbg);color:var(--bad)}
+.sev.med{background:var(--attnbg);color:var(--attn)}
+.sev.low{background:var(--surface-2);color:var(--ink-2)}
+.fix{border-left:3px solid var(--gold);padding:2px 10px;margin-top:4px}
+.fix .k{font:700 10.5px/1.6 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--gold)}
+.ok{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.ok ul{margin:4px 0 0;padding-left:18px;color:var(--ink-2)}
+.ok li{margin:2px 0}
+table{border-collapse:collapse;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:13.5px;vertical-align:top}
+thead th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;background:var(--nav);color:var(--navink)}
+tr:last-child td{border-bottom:0}
+.foot{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;max-width:85ch}
+.foot b{color:var(--ink)}
+</style>
+<div class="wrap">
+  <header>
+    <h1>The Copilot, stress-tested as a person would use it</h1>
+    <p class="lede">Every area walked end to end on the build of 30 October 2026, with the questions a person asks: can I go back, can I skip this, where do I go next, what if the plan changes under me, what if I reload. Read off the code's own guards and the run's screens, not from memory. Findings first, then what held.</p>
+  </header>
+
+  <div class="sum">
+    <div class="tile"><b>14</b><span>findings</span></div>
+    <div class="tile"><b>4</b><span>no way back once a step is taken</span></div>
+    <div class="tile"><b>4</b><span>cannot skip what does not apply</span></div>
+    <div class="tile"><b>6</b><span>movement between areas, dead ends, wording</span></div>
+  </div>
+
+  <h2>1 · No way back<small>A step taken cannot be untaken; the only way out is a new chat.</small></h2>
+
+  <div class="f"><span class="id">S1</span><span class="t"><span class="sev high">High</span>Directions: "Go ahead" cannot be undone</span><span class="w">Directions chat, after Go ahead with the N ticked</span>
+    <p>Once Go ahead is pressed the Directions table settles: scores and ticks stop being pressable and the Capabilities step begins. A person who then sees a wrong tick, or wants one more Direction, has no way back. The stored row allows it (<code>chose</code> can be unset) but nothing on the page does.</p>
+    <p class="fix"><span class="k">Fix</span> A <b>Change the Directions</b> link on the folded row and on the pane's card, which unsets the choice, keeps the Capabilities already suggested, and reopens the table. Small.</p></div>
+
+  <div class="f"><span class="id">S2</span><span class="t"><span class="sev high">High</span>Competitive Discipline: the discipline cannot be changed once chosen</span><span class="w">Competitive Discipline chat, after "Yes, Best Total Cost"</span>
+    <p>The recommendation's choices are drawn only while no discipline is chosen. After choosing, the values come; a person who meant Best Total Solution can only start a new chat. The scores stay pressable until the table exists, so a changed score after the choice changes nothing.</p>
+    <p class="fix"><span class="k">Fix</span> <b>Choose a different discipline</b> under the recommendation once chosen, which clears the values and the table and reopens the choice; and the scores settle at the choice, not at the table, so a change there always has an effect. Small.</p></div>
+
+  <div class="f"><span class="id">S3</span><span class="t"><span class="sev med">Medium</span>SWOT: a drafted SWOT cannot be undrafted after Use it</span><span class="w">SWOT chat, after a change is used</span>
+    <p>"Say what to change" proposes and the person uses or keeps it; good. But once used there is no "put back what it was": the previous draft is gone from the chat and the row. Draft it again starts from the material, not from the draft before the change.</p>
+    <p class="fix"><span class="k">Fix</span> Keep the draft before each Use it on the row (one step of undo) and offer <b>Put back the SWOT as it was</b> on the note. Small.</p></div>
+
+  <div class="f"><span class="id">S4</span><span class="t"><span class="sev low">Low</span>Foundation: the road cannot be changed after the years</span><span class="w">Foundation chat, guided or template</span>
+    <p>A person who took Guided questions and finds the questions slow cannot switch to the template without a new chat; the parts answered so far would come along if they could.</p>
+    <p class="fix"><span class="k">Fix</span> <b>Switch to the template</b> on the chat's head after the first part, keeping the parts agreed. Medium; the lowest priority of the four.</p></div>
+
+  <h2>2 · Cannot skip<small>The flow insists on something the person does not need.</small></h2>
+
+  <div class="f"><span class="id">S5</span><span class="t"><span class="sev high">High</span>Execution: every Direction and Capability must be drafted before Save</span><span class="w">Execution chat, Save held</span>
+    <p>Save is held until every item has at least one measure and one tactic. A unit with six Directions of which two are not being executed this period must still draft the two, or cannot save at all. There is no "not this period".</p>
+    <p class="fix"><span class="k">Fix</span> <b>Leave out this period</b> on a card's head, kept on the row; Save then needs at least one item drafted and says which are left out; Apply writes nothing for them. Small.</p></div>
+
+  <div class="f"><span class="id">S6</span><span class="t"><span class="sev med">Medium</span>Execution: the items are fixed when the chat opens</span><span class="w">Execution chat, after a Direction is added to the plan</span>
+    <p>The chat reads the plan's Directions and Capabilities once, when it is made. A Direction applied to the plan afterwards, or a Capability added by hand, never appears; the person does not know why and opens a second chat.</p>
+    <p class="fix"><span class="k">Fix</span> Read the plan's items again when the chat opens and add the new ones as undrafted cards, with a line in the chat saying so; never remove one that is drafted. Small.</p></div>
+
+  <div class="f"><span class="id">S7</span><span class="t"><span class="sev med">Medium</span>Execution: what the plan already holds is not shown</span><span class="w">Execution chat, an item already carrying measures on the plan</span>
+    <p>A Direction with measures and tactics on the plan opens as "Not drafted yet". Drafting suggests new ones; Apply then updates by name and adds the rest, so the plan ends with both sets, and the person never saw the old ones in the chat.</p>
+    <p class="fix"><span class="k">Fix</span> Open each card with what the plan holds, marked <b>On the plan</b> as the Directions' rows are, so a draft adds to it and Apply replaces what was shown. Medium.</p></div>
+
+  <div class="f"><span class="id">S8</span><span class="t"><span class="sev low">Low</span>Directions from the plan: scoring four old rows to tick one</span><span class="w">Directions chat, Start from the existing ones</span>
+    <p>Plan rows arrive with the scores the plan holds; an unscored one is held until scored (§654). Right in itself, but a person who wants to keep three unscored Directions as they are, untouched, must score all three to tick them, or leave them unticked and trust "nothing is removed". The second is true but not said where the tick is.</p>
+    <p class="fix"><span class="k">Fix</span> The held tick's line says it: <i>Score it first — or leave it unticked; it stays on the plan as it is.</i> Wording only.</p></div>
+
+  <h2>3 · Movement between areas, dead ends, wording<small>Where to next, and what a line should have said.</small></h2>
+
+  <div class="f"><span class="id">S9</span><span class="t"><span class="sev high">High</span>No onward path after Apply</span><span class="w">Every area, after Apply to plan</span>
+    <p>After Apply the foot reads <i>v1 on the plan</i> and the chat stops. The method has an order — SWOT, then Competitive Discipline, then Directions, then Execution — but nothing says <i>Next: Directions</i>, and the person goes looking through the tabs. The same after Save in Advisory.</p>
+    <p class="fix"><span class="k">Fix</span> One line after Apply with the next step as a button: <b>Next: Directions — suggest them from this SWOT</b>, opening that area's start screen. Small, and the biggest gain for the least code.</p></div>
+
+  <div class="f"><span class="id">S10</span><span class="t"><span class="sev high">High</span>Execution says "choose Directions first" to someone who did</span><span class="w">Execution start, Directions saved but not applied</span>
+    <p>A person who saved Directions v1 and did not press Apply opens Execution and reads <i>The plan has no Directions or Capabilities yet. Choose them first, in the Directions section.</i> They did choose them; the plan does not hold them because they were not applied. The line sends them back to redo what is done.</p>
+    <p class="fix"><span class="k">Fix</span> When a saved Directions version exists and the plan holds none: <i>Directions — Mobile v1 is saved but not on the plan yet. Apply it there first</i>, with a button that opens that version's page. Small.</p></div>
+
+  <div class="f"><span class="id">S11</span><span class="t"><span class="sev med">Medium</span>No "Start from the existing plan" for Competitive Discipline and Execution</span><span class="w">Both start screens</span>
+    <p>Foundation, Analysis and Directions offer the plan card when the plan holds something (§653). Competitive Discipline does not, although the plan may hold a discipline and values; Execution does not, although it always reads the plan's items — and then hides what they hold (S7).</p>
+    <p class="fix"><span class="k">Fix</span> The same card on both: Competitive Discipline opens with the plan's discipline and values as the table, scored anew on request; Execution's card is the only card, reading <i>Start from the plan's Directions · 6 items, 2 with measures</i>. Medium, together with S7.</p></div>
+
+  <div class="f"><span class="id">S12</span><span class="t"><span class="sev med">Medium</span>A second chat in the same area starts cold, beside an unfinished one</span><span class="w">Every area's start screen</span>
+    <p>With a Directions chat half done, + New chat offers the same cards as if nothing existed. A person who meant to continue opens a second chat, and now has two "Directions — Mobile" in the rail, one 3 of 4 done, one 0 of 4. Nothing warns.</p>
+    <p class="fix"><span class="k">Fix</span> On the start screen, above the cards, when a chat in this area is unfinished: <i>Directions — Mobile is 3 of 4 done — continue it, or start another.</i> Small.</p></div>
+
+  <div class="f"><span class="id">S13</span><span class="t"><span class="sev low">Low</span>Apply to plan writes to the place the page is on, said only in the ask</span><span class="w">Every Apply</span>
+    <p>The ask names the place (<i>Where: Mobile</i>), and that is right. But a chat made on Mobile and opened later while the page is on Retail Stores still says Mobile in the chat's name and would still write to Mobile — correct, and not obvious; the ask is the only guard.</p>
+    <p class="fix"><span class="k">Fix</span> The pane's head carries the place as the chat's name does, and the ask's <i>Where</i> line is bold when it differs from the page's place. Wording only.</p></div>
+
+  <div class="f"><span class="id">S14</span><span class="t"><span class="sev low">Low</span>Draft all stops silently on one failure</span><span class="w">Execution chat</span>
+    <p>Draft all runs the items one after another; if the model fails on the third, the red line says so and the chain stops, with <i>Draft all 3 left</i> offered again. Right, but the person does not see which item failed unless they read the cards.</p>
+    <p class="fix"><span class="k">Fix</span> The red line names the item and the card in hand stays on it. Wording only.</p></div>
+
+  <h2>4 · What held<small>Tried and found sound; listed so the sweep is whole.</small></h2>
+  <div class="ok">
+    <ul>
+      <li><b>Reload at any step</b> — every area's state is the row's; the chat, the pane and the foot read the same after a reload, including the folded rows, the asks and answers, and "on the plan".</li>
+      <li><b>Held buttons</b> — every disabled control in the six areas says why on hover (§649); the sweep found none without a reason.</li>
+      <li><b>The box</b> — held with a relevant grey line in every area and every step; Send only once something is typed (§652, §683).</li>
+      <li><b>Narrow windows</b> — the chat yields, then the rail, the to-do and the work pane leave one at a time; the sheets open and close (§670).</li>
+      <li><b>Save, then Apply</b> — no area writes the plan on Save; every Apply asks, archives the part as its own kind, and can be put back from Archived plans; Advisory stops at Deliverables.</li>
+      <li><b>Versions</b> — every saved version's page is drawn as its type with On the plan and Apply; Edit as vN+1 opens its chat (§654).</li>
+      <li><b>SWOT skipping</b> — an area with no method ticked is left out; Change methods works mid-way and keeps what was gathered; the draft needs only the analyses of the areas ticked.</li>
+      <li><b>Foundation skipping</b> — parts switched off in Setup never appear; a short answer nudges once and can be overridden; "Leave it as it is" keeps a card.</li>
+      <li><b>Advisory</b> — Proceed from the first question; two rounds at most; the brief revised through the box; the round box counts the server's count.</li>
+      <li><b>Model failure</b> — every ask fails in words with nothing lost; the timeout says the answer will be there when the chat is opened again.</li>
+    </ul>
+  </div>
+
+  <h2>Proposed order<small>three batches, each merged on its own</small></h2>
+  <table><thead><tr><th>Batch</th><th>Findings</th><th>Why together</th></tr></thead><tbody>
+    <tr><td><b>1 · Ways back and the onward path</b></td><td>S1, S2, S9, S10, S12</td><td>The dead ends a person hits first; all small; the chat's shape does not change.</td></tr>
+    <tr><td><b>2 · Execution reads the plan</b></td><td>S5, S6, S7, S11</td><td>One area, one model: what the plan holds, what is left out, what is new since.</td></tr>
+    <tr><td><b>3 · The rest</b></td><td>S3, S4, S8, S13, S14</td><td>Undo for the SWOT, a road switch, and three lines of wording.</td></tr>
+  </tbody></table>
+
+  <div class="foot"><b>Not in this sweep:</b> the free chat's answers (their quality is the model's), the Sources rail beyond what the SWOT uses, and two people in one chat at once, which the Copilot does not try to handle. Each finding names where it is read from; none is a guess at what a person might feel.</div>
+</div>

@@ -1,7 +1,7 @@
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
-import { WorkspacePageHeader } from "../workspace-page-header";
+import { clientSettings, profileAndBrand } from "@/ffp/lib/data/client-settings";
 import { buildRaciTableRows } from "@/ffp/lib/domain/raci-table";
 import { buildAuthorityTableRows } from "@/ffp/lib/domain/authority-table";
 import { buildCombinedMatrixRows, deriveControlPoints } from "@/ffp/lib/domain/process-report";
@@ -254,8 +254,10 @@ export default async function GovernancePage(props: PageProps<"/[slug]/processes
     treatment: { overdueActions: risksForPanel.reduce((n, r) => n + r.treatmentActions.filter((a) => a.overdue).length, 0) },
   };
 
+  /* the industry is the client's, from SMP's client settings (stage 1b); size and jurisdiction stay here for now */
+  const industry = profileAndBrand(await clientSettings(workspaceId), workspace).industry;
   const hasProfile = Boolean(
-    workspace.industry?.trim() && workspace.governanceCompanySize?.trim() && workspace.governanceJurisdiction?.trim()
+    industry?.trim() && workspace.governanceCompanySize?.trim() && workspace.governanceJurisdiction?.trim()
   );
 
   const roleNameByIdForControlPoints = roleNameById;
@@ -298,11 +300,7 @@ export default async function GovernancePage(props: PageProps<"/[slug]/processes
   );
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <WorkspacePageHeader
-        title={m.governance.page.title}
-        subtitle={m.governance.page.subtitle}
-      />
+    <main className="w-full">
 
       <div className="mb-4">
         <GovernanceDashboard
@@ -320,7 +318,7 @@ export default async function GovernancePage(props: PageProps<"/[slug]/processes
         <div className="rounded-xl border border-slate-200 bg-white p-5">
           <GovernanceProfileForm
             workspaceId={workspaceId}
-            industry={workspace.industry}
+            industry={industry}
             companySize={workspace.governanceCompanySize}
             jurisdiction={workspace.governanceJurisdiction}
           />

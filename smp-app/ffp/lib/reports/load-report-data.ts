@@ -20,6 +20,8 @@ import { applyPackOrder } from "@/ffp/lib/domain/process-order";
 import { valueChainSummary, type ActivityCard, type PhaseRef } from "@/ffp/lib/domain/value-chain";
 import type { RailProcess } from "@/ffp/lib/domain/milestone-rails";
 import type { ExportProcessData, ValueChainColumn } from "@/app/(ffp)/[slug]/processes/reports/export-preview";
+import { clientSettings, profileAndBrand } from "@/ffp/lib/data/client-settings";
+
 import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/lib/data/authority-assignments";
 import { buildGovernanceReport, type GovernanceReport } from "@/ffp/lib/domain/governance-report";
 
@@ -421,16 +423,18 @@ export async function loadReportData(workspaceId: string, processIds: string[]):
     })
   );
 
+  /* The client's name, profile and brand come from SMP's client settings (stage 1b, spec 067 §4.4). */
+  const client = profileAndBrand(await clientSettings(workspaceId), workspace);
   return {
     workspaceId,
-    companyName: workspace.name,
+    companyName: client.name,
     firmName: workspace.firm.name,
-    industry: workspace.industry,
-    description: workspace.description,
-    accentColor: workspace.accentColor,
-    accentColorTertiary: workspace.accentColorTertiary,
-    accentSecondary: workspace.accentColorSecondary,
-    logoDataUrl: workspace.logoDataUrl,
+    industry: client.industry,
+    description: client.about,
+    accentColor: client.primary,
+    accentColorTertiary: client.tertiary,
+    accentSecondary: client.secondary,
+    logoDataUrl: client.logo,
     people: people.map((p) => ({
       id: p.id,
       name: p.name,

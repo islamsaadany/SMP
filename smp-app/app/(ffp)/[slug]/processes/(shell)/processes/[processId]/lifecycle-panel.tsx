@@ -10,6 +10,7 @@ import {
   setReviewInterval,
 } from "@/ffp/lib/actions/process-lifecycle";
 import { StaffLink } from "../../staff-link";
+import { ConfirmDialog } from "../../confirm-dialog";
 import { STATUS_LABEL, type ProcessLifecycleStatus } from "@/ffp/lib/domain/process-lifecycle";
 
 const FLOW: ProcessLifecycleStatus[] = ["DRAFT", "IN_REVIEW", "APPROVED", "PUBLISHED", "RETIRED"];
@@ -32,6 +33,10 @@ export type PanelProps = {
   reviewIntervalMonths: number;
   /** Server-decided: this signed-in person is the approver or the sender. */
   canReturnFromReview: boolean;
+  /** Stage 5: the version in force, if any; whether the process has changed since it; the number the next version will carry. */
+  inForce: number | null;
+  changed: boolean;
+  nextVersion: number;
 };
 
 export function LifecyclePanel(p: PanelProps) {
@@ -42,6 +47,8 @@ export function LifecyclePanel(p: PanelProps) {
   // The approver cannot also be a reviewer: their box is greyed and left out.
   const [approverId, setApproverId] = useState("");
   const [reviewerIds, setReviewerIds] = useState<ReadonlySet<string>>(new Set());
+  // Retire asks through the module's own dialog, never the browser's (§731).
+  const [askRetire, setAskRetire] = useState(false);
 
   function run(fn: () => Promise<{ ok: boolean; error?: string; message?: string }>) {
     setError(null);
@@ -97,7 +104,7 @@ export function LifecyclePanel(p: PanelProps) {
         </p>
       )}
 
-      {p.status === "DRAFT" && (
+      {(p.status === "DRAFT" || (p.status === "PUBLISHED" && p.changed)) && (
         <form onSubmit={submit} className="space-y-3">
           {p.returnReason && (
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
@@ -105,7 +112,9 @@ export function LifecyclePanel(p: PanelProps) {
             </p>
           )}
           <p className="text-sm text-slate-600">
-            This is a draft. Pick who approves it and say what changed, then send it for review.
+            {p.inForce
+              ? `This is draft v${p.nextVersion}. Readers keep v${p.inForce} until it is approved and published. Pick who approves it and say what changed, then send it for review.`
+              : "This is a draft. Pick who approves it and say what changed, then send it for review."}
           </p>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold text-slate-700">Approver</span>
@@ -171,7 +180,7 @@ export function LifecyclePanel(p: PanelProps) {
         </form>
       )}
 
-      {p.status !== "DRAFT" && (
+      {p.status !== "DRAFT" && !(p.status === "PUBLISHED" && p.changed) && (
         <dl className="mb-3 grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1 text-sm">
           <dt className="text-slate-500">Approver</dt>
           <dd>{p.approver ? label(p.approver) : "Not recorded"}</dd>
@@ -222,16 +231,24 @@ export function LifecyclePanel(p: PanelProps) {
             />
             <span>months</span>
           </label>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => {
-              if (window.confirm("Retire this process? It stays on record but is no longer in force.")) run(() => retireProcess(ids));
-            }}
-            className={secondary}
-          >
+          <button type="button" disabled={pending} onClick={() => setAskRetire(true)} className={secondary}>
             Retire
           </button>
+          {askRetire && (
+            <ConfirmDialog
+              title="Retire this process?"
+              action="Retire the process"
+              destructive
+              pending={pending}
+              onClose={() => setAskRetire(false)}
+              onConfirm={() => {
+                setAskRetire(false);
+                run(() => retireProcess(ids));
+              }}
+            >
+              <p>It stays on record, with every version it holds, but is no longer in force. Nothing is deleted.</p>
+            </ConfirmDialog>
+          )}
         </div>
       )}
 

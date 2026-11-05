@@ -4,11 +4,11 @@
    for /topbar.js's own reason (app/topbar.js/route.ts). The address the
    pages write carries the script's hash and THAT address is cached for good;
    any other is asked about every time. */
-import { NAVSKEL_SCRIPT, NAVSKEL_STAMP } from "../../lib/navskel.ts";
+import { NAVSKEL_FILE, NAVSKEL_STAMP } from "../../lib/navskel.ts";
 
 export function GET(req: Request) {
   const current = new URL(req.url).searchParams.get("v") === NAVSKEL_STAMP;
-  return new Response(NAVSKEL_SCRIPT, {
+  return new Response(NAVSKEL_FILE, {
     status: 200,
     headers: { "Content-Type": "application/javascript; charset=utf-8",
       "Cache-Control": current ? "public, max-age=31536000, immutable" : "no-cache" },

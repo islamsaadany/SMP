@@ -1,0 +1,282 @@
+<title>Tracker Task Details</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap">
+<style>
+/* The opened task, drawn before it is built (§657): Description where Notes
+   was, a Progress box with its entries piling up under it, and the automatic
+   history folded behind one small link. Tokens are the tracker's own
+   (modules/tracker/page.ts). Layout: one column of frames, each a piece of
+   the page as it would stand, with a caption over it and a note under it. */
+*{box-sizing:border-box}
+:root{--bar:#1F3158;--bar-ink:#FFF;--bar-quiet:#C6D2E5;--bar-accent:#E3A64A;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--line-soft:#EEF1F5;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
+  --bad:#B23025;--bad-bg:#FBECEA;--ok:#2E7D4F;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--line-soft:#232935;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;--bad:#E88A80;--bad-bg:#3A2322;--ok:#6CC08F;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--line-soft:#232935;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;--bad:#E88A80;--bad-bg:#3A2322;--ok:#6CC08F;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.doc{max-width:1000px;margin:0 auto;padding-block:26px 64px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.doc>p.lede{max-width:74ch;color:var(--ink-2);margin:0 0 4px}
+.doc>p.lede b{color:var(--ink)}
+.cap{font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:30px 0 7px}
+.cap span{font-family:var(--font);letter-spacing:0;text-transform:none;font-weight:400}
+.note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:11px 14px;font-size:14px;color:var(--ink-2);margin:12px 0 0;max-width:80ch}
+.note b{color:var(--ink)}
+.note ul{margin:6px 0 0;padding-left:18px}
+.note li{margin:2px 0}
+svg{display:block}
+input,textarea,button{font:inherit;color:inherit}
+
+/* the frame stands in for the Actions card */
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.frame .list{padding:0}
+.grp{display:flex;align-items:baseline;gap:12px;padding:10px 14px 8px;border-bottom:2px solid var(--ink)}
+.grp .ix{font:600 11px/1 var(--mono);color:var(--ink-3)}
+.grp h3{margin:0;font:600 17px/1.2 var(--font)}
+.grp .meta{font:500 12.5px/1 var(--font);color:var(--ink-3)}
+
+/* the row, as built */
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 132px 84px 64px 128px 26px;gap:12px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line-soft)}
+.row.on{background:var(--surface)}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);padding:0}
+.tick.late{border-color:var(--bad)}
+.tn2{min-width:0}
+.t{font:400 15px/1.35 var(--font);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc{display:inline-flex;align-items:center;gap:6px;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 10px}
+.tc::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
+.when,.who{font:500 13px/1.4 var(--font);color:var(--ink-2);white-space:nowrap}
+.when.late{color:var(--bad)}
+.st{display:inline-flex;align-items:center;gap:7px;font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.st::before{content:"";width:12px;height:2px;background:var(--ink-3)}
+.st.ip::before{background:var(--gold)}
+.more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;padding:0;justify-self:end}
+.more.on{background:var(--surface-2);color:var(--ink)}
+.more svg{width:12px;height:12px}
+
+/* ── NEW: the quiet progress line under a closed row's name ── */
+.last{font:400 12.5px/1.4 var(--font);color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.last b{font-weight:600;color:var(--ink-2)}
+
+/* the opened task, as built: two columns */
+.open{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;padding:12px 14px 12px 46px;border-bottom:1px solid var(--line-2);background:var(--surface)}
+.open .lab{font:600 10.5px/1.7 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:10px 0 4px}
+.open .lab:first-child{margin-top:0}
+/* ── ROUND 2: the Description fits what is written, never scrolls ── */
+.open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:44px;resize:none;overflow:hidden;display:block;field-sizing:content}
+.open select{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 14px/1.4 var(--font);max-width:100%}
+.open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
+.open .acts{display:flex;gap:14px;padding-top:12px;font-size:13px;align-items:center}
+.open .acts button{background:none;border:0;padding:0;font:400 13px/1.4 var(--font);color:var(--ink-3);cursor:pointer;text-decoration:underline}
+.open .acts button.danger{color:var(--bad)}
+
+/* ── NEW: the Progress box and its entries ── */
+.pbox{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;background:var(--surface)}
+.pbox input{flex:1;min-width:0;border:0;background:transparent;outline:none;font:400 14px/1.5 var(--font);padding:0}
+.pbox input::placeholder{color:var(--ink-3)}
+.pbox .ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:4px 6px;white-space:nowrap}
+.pbox.filled{border-color:var(--gold)}
+/* ── ROUND 2: the entries scroll inside their own box once there are many ── */
+.prog{list-style:none;margin:8px 0 0;padding:0 8px 0 0;max-height:236px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable}
+.prog li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1px solid var(--line-2);font-size:13.5px;line-height:1.45;color:var(--ink)}
+.prog li:last-child{border-bottom:0}
+.prog .wk{font:600 11px/1.6 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;padding-top:2px;cursor:default;border-bottom:1px dotted transparent}
+.prog .wk.now{color:var(--gold)}
+.prog .by{font:600 12px/1.4 var(--font);color:var(--ink-2);margin-top:1px}
+.prog .by .x{font-weight:400;color:var(--ink-3);text-decoration:underline;margin-left:10px}
+.prog .ed{font-weight:400;color:var(--ink-3);margin-left:6px;font-style:italic}
+.prog textarea{border:1px solid var(--gold);border-radius:7px;background:var(--surface);color:var(--ink);padding:5px 9px;font:400 13.5px/1.45 var(--font);width:100%;resize:none;overflow:hidden;display:block;field-sizing:content}
+.prog .asked{display:inline-flex;gap:8px;align-items:center;margin-left:10px;font-weight:400;color:var(--ink-2)}
+.prog .asked .go{border:1px solid var(--line);border-radius:6px;padding:2px 8px;background:none;font:400 12px/1.4 var(--font)}
+.prog .asked .go.danger{color:var(--bad);border-color:var(--bad)}
+.tip{position:relative;display:inline-block}
+.tip .bub{position:absolute;left:0;top:22px;background:var(--ink);color:var(--surface);font:400 11.5px/1.4 var(--font);letter-spacing:0;text-transform:none;border-radius:6px;padding:4px 8px;white-space:nowrap;box-shadow:0 6px 18px rgba(20,28,43,.2)}
+.tip .bub::before{content:"";position:absolute;top:-4px;left:12px;border:4px solid transparent;border-top:0;border-bottom-color:var(--ink)}
+
+/* ── NEW: the history behind one link, and unfolded ── */
+.histlink{display:inline-flex;align-items:center;gap:5px;margin-top:12px;background:none;border:0;padding:0;font:500 12.5px/1.4 var(--font);color:var(--ink-3);cursor:pointer}
+.histlink svg{width:10px;height:10px;transition:transform .15s}
+.histlink.on svg{transform:rotate(90deg)}
+.hist{list-style:none;margin:6px 0 0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;color:var(--ink-2)}
+.hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line-2)}
+.hist li:last-child{border-bottom:0}
+.hist time{font:400 10.5px/1.6 var(--font);color:var(--ink-3);white-space:nowrap}
+.hist b{font-weight:600;color:var(--ink)}
+
+/* the Weekly check card */
+.blk{margin:10px 14px 14px;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.wkh{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);font:600 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.wkh .days{font-weight:400;letter-spacing:0;text-transform:none;font-size:12px}
+.row.chk{grid-template-columns:20px minmax(0,1fr) 84px 64px 128px 140px 26px;padding:9px 14px}
+.carry{display:inline-flex;align-items:center;gap:6px;font:500 12.5px/1 var(--font);color:var(--gold);white-space:nowrap}
+.carry svg{width:14px;height:14px}
+/* ── NEW: the progress line under a row on the check ── */
+.pline{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;padding:0 14px 10px;border-bottom:1px solid var(--line-soft)}
+.pline .pbox{grid-column:2;border-color:var(--line-2);background:var(--ground)}
+
+@media (max-width:760px){
+  .row,.row.chk{grid-template-columns:20px minmax(0,1fr) 26px}.row .tc,.row .when,.row .who,.row .st,.row .carry{display:none}
+  .open{grid-template-columns:1fr;padding-left:14px}
+  .pline{grid-template-columns:1fr}.pline .pbox{grid-column:1}
+}
+@media (prefers-reduced-motion:reduce){.histlink svg{transition:none}}
+</style>
+
+<div class="doc">
+<h1>The task's details: Description, Progress, and the history behind a link</h1>
+<p class="lede">Islam: <b>"the notes needs to be a description, and we need to have a progress input box per task so we input what happened in this task on weekly basis"</b>, with the task's own history of creation and movement <b>"opened in a different way"</b>. Three frames below: the opened task, the closed row, and a row on the Weekly check. Built nowhere yet.</p>
+
+<p class="cap">1 · The opened task <span>— arrow pressed on a row grouped by topic</span></p>
+<div class="frame"><div class="list">
+  <div class="grp"><span class="ix">01</span><h3>Budget</h3><span class="meta">3 open · <span style="color:var(--bad)">1 late</span></span></div>
+  <div class="row on">
+    <button class="tick" aria-label="Mark done"></button>
+    <div class="tn2"><div class="t">Collect the Q3 actuals from Finance</div></div>
+    <span></span>
+    <span class="when late">Late 2 w</span>
+    <span class="who">Noran</span>
+    <span class="st ip">In progress</span>
+    <button class="more on" aria-label="Close"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 8l4-4 4 4"/></svg></button>
+  </div>
+  <div class="open">
+    <div>
+      <p class="lab">Topic</p>
+      <select aria-label="Topic"><option>Budget</option><option>Office move</option><option>No topic</option></select>
+      <p class="lab">Description</p>
+      <textarea aria-label="Description" rows="3">The Q3 actuals, by cost centre, in the agreed template. Needed before the budget meeting on the 12th so the variances can be read against the plan.</textarea>
+      <div class="hint">What the task is. Grows with what you write; saved when you leave the box.</div>
+      <div class="acts"><button type="button" class="danger">Delete</button></div>
+    </div>
+    <div>
+      <p class="lab">Progress</p>
+      <div class="pbox"><input id="p1" placeholder="What happened on this task this week?" aria-label="Progress"><span class="ent">Enter</span></div>
+      <ul class="prog">
+        <li><span class="wk now tip">This week<span class="bub">Tue 28 Oct 2026 · 14:05</span></span><div>Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again.<div class="by">Noran <span class="x">Edit</span><span class="x">Delete</span></div></div></li>
+        <li><span class="wk">Last week</span><div>Nothing arrived. Finance say the close ran late; promised for Sunday.<div class="by">Noran <span class="ed">edited</span> <span class="x">Edit</span><span class="x">Delete</span></div></div></li>
+        <li><span class="wk">W42</span><div>Template agreed with Ahmed; sent to Finance with the deadline.<div class="by">Islam</div></div></li>
+        <li><span class="wk">W41</span><div>Asked Finance which template they can fill; waiting on their answer.<div class="by">Islam</div></div></li>
+        <li><span class="wk">W40</span><div>Task opened at the budget kick-off.<div class="by">Islam</div></div></li>
+      </ul>
+      <button type="button" class="histlink"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 1l4 4-4 4"/></svg>History</button>
+    </div>
+  </div>
+</div></div>
+<div class="note"><b>What changed, and what did not.</b>
+<ul>
+<li><b>Notes is now Description.</b> Same stored text, a new word and a line saying what it is for. <b>The box fits what is written</b>: it grows as you type and never scrolls inside itself (round 2). The note typed on the add line lands here, as it does today.</li>
+<li><b>Progress is a one-line box</b> with Enter, like the add line. An entry is stamped with who wrote it and the week it was written in (<b>This week</b>, <b>Last week</b>, <b>W42</b>); the exact day and time are on hover, as drawn on the first entry. Newest first.</li>
+<li><b>The entries scroll inside their own box</b> once there are more than about five (round 2), so a task with a long record does not push the page down. Newest at the top, so what matters is never behind the scroll.</li>
+<li><b>Your own entry can be edited or deleted; nobody else's.</b> The writer alone sees a quiet <b>Edit</b> and <b>Delete</b> on their own entry (round 2). Edit turns the entry into a box in place, Enter saves and Escape puts it back, and the entry then says <i>edited</i> beside the name (frame 1d). Delete asks first (frame 1b).</li>
+<li><b>Writing progress changes nothing else.</b> The status stays what somebody set.</li>
+<li><b>History is behind one small link</b> under the progress, where it unfolds in place (frame 1c). It is the automatic record — created, moved, handed on, status changed — and is read far less often than what people wrote.</li>
+</ul></div>
+
+<p class="cap">1b · Deleting your own entry <span>— asks first, in place</span></p>
+<div class="frame"><div class="open" style="padding-left:14px;grid-template-columns:1fr;max-width:460px">
+  <div>
+    <p class="lab">Progress</p>
+    <ul class="prog" style="margin-top:0">
+      <li><span class="wk now">This week</span><div>Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again.<div class="by">Noran <span class="asked">Delete this entry? <button type="button" class="go danger">Yes, delete it</button><button type="button" class="go">Keep it</button></span></div></div></li>
+      <li><span class="wk">Last week</span><div>Nothing arrived. Finance say the close ran late; promised for Sunday.<div class="by">Noran</div></div></li>
+    </ul>
+  </div>
+</div></div>
+
+<p class="cap">1d · Editing your own entry <span>— in place, Enter saves, Escape puts it back</span></p>
+<div class="frame"><div class="open" style="padding-left:14px;grid-template-columns:1fr;max-width:460px">
+  <div>
+    <p class="lab">Progress</p>
+    <ul class="prog" style="margin-top:0">
+      <li><span class="wk now">This week</span><div><textarea aria-label="Edit the entry" rows="2">Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again; he promised them by Thursday.</textarea><div class="by">Noran <span class="asked" style="color:var(--ink-3)">Enter saves · Escape puts it back</span></div></div></li>
+      <li><span class="wk">Last week</span><div>Nothing arrived. Finance say the close ran late; promised for Sunday.<div class="by">Noran <span class="ed">edited</span></div></div></li>
+    </ul>
+  </div>
+</div></div>
+
+<p class="cap">1c · History, unfolded <span>— the same link pressed</span></p>
+<div class="frame"><div class="open" style="padding-left:14px;grid-template-columns:1fr;max-width:460px">
+  <div>
+    <p class="lab">Progress</p>
+    <ul class="prog" style="margin-top:0">
+      <li><span class="wk">W42</span><div>Template agreed with Ahmed; sent to Finance with the deadline.<div class="by">Islam</div></div></li>
+    </ul>
+    <button type="button" class="histlink on"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 1l4 4-4 4"/></svg>History</button>
+    <ul class="hist">
+      <li><time>Tue 28 Oct 09:40</time><span><b>Noran</b> · Not started → In progress</span></li>
+      <li><time>Thu 22 Oct 16:12</time><span><b>Islam</b> · carried to this week (was W43)</span></li>
+      <li><time>Thu 15 Oct 16:03</time><span><b>Islam</b> · carried to W43 (was W42)</span></li>
+      <li><time>Mon 12 Oct 11:20</time><span><b>Islam</b> · handed to Noran (was Islam)</span></li>
+      <li><time>Mon 5 Oct 10:02</time><span><b>Islam</b> · created it, owner Islam, due W42</span></li>
+    </ul>
+  </div>
+</div></div>
+<div class="note"><b>The history gets fuller while it is here.</b> Today it records only creation and status changes. Once it is the detailed record it should also say when a task was carried to another week, handed to somebody else, renamed or moved to another topic — the movements Islam named. Each line: the day and time, who, what, and what it was before.</div>
+
+<p class="cap">2 · The closed row <span>— the latest progress under the name</span></p>
+<div class="frame"><div class="list">
+  <div class="grp"><span class="ix">01</span><h3>Budget</h3><span class="meta">3 open · <span style="color:var(--bad)">1 late</span></span></div>
+  <div class="row">
+    <button class="tick late" aria-label="Mark done"></button>
+    <div class="tn2"><div class="t">Collect the Q3 actuals from Finance</div><div class="last"><b>This week</b> · Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again.</div></div>
+    <span></span>
+    <span class="when late">Late 2 w</span>
+    <span class="who">Noran</span>
+    <span class="st ip">In progress</span>
+    <button class="more" aria-label="Notes and history"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4l4 4 4-4"/></svg></button>
+  </div>
+  <div class="row">
+    <button class="tick" aria-label="Mark done"></button>
+    <div class="tn2"><div class="t">Agree the headcount assumptions with HR</div><div class="last"><b>Last week</b> · HR want the hiring plan first; meeting set for Wednesday.</div></div>
+    <span></span>
+    <span class="when">This week</span>
+    <span class="who">Islam</span>
+    <span class="st">Not started</span>
+    <button class="more" aria-label="Notes and history"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4l4 4 4-4"/></svg></button>
+  </div>
+  <div class="row">
+    <button class="tick" aria-label="Mark done"></button>
+    <div class="tn2"><div class="t">Draft the capex list for the new floor</div></div>
+    <span></span>
+    <span class="when">Next week</span>
+    <span class="who">Omar</span>
+    <span class="st">Not started</span>
+    <button class="more" aria-label="Notes and history"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4l4 4 4-4"/></svg></button>
+  </div>
+</div></div>
+<div class="note"><b>One quiet grey line, one entry only</b> — the latest, with its week in front — cut off at the row's edge rather than wrapping, so a row is never taller than two lines. A task with no progress yet has no second line (the third row), so the list does not grow where nothing was written. The columns on the right do not move.</div>
+
+<p class="cap">3 · The Weekly check <span>— the progress written in the meeting</span></p>
+<div class="frame"><div class="list">
+  <div class="grp"><span class="ix">01</span><h3>Budget</h3><span class="meta">3 open · <span style="color:var(--bad)">1 late</span></span></div>
+  <div class="blk">
+    <div class="wkh">This week <span class="days">W44 · Sun 25 – Thu 29 Oct</span></div>
+    <div class="row chk" style="border-bottom:0">
+      <button class="tick late" aria-label="Mark done"></button>
+      <div class="tn2"><div class="t">Collect the Q3 actuals from Finance</div><div class="last"><b>This week</b> · Finance sent the actuals for four cost centres. Ops' two lines are still missing — chased Ahmed again.</div></div>
+      <span class="when late">Late 2 w</span>
+      <span class="who">Noran</span>
+      <span class="st ip">In progress</span>
+      <span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span>
+      <button class="more" aria-label="Notes and history"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4l4 4 4-4"/></svg></button>
+    </div>
+    <div class="pline"><div class="pbox"><input id="p2" placeholder="What happened this week?" aria-label="Progress"><span class="ent">Enter</span></div></div>
+    <div class="row chk" style="border-bottom:0">
+      <button class="tick" aria-label="Mark done"></button>
+      <div class="tn2"><div class="t">Agree the headcount assumptions with HR</div><div class="last"><b>Last week</b> · HR want the hiring plan first; meeting set for Wednesday.</div></div>
+      <span class="when"></span>
+      <span class="who">Islam</span>
+      <span class="st">Not started</span>
+      <span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span>
+      <button class="more" aria-label="Notes and history"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4l4 4 4-4"/></svg></button>
+    </div>
+    <div class="pline" style="border-bottom:0"><div class="pbox filled"><input id="p3" value="HR sent the hiring plan this morning; assumptions agreed except the two contractors." aria-label="Progress"><span class="ent">Enter</span></div></div>
+  </div>
+</div></div>
+<div class="note"><b>On the check, every open row under This week carries its Progress box</b>, right under it, so the entry is typed while the task is being talked about, and Enter adds it without leaving the meeting. The latest entry reads under the name as on the list. Last week's and next week's cards show the latest line but no box: progress is written on the week being reviewed.
+<ul>
+<li><b>Not drawn, said instead:</b> a finished task keeps its progress and can still take an entry from its opened panel, so the closing note is written where the task is.</li>
+<li><b>Deleting the task deletes its progress with it.</b> Deleting a topic leaves every task and its progress untouched, as today.</li>
+</ul></div>
+</div>

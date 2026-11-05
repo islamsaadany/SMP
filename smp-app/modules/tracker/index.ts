@@ -33,6 +33,8 @@ import {
   type Who, type Group, type Format, isView, isGroup, isFormat, isStatus, isOffice, calendarDay, oneLine, GROUP_COOKIE, FORMAT_COOKIE,
   oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange, thursdayOf, todayIn,
   oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic, mayCarry, nextWeekDay, ONLY_CHANGE,
+  oneProgress, addProgress, editProgress, deleteProgress, mayChangeProgress, ONLY_WRITER, trimmed,
+  oneStep, addStep, renameStep, tickStep, setStepDue, moveStep, deleteStep, stepsOf,
 } from "../../lib/tracker.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
@@ -52,7 +54,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
       /* §566: the views put back to pages — a press on a tab loads one. */
       .replace("/*%TABS%*/", brk() === "tabs-reload" ? "return;" : "")
       /* §567: the add line's picks carried past the add again. */
-      .replace("st.picked = false; /*%PICKS%*/", brk() === "keep-picks" ? "" : "st.picked = false;"),
+      .replace("st.picked = false; /*%PICKS%*/", brk() === "keep-picks" ? "" : "st.picked = false;")
+      /* §671: a refused change left standing on screen; a save sent the plain
+         way, for the browser to drop when the page leaves. */
+      .replace("/*%REFUSED%*/", brk() === "keep-refused" ? "return;" : "")
+      .replace("/*%KA%*/", brk() === "no-keepalive" ? "false && " : ""),
       { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which
@@ -62,7 +68,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
     if (first === "api") return no(403, "The Internal Tracker is the office's.");
     return new Response(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have, !!a.consultant), { status: 403, headers: shellHeaders() });
   }
-  const who: Who = { personKey: a.personKey ?? null, seat: a.seat ?? null };
+  const who: Who = { personKey: a.personKey ?? null, seat: a.seat ?? null, lead: !!a.lead };
 
   const page = (ask: Ask): PageArgs => ({ slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, ask, who, consultant: !!a.consultant });
 
@@ -188,6 +194,61 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, topicId: t.id });
   }
 
+  /* STEPS (§745): a task's lines, changed by whoever may change the task
+     (§42, asked of the stored task). The FIRST tick on a task not started
+     moves it to In progress by itself — the work has begun; the last tick
+     never marks it Done (the page asks). */
+  if (kind.startsWith("step-")) {
+    const st = kind === "step-add" ? null : await oneStep(c, String(b.stepId || ""));
+    if (kind !== "step-add" && !st) return refused(404, "That step is not on this task any more.");
+    const task = await oneAction(c, kind === "step-add" ? String(b.id || "") : st!.actionId);
+    if (!task) return refused(404, "That action is not on this client's list any more.");
+    if (!mayChange(task, who)) return refused(403, ONLY);
+    if (kind === "step-add") {
+      if (!trimmed(b.title)) return refused(400, "A step needs a few words.");
+      await addStep(c, task.id, String(b.title), by);
+    } else if (kind === "step-rename") {
+      if (!trimmed(b.title)) return refused(400, "A step needs a few words.");
+      await renameStep(c, st!.id, String(b.title));
+    } else if (kind === "step-tick") {
+      const done = !!b.done;
+      await tickStep(c, st!.id, done);
+      if (done && task.status === "not_started") await setStatus(c, task.id, "in_progress", by);
+    } else if (kind === "step-due") {
+      const due = b.due == null || b.due === "" ? null : calendarDay(b.due);
+      if (b.due && !due) return refused(400, "That is not a date this list can read.");
+      await setStepDue(c, st!.id, due);
+    } else if (kind === "step-move") {
+      await moveStep(c, st!.id, Number(b.dir) < 0 ? -1 : 1);
+    } else if (kind === "step-delete") {
+      await deleteStep(c, st!.id);
+    } else return refused(400, "Not something this list does.");
+    const all = await stepsOf(c, task.id);
+    return out(200, { ok: true, id: task.id, steps: all.length, done: all.filter((x) => x.done).length });
+  }
+
+  /* PROGRESS (§657): anybody past the gate writes an entry on any action;
+     an entry is then its WRITER'S — edited or deleted by them alone, judged
+     against the stored entry (§42). A body with nothing in it writes nothing. */
+  if (kind === "progress-add") {
+    if (!by) return refused(400, "You are not on this client's register yet, so nothing can be written under your name here.");
+    const target = await oneAction(c, String(b.id || ""));
+    if (!target) return refused(404, "That action is not on this client's list any more.");
+    if (!trimmed(b.body)) return refused(400, "A progress entry needs a few words.");
+    const p = await addProgress(c, target.id, String(b.body), by);
+    return out(200, { ok: true, id: target.id, progressId: p.id });
+  }
+  if (kind === "progress-edit" || kind === "progress-delete") {
+    const p = await oneProgress(c, String(b.progressId || ""));
+    if (!p) return refused(404, "That entry is not on this action any more.");
+    if (!mayChangeProgress(p, who)) return refused(403, ONLY_WRITER);
+    if (kind === "progress-edit") {
+      if (!trimmed(b.body)) return refused(400, "A progress entry needs a few words.");
+      await editProgress(c, p.id, String(b.body));
+    } else await deleteProgress(c, p.id);
+    return out(200, { ok: true, id: p.actionId, progressId: p.id });
+  }
+
   const id = String(b.id || "");
   if (!id) return refused(400, "Which action?");
   const cur = await oneAction(c, id);
@@ -201,16 +262,16 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
   } else if (kind === "due") {
     const due = b.due == null || b.due === "" ? null : calendarDay(b.due);
     if (b.due && !due) return refused(400, "That is not a date this list can read.");
-    await setFields(c, id, { due });
+    await setFields(c, id, { due }, by);
   } else if (kind === "notes") {
     await setFields(c, id, { description: String(b.description || "") });
   } else if (kind === "rename") {
     if (!oneLine(b.title)) return refused(400, "An action needs a few words.");
-    await setFields(c, id, { title: String(b.title) });
+    await setFields(c, id, { title: String(b.title) }, by);
   } else if (kind === "owner") {
     const ownerKey = String(b.ownerKey || "");
     if (!ownerKey || !(await isOfficeRow(c, ownerKey))) return refused(400, "An action is owned by somebody on the office's seats.");
-    await setFields(c, id, { ownerKey });
+    await setFields(c, id, { ownerKey }, by);
   } else if (kind === "topic") {
     /* One topic or none (§497): an id already on the list, a name to make or
        find, or nothing to take it off. A closed topic is not offered, but one
@@ -221,7 +282,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       if (!t) return refused(400, "That topic is not on this client's list any more.");
       topicId = t.id;
     } else if (oneLine(b.topicName)) topicId = (await addTopic(c, String(b.topicName), by)).id;
-    await setFields(c, id, { topicId });
+    await setFields(c, id, { topicId }, by);
   } else if (kind === "carry") {
     /* CARRY IT TO NEXT WEEK (§532, Islam's choice of the four put to him):
        the SAME action moved a week on — never a second line for one piece of
@@ -239,7 +300,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       return refused(400, cur.status === "done"
         ? "A finished action has nothing to carry."
         : "Only an action on this week can be carried to next week.");
-    await setFields(c, id, { due: nextWeekDay(today) });
+    await setFields(c, id, { due: nextWeekDay(today) }, by);
   } else if (kind === "delete") {
     await deleteAction(c, id);
   }

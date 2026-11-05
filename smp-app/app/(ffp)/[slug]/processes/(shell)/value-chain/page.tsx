@@ -1,7 +1,6 @@
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
-import { WorkspacePageHeader } from "../workspace-page-header";
 import type { ActivityCard, PhaseRef } from "@/ffp/lib/domain/value-chain";
 import { deriveGapsByStep } from "@/ffp/lib/domain/step-readiness";
 import { ValueChainBoard } from "./value-chain-board";
@@ -23,9 +22,8 @@ export default async function ValueChainPage(props: PageProps<"/[slug]/processes
   await requireOffice(workspaceId);
   await registerReady(workspaceId);
 
-  const [workspace, phases, processes, roles, steps, connections, activities, authorityAssignments] =
+  const [phases, processes, roles, steps, connections, activities, authorityAssignments] =
     await Promise.all([
-    prisma.workspace.findUniqueOrThrow({ where: { id: workspaceId } }),
     prisma.phase.findMany({ where: { workspaceId }, orderBy: [{ order: "asc" }, { name: "asc" }] }),
     prisma.process.findMany({
       where: { workspaceId, archivedAt: null },
@@ -119,11 +117,7 @@ export default async function ValueChainPage(props: PageProps<"/[slug]/processes
   }));
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <WorkspacePageHeader
-        title="Value Chain"
-        subtitle={`How work moves through ${workspace.name}, phase by phase, across every process.`}
-      />
+    <main className="w-full">
 
       <ValueChainSetup workspaceId={workspaceId} phases={phaseRefs} processes={processes} />
 

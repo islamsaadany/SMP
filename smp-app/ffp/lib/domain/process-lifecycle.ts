@@ -4,7 +4,10 @@
  *
  * Draft → In review → Approved → Published → Retired. Editing something in
  * force (Approved or Published) sends it back to Draft: the approval was for
- * the text that was approved, not for whatever it became.
+ * the text that was approved, not for whatever it became. A published version
+ * stays in force for its readers while the next one is drawn, sent and
+ * approved (stage 5, process-content.ts), so a process in force can send its
+ * next version for review once something in it has changed.
  */
 
 export type ProcessLifecycleStatus = "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "RETIRED";
@@ -16,7 +19,7 @@ const MOVES: Record<ProcessLifecycleStatus, Partial<Record<LifecycleAction, Proc
   DRAFT: { submit: "IN_REVIEW" },
   IN_REVIEW: { approve: "APPROVED", return: "DRAFT" },
   APPROVED: { publish: "PUBLISHED", return: "DRAFT" },
-  PUBLISHED: { retire: "RETIRED" },
+  PUBLISHED: { submit: "IN_REVIEW", retire: "RETIRED" },
   RETIRED: {},
 };
 

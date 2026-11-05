@@ -1151,13 +1151,178 @@
   ];
 
   /** @param {World} w @param {Person|null|undefined} person @param {string} area @param {string} target @returns {Grant} */
+  /* ── THE LADDER (§704; design-mockups/roles-and-access) ─────────────────
+     Islam, 2026-10-31: *"it's more of levels of visibility … everyone set on a
+     level can see his level or see the bigger level(s) one by one"*, *"take
+     care seeing doesn't mean reporting. a person can see the sibling
+     directions but can only report his"*, and after the measured comparison
+     of the two rules on every Raya seat, 2026-11-01: *"Apply the ladder."*
+
+     SO A ROLE ANSWERS TWO QUESTIONS, AND ONLY ONE OF THEM IS A SETTING.
+       · WHAT IT WRITES is what it holds, by rule: a unit's owner and
+         custodian, a function's head and custodian and a capability's owner
+         enter and submit for that place; a pillar's, a project's or a
+         direction's owner, and a contributor, enter their own lines in it
+         (bounded by OWN_LINES_ONLY, unchanged). The plan itself, the cycle
+         and Setup stay the office's (mayAuthorPage, neverOffered).
+       · HOW FAR UP IT READS is the one setting: own piece · own unit or
+         function · own division · the top. Each level holds everything on
+         it — reading your unit is reading its sibling pillars — and plan and
+         figures go together, so a unit's Strategy and Reporting can no
+         longer be read apart.
+
+     STORED IN THE ACCESS MAP IT ALREADY HAD, so no table moves and the server
+     reads it through the same `w.access`: three rows per role, each `view`
+     or `none` — a_reach_place, a_reach_div, a_reach_top — the level being the
+     highest one on. A role with none of the three stored reads its shipped
+     level (LADDER_DEFAULT), the levels every role had before (§704's own
+     measurement). The part owners' row reads §517's half eye as its level
+     until the row is set: "part" is own piece, absent is the whole place.
+
+     A PERSON CAN BE MOVED ONE LEVEL, up or down from their role
+     (`person.reach`, +1 or -1, on the register's own record) — an exception,
+     never a second table. The office (super, smoteam) is not on the ladder:
+     it reads and writes everything, as its own rows of the map say. */
+  var REACH = { place: "a_reach_place", div: "a_reach_div", top: "a_reach_top", pen: "a_pen" };
+  var REACH_KEYS = [REACH.place, REACH.div, REACH.top];
+  /* the page areas the ladder answers for; any other area (a module's own,
+     `always`) is asked of the map exactly as before */
+  var LADDER_AREAS = ["unit", "unit_strat", "fn", "fn_strat", "a_group", "a_cycle", "a_setup"];
+  var PEN_ROLES = ["owner", "custodian", "fnhead", "capowner"];
+  var LINE_PEN_ROLES = ["powner", "plowner", "dirowner", "contrib"];
+  /* THE PEN IS A SWITCH ON THE ROLE'S OWN LEVEL (Islam, 2026-11-01: "the view
+     approach is not clickable for on and off and the same for the editing").
+     On, the role enters and submits what it holds; off, it reads it. Stored as
+     one more row of the map (`a_pen`, edit or none). Shipped as the platform
+     already behaved: a place's holders write, a piece's holders and a
+     contributor read until the office turns their pen on. */
+  function penOn(w, roleKey) {
+    var row = ((w && w.access) || {})[roleKey];
+    if (row && Object.prototype.hasOwnProperty.call(row, REACH.pen)) return row[REACH.pen] === "edit";
+    return PEN_ROLES.indexOf(roleKey) > -1;
+  }
+  var LADDER_DEFAULT = { gceo: 3, cceo: 2, owner: 1, fnhead: 1, custodian: 1,
+    powner: 1, plowner: 1, dirowner: 1, capowner: 1, contrib: 1, employee: 0 };
+  /* the lowest level a role can be set to: a holder of a whole place always
+     reads it; a CEO holds a level, not a piece */
+  var LADDER_MIN = { owner: 1, fnhead: 1, custodian: 1 };
+  /* A CEO HOLDS A LEVEL, NOT A PIECE: the Group CEO stands only on the top,
+     a Division head on their division or the top — and either can be turned
+     off, to nothing (Islam, 2026-11-01: "on the company level and division I
+     can't click off the view option"). Between nothing and where they stand
+     there is no level for them, so a setting there reads as nothing. */
+  var LADDER_STAND = { gceo: 3, cceo: 2 };
+  function ladderStored(w, roleKey) {
+    var row = ((w && w.access) || {})[roleKey];
+    var has = function (k) { return !!row && Object.prototype.hasOwnProperty.call(row, k); };
+    if (!REACH_KEYS.some(has)) {
+      var d = LADDER_DEFAULT[roleKey];
+      if (d == null) return 0;
+      if (isPartRole(roleKey) && dirScopePart(w && w.group)) return 0;
+      return d;
+    }
+    var on = function (k) { return has(k) && row[k] !== "none"; };
+    return on(REACH.top) ? 3 : on(REACH.div) ? 2 : on(REACH.place) ? 1 : 0;
+  }
+  function reachMove(person) {
+    var m = person ? Number(person.reach) : 0;
+    return m === 1 || m === -1 ? m : 0;
+  }
+  /* The level a person reads at through one role: the role's, moved by
+     theirs, kept between the role's floor and the top, and stepping over a
+     division level the client does not have. */
+  function ladderLevel(w, person, roleKey) {
+    if (isOfficeRole(roleKey)) return 3;
+    var mv = reachMove(person), lv = ladderStored(w, roleKey) + mv;
+    if (lv === 2 && !midExists(w && w.group, w && w.companies)) lv = mv > 0 ? 3 : 1;
+    var lo = LADDER_MIN[roleKey] != null ? LADDER_MIN[roleKey] : 0;
+    lv = Math.max(lo, Math.min(3, lv));
+    if (LADDER_STAND[roleKey] != null && lv < LADDER_STAND[roleKey]) lv = 0;
+    return lv;
+  }
+  /* where a seat stands: its place, a capability read as the function (or
+     the top) that holds it, as capHolderTarget reads every capability */
+  function seatPlace(w, r) {
+    var at = String((r && r.at) || "group");
+    return boxRef(at).kind === "cap" ? capHolderTarget(w, at) : at;
+  }
+  function divisionOf(w, place) {
+    var r = boxRef(place), cs = (w && w.companies) || {}, live = function (ck) {
+      return !!ck && !!cs[ck] && cs[ck].active !== false ? ck : null; };
+    if (r.kind === "mid") return live(r.key);
+    if (r.kind === "fn") return live(((w.functions || {})[r.key] || {}).company);
+    if (r.kind === "top" || r.kind !== "bu") return null;
+    return live(((w.units || {})[r.key] || {}).company);
+  }
+  /* Does this seat read that target? The top reads everything; a division
+     level reads the division's page and every unit and function in it; any
+     level reads the seat's own place — at "own piece" the place's pages are
+     open and its lists hold only the person's own (pieceOnlyAt, the page's
+     part filter). The floor holds no piece, so its "own piece" is nothing. */
+  function ladderReads(w, person, r, target) {
+    var lv = ladderLevel(w, person, r.role);
+    if (lv >= 3) return true;
+    if ((r.role === NO_ROLE || LADDER_STAND[r.role] != null) && lv < 1) return false;
+    var t = capHolderTarget(w, target), p = seatPlace(w, r);
+    if (t === p) return true;
+    if (lv >= 2) {
+      var d = divisionOf(w, p);
+      if (d && (t === "co:" + d || divisionOf(w, t) === d)) return true;
+    }
+    return false;
+  }
+  /* One seat's grant on one area, the ladder's answer for every role but the
+     office's. Asked by grantIn and by rolesAtState, so "may they" and "which
+     role let them" cannot disagree (§53.5). */
+  function seatGrant(w, person, r, area, target) {
+    if (LADDER_AREAS.indexOf(area) < 0 || isOfficeRole(r.role)) {
+      if (!companyAllows(w, r, target)) return "none";
+      return grantFor(w, r.role, areaFor(area, w, r, target));
+    }
+    if (area === "a_cycle" || area === "a_setup") return "none";
+    /* the group's own pages are about the top or a division, whatever page
+       they are drawn beside: read as the top unless a division is named */
+    if (area === "a_group" && boxRef(target).kind !== "mid") target = "group";
+    /* any page family: a pillars function reports on the unit's pages, a
+       unit planning in projects on the function's */
+    if ((area === "unit" || area === "fn") && roleOwns(w, r, target) &&
+        (PEN_ROLES.indexOf(r.role) > -1 || LINE_PEN_ROLES.indexOf(r.role) > -1) && penOn(w, r.role)) return "edit";
+    return ladderReads(w, person, r, target) ? "view" : "none";
+  }
+  /* AT "OWN PIECE" ON A PLACE: the page is open and its lists are narrowed to
+     what the person holds. True only when every seat that reaches the place
+     reaches it at level 0 — a second seat that reads the whole place (its
+     owner's, a division's, the top's) opens it whole. */
+  function pieceOnlyAt(w, person, place) {
+    if (!person || !w) return false;
+    var t = capHolderTarget(w, String(place || "")), rs = rolesOrFloor(w, person), any = false;
+    for (var i = 0; i < rs.length; i++) {
+      var r = rs[i];
+      if (isOfficeRole(r.role) || PEN_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, t)) return false;
+      var lv = ladderLevel(w, person, r.role), p = seatPlace(w, r);
+      if (lv >= 3) return false;
+      if (lv >= 2) { var d = divisionOf(w, p); if (d && (t === "co:" + d || divisionOf(w, t) === d)) return false; }
+      if (p === t) { if (lv >= 1) return false; any = true; }
+    }
+    return any;
+  }
+  /* Is this pillar, direction or project the person's: its owner or its
+     custodian, or named on any of its rows — the same `namedOn` every role
+     here is derived with. */
+  function holdsItem(w, person, it) {
+    if (!it || !person) return false;
+    if (namedOn({ owner: it.owner }, person) || (it.custodian && namedOn({ owner: it.custodian }, person))) return true;
+    return ["measures", "tactics", "milestones", "deliverables", "outcomes"].some(function (k) {
+      return Array.isArray(it[k]) && it[k].some(function (row) { return namedOn(row, person); });
+    });
+  }
+
   function grantIn(w, person, area, target) {
     if (area === "always") return "view";
     var rs = rolesOrFloor(w, person);
     /** @type {Grant} */ var best = "none";
     for (var i = 0; i < rs.length; i++) {
-      if (!companyAllows(w, rs[i], target)) continue;
-      var g = grantFor(w, rs[i].role, areaFor(area, w, rs[i], target));
+      var g = seatGrant(w, person, rs[i], area, target);
       if (STATE_RANK[g] > STATE_RANK[best]) best = g;
     }
     return best;
@@ -4180,8 +4345,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      about who a bounded role is (§53.5). */
   function rolesAtState(w, person, area, target, state) {
     return rolesOrFloor(w, person).filter(function (r) {
-      if (!companyAllows(w, r, target)) return false;
-      return grantFor(w, r.role, areaFor(area, w, r, target)) === state;
+      return seatGrant(w, person, r, area, target) === state;   /* §704: the ladder's, as grantIn asks */
     }).map(function (r) { return r.role; });
   }
   function editingRoles(w, person, area, target) {
@@ -5243,10 +5407,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   var DIR_SCOPE = "dirScope";
   function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
   function partOnly(w, person) {
-    if (!person || !w || !dirScopePart(w.group)) return false;
+    if (!person || !w) return false;
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
       if (!isPartRole(rs[i].role)) return false;
+      /* §704: narrowed when the part owners' level is "own piece" — which is
+         what §517's half eye reads as until the row is set */
+      if (ladderLevel(w, person, rs[i].role) > 0) return false;
       holds = true;
     }
     return holds;
@@ -5345,6 +5512,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function topSplit(group) {
     var s = structureOf(group), t = s && s.top, b = t && t.plan;
     return !!(b && b.split === true);
+  }
+  /* §687: WHERE A READER'S SEAT LANDS — in the reading window (the default,
+     Islam: "build it yes") or on the workbench. A switch per client, on the
+     Structure step; kept on the structure as `readers: "workbench"`, and an
+     ABSENCE for the window (§50.6), so a client that never touched the
+     switch reads as the window was built to read. */
+  function readersOpen(group) {
+    var s = structureOf(group);
+    return !(s && s.readers === "workbench");
   }
   /* WHICH HALF A PILLAR BELONGS TO, as one answer rather than two call sites
      asking the question in opposite directions. `half` is "cap" or "dir";
@@ -5919,6 +6095,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
+    /* §704: the ladder */
+    REACH: REACH, LADDER_DEFAULT: LADDER_DEFAULT, LADDER_MIN: LADDER_MIN, LADDER_STAND: LADDER_STAND,
+    ladderStored: ladderStored, ladderLevel: ladderLevel, reachMove: reachMove, penOn: penOn,
+    ladderReads: ladderReads, pieceOnlyAt: pieceOnlyAt, holdsItem: holdsItem, divisionOf: divisionOf,
     neverOffered: neverOffered,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
@@ -6006,7 +6186,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     LAYER_KINDS: LAYER_KINDS, coUsedBy: coUsedBy, coOnLayer: coOnLayer,
     layerCompanies: layerCompanies, layerOn: layerOn, layerOrphans: layerOrphans, layerWords: layerWords,
     NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
-    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
+    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf, readersOpen: readersOpen,
     ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     endInMindOffered: endInMindOffered, endInMindOn: endInMindOn,
     holdsSeat: holdsSeat, holdsTopPart: holdsTopPart, mayReportTopOrPart: mayReportTopOrPart,
@@ -8821,11 +9001,15 @@ var NEWCYCLE = null;
    because the two panels answer different questions — NEWCYCLE really is a
    draft, of a cycle that does not exist yet and so has nothing to write to. */
 var CYCLEEDIT = null;
-/* §495: THE PLAN PERIOD HAS ITS OWN PEN on Setup › Planning & reporting
-   cycle, because it is the tenant's and outlives every cycle (§308) — so it
-   is no longer opened by the CYCLE's pen. Same shape as CYCLEEDIT: a mode,
-   nothing held back, the pickers write straight to GROUP. */
-var PLANEDIT = null;
+/* §693: WHICH TAB OF SETUP › PLANNING & REPORTING IS OPEN, and what the
+   board's filter row holds. A mode, like CYCLEEDIT above: nothing here is
+   stored. The filter is applied to the drawn rows in the shell, not by a
+   repaint, so Find keeps its cursor while it is typed in. PLANEDIT (§495)
+   is gone with the second pen — the plan period is edited in the one pen,
+   first, which is §308's own order. */
+var CYCLETAB = "setup";
+var BOARDFILTER = "all";
+var BOARDFIND = "";
 /* §495: HOW MANY TACTICS TICK A QUARTER THE PLAN PERIOD DOES NOT COVER.
    Flagged, never deleted (spec 064 §7): shortening the period must not throw
    away work somebody planned. A tactic's quarter is read in the plan's own
@@ -9533,6 +9717,59 @@ function brandChecks(){
    relational meaning, and adding a real column to a table that already exists
    needs a pre-phase migration (§33.5) for nothing gained. */
 function personActive(p){ return SMPRules.personActive(p); }
+/* ── REPORTS TO (§655) ─────────────────────────────────────────────
+   `p.reportsTo` is the manager's register KEY (§48) and rides in `extra`
+   like `phone` and `active` above, for the same reason: no relational
+   meaning the server reads, so no column and no migration. Read through
+   here, so a key pointing at a row that has gone reads as nobody rather
+   than as a name the register no longer holds. */
+function reportsToOf(p){
+  var k = p && p.reportsTo;
+  return k ? (personBy(k) || null) : null;
+}
+/* Everybody who answers to this person, directly. */
+function reportsOf(key){
+  return PEOPLE.filter(function(p){ return p.reportsTo === key; });
+}
+/* Everybody under them, however far down — the set that may NOT become
+   their manager, or the chain would loop. Walked with a seen-set so a loop
+   that arrived by some other road (an old file, a merge) ends the walk
+   rather than the page. */
+function reportsUnder(key){
+  var out = {}, queue = [key];
+  while (queue.length) {
+    var k = queue.shift();
+    reportsOf(k).forEach(function(p){
+      if (out[p.key] || p.key === key) return;
+      out[p.key] = true; queue.push(p.key);
+    });
+  }
+  return out;
+}
+/* Who the picker offers: active people in the register's order, never the
+   person themselves, never anybody under them, never a row the Forefront
+   platform MINTED for a consultant (§629 — they are not the client's people).
+   The one they already point at is kept whatever its status, so opening the
+   field cannot silently read a retired manager as nobody (§54.4). */
+function reportsToChoices(p){
+  var under = reportsUnder(p.key);
+  return PEOPLE.filter(function(m){
+    if (m.key === p.key || under[m.key]) return false;
+    if (p.reportsTo === m.key) return true;
+    return personActive(m) && !SMPRules.isMintedRow(m);
+  });
+}
+/* The one door that writes it. Deleted when cleared rather than kept as "",
+   so absent and blank stay one word (the rule the file fields keep above).
+   Refuses the person themselves and anybody under them — the picker never
+   offers either, and this is the save answering alike (§42). */
+function setReportsTo(p, key){
+  if (!p) return false;
+  if (!key) { delete p.reportsTo; return true; }
+  if (key === p.key || !personBy(key) || reportsUnder(p.key)[key]) return false;
+  p.reportsTo = key;
+  return true;
+}
 /* The first few words of a name, for a column that has to be narrow (§69.21).
    NEVER stored and never written back — `p.name` keeps whatever the file
    brought, and this is only what the register's frozen first column shows.
@@ -10598,6 +10835,17 @@ function personDeleteBlockers(key){
     plural(claims.length, "open request") + " for a figure — answer them on the " +
     "cycle page first, so the request is not left pointing at nobody"));
 
+  /* §655: `p.reportsTo` is a KEY, so it is on this list by the list's own
+     rule. Retiring is not blocked — a retired manager is still who somebody
+     answered to — but a row that is deleted would leave them answering to
+     nobody at all. */
+  var reps = reportsOf(key);
+  if (reps.length) out.push(personBlock(
+    plural(reps.length, "person").replace("persons", "people") + " reporting to them",
+    plural(reps.length, "person").replace("persons", "people") + " still report to them (" +
+    reps.map(function(r){ return r.name; }).join(", ") +
+    ") — change their Reports to first"));
+
   return out;
 }
 
@@ -10739,6 +10987,18 @@ function personMergePlan(keepKey, dropKey){
     if (c.by === drop.key && c.state === "open")
       plan.owns.push({ kind:"claim", name:"an open request for a figure" });
   });
+  /* §655: the people who answer to the other row come across, named so the
+     panel can say it. The survivor is left out — a merge must not make
+     somebody report to themselves. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key !== keep.key) plan.owns.push({ kind:"reports", name:r.name + " reporting to them" });
+  });
+  /* And who the other row answered to, when the survivor answers to nobody —
+     a fill like the text fields' (§87.5: what is recorded wins), never a
+     move of a manager the survivor already has, and never the survivor. */
+  var dropMgr = reportsToOf(drop);
+  if (dropMgr && !reportsToOf(keep) && dropMgr.key !== keep.key)
+    plan.fills.push({ k:"reportsTo", label:"Reports to", value:dropMgr.name, key:dropMgr.key });
 
   /* Where the other row sat, offered only when the survivor sits nowhere —
      moving somebody who already has a unit is a real act and a merge must not
@@ -10756,7 +11016,11 @@ function mergePeople(keepKey, dropKey, picks){
   if (!plan) return { ok:false, why:"There is nothing to merge." };
   var keep = plan.keep, drop = plan.drop, took = picks || {};
 
-  plan.fills.forEach(function(f){ keep[f.k] = f.value; });
+  plan.fills.forEach(function(f){
+    /* §655: the Reports to fill is a key dressed as a name for the panel. */
+    if (f.k === "reportsTo") { setReportsTo(keep, f.key); return; }
+    keep[f.k] = f.value;
+  });
   plan.picks.forEach(function(f){ if (took[f.k]) keep[f.k] = f.drop; });
 
   /* THE ATTACHMENT BEFORE THE ROLES, and the survivor’s own kept
@@ -10783,6 +11047,13 @@ function mergePeople(keepKey, dropKey, picks){
     });
   });
   claimsList().forEach(function(c){ if (c.by === drop.key) c.by = keep.key; });
+  /* §655: everybody who answered to the other row answers to the survivor
+     now — through the setter, so the survivor is never made to report to
+     themselves; a row it refuses is left pointing at the other row, and the
+     delete below names it rather than losing it. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key === keep.key) delete r.reportsTo; else setReportsTo(r, keep.key);
+  });
 
   /* AND THE DELETE IS THE CHECK. Anything this function forgot to hand over is
      still pointing at the row, so the delete refuses and the merge reports it
@@ -11160,7 +11431,33 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    register's own vocabulary: the page shows both columns side by side, so the
    file it exports should carry both. */
 var PEOPLE_FILE_COLS = ["Emp ID", "Full Name", "Name", "Job title", "Email",
-                        "Mobile", "Official BU", "Unit", "Role", "Status"];
+                        "Mobile", "Official BU", "Unit", "Reports to", "Role", "Status"];
+/* ── REPORTS TO IN THE FILE (§655.1) ───────────────────────────────────
+   Written as the manager's NAME — the register's own short name, which
+   `displayNames()` has already made unique across the register (§81.1), so
+   the download is a picture of the page and the picture reads back to one
+   row. Read as any of: an employee number, an address, the short name or
+   the full name — matched against the register first, then against the
+   other rows of the same file, so a manager who arrives in the same upload
+   as their report still resolves. Two rows answering to one spelling is
+   REFUSED with both named (§61's rule for capabilities: never pick the
+   first), and a name nobody carries is a problem that says what to write. */
+function reportsToByText(text, dnames){
+  var want = fileTxt(text);
+  if (!want) return { person:null };
+  var low = want.toLowerCase();
+  var byId = personByEmpId(want);
+  if (byId) return { person:byId };
+  var byMail = peopleByEmail(want);
+  if (byMail.length === 1) return { person:byMail[0] };
+  if (byMail.length > 1) return { ambiguous:byMail.map(function(p){ return p.name; }) };
+  var hits = PEOPLE.filter(function(p){
+    return fileTxt(knownName(p, dnames)).toLowerCase() === low || fileTxt(p.name).toLowerCase() === low;
+  });
+  if (hits.length > 1) return { ambiguous:hits.map(function(p){ return p.name; }) };
+  if (hits.length === 1) return { person:hits[0] };
+  return { unknown:true };
+}
 /* ── THE FILE CARRIES BOTH, AND THE OLD ONE STILL READS (§93.8) ───────
    Every file downloaded before today has a "Name" column holding the FULL
    name, so the new pair cannot simply take those headers: read blindly, an old
@@ -11707,6 +12004,22 @@ function planPeopleFile(rows){
       } };
     });
   })();
+  /* ── WHAT THE FILE'S OWN ROWS ANSWER TO (§655.1) ───────────────────
+     A Reports to cell may name somebody who is in this very file and not
+     yet on the register, so each row's identifiers are indexed once: its
+     employee number, address, full name and short name, each lowercased,
+     pointing at the row's position. Two rows under one spelling leave the
+     spelling ambiguous, which the reader says rather than resolves. */
+  var fileIds = {};
+  (rows || []).forEach(function(r, i){
+    [fileTxt(r["Emp ID"]), addrOf(r), fileTxt(fileFullName(r)), fileTxt(fileKnownName(r))]
+      .forEach(function(v){
+        var k = String(v || "").toLowerCase();
+        if (!k) return;
+        (fileIds[k] = fileIds[k] || []).push(i);
+      });
+  });
+  var byFileIndex = {};   /* file position → the plan row it became, for the loop walk */
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -11720,6 +12033,7 @@ function planPeopleFile(rows){
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
     var status = fileTxt(r["Status"]);
+    var mgrCell = fileTxt(r["Reports to"]);
     var label  = name || id || email || "this row";
 
     /* ── THE LADDER, ROW BY ROW (§87.5) ────────────────────────────
@@ -12011,12 +12325,93 @@ function planPeopleFile(rows){
                 conflict:conflict, choice:null, picks:[] };
 
     row.action = conflict ? "conflict" : (existing ? "match" : "add");
+    /* ── WHO THIS ROW REPORTS TO (§655.1) ─────────────────────────────
+       The register answers first; failing that, another row of this file.
+       `row.reportsTo` is { key } for somebody on the register, { row:i } for
+       somebody arriving in this file, and `row.reportsToLabel` is the word
+       the review shows. A blank cell says nothing, as every cell does (§54).
+       Naming the row itself is refused here, where the sentence can say
+       which row — the setter would refuse it too, silently (§42). */
+    if (mgrCell) {
+      var mg = reportsToByText(mgrCell, dnames);
+      if (mg.ambiguous) {
+        plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" could be ' +
+          mg.ambiguous.join(" or ") + '. Write their Emp ID or email, so the row says which.' });
+        return;
+      }
+      if (mg.person) {
+        if (existing && mg.person.key === existing.key) {
+          plan.problems.push({ at:at, msg:'"' + label + '" is written as reporting to themselves.' });
+          return;
+        }
+        row.reportsTo = { key:mg.person.key };
+        row.reportsToLabel = knownName(mg.person, dnames);
+      } else {
+        var inFile = (fileIds[mgrCell.toLowerCase()] || []).filter(function(j){ return j !== i; });
+        if (inFile.length > 1) {
+          plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" is on ' +
+            inFile.map(function(j){ return "Row " + (j + 2); }).join(" and ") +
+            ' of this file. Write their Emp ID or email, so the row says which.' });
+          return;
+        }
+        if (!inFile.length) {
+          plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" is nobody on the register and ' +
+            'nobody in this file. Write the name as the download does, or their Emp ID or email, ' +
+            'or leave it blank to keep who they report to now.' });
+          return;
+        }
+        row.reportsTo = { row:inFile[0] };
+        row.reportsToLabel = fileTxt(fileKnownName(rows[inFile[0]])) || fileTxt(fileFullName(rows[inFile[0]])) || mgrCell;
+      }
+    }
     /* A conflict is matched to NOBODY until it is answered, so there is
        nothing to compare against and no picks to show. They are built by
        peopleRowChoose() the moment the reading is chosen. */
     peopleRowPicks(row, conflict ? null : existing, dnames);
+    byFileIndex[i] = row;
     plan.rows.push(row);
   });
+  /* ── NO LOOPS, SAID BEFORE ANYTHING LANDS (§655.1) ─────────────────
+     The chain as this file would leave it: the register's own pointers,
+     overwritten by the rows that say something, a row still arriving
+     standing in for the person it will be. Walked from every row that
+     names a manager; a walk that comes back to the row is a problem on
+     that row, naming the ring — the setter refuses a loop too, but at
+     apply time, where nothing can be said (§42, §96). A conflict row is
+     nobody until it is answered, so a ring through one is caught by the
+     setter and not here; that row's own Reports to is then left as it was. */
+  (function(){
+    var node = function(row){ return row.key || ("row:" + row.at); };
+    var next = {}, nameOf = {};
+    PEOPLE.forEach(function(p){ if (p.reportsTo) next[p.key] = p.reportsTo; nameOf[p.key] = knownName(p, dnames); });
+    var target = function(row){
+      if (!row.reportsTo) return null;
+      if (row.reportsTo.key) return row.reportsTo.key;
+      var other = byFileIndex[row.reportsTo.row];
+      return other ? node(other) : null;
+    };
+    plan.rows.forEach(function(row){
+      if (row.action === "conflict") return;
+      var t = target(row);
+      if (t) next[node(row)] = t;
+      nameOf[node(row)] = row.name || row.at;
+    });
+    plan.rows.forEach(function(row){
+      if (!row.reportsTo || row.action === "conflict") return;
+      var start = node(row), k = next[start], path = [nameOf[start]], seen = {};
+      while (k && !seen[k]) {
+        seen[k] = true; path.push(nameOf[k] || k);
+        if (k === start) {
+          plan.problems.push({ at:row.at, msg:'Reports to would make a loop: ' +
+            path.join(" \u2192 ") + '. Somebody in that ring must report to somebody outside it.' });
+          delete row.reportsTo; delete row.reportsToLabel;
+          row.picks = row.picks.filter(function(f){ return f.k !== "reportsTo"; });
+          return;
+        }
+        k = next[k];
+      }
+    });
+  })();
   return plan;
 }
 
@@ -12069,6 +12464,21 @@ function peopleRowPicks(row, existing, dnames){
        lose, so it is filled and not asked about. */
     row.picks.push({ k:f.k, label:f.label, was:was, now:now, take:!was });
   });
+  /* §655.1: Reports to is a key dressed as a name, so it is compared as a
+     key and shown as a name. A cell naming the manager already recorded is
+     not a difference; a manager arriving in this file is always one. */
+  if (row.reportsTo) {
+    /* A manager still arriving in this file has no key yet, so they can never
+       be the one recorded — found by the check: compared as "no key" against
+       "no manager" they read as the same, and the pick was never offered. */
+    var same = !!row.reportsTo.key && row.reportsTo.key === (existing.reportsTo || null);
+    if (!same) {
+      var mgrWas = reportsToOf(existing);
+      row.picks.push({ k:"reportsTo", label:"Reports to",
+        was: mgrWas ? fileTxt(knownName(mgrWas, dnames)) : "",
+        now: row.reportsToLabel, take: !mgrWas });
+    }
+  }
   return row;
 }
 /* WHAT THIS ROW WOULD ACTUALLY DO, read live. The picks are ticked after the
@@ -12170,6 +12580,7 @@ function applyPeopleFile(plan){
          equal the guess stores nothing rather than freezing it (§93.8). */
       row.picks.forEach(function(f){
         if (!f.take) return;
+        if (f.k === "reportsTo") return;   /* §655.1: below, once every row has a key */
         if (f.k === "known") setKnownName(p, f.now); else p[f.k] = f.now;
       });
       if (row.id) p.empId = row.id;
@@ -12190,6 +12601,23 @@ function applyPeopleFile(plan){
     if (row.wantActive === true && !personActive(p)) restorePerson(p.key, false);
     if (row.role) grantPersonRole(p.key, row.role, row.where);
     if (row.wantActive === false && personActive(p)) retirePerson(p.key);
+    row.made = p.key;
+  });
+  /* ── REPORTS TO, LAST (§655.1) ─────────────────────────────────────
+     After every row has become a person, because a manager may be a row
+     that was only just added. A new person takes it outright; a matched
+     one only where the review ticked it (§87.6). Through the setter, which
+     still refuses a loop a conflict row's answer closed — the one ring the
+     planner could not see — and leaves that person as they were. */
+  plan.rows.forEach(function(row){
+    if (!row.reportsTo || !row.made) return;
+    var eff = peopleRowEffective(row);
+    if (eff.mode === "match" && !row.picks.some(function(f){ return f.k === "reportsTo" && f.take; })) return;
+    var mgr = row.reportsTo.key || (function(){
+      var other = plan.rows.filter(function(x){ return x.at === "Row " + (row.reportsTo.row + 2); })[0];
+      return other && other.made;
+    })();
+    if (mgr) setReportsTo(personBy(row.made), mgr);
   });
 }
 
@@ -14291,6 +14719,16 @@ function rowAtRisk(x){
 function needsNote(x){
   return rowAtRisk(x) && !(x.obj.note && x.obj.note.trim());
 }
+/* §705: THE WORD THE TAG SAYS — the band's own label ("Off track") when the
+   row owes a note, "" when it does not. One reader for every note box, so the
+   tag, the red edge and Submit's refusal cannot disagree about which rows owe
+   one (§53.5). Replaces §576's lock, which shut every other box on the page
+   until the note was written; Islam, 2026-11-02: *"don't stop a person from
+   entering the numbers"*. The box now says it is owed and nothing is shut. */
+function noteWant(x){
+  if (!needsNote(x)) return "";
+  return bandOf(rowReads(x)).label || "Off track";
+}
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
 /* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§105) ────────────────────
@@ -14665,46 +15103,6 @@ function noteMayWrite(subject, x){
   if (plansInObjectives(t)) return canReportFnRow(holderTarget(t), null, x.obj);
   /* `capReportBody`: a capability's own objectives belong to no project. */
   return canReportFnWhole(holderCodeOwner(c));
-}
-/* THE SUBJECTS ONE REPORTING PAGE DRAWS: its own, and on the company's the
-   capabilities reported in its own section (\u00a7520.8 \u2014 `capsHere()`, the same
-   narrowing that section is drawn from). */
-function noteLockSubjects(target){
-  var t = String(target || ""), out = [t];
-  if (t === "group" && holderSubject(t) === "group" && SMPRules.capExists(GROUP) &&
-      typeof capsHere === "function")
-    capsHere().forEach(function(c){ out.push("cap:" + c.id); });
-  return out;
-}
-/* The lock for one page: the Reporting page of `target`, or My reporting
-   (`mine`). NULL when nothing is red, so every caller asks one truthy
-   question. A breakdown's cells share their row's note (\u00a7343), so its row is
-   one entry however many of its figures are red. A report already closed
-   (submitted or parked, \u00a7220) has no open box to shut. */
-function noteLockOf(target, mine){
-  if (!REVIEW || REVIEW.state !== "open") return null;
-  var rows = [], ids = {};
-  var take = function(x, subj){
-    var id = x.noteId || x.id;
-    if (ids[id]) return;
-    ids[id] = true;
-    rows.push(Object.assign({ subj: subj }, x));
-  };
-  if (mine) {
-    /* \u00a7576: on My reporting the owner writes the note on their own red rows
-       (Islam's call) \u2014 asked through the gate their figure is entered by. */
-    myLineRows().forEach(function(r){
-      if (needsNote(r) && canEnterLine(r.target, r, "mine")) take(r, r.target);
-    });
-  } else if (target) {
-    noteLockSubjects(target).forEach(function(s){
-      if (reportClosed(s)) return;
-      subjectAsked(s).forEach(function(x){
-        if (needsNote(x) && noteMayWrite(s, x)) take(x, s);
-      });
-    });
-  }
-  return rows.length ? { rows: rows, ids: ids, mine: !!mine } : null;
 }
 /* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
    Islam, from his own tenant: the report would not submit because something
@@ -17428,6 +17826,14 @@ function partFilter(u){
   if (u && u.topLayer && partOnly()) {
     var w = world(), v = viewer();
     pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
+  }
+  /* §704: "OWN PIECE" ON A UNIT OR A FUNCTION. The ladder's lowest level,
+     where the place's pages are open and its lists hold only what the person
+     holds — the half eye's narrowing, carried from the top's own plan to
+     every place, and asked of the one rule both sides read. */
+  else if (u && !u.topLayer && u.ukey && SMPRules.pieceOnlyAt(world(), viewer(), u.ukey)) {
+    var w2 = world(), v2 = viewer();
+    pf = function(p){ return SMPRules.holdsItem(w2, v2, p); };
   }
   if (!pf) return hf;
   if (!hf) return pf;
@@ -20384,6 +20790,18 @@ function reportSectionState(){
     : { cls:"appear", badge:"" };
 }
 var CURRENT_REPORT_KEY = null;
+/* WHETHER THE REPORTING TAB IS DRAWN AT ALL (§690). Islam: *"make the
+   reporting button always available for the office."* For everybody else the
+   tab follows the cycle exactly as `reportSectionState()` says — open it is
+   there, closed it goes. The office is the one hand that opens, closes and
+   reopens cycles, so for it the tab stands whatever the cycle's state: on a
+   closed one the page says the cycle is closed and that its figures are a
+   record (renderReport / renderFnReport already draw that note), rather than
+   the tab disappearing from under the people who run the cycle. The grant is
+   still asked by `allowed()`; this answers only the cycle half. */
+function reportTabOn(){
+  return !!reportSectionState() || inOffice();
+}
 
 /* WHICH ROW A REPORTING BOX IS ABOUT (§334.18, correcting §326).
    IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,
@@ -24279,6 +24697,7 @@ var PILLAR_RANGE = "Pillars!$A$2:$A$400";
    rows in it puts blank entries in the dropdown. */
 function LISTS_UNIT_RANGE(n){ return "Lists!$A$2:$A$" + (n + 1); }
 function LISTS_BU_RANGE(n){ return "Lists!$B$2:$B$" + (n + 1); }
+function LISTS_PEOPLE_RANGE(n){ return "Lists!$C$2:$C$" + (n + 1); }   /* §655.1 */
 var PROJECT_RANGE = "Projects!$A$2:$A$100";
 
 /* ── THE REGISTER, FOR THE WORKBOOK'S FIVE OWNER COLUMNS (§551) ────────
@@ -25867,6 +26286,7 @@ function peopleReadme(){
     ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
     ["Unit", "Where they actually sit here — the business unit, supporting function or company that decides what they can open. Choose it from the dropdown. Fill it and it is used; leave it blank and their Official BU decides, where that name points at exactly one place; leave both and they are left where they are. This is the column to fill if you already know: nobody then has to be asked at sign-in."],
+    ["Reports to", "Who they answer to, written as the person's Name exactly as this file writes it — pick it from the dropdown. Their Emp ID or email is read too, and so is somebody added further down this same file. It decides nothing about what anybody can open. Blank keeps who they report to now; a name on two rows, a name nobody carries, or a chain that would loop back on itself stops the row and says so."],
     ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Employee and Contributor are not offered: they are what somebody attached to a part of the business and holding nothing else already is — Contributor where a plan names them, Employee where it does not."],
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
@@ -25940,6 +26360,17 @@ function peopleWorkbook(){
      carry the same value the register shows, or a download-edit-upload round
      trip would report the two people it separated as a change. */
   var dnames = displayNames();
+  /* §655.1: the register's names, for the Reports to dropdown — the short
+     names the column is written in, active people only, in the register's
+     order. From the Lists sheet, for §67.5's reason (an inline list over
+     255 characters is silently empty). Soft, like Official BU's: a manager
+     who is in the same file and not yet on the register is typed, and the
+     reader resolves them. */
+  var mgrNames = PEOPLE.filter(function(p){ return personActive(p) && !SMPRules.isMintedRow(p); })
+                       .map(function(p){ return knownName(p, dnames); });
+  if (mgrNames.length) {
+    vals.push({ range:range("Reports to"), from:LISTS_PEOPLE_RANGE(mgrNames.length), soft:true });
+  }
   var rows = PEOPLE.map(function(p){
     var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
     return [
@@ -25954,6 +26385,9 @@ function peopleWorkbook(){
          which is a real state, and writing a guess into it would be the file
          answering a question only the SMO can. */
       roleWhereLabel2(personAt(p)),
+      /* §655.1: the manager's short name, as the register shows it — unique
+         across the register (§81.1), so it reads back to one row. */
+      (function(){ var m = reportsToOf(p); return m ? knownName(m, dnames) : ""; })(),
       held.length ? roleName(held[0].role) : "",
       personActive(p) ? "Active" : "Retired",
       /* Everything after the first, WITH where it is held — the one column
@@ -25970,16 +26404,19 @@ function peopleWorkbook(){
      deletes, and a validation whose range has gone is a dropdown that is empty
      again, which is the bug this exists to fix. */
   var listRows = [];
-  for (var i = 0; i < Math.max(places.length, names.length); i++) {
-    listRows.push([places[i] || "", names[i] || ""]);
+  for (var i = 0; i < Math.max(places.length, names.length, mgrNames.length); i++) {
+    listRows.push([places[i] || "", names[i] || "", mgrNames[i] || ""]);
   }
 
   return [
     peopleReadme(),
-    { name:"Lists", widths:[38, 30],
-      head:["Unit, function or company", "Official BU"],
+    { name:"Lists", widths:[38, 30, 30],
+      head:["Unit, function or company", "Official BU", "People"],
       rows:listRows },
-    { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
+    /* §655.1: ONE WIDTH PER HEADING, "Also holds" included — the list had
+       been one short since the Name split (§93.8), so every column from
+       Name on wore its neighbour's width and the last one wore Excel's. */
+    { name:"People", widths:[12, 30, 22, 32, 30, 16, 22, 26, 24, 20, 11, 34],
       /* THE ESSENTIALS WEAR AN ASTERISK (§390.1). Written on the header only,
          never on PEOPLE_FILE_COLS: the validation ranges above look a column
          up by its bare name, and the reader matches headings ignoring
@@ -25990,7 +26427,12 @@ function peopleWorkbook(){
       }),
       /* "Also holds" is written and never read, so it is locked — and its
          index moved with the new column (§65). */
-      lockedCols:[9],
+      /* §655.1: DERIVED, like the validation ranges above. Written as a
+         position it had drifted — [9] since §65 — and the two columns added
+         since (§93.8, §655.1) each moved "Also holds" a place along, so the
+         grey style was sitting on Status. The platform's own column is the
+         one after the last of PEOPLE_FILE_COLS, by construction. */
+      lockedCols:[PEOPLE_FILE_COLS.length],
       validations:vals,
       rows:rows }
   ];
@@ -26017,7 +26459,9 @@ var PEOPLE_HEAD_ALIASES = {
   mail:"Email", emailaddress:"Email", email:"Email", workemail:"Email",
   employeename:"Name", employee:"Name",
   employeeid:"Emp ID", employeenumber:"Emp ID", empno:"Emp ID", staffid:"Emp ID",
-  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile"
+  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile",
+  manager:"Reports to", linemanager:"Reports to", managername:"Reports to",
+  supervisor:"Reports to", reportingto:"Reports to", reportingmanager:"Reports to"
 };
 var PEOPLE_ESSENTIALS = ["Name", "Job title", "Email"];
 /* What the downloaded template marks with an asterisk: the same three, with
@@ -29111,8 +29555,8 @@ function arrangeBtn(scope, unitKey){
    which is exactly why the button had to be honest about what it does. */
 function draftBtns(){
   return '<span class="repdraft">' +
-    '<button class="editbtn" data-repsave="1">Save draft</button>' +
     '<button class="linkbu" data-repcancel="1">Cancel</button>' +
+    '<button class="editbtn" data-repsave="1">Save draft</button>' +
     '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
     '</span>';
 }
@@ -30778,22 +31222,229 @@ function renderCompanyFoundation(){
   return foundationBody(o, "co:" + k, gpg);
 }
 
+/* ── WHO WE ARE IS TYPED IN ONE BOX (§685) ───────────────────────────
+   Islam, of the five lines of two boxes each: *"is there a more convenient
+   way for adding this part without filling 8 boxes"* — and, of the one-box
+   drawing §613 had set aside: *"keep approach 2 in creation but shows like
+   today with each bold title on the left and allows the user to make bold
+   the words from the start of the line only"*. So: ONE box while the pen is
+   on, a line per row, the bold opening words being the opener; and the
+   table exactly as it was while reading. The stored shape, `[opener, text]`
+   a line, does not move — the reading window, the slides and both
+   workbooks need nothing, and a unit's line keeps its id (§96's renumber
+   runs on the write as it did on Add). Bold runs from the START of a line
+   to the end of the selection and never from the middle, which is what
+   keeps every line splittable into the two columns; pressed inside the
+   bold words it takes the bold off. Written on blur like every other bound
+   field (§71.2, never a repaint under the cursor — §35), read back off the
+   box's lines; a blank line is not a row. Paste brings words only. */
+function clauseLines(clauses, page, tgt){
+  var cl = clauses || [];
+  if (!page) return '<dl style="margin:0">' + cl.map(function(c){
+      return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd><span class="flow">' + esc(c[1]) + '</span></dd></div>';
+    }).join("") + '</dl>';
+  return '<div class="clausebar"><button type="button" class="bbtn" data-clausebold="' + esc(tgt) +
+      '" title="Bold the opening words (Ctrl+B)" aria-keyshortcuts="Control+B" aria-pressed="false">B</button>' +
+      '<span class="clausehint">Select the opening words and press B (or Ctrl+B); bold runs from the start of the line. Enter starts a new line.</span></div>' +
+    '<div class="clausebox" contenteditable="true" role="textbox" aria-multiline="true" aria-label="' + esc(L("brief")) +
+      '" data-clausebox="' + esc(tgt) + '">' +
+      (cl.length ? cl.map(function(c){ return CLAUSEBOX.lineHtml(c[0], c[1]); }).join("") : CLAUSEBOX.lineHtml("", "")) +
+    '</div>';
+}
+/* The box itself. One <div> per line; the opener is the <b> run at the very
+   start of it and everything after is the text. The browser is left to type,
+   delete and move the caret; this steps in for the four things it would get
+   wrong — Enter (a new line that carries no bold), Ctrl+B (from the start of
+   the line, never from the middle), paste (words only, a line per pasted
+   line) and a <b> that lands mid-line after two lines are joined (unwrapped,
+   the caret left where it is). */
+var CLAUSEBOX = {
+  lineHtml: function(op, tx){
+    return "<div>" + (op ? "<b>" + esc(op) + "</b>" : "") + (op && tx ? " " : "") + esc(tx) + (op || tx ? "" : "<br>") + "</div>";
+  },
+  lines: function(box){
+    return Array.prototype.filter.call(box.childNodes, function(n){ return n.nodeType === 1 && n.nodeName !== "BR"; });
+  },
+  read: function(div){
+    var op = "", tx = "", lead = true;
+    Array.prototype.forEach.call(div.childNodes, function(n){
+      var t = n.textContent || "";
+      if (n.nodeName === "BR") return;
+      if (lead && (n.nodeName === "B" || n.nodeName === "STRONG")) { op += t; return; }
+      if (lead && !op && !t.trim()) return;
+      lead = false; tx += t;
+    });
+    return [op.trim(), tx.trim()];
+  },
+  rows: function(box){
+    return CLAUSEBOX.lines(box).map(CLAUSEBOX.read).filter(function(l){ return l[0] || l[1]; });
+  },
+  setLine: function(div, op, tx){ div.innerHTML = CLAUSEBOX.lineHtml(op, tx).slice(5, -6); },
+  normalise: function(box){
+    if (!CLAUSEBOX.lines(box).length) {
+      var t = box.textContent; box.innerHTML = CLAUSEBOX.lineHtml("", t);
+      CLAUSEBOX.place(CLAUSEBOX.lines(box)[0], t.length); return;
+    }
+    Array.prototype.slice.call(box.childNodes).forEach(function(n){
+      if (n.nodeType === 3 && n.textContent.trim()) { var d = document.createElement("div"); box.replaceChild(d, n); d.appendChild(n); }
+      else if (n.nodeType === 3 || n.nodeName === "BR") box.removeChild(n);
+    });
+    CLAUSEBOX.lines(box).forEach(function(div){
+      var seen = false;
+      Array.prototype.slice.call(div.childNodes).forEach(function(n){
+        if (n.nodeName === "B" || n.nodeName === "STRONG") {
+          if (seen) { while (n.firstChild) div.insertBefore(n.firstChild, n); div.removeChild(n); }
+        } else if (n.nodeType === 1 && n.nodeName !== "BR") {
+          div.replaceChild(document.createTextNode(n.textContent), n); seen = true;
+        } else if ((n.textContent || "").trim()) seen = true;
+      });
+    });
+  },
+  lineOf: function(box, node){
+    while (node && node.parentNode !== box) node = node.parentNode;
+    return node && node.nodeType === 1 ? node : null;
+  },
+  offsetIn: function(div, node, off){
+    var r = document.createRange(); r.setStart(div, 0); r.setEnd(node, off); return r.toString().length;
+  },
+  place: function(div, off){
+    var w = document.createTreeWalker(div, NodeFilter.SHOW_TEXT), n, seen = 0,
+        sel = window.getSelection(), r = document.createRange();
+    while ((n = w.nextNode())) {
+      var len = n.textContent.length;
+      if (seen + len >= off) { r.setStart(n, off - seen); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); return; }
+      seen += len;
+    }
+    r.selectNodeContents(div); r.collapse(false); sel.removeAllRanges(); sel.addRange(r);
+  },
+  caret: function(box){
+    var sel = window.getSelection();
+    if (!sel.rangeCount || !box.contains(sel.anchorNode)) return null;
+    var r = sel.getRangeAt(0), div = CLAUSEBOX.lineOf(box, r.startContainer);
+    if (!div) return null;
+    var endDiv = CLAUSEBOX.lineOf(box, r.endContainer);
+    return { div: div,
+      start: CLAUSEBOX.offsetIn(div, r.startContainer, r.startOffset),
+      end: endDiv === div ? CLAUSEBOX.offsetIn(div, r.endContainer, r.endOffset) : div.textContent.length };
+  },
+  inOpener: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) return false;
+    var op = CLAUSEBOX.read(c.div)[0];
+    return !!op && c.end <= op.length;
+  },
+  mark: function(box){
+    var bar = box.previousElementSibling, b = bar && bar.querySelector(".bbtn");
+    if (!b) return;
+    var on = CLAUSEBOX.inOpener(box);
+    b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false");
+  },
+  toggleBold: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) { box.focus(); return; }
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div), op, tx;
+    if (l[0] && c.end <= l[0].length) { op = ""; tx = (l[0] + " " + l[1]).trim(); }
+    else { op = full.slice(0, c.end).trim(); tx = full.slice(c.end).trim(); }
+    CLAUSEBOX.setLine(c.div, op, tx);
+    CLAUSEBOX.place(c.div, Math.min(op ? op.length : c.end, c.div.textContent.length));
+    CLAUSEBOX.mark(box);
+  },
+  split: function(box){
+    var c = CLAUSEBOX.caret(box); if (!c) return;
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div);
+    var head = full.slice(0, c.start), tail = full.slice(c.end), inOp = l[0] && c.start <= l[0].length;
+    CLAUSEBOX.setLine(c.div, inOp ? head.trim() : l[0], inOp ? "" : head.slice(l[0].length).trim());
+    var nd = document.createElement("div"); CLAUSEBOX.setLine(nd, "", tail.trim());
+    c.div.parentNode.insertBefore(nd, c.div.nextSibling);
+    CLAUSEBOX.place(nd, 0); CLAUSEBOX.mark(box);
+  },
+  paste: function(box, e){
+    e.preventDefault();
+    var text = String((e.clipboardData || window.clipboardData).getData("text/plain") || "").replace(/\r/g, "");
+    var parts = text.split("\n"), c = CLAUSEBOX.caret(box);
+    if (!c) {
+      parts.forEach(function(p){ var d = document.createElement("div"); CLAUSEBOX.setLine(d, "", p.trim()); box.appendChild(d); });
+      return;
+    }
+    var full = c.div.textContent, l = CLAUSEBOX.read(c.div), inOp = l[0] && c.start <= l[0].length;
+    if (parts.length === 1) {
+      var joined = full.slice(0, c.start) + parts[0] + full.slice(c.end);
+      var op = inOp ? joined.slice(0, l[0].length + parts[0].length).trim() : l[0];
+      CLAUSEBOX.setLine(c.div, op, joined.slice(op ? op.length : 0).trim());
+      CLAUSEBOX.place(c.div, Math.min(c.start + parts[0].length, c.div.textContent.length));
+      CLAUSEBOX.mark(box); return;
+    }
+    var head = full.slice(0, c.start) + parts[0], tail = parts[parts.length - 1] + full.slice(c.end);
+    CLAUSEBOX.setLine(c.div, inOp ? head.trim() : l[0], inOp ? "" : head.slice(l[0].length).trim());
+    var after = c.div;
+    parts.slice(1).forEach(function(p, i){
+      var d = document.createElement("div");
+      CLAUSEBOX.setLine(d, "", (i === parts.length - 2 ? tail : p).trim());
+      after.parentNode.insertBefore(d, after.nextSibling); after = d;
+    });
+    CLAUSEBOX.place(after, parts[parts.length - 1].length); CLAUSEBOX.mark(box);
+  },
+  /* `write(rows)` is handed the lines as `[opener, text]` pairs, blank ones
+     left out, on blur and only when something changed — a `change` event,
+     which a contenteditable box never fires, done by hand. */
+  wire: function(box, write){
+    var was = JSON.stringify(CLAUSEBOX.rows(box));
+    var bar = box.previousElementSibling, b = bar && bar.querySelector(".bbtn");
+    box.addEventListener("input", function(){ CLAUSEBOX.normalise(box); CLAUSEBOX.mark(box); });
+    /* TYPING AT THE END OF THE BOLD WORDS WRITES THE TEXT, NOT THE OPENER. A
+       new unit starts with the group's openers and nothing after them
+       (§96's fresh shape), so the first thing anybody does is put the caret
+       after "We are" and type — and a browser carries the bold on from the
+       end of a <b>, which would have made the whole line the opener and
+       the text empty. So the letter typed at the end of the bold is put in
+       by hand, into the plain text after it, and the caret left in that
+       text (merely moving the caret out first is not enough: the browser
+       puts it back to the end of the <b> and types bold). Typing INSIDE
+       the opener still extends it, and B is how the opener grows on
+       purpose. */
+    box.addEventListener("beforeinput", function(e){
+      if (e.inputType !== "insertText" || !e.data) return;
+      var sel = window.getSelection(); if (!sel.rangeCount || !sel.isCollapsed) return;
+      var r = sel.getRangeAt(0), n = r.startContainer, bold = n.nodeType === 3 ? n.parentNode : n;
+      if (!bold || (bold.nodeName !== "B" && bold.nodeName !== "STRONG") || bold.parentNode.parentNode !== box) return;
+      if (n.nodeType === 3 && (r.startOffset !== n.textContent.length || n.nextSibling)) return;
+      if (n.nodeType !== 3 && r.startOffset !== n.childNodes.length) return;
+      e.preventDefault();
+      var t = bold.nextSibling;
+      if (!t || t.nodeType !== 3) { t = document.createTextNode(""); bold.parentNode.insertBefore(t, bold.nextSibling); }
+      t.insertData(0, e.data);
+      var nr = document.createRange(); nr.setStart(t, e.data.length); nr.collapse(true);
+      sel.removeAllRanges(); sel.addRange(nr);
+      CLAUSEBOX.mark(box);
+    });
+    box.addEventListener("keydown", function(e){
+      if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) { e.preventDefault(); CLAUSEBOX.toggleBold(box); }
+      else if (e.key === "Enter") { e.preventDefault(); CLAUSEBOX.split(box); }
+      else if ((e.ctrlKey || e.metaKey) && /^[iu]$/i.test(e.key)) e.preventDefault();
+    });
+    box.addEventListener("paste", function(e){ CLAUSEBOX.paste(box, e); });
+    box.addEventListener("blur", function(){
+      var now = CLAUSEBOX.rows(box), s = JSON.stringify(now);
+      if (s === was) return;
+      was = s; write(now);
+    });
+    if (b) {
+      b.addEventListener("mousedown", function(e){ e.preventDefault(); });
+      b.addEventListener("click", function(){ CLAUSEBOX.toggleBold(box); });
+    }
+    if (!CLAUSEBOX.listening) {
+      CLAUSEBOX.listening = true;
+      document.addEventListener("selectionchange", function(){
+        var a = document.activeElement;
+        if (a && a.classList && a.classList.contains("clausebox")) CLAUSEBOX.mark(a);
+      });
+    }
+  }
+};
+
 function foundationBody(o, tgt, gpg){
   /* §404: every block is a component the office may switch off. */
   var on = function(c){ return compOn(tgt, c); };
   return '<div class="fgrid">' + (on("brief") ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
-      '<dl style="margin:0">' +
-      (o.clauses || []).map(function(c, ci){
-        var clt = tgt + "|" + ci;
-        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
-          (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
-            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(tgt) + '">+ Add a line</button></div>' : '') +
+      clauseLines(o.clauses, gpg, tgt) +
       '</div>' : '') +
       '<div class="fcol">' +
         (on("purpose") ? '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
@@ -31611,12 +32262,26 @@ function textOr(page, value, cls, setter){
 /* §576: `subj` is the subject the row belongs to, written as `data-repu` the
    way `repEntry` writes it — My reporting draws rows from several units, so
    the note's handler must resolve the row against ITS unit rather than the
-   page it is standing on (§345). Absent everywhere else, as before. */
+   page it is standing on (§345). Absent everywhere else, as before.
+
+   §705: `want` IS THE BAND'S WORD, NOT A BOOLEAN (`noteWant`): "" when the
+   row owes nothing, "Off track" when it does — and then the box wears a TAG
+   above it, "Note needed · off track", and asks in the prompt's own words.
+   The tag is drawn here, by the one builder every note box comes through,
+   so the unit's table, a capability's and My reporting cannot drift apart
+   on it (§53.5). It replaces §576's lock (a bar, every other box shut, the
+   cursor steered); the mockup Islam approved, design-mockups/note-tag/
+   2026-11-02_tag-on-the-note-box.html, option A. The prompt is grey and never
+   stored: Islam wanted words in the box so the person feels something is
+   owed, and real text there would have been saved as the note and let Submit
+   through on "No justification". */
+var NOTE_PROMPT = "No justification yet \u2014 why, and what is being done";
 function noteBox(hook, id, value, want, subj){
-  return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
+  return (want ? '<span class="notetag">Note needed \u00b7 ' + esc(String(want).toLowerCase()) + '</span>' : '') +
+    '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
     '="' + esc(id) + '"' + (subj ? ' data-repu="' + esc(subj) + '"' : '') +
     ' rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
-    (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
+    (want ? NOTE_PROMPT : "Note, if there is one") + '">' +
     esc(value || "") + '</textarea>';
 }
 /* AND THE OTHER HALF: A LINE BREAK SOMEBODY TYPED HAS TO SURVIVE BEING READ
@@ -31629,8 +32294,16 @@ function noteBox(hook, id, value, want, subj){
    ONE BUILDER, because there are six places that print a stored note and a
    class added at five of them is the drift this exists to stop (§53.5,
    §104.7). `tight` is the margin the cell wants, not a second kind of note. */
-function noteRead(note, tight){
-  if (!note) return "";
+/* §705: AND A RED ROW WITH NO NOTE, READ BY SOMEBODY WHO CANNOT WRITE IT,
+   SAYS SO. `need` is `needsNote(row)`, asked by the caller that has the row;
+   where it is true and nothing is written the cell reads "Needs justification"
+   in red — the platform's word, never stored, so a reader is not left with a
+   blank beside a red figure. Islam, 2026-11-02: *"make the red is Needs
+   justification"*. */
+var NOTE_NEED = "Needs justification";
+function noteRead(note, tight, need){
+  if (!note) return need ? '<span class="why notetext needjust"' + (tight ? ' style="margin:0"' : '') +
+    '>' + NOTE_NEED + '</span>' : "";
   return '<span class="why notetext"' + (tight ? ' style="margin:0"' : '') + '>' +
     esc(note) + '</span>';
 }
@@ -33758,19 +34431,7 @@ function renderUnitFoundation(u){
       "the Foundation") +
     '<div class="fgrid">' + (compOn(u.ukey, "brief")
       ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
-      '<dl style="margin:0">' +
-      u.clauses.map(function(c, ci){
-        var clt = u.ukey + "|" + ci;
-        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
-          (upg ? inputOr(upg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) +
-          (upg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
-            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
-        '">+ Add a line</button></div>' : '') + '</div>' : '') +
+      clauseLines(u.clauses, upg, u.ukey) + '</div>' : '') +
       unitPurposeAnd(u, upg,
         aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
           function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
@@ -34636,30 +35297,12 @@ function renderFocusBoard(){
    is not fixed from this page, so the chip is a door to where it is (§16.7 —
    a count that cannot take you to what it counts makes work; a door that
    admits what it cannot do is not the same fault). */
-/* ── §576: THE BAR THAT SAYS WHICH NOTE COMES FIRST ────────────────────
-   `NOTELOCK` is worked out by paint() before the render (`noteLockOf`), and
-   while it holds a row THIS bar is drawn in the "to finish" bar's place — the
-   mockup Islam approved: one bar, naming the row, and Go to it. Drawn for
-   whoever is locked, not only for whoever may submit, because a bounded
-   reporter and a tactic's owner are locked too and are the people most in
-   need of being told why every box went grey. It names the FIRST row and
-   counts the rest, so the person is never handed a list to work out. */
-var NOTELOCK = null;
-function noteLockBar(){
-  var lk = NOTELOCK;
-  if (!lk) return "";
-  var x = lk.rows[0], n = lk.rows.length;
-  var name = String((x.obj && x.obj.name) || "").trim() || "A figure";
-  var band = bandOf(rowReads(x)).label || "Off track";
-  return '<div class="lockbar" data-notelock="1" role="status">' +
-    '<span><b>' + esc(name) + ' is ' + esc(band.toLowerCase()) + '.</b> ' +
-    'Write its note before entering anything else.' +
-    (n > 1 ? ' <span class="lockn">1 of ' + n + '</span>' : '') + '</span>' +
-    '<button type="button" class="lockgo" data-notego="1">Go to it</button></div>';
-}
+/* §705: §576's lock bar stood here — drawn in this bar's place while a red
+   figure held the page. The lock went (the tag on the note box says what is
+   owed, `noteBox`), so this bar is the only one again and counts the note
+   among what is left, as it did before §576. */
 function reportBar(target){
   var t = String(target || "");
-  if (NOTELOCK) return noteLockBar();
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
   if (!REVIEW || REVIEW.state !== "open" || reportClosed(t)) return "";
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
@@ -34874,8 +35517,8 @@ function renderReport(u, opt){
   };
   var noteCell = function(x){
     return canEnterNote(u.ukey, x)
-      ? noteBox("note", x.id, x.obj.note, needsNote(x))
-      : noteRead(x.obj.note, true);
+      ? noteBox("note", x.id, x.obj.note, noteWant(x))
+      : noteRead(x.obj.note, true, needsNote(x));
   };
   var doneOf = function(list){
     var n = 0;
@@ -35584,7 +36227,7 @@ function capsShown(subject) {
   var target = holderTarget(subject);
   if (isCapTarget(target)) {
     var one = capById(capKeyOf(target));
-    return one ? [one] : [];
+    return one ? pieceHolders(target, [one]) : [];
   }
   /* §334: ONE HOLDER, SO THERE IS NOTHING LEFT TO ORDER. §310 sorted this
      list so a project owner met their own capability first; since §326 a
@@ -35595,8 +36238,22 @@ function capsShown(subject) {
      their project rather than a function page with nothing of theirs on it. */
   /* §405: a business unit that does not plan in pillars holds its own work
      exactly as a function does — one holder, addressed `u:<key>`. */
-  if (isUnitHolderId(target)) return unitHolders(subjKey(target));
-  return fnHolders(target.slice(3));
+  var hs = isUnitHolderId(target) ? unitHolders(subjKey(target)) : fnHolders(target.slice(3));
+  return pieceHolders(target, hs);
+}
+/* §704: AT "OWN PIECE" a holder is drawn with only the person's own projects
+   — one door, so Performance, Projects and Reporting narrow together. A
+   reading view: the holder's other fields are its own (the prototype), and
+   the projects are the same objects, so a figure reported lands where it
+   always did. Nobody who edits a plan is ever at own piece (the office reads
+   everything), so nothing adds to this list. */
+function pieceHolders(target, hs){
+  var place = isUnitHolderId(target) ? subjKey(target) : target;
+  if (!SMPRules.pieceOnlyAt(world(), viewer(), place)) return hs;
+  var w = world(), v = viewer();
+  return hs.map(function(c){
+    return Object.create(c, { projects: { value: (c.projects || []).filter(function(p){ return SMPRules.holdsItem(w, v, p); }), enumerable: true } });
+  });
 }
 /* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
    halves differ we say which and why). Projects, Reporting and Performance
@@ -36138,7 +36795,7 @@ function capKOTable(c){
            which is the honest pair: what they said, and what it scores. */
         var sc = measureScore(m);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
-          noteRead(m.note) + '</td>' +
+          noteRead(m.note, false, needsNote({ kind:"objective", obj:m })) + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -36164,7 +36821,7 @@ function projPerformanceBody(p, fk){
     var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
     return '<tr' + (notDue && !has ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + lateNote(when, done) +
-        noteRead(o.note) + '</td>' +
+        noteRead(o.note, false, !notDue && needsNote({ kind:(d ? "deliverable" : "outcome"), obj:o })) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + got + '</td>' +
@@ -36878,7 +37535,7 @@ function fnObjPerfTables(fk){
     var v = msReads(a), quiet = !dueThisCycle(a.due) && !a.status;
     return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
-      '<td>' + esc(a.name) + noteRead(a.note) + '</td>' +
+      '<td>' + esc(a.name) + noteRead(a.note, false, dueThisCycle(a.due) && needsNote({ kind:"action", obj:a })) + '</td>' +
       '<td class="cc">' + esc(a.owner || "—") + '</td>' +
       '<td class="cc">' + dxDate(a.due, a.status === "done") + '</td>' +
       '<td class="cc">' + (quiet ? notDueCell() : msPill(a)) + '</td>' +
@@ -36917,7 +37574,7 @@ function fnObjReportBody(fk){
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, mayR, m.name) + '</td>' +
       '<td class="cc">' + (has ? '<span class="fixedval">' + pct(measureScore(m)) + '</span>'
                                : '<span class="fixedval">&mdash;</span>') + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, mayR) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"objective", obj:m }, mayR) + '</td></tr>';
   }).join("");
   var aRows = SMPRules.shown(fnActions(fk)).map(function(a, i){
     var notDue = !dueThisCycle(a.due), quiet = notDue && !a.status;
@@ -36930,7 +37587,7 @@ function fnObjReportBody(fk){
         ? capPctBox(a, mayA, a.name) + (statusPending(a) ? needsPct() : "")
         : (a.status ? '<b>' + msReads(a) + '%</b>'
                     : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
-      '<td class="notecol">' + capNoteBox(a, mayA) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"action", obj:a, asked:!notDue }, mayA) + '</td></tr>';
   }).join("");
   return (kRows ? '<h4 class="mini">Objectives</h4>' +
       miniTable(["#","Objective","Dir.","Target","Reported","Progress","Note"], kRows) : "") +
@@ -36956,9 +37613,7 @@ function renderFnObjReport(fk){
      shut. */
   REPORT_CHROME = repChrome(target, c.done, c.total, pctDone, mayAll, subd, parked,
                             submitWhyShort(target), ownStateChip(target));
-  /* §576: this format draws no "to finish" bar, so the lock's bar goes where
-     the others put it — above the tables. */
-  return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
+  return '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
 /* §598.1: a function's projects or objectives page shows the plan as it
@@ -37119,13 +37774,23 @@ function capPctBox(x, may, label){
 }
 /* THROUGH `noteBox` (§271), or the two halves of one product's reporting go on
    being fine differently (§53.5, A15): the fault this fixes was on both pages
-   and a fix to one of them is how they drift. This side asks for no note, so
-   `want` is false and the placeholder is the quiet one — which is a difference
-   in what is OWED, not in the control. */
-function capNoteBox(x, may){
+   and a fix to one of them is how they drift.
+   §705: handed the ROW (`{kind, obj}`, the shape `rowReads` understands) and
+   not the object, so this side asks the same question a unit's note cell
+   asks — `noteWant` for the tag and the prompt, `needsNote` for the red
+   "Needs justification" where the person may not write. Before §705 it passed
+   `want:false` always (§279's recorded not-done) and §576's lock patched the
+   owed box after the paint; now the builder knows.
+   `asked` IS PART OF THE ROW, as `fnReportItems` carries it: a milestone or
+   outcome whose date has not come is red on its own figure and owed by
+   nobody — Submit does not ask for it (`fnAskedItems`), so the tag must not
+   either, or the page would tag four rows where the gate counts one. The
+   caller passes the same answer its "Not due" cell is drawn from. */
+function capNoteBox(row, may){
+  var owed = row.asked !== false && needsNote(row);
   return may
-    ? noteBox("cnote", x.id, x.note, false)
-    : noteRead(x.note, true);
+    ? noteBox("cnote", row.obj.id, row.obj.note, owed ? noteWant(row) : "")
+    : noteRead(row.obj.note, true, owed);
 }
 function capPickBox(x, may, opts, val){
   if (!may) return '<span class="mono">' + (val ? esc(val) : "\u2014") + '</span>';
@@ -37184,7 +37849,7 @@ function projReportBody(p, subject){
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + ent + '</td>' +
       '<td class="cc">' + pcell + '</td>' +
-      '<td class="notecol">' + capNoteBox(o, mayR) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:(d ? "deliverable" : "outcome"), obj:o, asked:!notDue }, mayR) + '</td></tr>';
   }).join("");
   var mRows = p.milestones.map(function(m, i){
     var notDue = !dueThisCycle(m.finish), quiet = notDue && !m.status;
@@ -37197,7 +37862,7 @@ function projReportBody(p, subject){
         ? capPctBox(m, mayM, m.name) + (statusPending(m) ? needsPct() : "")
         : (m.status ? '<b>' + msReads(m) + '%</b>'
                     : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, mayM) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"milestone", obj:m, asked:!notDue }, mayM) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
@@ -37234,7 +37899,7 @@ function capReportBody(c){
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
       '<td class="num">' + repTargetCell(m) + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox({ kind:"objective", obj:m }, may) + '</td></tr>';
   }).join("");
   var sel = railPick(c);
   var koBlock = c.keyObjectives.length
@@ -39654,127 +40319,226 @@ function accessMerged(row, col){
            value: vals.length === 1 ? vals[0] : null, mixed: vals.length > 1 };
 }
 
-function renderAccess(){
-  /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
-     A grant cannot express this: the SMO team holds `a_setup` at edit, which
-     is what lets them run every other Setup page — and editing THIS page is
-     editing who may edit this page, so anybody who can is a Super user
-     whatever their row says. The page stays READABLE to them: knowing what
-     everyone may do is part of running the office, and §37's rules are shown
-     to everyone who can open the page. */
-  var editable = grant("c_access") === "edit" && mayEditAccess();
-  /* §516.1: the second layer's row exists only where the client HAS a
-     second layer — Islam: "a client with no second layer has no second layer
-     row". Asked of midExists(), the one answer the set-up flow and the
-     Structure step already ask (§53.5). */
-  var COLS = SMPRules.ACCESS_COLS, ROWS = SMPRules.ACCESS_ROWS.filter(function(r){
-    return !r.mid || midExists(); });
+/* ── ROLES & ACCESS AS A LADDER (§704; design-mockups/roles-and-access) ──
+   Islam: *"it's more of levels of visibility … everyone set on a level can
+   see his level or see the bigger level(s) one by one"*, *"seeing doesn't
+   mean reporting"*, and, after the two rules were measured side by side on
+   every Raya seat, *"Apply the ladder."* So each role is one line: what it
+   ENTERS AND SUBMITS — a fact of what it holds, written as words, never a
+   control — and HOW FAR UP IT READS, the one control: own piece · own unit or
+   function · own division · the top, in the client's own words, the division
+   only where the client has one. The pen marks the level a role writes on (a switch), the eye every
+   level it reads; a level the role cannot stand on is struck through.
 
-  /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
-     (Islam, 2026-08-22: "remove all the descriptions from the headers and just
-     make it appear on hovering"). The notes are lists, and stacked under the
-     labels they made the HEAD of the table taller than its body. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §516) ──
-     Plan and Reporting are two answers about the same box, so the box's name
-     is written ONCE above them. Built off the `pair`/`col` fields the columns
-     carry — the header is derived from the same list the cells walk, so a
-     column cannot appear in one and not the other. */
-  var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
-  var hi = 0;
-  while (hi < COLS.length) {
-    var hc = COLS[hi];
-    if (!hc.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' +
-        esc(hc.label + " — " + hc.note) + '">' + esc(hc.label) + '</th>';
-      hi++;
-      continue;
+   The office's two rows are not on the ladder (they read and write
+   everything); the Copilot column and the reading-window switch stay as they
+   were. Under the table, one person can be moved a level up or down from
+   their role — an exception kept on the person, never a second table. */
+var ACC_EXC_PICK = null;
+function ladderWords(){
+  var top = String(labelWord("topword", "group") || "group").trim().toLowerCase();
+  var div = String(labelWord("division", "group") || "division").trim().toLowerCase();
+  return ["Own piece", buExists() ? "Own unit or function" : "Own function", "Own " + div, "The " + top];
+}
+var LADDER_ROW = {
+  gceo:      { held: null, says: "Nothing — holds no piece" },
+  cceo:      { held: null, says: "Nothing — holds no piece" },
+  owner:     { held: 1, says: "Their unit’s or function’s figures, and its submission" },
+  custodian: { held: 1, says: "What they keep, as its owner would" },
+  part:      { held: 0, says: "The lines of their own pillar, project, direction or capability" },
+  contrib:   { held: 0, says: "The lines that name them" }
+};
+LADDER_ROW[SMPRules.ACCESS_ROWS.filter(function(r){ return r.floor; })[0].key] = { held: null, floor: true, says: "Nothing" };
+function ladderLevels(){ return midExists() ? [0, 1, 2, 3] : [0, 1, 3]; }
+function ladderCell(r, editable){
+  var info = LADDER_ROW[r.key] || {}, words = ladderWords(), role = r.of[0], levels = ladderLevels();
+  var lv = SMPRules.ladderStored(world(), role);
+  if (lv === 2 && !midExists()) lv = 1;
+  var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = false;
+  /* a CEO stands only from their level up, and can be turned off to nothing */
+  var stand = SMPRules.LADDER_STAND[role];
+  if (stand != null) { lo = stand; if (lv < stand) lv = 0; }
+  var pen = info.held != null && SMPRules.penOn(world(), role);
+  /* the level a press on the lit one steps down to: the next one below that
+     the client has, never under the role's floor */
+  var below = function(i){ var k = levels.indexOf(i); return k > 0 && levels[k - 1] >= lo ? levels[k - 1] : stand != null ? 0 : null; };
+  return '<span class="ladder' + (editable ? '' : ' ro') + '" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + levels.map(function(i){
+    var struck = i < lo && !(info.floor && i === 0);
+    var word = info.floor && i === 0 ? "Nothing" : words[i];
+    /* the role's own level carries the pen switch: on, it enters and submits
+       what it holds; off, it reads it */
+    if (!struck && info.held === i) {
+      return '<button type="button" class="' + (pen ? 'pen' : 'eye') + '"' + (editable ? ' data-pen="' + esc(r.key) + '|' + (pen ? 'off' : 'on') + '"' : ' disabled') +
+        ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + pen + '" title="' + (pen ? 'Enters and submits here — press to make it read only' : 'Reads only here — press to let them enter and submit') + '">' +
+        (pen ? ICON_PEN : ICON_EYE) + esc(word) + '</button>';
     }
-    var span = 0;
-    while (hi + span < COLS.length && COLS[hi + span].pair === hc.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(hc.pair) +
-      '">' + esc(hc.pair) + '</th>';
-    for (var hj = 0; hj < span; hj++) {
-      var hb = COLS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.label + " — " + hb.note) +
-        '">' + esc(hb.col) + '</th>';
-    }
-    hi += span;
-  }
-  /* ── THE COPILOT COLUMN (Islam, 2026-10-01, from the signed-off
-     design-mockups/copilot-access/2026-10-01_copilot-column.html) ──────
-     Last, and only where the client has the Copilot: the served document
-     stamps its area (`data-copilot-area`, MODULE_DEF's own declaration), so
-     over file:// and on a client without it there is no column to write to
-     nothing (§61). The office's two rows carry the eye and the pen through
-     the module cell's own writer (§359.5: the default is an ABSENCE, edit);
-     every other row is a dash by RULE — "office only for now" — because the
-     api refuses a client's own person whatever the map holds, and a toggle
-     that changes nothing is decoration (§42). Both office rows are a single
-     role each on the merged table (§516), so the cell names that role. */
-  var COPA = copilotArea();
-  if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
-  var head = headTop + "</tr>" + headSub + "</tr>";
-
-  /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
-     Employee stopped being one: nobody grants it, and it was drawn as a chip
-     claiming somebody held something they did not. What it decided is still
-     a real question — what somebody on the register with NO role may open —
-     so it is still a row here, labelled as the state it is, and editable: a
-     client who wants people with no role to see nothing sets it to none and
-     can see that they have. */
-  var differ = [];
-  var body = ROWS.map(function(r){
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      COLS.map(function(c){
-        var m = accessMerged(r, c);
-        if (!m.pairs.length) return stateCell(r.of[0], c.areas[0], editable, m.why || "Cannot come up for this role.");
-        var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
-        var opt = { attr: "data-acm", target: target, value: m.value,
-                    ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: ACC_WHAT[c.key] || c.label } };
-        if (c.key === "plan") opt.states = ["view", "fill", "edit"];
-        if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
-        if (m.mixed) {
-          differ.push(accessRowName(r) + " · " + (c.col ? c.pair + ": " + c.col : c.label));
-          opt.mixed = true;
-          opt.title = "These differ underneath: " + m.pairs.map(function(p){
-            return accessRoleName(p.role) + " in " + accessAreaLabel(p.area).toLowerCase().replace(/^own /, "own ") +
-              " — " + ACC_WORD[p.v];
-          }).join("; ") + "." + (editable ? " Press a state to give them all that one." : "");
-        }
-        return stateCell(r.of[0], c.areas[0], editable, null, opt);
-      }).join("") +
-      (COPA ? (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])
-        ? stateCell(r.of[0], COPA.key, editable, null, {
-            value: moduleGrantFor(r.of[0], COPA), states: ["view", "edit"],
-            attr: "data-mac", shipped: COPA.shipped || "none",
-            ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: COPA.label || COPA.key } })
-        : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
+    var lit = !struck && i <= lv && (info.held == null ? (info.floor ? i >= 1 : true) : i > info.held);
+    var nil = info.floor && i === 0 && lv === 0;
+    var to = lit && i === lv ? below(i) : i;
+    if (info.floor && lit && i === lv && to === null) to = 0;
+    var can = editable && !struck && !fixed && to !== null && !nil;
+    return '<button type="button" class="' + (struck ? "off" : lit ? "eye" : nil ? "nil" : "") + '"' + (can ? ' data-lad="' + esc(r.key) + '|' + to + '"' : ' disabled') +
+      ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + lit + '"' +
+      (struck ? ' title="Not a level this role stands on"' : lit && i === lv && can ? ' title="Press to stop reading at this level"' : '') + '>' +
+      (lit ? ICON_EYE : '') + esc(word) + '</button>';
+  }).join("") + '</span>';
+}
+/* A person's own level: the highest any of their roles reads at, moved by
+   their exception — what the navigation will actually give them. */
+function personReadsAt(p){
+  var w = world(), rs = SMPRules.personRoles(w, p).map(function(x){ return x.role; });
+  if (!rs.length) rs = ["employee"];
+  return rs.reduce(function(m, k){ return Math.max(m, SMPRules.isOfficeRole(k) ? 3 : SMPRules.ladderLevel(w, p, k)); }, 0);
+}
+function accessExceptions(editable){
+  var words = ladderWords(), w = world();
+  var moved = PEOPLE.filter(function(p){ return SMPRules.reachMove(p) !== 0 || p.key === ACC_EXC_PICK; });
+  var rows = moved.map(function(p){
+    var mv = SMPRules.reachMove(p), now = personReadsAt(p);
+    var at = function(m){ var o = p.reach; if (m) p.reach = m; else delete p.reach; var v = personReadsAt(p); if (o == null) delete p.reach; else p.reach = o; return v; };
+    var asRole = at(0), down = at(-1) < asRole, up = at(1) > asRole;
+    var b = function(m, label, ok){ return '<button type="button" class="seg' + (mv === m ? ' on' : '') + '"' +
+      (mv === m ? '' : editable && ok ? ' data-reachp="' + esc(p.key) + '|' + m + '"' : ' disabled') + ' aria-pressed="' + (mv === m) + '">' + label + '</button>'; };
+    var roles = SMPRules.personRoleKeys(w, p).map(accessRoleName).join(", ") || "no role";
+    return '<div class="acexrow"><span class="acexwho"><b>' + esc(p.name || p.key) + '</b><span>' + esc(roles) + '</span></span>' +
+      '<span class="segsw">' + b(-1, "One lower", down) + b(0, "As the role", true) + b(1, "One higher", up) + '</span>' +
+      '<span class="acexnow">Reads up to <b>' + esc(words[Math.min(3, now)] || "") + '</b></span></div>';
   }).join("");
-
-  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§516). Its
-     hover says which pairs and what each holds; this line says that there is
-     something to decide at all, because a cell with nothing lit is easy to
-     read as "no access" from across the room. A status, not a description
-     (1b-ii), and drawn only while there is one. */
-  var differLine = differ.length
-    ? '<p class="acdiffer"><b>' + differ.length + (differ.length === 1 ? ' cell holds' : ' cells hold') +
-      ' different answers underneath</b> — ' + differ.map(esc).join(", ") +
-      '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
-    : '';
-
+  var pick = editable ? '<label class="acexpick"><span>Move one person</span><select data-reachpick><option value="">Choose a person…</option>' +
+    PEOPLE.filter(function(p){ return personActive(p) && !SMPRules.isOffice(w, p) && SMPRules.reachMove(p) === 0 && p.key !== ACC_EXC_PICK; })
+      .map(function(p){ return '<option value="' + esc(p.key) + '">' + esc(p.name || p.key) + '</option>'; }).join("") + '</select></label>' : '';
+  if (!rows && !editable) return "";
+  return '<div class="acex"><h3>Exceptions</h3>' + (rows || '<p class="acexnone">Nobody reads differently from their role.</p>') + pick + '</div>';
+}
+/* ── §704, REFINED (Islam, 2026-11-01) ────────────────────────────────
+   *"the copilot has the old icons. and the owner is just owner — is that the
+   capability owner or function or direction or what? the description column
+   needs to be useful to the SMO team to adjust"*, and of the switch above
+   the table, *"make the button better as well"*. So:
+     · every row names the roles it covers, in this client's words (a row
+       covering one role is titled by it — "Function head" at El Abd);
+     · the middle column says what the row's settings MEAN now — what the
+       role sees, what it writes, what it does not see — and changes with
+       every press, instead of a fixed phrase;
+     · the Copilot cell is the ladder's own eye and pen;
+     · the first-screen switch is its own settings row with a plain label,
+       the people it applies to today, and what it never changes. */
+var W_TXT = function(k, which){ return String(labelWord(k, which || "group") || "").trim(); };
+function accWords(){
+  var place = buExists() ? "business unit or function" : "function";
+  var places = buExists() ? "business units and functions" : "functions";
+  return { place: place, places: places, div: (W_TXT("division") || "division").toLowerCase(), top: (W_TXT("topword") || "group").toLowerCase() };
+}
+function accCovers(r){
+  var u = buExists() ? W_TXT("unitword") || "Business unit" : null;
+  var caps = (GROUP.capabilities || []).some(function(c){ return c && c.active !== false; });
+  var projects = FUNCTION_KEYS.some(function(k){ return FUNCTIONS[k] && fnPlansInProjects(FUNCTIONS[k]); });
+  switch (r.key) {
+    case "owner": return (u ? [u + " owner"] : []).concat(["Function head"]);
+    case "custodian": return (u ? [u + " custodian"] : []).concat(["Function custodian"], caps ? ["Capability custodian"] : []);
+    case "part": return (u ? [(W_TXT("pillar") || "Pillar") + " owner"] : [])
+      .concat(projects ? [(W_TXT("project") || "Project") + " owner"] : [], topHasPlan() ? ["Direction owner"] : [], caps ? [(W_TXT("capability") || "Capability") + " owner"] : []);
+    case "contrib": return ["Named on a measure, tactic or milestone"];
+    default: return r.floor ? ["On the register, holding nothing"] : [];
+  }
+}
+function accTitle(r){ var cv = accCovers(r); return cv.length === 1 && !r.floor && r.key !== "contrib" ? cv[0] : accessRowName(r); }
+function accRoleCell(r){
+  var cv = accCovers(r), single = cv.length === 1 && !r.floor && r.key !== "contrib";
+  return '<td class="rolecell"><b>' + esc(accTitle(r)) + '</b><span class="why">' + matrixRoleHeads(r) + '</span>' +
+    (cv.length && !single ? '<span class="accov">' + cv.map(function(x){ return '<span>' + esc(x) + '</span>'; }).join("") + '</span>' : '') + '</td>';
+}
+/* What this row's settings mean, now — the sentence the SMO team adjusts by. */
+function accMeaning(r){
+  var w = accWords(), info = LADDER_ROW[r.key] || {}, role = r.of[0];
+  var lv = SMPRules.ladderStored(world(), role), stand = SMPRules.LADDER_STAND[role];
+  if (lv === 2 && !midExists()) lv = 1;
+  if (stand != null && lv < stand) lv = 0;
+  var pen = info.held != null && SMPRules.penOn(world(), role);
+  var everything = "Everything in the " + w.top + ".";
+  var sees;
+  if (info.floor) sees = lv === 0 ? "Nothing." : lv === 1 ? "The " + w.place + " they are attached to." : lv === 2 ? "Their own " + w.div + " and everything in it." : everything;
+  else if (stand != null) sees = lv === 0 ? "Nothing." : lv === 3 ? everything : "Their own " + w.div + ": its page and every " + w.place + " in it.";
+  else sees = lv === 0 ? "Only their own piece inside their " + w.place + "." :
+    lv === 1 ? "Their own " + w.place + " in full: every piece in it, its plan and its figures." :
+    lv === 2 ? "Every " + w.place + " in their " + w.div + ", and the " + w.div + "’s page." : everything;
+  var writes = info.held == null ? "Nothing. They hold no piece."
+    : pen ? "Enters and submits " + ({ owner: (buExists() ? "their unit’s or function’s" : "their function’s") + " figures, and its report", custodian: "what they keep, as its owner would",
+        part: "the lines of their own piece", contrib: "the lines that name them" }[r.key] || "what they hold") + "."
+    : "Nothing. Reads only until the pen is on.";
+  var hides = [];
+  if (!(lv === 0 && (stand != null || info.floor)) && lv < 3) {
+    if (lv === 0) hides.push("the other pieces beside theirs");
+    if (lv <= 1) hides.push("other " + w.places);
+    if (lv === 2) hides.push("other " + w.div + "s");
+    hides.push("the " + w.top + "’s own pages");
+  }
+  return '<td class="acmeans"><span><b>Sees</b> ' + esc(sees) + '</span><span><b>Writes</b> ' + esc(writes) + '</span>' +
+    (hides.length ? '<span class="acno">Does not see ' + esc(hides.join(", ")) + '.</span>' : '') + '</td>';
+}
+/* The Copilot cell in the ladder's own terms: the eye reads it, the pen uses
+   it. Pressing a lit one turns it off; the writer is the module's own
+   (`data-mac`, "role|area|state|shipped"). Office only, by rule. */
+function accCopilotCell(r, editable, COPA){
+  var office = r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]);
+  if (!office) return '<td class="accop"><span class="acdash" title="Office only for now.">Office only</span></td>';
+  var v = moduleGrantFor(r.of[0], COPA), sh = COPA.shipped || "none", role = r.of[0];
+  var to = function(st){ return role + '|' + COPA.key + '|' + st + '|' + sh; };
+  var eyeOn = v === "view" || v === "edit", penOn = v === "edit";
+  var who = accessRowName(r) + " · " + matrixRoleHeads(r);
+  return '<td class="accop"><span class="ladder' + (editable ? '' : ' ro') + '">' +
+    '<button type="button" class="' + (eyeOn ? 'eye' : '') + '"' + (editable ? ' data-mac="' + esc(to(eyeOn ? "none" : "view")) + '"' : ' disabled') +
+      ' data-askwho="' + esc(who) + '" data-askwhat="' + esc(COPA.label || "the Copilot") + '" data-askfrom="' + esc(v) + '" aria-pressed="' + eyeOn + '">' + ICON_EYE + 'Reads</button>' +
+    '<button type="button" class="' + (penOn ? 'pen' : '') + '"' + (editable ? ' data-mac="' + esc(to(penOn ? "view" : "edit")) + '"' : ' disabled') +
+      ' data-askwho="' + esc(who) + '" data-askwhat="' + esc(COPA.label || "the Copilot") + '" data-askfrom="' + esc(v) + '" aria-pressed="' + penOn + '">' + ICON_PEN + 'Uses</button>' +
+    '</span></td>';
+}
+var ICON_WINDOW = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h6.2c.5 0 .8.3.8.8v10.2c0-.6-.4-1-1-1H3zM17 4.5h-6.2c-.5 0-.8.3-.8.8v10.2c0-.6.4-1 1-1H17z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+var ICON_BENCH = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 7.5h14M8 7.5v9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+function accLanding(editable, ROWS){
+  var rdOn = SMPRules.readersOpen(GROUP);
+  var who = ROWS.filter(function(r){
+    var info = LADDER_ROW[r.key] || {};
+    return !(r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])) && (info.held == null || !SMPRules.penOn(world(), r.of[0]));
+  }).map(accTitle);
+  var opt = function(on, key, icon, word){
+    return '<button type="button" class="acland-opt' + (on ? ' on' : '') + '"' + (editable && !on ? ' data-readers="' + key + '"' : (editable ? '' : ' disabled')) +
+      ' aria-pressed="' + on + '">' + icon + '<span>' + word + '</span></button>';
+  };
+  return '<div class="acland"><div class="acland-txt"><b>First screen for people who can change nothing</b>' +
+      '<span>Today: ' + esc(who.join(", ") || "nobody") + '. This decides where they open on sign-in, never what they can see.</span></div>' +
+    '<div class="acland-sw" role="group" aria-label="First screen for people who can change nothing">' +
+      opt(rdOn, "window", ICON_WINDOW, "Reading window") + opt(!rdOn, "workbench", ICON_BENCH, "Workbench") + '</div></div>';
+}
+function renderAccess(){
+  /* Editing this page is editing who may edit it, so it is the Super user's
+     whatever any row says; it stays readable to whoever can open it. */
+  var editable = grant("c_access") === "edit" && mayEditAccess();
+  var ROWS = SMPRules.ACCESS_ROWS.filter(function(r){ return !r.mid || midExists(); });
+  var COPA = copilotArea();
+  var office = ROWS.filter(function(r){ return r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]); });
+  var rest = ROWS.filter(function(r){ return office.indexOf(r) < 0; });
+  var head = '<tr><th>Role</th><th>Sees up to · writes</th><th>What this means</th>' + (COPA ? '<th>' + esc(COPA.label || "Copilot") + '</th>' : '') + '</tr>';
+  var officeRows = office.map(function(r){
+    return '<tr class="acoffice">' + accRoleCell(r) + '<td><span class="acall">Sees and edits everything, by rule</span></td>' +
+      '<td class="acmeans"><span>Runs the platform: the plan, the cycle, Setup.</span></td>' + (COPA ? accCopilotCell(r, editable, COPA) : '') + '</tr>';
+  }).join("");
+  var body = rest.map(function(r){
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + accRoleCell(r) + '<td class="acladder">' + ladderCell(r, editable) + '</td>' + accMeaning(r) +
+      (COPA ? accCopilotCell(r, editable, COPA) : '') + '</tr>';
+  }).join("");
+  var mine = SMPRules.personRoleKeys(world(), viewer()).map(accessRoleName).join(", ");
+  var roLine = editable ? '' : '<p class="acro"><b>Read only.</b> You are on this client as ' + esc(mine || "no seat") +
+    '. Only the Super user changes who reads and writes what.</p>';
   return section("", "Roles & access",
       null,
-      differLine +
-      '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
-      '<div class="chart-legend" style="margin-top:12px">' +
-        '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-view">' + ICON_HALFEYE + '</i> may read their part only (Part owner)</span>' +
-        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Plan only)</span>' +
-        '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
-        '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
-        (differ.length ? '<span><i class="st st-mixed">differs</i> answers differ underneath</span>' : '') +
-        '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
-      '</div>');
+      roLine +
+      '<div class="cfg acgrid acgrid-ladder"><table><thead>' + head + '</thead><tbody>' + officeRows + body + '</tbody></table></div>' +
+      '<p class="acladderkey"><span>' + ICON_EYE + ' sees — press a level to see up to it, the last lit one to step down</span>' +
+        '<span>' + ICON_PEN + ' enters and submits — a switch on the role’s own level</span>' +
+        '<span>Struck through: not a level this role can stand on.</span></p>' +
+      accLanding(editable, ROWS) +
+      accessExceptions(editable));
 }
 /* THE TWO ESSAYS ARE GONE FROM THE PAGE (Islam, 2026-08-22, on this table:
    "the design is poor"). "Own is not a setting" and "Three things are rules"
@@ -40100,8 +40864,10 @@ function cfgHead(title, alerts, editKey, mayEdit, clearScope, labels, extra){
                           "Each one is archived first and can be restored."
                         : "Actuals and notes, everywhere on this page. Every plan stands.") +
                     '</span></div>' +
-                  '<button class="danger" data-clearyes="' + CLEARING + '">Yes, clear</button>' +
                   '<button data-clearno="1">Cancel</button>' +
+                  '<button class="danger" data-clearyes="' + CLEARING + '">' +
+                    (CLEARING === clearScope + "||plan" ? "Clear every plan" : "Clear the progress") +
+                  '</button>' +
                 '</div>'
               : open
               ? '<div class="menu">' +
@@ -40219,9 +40985,9 @@ function assignPicker(where, roleKey, current, editable){
     '<div class="pickfoot">' +
       '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +
       '<span class="why pickhint" style="margin:0">Type a name to add someone new</span>' +
+      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
       (current ? '<button class="linkbu" data-pick-clear="' + esc(id + '|' + current) +
                  '">Unassign</button>' : '') +
-      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
     '</div></div>';
 }
 
@@ -40385,15 +41151,15 @@ function unitPanels(k, u){
       L("pillar") + ', ' + L("measure") + ', ' + L("tactic") + ', ' + L("keyobj") + ', SWOT and the foundation text. ' +
       'Kept as an archive dated today and restorable from <b>Import &amp; archives</b>.' +
       '</div><div class="cbtns">' +
-        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Yes, clear the plan</button>' +
-        '<button data-clearno="1">Cancel</button></div></div>';
+        '<button data-clearno="1">Cancel</button>' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Clear the plan</button></div></div>';
   if (CLEARING === k + "|nums")
     return '<div class="kmenu kconfirm"><div class="cq">' +
       '<b>Clear ' + esc(u.name) + '’s reported progress?</b> ' +
       'Actuals and progress only. The plan stands.' +
       '</div><div class="cbtns">' +
-        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Yes, clear the progress</button>' +
-        '<button data-clearno="1">Cancel</button></div></div>';
+        '<button data-clearno="1">Cancel</button>' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Clear the progress</button></div></div>';
   return "";
 }
 
@@ -40413,7 +41179,7 @@ function unitKebab(k, u, mayEdit){
      product has never offered to destroy one — so there is no entry here whose
      refusal would have to be written (§62). Retire is reversible and keeps
      every attribution true. */
-  acts.push('<button class="danger" data-uact="' + esc(k) + '">' +
+  acts.push('<button' + (u.active ? ' class="danger"' : '') + ' data-uact="' + esc(k) + '">' +
     (u.active ? "Retire this unit" : "Restore this unit") + '</button>');
   return kebabCell(UMENU === k, acts, panels, u.name, 'data-umenu="' + esc(k) + '"',
                    String(CLEARING || "").indexOf(k + "|") === 0);
@@ -41249,6 +42015,16 @@ var PEOPLE_COLS = [
      and it earns its place only when somebody is looking for the people who
      belong to a company and no unit. */
   { k:"company",  label:"Company", off:true },
+  /* ── WHO THEY ANSWER TO (§655) ──────────────────────────────────
+     Islam: "add a column to identify the manager of the person". "Reports
+     to", and not "Manager": the Org Directory already says it in those words,
+     Portfolio reads "Project Manager" as the Lead (spec 060 §5.1a), and
+     "Senior Manager" is a job title on this very register — a column headed
+     Manager would collide with both. It holds a register KEY and never a
+     typed name (§48), so a rename reaches it, and it GRANTS NOTHING (§56):
+     who somebody answers to is a fact about them, not a right. Shown by
+     default, because it was asked for as a column of the register. */
+  { k:"reportsto", label:"Reports to" },
   /* TWO COLUMNS, NOT ONE (Islam, 2026-08-24: "the contact in the People
      register table needs to split the email from the contact number").
      §54 put them together as "one answer to one question" — how you reach
@@ -41841,6 +42617,22 @@ function renderPeople(){
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
         '" placeholder="Job title">', true);
+    /* ── REPORTS TO (§655): A PICK FROM THE REGISTER, NEVER A TYPED NAME ──
+       The list is reportsToChoices(): everybody active, minus this person and
+       minus anybody who already answers to them, however far down — so a
+       loop cannot be chosen and no refusal has to be drawn. Somebody they
+       already point at stays in the list whatever their status, or opening
+       the dialog would silently read a retired manager as nobody (§54.4).
+       WIDE, like Job title above it: a fourth narrow field would put the
+       three places on a row of three and a row of one, §122's empty cell. */
+    var mgr = reportsToOf(p);
+    F("Reports to", '<select class="fld" data-preports="' + esc(p.key) + '">' +
+        '<option value="">&mdash; nobody &mdash;</option>' +
+        reportsToChoices(p).map(function(m){
+          return '<option value="' + esc(m.key) + '"' +
+            (mgr && mgr.key === m.key ? " selected" : "") + '>' +
+            esc(knownName(m, DNAMES)) + (personActive(m) ? "" : " (retired)") + '</option>';
+        }).join("") + '</select>', true);
     /* WIDE, SO THE THREE PLACES SIT TOGETHER (§135.6). Adding Company left the
        second block at four fields in a three-column grid — a row of three and
        a row of one, which is the empty cell §122 spent a redesign removing.
@@ -42181,7 +42973,7 @@ function renderPeople(){
          save refuses it, and `setTeam` is what actually retires a consultant
          whose seat is taken away (§338's sweep). */
       if (!ffRow)
-        danger.push('<button class="danger" data-pact="' + p.key + '">' +
+        danger.push('<button' + (personActive(p) ? ' class="danger"' : '') + ' data-pact="' + p.key + '">' +
           (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
       /* ── DELETE, AND THE REFUSAL IS WHERE THE CONFIRMATION WOULD BE ──
          §62's shape, because it is the same job on a different table: the
@@ -42330,8 +43122,8 @@ function renderPeople(){
           ') \u2014 those are text, not a link to this row.'
         : '') +
       '</div><div class="cbtns">' +
-        '<button data-pdel-no="1">No</button>' +
-        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Yes, delete</button>' +
+        '<button data-pdel-no="1">Cancel</button>' +
+        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Delete for good</button>' +
       '</div></div>';
   }
 
@@ -42542,6 +43334,17 @@ function renderPeople(){
           return ck
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
+        })()) : '') +
+      /* ── REPORTS TO (§655): THE REGISTER'S NAME, READ AT DRAW TIME ────
+         The row holds a key; what it prints is whatever the register calls
+         that person today (§48, §130.9). A manager who has retired is still
+         named — the fact did not stop being true — and the hover says so,
+         the way every other mark in this table speaks (§116.4). */
+      (showCol("reportsto") ? pcell(p, "Reports to", (function(){
+          var m = reportsToOf(p);
+          if (!m) return '<span class="why" style="margin:0">&mdash;</span>';
+          return '<span class="val" title="' + esc(m.name) +
+            (personActive(m) ? '' : ' \u00b7 retired') + '">' + esc(knownName(m, DNAMES)) + '</span>';
         })()) : '') +
       /* ── AN ADDRESS IS TAKEN WHOLE (§378) ──────────────────────────
          Islam: "can you make a right click on the email to highlight the
@@ -43087,6 +43890,8 @@ function renderPeople(){
         (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
         (showCol("bu")       ? th(esc(sitsInWord()), "wcol") : '') +
         (showCol("company")  ? th("Company")             : '') +
+        /* A select when the cell is open, so it takes §93.10's floor too. */
+        (showCol("reportsto") ? th("Reports to", "wcol") : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
@@ -43180,7 +43985,7 @@ function mergeStepHtml(){
   if (PMERGE.done) {
     return '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
       '<div class="cbtns" style="margin-top:14px">' +
-        '<button class="danger" data-pmerge-close="1">Close</button></div>';
+        '<button data-pmerge-close="1">Close</button></div>';
   }
   var a = PMERGE.a ? personBy(PMERGE.a) : null;
   if (!a) return '<div class="note">That row is no longer on the register.</div>';
@@ -43743,16 +44548,16 @@ function coPanels(ck, co, on){
           'so nothing is deleted and restoring puts it back exactly as it was.'
         : 'It returns to the group dropdown and every role held over it reads again.') +
     '</div><div class="cbtns">' +
-      '<button class="danger" data-coact="' + esc(ck) + '">Yes, ' +
-        (on ? "retire" : "restore") + '</button>' +
-      '<button data-clearno="1">Cancel</button></div></div>';
+      '<button data-clearno="1">Cancel</button>' +
+      '<button' + (on ? ' class="danger"' : '') + ' data-coact="' + esc(ck) + '">' +
+        (on ? "Retire the company" : "Restore the company") + '</button></div></div>';
 }
 function coKebab(ck, co, on, mayEdit){
   if (!mayEdit) return '<td class="cc kebcell"></td>';
   var acts = [
     '<button data-rowdlg="companies|' + esc(ck) + '">Edit details</button>',
     '<hr>',
-    '<button class="danger" data-coclear="' + esc(ck) + '">' +
+    '<button' + (on ? ' class="danger"' : '') + ' data-coclear="' + esc(ck) + '">' +
       (on ? "Retire this company" : "Restore this company") + '</button>'
   ];
   return kebabCell(COMENU === ck, acts, coPanels(ck, co, on), co.name,
@@ -44357,6 +45162,12 @@ function renderKB(){
            'already attributed to them stays true. Deleting takes the row, the password and ' +
            'the open sessions, and is <b>refused while anything still points at the ' +
            'person</b> \u2014 the refusal names what. Deleting is the Super user\u2019s.' },
+      { h: "Reports to says who somebody answers to, and decides nothing",
+        p: '<b>Reports to</b> names the person\u2019s manager, picked from the register ' +
+           'rather than typed, so renaming the manager renames them here too. It grants ' +
+           'nothing \u2014 what somebody may open is their roles, not who they answer to. ' +
+           'Nobody can be made to report to themselves or to somebody under them, and a ' +
+           'row cannot be deleted while anybody still reports to it.' },
       { h: "Two rows that are one person are merged, never guessed",
         p: 'Who a row <i>is</i> is decided by <b>Emp ID, then email</b> \u2014 never by the ' +
            'name, because two people really can share one. A row with neither is marked, ' +
@@ -45482,8 +46293,9 @@ function renderMyLines(){
        has one, as the figure sets' page does (§16.7). */
     var noteOf = function(r){
       return rowAtRisk(r) && canEnterLine(r.target, r, "mine")
-        ? noteBox("note", r.id, r.obj.note, needsNote(r), r.target)
-        : (r.obj.note ? noteRead(r.obj.note, true) : '<span class="nobody">&mdash;</span>');
+        ? noteBox("note", r.id, r.obj.note, noteWant(r), r.target)
+        : (r.obj.note || needsNote(r) ? noteRead(r.obj.note, true, needsNote(r))
+                                      : '<span class="nobody">&mdash;</span>');
     };
     var body = '<table class="cfg"><thead><tr>' +
         '<th style="width:26%">' + L1("tactic") + '</th><th style="width:18%">What it produced</th>' +
@@ -45540,7 +46352,7 @@ function renderMyLines(){
         (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
     (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
       'This is a record until the SMO opens the next one.</div>') +
-    noteLockBar() + chips + blocks +
+    chips + blocks +
     '<div class="note"><b>You enter the figure, and its note when it is red; the unit submits.</b> ' +
       'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
 }
@@ -45676,8 +46488,8 @@ function namePicker(unitKey, m, editable){
       '<div class="pickempty" hidden>No name matches.</div>' +
     '</div>' +
     '<div class="pickfoot">' +
-      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
       '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
+      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
     '</div></div>';
 }
 
@@ -46629,41 +47441,178 @@ function cyclePick(label, value, setter, opts){
    pickers are §308's own `planPeriodBlock()`, drawn only while this pen is
    open, so one control writes the period (§53.5). The timeline is the plan's
    calendar year(s), the plan shaded and the open cycle outlined. */
-function planPeriodPanel(can){
+/* ── §693: ONE CARD, ONE EDIT, TWO TABS ──────────────────────────────
+   Islam, shown three ways the page could read (design-mockups/
+   planning-reporting-views/2026-10-30_three-views.html): "go with A, build
+   it". The page did two jobs in one column — SETTING the plan period and the
+   cycle, and WATCHING who has reported — with two pens (§308's and §273.4's)
+   for what the strip read as one fact ("6 of 12 months of the plan"), and
+   the cycle's pen pushing the board 156px down the page (measured at
+   §273.4).
+
+   So: a tab each (`CYCLETAB`). THE SET-UP is one card, The year and the
+   cycle — the timeline across the top with the due date and the review day
+   PINNED on it, the facts under it, closed cycles as chips — with ONE Edit,
+   which opens the pen BESIDE the card (`.cycwrap.editing`), so nothing under
+   it moves. The pen holds, in order, the plan period (§308's own block),
+   the cycle (§307's pickers, while it is open), the review, and Ending it;
+   the new-cycle panel (§47.8) draws in the same slot. WHO HAS REPORTED is the
+   board as it was, with the headline strip over it and a filter row.
+
+   `PLANEDIT` IS GONE (§24): there is one pen, `CYCLEEDIT`, and it opens
+   whichever state the cycle is in — Reopen sits where Close does, behind the
+   pen, which is §273.2's own placement; Edit no longer opens the reopen
+   dialog straight from the strip.
+
+   THE TIMELINE DRAWS WHENEVER THERE IS A MONTH TO DRAW — the plan's or the
+   cycle's — where §495 drew it for a set period only. The lit months are
+   still EXACTLY the period: with none set nothing is lit and the key says
+   so, because a timeline that lights the calendar year as if it were the
+   plan is §35's assumption printed as a fact. */
+function cycleCard(can, open){
   var set = planSet(), a = planFrom(), b = planTo();
+  var cf = monthsOf(REVIEW.from), ct = reviewAsOf();
   var qw = function(m0, m1){ var q0 = Math.floor((m0 % 12) / 3) + 1, q1 = Math.floor((m1 % 12) / 3) + 1;
-    return Math.floor(m0 / 12) === Math.floor(m1 / 12) ? (q0 === q1 ? "Q" + q0 : "Q" + q0 + "\u2013Q" + q1) : ""; };
-  var facts = set
-    ? '<div><small>From</small><b>' + esc(SMPRules.monthLabel(a)) + '</b></div>' +
-      '<div><small>To</small><b>' + esc(SMPRules.monthLabel(b)) + '</b></div>' +
-      '<div><small>Length</small><b>' + planLength() + ' months' + (qw(a, b) ? ' \u00b7 ' + qw(a, b) : '') + '</b></div>'
-    : '<div><small>Plan period</small><b>Not set</b><span class="why" style="margin:0">the calendar year is used</span></div>';
+    return Math.floor(m0 / 12) === Math.floor(m1 / 12) ? (q0 === q1 ? "Q" + q0 : "Q" + q0 + "–Q" + q1) : ""; };
+  /* THE PINS. A day date's month is read through the same `monthsOf` every
+     cycle date is read through; the review day is stored as the date input
+     writes it (yyyy-mm-dd), so its month is read off that shape. Two pins on
+     one month share the cell. */
+  var pins = {}, nPins = 0;
+  var pin = function(m, word){ if (m == null) return; pins[m] = pins[m] ? pins[m] + " · " + word : word; nPins++; };
+  var dueM = monthsOf(REVIEW.due);
+  if (dueM != null) pin(dueM, "due " + String(REVIEW.due).replace(/\s*\d{4}\s*$/, ""));
+  var rd = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(REVIEW.reviewDay || ""));
+  var rdM = rd ? (+rd[1]) * 12 + (+rd[2]) - 1 : null;
+  if (rdM != null) pin(rdM, "review " + (+rd[3]) + " " + SMPRules.monthLabel(rdM).slice(0, 3));
+  var lo = null, hi = null;
+  [set ? a : null, set ? b : null, cf, ct, dueM, rdM].forEach(function(m){
+    if (m == null) return;
+    lo = lo == null ? m : Math.min(lo, m); hi = hi == null ? m : Math.max(hi, m);
+  });
   var tl = "";
-  if (set) {
-    var cf = monthsOf(REVIEW.from), ct = reviewAsOf();
-    var lo = Math.min(a, cf != null ? cf : a), hi = Math.max(b, ct != null ? ct : b);
+  if (lo != null) {
     var y0 = Math.floor(lo / 12), y1 = Math.floor(hi / 12);
     if (y1 - y0 > 2) y1 = y0 + 2;
-    var cells = "";
+    var cells = "", pinRow = "";
     for (var m = y0 * 12; m < (y1 + 1) * 12; m++) {
-      var inP = m >= a && m <= b, inC = cf != null && ct != null && m >= cf && m <= ct;
-      cells += '<span class="pptl-m' + (inP ? ' inp' : '') + (inC ? ' inc' : '') + (inC && !inP ? ' past' : '') +
-        '" title="' + esc(SMPRules.monthLabel(m)) + '">' + "JFMAMJJASOND".charAt(m % 12) + '</span>';
+      var inP = set && m >= a && m <= b, inC = cf != null && ct != null && m >= cf && m <= ct, pn = pins[m];
+      cells += '<span class="pptl-m' + (inP ? ' inp' : '') + (inC ? ' inc' : '') + (inC && set && !inP ? ' past' : '') +
+        (pn ? ' pin' : '') + '" title="' + esc(SMPRules.monthLabel(m)) + '"' +
+        (pn ? ' data-pin="' + esc(pn) + '"' : '') + '>' + "JFMAMJJASOND".charAt(m % 12) + '</span>';
+      /* THE PIN'S WORDS SIT IN A ROW OF THEIR OWN under the strip, one slot
+         per month, because the strip clips whatever hangs below it. */
+      pinRow += '<span class="pptl-p">' + (pn ? '<em>' + esc(pn) + '</em>' : '') + '</span>';
     }
     var yrs = ""; for (var yy = y0; yy <= y1; yy++) yrs += '<span>' + yy + '</span>';
-    tl = '<div class="pptl" data-plan-timeline><div class="pptl-y">' + yrs + '</div><div class="pptl-ms">' + cells + '</div>' +
-      '<div class="pptl-key"><span class="k inp"></span>Plan period' + (cf != null && ct != null ? '<span class="k inc"></span>This cycle' : '') + '</div></div>';
+    tl = '<div class="pptl' + (nPins ? ' pinned' : '') + '" data-plan-timeline><div class="pptl-y">' + yrs + '</div>' +
+      '<div class="pptl-ms">' + cells + '</div>' + (nPins ? '<div class="pptl-ps">' + pinRow + '</div>' : '') +
+      '<div class="pptl-key"><span class="k inp"></span>' +
+        (set ? 'Plan period' : 'Plan period not set — the calendar year is used') +
+        (cf != null && ct != null ? '<span class="k inc"></span>This cycle' : '') +
+        (nPins ? '<span class="k pin"></span>' + (dueM != null ? 'Reports due' : '') +
+          (dueM != null && rdM != null ? ' · ' : '') + (rdM != null ? 'Review day' : '') : '') +
+      '</div></div>';
   }
+  /* THE FACTS. The strip's own sentences, kept word for word where a check
+     or a person reads them: "reported as of", the "n of m months of the
+     plan" every figure is prorated by (§239.3, §308), and what the plan
+     edits are while the cycle runs. */
+  var asof = (function(){
+    var em = elapsedMonths();
+    if (em == null) return 'the year is not set, so every figure is measured against a whole one';
+    var why = [];
+    if (!planSet()) why.push('taken from the calendar year');
+    if (reviewAsOfDerived()) why.push('the month is from the cycle’s name');
+    return em + ' of ' + planLength() + ' months' + (planSet() ? ' of the plan' : '') +
+      (why.length ? ', ' + why.join(', ') : '');
+  })();
+  var hrs = SMPRules.remindHours(REVIEW);
+  var span = String(REVIEW.from || "").trim() && String(REVIEW.to || "").trim()
+    ? esc(REVIEW.from) + ' to ' + esc(REVIEW.to) : "";
+  var facts =
+    '<div data-fact-plan><small>Plan period</small>' +
+      (set ? '<b>' + esc(SMPRules.monthLabel(a)) + ' – ' + esc(SMPRules.monthLabel(b)) + '</b>' +
+             '<span class="sub">' + planLength() + ' months' + (qw(a, b) ? ' · ' + qw(a, b) : '') + '</span>'
+           : '<b>Not set</b><span class="sub">the calendar year is used</span>') + '</div>' +
+    '<div data-fact-cycle><small>This cycle</small><b><span data-cycle-name>' + esc(REVIEW.name) + '</span> ' +
+      '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span></b>' +
+      '<span class="sub">' + (span ? span + ' · ' : '') + '<span class="asof">reported as of <b>' + esc(reviewAsOfLabel()) + '</b></span> · ' + asof + '</span></div>' +
+    '<div data-fact-due><small>Reports due</small><b>' + (String(REVIEW.due || "").trim() ? esc(REVIEW.due) : 'Not set') + '</b>' +
+      '<span class="sub fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</span></div>' +
+    '<div data-fact-review><small>The review</small><b>' + (reviewDayWord() ? 'presents <span>' + esc(reviewDayWord()) + '</span>' : 'Not set') + '</b>' +
+      '<span class="sub">' + (hrs.length ? 'reminders ' + esc(hrs.join(' · ')) + ' hours before' : 'no reminders') + '</span></div>';
   var nOut = tacticsOutsidePlan();
-  return '<div class="planblk" data-plan-block>' +
-    '<div class="planblk-h"><span>Plan period</span>' +
-      (can ? '<button class="editbtn' + (PLANEDIT ? ' penon' : '') + '" data-editplan="1">' + (PLANEDIT ? 'Done editing' : 'Edit') + '</button>' : '') +
-    '</div>' +
-    '<div class="planblk-facts">' + facts + '</div>' + tl +
+  var chips = HISTORY.length
+    ? '<div class="planblk-chips" data-closed-cycles><span class="lab">Closed cycles</span>' +
+        HISTORY.map(function(h){ return '<span class="pill kind">' + esc(h.name) + ' · ' + h.group + '%</span>'; }).join("") + '</div>'
+    : '';
+  return '<div class="planblk" data-plan-block data-cycle-card>' +
+    '<div class="planblk-h"><span>The year and the cycle</span><span class="planblk-acts">' +
+      (can && !open && !NEWCYCLE ? '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>' : '') +
+      (can && !NEWCYCLE ? '<button class="editbtn' + (CYCLEEDIT ? ' penon' : '') + '" data-editcycle="1">' +
+        (CYCLEEDIT ? 'Done editing' : 'Edit') + '</button>' : '') +
+    '</span></div>' +
+    tl +
+    '<div class="planblk-facts">' + facts + '</div>' +
+    (cyclePastPlan() ? '<div class="planblk-flag" data-cyc-past><b>Runs past the plan period.</b> A figure measured after the plan ended is measured against a whole target.</div>' : '') +
     (nOut ? '<div class="planblk-flag" data-plan-outside><b>' + nOut + ' tactic' + (nOut === 1 ? ' ticks a quarter' : 's tick a quarter') +
       ' outside the plan period.</b> They are kept as they are; change the period or the quarters on the plan.</div>' : '') +
-    (PLANEDIT && can ? '<div class="planblk-pen">' + planPeriodBlock() + '</div>' : '') +
+    chips +
   '</div>';
+}
+
+/* THE PEN, beside the card. `.newcycle` is kept as its class because every
+   field in it writes through FIELDS and is addressed by the checks under that
+   name (§53.5); `cycdrawer` is the shape. */
+function cycleDrawer(can, open){
+  if (!can || !CYCLEEDIT) return "";
+  return '<div class="cfg newcycle cycdrawer" data-cycle-drawer>' +
+    planPeriodBlock() +
+    (open
+      ? '<div class="cyc2-r cycown"><div class="nc-h">This cycle</div>' +
+          '<div class="nc-grid">' +
+            cycleField("Name", REVIEW.name, "H1 2027", function(v){
+              /* TRIMMED, and an empty name is REFUSED rather than stored: it
+                 is what every snapshot and archived plan is filed under once
+                 the cycle closes (§273.4). */
+              var t = String(v).trim();
+              if (!t) return false;
+              REVIEW.name = t;
+            }, "nm-lab") +
+            cyclePick("Covers from", REVIEW.from, function(v){ REVIEW.from = String(v).trim(); }, { wide:true }) +
+            cyclePick("to", REVIEW.to, function(v){ REVIEW.to = String(v).trim(); }, { wide:true, cls:"tobtn" }) +
+            cyclePick("Reports due", REVIEW.due, function(v){ REVIEW.due = String(v).trim(); }, { day:true }) +
+          '</div>' +
+          '<div class="nc-why"><b>The month it covers to decides what every figure ' +
+            'is measured against.</b> A target that adds up across the year is compared ' +
+            'with the share of it due by then, and work dated after it is not asked for. ' +
+            'Changes are kept as you type.</div>' +
+        '</div>'
+      : '') +
+    reviewDayBlock() +
+    '<div class="cyc2-r cyc2-d cycend"><div class="nc-h">' + (open ? 'Ending it' : 'Reopening it') + '</div>' +
+      (open
+        ? '<p class="cyc2-p">Closing files every figure under this name and stops ' +
+            'the units reporting.</p>' +
+          '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>'
+        : '<p class="cyc2-p">' + esc(REVIEW.name) + ' is closed and its figures are a record. ' +
+            'Reopening makes them live again.</p>' +
+          '<button class="editbtn danger" data-reopencycle="1">Reopen the cycle</button>') +
+    '</div>' +
+  '</div>';
+}
+
+function cycleTabs(){
+  var t = cycleTotals();
+  var tab = function(k, label, count){
+    var on = CYCLETAB === k;
+    return '<button type="button" role="tab" data-cyctab="' + k + '" aria-selected="' + on + '"' +
+      (on ? ' class="on"' : '') + '>' + label +
+      (count != null ? '<span class="kbcount">' + count + '</span>' : '') + '</button>';
+  };
+  return '<div class="kbtabs cyctabs" role="tablist">' +
+    tab("setup", "The set-up") + tab("board", "Who has reported", t.done + " / " + t.total) + '</div>';
 }
 
 function planPeriodBlock(){
@@ -46746,6 +47695,17 @@ function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
 function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
+  /* §693: EVERY ROW SAYS WHAT THE FILTER ROW ASKS — its state, whether it
+     owes a note, and the words Find a line matches — and is counted as it
+     is drawn, so the filters' numbers are the rows' own and cannot drift
+     from them (§53.5). The filter itself is applied in the shell on the
+     drawn rows, never by a repaint, so typing in Find keeps its cursor. */
+  var STATS = { all:0, late:0, part:0, done:0, notes:0 };
+  var brow = function(st, miss, name, who, extra){
+    STATS.all++; STATS[st.key] = (STATS[st.key] || 0) + 1; if (miss) STATS.notes++;
+    return '<tr' + (extra || '') + ' data-brow data-state="' + esc(st.key) + '" data-notes="' + (miss ? 1 : 0) +
+      '" data-find="' + esc(String(name + ' ' + who).toLowerCase()) + '">';
+  };
 
   /* §244: THE UNIT HALF CARRIES A PILLARS FUNCTION TOO (Islam: "put them on
      the unit half"). One builder over a TARGET rather than a second copy of
@@ -46778,7 +47738,7 @@ function renderCycle(){
          with the progress bar beside it, which counts the same rows. */
       if (rowAnswered(x)) by[slot][0]++;
     });
-    return '<tr><td><b>' + esc(placeLabel(t)) + '</b></td>' +
+    return brow(st, miss, placeLabel(t), who) + '<td><b>' + esc(placeLabel(t)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -46817,7 +47777,7 @@ function renderCycle(){
     var cell = function(k, show){
       return '<td class="num">' + (show ? by[k][0] + '/' + by[k][1] : '\u2014') + '</td>';
     };
-    return '<tr data-line><td><b>' + esc(name) + '</b></td>' +
+    return brow(st, miss, name, who, ' data-line') + '<td><b>' + esc(name) + '</b></td>' +
       '<td class="why' + (nobody ? ' nobody' : '') + '" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -46941,7 +47901,7 @@ function renderCycle(){
        nothing to tell the two rows apart, on the page the office uses to chase
        people. `placeLabel()` adds the suffix only where the clash is real
        (§65, §93.12) and is what the unit half beside it now uses (§53.5). */
-    return '<tr><td><b>' + esc(placeLabel(target)) + '</b></td>' +
+    return brow(st, miss, placeLabel(target), who) + '<td><b>' + esc(placeLabel(target)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -46989,159 +47949,41 @@ function renderCycle(){
      the FUNCTIONS this page put on the board (§105) as well as the units. */
   var t = cycleTotals();
 
-  var head =
-    '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
-      '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
-      '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
-      /* ── THE REVIEW POINT, EDITABLE WHILE THE CYCLE RUNS (§239) ──────
-         Islam: "if I will set the cycle dates you need to give me the ability
-         to set this on opening the cycle and ability to edit this in an open
-         cycle." Before this there was NO control anywhere -- the value could
-         only ever be whatever the seed left, which is how a tenant came to be
-         reporting in Q2 against a platform that thought the year was over.
-
-         It is a MONTH because a quarter cannot say "eight months in", and it
-         is the platform's own month picker rather than a box, for §177's own
-         reason: with no box there is nothing to mistype and the picker can
-         only produce a shape `monthsOf()` already reads. */
-      '<span class="fstrip-meta asof">reported as of ' +
-        /* IT SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With no month
-           picked the platform still has an answer -- the cycle's own quarter
-           end -- so showing the picker's "Missing" would print an alarm over
-           something that is not owed (§177, §214.4) while the note beside it
-           reported a real number. The note says whether it was chosen or
-           inherited.
-
-           §273: AND IT IS A VALUE HERE, NEVER A CONTROL. The picker moved
-           inside the pen with everything else the office can change, so this
-           line reads the same for everybody and the strip carries nothing that
-           can be pressed by accident. One control for one fact (§53.5): a
-           picker here AND a picker in the panel is two, and they would have to
-           be kept in step. */
-        /* §307: ONE SOURCE. This read the stored month and fell back to the
-           derived one, which is exactly the pair that could disagree with the
-           `Jan 2027 to Jun 2027` printed six pixels to its left. It reads the
-           cycle's end now, through the one function every score reads. */
-        '<b>' + esc(reviewAsOfLabel()) + '</b>' +
-        /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
-           whether the month he picked had taken -- "can you check if the cycle
-           adjustment is saved" -- because the strip showed the value and
-           nothing showed the consequence. `8 of 12 months` is the number every
-           figure on the platform is actually prorated by, so a review point
-           that is not working says so on the page rather than being inferred
-           from a table reading 100%.
-
-           §278: it is the number every figure is prorated by BY DEFAULT — a row
-           carrying a monthly plan is measured against the months that have
-           actually run instead. The sentence is unchanged because it is still
-           true of the review point, which is what this strip is about; the
-           clause is here so the next reader is not told something the code
-           stopped doing (§104.8). */
-        /* §308: OF THE PLAN, AND IT SAYS WHICH PLAN. The denominator was a
-           hard-coded twelve and the count was months of the calendar year, so
-           a cycle covering July to August read "8 of 12" — a number taken
-           from neither of its own dates. It is the planning period now, and
-           where nobody has set one the line NAMES the assumption instead of
-           printing it as a fact (§35, §124). */
-        (function(){
-          var em = elapsedMonths();
-          if (em == null)
-            return ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
-              'figure is measured against a whole one</span>';
-          var why = [];
-          if (!planSet()) why.push('taken from the calendar year');
-          if (reviewAsOfDerived()) why.push('the month is from the cycle\u2019s name');
-          return ' <span class="why" style="margin:0">&middot; ' + em + ' of ' +
-            planLength() + ' months' + (planSet() ? ' of the plan' : '') +
-            (why.length ? ', ' + why.join(', ') : '') + '</span>';
-        })() + '</span>' +
-      /* THE REVIEW DAY IS ON THE STRIP, so the day is readable without
-         opening the pen — and only when there is one, because a line reading
-         "not set" over a thing nobody has to set is furniture (§45.2, §94.15).
-         Drawn for everybody: the day of the review is not a secret, and only
-         TAKING the files is the office's. */
-      (reviewDayWord() ? '<span class="fstrip-meta">presents <b>' +
-        esc(reviewDayWord()) + '</b></span>' : '') +
-      '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
-      /* §495: A CYCLE RUNNING PAST THE PLAN PERIOD IS SAID ON ITS OWN STRIP,
-         in the attention voice — nothing is wrong yet, but a figure measured
-         after the plan ended is measured against a whole target (§308). */
-      (cyclePastPlan() ? '<span class="badge b-late" data-cyc-past>Runs past the plan period</span>' : '') +
-      /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
-         Islam: "keep the close cycle inside the edit. as it's a critical
-         button to click, the pen should hold everything editable so it's kept
-         secured." So the strip's only control while a cycle runs is Edit, and
-         Close the cycle is drawn INSIDE the panel it opens -- the strip is a
-         line you read, not a line you press.
-
-         Edit is drawn while the cycle is OPEN only, which is the gate the
-         review point already had: a closed cycle's figures are filed under the
-         name it closed with (HISTORY keeps the name, §49.1), so renaming it
-         afterwards would leave this page and the history saying different
-         things. With it closed the strip carries "Open a new cycle..." exactly
-         as it did before. */
-      /* §273.2: AND A CLOSED CYCLE GETS THE PEN TOO. Islam picked it over a
-         Reopen button on the strip: the pen's far end holds the cycle's one
-         dangerous state change, whichever direction it goes -- Close while it
-         runs, Reopen once it has stopped -- so the strip goes on carrying
-         nothing that changes anything. `Open a new cycle...` stays beside it
-         because it is a different act with its own panel and its own
-         confirmation, and it is the only way to start one. */
-      /* §273.4: THE PEN SAYS WHICH WAY IT GOES, and lights up — the platform's
-         own `penBtn()` has read `on ? "Done editing" : "Edit"` since it was
-         written, and this control said Edit while you were editing. Islam:
-         "why is the edit button still there it should turn into done editing
-         so I click it and the box collapse saving what I did". */
-      (can
-        ? '<button class="editbtn' + (open && CYCLEEDIT ? ' penon' : '') +
-            '" data-editcycle="1">' +
-            (open && CYCLEEDIT ? 'Done editing' : 'Edit') + '</button>' +
-          (open ? '' : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
-        : '') +
-    '</div>' +
-    /* ── OPENING A NEW CYCLE (§47.8), PUT BACK ────────────────────
-       §261.2 replaced the `NEWCYCLE ? ... : CYCLEEDIT ? ...` chain with a
-       CYCLEEDIT-only branch and took this arm with it, so on `main` today
-       "Open a new cycle..." sets the draft and DRAWS NOTHING — §96 exactly, a
-       control that renders perfectly and does nothing, and it is the only way
-       to start a cycle at all. Found by `checks/repeat-project.py` hanging on
-       `#nc-name`; reproduced on the shipped build before anything was written,
-       so it is not this section's doing and it is this section's to fix
-       (§51.11 from the other side: the check was RIGHT and had been red for
-       exactly as long as the panel had been gone).
-
-       PUT BACK VERBATIM, not rebuilt on §273.4's `cycleField()`: this panel
-       is wired by ID in the shell and writes on `input` rather than `change`
-       for a stated reason (Open can be pressed from inside a field), so
-       re-expressing it would be a second change riding a restoration. It keeps
-       its Open/Cancel pair, and that is NOT the Save and Cancel §273.4
-       removed — this really is a draft, describing a cycle that does not exist
-       yet, and nothing reaches REVIEW until Open is pressed. */
-    (NEWCYCLE
-      ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
-        /* §307: THE SAME FOUR CONTROLS THE PEN DRAWS. This panel typed its
-           three dates and picked a fourth month that no longer exists, so it
-           was the one place in the product where a cycle could be opened with
-           an end its own arithmetic could not read. The dates go through
-           `cyclePick` and write into the draft through FIELDS; only the NAME
-           is still typed, so only the name is still read by id. */
-        /* ── THE REFUSAL IS UNDER THE BOX THAT REFUSED (§534.2) ──────
-           Both of this panel's refusals were browser boxes, and a box opens
-           OVER the form: the empty field could not be seen while the sentence
-           about it was on screen. The name's box then put the cursor in the
-           field afterwards and the month's did not — one form, two
-           behaviours, because a notice said away from its control has no
-           natural place to point.
-
-           DERIVED, NEVER STORED STALE (§48.2's instinct, one layer down):
-           `NEWCYCLE.why` names the field that was empty when Open was
-           pressed, and this reads it back against the CURRENT value, so
-           filling the box clears the line with no handler to remember. */
+  /* §693: THE HEADLINE STRIP, OVER THE BOARD. The cycle's name and dates
+     moved into the card's facts; what is left here is the four numbers
+     cycleTotals() answers (§108.1), drawn on the board's tab where the rows
+     they add up are. */
+  var strip =
+    '<div class="fstrip" style="margin-bottom:14px"><div class="fstrip-body">' +
+      '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
+      '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
+        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
+        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
+      '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
+    '</div></div>';
+  var filt = function(k, label, n){
+    var on = BOARDFILTER === k;
+    return '<button type="button" class="bfilt' + (on ? ' on' : '') + '" data-bfilter="' + k +
+      '" aria-pressed="' + on + '">' + label + '<span class="kbcount">' + n + '</span></button>';
+  };
+  var filters =
+    '<div class="bfilters" data-board-filters>' +
+      filt("all", "All", STATS.all) + filt("late", "Not started", STATS.late) +
+      filt("notes", "Needs a note", STATS.notes) + filt("part", "In progress", STATS.part) +
+      filt("done", "Submitted", STATS.done) +
+      '<input class="fld bfind" id="board-find" value="' + esc(BOARDFIND) + '" placeholder="Find a line…" ' +
+        'aria-label="Find a reporting line">' +
+    '</div>';
+  /* THE NEW-CYCLE PANEL (§47.8, put back at §261.2's cost) draws in the pen's
+     slot beside the card. Verbatim from there: wired by ID in the shell and
+     writing on `input`, so Open can read the name before the box is left. */
+  var newPanel = NEWCYCLE
+      ? '<div class="cfg newcycle cycdrawer" data-cycle-drawer><div class="nc-h">Open a new cycle</div>' +
         (function(){
           var why = NEWCYCLE.why;
           if (why === "name" && String(NEWCYCLE.name || "").trim()) why = null;
           if (why === "to" && String(NEWCYCLE.to || "").trim()) why = null;
-          return '<div class="nc-grid nc-1line">' +
+          return '<div class="nc-grid">' +
             '<label class="nm-lab"><span>Name</span><input class="fld' +
               (why === "name" ? " bad" : "") + '" id="nc-name"' +
               (why === "name" ? ' aria-invalid="true"' : '') + ' value="' +
@@ -47160,9 +48002,6 @@ function renderCycle(){
             ? '<p class="picerr"><b>The cycle needs a name.</b> It is what its figures ' +
               'are filed under once it closes, and what the next cycle compares against.</p>'
             : why === "to"
-            /* The band below already says what the month decides, and it is on
-               screen — so the refusal names the control and leaves the
-               explaining to the sentence that was always there. */
             ? '<p class="picerr"><b>Pick the month this cycle covers to.</b> ' +
               'It is the review point, and the line below says what it decides.</p>'
             : '');
@@ -47172,94 +48011,10 @@ function renderCycle(){
           'the share of it due by then, and a tactic whose span has not started yet is ' +
           'not asked for.</div>' +
         '<div class="nc-act">' +
-          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
-          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
-      : '') +
-    /* ── THE PEN ITSELF (§273, restructured by §273.4) ─────────────
-       Islam, of the shipped panel: "rather than having a save and cancel
-       buttons inside the box itself rearrange the buttons and think of
-       different structures of this banner" — and, of three drawn on his own
-       tenant, "C".
-
-       SAVE AND CANCEL ARE GONE, AND THAT IS THE WHOLE OF IT. Nowhere else in
-       this product has either: every bound field writes on `change`, which is
-       on blur (§35), and the pen only ever closed the mode. §273 invented a
-       second model — a draft, a Save, a Cancel and a guard to make the draft
-       safe — and needed two buttons nothing else here needs. The fields write
-       straight through `FIELDS` now, like every other field in the platform,
-       so there is no draft, nothing unsaved, and nothing for a guard to hold.
-
-       TWO COLUMNS, WHICH IS HIS PICK OVER EDITING IN PLACE AND OVER THE PLAIN
-       BOX: the fields on the left, and ENDING IT behind a rule on the right,
-       so the destructive act never shares a row with the boxes you are typing
-       in. The cost was measured before he chose — pressing Edit moves the page
-       below by 156px here against 12px for the in-place shape. */
-    (CYCLEEDIT && open
-      ? '<div class="cfg newcycle"><div class="cyc2">' +
-          '<div class="cyc2-f">' +
-            '<div class="nc-h">This cycle</div>' +
-            '<div class="nc-grid nc-1line">' +
-              cycleField("Name", REVIEW.name, "H1 2027", function(v){
-                /* TRIMMED, and an empty name is REFUSED rather than stored:
-                   it is what every snapshot and archived plan is filed under
-                   once the cycle closes. With no Save there is no press to
-                   refuse at, so the refusal is the name COMING BACK into the
-                   box — the value returning is the explanation (§124). */
-                var t = String(v).trim();
-                if (!t) return false;
-                REVIEW.name = t;
-              }, "nm-lab") +
-              /* ── EVERY DATE IS PICKED, AND THERE ARE THREE (§307) ────
-                 Islam: "all the dates should be date selector like the
-                 reporting as of. and why do we still have the reporting as
-                 of? ... the reports due is the only 1 with a day date as it's
-                 a cutt off dates. and if we set that they will be only 4 boxes
-                 can be in 1 line" — and then, deciding the question underneath
-                 it himself: "the cycle ending is the reporting as of so that's
-                 what the proration depend on ... if you are using reporting as
-                 of then this should replace the cover to."
-
-                 THE REPORTING AS OF BOX IS GONE, and its meaning is in `to`.
-                 Nothing keeps a second copy, so the two can never disagree
-                 again — which they could, and on his own tenant did: a cycle
-                 covering to Jun 2027 reporting as of Aug 2026, asking for work
-                 due to June and judging it against August.
-
-                 PICKED, NEVER TYPED, for §177's reason one field along: with
-                 no box there is nothing to mistype, and a cycle whose end
-                 cannot be read falls back — silently, until now — to a quarter
-                 nobody chose. `wide` because `cycleYear()` scrapes these
-                 strings for a four-digit year. */
-              cyclePick("Covers from", REVIEW.from, function(v){
-                REVIEW.from = String(v).trim();
-              }, { wide:true }) +
-              cyclePick("to", REVIEW.to, function(v){
-                REVIEW.to = String(v).trim();
-              }, { wide:true, cls:"tobtn" }) +
-              cyclePick("Reports due", REVIEW.due, function(v){
-                REVIEW.due = String(v).trim();
-              }, { day:true }) +
-            '</div>' +
-            '<div class="nc-why"><b>The month it covers to decides what every figure ' +
-              'is measured against.</b> A target that adds up across the year is compared ' +
-              'with the share of it due by then, and work dated after it is not asked for. ' +
-              'Changes are kept as you type.</div>' +
-          '</div>' +
-          '<div class="cyc2-d">' +
-            '<div class="nc-h">Ending it</div>' +
-            '<p class="cyc2-p">Closing files every figure under this name and stops ' +
-              'the units reporting.</p>' +
-            '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>' +
-          '</div>' +
-        '</div>' + reviewDayBlock() + '</div>'
-      : '') +
-    '<div class="fstrip-body">' +
-      '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
-      '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
-        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
-      '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
-    '</div></div>';
+          '<button class="linkbu" data-nc-cancel="1">Cancel</button>' +
+          '<button class="editbtn" data-nc-go="1">Open this cycle</button></div></div>'
+      : '';
+  var drawer = newPanel || cycleDrawer(can, open);
 
   /* CLAIM REQUESTS (spec 008 §5). The SMO answers them, not the holder — the
      holder has an interest in the answer, and the SMO is the only person who
@@ -47276,47 +48031,50 @@ function renderCycle(){
       '<td>' + esc((want && want.name) || c.set) + '</td>' +
       '<td class="why" style="margin:0">' + esc(personName(c.by) || c.by) + '</td>' +
       '<td class="cc">' + (can
-        ? '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button> ' +
-          '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button>'
+        ? '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button> ' +
+          '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button>'
         : '') + '</td></tr>';
   }).join("");
+
+  var board =
+    '<div class="cfg"><table><thead><tr><th style="width:17%">Reporting line</th><th>Reporting</th>' +
+      '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
+      '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
+      '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +
+    '<div class="note" data-board-empty hidden>No reporting line matches.</div>' +
+    (open
+      ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
+        'means never closing, and a cycle that never closes writes no history. Whatever is ' +
+        'unreported closes as unreported and stays visibly so.</div>'
+      : '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record. ' +
+        'Opening a new cycle asks every unit again and lets each score show what it was last time.</div>');
 
   return cfgHead("Planning & reporting cycle",
       ['<span class="pill kind">' + esc(REVIEW.cadence) + '</span>'].concat(
         claims.length ? ['<span class="pill attn">' + claims.length + ' claim request' +
           (claims.length === 1 ? "" : "s") + '</span>'] : []),
-      null, false) + planPeriodPanel(can) + head + contTakenSection() +
-    (claims.length
-      ? section("", "Claim requests", null,
-          '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +
-            '<th style="width:16%">Held by</th><th style="width:20%">Wanted by</th>' +
-            '<th style="width:18%">Asked by</th><th class="cc" style="width:12%"></th>' +
-          '</tr></thead><tbody>' + claimRows + '</tbody></table></div>' +
-          '<div class="note"><b>One figure belongs to one set</b>, so somebody has asked for ' +
-            'one that is already held. <b>Move it</b> puts the figure in the asking set; ' +
-            '<b>leave it</b> closes the request without moving anything. Either way the ' +
-            'conversation about whether it is the right number stays between the two ' +
-            'teams \u2014 this only decides who enters it.</div>')
-      : '') +
-    section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
-    section("", "Who has reported", null,
-      '<div class="cfg"><table><thead><tr><th style="width:17%">Reporting line</th><th>Reporting</th>' +
-        '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
-        '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +
-      (open
-        ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
-          'means never closing, and a cycle that never closes writes no history. Whatever is ' +
-          'unreported closes as unreported and stays visibly so.</div>'
-        : '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record. ' +
-          'Opening a new cycle asks every unit again and lets each score show what it was last time.</div>') +
-      (HISTORY.length
-        ? '<h4 class="mini">Closed cycles</h4><div class="cfg"><table><thead><tr><th>Cycle</th>' +
-          '<th class="cc">Group figure</th></tr></thead><tbody>' +
-          HISTORY.map(function(h){
-            return '<tr><td>' + esc(h.name) + '</td><td class="num">' + h.group + '%</td></tr>';
-          }).join("") + '</tbody></table></div>'
-        : ''));
+      null, false) + cycleTabs() +
+    (CYCLETAB === "board"
+      ? strip + filters + board
+      /* THE PEN IS A COLUMN OF ITS OWN beside everything on the tab — the
+         card AND the sections under it — so opening it moves nothing down
+         the page (§693): the sections narrow beside it, they do not drop. */
+      : '<div class="cycwrap' + (drawer ? ' editing' : '') + '"><div class="cycleft">' +
+        cycleCard(can, open) + contTakenSection() +
+        (claims.length
+          ? section("", "Claim requests", null,
+              '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +
+                '<th style="width:16%">Held by</th><th style="width:20%">Wanted by</th>' +
+                '<th style="width:18%">Asked by</th><th class="cc" style="width:12%"></th>' +
+              '</tr></thead><tbody>' + claimRows + '</tbody></table></div>' +
+              '<div class="note"><b>One figure belongs to one set</b>, so somebody has asked for ' +
+                'one that is already held. <b>Move it</b> puts the figure in the asking set; ' +
+                '<b>leave it</b> closes the request without moving anything. Either way the ' +
+                'conversation about whether it is the right number stays between the two ' +
+                'teams — this only decides who enters it.</div>')
+          : '') +
+        section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
+        '</div>' + drawer + '</div>');
 }
 
 /* ── Setup · Supporting functions ───────────────────────────────────
@@ -47535,7 +48293,7 @@ function fnKebab(fk, f, mayEdit){
   if (mayDestroy())
     acts.push('<button data-clear="fn|' + esc(fk) + '|plan">Clear plan</button>');
   acts.push('<hr>');
-  acts.push('<button class="danger" data-fnretire="' + esc(fk) + '">' +
+  acts.push('<button' + (f.active === false ? '' : ' class="danger"') + ' data-fnretire="' + esc(fk) + '">' +
     (f.active === false ? "Reinstate this function" : "Retire this function") + '</button>');
   if (mayDestroy())
     acts.push('<button class="danger" data-fndel="' + esc(fk) + '">Delete permanently</button>');
@@ -47594,7 +48352,7 @@ function fnPanels(fk, f){
         : "Nothing points at it and nothing has been reported against it. There is no " +
           "undo \u2014 Retire is the reversible one.") +
       '</div><div class="cbtns"><button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-fndelyes="' + esc(fk) + '">Yes, delete it</button></div></div>';
+      '<button class="danger" data-fndelyes="' + esc(fk) + '">Delete the function</button></div></div>';
   }
   var n = functionCapCount(fk);
   var caps = n + " " + (n === 1 ? "capability" : "capabilities");
@@ -47603,13 +48361,13 @@ function fnPanels(fk, f){
       L("keyobj") + ' and ' + L("project") + ' across ' + caps + '. The definitions stand, and each ' +
       'plan is archived first.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Yes, clear the plan</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Clear the plan</button>' +
       '</div></div>';
   if (CLEARING === "fn|" + fk + "|nums")
     return '<div class="kmenu kconfirm"><div class="cq"><b>Clear the reported progress?</b> ' +
       'Actuals and notes across ' + caps + '. The plan stands.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Yes, clear the progress</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Clear the progress</button>' +
       '</div></div>';
   return "";
 }
@@ -49224,8 +49982,8 @@ function tkBar(id, opts){
 function rowActions(table, key, ed, extra){
   if (ed) {
     return '<td class="cc tk-editcell">' +
-      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button>' +
-      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>' +
+      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button></td>';
   }
   return '<td class="cc">' +
     '<button class="ico tk-pen" data-rowedit="' + esc(table + "|" + key) + '" ' +
@@ -49805,8 +50563,8 @@ function builderChooserHtml(){
       '<span class="bstat ' + (has ? "has" : "empty") + '">' + (has ? "Has a plan" : "Empty") + '</span>' +
       (confirming
         ? '<span class="bconfirm">Archive today’s plan and start fresh? ' +
-            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Yes, archive it</button>' +
-            '<button class="blink" data-bnofresh="1">Cancel</button></span>'
+            '<button class="blink" data-bnofresh="1">Cancel</button>' +
+            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Archive it</button></span>'
         /* A subject with content gets TWO ways in: Continue picks up a
            paused build exactly where the data stands (§129: progress is the
            plan itself, so nothing was ever "saved" to resume), and Start
@@ -49946,11 +50704,6 @@ function bformDef(kind, ctx){
         { k:"name", label:"Action", req:true, ph:"The work itself, as a sentence" },
         { k:"owner", label:"Owner", type:"owner" },
         { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
-      ] },
-    clause: { title:"Add a line to “Who we are”",
-      fields:[
-        { k:"label", label:"The lead — the words down the left", req:true, ph:"e.g. We serve" },
-        { k:"text", label:"The line itself", type:"long" }
       ] },
     swot: { title:"Add " + ({ s:"a strength", w:"a weakness", o:"an opportunity", t:"a threat" }[ctx && ctx.q] || "a line"),
       fields:[
@@ -50174,13 +50927,6 @@ function bApply(kind, ctx, d){
     ac.name = v("name"); ac.owner = v("owner"); ac.due = v("due");
     return true;
   }
-  if (kind === "clause") {
-    var cu = ctx.target === "group" ? GROUP : unitLikeWritable(ctx.target);
-    if (!cu || !Array.isArray(cu.clauses)) return false;
-    cu.clauses.push([v("label"), v("text")]);
-    if (cu.ukey) renumberUnit(cu);
-    return true;
-  }
   if (kind === "swot") {
     var su = unitLikeWritable(ctx.target); if (!su || !su.swot) return false;
     if (!Array.isArray(su.swot[ctx.q])) return false;
@@ -50323,8 +51069,8 @@ function builderReviewHtml(target){
   return '<div class="brv">' + rows + '</div>' +
     '<p class="bfoot">Finishing closes the band and nothing else — the plan has been live all along. ' +
       'Gaps stay findable on the pages' + (gaps.length ? '' : ' — and there are none') + '.</p>' +
-    '<div class="bfacts"><button class="bprim" data-bdone="1">Finish building</button>' +
-    '<button class="blink" data-brvback="1">Keep building</button></div>';
+    '<div class="bfacts"><button class="blink" data-brvback="1">Keep building</button>' +
+    '<button class="bprim" data-bdone="1">Finish building</button></div>';
 }
 
 /* ── present.js ── */
@@ -55565,6 +56311,667 @@ if (ROOM_MODE) {
      the laptop never shows the slide before last. */
   addEventListener("keyup", function(){ setTimeout(roomReport, 0); });
 }
+
+/* ── reading.js ── */
+/* ── THE READING WINDOW (§676; design-mockups/strategy-reading-view) ─────
+   Islam, 2026-10-29: *"people who see for the first time they get confused
+   somehow … some sort of a window that opens, and this window has the
+   multiple tabs, the foundation, the analysis, the directions and so on just
+   for viewing things rather than the detailed view … this view is mainly for
+   the CEO or people are not owners on the function or people who want to see
+   the company Strategy in general"*. Settled from three mockup rounds: a
+   window over the platform, a picker for the company or a unit, four tabs in
+   the approach's own order — Foundation, Analysis, Directions (each with its
+   measures and its tactics, folded to one line), Overall performance — and
+   Exit. The line per tab that said what the tab answers went on Islam's word
+   (2026-10-29, §680): the names say it.
+
+   A MODE, NOT A PAGE, as Presentation mode is (present.js): it takes the
+   whole window, the chrome disappears, Exit and Escape return the reader to
+   exactly where they were. AND AN ADDRESS OF ITS OWN (§689):
+   /<client>/strategy/read, /read/<unit>, /read/<unit>/<tab> — written and
+   read by shell/route.js off the `smp:reading` event this fires, so a link
+   a CEO is sent opens the window on the page it names. And NOTHING NEW IS COMPUTED (welcome.js's rule,
+   §53.5): every figure is the same function the workbench's page calls —
+   measureScore, pillarPerf, unitObjectives, unitPillars, unitExec and their
+   group twins — and every list goes through SMPRules.shown, so the window
+   never disagrees with the page behind it. It only leaves out what edits,
+   weighs or orders.
+
+   THE SUBJECTS ARE THE NAVIGATOR'S, CUT DOWN BY REACH (§692; mockup rounds
+   5 and 6). Islam: *"why don't we have the plans like the navigator
+   approach units and functions where the viewer can see what he wants to
+   see. that should follow the visibility logic we already have in the roles
+   and access"*, then of a drop-down, *"not usable for long lists. why don't
+   we use the navigator concept?"*. So the window carries the workbench's own
+   row under its strip — the company menu pinned at the left, the Units |
+   Functions switch, the names on one line that scrolls — built by the same
+   builder the workbench's row is (shell.html navParts), which is what makes
+   the matrix's grant the only rule: a subject is on the row when the viewer
+   holds a page there and not otherwise, one side alone is a word, and a
+   viewer who reaches one subject lands on it. And each subject is read in
+   its own shape: a unit as before; a supporting function as its Overview,
+   its S&W, its plan under the plan's own name — Directions, Projects or
+   Objectives, by the way it plans — and Overall performance; a division as
+   its own Foundation (§404) and the performance of what it holds. */
+var READING = (function () {
+  var ST = { target: "group", tab: "found", open: {}, fold: "units", followed: null };
+
+  /* ── what can be read: whatever the navigator would list for this viewer ──
+     The row's parts, from the workbench's own builder, with the window's
+     subject as the place and the window's own side open; and the keys a
+     press can land on — the top layer and the divisions the row offers,
+     every side's names, and a side's own division where it carries one. */
+  function kindOf(key) {
+    if (key === "group") return "group";
+    if (/^fn:/.test(key)) return "fn";
+    if (/^co:/.test(key)) return "co";
+    if (/^cap:/.test(key)) return "cap";
+    return UNITS[key] ? "unit" : null;
+  }
+  function fnKey(key) { return String(key).slice(3); }
+  function rowParts() {
+    var r = navParts(ST.target, ST.fold, ST.followed);
+    ST.fold = r.fold; ST.followed = r.followed;
+    return r.parts;
+  }
+  function reachKeys() {
+    var keys = [];
+    var add = function (k) { if (k && keys.indexOf(k) < 0) keys.push(k); };
+    var tops = [];
+    if (ownTabs(SUBS.group, "group").length) tops.push("group");
+    if (buExists() || !tops.length) companiesReachable().forEach(function (ck) {
+      if (ownTabs(SUBS.co, "co:" + ck).length) tops.push("co:" + ck);
+    });
+    tops.forEach(add);
+    navSides().forEach(function (x) { if (x.co) add("co:" + x.co); (x.keys || []).forEach(add); });
+    return keys;
+  }
+  /* the side a subject sits on, so opening the window on it lights the name */
+  function sideOf(key) {
+    var hit = null;
+    navSides().forEach(function (x) { if (!hit && ((x.keys || []).indexOf(key) >= 0 || (x.co && key === "co:" + x.co))) hit = x.fold; });
+    return hit;
+  }
+  /* a target somebody asked for, read as a subject the window can show:
+     a capability reads as the function that holds it; anything out of
+     reach falls to the first subject reached; nothing reached is null */
+  function norm(t) {
+    var k = String(t || ""), reach = reachKeys();
+    if (kindOf(k) === "cap") { var c = capById(k.slice(4)); k = c && c.fn ? "fn:" + c.fn : ""; }
+    if (reach.indexOf(k) >= 0) return k;
+    return reach.length ? reach[0] : null;
+  }
+  /* the record the Foundation reads: a unit's own, a function's own, a
+     division's (coFoundOf, §404), or the group's; the plan and the SWOT of a
+     unit or a pillars function come through unitLike, the group's through
+     topAsUnit() */
+  function recordOf(key) {
+    var kind = kindOf(key);
+    return kind === "unit" ? UNITS[key] : kind === "fn" ? FUNCTIONS[fnKey(key)] : kind === "co" ? coFoundOf(key.slice(3)) : GROUP;
+  }
+  function planOf(key) { return key === "group" ? topAsUnit() : unitLike(key); }
+  function swotOf(key) {
+    var o = kindOf(key) === "fn" ? FUNCTIONS[fnKey(key)] : planOf(key);
+    return (o && o.swot && typeof o.swot === "object") ? o.swot : {};
+  }
+  function fnWay(key) { return kindOf(key) === "fn" ? fnFormat(FUNCTIONS[fnKey(key)]) : null; }
+
+  /* THE TABS' WORDS IN AN ADDRESS (§689): /<client>/strategy/read/<subject>/<word> */
+  var TAB_WORD = { found: "foundation", swot: "analysis", dir: "directions", cap: "capabilities", proj: "projects", obj: "objectives", perf: "performance" };
+  function tabKeyOf(word) { for (var k in TAB_WORD) if (TAB_WORD[k] === word || k === word) return k; return null; }
+  /* EACH SUBJECT'S OWN TABS (§692): a tab is offered on the kinds it names
+     and where its `when` — the workbench's own conditions for the matching
+     page (shell.html SUBS) — answers yes. */
+  var TABS = [
+    { k: "found", label: function (key) { return SMPRules.foundTitle(GROUP, key) || "Foundation"; },
+      when: function (key) {
+        var kind = kindOf(key);
+        if (kind === "fn") return SMPRules.foundOn(GROUP, key) && (compOn(key, SMPRules.descPart(key)) || (compOn(key, "keyobj") && !plansInObjectives(key)));
+        if (kind === "co") {
+          var st = SMPRules.structureOf(GROUP), m = st && st.mid;
+          return !!(m && Array.isArray(m.on)) && SMPRules.foundOn(GROUP, key) &&
+            ["brief", "purpose", "aspiration", "keyobj", "values"].some(function (c) { return compOn(key, c); });
+        }
+        return true;
+      } },
+    { k: "swot", label: function (key) { return SMPRules.swotTitle(GROUP, key) || (kindOf(key) === "fn" ? "S&W" : "Analysis"); },
+      when: function (key) { var kind = kindOf(key); return kind === "fn" ? compOn(key, "swot") : kind !== "co"; } },
+    { k: "dir", label: function () { return "Directions"; },
+      when: function (key) { var kind = kindOf(key); return kind === "fn" ? (fnWay(key) === "pillars" && planOn(key)) : kind !== "co"; } },
+    /* CAPABILITIES, A TAB OF THEIR OWN WHERE THE BOX KEEPS THEM APART (§679).
+       Islam, of El Abd: *"where is the capabilities tab?"* — §677 had put them
+       under Directions as a second list; the workbench gives a split box a
+       Capabilities tab (§560), and so does the window. Offered only where the
+       box's own question (boxSplit) answers yes and there is a capability to
+       read, since a tab over nothing is not a choice (§61). */
+    { k: "cap", label: function () { return L("capability", "bu"); },
+      when: function (key) { var u = planOf(key); return !!u && kindOf(key) !== "co" && boxSplit(u) && SMPRules.shown(itemsNow(u)).some(function (it) { return SMPRules.pillarIsCap(it); }); } },
+    /* a function's plan under the plan's own name — the title the office gave
+       that way of planning, else the client's word for a project, else
+       Objectives — exactly as its own Strategy tab names the section */
+    { k: "proj", label: function (key) { return SMPRules.planTitle(GROUP, key, "projects") || L("project"); },
+      when: function (key) { return fnWay(key) === "projects" && planOn(key); } },
+    { k: "obj", label: function (key) { return SMPRules.planTitle(GROUP, key, "objectives") || "Objectives"; },
+      when: function (key) { return fnWay(key) === "objectives" && planOn(key); } },
+    { k: "perf", label: function () { return "Overall performance"; } }
+  ];
+  function tabsFor(key) { return TABS.filter(function (t) { return !t.when || t.when(key); }); }
+
+  /* ── the pieces ── */
+  function stand(v) {
+    if (v == null || isNaN(v)) return '<span class="rbar"><b style="width:0"></b></span>';
+    var w = Math.max(0, Math.min(100, Math.round(v)));
+    return '<span class="rbar ' + band(v) + '"><b style="width:' + w + '%"></b></span>';
+  }
+  /* THE TWO TABLES (§682). Islam, of an opened direction: *"the tables
+     columns are too far away … no frame or grid is confusing and the tables
+     are titled measures and then the table start with measures and then
+     tactics … confusing as well"*. So: a real table with a frame and a line
+     under every row, its header the only title — no label over it saying
+     the same word — and the columns kept to the width the figures need
+     rather than spread to the card's edge. */
+  function measureRows(list) {
+    var rows = SMPRules.shown(list || []);
+    if (!rows.length) return '<p class="rnone">No measures yet.</p>';
+    return '<table class="rtable rmeas"><thead><tr><th>Measure</th><th class="num">Target</th><th class="num">Actual</th><th>Standing</th></tr></thead><tbody>' +
+      rows.map(function (m) {
+        var sc = measureScore(m);
+        /* a measure not yet given a target or a figure shows a dash, never a bare direction sign over nothing (El Abd, 2026-10-29) */
+        var tgt = String(m.target == null ? "" : m.target).trim(), fig = String(figShown(m) || "").trim();
+        return '<tr><td>' + esc(m.name || "") + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
+          '<td class="num">' + (fig ? fig : '\u2014') + '</td><td class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></td></tr>';
+      }).join("") + '</tbody></table>';
+  }
+  function tacticRows(list) {
+    var rows = SMPRules.shown(list || []);
+    if (!rows.length) return '<p class="rnone">No tactics yet.</p>';
+    return '<table class="rtable rtacs"><thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Status</th></tr></thead><tbody>' +
+      rows.map(function (t) {
+        return '<tr><td>' + esc(t.name || "") + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
+          '<td><span class="rq">' + [t.q1, t.q2, t.q3, t.q4].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span></td>' +
+          '<td><span class="rsts">' + esc(t.status || "\u2014") + '</span></td></tr>';
+      }).join("") + '</tbody></table>';
+  }
+
+  /* FOUNDATION, AS ISLAM READS IT (§680): who we are on the left; on the
+     right the vision (the aspiration), the end in mind and the mission (the
+     purpose), each a card in the layer's own word for it; under
+     them the key objectives and the core values. Each block only where
+     Structure carries it (compOn). */
+  function foundation(key) {
+    if (kindOf(key) === "fn") return fnFoundation(key);
+    var o = recordOf(key), on = function (c) { return compOn(key, c); }, out = "";
+    var asp = String(o.aspiration || "").trim(), end = String(o.endInMind || "").trim(), mis = String(o.mission || "").trim();
+    var cl = Array.isArray(o.clauses) ? o.clauses : [];
+    var who = on("brief") && cl.length ? '<div class="rcard"><h3>' + L("brief") + '</h3><div class="rclauses">' +
+      cl.map(function (c) { return '<b>' + esc(c[0] || "") + '</b><span>' + esc(c[1] || "") + '</span>'; }).join("") + '</div></div>' : "";
+    var vision = on("aspiration") && asp ? '<div class="rcard"><h3>' + L1("aspiration") + '</h3><p class="rasp">' + esc(asp) + '</p></div>' : "";
+    /* the end in mind is its own card under the layer's own word for it — "Moto" at El Abd — not a line under the vision (Islam, 2026-10-29) */
+    var endin = on("aspiration") && end ? '<div class="rcard"><h3>' + L1("endinmind") + '</h3><p class="rmis">' + esc(end) + '</p></div>' : "";
+    var mission = on("purpose") && mis ? '<div class="rcard"><h3>' + L1("purpose") + '</h3><p class="rmis">' + esc(mis) + '</p></div>' : "";
+    var right = vision + endin + mission;
+    if (who || right) out += '<div class="rtwo">' + (who || '') + (right ? '<div class="rcol">' + right + '</div>' : '') + '</div>';
+    if (on("keyobj") && SMPRules.shown(o.keyObjectives || []).length) {
+      var kw = L1("keyobj");
+      out += '<div><p class="rk">' + kw + (/s$/i.test(kw) ? "" : "s") + '</p><div class="rcard">' + measureRows(o.keyObjectives) + '</div></div>';
+    }
+    var vals = Array.isArray(o.values) ? o.values : [];
+    if (on("values") && vals.length)
+      out += '<div><p class="rk">' + L1("values") + '</p><div class="rvals">' + vals.map(function (v) {
+        return '<div class="rval"><b>' + esc(v.name || "") + '</b>' + (v.def ? '<span>' + esc(v.def) + '</span>' : '') + '</div>';
+      }).join("") + '</div></div>';
+    return out || '<p class="rnone">Nothing written here yet.</p>';
+  }
+
+  /* A FUNCTION'S OVERVIEW (§692), as its own page draws it (group-render.js
+     holderOverview): what it is — the function, who leads it, its
+     definition — while the brief is on, and its key objectives while they
+     are on and it does not keep them on its plan (a function planning in
+     objectives and actions holds them there, §430). */
+  function fnFoundation(key) {
+    var fk = fnKey(key), f = FUNCTIONS[fk]; if (!f) return '<p class="rnone">Nothing written here yet.</p>';
+    var briefOn = compOn(key, SMPRules.descPart(key)), koOn = compOn(key, "keyobj") && !plansInObjectives(key), out = "";
+    if (briefOn) {
+      var def = String(f.def || "").trim();
+      out += '<div class="rcard"><h3>What it is</h3><div class="rclauses">' +
+        '<b>' + esc(L1("fnword")) + '</b><span>' + esc(f.name || "") + '</span>' +
+        '<b>Led by</b><span>' + (f.head ? esc(personName(f.head)) : '\u2014') + '</span>' +
+        '<b>Definition</b><span>' + (def ? esc(def) : '\u2014') + '</span></div></div>';
+    }
+    if (koOn) {
+      var kw = L1("keyobj"), list = Array.isArray(f.keyObjectives) ? f.keyObjectives : [];
+      out += '<div><p class="rk">' + kw + (/s$/i.test(kw) ? "" : "s") + '</p><div class="rcard">' +
+        (SMPRules.shown(list).length ? measureRows(list) : '<p class="rnone">None. This ' + esc(L1("fnword")) + ' is judged by its ' + esc(fnPlansInPillars(f) ? L("pillar", "bu") : L("project")) + '.</p>') + '</div></div>';
+    }
+    return out || '<p class="rnone">Nothing written here yet.</p>';
+  }
+
+  function analysis(key) {
+    var sw = swotOf(key);
+    var quads = SMPRules.swotQuads(GROUP, key) || [];
+    if (!quads.length) return '<p class="rnone">No analysis is kept at this level.</p>';
+    return '<div class="rswot">' + quads.map(function (q) {
+      var list = Array.isArray(sw[q]) ? sw[q] : [];
+      return '<div class="rcard rq-' + esc(q) + '"><h3><i>' + esc(String(q).charAt(0).toUpperCase()) + '</i>' + L(SMPRules.QUAD_KEYS[q]) + '</h3>' +
+        (list.length ? '<ol>' + list.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join("") + '</ol>' : '<p class="rnone">Nothing listed.</p>') + '</div>';
+    }).join("") + '</div>';
+  }
+
+  /* DIRECTIONS AND CAPABILITIES APART WHERE THE BOX KEEPS THEM APART (§677,
+     §679). The question is the workbench's own, `boxSplit(u)`
+     (SMPRules.pillarsSplit): where it answers yes, Directions holds the
+     directions alone and the capabilities have the tab above; where it
+     answers no, one list, as the box itself is. */
+  function directions(key, caps) {
+    /* §704: at "own piece" the person's own alone, as the page narrows it */
+    var u = planOf(key), pf = typeof partFilter === "function" ? partFilter(u) : null, items = SMPRules.shown(itemsNow(u));
+    if (pf) items = items.filter(pf);
+    if (boxSplit(u)) items = items.filter(function (it) { return !!SMPRules.pillarIsCap(it) === !!caps; });
+    var word = caps ? L1("capability").toLowerCase() : "direction";
+    if (!items.length) return '<p class="rnone">No ' + esc(word) + 's this year.</p>';
+    return '<div class="rtools">' + items.length + ' ' + esc(word) + (items.length === 1 ? "" : "s") + ', folded \u2014 press one to open it.' +
+      '<button type="button" data-rall="open">Open all</button><button type="button" data-rall="close">Close all</button></div>' +
+      dirList(u, items);
+  }
+  function dirList(u, items) {
+    var all = u.items || [];
+    return '<div class="rdirs">' + items.map(function (it) {
+        var id = u.ukey + "|" + all.indexOf(it), open = !!ST.open[id], sc = pillarPerf(it);
+        var ms = SMPRules.shown(it.measures || []).length, ts = SMPRules.shown(it.tactics || []).length;
+        return '<div class="rdir' + (open ? " open" : "") + '" data-rdir="' + esc(id) + '">' +
+          '<div class="rfold" role="button" tabindex="0" aria-expanded="' + (open ? "true" : "false") + '">' +
+          '<span class="rcode">' + esc(pillarCode(u, all.indexOf(it))) + '</span>' +
+          '<h3>' + esc(it.name || "") + (it.sub ? '<span class="rsub">' + esc(it.sub) + '</span>' : '') + '</h3>' +
+          '<span class="rsum"><b>' + ms + '</b> measure' + (ms === 1 ? "" : "s") + ' · <b>' + ts + '</b> tactic' + (ts === 1 ? "" : "s") +
+          ' · <b style="color:' + bandInk(sc) + '">' + pct(sc) + '</b></span>' + stand(sc) +
+          '<span class="rchev" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></span></div>' +
+          '<div class="rmore">' + measureRows(it.measures) + tacticRows(it.tactics) + '</div></div>';
+      }).join("") + '</div>';
+  }
+
+  function figure(v, what, sub) {
+    return '<div class="rfig"><b style="color:' + bandInk(v) + '">' + pct(v) + '</b><span>' + what + ' — ' + sub + '</span>' +
+      (v == null || isNaN(v) ? '' : '<i class="rband ' + band(v) + '">' + esc(bandWord(v)) + '</i>') + '</div>';
+  }
+  /* OVERALL PERFORMANCE (§686). Islam, of El Abd's company: *"why the
+     overall performance is not showing while it is showing in the
+     performance tab for directions performance and execution"*. §676 scored
+     a top layer by its units alone; El Abd has none, and its plan is the top
+     layer's own. So the three figures are the ones the Performance page
+     draws for that subject: a unit's headline, its directions' mean and its
+     execution ratio (`unitObjectives`, `unitPillars`, `unitRatio` — the
+     ratio, delivered against planned, which is the page's own card, not the
+     delivered mean); a top layer's own key objectives, then, where it has a
+     plan of its own in directions, that plan's mean and ratio over
+     `topAsUnit()`, as the group page's own section does (§607), else the
+     units' headlines at their weights and their execution. */
+  function performance(key) {
+    var kind = kindOf(key);
+    if (kind === "co") return coPerformance(key.slice(3));
+    if (kind === "fn" && fnWay(key) === "projects") return projPerformance(key);
+    if (kind === "fn" && fnWay(key) === "objectives") return objPerformance(key);
+    var unit = kind === "unit" || kind === "fn", u = unit ? planOf(key) : null;
+    if (unit && !u) return '<p class="rnone">Nothing to score yet.</p>';
+    var own = !unit && topHasPlan() && planOn("group") && topWay() !== "projects";
+    var tu = own ? topAsUnit() : null;
+    var a = unit ? unitObjectives(u) : groupKeyObjectives();
+    var b = unit ? unitPillars(u) : own ? unitPillars(tu) : groupUnitsObjectives();
+    var c = unit ? unitRatio(u) : own ? unitRatio(tu) : groupExec();
+    var head = unit ? u.keyObjectives : GROUP.keyObjectives;
+    var bw = unit || own ? "Directions" : L1("unitword") + "s";
+    var bs = unit ? "each direction\u2019s measures, averaged per direction" : own ? "the " + esc(labelWord("topword", "group") || "company").toLowerCase() + "\u2019s own directions, averaged" : "the units\u2019 own headlines, at their weights";
+    return '<div class="rthree">' +
+      figure(a, "Measures", unit ? "the " + (kind === "fn" ? esc(L1("fnword")).toLowerCase() : "unit") + "\u2019s headline measures against their targets" : "the group\u2019s own headline measures against their targets") +
+      figure(b, bw, bs) +
+      figure(c, "Execution", "delivered against what should have been by now; 100% is on plan, not finished") + '</div>' +
+      '<div class="rcard"><h3>Headline measures</h3>' + measureRows(head) + '</div>';
+  }
+
+  /* ── A FUNCTION THAT PLANS IN PROJECTS (§692) ─────────────────────────
+     Its Performance page's own three readings (group-render.js
+     renderFnPerformance → capScoreCards): the key objectives' score, the
+     projects' own readings averaged (capPerf), and the milestones due so
+     far as read (capExec). The holder is the function's own (capsShown →
+     fnOwnHolder), the same list its page draws. */
+  function holderOf(key) { var hs = capsShown(key); return hs && hs.length ? hs[0] : null; }
+  function projPerformance(key) {
+    var c = holderOf(key);
+    if (!c) return '<p class="rnone">No ' + esc(L("project")) + ' yet. Nothing to report until there are.</p>';
+    var ex = capExec(c), ps = SMPRules.shown(c.projects || []);
+    return '<div class="rthree">' +
+      figure(capKOScore(c), L1("keyobj") + "s", "the " + esc(L1("fnword")).toLowerCase() + "\u2019s own headline measures against their targets") +
+      figure(capPerf(c), L("project"), "each " + esc(L1("project")).toLowerCase() + "\u2019s deliverables and outcomes, averaged") +
+      figure(ex.pct, "Execution", "the milestones due so far, as read; " + ex.done + " of " + ex.total + " completed") + '</div>' +
+      '<div class="rcard"><h3>Headline measures</h3>' + measureRows(c.keyObjectives) + '</div>' +
+      (ps.length ? '<div class="rcard"><h3>' + esc(L("project")) + '</h3><table class="rtable rprojs"><thead><tr><th>Code</th><th>' + esc(L1("project")) + '</th><th>Owner</th><th class="num">Milestones</th><th>Standing</th></tr></thead><tbody>' +
+        ps.map(function (p) {
+          var v = projPerf(p), m = projMilestones(p);
+          return '<tr><td class="rcodecell">' + esc(projCode(holderCodeOwner(c), p)) + '</td><td>' + esc(p.name || "") + '</td><td>' + esc(p.owner || "\u2014") + '</td>' +
+            '<td class="num">' + m.done + ' of ' + m.total + '</td><td class="rst">' + stand(v) + '<i style="color:' + bandInk(v) + '">' + pct(v) + '</i></td></tr>';
+        }).join("") + '</tbody></table></div>' : '');
+  }
+  /* the plan as it was formed: one folded line per project, as a direction
+     is (§677), opened to its deliverables and outcomes and its milestones */
+  function projects(key) {
+    var c = holderOf(key), ps = c ? SMPRules.shown(c.projects || []) : [];
+    if (!ps.length) return '<p class="rnone">No ' + esc(L("project")) + ' yet.</p>';
+    return '<div class="rtools">' + ps.length + ' ' + esc(ps.length === 1 ? L1("project") : L("project")).toLowerCase() + ', folded \u2014 press one to open it.' +
+      '<button type="button" data-rall="open">Open all</button><button type="button" data-rall="close">Close all</button></div>' +
+      '<div class="rdirs">' + ps.map(function (p) {
+        var id = key + "|" + p.id, open = !!ST.open[id], sc = projPerf(p), m = projMilestones(p);
+        var ds = SMPRules.shown(p.deliverables || []).length, os = SMPRules.shown(p.outcomes || []).length;
+        return '<div class="rdir' + (open ? " open" : "") + '" data-rdir="' + esc(id) + '">' +
+          '<div class="rfold" role="button" tabindex="0" aria-expanded="' + (open ? "true" : "false") + '">' +
+          '<span class="rcode">' + esc(projCode(holderCodeOwner(c), p)) + '</span>' +
+          '<h3>' + esc(p.name || "") + (p.brief ? '<span class="rsub">' + esc(p.brief) + '</span>' : '') + '</h3>' +
+          '<span class="rsum">' + (p.owner ? esc(p.owner) + ' · ' : '') + '<b>' + ds + '</b> deliverable' + (ds === 1 ? "" : "s") + ' · <b>' + os + '</b> outcome' + (os === 1 ? "" : "s") +
+          ' · <b>' + m.done + '</b> of <b>' + m.total + '</b> milestones · <b style="color:' + bandInk(sc) + '">' + pct(sc) + '</b></span>' + stand(sc) +
+          '<span class="rchev" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></span></div>' +
+          '<div class="rmore">' + dxTable(p) + milestoneRows(p) + '</div></div>';
+      }).join("") + '</div>';
+  }
+  function dxTable(p) {
+    var rows = SMPRules.shown(p.deliverables || []).map(function (d) { return { d: true, o: d }; })
+      .concat(SMPRules.shown(p.outcomes || []).map(function (o) { return { d: false, o: o }; }));
+    if (!rows.length) return '<p class="rnone">No deliverables or outcomes yet.</p>';
+    return '<table class="rtable rdx"><thead><tr><th>Deliverable or outcome</th><th>Kind</th><th class="num">Target</th><th>Reads</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        var v = r.d ? delivReads(r.o) : r.o.progress;
+        return '<tr><td>' + esc(r.o.name || "") + '</td><td class="row">' + (r.d ? "Deliverable" : "Outcome") + '</td>' +
+          '<td class="num">' + (r.d ? "Y/N" : (r.o.target ? (r.o.dir ? esc(r.o.dir) + ' ' : '') + esc(r.o.target) : '\u2014')) + '</td>' +
+          '<td>' + (r.d ? statusPill(r.o, "Delivered") : (v == null || v === "" ? '\u2014' : esc(String(v)) + '%')) + '</td></tr>';
+      }).join("") + '</tbody></table>';
+  }
+  function milestoneRows(p) {
+    var rows = SMPRules.shown(p.milestones || []);
+    if (!rows.length) return '<p class="rnone">No milestones yet.</p>';
+    return '<table class="rtable rms"><thead><tr><th>Milestone</th><th>Due</th><th>Status</th><th class="num">Done</th></tr></thead><tbody>' +
+      rows.map(function (m) {
+        var v = msReads(m);
+        return '<tr><td>' + esc(m.name || "") + '</td><td class="row">' + dxDate(m.finish, m.status === "done") + '</td><td>' + statusPill(m, "Completed") + '</td>' +
+          '<td class="num">' + (v == null ? '\u2014' : v + '%') + '</td></tr>';
+      }).join("") + '</tbody></table>';
+  }
+
+  /* ── A FUNCTION THAT PLANS IN OBJECTIVES AND ACTIONS (§692, §342) ────
+     Its page's two cards (fnObjCards): the objectives' score and the
+     actions due so far as read; its plan, the objectives and the actions
+     as two tables. */
+  function objPerformance(key) {
+    var fk = fnKey(key), h = fnOwnHolder(fk), t = fnActionsTally(fk);
+    return '<div class="rthree rtwo-fig">' +
+      figure(fnObjScore(fk), L1("keyobj") + "s", "the " + esc(L1("fnword")).toLowerCase() + "\u2019s own objectives against their targets") +
+      figure(t.pct, L("action"), "the " + esc(L("action")).toLowerCase() + " due so far, as read; " + t.done + " of " + t.total + " done") + '</div>' +
+      '<div class="rcard"><h3>' + esc(L1("keyobj")) + 's</h3>' + measureRows(h ? h.keyObjectives : []) + '</div>' +
+      '<div class="rcard"><h3>' + esc(L("action")) + '</h3>' + actionRows(fk) + '</div>';
+  }
+  function objectives(key) {
+    var fk = fnKey(key), h = fnOwnHolder(fk);
+    return '<div class="rcard"><h3>' + esc(L1("keyobj")) + 's</h3>' + measureRows(h ? h.keyObjectives : []) + '</div>' +
+      '<div class="rcard"><h3>' + esc(L("action")) + '</h3>' + actionRows(fk) + '</div>';
+  }
+  function actionRows(fk) {
+    var rows = SMPRules.shown(fnActions(fk));
+    if (!rows.length) return '<p class="rnone">No ' + esc(L("action")).toLowerCase() + ' yet.</p>';
+    return '<table class="rtable racts"><thead><tr><th>' + esc(L1("action")) + '</th><th>Owner</th><th>Due</th><th>Status</th><th class="num">Done</th></tr></thead><tbody>' +
+      rows.map(function (a) {
+        var v = msReads(a);
+        return '<tr><td>' + esc(a.name || "") + '</td><td class="row">' + esc(a.owner || "\u2014") + '</td><td class="row">' + dxDate(a.due, a.status === "done") + '</td>' +
+          '<td>' + statusPill(a, "Done") + '</td><td class="num">' + (v == null ? '\u2014' : v + '%') + '</td></tr>';
+      }).join("") + '</tbody></table>';
+  }
+
+  /* ── A DIVISION (§692) ─────────────────────────────────────────────────
+     Its Performance page's own cards (renderCompanyPerformance): the units'
+     performance at their weights re-normalised to the division, their
+     execution as a share of plan, and the division's share of the group;
+     then each unit's own readings, and the supporting functions it holds
+     with their headline. */
+  function fnHeadline(fk) {
+    var f = FUNCTIONS[fk]; if (!f) return null;
+    if (fnPlansInPillars(f)) { var u = fnAsUnit(fk); return u ? unitObjectives(u) : null; }
+    if (fnPlansInObjectives(f)) return fnObjScore(fk);
+    var h = fnOwnHolder(fk); return h ? capPerf(h) : null;
+  }
+  function coPerformance(ck) {
+    var co = COMPANIES[ck]; if (!co) return '<p class="rnone">No such division.</p>';
+    syncWeights();
+    var keys = companyUnitKeys(ck), fks = companyFnKeys(ck), share = companyWeight(ck);
+    if (!keys.length && !fks.length) return '<p class="rnone">' + esc(co.name) + ' holds nothing yet.</p>';
+    var uw = L1("unitword");
+    return '<div class="rthree">' +
+      figure(companyObjectives(ck), uw + "s", "the " + plural(keys.length, uw.toLowerCase()) + " in " + esc(co.name) + ", each on its own headline, at their weights") +
+      figure(companyRatio(ck), "Execution", "the " + uw.toLowerCase() + "s\u2019 delivery as a share of plan, at the same weights") +
+      '<div class="rfig"><b>' + share + '%</b><span>Share of the group \u2014 what these ' + uw.toLowerCase() + 's together are worth at group level</span></div></div>' +
+      (keys.length ? '<div class="rcard"><h3>The ' + esc(uw.toLowerCase()) + 's it holds</h3><table class="rtable rcos"><thead><tr><th>' + esc(uw) + '</th><th class="num">Measures</th><th class="num">Directions</th><th class="num">Execution</th><th class="num">Weight in ' + esc(co.name) + '</th></tr></thead><tbody>' +
+        keys.map(function (k) {
+          var u = UNITS[k], w = share ? Math.round((u.weight || 0) / share * 1000) / 10 : 0;
+          return '<tr><td>' + esc(u.name) + '</td><td class="num" style="color:' + bandInk(unitObjectives(u)) + '">' + pct(unitObjectives(u)) + '</td><td class="num" style="color:' + bandInk(unitPillars(u)) + '">' + pct(unitPillars(u)) + '</td>' +
+            '<td class="num" style="color:' + bandInk(unitRatio(u)) + '">' + pct(unitRatio(u)) + '</td><td class="num">' + w + '%</td></tr>';
+        }).join("") + '</tbody></table></div>' : '') +
+      (fks.length ? '<div class="rcard"><h3>The ' + esc(L("fnword")).toLowerCase() + ' it holds</h3><table class="rtable rcofn"><thead><tr><th>' + esc(L1("fnword")) + '</th><th>Plans in</th><th class="num">Headline</th></tr></thead><tbody>' +
+        fks.map(function (fk) {
+          var f = FUNCTIONS[fk], v = fnHeadline(fk), way = fnFormat(f);
+          return '<tr><td>' + esc(f.name) + '</td><td class="row">' + esc(way === "pillars" ? "directions" : way === "objectives" ? "objectives and actions" : L("project").toLowerCase()) + '</td><td class="num" style="color:' + bandInk(v) + '">' + pct(v) + '</td></tr>';
+        }).join("") + '</tbody></table></div>' : '');
+  }
+
+  /* ── the window ── */
+  function root() { return document.getElementById("readroot"); }
+  function paint() {
+    var r = root(); if (!r) return;
+    var key = norm(ST.target);
+    if (!key) { close(); return; }
+    ST.target = key;
+    var tabs = tabsFor(key);
+    var tab = tabs.filter(function (t) { return t.k === ST.tab; })[0] || tabs[0];
+    r.querySelector(".rwtop").innerHTML =
+      '<span class="rmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span>' +
+      '<span class="rco">' + esc(GROUP.org || "") + '</span>' +
+      '<span class="rsp"></span>' +
+      (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
+      '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
+    r.querySelector(".rwnav").innerHTML = rowHTML(key);
+    r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
+      return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
+    }).join("");
+    var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false)
+      : tab.k === "cap" ? directions(key, true) : tab.k === "proj" ? projects(key) : tab.k === "obj" ? objectives(key) : performance(key);
+    r.querySelector(".rwbody").innerHTML = body;
+    r.querySelector(".rwbody").scrollTop = 0;
+    ST.tab = tab.k;
+    rowSettle();
+    said();
+  }
+
+  /* ── THE ROW (§692): the navigator's parts, drawn in the window's own
+     markup. The first part, where it is the top layer or a division, is
+     pinned at the left as the company menu is; the switch is pinned; the
+     names scroll between two fades that say there is more (§136). ── */
+  function rowHTML(key) {
+    var parts = rowParts(), names = [], ctrl = "";
+    parts.forEach(function (p, i) {
+      if (p.tops) {
+        var here = p.tops.filter(function (x) { return x.k === key; })[0];
+        ctrl += '<details class="rtops"><summary aria-haspopup="menu"' + (here ? ' class="here"' : '') + '>' + esc((here || p.tops[0]).label) + '<i aria-hidden="true">\u25be</i></summary>' +
+          '<div class="rmenu" role="menu">' + p.tops.map(function (x) {
+            return '<button type="button" role="menuitem" data-rgo="' + esc(x.k) + '"' + (x.k === key ? ' aria-current="true"' : '') + '>' + esc(x.label) +
+              (x.k === "group" ? '' : '<span class="rsubn">' + plural(companyUnitKeys(x.k.slice(3)).length, L1("unitword"), L("unitword")) + '</span>') + '</button>';
+          }).join("") + '</div></details>';
+        return;
+      }
+      if (p.folds) {
+        if (p.folds.length === 1 && p.folds[0].one) { ctrl += '<span class="rsep"></span><span class="rsw one"><span class="nsw on">' + esc(p.folds[0].label) + '</span></span>'; return; }
+        if (p.folds.length > 2 || p.multi) {
+          ctrl += '<span class="rsep"></span><div class="rsw multi" role="group" aria-label="Which list to show">' + p.folds.map(function (f) {
+            return '<button type="button" class="nsw' + (f.open ? " on" : "") + '" data-rfold="' + esc(f.fold) + '"' + (f.co ? ' data-rco="' + esc(f.co) + '"' : '') + ' aria-pressed="' + (f.open ? "true" : "false") + '">' + esc(f.label) + '</button>';
+          }).join("") + '</div>';
+          return;
+        }
+        var lit = p.folds.filter(function (f) { return f.open; })[0] || p.folds[0];
+        var other = p.folds.filter(function (f) { return f !== lit; })[0] || lit;
+        ctrl += '<span class="rsep"></span><button type="button" class="rsw" data-rfold="' + esc(other.fold) + '" aria-label="Showing ' + esc(lit.label.toLowerCase()) + '. Press to show ' + esc(other.label.toLowerCase()) + '.">' +
+          p.folds.map(function (f) { return '<span class="nsw' + (f.open ? " on" : "") + '">' + esc(f.label) + '</span>'; }).join("") + '</button>';
+        return;
+      }
+      if (!p.k) return;
+      var b = '<button type="button" data-rgo="' + esc(p.k) + '"' + (p.k === key ? ' aria-current="page"' : '') + '>' + esc(p.label) + '</button>';
+      if (i === 0 && (p.k === "group" || /^co:/.test(p.k))) ctrl += '<span class="rtop1">' + b + '</span>'; else names.push(b);
+    });
+    return ctrl + (names.length ? '<span class="rsep"></span><div class="rclip"><div class="rscroll">' + names.join("") + '</div><div class="rfade l" hidden></div><div class="rfade r" hidden></div></div>' : '');
+  }
+  function rowSettle() {
+    var r = root(), sc = r && r.querySelector(".rscroll"); if (!sc) return;
+    var lit = sc.querySelector('[aria-current="page"]');
+    if (lit && (lit.offsetLeft < sc.scrollLeft || lit.offsetLeft + lit.offsetWidth > sc.scrollLeft + sc.clientWidth)) sc.scrollLeft = Math.max(0, lit.offsetLeft - 24);
+    fades();
+  }
+  function fades() {
+    var r = root(), sc = r && r.querySelector(".rscroll"); if (!sc) return;
+    var l = r.querySelector(".rfade.l"), rt = r.querySelector(".rfade.r");
+    if (l) l.hidden = sc.scrollLeft <= 0;
+    if (rt) rt.hidden = sc.scrollLeft + sc.clientWidth >= sc.scrollWidth - 1;
+  }
+  function go(key) {
+    if (!key || key === ST.target) return;
+    ST.target = key; ST.open = {};
+    var side = sideOf(key); if (side) ST.fold = side;
+    paint();
+  }
+
+  /* WHAT THE WINDOW SHOWS, SAID TO WHOEVER LISTENS (§689): shell/route.js
+     writes it into the address and reads an address back into it. */
+  function state() { return { open: isOpen(), target: ST.target, tab: TAB_WORD[ST.tab] || "foundation" }; }
+  function said() {
+    try { document.dispatchEvent(new CustomEvent("smp:reading", { detail: state() })); } catch (e) {}
+  }
+  function isOpen() { var r = root(); return !!(r && r.classList.contains("on")); }
+
+  function open(target, tab) {
+    var r = root(); if (!r) return;
+    var t = norm(target === null ? "" : String(target || TARGET || "group"));
+    if (!t) return false;   /* nothing this viewer reaches: no window to open (§61) */
+    ST.target = t;
+    var side = sideOf(t); if (side) ST.fold = side;
+    ST.tab = (tab && tabKeyOf(String(tab))) || "found";
+    ST.open = {};
+    r.classList.add("on");
+    document.body.classList.add("reading");
+    paint();
+    r.focus();
+    return isOpen();
+  }
+  function close() {
+    var r = root(); if (!r) return;
+    r.classList.remove("on");
+    document.body.classList.remove("reading");
+    said();
+    var b = document.getElementById("readbtn");
+    if (b) b.focus();
+  }
+
+  function wire() {
+    var r = root(), b = document.getElementById("readbtn");
+    if (b) { b.hidden = false; b.addEventListener("click", function () { open(TARGET); }); }
+    if (!r) return;
+    r.addEventListener("click", function (e) {
+      var t = e.target.closest ? e.target : null; if (!t) return;
+      var tab = t.closest("[data-rtab]"); if (tab) { ST.tab = tab.getAttribute("data-rtab"); paint(); return; }
+      if (t.closest("[data-rexit]")) { close(); return; }
+      /* the row (§692): a name or a top goes there; a side opens its list,
+         and a side that carries a division opens that division's page too
+         (§464), where the viewer reaches it */
+      var goto = t.closest("[data-rgo]"); if (goto) { go(goto.getAttribute("data-rgo")); return; }
+      var side = t.closest("[data-rfold]");
+      if (side) {
+        ST.fold = side.getAttribute("data-rfold");
+        var co = side.getAttribute("data-rco");
+        if (co && reachKeys().indexOf("co:" + co) >= 0 && ST.target !== "co:" + co) { ST.target = "co:" + co; ST.open = {}; }
+        paint(); return;
+      }
+      var all = t.closest("[data-rall]");
+      if (all) {
+        var on = all.getAttribute("data-rall") === "open";
+        r.querySelectorAll(".rdir").forEach(function (d) { ST.open[d.getAttribute("data-rdir")] = on; d.classList.toggle("open", on); d.querySelector(".rfold").setAttribute("aria-expanded", String(on)); });
+        return;
+      }
+      var fold = t.closest(".rfold");
+      if (fold) {
+        var d = fold.parentNode, id = d.getAttribute("data-rdir"), now = !d.classList.contains("open");
+        ST.open[id] = now; d.classList.toggle("open", now); fold.setAttribute("aria-expanded", String(now));
+      }
+    });
+    r.addEventListener("scroll", function (e) { var el = e.target; if (el instanceof Element && el.classList.contains("rscroll")) fades(); }, true);
+    window.addEventListener("resize", function () { if (r.classList.contains("on")) fades(); });
+    /* THE WINDOW'S OWN KEYS, AND NONE OF THE PLATFORM'S WHILE IT IS UP. Taken
+       at the document, first, so the tab keys, the action keys and the
+       deck's own Escape (all listening at the document) never see a key
+       pressed in the window: Escape returns, Enter or Space opens the
+       direction under the focus, and anything else is the browser's own. */
+    document.addEventListener("keydown", function (e) {
+      if (!r.classList.contains("on")) return;
+      if (e.key === "Escape") { e.preventDefault(); close(); }
+      else if (e.key === "Enter" || e.key === " ") { var el = e.target; if (el instanceof HTMLElement && el.classList.contains("rfold")) { e.preventDefault(); el.click(); } }
+      e.stopPropagation();
+    }, true);
+  }
+
+  /* ── A SEAT THAT EDITS NOTHING OPENS IN THE WINDOW (§687) ──────────────
+     Islam: *"build it yes"*, of the mockup's first position. A reader's seat
+     — a CEO's, a peer's, anybody's that the access matrix lets look and never
+     write — lands in the window, with the workbench a press of Exit away;
+     everybody else lands on the workbench as before.
+
+     THE SEAT IS READ FROM THE MATRIX AND THE ROLES, NOT GUESSED FROM A NAME:
+     the office is never a reader (SMPRules.isOffice), nor is anybody holding
+     a piece — a unit, a function, a capability, a project, a pillar, a
+     direction, a contribution — and otherwise a seat is a reader exactly
+     when no page of the platform grants it edit or fill on any target it
+     could reach — the group, every unit, every supporting function,
+     every capability, every company — asked through the one rule every pen
+     asks, `SMPRules.grantAtPage` (§42). The same silences the welcome keeps:
+     no person, a projector, a deep address (a link straight to a page is a
+     page somebody meant to open, §148). */
+  var HOLDING = ["owner", "custodian", "capowner", "fnhead", "powner", "plowner", "dirowner", "contrib"];
+  function readerSeat(person) {
+    if (!person) return false;
+    var w = world();
+    if (SMPRules.isOffice(w, person)) return false;
+    /* a bounded role holds rows the page-level grant does not show — a
+       project's owner fills his project (§177) — so anybody holding a piece
+       works in the platform, whatever the matrix says of the page */
+    var roles = SMPRules.personRoleKeys ? SMPRules.personRoleKeys(w, person) : [];
+    if (roles.some(function (k) { return HOLDING.indexOf(k) > -1; })) return false;
+    var targets = ["group"];
+    (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function (k) { targets.push(k); });
+    Object.keys(typeof FUNCTIONS !== "undefined" ? FUNCTIONS : {}).forEach(function (k) { targets.push("fn:" + k); });
+    (Array.isArray(GROUP.capabilities) ? GROUP.capabilities : []).forEach(function (c) { if (c && c.id) targets.push("cap:" + c.id); });
+    Object.keys(typeof COMPANIES !== "undefined" ? COMPANIES : {}).forEach(function (k) { targets.push("co:" + k); });
+    var pages = SMPRules.PAGES || [];
+    for (var i = 0; i < pages.length; i++) {
+      for (var j = 0; j < targets.length; j++) {
+        var g = SMPRules.grantAtPage(w, person, pages[i].key, targets[j]);
+        if (g === "edit" || g === "fill") return false;
+      }
+    }
+    return true;
+  }
+  function offer(person, viewAs) {
+    /* the client's own switch first (Structure step, SMPRules.readersOpen) */
+    if (!SMPRules.readersOpen(GROUP)) return false;
+    if (!readerSeat(person)) return false;
+    if (document.body && document.body.classList.contains("presenting")) return false;
+    /* a deep address is the sign-in's own page; Viewing as somebody is a
+       sign-in as them (§237), so it lands where theirs would (§743) */
+    if (!viewAs) { try { if (document.documentElement.getAttribute("data-deep-address") === "1") return false; } catch (e) {} }
+    /* §692: on the first subject this seat reaches — the company where it
+       reaches the company, its one unit or function where that is all */
+    return !!open(null);
+  }
+
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen };
+})();
 
 /* ── slides.js ── */
 /* ── PICTURE SLIDES (§50, backlog §16.12 built) ───────────────────────────
@@ -61062,8 +62469,8 @@ var CHAT = (function(){
               'placeholder="Write to them…"></textarea>' +
           "</div>" +
           '<div class="chnew-acts">' +
-            '<button class="chsend" type="button" data-chnewsend="1">Send</button>' +
             '<button class="chnew-x" type="button" data-chnewcancel="1">Cancel</button>' +
+            '<button class="chsend" type="button" data-chnewsend="1">Send</button>' +
           "</div>" +
           '<div class="chnote" id="chnewnote">' +
             "They will see it in the corner, get a box on their screen if they " +
@@ -63257,8 +64664,8 @@ var WELCOME = (function(){
               '<div class="wtourbody" data-wtourbody hidden>' +
                 "<p>A short walk of the platform on your own plan — about two minutes.</p>" +
                 '<div class="wtourbtns">' +
-                  '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
                   '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+                  '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
                 "</div>" +
               "</div>" +
             "</div>" +
@@ -65014,11 +66421,11 @@ var COPILOT = (function(){
   var WORKFLOW_WORD = { foundation:"Foundation workflow", analysis:"SWOT workflow", compete:"Competitive Discipline workflow",
     directions:"Directions workflow", capabilities:"Capabilities workflow", execution:"Execution workflow", advisory:"Advisory workflow" };
   var STARTS = {
-    analysis: ["SWOT, step by step", "The internal, micro and macro analyses, then the SWOT — from notes, a template or guided questions."],
+    analysis: ["SWOT, step by step", "The internal, micro and macro analyses, then the SWOT."],
     compete: ["Score the value disciplines", "Market and internal factors, then the value proposition."],
     directions: ["Suggest and score Directions", "From the SWOT and the discipline, scored Urgency × Importance × Ease."],
     capabilities: ["Choose Capabilities", "What the chosen Directions need, each with an owner."],
-    execution: ["Plan the period", "Measures and tactics for each Direction, by quarter."],
+    execution: ["Build from the Directions", "The period, then measures and tactics drafted for each of the plan’s Directions and Capabilities. What the plan holds is shown on the cards and replaced on Apply."],
     advisory: ["Bring a decision", "A few questions, then a decision brief."]
   };
   var STARTTEXT = {};            /* place|section → what is half typed in the start box */
@@ -65043,6 +66450,17 @@ var COPILOT = (function(){
     if (s === "foundation") { var pp = planParts(), off = skipNow(), n = Object.keys(pp).filter(function(k){ return pp[k] && (!Array.isArray(pp[k]) || pp[k].length) && off.indexOf(k) < 0; }).length; if (!n) return ""; attr = 'data-cop-road="plan"'; meta = n + (n === 1 ? " part" : " parts"); }
     else if (s === "analysis") { var sw = planSwot(), ln = LETTERS.reduce(function(k, L){ return k + ((sw[L] || []).length); }, 0); if (!ln) return ""; attr = 'data-cop-newplan="analysis"'; meta = ln + (ln === 1 ? " line" : " lines"); }
     else if (s === "directions") { var nd = dvExisting().length; if (!nd) return ""; attr = 'data-cop-newplan="directions"'; meta = nd + (nd === 1 ? " Direction" : " Directions"); }
+    /* §697 S11 — the same card for Competitive Discipline (the plan's
+       discipline and values come in as the table) and for Execution, where it
+       reads "Refine the existing execution": the measures and tactics the
+       plan holds, on each card, drafts adding to them. */
+    else if (s === "compete") { var cw = cpPlanHeld(); if (!cw) return ""; attr = 'data-cop-newplan="compete"'; meta = cpWord(cw.discipline) + " · " + cw.values.length + (cw.values.length === 1 ? " value" : " values");
+      return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) + '<span class="coppt"><span class="coptag">On the plan today</span>Start from the existing plan</span>' +
+        '<span class="coppd">Load the discipline and the values the plan holds as the table, and change any part. Score the disciplines anew to check the choice. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>'; }
+    else if (s === "execution") { var ei = exItems(), withL = ei.filter(function(it){ return it.measures.length || it.tactics.length; }).length; if (!withL) return ""; attr = 'data-cop-newplan="execution"';
+      meta = withL + (withL === 1 ? " item" : " items") + " with measures · " + (ei.length - withL) + " without";
+      return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) + '<span class="coppt"><span class="coptag">On the plan today</span>Refine the existing execution</span>' +
+        '<span class="coppd">Load the measures and tactics the plan holds, on each Direction’s and Capability’s card, and change any part; a draft adds to them. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>'; }
     else return "";
     return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) +
       '<span class="coppt"><span class="coptag">On the plan today</span>Start from the existing plan</span>' +
@@ -65054,16 +66472,26 @@ var COPILOT = (function(){
       ? PATH_CARDS.filter(function(c){ return STARTROADS.indexOf(c.k) >= 0; }).map(function(c){ return '<button type="button" class="coppcard" data-cop-road="' + c.k + '">' + icon(c.i) +
           '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>'; }).join("")
       : (function(c){ return '<button type="button" class="coppcard" data-cop-newchat>' + icon(PATH_CARDS[0].i) +
-          '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span></button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]));
+          '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span>' +
+          /* §691 — THE SWOT'S FOUR WAYS IN, SAID ON ITS CARD (Islam: "A"; the
+             mockup design-mockups/copilot-start/2026-10-29_swot-ways-in.html).
+             They were one step on, in the methods grid, where someone bringing
+             their reports could not see them. The chips are words, not buttons:
+             the card is pressed as one, and the grid opens as before. */
+          (s === "analysis" ? '<span class="copways" data-cop-ways>' + ["Guided questions", "Template", "Ready reports", "Deep research"].map(function(w){ return '<span class="copway">' + w + '</span>'; }).join("") + '</span>' +
+            '<span class="copwaysk">Pick one or more per area at the next step.</span>' : '') + '</button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]));
     return '<div class="copstart" data-cop-startscreen>' +
       '<h2 class="copstarth">What would you like to do with ' + E(area) + '?</h2>' +
       '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything, attach your notes, or paste ' + E(BOXWORK[s] || "finished work") + '…" aria-label="Ask the Copilot, attach notes or paste work — this starts a free chat">' + E(STARTTEXT[key()] || "") + '</textarea>' +
-        '<button type="button" class="copsend" data-cop-startsend aria-label="Start a free chat" title="Send">' + SENDMARK + '</button></div>' +
+        /* §683 — Send is not there until something is typed, on the start
+           screen as in every chat (§652; Islam: "as we agreed, across all
+           the parts"). */
+        '<button type="button" class="copsend" data-cop-startsend aria-label="Start a free chat" title="Send"' + (String(STARTTEXT[key()] || "").trim() ? '' : ' hidden') + '>' + SENDMARK + '</button></div>' +
       '<div class="copunder copstartunder"><button type="button" class="copclip copstartclip" data-cop-startattach aria-label="Attach notes — a Word, PDF or Excel file" title="Attach notes — a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '<span>Attach notes</span></button>' +
         '<input type="file" hidden data-cop-startfile accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
         '<span class="cophint">Word, PDF or Excel · or paste · Enter sends</span></div>' +
       '<p class="copstartk">Typing, attaching or pasting here starts a free chat.</p>' +
-      '<div class="copor">or start step by step</div>' +
+      '<div class="copor">or start step by step</div>' + unfinishedHtml() +
       '<div class="coppaths copstartcards">' + cards + '</div></div>';
   }
   function chatsFoot(){
@@ -65085,8 +66513,8 @@ var COPILOT = (function(){
     return head + rows.map(function(c){
       var on = o.kind === "chat" && o.id === c.id;
       if (ASKDEL === c.id) return '<div class="coprow ask" data-cop-row="' + E(c.id) + '"><span class="copt">' + E(c.title) + '</span>' +
-        '<span class="copaskrow">Delete? <button type="button" class="copbtn danger solid" data-cop-delete-yes="' + E(c.id) + '">Delete</button>' +
-        '<button type="button" class="copbtn quiet" data-cop-delete-no>Cancel</button></span></div>';
+        '<span class="copaskrow">Delete? <button type="button" class="copbtn quiet" data-cop-delete-no>Cancel</button>' +
+        '<button type="button" class="copbtn danger solid" data-cop-delete-yes="' + E(c.id) + '">Delete</button></span></div>';
       if (RENAME === c.id) return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
         '<input class="fld copren" data-cop-rename-box="' + E(c.id) + '" value="' + E(c.title) + '" aria-label="Chat name" maxlength="160"></div>';
       var menu = MENU === c.id ? '<div class="copmenu" role="menu">' + (arch
@@ -65118,6 +66546,53 @@ var COPILOT = (function(){
   }
   /* §654 B4 — the rail's chip in the Copilot's own words. */
   function kindWord(k){ return k === "promotable" ? "Can go on the plan" : "Stays in the Copilot"; }
+  /* §694 S9 — THE ONWARD PATH. After Apply (after Save, in Advisory) one line
+     names the method's next step, with a button that opens that area's start
+     screen in this place. The order is the method's: SWOT, Competitive
+     Discipline, Directions, Execution; an area this place does not offer is
+     stepped over. The same line sits on a version's page under On the plan. */
+  var NEXTOF = {
+    analysis:   { k:"compete",    t:"Competitive Discipline — score the value disciplines from this SWOT." },
+    compete:    { k:"directions", t:"Directions — suggest and score them from the SWOT and this discipline." },
+    directions: { k:"execution",  t:"Execution — measures and tactics for each of them, by quarter." },
+    execution:  { k:"advisory",   t:"The plan is complete for the period; its tabs show it. Bring a decision to Advisory when one comes." },
+    advisory:   { k:"directions", t:"Put the decision to work in the plan’s Directions, or bring another decision." }
+  };
+  function nextOf(sec){
+    var seen = {}, n = NEXTOF[sec];
+    while (n && !seen[n.k]) { seen[n.k] = true; if (here().some(function(s){ return s.k === n.k; })) return n; n = NEXTOF[n.k]; }
+    return null;
+  }
+  function nextHtml(sec){
+    var n = nextOf(sec); if (!n) return "";
+    return '<div class="copnext" data-cop-next><span class="copnextk">Next</span><span class="copnextt">' + E(n.t) + '</span>' +
+      '<button type="button" class="copbtn solid" data-cop-go="' + E(n.k) + '">Open ' + E(sectionLabel(n.k)) + '</button></div>';
+  }
+  function sectionLabel(k){ for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === k) return SECTIONS[i].label; return k; }
+  /* Walk to a section of the Copilot in this place: its start screen, or a
+     deliverable of it (S10 opens the saved Directions version from Execution). */
+  function goSection(k, delivId){
+    if (typeof CURSEC === "undefined") return;
+    CURSEC.copilot = k; SHEET = ""; MENU = null; ASKDEL = null; SAY = "";
+    var kk = place() + "|" + k;
+    if (delivId) OPEN[kk] = { kind: "deliv", id: delivId }; else delete OPEN[kk];
+    PANE = null;
+    if (typeof paint === "function") paint(); else draw();
+    if (delivId) openItem("deliv", delivId);
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  /* §694 S12 — AN UNFINISHED CHAT IS NAMED ON THE START SCREEN: a step-by-step
+     chat in this place and area with steps still open (the rail's "N of M
+     done"), so + New chat does not start a second one beside it unknowing.
+     Free chats have no steps and are not counted. */
+  function unfinishedHtml(){
+    var l = list(); if (!l || l.failed) return "";
+    var rows = (l.chats || []).filter(function(c){ var sp = (l.swotProgress || {})[c.id]; return sp && sp.of > 0 && sp.done < sp.of; });
+    if (!rows.length) return "";
+    var c = rows[0], sp = l.swotProgress[c.id], more = rows.length - 1;
+    return '<div class="copunfinished" data-cop-unfinished><span><b>' + E(c.title) + '</b> is ' + sp.done + ' of ' + sp.of + ' done, last touched ' + E(when(c.last)) + (more ? ', and ' + more + ' more ' + (more === 1 ? 'is' : 'are') + ' unfinished in the rail' : '') + '.</span>' +
+      '<button type="button" class="copbtn solid" data-cop-chat="' + E(c.id) + '">Continue it</button><span class="copm">or start another below</span></div>';
+  }
 
   function mainHtml(){
     var o = OPEN[key()];
@@ -65449,8 +66924,8 @@ var COPILOT = (function(){
       var sw = p.pastedOffer.section, lab = "";
       for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === sw) lab = SECTIONS[i].label;
       h += '<div class="copopts"><span class="copm">Keep the pasted material as its own deliverable?</span>' +
-        '<button type="button" class="copopt rec" data-cop-savepasted="' + E(p.pastedOffer.messageId) + '" data-cop-sec="' + E(sw) + '">Save to ' + E(lab || sw) + '</button>' +
-        '<button type="button" class="copopt" data-cop-notnow="' + E(p.pastedOffer.messageId) + '">Not now</button></div>';
+        '<button type="button" class="copopt" data-cop-notnow="' + E(p.pastedOffer.messageId) + '">Not now</button>' +
+        '<button type="button" class="copopt rec" data-cop-savepasted="' + E(p.pastedOffer.messageId) + '" data-cop-sec="' + E(sw) + '">Save to ' + E(lab || sw) + '</button></div>';
     }
     if (p.options && p.options.length && last && canEdit()) {
       h += '<div class="copopts">' + p.options.map(function(o){
@@ -65529,7 +67004,7 @@ var COPILOT = (function(){
   function chatW(){ try { var v = Number(localStorage.getItem(GRIPKEY)); return v >= 420 && v <= 1400 ? v : 0; } catch (e) { return 0; } }
   function splitStyle(){ var w = chatW(); return w ? ' style="--cop-chatw:' + w + 'px"' : ''; }
   var GRIP = '<div class="copgrip" data-cop-grip role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the chat" title="Drag to resize · double-click for the default width"></div>';
-  function sheetBtn(k, label){ return '<button type="button" class="copbtn quiet copsheetb" data-cop-sheet="' + k + '" aria-expanded="' + (SHEET === k) + '">' + label + '</button>'; }
+  function sheetBtn(k, label){ return '<button type="button" class="copbtn quiet copsheetb copsheetb-' + k + '" data-cop-sheet="' + k + '" aria-expanded="' + (SHEET === k) + '">' + label + '</button>'; }
   function chatHtml(){
     var c = PANE.chat;
     var head = '<h3 class="coph">' + E(c.title) + '</h3>' + (c.archived ? '<span class="copchip">Archived</span>' : '');
@@ -65572,7 +67047,11 @@ var COPILOT = (function(){
   /* What the box asks for: in the guided flow it says what a typed line
      will do there (§465). */
   function boxWord(pend){
-    if (swotOn()) return swGuidedNow() ? "Type your answer…" : "Use the choices above to carry on…";
+    if (swotOn()) return swGuidedNow() ? "Type your answer…" : swCanChange() ? "Say what to change — move a line, drop one, reword one…" : PANE.swot.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
+    if (competeOn()) return cpCanType() ? "Ask for a change — another title, a How to drop, a Measure to add…" : PANE.compete.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
+    if (advOn()) { var sa0 = PANE.advisory, pq0 = adPending(sa0); return !adCanType() ? (sa0.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…") : !sa0.ask ? "What would you like advice on?" : sa0.brief ? "Ask for a change — another option, a different recommendation, a step to add…" : pq0 && pq0.clash ? "Or give the number yourself…" : "Your answer…"; }
+    if (execOn()) return exCanType() ? "Ask for a change to " + PANE.exec.items[PANE.exec.cursor].title + "’s measures or tactics…" : PANE.exec.saved ? "Saved — nothing more to type here." : PANE.exec.period ? "Pick an item on the right to ask about it…" : "Use the choices above to carry on…";
+    if (dirsOn()) return dvCanType() ? (DVADD[PANE.chat.id] === dvAskWhat() ? (dvAskWhat() === "caps" ? "A Capability of your own — type it and press Enter…" : "A Direction of your own — type it and press Enter…") : "Ask for something — a couple more, or a different angle…") : PANE.dirs.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
     if (flowView()) {
       var ph = PANE.flow.phase;
       /* §652 — the grey line invites what the box can do NOW (Islam: "use
@@ -65589,14 +67068,14 @@ var COPILOT = (function(){
     var text = DRAFT[c.id] || "";
     return '<div class="copcompose">' +
       '<div class="copbox">' +
-        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + (swotOn() && !swGuidedNow() ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
+        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow() && !swCanChange()) || (competeOn() && !cpCanType()) || (dirsOn() && !dvCanType()) || (execOn() && !exCanType()) || (advOn() && !adCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
         /* §652 — Send appears only once there is something to send (Islam:
            "the enter button should only appear when I write something, like
            Claude"); while the Copilot works it stays, held, saying so. */
         (function(){ var w = THINKING === c.id ? BUSY : "", none = !text.trim() && !pend;
         return '<button type="button" class="copsend' + heldCls(w) + '" data-cop-send aria-label="Send"' + (none ? ' hidden' : '') + (w ? held(w) : ' title="Send"') + '>' + SENDMARK + '</button>'; })() +
       '</div>' +
-      '<div class="copunder">' + (flowView() || swotOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
+      '<div class="copunder">' + (flowView() || swotOn() || competeOn() || dirsOn() || execOn() || advOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
         '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
         '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
         '<span class="cophint">Enter sends · Shift + Enter for a new line</span>' +
@@ -66000,8 +67479,9 @@ var COPILOT = (function(){
       var agreedNow = !!String(f.drafts[p] || "").trim();
       return aiMsg('<span class="copeh">' + E(partName(S[p])) + ' · Proposal ' + n + '</span><div class="copfdraft">' + E(withY(t, f)) + '</div>' +
         (ed ? 'Refine it, or type what to change in the box below.' + refBtns +
-          '<div class="copbtns"><button type="button" class="copbtn solid' + heldCls(busyHere && BUSY) + '" data-cop-fsave' + held(busyHere && BUSY) + '>Save to the card</button>' +
-          (agreedNow ? '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-fkeep' + held(busyHere && BUSY) + '>Keep as it was</button>' : '') + '</div>' : ''), true);
+          '<div class="copbtns">' +
+          (agreedNow ? '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-fkeep' + held(busyHere && BUSY) + '>Keep as it was</button>' : '') +
+          '<button type="button" class="copbtn solid' + heldCls(busyHere && BUSY) + '" data-cop-fsave' + held(busyHere && BUSY) + '>Save to the card</button></div>' : ''), true);
     };
     log.forEach(function(x, k){
       var p = x.p, el = p >= 0 ? S[p] : null;
@@ -66537,13 +68017,17 @@ var COPILOT = (function(){
   /* §653 — THE RAIL STAYS OPEN WHILE THERE IS ROOM (Islam: "collapsing the
      side banner by default … doesn't give the user the ability to know that
      he is on the right chat"). It folds by itself only when the Copilot is
-     tight — §642's rule: the work beside the chat needs 1000px, the rail
-     about 240 more — and a fold made with the button is kept across visits.
+     tight — §670's order: the rail folds first, as soon as three columns
+     (1120px) no longer fit beside it; the to-do goes after it — and a fold
+     made with the button is kept across visits.
      Reverses §490.2's "a running chat folds the rails". */
   function tight(){
     if (!resultOpen()) return false;
     var p = document.querySelector("[data-cop-pane]"); if (!p) return false;
-    return p.getBoundingClientRect().width / (typeof pageZoom === "function" ? pageZoom() : 1) < 1240;
+    /* §670 — the rail folds first, before the to-do (Islam): as soon as the
+       three columns (1120px) no longer fit beside the rail (200 + 8) within
+       the Copilot's own padding (16). */
+    return p.getBoundingClientRect().width / (typeof pageZoom === "function" ? pageZoom() : 1) < 1344;
   }
   function railFolded(){ return railShut() || (tight() && !RAILKEPT); }
   function syncRail(){
@@ -66563,8 +68047,8 @@ var COPILOT = (function(){
     var body = editing
       ? '<textarea class="fld copedit" data-cop-edit-text rows="12" aria-label="Deliverable text">' + E(EDIT.text) + '</textarea>' +
         '<input class="fld" data-cop-edit-note placeholder="What changed (optional)" aria-label="What changed" value="' + E(EDIT.note) + '">' +
-        '<div class="copbtns"><button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button>' +
-        '<button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button></div>'
+        '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button>' +
+        '<button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button></div>'
       : '<div class="copdoc">' + (text ? E(text) : '<span class="copnone">This version holds no text.</span>') + '</div>';
     /* §524 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
        client's own words, with whether it is on the plan and the same
@@ -66587,7 +68071,8 @@ var COPILOT = (function(){
       body = typed + '<div class="copplanrow" data-cop-planrow>' + (onN
           ? '<span class="copsvst ok">On the plan as v' + E(onN) + (onN < cur.n ? ' · v' + E(cur.n) + ' is not applied yet' : '') + ' · ' + E(nameOf(d.applied.by)) + ' · ' + E(when(d.applied.at)) + '</span>'
           : '<span class="copsvst warn">Not on the plan yet</span>') +
-        (canEdit() && d.type !== "advisory" ? '<button type="button" class="copbtn' + (onN === cur.n ? '' : ' solid') + '" data-cop-dapply="' + E(d.id) + '">' + (onN === cur.n ? "Apply to plan again" : "Apply to plan") + '</button>' : '') + '</div>';
+        (canEdit() && d.type !== "advisory" ? '<button type="button" class="copbtn' + (onN === cur.n ? '' : ' solid') + '" data-cop-dapply="' + E(d.id) + '">' + (onN === cur.n ? "Apply to plan again" : "Apply to plan") + '</button>' : '') + '</div>' +
+        (onN === cur.n || d.type === "advisory" ? nextHtml(d.section) : '');
     }
     if (d.type === "foundation" && fp.length && !editing) {
       var words = partWords();
@@ -66639,9 +68124,11 @@ var COPILOT = (function(){
     }
     if (d.type === "execution" && Array.isArray(b.items)) {
       var per = b.period ? '<p class="copdline"><b>Period</b> ' + E(b.period.y + " · Q" + Math.ceil(b.period.m1 / 3) + (b.period.m2 !== b.period.m1 ? "–Q" + Math.ceil(b.period.m2 / 3) : "")) + '</p>' : '';
-      return '<div class="copdtyped">' + per + b.items.map(function(it){
+      var outs = b.items.filter(function(it){ return it.out && !it.gone; });
+      return '<div class="copdtyped">' + per + b.items.filter(function(it){ return !it.out && !it.gone; }).map(function(it){
         return '<h5>' + E(it.title || it.name || "") + '</h5>' + li(it.measures, function(m){ return '<b>' + E(m.name) + '</b> <span class="copm">· ' + E(m.target || "—") + '</span>'; }) +
-          li(it.tactics, function(x){ return E(x.name) + ' <span class="copm">· ' + E(x.owner || "—") + (x.quarters && x.quarters.length ? ' · Q' + x.quarters.join(", Q") : '') + '</span>'; }); }).join("") + '</div>';
+          li(it.tactics, function(x){ return E(x.name) + ' <span class="copm">· ' + E(x.owner || "—") + (x.quarters && x.quarters.length ? ' · Q' + x.quarters.join(", Q") : '') + '</span>'; }); }).join("") +
+        (outs.length ? '<h5>Left out this period</h5><p class="copdline">' + outs.map(function(it){ return E(it.title); }).join(" · ") + ' — nothing drafted, nothing written on Apply.</p>' : '') + '</div>';
     }
     if (d.type === "swot" && b.swot && typeof b.swot === "object") {
       return '<div class="copdtyped copdswot">' + LETTERS.map(function(L){ return '<section><h5>' + E(LETTER_WORD[L]) + '</h5>' + li(b.swot[L], function(x){ return '<b>' + E(x.title) + '</b>' + (x.description ? ' <span class="copm">· ' + E(x.description) + '</span>' : ''); }) + '</section>'; }).join("") + '</div>';
@@ -66669,7 +68156,8 @@ var COPILOT = (function(){
     } else if (d.type === "execution") {
       var ex = { period: b.period, items: b.items || [] };
       capIds = ex.items.filter(function(it){ return it.kind !== "direction"; }).map(function(it){ return it.planId; }).filter(Boolean);
-      what = vword + " — the measures and tactics of " + ex.items.length + " items, and the plan period, onto the plan."; replaces = "A measure or tactic with the same name is updated, a new one is added; nothing is removed. " + arch;
+      var exIns = ex.items.filter(function(it){ return !it.out && !it.gone; });
+      what = vword + " — the measures and tactics of " + exIns.length + " items, and the plan period, onto the plan." + (ex.items.length > exIns.length ? " " + (ex.items.length - exIns.length) + " left out, untouched." : ""); replaces = "What each item showed replaces what the plan holds for it: a line with the same name is updated, a new one is added, a line dropped is dropped. " + arch;
       can = function(){ return !!ex.period; };
       write = function(){ return exWritePlan(ex); };
     } else if (d.type === "swot") {
@@ -66829,8 +68317,8 @@ var COPILOT = (function(){
     if (!s.list.length) return '<div class="copnone">No sources yet. Reports and answers brought into a SWOT are kept here.</div>';
     return s.list.map(function(r){
       if (SRCASK === r.id) return '<div class="coprow ask"><span class="copt">' + E(r.name) + '</span><span class="copaskrow">Delete? ' +
-        '<button type="button" class="copbtn danger solid" data-cop-src-del-yes="' + E(r.id) + '">Delete</button>' +
-        '<button type="button" class="copbtn quiet" data-cop-src-del-no>Cancel</button></span></div>';
+        '<button type="button" class="copbtn quiet" data-cop-src-del-no>Cancel</button>' +
+        '<button type="button" class="copbtn danger solid" data-cop-src-del-yes="' + E(r.id) + '">Delete</button></span></div>';
       return '<div class="coprow copsrcrow" data-cop-src="' + E(r.id) + '">' +
         '<a class="copitem" href="' + E(url("source", ["id=" + encodeURIComponent(r.id)])) + '" target="_blank" rel="noopener">' +
           '<span class="copt">' + E(r.name) + '</span>' +
@@ -66987,9 +68475,42 @@ var COPILOT = (function(){
         (s.check.issues.length ? '<ul class="copswiss">' + s.check.issues.map(function(x){ return '<li>' + (x.letter ? '<b>' + E(LETTER_WORD[x.letter] || x.letter) + ':</b> ' : '') + E(x.text) + '</li>'; }).join("") + '</ul>' : ' Nothing to fix.') +
         swOpts(again)));
     }
-    if (s.phase === "saved") out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Deliverables. <b>Apply to plan</b>, at the foot of the SWOT, writes it into the plan’s SWOT.'));
+    /* §654 C2 — SAY WHAT TO CHANGE (§645's decision, built): the asks, the
+       proposals and the decisions, in the order they happened; the proposal
+       in hand says what differs from the SWOT on the right and waits for
+       Use it or Keep as it was — the draft moves only on Use it (§643). */
+    (s.log || []).forEach(function(x, k, a){
+      if (x.w === "me") { out.push(meMsg(x.t)); return; }
+      if (x.w === "note") { out.push('<div class="copfnote">' + E(x.t) + '</div>'); return; }
+      var inHand = s.proposal && k === a.length - 1 && s.proposal.reply === x.t;
+      out.push(aiMsg(E(x.t) + (inHand ? swDiffHtml(s.draft, s.proposal.draft) +
+        (ed && s.phase !== "saved" ? swOpts([swOpt('data-cop-sw-prop="use"', "Use it", true, busyHere), swOpt('data-cop-sw-prop="keep"', "Keep as it was", false, busyHere)]) : '') : ''), !!inHand));
+    });
+    /* §698 S3 — one step back after Use it, and forward again */
+    if (ed && s.phase !== "saved" && !s.proposal && s.before && s.draft) {
+      var sameD = function(a, b2){ return JSON.stringify(a) === JSON.stringify(b2); };
+      if (sameD(s.draft, s.before.next)) out.push('<div class="copfnote" data-cop-sw-backline><button type="button" class="linkbu" data-cop-sw-putback="back"' + held(busyHere ? BUSY : "") + '>Put back the SWOT as it was</button></div>');
+      else if (sameD(s.draft, s.before.draft)) out.push('<div class="copfnote" data-cop-sw-backline><button type="button" class="linkbu" data-cop-sw-putback="again"' + held(busyHere ? BUSY : "") + '>Use the change again</button></div>');
+    }
+    if (s.phase === "saved" && swPlanHolds(s.draft)) out.push(aiMsg('<b>v' + E(s.saved.n) + '</b> is on the plan.' + nextHtml("analysis")));
+    else if (s.phase === "saved") out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Deliverables. <b>Apply to plan</b>, at the foot of the SWOT, writes it into the plan’s SWOT.'));
+    else if (ed && s.draft && !s.proposal) out.push('<div class="copfnote">Say what to change in the box below — move a line, drop one, reword one — and I will propose it here first.</div>');
     return out.join("");
   }
+  /* what a proposal changes, letter by letter: added, dropped, reworded */
+  function swDiffHtml(now, next){
+    var rows = [];
+    LETTERS.forEach(function(L){
+      var a = (now && now[L]) || [], b = (next && next[L]) || [], at = {}, bt = {};
+      a.forEach(function(x){ at[x.title.toLowerCase()] = x; }); b.forEach(function(x){ bt[x.title.toLowerCase()] = x; });
+      var add = b.filter(function(x){ return !at[x.title.toLowerCase()]; }).map(function(x){ return '<li class="add">+ ' + E(x.title) + '</li>'; });
+      var drop = a.filter(function(x){ return !bt[x.title.toLowerCase()]; }).map(function(x){ return '<li class="drop">− ' + E(x.title) + '</li>'; });
+      var chg = b.filter(function(x){ var o = at[x.title.toLowerCase()]; return o && (o.description !== x.description || o.evidence !== x.evidence); }).map(function(x){ return '<li class="chg">~ ' + E(x.title) + ' <span class="copm">· reworded</span></li>'; });
+      if (add.length || drop.length || chg.length) rows.push('<div class="copswdiff-l"><b>' + E(LETTER_WORD[L]) + '</b><ul>' + add.concat(drop, chg).join("") + '</ul></div>');
+    });
+    return '<div class="copswdiff">' + (rows.length ? rows.join("") : '<span class="copm">Nothing differs from the SWOT on the right.</span>') + '</div>';
+  }
+  function swCanChange(){ var s = PANE.swot; return !!(swotOn() && canEdit() && s.draft && (s.phase === "draft" || s.phase === "check") && !s.saved && !PANE.chat.archived); }
   /* The line being gathered: a guided question with the answers so far, or
      a source line (a template, a report, the research) with its controls. */
   function swLineMsgs(s, ed, busyHere, ext){
@@ -67134,7 +68655,7 @@ var COPILOT = (function(){
           }).join("") + '</ul>' : '<p class="copnote">Nothing found here.</p>') +
           (it.from && !editing ? '<div class="copsw-used">Used: ' + E(it.from) + '</div>' : '') + '</div>';
       }).join("") + '</div>' +
-      (ed && editing ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-sw-ansave="' + area + '">Save the changes</button><button type="button" class="copbtn quiet" data-cop-sw-anedit-no>Cancel</button></div>' : '') + '</div>';
+      (ed && editing ? '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-sw-anedit-no>Cancel</button><button type="button" class="copbtn solid" data-cop-sw-ansave="' + area + '">Save the changes</button></div>' : '') + '</div>';
   }
   function swExternal(s){ return ["micro","macro"].filter(function(a){ return (s.methods[a] || []).length; }); }
   /* APPLY TO PLAN WRITES THE PLAN (§641; before it, Save did): the server
@@ -67281,6 +68802,10 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-sw-agree]"))) { var ga = b.getAttribute("data-cop-sw-agree"); g = swCopy(); g[ga].agreed = true; swSave(g); return true; }
     if ((b = hit(ev, "[data-cop-sw-draft]"))) { if (!b.disabled) swAsk({ act:"swotDraft", swot: swCopy() }); return true; }
     if ((b = hit(ev, "[data-cop-sw-check]"))) { swAsk({ act:"swotCheck", swot: swCopy() }); return true; }
+    if ((b = hit(ev, "[data-cop-sw-putback]"))) { if (THINKING) return true; var pb = PANE.chat.id;
+      act({ act:"swotPutBack", id: pb, again: b.getAttribute("data-cop-sw-putback") === "again", placeWord: placeWord() }, function(j){ if (PANE && PANE.chat && PANE.chat.id === pb) swView(j); draw(); }); return true; }
+    if ((b = hit(ev, "[data-cop-sw-prop]"))) { if (THINKING) return true; var use = b.getAttribute("data-cop-sw-prop") === "use", pid = PANE.chat.id;
+      act({ act:"swotProposal", id: pid, use: use, placeWord: placeWord() }, function(j){ if (PANE && PANE.chat && PANE.chat.id === pid) swView(j); draw(); }); return true; }
     if ((b = hit(ev, "[data-cop-sw-finish]"))) {
       if (b.disabled) return true;
       act({ act:"swotFinish", id: id, placeWord: placeWord() }, function(j){
@@ -67356,16 +68881,29 @@ var COPILOT = (function(){
      one discipline while the to-do says another (§94.8). A score pressed is
      marked as edited, so what the Copilot said and what the person changed
      stay told apart. Nothing reaches the plan until Save is pressed. */
-  var CPMORE = {}, CPINT = {}, CPASKTXT = {}, CPPEND = null;
+  var CPMORE = {}, CPINT = {}, CPASKTXT = {}, CPSCORES = {}, CPPEND = null, CPUNCH = {};
   function competeOn(){ return !!(PANE && PANE.chat && PANE.compete); }
   function cpCopy(){ return JSON.parse(JSON.stringify(PANE.compete)); }
-  function cpView(j){ ["compete","competeApplied","competeTodo","competeDone","competeFactors","competeResult","competeWords"]
+  function cpView(j){ ["compete","competeApplied","competeNextVersion","competeTodo","competeDone","competeFactors","competeResult","competeWords"]
     .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
   function cpProgress(id){
     var l = list(); if (l && l.swotProgress && PANE && PANE.competeTodo) l.swotProgress[id] = { done: PANE.competeDone, of: PANE.competeTodo.length };
   }
   function cpTitle(){ return "Competitive Discipline — " + placeWord(); }
-  function cpWord(d){ return ((PANE.competeWords || {}).disc || {})[d] || d; }
+  /* §697 S11 — the plan's Competitive Discipline, when it holds one. */
+  function cpPlanHeld(){
+    /* Read, never written: competeWritable would make the plan's compete
+       object where there is none and dirty the plan on every draw. */
+    var h = null; try { h = typeof competeHolder === "function" ? competeHolder(place()) : null; } catch (e) { h = null; }
+    var w = h && h.compete && typeof h.compete === "object" ? h.compete : null;
+    if (!w || !w.discipline || !Array.isArray(w.values)) return null;
+    var vals = w.values.filter(function(v){ return v && String(v.title || "").trim(); }).map(function(v){ return { title: String(v.title).trim(), how: (v.how || []).slice(), measure: (v.measure || []).slice() }; });
+    return vals.length ? { discipline: w.discipline, values: vals } : null;
+  }
+  /* The discipline's word from the open chat's words, or the platform's own
+     when no chat is open (§697: the start screen's plan card names it). */
+  var CP_DISC_WORD = { btc: "Best Total Cost", bts: "Best Total Solution", bp: "Best Product" };
+  function cpWord(d){ return (((PANE && PANE.competeWords) || {}).disc || {})[d] || CP_DISC_WORD[d] || d; }
   /* A press made while an earlier save is still on its way is not dropped:
      the latest patch waits and goes when the line is free. */
   function cpSave(patch, quiet){
@@ -67402,7 +68940,7 @@ var COPILOT = (function(){
   }
   function cpSideHtml(){
     var todo = PANE.competeTodo || [], done = PANE.competeDone || 0, n = todo.length;
-    return '<aside class="copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
+    return '<aside class="copftodo copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
       '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
       '<div class="copsw-tg"><ul>' + todo.map(function(t){
         return '<li class="copsw-li ' + t.state + '" data-cop-cp-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
@@ -67440,21 +68978,26 @@ var COPILOT = (function(){
     var clar = (W.clarity || {})[m.clarity] || m.clarity;
     var line = '<b>' + E(cpWord(m.leader)) + '</b> leads the market by ' + E(String(m.gap)) + ' points <span class="copcp-cl ' + E(m.clarity) + '">' + E(clar) + '</span>. ' +
       (!i.complete ? '' : R.aligned ? 'Your internal scores point the same way.' : 'Your internal scores lean to ' + E(cpWord(i.leader)) + '.');
-    var h = cpMsg("ai", line + (s.chosen ? '' : ' Go with it?'));
-    if (!s.chosen) {
-      if (ed) h += '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-choose="' + E(m.leader) + '">Yes, ' + E(cpWord(m.leader)) + '</button>' +
+    /* §694 S2 — the choice can be changed once made: a link under the
+       recommendation brings the three back, saying what goes with the change. */
+    var again = !!(s.chosen && ed && CPUNCH[PANE.chat.id]);
+    var opts = (!s.chosen || again) && ed ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-choose="' + E(m.leader) + '">Choose ' + E(cpWord(m.leader)) + '</button>' +
         ((W.discs || []).filter(function(d){ return d !== m.leader; }).map(function(d){
           return '<button type="button" class="copopt" data-cop-cp-choose="' + E(d) + '">Choose ' + E(cpWord(d)) + ' instead</button>'; }).join("")) +
-        '<button type="button" class="copopt" data-cop-cp-more="1">Let me change scores</button></div>';
-      return h;
-    }
-    return h + cpMsg("me", "Go with " + E(cpWord(s.chosen)) + ".");
+        (again ? '<button type="button" class="copopt" data-cop-cp-unchoose>Never mind</button></div><p class="copnote">Choosing another clears the values and the table drawn for ' + E(cpWord(s.chosen)) + '; the scores stay.</p>'
+          : '<button type="button" class="copopt" data-cop-cp-more="1">Let me change scores</button></div>')
+      : s.chosen && ed ? '<div class="copopts"><button type="button" class="linkbu" data-cop-cp-unchoose>Choose a different discipline</button></div>' : '';
+    /* §697 S11 — scored as a check of the plan's choice: the line says
+       whether the market agrees, and nobody "went with" anything here. */
+    if (s.fromPlan && s.chosen && !again) line += m.leader === s.chosen ? ' That matches the plan’s choice.' : ' The plan’s choice is <b>' + E(cpWord(s.chosen)) + '</b> — keep it, or choose ' + E(cpWord(m.leader)) + ' instead.';
+    var h = aiMsg(line + (s.chosen ? '' : ' Go with it?') + opts);
+    return s.chosen && !s.fromPlan ? h + meMsg("Go with " + cpWord(s.chosen) + ".") : h;
   }
   function cpCardsHtml(ed){
     var s = PANE.compete, picked = {};
     (s.picked || []).forEach(function(n){ picked[n] = true; });
     var n = (s.picked || []).length;
-    var h = cpMsg("ai", 'Here are ' + s.suggested.length + ' values for <b>' + E(cpWord(s.chosen)) + '</b>. Tick the ones closest to how you want to win — usually 3 or 4.') +
+    var h = aiMsg('Here are ' + s.suggested.length + ' values for <b>' + E(cpWord(s.chosen)) + '</b>. Tick the ones closest to how you want to win — usually 3 or 4.') +
       '<div class="copcp-cards">' + s.suggested.map(function(v, k){
         var on = !!picked[k];
         return '<div class="copcp-card' + (on ? " on" : "") + '">' +
@@ -67477,38 +69020,104 @@ var COPILOT = (function(){
       row("Measure", function(v, i){ return '<td>' + (ed ? '<textarea class="fld cmpbox" data-cop-cp-cell="' + i + '|measure" aria-label="Measure, value ' + (i + 1) + '">' + E(v.measure.join("\n")) + '</textarea>' : bullets(v.measure)) + '</td>'; }) +
       '</tbody></table></div></div>';
   }
+  /* §654 C1 — COMPETITIVE DISCIPLINE, SPLIT THREE WAYS (the SWOT's shape,
+     §641–§653; the sweep's C1, Competitive Discipline first): the chat on
+     the left, in the order it happened; the work — the scores, then the
+     table — on the right, where it stays put; Save and Apply to plan at the
+     pane's foot; the to-do beside. A change is asked for in the chat's own
+     box, not a second box under the table. */
+  function cpStepWord(s){
+    return s.saved ? "Saved" : s.table ? "The table" : s.chosen ? "The values" : (((PANE.competeResult || {}).market) || {}).complete ? "The discipline" : "Scores";
+  }
+  function cpCanType(){ var s = PANE.compete; return !!(canEdit() && s && s.table && !s.saved && !PANE.chat.archived); }
   function competeHtml(){
-    var s = PANE.compete, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id;
-    var head = '<div class="copvline"><b>' + E(PANE.chat.title || cpTitle()) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</div>';
+    var s = PANE.compete, c = PANE.chat, ed = canEdit() && !s.saved, busyHere = THINKING === c.id;
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
-    var m = ((PANE.competeResult || {}).market) || {};
-    var main = '';
-    if (!m.complete) {
-      main = cpMsg("ai", "I will score the three value disciplines — Best Total Cost, Best Total Solution and Best Product — against 10 market factors and 10 internal ones, from what the plan says about " + E(placeWord()) + ". You can change any score.") +
-        (ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-score>Score them</button></div>' : '');
-    } else {
-      main = cpMsg("ai", "Each factor is scored 0, 1 or 2 for each discipline. The market decides; the internal scores are a check." + (ed ? " Press a score to change it." : "")) +
-        cpScoreTable("market", ed && s.phase !== "table") +
-        '<div class="copopts"><button type="button" class="linkbu" data-cop-cp-int aria-expanded="' + !!CPINT[id] + '">' + (CPINT[id] ? "Hide internal factors" : "Show internal factors (" + (((PANE.competeFactors || {}).internal) || []).length + ")") + '</button></div>' +
-        (CPINT[id] ? cpScoreTable("internal", ed && s.phase !== "table") : '') +
-        cpRecHtml(ed);
-      if (s.chosen && s.suggested.length && !s.table) main += cpCardsHtml(ed);
-      else if (s.chosen && !s.suggested.length && ed && !busyHere) main += '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-again>Suggest values</button></div>';
-      if (s.table) {
-        main += cpMsg("me", "Use these " + s.table.values.length + ".");
-        if (s.reply) main += cpMsg("ai", E(s.reply));
-        if (ed && s.alts && s.alts.length) main += '<div class="copopts">' + s.alts.map(function(a){
-          return '<button type="button" class="copopt" data-cop-cp-alt="' + E(a) + '">' + E(a) + '</button>'; }).join("") + '</div>';
-        main += cpTableHtml(ed);
-        if (ed) main += '<p class="copnote">Every cell is editable here before saving.</p>' +
-          '<div class="copcp-ask"><textarea class="fld" data-cop-cp-ask rows="2" placeholder="Ask for a change — another title, a How to drop, a Measure to add" aria-label="Ask the Copilot to change the table">' + E(CPASKTXT[id] || "") + '</textarea>' +
-          '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-cp-refine' + held(busyHere && BUSY) + '>Send</button></div>' +
-          '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-cp-chat>Ask for a change</button>' +
-          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to Competitive Discipline</button></div>';
-        if (s.saved) main += savedApplyHtml(s.saved, "cp");
-      }
+    var todo = PANE.competeTodo || [], done = PANE.competeDone || 0;
+    var chat = '<div class="copchat copfchat copswchat copcpchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
+      '<div class="copfhead"><b><span class="copfname">' + E(c.title || cpTitle()) + '</span><small> · ' + E(cpStepWord(s)) + '</small></b>' + sheetBtn("cards", s.table ? "View the table" : "View the scores") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
+      '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + cpMsgs(s, ed, busyHere) + work + '</div></div>' +
+      (!canEdit() ? VIEWONLY
+        : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
+        : composerHtml(c, false)) + '</div>';
+    return '<div class="copflow copswflow' + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
+      chat + GRIP + cpPaneHtml(s, ed, busyHere) + cpSideHtml() + '<div class="copshade" data-cop-sheet=""></div></div>';
+  }
+  /* the conversation, drawn from what is stored, in the order it happened */
+  function cpMsgs(s, ed, busyHere){
+    var out = [], m = ((PANE.competeResult || {}).market) || {};
+    /* §697 S11 — started from the plan: the table is already on the right,
+       and scoring is a check of the plan's choice, offered not owed. */
+    if (s.fromPlan && s.table) out.push(aiMsg('Started from the plan’s Competitive Discipline — <b>' + E(cpWord(s.table.discipline)) + '</b> and ' + s.table.values.length + (s.table.values.length === 1 ? ' value' : ' values') + ', as the table on the right. Every cell can be edited there; ask here for a change. Score the three disciplines to check the choice.' +
+      (!m.complete && ed ? swOpts([swOpt('data-cop-cp-score', "Score them", true, busyHere)]) : '')));
+    else out.push(aiMsg("I will score the three value disciplines — Best Total Cost, Best Total Solution and Best Product — against 10 market factors and 10 internal ones, from what the plan says about " + E(placeWord()) + ". The scores go on the right; you can change any of them." +
+      (!m.complete && ed ? swOpts([swOpt('data-cop-cp-score', "Score them", true, busyHere)]) : '')));
+    if (!m.complete && !(s.fromPlan && s.table)) return out.join("");
+    if (m.complete) {
+    out.push(meMsg("Score them"));
+    out.push(aiMsg("Scored — the 20 factors are on the right, 0, 1 or 2 for each discipline. The market decides; the internal scores are a check." + (ed && !s.chosen ? " Press a score there to change it." : "")));
+    out.push(cpRecHtml(ed));
+    if (!s.chosen) return out.join("");
     }
-    return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + cpSideHtml() + '</div>';
+    if (!(s.fromPlan && s.table && !s.suggested.length)) {
+    if (s.suggested.length && !s.table) out.push(cpCardsHtml(ed));
+    else if (!s.suggested.length) out.push(aiMsg("Next, the values — the three or four things " + E(placeWord()) + " will be known for." + (ed && !busyHere ? swOpts([swOpt('data-cop-cp-again', "Suggest values", true)]) : '')));
+    if (!s.table) return out.join("");
+    /* §644 — the cards fold where they happened, and open again on a press */
+    out.push(cpValuesFold(s));
+    out.push(meMsg("Use these " + s.table.values.length + "."));
+    out.push(aiMsg("Here is the table, on the right" + (ed ? " — every cell can be edited there before saving. Ask for a change here: another title, a How to drop, a Measure to add. <b>Save</b>, at the foot of the table, keeps it as a version." : ".")));
+    }
+    (s.log || []).forEach(function(x, k, a){
+      if (x.w === "me") { out.push(meMsg(x.t)); return; }
+      var last = k === a.length - 1;
+      out.push(aiMsg(E(x.t) + (last && ed && s.alts && s.alts.length ? swOpts(s.alts.map(function(t){ return swOpt('data-cop-cp-alt="' + E(t) + '"', t, false, busyHere); })) : '')));
+    });
+    if (s.saved && appliedOn(s.saved, PANE.competeApplied)) out.push(aiMsg('<b>v' + E(s.saved.n) + '</b> is on the plan.' + nextHtml("compete")));
+    else if (s.saved) out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Deliverables. <b>Apply to plan</b>, at the foot of the table, writes it into the plan’s Competitive Discipline.'));
+    return out.join("");
+  }
+  function cpValuesFold(s){
+    var open = !!FOLD[PANE.chat.id + ":cpvals"], picked = {}; (s.picked || []).forEach(function(n){ picked[n] = true; });
+    var n = (s.picked || []).length, bits = s.suggested.length + " offered · " + n + " ticked";
+    var body = open ? '<div class="coppfb"><div class="copcp-cards small">' + s.suggested.map(function(v, k){
+        return '<div class="copcp-card' + (picked[k] ? " on" : "") + '"><span class="copsw-tick' + (picked[k] ? " on" : "") + '">&#10003;</span><h4>' + E(v.title) + '</h4></div>'; }).join("") + '</div></div>' : '';
+    return '<div class="coppf' + (open ? ' open' : '') + '" data-cop-foldbox="cpvals"><button type="button" class="coppfh" data-cop-pfold="cpvals" aria-expanded="' + open + '">' +
+      '<span class="copchev" aria-hidden="true">▸</span><b>The values</b><small>' + E(bits) + '</small><span class="copst done">Agreed</span></button>' + body + '</div>';
+  }
+  /* the work, on the right: the scores, then the table above them */
+  function cpPaneHtml(s, ed, busyHere){
+    var m = ((PANE.competeResult || {}).market) || {}, id = PANE.chat.id, vn = s.saved ? s.saved.n : (PANE.competeNextVersion || 1);
+    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E(cpTitle()) + ' v' + E(vn) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</span>' +
+      '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
+    var body;
+    if (!m.complete) body = (s.fromPlan && s.table ? '<div class="copsw-card copcp-tablecard"><h3>The table</h3>' + cpTableHtml(ed) + (ed ? '<p class="copnote">From the plan — every cell is editable here before saving.</p>' : '') + '</div>' : '') +
+      '<div class="copsw-card"><h3>The scores</h3><p class="copnote">' + (s.fromPlan ? 'Nothing scored yet — ask the chat to score the three disciplines, as a check of the plan’s choice.' : 'Nothing scored yet — the chat scores the three disciplines first.') + '</p></div>';
+    else {
+      /* §694 S2 — the scores settle at the choice, not at the table: a changed
+         score always has an effect, and after the choice the way to change
+         them is to choose again. */
+      var scoresOpen = !s.table || !!CPSCORES[id], scEd = ed && (!s.chosen || s.fromPlan);
+      var scores = '<div class="copsw-card copcp-scores"><h3>The scores' + (s.table ? ' <button type="button" class="linkbu" data-cop-cp-scores aria-expanded="' + scoresOpen + '">' + (scoresOpen ? "Hide" : "Show") + '</button>' : '') + '</h3>' +
+        (scoresOpen ? cpScoreTable("market", scEd) +
+          '<div class="copopts"><button type="button" class="linkbu" data-cop-cp-int aria-expanded="' + !!CPINT[id] + '">' + (CPINT[id] ? "Hide internal factors" : "Show internal factors (" + (((PANE.competeFactors || {}).internal) || []).length + ")") + '</button></div>' +
+          (CPINT[id] ? cpScoreTable("internal", scEd) : '') + (ed && s.chosen && !s.fromPlan ? '<p class="copnote">Settled at the choice of ' + E(cpWord(s.chosen)) + ' — <button type="button" class="linkbu" data-cop-cp-unchoose>choose a different discipline</button> to change them.</p>' : '') : '') + '</div>';
+      body = s.table ? '<div class="copsw-card copcp-tablecard"><h3>The table</h3>' + cpTableHtml(ed) + (ed ? '<p class="copnote">Every cell is editable here before saving.</p>' : '') + '</div>' + scores : scores;
+    }
+    return '<div class="copleft copswpane copcppane" data-cop-cppane>' + head + '<div class="copswpb">' + body + '</div>' + cpFootHtml(s, busyHere) + '</div>';
+  }
+  function cpFootHtml(s, busyHere){
+    var saved = !!s.saved, note = PANE.competeApplied, on = saved && ((note && note.n === s.saved.n) || APPLIED[PANE.chat.id] === s.saved.n);
+    var sb = [];
+    if (saved) { sb.push('<b>v' + E(s.saved.n) + '</b> saved'); sb.push(on ? '<span class="on">v' + E(s.saved.n) + ' on the plan</span>' : 'not on the plan yet'); }
+    else sb.push('<b>v' + E(PANE.competeNextVersion || 1) + '</b> in progress');
+    var state = '<span class="copsvst" data-cop-cpstate>' + sb.join(' <i>·</i> ') + '</span>';
+    return '<div class="copoutf copswfoot" data-cop-cpfoot>' + state + '<span class="copsw-sp"></span>' +
+      (canEdit() ? (function(){
+        var wf = busyHere ? BUSY : saved ? "Nothing has changed since it was saved." : !s.table ? "Pick the values first — the table is what is saved." : "";
+        var wa = busyHere ? BUSY : !saved ? "Save it first — the plan only takes a saved version." : "";
+        return '<button type="button" class="copbtn' + heldCls(wf) + '" data-cop-cp-finish' + held(wf) + '>Save</button>' +
+          '<button type="button" class="copbtn solid' + heldCls(wa) + '" data-cop-cp-apply' + held(wa) + '>' + (on ? "Apply to plan again" : "Apply to plan") + '</button>'; })() : '') + '</div>';
   }
   /* The plan is written after a press, never inside a fetch's tail with a
      hand on the page (§35): the same order the SWOT's Save keeps. */
@@ -67532,7 +69141,9 @@ var COPILOT = (function(){
     var b, s = PANE.compete, id = PANE.chat.id;
     if ((b = hit(ev, "[data-cop-cp-apply]"))) { if (canEdit() && s.saved) cpApplyAsk(); return true; }
     if ((b = hit(ev, "[data-cop-cp-int]"))) { CPINT[id] = !CPINT[id]; draw(); return true; }
-    if ((b = hit(ev, "[data-cop-cp-more]"))) { CPMORE[id] = b.getAttribute("data-cop-cp-more") === "1" ? true : !CPMORE[id]; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-cp-more]"))) { CPMORE[id] = b.getAttribute("data-cop-cp-more") === "1" ? true : !CPMORE[id]; if (b.getAttribute("data-cop-cp-more") === "1" && tight()) SHEET = "cards"; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-cp-scores]"))) { CPSCORES[id] = !CPSCORES[id]; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-pfold]"))) { var fk = id + ":" + b.getAttribute("data-cop-pfold"); if (FOLD[fk]) delete FOLD[fk]; else FOLD[fk] = true; draw(); return true; }
     if (!canEdit() || s.saved) return false;
     if ((b = hit(ev, "[data-cop-cp-score]"))) { cpAsk({ act:"competeScore" }); return true; }
     if ((b = hit(ev, "[data-cop-cp-sc]"))) {
@@ -67546,7 +69157,12 @@ var COPILOT = (function(){
       cpSave(patch);
       return true;
     }
-    if ((b = hit(ev, "[data-cop-cp-choose]"))) { cpAsk({ act:"competeValues", compete:{ chosen: b.getAttribute("data-cop-cp-choose") } }); return true; }
+    if ((b = hit(ev, "[data-cop-cp-choose]"))) {
+      var dsc = b.getAttribute("data-cop-cp-choose"); CPUNCH[id] = false;
+      if (s.chosen && s.chosen === dsc) { draw(); return true; }
+      cpAsk({ act:"competeValues", compete:{ chosen: dsc } }); return true;
+    }
+    if ((b = hit(ev, "[data-cop-cp-unchoose]"))) { CPUNCH[id] = !CPUNCH[id]; draw(); return true; }
     if ((b = hit(ev, "[data-cop-cp-again]"))) { cpAsk({ act:"competeValues" }); return true; }
     if ((b = hit(ev, "[data-cop-cp-pick]"))) {
       var n = +b.getAttribute("data-cop-cp-pick"), pk = (s.picked || []).slice(), at = pk.indexOf(n);
@@ -67562,14 +69178,6 @@ var COPILOT = (function(){
       return true;
     }
     if ((b = hit(ev, "[data-cop-cp-alt]"))) { cpAsk({ act:"competeRefine", ask: "Use “" + b.getAttribute("data-cop-cp-alt") + "” as the title." }); return true; }
-    if ((b = hit(ev, "[data-cop-cp-refine]"))) {
-      var q = String(CPASKTXT[id] || "").trim();
-      if (!q) { var bx = document.querySelector("[data-cop-cp-ask]"); if (bx) bx.focus(); return true; }
-      CPASKTXT[id] = "";
-      cpAsk({ act:"competeRefine", ask: q });
-      return true;
-    }
-    if ((b = hit(ev, "[data-cop-cp-chat]"))) { var bx2 = document.querySelector("[data-cop-cp-ask]"); if (bx2) bx2.focus(); return true; }
     if ((b = hit(ev, "[data-cop-cp-finish]"))) {
       if (THINKING) return true;
       act({ act:"competeFinish", id:id, placeWord:placeWord() }, function(j){
@@ -67633,7 +69241,7 @@ var COPILOT = (function(){
   function adSideHtml(){
     var s = PANE.advisory, todo = PANE.advisoryTodo || [], done = PANE.advisoryDone || 0, n = todo.length;
     var c = PANE.advisoryCount || { round:1, rounds:2, asked:0, of:5, total:0 };
-    var h = '<aside class="copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
+    var h = '<aside class="copftodo copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
       '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
       '<div class="copsw-tg"><ul>' + todo.map(function(t){
         return '<li class="copsw-li ' + t.state + '" data-cop-ad-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
@@ -67655,10 +69263,10 @@ var COPILOT = (function(){
   }
   function adAnswerHtml(t){
     var W = PANE.advisoryWords || {}, cw = W.clash || {};
-    if (t.how === "assumed") return cpMsg("me", E(W.assume || "Assume for me"));
-    if (t.how === "platform") return cpMsg("me", E(cw.platform || "Use the platform figure") + " — " + E(t.answer));
-    if (t.how === "file") return cpMsg("me", E(cw.file || "Use the file") + " — " + E(t.answer));
-    return t.how ? cpMsg("me", E(t.answer)) : "";
+    if (t.how === "assumed") return meMsg(W.assume || "Assume for me");
+    if (t.how === "platform") return meMsg((cw.platform || "Use the platform figure") + " — " + t.answer);
+    if (t.how === "file") return meMsg((cw.file || "Use the file") + " — " + t.answer);
+    return t.how ? meMsg(t.answer) : "";
   }
   function adBriefHtml(b){
     var L = "ABCD";
@@ -67672,14 +69280,35 @@ var COPILOT = (function(){
       (b.why ? '<div><h4>Why</h4><p>' + E(b.why) + '</p></div>' : '') +
       (b.next.length ? '<div><h4>Next steps</h4><ol>' + b.next.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ol></div>' : '') + '</div>';
   }
+  /* §688 — ADVISORY, SPLIT THREE WAYS (the last area; the working mockup
+     design-mockups/copilot-layout/2026-10-29_advisory-split-working.html,
+     Islam: "ok proceed and build the advisory split"): the conversation
+     stays the conversation — the question, then one question at a time with
+     its choices under it, a typed answer through the chat's own box; the
+     Decision Brief is the work on the right, with what was assumed before it
+     is written; Save at the pane's foot and no Apply — Advisory stays in the
+     Copilot (§645); the to-do, the round box and what it can see beside. */
+  function adStepWord(s){ return s.saved ? "Saved" : s.brief ? "The brief" : s.ask ? "Questions" : "Your question"; }
+  function adPending(s){ var t = s.turns[s.turns.length - 1]; return t && !t.how ? t : null; }
+  function adCanType(){ var s = PANE.advisory; if (!s || !canEdit() || s.saved || PANE.chat.archived) return false; return !s.ask || !!s.brief || !!adPending(s); }
   function advHtml(){
-    var s = PANE.advisory, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id;
-    var W = PANE.advisoryWords || {}, cw = W.clash || {};
-    var head = '<div class="copvline"><b>' + E(PANE.chat.title || adTitle()) + '</b> · ' + (s.saved ? "saved" : s.brief ? "brief written" : "in progress") + '</div>';
+    var s = PANE.advisory, c = PANE.chat, ed = canEdit() && !s.saved, busyHere = THINKING === c.id;
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
-    var main = cpMsg("ai", "Bring me a decision you are weighing about " + E(placeWord()) + ". I will ask a few questions — one at a time — then write a Decision Brief with options and one recommendation.");
-    if (s.ask) main += cpMsg("me", E(s.ask));
-    var last = s.turns.length - 1;
+    var todo = PANE.advisoryTodo || [], done = PANE.advisoryDone || 0;
+    var chat = '<div class="copchat copfchat copswchat copadchat adv" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
+      '<div class="copfhead"><b><span class="copfname">' + E(c.title || adTitle()) + '</span><small> · ' + E(adStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the brief") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
+      '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + adMsgs(s, ed, busyHere) + work + '</div></div>' +
+      (!canEdit() ? VIEWONLY
+        : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
+        : composerHtml(c, false)) + '</div>';
+    return '<div class="copflow copswflow' + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
+      chat + GRIP + adPaneHtml(s, ed, busyHere) + adSideHtml() + '<div class="copshade" data-cop-sheet=""></div></div>';
+  }
+  function adMsgs(s, ed, busyHere){
+    var out = [], W = PANE.advisoryWords || {}, cw = W.clash || {}, last = s.turns.length - 1;
+    out.push(aiMsg("Bring me a decision you are weighing about " + E(placeWord()) + ". I will ask a few questions — one at a time — then write a Decision Brief with options and one recommendation."));
+    if (!s.ask) return out.join("");
+    out.push(meMsg(s.ask));
     s.turns.forEach(function(t, k){
       var inRound = s.turns.slice(0, k + 1).filter(function(x){ return x.round === t.round; }).length;
       var q = '<div class="adq">Round ' + t.round + ' · Question ' + inRound + ' of ' + ((PANE.advisoryCount || {}).of || 5) + '</div>';
@@ -67687,40 +69316,43 @@ var COPILOT = (function(){
       q += '<p>' + E(t.q) + '</p>';
       if (t.clash) q += '<div class="adclash"><b>Two sources disagree on ' + E(t.clash.what) + '</b><div class="adsrc">' +
         adTag("platform") + '<span>' + E(t.clash.platform) + '</span>' + adTag("file") + '<span>' + E(t.clash.file) + '</span></div></div>';
-      main += cpMsg("ai", q) + adAnswerHtml(t);
+      if (!t.how && ed && !busyHere && !s.brief) q += '<div class="copopts" data-cop-ad-choices>' +
+        (t.clash ? '<button type="button" class="copopt" data-cop-ad-reply="platform">' + E(cw.platform || "Use the platform figure") + '</button>' +
+                   '<button type="button" class="copopt" data-cop-ad-reply="file">' + E(cw.file || "Use the file") + '</button>' : '') +
+        '<button type="button" class="copopt" data-cop-ad-reply="assume">' + E(W.assume || "Assume for me") + '</button>' +
+        '<button type="button" class="copopt" data-cop-ad-reply="proceed">' + E(W.proceed || "Proceed with what you have") + '</button></div>';
+      out.push(aiMsg(q, true));
+      /* Proceed marks the open question assumed on the row; the chat says what was pressed */
+      if (s.stopped && k === last && t.how === "assumed") out.push(meMsg(W.proceed || "Proceed with what you have"));
+      else { var a = adAnswerHtml(t); if (a) out.push(a); }
     });
-    var p = s.turns.length && !s.turns[last].how ? s.turns[last] : null;
+    if (s.stopped && (!s.turns.length || s.turns[last].how !== "assumed")) out.push(meMsg(W.proceed || "Proceed with what you have"));
+    if (!s.brief && ed && !busyHere && !adPending(s)) out.push(aiMsg((s.stopped ? "" : "Nothing is waiting on you. ") + '<div class="copopts"><button type="button" class="copopt rec" data-cop-ad-next>' + ((PANE.advisoryCount || {}).owed || s.stopped ? "Write the brief" : "Continue") + '</button></div>'));
     if (s.brief) {
-      if (s.lead) main += cpMsg("ai", E(s.lead));
-      main += adBriefHtml(s.brief);
-      if (s.reply) main += cpMsg("ai", E(s.reply));
+      var n = s.brief.options.length, as = (s.assumed || []).length;
+      out.push(aiMsg((s.lead ? E(s.lead) + ' ' : '') + 'The brief is on the right: <b>' + E(s.brief.title) + '</b> — ' + n + (n === 1 ? ' option' : ' options') + ', one recommended' + (as ? ', ' + as + (as === 1 ? ' thing' : ' things') + ' assumed' : '') + '.' +
+        (ed ? ' Ask here for a change — another option, a different recommendation, a step to add — or <b>Save</b> at the foot.' : '')));
+      (s.log || []).forEach(function(x){ out.push(x.w === "me" ? meMsg(x.t) : aiMsg(E(x.t))); });
     }
-    if (ed && !busyHere) {
-      if (!s.ask) {
-        main += '<div class="copcp-ask"><textarea class="fld" data-cop-ad-text rows="3" placeholder="What would you like advice on?" aria-label="Your question for the Copilot">' + E(ADTXT[id] || "") + '</textarea>' +
-          '<button type="button" class="copbtn solid" data-cop-ad-send>Ask</button></div>';
-      } else if (!s.brief) {
-        if (p) {
-          main += '<div class="copopts" data-cop-ad-choices>' +
-            (p.clash ? '<button type="button" class="copopt" data-cop-ad-reply="platform">' + E(cw.platform || "Use the platform figure") + '</button>' +
-                       '<button type="button" class="copopt" data-cop-ad-reply="file">' + E(cw.file || "Use the file") + '</button>' : '') +
-            '<button type="button" class="copopt" data-cop-ad-reply="assume">' + E(W.assume || "Assume for me") + '</button>' +
-            '<button type="button" class="copopt" data-cop-ad-reply="proceed">' + E(W.proceed || "Proceed with what you have") + '</button></div>' +
-            '<div class="copcp-ask"><textarea class="fld" data-cop-ad-text rows="2" placeholder="' + (p.clash ? "Or give the number yourself" : "Your answer") + '" aria-label="Your answer">' + E(ADTXT[id] || "") + '</textarea>' +
-            '<button type="button" class="copbtn" data-cop-ad-send>Send</button></div>';
-        } else {
-          /* Nothing waiting (the model did not answer, or proceed was pressed
-             and the brief failed): the way on is to ask again (§61). */
-          main += '<div class="copopts"><button type="button" class="copopt rec" data-cop-ad-next>' + ((PANE.advisoryCount || {}).owed ? "Write the brief" : "Continue") + '</button></div>';
-        }
-      } else {
-        main += '<div class="copcp-ask"><textarea class="fld" data-cop-ad-change rows="2" placeholder="Ask for a change — another option, a different recommendation, a step to add" aria-label="Ask the Copilot to change the brief">' + E(ADASK[id] || "") + '</textarea>' +
-          '<button type="button" class="copbtn" data-cop-ad-revise>Ask for changes</button></div>' +
-          '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-ad-finish>Save to Advisory deliverables</button></div>';
-      }
-    }
-    if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + " in Advisory deliverables. It stays in the Copilot and does not go into the plan.");
-    return head + '<div class="copsw adv"><div class="copsw-main">' + main + work + '</div>' + adSideHtml() + '</div>';
+    if (s.saved) out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Advisory deliverables. It stays in the Copilot and does not go into the plan.' + nextHtml("advisory")));
+    return out.join("");
+  }
+  function adPaneHtml(s, ed, busyHere){
+    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E(s.brief ? s.brief.title : adTitle()) + ' v' + E(s.saved ? s.saved.n : 1) + '</b> · ' + (s.saved ? "saved" : s.brief ? "brief written" : "in progress") + '</span>' +
+      '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
+    var body;
+    if (s.brief) body = adBriefHtml(s.brief);
+    else body = '<div class="copsw-card"><h3>The Decision Brief</h3><p class="copnote">' + (s.ask ? "Not written yet — the questions first. It comes here once they are answered, or when you proceed with what it has." : "Nothing yet — bring a decision in the chat.") + '</p></div>' +
+      ((s.assumed || []).length ? '<div class="copsw-card"><h3>Assumed so far</h3><ul class="adlist">' + s.assumed.map(function(a){ return '<li>' + adTag("assumed") + ' ' + E(a) + '</li>'; }).join("") + '</ul></div>' : '');
+    return '<div class="copleft copswpane copadpane" data-cop-adpane>' + head + '<div class="copswpb">' + body + '</div>' + adFootHtml(s, busyHere) + '</div>';
+  }
+  function adFootHtml(s, busyHere){
+    var saved = !!s.saved, state = '<span class="copsvst" data-cop-adstate>' + (saved ? '<b>v' + E(s.saved.n) + '</b> saved' : '<b>v1</b> in progress') + '</span>';
+    return '<div class="copoutf copswfoot" data-cop-adfoot>' + state + '<span class="copsw-sp"></span>' +
+      (canEdit() ? (function(){
+        var wf = busyHere ? BUSY : saved ? "Nothing has changed since it was saved." : !s.brief ? "The brief is not written yet — answer the questions, or proceed with what it has." : "";
+        return '<button type="button" class="copbtn solid' + heldCls(wf) + '" data-cop-ad-finish' + held(wf) + '>Save</button>'; })() : '') +
+      '<span class="copm copadstays" title="An Advisory brief is kept under Deliverables and never written into the plan (§645)">Stays in the Copilot</span></div>';
   }
   function adClick(ev){
     if (!advOn()) return false;
@@ -67768,7 +69400,7 @@ var COPILOT = (function(){
      it. */
   var DVASK = {}, DVOWN = {}, DVADD = {}, DVPEND = null;
   function dirsOn(){ return !!(PANE && PANE.chat && PANE.dirs); }
-  function dvView(j){ ["dirs","dirsApplied","dirsTodo","dirsDone","dirsScores","dirsWords","dirsBlocker"]
+  function dvView(j){ ["dirs","dirsApplied","dirsNextVersion","dirsTodo","dirsDone","dirsScores","dirsWords","dirsBlocker"]
     .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
   function dvCopy(){ return JSON.parse(JSON.stringify(PANE.dirs)); }
   function dvProgress(id){
@@ -67848,7 +69480,7 @@ var COPILOT = (function(){
   }
   function dvSideHtml(){
     var todo = PANE.dirsTodo || [], done = PANE.dirsDone || 0, n = todo.length;
-    return '<aside class="copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
+    return '<aside class="copftodo copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
       '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
       '<div class="copsw-tg"><ul>' + todo.map(function(t){
         return '<li class="copsw-li ' + t.state + '" data-cop-dv-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
@@ -67888,7 +69520,7 @@ var COPILOT = (function(){
           }).join("") +
           '<td class="copdv-score">' + (sc[i] == null ? "–" : E(String(sc[i]))) + '</td>' +
           '<td>' + dvOwnerCell("o", i, o.ownedBy, ed) + '</td>' +
-          '<td>' + dvTick('data-cop-dv-go="' + i + '"', !!o.go, "Go ahead with " + o.title, ed, sc[i] == null && !o.go ? "Score it first — Urgency, Importance and Ease." : "") + '</td></tr>';
+          '<td>' + dvTick('data-cop-dv-go="' + i + '"', !!o.go, "Go ahead with " + o.title, ed, sc[i] == null && !o.go ? (o.mark === "plan" ? "Score it first — or leave it unticked; it stays on the plan as it is." : "Score it first — Urgency, Importance and Ease.") : "") + '</td></tr>';
       }).join("") + '</tbody></table></div>';
   }
   function dvCapsHtml(ed){
@@ -67916,49 +69548,144 @@ var COPILOT = (function(){
       '<div class="copcp-ask"><textarea class="fld" data-cop-dv-ask rows="2" placeholder="Ask for something — a couple more, or a different angle" aria-label="Ask the Copilot">' + E(DVASK[id] || "") + '</textarea>' +
       '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-dv-send="' + what + '"' + held(busyHere && BUSY) + '>Send</button></div>';
   }
+  /* §675 — DIRECTIONS, SPLIT THREE WAYS (the SWOT's shape, §641–§653;
+     Competitive Discipline's, §654 C1; the working mockup
+     design-mockups/copilot-layout/2026-10-29_directions-split-working.html,
+     Islam: "ok proceed and build it"): the chat on the left in the order it
+     happened; the Directions and the Capabilities on the right where they
+     stay put, Go ahead under the Directions; Save and Apply to plan at the
+     pane's foot; the to-do beside. Asks for more go through the chat's own
+     box; "+ Add my own" turns the box into a line of your own. */
+  function dvStepWord(s){
+    if (s.saved) return "Saved";
+    if (s.mode === "capabilities") return "The Capabilities";
+    if (!s.start) return "Start";
+    return s.chose && s.withCaps ? "The Capabilities" : "The Directions";
+  }
+  function dvCanType(){ var s = PANE.dirs; if (!s || !canEdit() || s.saved || PANE.chat.archived) return false; return s.mode === "capabilities" ? s.caps.length > 0 : s.options.length > 0; }
+  function dvAskWhat(){ var s = PANE.dirs; return s.mode === "capabilities" || (s.chose && s.withCaps) ? "caps" : "dirs"; }
   function dirsHtml(){
-    var s = PANE.dirs, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id;
-    var head = '<div class="copvline"><b>' + E(PANE.chat.title || dvTitle(s.mode)) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</div>';
+    var s = PANE.dirs, c = PANE.chat, ed = canEdit() && !s.saved, busyHere = THINKING === c.id;
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
-    var main = '', g = s.options.filter(function(o){ return o.go; }), k = s.caps.filter(function(x){ return x.keep; });
-    var reply = s.reply ? cpMsg("ai", E(s.reply)) : '';
+    var todo = PANE.dirsTodo || [], done = PANE.dirsDone || 0;
+    var chat = '<div class="copchat copfchat copswchat copdvchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
+      '<div class="copfhead"><b><span class="copfname">' + E(c.title || dvTitle(s.mode)) + '</span><small> · ' + E(dvStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the tables") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
+      '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + dvMsgs(s, ed, busyHere) + work + '</div></div>' +
+      (!canEdit() ? VIEWONLY
+        : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
+        : composerHtml(c, false)) + '</div>';
+    return '<div class="copflow copswflow' + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
+      chat + GRIP + dvPaneHtml(s, ed, busyHere) + dvSideHtml() + '<div class="copshade" data-cop-sheet=""></div></div>';
+  }
+  /* the conversation, drawn from what is stored, in the order it happened */
+  function dvMsgs(s, ed, busyHere){
+    var out = [], id = PANE.chat.id, g = s.options.filter(function(o){ return o.go; });
+    var moreOpts = function(what){ return ed && !busyHere ? swOpts([swOpt('data-cop-dv-more="' + what + '"', "Suggest more"), swOpt('data-cop-dv-add="' + what + '"', DVADD[id] === what ? "Never mind" : "+ Add my own")]) : ''; };
+    var logOf = function(p, withOpts){
+      var rows = (s.log || []).filter(function(x){ return x.p === p; });
+      return rows.map(function(x, k){
+        if (x.w === "me") return meMsg(x.t);
+        return aiMsg(E(x.t) + (withOpts && k === rows.length - 1 ? moreOpts(p) : ''));
+      }).join("");
+    };
     if (s.mode === "directions") {
-      if (s.start === "") {
-        main = cpMsg("ai", 'The plan already has <b>' + s.hadPlan + '</b> ' + (s.hadPlan === 1 ? "Direction" : "Directions") + '. Start from them, or start fresh?') +
-          (ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-start="plan">Start from the existing ones</button>' +
-            '<button type="button" class="copopt" data-cop-dv-start="fresh">Start fresh</button></div>' : '');
-      } else if (!s.options.length) {
-        main = cpMsg("ai", 'I will suggest the Directions ' + E(placeWord()) + ' could take, from the plan as it stands, and score each by Urgency × Importance × Ease.') +
-          (ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-suggest>Suggest Directions</button></div>' : '');
-      } else {
-        main = cpMsg("ai", 'Here are ' + s.options.length + ' possible Directions, each scored out of ' + E(String((PANE.dirsWords || {}).max || 64)) + '. Change any score, set who owns it, and tick what goes ahead.') + reply +
-          dvOptionsHtml(ed);
-        if (ed && !s.chose) main += '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-go-all' + held(g.length ? "" : "Tick at least one Direction first.") + '>Go ahead with the ' + g.length + ' ticked</button></div>' +
-          dvAskHtml("dirs", busyHere);
-        if (s.chose) {
-          main += cpMsg("me", "Go ahead with these " + g.length + ".");
-          if (s.withCaps) {
-            main += cpMsg("ai", g.length + (g.length === 1 ? " Direction" : " Directions") + " chosen. Next, the Capabilities we need to deliver them.");
-            if (!s.caps.length) main += ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-caps>Suggest Capabilities</button></div>' : '';
-            else main += dvCapsHtml(ed) + (ed ? dvAskHtml("caps", busyHere) : '');
-          }
-        }
+      if (s.hadPlan) {
+        out.push(aiMsg('The plan already has <b>' + s.hadPlan + '</b> ' + (s.hadPlan === 1 ? "Direction" : "Directions") + '. Start from them, or start fresh?' +
+          (!s.start && ed && !busyHere ? swOpts([swOpt('data-cop-dv-start="plan"', "Start from the existing ones", true), swOpt('data-cop-dv-start="fresh"', "Start fresh")]) : '')));
+        if (!s.start) return out.join("");
+        out.push(meMsg(s.start === "plan" ? "Start from the existing ones" : "Start fresh"));
+        /* §698 S8 — the plan's rows without scores: what leaving them means */
+        var unsc = s.start === "plan" ? s.options.filter(function(o, i){ return o.mark === "plan" && (PANE.dirsScores || [])[i] == null; }).length : 0;
+        if (unsc) out.push(aiMsg('The plan\u2019s Directions are on the table, marked. <b>' + unsc + ' of them ' + (unsc === 1 ? 'carries' : 'carry') + ' no scores</b>: score ' + (unsc === 1 ? 'it' : 'them') + ' to tick ' + (unsc === 1 ? 'it' : 'them') + ', or leave ' + (unsc === 1 ? 'it' : 'them') + ' unticked — ' + (unsc === 1 ? 'it stays' : 'they stay') + ' on the plan as ' + (unsc === 1 ? 'it is' : 'they are') + '.'));
+      }
+      if (!s.options.length) {
+        out.push(aiMsg('I will suggest the Directions ' + E(placeWord()) + ' could take, from the plan as it stands, and score each by Urgency × Importance × Ease.' + (ed && !busyHere ? swOpts([swOpt('data-cop-dv-suggest', "Suggest Directions", true)]) : '')));
+        return out.join("");
+      }
+      out.push(meMsg("Suggest Directions"));
+      var dirsLog = (s.log || []).some(function(x){ return x.p === "dirs"; });
+      out.push(aiMsg('Here are <b>' + s.options.length + '</b> possible Directions, scored out of ' + E(String((PANE.dirsWords || {}).max || 64)) + ', on the right. Change any score there, set who owns it, and tick what goes ahead' + (ed && !s.chose ? ' — then <b>Go ahead</b>, under the table' : '') + '.' +
+        (ed && !s.chose ? ' Ask here for a couple more, or a different angle.' : '') + (!s.chose && !dirsLog ? moreOpts("dirs") : '')));
+      out.push(logOf("dirs", !s.chose));
+      if (!s.chose) {
+        /* §694 S1 — opened again after Go ahead: said once, here. */
+        if (s.caps.length) out.push(aiMsg('The Directions are open again — scores, owners and ticks as they were. Change the ticks, then <b>Go ahead</b> under the table. The ' + s.caps.length + ' Capabilities suggested so far are kept, marked as suggested for the earlier set.'));
+        return out.join("");
+      }
+      /* §644 — the Directions fold where they were agreed, opening on a press */
+      out.push(dvFoldHtml(s));
+      out.push(meMsg("Go ahead with these " + g.length + "."));
+      if (s.withCaps) {
+        out.push(aiMsg(g.length + (g.length === 1 ? " Direction" : " Directions") + " chosen. Next, the Capabilities we need to deliver them." +
+          (!s.caps.length && ed && !busyHere ? swOpts([swOpt('data-cop-dv-caps', "Suggest Capabilities", true)]) : '')));
+        if (!s.caps.length) return out.join("");
+        out.push(meMsg("Suggest Capabilities"));
       }
     } else {
       var have = dvExisting();
-      main = cpMsg("ai", have.length ? 'I read your <b>' + have.length + '</b> saved ' + (have.length === 1 ? "Direction" : "Directions") + ' and the SWOT. These are the Capabilities I would build to deliver them.'
-        : 'This place has no saved Directions yet, so I will work from the SWOT alone.');
-      if (!s.caps.length) main += ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-dv-caps>Suggest Capabilities</button></div>' : '';
-      else main += reply + dvCapsHtml(ed) + (ed ? dvAskHtml("caps", busyHere) : '');
+      out.push(aiMsg(have.length ? 'I read your <b>' + have.length + '</b> saved ' + (have.length === 1 ? "Direction" : "Directions") + ' and the SWOT. These are the Capabilities I would build to deliver them.'
+        : 'This place has no saved Directions yet, so I will work from the SWOT alone.') + (!s.caps.length && ed && !busyHere ? swOpts([swOpt('data-cop-dv-caps', "Suggest Capabilities", true)]) : ''));
+      if (!s.caps.length) return out.join("");
+      out.push(meMsg("Suggest Capabilities"));
     }
-    if (ed && (s.mode === "capabilities" ? s.caps.length : s.chose)) {
-      var label = s.mode === "capabilities" ? "Save " + k.length + (k.length === 1 ? " Capability" : " Capabilities")
-        : "Save " + g.length + (g.length === 1 ? " Direction" : " Directions") + (s.withCaps ? " and " + k.length + (k.length === 1 ? " Capability" : " Capabilities") : "");
-      var why = PANE.dirsBlocker || "";
-      main += '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-dv-finish' + held(why) + '>' + E(label) + '</button></div>';
+    if (s.caps.length) {
+      var capsLog = (s.log || []).some(function(x){ return x.p === "caps"; });
+      out.push(aiMsg((s.caps.length === 1 ? 'Here is <b>1</b> Capability' : 'Here are <b>' + s.caps.length + '</b> Capabilities') + ', on the right. Set the kind and the owner there, and keep the ones to build.' +
+        (ed ? ' Ask here for a couple more, or a different angle. <b>Save</b>, at the foot of the tables, keeps them as a version.' : '') + (!capsLog ? moreOpts("caps") : '')));
+      out.push(logOf("caps", true));
     }
-    if (s.saved) main += savedApplyHtml(s.saved, "dv");
-    return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + dvSideHtml() + '</div>';
+    if (s.saved && appliedOn(s.saved, PANE.dirsApplied)) out.push(aiMsg('<b>v' + E(s.saved.n) + '</b> is on the plan.' + nextHtml("directions")));
+    else if (s.saved) out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Deliverables. <b>Apply to plan</b>, at the foot of the tables, writes it into the plan.'));
+    return out.join("");
+  }
+  function dvFoldHtml(s){
+    var open = !!FOLD[PANE.chat.id + ":dvopts"], sc = PANE.dirsScores || [], g = s.options.filter(function(o){ return o.go; });
+    var body = open ? '<div class="coppfb"><ul class="copdul">' + s.options.map(function(o, i){
+        return '<li>' + (o.go ? '<b>' : '') + E(o.title) + (o.go ? '</b>' : '') + ' <span class="copm">· ' + (sc[i] == null ? "unscored" : sc[i] + " of " + ((PANE.dirsWords || {}).max || 64)) + (o.go ? " · goes ahead" : "") + (o.ownedBy ? " · " + E(dvFnName(o.ownedBy) || o.ownedBy) : "") + '</span></li>'; }).join("") + '</ul>' + (canEdit() && !s.saved && s.chose ? '<p class="copnote"><button type="button" class="linkbu" data-cop-dv-unchoose>Change the Directions</button> — opens the table again; what is ticked, scored and owned stays.</p>' : '') + '</div>' : '';
+    return '<div class="coppf' + (open ? ' open' : '') + '" data-cop-foldbox="dvopts"><button type="button" class="coppfh" data-cop-pfold="dvopts" aria-expanded="' + open + '">' +
+      '<span class="copchev" aria-hidden="true">▸</span><b>The Directions</b><small>' + s.options.length + ' offered · ' + g.length + ' ticked</small><span class="copst done">Agreed</span></button>' + body + '</div>';
+  }
+  /* the work, on the right: the Directions, Go ahead under them, then the Capabilities */
+  function dvPaneHtml(s, ed, busyHere){
+    var g = s.options.filter(function(o){ return o.go; }), k = s.caps.filter(function(x){ return x.keep; });
+    var vn = s.saved ? s.saved.n : (PANE.dirsNextVersion || 1);
+    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E(dvTitle(s.mode)) + ' v' + E(vn) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</span>' +
+      '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
+    var body = '';
+    if (s.mode === "directions") {
+      /* §694 S1 — Go ahead can be undone: Change the Directions, on the card
+         head and in the chat's folded row, unsets the choice and keeps the rest. */
+      body += '<div class="copsw-card copdv-card"><h3>The Directions' + (s.options.length ? ' <span class="copsw-n">' + s.options.length + ' offered · ' + g.length + ' ticked</span>' : '') +
+        (ed && s.chose ? ' <button type="button" class="linkbu copdv-unchoose" data-cop-dv-unchoose' + held(busyHere ? BUSY : "") + '>Change the Directions</button>' : '') + '</h3>' +
+        (s.options.length ? dvOptionsHtml(ed && !s.chose) +
+          (ed && !s.chose ? '<div class="copdv-under"><button type="button" class="copbtn" data-cop-dv-go-all' + held(busyHere ? BUSY : g.length ? "" : "Tick at least one Direction first.") + '>Go ahead with the ' + g.length + ' ticked</button></div>' : '')
+          : '<p class="copnote">Nothing suggested yet — the chat suggests them first.</p>') + '</div>';
+      if (s.withCaps) body += '<div class="copsw-card copdv-card"><h3>The Capabilities' + (s.caps.length ? ' <span class="copsw-n">' + s.caps.length + ' suggested · ' + k.length + ' kept</span>' : '') + '</h3>' +
+        (s.caps.length ? (!s.chose ? '<p class="copnote">Suggested for the earlier set of Directions — they stay; untick any that no longer fit.</p>' : '') + dvCapsHtml(ed) : '<p class="copnote">' + (s.chose ? 'Nothing suggested yet — the chat suggests them next.' : 'After the Directions.') + '</p>') + '</div>';
+    } else {
+      body += '<div class="copsw-card copdv-card"><h3>The Capabilities' + (s.caps.length ? ' <span class="copsw-n">' + s.caps.length + ' suggested · ' + k.length + ' kept</span>' : '') + '</h3>' +
+        (s.caps.length ? dvCapsHtml(ed) : '<p class="copnote">Nothing suggested yet — the chat suggests them first.</p>') + '</div>';
+    }
+    return '<div class="copleft copswpane copdvpane" data-cop-dvpane>' + head + '<div class="copswpb">' + body + '</div>' + dvFootHtml(s, busyHere) + '</div>';
+  }
+  function dvFootHtml(s, busyHere){
+    var saved = !!s.saved, note = PANE.dirsApplied, on = saved && ((note && note.n === s.saved.n) || APPLIED[PANE.chat.id] === s.saved.n), g = s.options.filter(function(o){ return o.go; }), k = s.caps.filter(function(x){ return x.keep; });
+    var sb = [];
+    if (saved) { sb.push('<b>v' + E(s.saved.n) + '</b> saved'); sb.push(on ? '<span class="on">v' + E(s.saved.n) + ' on the plan</span>' : 'not on the plan yet'); }
+    else sb.push('<b>v' + E(PANE.dirsNextVersion || 1) + '</b> in progress');
+    var state = '<span class="copsvst" data-cop-dvstate>' + sb.join(' <i>·</i> ') + '</span>';
+    var label = saved ? "Save" : s.mode === "capabilities" ? "Save " + k.length + (k.length === 1 ? " Capability" : " Capabilities")
+      : "Save " + g.length + (g.length === 1 ? " Direction" : " Directions") + (s.withCaps ? " and " + k.length + (k.length === 1 ? " Capability" : " Capabilities") : "");
+    return '<div class="copoutf copswfoot" data-cop-dvfoot>' + state + '<span class="copsw-sp"></span>' +
+      (canEdit() ? (function(){
+        var wf = busyHere ? BUSY : saved ? "Nothing has changed since it was saved."
+          : s.mode === "directions" && !s.options.length ? "Suggest the Directions first."
+          : s.mode === "directions" && !s.chose ? "Press Go ahead under the Directions first — Save takes what goes ahead."
+          : s.mode === "capabilities" && !s.caps.length ? "Suggest the Capabilities first."
+          : (PANE.dirsBlocker || "");
+        var wa = busyHere ? BUSY : !saved ? "Save it first — the plan only takes a saved version." : "";
+        return '<button type="button" class="copbtn' + heldCls(wf) + '" data-cop-dv-finish' + held(wf) + '>' + E(label) + '</button>' +
+          '<button type="button" class="copbtn solid' + heldCls(wa) + '" data-cop-dv-apply' + held(wa) + '>' + (on ? "Apply to plan again" : "Apply to plan") + '</button>'; })() : '') + '</div>';
   }
   /* The plan is written after the press, the same order How we compete keeps
      (§35). A ticked Direction that came from the plan updates THAT pillar;
@@ -67969,6 +69696,7 @@ var COPILOT = (function(){
      asks first in the platform's own dialog, archives what the plan holds,
      writes, and says whether the plan's save went through. */
   var APPLIED = {};   /* chat id → the version applied in this visit */
+  function appliedOn(sv, note){ return !!(sv && ((note && note.n === sv.n) || APPLIED[PANE.chat.id] === sv.n)); }
   function savedApplyHtml(sv, k){
     /* §654 A3 — "on the plan" is the deliverable's own note (planApplied),
        so it survives a reload; this visit's memory covers the moment between
@@ -67980,6 +69708,13 @@ var COPILOT = (function(){
       (canEdit() ? '<div class="copbtns"><button type="button" class="copbtn' + (on ? '' : ' solid') + '" data-cop-' + k + '-apply>' + (on ? "Apply to plan again" : "Apply to plan") + '</button></div>' : '');
   }
   function planApplyAsk(what, replaces, go){
+    /* §698 S13 — the plan written is the page's place's. A chat only opens on
+       its own place today (the rail and the deep link read the page's list),
+       so this never holds; if it ever does, Apply says so rather than write
+       one place's work into another's plan. */
+    var cp = PANE && PANE.chat && PANE.chat.place;
+    if (cp && cp !== place()) { var cw = cp; try { if (typeof placeLabel === "function") cw = placeLabel(cp) || cp; } catch (e) {}
+      SAY = "This chat was made on " + cw + ", and the page is on " + placeWord() + ". Open " + cw + " to apply it — nothing was written."; draw(); return; }
     if (typeof openModalHtml !== "function") { go(); return; }
     openModalHtml("Apply to the plan?", "",
       '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
@@ -68052,11 +69787,11 @@ var COPILOT = (function(){
         function(){ return dvWritePlan(PANE.dirs); }); });
   }
   function exApplyAsk(){
-    var s = PANE.exec, caps = s.items.filter(function(it){ return it.kind !== "direction"; }).map(function(it){ return it.planId; }).filter(Boolean);
-    var nm = s.items.reduce(function(n, it){ return n + it.measures.length; }, 0), nt = s.items.reduce(function(n, it){ return n + it.tactics.length; }, 0);
-    planApplyAsk(E(s.saved.title) + " v" + E(String(s.saved.n)) + " — " + nm + " measures and " + nt + " tactics onto " + s.items.length + (s.items.length === 1 ? " item" : " items") + " of the plan, and the plan period.",
+    var s = PANE.exec, ins = s.items.filter(exIn), caps = ins.filter(function(it){ return it.kind !== "direction"; }).map(function(it){ return it.planId; }).filter(Boolean), outs = s.items.filter(function(it){ return it.out && !it.gone; });
+    var nm = ins.reduce(function(n, it){ return n + it.measures.length; }, 0), nt = ins.reduce(function(n, it){ return n + it.tactics.length; }, 0);
+    planApplyAsk(E(s.saved.title) + " v" + E(String(s.saved.n)) + " — " + nm + " measures and " + nt + " tactics onto " + ins.length + (ins.length === 1 ? " item" : " items") + " of the plan, and the plan period." + (outs.length ? " " + outs.length + (outs.length === 1 ? " item" : " items") + " left out this period, untouched." : ""),
       "The plan's Directions, with their measures and tactics, are archived first" + (caps.length ? ", and the " + caps.length + (caps.length === 1 ? " Capability" : " Capabilities") + " it updates" : "") +
-        ". A measure or tactic with the same name is updated, a new one is added; nothing is removed. Archives are under Import &amp; storage › Archived plans.",
+        ". What each card shows replaces what the item holds: a line with the same name is updated, a new one is added, a line dropped from the card is dropped. Archives are under Import &amp; storage › Archived plans.",
       function(){ planApplyGo(s.saved, "execution", caps, function(){ return !!(s.period && typeof GROUP !== "undefined"); }, function(){ return exWritePlan(PANE.exec); }); });
   }
   function dvWritePlan(s){
@@ -68093,6 +69828,7 @@ var COPILOT = (function(){
     if (!dirsOn()) return false;
     var b, s = PANE.dirs, id = PANE.chat.id;
     if ((b = hit(ev, "[data-cop-dv-apply]"))) { if (canEdit() && s.saved) dvApplyAsk(); return true; }
+    if ((b = hit(ev, "[data-cop-pfold]"))) { var fk = id + ":" + b.getAttribute("data-cop-pfold"); if (FOLD[fk]) delete FOLD[fk]; else FOLD[fk] = true; draw(); return true; }
     if (!canEdit() || s.saved) return false;
     if ((b = hit(ev, "[data-cop-dv-start]"))) {
       var st = b.getAttribute("data-cop-dv-start");
@@ -68125,6 +69861,14 @@ var COPILOT = (function(){
       x3.keep = !x3.keep; PANE.dirs = g3; draw(); dvSave({ caps: g3.caps });
       return true;
     }
+    if ((b = hit(ev, "[data-cop-dv-unchoose]"))) {
+      if (busy || THINKING) return true;
+      act({ act:"dirSave", id:id, dirs:{ chose:false } }, function(j){
+        if (PANE && PANE.chat && PANE.chat.id === id) dvView(j);
+        dvProgress(id); if (tight()) SHEET = "cards"; draw();
+      });
+      return true;
+    }
     if ((b = hit(ev, "[data-cop-dv-go-all]"))) {
       if (!s.options.some(function(o){ return o.go; })) { SAY = "Tick at least one Direction first."; draw(); return true; }
       act({ act:"dirSave", id:id, dirs:{ chose:true } }, function(j){
@@ -68135,23 +69879,10 @@ var COPILOT = (function(){
       return true;
     }
     if ((b = hit(ev, "[data-cop-dv-more]"))) { dvAsk({ act: b.getAttribute("data-cop-dv-more") === "caps" ? "capSuggest" : "dirMore" }); return true; }
+    /* §675 — "+ Add my own" turns the chat's box into a line of your own, pressed again it is the ask box again */
     if ((b = hit(ev, "[data-cop-dv-add]"))) {
       var w = b.getAttribute("data-cop-dv-add"); DVADD[id] = DVADD[id] === w ? null : w; draw();
-      var bx = document.querySelector("[data-cop-dv-owntitle]"); if (bx) bx.focus();
-      return true;
-    }
-    if ((b = hit(ev, "[data-cop-dv-addgo]"))) {
-      var t = String(DVOWN[id] || "").trim();
-      if (!t) { var bx2 = document.querySelector("[data-cop-dv-owntitle]"); if (bx2) bx2.focus(); return true; }
-      DVOWN[id] = ""; DVADD[id] = null;
-      dvAsk({ act: b.getAttribute("data-cop-dv-addgo") === "caps" ? "capSuggest" : "dirMore", own:[t] });
-      return true;
-    }
-    if ((b = hit(ev, "[data-cop-dv-send]"))) {
-      var q = String(DVASK[id] || "").trim();
-      if (!q) { var bx3 = document.querySelector("[data-cop-dv-ask]"); if (bx3) bx3.focus(); return true; }
-      DVASK[id] = "";
-      dvAsk({ act: b.getAttribute("data-cop-dv-send") === "caps" ? "capSuggest" : "dirMore", ask:q });
+      var bx = document.querySelector("[data-cop-text]"); if (bx) bx.focus();
       return true;
     }
     if ((b = hit(ev, "[data-cop-dv-finish]"))) {
@@ -68213,19 +69944,46 @@ var COPILOT = (function(){
      act, the model asked by one, the plan written after the save press. */
   var EXPEND = null, EXASK = {}, EXPICK = {};
   function execOn(){ return !!(PANE && PANE.chat && PANE.exec); }
-  function exView(j){ ["exec","execApplied","execTodo","execDone","execBlocker","execWords"].forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
+  function exView(j){ ["exec","execApplied","execNextVersion","execTodo","execDone","execBlocker","execWords"].forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
   function exCopy(){ return JSON.parse(JSON.stringify(PANE.exec)); }
   function exProgress(id){ var l = list(); if (l && l.swotProgress && PANE && PANE.execTodo) l.swotProgress[id] = { done: PANE.execDone, of: PANE.execTodo.length }; }
   /* The plan's Directions and the capabilities this place holds, as the
      items the chat walks. */
+  /* §697 S7 — WITH WHAT THE PLAN HOLDS under each item: a pillar's measures
+     and tactics, a Capability's key objectives and projects (the quarters
+     read off its months), every line marked the plan's. */
+  function exPlanLines(pl, cap){
+    var ms = [], ts = [], named = function(x){ return x && String(x.name || "").trim(); };
+    if (pl) {
+      (pl.measures || []).filter(named).forEach(function(m){ ms.push({ name: String(m.name).trim(), target: String(m.target == null ? "" : m.target), compile: m.compile || "", mark: "plan" }); });
+      (pl.tactics || []).filter(named).forEach(function(x){ ts.push({ name: String(x.name).trim(), owner: String(x.owner || ""), quarters: [1,2,3,4].filter(function(q){ return +x["q" + q] === 1; }), mark: "plan" }); });
+    } else if (cap) {
+      (cap.keyObjectives || []).filter(named).forEach(function(m){ ms.push({ name: String(m.name).trim(), target: String(m.target == null ? "" : m.target), compile: m.compile || "", mark: "plan" }); });
+      (cap.projects || []).filter(named).forEach(function(x){
+        var q1 = EX_MONTHS.indexOf(String(x.start || "").split(" ")[0]), q2 = EX_MONTHS.indexOf(String(x.end || "").split(" ")[0]), qs = [];
+        if (q1 >= 0 && q2 >= 0) for (var q = Math.ceil((q1 + 1) / 3); q <= Math.ceil((q2 + 1) / 3); q++) qs.push(q);
+        ts.push({ name: String(x.name).trim(), owner: String(x.owner || ""), quarters: qs, mark: "plan" }); });
+    }
+    return { measures: ms, tactics: ts };
+  }
   function exItems(){
+    var h = dvHolder();
     var out = dvExisting().map(function(d){
-      var h = dvHolder(), p = h && h.items ? h.items.filter(function(x){ return x && x.id === d.id; })[0] : null;
-      return { kind:"direction", planId: d.id, title: d.title, ownedBy: p && p.ownedBy ? dvFnName(p.ownedBy) : "" };
+      var p = h && h.items ? h.items.filter(function(x){ return x && x.id === d.id; })[0] : null, ln = exPlanLines(p, null);
+      return { kind:"direction", planId: d.id, title: d.title, ownedBy: p && p.ownedBy ? dvFnName(p.ownedBy) : "", measures: ln.measures, tactics: ln.tactics };
     });
     if (place() === "group" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
-      GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: dvPersonName(c.head) }); });
+      GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) { var ln = exPlanLines(null, c); out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: dvPersonName(c.head), measures: ln.measures, tactics: ln.tactics }); } });
     return out;
+  }
+  /* §697 S6 — the plan read again when the chat opens, once a visit. */
+  var EXSYNCED = {};
+  function exSync(){
+    if (!execOn() || !canEdit() || PANE.exec.saved || PANE.chat.archived) return;
+    var id = PANE.chat.id; if (EXSYNCED[id]) return; EXSYNCED[id] = true;
+    act({ act:"execSync", id:id, items: exItems(), placeWord: placeWord() }, function(j){
+      if (PANE && PANE.chat && PANE.chat.id === id) { exView(j); exProgress(id); draw(); }
+    });
   }
   function exSave(patch){
     if (!execOn()) return;
@@ -68238,31 +69996,54 @@ var COPILOT = (function(){
       draw();
     });
   }
-  function exAsk(ask){
+  function exAsk(ask, said, quiet){
     if (!execOn() || THINKING) return;
     var id = PANE.chat.id;
     THINKING = id; SAY = ""; THINK_AT = Date.now();
     if (!WORK_TIMER) WORK_TIMER = setInterval(workTick, 500);
     draw();
-    post({ act:"execDraft", id:id, exec: exCopy(), ask: ask || "", placeWord: placeWord(), context: swContext() }, WAIT_MS).then(function(x){
+    delete EXFAIL[id];
+    post({ act:"execDraft", id:id, exec: exCopy(), ask: ask || "", said: said || "", quiet: !!quiet, placeWord: placeWord(), context: swContext() }, WAIT_MS).then(function(x){
       THINKING = null;
-      if (x.st === 200 && x.j && x.j.ok) { if (PANE && PANE.chat && PANE.chat.id === id) { exView(x.j); exProgress(id); } draw(); return; }
-      SAY = (x.j && x.j.why) || "That did not work. Nothing was lost — try again."; draw();
+      if (x.st === 200 && x.j && x.j.ok) {
+        if (PANE && PANE.chat && PANE.chat.id === id) { exView(x.j); exProgress(id);
+          /* §684 — Draft all: the next undrafted item, until none is left */
+          if (EXALL[id]) { var nx = exLeft()[0]; if (nx != null) { PANE.exec.cursor = nx; draw(); exAsk("", "", true); return; } delete EXALL[id]; } }
+        draw(); return;
+      }
+      exFailed(id, (x.j && x.j.why) || "That did not work.");
     }, function(err){
       THINKING = null;
-      SAY = err && err.timedOut ? "This is taking too long, so the page stopped waiting. Try again in a moment." : "The server could not be reached. Nothing was lost — try again.";
-      draw();
+      exFailed(id, err && err.timedOut ? "This took too long, so the page stopped waiting." : "The server could not be reached.");
     });
+  }
+  /* §698 S14 — A DRAFT THAT FAILS NAMES ITS ITEM, keeps its card in hand,
+     and offers the ways on: draft it again, Draft all from it, or skip to
+     the next. Said in the chat, cleared by the next draft. */
+  var EXFAIL = {};
+  function exFailed(id, why){
+    var all = !!EXALL[id]; delete EXALL[id];
+    if (PANE && PANE.chat && PANE.chat.id === id && PANE.exec) EXFAIL[id] = { k: PANE.exec.cursor, all: all, why: String(why || "") };
+    else SAY = String(why || "That did not work.") + " Nothing was lost — try again.";
+    draw();
+  }
+  function exFailHtml(s, ed){
+    var f = EXFAIL[PANE.chat.id], it = f && s.items[f.k]; if (!f || !it || it.drafted) return "";
+    var inN = s.items.filter(exIn).length, done = inN - exLeft().length, left = exLeft().length, others = exLeft().filter(function(k){ return k !== f.k; }).length;
+    return '<div class="copmsg ai copbad" data-cop-ex-fail role="alert"><div class="copbody"><b>' + (f.all ? 'Draft all stopped at ' : 'Could not draft ') + E(it.title) + '</b> — ' + E(f.why.replace(/\s*Nothing was lost.*$/, "")) +
+      ' Nothing was lost: ' + done + ' of ' + inN + ' are drafted, and its card is in hand on the right.' +
+      (ed ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-ex-draft>Draft it again</button>' + (left > 1 ? '<button type="button" class="copopt" data-cop-ex-draftall>Draft all ' + left + ' left</button>' : '') +
+        (others ? '<button type="button" class="copopt" data-cop-ex-skip>Skip it — draft the next one</button>' : '') + '</div>' : '') + '</div></div>';
   }
   function exSideHtml(){ var keep = [PANE.dirsTodo, PANE.dirsDone]; PANE.dirsTodo = PANE.execTodo; PANE.dirsDone = PANE.execDone;
     var h = dvSideHtml(); PANE.dirsTodo = keep[0]; PANE.dirsDone = keep[1]; return h; }
   var EX_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   function exPeriodAsk(ed){
     var w = PANE.execWords || {}, ch = w.choices || {}, pk = EXPICK[PANE.chat.id];
-    var h = cpMsg("ai", "How long is this plan?");
-    if (!ed) return h;
+    var h = "How long is this plan?";
+    if (!ed) return aiMsg(h);
     h += '<div class="copopts"><button type="button" class="copopt" data-cop-ex-period="full">' + E(ch.fullWord || "Full year") + '</button>' +
-      '<button type="button" class="copopt" data-cop-ex-period="rest">This quarter to year end — ' + E(ch.restWord || "") + '</button>' +
+      '<button type="button" class="copopt rec" data-cop-ex-period="rest">This quarter to year end — ' + E(ch.restWord || "") + '</button>' +
       '<button type="button" class="copopt" data-cop-ex-pick>Pick months</button></div>';
     if (pk) {
       var mo = function(attr, v){ return '<select class="fld copdv-own" ' + attr + '>' + EX_MONTHS.map(function(m, i){ return '<option value="' + (i + 1) + '"' + (i + 1 === v ? ' selected' : '') + '>' + m + '</option>'; }).join("") + '</select>'; };
@@ -68270,15 +70051,17 @@ var COPILOT = (function(){
         ' <input class="fld copex-y" data-cop-ex-y value="' + E(String(pk.y)) + '" inputmode="numeric" aria-label="Year">' +
         '<button type="button" class="copbtn" data-cop-ex-pickgo>Use these months</button></div>';
     }
-    return h;
+    return aiMsg(h, true);
   }
   function exItemHtml(it, k, ed){
     var w = PANE.execWords || {}, qs = w.quarters || [1,2,3,4], comp = w.compiles || ["Sum","Count","Latest","Average"];
-    var mrow = function(m, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-m="' + i + '|name" value="' + E(m.name) + '" aria-label="Measure">' : E(m.name)) + '</td>' +
+    /* §697 S7 — a line the plan holds is marked so, and beside it a new one */
+    var showMarks = exHeld(it), mk = function(x){ return !showMarks ? '' : x.mark === "plan" ? '<span class="copex-mark plan">on the plan</span>' : '<span class="copex-mark new">new</span>'; };
+    var mrow = function(m, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-m="' + i + '|name" value="' + E(m.name) + '" aria-label="Measure">' : E(m.name)) + mk(m) + '</td>' +
       '<td>' + (ed ? '<input class="fld" data-cop-ex-m="' + i + '|target" value="' + E(m.target) + '" aria-label="Target for the period">' : E(m.target || "—")) + '</td>' +
       '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-m="' + i + '|compile" aria-label="Compile"><option value="">—</option>' + comp.map(function(c){ return '<option' + (c === m.compile ? ' selected' : '') + '>' + c + '</option>'; }).join("") + '</select>' : E(m.compile || "—")) + '</td>' +
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-mx="' + i + '" aria-label="Remove this measure">&times;</button></td>' : '') + '</tr>'; };
-    var trow = function(t, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|name" value="' + E(t.name) + '" aria-label="Tactic">' : E(t.name)) + '</td>' +
+    var trow = function(t, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|name" value="' + E(t.name) + '" aria-label="Tactic">' : E(t.name)) + mk(t) + '</td>' +
       /* §551: AN OWNER IS PICKED HERE TOO. This was the one free-text owner
          box left in the product — the draft a chat writes, which is then
          saved into a real plan, so a name typed here becomes a name on the
@@ -68311,29 +70094,114 @@ var COPILOT = (function(){
       '<div class="copcp-wrap"><table class="copcp-tab copex-t"><thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th>' + (ed ? '<th></th>' : '') + '</tr></thead><tbody>' + it.tactics.map(trow).join("") + '</tbody></table></div>' +
       (ed ? '<button type="button" class="linkbu" data-cop-ex-addt>+ Add a tactic</button>' : '') + '</div>';
   }
+  /* §684 — EXECUTION, SPLIT THREE WAYS (the SWOT's shape, §641–§653;
+     Competitive Discipline's and Directions', §654 C1, §675; the working
+     mockup design-mockups/copilot-layout/2026-10-29_execution-split-working.html,
+     Islam: "ok proceed and build the execution split"): the period asked in
+     the chat; every Direction and Capability a card on the right, one in
+     hand at a time, drafted from its card, or all from the chat; measures
+     and tactics edited on the card; asks through the chat's own box for the
+     item in hand; Save and Apply to plan at the pane's foot; the to-do
+     beside. Back and Next go — the cards are all there. */
+  var EXALL = {};
+  /* §697 — what is left to draft: not left out, not gone, not drafted; and on
+     the refine road an item carrying the plan's measures and tactics is not
+     owed a draft either. */
+  function exIn(it){ return !it.out && !it.gone; }
+  function exLeft(){ var s = PANE.exec; return s.items.map(function(it, k){ return exIn(it) && !it.drafted && (s.road !== "refine" || !(it.measures.length && it.tactics.length)) ? k : -1; }).filter(function(k){ return k >= 0; }); }
+  function exHeld(it){ return it.measures.some(function(m){ return m.mark === "plan"; }) || it.tactics.some(function(x){ return x.mark === "plan"; }); }
+  function exStepWord(s){
+    if (s.saved) return "Saved";
+    if (!s.period) return "The period";
+    var left = exLeft().length, inN = s.items.filter(exIn).length, outN = s.items.filter(function(it){ return it.out && !it.gone; }).length, tail = outN ? " · " + outN + " left out" : "";
+    return left ? "Drafting · " + (inN - left) + " of " + inN + tail : "Ready to save" + tail;
+  }
+  function exCanType(){ var s = PANE.exec, it = s && s.items[s.cursor]; return !!(canEdit() && s && !s.saved && !PANE.chat.archived && s.period && it && !it.out && !it.gone && (it.drafted || (it.measures.length && it.tactics.length))); }
   function execHtml(){
-    var s = PANE.exec, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id, w = PANE.execWords || {};
-    var head = '<div class="copvline"><b>' + E(PANE.chat.title || "Execution") + '</b> · ' + (s.saved ? "saved" : "in progress") + '</div>';
+    var s = PANE.exec, c = PANE.chat, ed = canEdit() && !s.saved, busyHere = THINKING === c.id;
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
-    var main = '';
-    if (!s.items.length) main = cpMsg("product", "This place's plan has no Directions or Capabilities yet. Choose them first, in the Directions section.");
-    else if (!s.period) main = exPeriodAsk(ed);
-    else {
-      main = '<div class="copex-period" data-cop-ex-strip>This plan covers <b>' + E(w.period) + '</b>' + (ed ? '<button type="button" class="linkbu" data-cop-ex-change>Change</button>' : '') + '</div>' +
-        (EXPICK[id] ? exPeriodAsk(ed) : '');
-      var it = s.items[s.cursor];
-      if (s.reply) main += cpMsg("ai", E(s.reply));
-      main += exItemHtml(it, s.cursor, ed);
-      if (ed && !busyHere) main += '<div class="copopts">' + (it.drafted ? '' : '<button type="button" class="copopt rec" data-cop-ex-draft>Draft measures and tactics</button>') +
-        (s.cursor > 0 ? '<button type="button" class="copopt" data-cop-ex-go="-1">Back</button>' : '') +
-        (s.cursor < s.items.length - 1 ? '<button type="button" class="copopt" data-cop-ex-go="1">Next</button>' : '') + '</div>' +
-        '<div class="copcp-ask"><textarea class="fld" data-cop-ex-ask rows="2" placeholder="Ask for a change to these measures or tactics" aria-label="Ask the Copilot">' + E(EXASK[id] || "") + '</textarea>' +
-        '<button type="button" class="copbtn" data-cop-ex-send>Send</button></div>';
-      if (ed) { var why = PANE.execBlocker || "";
-        main += '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-ex-finish' + held(why) + '>Save</button></div>'; }
+    var todo = PANE.execTodo || [], done = PANE.execDone || 0;
+    var chat = '<div class="copchat copfchat copswchat copexchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
+      '<div class="copfhead"><b><span class="copfname">' + E(c.title || "Execution — " + placeWord()) + '</span><small> · ' + E(exStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the items") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
+      '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + exMsgs(s, ed, busyHere) + work + '</div></div>' +
+      (!canEdit() ? VIEWONLY
+        : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
+        : composerHtml(c, false)) + '</div>';
+    return '<div class="copflow copswflow' + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
+      chat + GRIP + exPaneHtml(s, ed, busyHere) + exSideHtml() + '<div class="copshade" data-cop-sheet=""></div></div>';
+  }
+  function exMsgs(s, ed, busyHere){
+    var out = [], w = PANE.execWords || {}, id = PANE.chat.id, left = exLeft();
+    /* §694 S10 — nothing to plan for: a saved Directions version waiting for
+       Apply is named and opened, rather than sending the person to choose again. */
+    if (!s.items.length) {
+      var dsv = PANE.execDirsSaved;
+      return dsv ? aiMsg('<b>' + E(dsv.title) + ' v' + E(dsv.n) + '</b> is saved but not on the plan yet, so there is nothing here to plan for. Apply it to the plan first; then a new Execution chat reads the Directions and Capabilities from there.' +
+          '<div class="copopts"><button type="button" class="copbtn solid" data-cop-go-deliv="' + E(dsv.id) + '" data-cop-go="directions">Open ' + E(dsv.title) + ' v' + E(dsv.n) + '</button><span class="copm">The version page, where Apply to plan is.</span></div>')
+        : aiMsg('The plan has no Directions or Capabilities yet, and none are saved in the Copilot. Choose them first.' +
+          '<div class="copopts"><button type="button" class="copbtn solid" data-cop-go="directions">Open Directions</button><span class="copm">The Directions start screen, in this place.</span></div>');
     }
-    if (s.saved) main += savedApplyHtml(s.saved, "ex");
-    return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + exSideHtml() + '</div>';
+    out.push(exPeriodAsk(ed && (!s.period || !!EXPICK[id])));
+    if (!s.period) return out.join("");
+    out.push(meMsg(w.period || "The period"));
+    /* §697 — what the plan already holds is said, and the road with it. */
+    var heldN = s.items.filter(function(it){ return exIn(it) && exHeld(it); }).length, inN = s.items.filter(exIn).length;
+    out.push(aiMsg('This plan covers <b>' + E(w.period) + '</b>. The ' + inN + ' Directions and Capabilities are on the right' +
+      (heldN ? ' — <b>' + heldN + ' of them already ' + (heldN === 1 ? 'carries' : 'carry') + ' measures and tactics on the plan</b>, shown on ' + (heldN === 1 ? 'its card' : 'their cards') + '; ' + (s.road === "refine" ? 'a draft adds to what is there, and Apply replaces what the card shows.' : 'a draft replaces what the card shows, and nothing on the plan changes until Apply.') : ' — I draft each one\u2019s measures and tactics from the plan.') +
+      ' Draft them one at a time there, or all at once here.' +
+      (ed && !busyHere && left.length ? swOpts([swOpt('data-cop-ex-draftall', (s.road === "refine" && heldN ? "Draft the " + left.length + " without" : "Draft all " + left.length + " left"), true), swOpt('data-cop-ex-next', "Draft the next one")]) : '')));
+    (s.log || []).forEach(function(x){ out.push(x.w === "me" ? meMsg(x.t) : aiMsg((x.k >= 0 && s.items[x.k] ? '<b>' + E(s.items[x.k].title) + '</b> — ' : '') + E(x.t))); });
+    /* §697 S5 — what is left out this period, said once, from the state */
+    var outs = s.items.filter(function(it){ return it.out && !it.gone; });
+    if (outs.length) out.push(aiMsg(outs.map(function(it){ return '<b>' + E(it.title) + '</b>'; }).join(", ") + (outs.length === 1 ? ' is' : ' are') + ' left out this period: nothing is drafted for ' + (outs.length === 1 ? 'it' : 'them') + ', and Apply writes nothing for ' + (outs.length === 1 ? 'it. It stays' : 'them. They stay') + ' on the plan as ' + (outs.length === 1 ? 'it is.' : 'they are.')));
+    if (s.saved && appliedOn(s.saved, PANE.execApplied)) out.push(aiMsg('<b>v' + E(s.saved.n) + '</b> is on the plan.' + nextHtml("execution")));
+    else if (s.saved) out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Deliverables. <b>Apply to plan</b>, at the foot, writes the measures, the tactics and the period into the plan.'));
+    else if (ed && !left.length) out.push(aiMsg('Every item is ' + (outs.length ? 'drafted or left out' : 'drafted') + '. Change anything on the right, ask here for a change to the item in hand, then <b>Save</b> at the foot.'));
+    if (!s.saved) out.push(exFailHtml(s, ed && !busyHere));
+    return out.join("");
+  }
+  function exPaneHtml(s, ed, busyHere){
+    var w = PANE.execWords || {}, id = PANE.chat.id, vn = s.saved ? s.saved.n : (PANE.execNextVersion || 1);
+    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E("Execution — " + placeWord()) + ' v' + E(vn) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</span>' +
+      '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
+    var body;
+    if (!s.items.length) body = '<p class="copnote">Nothing to draft — the plan holds no Directions or Capabilities' + (PANE.execDirsSaved ? '. ' + E(PANE.execDirsSaved.title) + ' v' + E(PANE.execDirsSaved.n) + ' is saved and waits for Apply.' : ', and none are saved.') + '</p>';
+    else if (!s.period) body = '<div class="copsw-card"><h3>The items</h3><p class="copnote">The plan period first — the chat asks it. Then the ' + s.items.length + ' Directions and Capabilities come here, one card each.</p></div>';
+    else body = '<div class="copex-period" data-cop-ex-strip>This plan covers <b>' + E(w.period) + '</b>' + (ed ? '<button type="button" class="linkbu" data-cop-ex-change>Change</button>' : '') + '</div>' +
+      s.items.map(function(it, k){
+        var now = k === s.cursor, has = it.measures.length > 0 || it.tactics.length > 0, done = it.measures.length > 0 && it.tactics.length > 0, onPlan = exHeld(it);
+        var nM = it.measures.length, nT = it.tactics.length, nNew = it.measures.filter(function(m){ return m.mark !== "plan"; }).length + it.tactics.filter(function(x){ return x.mark !== "plan"; }).length;
+        /* §697 S7, S5, S6 — the head says what the plan holds, what is new,
+           what is left out, what is gone */
+        var counts = it.gone ? "No longer on the plan" : it.out ? "Left out this period"
+          : !has ? "Not drafted yet"
+          : (onPlan && !it.drafted ? "On the plan · " : "") + nM + (nM === 1 ? " measure" : " measures") + " · " + nT + (nT === 1 ? " tactic" : " tactics") + (onPlan && nNew ? " · " + nNew + " new" : "");
+        var st = it.gone ? '<span class="copst off">Gone</span>' : it.out ? '<span class="copst off">Left out</span>' : done ? '<span class="copst done">' + (it.drafted ? "Drafted" : "On the plan") + '</span>' : now ? '<span class="copst now">In hand</span>' : '<span class="copst"></span>';
+        var body = it.gone ? '<p class="copnote">This item is no longer on the plan. Its lines stay here, and Apply will not write them.</p>' + (has ? exItemHtml(it, k, false) : '')
+          : it.out ? '<p class="copnote">Nothing is drafted for it and Apply writes nothing for it.' + (ed ? ' <button type="button" class="linkbu" data-cop-ex-in="' + k + '">Put it back</button>' : '') + '</p>'
+          : (has ? exItemHtml(it, k, ed) : '<p class="copnote">Nothing here yet.</p>') +
+            (ed && !it.drafted ? '<div class="copopts"><button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-ex-draft' + held(busyHere && BUSY) + '>' + (onPlan ? (s.road === "refine" ? "Draft more from the plan" : "Draft anew") : "Draft measures and tactics") + '</button>' +
+              (onPlan ? '<span class="copm">' + (s.road === "refine" ? "Adds to what is here; nothing on the plan is replaced until Apply." : "Replaces what is here on the card; nothing on the plan changes until Apply.") + '</span>' : '') +
+              '<button type="button" class="linkbu" data-cop-ex-out="' + k + '">Leave out this period</button></div>'
+             : ed && it.drafted ? '<div class="copopts"><button type="button" class="linkbu" data-cop-ex-out="' + k + '">Leave out this period</button></div>' : '');
+        return '<div class="copsw-card copex-card' + (now ? " now" : "") + (it.out || it.gone ? " out" : "") + '" data-cop-ex-card="' + k + '">' +
+          '<button type="button" class="copex-head" data-cop-ex-card-pick="' + k + '" aria-expanded="' + now + '"><span class="copex-kind">' + (it.kind === "capability" ? "Capability" : "Direction") + '</span><b>' + E(it.title) + '</b><small>' + E(counts) + '</small>' + st + '</button>' +
+          (now ? '<div class="copex-body">' + body + '</div>' : '') + '</div>';
+      }).join("");
+    return '<div class="copleft copswpane copexpane" data-cop-expane>' + head + '<div class="copswpb">' + body + '</div>' + exFootHtml(s, busyHere) + '</div>';
+  }
+  function exFootHtml(s, busyHere){
+    var saved = !!s.saved, note = PANE.execApplied, on = saved && ((note && note.n === s.saved.n) || APPLIED[PANE.chat.id] === s.saved.n);
+    var sb = [];
+    if (saved) { sb.push('<b>v' + E(s.saved.n) + '</b> saved'); sb.push(on ? '<span class="on">v' + E(s.saved.n) + ' on the plan</span>' : 'not on the plan yet'); }
+    else sb.push('<b>v' + E(PANE.execNextVersion || 1) + '</b> in progress');
+    var state = '<span class="copsvst" data-cop-exstate>' + sb.join(' <i>·</i> ') + '</span>';
+    return '<div class="copoutf copswfoot" data-cop-exfoot>' + state + '<span class="copsw-sp"></span>' +
+      (canEdit() ? (function(){
+        var wf = busyHere ? BUSY : saved ? "Nothing has changed since it was saved." : (PANE.execBlocker || "");
+        var wa = busyHere ? BUSY : !saved ? "Save it first — the plan only takes a saved version." : "";
+        return '<button type="button" class="copbtn' + heldCls(wf) + '" data-cop-ex-finish' + held(wf) + '>Save</button>' +
+          '<button type="button" class="copbtn solid' + heldCls(wa) + '" data-cop-ex-apply' + held(wa) + '>' + (on ? "Apply to plan again" : "Apply to plan") + '</button>'; })() : '') + '</div>';
   }
   /* The plan is written after the save press (§35): the plan period onto
      the company, each Direction's measures and tactics onto its pillar, and a
@@ -68346,13 +70214,23 @@ var COPILOT = (function(){
     if (R && R.monthLabel) { GROUP[R.PLAN_FROM || "planFrom"] = R.monthLabel(p.y * 12 + p.m1 - 1); GROUP[R.PLAN_TO || "planTo"] = R.monthLabel(p.y * 12 + p.m2 - 1); }
     var h = dvHolder(), wrote = 0, yy = String(p.y).slice(2);
     var find = function(list, name){ return list.filter(function(x){ return x && String(x.name || "").trim().toLowerCase() === name.toLowerCase(); })[0]; };
+    /* §697 S7 — WHAT THE CARD SHOWS REPLACES WHAT THE ITEM HOLDS: a row with
+       the card's name is updated (its id and actuals kept), a new one added,
+       and a row the card no longer carries is dropped — the person saw it
+       there and dropped it. An item left out this period, or gone from the
+       plan, is not touched (S5, S6). The archive Apply takes first holds
+       what was there. */
+    var keepNamed = function(list, lines){ var want = {}; lines.forEach(function(x){ want[String(x.name || "").trim().toLowerCase()] = true; });
+      for (var i = list.length - 1; i >= 0; i--) { var nm = String(list[i] && list[i].name || "").trim().toLowerCase(); if (nm && !want[nm]) list.splice(i, 1); } };
     s.items.forEach(function(it){
+      if (it.out || it.gone) return;
       if (it.kind === "direction") {
         var pl = h && Array.isArray(h.items) ? h.items.filter(function(x){ return x && x.id === it.planId; })[0] : null;
         if (!pl) return;
         it.measures.forEach(function(m){ var r = find(pl.measures || [], m.name) || addMeasure(pl); if (!r) return; r.name = m.name; r.target = m.target; if (m.compile) r.compile = m.compile; });
         it.tactics.forEach(function(t){ var r = find(pl.tactics || [], t.name) || addTactic(pl); if (!r) return; r.name = t.name; r.owner = t.owner;
           [1,2,3,4].forEach(function(q){ r["q" + q] = t.quarters.indexOf(q) >= 0 ? 1 : 0; }); });
+        if (Array.isArray(pl.measures)) keepNamed(pl.measures, it.measures); if (Array.isArray(pl.tactics)) keepNamed(pl.tactics, it.tactics);
         wrote++;
       } else {
         var c = Array.isArray(GROUP.capabilities) ? GROUP.capabilities.filter(function(x){ return x && String(x.id) === it.planId; })[0] : null;
@@ -68363,6 +70241,7 @@ var COPILOT = (function(){
         it.tactics.forEach(function(t){ var r = find(c.projects || [], t.name) || addProject(c); if (!r) return; r.name = t.name; r.owner = t.owner;
           if (t.quarters.length) { var a = (Math.min.apply(null, t.quarters) - 1) * 3, b = Math.max.apply(null, t.quarters) * 3 - 1;
             r.start = EX_MONTHS[a] + " " + yy; r.end = EX_MONTHS[b] + " " + yy; } });
+        if (Array.isArray(c.keyObjectives)) keepNamed(c.keyObjectives, it.measures); if (Array.isArray(c.projects)) keepNamed(c.projects, it.tactics);
         wrote++;
       }
     });
@@ -68382,10 +70261,19 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-ex-pickgo]"))) { var pk = EXPICK[id];
       act({ act:"execPeriod", id:id, period: pk }, function(j){ EXPICK[id] = null; exView(j); exProgress(id); draw(); }); return true; }
     if ((b = hit(ev, "[data-cop-ex-draft]"))) { exAsk(""); return true; }
-    if ((b = hit(ev, "[data-cop-ex-send]"))) { var q = String(EXASK[id] || "").trim(); if (!q) return true; EXASK[id] = ""; exAsk(q); return true; }
-    if ((b = hit(ev, "[data-cop-ex-go]"))) { var g = exCopy(); g.cursor = Math.max(0, Math.min(g.items.length - 1, g.cursor + (+b.getAttribute("data-cop-ex-go")))); g.reply = ""; PANE.exec = g; exSave(g); return true; }
-    if ((b = hit(ev, "[data-cop-ex-addm]"))) return exItemPatch(function(it){ it.measures.push({ name:"New measure", target:"", compile:"" }); });
-    if ((b = hit(ev, "[data-cop-ex-addt]"))) return exItemPatch(function(it){ it.tactics.push({ name:"New tactic", owner:"", quarters:[] }); });
+    if ((b = hit(ev, "[data-cop-ex-skip]"))) { var fk = (EXFAIL[id] || {}).k, lf = exLeft(), nk = lf.filter(function(k){ return k > fk; })[0]; if (nk == null) nk = lf.filter(function(k){ return k !== fk; })[0]; if (nk == null) return true; PANE.exec.cursor = nk; exAsk("", "Draft " + PANE.exec.items[nk].title); return true; }
+    if ((b = hit(ev, "[data-cop-ex-next]"))) { var nx = exLeft()[0]; if (nx == null) return true; PANE.exec.cursor = nx; exAsk(""); return true; }
+    if ((b = hit(ev, "[data-cop-ex-draftall]"))) { var n0 = exLeft()[0]; if (n0 == null) return true; EXALL[id] = true; PANE.exec.cursor = n0; exAsk("", "Draft all"); return true; }
+    /* a card's head puts its item in hand (data-cop-ex-pick is the period's Pick months, above) */
+    if ((b = hit(ev, "[data-cop-ex-card-pick]"))) { var g = exCopy(); g.cursor = +b.getAttribute("data-cop-ex-card-pick"); PANE.exec = g; draw(); exSave(g); return true; }
+    if ((b = hit(ev, "[data-cop-dv-todo]"))) { var tk = String(b.getAttribute("data-cop-dv-todo") || ""); if (tk.indexOf("item:") === 0) { var ti = s.items.findIndex(function(it){ return "item:" + it.planId === tk; }); if (ti >= 0) { var g1 = exCopy(); g1.cursor = ti; PANE.exec = g1; draw(); exSave(g1); } } return true; }
+    if ((b = hit(ev, "[data-cop-ex-addm]"))) return exItemPatch(function(it){ it.measures.push({ name:"New measure", target:"", compile:"", mark:"new" }); });
+    if ((b = hit(ev, "[data-cop-ex-addt]"))) return exItemPatch(function(it){ it.tactics.push({ name:"New tactic", owner:"", quarters:[], mark:"new" }); });
+    /* §697 S5 — left out this period, and back */
+    if ((b = hit(ev, "[data-cop-ex-out]")) || (b = hit(ev, "[data-cop-ex-in]"))) {
+      var ko = +b.getAttribute(b.hasAttribute("data-cop-ex-out") ? "data-cop-ex-out" : "data-cop-ex-in"), g4 = exCopy(); if (!g4.items[ko]) return true;
+      g4.items[ko].out = b.hasAttribute("data-cop-ex-out"); PANE.exec = g4; draw(); exSave({ items: g4.items }); return true;
+    }
     if ((b = hit(ev, "[data-cop-ex-mx]"))) { var mi = +b.getAttribute("data-cop-ex-mx"); return exItemPatch(function(it){ it.measures.splice(mi, 1); }); }
     if ((b = hit(ev, "[data-cop-ex-tx]"))) { var ti = +b.getAttribute("data-cop-ex-tx"); return exItemPatch(function(it){ it.tactics.splice(ti, 1); }); }
     if ((b = hit(ev, "[data-cop-ex-q]"))) { var qp = b.getAttribute("data-cop-ex-q").split("|");
@@ -68417,8 +70305,8 @@ var COPILOT = (function(){
     if (el.hasAttribute && el.hasAttribute("data-cop-ex-y")) { pk.y = +el.value; return true; }
     return false;
   }
-  function exNew(){
-    act({ act:"newExecution", place: place(), title: "Execution — " + placeWord(), items: exItems() }, function(j){
+  function exNew(road){
+    act({ act:"newExecution", place: place(), title: "Execution — " + placeWord(), items: exItems(), road: road || "build" }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       exView(j);
@@ -68440,6 +70328,7 @@ var COPILOT = (function(){
       else if (x.st === 404) { delete OPEN[k]; PANE = null; SAY = (x.j && x.j.why) || "That is not here any more."; loadList(true); return; }
       else PANE = { id: id, failed: true, why: x.j && x.j.why };
       draw();
+      if (kind === "chat" && PANE && PANE.exec) exSync();
     }, function(){ PANE = { id: id, failed: true }; draw(); });
   }
   function act(body, then){
@@ -68456,6 +70345,7 @@ var COPILOT = (function(){
   function hit(ev, sel){ return ev.target && ev.target.closest && ev.target.closest(sel); }
   document.addEventListener("input", function(ev){
     var t = hit(ev, "[data-cop-text]"); if (t && PANE && PANE.chat) { DRAFT[PANE.chat.id] = t.value; fitBox(); }
+    var st0 = hit(ev, "[data-cop-starttext]"); if (st0) { STARTTEXT[key()] = st0.value; var sb = document.querySelector("[data-cop-startsend]"); if (sb) sb.hidden = !st0.value.trim(); }
     var e = hit(ev, "[data-cop-edit-text]"); if (e && EDIT) EDIT.text = e.value;
     var fa = hit(ev, "[data-cop-fans]"); if (fa && flowOn()) PANE.flow.ans[PANE.flow.e][+fa.getAttribute("data-cop-fans")] = fa.value;
     var pe = hit(ev, "[data-cop-pentext]");
@@ -68584,7 +70474,22 @@ var COPILOT = (function(){
     var files = (PANE.pending || []).slice();
     if (!text.trim() && !files.length) return;
     if (flowView()) { if (forced == null && t) t.value = ""; flowType(text); return; }
-    if (swotOn()) { if (!swGuidedNow()) return; if (forced == null && t) t.value = ""; DRAFT[id] = ""; swType(text); return; }
+    if (swotOn()) {
+      if (swGuidedNow()) { if (forced == null && t) t.value = ""; DRAFT[id] = ""; swType(text); return; }
+      /* §654 C2 — with a draft on the right, the box says what to change */
+      if (swCanChange()) { if (forced == null && t) t.value = ""; DRAFT[id] = ""; swAsk({ act:"swotChange", ask: text.trim(), swot: swCopy() }); return; }
+      return;
+    }
+    /* §688 — in an Advisory chat the box is the question, then the answer, then a change to the brief */
+    if (advOn()) { if (!adCanType()) return; var sa = PANE.advisory, pq = adPending(sa); if (forced == null && t) t.value = ""; DRAFT[id] = "";
+      if (sa.brief) adAsk({ act:"advisoryRevise", ask: text.trim() }); else adAsk({ act:"advisoryTurn", reply: pq && pq.clash ? "own" : "say", words: text.trim() }); return; }
+    /* §684 — in an Execution chat the box asks for a change to the item in hand */
+    if (execOn()) { if (!exCanType()) return; if (forced == null && t) t.value = ""; DRAFT[id] = ""; exAsk(text.trim()); return; }
+    /* §675 — in a Directions chat the box asks for more, or adds a line of your own */
+    if (dirsOn()) { if (!dvCanType()) return; var w = dvAskWhat(), ownLine = DVADD[id] === w; if (forced == null && t) t.value = ""; DRAFT[id] = ""; DVADD[id] = null;
+      dvAsk(ownLine ? { act: w === "caps" ? "capSuggest" : "dirMore", own: [text.trim()] } : { act: w === "caps" ? "capSuggest" : "dirMore", ask: text.trim() }); return; }
+    /* §654 C1 — in a Competitive Discipline chat the box asks for a change to the table */
+    if (competeOn()) { if (!cpCanType()) return; if (forced == null && t) t.value = ""; DRAFT[id] = ""; cpAsk({ act:"competeRefine", ask: text.trim() }); return; }
     var ctx = contextOf();
     if (forced == null) { DRAFT[id] = ""; if (t) t.value = ""; }
     PANE.messages = PANE.messages.concat([{ id:"new", who:"person", by: (typeof SYNC !== "undefined" && SYNC.actingAs && SYNC.actingAs()) || "",
@@ -68609,10 +70514,39 @@ var COPILOT = (function(){
          the server, so it is not put back in the box — sending it again would
          say it twice; the chat is read again instead, and an answer that
          arrives later is there the next time it is opened. */
-      if (err && err.timedOut) { SAY = "This is taking too long, so the page stopped waiting. If the answer arrives, it will be here when you open this chat again."; openItem("chat", id); return; }
-      SAY = "The server could not be reached. What you typed is back in the box — try again.";
-      if (forced == null) DRAFT[id] = text; openItem("chat", id);
+      /* §744 — THE CONNECTION DROPPED (Islam's screenshot: ERR_NETWORK_CHANGED
+         on "assume all for me and go ahead with all pillars", and the chat sat
+         there). The server goes on writing the answer when the page loses the
+         line, so the page watches for it rather than reading the chat once,
+         at once, while the answer is still being written. */
+      watchAnswer(id, text, forced == null, !!(err && err.timedOut));
     });
+  }
+  var WATCH = {};
+  function watchAnswer(id, text, putBack, timedOut){
+    var tries = 0, MAX = 36, stop = function(){ delete WATCH[id]; };
+    WATCH[id] = true;
+    SAY = timedOut ? "This is taking a while, so the page stopped waiting on the line — it is watching for the answer instead."
+      : "The connection dropped while the answer was being written. Watching for it here — nothing was lost.";
+    draw();
+    var look = function(){
+      if (!WATCH[id]) return;
+      tries++;
+      getJ("chat", ["id=" + encodeURIComponent(id), "placeWord=" + encodeURIComponent(placeWord())]).then(function(x){
+        if (!WATCH[id]) return;
+        var ms = x.st === 200 && x.j && x.j.ok ? (x.j.messages || []) : null;
+        var head = function(s){ return String(s || "").replace(/\s+/g, " ").trim().slice(0, 60); };
+        var mine = ms ? ms.map(function(m){ return m.who !== "ai" && head(m.body) === head(text); }).lastIndexOf(true) : -1;
+        var answered = ms && mine >= 0 && ms.slice(mine + 1).some(function(m){ return m.who === "ai"; });
+        if (answered) { stop(); SAY = ""; if (OPEN[key()] && OPEN[key()].id === id) openItem("chat", id); else draw(); loadList(true); return; }
+        if (tries >= MAX) { stop();
+          SAY = ms && mine < 0 ? "The message did not reach the server. What you typed is back in the box — try again." : "No answer came. Ask again when you are ready — your message is kept.";
+          if (ms && mine < 0 && putBack) DRAFT[id] = text;
+          if (OPEN[key()] && OPEN[key()].id === id) openItem("chat", id); else draw(); return; }
+        setTimeout(look, 5000);
+      }, function(){ if (WATCH[id]) setTimeout(look, 5000); });
+    };
+    setTimeout(look, 3000);
   }
 
   /* A FILE, read in the browser only as far as its size and name; the server
@@ -68719,6 +70653,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
+    if ((b = hit(ev, "[data-cop-go]"))) { goSection(b.getAttribute("data-cop-go"), b.getAttribute("data-cop-go-deliv") || ""); return; }
     /* §538: the hold moved from `disabled` to `aria-disabled` so its reason
        could be read, and `b.disabled` goes false the moment it does — a guard
        left reading that property would let the held button act. */
@@ -68738,6 +70673,18 @@ var COPILOT = (function(){
       MENU = null;
       var np = b.getAttribute("data-cop-newplan");
       if (np === "directions") { dvNew("directions", true); return; }
+      if (np === "execution") { exNew("refine"); return; }
+      if (np === "compete") {
+        var cw = cpPlanHeld(); if (!cw) return;
+        act({ act:"newCompete", place: place(), title: cpTitle(), fromPlan: { discipline: cw.discipline, values: cw.values } }, function(j){
+          var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+          PANE = Object.assign({ id: j.chat.id, chat: j.chat, messages: [] }, {});
+          cpView(j);
+          OPEN[key()] = { kind:"chat", id: j.chat.id };
+          draw();
+        });
+        return;
+      }
       act({ act:"newSwot", place: place(), title: swTitle(), fromPlan: planSwot() }, function(j){
         var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
         PENDSTART[j.chat.id] = "plan";
@@ -75816,8 +77763,14 @@ var SYNC = (function () {
                the tour's own offer, made visibly instead of automatically.
                TOUR.offer's memory is untouched, so with the welcome already
                seen this session the tour offers itself exactly as before. */
-            var greeted = false;
-            try { greeted = WELCOME.offer(person); } catch (e) {}
+            /* §687: A READER'S SEAT LANDS IN THE READING WINDOW, and is
+               neither greeted nor toured over it — the window is the whole
+               of the platform for them, and the welcome's doors lead to
+               pages they came here not to work. */
+            var reading = false;
+            try { reading = READING.offer(person); } catch (e) {}
+            var greeted = reading;
+            if (!greeted) { try { greeted = WELCOME.offer(person); } catch (e) {} }
             if (!greeted) TOUR.offer(person);
           });
           setInterval(save, 5000);
@@ -76193,8 +78146,9 @@ var SYNC = (function () {
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB,
@@ -76254,7 +78208,10 @@ var SYNC = (function () {
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
+        /* §690: the office keeps the tab whatever the cycle's state;
+           `canReport` says no to everyone on a closed cycle, so the office is
+           asked by name there. */
+        when: function(){ return reportTabOn() && topHasPlan() && planOn("group") && (inOffice() || canReport("group")); },
         render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB,
@@ -76362,8 +78319,9 @@ var SYNC = (function () {
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*).
+           §690: and the office keeps the tab whatever the cycle's state. */
+        when: function(t){ return reportTabOn() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB,
@@ -76436,9 +78394,14 @@ var SYNC = (function () {
          single rail never shows a second Roles & access. Access is
          `c_access` — the same door as Strategy's matrix, readable to the
          office and written by the Super user alone (§89). */
-      { k:"access", ac:"c_access", grp:"access", mod:"insights", label:"Roles & access", glyph:"⚿", find:"permissions roles who can open insights library grant",
-        when: function(){ return moduleWord() === "insights"; },
-        render:renderModuleAccess },
+      /* §702: INSIGHTS' ROLES & ACCESS IS GONE. Islam: *"the choice made when
+         posting do the job. no need for the roles and access in the
+         insights."* Who reads a report is chosen when it is posted (the
+         departments it goes to, or everyone), so a second gate on opening
+         the library was a second place to look. Insights now declares no
+         area (lib/modules.ts) and its Setup is the Landing line alone.
+         renderModuleAccess stays in config-render.js for the next module
+         that declares an area. */
       { k:"landing", ac:"c_landing", grp:"landing", mod:"insights", label:"Landing line", glyph:"▤", find:"landing line welcome screen what insights says row sentence",
         when: function(){ return moduleWord() === "insights" && inOffice(); },
         render:renderLandingLine },
@@ -76971,11 +78934,20 @@ var SYNC = (function () {
   function switchViewer(key, after){
     var go = function(){
       leaveModes();
+      /* §743: VIEWING AS SOMEBODY OPENS WHERE THEIR SIGN-IN WOULD (§237's
+         rule, carried to the reading window). Islam: *"aliaa is an employee
+         and is landing on the workbench not the read as agreed"* — the
+         window was offered at sign-in only, so a view-as always landed on
+         the workbench. The window the last person had open closes first; a
+         reader's seat then opens it again, anybody else stays on the
+         workbench. */
+      try { if (READING.isOpen()) READING.close(); } catch (e) {}
       VIEWER = key;
       var sel = document.getElementById("asWho");
       if (sel) sel.value = VIEWER;
       current = null; currentSub = null;
       paint(); window.scrollTo(0, 0);
+      try { READING.offer(viewer(), true); } catch (e) {}
       if (after) after();
     };
     if (typeof SYNC === "undefined" || !SYNC.saveNow) return go();
@@ -77312,7 +79284,20 @@ var SYNC = (function () {
     if (r.kind === "fn")  return navName(FUNCTIONS[r.key]);
     return navName(UNITS[k]);
   }
+  /* §692: THE SAME ROW, ASKED WITH SOMEBODY ELSE'S PLACE AND FOLD. The
+     reading window draws this row under its strip (reading.js, Islam:
+     *"why don't we use the navigator concept?"*), with the window's own
+     subject lit and its own Units | Functions side open — so the builder
+     takes the place and the fold as arguments and hands the settled fold
+     back, and the workbench's own call below feeds it `current` and NAVFOLD
+     exactly as before. One builder, two rows that cannot disagree about
+     who reaches what (§53.5). */
   function unitTabs(){
+    var r = navParts(current, NAVFOLD, NAVFOLDAT);
+    NAVFOLD = r.fold; NAVFOLDAT = r.followed;
+    return r.parts;
+  }
+  function navParts(at, fold, followed){
     var out = [];
     /* ── THE GROUP BUTTON BECOMES A DROPDOWN (§68) ────────────────────
        Islam, asked where a company should sit: "make the group button name
@@ -77339,9 +79324,9 @@ var SYNC = (function () {
     });
     if (tops.length === 1) out.push({ k:tops[0].k, label:tops[0].label });
     else if (tops.length > 1) out.push({ tops:tops });
-    var us = myUnits(), cs = myFns(), fold = foldsNeeded();
+    var us = myUnits(), cs = myFns(), folded = foldsNeeded();   /* §692: `folded`, since `fold` is the argument */
 
-    if (fold) {
+    if (folded) {
       /* The row does NOT group by company (§15.13). It was built that way and
          taken out in the same version: the SMO and the group CEO see
          everything and already have this fold, so companies added a second
@@ -77371,17 +79356,17 @@ var SYNC = (function () {
       /* §464: on the company the list follows where you ARE when you arrive
          somewhere new — a function opened from a link, or a division's page —
          and is left alone while you are only browsing the switch. */
-      if (atCo && current !== NAVFOLDAT) {
-        NAVFOLDAT = current;
+      if (atCo && at !== followed) {
+        followed = at;
         sides.forEach(function(x){
-          if (x.keys.indexOf(current) !== -1 || (x.co && current === "co:" + x.co)) NAVFOLD = x.fold;
+          if (x.keys.indexOf(at) !== -1 || (x.co && at === "co:" + x.co)) fold = x.fold;
         });
       }
-      if (!sides.some(function(x){ return x.fold === NAVFOLD; }))
-        NAVFOLD = sides.length ? sides[0].fold : "units";
+      if (!sides.some(function(x){ return x.fold === fold; }))
+        fold = sides.length ? sides[0].fold : "units";
       out.push({ multi:atCo, folds: sides.map(function(x){
-        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold, co:x.co || null,
-          here:!!(x.co && current === "co:" + x.co), one:!!x.one };
+        return { fold:x.fold, label:x.label, open:fold === x.fold, co:x.co || null,
+          here:!!(x.co && at === "co:" + x.co), one:!!x.one };
       }) });
       /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
          (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
@@ -77395,7 +79380,7 @@ var SYNC = (function () {
          silently, and it fails looking like the feature was never built. The
          same one-argument helper answers for both now, so a third kind of
          thing added later cannot get this wrong on its own. */
-      (sides.filter(function(x){ return x.fold === NAVFOLD; })[0] || { keys:[] })
+      (sides.filter(function(x){ return x.fold === fold; })[0] || { keys:[] })
         .keys.forEach(function(k){ out.push({ k:k, label:navLabelFor(k) }); });
     } else {
       /* NO SWITCH: every side's destinations, in the same order, on one line.
@@ -77412,7 +79397,7 @@ var SYNC = (function () {
        Anchored right rather than trailing the row: it is the same destination
        wherever you are, and a control that moves as the list beside it grows
        is a control you have to look for. */
-    return out;
+    return { parts: out, fold: fold, followed: followed };
   }
 
 
@@ -78812,9 +80797,9 @@ var SYNC = (function () {
     strip.setAttribute("role", "alertdialog");
     strip.innerHTML = '<div class="lsay"><b>“' + esc(a.title) + '” has changes that aren’t applied:</b> ' +
       esc(a.waiting().join(", ")) + '.</div><div class="lacts">' +
-      '<button type="button" class="askyes" data-leave="go">Apply and continue</button>' +
+      '<button type="button" class="askno" data-leave="stay">Keep editing</button>' +
       '<button type="button" class="askno" data-leave="drop">Discard changes</button>' +
-      '<button type="button" class="askno" data-leave="stay">Keep editing</button></div>';
+      '<button type="button" class="askyes" data-leave="go">Apply and continue</button></div>';
     document.body.appendChild(strip);
     LEAVE = strip;
     var on = function(){ leaveClose(); placeGo(target); leaveModes(); paint(); };
@@ -79422,15 +81407,6 @@ var SYNC = (function () {
        It holds the TARGET rather than a boolean, so it can never open
        somebody else's report. */
     if (def && def.k === "report") REPORTING = current;
-    /* §576: AND WHETHER A RED FIGURE HOLDS THIS PAGE. Worked out ONCE per
-       paint, before the render, because two halves read it — the bar the
-       renderers draw in the "to finish" bar's place, and `noteLockApply()`
-       after the paint, which shuts every other box — and two answers to one
-       question inside one frame is how a bar comes to name a row whose boxes
-       are open (§53.5). */
-    NOTELOCK = (def && typeof noteLockOf === "function" &&
-                (def.k === "report" || def.k === MY_TAB.k))
-      ? noteLockOf(def.k === "report" ? REPORTING : null, def.k === MY_TAB.k) : null;
     var body;
     try {
       body = (current === "group" || current === "setup" || current === "manage")
@@ -79809,10 +81785,6 @@ var SYNC = (function () {
        ones a bound field did not rebuild — a second listener on a survivor
        would step twice on one Enter (§24, §47.2). */
     if (typeof repKeys === "function") repKeys();
-    /* §576: AND WHILE A RED FIGURE HOLDS THE PAGE, every box but its row's
-       shuts — after the marks and the keys, because it reads the same
-       controls they annotate and only switches some of them off. */
-    noteLockApply();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -79853,7 +81825,6 @@ var SYNC = (function () {
     putScrollsIn(document.getElementById("panel"), _keep.boxes);
     if (_keep.y) window.scrollTo(0, _keep.y);
     putFocus(_keep.focus);
-    noteLockFocus(_keep.focus);
     positionRowMenu();
     focusOpenMenu();
     /* ── AND THE DIALOG, IF ONE IS OPEN (§116.6) ─────────────────────
@@ -80377,131 +82348,11 @@ var SYNC = (function () {
      forgets to add to the day a seventh box kind arrives). */
   var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
     "[data-cpct],[data-note],[data-cnote]";
-  /* ── §576: THE LOCK, APPLIED TO WHAT THE PAINT DREW ─────────────────
-     `NOTELOCK` (paint(), from `noteLockOf`) names the rows whose note is
-     owed; every reporting box that answers any OTHER row is switched off
-     here, along with the subject's own cycle note. In ONE place over the
-     same list the walk and the keys read (`REP_BOXES`), never at the eight
-     builders — a box kind added tomorrow is locked by being a box (§104.7).
-
-     `disabled`, not `aria-disabled`: the person must not be able to type, and
-     a shut box that still takes a keystroke is a lock in name only. The hover
-     says why. A locked row's note joins the tab path even where its builder
-     took it out (§528, and a capability's note always), because it is now the
-     one box the page is asking for. */
-  function repBoxRow(el){
-    var d = el.dataset;
-    return d.rep != null ? d.rep : d.crep != null ? d.crep : d.cpick != null ? d.cpick
-         : d.cpct != null ? d.cpct : d.note != null ? d.note : d.cnote;
-  }
-  function noteLockApply(){
-    if (!NOTELOCK) return;
-    var x = NOTELOCK.rows[0];
-    var why = "Write the note on " +
-      (String((x.obj && x.obj.name) || "").trim() || "the red figure") + " first";
-    document.querySelectorAll(REP_BOXES + ",[data-unote]").forEach(function(el){
-      var id = el.dataset.unote != null ? null : repBoxRow(el);
-      if (id != null && NOTELOCK.ids[id]) {
-        if (el.dataset.note != null || el.dataset.cnote != null) {
-          el.classList.add("lockhere");
-          el.removeAttribute("tabindex");
-          /* §576.2: in the wanted note's own words (`noteBox`). A capability's
-             box is always drawn with the quiet "Note, if there is one", which
-             the bar above it contradicts. */
-          if (!el.value) el.placeholder = "Why, and what is being done";
-        }
-        return;
-      }
-      el.disabled = true;
-      el.setAttribute("title", why);
-      /* The figure's box wears its unit beside it; the wrapper is what reads
-         as the box, so it is the wrapper that greys. */
-      (el.closest(".entry") || el).classList.add("lockshut");
-    });
-  }
-  /* The first owed note that is ON THE SCREEN, in the bar's order. */
-  function noteLockNote(){
-    if (!NOTELOCK) return null;
-    var notes = [].slice.call(document.querySelectorAll("[data-note],[data-cnote]"));
-    for (var i = 0; i < NOTELOCK.rows.length; i++) {
-      var id = NOTELOCK.rows[i].noteId || NOTELOCK.rows[i].id;
-      for (var j = 0; j < notes.length; j++) if (repBoxRow(notes[j]) === id) return notes[j];
-    }
-    return null;
-  }
-  /* WHEN THE BOX SOMEBODY WAS IN HAS JUST SHUT, the cursor goes to the note.
-     That is the moment this exists for: a red figure typed and Tab pressed
-     lands in the NEXT row's box, which the commit's paint has just greyed, and
-     the browser drops a disabled box's focus on the body. Only then — a paint
-     that left the focus somewhere live (a rail button, the row's own figure)
-     is somebody doing something else, and the page does not take it away. */
-  /* A reporting box has just committed. Heard in the CAPTURE phase, so it is
-     set before the box's own handler runs the paint that reads it — the
-     focus the paint keeps (`_keep.focus`) is already gone by then on a Tab,
-     because Chromium fires `change` as the focus leaves. A page that merely
-     OPENS with a red row does not move anybody's cursor; typing does. */
-  var NOTELOCK_TYPED = false;
-  document.addEventListener("change", function(e){
-    if (e.target && e.target.matches && e.target.matches(REP_BOXES)) NOTELOCK_TYPED = true;
-  }, true);
-  /* §576.2: AND WHETHER THE COMMIT WAS A KEY. Tab or Enter is somebody
-     moving on through the report; a mouse press is somebody choosing where
-     to go, and that choice is left alone. */
-  var NOTELOCK_KEYED = false;
-  document.addEventListener("keydown", function(e){
-    NOTELOCK_KEYED = e.key === "Tab" || e.key === "Enter";
-  }, true);
-  document.addEventListener("mousedown", function(){ NOTELOCK_KEYED = false; }, true);
-  /* Is this control the locked row's own — its figure or its note? */
-  function noteLockOwn(el){
-    if (!NOTELOCK || !el || !el.matches || !el.matches(REP_BOXES)) return false;
-    var id = repBoxRow(el);
-    return id != null && !!NOTELOCK.ids[id];
-  }
-  function noteLockFocus(kept){
-    var typed = NOTELOCK_TYPED, keyed = NOTELOCK_KEYED;
-    NOTELOCK_TYPED = false;
-    if (!NOTELOCK || !(kept || typed)) return;
-    var go = function(){
-      if (!NOTELOCK) return;
-      var a = document.activeElement;
-      /* §576.2: A TAB FROM A RED FIGURE ENDS IN THE NOTE, wherever the
-         browser's own step put it. The step is taken AFTER the commit's paint
-         and picks the next control it can still reach — on My reporting, with
-         every other line shut, that is Save draft, and the line below left it
-         there: measured, the cursor on Save draft in 2 Tabs of 12, and
-         note-lock.py's own Tab red 1 run in 4. Only a key does this; a press
-         somewhere live is still somebody doing something else. */
-      if (a && a !== document.body && !a.disabled &&
-          !(typed && keyed && !noteLockOwn(a))) return;
-      var n = noteLockNote();
-      if (n) n.focus();
-    };
-    go();
-    /* AND ONCE MORE AFTER THE BROWSER'S OWN STEP. A Tab commits the figure
-       (`change`, whose paint runs inside the keypress) and only THEN moves the
-       focus — to the box it had picked before the paint replaced it, which is
-       detached, so the focus falls on the body after this paint has already
-       returned. Measured on the build before §576 too: Tab out of a figure
-       has always left the cursor nowhere. Queued, it lands in the note. */
-    setTimeout(go, 0);
-  }
-  /* GO TO IT: the place the first owed note is in, opened the way the bar's
-     chips open one (`repGoTo`) — its rail, its capability on the company's
-     page, every band on My reporting — and then the note itself, lit. */
-  function noteGo(){
-    if (!NOTELOCK) return;
-    var x = NOTELOCK.rows[0], pl = x.place || {};
-    if (NOTELOCK.mine) {
-      if (MYLINEF && MYLINEF !== x.target) MYLINEF = "";
-    } else {
-      if (REPORTING === "group" && String(x.subj || "").indexOf("cap:") === 0)
-        TOPCAP = String(x.subj).slice(4);
-      if (pl.rail) RAIL[pl.rail] = pl.code;
-    }
-    paint();
-    setTimeout(function(){ var n = noteLockNote(); if (n) gapLight(n); }, 0);
-  }
+  /* §705: §576's lock lived here — `noteLockApply` shut every reporting box
+     but the red row's after each paint, and `noteLockFocus`/`noteGo` steered
+     the cursor to the owed note. Gone at Islam's word (*"don't stop a person
+     from entering the numbers"*): the owed note is said by the tag `noteBox`
+     draws, and nothing is shut or steered. */
   function repMarkControls(){
     document.querySelectorAll(".repwalk").forEach(function(el){
       el.classList.remove("repwalk");
@@ -80570,8 +82421,6 @@ var SYNC = (function () {
     }, 0);
   }
   function repWalk(){
-    /* §576: and Alt+Enter is the lock's Go to it while it holds. */
-    if (NOTELOCK) { noteGo(); return; }
     var chips = repChips(), i = -1, a;
     for (a = 0; a < chips.length; a++)
       if (chips[a].dataset.rkey === REPWALK_KEY) { i = a; break; }
@@ -80676,9 +82525,6 @@ var SYNC = (function () {
      there is genuinely nothing to point at and nothing is better than a guess
      at which row took its place. */
   function repStep(key, by){
-    /* §576: while a red figure holds the page, the next place is its note. */
-    var owed = noteLockNote();
-    if (owed) { gapLight(owed); return; }
     var els = repTypedBoxes(), i, here = null;
     for (i = 0; i < els.length; i++) if (repKeyOf(els[i]) === key) { here = i; break; }
     if (here == null) return;
@@ -81201,6 +83047,57 @@ var SYNC = (function () {
           : accessImpact(d.askfrom, to, d.askwhat || "this"),
         go: function(){ go(); paint(); askSaved(findCell); } });
     }
+    /* §704: THE LADDER. A press sets how far up every role on the row reads,
+       as the three reach rows of the map — the place, the division, the top,
+       each view or none — and clears §517's half eye, which the part owners'
+       row read as its level only until the row was set. */
+    document.querySelectorAll("[data-lad]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.lad.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], lv = +p[1];
+        if (!row) return;
+        var words = ladderWords();
+        askFirst(b, { title: b.dataset.askwho || "This role",
+          body: lv === 0 && row.floor ? "Will read <b>nothing</b> unless they hold something."
+            : "Will read up to <b>" + esc(words[lv]) + "</b>. What they enter and submit does not change.",
+          go: function(){
+            var R = SMPRules.REACH;
+            row.of.forEach(function(k){
+              var a = (ACCESS[k] = ACCESS[k] || {});
+              a[R.place] = lv >= 1 ? "view" : "none";
+              a[R.div] = lv >= 2 ? "view" : "none";
+              a[R.top] = lv >= 3 ? "view" : "none";
+            });
+            if (row.key === "part") delete GROUP[SMPRules.DIR_SCOPE];
+            paint(); askSaved(function(){ var x = document.querySelector('[data-lad^="' + p[0] + '|"]'); return x && x.closest("td"); });
+          } });
+      });
+    });
+    /* §704: the pen, a switch on the role's own level (`a_pen`, edit or none). */
+    document.querySelectorAll("[data-pen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pen.split("|"), row = SMPRules.ACCESS_ROWS.filter(function(r){ return r.key === p[0]; })[0], on = p[1] === "on";
+        if (!row) return;
+        askFirst(b, { title: b.dataset.askwho || "This role",
+          body: on ? "Will <b>enter and submit</b> what they hold." : "Will <b>read only</b> what they hold, and enter nothing.",
+          go: function(){
+            row.of.forEach(function(k){ (ACCESS[k] = ACCESS[k] || {})[SMPRules.REACH.pen] = on ? "edit" : "none"; });
+            paint(); askSaved(function(){ var x = document.querySelector('[data-pen^="' + p[0] + '|"]'); return x && x.closest("td"); });
+          } });
+      });
+    });
+    /* One person moved a level from their role (person.reach, +1 or -1). */
+    document.querySelectorAll("[data-reachp]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.reachp.split("|"), who = PEOPLE.filter(function(x){ return x.key === p[0]; })[0], mv = +p[1];
+        if (!who) return;
+        askFirst(b, { title: who.name || who.key,
+          body: mv === 0 ? "Will read <b>as their role</b> again." : "Will read <b>one level " + (mv > 0 ? "higher" : "lower") + "</b> than their role. What they enter and submit does not change.",
+          go: function(){ if (mv) who.reach = mv; else delete who.reach; if (!mv && ACC_EXC_PICK === who.key) ACC_EXC_PICK = null; paint(); askSaved(function(){ return document.querySelector(".acex"); }); } });
+      });
+    });
+    document.querySelectorAll("[data-reachpick]").forEach(function(sel){
+      sel.addEventListener("change", function(){ ACC_EXC_PICK = sel.value || null; paint(); });
+    });
     function accessPartCell(){ var x = document.querySelector("[data-dirscope]"); return x && x.closest("td"); }
     document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -81800,18 +83697,37 @@ var SYNC = (function () {
        button only opens and closes the pen. `cycleDraft()`, `cycleEditDirty()`,
        `ceHoldPaint()`, the two `data-ce-*` handlers and the four `input`
        handlers are DELETED rather than left unreachable (§24). */
-    /* §495: THE PLAN PERIOD'S OWN PEN, the cycle pen's shape (§273.4): the
-       pickers write as they are picked, so this only opens and closes. */
-    var ep = document.querySelector("[data-editplan]");
-    if (ep) ep.addEventListener("click", function(){
-      var a = document.activeElement;
-      if (PLANEDIT && a && a.blur) a.blur();
-      PLANEDIT = PLANEDIT ? null : true;
-      paint();
+    /* §693: THE TWO TABS of Setup › Planning & reporting, and the board's
+       filter row. The tab is a mode and repaints; the filter is applied to
+       the rows already drawn, so typing in Find never loses its cursor to a
+       repaint (§219's cousin). */
+    document.querySelectorAll("[data-cyctab]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.getAttribute("data-cyctab");
+        if (k === CYCLETAB) return;
+        var a = document.activeElement;
+        if (a && a.blur) a.blur();
+        CYCLETAB = k;
+        paint();
+      });
     });
+    document.querySelectorAll("[data-bfilter]").forEach(function(b){
+      b.addEventListener("click", function(){
+        BOARDFILTER = b.getAttribute("data-bfilter");
+        document.querySelectorAll("[data-bfilter]").forEach(function(x){
+          var on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on));
+        });
+        applyBoardFilter();
+      });
+    });
+    var bf = document.getElementById("board-find");
+    if (bf) bf.addEventListener("input", function(){ BOARDFIND = bf.value; applyBoardFilter(); });
+    applyBoardFilter();
     var ec = document.querySelector("[data-editcycle]");
     if (ec) ec.addEventListener("click", function(){
-      if (REVIEW.state !== "open") return reopenDialog();
+      /* §693: the pen opens for a closed cycle too — the plan period and the
+         review are its to edit whatever the cycle's state, and Reopen sits
+         where Close does, at the pen's far end (§273.2). */
       /* COMMIT THE BOX BEFORE LEAVING IT (§219). A field writes on `change`,
          which is on blur — a mouse press blurs on the way past, which is the
          almost-always that hides this, and a keyboard press does not. `blur()`
@@ -81827,6 +83743,8 @@ var SYNC = (function () {
       }
     });
 
+    var rc = document.querySelector("[data-reopencycle]");
+    if (rc) rc.addEventListener("click", function(){ reopenDialog(); });
     /* ── REOPENING A CLOSED CYCLE (§273.2, reshaped by §273.3) ──────
        Before this, NOTHING in the product reopened a cycle: `canReport()` and
        `canReportFn()` both open with `REVIEW.state !== "open"` BEFORE any role
@@ -81852,6 +83770,31 @@ var SYNC = (function () {
        stack of label/value rows, two buttons — is what every confirmation in
        this product already wears (§53.5, and `.cbtns`' own note about the
        third copy being the one that gets extracted). */
+    /* §693: THE BOARD'S FILTER, applied to the drawn rows. A band (units,
+       capabilities, functions) whose every row is hidden hides with them,
+       and a board with no row left says so on one line. */
+    function applyBoardFilter(){
+      var rows = document.querySelectorAll("[data-brow]");
+      if (!rows.length) return;
+      var q = String(BOARDFIND || "").trim().toLowerCase();
+      rows.forEach(function(tr){
+        var ok = BOARDFILTER === "all" ||
+          (BOARDFILTER === "notes" ? tr.getAttribute("data-notes") === "1"
+                                   : tr.getAttribute("data-state") === BOARDFILTER);
+        if (ok && q) ok = (tr.getAttribute("data-find") || "").indexOf(q) >= 0;
+        tr.hidden = !ok;
+      });
+      document.querySelectorAll("tr.dxband").forEach(function(b){
+        var n = b.nextElementSibling, any = false;
+        while (n && !n.classList.contains("dxband")) {
+          if (n.hasAttribute("data-brow") && !n.hidden) any = true;
+          n = n.nextElementSibling;
+        }
+        b.hidden = !any;
+      });
+      var e = document.querySelector("[data-board-empty]");
+      if (e) e.hidden = !!document.querySelector("[data-brow]:not([hidden])");
+    }
     function reopenDialog(){
       var last = HISTORY.length ? HISTORY[HISTORY.length - 1] : null;
       var scored = last && last.name === REVIEW.name ? last.group : null;
@@ -83069,6 +85012,18 @@ var SYNC = (function () {
         setDriversOn(this.dataset.drvswitch === "1"); paint();
       });
     });
+    /* §687: where a reader's seat lands (Roles & access). The window is the
+       absence; the workbench is written on the client's structure (§50.6). */
+    document.querySelectorAll("[data-readers]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (this.dataset.readers === "workbench") structWritable().readers = "workbench";
+        else {
+          var st = GROUP[SMPRules.STRUCTURE];
+          if (st && typeof st === "object") { delete st.readers; if (!Object.keys(st).length) delete GROUP[SMPRules.STRUCTURE]; }
+        }
+        fieldSaved(); paint();
+      });
+    });
     var as = document.getElementById("addseason");
     if (as) as.addEventListener("click", function(){
       if (!Array.isArray(GROUP[SMPRules.SEASONS])) GROUP[SMPRules.SEASONS] = [];
@@ -84040,6 +85995,21 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* ── REPORTS TO (§655) ────────────────────────────────────────────
+       Through setReportsTo(), the one door that writes it, and the same
+       grant every other field of the register asks. It refuses the person
+       themselves and anybody under them — the picker never offers either,
+       so a refusal here is a stale list, and the repaint draws the right
+       one. Nothing about roles: who somebody answers to grants nothing. */
+    R.querySelectorAll("[data-preports]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        if (grant("c_people") !== "edit") return;
+        var p = personBy(sel.dataset.preports);
+        if (!p) return;
+        setReportsTo(p, sel.value || null);
+        paint();
+      });
+    });
     R.querySelectorAll("[data-pat]").forEach(function(sel){
       sel.addEventListener("change", function(){
         if (grant("c_people") !== "edit") return;
@@ -84976,7 +86946,7 @@ var SYNC = (function () {
               'this test copy goes for good. Messages that went to the business ' +
               'are never removed.</span></div>' +
             '<div class="cbtns"><button data-delno="1">Cancel</button>' +
-            '<button class="danger" data-delyes="1">Yes, remove it</button></div>' +
+            '<button class="danger" data-delyes="1">Remove the copy</button></div>' +
           '</div>');
         var box = document.getElementById("modal-b");
         if (!box) return;
@@ -85117,7 +87087,7 @@ var SYNC = (function () {
           '<div class="kv"><span class="k">No undo</span><span>A message that has ' +
             'gone cannot be recalled.</span></div>' +
           '<div class="cbtns"><button data-sendno="1">Cancel</button>' +
-          '<button class="danger" data-sendyes="1">Yes, send it</button></div>' +
+          '<button class="danger" data-sendyes="1">Send it</button></div>' +
         '</div>');
       var box = document.getElementById("modal-b");
       if (box) {
@@ -86115,11 +88085,6 @@ var SYNC = (function () {
       }
       if (ev.target.closest("[data-repnext]")) repWalk();
     });
-    /* §576: the lock's own bar, drawn in that bar's place while a red figure
-       holds the page — one button, and it goes to the note that is owed. */
-    document.querySelectorAll("[data-notego]").forEach(function(b){
-      b.addEventListener("click", function(){ noteGo(); });
-    });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never
        rewritten in place), and never double-bound onto the bar's own. */
@@ -86461,20 +88426,26 @@ var SYNC = (function () {
         paint();
       });
     });
-    document.querySelectorAll("[data-clauseadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var t = b.dataset.clauseadd;
-        /* §212: a function's page is gated on the FUNCTION's key. Gating an
-           `fn:` target on `u_found` is §211's fault exactly, and here it fails
-           CLOSED — the button renders and the click returns silently. */
-        var tr = boxRef(t), isCo = tr.kind === "mid";
-        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
-        if (!o || !Array.isArray(o.clauses)) return;
-        o.clauses.push(["", ""]);
+    /* §685: WHO WE ARE IS ONE BOX — its lines are read back on blur and
+       written over the stored ones in place, so a unit's line keeps its row
+       and is renumbered as Add used to (§96). */
+    document.querySelectorAll("[data-clausebox]").forEach(function(box){
+      var t = box.dataset.clausebox;
+      /* §212: a function's page is gated on the FUNCTION's key. Gating an
+         `fn:` target on `u_found` is §211's fault exactly, and here it fails
+         CLOSED — the box is drawn and cannot be typed in. */
+      var tr = boxRef(t), isCo = tr.kind === "mid";
+      var o = mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)
+        ? (t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t)) : null;
+      if (!o || !Array.isArray(o.clauses)) { box.contentEditable = "false"; return; }
+      CLAUSEBOX.wire(box, function(rows){
+        rows.forEach(function(l, i){
+          if (o.clauses[i]) { o.clauses[i][0] = l[0]; o.clauses[i][1] = l[1]; }
+          else o.clauses.push([l[0], l[1]]);
+        });
+        o.clauses.length = rows.length;
         if (o.ukey) renumberUnit(o);
-        fieldSaved(); paint();
+        fieldSaved();
       });
     });
     /* §478: a unit's Core Values — add and remove, re-asked on the click
@@ -86554,20 +88525,6 @@ var SYNC = (function () {
         if (!how) return;
         o.values.splice(i, 1);
         unitValuesTouch(o, how);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-clauserm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        var tr = boxRef(t), isCo = tr.kind === "mid";
-        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
-        if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
-        if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
-            rmAsk(b, "clauserm", b.dataset.clauserm, "Remove this line?")) return;
-        o.clauses.splice(i, 1);
-        if (o.ukey) renumberUnit(o);
         fieldSaved(); paint();
       });
     });
@@ -87696,6 +89653,10 @@ var SYNC = (function () {
        to their full name (§93.8). Written through setKnownName so it is deleted
        rather than stored when it matches the guess (§50.6). */
     if (NEWDRAFT.known) setKnownName(made, NEWDRAFT.known);
+    /* And who they answer to (§655), through the one setter — the draft held
+       a key the picker offered, and a pick the Add press dropped would be
+       §96's inert editor on the one form that cannot be reopened. */
+    if (NEWDRAFT.reportsTo) setReportsTo(made, NEWDRAFT.reportsTo);
     newPersonReset();
     newDraftEnd();
     PDLG = null;
@@ -89071,6 +91032,9 @@ var SYNC = (function () {
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
+  /* §676: the reading window's door and its own controls, chrome that exists
+     before any page is drawn, like the theme's. */
+  READING.wire();
   /* §539: the key and the "?" beside Light and Dark. Wired here beside the
      theme because both are chrome that exists before any page is drawn. */
   KEYSHEET.wire();
@@ -89181,6 +91145,19 @@ var SYNC = (function () {
        `null` leaves the page exactly where it is rather than reading the
        word as a destination. */
     if (seg.length === 1 && seg[0] === LIB_TAB_KEY) return null;
+    /* §689: THE READING WINDOW'S OWN ADDRESS — `read`, then the subject (a
+       unit's key, or none for the company), then the tab's word. The place
+       remembered under it is the subject's own page, so Exit lands there;
+       and it is a deep address, a page somebody asked for by name. */
+    if (seg[0] === "read") {
+      /* §692: a supporting function or a division as the subject —
+         /read/fn/<key>, /read/co/<key> — spelt as the places' own are */
+      var rt = "group", ti = 2;
+      if ((seg[1] === "fn" || seg[1] === "co") && seg[2]) { rt = seg[1] + ":" + seg[2]; ti = 3; }
+      else if (seg[1] && seg[1] !== "group") rt = seg[1];
+      var rk = kindOf(rt), rs = rk === "unit" ? "strategy" : rk === "fn" ? "fnstrat" : null;
+      return { d: rt, s: rs, c: null, read: { t: rt, tab: seg[ti] || null } };
+    }
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
     else if (seg[0] === "co" && seg[1]) { d = "co:" + seg[1]; i = 2; }
     else if (seg[0] === "tour") { return { tour: true }; }
@@ -89574,8 +91551,32 @@ var SYNC = (function () {
   } catch (e) { /* a store that refuses: the shell opens where it would have */ }
   /* ── after every paint: the place is the address ── */
   var last = null;
+  /* §689: the reading window's address, beside the places'. */
+  function readAddressOf(t, tab) {
+    var sub = !t || t === "group" ? (tab ? "/group" : "")
+      : /^(fn|co):/.test(t) ? "/" + t.slice(0, 2) + "/" + t.slice(3) : "/" + t;   /* §692 */
+    return "/" + SLUG + (MODULE ? "/" + MODULE : "") + "/read" + sub + (tab ? "/" + tab : "");
+  }
+  var readOpened = false;
+  function readingOpen() { return typeof READING !== "undefined" && READING.isOpen && READING.isOpen(); }
+  document.addEventListener("smp:reading", function (ev) {
+    var st = (ev instanceof CustomEvent && ev.detail) || {};
+    if (st.open) {
+      var a = readAddressOf(st.target, st.tab);
+      if (a === last) return;
+      var was = last; last = a;
+      try {
+        if (was !== null && !/\/read(\/|$)/.test(was)) history.pushState({ read: { t: st.target, tab: st.tab } }, "", a);
+        else history.replaceState({ read: { t: st.target, tab: st.tab } }, "", a);
+      } catch (e) {}
+    } else {
+      /* closed: the place's own address again, in place of the window's */
+      last = null; sync(false);
+    }
+  });
   function sync(push) {
     if (typeof current === "undefined" || !current) return;
+    if (readingOpen()) return;   /* §689: the window's address stands while it is up */
     var d = current, s = currentSub || null, c = (s && typeof CURSEC !== "undefined" && CURSEC[s]) || null;
     var a = addressOf(d, s, c);
     if (a === last) return;
@@ -89631,10 +91632,19 @@ var SYNC = (function () {
       try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
       try { mountProcessesLink(); } catch (e) {}
+      /* §689: arrived at the window's own address — opened once, after the
+         first true paint, on the subject and tab the address names */
+      if (here && here.read && !readOpened && typeof READING !== "undefined") {
+        readOpened = true;
+        try { READING.open(here.read.t, here.read.tab); } catch (e) {}
+      }
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
     var st = ev.state || placeOf(restOf(location.pathname));
+    /* §689: a history entry of the window's opens it there; one of a place closes it */
+    if (st && st.read && typeof READING !== "undefined") { last = location.pathname; READING.open(st.read.t, st.read.tab); return; }
+    if (readingOpen()) { last = location.pathname; try { READING.close(); } catch (e) {} }
     if (!st || !st.d || typeof current === "undefined") return;
     last = location.pathname;
     current = st.d; currentSub = st.s || null;

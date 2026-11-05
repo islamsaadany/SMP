@@ -75,6 +75,7 @@ def js(pg, expr, arg=None):
 BOARD = """() => {
   const box = document.createElement("div");
   box.id = "boardprobe";
+  CYCLETAB = 'board';  /* §693: the board is the page's second tab */
   box.innerHTML = renderCycle();
   document.body.appendChild(box);
   const t = [...box.querySelectorAll("table")].find(x =>

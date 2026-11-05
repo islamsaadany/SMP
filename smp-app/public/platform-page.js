@@ -1403,12 +1403,13 @@
       var row = function (k, v) { if (!v) return; dl.appendChild(el("dt", null, k)); var dd = el("dd"); if (typeof v === "string") dd.textContent = v; else dd.appendChild(v); dl.appendChild(dd); };
       row("Type", typeTag(c.kind));
       row("When", spanWord(c.started, c.ended));
+      row("Planned man-days", c.plannedDays != null ? String(c.plannedDays) : "");
       row("Lead", c.lead ? c.lead.name : "");
       row("Team", c.ourTeam.map(function (p) { return p.name; }).join(", "));
       if (!c.hidden && c.state !== "running") row("Deliverables", String(c.deliverables.length));
       row("Learnings", String(c.insightList.length));
       g.appendChild(dl);
-      g.appendChild(el("p", "src", "Type, months, lead and team come from the Clients page."));
+      g.appendChild(el("p", "src", "Type, months, man-days, lead and team come from the Clients page."));
       var stl = el("p", "trst");
       stl.appendChild(el("span", "st " + st[1], st[0] + (c.state === "done" && c.doneAt ? " · " + whenWord(c.doneAt) : "")));
       if (c.writer && c.state !== "running") stl.appendChild(el("span", "muted", (c.state === "done" ? "by " : "writing: ") + c.writer.name));
@@ -1689,6 +1690,7 @@
       "  Client:    " + c.client.name + (c.client.industry ? " (" + c.client.industry + ")" : "") + "\n" +
       "  The work:  " + c.name + " (" + (TYPE_WORD[c.kind] || "Planning") + ")\n" +
       (spanLong(c.started, c.ended) ? "  When:      " + spanLong(c.started, c.ended) + "\n" : "") +
+      (c.plannedDays != null ? "  Man-days:  " + c.plannedDays + " agreed with the client\n" : "") +
       (c.lead ? "  Lead:      " + c.lead.name + "\n" : "") +
       (team ? "  Our team:  " + team + "\n" : "") + "\n" +
       "Interview me. Ask ONE question at a time and wait for my answer before asking the next one. " +
@@ -1739,6 +1741,7 @@
     page.appendChild(row);
     var ctx = el("div", "trctxs");
     [["Client", c.client.name], ["Industry", c.client.industry], ["When", spanWord(c.started, c.ended)],
+     ["Man-days", c.plannedDays != null ? String(c.plannedDays) : ""],
      ["Lead", c.lead ? c.lead.name : ""], ["Team", c.ourTeam.map(function (p) { return p.name; }).join(", ")]].forEach(function (p) {
       if (!p[1]) return;
       var d = el("span"); d.appendChild(el("i", null, p[0] + " ")); d.appendChild(el("b", null, p[1])); ctx.appendChild(d);
@@ -2510,12 +2513,100 @@
     sec.querySelector(".mwsh .meta").textContent = (all - done) + " open" + (done ? " · " + done + " done" : "");
   }
 
-  /* ONE ROW, from the server's row and nothing else: the tick, the action,
-     its client, its week, its status, and the way into that client's
-     Tracker. `act(r, status, via, row)` is the press. */
+  /* ONE ROW, from the server's row and nothing else (§709, the Tracker's
+     quiet row): the tick; the name, which opens the task HERE; under it the
+     client (when the list is by date) and the latest update; the week only
+     when it is the exception; the status as a dot and its word; ⋯. `act(r,
+     status, via, row)` is the tick's and the status's press; the rest is
+     MW's, set by drawMyWork. */
+  var MW = { open: null, tab: {}, detail: {}, loading: {}, menu: null, sub: null, renaming: null, pedit: null, pdel: null,
+    write: null, redraw: null, said: null, prev: {}, sadd: {}, srename: null, draft: {}, auto: {}, focus: null };
+  var MW_DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>';
+  var MW_I = {
+    lines: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    pen: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+    cal: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    hand: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    out: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 3h4v4M13 3 7.5 8.5M12 9.5V13H3V4h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    bin: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
+  };
+  function mwKey(r) { return r.client + ":" + r.id; }
+  /* §733 LINKS IN A NOTE READ SHORT: each http(s) address drawn as a small
+     tag named after its site, opening in a new tab, the full address on
+     hover; the words stored as typed. The Tracker's rule is lib/links.ts —
+     the same site names, kept here as the console draws its own rows. */
+  function mwSite(href) {
+    var u; try { u = new URL(href); } catch (e) { return "Link"; }
+    var h = u.hostname.toLowerCase().replace(/^www\./, ""), p = u.pathname;
+    if (h === "docs.google.com") return p.indexOf("/spreadsheets") === 0 ? "Google Sheets" : p.indexOf("/presentation") === 0 ? "Google Slides" : p.indexOf("/forms") === 0 ? "Google Forms" : "Google Docs";
+    if (h === "drive.google.com") return "Google Drive";
+    if (/\.sharepoint\.com$/.test(h)) return "SharePoint";
+    if (h === "onedrive.live.com" || h === "1drv.ms") return "OneDrive";
+    if (h === "teams.microsoft.com") return "Teams";
+    if (h === "miro.com") return "Miro";
+    if (h === "notion.so" || /\.notion\.site$/.test(h)) return "Notion";
+    return h || "Link";
+  }
+  var MW_LINK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  function mwLinks(host, text) {
+    var s = String(text || ""), re = /https?:\/\/[^\s<>"']+/g, m, at = 0;
+    while ((m = re.exec(s))) {
+      var url = m[0], tr = url.match(/[.,;:!?)\]]+$/);
+      if (tr) url = url.slice(0, -tr[0].length);
+      if (m.index > at) host.appendChild(document.createTextNode(s.slice(at, m.index)));
+      var a = el("a", "lktag");
+      a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = url;
+      a.innerHTML = MW_LINK;
+      a.appendChild(document.createTextNode(mwSite(url)));
+      a.addEventListener("click", function (e) { e.stopPropagation(); });
+      host.appendChild(a);
+      at = m.index + url.length;
+      re.lastIndex = at;
+    }
+    if (at < s.length) host.appendChild(document.createTextNode(s.slice(at)));
+    return host;
+  }
+  /* §720: View in Tracker shows the task in its Tracker, lit — it does not open it */
+  function mwTrackerHref(r) { return "/" + r.client + "/tracker?view=all&show=" + encodeURIComponent(r.id); }
+  /* the opened task's details, read once and again after every write */
+  function mwLoad(r) {
+    var key = mwKey(r);
+    if (MW.detail[key] || MW.loading[key]) return;
+    MW.loading[key] = true;
+    post({ action: "workDetail", client: r.client, id: r.id }).then(function (j) {
+      delete MW.loading[key];
+      MW.detail[key] = j.ok ? j.detail : { error: j.error || "Could not read this task." };
+      if (MW.redraw) MW.redraw();
+    }).catch(function () { delete MW.loading[key]; MW.detail[key] = { error: "Could not reach the server." }; if (MW.redraw) MW.redraw(); });
+  }
+  /* §728 OPENS AT ONCE: once a list is drawn, every task's details are read
+     in one call, in the background; a press on a name finds them already
+     here. A task already read (or being read) is not asked for again. */
+  function mwPrefetch(list) {
+    var want = (list || []).filter(function (r) { var k = mwKey(r); return r && r.id && !MW.detail[k] && !MW.loading[k]; });
+    if (!want.length) return;
+    want.forEach(function (r) { MW.loading[mwKey(r)] = true; });
+    post({ action: "workDetails", items: want.map(function (r) { return { client: r.client, id: r.id }; }) }).then(function (j) {
+      var got = (j && j.ok && j.details) || [];
+      var redraw = false;
+      want.forEach(function (r, i) {
+        var k = mwKey(r);
+        delete MW.loading[k];
+        if (got[i] && !got[i].error) { MW.detail[k] = got[i]; if (MW.open === k) redraw = true; }
+      });
+      if (redraw && MW.redraw) MW.redraw();
+    }).catch(function () { want.forEach(function (r) { delete MW.loading[mwKey(r)]; }); });
+  }
+  function mwToggle(r) {
+    var key = mwKey(r);
+    MW.open = MW.open === key ? null : key;
+    MW.menu = null; MW.sub = null;
+    if (MW.open) mwLoad(r);
+    MW.redraw();
+  }
   function mwRow(r, statuses, act) {
-    var done = r.status === "done";
-    var row = el("div", "mwrow" + (done ? " done" : "") + (r.late ? " late" : ""));
+    var done = r.status === "done", key = mwKey(r), open = MW.open === key;
+    var row = el("div", "mwrow" + (done ? " done" : "") + (r.late ? " late" : "") + (open ? " on" : ""));
     row.setAttribute("data-client", r.client);
     row.setAttribute("data-id", r.id);
     row.setAttribute("data-status", r.status);
@@ -2531,13 +2622,57 @@
     if (r.canChange) tick.addEventListener("click", function () { act(r, done ? (r.was || "not_started") : "done", "tick", row); });
     else tick.disabled = true;
     row.appendChild(tick);
-    row.appendChild(el("span", "t", r.title || "(untitled)"));
-    var cl = el("span", "mwcl");
-    cl.title = r.clientName;
-    cl.appendChild(el("i", null, r.clientName));
-    row.appendChild(cl);
-    row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.when));
+    var main = el("div", "mwmain");
+    if (MW.renaming === key) {
+      var box = el("span", "t"), inp = el("input");
+      inp.value = r.title || "";
+      inp.setAttribute("aria-label", "Rename the action");
+      inp.maxLength = 200;
+      var settled = false;
+      var finish = function (keep) {
+        if (settled) return; settled = true;
+        var v = inp.value.replace(/\s+/g, " ").trim();
+        MW.renaming = null;
+        if (keep && v && v !== r.title) MW.write(r, "rename", { title: v }); else MW.redraw();
+      };
+      inp.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); finish(true); }
+        else if (e.key === "Escape") { e.preventDefault(); finish(false); }
+      });
+      inp.addEventListener("blur", function () { finish(true); });
+      box.appendChild(inp);
+      main.appendChild(box);
+      setTimeout(function () { inp.focus(); inp.select(); }, 0);
+    } else {
+      var t = el("button", "t", r.title || "(untitled)");
+      t.type = "button";
+      t.title = r.title || "";
+      t.setAttribute("aria-expanded", String(open));
+      t.addEventListener("click", function () { mwToggle(r); });
+      main.appendChild(t);
+    }
+    var bits = [];
+    if (TSORT.by !== "client") { var cl = el("span", "mwcl", r.clientName); bits.push(cl); }
+    /* §745: the task's steps, as on the Tracker's row — a thin bar and "2 of 5 steps" */
+    if (r.steps && r.steps.n) {
+      var sc = el("span", "stc");
+      sc.title = r.steps.d + " of " + r.steps.n + " steps ticked";
+      var bar = el("i"), fill = el("b"); fill.style.width = Math.round(100 * r.steps.d / r.steps.n) + "%"; bar.appendChild(fill);
+      sc.appendChild(bar); sc.appendChild(document.createTextNode(r.steps.d + " of " + r.steps.n + " steps"));
+      bits.push(sc);
+    }
+    /* §728 THE TRACKER'S QUIET LINE (§721): the note's week said only when it
+       is not this week, so "Last week" still flags a task nobody has touched */
+    if (r.last) { var up = el("span", "up"); if (!r.last.now) { up.appendChild(el("b", null, r.last.week)); up.appendChild(document.createTextNode(" · ")); } mwLinks(up, r.last.body); bits.push(up); }
+    if (bits.length) {
+      var meta = el("div", "mwmeta");
+      bits.forEach(function (b, i) { if (i) meta.appendChild(el("span", "sep")); meta.appendChild(b); });
+      main.appendChild(meta);
+    }
+    row.appendChild(main);
+    row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.cell != null ? r.cell : r.when));
     var st = el("span", "mwst" + (r.status === "in_progress" ? " prog" : done ? " done" : "") + (r.canChange ? " live" : ""));
+    st.appendChild(el("span", "mwdot"));
     if (r.canChange) {
       var sel = el("select");
       sel.setAttribute("aria-label", "Status: " + (r.title || ""));
@@ -2553,18 +2688,398 @@
       st.appendChild(el("span", null, r.statusWord));
     }
     row.appendChild(st);
-    var link = el("a", "mwgo");
-    link.href = "/" + r.client + "/tracker";
-    link.title = "Open " + r.clientName + "’s Tracker";
-    link.setAttribute("aria-label", link.title);
-    link.innerHTML = MW_GO;
-    row.appendChild(link);
-    row.addEventListener("click", function (e) {
-      if (e.target.closest(".mwtick, .mwst.live, .mwgo")) return;
-      location.assign("/" + r.client + "/tracker");
-    });
+    var mn = el("span", "mwmenu");
+    var kb = el("button", "mwkb");
+    kb.type = "button";
+    kb.innerHTML = MW_DOTS;
+    kb.setAttribute("aria-haspopup", "menu");
+    kb.setAttribute("aria-expanded", String(MW.menu === key));
+    kb.setAttribute("aria-label", "More for " + (r.title || "this task"));
+    kb.addEventListener("click", function () { MW.menu = MW.menu === key ? null : key; MW.sub = null; MW.redraw(); });
+    mn.appendChild(kb);
+    if (MW.menu === key) mn.appendChild(mwMenu(r));
+    row.appendChild(mn);
+    if (open) row.appendChild(mwDetail(r));
     return row;
   }
+  /* THE ⋯ (§709): Details and progress · Rename · Change the week · Hand to
+     someone else · Open in the client's Tracker · Delete — the last behind
+     its question, the week and the people read with the task's details */
+  function mwMenu(r) {
+    /* §713 (Islam: "change the week and hand to someone should be on the top
+       of the list and remove details and progress ... rename come third",
+       and "the sub lists open on hovering"): Change the week and Hand to
+       someone else first, each opening a small list beside the menu — on
+       hover, and on a press for a hand with no hover; the hand-over list is
+       the rest of the team, the owner left out. Then Rename, Open in its
+       Tracker, Delete. The lists are read with the task's details. */
+    var key = mwKey(r), pop = el("div", "mwpop"), d = MW.detail[key];
+    pop.setAttribute("role", "menu");
+    var item = function (icon, word, fn, cls, into) {
+      var b = el("button", cls || null);
+      b.type = "button";
+      b.setAttribute("role", "menuitem");
+      b.innerHTML = icon || "";
+      b.appendChild(document.createTextNode(word));
+      b.addEventListener("click", function (e) { e.stopPropagation(); fn(); });
+      (into || pop).appendChild(b);
+      return b;
+    };
+    if (MW.sub === "del") {
+      var sure = el("div", "sure");
+      sure.appendChild(document.createTextNode("Delete this action from " + r.clientName + "’s Tracker?"));
+      var two = el("div");
+      var yes = el("button", "danger", "Yes, delete it"); yes.type = "button";
+      yes.addEventListener("click", function (e) { e.stopPropagation(); MW.write(r, "delete", {}); });
+      var no2 = el("button", null, "Keep it"); no2.type = "button";
+      no2.addEventListener("click", function (e) { e.stopPropagation(); MW.sub = null; MW.redraw(); });
+      two.appendChild(yes); two.appendChild(no2); sure.appendChild(two); pop.appendChild(sure);
+      return pop;
+    }
+    if (r.canChange) {
+      mwLoad(r);
+      var sub = function (which, icon, word, fill) {
+        var w = el("div", "mwsubw" + (MW.sub === which ? " on" : ""));
+        var b = item(icon, word, function () { MW.sub = MW.sub === which ? null : which; MW.redraw(); }, "mwsubb", w);
+        b.setAttribute("aria-haspopup", "true");
+        b.appendChild(el("span", "chev", "›"));
+        var side = el("div", "mwside");
+        side.setAttribute("role", "listbox");
+        if (!d || d.error) side.appendChild(el("p", "wait", d && d.error ? d.error : "Reading…"));
+        else fill(side);
+        w.appendChild(side);
+        pop.appendChild(w);
+      };
+      if (r.status !== "done") sub("week", MW_I.cal, "Week", function (side) {
+        side.appendChild(el("div", "h", "Move to"));
+        d.weeks.forEach(function (wk) {
+          var b = item("", wk.word, function () { MW.write(r, "due", { due: wk.day }); }, wk.on ? "on" : null, side);
+          b.appendChild(el("small", null, wk.days));
+        });
+      });
+      sub("hand", MW_I.hand, "Owner", function (side) {
+        side.appendChild(el("div", "h", "New owner"));
+        var rest = d.team.filter(function (p) { return !p.owner; });
+        if (!rest.length) side.appendChild(el("p", "wait", "Nobody else holds a seat on this client."));
+        rest.forEach(function (p) {
+          var b = item("", p.name, function () { MW.write(r, "owner", { ownerKey: p.key }); }, null, side);
+          if (p.me) b.appendChild(el("small", null, "you"));
+        });
+      });
+    }
+    var go = el("a");
+    go.href = mwTrackerHref(r);
+    go.setAttribute("role", "menuitem");
+    go.innerHTML = MW_I.out;
+    /* §716 (Islam: "it's taking 2 lines … open the tracker in a simpler way"):
+       "Open in Tracker" — the client's name is already on the row; the full
+       name rides as the tooltip. */
+    go.appendChild(document.createTextNode("View in Tracker"));
+    go.title = "View in " + r.clientName + "’s Tracker";
+    pop.appendChild(go);
+    if (r.canChange) {
+      /* §718 (Islam: "make open in tracker before rename so rename becomes
+         the last in all lists"): Rename last before Delete, as on the Tracker. */
+      item(MW_I.pen, "Rename", function () { MW.renaming = key; MW.menu = null; MW.redraw(); });
+      pop.appendChild(el("hr"));
+      item(MW_I.bin, "Delete", function () { MW.sub = "del"; MW.redraw(); }, "danger");
+    }
+    return pop;
+  }
+  /* THE OPENED TASK (§709, the Tracker's option D): Progress — the box with
+     Add beside it and the entries on a timeline; Description — text, written
+     by clicking into it and saved on leaving; History; and Open in the
+     client's Tracker at the end of the tabs, the press this row used to be. */
+  /* ── STEPS IN MY TASKS' OPENED TASK (§747) ────────────────────────
+     Islam, 2026-11-04: "simple but consistent" — the Tracker's opened task,
+     line for line: a task without steps shows one small "+ Add steps" (grey
+     words, a blue +); pressed, the Steps title and the add line come out
+     (Enter adds and keeps it open; Escape, or leaving it empty, shuts it).
+     With steps: the title and its count, the list, "+ Add a step" under it.
+     Whoever may change the task plans them here as in the Tracker — tick,
+     rename (press the words), a week, ↑ ↓ ×; a tick writes "Done: <step>"
+     into this week's box, saved only with it. */
+  function mwStepWrite(r, op, extra, then) {
+    MW.focus = then || null;
+    MW.write(r, op, extra);
+  }
+  function mwTickToBox(key, name, on) {
+    var a = MW.auto[key] || (MW.auto[key] = { names: [], edited: false });
+    var cur = MW.draft[key] || "";
+    if (on) {
+      if (a.names.indexOf(name) < 0) a.names.push(name);
+      var add = "Done: " + name;
+      MW.draft[key] = cur ? (cur.indexOf(add) >= 0 ? cur : cur + "; " + add) : add;
+    } else {
+      a.names = a.names.filter(function (n) { return n !== name; });
+      if (!a.edited) MW.draft[key] = cur.split("; ").filter(function (p) { return p !== "Done: " + name; }).join("; ");
+    }
+  }
+  function mwSteps(r, d, key) {
+    /* §748: Home is for quick updates and adding tasks — no steps in its
+       opened task (the row keeps its count); with steps the add line stays
+       open under them, as in the Tracker */
+    if (TAB === "home") return null;
+    var all = d.steps || [], live = !!d.canChange, open = !!MW.sadd[key] || all.length > 0;
+    if (!all.length && !live) return null;
+    var sec = el("div", "mwsteps");
+    sec.setAttribute("data-steps", "");
+    if (all.length || open) {
+      var h = el("div", "mwssh", "Steps");
+      if (all.length) h.appendChild(el("span", "c", all.filter(function (x) { return x.done; }).length + " of " + all.length));
+      sec.appendChild(h);
+    }
+    if (all.length) {
+      var ul = el("ul", "mwsl");
+      all.forEach(function (st, i) {
+        var li = el("li", "mwsline" + (st.done ? " done" : ""));
+        li.setAttribute("data-sid", st.id);
+        var cb = el("button", "mwscb", st.done ? "✓" : "");
+        cb.type = "button";
+        cb.setAttribute("aria-pressed", String(st.done));
+        cb.setAttribute("aria-label", (st.done ? "Untick: " : "Tick: ") + st.title);
+        if (!live) cb.disabled = true;
+        cb.addEventListener("click", function () {
+          mwTickToBox(key, st.title, !st.done);
+          mwStepWrite(r, "step-tick", { stepId: st.id, done: !st.done }, d.canWrite ? "box" : null);
+        });
+        li.appendChild(cb);
+        if (MW.srename === st.id) {
+          var ri = el("input", "mwsren");
+          ri.value = st.title; ri.maxLength = 300; ri.setAttribute("aria-label", "Rename the step");
+          var done2 = false, fin = function (keep) {
+            if (done2) return; done2 = true; MW.srename = null;
+            var v = ri.value.replace(/\s+/g, " ").trim();
+            if (keep && v && v !== st.title) mwStepWrite(r, "step-rename", { stepId: st.id, title: v }); else MW.redraw();
+          };
+          ri.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") { e.preventDefault(); fin(true); }
+            else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); fin(false); }
+          });
+          ri.addEventListener("blur", function () { fin(true); });
+          li.appendChild(ri);
+          setTimeout(function () { ri.focus(); ri.select(); }, 0);
+        } else {
+          var nm = el("span", "mwsnm", st.title);
+          if (live) {
+            nm.setAttribute("role", "button"); nm.tabIndex = 0; nm.title = "Press to rename";
+            var ren = function () { MW.srename = st.id; MW.redraw(); };
+            nm.addEventListener("click", ren);
+            nm.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ren(); } });
+          }
+          li.appendChild(nm);
+        }
+        if (live) {
+          var wk = el("select", "mwswk" + (st.due ? " set" : "") + (st.late ? " late" : ""));
+          wk.setAttribute("aria-label", "Week of the step");
+          var o0 = el("option", null, st.due ? "No week" : "+ week"); o0.value = ""; wk.appendChild(o0);
+          var hit = false;
+          (d.stepWeeks || []).forEach(function (w) { var o = el("option", null, w.word + " · " + w.days); o.value = w.day; if (st.due === w.day) { o.selected = true; hit = true; } wk.appendChild(o); });
+          if (st.due && !hit) { var ox = el("option", null, st.week); ox.value = st.due; ox.selected = true; wk.appendChild(ox); }
+          wk.addEventListener("change", function () { mwStepWrite(r, "step-due", { stepId: st.id, due: wk.value }); });
+          li.appendChild(wk);
+          var tl = el("span", "mwstools");
+          [["↑", "Move up", -1], ["↓", "Move down", 1]].forEach(function (x) {
+            var b = el("button", null, x[0]); b.type = "button"; b.setAttribute("aria-label", x[1]);
+            if ((x[2] < 0 && i === 0) || (x[2] > 0 && i === all.length - 1)) b.disabled = true;
+            b.addEventListener("click", function () { mwStepWrite(r, "step-move", { stepId: st.id, dir: x[2] }); });
+            tl.appendChild(b);
+          });
+          var del = el("button", "danger", "×"); del.type = "button"; del.setAttribute("aria-label", "Remove the step");
+          del.addEventListener("click", function () { mwStepWrite(r, "step-delete", { stepId: st.id }); });
+          tl.appendChild(del);
+          li.appendChild(tl);
+        } else if (st.due) li.appendChild(el("span", "mwswk set" + (st.late ? " late" : ""), st.week));
+        ul.appendChild(li);
+      });
+      sec.appendChild(ul);
+    }
+    if (live) {
+      if (open) {
+        var line = el("div", "mwsadd"), ni = el("input");
+        line.appendChild(el("span", null, "+"));
+        ni.placeholder = "Add a step and press Enter"; ni.maxLength = 300;
+        ni.setAttribute("aria-label", "Add a step to " + (r.title || "this task"));
+        ni.setAttribute("data-snew", "");
+        ni.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            var v = ni.value.replace(/\s+/g, " ").trim();
+            if (!v || ni.disabled) return;
+            ni.disabled = true;
+            mwStepWrite(r, "step-add", { title: v }, "add");
+          } else if (e.key === "Escape") {
+            e.preventDefault(); e.stopPropagation();
+            if (all.length) { ni.value = ""; return; }
+            MW.sadd[key] = false; MW.redraw();
+          }
+        });
+        ni.addEventListener("blur", function () {
+          if (all.length) return;
+          setTimeout(function () { if (!ni.isConnected || ni.disabled || ni.value.trim() || document.activeElement === ni) return; MW.sadd[key] = false; MW.redraw(); }, 150);
+        });
+        line.appendChild(ni);
+        sec.appendChild(line);
+      } else {
+        var lk = el("button", "mwslink");
+        lk.type = "button";
+        lk.setAttribute("data-sadd", "");
+        lk.appendChild(el("b", null, "+"));
+        lk.appendChild(document.createTextNode(" Add steps"));
+        lk.addEventListener("click", function () { MW.sadd[key] = true; MW.focus = "add"; MW.redraw(); });
+        sec.appendChild(lk);
+      }
+    }
+    /* where the cursor goes once the list is drawn again */
+    if (MW.focus) {
+      var want = MW.focus;
+      setTimeout(function () {
+        if (MW.focus !== want) return;
+        var t = want === "add" ? sec.querySelector("[data-snew]") : document.getElementById("mwp-" + r.id);
+        if (!t || !t.isConnected) return;
+        /* drawn first from what was shown, then from the fresh read: the
+           cursor is put back each time until the fresh one is on screen */
+        if (MW.detail[key]) MW.focus = null;
+        t.focus();
+        if (want === "box" && t.setSelectionRange) t.setSelectionRange(t.value.length, t.value.length);
+      }, 0);
+    }
+    return sec;
+  }
+  function mwDetail(r) {
+    var key = mwKey(r), d = MW.detail[key], box = el("div", "mwdet");
+    /* §747 after a write the task is read again behind what was shown, so the
+       opened task does not blink to Reading… on every tick */
+    if (!d && MW.prev[key] && !MW.prev[key].error) { mwLoad(r); d = MW.prev[key]; }
+    if (!d) { box.appendChild(el("p", "muted", "Reading…")); mwLoad(r); return box; }
+    if (d.error) { box.appendChild(el("p", "err", d.error)); return box; }
+    var tab = MW.tab[key] || "p";
+    var tabs = el("div", "mwtabs");
+    tabs.setAttribute("role", "tablist");
+    [["p", "Progress", d.progress.length], ["d", "Description", 0], ["h", "History", d.history.length]].forEach(function (x) {
+      var b = el("button", "mwtab", x[1]);
+      b.type = "button";
+      b.setAttribute("role", "tab");
+      b.setAttribute("data-tab", x[0]);
+      b.setAttribute("aria-selected", String(tab === x[0]));
+      if (x[2]) b.appendChild(el("span", "n", String(x[2])));
+      b.addEventListener("click", function () { MW.tab[key] = x[0]; MW.redraw(); });
+      tabs.appendChild(b);
+    });
+    tabs.appendChild(el("span", "sp"));
+    var go = el("a", "mwopen", "View in " + r.clientName + "’s Tracker →");
+    go.href = mwTrackerHref(r);
+    tabs.appendChild(go);
+    box.appendChild(tabs);
+    if (tab === "p") {
+      var stepsAt = mwSteps(r, d, key);
+      if (stepsAt) box.appendChild(stepsAt);
+      if (d.canWrite) {
+        if (stepsAt && ((d.steps || []).length || MW.sadd[key])) box.appendChild(el("div", "mwssh", "This week"));
+        var cp = el("div", "mwcompose"), inp = el("input"), add = el("button", null, "Add");
+        inp.id = "mwp-" + r.id;
+        /* a tick's "Done: <step>" and anything typed stay through a redraw */
+        inp.value = MW.draft[key] || "";
+        inp.addEventListener("input", function () { MW.draft[key] = inp.value; if (MW.auto[key]) MW.auto[key].edited = true; });
+        inp.placeholder = "What happened this week?";
+        inp.setAttribute("aria-label", "Progress on " + (r.title || "this task"));
+        inp.maxLength = 2000;
+        add.type = "button";
+        var send = function () { var v = inp.value.trim(); if (!v) { inp.focus(); return; } inp.disabled = true; delete MW.draft[key]; delete MW.auto[key]; MW.write(r, "progress", { body: v }); };
+        add.addEventListener("click", send);
+        inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); send(); } });
+        cp.appendChild(inp); cp.appendChild(add); box.appendChild(cp);
+      }
+      if (!d.progress.length) box.appendChild(el("p", "none", "Nothing written yet."));
+      else {
+        var ol = el("ol", "mwtl");
+        /* §739 TWO BEFORE THIS WEEK (Islam: "make before this week only 2
+           entries and it applies to all, the full story … is an exception in
+           any view"): this week's entries, then the latest two before it; the
+           rest behind "Show N earlier", kept open per task while it is open */
+        if (!MW.allp) MW.allp = {};
+        var nb = 0, extra = 0, allOn = !!MW.allp[key];
+        d.progress.forEach(function (p) {
+          var li = el("li");
+          if (!p.now && ++nb > 2) { extra++; if (!allOn) li.hidden = true; }
+          li.appendChild(el("div", "wk" + (p.now ? " now" : ""), p.week + " · " + p.by + (p.edited ? " · edited" : "")));
+          /* YOUR OWN ENTRY: Edit turns it into a box in place (Enter or
+             leaving saves, Escape puts it back); Delete asks first (§712) —
+             the Tracker's own rule, the writer alone */
+          if (MW.pedit === p.id) {
+            var ta = el("textarea", "mwpedit");
+            ta.value = p.body;
+            ta.rows = 2;
+            ta.maxLength = 2000;
+            ta.setAttribute("aria-label", "Edit the entry");
+            var settled = false;
+            var finish = function (keep) {
+              if (settled) return; settled = true;
+              var v = ta.value.replace(/[ \t]+\n/g, "\n").trim();
+              MW.pedit = null;
+              if (keep && v && v !== p.body) MW.write(r, "progress-edit", { progressId: p.id, body: v }); else MW.redraw();
+            };
+            ta.addEventListener("keydown", function (e) {
+              if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finish(false); }
+              else if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); finish(true); }
+            });
+            ta.addEventListener("blur", function () { finish(true); });
+            li.appendChild(ta);
+            setTimeout(function () { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 0);
+          } else li.appendChild(mwLinks(el("div", "tx"), p.body));
+          if (p.mine && MW.pedit !== p.id) {
+            var acts = el("div", "mwpacts");
+            if (MW.pdel === p.id) {
+              acts.appendChild(document.createTextNode("Delete this entry? "));
+              var yes = el("button", "danger sure", "Yes, delete it"); yes.type = "button";
+              yes.addEventListener("click", function () { MW.pdel = null; MW.write(r, "progress-delete", { progressId: p.id }); });
+              var keep = el("button", "sure", "Keep it"); keep.type = "button";
+              keep.addEventListener("click", function () { MW.pdel = null; MW.redraw(); });
+              acts.appendChild(yes); acts.appendChild(keep);
+            } else {
+              var ed = el("button", null, "Edit"); ed.type = "button";
+              ed.addEventListener("click", function () { MW.pedit = p.id; MW.pdel = null; MW.redraw(); });
+              var dl = el("button", "danger", "Delete"); dl.type = "button";
+              dl.addEventListener("click", function () { MW.pdel = p.id; MW.pedit = null; MW.redraw(); });
+              acts.appendChild(ed); acts.appendChild(dl);
+            }
+            li.appendChild(acts);
+          }
+          ol.appendChild(li);
+        });
+        box.appendChild(ol);
+        if (extra) {
+          var more = el("button", "mwpmore", allOn ? "Show fewer" : "Show " + extra + " earlier \u203a");
+          more.type = "button";
+          more.addEventListener("click", function () { MW.allp[key] = !allOn; MW.redraw(); });
+          box.appendChild(more);
+        }
+      }
+    } else if (tab === "d") {
+      if (d.canChange) {
+        var ta = el("textarea", "mwdesc");
+        ta.rows = 1;
+        ta.value = d.description || "";
+        ta.placeholder = "What the task is. Click to write it.";
+        ta.setAttribute("aria-label", "Description of " + (r.title || "this task"));
+        ta.maxLength = 5000;
+        ta.addEventListener("blur", function () { if (ta.value !== (d.description || "")) MW.write(r, "notes", { description: ta.value }); });
+        box.appendChild(ta);
+      } else box.appendChild(el("p", d.description ? null : "none", d.description || "No description."));
+    } else {
+      var ul = el("ul", "mwhist");
+      d.history.forEach(function (h) { var li = el("li"); li.appendChild(el("time", null, h.day)); li.appendChild(el("span", null, h.text)); ul.appendChild(li); });
+      box.appendChild(ul);
+    }
+    return box;
+  }
+  /* a press anywhere but a menu closes the menu */
+  document.addEventListener("click", function (e) {
+    if (MW.menu && !(e.target.closest && e.target.closest(".mwmenu"))) { MW.menu = null; MW.sub = null; if (MW.redraw) MW.redraw(); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && MW.menu) { MW.menu = null; MW.sub = null; if (MW.redraw) MW.redraw(); }
+  });
 
   /* A WRITE-UP ON MY WORK (spec 067 §8): the row's own look, a book where
      the tick is and "Case study" where the status is. It carries NO control
@@ -2577,13 +3092,19 @@
     mk.title = "An assignment to write up";
     mk.innerHTML = NAV_ICON.memory;
     row.appendChild(mk);
+    /* the row's own shape since §709: the name, the client under it */
+    var main = el("div", "mwmain");
     var t = el("span", "t", "Write up the assignment · ");
     t.appendChild(el("b", null, r.name));
-    row.appendChild(t);
-    var cl = el("span", "mwcl");
-    cl.title = r.clientName;
-    cl.appendChild(el("i", null, r.clientName));
-    row.appendChild(cl);
+    main.appendChild(t);
+    if (TSORT.by !== "client") {
+      var meta = el("div", "mwmeta");
+      var cl = el("span", "mwcl", r.clientName);
+      cl.title = r.clientName;
+      meta.appendChild(cl);
+      main.appendChild(meta);
+    }
+    row.appendChild(main);
     row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.when));
     var st = el("span", "mwst prog");
     st.appendChild(el("span", null, "Track Record"));
@@ -2615,7 +3136,7 @@
       var pick = null;
       if (j.people && j.people.length > 1) {
         pick = el("label", "mwwho");
-        pick.appendChild(document.createTextNode("Show"));
+        pick.appendChild(document.createTextNode("Show:"));
         var sel = el("select");
         sel.setAttribute("data-workwho", "");
         j.people.forEach(function (p) {
@@ -2644,6 +3165,8 @@
       var noneOpen = (j.who && !j.who.self ? j.who.name + " has" : "You have") + " no open actions in any client's Tracker.";
       if (!rows.length && !cases.length && !doneRows.length) {
         body.appendChild(el("p", "muted", noneOpen));
+        if (!j.who || j.who.self) body.appendChild(mwAddLine(said));
+        mwAddFocus();
         return;
       }
 
@@ -2737,12 +3260,46 @@
 
       var list = el("div");
       list.setAttribute("data-grid", "mywork");
+      /* §709: the opened task and the ⋯ write through the Tracker's own rules
+         (workWrite), and the list is drawn again from the server's answer —
+         a hand-over or a delete takes the row off; anything else swaps it */
+      MW.said = said;
+      MW.redraw = function () { if (TAB !== "mywork") return; draw(); find(); };
+      MW.write = function (r, op, extra) {
+        var key = mwKey(r), q = { action: "workWrite", client: r.client, id: r.id, op: op };
+        Object.keys(extra || {}).forEach(function (k) { q[k] = extra[k]; });
+        post(q).then(function (a) {
+          if (!a.ok) { said.textContent = a.error || "That did not save. Nothing was changed — try again."; said.hidden = false; MW.redraw(); return; }
+          said.hidden = true;
+          MW.menu = null; MW.sub = null; MW.renaming = null;
+          MW.prev[key] = MW.detail[key]; delete MW.detail[key];
+          var at = rows.indexOf(r), dat = doneRows.indexOf(r);
+          if (a.gone) {
+            if (at >= 0) rows.splice(at, 1);
+            if (dat >= 0) doneRows.splice(dat, 1);
+            if (MW.open === key) MW.open = null;
+          } else if (a.row) {
+            a.row.was = r.was;
+            if (at >= 0) rows[at] = a.row;
+            if (dat >= 0) doneRows[dat] = a.row;
+          }
+          mwCount(m.strip, rows.concat(cases));
+          setCnt();
+          MW.redraw();
+          if (op === "progress") { var pn = document.getElementById("mwp-" + r.id); if (pn) pn.focus(); }
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          said.textContent = "Could not reach the server. Nothing was changed — try again."; said.hidden = false; MW.redraw();
+        });
+      };
       /* A GROUP'S LABEL (A2): its name (Late in red), how many are open, and
          by client a way straight into that client's Internal Tracker, over a
          grey rule the card's whole width. */
       var head = function (sec, n, name, late, client) {
         if (late) sec.classList.add("late");
         var sh = el("div", "mwsh");
+        /* by client, the client's initials before its name (§709) */
+        if (client) sh.appendChild(el("span", "mwav", String(name.textContent || "").split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0]; }).join("").toUpperCase()));
         sh.appendChild(name);
         sh.appendChild(el("span", "meta"));
         if (client) {
@@ -2813,18 +3370,31 @@
         got.forEach(function (r) { sec.appendChild(mwRow(r, statuses, act)); });
         list.appendChild(sec);
       };
-      if (pick) hd.appendChild(pick);
+      /* §725 THE TRACKER'S QUIET BAR (design-mockups/home/
+         2026-11-03_my-tasks-bar.html): the views after the count, then
+         Search as an icon that opens, then the small words Done and Show */
       hd.appendChild(sortSwitch(function () { draw(); find(); }));
-      hd.appendChild(hoSwitch("Done", [["hide", "Hide"], ["week", "Last week"], ["month", "30 days"]], TDONE.show, function (v) {
+      var findW = el("label", "mwfind");
+      findW.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+      findW.appendChild(search);
+      hd.appendChild(findW);
+      hd.appendChild(mwWord("Done", [["hide", "Hide"], ["week", "Last week"], ["month", "Last 30 days", "30 days"]], TDONE.show, function (v) {
         TDONE.show = v;
         try { localStorage.setItem("smp.tasks.done", v); } catch (e) { /* this device only */ }
         draw(); find();
       }));
-      hd.appendChild(search);
+      if (pick) hd.appendChild(pick);
       card.appendChild(list);
+      /* §746 the add line, on one's own list only — under the tasks, never
+         between the card's head and its rows (§749, Islam: "add task should
+         come at the bottom, it's very strange to be splitting the title part
+         from the tasks itself") */
+      if (!j.who || j.who.self) card.appendChild(mwAddLine(said));
       body.appendChild(card);
+      mwAddFocus();
       draw();
       setCnt();
+      mwPrefetch(rows.concat(doneRows));
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
@@ -2874,12 +3444,64 @@
     w.appendChild(sw);
     return w;
   }
+  /* §725 (Islam: "My tasks top bar match the tracker"): Sort by reads as
+     the Tracker's views do — plain words, the chosen one on a soft grey —
+     "By date · By client", on My tasks and on Home's Your tasks */
   function sortSwitch(onChange) {
-    return hoSwitch("Sort by", [["date", "Date"], ["client", "Client"]], TSORT.by, function (v) {
+    var w = hoSwitch("Sort by", [["date", "By date"], ["client", "By client"]], TSORT.by, function (v) {
       TSORT.by = v;
       try { localStorage.setItem("smp.tasks.sort", v); } catch (e) { /* this device only */ }
       onChange();
     });
+    w.classList.add("mwviews");
+    if (w.firstChild && w.firstChild.nodeType === 3) w.removeChild(w.firstChild);
+    return w;
+  }
+  /* §725: a small word that opens its choices — "Done: Hide ▾", as the
+     Tracker's "Group: Owner ▾"; each choice keeps data-sort and aria-pressed */
+  function mwWord(word, opts, on, pick) {
+    var w = el("span", "mwword");
+    var b = el("button", "mwwordb");
+    b.type = "button";
+    b.setAttribute("aria-haspopup", "menu");
+    b.setAttribute("aria-expanded", "false");
+    var cur = el("b");
+    b.appendChild(document.createTextNode(word + ": "));
+    b.appendChild(cur);
+    b.appendChild(el("span", "car", "\u25BE"));
+    var m = el("span", "mwwordm");
+    m.setAttribute("role", "menu");
+    m.hidden = true;
+    var shut = function () { m.hidden = true; b.setAttribute("aria-expanded", "false"); };
+    var set = function (v) {
+      opts.forEach(function (o) { if (o[0] === v) cur.textContent = o[2] || o[1]; });
+      m.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x.getAttribute("data-sort") === v)); });
+    };
+    opts.forEach(function (o) {
+      var x = el("button", null, o[1]);
+      x.type = "button";
+      x.setAttribute("role", "menuitemradio");
+      x.setAttribute("data-sort", o[0]);
+      x.addEventListener("click", function (e) {
+        e.stopPropagation();
+        shut();
+        if (x.getAttribute("aria-pressed") === "true") return;
+        set(o[0]);
+        pick(o[0]);
+      });
+      m.appendChild(x);
+    });
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      m.hidden = !m.hidden;
+      b.setAttribute("aria-expanded", String(!m.hidden));
+    });
+    document.addEventListener("click", function () { if (!m.hidden) shut(); });
+    w.addEventListener("keydown", function (e) { if (e.key === "Escape" && !m.hidden) { shut(); b.focus(); } });
+    w.appendChild(b);
+    w.appendChild(m);
+    set(on);
+    return w;
   }
   var HOCL = { show: "mine" };
   /* My tasks' Show done: hide, the last week or the last 30 days, kept on this device */
@@ -2944,6 +3566,180 @@
     host.appendChild(card);
     return { card: card, head: hd, body: body, count: function (n) { cnt.textContent = String(n); cnt.hidden = false; } };
   }
+  /* ── ADD A TASK (§746) ─────────────────────────────────────────────
+     Islam, 2026-11-03: "my tasks and home should have the ability to add a
+     new task … my tasks can add it as a line but home … a pop up". What each
+     client offers (open topics, office team) and the weeks are read once
+     (workAddFacts) and kept for the page; the add goes through the Tracker's
+     own rules (workAdd). The client last added to is kept on this device. */
+  var ADDF = null;
+  function addFacts() {
+    if (!ADDF) ADDF = post({ action: "workAddFacts" }).then(function (j) { if (!j || !j.ok) { ADDF = null; throw new Error((j && j.error) || "Could not read your clients."); } return j; });
+    return ADDF;
+  }
+  function addLastClient(set) {
+    try { if (set) localStorage.setItem("smp.add.client", set); return localStorage.getItem("smp.add.client") || ""; } catch (e) { return set || ""; }
+  }
+  function addOpt(sel, value, words, on) {
+    var o = el("option", null, words);
+    o.value = value;
+    if (on) o.selected = true;
+    sel.appendChild(o);
+  }
+  /* the client's selects (topic, owner) follow the client chosen */
+  function addFill(f, cl, topic, owner) {
+    topic.textContent = ""; owner.textContent = "";
+    addOpt(topic, "", "No topic", true);
+    var c = (f.clients || []).filter(function (x) { return x.key === cl; })[0];
+    if (!c) return;
+    c.topics.forEach(function (t) { addOpt(topic, t.id, t.name, false); });
+    c.team.forEach(function (p) { addOpt(owner, p.key, p.me ? "Me" : p.name, p.me); });
+  }
+  function addSelects(f, wrap, lab) {
+    var mk = function (name) { var s = el("select"); s.setAttribute("aria-label", name); s.setAttribute("data-add", name.toLowerCase()); return s; };
+    var client = mk("Client"), week = mk("Week"), topic = mk("Topic"), owner = mk("Owner");
+    var last = addLastClient();
+    var keys = (f.clients || []).map(function (c) { return c.key; });
+    (f.clients || []).forEach(function (c) { addOpt(client, c.key, c.name, c.key === last); });
+    if (keys.indexOf(last) < 0 && keys.length) client.value = keys[0];
+    (f.weeks || []).forEach(function (w, i) { addOpt(week, w.day, w.word, i === 0); });
+    addOpt(week, "", "No date", false);
+    addFill(f, client.value, topic, owner);
+    client.addEventListener("change", function () { addFill(f, client.value, topic, owner); });
+    [["Client", client], ["Week", week], ["Topic", topic], ["Owner", owner]].forEach(function (x) { wrap.appendChild(lab ? lab(x[0], x[1]) : x[1]); });
+    return { client: client, week: week, topic: topic, owner: owner,
+      body: function (title) { return { action: "workAdd", client: client.value, title: title, due: week.value, topicId: topic.value || undefined, ownerKey: owner.value || undefined }; } };
+  }
+  /* MY TASKS: a line under the card's head */
+  function mwAddLine(said) {
+    var line = el("div", "mwadd");
+    line.appendChild(el("span", "pl", "+"));
+    var inp = el("input");
+    inp.placeholder = "Add a task and press Enter";
+    inp.setAttribute("aria-label", "Add a task");
+    inp.setAttribute("data-mwadd", "");
+    line.appendChild(inp);
+    var chips = el("span", "mwaddc");
+    line.appendChild(chips);
+    var sel = null;
+    addFacts().then(function (f) {
+      if (!(f.clients || []).length) { line.hidden = true; return; }
+      sel = addSelects(f, chips, null);
+    }).catch(function () { line.hidden = true; });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || !sel || line.getAttribute("aria-busy") === "true") return;
+      var t = inp.value.trim();
+      if (!t) return;
+      line.setAttribute("aria-busy", "true");
+      post(sel.body(t)).then(function (a) {
+        line.removeAttribute("aria-busy");
+        if (!a.ok) { said.textContent = a.error || "That did not save — try again."; said.hidden = false; return; }
+        addLastClient(sel.client.value);
+        WORK.refocusAdd = true;
+        go("mywork");
+      }).catch(function (e2) {
+        line.removeAttribute("aria-busy");
+        if (String(e2.message) === "sign in") return;
+        said.textContent = "Could not reach the server. Nothing was added — try again."; said.hidden = false;
+      });
+    });
+    return line;
+  }
+  /* HOME: + New task opens a small pop-up; Create, Cancel, Escape */
+  function hoNewTask(after) {
+    var b = el("button", "newtask", "+ New task");
+    b.type = "button";
+    b.setAttribute("data-newtask", "");
+    b.addEventListener("click", function () {
+      addFacts().then(function (f) { ntOpen(f, b, after); }).catch(function () { /* nothing to add to */ });
+    });
+    return b;
+  }
+  function ntOpen(f, opener, after) {
+    var scrim = el("div", "ntscrim"), pop = el("div", "ntpop");
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-modal", "true");
+    pop.setAttribute("aria-labelledby", "nth");
+    var hd = el("div", "poph"), h = el("h3", null, "New task");
+    h.id = "nth";
+    var x = el("button", "x", "×");
+    x.type = "button"; x.setAttribute("aria-label", "Close");
+    hd.appendChild(h); hd.appendChild(x);
+    pop.appendChild(hd);
+    var lab = function (words, ctl, small) {
+      var l = el("label");
+      var sp = el("span", null, words);
+      if (small) { sp.appendChild(document.createTextNode(" ")); sp.appendChild(el("small", null, small)); }
+      l.appendChild(sp); l.appendChild(ctl);
+      return l;
+    };
+    var title = el("input");
+    title.placeholder = "What needs doing";
+    title.setAttribute("data-add", "title");
+    pop.appendChild(lab("Task", title));
+    var held = el("div");
+    var sel = addSelects(f, held, function (w, c) { return lab(w, c, w === "Topic" ? "optional" : ""); });
+    var labs = held.children;
+    var r1 = el("div", "two"), r2 = el("div", "two");
+    r1.appendChild(labs[0]); r1.appendChild(labs[0]);
+    r2.appendChild(labs[0]); r2.appendChild(labs[0]);
+    pop.appendChild(r1); pop.appendChild(r2);
+    var said = el("p", "err");
+    said.hidden = true;
+    pop.appendChild(said);
+    var ft = el("div", "popf");
+    var cancel = el("button", "btn", "Cancel"), create = el("button", "btn solid", "Create");
+    cancel.type = "button"; create.type = "button";
+    create.setAttribute("data-create", "");
+    ft.appendChild(cancel); ft.appendChild(create);
+    pop.appendChild(ft);
+    var close = function () {
+      document.removeEventListener("keydown", esc, true);
+      scrim.remove(); pop.remove();
+      if (opener) opener.focus();
+    };
+    var esc = function (e) { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(); } };
+    document.addEventListener("keydown", esc, true);
+    scrim.addEventListener("click", close);
+    x.addEventListener("click", close);
+    cancel.addEventListener("click", close);
+    var make = function () {
+      var t = title.value.trim();
+      if (!t) { title.focus(); return; }
+      if (create.disabled) return;
+      create.disabled = true;
+      post(sel.body(t)).then(function (a) {
+        create.disabled = false;
+        if (!a.ok) { said.textContent = a.error || "That did not save — try again."; said.hidden = false; return; }
+        addLastClient(sel.client.value);
+        close();
+        if (after) after();
+      }).catch(function (e) {
+        create.disabled = false;
+        if (String(e.message) === "sign in") return;
+        said.textContent = "Could not reach the server. Nothing was added — try again."; said.hidden = false;
+      });
+    };
+    create.addEventListener("click", make);
+    title.addEventListener("keydown", function (e) { if (e.key === "Enter") make(); });
+    document.body.appendChild(scrim);
+    document.body.appendChild(pop);
+    title.focus();
+  }
+  /* after an add, the line is ready for the next one */
+  function mwAddFocus() {
+    if (!WORK.refocusAdd) return;
+    WORK.refocusAdd = false;
+    /* the tab may be drawn aside and swapped in a moment later (§400.2):
+       the cursor goes in once the line is on the page */
+    var n = 0;
+    var put = function () {
+      var i = document.querySelector("[data-mwadd]");
+      if (i && i.isConnected) { i.focus(); return; }
+      if (++n < 40) setTimeout(put, 50);
+    };
+    put();
+  }
   function hoLink(words, press) {
     var a = el("button", "holink", words);
     a.type = "button";
@@ -2989,54 +3785,6 @@
     return row;
   }
 
-  /* A TASK ON HOME OPENS WHAT ITS ROW ON MY TASKS OPENS — the client's
-     Tracker, or the case study to write — AND ITS TICK FINISHES IT (§614.1):
-     My tasks' own `workStatus` write, drawn live only where the server says
-     this person may (canChange), the row staying where the hand left it,
-     green, until Home is read again (§583). A write-up has no tick: it is
-     done on the case study, never from a list (spec 067 §8). Under a client's
-     heading the row does not name the client again. */
-  function hoTask(r, isCase, act, noClient) {
-    var done = !isCase && r.status === "done";
-    var b = el("div", "hotask" + (r.late && !done ? " late" : "") + (done ? " done" : ""));
-    b.tabIndex = 0;
-    b.setAttribute("role", "link");
-    if (isCase) {
-      b.setAttribute("data-case", r.id);
-      var bk = el("span", "bk");
-      bk.innerHTML = NAV_ICON.memory;
-      b.appendChild(bk);
-    } else {
-      b.setAttribute("data-client", r.client);
-      b.setAttribute("data-id", r.id);
-      var tick = el("button", "mwtick");
-      tick.type = "button";
-      tick.setAttribute("role", "checkbox");
-      tick.setAttribute("aria-checked", String(done));
-      tick.setAttribute("aria-label", (done ? "Mark not done: " : "Mark done: ") + (r.title || ""));
-      if (done) tick.innerHTML = MW_TICK;
-      if (r.canChange && act) tick.addEventListener("click", function (e) { e.stopPropagation(); act(r, b); });
-      else { tick.disabled = true; tick.title = "Only its owner or the client's Super user can finish this"; }
-      b.appendChild(tick);
-    }
-    var t = el("span", "t");
-    if (isCase) { t.appendChild(document.createTextNode("Write up the assignment · ")); t.appendChild(el("b", null, r.name)); }
-    else t.appendChild(document.createTextNode(r.title || "(untitled)"));
-    var m = el("span", "m");
-    if (!noClient) { m.appendChild(el("span", "c", r.clientName)); m.appendChild(document.createTextNode(" · ")); }
-    m.appendChild(document.createTextNode(isCase ? "Track Record" : r.statusWord || ""));
-    t.appendChild(m);
-    b.appendChild(t);
-    b.appendChild(el("span", "wh", r.when || ""));
-    var open = function () {
-      if (isCase) { CS.jump = { id: r.id, view: "case", fresh: true }; go("memory"); }
-      else location.assign("/" + r.client + "/tracker");
-    };
-    b.addEventListener("click", function (e) { if (!e.target.closest(".mwtick")) open(); });
-    b.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target === b) open(); });
-    return b;
-  }
-
   /* YOUR TASKS: ONE LIST, overdue first (its date in red), then this week —
      the two tabs are gone (Islam: "remove the overdue and this week
      filters"). Next week and later stay on My tasks. */
@@ -3050,47 +3798,100 @@
     /* a refused or failed tick is said here, in words, and the row is left as it was */
     var said = el("p", "err hosaid");
     said.hidden = true;
-    var rows = el("div");
+    var rows = el("div", "mwlist mwhome");
     var recount = function () { c.count(rows.querySelectorAll(".hotask:not(.done)").length); };
-    var act = function (r, row) {
+    /* §711: HOME'S ROWS ARE MY TASKS' ROWS (Islam: "now refine the home page
+       tasks the same way"; design-mockups/home/2026-11-03_home-tasks-working.html).
+       The same mwRow — the name on one line opening the task HERE, in the
+       card, with Progress · Description · History and Open in its Tracker; the
+       client and the latest update under it; the week only when it is the
+       exception; the status a dot and its word; ⋯ — written through the same
+       workStatus and workWrite, the rows still the late and this week's. A
+       write-up keeps its own row (mwCaseRow). Grouped under two quiet
+       strips, Late and This week, or under each client. The rows keep the
+       Home classes the page has always had (.hotask, .hogrp), so a reader of
+       Home finds what it found. */
+    var mact = function (r, status, via, row) {
       if (row.getAttribute("aria-busy") === "true") return;
-      var done = r.status === "done";
-      var hadFocus = document.activeElement === row.querySelector(".mwtick");
       row.setAttribute("aria-busy", "true");
-      var undo = function (msg) { row.removeAttribute("aria-busy"); said.textContent = msg; said.hidden = false; };
-      post({ action: "workStatus", client: r.client, id: r.id, status: done ? (r.was || "not_started") : "done" }).then(function (a) {
-        if (!a.ok) { undo(a.error || "That did not save. Nothing was changed — try again."); return; }
+      post({ action: "workStatus", client: r.client, id: r.id, status: status }).then(function (a) {
+        row.removeAttribute("aria-busy");
+        if (!a.ok) { said.textContent = a.error || "That did not save. Nothing was changed — try again."; said.hidden = false; return; }
         var nr = a.row;
-        nr.was = done ? r.was : r.status;
-        /* the row keeps its place in the list, so a re-sort keeps the tick */
+        nr.was = r.status === "done" ? r.was : r.status;
         list.forEach(function (x) { if (x[2] === r) x[2] = nr; });
-        var fresh = hoTask(nr, false, act, row.getAttribute("data-noclient") === "1");
-        if (row.getAttribute("data-noclient") === "1") fresh.setAttribute("data-noclient", "1");
-        row.parentNode.replaceChild(fresh, row);
         said.hidden = true;
-        recount();
-        if (hadFocus) fresh.querySelector(".mwtick").focus();
+        draw();
+        var f = rows.querySelector('.mwrow[data-id="' + nr.id + '"] ' + (via === "tick" ? ".mwtick" : ".mwst select"));
+        if (f) f.focus();
       }).catch(function (e) {
+        row.removeAttribute("aria-busy");
         if (String(e.message) === "sign in") return;
-        undo("Could not reach the server. Nothing was changed — try again.");
+        said.textContent = "Could not reach the server. Nothing was changed — try again."; said.hidden = false;
       });
     };
+    var hookMW = function () {
+      MW.redraw = function () { if (TAB !== "home") return; draw(); };
+      MW.write = function (r, op, extra) {
+        var key = mwKey(r), q = { action: "workWrite", client: r.client, id: r.id, op: op };
+        Object.keys(extra || {}).forEach(function (k) { q[k] = extra[k]; });
+        post(q).then(function (a) {
+          if (!a.ok) { said.textContent = a.error || "That did not save. Nothing was changed — try again."; said.hidden = false; draw(); return; }
+          said.hidden = true;
+          MW.menu = null; MW.sub = null; MW.renaming = null;
+          MW.prev[key] = MW.detail[key]; delete MW.detail[key];
+          if (a.gone || (a.row && a.row.bucket !== "late" && a.row.bucket !== "week")) {
+            /* handed on, deleted, or moved past this week: it leaves Home */
+            list = list.filter(function (x) { return x[2] !== r; });
+            if (MW.open === key) MW.open = null;
+          } else if (a.row) {
+            a.row.was = r.was;
+            list.forEach(function (x) { if (x[2] === r) x[2] = a.row; });
+          }
+          draw();
+          if (op === "progress") { var pn = document.getElementById("mwp-" + r.id); if (pn) pn.focus(); }
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          said.textContent = "Could not reach the server. Nothing was changed — try again."; said.hidden = false; draw();
+        });
+      };
+    };
+    var statuses = j.statuses || [];
+    var one = function (x, noClient) {
+      var row = x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, mact);
+      row.classList.add("hotask");
+      if (noClient) row.setAttribute("data-noclient", "1");
+      return row;
+    };
+    var strip = function (cls, word, n, late) {
+      var h = el("div", "mwhs " + cls);
+      h.appendChild(el("b", null, word));
+      var meta = el("span", null, String(n));
+      if (late) { meta.appendChild(document.createTextNode(" · ")); meta.appendChild(el("em", null, late + " late")); }
+      h.appendChild(meta);
+      return h;
+    };
     var draw = function () {
+      hookMW();
       rows.textContent = "";
-      if (!list.length) { rows.appendChild(el("p", "honone", "Nothing overdue or due this week.")); return; }
+      if (!list.length) { rows.appendChild(el("p", "honone", "Nothing overdue or due this week.")); recount(); return; }
       list.sort(byDue);
       if (TSORT.by === "client") {
         byClient(list).forEach(function (g) {
-          var h = el("div", "hogrp");
+          var h = strip("hogrp", g.name, g.rows.length, g.late);
           h.setAttribute("data-group", g.key);
-          h.appendChild(document.createTextNode(g.name));
-          var meta = el("i", null, " · " + g.rows.length);
-          if (g.late) { meta.appendChild(document.createTextNode(", ")); meta.appendChild(el("span", "late", g.late + " late")); }
-          h.appendChild(meta);
+          h.insertBefore(el("span", "mwav", String(g.name || "").split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0]; }).join("").toUpperCase()), h.firstChild);
           rows.appendChild(h);
-          g.rows.forEach(function (x) { var t = hoTask(x[2], !!x[1], act, true); t.setAttribute("data-noclient", "1"); rows.appendChild(t); });
+          g.rows.forEach(function (x) { rows.appendChild(one(x, true)); });
         });
-      } else list.forEach(function (x) { rows.appendChild(hoTask(x[2], !!x[1], act)); });
+      } else {
+        [["late", "Late"], ["week", "This week"]].forEach(function (b) {
+          var mine = list.filter(function (x) { return x[2].bucket === b[0]; });
+          if (!mine.length) return;
+          rows.appendChild(strip(b[0], b[1], mine.length, 0));
+          mine.forEach(function (x) { rows.appendChild(one(x, false)); });
+        });
+      }
       recount();
     };
     c.head.appendChild(sortSwitch(draw));
@@ -3099,6 +3900,7 @@
     if (j.unanswered && j.unanswered.length) box.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + "."));
     box.appendChild(rows);
     draw();
+    mwPrefetch(list.filter(function (x) { return !x[1]; }).map(function (x) { return x[2]; }));
   }
 
   function hoCases(c, j) {
@@ -3160,6 +3962,9 @@
     var cc = hoCard(top, "Your clients", NAV_ICON.clients, "clients");
     cc.head.appendChild(hoLink("All clients →", function () { go("clients", "row"); }));
     var tc = hoCard(top, "Your tasks", HO_TASKS, "tasks");
+    addFacts().then(function (f) {
+      if ((f.clients || []).length && TAB === "home") tc.head.appendChild(hoNewTask(function () { go("home"); }));
+    }).catch(function () { /* no client to add to: no button */ });
     var sc = hoCard(page, "Track Record", NAV_ICON.memory, "cases");
     sc.card.classList.add("hosec");
     sc.head.appendChild(hoLink("Track Record →", function () { go("memory", "row"); }));
@@ -3521,6 +4326,7 @@
     var facts = el("span", "facts");
     facts.appendChild(el("span", "mo", spanWord(a.started, a.ended)));
     var fact = function (label, value) { var x = el("span"); x.appendChild(el("b", null, label)); x.appendChild(document.createTextNode(" " + value)); facts.appendChild(x); };
+    if (a.plannedDays != null) fact("Man-days:", String(a.plannedDays));
     if (a.lead) fact("Lead:", a.lead.name);
     var team = (a.team || []).filter(function (p2) { return !a.lead || p2.id !== a.lead.id; }).map(function (p2) { return p2.name; });
     if (team.length) fact("Team:", team.join(", "));
@@ -3548,6 +4354,11 @@
     ty.value = a ? a.kind : "planning";
     var st = box("asg-start", "Start", monthPick(a ? a.started : "", "Pick the month"));
     var en = box("asg-end", "End", monthPick(a ? a.ended : "", "Still running"));
+    /* THE PLANNED MAN-DAYS (§696) — Islam: "the number of days of the
+       agreement that we agreed on with the client". A whole number, or
+       empty where none was recorded. */
+    var dy = box("asg-days", "Planned man-days", el("input", "fld")); dy.type = "number"; dy.min = "0"; dy.step = "1"; dy.inputMode = "numeric";
+    dy.value = a && a.plannedDays != null ? String(a.plannedDays) : ""; dy.placeholder = "Days agreed";
     var ld = box("asg-lead", "Lead", el("select", "fld"));
     var pick0 = el("option", null, "Pick the lead"); pick0.value = ""; ld.appendChild(pick0);
     o.consultants.forEach(function (p) { var op = el("option", null, p.name || p.email); op.value = p.id; ld.appendChild(op); });
@@ -3602,7 +4413,7 @@
     var save = csButton(a ? "Save" : "Add", "amber sm", function () {
       save.disabled = true;
       cpostCases({ action: "assign", id: a ? a.id : undefined, client: c.key, name: nm.value, kind: ty.value, started: st.value, ended: en.value,
-                   lead: ld.value, team: team.map(function (t) { return t.id; }) }).then(function (r) {
+                   plannedDays: dy.value, lead: ld.value, team: team.map(function (t) { return t.id; }) }).then(function (r) {
         save.disabled = false;
         if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be saved."; said.hidden = false; return; }
         CLREG.open = ""; clRegRead();
@@ -5729,6 +6540,9 @@
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" },
       body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
   });
+  /* Light, dark or auto: theme.js owns the choice and the mark (§27, §674);
+     this only hangs its control on the band, which has to exist first. */
+  THEME.wire();
 
   /* ── Boot ──────────────────────────────────────────────────────
      BOTH QUESTIONS AT ONCE (§369). Islam: "something strange the window is not

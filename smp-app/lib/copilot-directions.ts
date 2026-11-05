@@ -55,8 +55,12 @@ export type Dirs = {
   chose: boolean;           // "Go ahead with the N ticked" was pressed
   caps: Cap[];
   reply: string;
+  /* §675 — the chat in time: every ask for more and its answer, in order, marked
+     with the step it belongs to (the Directions or the Capabilities). */
+  log: { p: "dirs" | "caps"; w: "me" | "ai"; t: string }[];
   saved: { deliverableId: string; n: number; title: string } | null;
 };
+export const MAX_DV_LOG = 200;
 
 /* ── THE ONE SCORING FUNCTION ──────────────────────────────────────────
    Each of the three is 1 to 4; the score is their product, out of 64. A row
@@ -71,7 +75,7 @@ export function scoreOf(o: { urgency: number; importance: number; ease: number }
 
 export const newDirs = (mode: Mode, withCaps: boolean, hadPlan: number): Dirs =>
   ({ mode, withCaps: mode === "directions" && !!withCaps, start: hadPlan > 0 && mode === "directions" ? "" : "fresh", hadPlan,
-     options: [], chose: false, caps: [], reply: "", saved: null });
+     options: [], chose: false, caps: [], reply: "", log: [], saved: null });
 
 const KEY = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 const cleanKey = (v: unknown) => { const s = str(v).trim(); return KEY.test(s) ? s : ""; };
@@ -115,6 +119,7 @@ export function storedDirs(raw: unknown): Dirs | null {
   base.start = j.start === "plan" || j.start === "fresh" ? j.start : base.start;
   if (j.saved && typeof j.saved === "object" && j.saved.deliverableId) base.saved = { deliverableId: str(j.saved.deliverableId), n: Number(j.saved.n) || 0, title: oneLine(j.saved.title) };
   base.reply = String(j.reply ?? "").slice(0, 1200);
+  base.log = (Array.isArray(j.log) ? j.log : []).map((x: any) => ({ p: x && x.p === "caps" ? "caps" : "dirs", w: x && x.w === "ai" ? "ai" : "me", t: String((x && x.t) ?? "").slice(0, 1200) })).filter((x: any) => x.t).slice(-MAX_DV_LOG) as Dirs["log"];
   return sanitizeDirs({ options: j.options, caps: j.caps, chose: j.chose }, base);
 }
 export async function dirsOf(c: Q, chatId: string): Promise<Dirs | null> {
@@ -254,6 +259,13 @@ export function dirsText(s: Dirs, fnName: (k: string) => string, ownerName: (k: 
     kept(s).forEach((c, k) => out.push((k + 1) + ". " + c.title + (c.kind ? " — " + CAP_KIND_WORD[c.kind] : "") + (c.serves.length ? " · serves " + c.serves.join(", ") : "") + (c.ownedBy ? " · " + ownerName(c.ownedBy) : "")));
   }
   return out.join("\n");
+}
+/* §675 — the version the pane's head names before the save (the SWOT's shape). */
+export async function nextDirsVersion(c: Q, chat: { place: string; section: string }, s: Dirs, placeWord: string): Promise<number> {
+  const r = await c.query(
+    "SELECT coalesce(max(v.n), 0) + 1 AS n FROM copilot_deliverables d LEFT JOIN copilot_versions v ON v.deliverable_id = d.id " +
+    "WHERE d.place = $1 AND d.section = $2 AND lower(d.title) = lower($3)", [chat.place, chat.section, dirsTitle(s, placeWord)]);
+  return Number(r.rows[0]?.n) || 1;
 }
 export const dirsTitle = (s: Dirs, placeWord: string) =>
   ((s.mode === "capabilities" ? "Capabilities — " : "Directions — ") + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);

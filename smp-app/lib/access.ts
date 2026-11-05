@@ -22,6 +22,7 @@
    gets (§320.5 — one behaviour for "not a thing here", so a refused address
    tells nobody the module exists). */
 import { createRequire } from "node:module";
+import type { PoolClient } from "pg";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import { copilotGrant, storedCopilotGrant } from "./copilot.ts";
@@ -68,18 +69,40 @@ export function decideOpen(seat: Seat, module: string, graph: unknown, personKey
   return frozen.mayOpen(graph, personKey || "", area);
 }
 
-export async function mayOpenModule(tenantId: string, seat: Seat, personKey: string | null | undefined, module: string): Promise<boolean> {
+/* ── WHAT A DOCUMENT READS OF ITS TENANT, ONCE (§669) ──────────────────
+   The route asked the gate, then the switcher, then the library's stamp,
+   and each opened a transaction of its own — the whole graph read TWICE,
+   one after the other, before any HTML left. `OnTenant` is one connection
+   the request already holds and the graph read at most once on it, shared
+   by every reader of that request. `onTenant(c)` is made inside a
+   withTenant; `offTenant(tenantId)` is the old shape — each read opens its
+   own transaction, exactly as before — for the callers that hold none (the
+   client's bare address, the console), so nothing they do changed. */
+export type OnTenant = { c: PoolClient | null; graph: () => Promise<unknown>; copilotGrant: (seat: unknown) => Promise<string | null> };
+export function onTenant(c: PoolClient): OnTenant {
+  let g: Promise<unknown> | null = null;
+  return { c, graph: () => (g ??= readState(c)), copilotGrant: (seat) => storedCopilotGrant(c, seat) };
+}
+function offTenant(tenantId: string): OnTenant {
+  return { c: null,
+    graph: () => withTenant(tenantId, (c) => readState(c)),
+    copilotGrant: (seat) => withTenant(tenantId, (c) => storedCopilotGrant(c, seat)) };
+}
+
+export async function mayOpenModuleOn(on: OnTenant, seat: Seat, personKey: string | null | undefined, module: string): Promise<boolean> {
   const area = openingArea(module);
   if (!area || seat === "super" || seat === "smoteam") return decideOpen(seat, module, null, personKey);
-  const graph = await withTenant(tenantId, (c) => readState(c));
-  return decideOpen(seat, module, graph, personKey);
+  return decideOpen(seat, module, await on.graph(), personKey);
+}
+export function mayOpenModule(tenantId: string, seat: Seat, personKey: string | null | undefined, module: string): Promise<boolean> {
+  return mayOpenModuleOn(offTenant(tenantId), seat, personKey, module);
 }
 
 /* The modules this PERSON may open here: the client's own list (modulesFor,
    the registry's reader) narrowed by the grant — one read of the graph for
    all of them, or a client with four modules would open four connections
    per page. */
-export async function openableModules(tenantId: string, seat: Seat, personKey: string | null | undefined, stored: unknown): Promise<ModuleKey[]> {
+export async function openableModulesOn(on: OnTenant, seat: Seat, personKey: string | null | undefined, stored: unknown): Promise<ModuleKey[]> {
   let have = modulesFor(stored);
   /* The Copilot's own page is listed on the switcher (§456) for the office
      alone, and not for an office seat whose Copilot cell reads None — a door
@@ -87,7 +110,7 @@ export async function openableModules(tenantId: string, seat: Seat, personKey: s
      read, and only on a client that has the module. */
   if (have.includes("copilot")) {
     const office = seat === "super" || seat === "smoteam";
-    const g = office ? copilotGrant(seat, await withTenant(tenantId, (c) => storedCopilotGrant(c, seat))) : "none";
+    const g = office ? copilotGrant(seat, await on.copilotGrant(seat)) : "none";
     if (g === "none") have = have.filter((k) => k !== "copilot");
   }
   /* Processes is the office's by rule too (FFProcess carried in, decision
@@ -95,6 +118,9 @@ export async function openableModules(tenantId: string, seat: Seat, personKey: s
      must not offer them a door that only says no (§61). */
   if (seat !== "super" && seat !== "smoteam") have = have.filter((k) => !OFFICE_ONLY.has(k));
   if (seat === "super" || seat === "smoteam" || !have.some((k) => openingArea(k))) return have;
-  const graph = await withTenant(tenantId, (c) => readState(c));
+  const graph = await on.graph();
   return have.filter((k) => decideOpen(seat, k, graph, personKey));
+}
+export function openableModules(tenantId: string, seat: Seat, personKey: string | null | undefined, stored: unknown): Promise<ModuleKey[]> {
+  return openableModulesOn(offTenant(tenantId), seat, personKey, stored);
 }

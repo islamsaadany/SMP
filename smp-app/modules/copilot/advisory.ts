@@ -15,6 +15,7 @@ import {
   type Advisory, newAdvisory, storedAdvisory, advisoryOf, writeAdvisory, applyReply, todoOf, doneCount, countView, briefOwed, pending,
   advisoryInstruction, TURN_SCHEMA, BRIEF_SCHEMA, REVISE_SCHEMA, turnQuestion, briefQuestion, reviseQuestion, takeTurn, cleanBrief, saveAdvisory,
   ASSUME_WORDS, PROCEED_WORDS, CLASH_WORDS, SOURCE_TAG, MAX_ASK,
+  MAX_AD_LOG,
 } from "../../lib/copilot-advisory.ts";
 
 type Out = { status: number; body: Record<string, unknown> };
@@ -150,7 +151,8 @@ export async function advisoryAsk(tenantId: string, b: any, _who: Who): Promise<
     if (kind === "advisoryRevise") {
       const bf = cleanBrief(j.brief);
       if (!bf || !now.brief) return refused(503, failedLine("the brief came back incomplete"));
-      g = { ...now, brief: bf, reply: oneLine(j.reply).slice(0, 1200) };
+      const reply = oneLine(j.reply).slice(0, 1200);
+      g = { ...now, brief: bf, reply, log: [...now.log, { w: "me" as const, t: ask }, ...(reply ? [{ w: "ai" as const, t: reply }] : [])].slice(-MAX_AD_LOG) };
     } else {
       const t = takeTurn(now, j);
       if (typeof t === "string") return refused(503, failedLine(t));

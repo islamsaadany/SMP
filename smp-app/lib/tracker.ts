@@ -248,7 +248,10 @@ export type Action = {
   status: Status; doneDay: string | null;
   createdBy: string; createdAt: string; updatedAt: string;
 };
-export type Who = { personKey: string | null; seat: string | null };
+/* `lead` (§695): this account leads one of the client's assignments that is
+   not yet written up — the Clients page's registry, read at the door, never
+   from the page. It widens mayChange and nothing else. */
+export type Who = { personKey: string | null; seat: string | null; lead?: boolean };
 
 export function shape(r: Record<string, any>): Action {
   return {
@@ -362,14 +365,20 @@ export function summary(all: Action[], today: string): Summary {
 
 /* ══ who may do what (spec 054 §6, one rule since §356.11) ════════════
    Change the title, the notes, the date, the status; hand it to somebody
-   else; delete it: the owner or the client's Super user. Being the creator
-   confers nothing, and with collaborators gone nobody else was ever on it. */
+   else; delete it: the owner, the client's Super user — or, since §695, the
+   LEAD of one of the client's assignments (the Clients page's registry),
+   who answers for every task on the client and not only their own. Being
+   the creator confers nothing, and with collaborators gone nobody else was
+   ever on it. Progress entries keep their own rule (mayChangeProgress): the
+   lead does not edit what somebody else wrote.
+   SMP_BREAK=lead-nobody drops the lead from the rule; checks/tracker.mjs §2
+   must go red under it. */
 export function mayChange(a: Action, who: Who): boolean {
-  return who.seat === "super" || isMine(a, who);
+  return who.seat === "super" || (who.lead === true && brk() !== "lead-nobody") || isMine(a, who);
 }
 /* What a refusal of that rule says — the Tracker's api and My work's tick
    (§583) refuse with the one sentence. */
-export const ONLY_CHANGE = "Only its owner or the client's Super user can change this action.";
+export const ONLY_CHANGE = "Only its owner, the lead of one of the client's assignments or the client's Super user can change this action.";
 
 /* THE SHORT NAME ON A ROW is the SPINE's answer now (lib/people.ts) — the
    register's own first-name rule, a clashing pair lengthened, and the whole
@@ -425,11 +434,22 @@ export async function oneAction(c: Q, id: string): Promise<Action | null> {
   return r.rows[0] ? shape(r.rows[0]) : null;
 }
 
-export type Event = { kind: string; from: Status | null; to: Status | null; by: string; at: string };
+/* THE HISTORY (§657, widening §356's): one row on creation, one per status
+   change, and one per MOVEMENT — a carry to another week (`due`), a hand-over
+   (`owner`), a rename (`title`), a move to another topic (`topic`) — with
+   what it was and what it became in `detail` (`{from, to}`, each a string or
+   null). Appended, never edited (§42). */
+export type Event = { kind: string; from: Status | null; to: Status | null; by: string; at: string; detail: Record<string, string | null> };
 export async function eventsOf(c: Q, id: string): Promise<Event[]> {
   const r = await c.query(
-    "SELECT kind, from_status, to_status, by_key, at FROM tracker_events WHERE action_id = $1 ORDER BY at DESC, id DESC", [id]);
-  return r.rows.map((x: any) => ({ kind: str(x.kind), from: x.from_status || null, to: x.to_status || null, by: str(x.by_key), at: str(x.at) }));
+    "SELECT kind, from_status, to_status, by_key, at, detail FROM tracker_events WHERE action_id = $1 ORDER BY at DESC, id DESC", [id]);
+  return r.rows.map((x: any) => ({ kind: str(x.kind), from: x.from_status || null, to: x.to_status || null, by: str(x.by_key), at: str(x.at),
+    detail: x.detail && typeof x.detail === "object" ? x.detail : {} }));
+}
+async function moved(c: Q, id: string, kind: string, from: string | null, to: string | null, by: string): Promise<void> {
+  if ((from || null) === (to || null)) return;          /* setting a thing to what it is writes nothing (§94.5) */
+  await c.query("INSERT INTO tracker_events (action_id, kind, by_key, detail) VALUES ($1, $2, $3, $4::jsonb)",
+    [id, kind, by, JSON.stringify({ from: from || null, to: to || null })]);
 }
 
 /* THE ADD LINE TAKES EVERYTHING (Islam, 2026-09-16): the date, the owner
@@ -443,8 +463,8 @@ export async function addAction(c: Q, a: { title: string; ownerKey: string; by: 
     "INSERT INTO tracker_actions (title, owner_key, created_by, due, first_due, description, topic_id) VALUES ($1, $2, $3, $4, $4, $5, $6) RETURNING " + COLS,
     [title, a.ownerKey, a.by, due, trimmed(a.description || "").slice(0, NOTES_MAX), a.topicId || null]);
   const row = shape(r.rows[0]);
-  await c.query("INSERT INTO tracker_events (action_id, kind, to_status, by_key) VALUES ($1, 'created', $2, $3)",
-    [row.id, row.status, a.by]);
+  await c.query("INSERT INTO tracker_events (action_id, kind, to_status, by_key, detail) VALUES ($1, 'created', $2, $3, $4::jsonb)",
+    [row.id, row.status, a.by, JSON.stringify({ owner: row.ownerKey, due: row.due, topic: row.topicId })]);
   return row;
 }
 
@@ -452,7 +472,10 @@ export type Patch = { title?: string; description?: string; due?: string | null;
 /* THE FIRST DUE DATE IS WRITTEN ONCE (spec 054 §5): set the day the action
    first gets a date and never moved by a reschedule, so the carried count
    cannot be reset by giving an action a new date every Sunday. */
-export async function setFields(c: Q, id: string, p: Patch): Promise<Action | null> {
+export async function setFields(c: Q, id: string, p: Patch, by: string = ""): Promise<Action | null> {
+  /* THE MOVEMENTS GO INTO THE HISTORY (§657): read the row first, so each
+     is written as what it was and what it became, and only where it moved. */
+  const was = by ? await oneAction(c, id) : null;
   const sets: string[] = [], args: unknown[] = [];
   const put = (col: string, v: unknown) => { args.push(v); sets.push(col + " = $" + args.length); };
   if (p.title !== undefined) { const t = oneLine(p.title).slice(0, TITLE_MAX); if (!t) throw new Error("an action needs a title"); put("title", t); }
@@ -468,8 +491,153 @@ export async function setFields(c: Q, id: string, p: Patch): Promise<Action | nu
   sets.push("updated_at = now()");
   args.push(id);
   const r = await c.query("UPDATE tracker_actions SET " + sets.join(", ") + " WHERE id = $" + args.length + " RETURNING " + COLS, args);
-  return r.rows[0] ? shape(r.rows[0]) : null;
+  const now = r.rows[0] ? shape(r.rows[0]) : null;
+  if (was && now) {
+    if (p.due !== undefined) await moved(c, id, "due", was.due, now.due, by);
+    if (p.ownerKey !== undefined) await moved(c, id, "owner", was.ownerKey, now.ownerKey, by);
+    if (p.title !== undefined) await moved(c, id, "title", was.title, now.title, by);
+    if (p.topicId !== undefined) await moved(c, id, "topic", was.topicId, now.topicId, by);
+  }
+  return now;
 }
+
+/* ══ progress (§657) ══════════════════════════════════════════════════
+   Islam: "a progress input box per task so we input what happened in this
+   task on weekly basis". An entry is what somebody WROTE at a review: the
+   words, who, when — and it is the writer's: they alone may edit it (which
+   stamps it edited) or delete it. Anybody in the office may write one; the
+   gate is the module's (decision 2). Newest first, because the latest is
+   what the meeting wants. The latest entry per action is read in one query
+   for the list, which draws it under the row. */
+export const PROGRESS_MAX = 2000;
+export type Progress = { id: string; actionId: string; body: string; by: string; at: string; editedAt: string | null };
+const PCOLS = "id, action_id, body, by_key, at, edited_at";
+function shapeProgress(r: Record<string, any>): Progress {
+  return { id: str(r.id), actionId: str(r.action_id), body: str(r.body), by: str(r.by_key), at: str(r.at), editedAt: r.edited_at ? str(r.edited_at) : null };
+}
+/* §719 (Islam: "opening the task loads and takes time it should open
+   momentarily"): every row's history and progress in one read each, so the
+   page carries each task's opened panel and opening it asks nothing. */
+export async function eventsByAction(c: Q): Promise<Map<string, Event[]>> {
+  const r = await c.query(
+    "SELECT action_id, kind, from_status, to_status, by_key, at, detail FROM tracker_events ORDER BY at DESC, id DESC");
+  const m = new Map<string, Event[]>();
+  for (const x of r.rows as any[]) {
+    const k = str(x.action_id);
+    if (!m.has(k)) m.set(k, []);
+    m.get(k)!.push({ kind: str(x.kind), from: x.from_status || null, to: x.to_status || null, by: str(x.by_key), at: str(x.at),
+      detail: x.detail && typeof x.detail === "object" ? x.detail : {} });
+  }
+  return m;
+}
+export async function progressByAction(c: Q): Promise<Map<string, Progress[]>> {
+  const r = await c.query("SELECT " + PCOLS + " FROM tracker_progress ORDER BY at DESC, id DESC");
+  const m = new Map<string, Progress[]>();
+  for (const x of r.rows as any[]) { const p = shapeProgress(x); if (!m.has(p.actionId)) m.set(p.actionId, []); m.get(p.actionId)!.push(p); }
+  return m;
+}
+export async function progressOf(c: Q, actionId: string): Promise<Progress[]> {
+  const r = await c.query("SELECT " + PCOLS + " FROM tracker_progress WHERE action_id = $1 ORDER BY at DESC, id DESC", [actionId]);
+  return r.rows.map(shapeProgress);
+}
+/* STEPS (§745). Islam: "how shall we add sub tasks for the task? … breaking
+   it down would help in planning" → "go with B, but remove the owner for
+   now. the task already has an owner he shall manage the steps". A step is a
+   line of its task: the words, an optional week (a day, as the task's own
+   week is stored), ticked or not, and its place in the task's order. Steps
+   are the task's — whoever may change the task may change its steps (§42,
+   asked of the stored task by the module). Read for every task in one query,
+   as the progress is (§719), so the page carries them. */
+export const STEP_MAX = 300;
+export type Step = { id: string; actionId: string; title: string; due: string | null; done: boolean; pos: number };
+const SCOLS = "id, action_id, title, to_char(due, 'YYYY-MM-DD') AS due, done_at, pos";
+function shapeStep(r: Record<string, any>): Step {
+  return { id: str(r.id), actionId: str(r.action_id), title: str(r.title), due: r.due ? str(r.due) : null, done: !!r.done_at, pos: Number(r.pos) || 0 };
+}
+export async function stepsByAction(c: Q): Promise<Map<string, Step[]>> {
+  const r = await c.query("SELECT " + SCOLS + " FROM tracker_steps ORDER BY action_id, pos, at, id");
+  const m = new Map<string, Step[]>();
+  for (const x of r.rows as any[]) { const p = shapeStep(x); if (!m.has(p.actionId)) m.set(p.actionId, []); m.get(p.actionId)!.push(p); }
+  return m;
+}
+export async function stepsOf(c: Q, actionId: string): Promise<Step[]> {
+  const r = await c.query("SELECT " + SCOLS + " FROM tracker_steps WHERE action_id = $1 ORDER BY pos, at, id", [actionId]);
+  return r.rows.map(shapeStep);
+}
+/* how many steps each task has and how many are ticked — for the rows of
+   My tasks and Home, which say "2 of 5 steps" (§745) */
+export async function stepTally(c: Q): Promise<Map<string, { n: number; d: number }>> {
+  const r = await c.query("SELECT action_id, count(*)::int AS n, count(done_at)::int AS d FROM tracker_steps GROUP BY action_id");
+  return new Map((r.rows as any[]).map((x) => [str(x.action_id), { n: Number(x.n) || 0, d: Number(x.d) || 0 }]));
+}
+export async function oneStep(c: Q, id: string): Promise<Step | null> {
+  const r = await c.query("SELECT " + SCOLS + " FROM tracker_steps WHERE id = $1", [id]);
+  return r.rows[0] ? shapeStep(r.rows[0]) : null;
+}
+/* a new step goes to the end of the task's order */
+export async function addStep(c: Q, actionId: string, title: string, by: string): Promise<Step> {
+  const t = trimmed(title).slice(0, STEP_MAX);
+  if (!t) throw new Error("a step needs a few words");
+  const r = await c.query(
+    "INSERT INTO tracker_steps (action_id, title, by_key, pos) VALUES ($1, $2, $3, (SELECT COALESCE(MAX(pos), 0) + 1 FROM tracker_steps WHERE action_id = $1)) RETURNING " + SCOLS,
+    [actionId, t, by]);
+  return shapeStep(r.rows[0]);
+}
+export async function renameStep(c: Q, id: string, title: string): Promise<void> {
+  const t = trimmed(title).slice(0, STEP_MAX);
+  if (!t) throw new Error("a step needs a few words");
+  await c.query("UPDATE tracker_steps SET title = $2 WHERE id = $1", [id, t]);
+}
+export async function tickStep(c: Q, id: string, done: boolean): Promise<void> {
+  await c.query("UPDATE tracker_steps SET done_at = CASE WHEN $2 THEN COALESCE(done_at, now()) ELSE NULL END WHERE id = $1", [id, done]);
+}
+export async function setStepDue(c: Q, id: string, due: string | null): Promise<void> {
+  await c.query("UPDATE tracker_steps SET due = $2 WHERE id = $1", [id, due]);
+}
+/* one place up or down the task's order: the step and its neighbour swap */
+export async function moveStep(c: Q, id: string, dir: -1 | 1): Promise<void> {
+  const s = await oneStep(c, id); if (!s) return;
+  const all = await stepsOf(c, s.actionId);
+  const i = all.findIndex((x) => x.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= all.length) return;
+  /* positions written fresh as 1..n, so steps added at the same position never tie */
+  const order = all.map((x) => x.id); [order[i], order[j]] = [order[j], order[i]];
+  for (let k = 0; k < order.length; k++) await c.query("UPDATE tracker_steps SET pos = $2 WHERE id = $1", [order[k], k + 1]);
+}
+export async function deleteStep(c: Q, id: string): Promise<void> {
+  await c.query("DELETE FROM tracker_steps WHERE id = $1", [id]);
+}
+export async function oneProgress(c: Q, id: string): Promise<Progress | null> {
+  const r = await c.query("SELECT " + PCOLS + " FROM tracker_progress WHERE id = $1", [id]);
+  return r.rows[0] ? shapeProgress(r.rows[0]) : null;
+}
+export async function latestProgress(c: Q): Promise<Map<string, Progress>> {
+  const r = await c.query("SELECT DISTINCT ON (action_id) " + PCOLS + " FROM tracker_progress ORDER BY action_id, at DESC, id DESC");
+  return new Map(r.rows.map((x: any) => { const p = shapeProgress(x); return [p.actionId, p]; }));
+}
+export async function addProgress(c: Q, actionId: string, body: string, by: string): Promise<Progress> {
+  const b = trimmed(body).slice(0, PROGRESS_MAX);
+  if (!b) throw new Error("a progress entry needs a few words");
+  const r = await c.query("INSERT INTO tracker_progress (action_id, body, by_key) VALUES ($1, $2, $3) RETURNING " + PCOLS, [actionId, b, by]);
+  return shapeProgress(r.rows[0]);
+}
+export async function editProgress(c: Q, id: string, body: string): Promise<Progress | null> {
+  const b = trimmed(body).slice(0, PROGRESS_MAX);
+  if (!b) throw new Error("a progress entry needs a few words");
+  const r = await c.query("UPDATE tracker_progress SET body = $2, edited_at = CASE WHEN body = $2 THEN edited_at ELSE now() END WHERE id = $1 RETURNING " + PCOLS, [id, b]);
+  return r.rows[0] ? shapeProgress(r.rows[0]) : null;
+}
+export async function deleteProgress(c: Q, id: string): Promise<boolean> {
+  const r = await c.query("DELETE FROM tracker_progress WHERE id = $1", [id]);
+  return (r.rowCount || 0) > 0;
+}
+/* THE WRITER'S ALONE (§657): the check's break hands every entry to anybody
+   past the gate, which must turn checks/tracker.mjs red (§94.5). */
+export function mayChangeProgress(p: Progress, who: Who): boolean {
+  if (brk() === "progress-anyone") return !!who.personKey;
+  return !!who.personKey && p.by === who.personKey;
+}
+export const ONLY_WRITER = "Only the person who wrote a progress entry can change it.";
 
 /* Done stamps when and clears the first due date (spec 054 §5); reopening
    clears the stamp and starts the first due date again from the date the

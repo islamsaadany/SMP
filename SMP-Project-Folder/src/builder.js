@@ -340,8 +340,8 @@ function builderChooserHtml(){
       '<span class="bstat ' + (has ? "has" : "empty") + '">' + (has ? "Has a plan" : "Empty") + '</span>' +
       (confirming
         ? '<span class="bconfirm">Archive today’s plan and start fresh? ' +
-            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Yes, archive it</button>' +
-            '<button class="blink" data-bnofresh="1">Cancel</button></span>'
+            '<button class="blink" data-bnofresh="1">Cancel</button>' +
+            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Archive it</button></span>'
         /* A subject with content gets TWO ways in: Continue picks up a
            paused build exactly where the data stands (§129: progress is the
            plan itself, so nothing was ever "saved" to resume), and Start
@@ -481,11 +481,6 @@ function bformDef(kind, ctx){
         { k:"name", label:"Action", req:true, ph:"The work itself, as a sentence" },
         { k:"owner", label:"Owner", type:"owner" },
         { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
-      ] },
-    clause: { title:"Add a line to “Who we are”",
-      fields:[
-        { k:"label", label:"The lead — the words down the left", req:true, ph:"e.g. We serve" },
-        { k:"text", label:"The line itself", type:"long" }
       ] },
     swot: { title:"Add " + ({ s:"a strength", w:"a weakness", o:"an opportunity", t:"a threat" }[ctx && ctx.q] || "a line"),
       fields:[
@@ -709,13 +704,6 @@ function bApply(kind, ctx, d){
     ac.name = v("name"); ac.owner = v("owner"); ac.due = v("due");
     return true;
   }
-  if (kind === "clause") {
-    var cu = ctx.target === "group" ? GROUP : unitLikeWritable(ctx.target);
-    if (!cu || !Array.isArray(cu.clauses)) return false;
-    cu.clauses.push([v("label"), v("text")]);
-    if (cu.ukey) renumberUnit(cu);
-    return true;
-  }
   if (kind === "swot") {
     var su = unitLikeWritable(ctx.target); if (!su || !su.swot) return false;
     if (!Array.isArray(su.swot[ctx.q])) return false;
@@ -858,6 +846,6 @@ function builderReviewHtml(target){
   return '<div class="brv">' + rows + '</div>' +
     '<p class="bfoot">Finishing closes the band and nothing else — the plan has been live all along. ' +
       'Gaps stay findable on the pages' + (gaps.length ? '' : ' — and there are none') + '.</p>' +
-    '<div class="bfacts"><button class="bprim" data-bdone="1">Finish building</button>' +
-    '<button class="blink" data-brvback="1">Keep building</button></div>';
+    '<div class="bfacts"><button class="blink" data-brvback="1">Keep building</button>' +
+    '<button class="bprim" data-bdone="1">Finish building</button></div>';
 }

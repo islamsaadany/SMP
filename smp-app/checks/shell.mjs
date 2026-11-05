@@ -91,10 +91,15 @@ const MODEL_ANSWER = {
 /* §472: a provider that takes its time, so the working line can be seen
    while it waits (0 = answer at once, which is every other section). */
 let MODEL_DELAY = 0;
+/* §698 — the request with this index (in MODEL_SEEN) is answered with a 400 (a 5xx is "busy" and retried, §458),
+   so a failure can be pressed through; -1 fails none. */
+let MODEL_FAIL_AT = -1;
 const model = http.createServer((req, res) => {
   let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
     try { MODEL_SEEN.push(JSON.parse(b)); } catch { MODEL_SEEN.push(null); }
+    const failThis = MODEL_SEEN.length - 1 === MODEL_FAIL_AT;
     setTimeout(() => {
+      if (failThis) { res.writeHead(400, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: { message: "stand-in failure" } })); return; }
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(MODEL_ANSWER) }] } }] }));
     }, MODEL_DELAY);
@@ -179,7 +184,15 @@ async function section(name, fn) {
      screen while building it. The full run is the one that counts. */
   if (process.env.SMP_ONLY && !name.startsWith(process.env.SMP_ONLY)) return;
   console.log("── " + name);
-  try { await fn(); } catch (e) { fail(name + " — the section died rather than reporting (§215)", (e && e.message ? e.message.split("\n")[0] : e) + " @ " + (page ? page.url() : "")); }
+  try { await fn(); } catch (e) {
+    /* §654 — a section that dies leaves a picture and the page's last words, so the death can be read without a rerun */
+    let last = "";
+    try { if (page && process.env.SMP_SHOTS) { await page.screenshot({ path: process.env.SMP_SHOTS + "/died-" + name.slice(0, 2).replace(/\W/g, "") + ".png" });
+      last = await page.evaluate(() => JSON.stringify({ say: (document.querySelector(".copsay") || {}).textContent || "", msgs: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg, .copsw-main .copmsg")).slice(-3).map((m) => m.className + ":" + m.textContent.trim().slice(0, 90)), flow: (document.querySelector(".copflow, .copsw, .copstart") || {}).className,
+        hit: Array.from(document.querySelectorAll(".copcp-more [data-cop-cp-more], [data-cop-cp-score], [data-cop-chats] [data-cop-chat]")).map((el) => { const r = el.getBoundingClientRect(); const t = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return [el.outerHTML.slice(0, 60), Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height), t ? t.tagName + "." + t.className : null, el.contains(t)]; }) })); } } catch {}
+    if (last) console.log("DIED " + last);
+    if (errs.length) console.log("DIED-ERRS " + errs.slice(-3).join(" | ").slice(0, 600));
+    fail(name + " — the section died rather than reporting (§215)", (e && e.message ? e.message.split("\n")[0] : e) + " @ " + (page ? page.url() : "")); }
   finally { try { if (ctx) await ctx.close(); } catch {} ctx = null; page = null; }
 }
 
@@ -1099,7 +1112,10 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
        and nothing is stored as the person's choice; it folds by itself only
        when the Copilot is tight. */
     check(shut0 && shut0[0] === null && shut0[1] === null && (await railNow()) > 0, "§653 with a draft beside the chat and room for it, the rail stays open — the chat and its versions in view — and nothing is stored as the person's choice", JSON.stringify(shut0) + " " + (await railNow()));
-    await page.setViewportSize({ width: 1000, height: 900 }); await page.waitForTimeout(300);
+    /* §670 — the rule reads layout pixels, so the window is set in them: at
+       the 80% zoom this section runs at, a 1000px layout window is 800px. */
+    const zRail = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
+    await page.setViewportSize({ width: Math.round(1000 * zRail), height: 900 }); await page.waitForTimeout(300);
     const tightRail = await railNow();
     await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(300);
     check(!tightRail && (await railNow()) > 0, "§653 …and folds by itself only when the Copilot is tight (a 1000px window), opening again with room", JSON.stringify({ tightRail, back: await railNow() }));
@@ -1514,11 +1530,40 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       /* §642 (Islam's screenshot: the cards over the chat on a laptop): the
          switch reads the Copilot's own width, not the window's, so at a
          1100px window the cards and the to-do stay beside the chat … */
-      await page.setViewportSize({ width: 1100, height: 900 }); await page.waitForTimeout(250);
-      const lap = await page.evaluate(() => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"), t = document.querySelector(".copftodo");
-        return { cards: getComputedStyle(l).display, todo: getComputedStyle(t).display, beside: l.getBoundingClientRect().left >= c.getBoundingClientRect().right - 1,
-          main: Math.round(parseFloat(getComputedStyle(document.querySelector(".copmain")).width)) }; });
-      check(lap.cards !== "none" && lap.todo !== "none" && lap.beside, "§642 at a 1100px window the cards and the to-do stay beside the chat, as on a laptop", JSON.stringify(lap));
+      /* §670 — REWRITTEN, NOT LOOSENED (§218): what gives way, in order
+         (Islam: the rail before the to-do). At 1440 the three stand together
+         and the chat keeps its default; at 1300 the rail has folded and the
+         three columns still stand, the chat having yielded; at 1100 the
+         to-do has folded to its button too and the cards are still beside
+         the chat; the work beside the chat never goes under 480 while there
+         are two columns. */
+      /* Widths are layout pixels (what the rule reads), so the window is set
+         and the columns measured through the page's zoom. */
+      /* A rail pressed open earlier in this section is kept open for the
+         visit (§653), so the widths are read on a fresh visit of the chat. */
+      await open("/raya-trade/strategy/mobile/copilot/foundation"); await page.click("[data-cop-chats] [data-cop-chat]"); await page.waitForSelector(".copleft", { timeout: 10000 });
+      /* Real window widths; the page is at 80% from 1000px of window up
+         (_shared.css) and at 100% under it, and the rule reads layout pixels,
+         so the columns are measured through whatever zoom applies after the
+         resize. A 1040px window is 1300 layout pixels; 980 is 980. */
+      const lay = async (w) => { await page.setViewportSize({ width: w, height: 900 }); await page.waitForTimeout(350);
+        const z = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
+        return page.evaluate((z) => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"), t = document.querySelector(".copftodo"), r = document.querySelector(".coprails");
+          const bt = document.querySelector('.copfhead [data-cop-sheet="todo"]'), px = (el) => Math.round(el.getBoundingClientRect().width / z);
+          return { cards: getComputedStyle(l).display, todo: getComputedStyle(t).display, beside: l.getBoundingClientRect().left >= c.getBoundingClientRect().right - 1,
+            chat: px(c), work: px(l), rail: r ? px(r) : 0, todoBtn: !!(bt && bt.offsetParent) }; }, z); };
+      const L1440 = await lay(1440), L1300 = await lay(1040), L1100 = await lay(980);
+      check(L1440.cards !== "none" && L1440.todo !== "none" && L1440.beside && L1440.rail > 0 && !L1440.todoBtn, "§670 at 1440 the cards and the to-do stand beside the chat and the rail is open", JSON.stringify(L1440));
+      check(L1300.cards !== "none" && L1300.todo !== "none" && L1300.beside && L1300.rail === 0 && !L1300.todoBtn && L1300.work >= 480 && L1300.chat < 740,
+        "§670 at a 1040px window (1300 layout) the rail has folded first, the three columns still stand, the chat has yielded and the cards keep at least 480px beside it", JSON.stringify(L1300));
+      check(L1100.cards !== "none" && L1100.todo === "none" && L1100.beside && L1100.rail === 0 && L1100.todoBtn && L1100.work >= 388,
+        "§670 at a 980px window the to-do has folded to its button too, and the cards are still beside the chat", JSON.stringify(L1100));
+      await page.click('.copfhead [data-cop-sheet="todo"]'); await page.waitForTimeout(150);
+      const tb = await page.evaluate(() => { const t = document.querySelector(".copftodo"), f = document.querySelector(".copflow"), l = document.querySelector(".copleft"); const a = t.getBoundingClientRect(), b = f.getBoundingClientRect(), w = l.getBoundingClientRect();
+        return { todo: getComputedStyle(t).display, over: Math.abs(a.right - b.right) <= 2 && a.left < w.right && a.right > w.left, shade: getComputedStyle(document.querySelector(".copflow > .copshade")).display }; });
+      await page.click(".copflow > .copshade", { position: { x: 20, y: 20 } }); await page.waitForTimeout(150);
+      check(tb.todo === "flex" && tb.over && tb.shade === "block" && (await page.evaluate(() => getComputedStyle(document.querySelector(".copftodo")).display)) === "none",
+        "§670 …and its button opens the to-do over the work's side of the Copilot, closed by a press beside it", JSON.stringify(tb));
       /* … and only when the Copilot itself has no room do they open over it. */
       await page.setViewportSize({ width: 760, height: 900 }); await page.waitForTimeout(250);
       const n0 = await page.evaluate(() => ({ cards: getComputedStyle(document.querySelector(".copleft")).display, todo: getComputedStyle(document.querySelector(".copftodo")).display,
@@ -2108,6 +2153,16 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     await page.waitForSelector(".copsw-grid", { timeout: 10000 });
     const resCell = await page.evaluate(() => { const rows = Array.from(document.querySelectorAll(".copsw-grid tbody tr")); const r = rows[0]; return r ? r.lastElementChild.textContent.trim() : null; });
     check(resCell === "—", "Internal has no Deep research — its cell reads a dash", resCell);
+    /* §670 — squeezed (Islam's screenshot), the methods grid keeps its shape:
+       row names on one line, column names on two at most, every tick in its column. */
+    const zGrid = await page.evaluate(() => typeof pageZoom === "function" ? pageZoom() : 1);
+    await page.setViewportSize({ width: Math.round(1100 * zGrid), height: 900 }); await page.waitForTimeout(300);
+    const grid = await page.evaluate(() => { const rh = Array.from(document.querySelectorAll(".copsw-grid th[scope=row]")), ch = Array.from(document.querySelectorAll(".copsw-grid thead th"));
+      const lines = (t) => { const r = document.createRange(); r.selectNodeContents(t); const ys = new Set(Array.from(r.getClientRects()).map((b) => Math.round(b.top))); return ys.size || 1; };
+      return { rowLines: rh.map(lines), colLines: ch.map(lines),
+        ticks: document.querySelectorAll(".copsw-grid [data-cop-sw-m]").length, wrapW: Math.round(document.querySelector(".copsw-gridwrap").getBoundingClientRect().width), tableW: Math.round(document.querySelector(".copsw-grid").getBoundingClientRect().width) }; });
+    await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(300);
+    check(grid.rowLines.every((n) => n <= 1) && grid.colLines.every((n) => n <= 2) && grid.ticks === 11, "§670 at a 1100px window the methods grid keeps its shape — row names on one line, column names on two at most, eleven ticks", JSON.stringify(grid));
     for (const m of ["internal|guided", "micro|report", "macro|research"]) { await page.click('[data-cop-sw-m="' + m + '"]'); await page.waitForTimeout(300); }
     await shot("2-methods");
     let sw = await swotRow(id);
@@ -2241,6 +2296,41 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
       "§641 Save and Apply to plan stand only at the pane's foot (Apply waits for a saved version); the check is said in the chat", JSON.stringify(nochat));
     await shot("6-check");
     await heldSweep(page, "SWOT, the check");
+    /* §654 C2 — SAY WHAT TO CHANGE: with a draft on the right the chat's own
+       box asks for a change; it comes back as a proposal in the chat, saying
+       what differs, and the SWOT on the right stays as it was until Use it. */
+    const wKeep = MODEL_ANSWER.w;
+    Object.assign(MODEL_ANSWER, { w: ["Thin online presence", "Slow pricing", "Stock gaps", "Legacy systems"].map(it), reply: "Merged the two overlapping weaknesses into one." });
+    const swBox = await page.evaluate(() => ({ dis: (document.querySelector("[data-cop-text]") || {}).disabled, ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "" }));
+    check(swBox.dis === false && /Say what to change/.test(swBox.ph), "§654 C2 with a draft on the right, the chat's box opens and asks what to change", JSON.stringify(swBox));
+    await page.fill("[data-cop-text]", "Merge the two overlapping weaknesses");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector('[data-cop-sw-prop="use"]', { timeout: 15000 });
+    const prop = await page.evaluate(() => ({ me: Array.from(document.querySelectorAll(".copswchat .copmsg.me")).some((m) => /Merge the two overlapping weaknesses/.test(m.textContent)),
+      reply: /Merged the two overlapping weaknesses/.test((document.querySelector(".copswchat") || {}).textContent || ""),
+      diff: (document.querySelector(".copswdiff") || {}).textContent || "", paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, keep: !!document.querySelector('[data-cop-sw-prop="keep"]') }));
+    check(prop.me && prop.reply && /Weaknesses/.test(prop.diff) && /− Few data skills/.test(prop.diff) && prop.paneW === 5 && prop.keep,
+      "§654 C2 the ask and the answer sit in the chat with what differs (− Few data skills), Use it and Keep as it was offered — and the SWOT on the right still holds five weaknesses", JSON.stringify(prop));
+    await page.click('[data-cop-sw-prop="use"]');
+    await page.waitForFunction(() => document.querySelectorAll(".copswpane .copsw-l.w li").length === 4, null, { timeout: 10000 }).catch(() => {});
+    const used = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, note: Array.from(document.querySelectorAll(".copswchat .copfnote")).map((n) => n.textContent).join("|"),
+      prop: !!document.querySelector("[data-cop-sw-prop]"), check: !!document.querySelector(".copswpane .copsw-check") }));
+    check(used.paneW === 4 && /Used — Merged/.test(used.note) && !used.prop && !used.check, "§654 C2 Use it writes the proposal into the SWOT on the right (four weaknesses), says so in the chat's record, and clears the old check", JSON.stringify(used));
+    /* §698 S3 — one step back: Put back the SWOT as it was, and Use the change again */
+    check(!!(await page.$('[data-cop-sw-putback="back"]')), "§698 after Use it the chat offers Put back the SWOT as it was");
+    await page.click('[data-cop-sw-putback="back"]');
+    await page.waitForFunction(() => document.querySelectorAll(".copswpane .copsw-l.w li").length === 5, null, { timeout: 10000 }).catch(() => {});
+    const pb = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, note: Array.from(document.querySelectorAll(".copswchat .copfnote")).map((n) => n.textContent).join("|"), again: !!document.querySelector('[data-cop-sw-putback="again"]') }));
+    check(pb.paneW === 5 && /Put back as it was/.test(pb.note) && pb.again, "§698 …pressed, the SWOT on the right holds five weaknesses again, the chat says so, and Use the change again is offered", JSON.stringify(pb));
+    await page.click('[data-cop-sw-putback="again"]');
+    await page.waitForFunction(() => document.querySelectorAll(".copswpane .copsw-l.w li").length === 4, null, { timeout: 10000 }).catch(() => {});
+    const ua = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, back: !!document.querySelector('[data-cop-sw-putback="back"]') }));
+    check(ua.paneW === 4 && ua.back, "§698 …and Use the change again brings the change back, with Put back offered again", JSON.stringify(ua));
+    await open("/raya-trade/strategy/mobile/copilot/analysis"); await page.click("[data-cop-chats] [data-cop-chat]");
+    await page.waitForSelector(".copswpane .copsw-l", { timeout: 15000 });
+    const again = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, me: Array.from(document.querySelectorAll(".copswchat .copmsg.me")).filter((m) => /Merge the two/.test(m.textContent)).length }));
+    check(again.paneW === 4 && again.me === 1, "§654 C2 …and after a reload the ask and the change are still there — stored", JSON.stringify(again));
+    Object.assign(MODEL_ANSWER, { w: wKeep });
     const plan0 = await page.evaluate(() => { try { return JSON.stringify(UNITS.mobile.swot); } catch (e) { return String(e); } });
     await page.click("[data-cop-swfoot] [data-cop-sw-finish]");
     await page.waitForFunction(() => /Saved as v1/.test((document.querySelector("[data-cop-swstate]") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
@@ -2304,6 +2394,18 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
        the first card, then the workflow's. */
     check(/Mobile/.test(st.head) && /Analysis/.test(st.head) && st.cards.length === 2 && /Start from the existing plan/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
       "§639, §653 the area opens on its start screen: a box to just ask, the plan card first and the SWOT workflow as a card under it, no menu, at the reading width", JSON.stringify(st));
+    /* §691 — the SWOT's four ways in, said on its card as chips that are words, not buttons */
+    const ways = await page.evaluate(() => ({ chips: Array.from(document.querySelectorAll(".copstart [data-cop-newchat] .copway")).map((x) => x.textContent), btns: document.querySelectorAll(".copstart [data-cop-newchat] button").length,
+      note: (document.querySelector(".copstart [data-cop-newchat] .copwaysk") || {}).textContent || "" }));
+    check(ways.chips.join("|") === "Guided questions|Template|Ready reports|Deep research" && ways.btns === 0 && /one or more per area/.test(ways.note), "§691 the SWOT card says its four ways in as chips, words not buttons, with the line that the grid decides per area", JSON.stringify(ways));
+    /* §683 — Send is not there until something is typed, on the start
+       screen as in every chat (§652). */
+    const sendVis0 = await page.evaluate(() => { const b = document.querySelector("[data-cop-startsend]"); return !!b && getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 0; });
+    await page.fill("[data-cop-starttext]", "x"); await page.dispatchEvent("[data-cop-starttext]", "input");
+    const sendVis1 = await page.evaluate(() => { const b = document.querySelector("[data-cop-startsend]"); return !!b && getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 0; });
+    await page.fill("[data-cop-starttext]", ""); await page.dispatchEvent("[data-cop-starttext]", "input");
+    const sendVis2 = await page.evaluate(() => { const b = document.querySelector("[data-cop-startsend]"); return !!b && getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 0; });
+    check(!sendVis0 && sendVis1 && !sendVis2, "§683 the start screen's Send is not there until something is typed, and goes again when the box is emptied", JSON.stringify([sendVis0, sendVis1, sendVis2]));
     /* §634: Competitive Discipline and the capabilities ride along too —
        set on the page's own objects, as their pages would set them. */
     await page.evaluate(() => {
@@ -2324,6 +2426,22 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     const row = (await asTenant(tenantId, (c) => c.query("select c.section, c.extra, (select string_agg(m.body, '|' order by m.id) from copilot_messages m where m.chat_id = c.id and m.who = 'person') said from copilot_chats c order by c.created_at desc limit 1"))).rows[0];
     check(row && row.section === "analysis" && row.extra && row.extra.free === true && row.said === "Which weakness hurts us most?",
       "…kept in its area, marked free, with what was typed as its first message, said once", JSON.stringify(row));
+    /* §744 — THE LINE DROPS WHILE THE ANSWER IS WRITTEN (Islam's
+       ERR_NETWORK_CHANGED): the message reaches the server and is answered,
+       but the page's request is cut off. The page watches and shows the answer. */
+    const ai0 = await page.$$eval("[data-cop-msgs] .copmsg.ai", (a) => a.length);
+    const cut = async (route) => { const req = route.request(); if (req.method() === "POST" && /"act":"say"/.test(req.postData() || "")) { await route.fetch().catch(() => {}); await route.abort("internetdisconnected"); } else await route.continue(); };
+    await page.route("**/*", cut);
+    await page.fill("[data-cop-text]", "And the second weakness?");
+    await page.press("[data-cop-text]", "Enter");
+    await page.waitForFunction(() => /Watching for it/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const watching = await page.evaluate(() => (document.querySelector(".copsay") || {}).textContent || "");
+    await page.unroute("**/*", cut);
+    await page.waitForFunction((n) => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length > n, ai0, { timeout: 30000 }).catch(() => {});
+    const after = await page.evaluate(() => ({ ai: document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length, say: (document.querySelector(".copsay") || {}).textContent || "", box: (document.querySelector("[data-cop-text]") || {}).value || "" }));
+    check(/connection dropped/.test(watching) && after.ai > ai0 && !/Watching/.test(after.say) && after.box === "",
+      "§744 when the line drops while the answer is written, the page says so, watches, and shows the answer when it lands — what was typed is not put back to be sent twice", JSON.stringify({ watching, after, ai0 }));
+    errs = errs.filter((e) => !/ERR_INTERNET_DISCONNECTED|net::ERR_FAILED|Failed to fetch|NetworkError/i.test(e));
     await page.locator("[data-cop-home]:visible").first().click();
     check(!!(await page.$("[data-cop-startscreen]")), "§639 + New chat brings the start screen back");
     /* §640 THE BOX TAKES THE MATERIAL: notes picked there open a free chat
@@ -2355,7 +2473,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
   }
 });
 
-await section("3k · the How we compete chat: scores, the discipline, values, the table, the save (§493)", async () => {
+await section("3k · the How we compete chat: scores, the discipline, values, the table, the save (§493; split three ways §654 C1)", async () => {
   const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/cd-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off mockup
      (design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
@@ -2376,15 +2494,42 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/compete");
+    /* §697 S11 — the plan card, exactly when the plan holds a discipline and values */
+    await page.waitForSelector(".copstart [data-cop-newchat]", { timeout: 15000 });
+    const cps = await page.evaluate(() => { let w = null; try { w = (typeof UNITS !== "undefined" && UNITS.mobile && UNITS.mobile.compete) || (typeof competeWritable === "function" ? competeWritable("mobile") : null); } catch (e) {} const held = !!(w && w.discipline && (w.values || []).some((v) => v && v.title));
+      const c = document.querySelector('.copstart [data-cop-newplan="compete"]'); return { held, card: !!c, t: c ? c.textContent : "" }; });
+    check(cps.card === cps.held && (!cps.held || /Start from the existing plan/.test(cps.t) && /values/.test(cps.t)), "§697 Competitive Discipline's start screen offers Start from the existing plan exactly when the plan holds a discipline and values", JSON.stringify(cps));
+    if (cps.held) {
+      await page.click('.copstart [data-cop-newplan="compete"]');
+      await page.waitForSelector("[data-cop-cppane] table.cmptab", { timeout: 15000 });
+      const fp = await page.evaluate(() => ({ said: /Started from the plan/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), score: !!document.querySelector("[data-cop-cp-score]"), cells: document.querySelectorAll("[data-cop-cp-cell]").length,
+        step: (document.querySelector(".copfhead small") || {}).textContent || "", save: (document.querySelector("[data-cop-cp-finish]") || {}).getAttribute ? document.querySelector("[data-cop-cp-finish]").getAttribute("aria-disabled") : null }));
+      check(fp.said && fp.score && fp.cells > 0 && fp.save !== "true", "§697 …pressed, the chat opens at the plan's table, editable, Score them offered as a check, Save live", JSON.stringify(fp));
+      await open("/raya-trade/strategy/mobile/copilot/compete");
+    }
     await newWorkflow();
-    await page.waitForSelector("[data-cop-cp-sc], [data-cop-cp-score]", { timeout: 15000 });
-    if (!(await page.$("[data-cop-cp-sc]")) && (await page.$("[data-cop-cp-score]"))) { await page.click("[data-cop-cp-score]"); await page.waitForSelector("[data-cop-cp-sc]", { timeout: 15000 }); }
+    /* A new chat scores itself, so "Score them" is on the page only for a
+       moment: wait for the scores, and press the button only if they never
+       come on their own (a click on a button that has just gone waits out
+       its whole timeout — the §654 C1 run's flake). */
+    await page.waitForSelector("[data-cop-cp-sc]", { timeout: 20000 }).catch(async () => {
+      if (await page.$("[data-cop-cp-score]")) { await page.click("[data-cop-cp-score]"); await page.waitForSelector("[data-cop-cp-sc]", { timeout: 15000 }); } });
     let r = await row();
     check(!!r && r.s && r.s.phase === "discipline", "a new chat scores itself and moves on to the discipline", JSON.stringify(r && r.s && r.s.phase));
     const rec = await page.evaluate(() => (document.querySelector('[data-cop-cp-choose].rec') || {}).getAttribute ? document.querySelector('[data-cop-cp-choose].rec').getAttribute("data-cop-cp-choose") : null);
     check(rec === "btc", "the page recommends the discipline the scores lead with", rec);
     const few = await page.$$eval("[data-cop-cp-sc]", (a) => a.length);
     check(few === 9, "the market table opens on three factors, a pill per discipline", few);
+    /* §654 C1 — the split: the scores sit in the pane on the right, the
+       conversation on the left in the order it happened, the to-do beside;
+       the chat's own box is held until there is a table to change. */
+    const sp = await page.evaluate(() => ({
+      pane: !!document.querySelector("[data-cop-cppane] [data-cop-cp-sc]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-cp-sc]"),
+      todo: !!document.querySelector(".copftodo [data-cop-cp-todo]"), step: (document.querySelector(".copfhead small") || {}).textContent || "",
+      me: (document.querySelector("[data-cop-msgs] .copmsg.me") || {}).textContent || "", box: (document.querySelector("[data-cop-text]") || {}).disabled,
+      foot: (document.querySelector("[data-cop-cpfoot]") || {}).textContent || "", save: (document.querySelector("[data-cop-cp-finish]") || {}).getAttribute ? document.querySelector("[data-cop-cp-finish]").getAttribute("data-tip") : null }));
+    check(sp.pane && !sp.inChat && sp.todo && /The discipline/.test(sp.step) && /Score them/.test(sp.me) && sp.box === true && /v1/.test(sp.foot) && /in progress/.test(sp.foot) && /Pick the values first/.test(String(sp.save)),
+      "§654 C1 the scores are on the right, the to-do beside, the chat reads 'Score them' as what happened, its box held until there is a table, and Save held saying to pick the values first", JSON.stringify(sp));
     await page.click(".copcp-more [data-cop-cp-more]"); await page.waitForTimeout(300);
     const all = await page.$$eval("[data-cop-cp-sc]", (a) => a.length);
     check(all === CP_M.length * 3, "…and + more shows every market factor", all);
@@ -2397,6 +2542,17 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await page.click('[data-cop-cp-choose="btc"]');
     await page.waitForSelector("[data-cop-cp-pick]", { timeout: 15000 });
     check((await page.$$eval("[data-cop-cp-pick]", (a) => a.length)) === 5, "choosing the discipline brings five value cards");
+    /* §694 S2 — the scores settle at the choice, and the choice can be
+       changed: a link under the recommendation brings the three back with
+       what goes with the change; Never mind folds them again. */
+    const s2a = await page.evaluate(() => ({ live: document.querySelectorAll("[data-cop-cppane] button[data-cop-cp-sc]").length, link: document.querySelectorAll("[data-cop-cp-unchoose]").length, opts: document.querySelectorAll("[data-cop-cp-choose]").length,
+      settled: /Settled at the choice/.test((document.querySelector("[data-cop-cppane]") || {}).textContent || "") }));
+    check(s2a.live === 0 && s2a.link >= 1 && s2a.opts === 0 && s2a.settled, "§694 after the choice the scores are settled and say so, and 'Choose a different discipline' stands under the recommendation", JSON.stringify(s2a));
+    await page.click("[data-cop-msgs] [data-cop-cp-unchoose]"); await page.waitForTimeout(200);
+    const s2b = await page.evaluate(() => ({ opts: document.querySelectorAll("[data-cop-cp-choose]").length, note: /clears the values and the table/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), never: !!document.querySelector(".copopt[data-cop-cp-unchoose]") }));
+    check(s2b.opts === 3 && s2b.note && s2b.never, "§694 …pressed, the three choices come back with the line on what a change clears, and Never mind", JSON.stringify(s2b));
+    await page.click(".copopt[data-cop-cp-unchoose]"); await page.waitForTimeout(200);
+    check((await page.$$eval("[data-cop-cp-choose]", (a) => a.length)) === 0 && (await page.$$eval("[data-cop-cp-pick]", (a) => a.length)) === 5, "§694 …and Never mind folds them, the values untouched");
     await page.click('[data-cop-cp-pick="0"]'); await page.waitForTimeout(400);
     await page.click('[data-cop-cp-pick="2"]'); await page.waitForTimeout(400);
     await page.click("[data-cop-cp-use]");
@@ -2405,11 +2561,25 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(r.s.table && r.s.table.discipline === "btc" && r.s.table.values.map((v) => v.title).join() === "Hassle-free,Wide reach", "the two ticked values become the table, stored", JSON.stringify(r.s.table && r.s.table.values.map((v) => v.title)));
     const cells = await page.$$eval("[data-cop-cp-cell]", (a) => a.length);
     check(cells === 6, "every cell of the table is editable before saving", cells);
-    await page.fill("[data-cop-cp-ask]", "Rename the first value");
-    await page.click("[data-cop-cp-refine]");
+    const tb = await page.evaluate(() => ({ pane: !!document.querySelector("[data-cop-cppane] table.cmptab"), fold: (document.querySelector('[data-cop-pfold="cpvals"]') || {}).textContent || "",
+      cards: document.querySelectorAll("[data-cop-cp-pick]").length, box: (document.querySelector("[data-cop-text]") || {}).disabled, ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "" }));
+    check(tb.pane && /The values/.test(tb.fold) && /5 offered · 2 ticked/.test(tb.fold) && tb.cards === 0 && tb.box === false && /Ask for a change/.test(tb.ph),
+      "§654 C1 the table is on the right; the cards fold where they happened as 'The values · 5 offered · 2 ticked'; the chat's box opens, asking for a change", JSON.stringify(tb));
+    await page.click('[data-cop-pfold="cpvals"]'); await page.waitForTimeout(200);
+    const fo = await page.$$eval(".coppf.open .copcp-cards.small .copcp-card", (a) => a.length);
+    check(fo === 5, "§654 C1 …and opens again on a press, showing the five cards as they were ticked", fo);
+    /* the ask goes through the chat's own box, and stays in the chat in order */
+    await page.fill("[data-cop-text]", "Rename the first value");
+    await page.keyboard.press("Enter");
     await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
     const alts = await page.$$eval("[data-cop-cp-alt]", (a) => a.map((x) => x.textContent));
     check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
+    const lg = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me, [data-cop-msgs] .copmsg.ai")).slice(-2).map((m) => m.className.replace(/.*\b(me|ai)\b.*/, "$1") + ":" + m.textContent.trim().slice(0, 40)));
+    check(lg.length === 2 && /^me:.*Rename the first value/.test(lg[0]) && /^ai:.*Done — the first value is renamed/.test(lg[1]), "§654 C1 the ask and its answer stay in the chat, in order", JSON.stringify(lg));
+    await open("/raya-trade/strategy/mobile/copilot/compete"); await page.click("[data-cop-chats] [data-cop-chat]");
+    await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
+    const lg2 = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent.trim()).filter((t) => /Rename the first value/.test(t)).length);
+    check(lg2 === 1, "§654 C1 …and after a reload, still there — stored, not this visit's memory", lg2);
     await heldSweep(page, "Competitive Discipline, before the save");
     await shot("1-before-save");
     /* §654 B1 — REWRITTEN, NOT LOOSENED (§218): Save keeps the version and
@@ -2422,8 +2592,10 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await page.waitForTimeout(1500);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Competitive Discipline%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Competitive Discipline — Mobile" && dv.n === 1, "Save writes How we compete — Mobile v1", JSON.stringify(dv));
-    const cpSv = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.compete || null) === b, line: /not on the plan yet/.test((document.querySelector(".copsw-main") || {}).textContent || ""), apply: !!document.querySelector("[data-cop-cp-apply]") }), cpBefore);
-    check(cpSv.same && cpSv.line && cpSv.apply, "§654 Save leaves the plan's Competitive Discipline exactly as it was — the chat says it is not on the plan yet and offers Apply to plan", JSON.stringify(cpSv));
+    const cpSv = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.compete || null) === b, line: /v1 saved.*not on the plan yet/.test((document.querySelector("[data-cop-cpfoot]") || {}).textContent || ""),
+      apply: (document.querySelector("[data-cop-cp-apply]") || {}).getAttribute ? document.querySelector("[data-cop-cp-apply]").getAttribute("aria-disabled") : "none", saveHeld: (document.querySelector("[data-cop-cp-finish]") || {}).getAttribute ? document.querySelector("[data-cop-cp-finish]").getAttribute("data-tip") : null,
+      said: /Saved as .*v1.*under Deliverables/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || "") }), cpBefore);
+    check(cpSv.same && cpSv.line && cpSv.apply !== "true" && /Nothing has changed/.test(String(cpSv.saveHeld)) && cpSv.said, "§654 Save leaves the plan's Competitive Discipline exactly as it was — the pane's foot says v1 saved · not on the plan yet with Apply to plan live, Save held, and the chat says where the version is", JSON.stringify(cpSv));
     await page.click("[data-cop-cp-apply]");
     await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
     const cpAsk = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
@@ -2435,10 +2607,18 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(JSON.stringify(plan) === JSON.stringify(["btc", 5]), "…and Yes writes the table into the plan's Competitive Discipline", JSON.stringify(plan));
     const cpAr = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), cpArch.n);
     check(cpArch.had ? cpAr.includes("compete:mobile") && !cpAr.includes("unit:mobile") : cpAr.length === 0, "§654 …having archived the plan's Competitive Discipline as its own kind (or nothing, where the plan held none)", JSON.stringify({ cpAr, had: cpArch.had }));
-    const cpOn = await page.evaluate(() => ({ line: /It is on the plan\./.test((document.querySelector(".copsw-main") || {}).textContent || ""), again: /again/.test((document.querySelector("[data-cop-cp-apply]") || {}).textContent || "") }));
-    check(cpOn.line && cpOn.again, "§654 …and the chat says it is on the plan, offering Apply again", JSON.stringify(cpOn));
+    const cpOn = await page.evaluate(() => ({ line: /v1 on the plan/.test((document.querySelector("[data-cop-cpfoot]") || {}).textContent || ""), again: /again/.test((document.querySelector("[data-cop-cp-apply]") || {}).textContent || "") }));
+    check(cpOn.line && cpOn.again, "§654 …and the pane's foot says v1 on the plan, offering Apply again", JSON.stringify(cpOn));
+    /* §694 S9 — the onward path: one line after Apply names the next step
+       and opens its start screen in this place. */
+    const nx = await page.evaluate(() => { const n = document.querySelector("[data-cop-msgs] [data-cop-next]"); return n ? { t: n.textContent, go: (n.querySelector("[data-cop-go]") || {}).getAttribute ? n.querySelector("[data-cop-go]").getAttribute("data-cop-go") : null } : null; });
+    check(!!nx && /Next/.test(nx.t) && /Directions/.test(nx.t) && nx.go === "directions", "§694 after Apply the chat says Next: Directions, with a button to open it", JSON.stringify(nx));
     await shot("2-saved");
-    check(!(await page.$("[data-cop-cp-finish]")), "a saved chat offers no Save again");
+    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-cp-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649)");
+    await page.click('[data-cop-msgs] [data-cop-next] [data-cop-go="directions"]');
+    await page.waitForSelector("[data-cop-startscreen]", { timeout: 10000 });
+    const went = await page.evaluate(() => ({ h: (document.querySelector("[data-cop-startscreen] .copstarth") || {}).textContent || "", sec: typeof CURSEC !== "undefined" ? CURSEC.copilot : null }));
+    check(/Directions/.test(went.h) && went.sec === "directions", "§694 …which opens the Directions start screen in this place", JSON.stringify(went));
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
@@ -2486,6 +2666,17 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     check((r.s.options || []).some((o) => o.title === "Upper Egypt"), "…and the Copilot's own are added beside them");
     const marks = await page.$$eval(".copdv-mk.plan", (a) => a.length);
     check(marks === before.length, "a row from the plan says so on the page", marks);
+    /* §675 — the split: the Directions table in the pane on the right, the
+       to-do beside, the chat reading what happened, its box live for an
+       ask, Go ahead under the table, Save held saying why. */
+    const spl = await page.evaluate(() => ({ pane: !!document.querySelector("[data-cop-dvpane] [data-cop-dv-sc]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-dv-sc]"),
+      todo: !!document.querySelector(".copftodo [data-cop-dv-todo]"), step: (document.querySelector(".copfhead small") || {}).textContent || "",
+      me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent.replace(/^.*?\n?/, "").trim()).join("|"),
+      ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "", dis: (document.querySelector("[data-cop-text]") || {}).disabled,
+      goall: !!document.querySelector("[data-cop-dvpane] [data-cop-dv-go-all]"), foot: (document.querySelector("[data-cop-dvfoot]") || {}).textContent || "",
+      save: (document.querySelector("[data-cop-dv-finish]") || {}).getAttribute ? document.querySelector("[data-cop-dv-finish]").getAttribute("data-tip") : null }));
+    check(spl.pane && !spl.inChat && spl.todo && /The Directions/.test(spl.step) && /Start from the existing ones/.test(spl.me) && /Suggest Directions/.test(spl.me) && /Ask for something/.test(spl.ph) && spl.dis === false && spl.goall && /v1/.test(spl.foot) && /in progress/.test(spl.foot) && /Go ahead under the Directions first/.test(String(spl.save)),
+      "§675 the Directions stand in the pane on the right with Go ahead under them, the to-do beside; the chat reads 'Start from the existing ones' and 'Suggest Directions' as what happened, its box asks for more, and Save is held saying to press Go ahead first", JSON.stringify(spl));
     const i = r.s.options.findIndex((o) => o.title === "Upper Egypt");
     const sc0 = await page.evaluate((i) => document.querySelectorAll("td.copdv-score")[i].textContent, i);
     check(sc0 === "64", "a Direction's score is drawn, Urgency × Importance × Ease", sc0);
@@ -2504,8 +2695,9 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     if (iPlan > -1 && !r.s.options[iPlan].go) {
       const unscored = !(r.s.options[iPlan].urgency && r.s.options[iPlan].importance && r.s.options[iPlan].ease);
       const heldTick = await page.evaluate((i) => { const b = document.querySelector('[data-cop-dv-go="' + i + '"]'); return b ? { held: b.getAttribute("aria-disabled"), tip: b.getAttribute("data-tip") || "" } : null; }, iPlan);
-      check(!!heldTick && (unscored ? heldTick.held === "true" && /Score it first/.test(heldTick.tip) : heldTick.held !== "true"),
-        unscored ? "§654 a plan row with no scores has its go-ahead tick held, saying to score it first" : "§654 a plan row carries the scores the plan holds, so its tick is live", JSON.stringify({ unscored, heldTick, o: r.s.options[iPlan] }));
+      check(!!heldTick && (unscored ? heldTick.held === "true" && /Score it first — or leave it unticked; it stays on the plan as it is/.test(heldTick.tip) : heldTick.held !== "true"),
+        unscored ? "§654 a plan row with no scores has its go-ahead tick held, saying to score it first — §698: or leave it unticked, as it stays on the plan" : "§654 a plan row carries the scores the plan holds, so its tick is live", JSON.stringify({ unscored, heldTick, o: r.s.options[iPlan] }));
+      if (unscored) check(/carr(y|ies) no scores/.test((await page.evaluate(() => (document.querySelector("[data-cop-msgs]") || {}).textContent || ""))), "§698 …and the chat says how many of the plan's rows carry no scores, and that leaving them unticked keeps them");
       if (unscored) { for (const k of ["urgency", "importance", "ease"]) { if (!r.s.options[iPlan][k]) { await page.click('[data-cop-dv-sc="' + iPlan + '|' + k + '"]'); await page.waitForTimeout(500); } } r = await row(); }
       await page.click('[data-cop-dv-go="' + iPlan + '"]'); await page.waitForTimeout(700);
     }
@@ -2515,7 +2707,40 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await page.waitForTimeout(1500);
     r = await row();
     check(r.s.chose === true, "Go ahead stores the choice", JSON.stringify(r.s.chose));
+    const fld = await page.evaluate(() => ({ fold: (document.querySelector('[data-cop-pfold="dvopts"]') || {}).textContent || "", me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), scLive: document.querySelectorAll("[data-cop-dvpane] button[data-cop-dv-sc]").length, goall: !!document.querySelector("[data-cop-dv-go-all]") }));
+    check(/The Directions/.test(fld.fold) && new RegExp(r.s.options.length + " offered · " + goN + " ticked").test(fld.fold) && /Agreed/.test(fld.fold) && new RegExp("Go ahead with these " + goN).test(fld.me) && fld.scLive === 0 && !fld.goall,
+      "§675 …the Directions fold in the chat where they were agreed, the press reads as the person's line, and the scores settle (no Go ahead left)", JSON.stringify(fld));
+    await page.click('[data-cop-pfold="dvopts"]'); await page.waitForTimeout(200);
+    const fo2 = await page.$$eval(".coppf.open .copdul li", (a) => a.length);
+    check(fo2 === r.s.options.length, "§675 …and open again on a press, one line per Direction with its score and whether it goes ahead", fo2);
     const withCaps = !!r.s.withCaps;
+    /* §694 S1 — Go ahead can be undone: Change the Directions on the card
+       head (and in the open fold) unsets the choice, keeps what is ticked,
+       scored and owned, and keeps the Capabilities suggested so far. */
+    if (withCaps) await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
+    const capsBefore = ((await row()).s.caps || []).length;
+    const s1a = await page.evaluate(() => ({ head: !!document.querySelector("[data-cop-dvpane] h3 [data-cop-dv-unchoose]"), fold: !!document.querySelector(".coppf.open [data-cop-dv-unchoose]") }));
+    check(s1a.head && s1a.fold, "§694 Change the Directions stands on the card head and in the open fold", JSON.stringify(s1a));
+    await page.click("[data-cop-dvpane] h3 [data-cop-dv-unchoose]");
+    await page.waitForSelector("[data-cop-dv-go-all]", { timeout: 10000 });
+    await page.waitForTimeout(500);
+    r = await row();
+    const s1b = await page.evaluate(() => ({ scLive: document.querySelectorAll("[data-cop-dvpane] button[data-cop-dv-sc]").length, said: /open again/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), fold: !!document.querySelector('[data-cop-pfold="dvopts"]'),
+      kept: /suggested for the earlier set/i.test((document.querySelector("[data-cop-dvpane]") || {}).textContent || ""), step: (document.querySelector(".copfhead small") || {}).textContent || "" }));
+    check(r.s.chose === false && r.s.options.filter((o) => o.go).length === goN && (r.s.caps || []).length === capsBefore && s1b.scLive > 0 && s1b.said && !s1b.fold && (!withCaps || s1b.kept) && /Directions/.test(s1b.step),
+      "§694 …pressed: the choice is unset, the ticks and scores stay and are pressable again, the chat says so, the Capabilities are kept and marked for the earlier set", JSON.stringify({ chose: r.s.chose, go: r.s.options.filter((o) => o.go).length, caps: (r.s.caps || []).length, s1b }));
+    /* §694 S12 — with this chat unfinished, the start screen names it. */
+    await page.locator("[data-cop-home]:visible").first().click();
+    await page.waitForSelector("[data-cop-startscreen]", { timeout: 10000 });
+    const unf = await page.evaluate(() => { const u = document.querySelector("[data-cop-startscreen] [data-cop-unfinished]"); const cards = document.querySelector("[data-cop-startscreen] .copstartcards");
+      return u ? { t: u.textContent, btn: !!u.querySelector("[data-cop-chat]"), above: cards ? u.getBoundingClientRect().bottom <= cards.getBoundingClientRect().top : false } : null; });
+    check(!!unf && /Directions/.test(unf.t) && / of \d+ done/.test(unf.t) && unf.btn && unf.above, "§694 the start screen names the unfinished chat with its progress, Continue it above the cards", JSON.stringify(unf));
+    await page.click("[data-cop-startscreen] [data-cop-unfinished] [data-cop-chat]");
+    await page.waitForSelector("[data-cop-dv-go-all]", { timeout: 10000 });
+    await page.click("[data-cop-dv-go-all]");
+    await page.waitForTimeout(1500);
+    r = await row();
+    check(r.s.chose === true && (r.s.caps || []).length === capsBefore, "§694 Continue it opens the chat, and Go ahead again stands with the same Capabilities", JSON.stringify({ chose: r.s.chose, caps: (r.s.caps || []).length }));
     if (withCaps) {
       await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
       r = await row();
@@ -2547,8 +2772,9 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await page.waitForTimeout(2000);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Directions%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Directions — Mobile" && dv.n === 1, "Save writes Directions — Mobile v1", JSON.stringify(dv));
-    const sv0 = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.items) === b, line: /not on the plan yet/.test((document.querySelector(".copsw-main") || {}).textContent || ""), apply: !!document.querySelector("[data-cop-dv-apply]") }), planBefore);
-    check(sv0.same && sv0.line && sv0.apply, "§645 Save keeps a version and leaves the plan exactly as it was — the chat says it is not on the plan yet and offers Apply to plan", JSON.stringify(sv0));
+    const sv0 = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.items) === b, line: /v1 saved.*not on the plan yet/.test((document.querySelector("[data-cop-dvfoot]") || {}).textContent || ""),
+      apply: (document.querySelector("[data-cop-dv-apply]") || {}).getAttribute ? document.querySelector("[data-cop-dv-apply]").getAttribute("aria-disabled") : "none", said: /Saved as .*v1.*under Deliverables/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || "") }), planBefore);
+    check(sv0.same && sv0.line && sv0.apply !== "true" && sv0.said, "§645 Save keeps a version and leaves the plan exactly as it was — the pane's foot says v1 saved · not on the plan yet with Apply to plan live, and the chat says where the version is (§675)", JSON.stringify(sv0));
     await page.click("[data-cop-dv-apply]");
     await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
     const askDv = await page.evaluate((b) => ({ t: (document.getElementById("modal-b") || {}).textContent || "", same: JSON.stringify(UNITS.mobile.items) === b }), planBefore);
@@ -2565,8 +2791,10 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await open("/raya-trade/strategy/mobile/copilot/directions");
     await page.click("[data-cop-chats] [data-cop-chat]");
     await page.waitForSelector("[data-cop-dv-apply]", { timeout: 10000 }).catch(() => {});
-    const re = await page.evaluate(() => ({ line: /It is on the plan\./.test((document.querySelector(".copsw-main") || {}).textContent || ""), again: (document.querySelector("[data-cop-dv-apply]") || {}).textContent || "" }));
-    check(re.line && /again/.test(re.again), "§654 after a reload the chat still says v1 is on the plan — the note on the deliverable, not this visit's memory", JSON.stringify(re));
+    const re = await page.evaluate(() => ({ line: /v1 on the plan/.test((document.querySelector("[data-cop-dvfoot]") || {}).textContent || ""), again: (document.querySelector("[data-cop-dv-apply]") || {}).textContent || "" }));
+    check(re.line && /again/.test(re.again), "§654 after a reload the pane's foot still says v1 on the plan — the note on the deliverable, not this visit's memory (§675)", JSON.stringify(re));
+    const nx2 = await page.evaluate(() => { const n = document.querySelector("[data-cop-msgs] [data-cop-next]"); return n ? { t: n.textContent, go: (n.querySelector("[data-cop-go]") || {}).getAttribute ? n.querySelector("[data-cop-go]").getAttribute("data-cop-go") : null } : null; });
+    check(!!nx2 && /Execution/.test(nx2.t) && nx2.go === "execution", "§694 after Apply the Directions chat says Next: Execution", JSON.stringify(nx2));
     await shot("2-applied");
     const after = await page.evaluate(() => UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name, u: p.urgency })));
     const kept = r.s.options.filter((o) => o.go && o.planId);
@@ -2578,7 +2806,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       const own = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; return c ? { head: c.head || null, fn: c.fn || null } : null; });
       check(!!own && own.head === CAP_OWNER && !own.fn, "§626 …and its Owner is the person picked, written as its owner and not as a function", JSON.stringify(own) + " want " + CAP_OWNER);
     }
-    check(!(await page.$("[data-cop-dv-finish]")), "a saved chat offers no Save again");
+    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-dv-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §675)");
     check(goN > 0, "something went ahead", goN);
     if (!withCaps) {
       /* Capabilities are their own layer here, so they are their own section
@@ -2641,41 +2869,111 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/execution");
+    /* §697 S11 — two roads on the start screen: Refine the existing execution
+       (when some item carries measures) and Build from the Directions */
+    await page.waitForSelector(".copstart [data-cop-newchat]", { timeout: 15000 });
+    const sc = await page.evaluate(() => { const held = (UNITS.mobile.items || []).some((p) => p && p.name && ((p.measures || []).some((m) => m && m.name) || (p.tactics || []).some((x) => x && x.name)));
+      const rf = document.querySelector('.copstart [data-cop-newplan="execution"]'); return { held, refine: !!rf, refineT: rf ? rf.textContent : "", build: (document.querySelector(".copstart [data-cop-newchat]") || {}).textContent || "" }; });
+    check(sc.refine === sc.held && (!sc.held || /Refine the existing execution/.test(sc.refineT) && /with measures/.test(sc.refineT)) && /Build from the Directions/.test(sc.build), "§697 Execution's start screen offers Refine the existing execution when the plan holds measures, and Build from the Directions", JSON.stringify(sc));
     await newWorkflow();
     await page.waitForSelector("[data-cop-ex-period]", { timeout: 15000 });
     let r = await row();
     check(!!r && r.s && !r.s.period && (r.s.items || []).length > 0, "a new Execution chat asks the period first, with the plan's items listed", JSON.stringify(r && r.s && { p: r.s.period, n: (r.s.items || []).length }));
     check(!(await page.$("[data-cop-ex-draft]")), "…and offers no drafting before the period is chosen");
     await page.click('[data-cop-ex-period="rest"]');
-    await page.waitForSelector("[data-cop-ex-draft], [data-cop-ex-go]", { timeout: 15000 });
+    await page.waitForSelector("[data-cop-ex-draftall]", { timeout: 15000 });
     r = await row();
     const per = r.s.period;
     check(!!per && per.m2 === 12, "the period is stored, running to the year's end", JSON.stringify(per));
     const qs = [1, 2, 3, 4].filter((q) => (q - 1) * 3 + 1 <= per.m2 && q * 3 >= per.m1);
-    for (let n = 0; n < 40; n++) {
-      if (await page.$("[data-cop-ex-draft]")) { await page.click("[data-cop-ex-draft]"); await page.waitForTimeout(1500); continue; }
-      if (await page.$('[data-cop-ex-go="1"]')) { await page.click('[data-cop-ex-go="1"]'); await page.waitForTimeout(700); continue; }
-      break;
-    }
+    /* §684 — the split: the period strip and one card per item in the pane,
+       the first in hand with its Draft button, the to-do beside, the chat
+       reading the period as the person's line, its box held until the item
+       in hand is drafted, Save held with the real blocker. */
+    const sp = await page.evaluate(() => ({ strip: !!document.querySelector("[data-cop-expane] [data-cop-ex-strip]"), cards: document.querySelectorAll("[data-cop-expane] [data-cop-ex-card]").length, open: document.querySelectorAll("[data-cop-expane] .copex-card.now").length,
+      draftBtn: !!document.querySelector("[data-cop-expane] .copex-card.now [data-cop-ex-draft]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-ex-card], [data-cop-chatbox] [data-cop-ex-item]"), todo: !!document.querySelector(".copftodo [data-cop-dv-todo]"),
+      me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), dis: (document.querySelector("[data-cop-text]") || {}).disabled, step: (document.querySelector(".copfhead small") || {}).textContent || "",
+      save: (document.querySelector("[data-cop-ex-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ex-finish]").getAttribute("data-tip") : null, foot: (document.querySelector("[data-cop-exfoot]") || {}).textContent || "" }));
+    /* §697 — an item that carries the plan's measures and tactics opens with
+       them: its box is live and Save is not held by it; the §684 holds apply
+       to an item that carries nothing. */
+    const held0 = r.s.items[0].measures.some((m) => m.mark === "plan") && r.s.items[0].tactics.some((x) => x.mark === "plan");
+    const anyBare = r.s.items.some((x) => !(x.measures.length && x.tactics.length));
+    check(sp.strip && sp.cards === r.s.items.length && sp.open === 1 && sp.draftBtn && !sp.inChat && sp.todo && /Oct/.test(sp.me) && sp.dis === !held0 && /Drafting · 0 of/.test(sp.step) && (anyBare ? /still needs at least one measure/.test(String(sp.save)) : sp.save === null) && /v1/.test(sp.foot),
+      "§684 the period strip and one card per item stand in the pane, the first in hand with Draft on it, the to-do beside; the chat reads the period as the person's line, its box is held, Save is held with the item that still needs a measure", JSON.stringify(sp));
+    /* §697 S7 — a card opens with what the plan holds, marked; the chat counts them */
+    const heldItems = r.s.items.filter((x) => x.measures.some((m) => m.mark === "plan") || x.tactics.some((y) => y.mark === "plan"));
+    const hm = await page.evaluate(() => ({ heads: Array.from(document.querySelectorAll("[data-cop-expane] .copex-head small")).map((s) => s.textContent), marks: document.querySelectorAll("[data-cop-expane] .copex-card.now .copex-mark.plan").length,
+      said: /already carr/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), draft: (document.querySelector("[data-cop-expane] .copex-card.now [data-cop-ex-draft]") || {}).textContent || "" }));
+    check(hm.heads.filter((h) => /^On the plan/.test(h)).length === heldItems.length && (heldItems.length === 0 || hm.said) && (heldItems[0] !== r.s.items[0] || (hm.marks > 0 && /Draft anew/.test(hm.draft))),
+      "§697 the cards whose item carries measures on the plan say so on the head, the lines are marked on the plan, the chat counts them, and on the build road the button reads Draft anew", JSON.stringify({ hm, held: heldItems.length }));
+    /* §697 S5 — left out this period, and back */
+    const lastK = r.s.items.length - 1;
+    await page.click('[data-cop-ex-card-pick="' + lastK + '"]'); await page.waitForTimeout(600);
+    await page.click('[data-cop-ex-out="' + lastK + '"]'); await page.waitForTimeout(900);
     r = await row();
-    check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one at a time", JSON.stringify(r.s.items.map((x) => x.drafted)));
+    const lo = await page.evaluate((k) => ({ head: (document.querySelector('[data-cop-ex-card="' + k + '"] .copex-head small') || {}).textContent || "", step: (document.querySelector(".copfhead small") || {}).textContent || "",
+      said: /left out this period/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), back: !!document.querySelector('[data-cop-ex-in="' + k + '"]') }), lastK);
+    check(r.s.items[lastK].out === true && /Left out this period/.test(lo.head) && /1 left out/.test(lo.step) && lo.said && lo.back, "§697 Leave out this period marks the card, the head counts it, the chat says what it means, Put it back is offered", JSON.stringify({ out: r.s.items[lastK].out, lo }));
+    await page.click('[data-cop-ex-in="' + lastK + '"]'); await page.waitForTimeout(900);
+    r = await row();
+    check(r.s.items[lastK].out === false, "§697 …and Put it back puts it back");
+    await page.click('[data-cop-ex-card-pick="0"]'); await page.waitForTimeout(600);
+    /* §698 S14 — the third draft of the chain fails: the line names the item,
+       its card stays in hand, and Draft all the rest carries on */
+    const failK = r.s.items.length >= 3 ? 2 : -1;
+    if (failK >= 0) MODEL_FAIL_AT = MODEL_SEEN.length + failK;
+    await page.click("[data-cop-ex-draftall]");
+    if (failK >= 0) {
+      await page.waitForSelector("[data-cop-ex-fail]", { timeout: 30000 }).catch(() => {});
+      MODEL_FAIL_AT = -1;
+      r = await row();
+      const fl = await page.evaluate(() => { const f = document.querySelector("[data-cop-ex-fail]"); return f ? { t: f.textContent, again: !!f.querySelector("[data-cop-ex-draft]"), all: !!f.querySelector("[data-cop-ex-draftall]"), skip: !!f.querySelector("[data-cop-ex-skip]"),
+        inHand: (document.querySelector("[data-cop-expane] .copex-card.now") || {}).getAttribute ? document.querySelector("[data-cop-expane] .copex-card.now").getAttribute("data-cop-ex-card") : null } : null; });
+      check(!!fl && new RegExp("Draft all stopped at " + r.s.items[failK].title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(fl.t) && /2 of \d+ are drafted/.test(fl.t) && fl.again && fl.all && fl.skip && fl.inHand === String(failK) && r.s.items[failK].drafted === false,
+        "§698 when a draft fails in Draft all, the chat names the item it stopped at, counts what is drafted, keeps its card in hand, and offers Draft it again, Draft all left and Skip it", JSON.stringify(fl));
+      await page.click("[data-cop-ex-fail] [data-cop-ex-draftall]");
+    }
+    for (let n = 0; n < 40; n++) { await page.waitForTimeout(1200); r = await row(); if (r.s.items.every((x) => x.drafted)) break; }
+    if (failK >= 0) check(!(await page.$("[data-cop-ex-fail]")), "§698 …and the line goes once the chain carries on");
+    await page.waitForTimeout(800);
+    r = await row();
+    check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one after another from Draft all (§684)", JSON.stringify(r.s.items.map((x) => x.drafted)));
+    const lg = await page.evaluate(() => ({ me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"), ai: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.ai")).map((m) => m.textContent).filter((t) => /\d+ measures?, \d+ tactics?, on the right/.test(t)).length,
+      ready: /Ready to save/.test((document.querySelector(".copfhead small") || {}).textContent || ""), box: (document.querySelector("[data-cop-text]") || {}).disabled, ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "" }));
+    check(/Draft all/.test(lg.me) && lg.ai === r.s.items.length && lg.ready && lg.box === false && /Ask for a change to/.test(lg.ph),
+      "§684 the chat reads Draft all as the person's line and one answer per item, each naming its counts; the head reads Ready to save; the box asks for a change to the item in hand", JSON.stringify(lg));
+    await page.click('[data-cop-ex-card-pick="0"]');
+    await page.waitForFunction(() => { const c = document.querySelector("[data-cop-expane] .copex-card.now"); return c && c.getAttribute("data-cop-ex-card") === "0"; }, null, { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(900);
+    const pk = await page.evaluate(() => ({ open: (document.querySelector("[data-cop-expane] .copex-card.now") || {}).getAttribute ? document.querySelector("[data-cop-expane] .copex-card.now").getAttribute("data-cop-ex-card") : null, rows: document.querySelectorAll("[data-cop-expane] .copex-card.now [data-cop-ex-m]").length }));
+    r = await row();
+    check(pk.open === "0" && pk.rows > 0 && r.s.cursor === 0, "§684 pressing a card's head puts that item in hand, its tables open to edit, stored as the cursor", JSON.stringify({ pk, cursor: r.s.cursor }));
     check(r.s.items.every((x) => x.tactics.every((t) => t.quarters.every((q) => qs.includes(q)))), "a quarter outside the period never reaches the chat", JSON.stringify(r.s.items.map((x) => x.tactics.map((t) => t.quarters))));
     await heldSweep(page, "Execution, before the save");
     await shot("1-before-save");
     const strip = await page.evaluate(() => (document.querySelector("[data-cop-ex-strip]") || {}).textContent || "");
     check(/This plan covers/.test(strip) && !/·/.test(strip), "§654 the period line carries no stray separator", strip);
     const fin = await page.$("[data-cop-ex-finish]");
-    check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645)");
+    check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645), at the pane's foot (§684)");
+    /* §697 S5 — the last item is left out before the save: Save stays live, Apply leaves it untouched */
+    await page.click('[data-cop-ex-card-pick="' + lastK + '"]'); await page.waitForTimeout(600);
+    await page.click('[data-cop-ex-out="' + lastK + '"]'); await page.waitForTimeout(900);
+    r = await row();
+    const outIt = r.s.items[lastK];
+    check(outIt.out === true && outIt.drafted === true && (await page.evaluate(() => (document.querySelector("[data-cop-ex-finish]") || {}).getAttribute("aria-disabled"))) !== "true", "§697 a drafted item can still be left out, and Save stays live", JSON.stringify({ out: outIt.out }));
     const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
     const exArch = await page.evaluate(() => ARCHIVES.length);
     /* A Capability holding nothing yet has nothing to archive (archiveCapPlan
        keeps nothing empty), so the ones expected are those that hold something. */
-    const exCapIds = r.s.items.filter((x) => x.kind !== "direction").map((x) => String(x.planId));
-    if (fin) { await fin.click(); await page.waitForTimeout(2200); }
+    const exCapIds = r.s.items.filter((x) => x.kind !== "direction" && !x.out).map((x) => String(x.planId));
+    const fin2 = await page.$("[data-cop-ex-finish]");
+    if (fin2) { await fin2.click(); await page.waitForTimeout(2200); }
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
-    const exSv = await page.evaluate((b) => ({ same: JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]) === b, apply: !!document.querySelector("[data-cop-ex-apply]") }), exBefore);
-    check(exSv.same && exSv.apply, "§645 Save leaves the plan — measures, tactics, capabilities and the period — exactly as it was, and offers Apply to plan", JSON.stringify(exSv));
+    const exSv = await page.evaluate((b) => ({ same: JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]) === b, apply: (document.querySelector("[data-cop-ex-apply]") || {}).getAttribute ? document.querySelector("[data-cop-ex-apply]").getAttribute("aria-disabled") : "none",
+      line: /v1 saved.*not on the plan yet/.test((document.querySelector("[data-cop-exfoot]") || {}).textContent || ""), said: /Saved as .*v1.*under Deliverables/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || "") }), exBefore);
+    check(exSv.same && exSv.apply !== "true" && exSv.line && exSv.said, "§645 Save leaves the plan — measures, tactics, capabilities and the period — exactly as it was; the pane's foot says v1 saved · not on the plan yet with Apply to plan live, and the chat says where the version is (§684)", JSON.stringify(exSv));
     await page.click("[data-cop-ex-apply]");
     await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
     const askEx = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
@@ -2698,14 +2996,21 @@ await section("3m · the Execution chat: the period once, each item drafted, the
         const pj = (c.projects || []).filter((x) => x.name === "Ex launch")[0];
         out.caps.push({ ko: ko ? ko.target : null, pj: pj ? [pj.start, pj.end] : null }); });
       return out;
-    }, r.s.items.map((x) => x.planId));
+    }, r.s.items.filter((x) => !x.out).map((x) => x.planId));
+    const outPlan = await page.evaluate((it) => { if (it.kind === "direction") { const p = (UNITS.mobile.items || []).find((x) => x && x.id === it.planId); return p ? !(p.measures || []).some((m) => m.name === "Ex share") : null; }
+      const c = (GROUP.capabilities || []).find((x) => String(x.id) === it.planId); return c ? !(c.keyObjectives || []).some((m) => m.name === "Ex share") : null; }, outIt);
+    check(outPlan === true, "§697 the item left out this period is untouched by Apply — its drafted measure never reaches the plan", JSON.stringify(outPlan));
     const want = await page.evaluate((p) => [SMPRules.monthLabel(p.y * 12 + p.m1 - 1), SMPRules.monthLabel(p.y * 12 + p.m2 - 1)], per);
     check(plan.from === want[0] && plan.to === want[1], "the period becomes the plan period", JSON.stringify([plan.from, plan.to]));
     const qWant = [1, 2, 3, 4].map((q) => (qs.includes(q) ? 1 : 0)).join("");
     check(plan.dirs.length > 0 && plan.dirs.every((d) => d.m === "30%" && d.q === qWant), "each Direction gains its measure, and its tactic runs only in the period's quarters", JSON.stringify(plan.dirs) + " want " + qWant);
     check(plan.caps.every((c) => c.ko === "30%" && c.pj && c.pj[1] === "Dec " + String(per.y).slice(2)), "each Capability gains a key objective and a dated project inside the period", JSON.stringify(plan.caps));
-    check(!(await page.$("[data-cop-ex-finish]")), "a saved chat offers no Save again");
-    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-ex-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §684)");
+    const onp = await page.evaluate(() => /v1 on the plan/.test((document.querySelector("[data-cop-exfoot]") || {}).textContent || ""));
+    check(onp, "§684 …and after Apply the pane's foot says v1 on the plan");
+    /* §698 — the deliberate failure above is a 503 the browser logs; nothing else may be */
+    const errs3m = errs.filter((e) => !(failK >= 0 && /status of 503/.test(e)));
+    check(!errs3m.length, "no page errors through the whole flow", errs3m.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
@@ -2728,11 +3033,17 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/advisory");
     await newWorkflow();
-    await page.waitForSelector("[data-cop-ad-text]", { timeout: 15000 });
+    await page.waitForSelector("[data-cop-text]", { timeout: 15000 });
     check(!!(await page.$("[data-cop-ad-budget]")), "a new Advisory chat shows the question count in the right column");
+    /* §688 — the split: the chat's own box carries the question; the pane
+       says the brief is not written yet; the to-do and the round box beside. */
+    const sp0 = await page.evaluate(() => ({ ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "", dis: (document.querySelector("[data-cop-text]") || {}).disabled, pane: (document.querySelector("[data-cop-adpane]") || {}).textContent || "",
+      todo: !!document.querySelector(".copftodo [data-cop-ad-todo]"), budget: !!document.querySelector(".copftodo [data-cop-ad-budget]"), save: (document.querySelector("[data-cop-ad-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ad-finish]").getAttribute("data-tip") : null, apply: !!document.querySelector("[data-cop-adfoot] [data-cop-ad-apply], [data-cop-adfoot] .solid + .solid"), stays: /Stays in the Copilot/.test((document.querySelector("[data-cop-adfoot]") || {}).textContent || "") }));
+    check(/advice on/.test(sp0.ph) && sp0.dis === false && /Not written yet|Nothing yet/.test(sp0.pane) && sp0.todo && sp0.budget && /not written yet/.test(String(sp0.save)) && !sp0.apply && sp0.stays,
+      "§688 the chat's box asks what you would like advice on, the pane says the brief is not written yet, the to-do and the round box stand beside, Save is held saying why, and the foot says it stays in the Copilot with no Apply", JSON.stringify(sp0));
     setAns({ kind: "question", lead: "Good question.", question: "How many stores do you run today?" });
-    await page.fill("[data-cop-ad-text]", "Should we open stores in Upper Egypt?");
-    await page.click("[data-cop-ad-send]");
+    await page.fill("[data-cop-text]", "Should we open stores in Upper Egypt?");
+    await page.keyboard.press("Enter");
     await page.waitForSelector(".adq", { timeout: 15000 });
     let r = await row();
     check(!!r && r.s.ask === "Should we open stores in Upper Egypt?" && r.s.turns.length === 1, "the question is stored and ONE question comes back", JSON.stringify(r && r.s));
@@ -2752,6 +3063,21 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     check(recs === 1, "the brief shows exactly one recommended option", recs);
     const tags = await page.$$eval("[data-cop-ad-brief] .adtag", (a) => a.map((x) => x.textContent));
     check(tags.join() === "Platform,Assumed", "every fact says where it came from", JSON.stringify(tags));
+    const sp1 = await page.evaluate(() => ({ inPane: !!document.querySelector("[data-cop-adpane] [data-cop-ad-brief]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-ad-brief]"),
+      said: /brief is on the right/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent).join("|"),
+      ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "", head: (document.querySelector("[data-cop-adpane] .copvline") || {}).textContent || "", save: (document.querySelector("[data-cop-ad-finish]") || {}).getAttribute ? document.querySelector("[data-cop-ad-finish]").getAttribute("aria-disabled") : null }));
+    check(sp1.inPane && !sp1.inChat && sp1.said && /Proceed with what you have/.test(sp1.me) && /Ask for a change/.test(sp1.ph) && /Upper Egypt stores v1/.test(sp1.head) && sp1.save !== "true",
+      "§688 the brief stands in the pane, headed by its title; the chat says it is on the right and reads Proceed as the person's line; the box asks for a change; Save is live", JSON.stringify(sp1));
+    /* a change asked for through the chat's box: the brief changes on the right, the ask and the answer stay in the chat */
+    setAns({ reply: "Added a third option.", brief: { title: "Upper Egypt stores", situation: "Growth is flat in Cairo.", known: [{ source: "platform", text: "42 stores" }, { source: "assumed", text: "Rents flat" }],
+      options: [{ title: "Open 2", detail: "Pilot", recommended: true }, { title: "Open 5", detail: "Phased", recommended: false }, { title: "Franchise two", detail: "A partner carries the outlay", recommended: false }], why: "Lower risk", next: ["Pick sites"] } });
+    await page.fill("[data-cop-text]", "Add a franchise option");
+    await page.keyboard.press("Enter");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-adpane] [data-cop-ad-brief] .adopt").length === 3, null, { timeout: 15000 }).catch(() => {});
+    const rv = await page.evaluate(() => ({ opts: document.querySelectorAll("[data-cop-adpane] [data-cop-ad-brief] .adopt").length, me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).some((m) => /Add a franchise option/.test(m.textContent)), ai: /Added a third option/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || "") }));
+    check(rv.opts === 3 && rv.me && rv.ai, "§688 a change asked for through the chat's box changes the brief on the right, and the ask and the answer stay in the chat", JSON.stringify(rv));
+    r = await row();
+    check((r.s.log || []).length === 2 && r.s.log[0].t === "Add a franchise option", "§688 …stored on the row, so a reload reads the same", JSON.stringify(r.s.log));
     await heldSweep(page, "Advisory, before the save");
     await shot("1-before-save");
     await page.click("[data-cop-ad-finish]");
@@ -2759,7 +3085,7 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, d.kind, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.section = 'advisory' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Upper Egypt stores" && dv.kind === "copilot-only" && dv.n === 1, "Save writes the brief as an Advisory deliverable, v1, kept in the Copilot", JSON.stringify(dv));
     await shot("2-saved");
-    check(!(await page.$("[data-cop-ad-finish]")), "a saved chat offers no Save again");
+    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-ad-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649, §688)");
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     setAns(keep);
@@ -2870,6 +3196,9 @@ await section("4 · Forefront's own pages", async () => {
   await ta("MW late one", "smo", -14, "in_progress");
   await ta("MW this week", "smo", 0, "not_started");
   await ta("MW far off", "smo", 30, "not_started");
+  /* §745: two steps on one task, one ticked — the row says 1 of 2 steps */
+  await owner.query("INSERT INTO tracker_steps (tenant_id, action_id, title, pos, done_at) SELECT $1, id, 'First step', 1, now() FROM tracker_actions WHERE tenant_id = $1 AND title = 'MW far off'", [tenantId]);
+  await owner.query("INSERT INTO tracker_steps (tenant_id, action_id, title, pos) SELECT $1, id, 'Second step', 2 FROM tracker_actions WHERE tenant_id = $1 AND title = 'MW far off'", [tenantId]);
   await ta("MW finished", "smo", -3, "done");
   /* when each was finished, as the Tracker stamps it: one this week, one
      three weeks ago (for My tasks' Show done, round three) */
@@ -2905,6 +3234,29 @@ await section("4 · Forefront's own pages", async () => {
         font: h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : "" }; });
     check(mwc.cards === 1 && mwc.secs === 3 && mwc.title === "Open tasks" && mwc.count === "3" && mwc.ctl && /^[\d.]+px solid$/.test(mwc.rule) && parseFloat(mwc.rule) >= 1 && /Internal Tracker/.test(mwc.sub) && mwc.font === "Georgia 700",
       "\u2026in one card titled Open tasks (Georgia bold) with its filters in its header, the groups labelled over a grey rule, under Home's band", JSON.stringify(mwc));
+    /* §725 MY TASKS' BAR IS THE TRACKER'S QUIET BAR */
+    const bar725 = await page.evaluate(() => { const h = document.querySelector(".mwcardhd"), ic = h && h.querySelector(".hocic"), s = h && h.querySelector(".mwfind .mwsearch"), d = h && h.querySelector(".mwwordb");
+      return h ? { tile: !!ic && getComputedStyle(ic).display !== "none", views: Array.from(h.querySelectorAll(".mwviews button")).map((b) => b.textContent), srchW: s ? Math.round(s.getBoundingClientRect().width) : -1,
+        done: d ? d.textContent.replace(/\s+/g, " ").trim() : "", order: Array.from(h.children).filter((x) => getComputedStyle(x).display !== "none").map((x) => x.className || x.tagName) } : null; });
+    check(!!bar725 && !bar725.tile && bar725.views.join("|") === "By date|By client" && bar725.srchW === 0 && /^Done: Hide/.test(bar725.done),
+      "\u2026its bar is the Tracker's quiet bar: no tile, By date \u00b7 By client as plain words, Search an icon with its box shut, Done a small word (\u00a7725)", JSON.stringify(bar725));
+    /* §729: the Done menu is shut until pressed (an author display had beaten
+       [hidden], so it stood open); and a hover greys the FIRST row too (the
+       odd rows' background:none had outweighed the hover) */
+    const menu729 = await page.evaluate(() => { const m = document.querySelector(".mwcardhd .mwwordm"); return m ? getComputedStyle(m).display : "gone"; });
+    await page.hover(".mwlist .mwrow >> nth=0");
+    const hov729 = await page.evaluate(() => { const r = document.querySelector(".mwlist .mwrow"); return r ? getComputedStyle(r).backgroundColor : ""; });
+    /* §730: a name is never cut — it wraps; the note line stays one line */
+    const wrap730 = await page.evaluate(() => { const t = document.querySelector(".mwlist .mwrow .t"), up = document.querySelector(".mwlist .mwmeta .up");
+      return { ws: t ? getComputedStyle(t).whiteSpace : "", tov: t ? getComputedStyle(t).textOverflow : "", up: up ? getComputedStyle(up).whiteSpace : "nowrap" }; });
+    check(wrap730.ws === "normal" && wrap730.tov !== "ellipsis" && wrap730.up === "nowrap", "\u2026a task's name is never cut, it wraps; the note line under it stays one line (\u00a7730)", JSON.stringify(wrap730));
+    check(menu729 === "none" && !/rgba\(0, 0, 0, 0\)|transparent/.test(hov729),
+      "\u2026the Done menu is shut until pressed, and a hover greys the first row as it does the others (\u00a7729)", JSON.stringify({ menu729, hov729 }));
+    await page.click(".mwcardhd .mwfind svg");
+    check((await page.evaluate("Math.round(document.querySelector('.mwcardhd .mwsearch').getBoundingClientRect().width)")) > 100, "\u2026a press on the search icon opens its box (\u00a7725)", "");
+    /* §745: a task's steps on its row, as the Tracker's */
+    const st743 = await page.evaluate(() => { const r = Array.from(document.querySelectorAll(".mwlist .mwrow")).find((x) => /MW far off/.test(x.textContent)); const s = r && r.querySelector(".mwmeta .stc"); return s ? s.textContent : ""; });
+    check(st743 === "1 of 2 steps", "\u2026a task with steps says how far they have got on its row \u2014 1 of 2 steps (\u00a7745)", st743);
     await page.fill(".mwsearch", "far off");
     const found = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwrow")).filter((r) => !r.hidden).map((r) => r.querySelector(".t").textContent));
     check(JSON.stringify(found) === JSON.stringify(["MW far off"]), "\u2026and its search finds a task by its words", JSON.stringify(found));
@@ -2912,23 +3264,27 @@ await section("4 · Forefront's own pages", async () => {
     /* ROUND THREE (2026-10-24): rows alternate light grey and white, grey
        first; and Show done brings the finished tasks back, the last week by
        default of the two (Islam: "last week is the important one") */
-    const zebra = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwsec:not(.done)")).map((sec) =>
-      Array.from(sec.querySelectorAll(".mwrow")).map((r) => getComputedStyle(r).backgroundColor)));
-    const z0 = zebra.length ? zebra[0][0] : "";
-    check(zebra.length === 3 && z0 && !/rgba\(0, 0, 0, 0\)|transparent/.test(z0) && zebra.every((g) => g[0] === z0),
-      "\u2026each group's rows start light grey (the alternation restarts under each group)", JSON.stringify(zebra));
+    /* §709 (Islam: "go ahead, build it", the working mockup): every group is a
+       card of its own — its own frame and rounded corners — and the rows are
+       not striped any more, the Tracker's quiet row */
+    const cards = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwsec:not(.done)")).map((sec) => {
+      const c = getComputedStyle(sec), r = sec.querySelector(".mwrow");
+      return { radius: parseFloat(c.borderTopLeftRadius), border: c.borderTopStyle, row: r ? getComputedStyle(r).backgroundColor : "" }; }));
+    check(cards.length === 3 && cards.every((g) => g.radius >= 8 && g.border === "solid" && /rgba\(0, 0, 0, 0\)|transparent/.test(g.row)),
+      "\u2026each group is a card of its own, its rows unstriped (\u00a7709)", JSON.stringify(cards));
     const doneOf = () => page.evaluate(() => { const sec = document.querySelector(".mwlist .mwsec.done");
       return sec ? { h: sec.querySelector(".mwsh h2").textContent, rows: Array.from(sec.querySelectorAll(".mwrow .t")).map((t) => t.textContent) } : null; });
     check((await doneOf()) === null && !!(await page.$('.mwcardhd button[data-sort="hide"][aria-pressed="true"]')),
       "\u2026finished tasks are hidden until asked for", "");
-    await page.click('.mwcardhd button[data-sort="week"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="week"]');
     const dw = await doneOf();
     check(!!dw && dw.h === "Done in the last week" && dw.rows.includes("MW finished") && !dw.rows.includes("MW done in the month") && !dw.rows.includes("MW not mine"),
       "\u2026Show done \u00b7 Last week lists the one finished this week, under its own heading, not the older one, and never somebody else's", JSON.stringify(dw));
-    await page.click('.mwcardhd button[data-sort="month"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="month"]');
     const dm = await doneOf();
     check(!!dm && dm.h === "Done in the last 30 days" && JSON.stringify(dm.rows) === JSON.stringify(["MW finished", "MW done in the month"]), "\u2026and 30 days lists it and the one three weeks back, newest first", JSON.stringify(dm));
-    await page.click('.mwcardhd button[data-sort="hide"]');
+    await page.click('.mwcardhd .mwwordb'); await page.click('.mwcardhd .mwwordm button[data-sort="hide"]');
+    check((await page.evaluate(() => getComputedStyle(document.querySelector(".mwcardhd .mwwordm")).display)) === "none", "\u2026and the Done menu shuts once a choice is pressed (\u00a7729)", "");
     check((await doneOf()) === null, "\u2026and Hide puts them away again", "");
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
@@ -2986,7 +3342,8 @@ await section("4 · Forefront's own pages", async () => {
         const r = await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "workStatus", client: "raya-trade", id, status: "done" }) });
         return { status: r.status, body: await r.json() };
       }, ids["MW not mine"]);
-      check(refused.status === 403 && /owner or the client's Super user/.test(refused.body.error || "") && (await stored("MW not mine")) === "not_started",
+      /* §695 (main) — the refusal names the assignment's lead too; the check reads the Tracker's own constant's words. */
+      check(refused.status === 403 && /Only its owner, the lead of one of the client's assignments or the client's Super user/.test(refused.body.error || "") && (await stored("MW not mine")) === "not_started",
         "somebody else's action is refused to a team seat, in the Tracker's words, and left as it was (\u00a7583)", JSON.stringify(refused));
     } finally {
       await owner.query("UPDATE tenant_users SET seat = 'super' WHERE tenant_id = $1 AND user_id = $2", [tenantId, officeId]);
@@ -2994,9 +3351,94 @@ await section("4 · Forefront's own pages", async () => {
     /* the made state put back for the card below: three open, one late */
     await owner.query("UPDATE tracker_actions SET status = $2, done_at = NULL, first_due = due WHERE id = $1", [ids["MW late one"], "in_progress"]);
     await owner.query("UPDATE tracker_actions SET status = $2, done_at = NULL, first_due = due WHERE id = $1", [ids["MW far off"], "not_started"]);
+    /* §709: A PRESS ON A TASK'S NAME OPENS IT HERE — the Tracker's three tabs,
+       with Open in its Tracker beside them — and a line of progress written
+       there is the Tracker's own entry, read back from Postgres (§96); the
+       way into the client's Tracker is that link, and it still goes there. */
+    const firstId = await page.locator(".mwrow >> nth=0").getAttribute("data-id");
+    /* §728: the details were read with the list, so the press asks nothing,
+       and the tabs are there at once */
+    await page.waitForFunction(() => { const r = document.querySelector(".mwrow"); return !!r; }, null, { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+    let asked728 = 0; const c728 = (rq) => { const d = rq.postData() || ""; if (/"action":"workDetails?"/.test(d)) asked728++; };
+    page.on("request", c728);
     await page.click(".mwrow .t >> nth=0");
+    const now728 = await page.evaluate(() => !!document.querySelector(".mwrow.on .mwdet .mwtabs"));
+    page.off("request", c728);
+    check(asked728 === 0 && now728, "\u2026a task opens at once: its details came with the list, the press asks the server nothing (\u00a7728)", JSON.stringify({ asked728, now728 }));
+    await page.waitForSelector(".mwrow.on .mwdet .mwtabs", { timeout: 8000 }).catch(() => {});
+    const det = await page.evaluate(() => { const r = document.querySelector(".mwrow.on");
+      return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), path: location.pathname } : null; });
+    check(!!det && det.tabs.join("|") === "Progress|Description|History" && det.open && det.path === "/platform",
+      "\u2026a press on a task's name opens it here, in the Tracker's three tabs, Open in its Tracker beside them (\u00a7709)", JSON.stringify(det));
+    await page.fill("#mwp-" + firstId, "Written from My tasks, see https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1").catch(() => {});
+    await page.click(".mwrow.on .mwcompose button").catch(() => {});
+    await page.waitForSelector(".mwrow.on .mwtl li", { timeout: 8000 }).catch(() => {});
+    const wrote = (await owner.query("SELECT body FROM tracker_progress WHERE action_id = $1", [firstId])).rows.map((x) => x.body);
+    check(wrote.some((x) => /^Written from My tasks/.test(x)) && /Written from My tasks/.test(await page.locator(".mwrow.on .mwtl").textContent().catch(() => "")),
+      "\u2026and a line of progress written there is the Tracker's own entry, drawn on its timeline", JSON.stringify(wrote));
+    /* §728: the row's quiet line — the name heavier than the line, the
+       client plain, and no "This week" in front of this week's note */
+    const q728 = await page.evaluate((id) => { const r = document.querySelector('.mwrow[data-id="' + id + '"]'); if (!r) return null;
+      const t = r.querySelector(".t"), up = r.querySelector(".mwmeta .up"), cl = r.querySelector(".mwmeta .mwcl");
+      return { name: t ? +getComputedStyle(t).fontWeight : 0, up: up ? up.textContent : "", cl: cl ? +getComputedStyle(cl).fontWeight : 400 }; }, firstId);
+    /* §733: the link in it reads as a small tag, on the timeline and on the row's line */
+    const lk733 = await page.evaluate((id) => { const r = document.querySelector('.mwrow[data-id="' + id + '"]');
+      const t = document.querySelector(".mwrow.on .mwtl a.lktag") || document.querySelector(".mwdet .mwtl a.lktag"), u = r && r.querySelector(".mwmeta a.lktag");
+      return { tl: t ? t.textContent + " " + t.getAttribute("href") : "", row: u ? u.textContent : "" }; }, firstId);
+    check(lk733.tl === "Google Sheets https://docs.google.com/spreadsheets/d/1zNp/edit#gid=1" && lk733.row === "Google Sheets",
+      "\u2026a link in the note reads as a small Google Sheets tag, on the timeline and on the row's line (\u00a7733)", JSON.stringify(lk733));
+    check(!!q728 && q728.name >= 600 && q728.cl <= 400 && /^Written from My tasks/.test(q728.up),
+      "\u2026and the row's line is the Tracker's quiet one: the name heavier, the client plain, no \"This week\" in front of this week's note (\u00a7728)", JSON.stringify(q728));
+    /* §712: YOUR OWN ENTRY IS EDITED AND DELETED HERE TOO — Edit turns it into
+       a box, Enter saves it (read back from Postgres); Delete asks first,
+       and Yes removes it */
+    await page.click(".mwrow.on .mwpacts button >> text=Edit").catch(() => {});
+    /* the box puts the cursor at the end a moment after it opens; typing
+       before that lands appends instead of replacing — wait for it (§739 run) */
+    await page.waitForFunction(() => { const t = document.activeElement; return !!t && t.classList.contains("mwpedit") && t.selectionStart === t.value.length; }, null, { timeout: 4000 }).catch(() => {});
+    await page.fill(".mwrow.on .mwpedit", "Edited from My tasks").catch(() => {});
+    await page.press(".mwrow.on .mwpedit", "Enter").catch(() => {});
+    await page.waitForFunction(() => /Edited from My tasks/.test((document.querySelector(".mwrow.on .mwtl") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
+    const edited = (await owner.query("SELECT body, edited_at FROM tracker_progress WHERE action_id = $1", [firstId])).rows;
+    check(edited.length === 1 && edited[0].body === "Edited from My tasks" && !!edited[0].edited_at, "\u2026and my own entry is edited in place there, saved as the Tracker saves it (\u00a7712)", JSON.stringify(edited));
+    await page.click(".mwrow.on .mwpacts button >> text=Delete").catch(() => {});
+    const asked = (await page.locator(".mwrow.on .mwpacts").textContent().catch(() => "")) || "";
+    await page.click(".mwrow.on .mwpacts button >> text=Delete it").catch(() => {});
+    await page.waitForSelector(".mwrow.on .mwdet .none", { timeout: 8000 }).catch(() => {});
+    const leftE = (await owner.query("SELECT count(*)::int AS n FROM tracker_progress WHERE action_id = $1", [firstId])).rows[0].n;
+    check(/Delete this entry\?/.test(asked) && leftE === 0, "\u2026and deleted there, asked first", asked + " · left " + leftE);
+    await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
+    /* §739: TWO BEFORE THIS WEEK — four older updates put in, then a line
+       written here (which reads the task again): this week's line and the
+       latest two before it show, the rest behind Show N earlier, which opens them */
+    for (let k = 1; k <= 4; k++) await owner.query("INSERT INTO tracker_progress (tenant_id, action_id, body, by_key, at) VALUES ($1, $2, $3, 'smo', now() - ($4 || ' days')::interval)", [tenantId, firstId, "Older update " + k, String(7 * k)]);
+    await page.fill("#mwp-" + firstId, "This week's line").catch(() => {});
+    await page.click(".mwrow.on .mwcompose button").catch(() => {});
+    await page.waitForFunction(() => document.querySelectorAll(".mwrow.on .mwtl li").length >= 5, null, { timeout: 8000 }).catch(() => {});
+    const vis739 = () => page.evaluate(() => Array.from(document.querySelectorAll(".mwrow.on .mwtl li")).filter((x) => !x.hidden).length);
+    const t739 = { all: await page.locator(".mwrow.on .mwtl li").count(), shown: await vis739(), link: ((await page.locator(".mwrow.on .mwpmore").textContent().catch(() => "")) || "").trim() };
+    await page.click(".mwrow.on .mwpmore").catch(() => {});
+    const t739b = { shown: await vis739(), link: ((await page.locator(".mwrow.on .mwpmore").textContent().catch(() => "")) || "").trim() };
+    check(t739.all === 5 && t739.shown === 3 && /^Show 2 earlier/.test(t739.link) && t739b.shown === 5 && t739b.link === "Show fewer",
+      "\u2026an opened task shows this week's line and the latest two before it, the rest behind Show N earlier, which opens them (\u00a7739)", JSON.stringify({ t739, t739b }));
+    await owner.query("DELETE FROM tracker_progress WHERE action_id = $1", [firstId]);
+    /* §713: THE ⋯ — Change the week and Hand to someone else first, each a
+       small list opened by HOVER beside the menu; Details and progress gone;
+       Rename third */
+    await page.click(".mwrow:not(.on) .mwkb >> nth=0").catch(() => {});
+    await page.waitForSelector(".mwpop .mwsubb", { timeout: 8000 }).catch(() => {});
+    const order = await page.evaluate(() => Array.from(document.querySelectorAll(".mwpop > .mwsubw > button, .mwpop > button, .mwpop > a")).map((b) => b.textContent.replace("›", "").trim()));
+    await page.hover(".mwpop .mwsubw:first-child > button").catch(() => {});
+    await page.waitForTimeout(300);
+    const weeks = await page.evaluate(() => { const s = document.querySelector(".mwpop .mwsubw:first-child > .mwside"); return s && getComputedStyle(s).display !== "none" ? s.querySelectorAll("button").length : 0; });
+    check(order[0] === "Week" && order[1] === "Owner" && order[2] === "View in Tracker" && order[3] === "Rename" && !order.includes("Details and progress") && weeks >= 4,
+      "\u2026the \u22ef starts with Week and Owner, each a list that opens on hover; then View in Tracker on one short line, Rename last before Delete (\u00a7713, \u00a7716, \u00a7718, \u00a7720); no Details and progress", JSON.stringify({ order, weeks }));
+    await page.keyboard.press("Escape");
+    const viewHref = await page.getAttribute(".mwrow.on .mwopen", "href").catch(() => "");
+    await page.click(".mwrow.on .mwopen");
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
-    check(path() === "/raya-trade/tracker", "\u2026and a row opens that client's Tracker", path());
+    check(path() === "/raya-trade/tracker" && /[?&]show=/.test(viewHref) && !/[?&]open=/.test(viewHref), "\u2026and View in its Tracker goes to that client's Tracker to show the task, not open it (\u00a7720)", path() + " " + viewHref);
     await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
     /* §620: arriving shows the tab's SAVED copy first, marked and inert, then
        the latest — the card is read off the latest, never the saved one */
@@ -3038,7 +3480,7 @@ await section("4 · Forefront's own pages", async () => {
     const h1 = await home();
     check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Track Record"]),
       "Home draws your clients, your tasks and the Track Record, each a card with its header inside it (spec 068, 069)", JSON.stringify(h1.heads));
-    check(h1.tabs === 0 && h1.sort === "Date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
+    check(h1.tabs === 0 && h1.sort === "By date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
       "\u2026its tasks are one list by date, the late one first in the alarm, then the one due now; the far one is left to My tasks", JSON.stringify(h1));
     check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)) && !h1.industry,
       "\u2026the client you have a seat on is one line with a door into each module, and no industry or seat", JSON.stringify(h1.clients));
@@ -3202,14 +3644,26 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForSelector('.hotask[data-id="' + lateId + '"]:not(.done)', { timeout: 8000 }).catch(() => {});
     check((await stored("MW late one")) === "in_progress" && (await home()).count === "2",
       "\u2026and unticking puts it back as it was", await stored("MW late one"));
+    /* §711: HOME'S ROW IS MY TASKS' ROW — a press on a task's name opens it in
+       the card, in the Tracker's three tabs with Open in its Tracker, and
+       Home stays where it is; pressed again, it folds */
+    await page.click('[data-home="tasks"] .mwrow[data-id="' + lateId + '"] .t');
+    await page.waitForSelector('[data-home="tasks"] .mwrow.on .mwtabs', { timeout: 8000 }).catch(() => {});
+    const hopen = await page.evaluate(() => { const r = document.querySelector('[data-home="tasks"] .mwrow.on');
+      return r ? { tabs: Array.from(r.querySelectorAll(".mwtab")).map((t) => t.firstChild.textContent.trim()), open: !!r.querySelector(".mwopen"), hash: location.hash } : null; });
+    check(!!hopen && hopen.tabs.join("|") === "Progress|Description|History" && hopen.open && hopen.hash !== "#mywork",
+      "\u2026a press on a task's name on Home opens it in the card, in the Tracker's three tabs (\u00a7711)", JSON.stringify(hopen));
+    if (process.env.SHOTDIR) await page.screenshot({ path: process.env.SHOTDIR + "/home-new.png", fullPage: true });
+    await page.click('[data-home="tasks"] .mwrow.on .t').catch(() => {});
+    check(!(await page.locator('[data-home="tasks"] .mwrow.on').count()), "\u2026and pressed again it folds");
     /* SORT BY CLIENT, in the same card, kept on the device */
     await page.click('[data-home="tasks"] .hosort button[data-sort="client"]');
     const hc = await home();
-    check(hc.sort === "Client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
+    check(hc.sort === "By client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
       "\u2026Sort by Client groups the same tasks under the client, late first", JSON.stringify(hc));
     await page.reload({ waitUntil: "networkidle" });
     await page.waitForSelector('[data-home="tasks"] .hogrp', { timeout: 8000 }).catch(() => {});
-    check((await home()).sort === "Client", "\u2026and the choice is kept after a reload", (await home()).sort);
+    check((await home()).sort === "By client", "\u2026and the choice is kept after a reload", (await home()).sort);
     await page.click('[data-home="tasks"] .hosort button[data-sort="date"]');
     await page.click('[data-home="tasks"] .holink');
     await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});
@@ -3244,6 +3698,94 @@ await section("4 · Forefront's own pages", async () => {
       check(m2 === "No plan", "\u2026and the same client with no directions anywhere is", m2);
     } finally {
       await owner.query("DELETE FROM tenants WHERE key = 'plan-top'");
+    }
+    /* §746 ADD A TASK: My tasks' line (type, Enter; its client and week come
+       out on focus) and Home's + New task pop-up, each stored in the client's
+       Tracker as one's own, this week by default */
+    {
+      const tkey = (await owner.query("SELECT key FROM tenants WHERE id = $1", [tenantId])).rows[0].key;
+      const stored744 = (t) => owner.query("SELECT owner_key, to_char(due, 'YYYY-MM-DD') AS due FROM tracker_actions WHERE tenant_id = $1 AND title = $2", [tenantId, t]).then((r) => r.rows[0] || null);
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+      await page.waitForSelector("body.ready", { timeout: 8000 }).catch(() => {});
+      await page.locator("#nav button", { hasText: "My tasks" }).click();
+      await page.waitForSelector("[data-mwadd]", { timeout: 8000 }).catch(() => {});
+      const shut744 = await page.evaluate(() => { const c = document.querySelector(".mwadd .mwaddc"); return c ? getComputedStyle(c).display : "gone"; });
+      /* §749 the add line sits under the tasks, the last thing in the card — never between its head and its rows */
+      const foot749 = await page.evaluate(() => { const card = document.querySelector(".mwlist"), add = card && card.querySelector(".mwadd"), secs = card ? card.querySelectorAll(".mwsec") : [];
+        const last = secs.length ? secs[secs.length - 1] : null;
+        return { last: !!add && card.lastElementChild === add, below: !!add && !!last && add.getBoundingClientRect().top >= last.getBoundingClientRect().bottom }; });
+      if (process.env.SMP_SHOT749) await page.screenshot({ path: process.env.SMP_SHOT749, fullPage: false });
+      check(foot749.last && foot749.below, "My tasks' add line is at the foot of the list, under the last group (\u00a7749)", JSON.stringify(foot749));
+      await page.click("[data-mwadd]");
+      await page.waitForSelector('.mwadd select[data-add="client"] option', { state: "attached", timeout: 5000 }).catch(() => {});
+      const open744 = await page.evaluate(() => { const c = document.querySelector(".mwadd .mwaddc"); return c ? { d: getComputedStyle(c).display, n: c.querySelectorAll("select").length, wk: (c.querySelector('[data-add="week"] option:checked') || {}).textContent || "", own: (c.querySelector('[data-add="owner"] option:checked') || {}).textContent || "" } : null; });
+      check(shut744 === "none" && !!open744 && open744.d === "flex" && open744.n === 4 && open744.wk === "This week" && open744.own === "Me",
+        "My tasks has an add line; a click opens its client, week (this week), topic and owner (Me) (\u00a7746)", JSON.stringify({ shut744, open744 }));
+      await page.selectOption('.mwadd select[data-add="client"]', tkey).catch(() => {});
+      await page.fill("[data-mwadd]", "MW added by the line");
+      await page.press("[data-mwadd]", "Enter");
+      await page.waitForFunction(() => Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), null, { timeout: 8000 }).catch(() => {});
+      await page.waitForFunction(() => document.activeElement && document.activeElement.hasAttribute("data-mwadd"), null, { timeout: 3000 }).catch(() => {});
+      const line744 = await page.evaluate(() => ({ row: Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), focus: document.activeElement && document.activeElement.hasAttribute("data-mwadd"), on: document.activeElement ? document.activeElement.tagName + "." + document.activeElement.className : "" }));
+      const db744 = await stored744("MW added by the line");
+      check(line744.row && line744.focus && !!db744 && !!db744.due && !!db744.owner_key,
+        "\u2026Enter stores it in that client's Tracker as one's own, this week, the row comes in and the line is ready for the next (\u00a7746)", JSON.stringify({ line744, db744 }));
+      /* §747 STEPS IN MY TASKS' OPENED TASK: quiet until asked for (+ Add
+         steps, grey words and a blue +), then the Tracker's own — Enter adds
+         and keeps the line, Escape shuts it, a tick writes "Done: <step>"
+         into this week's box with the cursor in it, nothing saved */
+      await page.locator(".mwlist .mwrow .t", { hasText: "MW added by the line" }).click();
+      await page.waitForSelector(".mwrow.on .mwdet [data-steps] [data-sadd]", { timeout: 8000 }).catch(() => {});
+      const q745 = await page.evaluate(() => { const r = document.querySelector(".mwrow.on .mwdet"), lk = r && r.querySelector("[data-steps] [data-sadd]"), b = lk && lk.querySelector("b");
+        return r ? { link: lk ? lk.textContent.replace(/\s+/g, " ").trim() : "", title: !!r.querySelector(".mwsteps .mwssh"), wk: Array.from(r.querySelectorAll(".mwssh")).some((x) => x.textContent === "This week"), cols: lk && b ? [getComputedStyle(lk).color, getComputedStyle(b).color] : [] } : null; });
+      await page.click(".mwrow.on [data-sadd]");
+      await page.waitForFunction(() => document.activeElement && document.activeElement.hasAttribute("data-snew"), null, { timeout: 3000 }).catch(() => {});
+      const o745 = await page.evaluate(() => ({ focus: !!document.activeElement && document.activeElement.hasAttribute("data-snew"), title: !!document.querySelector(".mwrow.on .mwsteps .mwssh") }));
+      await page.keyboard.type("Line step"); await page.keyboard.press("Enter");
+      await page.waitForFunction(() => Array.from(document.querySelectorAll(".mwrow.on .mwsnm")).some((x) => x.textContent === "Line step") && document.activeElement && document.activeElement.hasAttribute("data-snew"), null, { timeout: 8000 }).catch(() => {});
+      const a745 = await page.evaluate(() => ({ step: Array.from(document.querySelectorAll(".mwrow.on .mwsnm")).map((x) => x.textContent), focus: !!document.activeElement && document.activeElement.hasAttribute("data-snew"), count: ((document.querySelector(".mwrow.on .mwmeta .stc") || {}).textContent || "") }));
+      const sdb745 = (await owner.query("SELECT s.title, s.done_at IS NOT NULL AS done FROM tracker_steps s JOIN tracker_actions a ON a.id = s.action_id WHERE a.tenant_id = $1 AND a.title = 'MW added by the line'", [tenantId])).rows;
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(400);
+      /* §748: with steps the line stays open, no link */
+      const e745 = await page.evaluate(() => ({ line: !!document.querySelector(".mwrow.on [data-snew]"), link: !!document.querySelector(".mwrow.on [data-sadd]") }));
+      check(!!q745 && q745.link === "+ Add steps" && !q745.title && !q745.wk && q745.cols.length === 2 && q745.cols[0] !== q745.cols[1] && o745.focus && o745.title &&
+        a745.step.join("|") === "Line step" && a745.focus && sdb745.length === 1 && e745.line && !e745.link,
+        "My tasks' opened task, as the Tracker's: a task without steps shows only + Add steps; pressed, the title and line come out, Enter stores a step and keeps the line, which stays open once there are steps (\u00a7747, \u00a7748)", JSON.stringify({ q745, o745, a745, sdb745, e745 }));
+      await page.click(".mwrow.on .mwsline .mwscb");
+      await page.waitForFunction(() => { const i = document.querySelector(".mwrow.on .mwcompose input"); return i && i.value === "Done: Line step" && document.activeElement === i && !!document.querySelector(".mwrow.on .mwsline.done"); }, null, { timeout: 8000 }).catch(() => {});
+      const t745 = await page.evaluate(() => { const i = document.querySelector(".mwrow.on .mwcompose input"); return { v: i ? i.value : null, focus: document.activeElement === i, done: !!document.querySelector(".mwrow.on .mwsline.done"), wk: Array.from(document.querySelectorAll(".mwrow.on .mwssh")).some((x) => x.textContent === "This week") }; });
+      const tdb745 = (await owner.query("SELECT s.done_at IS NOT NULL AS done, a.status, (SELECT count(*) FROM tracker_progress p WHERE p.action_id = a.id)::int AS notes FROM tracker_steps s JOIN tracker_actions a ON a.id = s.action_id WHERE a.tenant_id = $1 AND a.title = 'MW added by the line'", [tenantId])).rows[0] || {};
+      check(t745.v === "Done: Line step" && t745.focus && t745.done && t745.wk && tdb745.done === true && tdb745.status === "in_progress" && tdb745.notes === 0,
+        "\u2026a tick there is stored (the task moves to In progress) and writes \"Done: Line step\" into this week's box, the cursor in it, nothing saved (\u00a7747)", JSON.stringify({ t745, tdb745 }));
+      await page.locator("#nav button", { hasText: "Home" }).click();
+      await page.waitForSelector("[data-newtask]", { timeout: 8000 }).catch(() => {});
+      /* §748: Home is for quick updates — its opened task has no steps; the row keeps its count */
+      await page.waitForFunction(() => Array.from(document.querySelectorAll('[data-home="tasks"] .mwrow .t')).some((t) => t.textContent === "MW added by the line"), null, { timeout: 8000 }).catch(() => {});
+      const hrows746 = await page.evaluate(() => Array.from(document.querySelectorAll('[data-home="tasks"] .mwrow .t, [data-home="tasks"] .t')).map((t) => t.textContent).slice(0, 8));
+      /* (it may still be open from My tasks — the open task is shared — so a press can fold it) */
+      if (!(await page.$('[data-home="tasks"] .mwrow.on .mwtabs'))) await page.locator('[data-home="tasks"] .mwrow .t', { hasText: "MW added by the line" }).click({ timeout: 5000 }).catch(() => {});
+      await page.waitForSelector('[data-home="tasks"] .mwrow.on .mwtabs', { timeout: 8000 }).catch(() => {});
+      const h746 = await page.evaluate(() => { const r = document.querySelector('[data-home="tasks"] .mwrow.on'); return r ? { steps: !!r.querySelector("[data-steps]"), box: !!r.querySelector(".mwcompose input"), count: ((r.querySelector(".mwmeta .stc") || {}).textContent || "") } : null; });
+      check(!!h746 && !h746.steps && h746.box && h746.count === "1 of 1 steps", "Home's opened task has no steps \u2014 this week's box only; the row keeps its count (\u00a7748)", JSON.stringify({ h746, hrows746 }));
+      await page.click("[data-newtask]");
+      await page.waitForSelector(".ntpop", { timeout: 4000 }).catch(() => {});
+      const pop744 = await page.evaluate(() => { const p = document.querySelector(".ntpop"); return p ? { labels: Array.from(p.querySelectorAll("label > span")).map((s) => s.textContent.trim()), focus: document.activeElement && document.activeElement.getAttribute("data-add") } : null; });
+      await page.keyboard.press("Escape");
+      const gone744 = await page.evaluate(() => !document.querySelector(".ntpop") && !document.querySelector(".ntscrim"));
+      check(!!pop744 && pop744.labels.join("|") === "Task|Client|Week|Topic optional|Owner" && pop744.focus === "title" && gone744,
+        "Home's + New task opens a pop-up \u2014 Task, Client, Week, Topic (optional), Owner \u2014 and Escape closes it (\u00a7746)", JSON.stringify({ pop744, gone744 }));
+      await page.click("[data-newtask]");
+      await page.waitForSelector(".ntpop", { timeout: 4000 }).catch(() => {});
+      await page.selectOption('.ntpop select[data-add="client"]', tkey).catch(() => {});
+      await page.fill('.ntpop [data-add="title"]', "MW added by the pop-up");
+      await page.selectOption('.ntpop select[data-add="week"]', "");
+      await page.click(".ntpop [data-create]");
+      await page.waitForFunction(() => !document.querySelector(".ntpop"), null, { timeout: 8000 }).catch(() => {});
+      const db744b = await stored744("MW added by the pop-up");
+      check(!!db744b && db744b.due === null && !(await page.$(".ntpop")),
+        "\u2026Create stores it (No date chosen: no week) and closes the pop-up (\u00a7746)", JSON.stringify(db744b));
     }
   } finally {
     await owner.query("DELETE FROM tracker_actions WHERE tenant_id = $1", [tenantId]);
@@ -3495,8 +4037,14 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
   check(/javascript|ecmascript/i.test(r.headers.get("content-type") || ""), "…as JavaScript, or the browser refuses it", r.headers.get("content-type"));
   check(body.includes('addEventListener("push"') && body.includes('addEventListener("notificationclick"'),
         "…and it carries the notification half (Phase G's row: a push cannot arrive without it)");
-  check(!/addEventListener\("fetch"/.test(body),
-        "…and NO fetch handler: nothing here is served from disk (the plan's line 47, kept)");
+  /* §701: ONE fetch handler, for page loads alone, answering SMP's own
+     offline page when the network fails — and still nothing on disk (the
+     plan's line 47, kept): it never opens a cache. */
+  const fetchAt = body.indexOf('addEventListener("fetch"');
+  const handler = fetchAt < 0 ? "" : body.slice(fetchAt, body.indexOf("\n});", fetchAt));
+  check(fetchAt >= 0 && /mode !== "navigate"/.test(handler) && !/caches/.test(handler),
+        "…and its one fetch handler answers page loads only, and opens no cache (§701; the plan's line 47, kept)");
+  check((body.match(/addEventListener\("fetch"/g) || []).length === 1, "…and there is only the one");
 
   /* THE BOTH-ENDS HALF (§94.2): it is not enough that the frozen caches are
      gone — a build that served no worker at all would satisfy that. So the
@@ -3531,6 +4079,15 @@ await section("9 · the worker carries the notifications and stores nothing (Pha
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
   const after = await page.evaluate(() => caches.keys());
   check(after.length === 0, "…and a navigation under it stores nothing", JSON.stringify(after));
+
+  /* §701: AND A PAGE LOAD WITH NO CONNECTION IS SMP'S OWN OFFLINE PAGE, not
+     the browser's error — answered by the worker, so still nothing stored. */
+  await ctx.setOffline(true);
+  await page.goto(BASE + "/raya-trade/strategy").catch(() => {});
+  const off = await page.evaluate(() => ({ h: (document.querySelector("h1") || {}).textContent || "", retry: !!document.getElementById("retry") })).catch(() => ({ h: "", retry: false }));
+  await ctx.setOffline(false);
+  check(off.h === "You're offline" && off.retry, "a page load with no connection shows SMP's own offline page, with Try again (§701)", JSON.stringify(off));
+  check((await page.evaluate(() => caches.keys())).length === 0, "…and showing it stored nothing");
 
   /* AND THE HALF THE WORKER IS FOR ON AN IPHONE (§26): a push is only ever
      delivered to a platform that has been ADDED TO A HOME SCREEN, which

@@ -1,7 +1,6 @@
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
-import { WorkspacePageHeader } from "../workspace-page-header";
 import { buildProcessLandscape, describeLandscape } from "@/ffp/lib/domain/process-landscape";
 import type { LandscapeProcessInput } from "./landscape-canvas";
 import type { RailProcess } from "@/ffp/lib/domain/milestone-rails";
@@ -120,11 +119,8 @@ export default async function HelicopterViewPage(props: PageProps<"/[slug]/proce
   const landscape = buildProcessLandscape(landscapeProcesses);
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <WorkspacePageHeader
-        title="Helicopter View"
-        subtitle={`How ${workspace.name}'s processes connect — ${describeLandscape(landscape)}.`}
-      />
+    <main className="w-full">
+      <p className="mb-3 text-sm text-slate-600">{`How ${workspace.name}'s processes connect: ${describeLandscape(landscape)}.`}</p>
 
       <HelicopterView
         workspaceId={workspaceId}

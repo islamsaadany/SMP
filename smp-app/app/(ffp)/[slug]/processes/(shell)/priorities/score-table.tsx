@@ -15,6 +15,7 @@ import {
   setProcessPriority,
 } from "@/ffp/lib/actions/priorities";
 import { ProcessPicker } from "./process-picker";
+import { ConfirmDialog } from "../confirm-dialog";
 import { planUnits } from "@/ffp/lib/domain/priority-units";
 import { DECISIONS, DECISION_LABEL, inTree, type Decision, type Weights } from "@/ffp/lib/domain/priorities";
 import type { PriorityRow, StepRow } from "@/ffp/lib/data/priorities";
@@ -64,6 +65,10 @@ export function ScoreTable({
   const [clearing, setClearing] = useState(false);
   const [kinds, setKinds] = useState<ReadonlySet<string>>(new Set());
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
+  // The questions this table asks go through the module's own dialog, never
+  // the browser's confirm() or prompt() (§731).
+  const [askClear, setAskClear] = useState(false);
+  const [promote, setPromote] = useState<{ stepId: string; label: string; name: string } | null>(null);
   const tree = useMemo(() => inTree(rows), [rows]);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const [subsOpen, setSubsOpen] = useState<ReadonlySet<string>>(new Set());
@@ -213,19 +218,31 @@ export function ScoreTable({
               <button
                 type="button"
                 disabled={pending || kinds.size === 0 || picked.size === 0}
-                onClick={() => {
-                  if (!window.confirm(`Clear ${[...kinds].join(", ")} on ${picked.size} process(es)? This cannot be undone.`)) return;
-                  run(() => clearPriorityEntries({ workspaceId, kinds: [...kinds] as (typeof CLEAR_KINDS)[number]["key"][], processIds: [...picked] }), (d) => {
-                    setNote(`Cleared ${(d as { cleared: number }).cleared} process(es).`);
-                    setClearing(false);
-                  });
-                }}
+                onClick={() => setAskClear(true)}
                 className="rounded-lg bg-rose-700 px-3 py-1.5 font-semibold text-white hover:bg-rose-800 disabled:opacity-40"
               >
                 Clear the selected
               </button>
               <button type="button" className="underline" onClick={() => setClearing(false)}>Cancel</button>
             </div>
+            {askClear && (
+              <ConfirmDialog
+                title={`Clear ${CLEAR_KINDS.filter((k) => kinds.has(k.key)).map((k) => k.label.toLowerCase()).join(", ")} on ${picked.size} ${picked.size === 1 ? "process" : "processes"}?`}
+                action="Clear them"
+                destructive
+                pending={pending}
+                onClose={() => setAskClear(false)}
+                onConfirm={() => {
+                  setAskClear(false);
+                  run(() => clearPriorityEntries({ workspaceId, kinds: [...kinds] as (typeof CLEAR_KINDS)[number]["key"][], processIds: [...picked] }), (d) => {
+                    setNote(`Cleared ${(d as { cleared: number }).cleared} process(es).`);
+                    setClearing(false);
+                  });
+                }}
+              >
+                <p>The entries go from every ticked process, and the ranking moves with them. There is no undo.</p>
+              </ConfirmDialog>
+            )}
           </div>
         )}
         {note && <p role="status" className="mt-2 text-xs text-emerald-700">{note}</p>}
@@ -376,10 +393,7 @@ export function ScoreTable({
                   processDecision={r.decision}
                   onDecision={(d) => run(() => setStepDecision({ workspaceId, stepId: st.id, decision: d }))}
                   onWhy={(v) => run(() => setStepPriority({ workspaceId, stepId: st.id, why: v || null }))}
-                  onPromote={() => {
-                    const name = window.prompt("Name for the new process (it becomes a sub-process of this one, branching from the step):", st.label);
-                    if (name && name.trim()) run(() => promoteStepToProcess({ workspaceId, stepId: st.id, name: name.trim() }), () => setNote(`Made "${name.trim()}" a process of its own. The step stays in the main process as the link.`));
-                  }}
+                  onPromote={() => setPromote({ stepId: st.id, label: st.label, name: st.label })}
                 />
               ))}
               </Fragment>
@@ -387,6 +401,40 @@ export function ScoreTable({
           </tbody>
         </table>
       </section>
+      {promote && (
+        <ConfirmDialog
+          title={`Make "${promote.label}" a process of its own?`}
+          action="Make it a process"
+          pending={pending}
+          disabled={!promote.name.trim()}
+          onClose={() => setPromote(null)}
+          onConfirm={() => {
+            const name = promote.name.trim();
+            setPromote(null);
+            run(() => promoteStepToProcess({ workspaceId, stepId: promote.stepId, name }), () => setNote(`Made "${name}" a process of its own. The step stays in the main process as the link.`));
+          }}
+        >
+          <p>It becomes a sub-process of this one, branching from the step. The step stays in the main process as the link.</p>
+          <label className="grid gap-1 text-xs font-medium text-slate-600">
+            Name of the new process
+            <input
+              type="text"
+              value={promote.name}
+              maxLength={200}
+              onChange={(e) => setPromote({ ...promote, name: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && promote.name.trim()) {
+                  e.preventDefault();
+                  const name = promote.name.trim();
+                  setPromote(null);
+                  run(() => promoteStepToProcess({ workspaceId, stepId: promote.stepId, name }), () => setNote(`Made "${name}" a process of its own. The step stays in the main process as the link.`));
+                }
+              }}
+              className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm text-slate-900"
+            />
+          </label>
+        </ConfirmDialog>
+      )}
       <p className="rounded-lg border-s-4 border-amber-400 bg-amber-50 px-4 py-2 text-xs text-amber-900">
         Office-only working view. The suggestions come from the process map and the risks already logged. You accept or change them, and none of this is printed in anything the client receives except the sign-off page.
       </p>
@@ -420,6 +468,8 @@ function StepLine({
   onPromote: () => void;
 }) {
   const sugg = { importance: null, complexity: st.suggestedComplexity, risk: st.suggestedRisk } as const;
+  // Clearing a flag takes the step's scores with it, so it asks first (§731).
+  const [askUnflag, setAskUnflag] = useState(false);
   return (
     <tr className="border-t border-slate-100 bg-amber-50/30 align-top text-[13px]">
       {clearing && <td />}
@@ -431,13 +481,28 @@ function StepLine({
           aria-label={`${st.flagged ? "Unflag" : "Flag"} step ${st.label}`}
           title={st.flagged ? "Flagged. Click to clear it and its scores." : "Flag this step to score it"}
           onClick={() => {
-            if (st.flagged && !window.confirm("Clear the flag? This removes the step's scores.")) return;
-            onFlag(!st.flagged);
+            if (st.flagged) setAskUnflag(true);
+            else onFlag(true);
           }}
           className={`text-base ${st.flagged ? "" : "opacity-35"} disabled:cursor-default`}
         >
           ⚑
         </button>
+        {askUnflag && (
+          <ConfirmDialog
+            title={`Clear the flag on "${st.label}"?`}
+            action="Clear the flag"
+            destructive
+            pending={pending}
+            onClose={() => setAskUnflag(false)}
+            onConfirm={() => {
+              setAskUnflag(false);
+              onFlag(false);
+            }}
+          >
+            <p>The step's scores and its why note go with the flag. Flagging it again starts from nothing.</p>
+          </ConfirmDialog>
+        )}
       </td>
       <td className="px-3 py-2 ps-10">
         <span aria-hidden className="me-1 text-slate-400">↳</span>

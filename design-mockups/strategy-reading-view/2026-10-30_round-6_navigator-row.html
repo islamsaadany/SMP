@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The reading window's navigator row</title>
+<!-- Islam, 2026-10-30, of round 5's picker: "the drop down is a bit not
+     usable for long lists. why don't we use the navigator concept?" -->
+<style>
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-2:#0F2546;--navy-ink:#FFFFFF;--navy-quiet:#B7C4D8;--navy-rule:rgba(255,255,255,.14);--navy-lit:rgba(255,255,255,.16);--gold:#C9A24D;--gold-deep:#8A6B22;--good:#2E7D5B;--attn:#B8860B;--bad:#B04434;--sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#0E1014;--navy-2:#090B0E;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--navy-rule:rgba(255,255,255,.12);--navy-lit:rgba(255,255,255,.14);--gold:#D9B665;--gold-deep:#C9A24D;--good:#5FB68C;--attn:#D9B23C;--bad:#D97066;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 70px;display:grid;gap:32px}
+.head{display:flex;align-items:flex-start;gap:16px}.head>div{flex:1}
+h1{margin:0;font-size:22px;font-weight:700;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:76ch}
+.rules{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}.rules b{color:var(--ink);font-weight:600}
+.pgtheme{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--ink-2);font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.pgtheme svg{width:14px;height:14px}
+section{display:grid;gap:10px}
+.ph2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ph2 .n{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep);letter-spacing:.1em}
+h2{margin:0;font-size:16px;font-weight:700}.ph2 p{margin:0;color:var(--ink-3);font-size:13.5px}
+.cap{font-size:13.5px;color:var(--ink-2);margin:0;max-width:80ch}.cap b{color:var(--ink);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+.who{font-size:12.5px;color:var(--ink-3);margin:0 0 6px}.who b{color:var(--ink);font-weight:600}
+/* strip */
+.rwtop{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:14px;padding:0 22px;min-height:52px}
+.rwtop .mark{width:26px;height:26px;border-radius:7px;background:var(--gold);color:#16325C;display:grid;place-items:center;flex:none}.rwtop .mark svg{width:18px;height:18px}
+.rwtop .co{font-size:14px;font-weight:600;white-space:nowrap}
+.rwtop .sp{flex:1}.rwtop .asof{font-size:12px;color:var(--navy-quiet)}
+.rwtop .ex{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--navy-quiet);border:1px solid var(--navy-rule);border-radius:999px;padding:4px 12px}
+/* the navigator row, as the workbench draws it */
+.nav{background:var(--navy-2);color:var(--navy-quiet);display:flex;align-items:center;gap:6px;padding:0 14px;min-height:46px;font-size:14px;font-weight:600;position:relative}
+.nav .top{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:7px;color:var(--navy-ink);white-space:nowrap}.nav .top i{font-style:normal;font-size:10px;color:var(--navy-quiet)}
+.nav .sep{width:1px;height:24px;background:var(--navy-rule);margin:0 6px}
+.nav .sw{display:inline-flex;background:var(--navy-lit);border-radius:8px;padding:3px;gap:2px}
+.nav .sw span{padding:5px 12px;border-radius:6px;color:var(--navy-ink);white-space:nowrap}.nav .sw span.on{background:rgba(255,255,255,.22)}
+.nav .sw.one{background:none;padding:0}.nav .sw.one span{color:var(--navy-ink);padding:5px 10px}
+.nav .clip{flex:1;position:relative;overflow:hidden;min-width:0}
+.nav .scroll{display:flex;gap:2px;white-space:nowrap;padding:0 4px}
+.nav .scroll span{padding:7px 12px;border-radius:7px;color:var(--navy-ink);opacity:.86}.nav .scroll span.on{background:var(--navy-lit);opacity:1}
+.nav .fade{position:absolute;top:0;bottom:0;right:0;width:48px;background:linear-gradient(90deg,transparent,var(--navy-2))}
+.menu{position:absolute;left:14px;top:44px;z-index:5;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(15,23,42,.18);min-width:230px;padding:6px;font-size:13.5px;font-weight:500}
+.menu .i{padding:7px 10px;border-radius:6px;color:var(--ink-2);display:flex;justify-content:space-between;gap:12px}.menu .i.on{background:var(--surface-2);color:var(--ink);font-weight:600}.menu .i small{color:var(--ink-3);font-weight:400}
+.frame.menuopen{overflow:visible}.frame.menuopen .nav{overflow:visible}
+.rwtabs{display:flex;gap:2px;padding:0 22px;background:var(--navy);border-bottom:3px solid var(--gold)}
+.rwtabs span{padding:10px 14px 9px;font-size:13.5px;font-weight:600;color:var(--navy-quiet);border-radius:8px 8px 0 0;white-space:nowrap}.rwtabs span.on{background:var(--ground);color:var(--ink)}
+.rwbody{padding:16px 22px;display:grid;gap:10px;min-height:96px}
+.rwbody p{margin:0;font-size:13px;color:var(--ink-3)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>The reading window's navigator row</h1>
+      <p class="lede">Round 5 put the subjects in a drop-down; with ten units and eight functions that is a list to scroll through. The workbench already solved this: a row with the company menu pinned at the left, the Units | Functions switch, and the names on one line that scrolls. The window carries that same row under its strip, cut down for the viewer by the Roles &amp; access reach rule. Nothing else about the window changes.</p>
+      <ul class="rules">
+        <li><b>The same row, the same rules.</b> The company menu holds the company and its divisions; pressing one reads it and narrows the units to its own, as the workbench does. The switch has two sides, or three where a capability exists (§334). The names scroll; the controls stay pinned (§136).</li>
+        <li><b>Cut down by reach.</b> A name is in the row when the matrix gives this viewer view or better on any of that subject's pages. A side of the switch with nothing in it is not drawn; one side alone is a word, not a switch (§464).</li>
+        <li><b>The lit name is the subject</b>; the tabs below are that subject's own: a unit's four, a function's four with its plan's tab, a division's two.</li>
+        <li><b>One subject reached:</b> the row is its word alone and the window opens on it.</li>
+      </ul>
+    </div>
+    <button class="pgtheme" id="pgtheme" type="button"></button>
+  </div>
+
+  <section>
+    <div class="ph2"><span class="n">01</span><h2>Group CEO — reaches everything</h2><p>units lit, then functions lit, then the company menu open</p></div>
+    <div class="frame" id="a1"></div>
+    <div class="frame" id="a2"></div>
+    <div class="frame menuopen" id="a3" style="min-height:230px"></div>
+    <p class="cap">Three states of one row. <b>Raya Trade</b> in the menu reads the company itself (Foundation, Overall performance) with every unit on the line; <b>Distribution</b> reads the division and the line narrows to Mobile, CE and IT Dist. The lit name on the line is what the tabs show.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">02</span><h2>Narrower seats</h2><p>the same row with less in it</p></div>
+    <div class="pair">
+      <div><p class="who"><b>Mobile's reader</b> — the company and one unit</p><div class="frame" id="b"></div></div>
+      <div><p class="who"><b>Finance's reader</b> — one function, nothing else</p><div class="frame" id="c"></div></div>
+    </div>
+    <p class="cap">Left: no division is reached, so the company menu is the word <b>Raya Trade</b>; one side of the switch has something in it, so <b>Units</b> is a word; one name on the line. Right: one subject in all, so the row is <b>Finance</b> alone and the window opened on it — tabs Foundation, S&amp;W, Projects, Overall performance.</p>
+  </section>
+</div>
+<script>
+(function () {
+  var pg = "light";
+  try { var t = localStorage.getItem("smp.theme"); if (t === "light" || t === "dark") pg = t; else if (matchMedia("(prefers-color-scheme: dark)").matches) pg = "dark"; } catch (e) {}
+  var SUN = '<circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>', MOON = '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>';
+  var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg>';
+  function strip() { return '<div class="rwtop"><span class="mark">' + STAR + '</span><span class="co">Raya Trade</span><span class="sp"></span><span class="asof">Cycle 2</span><span class="ex">Exit</span></div>'; }
+  function nav(o) {
+    var h = '<div class="nav">';
+    h += '<span class="top' + (o.flagTop ? " flag" : "") + '">' + o.top + (o.topMenu ? ' <i>▾</i>' : '') + '</span>';
+    if (o.sw) { h += '<span class="sep"></span><span class="sw' + (o.sw.length === 1 ? " one" : "") + (o.flagSw ? " flag" : "") + '">' + o.sw.map(function (s) { return '<span class="' + (s === o.on ? "on" : "") + '">' + s + '</span>'; }).join("") + '</span>'; }
+    if (o.names) { h += '<span class="sep"></span><div class="clip"><div class="scroll">' + o.names.map(function (n) { return '<span class="' + (n === o.lit ? "on" : "") + '">' + n + '</span>'; }).join("") + '</div>' + (o.fade ? '<div class="fade"></div>' : '') + '</div>'; }
+    if (o.menu) h += o.menu;
+    return h + '</div>';
+  }
+  function tabs(list, on) { return '<div class="rwtabs">' + list.map(function (x) { return '<span class="' + (x === on ? "on" : "") + '">' + x + '</span>'; }).join("") + '</div>'; }
+  var UNITS = ["Mobile", "Retail", "Mazaya", "CE", "Online", "Corporate", "Care", "IT Dist.", "Logistics", "Nigeria", "Printing", "Packaging"];
+  var FNS = ["Finance", "HR", "Treasury", "Marketing", "IT", "Strategy Management Office"];
+  var UT = ["Foundation", "Analysis", "Directions", "Overall performance"];
+  document.getElementById("a1").innerHTML = strip() + nav({ top: "Raya Trade", topMenu: true, sw: ["Units", "Functions", "Capabilities"], on: "Units", names: UNITS, lit: "Mobile", fade: true, flagSw: true }) + tabs(UT, "Foundation") + '<div class="rwbody"><p>Mobile — Foundation. The line scrolls; the menu and the switch stay where they are.</p></div>';
+  document.getElementById("a2").innerHTML = strip() + nav({ top: "Raya Trade", topMenu: true, sw: ["Units", "Functions", "Capabilities"], on: "Functions", names: FNS, lit: "Finance" }) + tabs(["Foundation", "S&W", "Projects", "Overall performance"], "Projects") + '<div class="rwbody"><p>Finance — Projects. A function’s tabs: its plan’s own name on the third.</p></div>';
+  var menu = '<div class="menu flag"><div class="i on"><span>Raya Trade</span></div><div class="i"><span>Distribution</span><small>3 units</small></div><div class="i"><span>B2C</span><small>2 units</small></div></div>';
+  document.getElementById("a3").innerHTML = strip() + nav({ top: "Raya Trade", topMenu: true, sw: ["Units", "Functions", "Capabilities"], on: "Units", names: UNITS, lit: "Mobile", fade: true, menu: menu }) + tabs(UT, "Foundation") + '<div class="rwbody"><p style="padding-left:240px">Pressing <b>Distribution</b> reads the division (Foundation, Overall performance) and the line becomes Mobile · CE · IT Dist.</p></div>';
+  document.getElementById("b").innerHTML = strip() + nav({ top: "Raya Trade", sw: ["Units"], on: "Units", names: ["Mobile"], lit: "Mobile", flagTop: true }) + tabs(UT, "Foundation") + '<div class="rwbody"><p>Raya Trade is a word: no division reached. Press it to read the company; press Mobile to read the unit.</p></div>';
+  document.getElementById("c").innerHTML = strip() + nav({ top: "Finance", flagTop: true }) + tabs(["Foundation", "S&W", "Projects", "Overall performance"], "Foundation") + '<div class="rwbody"><p>Opened on Finance. The row carries the one word and nothing to press.</p></div>';
+  function draw() { document.documentElement.setAttribute("data-theme", pg); var b = document.getElementById("pgtheme"); b.innerHTML = '<svg viewBox="0 0 20 20">' + (pg === "light" ? SUN : MOON) + '</svg>' + (pg === "light" ? "View in dark" : "View in light"); }
+  document.getElementById("pgtheme").addEventListener("click", function () { pg = pg === "light" ? "dark" : "light"; draw(); }); draw();
+})();
+</script>
+</body>
+</html>

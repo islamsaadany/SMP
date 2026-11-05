@@ -1,0 +1,418 @@
+<title>Process Builder Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: where the Strategy Office builds a process, drawn three ways against the page managers read.
+   Palette and type: SMP's Forefront tokens and Source Sans 3, as in the other process mockups. */
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+  --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C; --focus:#8A6B22; --stone:#16325C;
+  --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+  --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+  --over-bg:#FBF6E9; --over-line:#D9C489;
+  --bar:#16325C; --bar-ink:#FFFFFF; --bar-quiet:#B9C2CE; --bar-accent:#E8A33A; --bar-late:#FF9B8F; --bar-hover:rgba(255,255,255,.1);
+  --scrim:rgba(10,14,22,.45); --shadow:0 10px 28px rgba(15,23,42,.16);
+  --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--over-bg)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+p,ul,ol{margin:0}
+[hidden]{display:none!important}
+
+/* drawing band */
+.mk{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--over-bg);border-bottom:1px dashed var(--over-line)}
+.mk-in{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.mk-tag{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);border:1px dashed var(--gold-deep);border-radius:4px;padding:1px 6px}
+.mk-id{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-right:auto}
+.mk-id b{font-size:14px}
+.mk-id span{font-size:12px;color:var(--ink-2)}
+.mk-sw{display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--over-line);border-radius:8px;flex-wrap:wrap;align-items:center}
+.mk-sw>span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);padding:0 6px}
+.mk-sw button{border:0;background:none;border-radius:6px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.mk-sw button.on{background:var(--panel);color:var(--panel-ink)}
+.doc{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 60px}
+.intro{font-size:13.5px;color:var(--ink-2);max-width:92ch;margin-bottom:12px}
+.intro b{color:var(--ink)}
+
+/* product frame */
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;min-height:40px}
+.tb .brand{font-weight:600;font-size:14px}
+.tb .read{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--surface-2)}
+.tb .who{margin-left:auto;font-size:12.5px;color:var(--ink-3)}
+.tb .seat{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--gold);color:var(--gold-deep);background:var(--over-bg);border-radius:4px;padding:1px 6px}
+.tb .out{border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+@media (max-width:620px){.tb .who{display:none}.tb{padding:0 12px}}
+.pg{padding:20px 24px 28px}
+@media (max-width:640px){.pg{padding:14px 12px 22px}}
+
+/* the masthead (Internal Tracker), actions top right */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 18px;margin:0 0 14px;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mrow{display:flex;align-items:stretch;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.mside{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:14px}
+.wkof{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.mast h1{font-size:24px;font-weight:600;line-height:1.15;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.msub{font-size:13px;color:var(--bar-quiet);margin-top:5px}
+.msub b{color:var(--bar-ink);font-weight:600}
+.mstrip{display:flex;gap:22px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.mtile{text-align:right;min-height:48px}
+.mtile b{display:block;font-size:22px;font-weight:600;line-height:1}
+.mtile span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.mtile.late b{color:var(--bar-late)}
+.macts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bq{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:500;color:var(--bar-quiet);padding:6px 9px;border-radius:7px;background:none;border:0}
+.bq:hover{background:var(--bar-hover);color:var(--bar-ink)}
+.bgold{background:var(--bar-accent);color:var(--bar);border:0;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:700}
+.tog{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.35);border-radius:99px;padding:4px 10px 4px 5px;background:none;color:var(--bar-ink);font-size:13px;font-weight:600}
+.tog i{width:30px;height:18px;border-radius:99px;background:rgba(255,255,255,.25);position:relative;transition:background .15s}
+.tog i::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .15s}
+.tog[aria-pressed="true"] i{background:var(--bar-accent)}
+.tog[aria-pressed="true"] i::after{left:14px}
+.pill{display:inline-flex;font-size:11.5px;font-weight:600;border-radius:99px;padding:1px 9px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good-tx)}
+.pill.attn{background:var(--attn-bg);color:var(--attn-tx)}
+@media (max-width:640px){.mast{padding:14px 14px 16px}.mtile{text-align:left}.mstrip{gap:14px}.mside{align-items:flex-start}}
+
+/* view tabs: buttons (style 2), with an office group */
+.vt{display:inline-flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:100%;margin:0 0 14px;flex-wrap:wrap;align-items:center}
+.vt button{border:0;background:none;border-radius:7px;padding:8px 16px;font-size:14.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;display:inline-flex;gap:7px;align-items:baseline}
+.vt button.on{background:var(--panel);color:var(--panel-ink)}
+.vt .ct{font-size:12px;font-weight:600;color:var(--ink-3)}
+.vt button.on .ct{color:var(--bar-quiet)}
+.vt .ct.bad{color:var(--bad-tx)}
+.vt .grp{display:inline-flex;align-items:center;gap:2px;margin-left:6px;padding-left:8px;border-left:1px solid var(--line)}
+.vt .grp>span{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);padding:0 6px 0 2px}
+@media (max-width:640px){.vt button{padding:7px 11px;font-size:14px}.vt .grp{flex-basis:100%;flex-wrap:wrap;margin:2px 0 0;padding:4px 0 0;border-left:0;border-top:1px solid var(--line)}}
+
+/* shared blocks */
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.lbl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.note{font-size:12.5px;color:var(--ink-3)}
+.code{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--stone)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.chip.gold{border-color:var(--gold);background:var(--over-bg);color:var(--gold-deep)}
+.chip.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad-tx)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.btn:hover{border-color:var(--gold);color:var(--ink)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--on-accent);font-weight:700}
+.btn.dash{border-style:dashed}
+.ph{border:1px dashed var(--line);border-radius:8px;padding:22px 18px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
+.ph b{display:block;font-size:15px;color:var(--ink);margin-bottom:4px}
+
+/* the flow, with an edit toolbar */
+.ftool{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+.ftool .sp{flex:1}
+.agrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;align-items:start}
+@media (max-width:1180px){.agrid{grid-template-columns:minmax(0,1fr)}}
+.lanes-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.lanes{position:relative;display:grid;grid-template-columns:104px repeat(7,minmax(108px,1fr));grid-template-rows:repeat(4,96px);min-width:860px}
+.lane-bg{grid-column:1/-1;border-top:1px solid var(--line-soft)}
+.lane-bg.z{background:var(--zebra)}
+.lane-l{grid-column:1;display:flex;align-items:center;padding:10px 12px;background:var(--surface-2);border-right:1px solid var(--line);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);position:sticky;left:0;z-index:3}
+.st{position:relative;z-index:2;align-self:center;justify-self:center;width:102px;text-align:left;border:1.5px solid var(--field-line);background:var(--surface);border-radius:8px;padding:6px 9px}
+.st .n{display:block;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-3)}
+.st b{display:block;font-size:12.5px;line-height:1.25}
+.st.dec{border-style:dashed;border-color:var(--stone)}
+.st.ends{border-radius:99px;width:96px;text-align:center;background:var(--surface-2)}
+.st.on{box-shadow:0 0 0 3px var(--gold)}
+.st .gap{position:absolute;top:-9px;right:-7px;width:18px;height:18px;border-radius:50%;background:var(--bad);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+.reading .st .gap{display:none}
+svg.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
+svg.edges path{fill:none;stroke:var(--ink-3);stroke-width:1.5}
+svg.edges .ah{fill:var(--ink-3)}
+svg.edges rect{fill:var(--surface)}
+svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
+.drawer{padding:12px 14px;display:grid;gap:10px}
+.drawer h3{font-size:16px}
+.dl{display:grid;grid-template-columns:90px minmax(0,1fr);gap:5px 10px;font-size:13px;margin:0}
+.dl dt{color:var(--ink-3);font-size:12.5px}
+.dl dd{margin:0}
+.fld{display:grid;gap:3px}
+.fld>span{font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.fld input,.fld select{border:1px solid var(--field-line);border-radius:6px;background:var(--surface);padding:5px 8px;font-size:13px;width:100%}
+.fld .row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.chg{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-deep)}
+.from{font-size:12px;border-left:3px solid var(--gold);background:var(--over-bg);padding:6px 9px;border-radius:0 6px 6px 0;color:var(--ink-2)}
+.ctl{font-size:12.5px;color:var(--ink-2)}
+.ctl.bad{color:var(--bad-tx);font-weight:600}
+
+/* RACI grid */
+.raci-wrap{overflow-x:auto}
+.raci{width:100%;border-collapse:collapse;min-width:640px}
+.raci th{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:center;padding:8px 6px;border-bottom:1px solid var(--line);background:var(--zebra)}
+.raci th:first-child{text-align:left;padding-left:14px}
+.raci td{border-top:1px solid var(--line-soft);text-align:center;padding:7px 6px;font-size:13px}
+.raci td:first-child{text-align:left;padding-left:14px;font-weight:600}
+.raci td.gaprow{color:var(--bad-tx)}
+.rc{display:inline-grid;place-items:center;width:28px;height:26px;border-radius:5px;border:1px solid var(--line);font-weight:800;font-size:12.5px;background:var(--surface);color:var(--ink-3)}
+.rc.R{background:var(--surface-2);color:var(--ink)}
+.rc.A{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.rc.C,.rc.I{color:var(--ink-2)}
+.rc.empty{border-style:dashed}
+
+/* separate builder (C) */
+.bld{display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.bld{grid-template-columns:minmax(0,1fr)}}
+.rail{padding:8px;display:grid;gap:2px;position:sticky;top:60px}
+.rail button{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;border:0;background:none;border-radius:6px;padding:8px 10px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.rail button:hover{background:var(--surface-2)}
+.rail button.on{background:var(--panel);color:var(--panel-ink)}
+.rail .dot{width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}
+.rail .dot.bad{background:var(--bad)}
+.rail .dot.q{background:var(--line)}
+@media (max-width:900px){.rail{position:static;grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto}}
+.bld .agrid{grid-template-columns:minmax(0,1fr) 270px}
+.bld .lanes{grid-template-columns:96px repeat(7,minmax(90px,1fr));min-width:726px}
+.bld .st{width:86px}
+.bld .st.ends{width:84px}
+@media (max-width:1180px){.bld .agrid{grid-template-columns:minmax(0,1fr)}}
+.bh{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:10px}
+.bh h2{font-size:18px}
+
+/* looking as Hend: what she never sees */
+.as-hend .office-only{display:none!important}
+.hend-note{display:none}
+.as-hend .hend-note{display:block}
+
+/* the note under each option */
+.verdict{margin-top:14px;border:1px dashed var(--over-line);background:var(--over-bg);border-radius:10px;padding:12px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.verdict{grid-template-columns:1fr}}
+.verdict h4{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:4px}
+.verdict ul{padding-left:16px;font-size:13px;color:var(--ink-2);display:grid;gap:3px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);color:var(--panel-ink);font-size:13px;padding:9px 14px;border-radius:8px;box-shadow:var(--shadow);z-index:60;max-width:min(560px,calc(100% - 32px))}
+</style>
+
+<div class="mk"><div class="mk-in">
+  <div class="mk-id"><span class="mk-tag">Mockup</span><b>Where the office builds a process, three ways</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
+  <div class="mk-sw" role="tablist" aria-label="Options"><button type="button" data-opt="a" role="tab">A · Edit switch</button><button type="button" data-opt="b" role="tab">B · Plus office tabs</button><button type="button" data-opt="c" role="tab">C · Separate builder</button></div>
+  <div class="mk-sw" role="group" aria-label="Looking as"><span>Looking as</span><button type="button" data-as="office">Mona, office</button><button type="button" data-as="hend">Hend, owner</button></div>
+</div></div>
+
+<div class="doc">
+  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Hend Mourad suggested a change to step 4 of <b>Order-to-Cash</b>, and you are drafting v4 from it. Switch <b>Looking as</b> to Hend to see what she sees of the same process in each option.</p>
+
+  <div class="frame" id="frame">
+    <div class="tb"><span class="brand">Raya Trade</span><span class="read">Processes</span><span class="who" id="tb-who">Mona Farag</span><span class="seat office-only">Strategy Office</span><span class="out">Sign out</span></div>
+    <div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div style="min-width:0">
+            <p class="wkof" id="m-eyebrow">Raya Trade · Processes › ORD100 · Finance</p>
+            <h1>Order-to-Cash <span class="pill good">In force · v2</span><span class="pill attn office-only">Draft v4</span></h1>
+            <p class="msub"><span class="office-only">Draft v4 started 24 Oct from Hend Mourad’s suggestion on step 4 · </span>Owner <b>Hend Mourad</b> · Approver <b>Yara Kamal</b></p>
+          </div>
+          <div class="mside">
+            <div class="macts" id="m-acts"></div>
+            <div class="mstrip" id="m-tiles"></div>
+          </div>
+        </div>
+      </header>
+      <div class="vt" id="vt" role="tablist" aria-label="Views"></div>
+
+      <!-- shared views (A and B) -->
+      <section data-view="flow" hidden><div id="slot-shared"></div></section>
+      <section data-view="steps" hidden><div class="ph"><b>Steps</b>The same list Hend reads. With Editing on, each field is edited where it sits: the step name, who does it, what they do.</div></section>
+      <section data-view="summary" hidden><div class="ph"><b>Summary</b>The same summary Hend reads. With Editing on, the office edits the purpose, scope and measures in place.</div></section>
+      <section data-view="raci" hidden><div id="slot-raci-b"></div></section>
+      <section data-view="authority" hidden><div class="ph"><b>Authority</b>Who may approve what, and up to which amount: the rules as sentences, as in the full prototype.</div></section>
+      <section data-view="controls" hidden><div class="ph"><b>Controls</b>Every risk, its control, the evidence and the last test, as in the full prototype.</div></section>
+      <section data-view="life" hidden><div class="ph"><b>Lifecycle</b>Draft, review, approval, publish, and every version with what changed, as in the full prototype.</div></section>
+
+      <!-- separate builder (C) -->
+      <section data-view="builder" hidden>
+        <div class="bld office-only">
+          <nav class="box rail" id="rail" aria-label="Builder sections"></nav>
+          <div id="bmain"></div>
+        </div>
+        <div class="ph hend-note"><b>Hend never opens the builder</b>She opens the reading page: the process page mockup, with Flow, Steps and Summary. The office checks what she will see with Preview as manager.</div>
+      </section>
+
+      <!-- the blocks that move between options -->
+      <div hidden id="park">
+        <div id="flowblock">
+          <div class="ftool office-only" id="ftool"><button class="btn" type="button" data-toast="Adds a step after the one selected.">+ Step</button><button class="btn" type="button" data-toast="Adds a decision with two ways out.">+ Decision</button><button class="btn" type="button" data-toast="Click two steps to join them.">Connect two steps</button><button class="btn" type="button" data-toast="Undoes the last change.">Undo</button><span class="sp"></span><span class="note">Saved as you type · 2 gaps</span></div>
+          <div class="agrid">
+            <div class="lanes-wrap"><div class="lanes" id="lanes">
+              <div class="lane-bg" style="grid-row:1"></div><div class="lane-bg z" style="grid-row:2"></div><div class="lane-bg" style="grid-row:3"></div><div class="lane-bg z" style="grid-row:4"></div>
+              <div class="lane-l" style="grid-row:1">Sales coordinator</div><div class="lane-l" style="grid-row:2">Credit controller</div><div class="lane-l" style="grid-row:3">Logistics coordinator</div><div class="lane-l" style="grid-row:4">Billing clerk</div>
+              <button type="button" class="st ends" id="s0" style="grid-row:1;grid-column:2"><span class="n">START</span><b>Order received</b></button>
+              <button type="button" class="st" id="s1" data-step="1" style="grid-row:1;grid-column:3"><span class="n">STEP 1</span><b>Confirm order</b></button>
+              <button type="button" class="st dec" id="s2" data-step="2" style="grid-row:2;grid-column:4"><span class="n">STEP 2</span><b>Credit check</b></button>
+              <button type="button" class="st" id="s3" data-step="3" style="grid-row:1;grid-column:5"><span class="n">STEP 3</span><b>Ask for prepayment</b><span class="gap" title="No one accountable">!</span></button>
+              <button type="button" class="st" id="s4" data-step="4" style="grid-row:3;grid-column:6"><span class="n">STEP 4</span><b>Deliver</b><span class="gap" title="Risk with no control">!</span></button>
+              <button type="button" class="st" id="s5" data-step="5" style="grid-row:4;grid-column:7"><span class="n">STEP 5</span><b>Invoice</b></button>
+              <button type="button" class="st" id="s6" data-step="6" style="grid-row:2;grid-column:8"><span class="n">STEP 6</span><b>Collect payment</b></button>
+              <svg class="edges" id="edges" aria-hidden="true"></svg>
+            </div></div>
+            <aside class="box drawer" id="drawer" aria-live="polite"></aside>
+          </div>
+        </div>
+        <div id="raciblock" class="box raci-wrap"><table class="raci" id="raci"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="verdict" id="verdict"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const ROLES = ['Sales coordinator', 'Credit controller', 'Logistics coordinator', 'Billing clerk', 'Finance manager', 'CFO'];
+  const STEPS = [
+    { n: 1, t: 'Confirm order', who: 'Sales coordinator', acts: ['Check the order against the quote', 'Confirm prices, quantities and the delivery date', 'Enter the order in the ERP'], raci: ['R', '', '', '', 'A', ''], appr: '', time: '', risk: null },
+    { n: 2, t: 'Credit check', who: 'Credit controller', dec: true, acts: ['Add this order to the customer’s balance', 'Compare it with the credit limit'], raci: ['I', 'R', '', '', 'A', 'C'], appr: 'At or above $250,000 the CFO approves', time: '1 day, then the Finance manager', risk: ['Goods released over the limit', 'The ERP blocks orders over the limit'] },
+    { n: 3, t: 'Ask for prepayment', who: 'Sales coordinator', acts: ['Send the pro-forma invoice', 'Chase until it is paid or cancelled'], raci: ['R', 'I', '', '', '', ''], appr: '', time: '5 days, then the Commercial manager', risk: null, gap: 'No one is accountable for this step' },
+    { n: 4, t: 'Deliver', who: 'Logistics coordinator', acts: ['Pick and pack', 'Deliver, and photograph the signed proof in the app'], inForce: ['Pick and pack', 'Deliver and bring back signed proof of delivery'], changed: 1, raci: ['I', '', 'R', '', 'A', ''], appr: '', time: '', risk: ['Proof of delivery missing', null], gap: 'A risk with no control' },
+    { n: 5, t: 'Invoice', who: 'Billing clerk', acts: ['Raise the invoice from the signed proof', 'Send it to the customer'], raci: ['', 'I', '', 'R', 'A', ''], appr: '', time: '2 days after delivery', risk: ['Invoice sent with the wrong price', 'Price list signed off before use'] },
+    { n: 6, t: 'Collect payment', who: 'Credit controller', acts: ['Match receipts to invoices', 'Chase overdue invoices every week'], raci: ['', 'R', '', 'C', 'A', ''], appr: '', time: '', risk: null },
+  ];
+  let OPT = 'a', AS = 'office', EDIT = true, VIEW = 'flow', SEL = 4, SECT = 'map';
+
+  const editing = () => AS === 'office' && (OPT === 'c' || EDIT);
+  function drawer() {
+    const s = STEPS.find((x) => x.n === SEL);
+    $$('.st').forEach((b) => b.classList.toggle('on', b.dataset.step === String(SEL)));
+    const raciChips = s.raci.map((v, i) => v ? '<span class="chip' + (v === 'A' ? ' gold' : '') + '">' + v + ' · ' + esc(ROLES[i]) + '</span>' : '').join('');
+    if (!editing()) {
+      $('#drawer').innerHTML = '<span class="note" style="font-family:var(--mono);font-weight:700">STEP ' + s.n + '</span><h3>' + esc(s.t) + '</h3><dl class="dl"><dt>Done by</dt><dd>' + esc(s.who) + '</dd>' + (s.appr ? '<dt>Approval</dt><dd>' + esc(s.appr) + '</dd>' : '') + (s.time ? '<dt>Time limit</dt><dd>' + esc(s.time) + '</dd>' : '') + '</dl><ul style="padding-left:18px;font-size:13px">' + (AS === 'hend' && s.inForce ? s.inForce : s.acts).map((a) => '<li>' + esc(a) + '</li>').join('') + '</ul>' +
+        (s.risk ? (s.risk[1] ? '<p class="ctl">Control: ' + esc(s.risk[1]) + '</p>' : '<p class="ctl bad">“' + esc(s.risk[0]) + '” has no control</p>') : '') +
+        (AS === 'hend' ? '<div><button class="btn" type="button" data-toast="Goes to the Strategy Office, pinned to this step.">Suggest a change to this step</button></div>' : '');
+      return;
+    }
+    $('#drawer').innerHTML = '<span class="note" style="font-family:var(--mono);font-weight:700">STEP ' + s.n + ' · EDITING</span>' +
+      (s.n === 4 ? '<p class="from">From Hend Mourad, 23 Oct: “Since August the warehouse sends the proof of delivery by photo.”</p>' : '') +
+      '<label class="fld"><span>Step</span><input value="' + esc(s.t) + '"></label>' +
+      '<label class="fld"><span>Done by</span><select>' + ROLES.map((r) => '<option' + (r === s.who ? ' selected' : '') + '>' + esc(r) + '</option>').join('') + '</select></label>' +
+      '<div class="fld"><span>What they do</span>' + s.acts.map((a, i) => '<input value="' + esc(a) + '">' + (s.changed === i ? '<span class="chg">Changed in v4</span>' : '')).join('') + '<div class="row"><button class="btn dash" type="button" data-toast="Adds a line.">+ Add a line</button></div></div>' +
+      '<div class="fld"><span>Who is involved</span><div class="row">' + raciChips + '<button class="btn dash" type="button" data-toast="Picks a role and R, A, C or I.">+</button></div>' + (s.gap && /accountable/.test(s.gap) ? '<span class="ctl bad">' + esc(s.gap) + '</span>' : '') + '</div>' +
+      '<div class="fld"><span>Approval and time limit</span><div class="row">' + (s.appr ? '<span class="chip">' + esc(s.appr) + '</span>' : '<button class="btn dash" type="button" data-toast="Writes an approval rule as a sentence.">+ Approval rule</button>') + (s.time ? '<span class="chip">' + esc(s.time) + '</span>' : '<button class="btn dash" type="button" data-toast="Sets how long the step may take.">+ Time limit</button>') + '</div></div>' +
+      '<div class="fld"><span>Risk and control</span>' + (s.risk ? '<div class="row"><span class="chip">' + esc(s.risk[0]) + '</span>' + (s.risk[1] ? '<span class="chip">' + esc(s.risk[1]) + '</span>' : '<button class="btn gold" type="button" data-toast="Adds a control for this risk.">+ Add a control</button>') + '</div>' : '<div class="row"><button class="btn dash" type="button" data-toast="Adds a risk to this step.">+ Add a risk</button></div>') + '</div>';
+  }
+
+  $('#raci').innerHTML = '<thead><tr><th>Step</th>' + ROLES.map((r) => '<th>' + esc(r) + '</th>').join('') + '</tr></thead><tbody>' +
+    STEPS.map((s) => '<tr><td class="' + (s.gap && /accountable/.test(s.gap) ? 'gaprow' : '') + '">' + s.n + ' · ' + esc(s.t) + (s.gap && /accountable/.test(s.gap) ? ' <span class="chip bad">No A</span>' : '') + '</td>' + s.raci.map((v) => '<td><button type="button" class="rc ' + (v || 'empty') + '" data-toast="Cycles through R, A, C, I and empty.">' + (v || '') + '</button></td>').join('') + '</tr>').join('') + '</tbody>';
+
+  const EDGES = [['s0', 's1'], ['s1', 's2'], ['s2', 's4', 'within limit'], ['s2', 's3', 'over limit'], ['s3', 's4', 'once paid'], ['s4', 's5'], ['s5', 's6']];
+  function arrows() {
+    const L = $('#lanes'), svg = $('#edges'); if (!L || !L.offsetParent) return;
+    const o = L.getBoundingClientRect(); let out = '<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="ah" d="M0 0 8 4 0 8z"/></marker></defs>', lab = '';
+    EDGES.forEach(([f, t, l]) => {
+      const a = document.getElementById(f).getBoundingClientRect(), b = document.getElementById(t).getBoundingClientRect();
+      const sx = a.right - o.left, sy = a.top - o.top + a.height / 2, ex = b.left - o.left - 2, ey = b.top - o.top + b.height / 2, mx = Math.round(sx + Math.min(24, (ex - sx) / 2));
+      out += '<path d="' + (Math.abs(sy - ey) < 2 ? 'M' + sx + ' ' + sy + 'H' + ex : 'M' + sx + ' ' + sy + 'H' + mx + 'V' + ey + 'H' + ex) + '" marker-end="url(#ah)"/>';
+      if (l) { const x = mx + 5, y = (sy + ey) / 2 + 4, w = l.length * 5.7 + 8; lab += '<rect x="' + (x - 3) + '" y="' + (y - 11) + '" width="' + w + '" height="15" rx="3"/><text x="' + x + '" y="' + y + '">' + l + '</text>'; }
+    });
+    svg.innerHTML = out + lab;
+  }
+
+  const SECTS = [['map', 'Map', 'bad'], ['raci', 'RACI', 'bad'], ['authority', 'Authority', ''], ['controls', 'Risks & controls', 'bad'], ['quality', 'Quality', ''], ['life', 'Lifecycle', 'q']];
+  const SECT_PH = { authority: ['Authority', 'Who may approve what, and up to which amount.'], controls: ['Risks & controls', 'Every risk, its control, the evidence and the last test.'], quality: ['Quality', 'Measures, non-conformances and corrective actions.'], life: ['Lifecycle', 'Draft, review, approval, publish, and every version.'] };
+
+  const NOTES = {
+    a: [['Good at', ['One page to build and to learn: what the office builds is exactly what managers read', 'Editing happens where the thing is read: the step, its people, its rule, its control', 'No second screen to keep in step']], ['What it costs', ['Dense work, such as the full RACI grid, authority rules and control testing, has to fit in the side panel', 'Hard for the office to see every step’s RACI at once']], ['When owners may edit drafts later', ['Easiest: show the Edit switch to the owner on a draft, and route the save to the office for review']]],
+    b: [['Good at', ['Everything A gives, plus full-width office views for the dense work (RACI grid, authority, controls, lifecycle)', 'Managers never see the office tabs; the office sees exactly what managers see, plus its own tabs', 'One address for the process, for everyone']], ['What it costs', ['The office has seven tabs, as today', 'Each tab needs a rule for who sees it']], ['When owners may edit drafts later', ['Easy: give owners the Edit switch on the shared tabs of a draft; keep the office tabs for the office']]],
+    c: [['Good at', ['Each audience gets a tool shaped for it; the builder can be as dense as consultants like', 'Closest to today’s page, so the least rework for the builder']], ['What it costs', ['Two pages to keep in step; every field shows up twice in the code', 'The office has to preview to see what managers will see', 'Hend’s “Suggest a change” lands on one page, the work happens on another']], ['When owners may edit drafts later', ['Hardest: owners would have to be let into the consultants’ builder, or a lighter editor built for them']]],
+  };
+
+  function render() {
+    const fr = $('#frame');
+    fr.classList.toggle('as-hend', AS === 'hend');
+    $$('[data-opt]').forEach((b) => { const on = b.dataset.opt === OPT; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    $$('[data-as]').forEach((b) => b.classList.toggle('on', b.dataset.as === AS));
+    $('#tb-who').textContent = AS === 'hend' ? 'Hend Mourad' : 'Mona Farag';
+    $('#m-eyebrow').textContent = OPT === 'c' && AS === 'office' ? 'Raya Trade · Processes › Builder › ORD100' : 'Raya Trade · Processes › ORD100 · Finance';
+    // actions, top right of the band
+    let acts = '';
+    if (AS === 'hend') acts = '<button class="bq" type="button" data-toast="Downloads the SOP.">Download SOP</button><button class="bq" type="button" data-toast="Prints the page.">Print</button><button class="bgold" type="button" data-toast="Goes to the Strategy Office.">Suggest a change</button>';
+    else if (OPT === 'c') acts = '<button class="bq" type="button" data-toast="Shows the reading page as Hend will see it once v4 is published.">Preview as manager</button><button class="bgold" type="button" data-toast="Sends draft v4 to Yara Kamal for approval.">Send for approval</button>';
+    else acts = '<button class="tog" type="button" id="edit" aria-pressed="' + EDIT + '"><i></i>Editing</button><button class="bq" type="button" data-toast="Downloads the SOP.">Download SOP</button><button class="bgold" type="button" data-toast="Sends draft v4 to Yara Kamal for approval.">Send for approval</button>';
+    $('#m-acts').innerHTML = acts;
+    $('#m-tiles').innerHTML = (AS === 'hend' ? [['6', 'Steps', ''], ['4/5', 'Have read it', ''], ['1', 'Risk, no control', 'late'], ['19', 'Days to review', '']] : [['6', 'Steps', ''], ['2', 'Gaps', 'late'], ['4/6', 'Marks', ''], ['1', 'Suggestion', '']]).map(([n, l, c]) => '<div class="mtile ' + c + '"><b>' + n + '</b><span>' + l + '</span></div>').join('');
+    // tabs
+    const shared = [['flow', 'Flow', ''], ['steps', 'Steps', '6'], ['summary', 'Summary', '']];
+    const office = [['raci', 'RACI', '1 gap', 'bad'], ['authority', 'Authority', ''], ['controls', 'Controls', '1 gap', 'bad'], ['life', 'Lifecycle', 'Draft']];
+    const btn = ([k, l, n, c]) => '<button type="button" role="tab" class="' + (k === VIEW ? 'on' : '') + '" aria-selected="' + (k === VIEW) + '" data-view-go="' + k + '">' + l + (n ? ' <span class="ct ' + (c || '') + '">' + n + '</span>' : '') + '</button>';
+    const builderMode = OPT === 'c' && AS === 'office';
+    if (builderMode) VIEW = 'builder';
+    else if (VIEW === 'builder' || (!(OPT === 'b' && AS === 'office') && office.some((o) => o[0] === VIEW))) VIEW = 'flow';
+    $('#vt').hidden = builderMode;
+    $('#vt').innerHTML = shared.map(btn).join('') + (OPT === 'b' && AS === 'office' ? '<span class="grp"><span>Office</span>' + office.map(btn).join('') + '</span>' : '');
+    $$('[data-view]').forEach((v) => { v.hidden = v.dataset.view !== VIEW; });
+    // move the flow and the RACI grid to where this option shows them
+    const fb = $('#flowblock'), rb = $('#raciblock');
+    if (builderMode) {
+      $('#rail').innerHTML = SECTS.map(([k, l, c]) => '<button type="button" class="' + (k === SECT ? 'on' : '') + '" data-sect="' + k + '">' + l + '<span class="dot ' + c + '"></span></button>').join('');
+      const m = $('#bmain');
+      if (SECT === 'map') { m.innerHTML = '<div class="bh"><h2>Map</h2><span class="note">Draft v4 · 2 gaps</span></div>'; m.appendChild(fb); }
+      else if (SECT === 'raci') { m.innerHTML = '<div class="bh"><h2>RACI</h2><span class="note">1 step with no one accountable</span></div>'; m.appendChild(rb); $('#park').appendChild(fb); }
+      else { m.innerHTML = '<div class="bh"><h2>' + SECT_PH[SECT][0] + '</h2></div><div class="ph">' + SECT_PH[SECT][1] + ' As in the full prototype.</div>'; $('#park').appendChild(fb); }
+      if (SECT !== 'raci') $('#park').appendChild(rb);
+    } else {
+      $('#slot-shared').appendChild(fb);
+      $('#slot-raci-b').appendChild(rb);
+    }
+    fb.classList.toggle('reading', !editing());
+    $('#ftool').hidden = !editing();
+    drawer();
+    $('#verdict').innerHTML = NOTES[OPT].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
+    try { history.replaceState(null, '', '#' + OPT); } catch (e) {}
+    requestAnimationFrame(arrows);
+  }
+
+  let tt;
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2800); }
+  document.addEventListener('click', (e) => {
+    const t = e.target, o = t.closest('[data-opt]'), as = t.closest('[data-as]'), vg = t.closest('[data-view-go]'), sc = t.closest('[data-sect]'), st = t.closest('.st[data-step]'), tst = t.closest('[data-toast]');
+    if (o) { OPT = o.dataset.opt; render(); return; }
+    if (as) { AS = as.dataset.as; render(); return; }
+    if (t.closest('#edit')) { EDIT = !EDIT; render(); return; }
+    if (vg) { VIEW = vg.dataset.viewGo; render(); return; }
+    if (sc) { SECT = sc.dataset.sect; render(); return; }
+    if (st) { SEL = Number(st.dataset.step); drawer(); return; }
+    if (tst) { toast(tst.dataset.toast); return; }
+  });
+  window.addEventListener('resize', () => requestAnimationFrame(arrows));
+  const h = (location.hash || '').slice(1);
+  if (['a', 'b', 'c'].indexOf(h) >= 0) OPT = h;
+  render();
+})();
+</script>

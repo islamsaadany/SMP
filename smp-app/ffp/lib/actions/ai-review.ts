@@ -20,6 +20,7 @@ import { insertPositionAfter } from "@/ffp/lib/domain/step-order";
 import { loadProcessReviewContext } from "@/ffp/lib/data/process-review-context";
 import { getActionLocale } from "@/ffp/lib/i18n/server";
 import { withAnswerLanguage } from "@/ffp/lib/i18n/locale";
+import { placeByOrder } from "@/ffp/lib/data/step-place";
 
 export type { PersistedReviewFinding } from "@/ffp/lib/domain/review-findings";
 
@@ -353,6 +354,7 @@ export async function confirmProposedStep(
       });
       await tx.stepConnection.create({ data: { processId, fromStepId: anchorId, toStepId: created.id } });
     }
+    await placeByOrder(tx, processId); // the printed map reads the order (step-place.ts)
     return tx.reviewFinding.update({
       where: { id: finding.id },
       data: {

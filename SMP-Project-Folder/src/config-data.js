@@ -561,11 +561,15 @@ var NEWCYCLE = null;
    because the two panels answer different questions — NEWCYCLE really is a
    draft, of a cycle that does not exist yet and so has nothing to write to. */
 var CYCLEEDIT = null;
-/* §495: THE PLAN PERIOD HAS ITS OWN PEN on Setup › Planning & reporting
-   cycle, because it is the tenant's and outlives every cycle (§308) — so it
-   is no longer opened by the CYCLE's pen. Same shape as CYCLEEDIT: a mode,
-   nothing held back, the pickers write straight to GROUP. */
-var PLANEDIT = null;
+/* §693: WHICH TAB OF SETUP › PLANNING & REPORTING IS OPEN, and what the
+   board's filter row holds. A mode, like CYCLEEDIT above: nothing here is
+   stored. The filter is applied to the drawn rows in the shell, not by a
+   repaint, so Find keeps its cursor while it is typed in. PLANEDIT (§495)
+   is gone with the second pen — the plan period is edited in the one pen,
+   first, which is §308's own order. */
+var CYCLETAB = "setup";
+var BOARDFILTER = "all";
+var BOARDFIND = "";
 /* §495: HOW MANY TACTICS TICK A QUARTER THE PLAN PERIOD DOES NOT COVER.
    Flagged, never deleted (spec 064 §7): shortening the period must not throw
    away work somebody planned. A tactic's quarter is read in the plan's own
@@ -1273,6 +1277,59 @@ function brandChecks(){
    relational meaning, and adding a real column to a table that already exists
    needs a pre-phase migration (§33.5) for nothing gained. */
 function personActive(p){ return SMPRules.personActive(p); }
+/* ── REPORTS TO (§655) ─────────────────────────────────────────────
+   `p.reportsTo` is the manager's register KEY (§48) and rides in `extra`
+   like `phone` and `active` above, for the same reason: no relational
+   meaning the server reads, so no column and no migration. Read through
+   here, so a key pointing at a row that has gone reads as nobody rather
+   than as a name the register no longer holds. */
+function reportsToOf(p){
+  var k = p && p.reportsTo;
+  return k ? (personBy(k) || null) : null;
+}
+/* Everybody who answers to this person, directly. */
+function reportsOf(key){
+  return PEOPLE.filter(function(p){ return p.reportsTo === key; });
+}
+/* Everybody under them, however far down — the set that may NOT become
+   their manager, or the chain would loop. Walked with a seen-set so a loop
+   that arrived by some other road (an old file, a merge) ends the walk
+   rather than the page. */
+function reportsUnder(key){
+  var out = {}, queue = [key];
+  while (queue.length) {
+    var k = queue.shift();
+    reportsOf(k).forEach(function(p){
+      if (out[p.key] || p.key === key) return;
+      out[p.key] = true; queue.push(p.key);
+    });
+  }
+  return out;
+}
+/* Who the picker offers: active people in the register's order, never the
+   person themselves, never anybody under them, never a row the Forefront
+   platform MINTED for a consultant (§629 — they are not the client's people).
+   The one they already point at is kept whatever its status, so opening the
+   field cannot silently read a retired manager as nobody (§54.4). */
+function reportsToChoices(p){
+  var under = reportsUnder(p.key);
+  return PEOPLE.filter(function(m){
+    if (m.key === p.key || under[m.key]) return false;
+    if (p.reportsTo === m.key) return true;
+    return personActive(m) && !SMPRules.isMintedRow(m);
+  });
+}
+/* The one door that writes it. Deleted when cleared rather than kept as "",
+   so absent and blank stay one word (the rule the file fields keep above).
+   Refuses the person themselves and anybody under them — the picker never
+   offers either, and this is the save answering alike (§42). */
+function setReportsTo(p, key){
+  if (!p) return false;
+  if (!key) { delete p.reportsTo; return true; }
+  if (key === p.key || !personBy(key) || reportsUnder(p.key)[key]) return false;
+  p.reportsTo = key;
+  return true;
+}
 /* The first few words of a name, for a column that has to be narrow (§69.21).
    NEVER stored and never written back — `p.name` keeps whatever the file
    brought, and this is only what the register's frozen first column shows.
@@ -2338,6 +2395,17 @@ function personDeleteBlockers(key){
     plural(claims.length, "open request") + " for a figure — answer them on the " +
     "cycle page first, so the request is not left pointing at nobody"));
 
+  /* §655: `p.reportsTo` is a KEY, so it is on this list by the list's own
+     rule. Retiring is not blocked — a retired manager is still who somebody
+     answered to — but a row that is deleted would leave them answering to
+     nobody at all. */
+  var reps = reportsOf(key);
+  if (reps.length) out.push(personBlock(
+    plural(reps.length, "person").replace("persons", "people") + " reporting to them",
+    plural(reps.length, "person").replace("persons", "people") + " still report to them (" +
+    reps.map(function(r){ return r.name; }).join(", ") +
+    ") — change their Reports to first"));
+
   return out;
 }
 
@@ -2479,6 +2547,18 @@ function personMergePlan(keepKey, dropKey){
     if (c.by === drop.key && c.state === "open")
       plan.owns.push({ kind:"claim", name:"an open request for a figure" });
   });
+  /* §655: the people who answer to the other row come across, named so the
+     panel can say it. The survivor is left out — a merge must not make
+     somebody report to themselves. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key !== keep.key) plan.owns.push({ kind:"reports", name:r.name + " reporting to them" });
+  });
+  /* And who the other row answered to, when the survivor answers to nobody —
+     a fill like the text fields' (§87.5: what is recorded wins), never a
+     move of a manager the survivor already has, and never the survivor. */
+  var dropMgr = reportsToOf(drop);
+  if (dropMgr && !reportsToOf(keep) && dropMgr.key !== keep.key)
+    plan.fills.push({ k:"reportsTo", label:"Reports to", value:dropMgr.name, key:dropMgr.key });
 
   /* Where the other row sat, offered only when the survivor sits nowhere —
      moving somebody who already has a unit is a real act and a merge must not
@@ -2496,7 +2576,11 @@ function mergePeople(keepKey, dropKey, picks){
   if (!plan) return { ok:false, why:"There is nothing to merge." };
   var keep = plan.keep, drop = plan.drop, took = picks || {};
 
-  plan.fills.forEach(function(f){ keep[f.k] = f.value; });
+  plan.fills.forEach(function(f){
+    /* §655: the Reports to fill is a key dressed as a name for the panel. */
+    if (f.k === "reportsTo") { setReportsTo(keep, f.key); return; }
+    keep[f.k] = f.value;
+  });
   plan.picks.forEach(function(f){ if (took[f.k]) keep[f.k] = f.drop; });
 
   /* THE ATTACHMENT BEFORE THE ROLES, and the survivor’s own kept
@@ -2523,6 +2607,13 @@ function mergePeople(keepKey, dropKey, picks){
     });
   });
   claimsList().forEach(function(c){ if (c.by === drop.key) c.by = keep.key; });
+  /* §655: everybody who answered to the other row answers to the survivor
+     now — through the setter, so the survivor is never made to report to
+     themselves; a row it refuses is left pointing at the other row, and the
+     delete below names it rather than losing it. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key === keep.key) delete r.reportsTo; else setReportsTo(r, keep.key);
+  });
 
   /* AND THE DELETE IS THE CHECK. Anything this function forgot to hand over is
      still pointing at the row, so the delete refuses and the merge reports it
@@ -2900,7 +2991,33 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    register's own vocabulary: the page shows both columns side by side, so the
    file it exports should carry both. */
 var PEOPLE_FILE_COLS = ["Emp ID", "Full Name", "Name", "Job title", "Email",
-                        "Mobile", "Official BU", "Unit", "Role", "Status"];
+                        "Mobile", "Official BU", "Unit", "Reports to", "Role", "Status"];
+/* ── REPORTS TO IN THE FILE (§655.1) ───────────────────────────────────
+   Written as the manager's NAME — the register's own short name, which
+   `displayNames()` has already made unique across the register (§81.1), so
+   the download is a picture of the page and the picture reads back to one
+   row. Read as any of: an employee number, an address, the short name or
+   the full name — matched against the register first, then against the
+   other rows of the same file, so a manager who arrives in the same upload
+   as their report still resolves. Two rows answering to one spelling is
+   REFUSED with both named (§61's rule for capabilities: never pick the
+   first), and a name nobody carries is a problem that says what to write. */
+function reportsToByText(text, dnames){
+  var want = fileTxt(text);
+  if (!want) return { person:null };
+  var low = want.toLowerCase();
+  var byId = personByEmpId(want);
+  if (byId) return { person:byId };
+  var byMail = peopleByEmail(want);
+  if (byMail.length === 1) return { person:byMail[0] };
+  if (byMail.length > 1) return { ambiguous:byMail.map(function(p){ return p.name; }) };
+  var hits = PEOPLE.filter(function(p){
+    return fileTxt(knownName(p, dnames)).toLowerCase() === low || fileTxt(p.name).toLowerCase() === low;
+  });
+  if (hits.length > 1) return { ambiguous:hits.map(function(p){ return p.name; }) };
+  if (hits.length === 1) return { person:hits[0] };
+  return { unknown:true };
+}
 /* ── THE FILE CARRIES BOTH, AND THE OLD ONE STILL READS (§93.8) ───────
    Every file downloaded before today has a "Name" column holding the FULL
    name, so the new pair cannot simply take those headers: read blindly, an old
@@ -3447,6 +3564,22 @@ function planPeopleFile(rows){
       } };
     });
   })();
+  /* ── WHAT THE FILE'S OWN ROWS ANSWER TO (§655.1) ───────────────────
+     A Reports to cell may name somebody who is in this very file and not
+     yet on the register, so each row's identifiers are indexed once: its
+     employee number, address, full name and short name, each lowercased,
+     pointing at the row's position. Two rows under one spelling leave the
+     spelling ambiguous, which the reader says rather than resolves. */
+  var fileIds = {};
+  (rows || []).forEach(function(r, i){
+    [fileTxt(r["Emp ID"]), addrOf(r), fileTxt(fileFullName(r)), fileTxt(fileKnownName(r))]
+      .forEach(function(v){
+        var k = String(v || "").toLowerCase();
+        if (!k) return;
+        (fileIds[k] = fileIds[k] || []).push(i);
+      });
+  });
+  var byFileIndex = {};   /* file position → the plan row it became, for the loop walk */
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -3460,6 +3593,7 @@ function planPeopleFile(rows){
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
     var status = fileTxt(r["Status"]);
+    var mgrCell = fileTxt(r["Reports to"]);
     var label  = name || id || email || "this row";
 
     /* ── THE LADDER, ROW BY ROW (§87.5) ────────────────────────────
@@ -3751,12 +3885,93 @@ function planPeopleFile(rows){
                 conflict:conflict, choice:null, picks:[] };
 
     row.action = conflict ? "conflict" : (existing ? "match" : "add");
+    /* ── WHO THIS ROW REPORTS TO (§655.1) ─────────────────────────────
+       The register answers first; failing that, another row of this file.
+       `row.reportsTo` is { key } for somebody on the register, { row:i } for
+       somebody arriving in this file, and `row.reportsToLabel` is the word
+       the review shows. A blank cell says nothing, as every cell does (§54).
+       Naming the row itself is refused here, where the sentence can say
+       which row — the setter would refuse it too, silently (§42). */
+    if (mgrCell) {
+      var mg = reportsToByText(mgrCell, dnames);
+      if (mg.ambiguous) {
+        plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" could be ' +
+          mg.ambiguous.join(" or ") + '. Write their Emp ID or email, so the row says which.' });
+        return;
+      }
+      if (mg.person) {
+        if (existing && mg.person.key === existing.key) {
+          plan.problems.push({ at:at, msg:'"' + label + '" is written as reporting to themselves.' });
+          return;
+        }
+        row.reportsTo = { key:mg.person.key };
+        row.reportsToLabel = knownName(mg.person, dnames);
+      } else {
+        var inFile = (fileIds[mgrCell.toLowerCase()] || []).filter(function(j){ return j !== i; });
+        if (inFile.length > 1) {
+          plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" is on ' +
+            inFile.map(function(j){ return "Row " + (j + 2); }).join(" and ") +
+            ' of this file. Write their Emp ID or email, so the row says which.' });
+          return;
+        }
+        if (!inFile.length) {
+          plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" is nobody on the register and ' +
+            'nobody in this file. Write the name as the download does, or their Emp ID or email, ' +
+            'or leave it blank to keep who they report to now.' });
+          return;
+        }
+        row.reportsTo = { row:inFile[0] };
+        row.reportsToLabel = fileTxt(fileKnownName(rows[inFile[0]])) || fileTxt(fileFullName(rows[inFile[0]])) || mgrCell;
+      }
+    }
     /* A conflict is matched to NOBODY until it is answered, so there is
        nothing to compare against and no picks to show. They are built by
        peopleRowChoose() the moment the reading is chosen. */
     peopleRowPicks(row, conflict ? null : existing, dnames);
+    byFileIndex[i] = row;
     plan.rows.push(row);
   });
+  /* ── NO LOOPS, SAID BEFORE ANYTHING LANDS (§655.1) ─────────────────
+     The chain as this file would leave it: the register's own pointers,
+     overwritten by the rows that say something, a row still arriving
+     standing in for the person it will be. Walked from every row that
+     names a manager; a walk that comes back to the row is a problem on
+     that row, naming the ring — the setter refuses a loop too, but at
+     apply time, where nothing can be said (§42, §96). A conflict row is
+     nobody until it is answered, so a ring through one is caught by the
+     setter and not here; that row's own Reports to is then left as it was. */
+  (function(){
+    var node = function(row){ return row.key || ("row:" + row.at); };
+    var next = {}, nameOf = {};
+    PEOPLE.forEach(function(p){ if (p.reportsTo) next[p.key] = p.reportsTo; nameOf[p.key] = knownName(p, dnames); });
+    var target = function(row){
+      if (!row.reportsTo) return null;
+      if (row.reportsTo.key) return row.reportsTo.key;
+      var other = byFileIndex[row.reportsTo.row];
+      return other ? node(other) : null;
+    };
+    plan.rows.forEach(function(row){
+      if (row.action === "conflict") return;
+      var t = target(row);
+      if (t) next[node(row)] = t;
+      nameOf[node(row)] = row.name || row.at;
+    });
+    plan.rows.forEach(function(row){
+      if (!row.reportsTo || row.action === "conflict") return;
+      var start = node(row), k = next[start], path = [nameOf[start]], seen = {};
+      while (k && !seen[k]) {
+        seen[k] = true; path.push(nameOf[k] || k);
+        if (k === start) {
+          plan.problems.push({ at:row.at, msg:'Reports to would make a loop: ' +
+            path.join(" \u2192 ") + '. Somebody in that ring must report to somebody outside it.' });
+          delete row.reportsTo; delete row.reportsToLabel;
+          row.picks = row.picks.filter(function(f){ return f.k !== "reportsTo"; });
+          return;
+        }
+        k = next[k];
+      }
+    });
+  })();
   return plan;
 }
 
@@ -3809,6 +4024,21 @@ function peopleRowPicks(row, existing, dnames){
        lose, so it is filled and not asked about. */
     row.picks.push({ k:f.k, label:f.label, was:was, now:now, take:!was });
   });
+  /* §655.1: Reports to is a key dressed as a name, so it is compared as a
+     key and shown as a name. A cell naming the manager already recorded is
+     not a difference; a manager arriving in this file is always one. */
+  if (row.reportsTo) {
+    /* A manager still arriving in this file has no key yet, so they can never
+       be the one recorded — found by the check: compared as "no key" against
+       "no manager" they read as the same, and the pick was never offered. */
+    var same = !!row.reportsTo.key && row.reportsTo.key === (existing.reportsTo || null);
+    if (!same) {
+      var mgrWas = reportsToOf(existing);
+      row.picks.push({ k:"reportsTo", label:"Reports to",
+        was: mgrWas ? fileTxt(knownName(mgrWas, dnames)) : "",
+        now: row.reportsToLabel, take: !mgrWas });
+    }
+  }
   return row;
 }
 /* WHAT THIS ROW WOULD ACTUALLY DO, read live. The picks are ticked after the
@@ -3910,6 +4140,7 @@ function applyPeopleFile(plan){
          equal the guess stores nothing rather than freezing it (§93.8). */
       row.picks.forEach(function(f){
         if (!f.take) return;
+        if (f.k === "reportsTo") return;   /* §655.1: below, once every row has a key */
         if (f.k === "known") setKnownName(p, f.now); else p[f.k] = f.now;
       });
       if (row.id) p.empId = row.id;
@@ -3930,6 +4161,23 @@ function applyPeopleFile(plan){
     if (row.wantActive === true && !personActive(p)) restorePerson(p.key, false);
     if (row.role) grantPersonRole(p.key, row.role, row.where);
     if (row.wantActive === false && personActive(p)) retirePerson(p.key);
+    row.made = p.key;
+  });
+  /* ── REPORTS TO, LAST (§655.1) ─────────────────────────────────────
+     After every row has become a person, because a manager may be a row
+     that was only just added. A new person takes it outright; a matched
+     one only where the review ticked it (§87.6). Through the setter, which
+     still refuses a loop a conflict row's answer closed — the one ring the
+     planner could not see — and leaves that person as they were. */
+  plan.rows.forEach(function(row){
+    if (!row.reportsTo || !row.made) return;
+    var eff = peopleRowEffective(row);
+    if (eff.mode === "match" && !row.picks.some(function(f){ return f.k === "reportsTo" && f.take; })) return;
+    var mgr = row.reportsTo.key || (function(){
+      var other = plan.rows.filter(function(x){ return x.at === "Row " + (row.reportsTo.row + 2); })[0];
+      return other && other.made;
+    })();
+    if (mgr) setReportsTo(personBy(row.made), mgr);
   });
 }
 
@@ -6031,6 +6279,16 @@ function rowAtRisk(x){
 function needsNote(x){
   return rowAtRisk(x) && !(x.obj.note && x.obj.note.trim());
 }
+/* §705: THE WORD THE TAG SAYS — the band's own label ("Off track") when the
+   row owes a note, "" when it does not. One reader for every note box, so the
+   tag, the red edge and Submit's refusal cannot disagree about which rows owe
+   one (§53.5). Replaces §576's lock, which shut every other box on the page
+   until the note was written; Islam, 2026-11-02: *"don't stop a person from
+   entering the numbers"*. The box now says it is owed and nothing is shut. */
+function noteWant(x){
+  if (!needsNote(x)) return "";
+  return bandOf(rowReads(x)).label || "Off track";
+}
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
 /* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§105) ────────────────────
@@ -6405,46 +6663,6 @@ function noteMayWrite(subject, x){
   if (plansInObjectives(t)) return canReportFnRow(holderTarget(t), null, x.obj);
   /* `capReportBody`: a capability's own objectives belong to no project. */
   return canReportFnWhole(holderCodeOwner(c));
-}
-/* THE SUBJECTS ONE REPORTING PAGE DRAWS: its own, and on the company's the
-   capabilities reported in its own section (\u00a7520.8 \u2014 `capsHere()`, the same
-   narrowing that section is drawn from). */
-function noteLockSubjects(target){
-  var t = String(target || ""), out = [t];
-  if (t === "group" && holderSubject(t) === "group" && SMPRules.capExists(GROUP) &&
-      typeof capsHere === "function")
-    capsHere().forEach(function(c){ out.push("cap:" + c.id); });
-  return out;
-}
-/* The lock for one page: the Reporting page of `target`, or My reporting
-   (`mine`). NULL when nothing is red, so every caller asks one truthy
-   question. A breakdown's cells share their row's note (\u00a7343), so its row is
-   one entry however many of its figures are red. A report already closed
-   (submitted or parked, \u00a7220) has no open box to shut. */
-function noteLockOf(target, mine){
-  if (!REVIEW || REVIEW.state !== "open") return null;
-  var rows = [], ids = {};
-  var take = function(x, subj){
-    var id = x.noteId || x.id;
-    if (ids[id]) return;
-    ids[id] = true;
-    rows.push(Object.assign({ subj: subj }, x));
-  };
-  if (mine) {
-    /* \u00a7576: on My reporting the owner writes the note on their own red rows
-       (Islam's call) \u2014 asked through the gate their figure is entered by. */
-    myLineRows().forEach(function(r){
-      if (needsNote(r) && canEnterLine(r.target, r, "mine")) take(r, r.target);
-    });
-  } else if (target) {
-    noteLockSubjects(target).forEach(function(s){
-      if (reportClosed(s)) return;
-      subjectAsked(s).forEach(function(x){
-        if (needsNote(x) && noteMayWrite(s, x)) take(x, s);
-      });
-    });
-  }
-  return rows.length ? { rows: rows, ids: ids, mine: !!mine } : null;
 }
 /* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
    Islam, from his own tenant: the report would not submit because something
@@ -9168,6 +9386,14 @@ function partFilter(u){
   if (u && u.topLayer && partOnly()) {
     var w = world(), v = viewer();
     pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
+  }
+  /* §704: "OWN PIECE" ON A UNIT OR A FUNCTION. The ladder's lowest level,
+     where the place's pages are open and its lists hold only what the person
+     holds — the half eye's narrowing, carried from the top's own plan to
+     every place, and asked of the one rule both sides read. */
+  else if (u && !u.topLayer && u.ukey && SMPRules.pieceOnlyAt(world(), viewer(), u.ukey)) {
+    var w2 = world(), v2 = viewer();
+    pf = function(p){ return SMPRules.holdsItem(w2, v2, p); };
   }
   if (!pf) return hf;
   if (!hf) return pf;
@@ -12124,6 +12350,18 @@ function reportSectionState(){
     : { cls:"appear", badge:"" };
 }
 var CURRENT_REPORT_KEY = null;
+/* WHETHER THE REPORTING TAB IS DRAWN AT ALL (§690). Islam: *"make the
+   reporting button always available for the office."* For everybody else the
+   tab follows the cycle exactly as `reportSectionState()` says — open it is
+   there, closed it goes. The office is the one hand that opens, closes and
+   reopens cycles, so for it the tab stands whatever the cycle's state: on a
+   closed one the page says the cycle is closed and that its figures are a
+   record (renderReport / renderFnReport already draw that note), rather than
+   the tab disappearing from under the people who run the cycle. The grant is
+   still asked by `allowed()`; this answers only the cycle half. */
+function reportTabOn(){
+  return !!reportSectionState() || inOffice();
+}
 
 /* WHICH ROW A REPORTING BOX IS ABOUT (§334.18, correcting §326).
    IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,

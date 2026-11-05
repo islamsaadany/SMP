@@ -16,7 +16,12 @@ check("a draft cannot be approved", L.nextStatus("DRAFT", "approve") === null);
 check("a draft cannot be published", L.nextStatus("DRAFT", "publish") === null);
 check("in review cannot be published directly", L.nextStatus("IN_REVIEW", "publish") === null);
 check("retired is final", L.actionsFrom("RETIRED").length === 0);
-check("published cannot go back to review", L.nextStatus("PUBLISHED", "submit") === null);
+/* REWRITTEN (§218, stage 5, spec 067 §1): a published version now stays in force for its readers while the next
+   one is drawn, so a process in force CAN send its next version for review; the action refuses it until something
+   has changed (process-lifecycle.ts submitProcessForReview). What the old line guarded, that publishing is never
+   undone in place, the next two lines still hold. */
+check("a version in force can be followed by a new one sent for review", L.nextStatus("PUBLISHED", "submit") === "IN_REVIEW");
+check("published cannot be approved or published again in place", L.nextStatus("PUBLISHED", "approve") === null && L.nextStatus("PUBLISHED", "publish") === null);
 const ap = (o) => L.mayApprove({ actorPersonKey: "fn_fin", approverPersonKey: "fn_fin", actorEmail: "f@x.com", submitterEmail: "o@x.com", ...o });
 check("somebody who is not the approver may not approve", ap({ actorPersonKey: "mobhead" }).reason === "NOT_THE_APPROVER");
 check("the person who sent it may not approve their own", ap({ actorEmail: "O@X.com ", submitterEmail: "o@x.com" }).reason === "OWN_DRAFT");

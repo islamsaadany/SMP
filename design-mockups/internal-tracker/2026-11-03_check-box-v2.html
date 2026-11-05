@@ -1,0 +1,143 @@
+<title>Weekly Check Box v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* The weekly check's box, second pass. Islam: (1) why "Moves to next week ·
+   Keep it this week"? — gone, Save and next always carries; (2) no empty
+   "What happened this week?" when this week's note is already written — the
+   note stands there, "+ Add to this week" reopens the box; (3) the box stays
+   in view while the rail scrolls; and links in a note read short. Example
+   tasks. Scroll the page to see the box hold. */
+:root{--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F3F5F8;--surface:#FFF;--surface-2:#EDF0F5;
+  --blue:#1F5FBF;--blue-bg:#EAF2FB;--navy:#22304F;--good:#2F6B4F;--d0:#8A97AB;--d1:#E0B300;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--blue:#8FB4F0;--blue-bg:#16263A;--navy:#3A5794;--good:#63BE96;--d0:#7D889B;--d1:#E8C547;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.pg{max-width:1100px;margin:0 auto;padding-block:24px 48px;display:grid;gap:14px}
+.vs{display:inline-flex;flex-wrap:wrap;background:var(--surface-2);border-radius:8px;padding:3px;justify-self:start}
+.vs button{border:0;background:none;padding:7px 12px;border-radius:6px;font-size:13px;color:var(--ink-2)}
+.vs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.note{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:0;max-width:85ch}
+.note b{color:var(--ink)}.note p{margin:0}.note p+p{margin-top:6px}
+.meet{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}
+/* the rail */
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.th{padding:14px 16px 6px}
+.th .t1{display:flex;align-items:baseline;gap:8px}
+.th h3{margin:0;font-size:13px;font-weight:600;color:var(--ink-2)}
+.th .n{margin-left:auto;color:var(--ink-3);font-size:12px}
+.bar{height:3px;border-radius:2px;background:var(--line-2);margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue)}
+.it{display:flex;align-items:center;gap:10px;padding:6px 16px;font-size:14px;width:100%;border:0;background:none;text-align:left}
+.it:hover{background:var(--surface-2)}
+.it span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.c{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--line);flex:none;display:grid;place-items:center;font-size:9px;color:#fff}
+.it.gone .c{background:var(--ink-3);border-color:var(--ink-3)}
+.it.gone span{color:var(--ink-3)}
+.it.on{background:var(--blue-bg)}
+.it.on .c{border-color:var(--blue);border-width:4px}
+.lks{display:flex;gap:14px;padding:4px 16px 12px 41px;font-size:12.5px;border-bottom:1px solid var(--line-2);color:var(--ink-3)}
+.lks .add{color:var(--blue)}
+/* the box — STICKY */
+.box{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
+.eb{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ink-3)}
+.eb .sd{width:3px;height:3px;border-radius:50%;background:var(--ink-3);opacity:.7}
+.eb .wkp{border-bottom:1px dotted var(--ink-3)}
+.box h2{font-size:21px;margin:2px 0 16px;line-height:1.3}
+.in{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3);font-size:15px}
+.in .ek{margin-left:auto;font:500 11.5px/1 var(--font);color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:3px 6px}
+.wrote{border:1px solid var(--line-2);background:var(--ground);border-radius:10px;padding:10px 14px}
+.wrote .h{font-size:12px;color:var(--blue);font-weight:600}
+.wrote .bd{font-size:14.5px;margin-top:2px}
+.wrote .by{font-size:12.5px;color:var(--ink-3)}
+.wrote .more{border:0;background:none;padding:0;margin-top:6px;font-size:12.5px;color:var(--blue)}
+.row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--d1);flex:none}.dot.ns{background:var(--d0)}.dot.dn{background:var(--good)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;color:var(--ink-2)}
+.chip.on{border-color:var(--ink-2);color:var(--ink);font-weight:600}
+.sv{margin-left:auto;background:var(--navy);color:#fff;border-radius:8px;padding:8px 16px;font-weight:600;display:inline-flex;align-items:center;gap:10px}
+.sv kbd{font:500 11px/1 var(--font);opacity:.7}
+.ph{margin-top:20px;font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.tl{list-style:none;margin:12px 0 0 6px;padding:0 0 0 18px;border-left:1px solid var(--line-2);display:grid;gap:12px}
+.tl li{position:relative}
+.tl li::before{content:"";position:absolute;left:-22px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.tl li.now::before{background:var(--blue)}
+.tl .bd{font-size:14.5px;overflow-wrap:anywhere}
+.tl .sub{font-size:12.5px;color:var(--ink-3)}
+.tl li.now .sub b{color:var(--blue);font-weight:600}.tl .sub b{font-weight:400}
+/* a link in a note, read short */
+a.lk{display:inline-flex;align-items:center;gap:5px;color:var(--blue);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:0 7px;font-size:13px;line-height:1.6;vertical-align:1px;white-space:nowrap}
+a.lk:hover{background:var(--blue-bg)}
+a.lk svg{width:12px;height:12px}
+.lk2{color:var(--blue);text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--line)}
+.mm{display:flex;gap:14px;margin-top:18px;font-size:13px;color:var(--ink-3)}
+.ft{display:flex;margin-top:18px;padding-top:12px;border-top:1px solid var(--line-2);color:var(--ink-3);font-weight:500}
+.ft .r{margin-left:auto}
+@media (max-width:820px){.meet{grid-template-columns:1fr}.box{position:static;max-height:none}}
+</style>
+<div class="pg">
+  <div class="vs" role="group" aria-label="This week's note">
+    <button type="button" data-v="none" aria-pressed="true">No note yet this week</button>
+    <button type="button" data-v="had" aria-pressed="false">Note already written this week</button>
+  </div>
+  <div class="vs" role="group" aria-label="Links">
+    <button type="button" data-l="chip" aria-pressed="true">Link as a small tag</button>
+    <button type="button" data-l="word" aria-pressed="false">Link as a short word</button>
+  </div>
+  <div class="note" id="note"></div>
+  <div class="meet">
+    <div class="rail" id="rail"></div>
+    <div class="box" id="box"></div>
+  </div>
+</div>
+<script>
+const S={v:'none',l:'chip'};
+const LINKI='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1"/></svg>';
+const URL1='https://docs.google.com/spreadsheets/d/1zNp-RP_O0STFu8_EKCpu9LZwRFcN9s8k8j1tV4F0mFl/edit?gid=1260522434#gid=1260522434';
+const link=()=>S.l==='chip'?'<a class="lk" href="'+URL1+'" title="'+URL1+'" target="_blank" rel="noopener">'+LINKI+'Google Sheets</a>':'<a class="lk2" href="'+URL1+'" title="'+URL1+'" target="_blank" rel="noopener">docs.google.com</a>';
+const T1=[['Develop a key measure per business unit',1],['Finance Adjust Project that is missing Milestones',1],['Confirm IT Project updates with IT Function head',0],['Transformation Project Refinement',0],['Transformation project Confirmation (Mostafa)',0],['Reporting for Supply Chain (AbdelAzim)',0],['Finance Reporting',0],['CX one Project that Has 8 deliverables dropped',0],['Risk Team (Mena with Men3em) we need to align',0]];
+const T2=['Monthly reporting pack','Board pack template','KPI dictionary review','Dashboards for Retail','Data owners list','Q4 targets sign-off','Budget phasing','Cost centre mapping'];
+function rail(){
+ const it=(t,i,gone,on)=>'<button type="button" class="it'+(on?' on':'')+(gone?' gone':'')+'"><i class="c">'+(gone?'✓':'')+'</i><span>'+t+'</span></button>';
+ return '<div class="th"><div class="t1"><h3>Functions</h3><span class="n">2 of 9</span></div><div class="bar"><i style="width:22%"></i></div></div>'+
+  T1.map((t,i)=>it(t[0],i,i===1||i===2,i===0)).join('')+'<div class="lks"><span>1 done last week ›</span><span class="add">+ Next week\'s action</span></div>'+
+  '<div class="th"><div class="t1"><h3>Reporting</h3><span class="n">0 of 8</span></div><div class="bar"><i style="width:0"></i></div></div>'+
+  T2.map((t,i)=>it(t,i,false,false)).join('')+'<div class="lks"><span class="add">+ Next week\'s action</span></div>'+
+  '<div class="th"><div class="t1"><h3>Strategy</h3><span class="n">0 of 4</span></div><div class="bar"><i style="width:0"></i></div></div>'+
+  ['2027 Strategy planning (timeline)','Strategy communication to the board','Review Arabic content with Haitham','Follow up on the mission statement'].map((t,i)=>it(t,i,false,false)).join('')+'<div class="lks"><span class="add">+ Next week\'s action</span></div>';
+}
+function box(){
+ const top='<div class="eb"><span>Functions</span><i class="sd"></i><span>Mohamed</span><i class="sd"></i><span class="wkp" title="Press to set the week">This week</span></div><h2>Develop a key measure per business unit</h2>';
+ const chips='<div class="row"><span class="chip"><i class="dot ns"></i>Not started</span><span class="chip on"><i class="dot"></i>In progress</span><span class="chip"><i class="dot dn"></i>Done</span><span class="sv">Save and next <kbd>Ctrl ↵</kbd></span></div>';
+ const nowNote='I have developed one main key measure per each BU. '+link();
+ const input='<div class="in">What happened this week?<span class="ek">Enter</span></div>';
+ const wrote='<div class="wrote"><div class="h">This week</div><div class="bd">'+nowNote+'</div><div class="by">Mohamed</div><button type="button" class="more" data-add>+ Add to this week</button></div>';
+ const tl=(S.v==='had'?'':'<li class="now"><div class="bd">'+nowNote+'</div><div class="sub">Mohamed · <b>this week</b></div></li>').replace(/^/,'');
+ const hist='<ul class="tl">'+(S.v==='none'?'':'')+
+  '<li><div class="bd">Agreed the BU list with Finance; templates next. '+(S.l==='chip'?'<a class="lk" href="#" title="https://drive.google.com/…">'+LINKI+'Google Drive</a>':'<a class="lk2" href="#">drive.google.com</a>')+'</div><div class="sub">Mohamed · <b>last week</b></div></li>'+
+  '<li><div class="bd">Kick-off with the BU heads.</div><div class="sub">Islam · <b>W3 Oct</b></div></li></ul>';
+ return top+(S.v==='had'?wrote:input)+chips+'<div class="ph">'+(S.v==='had'?'Before this week':'Progress so far')+'</div>'+hist+
+  '<div class="mm"><span>Description</span><span>History (5)</span><span>⋯</span></div><div class="ft"><span>← Previous</span><span class="r">Skip →</span></div>';
+}
+const NOTES={
+ none:'<p><b>No note yet this week.</b> The box asks <b>What happened this week?</b> as before. Save and next writes it and always carries an unfinished task of this week on to next week; the "Moves to next week · Keep it this week" line is gone. To keep a task in this week, press the week in the grey line over the name.</p>',
+ had:'<p><b>Note already written this week.</b> No empty box: this week\'s note stands in its place, with who wrote it, and <b>+ Add to this week</b> opens the box under it if the meeting has more to say. The timeline below starts from last week ("Before this week").</p>'};
+const LN={chip:'<p><b>Links, read short (automatic).</b> A link typed or pasted into a note shows as a small tag named after the site — <b>Google Sheets</b>, <b>Google Drive</b>, <b>SharePoint</b>, or the site\'s own name — and opens in a new tab; pointing at it shows the full address. Nothing extra to do when writing.</p>',
+ word:'<p><b>Links, read short (automatic).</b> The same, as a plain underlined word: the site\'s address alone (docs.google.com), no tag.</p>'};
+function draw(){
+ document.getElementById('rail').innerHTML=rail();
+ document.getElementById('box').innerHTML=box();
+ document.getElementById('note').innerHTML=NOTES[S.v]+LN[S.l]+'<p>Scroll the page: the box stays in view beside the rail.</p>';
+ document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===S.v)));
+ document.querySelectorAll('[data-l]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.l===S.l)));
+}
+document.addEventListener('click',e=>{
+ const v=e.target.closest('[data-v]');if(v){S.v=v.dataset.v;draw();return}
+ const l=e.target.closest('[data-l]');if(l){S.l=l.dataset.l;draw();return}
+ const a=e.target.closest('[data-add]');if(a){a.outerHTML='<div class="in" style="margin-top:8px">Add to this week…<span class="ek">Enter</span></div>'}
+});
+draw();
+</script>

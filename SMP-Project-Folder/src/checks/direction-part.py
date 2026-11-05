@@ -364,13 +364,12 @@ with sync_playwright() as p:
               dirBoxes: p.querySelectorAll('[data-rep], [data-note]').length,
               submit: !!document.querySelector('[data-submit]'), speak: canSpeakFor('group'),
               text: p.textContent}}"""
-    #  §576.2: A RED FIGURE WITH NO NOTE LOCKS THE PAGE (§576.1) for whoever can
+    #  §576.2: a red figure with no note LOCKED the page for whoever could
     #  write that note, and the worked example's own cap6 holds one — so "its
-    #  boxes live" read a correctly LOCKED page (16 boxes, 3 open), red on
-    #  `main` since §576.1 went live. The company's rows and every
-    #  capability's are explained first, through the same two rules Submit
-    #  asks (`subjectAsked`, `needsNote`), so these claims measure the reach
-    #  they are about and not the lock (§94.2: the state is made).
+    #  boxes live" once read a locked page. §705 took the lock away (the owed
+    #  note is a tag on its box now, nothing shut); the explaining stays, so
+    #  these claims measure the reach they are about on a page with nothing
+    #  owed either way (§94.2: the state is made).
     EXPLAIN = """()=>{var n=0;
       ['group'].concat((GROUP.capabilities||[]).map(function(c){ return 'cap:'+c.id; }))
         .forEach(function(t){ subjectAsked(t).forEach(function(x){
@@ -511,9 +510,8 @@ with sync_playwright() as p:
       m.focus(); m.value='7'; m.dispatchEvent(new Event('change',{bubbles:true})); m.blur();
       return GROUP.capabilities.find(x=>x.id==='capZZ').items[0].measures[0].actual}""")
     ck("§520.7: …and a typed figure reaches the stored plan", typed == "7%", typed)
-    #  §576.2: 7% is in the red, so it locks the page until it is explained —
-    #  explained here, before the other viewers' boxes are asked whether they
-    #  are live.
+    #  §576.2/§705: 7% is in the red; explained here, so the other viewers'
+    #  boxes are asked about reach on a page owing nothing.
     safe(pg, EXPLAIN, 0)
     #  BOTH ENDS (§94.2): a direction owner is drawn no capability section at
     #  all, and the office is drawn the same two boxes.

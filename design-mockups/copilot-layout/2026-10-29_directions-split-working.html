@@ -1,0 +1,292 @@
+<title>Directions Split, Working</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: the Copilot's three columns, live — press through the whole Directions flow; scores, owners and ticks change the pane, the chat records what happened. */
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--attn:#B45309;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top h1{font-size:17px;margin:0}
+.top .hint{color:var(--ink-3);font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:5px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--navink);font-weight:600}
+.pane{flex:1 1 auto;min-height:560px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;min-width:0}
+.rail{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:8px;font-size:12.5px}
+.rail .h{font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.rail .row{background:var(--surface);border-left:3px solid var(--goldfill);padding:6px 8px;border-radius:4px}
+.rail .row small{display:block;color:var(--ink-3)}
+.flow{display:grid;grid-template-columns:min(760px,max(420px,calc(100% - 700px))) 12px minmax(0,1fr) 208px;min-width:0;min-height:0}
+@media (max-width:1240px){.flow{grid-template-columns:min(760px,max(420px,calc(100% - 492px))) 12px minmax(0,1fr)}.todo{display:none}}
+@media (max-width:900px){.flow{grid-template-columns:minmax(0,1fr)}.grip,.work{display:none}}
+.chat{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.chead{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font-weight:700}
+.chead small{font-weight:400;color:var(--ink-3)}
+.chead .sp{flex:1}
+.msgs{flex:1 1 auto;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.who{font-size:11px;color:var(--ink-3);margin-bottom:2px}
+.ai{border-left:3px solid var(--goldfill);padding:4px 10px;max-width:70ch}
+.me{align-self:flex-end;max-width:80%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.opt{font-size:12.5px;font-weight:600;padding:2px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.opt.rec{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.opt[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+.fold{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.fold>button{width:100%;display:flex;gap:8px;align-items:center;border:0;background:none;text-align:left;padding:7px 12px}
+.fold>button:hover{background:var(--surface-2)}
+.fold .chev{color:var(--ink-3);transition:transform .12s}
+.fold.open .chev{transform:rotate(90deg)}
+.fold small{flex:1;color:var(--ink-3)}
+.st{font:600 11.5px/1.4 var(--sans);color:var(--good)}
+.fbody{display:none;border-top:1px solid var(--line);padding:8px 12px;font-size:12.5px;color:var(--ink-2)}
+.fold.open .fbody{display:block}
+.fbody li{margin:2px 0}
+.note{text-align:center;color:var(--ink-3);font-size:12.5px}
+.compose{padding:8px 12px 10px;border-top:1px solid var(--line)}
+.box{display:flex;gap:6px;align-items:flex-end;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface)}
+.box textarea{flex:1;border:0;background:none;resize:none;font:inherit;color:inherit;outline:none;min-height:22px}
+.box textarea:disabled{color:var(--ink-3)}
+.box button{border:0;background:var(--nav);color:var(--navink);border-radius:6px;padding:3px 10px;font-weight:600}
+.box button[hidden]{display:none}
+.under{font-size:11px;color:var(--ink-3);margin-top:4px}
+.grip{border-left:1px solid var(--line);margin:0 6px}
+.work{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);overflow:hidden}
+.whead{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface);font-size:12.5px;color:var(--ink-3)}
+.whead b{color:var(--ink)}
+.wbody{flex:1 1 auto;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.card h3{margin:0 0 8px;font-size:14px;display:flex;gap:8px;align-items:baseline}
+.card h3 .n{font-size:11px;color:var(--ink-3);font-weight:400}
+.card h3 .lk{margin-left:auto;border:0;background:none;color:var(--gold);font-weight:600;font-size:12px;text-decoration:underline;text-underline-offset:2px}
+.card p.quiet{margin:6px 0 0;color:var(--ink-3);font-size:12px}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:center;font-size:12.5px;vertical-align:middle}
+thead th{font-size:10px;letter-spacing:.05em;text-transform:uppercase;background:var(--nav);color:var(--navink);white-space:normal;line-height:1.2}
+th[scope=row]{text-align:left;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+tr.on{background:var(--surface-2)}
+tr.on th[scope=row]{box-shadow:inset 3px 0 0 var(--nav)}
+.plan{font:600 9.5px/1.4 var(--sans);padding:0 5px;border:1px solid var(--line);border-radius:6px;color:var(--ink-3);margin-left:5px;vertical-align:middle}
+.sc{min-width:24px;border:1px solid var(--line);border-radius:10px;padding:0 6px;background:var(--surface);font-weight:600}
+.sc.ed{border-color:var(--gold)}
+.tick{width:18px;height:18px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:transparent;font-size:12px;line-height:1}
+.tick.on{background:var(--nav);border-color:var(--nav);color:#fff}
+.tick[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+select{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);padding:1px 4px;max-width:100%}
+.under-table{display:flex;justify-content:flex-end;margin-top:8px}
+.btn{font-size:12.5px;font-weight:600;padding:3px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.btn.solid{background:var(--gold);border-color:var(--gold);color:#fff}
+.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+.wfoot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:8px 10px;background:var(--surface)}
+.state{flex:1;font-size:12.5px;color:var(--ink-3)}
+.state b{color:var(--ink)}
+.state .onp{color:var(--good);font-weight:600}
+.todo{margin-left:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 12px;align-self:start;font-size:12.5px}
+.todo .h{display:flex;gap:6px;align-items:baseline;margin-bottom:6px}
+.todo .h b{font-size:13.5px}
+.todo .h small{color:var(--ink-3)}
+.todo ul{list-style:none;margin:0;padding:0}
+.todo li{display:flex;gap:7px;align-items:center;padding:3px 0}
+.dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--line)}
+li.done .dot{background:var(--good);border-color:var(--good)}
+.pill{margin-left:auto;font:600 10px/1.5 var(--sans);padding:0 6px;border:1px solid var(--line);border-radius:8px;color:var(--ink-3)}
+li.done .pill{color:var(--good);border-color:var(--good)}
+.tip{position:fixed;z-index:20;background:var(--ink);color:var(--ground);font-size:12px;padding:4px 8px;border-radius:6px;max-width:260px;pointer-events:none;display:none}
+.shade{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:30;align-items:center;justify-content:center;padding:16px}
+.shade.on{display:flex}
+.modal{background:var(--surface);color:var(--ink);border-radius:10px;padding:16px 18px;max-width:520px;width:100%;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.modal h2{margin:0;font-size:16px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:13px}
+.kv .k{color:var(--ink-3)}
+.mbtns{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+@media (prefers-reduced-motion:reduce){.fold .chev{transition:none}}
+</style>
+<div class="top"><h1>Directions, split three ways · working mockup</h1>
+  <span class="seg" id="scen"><button data-s="dirs" aria-pressed="true">Directions with Capabilities</button><button data-s="caps">Capabilities only</button></span>
+  <button class="btn" id="reset">Start over</button>
+  <span class="hint">Press through it: scores cycle 1–4, ticks toggle, the chat's box takes an ask. Narrow the window to see the to-do fold, then the tables.</span></div>
+<div class="pane">
+  <div class="rail"><div class="h">Chats</div><div class="row"><b id="railTitle">Directions — Mobile</b><small id="railSub">Mohamed Essam · today · 0 of 4 done</small></div></div>
+  <div class="flow">
+    <div class="chat"><div class="chead"><span id="chTitle">Directions — Mobile</span><small id="chStep">· Start</small><span class="sp"></span></div>
+      <div class="msgs" id="msgs"></div>
+      <div class="compose"><div class="box"><textarea id="box" rows="1" placeholder="Use the choices above to carry on…" disabled></textarea><button id="send" hidden>Send</button></div><div class="under">Enter sends · Shift + Enter for a new line</div></div></div>
+    <div class="grip"></div>
+    <div class="work"><div class="whead"><b id="wTitle">Directions — Mobile v1</b><span id="wState">· in progress</span></div>
+      <div class="wbody" id="wbody"></div>
+      <div class="wfoot"><span class="state" id="foot"><b>v1</b> in progress</span><button class="btn" id="save">Save</button><button class="btn solid" id="apply">Apply to plan</button></div></div>
+    <aside class="todo" id="todo"></aside>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+<div class="shade" id="shade"><div class="modal"><h2>Apply to the plan?</h2><div class="kv" id="mkv"></div><div class="mbtns"><button class="btn" id="mno">Cancel</button><button class="btn solid" id="myes">Apply to plan</button></div></div></div>
+<script>
+(function(){
+  var PEOPLE = ["—", "Amaka Eze", "Mohamed Essam", "Sara Hamed", "Omar Khalil"];
+  var KINDS = { gap: "Gap-closing", transformation: "Transformation", enabler: "Enabler" };
+  var PLAN = [["Digital & Data-Driven Operations", 1, 1, 1], ["Channel Preference & Development", null, null, null], ["Portfolio & Value Chain Expansion", null, null, null], ["Asset-Light Model Regional Expansion", null, null, null]];
+  var FRESH = [["Upper Egypt", 4, 4, 1], ["Own label", 1, 1, 1]];
+  var CAPS = [["Data-led stock", "enabler", ["Upper Egypt"]], ["Regional field team", "gap", ["Upper Egypt"]], ["Private-label sourcing", "transformation", ["Own label"]], ["Store data dashboards", "enabler", ["Digital & Data-Driven Operations"]]];
+  var S, FOLD = {};
+  function fresh(mode){
+    S = { mode: mode, start: "", options: [], chose: false, caps: [], capsOn: false, log: [], saved: null, applied: false, changed: false };
+    if (mode === "caps") { S.start = "n/a"; S.options = [["Upper Egypt", 4, 4, 1], ["Own label", 1, 1, 1]].map(function(o){ return { t: o[0], u: o[1], i: o[2], e: o[3], own: "—", go: true, mark: "saved" }; }); S.chose = true; }
+    FOLD = {}; draw();
+  }
+  var E = function(x){ return String(x).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var score = function(o){ return o.u && o.i && o.e ? o.u * o.i * o.e : null; };
+  var goes = function(){ return S.options.filter(function(o){ return o.go; }); };
+  var kept = function(){ return S.caps.filter(function(c){ return c.keep; }); };
+  function ai(h){ return '<div><div class="who">Copilot</div><div class="ai">' + h + '</div></div>'; }
+  function me(t){ return '<div class="me"><div class="who">Mohamed Essam</div>' + E(t) + '</div>'; }
+  function opts(a){ return '<div class="opts">' + a.join("") + '</div>'; }
+  function opt(act, label, rec, why){ return '<button type="button" class="opt' + (rec ? " rec" : "") + '" data-act="' + act + '"' + (why ? ' aria-disabled="true" data-tip="' + E(why) + '"' : '') + '>' + E(label) + '</button>'; }
+  function stepWord(){ if (S.saved) return "Saved"; if (S.mode === "caps") return "The Capabilities"; if (!S.start) return "Start"; if (!S.options.length) return "The Directions"; if (!S.chose) return "The Directions"; return "The Capabilities"; }
+  function msgs(){
+    var out = [], ed = !S.saved;
+    if (S.mode === "dirs") {
+      out.push(ai("Mobile already has <b>4</b> Directions on the plan. Start from them, or start fresh?" + (!S.start && ed ? opts([opt("start-plan", "Start from the existing ones", true), opt("start-fresh", "Start fresh")]) : "")));
+      if (!S.start) return out.join("");
+      out.push(me(S.start === "plan" ? "Start from the existing ones" : "Start fresh"));
+      if (!S.options.length) { out.push(ai("I will suggest the Directions Mobile could take, from the plan as it stands, and score each by Urgency × Importance × Ease." + (ed ? opts([opt("suggest", "Suggest Directions", true)]) : ""))); return out.join(""); }
+      out.push(me("Suggest Directions"));
+      out.push(ai("Here are <b>" + S.options.length + "</b> possible Directions, scored out of 64, on the right. Change any score there, set who owns it, and tick what goes ahead. Ask here for a couple more, or a different angle." + (ed && !S.chose ? opts([opt("more", "Suggest more"), opt("own", "+ Add my own")]) : "")));
+    } else {
+      out.push(ai("I read your <b>2</b> saved Directions and the SWOT. These are the Capabilities I would build to deliver them." + (!S.capsOn && ed ? opts([opt("capsgo", "Suggest Capabilities", true)]) : "")));
+    }
+    S.log.forEach(function(x, k){
+      if (x.w === "me") { out.push(me(x.t)); return; }
+      if (x.w === "fold") { var o = FOLD[k]; out.push('<div class="fold' + (o ? " open" : "") + '" data-fold="' + k + '"><button type="button"><span class="chev">▸</span><b>' + E(x.t) + '</b><small>' + E(x.s) + '</small><span class="st">Agreed</span></button><div class="fbody"><ul>' + x.items.map(function(i){ return '<li>' + E(i) + '</li>'; }).join("") + '</ul></div></div>'); return; }
+      if (x.w === "note") { out.push('<div class="note">' + E(x.t) + '</div>'); return; }
+      var last = k === S.log.length - 1;
+      out.push(ai(x.t + (last && x.opts && ed ? opts(x.opts.map(function(o){ return opt(o[0], o[1], o[2], o[3]); })) : "")));
+    });
+    if (S.saved) out.push(ai("Saved as <b>" + E(S.saved) + "</b>; it is under Deliverables. <b>Apply to plan</b>, at the foot of the tables, writes it into the plan."));
+    return out.join("");
+  }
+  function optionsTable(ed){
+    return '<table><thead><tr><th style="text-align:left;width:36%">Possible Direction</th><th>Urgency</th><th>Importance</th><th>Ease</th><th>Score</th><th style="width:19%">Owned by</th><th>Go ahead</th></tr></thead><tbody>' +
+      S.options.map(function(o, i){
+        var sc = score(o), cell = function(k){ return ed && !S.chose ? '<button type="button" class="sc' + (o.ed && o.ed[k] ? " ed" : "") + '" data-sc="' + i + '|' + k + '" title="Press to change: 1 to 4">' + (o[k] || "–") + '</button>' : '<span class="sc">' + (o[k] || "–") + '</span>'; };
+        var why = sc == null && !o.go ? "Score it first — Urgency, Importance and Ease." : "";
+        return '<tr' + (o.go ? ' class="on"' : '') + '><th scope="row" title="' + E(o.t) + '">' + E(o.t) + (o.mark === "plan" ? '<span class="plan">Plan</span>' : o.mark === "own" ? '<span class="plan">Yours</span>' : o.mark === "saved" ? '<span class="plan">Saved</span>' : '') + '</th>' +
+          '<td>' + cell("u") + '</td><td>' + cell("i") + '</td><td>' + cell("e") + '</td><td><b>' + (sc == null ? "–" : sc) + '</b></td>' +
+          '<td>' + (ed ? '<select data-own="' + i + '" aria-label="Owner">' + PEOPLE.map(function(p){ return '<option' + (p === o.own ? " selected" : "") + '>' + E(p) + '</option>'; }).join("") + '</select>' : E(o.own)) + '</td>' +
+          '<td>' + (ed && !S.chose ? '<button type="button" class="tick' + (o.go ? " on" : "") + '" data-go="' + i + '"' + (why ? ' aria-disabled="true" data-tip="' + E(why) + '"' : '') + ' aria-pressed="' + !!o.go + '">✓</button>' : '<span class="tick' + (o.go ? " on" : "") + '">✓</span>') + '</td></tr>';
+      }).join("") + '</tbody></table>';
+  }
+  function capsTable(ed){
+    return '<table><thead><tr><th style="text-align:left;width:30%">Capability</th><th>Kind</th><th>Serves</th><th style="width:22%">Owner</th><th>Keep</th></tr></thead><tbody>' +
+      S.caps.map(function(c, i){
+        return '<tr' + (c.keep ? ' class="on"' : '') + '><th scope="row" title="' + E(c.t) + '">' + E(c.t) + '</th>' +
+          '<td>' + (ed ? '<select data-kind="' + i + '" aria-label="Kind">' + Object.keys(KINDS).map(function(k){ return '<option value="' + k + '"' + (k === c.kind ? " selected" : "") + '>' + KINDS[k] + '</option>'; }).join("") + '</select>' : KINDS[c.kind]) + '</td>' +
+          '<td style="font-size:11.5px;color:var(--ink-2)">' + c.serves.map(E).join(", ") + '</td>' +
+          '<td>' + (ed ? '<select data-cown="' + i + '" aria-label="Owner">' + PEOPLE.map(function(p){ return '<option' + (p === c.own ? " selected" : "") + '>' + E(p) + '</option>'; }).join("") + '</select>' : E(c.own)) + '</td>' +
+          '<td>' + (ed ? '<button type="button" class="tick' + (c.keep ? " on" : "") + '" data-keep="' + i + '" aria-pressed="' + !!c.keep + '">✓</button>' : '<span class="tick' + (c.keep ? " on" : "") + '">✓</span>') + '</td></tr>';
+      }).join("") + '</tbody></table><p class="quiet"><b>Gap-closing</b>: something we must build because a weakness or a Direction needs it. <b>Transformation</b>: a change we choose to make for its own sake. <b>Enabler</b>: a supporting foundation such as data or systems.</p>';
+  }
+  function work(){
+    var ed = !S.saved, g = goes();
+    if (S.mode === "dirs" && !S.options.length) return '<div class="card"><h3>The Directions</h3><p class="quiet">Nothing suggested yet — the chat suggests them first.</p></div>';
+    var h = "";
+    if (S.mode === "dirs") h += '<div class="card"><h3>The Directions <span class="n">' + S.options.length + ' offered · ' + g.length + ' ticked</span></h3>' + optionsTable(ed) +
+      (ed && !S.chose ? '<div class="under-table"><button type="button" class="btn" id="goall"' + (g.length ? '' : ' aria-disabled="true" data-tip="Tick at least one Direction first."') + '>Go ahead with the ' + g.length + ' ticked</button></div>' : '') + '</div>';
+    if (S.caps.length) h += '<div class="card"><h3>The Capabilities <span class="n">' + S.caps.length + ' suggested · ' + kept().length + ' kept</span></h3>' + capsTable(ed) + '</div>';
+    else if (S.mode === "dirs" && S.chose) h += '<div class="card"><h3>The Capabilities</h3><p class="quiet">Nothing suggested yet — the chat suggests them next.</p></div>';
+    return h;
+  }
+  function todo(){
+    var g = goes(), k = kept(), rows = S.mode === "caps"
+      ? [["Suggest Capabilities", !!S.caps.length, S.caps.length ? S.caps.length + " suggested" : "From the saved Directions"], ["Choose and set owners", k.length > 0 && k.every(function(c){ return c.own !== "—"; }), k.length ? k.length + " kept" + (k.some(function(c){ return c.own === "—"; }) ? " · owners to set" : "") : "None kept yet"], ["Save", !!S.saved, S.saved ? "Saved as " + S.saved : "Into the plan"]]
+      : [["Options", !!S.options.length, S.options.length ? S.options.length + " scored" : "Not suggested yet"], ["Choose Directions", S.chose, S.chose ? g.length + " going ahead" : g.length ? g.length + " ticked" : "Tick what goes ahead"], ["Choose Capabilities", S.chose && k.length > 0, k.length ? k.length + " kept" : "After the Directions"], ["Save", !!S.saved, S.saved ? "Saved as " + S.saved : "Into the plan"]];
+    var done = rows.filter(function(r){ return r[1]; }).length;
+    return '<div class="h"><b>To-do</b><small>' + done + '/' + rows.length + '</small></div><ul>' + rows.map(function(r){ return '<li' + (r[1] ? ' class="done"' : '') + '><span class="dot"></span><span title="' + E(r[2]) + '">' + E(r[0]) + '</span><span class="pill">' + (r[1] ? "Done" : "") + '</span></li>'; }).join("") + '</ul>';
+  }
+  function draw(){
+    var g = goes(), k = kept();
+    document.getElementById("msgs").innerHTML = msgs();
+    document.getElementById("wbody").innerHTML = work();
+    document.getElementById("todo").innerHTML = todo();
+    document.getElementById("chStep").textContent = "· " + stepWord();
+    var title = (S.mode === "caps" ? "Capabilities — Mobile" : "Directions — Mobile");
+    document.getElementById("chTitle").textContent = title; document.getElementById("railTitle").textContent = title; document.getElementById("wTitle").textContent = title + " v1";
+    document.getElementById("wState").textContent = S.saved ? "· saved" : "· in progress";
+    var rows = S.mode === "caps" ? 3 : 4, done = Array.from(document.querySelectorAll("#todo li.done")).length;
+    document.getElementById("railSub").textContent = "Mohamed Essam · today · " + done + " of " + rows + " done";
+    document.getElementById("foot").innerHTML = S.saved ? '<b>v1</b> saved <i>·</i> ' + (S.applied ? '<span class="onp">v1 on the plan</span>' : 'not on the plan yet') : '<b>v1</b> in progress';
+    var wf = S.saved ? "Nothing has changed since it was saved." : S.mode === "caps" ? (k.length ? (k.some(function(c){ return c.own === "—"; }) ? "Set an owner for every kept Capability first." : "") : "Keep at least one Capability first.")
+      : !S.options.length ? "Suggest the Directions first." : !S.chose ? "Press Go ahead under the table first — Save takes what goes ahead." : "";
+    var wa = !S.saved ? "Save it first — the plan only takes a saved version." : "";
+    held(document.getElementById("save"), wf); held(document.getElementById("apply"), wa);
+    document.getElementById("apply").textContent = S.applied ? "Apply to plan again" : "Apply to plan";
+    var canType = !S.saved && (S.mode === "caps" ? S.capsOn : S.options.length > 0), box = document.getElementById("box");
+    box.disabled = !canType;
+    box.placeholder = S.saved ? "Saved — nothing more to type here." : canType ? "Ask for something — a couple more, or a different angle…" : "Use the choices above to carry on…";
+    var m = document.getElementById("msgs"); m.scrollTop = m.scrollHeight;
+  }
+  function held(b, why){ if (why) { b.setAttribute("aria-disabled", "true"); b.setAttribute("data-tip", why); } else { b.removeAttribute("aria-disabled"); b.removeAttribute("data-tip"); } }
+  function say(t, o){ S.log.push({ w: "ai", t: t, opts: o }); }
+  function suggestCaps(){
+    S.caps = CAPS.filter(function(c){ return S.mode === "caps" || c[2].some(function(d){ return goes().some(function(o){ return o.t === d; }); }); }).map(function(c, i){ return { t: c[0], kind: c[1], serves: c[2], own: i === 0 ? "Amaka Eze" : "—", keep: i === 0 }; });
+    if (!S.caps.length) S.caps = CAPS.slice(0, 2).map(function(c){ return { t: c[0], kind: c[1], serves: c[2], own: "—", keep: false }; });
+    S.capsOn = true;
+    say("Here are <b>" + S.caps.length + "</b> Capabilities, on the right. Set the kind and the owner there, and keep the ones to build. Ask here for a couple more, or a different angle. <b>Save</b>, at the foot of the tables, keeps them as a version.", [["more", "Suggest more"], ["own", "+ Add my own"]]);
+  }
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest("[aria-disabled='true']"); if (b) { ev.preventDefault(); return; }
+    var t;
+    if ((t = ev.target.closest("[data-act]"))) {
+      var a = t.getAttribute("data-act");
+      if (a === "start-plan" || a === "start-fresh") { S.start = a === "start-plan" ? "plan" : "fresh"; }
+      else if (a === "suggest") { S.options = (S.start === "plan" ? PLAN.map(function(o){ return { t: o[0], u: o[1], i: o[2], e: o[3], own: "—", go: !!(o[1] && o[2] && o[3]), mark: "plan" }; }) : []).concat(FRESH.map(function(o){ return { t: o[0], u: o[1], i: o[2], e: o[3], own: "—", go: true, mark: "" }; })); }
+      else if (a === "more") { S.log.push({ w: "me", t: "Suggest more" }); if (S.capsOn && (S.mode === "caps" || S.chose)) { S.caps.push({ t: "Trade credit desk", kind: "gap", serves: ["Own label"], own: "—", keep: false }); say("Added <b>Trade credit desk</b> — gap-closing, serving Own label — on the right.", [["more", "Suggest more"], ["own", "+ Add my own"]]); } else { S.options.push({ t: "Device trade-in", u: 2, i: 3, e: 3, own: "—", go: false, mark: "" }); say("Added <b>Device trade-in</b>, scored 2 · 3 · 3, on the right.", [["more", "Suggest more"], ["own", "+ Add my own"]]); } }
+      else if (a === "own") { var box = document.getElementById("box"); box.focus(); box.value = ""; box.placeholder = "A Direction of your own — type it and press Enter"; return; }
+      else if (a === "capsgo") { S.log.push({ w: "me", t: "Suggest Capabilities" }); suggestCaps(); }
+      draw(); return;
+    }
+    if ((t = ev.target.closest("[data-sc]"))) { var p = t.getAttribute("data-sc").split("|"), o = S.options[+p[0]]; o[p[1]] = ((o[p[1]] || 0) % 4) + 1; o.ed = o.ed || {}; o.ed[p[1]] = true; draw(); return; }
+    if ((t = ev.target.closest("[data-go]"))) { var o2 = S.options[+t.getAttribute("data-go")]; o2.go = !o2.go; draw(); return; }
+    if ((t = ev.target.closest("[data-keep]"))) { var c = S.caps[+t.getAttribute("data-keep")]; c.keep = !c.keep; if (S.saved) S.changed = true; draw(); return; }
+    if ((t = ev.target.closest("#goall"))) { var g = goes(); S.chose = true;
+      S.log.push({ w: "fold", t: "The Directions", s: S.options.length + " offered · " + g.length + " ticked", items: S.options.map(function(o){ return o.t + " · " + (score(o) == null ? "unscored" : score(o) + " of 64") + (o.go ? " · goes ahead" : ""); }) });
+      S.log.push({ w: "me", t: "Go ahead with these " + g.length + "." });
+      say(g.length + " Direction" + (g.length === 1 ? "" : "s") + " chosen. Next, the Capabilities we need to deliver them.", [["capsgo", "Suggest Capabilities", true]]); draw(); return; }
+    if ((t = ev.target.closest("[data-fold]"))) { if (ev.target.closest("button")) { var k = t.getAttribute("data-fold"); FOLD[k] = !FOLD[k]; draw(); } return; }
+    if ((t = ev.target.closest("#save"))) { var g2 = goes(), k2 = kept(); S.saved = (S.mode === "caps" ? "Capabilities — Mobile v1" : "Directions — Mobile v1"); S.log.push({ w: "note", t: "Saved " + (S.mode === "caps" ? k2.length + " Capabilities" : g2.length + " Directions and " + k2.length + " Capabilities") + " as v1." }); draw(); return; }
+    if ((t = ev.target.closest("#apply"))) { var g3 = goes(), k3 = kept();
+      document.getElementById("mkv").innerHTML = '<span class="k">Where</span><span>Mobile</span><span class="k">What</span><span>' + E(S.saved) + ' — ' + (S.mode === "caps" ? k3.length + " Capabilities" : g3.length + " Directions and " + k3.length + " Capabilities") + ' onto the plan.</span><span class="k">What it replaces</span><span>A Direction with the same name is updated, a new one is added; nothing is removed. What the plan holds is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span>';
+      document.getElementById("shade").classList.add("on"); return; }
+    if (ev.target.closest("#mno") || (ev.target.id === "shade")) { document.getElementById("shade").classList.remove("on"); return; }
+    if (ev.target.closest("#myes")) { document.getElementById("shade").classList.remove("on"); S.applied = true; S.log.push({ w: "note", t: S.saved + " is on the plan now. What was there before is archived under Import & storage › Archived plans." }); draw(); return; }
+    if (ev.target.closest("#reset")) { fresh(S.mode); return; }
+    var sg = ev.target.closest("#scen [data-s]"); if (sg) { document.querySelectorAll("#scen button").forEach(function(x){ x.setAttribute("aria-pressed", String(x === sg)); }); fresh(sg.getAttribute("data-s")); return; }
+    if (ev.target.closest("#send")) { sendBox(); return; }
+  });
+  document.addEventListener("change", function(ev){
+    var t = ev.target;
+    if (t.matches("[data-own]")) { S.options[+t.getAttribute("data-own")].own = t.value; draw(); }
+    if (t.matches("[data-cown]")) { S.caps[+t.getAttribute("data-cown")].own = t.value; draw(); }
+    if (t.matches("[data-kind]")) { S.caps[+t.getAttribute("data-kind")].kind = t.value; draw(); }
+  });
+  function sendBox(){
+    var box = document.getElementById("box"), v = box.value.trim(); if (!v || box.disabled) return;
+    box.value = ""; S.log.push({ w: "me", t: v });
+    var own = /own|type it/.test(box.placeholder);
+    if (S.capsOn && (S.mode === "caps" || S.chose)) { S.caps.push({ t: own ? v : "Partner service network", kind: "gap", serves: [goes()[0] ? goes()[0].t : "Upper Egypt"], own: "—", keep: false }); say(own ? "Added <b>" + E(v) + "</b> as a Capability of your own, on the right — set its kind and owner there." : "Added <b>Partner service network</b> — gap-closing — on the right, from what you asked.", [["more", "Suggest more"], ["own", "+ Add my own"]]); }
+    else { S.options.push({ t: own ? v : "Retail financing", u: 3, i: 3, e: 2, own: "—", go: false, mark: own ? "own" : "" }); say(own ? "Added <b>" + E(v) + "</b> as your own, scored 3 · 3 · 2 on the right — change the scores there." : "Added <b>Retail financing</b>, scored 3 · 3 · 2, on the right.", [["more", "Suggest more"], ["own", "+ Add my own"]]); }
+    draw();
+  }
+  document.getElementById("box").addEventListener("input", function(){ document.getElementById("send").hidden = !this.value.trim(); });
+  document.getElementById("box").addEventListener("keydown", function(ev){ if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); sendBox(); } });
+  var tip = document.getElementById("tip");
+  document.addEventListener("mouseover", function(ev){ var h = ev.target.closest("[data-tip]"); if (!h) { tip.style.display = "none"; return; } var r = h.getBoundingClientRect(); tip.textContent = h.getAttribute("data-tip"); tip.style.display = "block"; tip.style.left = Math.min(r.left, innerWidth - 270) + "px"; tip.style.top = (r.bottom + 6) + "px"; });
+  document.addEventListener("mouseout", function(ev){ if (ev.target.closest("[data-tip]")) tip.style.display = "none"; });
+  fresh("dirs");
+})();
+</script>

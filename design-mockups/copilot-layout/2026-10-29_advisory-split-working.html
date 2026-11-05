@@ -1,0 +1,204 @@
+<title>Advisory Split, Working</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: the Copilot's three columns, live — the questions one at a time in the chat, the Decision Brief on the right once it is written, Save at the foot (Advisory stays in the Copilot), the count and what was assumed beside. */
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--goldbg:#FBF1DE;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--goldbg:#2E2717;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--goldbg:#2E2717;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top h1{font-size:17px;margin:0}
+.top .hint{color:var(--ink-3);font-size:13px}
+.pane{flex:1 1 auto;min-height:600px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;min-width:0}
+.rail{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:8px;font-size:12.5px}
+.rail .h{font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.rail .row{background:var(--surface);border-left:3px solid var(--goldfill);padding:6px 8px;border-radius:4px}
+.rail .row small{display:block;color:var(--ink-3)}
+.flow{display:grid;grid-template-columns:min(760px,max(420px,calc(100% - 700px))) 12px minmax(0,1fr) 208px;min-width:0;min-height:0}
+@media (max-width:1240px){.flow{grid-template-columns:min(760px,max(420px,calc(100% - 492px))) 12px minmax(0,1fr)}.todo{display:none}}
+@media (max-width:900px){.flow{grid-template-columns:minmax(0,1fr)}.grip,.work{display:none}}
+.chat{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.chead{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font-weight:700}
+.chead small{font-weight:400;color:var(--ink-3)}
+.msgs{flex:1 1 auto;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.who{font-size:11px;color:var(--ink-3);margin-bottom:2px}
+.ai{border-left:3px solid var(--goldfill);padding:4px 10px;max-width:70ch}
+.ai .adq{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+.me{align-self:flex-end;max-width:80%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.opt{font-size:12.5px;font-weight:600;padding:2px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.opt.rec{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.opt[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+.clash{margin-top:6px;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12.5px;background:var(--surface-2)}
+.tag{font:600 10px/1.5 var(--sans);padding:0 5px;border-radius:4px;margin-right:4px;vertical-align:middle}
+.tag.platform{background:var(--nav);color:var(--navink)}
+.tag.file{background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.tag.assumed{background:var(--goldbg);color:var(--gold)}
+.note{text-align:center;color:var(--ink-3);font-size:12.5px}
+.compose{padding:8px 12px 10px;border-top:1px solid var(--line)}
+.box{display:flex;gap:6px;align-items:flex-end;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface)}
+.box textarea{flex:1;border:0;background:none;resize:none;font:inherit;color:inherit;outline:none;min-height:22px}
+.box textarea:disabled{color:var(--ink-3)}
+.box button{border:0;background:var(--nav);color:var(--navink);border-radius:6px;padding:3px 10px;font-weight:600}
+.box button[hidden]{display:none}
+.under{font-size:11px;color:var(--ink-3);margin-top:4px}
+.grip{border-left:1px solid var(--line);margin:0 6px}
+.work{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);overflow:hidden}
+.whead{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface);font-size:12.5px;color:var(--ink-3)}
+.whead b{color:var(--ink)}
+.wbody{flex:1 1 auto;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.card h3{margin:0 0 6px;font-size:14px}
+.card p.quiet{margin:0;color:var(--ink-3);font-size:12.5px}
+.brief{display:flex;flex-direction:column;gap:10px}
+.brief h3{font-size:17px;margin:0}
+.brief h4{margin:0 0 3px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.brief p{margin:0}
+.brief ul,.brief ol{margin:0;padding-left:18px}
+.adopt{border:1px solid var(--line);border-radius:6px;padding:7px 10px;margin-top:6px}
+.adopt.rec{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.adopt .h{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.adrec{font:600 10px/1.6 var(--sans);background:var(--goldbg);color:var(--gold);padding:0 7px;border-radius:8px}
+.adopt p{color:var(--ink-2);font-size:12.5px;margin-top:2px}
+.btn{font-size:12.5px;font-weight:600;padding:3px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.btn.solid{background:var(--gold);border-color:var(--gold);color:#fff}
+.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+.wfoot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:8px 10px;background:var(--surface)}
+.state{flex:1;font-size:12.5px;color:var(--ink-3)}
+.state b{color:var(--ink)}
+.stays{font-size:12px;color:var(--ink-3)}
+.todo{margin-left:8px;display:flex;flex-direction:column;gap:8px;align-self:start}
+.tbox{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 12px;font-size:12.5px}
+.tbox .h{display:flex;gap:6px;align-items:baseline;margin-bottom:6px}
+.tbox .h b{font-size:13.5px}
+.tbox .h small{color:var(--ink-3)}
+.tbox ul{list-style:none;margin:0;padding:0}
+.tbox li{display:flex;gap:7px;align-items:center;padding:3px 0}
+.dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--line);flex:none}
+li.done .dot{background:var(--good);border-color:var(--good)}
+.pill{margin-left:auto;font:600 10px/1.5 var(--sans);padding:0 6px;border:1px solid var(--line);border-radius:8px;color:var(--ink-3)}
+li.done .pill{color:var(--good);border-color:var(--good)}
+.pips{display:flex;gap:4px;margin:4px 0}
+.pips i{width:22px;height:8px;border-radius:3px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)}
+.pips i.u{background:var(--gold);box-shadow:none}
+.tbox .why{color:var(--ink-3);font-size:12px;margin:0}
+.tip{position:fixed;z-index:20;background:var(--ink);color:var(--ground);font-size:12px;padding:4px 8px;border-radius:6px;max-width:280px;pointer-events:none;display:none}
+</style>
+<div class="top"><h1>Advisory, split three ways · working mockup</h1>
+  <button class="btn" id="reset">Start over</button>
+  <span class="hint">Press through it: ask, answer the questions in the chat's own box or with a choice, proceed, read the brief on the right, ask for a change, Save. Advisory stays in the Copilot: no Apply to plan.</span></div>
+<div class="pane">
+  <div class="rail"><div class="h">Chats</div><div class="row"><b>Advisory — Mobile</b><small id="railSub">Mohamed Essam · today · 0 of 4 done</small></div></div>
+  <div class="flow">
+    <div class="chat"><div class="chead"><span>Advisory — Mobile</span><small id="chStep">· Your question</small></div>
+      <div class="msgs" id="msgs"></div>
+      <div class="compose"><div class="box"><textarea id="box" rows="1" placeholder="What would you like advice on?"></textarea><button id="send" hidden>Send</button></div><div class="under">Enter sends · Shift + Enter for a new line</div></div></div>
+    <div class="grip"></div>
+    <div class="work"><div class="whead"><b>Advisory — Mobile v1</b><span id="wState">· in progress</span></div>
+      <div class="wbody" id="wbody"></div>
+      <div class="wfoot"><span class="state" id="foot"><b>v1</b> in progress</span><button class="btn solid" id="save">Save</button><span class="stays">Stays in the Copilot</span></div></div>
+    <aside class="todo" id="todo"></aside>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+(function(){
+  var QS = [["How many stores do you run today?", null], ["What did the last two store openings return in their first year?", { what: "the first-year return", platform: "14% on the plan", file: "9% in the board pack" }], ["Which regions have you ruled out, and why?", null], ["How much capital is set aside for expansion this year?", null], ["Who would run the new stores day to day?", null]];
+  var S, E = function(x){ return String(x).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  function fresh(){ S = { ask: "", turns: [], assumed: [], brief: null, stopped: false, log: [], saved: false }; draw(); }
+  var pending = function(){ var t = S.turns[S.turns.length - 1]; return t && !t.how ? t : null; };
+  function ai(h){ return '<div><div class="who">Copilot</div><div class="ai">' + h + '</div></div>'; }
+  function me(t){ return '<div class="me"><div class="who">Mohamed Essam</div>' + E(t) + '</div>'; }
+  function opts(a){ return '<div class="opts">' + a.join("") + '</div>'; }
+  function opt(act, label, rec){ return '<button type="button" class="opt' + (rec ? " rec" : "") + '" data-act="' + act + '">' + E(label) + '</button>'; }
+  function tag(k){ return '<span class="tag ' + k + '">' + ({ platform: "Platform", file: "File", assumed: "Assumed" })[k] + '</span>'; }
+  function msgs(){
+    var out = [], ed = !S.saved;
+    out.push(ai("Bring me a decision you are weighing about Mobile. I will ask a few questions — one at a time — then write a Decision Brief with options and one recommendation."));
+    if (!S.ask) return out.join("");
+    out.push(me(S.ask));
+    S.turns.forEach(function(t, k){
+      var q = '<div class="adq">Round 1 · Question ' + (k + 1) + ' of 5</div>' + (k === 0 ? '<p>Good question.</p>' : '') + '<p>' + E(t.q) + '</p>';
+      if (t.clash) q += '<div class="clash"><b>Two sources disagree on ' + E(t.clash.what) + '</b><br>' + tag("platform") + E(t.clash.platform) + ' &nbsp; ' + tag("file") + E(t.clash.file) + '</div>';
+      var isP = !t.how && ed && !S.brief;
+      if (isP) q += opts((t.clash ? [opt("platform", "Use the platform figure"), opt("file", "Use the file")] : []).concat([opt("assume", "Assume for me"), opt("proceed", "Proceed with what you have")]));
+      out.push(ai(q));
+      if (t.how === "assumed") out.push(me("I don’t know — assume for me"));
+      else if (t.how === "platform") out.push(me("Use the platform figure — " + t.answer));
+      else if (t.how === "file") out.push(me("Use the file — " + t.answer));
+      else if (t.how) out.push(me(t.answer));
+    });
+    if (S.stopped && !S.brief) out.push(me("Proceed with what you have"));
+    if (S.brief) {
+      out.push(ai("Here is the brief, on the right: <b>" + E(S.brief.title) + "</b> — " + S.brief.options.length + " options, one recommended" + (S.assumed.length ? ", " + S.assumed.length + " thing" + (S.assumed.length === 1 ? "" : "s") + " assumed" : "") + "." + (ed ? " Ask here for a change — another option, a different recommendation, a step to add — or <b>Save</b> at the foot." : "")));
+      S.log.forEach(function(x){ out.push(x.w === "me" ? me(x.t) : x.w === "note" ? '<div class="note">' + E(x.t) + '</div>' : ai(x.t)); });
+      if (S.saved) out.push(ai("Saved as <b>" + E(S.brief.title) + " v1</b>; it is under Advisory deliverables. It stays in the Copilot and does not go into the plan."));
+    }
+    return out.join("");
+  }
+  function work(){
+    if (!S.brief) return '<div class="card"><h3>The Decision Brief</h3><p class="quiet">' + (S.ask ? "Not written yet — the questions first. It comes here once they are answered, or when you proceed with what it has." : "Nothing yet — bring a decision in the chat.") + '</p></div>' +
+      (S.assumed.length ? '<div class="card"><h3>Assumed so far</h3><ul style="margin:0;padding-left:18px">' + S.assumed.map(function(a){ return '<li>' + tag("assumed") + E(a) + '</li>'; }).join("") + '</ul></div>' : '');
+    var b = S.brief, L = "ABCD";
+    return '<div class="card brief"><h3>' + E(b.title) + '</h3><div><h4>Situation</h4><p>' + E(b.situation) + '</p></div>' +
+      '<div><h4>What we know</h4><ul>' + b.known.map(function(f){ return '<li>' + tag(f.source) + E(f.text) + '</li>'; }).join("") + '</ul></div>' +
+      '<div><h4>Options</h4>' + b.options.map(function(o, k){ return '<div class="adopt' + (o.recommended ? " rec" : "") + '"><div class="h"><span>' + L.charAt(k) + '. ' + E(o.title) + '</span>' + (o.recommended ? '<span class="adrec">Recommended</span>' : '') + '</div><p>' + E(o.detail) + '</p></div>'; }).join("") + '</div>' +
+      '<div><h4>Why</h4><p>' + E(b.why) + '</p></div><div><h4>Next steps</h4><ol>' + b.next.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ol></div></div>';
+  }
+  function todo(){
+    var said = S.turns.filter(function(t){ return t.how; }).length, asked = S.turns.length;
+    var rows = [["Your question", !!S.ask, S.ask ? "Asked" : "Not asked yet"], ["Questions", !!S.brief || S.stopped, said + " answered"], ["Decision brief", !!S.brief, S.brief ? "Written" : "After the questions"], ["Save", S.saved, S.saved ? "Saved as " + S.brief.title + " v1" : "Into Advisory deliverables"]];
+    var n = rows.filter(function(r){ return r[1]; }).length, pips = ""; for (var k = 0; k < 5; k++) pips += '<i class="' + (k < asked ? "u" : "") + '"></i>';
+    return '<div class="tbox"><div class="h"><b>To-do</b><small>' + n + '/4</small></div><ul>' + rows.map(function(r){ return '<li' + (r[1] ? ' class="done"' : '') + '><span class="dot"></span><span title="' + E(r[2]) + '">' + r[0] + '</span><span class="pill">' + (r[1] ? "Done" : "") + '</span></li>'; }).join("") + '</ul></div>' +
+      '<div class="tbox"><div class="h"><b>Round 1 of 2</b><small>' + asked + ' of 5 asked</small></div><div class="pips">' + pips + '</div><p class="why">' + (S.brief ? (S.stopped && asked < 5 ? "Proceeded after " + asked + " of 5." : "The questions are done.") : "At most 5 questions a round and 2 rounds, then the brief.") + '</p></div>' +
+      (S.assumed.length ? '<div class="tbox"><div class="h"><b>Assumed so far</b></div><ul>' + S.assumed.map(function(a){ return '<li>' + tag("assumed") + E(a) + '</li>'; }).join("") + '</ul></div>' : '') +
+      '<div class="tbox"><div class="h"><b>What it can see</b></div><ul><li>' + tag("platform") + 'Mobile’s plan: 42 stores, 6 Directions</li><li>' + tag("file") + 'board-pack-q3.pdf</li></ul></div>';
+  }
+  function draw(){
+    document.getElementById("msgs").innerHTML = msgs();
+    document.getElementById("wbody").innerHTML = work();
+    document.getElementById("todo").innerHTML = todo();
+    document.getElementById("chStep").textContent = "· " + (S.saved ? "Saved" : S.brief ? "The brief" : S.ask ? "Questions" : "Your question");
+    document.getElementById("wState").textContent = S.saved ? "· saved" : S.brief ? "· brief written" : "· in progress";
+    document.getElementById("railSub").textContent = "Mohamed Essam · today · " + document.querySelectorAll("#todo li.done").length + " of 4 done";
+    document.getElementById("foot").innerHTML = S.saved ? '<b>v1</b> saved' : '<b>v1</b> in progress';
+    held(document.getElementById("save"), S.saved ? "Nothing has changed since it was saved." : !S.brief ? "The brief is not written yet — answer the questions, or proceed with what it has." : "");
+    var box = document.getElementById("box"), p = pending();
+    box.disabled = S.saved;
+    box.placeholder = S.saved ? "Saved — nothing more to type here." : !S.ask ? "What would you like advice on?" : S.brief ? "Ask for a change — another option, a different recommendation, a step to add…" : p ? (p.clash ? "Or give the number yourself…" : "Your answer…") : "Waiting for the next question…";
+    var m = document.getElementById("msgs"); m.scrollTop = m.scrollHeight;
+  }
+  function held(b, why){ if (why) { b.setAttribute("aria-disabled", "true"); b.setAttribute("data-tip", why); } else { b.removeAttribute("aria-disabled"); b.removeAttribute("data-tip"); } }
+  function nextQ(){ var k = S.turns.length; if (k < QS.length) S.turns.push({ q: QS[k][0], clash: QS[k][1], how: "", answer: "" }); else writeBrief(); }
+  function writeBrief(){ S.brief = { title: "Upper Egypt stores", situation: "Growth is flat in Cairo; the network is 42 stores, all north of Minya.", known: [{ source: "platform", text: "42 stores on the plan" }].concat(S.assumed.map(function(a){ return { source: "assumed", text: a }; })), options: [{ title: "Open 2 as a pilot", detail: "Two stores in Assiut and Sohag, read after two quarters.", recommended: true }, { title: "Open 5 in one wave", detail: "Phased over the year; higher outlay, faster learning.", recommended: false }], why: "Lower risk while the regional field team is built.", next: ["Pick the two sites", "Name the regional lead", "Set the first-year targets"] }; }
+  document.addEventListener("click", function(ev){
+    if (ev.target.closest("[aria-disabled='true']")) { ev.preventDefault(); return; }
+    var t;
+    if ((t = ev.target.closest("[data-act]"))) { var a = t.getAttribute("data-act"), p = pending(); if (!p) return;
+      if (a === "assume") { p.how = "assumed"; S.assumed.push(p.q.indexOf("stores") >= 0 ? "42 stores" : p.q.indexOf("return") >= 0 ? "Rents flat, returns as planned" : "As the plan says"); nextQ(); }
+      else if (a === "platform") { p.how = "platform"; p.answer = p.clash.platform; nextQ(); }
+      else if (a === "file") { p.how = "file"; p.answer = p.clash.file; nextQ(); }
+      else if (a === "proceed") { S.stopped = true; S.turns.pop(); writeBrief(); }
+      draw(); return; }
+    if (ev.target.closest("#save")) { S.saved = true; S.log.push({ w: "note", t: "Saved as " + S.brief.title + " v1." }); draw(); return; }
+    if (ev.target.closest("#reset")) { fresh(); return; }
+    if (ev.target.closest("#send")) { sendBox(); return; }
+  });
+  function sendBox(){ var box = document.getElementById("box"), v = box.value.trim(); if (!v || box.disabled) return; box.value = ""; document.getElementById("send").hidden = true;
+    if (!S.ask) { S.ask = v; nextQ(); }
+    else if (S.brief) { S.log.push({ w: "me", t: v }); S.brief.options.push({ title: "Franchise two stores", detail: "A partner carries the outlay; lower learning.", recommended: false }); S.log.push({ w: "ai", t: "Added <b>C. Franchise two stores</b> to the options, on the right. The recommendation stays with A." }); }
+    else { var p = pending(); if (p) { p.how = "say"; p.answer = v; nextQ(); } }
+    draw(); }
+  document.getElementById("box").addEventListener("input", function(){ document.getElementById("send").hidden = !this.value.trim(); });
+  document.getElementById("box").addEventListener("keydown", function(ev){ if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); sendBox(); } });
+  var tip = document.getElementById("tip");
+  document.addEventListener("mouseover", function(ev){ var h = ev.target.closest("[data-tip]"); if (!h) { tip.style.display = "none"; return; } var r = h.getBoundingClientRect(); tip.textContent = h.getAttribute("data-tip"); tip.style.display = "block"; tip.style.left = Math.min(r.left, innerWidth - 290) + "px"; tip.style.top = (r.bottom + 6) + "px"; });
+  document.addEventListener("mouseout", function(ev){ if (ev.target.closest("[data-tip]")) tip.style.display = "none"; });
+  fresh();
+})();
+</script>

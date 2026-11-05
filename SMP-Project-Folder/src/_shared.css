@@ -132,7 +132,7 @@
     /* NO ZEBRA in this language — rows separate on hover instead, and the
        columns are divided by hairlines. The token stays because a hundred
        rules read it; it just resolves to the surface it sits on. */
-    --zebra:#F6F8FB; --zebra-focus:#FFFBEB;
+    --zebra:#F6F8FB; --zebra-focus:#FFFBEB; --zebra-bad:#FBF1EF;
     --over-bg:#EEF2FF; --over-line:#C7D2FE;
     --on-fill:#FFFFFF;
   }
@@ -153,7 +153,7 @@
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
     --panel:#060B16; --panel-ink:#E8EDF5;
-    --zebra:#182339; --zebra-focus:#2E2510;
+    --zebra:#182339; --zebra-focus:#2E2510; --zebra-bad:#2E1616;
     --over-bg:#1E1B3A; --over-line:#3F3A72;
     --on-fill:#0B1120;
   }
@@ -215,7 +215,7 @@
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
     --panel:#16325C; --panel-ink:#FFFFFF;
-    --zebra:#F5F7FA; --zebra-focus:#FDFAF1;
+    --zebra:#F5F7FA; --zebra-focus:#FDFAF1; --zebra-bad:#FBF1EF;
     --over-bg:#FBF6E9; --over-line:#E8D9AE;
     --on-fill:#FFFFFF;
   }
@@ -240,7 +240,7 @@
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
     --panel:#0E1014; --panel-ink:#EAF0FA;
-    --zebra:#212630; --zebra-focus:#2A2720;
+    --zebra:#212630; --zebra-focus:#2A2720; --zebra-bad:#33201E;
     --over-bg:#332C16; --over-line:#4A3F1E;
     --on-fill:#14161A;
   }
@@ -928,6 +928,23 @@
   .clause:last-child { border-bottom:0; }
   .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
   .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
+  /* WHO WE ARE IS TYPED IN ONE BOX (§685): the lines above are how it READS;
+     with the pen on, this box stands in for the list — a line per row, the
+     bold opening words being the left column. The bar above it holds the one
+     button, B. */
+  .clausebar { display:flex; align-items:center; gap:12px; margin:0 0 8px; }
+  .bbtn { font:inherit; font-weight:800; font-size:14px; width:34px; height:30px; border:1px solid var(--field-line);
+          border-radius:7px; background:var(--surface); color:var(--stone); cursor:pointer; }
+  .bbtn:hover { background:var(--attn-bg); }
+  .bbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .bbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .clausehint { color:var(--none); font-size:13px; }
+  .clausebox { min-height:120px; border:1px solid var(--field-line); border-radius:8px; padding:10px 12px; outline:0;
+               background:var(--surface); color:var(--ink); font-family:var(--serif); font-size:15px; line-height:1.6;
+               white-space:pre-wrap; }
+  .clausebox:focus { border-color:var(--gold); }
+  .clausebox div { min-height:1.6em; }
+  .clausebox b { font-weight:700; color:var(--stone); }
   .statement { font-family:var(--serif); font-size:16px; line-height:1.5; }
   /* Prose somebody typed keeps the shape they typed it in (§51.1). pre-LINE,
      not pre-wrap: line breaks survive, accidental double spaces and pasted

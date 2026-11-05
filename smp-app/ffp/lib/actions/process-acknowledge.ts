@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/ffp/lib/db/client";
 import { readerSeat } from "@/ffp/lib/auth/workspace";
+import { inForce } from "@/ffp/lib/data/process-content";
 import { ok, notFound, unauthorized, validationError, type ActionResult } from "@/ffp/lib/actions/errors";
 
 const schema = z.object({ workspaceId: z.string().min(1), processId: z.string().min(1) });
@@ -25,14 +26,10 @@ export async function acknowledgeProcess(input: z.infer<typeof schema>): Promise
     return { ok: false, error: "VALIDATION_ERROR", message: "Only people on the Client register can acknowledge. Ask the office to add you" };
   }
 
-  const process = await prisma.process.findUnique({ where: { id: processId }, select: { workspaceId: true, lifecycleStatus: true, archivedAt: true } });
-  if (!process || process.workspaceId !== workspaceId || process.archivedAt || process.lifecycleStatus !== "PUBLISHED") return notFound();
-
-  const version = await prisma.processVersion.findFirst({
-    where: { processId, publishedAt: { not: null } },
-    orderBy: { number: "desc" },
-    select: { number: true },
-  });
+  const process = await prisma.process.findUnique({ where: { id: processId }, select: { workspaceId: true } });
+  if (!process || process.workspaceId !== workspaceId) return notFound();
+  /* the version in force, which stays in force while the next one is drawn (stage 5) */
+  const version = await inForce(processId);
   if (!version) return notFound();
 
   await prisma.processAcknowledgement.createMany({

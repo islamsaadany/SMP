@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/ffp/lib/db/client";
 import { requireFirmOwner, requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { canChangeLastFirmOwner } from "@/ffp/lib/domain/access-control";
-import { validateLogoDataUrl, isValidHexColor } from "@/ffp/lib/domain/logo";
 import { DEFAULT_GOVERNANCE_ASPECT_NAMES } from "@/ffp/lib/domain/governance-focus-areas";
 import { ok, validationError, type ActionResult, type ActionError } from "@/ffp/lib/actions/errors";
 
@@ -79,39 +78,6 @@ export async function createWorkspace(
   return ok({ id: workspace.id });
 }
 
-const updateWorkspaceProfileSchema = z.object({
-  workspaceId: z.string().min(1),
-  industry: z.string().trim().max(120).optional().or(z.literal("")),
-  description: z.string().trim().max(2000).optional().or(z.literal("")),
-});
-
-/**
- * Updates a Workspace's industry/context notes — the free-text background
- * an AI review draws on for sector-appropriate suggestions. Workspace
- * ADMIN-level, not Firm Owner-only: this is ordinary engagement upkeep, not
- * the structural create/delete of the Workspace itself.
- */
-export async function updateWorkspaceProfile(
-  input: z.infer<typeof updateWorkspaceProfileSchema>
-): Promise<ActionResult<{ id: string }>> {
-  const parsed = updateWorkspaceProfileSchema.safeParse(input);
-  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
-
-  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "ADMIN");
-  if (!access.ok) return access;
-
-  const workspace = await prisma.workspace.update({
-    where: { id: parsed.data.workspaceId },
-    data: {
-      industry: parsed.data.industry || null,
-      description: parsed.data.description || null,
-    },
-  });
-
-  revalidatePath(`/${parsed.data.workspaceId}/processes`);
-  return ok({ id: workspace.id });
-}
-
 const deleteWorkspaceSchema = z.object({
   workspaceId: z.string().min(1),
   confirmName: z.string().min(1),
@@ -145,67 +111,6 @@ export async function deleteWorkspace(
 
   revalidatePath("/platform");
   return ok({ id: parsed.data.workspaceId });
-}
-
-const updateWorkspaceBrandingSchema = z.object({
-  workspaceId: z.string().min(1),
-  logoDataUrl: z.string().min(1).nullable(),
-  accentColor: z.string().min(1).nullable(),
-  accentColorSecondary: z.string().min(1).nullable(),
-  accentColorTertiary: z.string().min(1).nullable(),
-});
-
-type WorkspaceBrandingResult = {
-  logoDataUrl: string | null;
-  accentColor: string | null;
-  accentColorSecondary: string | null;
-  accentColorTertiary: string | null;
-};
-
-/**
- * Sets or clears this client's logo and up to three named accent colors
- * (Primary/Secondary/Tertiary) — shown in the Workspace sidebar and used for
- * a few brand touches on every page of this Workspace only, so a consultant
- * sees the UI shift as they switch between client engagements. ADMIN-level,
- * not Firm Owner-only: ordinary engagement upkeep, same as
- * updateWorkspaceProfile.
- */
-export async function updateWorkspaceBranding(
-  input: z.infer<typeof updateWorkspaceBrandingSchema>
-): Promise<ActionResult<WorkspaceBrandingResult>> {
-  const parsed = updateWorkspaceBrandingSchema.safeParse(input);
-  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
-
-  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "ADMIN");
-  if (!access.ok) return access;
-
-  if (parsed.data.logoDataUrl !== null) {
-    const validation = validateLogoDataUrl(parsed.data.logoDataUrl);
-    if (!validation.ok) return validationError(validation.message);
-  }
-  for (const color of [parsed.data.accentColor, parsed.data.accentColorSecondary, parsed.data.accentColorTertiary]) {
-    if (color !== null && !isValidHexColor(color)) {
-      return validationError("Accent color must be a hex value like #2563eb.");
-    }
-  }
-
-  await prisma.workspace.update({
-    where: { id: parsed.data.workspaceId },
-    data: {
-      logoDataUrl: parsed.data.logoDataUrl,
-      accentColor: parsed.data.accentColor,
-      accentColorSecondary: parsed.data.accentColorSecondary,
-      accentColorTertiary: parsed.data.accentColorTertiary,
-    },
-  });
-
-  revalidatePath(`/${parsed.data.workspaceId}/processes`, "layout");
-  return ok({
-    logoDataUrl: parsed.data.logoDataUrl,
-    accentColor: parsed.data.accentColor,
-    accentColorSecondary: parsed.data.accentColorSecondary,
-    accentColorTertiary: parsed.data.accentColorTertiary,
-  });
 }
 
 const addOwnerSchema = z.object({ userId: z.string().min(1) });

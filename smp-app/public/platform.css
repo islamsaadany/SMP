@@ -135,7 +135,7 @@
     /* NO ZEBRA in this language — rows separate on hover instead, and the
        columns are divided by hairlines. The token stays because a hundred
        rules read it; it just resolves to the surface it sits on. */
-    --zebra:#F6F8FB; --zebra-focus:#FFFBEB;
+    --zebra:#F6F8FB; --zebra-focus:#FFFBEB; --zebra-bad:#FBF1EF;
     --over-bg:#EEF2FF; --over-line:#C7D2FE;
     --on-fill:#FFFFFF;
   }
@@ -156,7 +156,7 @@
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
     --panel:#060B16; --panel-ink:#E8EDF5;
-    --zebra:#182339; --zebra-focus:#2E2510;
+    --zebra:#182339; --zebra-focus:#2E2510; --zebra-bad:#2E1616;
     --over-bg:#1E1B3A; --over-line:#3F3A72;
     --on-fill:#0B1120;
   }
@@ -218,7 +218,7 @@
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
     --panel:#16325C; --panel-ink:#FFFFFF;
-    --zebra:#F5F7FA; --zebra-focus:#FDFAF1;
+    --zebra:#F5F7FA; --zebra-focus:#FDFAF1; --zebra-bad:#FBF1EF;
     --over-bg:#FBF6E9; --over-line:#E8D9AE;
     --on-fill:#FFFFFF;
   }
@@ -243,7 +243,7 @@
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
     --panel:#0E1014; --panel-ink:#EAF0FA;
-    --zebra:#212630; --zebra-focus:#2A2720;
+    --zebra:#212630; --zebra-focus:#2A2720; --zebra-bad:#33201E;
     --over-bg:#332C16; --over-line:#4A3F1E;
     --on-fill:#14161A;
   }
@@ -931,6 +931,23 @@
   .clause:last-child { border-bottom:0; }
   .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
   .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
+  /* WHO WE ARE IS TYPED IN ONE BOX (§685): the lines above are how it READS;
+     with the pen on, this box stands in for the list — a line per row, the
+     bold opening words being the left column. The bar above it holds the one
+     button, B. */
+  .clausebar { display:flex; align-items:center; gap:12px; margin:0 0 8px; }
+  .bbtn { font:inherit; font-weight:800; font-size:14px; width:34px; height:30px; border:1px solid var(--field-line);
+          border-radius:7px; background:var(--surface); color:var(--stone); cursor:pointer; }
+  .bbtn:hover { background:var(--attn-bg); }
+  .bbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .bbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .clausehint { color:var(--none); font-size:13px; }
+  .clausebox { min-height:120px; border:1px solid var(--field-line); border-radius:8px; padding:10px 12px; outline:0;
+               background:var(--surface); color:var(--ink); font-family:var(--serif); font-size:15px; line-height:1.6;
+               white-space:pre-wrap; }
+  .clausebox:focus { border-color:var(--gold); }
+  .clausebox div { min-height:1.6em; }
+  .clausebox b { font-weight:700; color:var(--stone); }
   .statement { font-family:var(--serif); font-size:16px; line-height:1.5; }
   /* Prose somebody typed keeps the shape they typed it in (§51.1). pre-LINE,
      not pre-wrap: line breaks survive, accidental double spaces and pasted
@@ -5833,6 +5850,151 @@ html[data-client-settings] .viewer { display:none; }
                   background:var(--warn-bg); color:var(--warn-tx); font-size:13px; }
   .planblk-pen { border-top:1px solid var(--line); padding:12px 18px 14px; }
   .planblk-pen > .cyc2-r.planper:first-child { border-top:0; margin-top:0; padding-top:0; }
+  /* ── §693: ONE CARD, THE PEN BESIDE IT, TWO TABS ─────────────────────
+     The card keeps §495's own rules above; what is new is the wrap that
+     puts the pen BESIDE it while editing (so nothing under the card moves,
+     §273.4's 156px measured and refused), the pins on the timeline, the
+     closed-cycle chips, and the board's filter row. Under 900px the pen
+     goes back under the card, which is the one width where "beside" would
+     be narrower than the pickers it holds. */
+  .cyctabs { margin:0 0 16px; }
+  .cycwrap { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start;
+             margin:0 0 16px; }
+  .cycwrap.editing { grid-template-columns:minmax(0,1fr) 360px; }
+  .cycwrap .newcycle { margin:0; }
+  .cycleft { min-width:0; }
+  .cycleft > .planblk { margin:0 0 20px; }
+  .planblk-acts { display:flex; gap:8px; align-items:center; }
+  .planblk-facts .sub { display:block; font-size:12px; color:var(--ink-3); margin-top:2px; }
+  .planblk-facts .sub.fmean { margin-left:0; }
+  .planblk-facts .badge { vertical-align:2px; margin-left:4px; }
+  .planblk-chips { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:0 12px 12px; }
+  .planblk-chips .lab { font-size:11px; letter-spacing:.07em; text-transform:uppercase;
+                        color:var(--ink-3); font-weight:700; }
+  .pptl { padding:12px 12px 12px; }
+  .pptl-m { position:relative; }
+  .pptl-m.pin::before { content:""; position:absolute; left:50%; top:0; bottom:0; width:2px;
+                        margin-left:-1px; background:var(--gold-deep); }
+  .pptl-ps { display:flex; margin-top:4px; }
+  .pptl-p { flex:1 1 0; min-width:0; position:relative; height:12px; }
+  .pptl-p em { position:absolute; left:50%; top:0; transform:translateX(-50%); white-space:nowrap;
+               font:700 10px/12px var(--sans); font-style:normal; color:var(--gold-deep); }
+  .pptl-key .k.pin { width:2px; height:12px; border-radius:0; background:var(--gold-deep); }
+  .cycdrawer { padding:14px 16px 16px; }
+  .cycdrawer > .cyc2-r:first-child, .cycdrawer > .nc-h:first-child + .nc-grid { border-top:0; margin-top:0; padding-top:0; }
+  .cycdrawer .nc-grid label, .cycdrawer .nc-grid .nm-lab { flex:1 1 140px; min-width:0; }
+  .cycdrawer .nc-grid .fld, .cycdrawer .nc-grid .cycbtn, .cycdrawer .nc-grid .nc-time,
+  .cycdrawer .nc-grid .nc-rem, .cycdrawer .nc-1line .cycbtn { width:100%; }
+  .cycdrawer .nc-1line { flex-wrap:wrap; }
+  .cycdrawer .cyc2-d { border-left:0; padding-left:0; }
+  .cycdrawer .cycend { background:var(--bad-bg); margin:18px -16px -16px; padding:14px 16px 16px;
+                       border-top:1px solid var(--line); border-radius:0 0 var(--r) var(--r); }
+  .cycdrawer .cycend .nc-h { color:var(--bad-tx); }
+  .cycdrawer .cycend .cyc2-p { color:var(--ink-2); }
+  .bfilters { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 0 12px; }
+  .bfilt { font:600 12px/1 var(--sans); padding:6px 11px; border:1px solid var(--line);
+           border-radius:999px; background:var(--surface); color:var(--ink-2); cursor:pointer; }
+  .bfilt.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+  .bfilt:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  .bfilters .bfind { margin-left:auto; width:200px; max-width:100%; }
+  @media (max-width:900px) {
+    .cycwrap.editing { grid-template-columns:minmax(0,1fr); }
+    .bfilters .bfind { margin-left:0; width:100%; }
+  }
+  /* A month is too narrow for its pin's words on a phone; the line and the
+     key stay, and the words are on the month's own hover. */
+  @media (max-width:600px) { .pptl-ps { display:none; } }
+
+/* §687: where a reader's seat lands — the line above the Roles & access matrix */
+.acreaders { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 12px; padding:10px 14px;
+  background:var(--surface); border:1px solid var(--line); border-radius:10px; font-size:13.5px; }
+.acreaders b { font-weight:600; white-space:nowrap; }
+.acreaders .acrdnow { font-weight:600; color:var(--ink); }
+.acreaders .acrdwhy { flex:1 1 320px; font-size:12.5px; color:var(--ink-3); }
+
+
+/* ── ROLES & ACCESS AS A LADDER (§704) ─────────────────────────────────── */
+.acgrid-ladder td.acsays { font-size:13px; color:var(--ink-2); }
+.acgrid-ladder td.acladder { white-space:nowrap; }
+.cfg.acgrid.acgrid-ladder table { width:auto; max-width:100%; table-layout:auto; min-width:0; }
+.cfg.acgrid.acgrid-ladder th:first-child, .cfg.acgrid.acgrid-ladder td.rolecell { width:auto; }
+.acgrid-ladder { overflow-x:auto; }
+.ladder { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface); }
+.ladder button { display:inline-flex; flex-direction:row; align-items:center; gap:0; width:auto; min-width:0; margin:0;
+  font:inherit; font-size:12.5px; font-weight:600; line-height:1.2; color:var(--ink-3); background:none; border:0; border-radius:0;
+  border-right:1px solid var(--line-soft, var(--line)); padding:6px 10px; cursor:pointer; white-space:nowrap; }
+.ladder button:last-child { border-right:0; }
+.ladder button:disabled { cursor:default; }
+.ladder button:not(:disabled):hover { color:var(--ink); background:var(--surface-2); }
+.ladder button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.ladder button b { margin-right:5px; }
+.ladder button.off { color:var(--line); text-decoration:line-through; }
+.ladder button.pen { background:var(--good-bg); color:var(--good); }
+.ladder button.eye { background:var(--panel); color:var(--panel-ink); }
+.ladder button.nil { background:var(--surface-2); color:var(--ink); }
+.acall { font-size:13px; font-weight:600; color:var(--ink-2); }
+.acladderkey { margin:10px 0 0; font-size:12.5px; color:var(--ink-3); }
+.acladderkey b { color:var(--ink-2); }
+.acex { margin-top:18px; border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--surface); display:grid; gap:8px; }
+.acex h3 { margin:0; font-size:13.5px; }
+.acexrow { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:6px 0; border-top:1px solid var(--line-soft, var(--line)); }
+.acexwho { min-width:220px; } .acexwho b { display:block; } .acexwho span { font-size:12px; color:var(--ink-3); }
+.acexnow { font-size:12.5px; color:var(--ink-3); } .acexnow b { color:var(--ink); }
+.acexnone { margin:0; font-size:13px; color:var(--ink-3); }
+.acexpick { display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-3); }
+.acexpick select { font:inherit; font-size:13px; padding:4px 8px; border:1px solid var(--line); border-radius:7px; background:var(--surface); color:var(--ink); }
+.acex .segsw button:disabled { color:var(--line); cursor:default; }
+/* §704: the ladder is one control on one line; the settings tables' cell cap
+   (.cfg table td, 150px with an ellipsis) would cut it, so it is lifted here */
+.cfg.acgrid.acgrid-ladder td { max-width:none; overflow:visible; text-overflow:clip; }
+.cfg.acgrid.acgrid-ladder td.acsays { white-space:normal; }
+:root[data-theme="dark"] .ladder button.eye { background:var(--ink-2); color:var(--ground); }
+/* §704: each column as wide as what it holds, with a little room around */
+.cfg.acgrid.acgrid-ladder th, .cfg.acgrid.acgrid-ladder td { padding-left:14px; padding-right:14px; }
+.cfg.acgrid.acgrid-ladder th:first-child, .cfg.acgrid.acgrid-ladder td.rolecell { width:auto; white-space:nowrap; }
+.cfg.acgrid.acgrid-ladder td.acsays { width:auto; max-width:280px; white-space:normal; }
+.cfg.acgrid.acgrid-ladder th:last-child, .cfg.acgrid.acgrid-ladder td:last-child { width:auto; }
+.ladder.ro button { cursor:default; }
+.ladder.ro button:not(.pen):not(.eye):not(.nil) { background:none; }
+.acro { margin:0 0 10px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); font-size:13px; color:var(--ink-2); }
+.acro b { color:var(--ink); }
+/* §704: the platform's own eye and pen in the ladder */
+.ladder button svg { width:14px; height:14px; margin-right:5px; flex:none; }
+.acladderkey { display:flex; flex-wrap:wrap; gap:6px 18px; }
+.acladderkey span { display:inline-flex; align-items:center; gap:5px; }
+.acladderkey svg { width:14px; height:14px; }
+.acsays .acoff { display:block; margin-top:2px; font-size:12px; font-weight:600; color:var(--bad, var(--ink-3)); }
+/* ── §704 refined: named rows, the live meaning, Copilot as eye and pen,
+   and the first-screen switch as its own settings row ─────────────────── */
+.cfg.acgrid.acgrid-ladder table { width:100%; }
+.cfg.acgrid.acgrid-ladder th { white-space:nowrap; }
+.cfg.acgrid.acgrid-ladder td { vertical-align:top; padding-top:11px; padding-bottom:11px; }
+.cfg.acgrid.acgrid-ladder td.rolecell { white-space:normal; min-width:150px; max-width:220px; }
+.cfg.acgrid.acgrid-ladder td.rolecell .why { display:block; margin-top:1px; }
+.accov { display:flex; flex-wrap:wrap; gap:3px; margin-top:6px; }
+.accov span { font-size:11.5px; font-weight:600; line-height:1.5; color:var(--ink-2); background:var(--surface-2); border-radius:999px; padding:0 8px; white-space:nowrap; }
+.cfg.acgrid.acgrid-ladder td.acmeans { white-space:normal; min-width:260px; max-width:380px; font-size:13px; color:var(--ink-2); line-height:1.45; }
+.acmeans span { display:block; }
+.acmeans span + span { margin-top:3px; }
+.acmeans b { color:var(--ink); font-weight:700; margin-right:4px; }
+.acmeans .acno { color:var(--ink-3); }
+.cfg.acgrid.acgrid-ladder td.accop { white-space:nowrap; }
+.acdash { font-size:12.5px; color:var(--ink-3); }
+tr.acoffice td { background:var(--surface-2); }
+.acland { display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; margin-top:16px; padding:14px 16px;
+  border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.acland-txt { flex:1 1 320px; min-width:0; display:grid; gap:2px; }
+.acland-txt b { font-size:14px; color:var(--ink); }
+.acland-txt span { font-size:13px; color:var(--ink-3); }
+.acland-sw { display:inline-flex; gap:8px; }
+.acland-opt { display:inline-flex; align-items:center; gap:8px; font:inherit; font-size:13.5px; font-weight:600; cursor:pointer;
+  padding:9px 14px; border-radius:9px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); }
+.acland-opt svg { width:18px; height:18px; }
+.acland-opt:not(.on):not(:disabled):hover { border-color:var(--ink-3); color:var(--ink); }
+.acland-opt.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); cursor:default; }
+.acland-opt:disabled:not(.on) { cursor:default; opacity:.6; }
+.acland-opt:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.cfg.acgrid.acgrid-ladder td.acmeans b { display:inline; }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
@@ -6313,10 +6475,20 @@ html[data-client-settings] .viewer { display:none; }
      a 30px one left from 3.0, and the later of the two won, so the row stayed
      31px tall no matter what the new number said. It is the tallest item in
      the row, so it alone was setting the height of the whole first line. */
-  .themebtn { padding:0; width:20px; height:20px; border-radius:50%;
+  /* 26px since §674, the size the modules' shared bar wears (lib/topbar.ts
+     .tbtheme) and the console's ring on its band: one mark, one size. */
+  .themebtn { padding:0; width:26px; height:26px; border-radius:50%;
               display:inline-flex; align-items:center; justify-content:center;
-              flex-shrink:0; }
-  .themesvg { width:12px; height:12px; display:block; }
+              flex-shrink:0; position:relative; }
+  .themesvg { width:14px; height:14px; display:block; }
+  /* THE SIGN ON HOVER (§674): the state alone — Light, Dark, or Auto and the
+     reading the device is giving — under the mark, on hover and on keyboard
+     focus. Drawn from data-tip, which theme.js keeps current. */
+  .themebtn[data-tip]:hover::after, .themebtn[data-tip]:focus-visible::after {
+    content:attr(data-tip); position:absolute; top:calc(100% + 8px); right:0; z-index:60;
+    white-space:nowrap; pointer-events:none; background:var(--ink); color:var(--surface);
+    font-family:inherit; font-size:11.5px; font-weight:600; line-height:1; letter-spacing:.02em; text-transform:none;
+    padding:7px 9px; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,.25); }
 
   /* ── THE WHITE TOP BAR, ON THE PLATFORM'S OWN SCALE (§410) ──────────────
      Islam, of the plan-page restyle: *"can you suggest a neat design for the
@@ -7022,29 +7194,19 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      note does not float in the middle of a cell beside a one-line figure. */
   .notefld{width:100%;max-width:none;text-align:left;font-size:13px;vertical-align:top}
   .notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
-  /* §576: A RED FIGURE HOLDS THE PAGE — the mockup Islam approved
-     (design-mockups/note-first/). The bar takes the "to finish" bar's place;
-     every other box greys and will not take typing; the owed note is ringed.
+  /* §705: THE TAG ON THE OWED NOTE BOX — the mockup Islam approved
+     (design-mockups/note-tag/2026-11-02_tag-on-the-note-box.html, option A):
+     a small red label above the box, a dot before it, reading "Note needed ·
+     off track". Above rather than over the box, so it never covers what is
+     typed. Replaces §576's lock bar, ring and greyed boxes, which stood here.
      Tokens only, so the dark theme carries it with nothing added. */
-  .lockbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;
-    width:fit-content;max-width:100%;margin:0 0 10px;padding:10px 14px;
-    border:1px solid var(--bad);border-radius:var(--r);background:var(--bad-bg);
-    color:var(--ink);font-size:var(--fs-body)}
-  .lockbar b{color:var(--bad-tx)}
-  .lockbar .lockn{color:var(--ink-3);font-size:var(--fs-small);white-space:nowrap}
-  .lockbar .lockgo{font:inherit;font-weight:600;font-size:13px;padding:5px 14px;
-    border:1px solid var(--bad);border-radius:6px;background:var(--surface);
-    color:var(--bad-tx);cursor:pointer;white-space:nowrap}
-  .lockbar .lockgo:hover{background:var(--bad-bg)}
-  .lockbar .lockgo:focus-visible{outline:2px solid var(--bad);outline-offset:2px}
-  .notefld.lockhere{outline:3px solid var(--bad);outline-offset:1px}
-  /* §576.2: A CAPABILITY'S PANE PINS ITS PROJECT BAND with a strip of page
-     ground 24px tall above it (`.pane > .pband::before`), and at the bar's
-     10px that strip painted over the bar's bottom edge — found by looking at
-     cap6, the one page the worked example opens locked. 26px because the
-     bar's own 10px collapses into it. Spaced where the bar meets that pane
-     and nowhere else, so no other page moves. */
-  .lockbar + .capbody{margin-top:26px}
+  .notetag{display:inline-flex;align-items:center;gap:6px;margin:0 0 5px;
+    font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--bad-tx);white-space:nowrap}
+  .notetag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);flex:none}
+  /* And the read side (§705): a red row nobody has explained, read by somebody
+     who may not write the note, says "Needs justification" in the same red. */
+  td .needjust, .needjust{color:var(--bad-tx);font-weight:600}  /* `td .why` sets the grey; this outranks it */
   /* And the break survives being read (§271, §161.3): `pre-line` keeps the
      newlines somebody typed and wraps everything else. On the READ-ONLY note
      wherever it is printed — never on `.why` at large, which is the page's
@@ -7082,13 +7244,6 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .entry .field{border:0;width:78px;border-radius:0}
   .entry .field:focus-visible{outline:none}
   .entry:focus-within{outline:2px solid var(--gold);outline-offset:1px}
-  /* §576: a box shut by the note lock — after `.entry.filled`, and naming it,
-     because a box that already holds a figure would otherwise stay green and
-     read as open. */
-  .lockshut, .entry.lockshut, .entry.filled.lockshut{opacity:.45;cursor:not-allowed;
-    background:var(--surface-2);border-color:var(--line)}
-  .entry.lockshut .field, .entry.filled.lockshut .field,
-  .entry.lockshut .unitsuf{background:transparent;cursor:not-allowed}
   .unitsuf{display:flex;align-items:center;padding:0 9px;background:var(--surface-2);
     border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;
     color:var(--ink-3);white-space:nowrap}
@@ -7158,7 +7313,11 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   /* Rows that already say something keep saying it. */
   .board tbody tr.alt td { background:var(--surface-2); }
   tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
-  tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
+  /* §705: a TOKEN, not the light pink it was written as — in the dark theme
+     that literal drew a light row across a dark table, and the tag the note
+     box now wears could not be read on it (2.0:1, measured). Light keeps the
+     exact colour it had; dark takes its own red wash. */
+  tbody tr.wantnote:nth-child(even) > td { background:var(--zebra-bad); }
 
   /* §414: SEVERAL OUTCOMES PER TACTIC. A sub-line wears its tactic's stripe
      rather than its own position's — the tactic's shared cells span it, so a
@@ -10761,6 +10920,198 @@ html.smp-room body { background:#0B1A33; }
 html.smp-room body > *:not(.deckroot) { visibility:hidden !important; }
 @media print { .sl-live, .roomstrip, .roomfull, .sl-notroom { display:none !important; } }
 
+/* ── THE READING WINDOW (§676) ──────────────────────────────────────────
+   A mode over the platform, as the deck is (present.css .deckroot): fixed,
+   the whole window, 61 so it beats the editor and nothing else. Its chrome
+   is one navy strip and the tab row on the gold rule; the body is the page's
+   own ground. Every colour is a token, so it follows the theme. */
+.readroot { position:fixed; inset:0; z-index:61; display:none; flex-direction:column; background:var(--ground); color:var(--ink); }
+.readroot.on { display:flex; }
+body.reading { overflow:hidden; }
+.readroot .vh { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); }
+
+.readroot .rwtop { flex:none; display:flex; align-items:center; gap:14px; min-height:52px; padding:0 22px;
+  background:var(--panel); color:var(--panel-ink); }
+.readroot .rmark { flex:none; width:26px; height:26px; border-radius:7px; background:var(--gold); color:#16325C; display:grid; place-items:center; }
+.readroot .rmark svg { width:18px; height:18px; }
+.readroot .rco { font-size:14px; font-weight:600; white-space:nowrap; }
+.readroot .rpick select { font:inherit; font-size:13.5px; font-weight:600; color:var(--panel-ink); background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.22); border-radius:7px; padding:5px 10px; cursor:pointer; }
+.readroot .rpick select option { color:var(--ink); background:var(--surface); }
+.readroot .rsp { flex:1; }
+.readroot .rasof { font-size:12px; color:var(--panel-quiet); white-space:nowrap; }
+.readroot .rexit { font:inherit; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--panel-quiet);
+  background:none; border:1px solid rgba(255,255,255,.22); border-radius:999px; padding:4px 12px; cursor:pointer; }
+.readroot .rexit:hover, .readroot .rexit:focus-visible { color:var(--panel-ink); border-color:var(--panel-ink); }
+
+.readroot .rwtabs { flex:none; display:flex; gap:2px; padding:0 22px; background:var(--panel); border-bottom:3px solid var(--gold); overflow-x:auto; }
+.readroot .rwtabs button { font:inherit; font-size:13.5px; font-weight:600; color:var(--panel-quiet); background:none; border:0;
+  padding:10px 14px 9px; border-radius:8px 8px 0 0; cursor:pointer; white-space:nowrap; }
+.readroot .rwtabs button:hover { color:var(--panel-ink); }
+.readroot .rwtabs button[aria-current="page"] { background:var(--ground); color:var(--ink); }
+.readroot .rwtabs button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+
+.readroot .rwbody { flex:1; min-height:0; overflow-y:auto; padding:22px 26px 40px; }
+.readroot .rwbody > * { max-width:1040px; }
+.readroot .rwbody > * + * { margin-top:18px; }
+.readroot .rk { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px; }
+/* the aspiration reads as the mission does (Islam, §680): same size, same weight, same ink */
+.readroot .rasp { font-size:14.5px; line-height:1.55; font-weight:400; color:var(--ink-2); margin:0; }
+.readroot .rmis { font-size:14.5px; color:var(--ink-2); margin:0; }
+.readroot .rasp + .rmis { margin-top:8px; }
+.readroot .rtwo { display:grid; grid-template-columns:1.2fr 1fr; gap:18px; align-items:start; }
+.readroot .rtwo > .rcard:only-child { grid-column:1 / -1; }
+.readroot .rcol { display:grid; gap:12px; }
+.readroot .rcard { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
+.readroot .rcard h3 { margin:0 0 10px; font-size:13.5px; font-weight:700; }
+.readroot .rclauses { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:13.5px; }
+.readroot .rclauses b { color:var(--gold-deep); font-weight:700; white-space:nowrap; }
+.readroot .rclauses span { color:var(--ink-2); }
+.readroot .rvals { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; }
+.readroot .rval { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+.readroot .rval b { display:block; font-size:13.5px; margin-bottom:4px; }
+.readroot .rval span { font-size:12.5px; color:var(--ink-3); }
+.readroot .rnone { margin:0; font-size:13.5px; color:var(--ink-3); }
+
+.readroot .rswot { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.readroot .rswot h3 { display:flex; align-items:center; gap:8px; }
+.readroot .rswot h3 i { font-style:normal; width:22px; height:22px; border-radius:6px; display:grid; place-items:center; font-size:11px; font-weight:800; }
+.readroot .rswot ol { margin:0; padding:0 0 0 18px; font-size:13.5px; color:var(--ink-2); display:grid; gap:5px; }
+.readroot .rq-s i { background:var(--good-bg); color:var(--good-tx, var(--good)); }
+.readroot .rq-w i { background:var(--bad-bg); color:var(--bad-tx, var(--bad)); }
+.readroot .rq-o i { background:var(--over-bg); color:var(--stone); }
+.readroot .rq-t i { background:var(--attn-bg); color:var(--attn-tx, var(--attn)); }
+
+.readroot .rtools { display:flex; align-items:center; gap:14px; font-size:12.5px; color:var(--ink-3); }
+.readroot .rtools button { font:inherit; font-size:12.5px; font-weight:700; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; }
+.readroot .rtools button:hover { text-decoration:underline; }
+.readroot .rdirs { display:grid; gap:8px; }
+.readroot .rgrp { margin:4px 0 0; }
+.readroot .rgrp + .rdirs { margin-top:8px; }
+.readroot .rdirs + .rgrp { margin-top:22px; }
+.readroot .rdir { background:var(--surface); border:1px solid var(--line); border-radius:10px; }
+.readroot .rfold { display:grid; grid-template-columns:auto 1fr auto 150px 22px; gap:14px; align-items:center; padding:13px 18px; cursor:pointer; user-select:none; border-radius:10px; }
+.readroot .rfold:hover { background:var(--zebra); }
+.readroot .rfold:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.readroot .rcode { font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--gold-deep); }
+.readroot .rfold h3 { margin:0; font-size:15px; font-weight:700; }
+.readroot .rsub { display:block; font-size:12.5px; color:var(--ink-3); font-weight:400; margin-top:2px; }
+.readroot .rsum { font-size:12.5px; color:var(--ink-3); white-space:nowrap; }
+.readroot .rsum b { color:var(--ink-2); font-weight:600; }
+.readroot .rchev { width:22px; height:22px; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; color:var(--ink-3); transition:transform .15s; }
+.readroot .rchev svg { width:11px; height:11px; }
+.readroot .rdir.open .rchev { transform:rotate(180deg); }
+.readroot .rmore { display:none; padding:12px 18px 16px; border-top:1px solid var(--line-soft); }
+.readroot .rdir.open .rmore { display:grid; gap:10px; }
+
+/* the tables (§682): framed, a line under every row, the header the title,
+   the columns as wide as their figures and no wider */
+.readroot .rtable { border-collapse:collapse; width:auto; max-width:100%; min-width:min(100%, 640px); font-size:13px; background:var(--surface);
+  border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.readroot .rtable th, .readroot .rtable td { padding:7px 12px; border-bottom:1px solid var(--line-soft); text-align:left; vertical-align:middle; }
+.readroot .rtable th { font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); background:var(--surface-2); border-bottom:1px solid var(--line); white-space:nowrap; }
+.readroot .rtable tbody tr:last-child td { border-bottom:0; }
+.readroot .rtable td:first-child { min-width:220px; }
+.readroot .rtable .num { text-align:right; white-space:nowrap; color:var(--ink-2); }
+.readroot .rtable td.rst { white-space:nowrap; }
+.readroot .rst { display:flex; align-items:center; gap:8px; }
+.readroot .rst i { font-style:normal; font-size:12px; font-weight:700; min-width:36px; text-align:right; }
+.readroot .rbar { display:inline-block; width:110px; height:7px; border-radius:4px; background:var(--surface-2); position:relative; overflow:hidden; }
+.readroot .rbar b { position:absolute; left:0; top:0; bottom:0; border-radius:4px; background:var(--good); }
+.readroot .rbar.attn b, .readroot .rbar.warn b { background:var(--attn); }
+.readroot .rbar.bad b { background:var(--bad); }
+.readroot .rfold .rbar { width:100%; }
+.readroot .row { color:var(--ink-3); white-space:nowrap; }
+.readroot .rq { display:inline-flex; gap:3px; vertical-align:middle; }
+.readroot .rq span { width:22px; height:8px; border-radius:2px; background:var(--surface-2); }
+.readroot .rq span.on { background:var(--stone); }
+.readroot .rsts { font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--attn-tx, var(--attn)); background:var(--attn-bg); border-radius:4px; padding:2px 6px; white-space:nowrap; }
+.readroot .rmore .rtable + .rtable { margin-top:12px; }
+.readroot .rcard > .rtable { min-width:0; width:100%; border:0; border-radius:0; }
+
+.readroot .rthree { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+.readroot .rfig { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+.readroot .rfig b { display:block; font-size:30px; line-height:1; font-weight:700; }
+.readroot .rfig span { display:block; font-size:12.5px; color:var(--ink-3); margin-top:6px; }
+.readroot .rband { display:inline-block; margin-top:8px; font-style:normal; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; border-radius:4px; padding:2px 7px; }
+.readroot .rband.good { background:var(--good-bg); color:var(--good-tx, var(--good)); }
+.readroot .rband.attn, .readroot .rband.warn { background:var(--attn-bg); color:var(--attn-tx, var(--attn)); }
+.readroot .rband.bad { background:var(--bad-bg); color:var(--bad-tx, var(--bad)); }
+
+/* the door on the bar: the one filled-looking control beside the ring */
+.readbtn { display:inline-flex; align-items:center; gap:6px; color:var(--stone); border-color:var(--gold); background:var(--over-bg); }
+.readbtn:hover { color:var(--ink); border-color:var(--gold-deep); }
+.readbtn svg { width:12px; height:12px; }
+
+@media (max-width:760px) {
+  .readroot .rtwo, .readroot .rswot, .readroot .rthree { grid-template-columns:1fr; }
+  .readroot .rfold { grid-template-columns:auto 1fr 22px; }
+  .readroot .rfold .rsum, .readroot .rfold .rbar { display:none; }
+  .readroot .rtable { min-width:0; width:100%; }
+  .readroot .rtable td:first-child { min-width:0; }
+  .readroot .rtacs th:nth-child(3), .readroot .rtacs td:nth-child(3) { display:none; }
+}
+
+/* ── THE ROW (§692): the navigator's row under the strip ────────────────
+   Drawn as the workbench's own (.units: arrange.css §136, §334, §464) in
+   the window's markup: the company menu and the switch pinned, the names
+   on one line that scrolls between two fades. A shade under the strip's
+   panel so the three bands read as three, and every colour a token. */
+.readroot .rwnav { flex:none; display:flex; align-items:center; gap:4px; min-height:46px; padding:0 14px;
+  background:color-mix(in srgb, var(--panel) 84%, black); color:var(--panel-quiet); }
+.readroot .rwnav:empty { display:none; }
+.readroot .rwnav button { font:inherit; font-size:13.5px; font-weight:600; color:var(--panel-quiet); background:none; border:0;
+  padding:8px 12px; border-radius:7px; cursor:pointer; white-space:nowrap; }
+.readroot .rwnav button:hover { color:var(--panel-ink); }
+.readroot .rwnav button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.readroot .rwnav button[aria-current="page"] { color:var(--panel-ink); background:color-mix(in srgb, var(--panel-ink) 16%, transparent); }
+.readroot .rsep { flex:none; width:1px; height:24px; margin:0 6px; background:color-mix(in srgb, var(--panel-ink) 16%, transparent); }
+.readroot .rtop1 { flex:none; }
+.readroot .rtop1 button { color:var(--panel-ink); }
+/* the company menu: a <details>, as the workbench's (arrange.css .topsel) */
+.readroot .rtops { position:relative; flex:none; }
+.readroot .rtops > summary { list-style:none; display:inline-flex; align-items:center; gap:7px; cursor:pointer; white-space:nowrap;
+  font-size:13.5px; font-weight:600; padding:8px 12px; border-radius:7px; color:var(--panel-ink); }
+.readroot .rtops > summary::-webkit-details-marker { display:none; }
+.readroot .rtops > summary i { font-style:normal; font-size:10px; color:var(--panel-quiet); }
+.readroot .rtops > summary:hover, .readroot .rtops[open] > summary { background:color-mix(in srgb, var(--panel-ink) 10%, transparent); }
+.readroot .rtops > summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.readroot .rmenu { position:absolute; z-index:5; top:calc(100% + 4px); left:0; min-width:230px; padding:6px; display:grid; gap:1px;
+  background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 28px rgba(15,23,42,.18); }
+.readroot .rmenu button { display:flex; justify-content:space-between; gap:12px; width:100%; text-align:left; color:var(--ink-2); font-weight:500; padding:7px 10px; border-radius:6px; }
+.readroot .rmenu button:hover { color:var(--ink); background:var(--surface-2); }
+.readroot .rmenu button[aria-current="true"] { color:var(--ink); font-weight:700; background:var(--surface-2); }
+.readroot .rmenu .rsubn { color:var(--ink-3); font-weight:400; font-size:12px; }
+/* the switch: one button of two words, a segmented control of more, one word alone (§41.8, §334, §464) */
+.readroot .rsw { display:inline-flex; align-items:center; flex:none; background:color-mix(in srgb, var(--panel-ink) 8%, transparent);
+  border:0; border-radius:7px; overflow:hidden; padding:0; margin:0 2px; cursor:pointer; font:inherit; }
+.readroot .rsw .nsw { display:block; padding:7px 13px; font-size:13.5px; font-weight:700; color:color-mix(in srgb, var(--panel-ink) 72%, transparent);
+  background:none; border:0; border-radius:0; letter-spacing:-.005em; }
+.readroot .rsw .nsw + .nsw { box-shadow:inset 1px 0 0 color-mix(in srgb, var(--panel-ink) 16%, transparent); }
+.readroot .rsw .nsw.on { color:var(--panel-ink); background:color-mix(in srgb, var(--panel-ink) 20%, transparent); }
+.readroot .rsw:hover { background:color-mix(in srgb, var(--panel-ink) 15%, transparent); }
+.readroot .rsw.multi { cursor:default; }
+.readroot .rsw.multi .nsw { cursor:pointer; }
+.readroot .rsw.multi .nsw:not(.on):hover { color:var(--panel-ink); background:color-mix(in srgb, var(--panel-ink) 10%, transparent); }
+.readroot .rsw.one { background:none; cursor:default; }
+.readroot .rsw.one .nsw.on { background:none; padding-left:10px; }
+/* the names: one line, scrolled, the fades saying there is more */
+.readroot .rclip { position:relative; flex:1 1 auto; min-width:0; align-self:stretch; display:flex; }
+.readroot .rscroll { display:flex; gap:2px; align-items:center; width:100%; overflow-x:auto; scrollbar-width:none; padding:0 4px; }
+.readroot .rscroll::-webkit-scrollbar { display:none; }
+.readroot .rscroll > * { flex:0 0 auto; }
+.readroot .rfade { position:absolute; top:0; bottom:0; width:40px; pointer-events:none; z-index:2; }
+.readroot .rfade.l { left:0;  background:linear-gradient(to right, color-mix(in srgb, var(--panel) 84%, black), transparent); }
+.readroot .rfade.r { right:0; background:linear-gradient(to left,  color-mix(in srgb, var(--panel) 84%, black), transparent); }
+/* a function's and a division's tables (§692) */
+.readroot .rcodecell { font:700 12px/1 ui-monospace, Menlo, monospace; color:var(--gold-deep); white-space:nowrap; }
+.readroot .rtwo-fig { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+.readroot .rtable .pill { display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:999px; background:var(--surface-2); color:var(--ink-2); }
+.readroot .rtable .pill.good { background:var(--good-bg); color:var(--good-tx, var(--good)); }
+.readroot .rtable .pill.attn { background:var(--attn-bg); color:var(--attn-tx, var(--attn)); }
+.readroot .rtable .lateval { color:var(--bad); } .readroot .rtable .latenote { font-size:11px; margin-left:6px; color:var(--bad); }
+.readroot .rtable .soonval { color:var(--ink-3); } .readroot .rtable .missing { color:var(--ink-3); font-style:italic; }
+
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.
 
@@ -12604,7 +12955,7 @@ body.presenting #buildband { display:none; }
 @media (max-width:820px){ .coppane.copshut { grid-template-columns:24px minmax(0, 1fr); } }
 
 .copflow { display:grid; grid-template-columns:minmax(0, .95fr) minmax(0, 1.1fr); gap:12px; min-height:0; }
-@media (max-width:980px){ .copflow { grid-template-columns:minmax(0, 1fr); } .copleft { display:none; } }
+/* §670 — the window-width rule that once hid the cards under 980px is gone: the Copilot's own width decides (the container queries below). */
 .copleft { min-width:0; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
 .copvline { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
 .copvline b { color:var(--ink); }
@@ -12799,9 +13150,13 @@ span.copsw-lb { cursor:default; }
 .copsw-ci span { font-size:var(--fs-micro, 11px); color:var(--ink-2); }
 .copsw-ci.none span { color:var(--ink-3); }
 .copsw-gridwrap { overflow-x:auto; margin-bottom:10px; }
-.copsw-grid { border-collapse:collapse; min-width:0; width:100%; }
+.copsw-grid { border-collapse:collapse; min-width:440px; width:100%; }
 .copsw-grid th, .copsw-grid td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:center; font-size:var(--fs-small, 12.5px); }
-.copsw-grid th[scope=row] { text-align:left; color:var(--ink); }
+/* §670 — squeezed, the column names take two lines and the row names never break: the ticks keep their columns */
+.copsw-grid thead th { white-space:normal; line-height:1.2; padding:6px 4px; vertical-align:middle; text-align:center; }
+.copsw-grid td { vertical-align:middle; }
+.copsw-grid td { min-width:64px; }
+.copsw-grid th[scope=row] { text-align:left; color:var(--ink); white-space:nowrap; }
 .copsw-grid td.na { color:var(--ink-3); }
 .copsw-tick { width:24px; height:24px; border:1px solid var(--line); border-radius:4px; background:var(--surface); color:var(--surface); font:700 13px/1 var(--sans); cursor:pointer; }
 .copsw-tick.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink, var(--surface)); }
@@ -12876,7 +13231,6 @@ span.copsw-lb { cursor:default; }
   .copsw-q .copsw-ans { flex:1 1 auto; min-height:120px; resize:vertical; }
   .copsw-side > .copsw-box:first-child { flex:1 1 auto; }
 }
-@media (max-width:980px){ .copftodo { display:none; } .copflow, .copflow.nocards { grid-template-columns:minmax(0,1fr); } }
 @media (min-width:821px) and (max-width:1020px){ .copmain:has(.copsw) .copsw { grid-template-columns:minmax(0,1fr); } }
 .copsw-meter { height:4px; margin-bottom:6px; }
 .copsw-tg + .copsw-tg { margin-top:4px; }
@@ -13107,21 +13461,39 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
    without a to-do (a chat with a draft), 420 + 360. The chat's default
    gives way first, never below 420. */
 .copmain { container:copmain / inline-size; }
-@container copmain (min-width:1000px){
+/* §670 — WHAT GIVES WAY, IN ORDER (Islam's squeezed SWOT: "nothing was
+   collapsed as we agreed"). The chat's default yields first — it shrinks
+   from 760 toward 420 before the work beside it goes under 480 — and then
+   the columns leave one at a time: the rail folds to its strip first (the
+   script's rule, under 1344px of pane), then the to-do folds to its button
+   (two columns, from 820px of Copilot — the page is at 100% under a 1000px
+   window, so this is the 900–999px window), then the work pane becomes a
+   sheet (under 820px). Three columns need 420 + 12 + 480 + 208 = 1120px. */
+@container copmain (min-width:1120px){
   .copsplit > .copgrip, .copflow > .copgrip { display:block; }
-  .copflow { gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 580px))) 12px minmax(0,1fr) 208px; }
+  .copflow { gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 700px))) 12px minmax(0,1fr) 208px; }
   .copflow > .copftodo { margin-left:8px; }
   .copflow.nocards { gap:8px; grid-template-columns:minmax(0,1fr) 200px; }
   .copflow.nocards > .copftodo { margin-left:0; }
 }
+@container copmain (min-width:820px) and (max-width:1119px){
+  .copflow > .copgrip { display:block; }
+  .copflow { gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 492px))) 12px minmax(0,1fr); position:relative; }
+  .copflow > .copftodo { display:none; }
+  .copflow .copsheetb-todo { display:inline-flex; }
+  .copflow.nocards { gap:0; grid-template-columns:minmax(0,1fr); }
+  .copflow.sheet-todo > .copftodo { display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(300px, 100%);
+    background:var(--surface); box-shadow:var(--shadow-md); padding:8px; overflow-y:auto; }
+  .copflow.sheet-todo > .copshade { display:block; position:absolute; inset:0; z-index:5; background:color-mix(in srgb, var(--ink) 22%, transparent); }
+}
 @container copmain (min-width:800px){
-  .copsplit { display:grid; gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 372px))) 12px minmax(0,1fr); }
+  .copsplit { display:grid; gap:0; grid-template-columns:min(var(--cop-chatw, 760px), max(420px, calc(100% - 492px))) 12px minmax(0,1fr); }
   .copsplit > .copgrip { display:block; }
   /* The office chat button floats over the window's corner (§490.2): with
      the draft beside the chat, the corner is the draft's foot, not the box. */
   .copoutf { padding-right:64px; }
 }
-@container copmain (max-width:999px){
+@container copmain (max-width:819px){
   .copflow, .copflow.nocards { grid-template-columns:minmax(0,1fr); position:relative; }
   .copflow > .copleft, .copflow > .copftodo { display:none; }
   .copflow .copsheetb, .copflow .copsheetx { display:inline-flex; }
@@ -13267,3 +13639,73 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copdswot { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
 @media (max-width:760px){ .copdswot { grid-template-columns:1fr; } }
 .copdstay { display:block; width:100%; margin-top:6px; }
+
+/* §654 C1 — Competitive Discipline split three ways: the pane holds the
+   scores, then the table above them; the folded value cards are small. */
+.copcppane .copcp-wrap { margin:0; }
+.copcppane .copsw-card h3 { display:flex; align-items:baseline; gap:8px; }
+.copcppane .copsw-card h3 .linkbu { margin-left:auto; }
+.copcp-cards.small { display:flex; flex-wrap:wrap; gap:6px; }
+.copcp-cards.small .copcp-card { display:flex; align-items:center; gap:6px; padding:4px 8px; margin:0; }
+.copcp-cards.small .copcp-card h4 { margin:0; font-size:var(--fs-small, 12.5px); }
+.copcp-cards.small .copcp-card:not(.on) { opacity:.6; }
+
+/* §654 C2 — what a proposed change differs in, letter by letter */
+.copswdiff { display:flex; flex-wrap:wrap; gap:6px 16px; margin:8px 0 2px; }
+.copswdiff-l b { display:block; font-size:var(--fs-small, 12.5px); color:var(--ink-3); margin-bottom:2px; }
+.copswdiff-l ul { list-style:none; margin:0; padding:0; font-size:var(--fs-small, 12.5px); }
+.copswdiff-l li.add { color:var(--good-tx); }
+.copswdiff-l li.drop { color:var(--bad-tx, #a33); }
+.copswdiff-l li.chg { color:var(--ink-2); }
+
+/* §675 — Directions split three ways: the two tables as cards in the pane, Go ahead under the first. */
+.copdvpane .copcp-wrap { margin:0; }
+.copdv-card h3 { display:flex; align-items:baseline; gap:8px; }
+.copdv-under { display:flex; justify-content:flex-end; margin-top:8px; }
+
+/* §684 — Execution split three ways: one card per item in the pane, the one in hand open. */
+.copexpane .copcp-wrap { margin:0; }
+.copex-card { padding:0; overflow:hidden; }
+.copex-head { display:flex; align-items:center; gap:8px; width:100%; border:0; background:none; text-align:left; padding:8px 12px; font:inherit; color:var(--ink); cursor:pointer; }
+.copex-head:hover { background:var(--surface-2); }
+.copex-head:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.copex-head b { font-weight:700; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copex-head small { flex:1 1 auto; min-width:0; color:var(--ink-3); font-size:var(--fs-small, 12.5px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.copex-kind { font:600 10px/1.5 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); border:1px solid var(--line); border-radius:6px; padding:0 5px; white-space:nowrap; }
+.copex-card.now { box-shadow:inset 3px 0 0 var(--gold); }
+.copex-body { border-top:1px solid var(--line); padding:8px 12px 10px; }
+.copex-body .copex-item { margin:0; }
+.copexpane .copex-period { margin:0; }
+
+/* §688 — Advisory split three ways: the brief fills the pane; the foot says it stays in the Copilot. */
+.copadpane .adbrief { max-width:none; }
+.copadstays { white-space:nowrap; }
+.copadchat .adq { font-size:var(--fs-micro, 11px); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-deep); margin-bottom:3px; }
+
+/* §691 — the SWOT's four ways in, as chips on its start card */
+.copways { grid-column:2; display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+.copway { font:600 11px/1.6 var(--sans); padding:0 8px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2); color:var(--ink-2); white-space:nowrap; }
+.copwaysk { grid-column:2; font-size:var(--fs-micro, 11px); color:var(--ink-3); }
+
+/* §694 — WAYS BACK AND THE ONWARD PATH (stress test batch 1). The Next
+   strip after Apply, the unfinished-chat line on the start screen, and the
+   Change the Directions link on the card head. */
+.copnext{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:8px 12px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;background:var(--surface)}
+.copnext .copnextk{font:700 10.5px/1.4 inherit;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.copnext .copnextt{flex:1 1 24ch;min-width:0}
+.copunfinished{display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:min(560px,100%);margin:0 auto;padding:8px 12px;border:1px solid var(--line);border-left:3px solid var(--attn, var(--gold));border-radius:8px;background:var(--surface);font-size:13px;text-align:left}
+.copunfinished>span:first-child{flex:1 1 24ch;min-width:0}
+.copdv-card h3 .copdv-unchoose{margin-left:auto;font-weight:400;font-size:12.5px}
+
+/* §697 — EXECUTION READS THE PLAN. A line the plan holds is marked beside its
+   name, a new one beside it; an item left out this period, or gone from the
+   plan, stands faded with its state on the head. */
+.copex-mark{display:inline-block;margin-left:6px;font:600 10px/1.4 var(--sans, inherit);letter-spacing:.04em;text-transform:uppercase;padding:0 5px;border-radius:8px;vertical-align:middle;white-space:nowrap}
+.copex-mark.plan{color:var(--good-tx);background:var(--surface-2)}
+.copex-mark.new{color:var(--ink-3);background:var(--surface-2)}
+.copex-card.out{opacity:.72}
+.copst.off{color:var(--ink-3)}
+
+/* §698 S14 — a draft that failed, named, in the chat */
+.copmsg.ai.copbad .copbody { border-left-color:var(--bad); }
+.copmsg.ai.copbad .copbody > b:first-child { color:var(--bad-tx); }

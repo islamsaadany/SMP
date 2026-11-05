@@ -1,0 +1,144 @@
+<title>Tracker Status Colours</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap">
+<style>
+/* The weekly check's rows, now and proposed: each status gets its own
+   filled chip so the three can be told apart at a glance, and "Carry to next
+   week" becomes a navy outlined button so it no longer reads as the gold
+   In progress. Tokens are the tracker's own (modules/tracker/page.ts) plus
+   one new --navy for the button. */
+*{box-sizing:border-box}
+:root{--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-soft:#EEF1F5;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;
+  --gold:#9C5D08;--gold-bg:#FBF3E4;--good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;
+  --navy:#1F3158;--navy-bg:#EAEFF8;--yel:#6B4E00;--yel-bg:#FFE98A;--yel-line:#E2BC2A;--ns:#2B3A55;--ns-bg:#FFF;--ns-line:#5E6E85;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-soft:#232935;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--gold-bg:#2E2715;--good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--navy:#A9C0EA;--navy-bg:#1E2840;--ns:#DDE3EC;--ns-bg:#1A1F29;--ns-line:#8E99AC;--yel:#FFE07A;--yel-bg:#3D3410;--yel-line:#8C7419;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-soft:#232935;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;
+  --gold:#F5A623;--gold-bg:#2E2715;--good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--navy:#A9C0EA;--navy-bg:#1E2840;--ns:#DDE3EC;--ns-bg:#1A1F29;--ns-line:#8E99AC;--yel:#FFE07A;--yel-bg:#3D3410;--yel-line:#8C7419;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);padding:0 16px}
+.doc{max-width:1000px;margin:0 auto;padding:26px 0 64px}
+h1{font-size:23px;font-weight:600;margin:0 0 4px}
+.cap{font:600 11px/1.6 var(--font);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:28px 0 7px}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow-x:auto}
+.row{display:grid;grid-template-columns:20px minmax(160px,1fr) 116px 64px 136px 160px;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line-soft);min-width:760px}
+.row:last-child{border-bottom:0}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px}
+.tick.late{border-color:var(--bad)}
+.tick.done{background:var(--good);border-color:var(--good)}
+.t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.done-t{color:var(--ink-3)}
+.when,.who{font:500 13px/1.4 var(--font);color:var(--ink-2);white-space:nowrap}
+.when.late{color:var(--bad);font-weight:600}
+svg{width:13px;height:13px;flex:none}
+
+/* NOW — as built */
+.a .st{display:inline-flex;align-items:center;gap:7px;font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.a .st::before{content:"";width:12px;height:2px;background:currentColor}
+.a .st.prog{color:var(--gold)}.a .st.done{color:var(--good)}
+.a .carry{display:inline-flex;align-items:center;gap:6px;font:500 12.5px/1 var(--font);color:var(--gold);padding:5px 8px;white-space:nowrap}
+
+/* PROPOSED */
+.b .st{display:inline-flex;align-items:center;gap:6px;height:26px;width:118px;padding:0 10px 0 9px;border-radius:999px;font:600 12.5px/1 var(--font);white-space:nowrap;justify-self:start;border:1px solid transparent}
+.b .st i{width:10px;height:10px;border-radius:50%;flex:none}
+.b .st.ns{background:var(--ns-bg);color:var(--ns);border-color:var(--ns-line)}
+.b .st.ns i{border:1.5px solid currentColor}
+.b .st.prog{background:var(--yel-bg);color:var(--yel);border-color:var(--yel-line)}
+.b .st.prog i{border:1.5px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+.b .st.done{background:var(--good-bg);color:var(--good);border-color:color-mix(in srgb,var(--good) 35%,transparent)}
+.b .st.done i{background:currentColor}
+.b .carry{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--font);color:var(--navy);background:var(--surface);border:1px solid var(--navy);border-radius:7px;padding:6px 10px;white-space:nowrap;justify-self:start}
+.b .carry:hover{background:var(--navy-bg)}
+
+/* the weekly note under a task */
+.last{font:400 12.5px/1.4 var(--font);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.last b{font-weight:600;color:var(--ink-2)}
+.ent{font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:4px 6px}
+/* now: the row shaded, the box in a white band of its own, full width */
+.a .row.hl{background:var(--surface-2);border-bottom:0}
+.a .pline{display:grid;grid-template-columns:20px 1fr;gap:12px;padding:0 14px 10px;border-bottom:1px solid var(--line-soft);min-width:760px}
+.a .pbox{grid-column:2;display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 11px;background:var(--ground);color:var(--ink-3);font-size:14.5px}
+.a .pbox span{flex:1}
+/* proposed: the task and its note are one block, one background, the note
+   under the name only, a slim line with the week said in front */
+.b .task{border-bottom:1px solid var(--line);min-width:760px}
+.b .task:last-child{border-bottom:0}
+.b .task:hover{background:var(--ground)}
+.b .task .row{border-bottom:0;padding-bottom:4px;min-width:0}
+.b .nin{display:grid;grid-template-columns:20px minmax(160px,1fr) 116px 64px 136px 160px;gap:12px;padding:0 14px 12px}
+.b .nbox{grid-column:2/5;display:flex;align-items:center;gap:8px;height:32px;border:1px solid var(--line);border-radius:7px;padding:0 10px;background:var(--surface);font-size:13.5px;color:var(--ink-3)}
+.b .nbox b{font:600 11px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding-right:8px;border-right:1px solid var(--line)}
+.b .nbox span{flex:1}
+.b .nbox .ent{padding:3px 5px;flex:none}
+/* colour options: B solid, C soft tint, D edge tag */
+.opt-h{font:600 15px/1.3 var(--font);margin:30px 0 8px}
+.opt-h span{font-weight:400;color:var(--ink-3);font-size:13.5px;margin-left:6px}
+.ob .st.ns{background:#5E6E85;color:#fff;border-color:#5E6E85}
+.ob .st.prog{background:#FFD43B;color:#3D2E00;border-color:#FFD43B}
+.ob .st.done{background:#1B6E4E;color:#fff;border-color:#1B6E4E}
+.ob .carry{background:#1F3158;color:#fff;border-color:#1F3158}
+.oc .st{border-radius:6px}
+.oc .st.ns{background:#E3E8EF;color:#2B3A55;border-color:transparent}
+.oc .st.prog{background:#FFF0A8;color:#6B4E00;border-color:transparent}
+.oc .st.done{background:#DCF0E5;color:#1B6E4E;border-color:transparent}
+.oc .carry{border-color:var(--line);color:var(--ink)}
+.oc .carry svg{color:#1F5FBF}
+.od .st{border-radius:4px;border:0;border-left:4px solid;background:var(--surface-2);color:var(--ink);padding-left:9px}
+.od .st i{display:none}
+.od .st.ns{border-left-color:#8A97AB}
+.od .st.prog{border-left-color:#F2C200;background:#FFF8D6}
+.od .st.done{border-left-color:#2E9E6E;background:#E9F4EF}
+.od .carry{border:0;background:none;color:#1F5FBF;text-decoration:underline;text-underline-offset:3px;padding:6px 2px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .oc .st.ns,:root:not([data-theme="light"]) .od .st{background:#2A3140;color:#DDE3EC}
+ :root:not([data-theme="light"]) .oc .st.prog,:root:not([data-theme="light"]) .od .st.prog{background:#3D3410;color:#FFE07A}
+ :root:not([data-theme="light"]) .oc .st.done,:root:not([data-theme="light"]) .od .st.done{background:#1B2C26;color:#63BE96}
+ :root:not([data-theme="light"]) .oc .carry svg,:root:not([data-theme="light"]) .od .carry{color:#8FB4F0}}
+</style>
+<div class="doc">
+<h1>Status and carry, made clear</h1>
+
+<div class="cap">Now</div>
+<div class="frame a">
+  <div class="row"><span class="tick"></span><span class="t">Draft the Q4 board pack</span><span class="when">Fri 6 Nov</span><span class="who">Islam</span><span class="st">Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+  <div class="row"><span class="tick"></span><span class="t">Interview three customer leads</span><span class="when">Thu 5 Nov</span><span class="who">Sara</span><span class="st prog">In progress</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+  <div class="row"><span class="tick late"></span><span class="t">Send pricing note to finance</span><span class="when late">Late · Mon 2 Nov</span><span class="who">Omar</span><span class="st">Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+  <div class="row"><span class="tick done"></span><span class="t done-t">Book the offsite venue</span><span class="when">Done Tue</span><span class="who">Islam</span><span class="st done">Done</span><span></span></div>
+</div>
+
+<div class="cap">Proposed</div>
+<div class="frame b">
+  <div class="row"><span class="tick"></span><span class="t">Draft the Q4 board pack</span><span class="when">Fri 6 Nov</span><span class="who">Islam</span><span class="st ns"><i></i>Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+  <div class="row"><span class="tick"></span><span class="t">Interview three customer leads</span><span class="when">Thu 5 Nov</span><span class="who">Sara</span><span class="st prog"><i></i>In progress</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+  <div class="row"><span class="tick late"></span><span class="t">Send pricing note to finance</span><span class="when late">Late · Mon 2 Nov</span><span class="who">Omar</span><span class="st ns"><i></i>Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+  <div class="row"><span class="tick done"></span><span class="t done-t">Book the offsite venue</span><span class="when">Done Tue</span><span class="who">Islam</span><span class="st done"><i></i>Done</span><span></span></div>
+</div>
+<div class="cap">With the weekly note — now</div>
+<div class="frame a">
+  <div class="row hl"><span class="tick"></span><span><div class="t">HR project: review the two projects &amp; develop the 3rd</div><div class="last"><b>Last week</b> · had a meeting this week and postponed to …</div></span><span class="when"></span><span class="who">Islam</span><span class="st prog">In progress</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+  <div class="pline"><div class="pbox"><span>What happened this week?</span><span class="ent" style="flex:none">Enter</span></div></div>
+  <div class="row"><span class="tick"></span><span class="t">Finance: adjust project that is missing milestones</span><span class="when"></span><span class="who">Islam</span><span class="st">Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+</div>
+
+<div class="cap">With the weekly note — proposed</div>
+<div class="frame b">
+  <div class="task">
+    <div class="row"><span class="tick"></span><span><div class="t">HR project: review the two projects &amp; develop the 3rd</div><div class="last"><b>Last week</b> · had a meeting this week and postponed to …</div></span><span class="when"></span><span class="who">Islam</span><span class="st prog"><i></i>In progress</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+    <div class="nin"><div class="nbox"><b>This week</b><span>What happened?</span><span class="ent">Enter</span></div></div>
+  </div>
+  <div class="task">
+    <div class="row"><span class="tick"></span><span class="t">Finance: adjust project that is missing milestones</span><span class="when"></span><span class="who">Islam</span><span class="st ns"><i></i>Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div>
+    <div class="nin"><div class="nbox"><b>This week</b><span>What happened?</span><span class="ent">Enter</span></div></div>
+  </div>
+</div>
+
+<h2 style="font-size:20px;margin:40px 0 0">Colour options — pick one</h2>
+<div class="opt-h">A · Soft with outline <span>the proposal above</span></div>
+<div class="frame b "><div class="row"><span class="tick"></span><span class="t">Draft the Q4 board pack</span><span class="when">Fri 6 Nov</span><span class="who">Islam</span><span class="st ns"><i></i>Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div><div class="row"><span class="tick"></span><span class="t">Interview three customer leads</span><span class="when">Thu 5 Nov</span><span class="who">Islam</span><span class="st prog"><i></i>In progress</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div><div class="row"><span class="tick done"></span><span class="t done-t">Book the offsite venue</span><span class="when">Done Tue</span><span class="who">Islam</span><span class="st done"><i></i>Done</span><span></span></div></div>
+<div class="opt-h">B · Solid <span>strongest; carry is a filled navy button</span></div>
+<div class="frame b ob"><div class="row"><span class="tick"></span><span class="t">Draft the Q4 board pack</span><span class="when">Fri 6 Nov</span><span class="who">Islam</span><span class="st ns"><i></i>Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div><div class="row"><span class="tick"></span><span class="t">Interview three customer leads</span><span class="when">Thu 5 Nov</span><span class="who">Islam</span><span class="st prog"><i></i>In progress</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div><div class="row"><span class="tick done"></span><span class="t done-t">Book the offsite venue</span><span class="when">Done Tue</span><span class="who">Islam</span><span class="st done"><i></i>Done</span><span></span></div></div>
+<div class="opt-h">C · Soft tint, no outline <span>calmer; carry is a plain button with a blue arrow</span></div>
+<div class="frame b oc"><div class="row"><span class="tick"></span><span class="t">Draft the Q4 board pack</span><span class="when">Fri 6 Nov</span><span class="who">Islam</span><span class="st ns"><i></i>Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div><div class="row"><span class="tick"></span><span class="t">Interview three customer leads</span><span class="when">Thu 5 Nov</span><span class="who">Islam</span><span class="st prog"><i></i>In progress</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div><div class="row"><span class="tick done"></span><span class="t done-t">Book the offsite venue</span><span class="when">Done Tue</span><span class="who">Islam</span><span class="st done"><i></i>Done</span><span></span></div></div>
+<div class="opt-h">D · Edge tag <span>colour on the left edge; carry is a blue link</span></div>
+<div class="frame b od"><div class="row"><span class="tick"></span><span class="t">Draft the Q4 board pack</span><span class="when">Fri 6 Nov</span><span class="who">Islam</span><span class="st ns"><i></i>Not started</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div><div class="row"><span class="tick"></span><span class="t">Interview three customer leads</span><span class="when">Thu 5 Nov</span><span class="who">Islam</span><span class="st prog"><i></i>In progress</span><span class="carry"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>Carry to next week</span></div><div class="row"><span class="tick done"></span><span class="t done-t">Book the offsite venue</span><span class="when">Done Tue</span><span class="who">Islam</span><span class="st done"><i></i>Done</span><span></span></div></div>
+</div>

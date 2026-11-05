@@ -198,7 +198,11 @@ CREATE TABLE case_studies (
   -- is asked for the write-up when the end month comes (migration 034).
   kind            text NOT NULL DEFAULT 'planning',
   lead_id         uuid REFERENCES users (id) ON DELETE SET NULL,
+  -- the days agreed with the client (§696, migration 036): a whole number,
+  -- NULL where none was recorded
+  planned_days    integer,
   CONSTRAINT case_kind CHECK (kind IN ('planning','retainer')),
+  CONSTRAINT case_planned_days CHECK (planned_days IS NULL OR planned_days >= 0),
   CONSTRAINT case_state CHECK (state IN ('running','writing','done')),
   CONSTRAINT case_name CHECK (btrim(name) <> ''),
   CONSTRAINT case_writing_has_writer CHECK (state = 'running' OR writer_id IS NOT NULL)
@@ -1100,8 +1104,11 @@ CREATE TABLE tracker_actions (
 CREATE INDEX tracker_actions_week ON tracker_actions (tenant_id, status, due);
 CREATE INDEX tracker_actions_topic_ix ON tracker_actions (tenant_id, topic_id);
 
--- One row per status change, plus one on creation. Appended, never edited:
--- a log a save could rewrite is not a log (§42).
+-- One row per movement, plus one on creation: a status change (the two
+-- status columns), and since §657 a carry to another week, a hand-over, a
+-- rename and a move to another topic, with what it was and what it became
+-- in `detail`. Appended, never edited: a log a save could rewrite is not a
+-- log (§42). Migration 035 on a database already up.
 CREATE TABLE tracker_events (
   tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id bigserial,
@@ -1111,11 +1118,50 @@ CREATE TABLE tracker_events (
   to_status text,
   by_key text NOT NULL DEFAULT '',
   at timestamptz NOT NULL DEFAULT now(),
+  detail jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (tenant_id, id),
   FOREIGN KEY (tenant_id, action_id) REFERENCES tracker_actions (tenant_id, id) ON DELETE CASCADE,
-  CONSTRAINT tracker_event_kind CHECK (kind IN ('created','status'))
+  CONSTRAINT tracker_event_kind CHECK (kind IN ('created','status','due','owner','title','topic'))
 );
 CREATE INDEX tracker_events_action ON tracker_events (tenant_id, action_id, at);
+
+-- PROGRESS (§657): what a person WROTE about an action at a weekly review,
+-- one row per entry. Not an event, because its writer may edit or delete it
+-- (edited_at says it was) while the events are a log. Goes with its action.
+-- Migration 035 on a database already up.
+CREATE TABLE tracker_progress (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  action_id uuid NOT NULL,
+  body text NOT NULL,
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  edited_at timestamptz,
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, action_id) REFERENCES tracker_actions (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT tracker_progress_body CHECK (btrim(body) <> '')
+);
+CREATE INDEX tracker_progress_action ON tracker_progress (tenant_id, action_id, at);
+
+-- STEPS (§745): a task broken into lines — the words, an optional week (a
+-- day, as the task's own), whether and when ticked, and its place in the
+-- task's order. No owner: the task's owner manages its steps. Goes with its
+-- action. Migration 037 on a database already up.
+CREATE TABLE tracker_steps (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  action_id uuid NOT NULL,
+  title text NOT NULL,
+  due date,
+  done_at timestamptz,
+  pos integer NOT NULL DEFAULT 0,
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, action_id) REFERENCES tracker_actions (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT tracker_steps_title CHECK (btrim(title) <> '')
+);
+CREATE INDEX tracker_steps_action ON tracker_steps (tenant_id, action_id, pos);
 
 -- ── MEETING NOTES (spec 055) ─────────────────────────────────────────────
 -- One meeting, one note, kept in the client's own room: the note, and one row

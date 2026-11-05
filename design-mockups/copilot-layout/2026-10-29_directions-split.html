@@ -1,0 +1,156 @@
+<title>Directions Split</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: Before (today's one column, from the run's own screen) over After (chat · pane · to-do), then the chat's steps in time. */
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--bad:#B91C1C;--badbg:#FBE9E9;--good:#2E6B45;--goodbg:#E6F2EA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--bad:#F5A3A3;--badbg:#3A1E1E;--good:#8FCBA4;--goodbg:#1C2E23;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--bad:#F5A3A3;--badbg:#3A1E1E;--good:#8FCBA4;--goodbg:#1C2E23;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-size:26px;margin:0;text-wrap:balance}
+h2{font-size:18px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:80ch}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}
+.fh{display:flex;align-items:baseline;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.fh b{font-size:15px}
+.tag{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 8px;border-radius:9px}
+.tag.before{background:var(--badbg);color:var(--bad)}
+.tag.after{background:var(--goodbg);color:var(--good)}
+.fh small{color:var(--ink-3);font-size:12.5px}
+.scr{background:var(--surface-2);padding:10px;overflow-x:auto}
+.app{display:grid;gap:8px;min-width:960px;font-size:12px}
+.app.before{grid-template-columns:150px minmax(0,1fr) 150px}
+.app.after{grid-template-columns:150px minmax(0,1fr) 12px 440px 170px}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:6px;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.col.rail{background:var(--surface-2)}
+.cap{font:700 10.5px/1.3 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);padding:6px 8px;border-bottom:1px solid var(--line);display:flex;gap:6px;align-items:center}
+.cap .pill{margin-left:auto;font:600 10px/1.4 var(--sans);text-transform:none;letter-spacing:0;padding:0 6px;border:1px solid var(--line);border-radius:8px;color:var(--ink-2)}
+.body{padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.grip{align-self:stretch;border-left:1px solid var(--line);margin:8px 0}
+.who{font-size:10.5px;color:var(--ink-3)}
+.ai{border-left:3px solid var(--goldfill);padding:3px 8px;color:var(--ink)}
+.me{align-self:flex-end;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:3px 9px}
+.opts{display:flex;flex-wrap:wrap;gap:4px}
+.opt{font:600 11px/1.5 var(--sans);padding:1px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.opt.rec{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.opt.held{opacity:.55}
+.fold{border:1px solid var(--line);border-radius:7px;padding:5px 9px;display:flex;gap:8px;align-items:center}
+.fold .chev{color:var(--ink-3)}
+.fold small{color:var(--ink-3);flex:1}
+.st{font:600 10.5px/1.4 var(--sans);color:var(--good)}
+.box{border:1px solid var(--line);border-radius:7px;padding:6px 9px;color:var(--ink-3);margin-top:auto}
+.box.off{background:var(--surface-2)}
+.card{border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--surface)}
+.card h5{margin:0 0 4px;font:700 11px/1.3 var(--sans);text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);display:flex;gap:8px}
+.card h5 a{margin-left:auto;color:var(--gold);font-weight:600;text-transform:none;letter-spacing:0}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th,td{border-bottom:1px solid var(--line);padding:3px 5px;text-align:center;font-size:11px;vertical-align:middle}
+thead th{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;background:var(--nav);color:var(--navink);white-space:normal;line-height:1.2}
+th[scope=row]{text-align:left;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan{font:600 9px/1.4 var(--sans);padding:0 4px;border:1px solid var(--line);border-radius:6px;color:var(--ink-3);margin-left:4px}
+.sc{display:inline-block;min-width:18px;border:1px solid var(--line);border-radius:9px;padding:0 4px}
+.tick{display:inline-block;width:13px;height:13px;border:1px solid var(--line);border-radius:3px;vertical-align:middle}
+.tick.on{background:var(--nav);border-color:var(--nav)}
+.tick.held{opacity:.4}
+.sel{display:inline-block;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink-2)}
+.foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:6px 8px;margin-top:auto}
+.foot .state{color:var(--ink-3);flex:1}
+.foot .state b{color:var(--ink)}
+.btn{font:600 11px/1.6 var(--sans);padding:1px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.btn.solid{background:var(--gold);border-color:var(--gold);color:#fff}
+.btn.held{opacity:.5}
+.todo li{list-style:none;display:flex;gap:6px;align-items:center;font-size:11px;padding:2px 0}
+.todo ul{margin:0;padding:0}
+.dot{width:8px;height:8px;border-radius:50%;border:2px solid var(--line)}
+.dot.done{background:var(--good);border-color:var(--good)}
+.note{padding:8px 14px 12px;font-size:13.5px;color:var(--ink-2);border-top:1px solid var(--line)}
+.note b{color:var(--ink)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--ink-2)}
+.step b{display:block;color:var(--ink);font-size:15px;margin-bottom:2px}
+.step .k{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--nav);color:var(--navink);font-weight:700;font-size:12.5px;margin-right:6px}
+.qs{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;max-width:85ch}
+.qs b{color:var(--ink)}
+</style>
+<div class="wrap">
+  <header>
+    <h1>Directions, split three ways</h1>
+    <p class="lede">The fourth area to take the SWOT's shape (§641, §653) after Competitive Discipline (§654 C1): the chat on the left in the order it happened, the two tables on the right where they stay put, Save and Apply to plan at the pane's foot, the to-do beside. Drawn from the run's own screen of a Directions chat on Mobile, three Directions ticked and one Capability kept, before the save.</p>
+  </header>
+
+  <div class="frame"><div class="fh"><b>Before</b><span class="tag before">today</span><small>one column: the tables, the ask box and Save all inside the chat, scrolling away with it; the head reads "in progress" only</small></div>
+    <div class="scr"><div class="app before">
+      <div class="col rail"><div class="cap">Chats</div><div class="body"><div><b>Directions — Mobile</b><br><span class="who">Mohamed Essam · 28 Oct 26 · 3 of 4 done</span></div></div></div>
+      <div class="col"><div class="cap">Directions — Mobile <span class="pill">in progress</span></div><div class="body">
+        <div class="ai">Here are 6 possible Directions, each scored out of 64. Change any score, set who owns it, and tick what goes ahead.</div>
+        <div class="ai">From the SWOT.</div>
+        <table><thead><tr><th style="text-align:left;width:34%">Possible Direction</th><th>Urgency</th><th>Importance</th><th>Ease</th><th>Score</th><th>Owned by</th><th>Go ahead</th></tr></thead><tbody>
+          <tr><th scope="row">Digital &amp; Data-Driven Operations<span class="plan">Plan</span></th><td><span class="sc">1</span></td><td><span class="sc">1</span></td><td><span class="sc">1</span></td><td>1</td><td><span class="sel">—</span></td><td><span class="tick on"></span></td></tr>
+          <tr><th scope="row">Channel Preference &amp; Development<span class="plan">Plan</span></th><td><span class="sc">–</span></td><td><span class="sc">–</span></td><td><span class="sc">–</span></td><td>–</td><td><span class="sel">—</span></td><td><span class="tick held"></span></td></tr>
+          <tr><th scope="row">Upper Egypt</th><td><span class="sc">4</span></td><td><span class="sc">4</span></td><td><span class="sc">1</span></td><td>16</td><td><span class="sel">—</span></td><td><span class="tick on"></span></td></tr>
+          <tr><th scope="row">Own label</th><td><span class="sc">1</span></td><td><span class="sc">1</span></td><td><span class="sc">1</span></td><td>1</td><td><span class="sel">—</span></td><td><span class="tick on"></span></td></tr>
+        </tbody></table>
+        <div class="opts" style="justify-content:flex-end"><span class="opt">Go ahead with these 3.</span></div>
+        <div class="ai">3 Directions chosen. Next, the Capabilities we need to deliver them.</div>
+        <table><thead><tr><th style="text-align:left;width:30%">Capability</th><th>Kind</th><th>Serves</th><th>Owner</th><th>Keep</th></tr></thead><tbody>
+          <tr><th scope="row">Data-led stock</th><td><span class="sel">Enabler</span></td><td>Upper Egypt</td><td><span class="sel">Amaka Eze</span></td><td><span class="tick on"></span></td></tr></tbody></table>
+        <div class="opts"><span class="opt">Suggest more</span><span class="opt">+ Add my own</span></div>
+        <div class="box">Ask for something — a couple more, or a different angle</div>
+        <div class="opts"><span class="btn solid">Save 3 Directions and 1 Capability</span></div>
+      </div></div>
+      <div class="col"><div class="cap">To-do <span class="pill">3/4</span></div><div class="body todo"><ul><li><span class="dot done"></span>Options</li><li><span class="dot done"></span>Choose Directions</li><li><span class="dot done"></span>Choose Capabilities</li><li><span class="dot"></span>Save</li></ul></div></div>
+    </div></div>
+    <div class="note">The work is drawn inside the chat and scrolls away with it. A second box under the table asks for changes. Save sits in the chat; after it, "Apply to plan" appears as one more line in the chat. "Go ahead with these 3" is a button the person pressed, not a line they said.</div></div>
+
+  <div class="frame"><div class="fh"><b>After</b><span class="tag after">the split</span><small>chat · pane · to-do, as the SWOT and Competitive Discipline stand</small></div>
+    <div class="scr"><div class="app after">
+      <div class="col rail"><div class="cap">Chats</div><div class="body"><div><b>Directions — Mobile</b><br><span class="who">Mohamed Essam · 28 Oct 26 · 3 of 4 done</span></div></div></div>
+      <div class="col"><div class="cap">Directions — Mobile · Capabilities <span class="pill">View the tables</span><span class="pill">To-do 3/4</span></div><div class="body">
+        <div class="ai">Mobile already has 4 Directions on the plan. Start from them, or start fresh?</div>
+        <div class="me">Start from the existing ones</div>
+        <div class="ai">Here are 6 possible Directions, scored out of 64, on the right. Change any score there, set who owns it, and tick what goes ahead. Ask here for a couple more, or a different angle.</div>
+        <div class="opts"><span class="opt">Suggest more</span><span class="opt">+ Add my own</span></div>
+        <div class="me">One about financing for small retailers</div>
+        <div class="ai">Added <b>Retail financing</b>, scored 3 · 3 · 2, on the right.</div>
+        <div class="fold"><span class="chev">▸</span><b>The Directions</b><small>7 offered · 3 ticked</small><span class="st">Agreed</span></div>
+        <div class="me">Go ahead with these 3.</div>
+        <div class="ai">3 Directions chosen. Next, the Capabilities we need to deliver them.</div>
+        <div class="opts"><span class="opt rec">Suggest Capabilities</span></div>
+        <div class="me">Suggest Capabilities</div>
+        <div class="ai">Here are 4 Capabilities, on the right. Set the kind and the owner, and keep the ones to build. <b>Save</b>, at the foot of the tables, keeps them as a version.</div>
+        <div class="box">Ask for something — a couple more, or a different angle…</div>
+      </div></div>
+      <div class="grip"></div>
+      <div class="col"><div class="cap">Directions — Mobile v1 <span class="pill">in progress</span></div><div class="body">
+        <div class="card"><h5>The Directions <a>Show scores</a></h5>
+        <table><thead><tr><th style="text-align:left;width:38%">Direction</th><th>U</th><th>I</th><th>E</th><th>Score</th><th>Owner</th><th>Go</th></tr></thead><tbody>
+          <tr><th scope="row">Digital &amp; Data-Driven Ops<span class="plan">Plan</span></th><td>1</td><td>1</td><td>1</td><td>1</td><td><span class="sel">—</span></td><td><span class="tick on"></span></td></tr>
+          <tr><th scope="row">Channel Preference<span class="plan">Plan</span></th><td>–</td><td>–</td><td>–</td><td>–</td><td><span class="sel">—</span></td><td><span class="tick held"></span></td></tr>
+          <tr><th scope="row">Upper Egypt</th><td>4</td><td>4</td><td>1</td><td>16</td><td><span class="sel">—</span></td><td><span class="tick on"></span></td></tr>
+          <tr><th scope="row">Retail financing</th><td>3</td><td>3</td><td>2</td><td>18</td><td><span class="sel">—</span></td><td><span class="tick"></span></td></tr>
+          <tr><th scope="row">Own label</th><td>1</td><td>1</td><td>1</td><td>1</td><td><span class="sel">—</span></td><td><span class="tick on"></span></td></tr>
+        </tbody></table></div>
+        <div class="card"><h5>The Capabilities</h5>
+        <table><thead><tr><th style="text-align:left;width:34%">Capability</th><th>Kind</th><th>Serves</th><th>Owner</th><th>Keep</th></tr></thead><tbody>
+          <tr><th scope="row">Data-led stock</th><td><span class="sel">Enabler</span></td><td>Upper Egypt</td><td><span class="sel">Amaka Eze</span></td><td><span class="tick on"></span></td></tr>
+          <tr><th scope="row">Regional field team</th><td><span class="sel">Gap-closing</span></td><td>Upper Egypt</td><td><span class="sel">—</span></td><td><span class="tick"></span></td></tr>
+        </tbody></table></div>
+        <div class="foot"><span class="state"><b>v1</b> in progress</span><span class="btn">Save</span><span class="btn solid held">Apply to plan</span></div>
+      </div></div>
+      <div class="col"><div class="cap">To-do <span class="pill">3/4</span></div><div class="body todo"><ul><li><span class="dot done"></span>Options</li><li><span class="dot done"></span>Choose Directions</li><li><span class="dot done"></span>Choose Capabilities</li><li><span class="dot"></span>Save</li></ul></div></div>
+    </div></div>
+    <div class="note"><b>Save</b> is held until a Direction is ticked ("Tick at least one Direction first"), then after a save until something changes ("Nothing has changed since it was saved"). <b>Apply to plan</b> is held until a version is saved, then asks first and archives what the plan holds (§645, §654). The foot's line runs <i>v1 in progress</i> → <i>v1 saved · not on the plan yet</i> → <i>v1 saved · v1 on the plan</i>. Where there is no room beside the chat, "View the tables" and "To-do 3/4" open them over it (§642, §670).</div></div>
+
+  <h2>The chat, in the order it happened</h2>
+  <div class="steps">
+    <div class="step"><b><span class="k">1</span>Start</b>From the plan's Directions or fresh — asked in the chat as today, or taken from the start screen's card (§653). Plan rows carry their scores; an unscored one cannot go ahead until scored (§654 B5).</div>
+    <div class="step"><b><span class="k">2</span>The Directions</b>Suggested onto the pane. "Suggest more" and "+ Add my own" stay as choices in the chat; the second box goes, and the chat's own box takes the ask. Every ask and its answer is kept on the stored row, so a reload reads the same.</div>
+    <div class="step"><b><span class="k">3</span>Go ahead</b>Pressed in the pane under the table; said in the chat as the person's line, and the Directions fold in place as "The Directions · 7 offered · 3 ticked · Agreed", opening again on a press (§644).</div>
+    <div class="step"><b><span class="k">4</span>The Capabilities</b>The same shape: suggested onto the pane under the Directions, kind and owner set there, asks through the chat's box.</div>
+    <div class="step"><b><span class="k">5</span>Save, then Apply</b>Both at the pane's foot, as §645 has them. The chat says where the version is; the foot says whether it is on the plan.</div>
+  </div>
+
+  <div class="qs"><b>Two things to confirm.</b> (1) The Capabilities-only chat (started from the Capabilities area) takes the same split with one table. (2) "Go ahead with these N" stays a button under the Directions table in the pane, where the ticks are, rather than in the chat; the chat records the press as the person's line. Say if you would rather have it in the chat.</div>
+</div>

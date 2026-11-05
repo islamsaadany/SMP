@@ -553,127 +553,226 @@ function accessMerged(row, col){
            value: vals.length === 1 ? vals[0] : null, mixed: vals.length > 1 };
 }
 
-function renderAccess(){
-  /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
-     A grant cannot express this: the SMO team holds `a_setup` at edit, which
-     is what lets them run every other Setup page — and editing THIS page is
-     editing who may edit this page, so anybody who can is a Super user
-     whatever their row says. The page stays READABLE to them: knowing what
-     everyone may do is part of running the office, and §37's rules are shown
-     to everyone who can open the page. */
-  var editable = grant("c_access") === "edit" && mayEditAccess();
-  /* §516.1: the second layer's row exists only where the client HAS a
-     second layer — Islam: "a client with no second layer has no second layer
-     row". Asked of midExists(), the one answer the set-up flow and the
-     Structure step already ask (§53.5). */
-  var COLS = SMPRules.ACCESS_COLS, ROWS = SMPRules.ACCESS_ROWS.filter(function(r){
-    return !r.mid || midExists(); });
+/* ── ROLES & ACCESS AS A LADDER (§704; design-mockups/roles-and-access) ──
+   Islam: *"it's more of levels of visibility … everyone set on a level can
+   see his level or see the bigger level(s) one by one"*, *"seeing doesn't
+   mean reporting"*, and, after the two rules were measured side by side on
+   every Raya seat, *"Apply the ladder."* So each role is one line: what it
+   ENTERS AND SUBMITS — a fact of what it holds, written as words, never a
+   control — and HOW FAR UP IT READS, the one control: own piece · own unit or
+   function · own division · the top, in the client's own words, the division
+   only where the client has one. The pen marks the level a role writes on (a switch), the eye every
+   level it reads; a level the role cannot stand on is struck through.
 
-  /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
-     (Islam, 2026-08-22: "remove all the descriptions from the headers and just
-     make it appear on hovering"). The notes are lists, and stacked under the
-     labels they made the HEAD of the table taller than its body. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §516) ──
-     Plan and Reporting are two answers about the same box, so the box's name
-     is written ONCE above them. Built off the `pair`/`col` fields the columns
-     carry — the header is derived from the same list the cells walk, so a
-     column cannot appear in one and not the other. */
-  var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
-  var hi = 0;
-  while (hi < COLS.length) {
-    var hc = COLS[hi];
-    if (!hc.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' +
-        esc(hc.label + " — " + hc.note) + '">' + esc(hc.label) + '</th>';
-      hi++;
-      continue;
+   The office's two rows are not on the ladder (they read and write
+   everything); the Copilot column and the reading-window switch stay as they
+   were. Under the table, one person can be moved a level up or down from
+   their role — an exception kept on the person, never a second table. */
+var ACC_EXC_PICK = null;
+function ladderWords(){
+  var top = String(labelWord("topword", "group") || "group").trim().toLowerCase();
+  var div = String(labelWord("division", "group") || "division").trim().toLowerCase();
+  return ["Own piece", buExists() ? "Own unit or function" : "Own function", "Own " + div, "The " + top];
+}
+var LADDER_ROW = {
+  gceo:      { held: null, says: "Nothing — holds no piece" },
+  cceo:      { held: null, says: "Nothing — holds no piece" },
+  owner:     { held: 1, says: "Their unit’s or function’s figures, and its submission" },
+  custodian: { held: 1, says: "What they keep, as its owner would" },
+  part:      { held: 0, says: "The lines of their own pillar, project, direction or capability" },
+  contrib:   { held: 0, says: "The lines that name them" }
+};
+LADDER_ROW[SMPRules.ACCESS_ROWS.filter(function(r){ return r.floor; })[0].key] = { held: null, floor: true, says: "Nothing" };
+function ladderLevels(){ return midExists() ? [0, 1, 2, 3] : [0, 1, 3]; }
+function ladderCell(r, editable){
+  var info = LADDER_ROW[r.key] || {}, words = ladderWords(), role = r.of[0], levels = ladderLevels();
+  var lv = SMPRules.ladderStored(world(), role);
+  if (lv === 2 && !midExists()) lv = 1;
+  var lo = SMPRules.LADDER_MIN[role] != null ? SMPRules.LADDER_MIN[role] : 0, fixed = false;
+  /* a CEO stands only from their level up, and can be turned off to nothing */
+  var stand = SMPRules.LADDER_STAND[role];
+  if (stand != null) { lo = stand; if (lv < stand) lv = 0; }
+  var pen = info.held != null && SMPRules.penOn(world(), role);
+  /* the level a press on the lit one steps down to: the next one below that
+     the client has, never under the role's floor */
+  var below = function(i){ var k = levels.indexOf(i); return k > 0 && levels[k - 1] >= lo ? levels[k - 1] : stand != null ? 0 : null; };
+  return '<span class="ladder' + (editable ? '' : ' ro') + '" role="group" aria-label="' + esc(accessRowName(r)) + ' reads up to">' + levels.map(function(i){
+    var struck = i < lo && !(info.floor && i === 0);
+    var word = info.floor && i === 0 ? "Nothing" : words[i];
+    /* the role's own level carries the pen switch: on, it enters and submits
+       what it holds; off, it reads it */
+    if (!struck && info.held === i) {
+      return '<button type="button" class="' + (pen ? 'pen' : 'eye') + '"' + (editable ? ' data-pen="' + esc(r.key) + '|' + (pen ? 'off' : 'on') + '"' : ' disabled') +
+        ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + pen + '" title="' + (pen ? 'Enters and submits here — press to make it read only' : 'Reads only here — press to let them enter and submit') + '">' +
+        (pen ? ICON_PEN : ICON_EYE) + esc(word) + '</button>';
     }
-    var span = 0;
-    while (hi + span < COLS.length && COLS[hi + span].pair === hc.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(hc.pair) +
-      '">' + esc(hc.pair) + '</th>';
-    for (var hj = 0; hj < span; hj++) {
-      var hb = COLS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.label + " — " + hb.note) +
-        '">' + esc(hb.col) + '</th>';
-    }
-    hi += span;
-  }
-  /* ── THE COPILOT COLUMN (Islam, 2026-10-01, from the signed-off
-     design-mockups/copilot-access/2026-10-01_copilot-column.html) ──────
-     Last, and only where the client has the Copilot: the served document
-     stamps its area (`data-copilot-area`, MODULE_DEF's own declaration), so
-     over file:// and on a client without it there is no column to write to
-     nothing (§61). The office's two rows carry the eye and the pen through
-     the module cell's own writer (§359.5: the default is an ABSENCE, edit);
-     every other row is a dash by RULE — "office only for now" — because the
-     api refuses a client's own person whatever the map holds, and a toggle
-     that changes nothing is decoration (§42). Both office rows are a single
-     role each on the merged table (§516), so the cell names that role. */
-  var COPA = copilotArea();
-  if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
-  var head = headTop + "</tr>" + headSub + "</tr>";
-
-  /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
-     Employee stopped being one: nobody grants it, and it was drawn as a chip
-     claiming somebody held something they did not. What it decided is still
-     a real question — what somebody on the register with NO role may open —
-     so it is still a row here, labelled as the state it is, and editable: a
-     client who wants people with no role to see nothing sets it to none and
-     can see that they have. */
-  var differ = [];
-  var body = ROWS.map(function(r){
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      COLS.map(function(c){
-        var m = accessMerged(r, c);
-        if (!m.pairs.length) return stateCell(r.of[0], c.areas[0], editable, m.why || "Cannot come up for this role.");
-        var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
-        var opt = { attr: "data-acm", target: target, value: m.value,
-                    ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: ACC_WHAT[c.key] || c.label } };
-        if (c.key === "plan") opt.states = ["view", "fill", "edit"];
-        if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
-        if (m.mixed) {
-          differ.push(accessRowName(r) + " · " + (c.col ? c.pair + ": " + c.col : c.label));
-          opt.mixed = true;
-          opt.title = "These differ underneath: " + m.pairs.map(function(p){
-            return accessRoleName(p.role) + " in " + accessAreaLabel(p.area).toLowerCase().replace(/^own /, "own ") +
-              " — " + ACC_WORD[p.v];
-          }).join("; ") + "." + (editable ? " Press a state to give them all that one." : "");
-        }
-        return stateCell(r.of[0], c.areas[0], editable, null, opt);
-      }).join("") +
-      (COPA ? (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])
-        ? stateCell(r.of[0], COPA.key, editable, null, {
-            value: moduleGrantFor(r.of[0], COPA), states: ["view", "edit"],
-            attr: "data-mac", shipped: COPA.shipped || "none",
-            ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: COPA.label || COPA.key } })
-        : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
+    var lit = !struck && i <= lv && (info.held == null ? (info.floor ? i >= 1 : true) : i > info.held);
+    var nil = info.floor && i === 0 && lv === 0;
+    var to = lit && i === lv ? below(i) : i;
+    if (info.floor && lit && i === lv && to === null) to = 0;
+    var can = editable && !struck && !fixed && to !== null && !nil;
+    return '<button type="button" class="' + (struck ? "off" : lit ? "eye" : nil ? "nil" : "") + '"' + (can ? ' data-lad="' + esc(r.key) + '|' + to + '"' : ' disabled') +
+      ' data-askwho="' + esc(accessRowName(r)) + '" aria-pressed="' + lit + '"' +
+      (struck ? ' title="Not a level this role stands on"' : lit && i === lv && can ? ' title="Press to stop reading at this level"' : '') + '>' +
+      (lit ? ICON_EYE : '') + esc(word) + '</button>';
+  }).join("") + '</span>';
+}
+/* A person's own level: the highest any of their roles reads at, moved by
+   their exception — what the navigation will actually give them. */
+function personReadsAt(p){
+  var w = world(), rs = SMPRules.personRoles(w, p).map(function(x){ return x.role; });
+  if (!rs.length) rs = ["employee"];
+  return rs.reduce(function(m, k){ return Math.max(m, SMPRules.isOfficeRole(k) ? 3 : SMPRules.ladderLevel(w, p, k)); }, 0);
+}
+function accessExceptions(editable){
+  var words = ladderWords(), w = world();
+  var moved = PEOPLE.filter(function(p){ return SMPRules.reachMove(p) !== 0 || p.key === ACC_EXC_PICK; });
+  var rows = moved.map(function(p){
+    var mv = SMPRules.reachMove(p), now = personReadsAt(p);
+    var at = function(m){ var o = p.reach; if (m) p.reach = m; else delete p.reach; var v = personReadsAt(p); if (o == null) delete p.reach; else p.reach = o; return v; };
+    var asRole = at(0), down = at(-1) < asRole, up = at(1) > asRole;
+    var b = function(m, label, ok){ return '<button type="button" class="seg' + (mv === m ? ' on' : '') + '"' +
+      (mv === m ? '' : editable && ok ? ' data-reachp="' + esc(p.key) + '|' + m + '"' : ' disabled') + ' aria-pressed="' + (mv === m) + '">' + label + '</button>'; };
+    var roles = SMPRules.personRoleKeys(w, p).map(accessRoleName).join(", ") || "no role";
+    return '<div class="acexrow"><span class="acexwho"><b>' + esc(p.name || p.key) + '</b><span>' + esc(roles) + '</span></span>' +
+      '<span class="segsw">' + b(-1, "One lower", down) + b(0, "As the role", true) + b(1, "One higher", up) + '</span>' +
+      '<span class="acexnow">Reads up to <b>' + esc(words[Math.min(3, now)] || "") + '</b></span></div>';
   }).join("");
-
-  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§516). Its
-     hover says which pairs and what each holds; this line says that there is
-     something to decide at all, because a cell with nothing lit is easy to
-     read as "no access" from across the room. A status, not a description
-     (1b-ii), and drawn only while there is one. */
-  var differLine = differ.length
-    ? '<p class="acdiffer"><b>' + differ.length + (differ.length === 1 ? ' cell holds' : ' cells hold') +
-      ' different answers underneath</b> — ' + differ.map(esc).join(", ") +
-      '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
-    : '';
-
+  var pick = editable ? '<label class="acexpick"><span>Move one person</span><select data-reachpick><option value="">Choose a person…</option>' +
+    PEOPLE.filter(function(p){ return personActive(p) && !SMPRules.isOffice(w, p) && SMPRules.reachMove(p) === 0 && p.key !== ACC_EXC_PICK; })
+      .map(function(p){ return '<option value="' + esc(p.key) + '">' + esc(p.name || p.key) + '</option>'; }).join("") + '</select></label>' : '';
+  if (!rows && !editable) return "";
+  return '<div class="acex"><h3>Exceptions</h3>' + (rows || '<p class="acexnone">Nobody reads differently from their role.</p>') + pick + '</div>';
+}
+/* ── §704, REFINED (Islam, 2026-11-01) ────────────────────────────────
+   *"the copilot has the old icons. and the owner is just owner — is that the
+   capability owner or function or direction or what? the description column
+   needs to be useful to the SMO team to adjust"*, and of the switch above
+   the table, *"make the button better as well"*. So:
+     · every row names the roles it covers, in this client's words (a row
+       covering one role is titled by it — "Function head" at El Abd);
+     · the middle column says what the row's settings MEAN now — what the
+       role sees, what it writes, what it does not see — and changes with
+       every press, instead of a fixed phrase;
+     · the Copilot cell is the ladder's own eye and pen;
+     · the first-screen switch is its own settings row with a plain label,
+       the people it applies to today, and what it never changes. */
+var W_TXT = function(k, which){ return String(labelWord(k, which || "group") || "").trim(); };
+function accWords(){
+  var place = buExists() ? "business unit or function" : "function";
+  var places = buExists() ? "business units and functions" : "functions";
+  return { place: place, places: places, div: (W_TXT("division") || "division").toLowerCase(), top: (W_TXT("topword") || "group").toLowerCase() };
+}
+function accCovers(r){
+  var u = buExists() ? W_TXT("unitword") || "Business unit" : null;
+  var caps = (GROUP.capabilities || []).some(function(c){ return c && c.active !== false; });
+  var projects = FUNCTION_KEYS.some(function(k){ return FUNCTIONS[k] && fnPlansInProjects(FUNCTIONS[k]); });
+  switch (r.key) {
+    case "owner": return (u ? [u + " owner"] : []).concat(["Function head"]);
+    case "custodian": return (u ? [u + " custodian"] : []).concat(["Function custodian"], caps ? ["Capability custodian"] : []);
+    case "part": return (u ? [(W_TXT("pillar") || "Pillar") + " owner"] : [])
+      .concat(projects ? [(W_TXT("project") || "Project") + " owner"] : [], topHasPlan() ? ["Direction owner"] : [], caps ? [(W_TXT("capability") || "Capability") + " owner"] : []);
+    case "contrib": return ["Named on a measure, tactic or milestone"];
+    default: return r.floor ? ["On the register, holding nothing"] : [];
+  }
+}
+function accTitle(r){ var cv = accCovers(r); return cv.length === 1 && !r.floor && r.key !== "contrib" ? cv[0] : accessRowName(r); }
+function accRoleCell(r){
+  var cv = accCovers(r), single = cv.length === 1 && !r.floor && r.key !== "contrib";
+  return '<td class="rolecell"><b>' + esc(accTitle(r)) + '</b><span class="why">' + matrixRoleHeads(r) + '</span>' +
+    (cv.length && !single ? '<span class="accov">' + cv.map(function(x){ return '<span>' + esc(x) + '</span>'; }).join("") + '</span>' : '') + '</td>';
+}
+/* What this row's settings mean, now — the sentence the SMO team adjusts by. */
+function accMeaning(r){
+  var w = accWords(), info = LADDER_ROW[r.key] || {}, role = r.of[0];
+  var lv = SMPRules.ladderStored(world(), role), stand = SMPRules.LADDER_STAND[role];
+  if (lv === 2 && !midExists()) lv = 1;
+  if (stand != null && lv < stand) lv = 0;
+  var pen = info.held != null && SMPRules.penOn(world(), role);
+  var everything = "Everything in the " + w.top + ".";
+  var sees;
+  if (info.floor) sees = lv === 0 ? "Nothing." : lv === 1 ? "The " + w.place + " they are attached to." : lv === 2 ? "Their own " + w.div + " and everything in it." : everything;
+  else if (stand != null) sees = lv === 0 ? "Nothing." : lv === 3 ? everything : "Their own " + w.div + ": its page and every " + w.place + " in it.";
+  else sees = lv === 0 ? "Only their own piece inside their " + w.place + "." :
+    lv === 1 ? "Their own " + w.place + " in full: every piece in it, its plan and its figures." :
+    lv === 2 ? "Every " + w.place + " in their " + w.div + ", and the " + w.div + "’s page." : everything;
+  var writes = info.held == null ? "Nothing. They hold no piece."
+    : pen ? "Enters and submits " + ({ owner: (buExists() ? "their unit’s or function’s" : "their function’s") + " figures, and its report", custodian: "what they keep, as its owner would",
+        part: "the lines of their own piece", contrib: "the lines that name them" }[r.key] || "what they hold") + "."
+    : "Nothing. Reads only until the pen is on.";
+  var hides = [];
+  if (!(lv === 0 && (stand != null || info.floor)) && lv < 3) {
+    if (lv === 0) hides.push("the other pieces beside theirs");
+    if (lv <= 1) hides.push("other " + w.places);
+    if (lv === 2) hides.push("other " + w.div + "s");
+    hides.push("the " + w.top + "’s own pages");
+  }
+  return '<td class="acmeans"><span><b>Sees</b> ' + esc(sees) + '</span><span><b>Writes</b> ' + esc(writes) + '</span>' +
+    (hides.length ? '<span class="acno">Does not see ' + esc(hides.join(", ")) + '.</span>' : '') + '</td>';
+}
+/* The Copilot cell in the ladder's own terms: the eye reads it, the pen uses
+   it. Pressing a lit one turns it off; the writer is the module's own
+   (`data-mac`, "role|area|state|shipped"). Office only, by rule. */
+function accCopilotCell(r, editable, COPA){
+  var office = r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]);
+  if (!office) return '<td class="accop"><span class="acdash" title="Office only for now.">Office only</span></td>';
+  var v = moduleGrantFor(r.of[0], COPA), sh = COPA.shipped || "none", role = r.of[0];
+  var to = function(st){ return role + '|' + COPA.key + '|' + st + '|' + sh; };
+  var eyeOn = v === "view" || v === "edit", penOn = v === "edit";
+  var who = accessRowName(r) + " · " + matrixRoleHeads(r);
+  return '<td class="accop"><span class="ladder' + (editable ? '' : ' ro') + '">' +
+    '<button type="button" class="' + (eyeOn ? 'eye' : '') + '"' + (editable ? ' data-mac="' + esc(to(eyeOn ? "none" : "view")) + '"' : ' disabled') +
+      ' data-askwho="' + esc(who) + '" data-askwhat="' + esc(COPA.label || "the Copilot") + '" data-askfrom="' + esc(v) + '" aria-pressed="' + eyeOn + '">' + ICON_EYE + 'Reads</button>' +
+    '<button type="button" class="' + (penOn ? 'pen' : '') + '"' + (editable ? ' data-mac="' + esc(to(penOn ? "view" : "edit")) + '"' : ' disabled') +
+      ' data-askwho="' + esc(who) + '" data-askwhat="' + esc(COPA.label || "the Copilot") + '" data-askfrom="' + esc(v) + '" aria-pressed="' + penOn + '">' + ICON_PEN + 'Uses</button>' +
+    '</span></td>';
+}
+var ICON_WINDOW = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h6.2c.5 0 .8.3.8.8v10.2c0-.6-.4-1-1-1H3zM17 4.5h-6.2c-.5 0-.8.3-.8.8v10.2c0-.6.4-1 1-1H17z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+var ICON_BENCH = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 7.5h14M8 7.5v9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+function accLanding(editable, ROWS){
+  var rdOn = SMPRules.readersOpen(GROUP);
+  var who = ROWS.filter(function(r){
+    var info = LADDER_ROW[r.key] || {};
+    return !(r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])) && (info.held == null || !SMPRules.penOn(world(), r.of[0]));
+  }).map(accTitle);
+  var opt = function(on, key, icon, word){
+    return '<button type="button" class="acland-opt' + (on ? ' on' : '') + '"' + (editable && !on ? ' data-readers="' + key + '"' : (editable ? '' : ' disabled')) +
+      ' aria-pressed="' + on + '">' + icon + '<span>' + word + '</span></button>';
+  };
+  return '<div class="acland"><div class="acland-txt"><b>First screen for people who can change nothing</b>' +
+      '<span>Today: ' + esc(who.join(", ") || "nobody") + '. This decides where they open on sign-in, never what they can see.</span></div>' +
+    '<div class="acland-sw" role="group" aria-label="First screen for people who can change nothing">' +
+      opt(rdOn, "window", ICON_WINDOW, "Reading window") + opt(!rdOn, "workbench", ICON_BENCH, "Workbench") + '</div></div>';
+}
+function renderAccess(){
+  /* Editing this page is editing who may edit it, so it is the Super user's
+     whatever any row says; it stays readable to whoever can open it. */
+  var editable = grant("c_access") === "edit" && mayEditAccess();
+  var ROWS = SMPRules.ACCESS_ROWS.filter(function(r){ return !r.mid || midExists(); });
+  var COPA = copilotArea();
+  var office = ROWS.filter(function(r){ return r.of.length === 1 && SMPRules.isOfficeRole(r.of[0]); });
+  var rest = ROWS.filter(function(r){ return office.indexOf(r) < 0; });
+  var head = '<tr><th>Role</th><th>Sees up to · writes</th><th>What this means</th>' + (COPA ? '<th>' + esc(COPA.label || "Copilot") + '</th>' : '') + '</tr>';
+  var officeRows = office.map(function(r){
+    return '<tr class="acoffice">' + accRoleCell(r) + '<td><span class="acall">Sees and edits everything, by rule</span></td>' +
+      '<td class="acmeans"><span>Runs the platform: the plan, the cycle, Setup.</span></td>' + (COPA ? accCopilotCell(r, editable, COPA) : '') + '</tr>';
+  }).join("");
+  var body = rest.map(function(r){
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + accRoleCell(r) + '<td class="acladder">' + ladderCell(r, editable) + '</td>' + accMeaning(r) +
+      (COPA ? accCopilotCell(r, editable, COPA) : '') + '</tr>';
+  }).join("");
+  var mine = SMPRules.personRoleKeys(world(), viewer()).map(accessRoleName).join(", ");
+  var roLine = editable ? '' : '<p class="acro"><b>Read only.</b> You are on this client as ' + esc(mine || "no seat") +
+    '. Only the Super user changes who reads and writes what.</p>';
   return section("", "Roles & access",
       null,
-      differLine +
-      '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
-      '<div class="chart-legend" style="margin-top:12px">' +
-        '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-view">' + ICON_HALFEYE + '</i> may read their part only (Part owner)</span>' +
-        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Plan only)</span>' +
-        '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
-        '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
-        (differ.length ? '<span><i class="st st-mixed">differs</i> answers differ underneath</span>' : '') +
-        '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
-      '</div>');
+      roLine +
+      '<div class="cfg acgrid acgrid-ladder"><table><thead>' + head + '</thead><tbody>' + officeRows + body + '</tbody></table></div>' +
+      '<p class="acladderkey"><span>' + ICON_EYE + ' sees — press a level to see up to it, the last lit one to step down</span>' +
+        '<span>' + ICON_PEN + ' enters and submits — a switch on the role’s own level</span>' +
+        '<span>Struck through: not a level this role can stand on.</span></p>' +
+      accLanding(editable, ROWS) +
+      accessExceptions(editable));
 }
 /* THE TWO ESSAYS ARE GONE FROM THE PAGE (Islam, 2026-08-22, on this table:
    "the design is poor"). "Own is not a setting" and "Three things are rules"
@@ -999,8 +1098,10 @@ function cfgHead(title, alerts, editKey, mayEdit, clearScope, labels, extra){
                           "Each one is archived first and can be restored."
                         : "Actuals and notes, everywhere on this page. Every plan stands.") +
                     '</span></div>' +
-                  '<button class="danger" data-clearyes="' + CLEARING + '">Yes, clear</button>' +
                   '<button data-clearno="1">Cancel</button>' +
+                  '<button class="danger" data-clearyes="' + CLEARING + '">' +
+                    (CLEARING === clearScope + "||plan" ? "Clear every plan" : "Clear the progress") +
+                  '</button>' +
                 '</div>'
               : open
               ? '<div class="menu">' +
@@ -1118,9 +1219,9 @@ function assignPicker(where, roleKey, current, editable){
     '<div class="pickfoot">' +
       '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +
       '<span class="why pickhint" style="margin:0">Type a name to add someone new</span>' +
+      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
       (current ? '<button class="linkbu" data-pick-clear="' + esc(id + '|' + current) +
                  '">Unassign</button>' : '') +
-      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
     '</div></div>';
 }
 
@@ -1284,15 +1385,15 @@ function unitPanels(k, u){
       L("pillar") + ', ' + L("measure") + ', ' + L("tactic") + ', ' + L("keyobj") + ', SWOT and the foundation text. ' +
       'Kept as an archive dated today and restorable from <b>Import &amp; archives</b>.' +
       '</div><div class="cbtns">' +
-        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Yes, clear the plan</button>' +
-        '<button data-clearno="1">Cancel</button></div></div>';
+        '<button data-clearno="1">Cancel</button>' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|plan">Clear the plan</button></div></div>';
   if (CLEARING === k + "|nums")
     return '<div class="kmenu kconfirm"><div class="cq">' +
       '<b>Clear ' + esc(u.name) + '’s reported progress?</b> ' +
       'Actuals and progress only. The plan stands.' +
       '</div><div class="cbtns">' +
-        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Yes, clear the progress</button>' +
-        '<button data-clearno="1">Cancel</button></div></div>';
+        '<button data-clearno="1">Cancel</button>' +
+        '<button class="danger" data-clearyes="' + esc(k) + '|nums">Clear the progress</button></div></div>';
   return "";
 }
 
@@ -1312,7 +1413,7 @@ function unitKebab(k, u, mayEdit){
      product has never offered to destroy one — so there is no entry here whose
      refusal would have to be written (§62). Retire is reversible and keeps
      every attribution true. */
-  acts.push('<button class="danger" data-uact="' + esc(k) + '">' +
+  acts.push('<button' + (u.active ? ' class="danger"' : '') + ' data-uact="' + esc(k) + '">' +
     (u.active ? "Retire this unit" : "Restore this unit") + '</button>');
   return kebabCell(UMENU === k, acts, panels, u.name, 'data-umenu="' + esc(k) + '"',
                    String(CLEARING || "").indexOf(k + "|") === 0);
@@ -2148,6 +2249,16 @@ var PEOPLE_COLS = [
      and it earns its place only when somebody is looking for the people who
      belong to a company and no unit. */
   { k:"company",  label:"Company", off:true },
+  /* ── WHO THEY ANSWER TO (§655) ──────────────────────────────────
+     Islam: "add a column to identify the manager of the person". "Reports
+     to", and not "Manager": the Org Directory already says it in those words,
+     Portfolio reads "Project Manager" as the Lead (spec 060 §5.1a), and
+     "Senior Manager" is a job title on this very register — a column headed
+     Manager would collide with both. It holds a register KEY and never a
+     typed name (§48), so a rename reaches it, and it GRANTS NOTHING (§56):
+     who somebody answers to is a fact about them, not a right. Shown by
+     default, because it was asked for as a column of the register. */
+  { k:"reportsto", label:"Reports to" },
   /* TWO COLUMNS, NOT ONE (Islam, 2026-08-24: "the contact in the People
      register table needs to split the email from the contact number").
      §54 put them together as "one answer to one question" — how you reach
@@ -2740,6 +2851,22 @@ function renderPeople(){
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
         '" placeholder="Job title">', true);
+    /* ── REPORTS TO (§655): A PICK FROM THE REGISTER, NEVER A TYPED NAME ──
+       The list is reportsToChoices(): everybody active, minus this person and
+       minus anybody who already answers to them, however far down — so a
+       loop cannot be chosen and no refusal has to be drawn. Somebody they
+       already point at stays in the list whatever their status, or opening
+       the dialog would silently read a retired manager as nobody (§54.4).
+       WIDE, like Job title above it: a fourth narrow field would put the
+       three places on a row of three and a row of one, §122's empty cell. */
+    var mgr = reportsToOf(p);
+    F("Reports to", '<select class="fld" data-preports="' + esc(p.key) + '">' +
+        '<option value="">&mdash; nobody &mdash;</option>' +
+        reportsToChoices(p).map(function(m){
+          return '<option value="' + esc(m.key) + '"' +
+            (mgr && mgr.key === m.key ? " selected" : "") + '>' +
+            esc(knownName(m, DNAMES)) + (personActive(m) ? "" : " (retired)") + '</option>';
+        }).join("") + '</select>', true);
     /* WIDE, SO THE THREE PLACES SIT TOGETHER (§135.6). Adding Company left the
        second block at four fields in a three-column grid — a row of three and
        a row of one, which is the empty cell §122 spent a redesign removing.
@@ -3080,7 +3207,7 @@ function renderPeople(){
          save refuses it, and `setTeam` is what actually retires a consultant
          whose seat is taken away (§338's sweep). */
       if (!ffRow)
-        danger.push('<button class="danger" data-pact="' + p.key + '">' +
+        danger.push('<button' + (personActive(p) ? ' class="danger"' : '') + ' data-pact="' + p.key + '">' +
           (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
       /* ── DELETE, AND THE REFUSAL IS WHERE THE CONFIRMATION WOULD BE ──
          §62's shape, because it is the same job on a different table: the
@@ -3229,8 +3356,8 @@ function renderPeople(){
           ') \u2014 those are text, not a link to this row.'
         : '') +
       '</div><div class="cbtns">' +
-        '<button data-pdel-no="1">No</button>' +
-        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Yes, delete</button>' +
+        '<button data-pdel-no="1">Cancel</button>' +
+        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Delete for good</button>' +
       '</div></div>';
   }
 
@@ -3441,6 +3568,17 @@ function renderPeople(){
           return ck
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
+        })()) : '') +
+      /* ── REPORTS TO (§655): THE REGISTER'S NAME, READ AT DRAW TIME ────
+         The row holds a key; what it prints is whatever the register calls
+         that person today (§48, §130.9). A manager who has retired is still
+         named — the fact did not stop being true — and the hover says so,
+         the way every other mark in this table speaks (§116.4). */
+      (showCol("reportsto") ? pcell(p, "Reports to", (function(){
+          var m = reportsToOf(p);
+          if (!m) return '<span class="why" style="margin:0">&mdash;</span>';
+          return '<span class="val" title="' + esc(m.name) +
+            (personActive(m) ? '' : ' \u00b7 retired') + '">' + esc(knownName(m, DNAMES)) + '</span>';
         })()) : '') +
       /* ── AN ADDRESS IS TAKEN WHOLE (§378) ──────────────────────────
          Islam: "can you make a right click on the email to highlight the
@@ -3986,6 +4124,8 @@ function renderPeople(){
         (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
         (showCol("bu")       ? th(esc(sitsInWord()), "wcol") : '') +
         (showCol("company")  ? th("Company")             : '') +
+        /* A select when the cell is open, so it takes §93.10's floor too. */
+        (showCol("reportsto") ? th("Reports to", "wcol") : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
@@ -4079,7 +4219,7 @@ function mergeStepHtml(){
   if (PMERGE.done) {
     return '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
       '<div class="cbtns" style="margin-top:14px">' +
-        '<button class="danger" data-pmerge-close="1">Close</button></div>';
+        '<button data-pmerge-close="1">Close</button></div>';
   }
   var a = PMERGE.a ? personBy(PMERGE.a) : null;
   if (!a) return '<div class="note">That row is no longer on the register.</div>';
@@ -4642,16 +4782,16 @@ function coPanels(ck, co, on){
           'so nothing is deleted and restoring puts it back exactly as it was.'
         : 'It returns to the group dropdown and every role held over it reads again.') +
     '</div><div class="cbtns">' +
-      '<button class="danger" data-coact="' + esc(ck) + '">Yes, ' +
-        (on ? "retire" : "restore") + '</button>' +
-      '<button data-clearno="1">Cancel</button></div></div>';
+      '<button data-clearno="1">Cancel</button>' +
+      '<button' + (on ? ' class="danger"' : '') + ' data-coact="' + esc(ck) + '">' +
+        (on ? "Retire the company" : "Restore the company") + '</button></div></div>';
 }
 function coKebab(ck, co, on, mayEdit){
   if (!mayEdit) return '<td class="cc kebcell"></td>';
   var acts = [
     '<button data-rowdlg="companies|' + esc(ck) + '">Edit details</button>',
     '<hr>',
-    '<button class="danger" data-coclear="' + esc(ck) + '">' +
+    '<button' + (on ? ' class="danger"' : '') + ' data-coclear="' + esc(ck) + '">' +
       (on ? "Retire this company" : "Restore this company") + '</button>'
   ];
   return kebabCell(COMENU === ck, acts, coPanels(ck, co, on), co.name,
@@ -5256,6 +5396,12 @@ function renderKB(){
            'already attributed to them stays true. Deleting takes the row, the password and ' +
            'the open sessions, and is <b>refused while anything still points at the ' +
            'person</b> \u2014 the refusal names what. Deleting is the Super user\u2019s.' },
+      { h: "Reports to says who somebody answers to, and decides nothing",
+        p: '<b>Reports to</b> names the person\u2019s manager, picked from the register ' +
+           'rather than typed, so renaming the manager renames them here too. It grants ' +
+           'nothing \u2014 what somebody may open is their roles, not who they answer to. ' +
+           'Nobody can be made to report to themselves or to somebody under them, and a ' +
+           'row cannot be deleted while anybody still reports to it.' },
       { h: "Two rows that are one person are merged, never guessed",
         p: 'Who a row <i>is</i> is decided by <b>Emp ID, then email</b> \u2014 never by the ' +
            'name, because two people really can share one. A row with neither is marked, ' +
@@ -6381,8 +6527,9 @@ function renderMyLines(){
        has one, as the figure sets' page does (§16.7). */
     var noteOf = function(r){
       return rowAtRisk(r) && canEnterLine(r.target, r, "mine")
-        ? noteBox("note", r.id, r.obj.note, needsNote(r), r.target)
-        : (r.obj.note ? noteRead(r.obj.note, true) : '<span class="nobody">&mdash;</span>');
+        ? noteBox("note", r.id, r.obj.note, noteWant(r), r.target)
+        : (r.obj.note || needsNote(r) ? noteRead(r.obj.note, true, needsNote(r))
+                                      : '<span class="nobody">&mdash;</span>');
     };
     var body = '<table class="cfg"><thead><tr>' +
         '<th style="width:26%">' + L1("tactic") + '</th><th style="width:18%">What it produced</th>' +
@@ -6439,7 +6586,7 @@ function renderMyLines(){
         (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
     (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
       'This is a record until the SMO opens the next one.</div>') +
-    noteLockBar() + chips + blocks +
+    chips + blocks +
     '<div class="note"><b>You enter the figure, and its note when it is red; the unit submits.</b> ' +
       'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
 }
@@ -6575,8 +6722,8 @@ function namePicker(unitKey, m, editable){
       '<div class="pickempty" hidden>No name matches.</div>' +
     '</div>' +
     '<div class="pickfoot">' +
-      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
       '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
+      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
     '</div></div>';
 }
 
@@ -7528,41 +7675,178 @@ function cyclePick(label, value, setter, opts){
    pickers are §308's own `planPeriodBlock()`, drawn only while this pen is
    open, so one control writes the period (§53.5). The timeline is the plan's
    calendar year(s), the plan shaded and the open cycle outlined. */
-function planPeriodPanel(can){
+/* ── §693: ONE CARD, ONE EDIT, TWO TABS ──────────────────────────────
+   Islam, shown three ways the page could read (design-mockups/
+   planning-reporting-views/2026-10-30_three-views.html): "go with A, build
+   it". The page did two jobs in one column — SETTING the plan period and the
+   cycle, and WATCHING who has reported — with two pens (§308's and §273.4's)
+   for what the strip read as one fact ("6 of 12 months of the plan"), and
+   the cycle's pen pushing the board 156px down the page (measured at
+   §273.4).
+
+   So: a tab each (`CYCLETAB`). THE SET-UP is one card, The year and the
+   cycle — the timeline across the top with the due date and the review day
+   PINNED on it, the facts under it, closed cycles as chips — with ONE Edit,
+   which opens the pen BESIDE the card (`.cycwrap.editing`), so nothing under
+   it moves. The pen holds, in order, the plan period (§308's own block),
+   the cycle (§307's pickers, while it is open), the review, and Ending it;
+   the new-cycle panel (§47.8) draws in the same slot. WHO HAS REPORTED is the
+   board as it was, with the headline strip over it and a filter row.
+
+   `PLANEDIT` IS GONE (§24): there is one pen, `CYCLEEDIT`, and it opens
+   whichever state the cycle is in — Reopen sits where Close does, behind the
+   pen, which is §273.2's own placement; Edit no longer opens the reopen
+   dialog straight from the strip.
+
+   THE TIMELINE DRAWS WHENEVER THERE IS A MONTH TO DRAW — the plan's or the
+   cycle's — where §495 drew it for a set period only. The lit months are
+   still EXACTLY the period: with none set nothing is lit and the key says
+   so, because a timeline that lights the calendar year as if it were the
+   plan is §35's assumption printed as a fact. */
+function cycleCard(can, open){
   var set = planSet(), a = planFrom(), b = planTo();
+  var cf = monthsOf(REVIEW.from), ct = reviewAsOf();
   var qw = function(m0, m1){ var q0 = Math.floor((m0 % 12) / 3) + 1, q1 = Math.floor((m1 % 12) / 3) + 1;
-    return Math.floor(m0 / 12) === Math.floor(m1 / 12) ? (q0 === q1 ? "Q" + q0 : "Q" + q0 + "\u2013Q" + q1) : ""; };
-  var facts = set
-    ? '<div><small>From</small><b>' + esc(SMPRules.monthLabel(a)) + '</b></div>' +
-      '<div><small>To</small><b>' + esc(SMPRules.monthLabel(b)) + '</b></div>' +
-      '<div><small>Length</small><b>' + planLength() + ' months' + (qw(a, b) ? ' \u00b7 ' + qw(a, b) : '') + '</b></div>'
-    : '<div><small>Plan period</small><b>Not set</b><span class="why" style="margin:0">the calendar year is used</span></div>';
+    return Math.floor(m0 / 12) === Math.floor(m1 / 12) ? (q0 === q1 ? "Q" + q0 : "Q" + q0 + "–Q" + q1) : ""; };
+  /* THE PINS. A day date's month is read through the same `monthsOf` every
+     cycle date is read through; the review day is stored as the date input
+     writes it (yyyy-mm-dd), so its month is read off that shape. Two pins on
+     one month share the cell. */
+  var pins = {}, nPins = 0;
+  var pin = function(m, word){ if (m == null) return; pins[m] = pins[m] ? pins[m] + " · " + word : word; nPins++; };
+  var dueM = monthsOf(REVIEW.due);
+  if (dueM != null) pin(dueM, "due " + String(REVIEW.due).replace(/\s*\d{4}\s*$/, ""));
+  var rd = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(REVIEW.reviewDay || ""));
+  var rdM = rd ? (+rd[1]) * 12 + (+rd[2]) - 1 : null;
+  if (rdM != null) pin(rdM, "review " + (+rd[3]) + " " + SMPRules.monthLabel(rdM).slice(0, 3));
+  var lo = null, hi = null;
+  [set ? a : null, set ? b : null, cf, ct, dueM, rdM].forEach(function(m){
+    if (m == null) return;
+    lo = lo == null ? m : Math.min(lo, m); hi = hi == null ? m : Math.max(hi, m);
+  });
   var tl = "";
-  if (set) {
-    var cf = monthsOf(REVIEW.from), ct = reviewAsOf();
-    var lo = Math.min(a, cf != null ? cf : a), hi = Math.max(b, ct != null ? ct : b);
+  if (lo != null) {
     var y0 = Math.floor(lo / 12), y1 = Math.floor(hi / 12);
     if (y1 - y0 > 2) y1 = y0 + 2;
-    var cells = "";
+    var cells = "", pinRow = "";
     for (var m = y0 * 12; m < (y1 + 1) * 12; m++) {
-      var inP = m >= a && m <= b, inC = cf != null && ct != null && m >= cf && m <= ct;
-      cells += '<span class="pptl-m' + (inP ? ' inp' : '') + (inC ? ' inc' : '') + (inC && !inP ? ' past' : '') +
-        '" title="' + esc(SMPRules.monthLabel(m)) + '">' + "JFMAMJJASOND".charAt(m % 12) + '</span>';
+      var inP = set && m >= a && m <= b, inC = cf != null && ct != null && m >= cf && m <= ct, pn = pins[m];
+      cells += '<span class="pptl-m' + (inP ? ' inp' : '') + (inC ? ' inc' : '') + (inC && set && !inP ? ' past' : '') +
+        (pn ? ' pin' : '') + '" title="' + esc(SMPRules.monthLabel(m)) + '"' +
+        (pn ? ' data-pin="' + esc(pn) + '"' : '') + '>' + "JFMAMJJASOND".charAt(m % 12) + '</span>';
+      /* THE PIN'S WORDS SIT IN A ROW OF THEIR OWN under the strip, one slot
+         per month, because the strip clips whatever hangs below it. */
+      pinRow += '<span class="pptl-p">' + (pn ? '<em>' + esc(pn) + '</em>' : '') + '</span>';
     }
     var yrs = ""; for (var yy = y0; yy <= y1; yy++) yrs += '<span>' + yy + '</span>';
-    tl = '<div class="pptl" data-plan-timeline><div class="pptl-y">' + yrs + '</div><div class="pptl-ms">' + cells + '</div>' +
-      '<div class="pptl-key"><span class="k inp"></span>Plan period' + (cf != null && ct != null ? '<span class="k inc"></span>This cycle' : '') + '</div></div>';
+    tl = '<div class="pptl' + (nPins ? ' pinned' : '') + '" data-plan-timeline><div class="pptl-y">' + yrs + '</div>' +
+      '<div class="pptl-ms">' + cells + '</div>' + (nPins ? '<div class="pptl-ps">' + pinRow + '</div>' : '') +
+      '<div class="pptl-key"><span class="k inp"></span>' +
+        (set ? 'Plan period' : 'Plan period not set — the calendar year is used') +
+        (cf != null && ct != null ? '<span class="k inc"></span>This cycle' : '') +
+        (nPins ? '<span class="k pin"></span>' + (dueM != null ? 'Reports due' : '') +
+          (dueM != null && rdM != null ? ' · ' : '') + (rdM != null ? 'Review day' : '') : '') +
+      '</div></div>';
   }
+  /* THE FACTS. The strip's own sentences, kept word for word where a check
+     or a person reads them: "reported as of", the "n of m months of the
+     plan" every figure is prorated by (§239.3, §308), and what the plan
+     edits are while the cycle runs. */
+  var asof = (function(){
+    var em = elapsedMonths();
+    if (em == null) return 'the year is not set, so every figure is measured against a whole one';
+    var why = [];
+    if (!planSet()) why.push('taken from the calendar year');
+    if (reviewAsOfDerived()) why.push('the month is from the cycle’s name');
+    return em + ' of ' + planLength() + ' months' + (planSet() ? ' of the plan' : '') +
+      (why.length ? ', ' + why.join(', ') : '');
+  })();
+  var hrs = SMPRules.remindHours(REVIEW);
+  var span = String(REVIEW.from || "").trim() && String(REVIEW.to || "").trim()
+    ? esc(REVIEW.from) + ' to ' + esc(REVIEW.to) : "";
+  var facts =
+    '<div data-fact-plan><small>Plan period</small>' +
+      (set ? '<b>' + esc(SMPRules.monthLabel(a)) + ' – ' + esc(SMPRules.monthLabel(b)) + '</b>' +
+             '<span class="sub">' + planLength() + ' months' + (qw(a, b) ? ' · ' + qw(a, b) : '') + '</span>'
+           : '<b>Not set</b><span class="sub">the calendar year is used</span>') + '</div>' +
+    '<div data-fact-cycle><small>This cycle</small><b><span data-cycle-name>' + esc(REVIEW.name) + '</span> ' +
+      '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span></b>' +
+      '<span class="sub">' + (span ? span + ' · ' : '') + '<span class="asof">reported as of <b>' + esc(reviewAsOfLabel()) + '</b></span> · ' + asof + '</span></div>' +
+    '<div data-fact-due><small>Reports due</small><b>' + (String(REVIEW.due || "").trim() ? esc(REVIEW.due) : 'Not set') + '</b>' +
+      '<span class="sub fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</span></div>' +
+    '<div data-fact-review><small>The review</small><b>' + (reviewDayWord() ? 'presents <span>' + esc(reviewDayWord()) + '</span>' : 'Not set') + '</b>' +
+      '<span class="sub">' + (hrs.length ? 'reminders ' + esc(hrs.join(' · ')) + ' hours before' : 'no reminders') + '</span></div>';
   var nOut = tacticsOutsidePlan();
-  return '<div class="planblk" data-plan-block>' +
-    '<div class="planblk-h"><span>Plan period</span>' +
-      (can ? '<button class="editbtn' + (PLANEDIT ? ' penon' : '') + '" data-editplan="1">' + (PLANEDIT ? 'Done editing' : 'Edit') + '</button>' : '') +
-    '</div>' +
-    '<div class="planblk-facts">' + facts + '</div>' + tl +
+  var chips = HISTORY.length
+    ? '<div class="planblk-chips" data-closed-cycles><span class="lab">Closed cycles</span>' +
+        HISTORY.map(function(h){ return '<span class="pill kind">' + esc(h.name) + ' · ' + h.group + '%</span>'; }).join("") + '</div>'
+    : '';
+  return '<div class="planblk" data-plan-block data-cycle-card>' +
+    '<div class="planblk-h"><span>The year and the cycle</span><span class="planblk-acts">' +
+      (can && !open && !NEWCYCLE ? '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>' : '') +
+      (can && !NEWCYCLE ? '<button class="editbtn' + (CYCLEEDIT ? ' penon' : '') + '" data-editcycle="1">' +
+        (CYCLEEDIT ? 'Done editing' : 'Edit') + '</button>' : '') +
+    '</span></div>' +
+    tl +
+    '<div class="planblk-facts">' + facts + '</div>' +
+    (cyclePastPlan() ? '<div class="planblk-flag" data-cyc-past><b>Runs past the plan period.</b> A figure measured after the plan ended is measured against a whole target.</div>' : '') +
     (nOut ? '<div class="planblk-flag" data-plan-outside><b>' + nOut + ' tactic' + (nOut === 1 ? ' ticks a quarter' : 's tick a quarter') +
       ' outside the plan period.</b> They are kept as they are; change the period or the quarters on the plan.</div>' : '') +
-    (PLANEDIT && can ? '<div class="planblk-pen">' + planPeriodBlock() + '</div>' : '') +
+    chips +
   '</div>';
+}
+
+/* THE PEN, beside the card. `.newcycle` is kept as its class because every
+   field in it writes through FIELDS and is addressed by the checks under that
+   name (§53.5); `cycdrawer` is the shape. */
+function cycleDrawer(can, open){
+  if (!can || !CYCLEEDIT) return "";
+  return '<div class="cfg newcycle cycdrawer" data-cycle-drawer>' +
+    planPeriodBlock() +
+    (open
+      ? '<div class="cyc2-r cycown"><div class="nc-h">This cycle</div>' +
+          '<div class="nc-grid">' +
+            cycleField("Name", REVIEW.name, "H1 2027", function(v){
+              /* TRIMMED, and an empty name is REFUSED rather than stored: it
+                 is what every snapshot and archived plan is filed under once
+                 the cycle closes (§273.4). */
+              var t = String(v).trim();
+              if (!t) return false;
+              REVIEW.name = t;
+            }, "nm-lab") +
+            cyclePick("Covers from", REVIEW.from, function(v){ REVIEW.from = String(v).trim(); }, { wide:true }) +
+            cyclePick("to", REVIEW.to, function(v){ REVIEW.to = String(v).trim(); }, { wide:true, cls:"tobtn" }) +
+            cyclePick("Reports due", REVIEW.due, function(v){ REVIEW.due = String(v).trim(); }, { day:true }) +
+          '</div>' +
+          '<div class="nc-why"><b>The month it covers to decides what every figure ' +
+            'is measured against.</b> A target that adds up across the year is compared ' +
+            'with the share of it due by then, and work dated after it is not asked for. ' +
+            'Changes are kept as you type.</div>' +
+        '</div>'
+      : '') +
+    reviewDayBlock() +
+    '<div class="cyc2-r cyc2-d cycend"><div class="nc-h">' + (open ? 'Ending it' : 'Reopening it') + '</div>' +
+      (open
+        ? '<p class="cyc2-p">Closing files every figure under this name and stops ' +
+            'the units reporting.</p>' +
+          '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>'
+        : '<p class="cyc2-p">' + esc(REVIEW.name) + ' is closed and its figures are a record. ' +
+            'Reopening makes them live again.</p>' +
+          '<button class="editbtn danger" data-reopencycle="1">Reopen the cycle</button>') +
+    '</div>' +
+  '</div>';
+}
+
+function cycleTabs(){
+  var t = cycleTotals();
+  var tab = function(k, label, count){
+    var on = CYCLETAB === k;
+    return '<button type="button" role="tab" data-cyctab="' + k + '" aria-selected="' + on + '"' +
+      (on ? ' class="on"' : '') + '>' + label +
+      (count != null ? '<span class="kbcount">' + count + '</span>' : '') + '</button>';
+  };
+  return '<div class="kbtabs cyctabs" role="tablist">' +
+    tab("setup", "The set-up") + tab("board", "Who has reported", t.done + " / " + t.total) + '</div>';
 }
 
 function planPeriodBlock(){
@@ -7645,6 +7929,17 @@ function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
 function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
+  /* §693: EVERY ROW SAYS WHAT THE FILTER ROW ASKS — its state, whether it
+     owes a note, and the words Find a line matches — and is counted as it
+     is drawn, so the filters' numbers are the rows' own and cannot drift
+     from them (§53.5). The filter itself is applied in the shell on the
+     drawn rows, never by a repaint, so typing in Find keeps its cursor. */
+  var STATS = { all:0, late:0, part:0, done:0, notes:0 };
+  var brow = function(st, miss, name, who, extra){
+    STATS.all++; STATS[st.key] = (STATS[st.key] || 0) + 1; if (miss) STATS.notes++;
+    return '<tr' + (extra || '') + ' data-brow data-state="' + esc(st.key) + '" data-notes="' + (miss ? 1 : 0) +
+      '" data-find="' + esc(String(name + ' ' + who).toLowerCase()) + '">';
+  };
 
   /* §244: THE UNIT HALF CARRIES A PILLARS FUNCTION TOO (Islam: "put them on
      the unit half"). One builder over a TARGET rather than a second copy of
@@ -7677,7 +7972,7 @@ function renderCycle(){
          with the progress bar beside it, which counts the same rows. */
       if (rowAnswered(x)) by[slot][0]++;
     });
-    return '<tr><td><b>' + esc(placeLabel(t)) + '</b></td>' +
+    return brow(st, miss, placeLabel(t), who) + '<td><b>' + esc(placeLabel(t)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -7716,7 +8011,7 @@ function renderCycle(){
     var cell = function(k, show){
       return '<td class="num">' + (show ? by[k][0] + '/' + by[k][1] : '\u2014') + '</td>';
     };
-    return '<tr data-line><td><b>' + esc(name) + '</b></td>' +
+    return brow(st, miss, name, who, ' data-line') + '<td><b>' + esc(name) + '</b></td>' +
       '<td class="why' + (nobody ? ' nobody' : '') + '" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -7840,7 +8135,7 @@ function renderCycle(){
        nothing to tell the two rows apart, on the page the office uses to chase
        people. `placeLabel()` adds the suffix only where the clash is real
        (§65, §93.12) and is what the unit half beside it now uses (§53.5). */
-    return '<tr><td><b>' + esc(placeLabel(target)) + '</b></td>' +
+    return brow(st, miss, placeLabel(target), who) + '<td><b>' + esc(placeLabel(target)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -7888,159 +8183,41 @@ function renderCycle(){
      the FUNCTIONS this page put on the board (§105) as well as the units. */
   var t = cycleTotals();
 
-  var head =
-    '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
-      '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
-      '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
-      /* ── THE REVIEW POINT, EDITABLE WHILE THE CYCLE RUNS (§239) ──────
-         Islam: "if I will set the cycle dates you need to give me the ability
-         to set this on opening the cycle and ability to edit this in an open
-         cycle." Before this there was NO control anywhere -- the value could
-         only ever be whatever the seed left, which is how a tenant came to be
-         reporting in Q2 against a platform that thought the year was over.
-
-         It is a MONTH because a quarter cannot say "eight months in", and it
-         is the platform's own month picker rather than a box, for §177's own
-         reason: with no box there is nothing to mistype and the picker can
-         only produce a shape `monthsOf()` already reads. */
-      '<span class="fstrip-meta asof">reported as of ' +
-        /* IT SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With no month
-           picked the platform still has an answer -- the cycle's own quarter
-           end -- so showing the picker's "Missing" would print an alarm over
-           something that is not owed (§177, §214.4) while the note beside it
-           reported a real number. The note says whether it was chosen or
-           inherited.
-
-           §273: AND IT IS A VALUE HERE, NEVER A CONTROL. The picker moved
-           inside the pen with everything else the office can change, so this
-           line reads the same for everybody and the strip carries nothing that
-           can be pressed by accident. One control for one fact (§53.5): a
-           picker here AND a picker in the panel is two, and they would have to
-           be kept in step. */
-        /* §307: ONE SOURCE. This read the stored month and fell back to the
-           derived one, which is exactly the pair that could disagree with the
-           `Jan 2027 to Jun 2027` printed six pixels to its left. It reads the
-           cycle's end now, through the one function every score reads. */
-        '<b>' + esc(reviewAsOfLabel()) + '</b>' +
-        /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
-           whether the month he picked had taken -- "can you check if the cycle
-           adjustment is saved" -- because the strip showed the value and
-           nothing showed the consequence. `8 of 12 months` is the number every
-           figure on the platform is actually prorated by, so a review point
-           that is not working says so on the page rather than being inferred
-           from a table reading 100%.
-
-           §278: it is the number every figure is prorated by BY DEFAULT — a row
-           carrying a monthly plan is measured against the months that have
-           actually run instead. The sentence is unchanged because it is still
-           true of the review point, which is what this strip is about; the
-           clause is here so the next reader is not told something the code
-           stopped doing (§104.8). */
-        /* §308: OF THE PLAN, AND IT SAYS WHICH PLAN. The denominator was a
-           hard-coded twelve and the count was months of the calendar year, so
-           a cycle covering July to August read "8 of 12" — a number taken
-           from neither of its own dates. It is the planning period now, and
-           where nobody has set one the line NAMES the assumption instead of
-           printing it as a fact (§35, §124). */
-        (function(){
-          var em = elapsedMonths();
-          if (em == null)
-            return ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
-              'figure is measured against a whole one</span>';
-          var why = [];
-          if (!planSet()) why.push('taken from the calendar year');
-          if (reviewAsOfDerived()) why.push('the month is from the cycle\u2019s name');
-          return ' <span class="why" style="margin:0">&middot; ' + em + ' of ' +
-            planLength() + ' months' + (planSet() ? ' of the plan' : '') +
-            (why.length ? ', ' + why.join(', ') : '') + '</span>';
-        })() + '</span>' +
-      /* THE REVIEW DAY IS ON THE STRIP, so the day is readable without
-         opening the pen — and only when there is one, because a line reading
-         "not set" over a thing nobody has to set is furniture (§45.2, §94.15).
-         Drawn for everybody: the day of the review is not a secret, and only
-         TAKING the files is the office's. */
-      (reviewDayWord() ? '<span class="fstrip-meta">presents <b>' +
-        esc(reviewDayWord()) + '</b></span>' : '') +
-      '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
-      /* §495: A CYCLE RUNNING PAST THE PLAN PERIOD IS SAID ON ITS OWN STRIP,
-         in the attention voice — nothing is wrong yet, but a figure measured
-         after the plan ended is measured against a whole target (§308). */
-      (cyclePastPlan() ? '<span class="badge b-late" data-cyc-past>Runs past the plan period</span>' : '') +
-      /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
-         Islam: "keep the close cycle inside the edit. as it's a critical
-         button to click, the pen should hold everything editable so it's kept
-         secured." So the strip's only control while a cycle runs is Edit, and
-         Close the cycle is drawn INSIDE the panel it opens -- the strip is a
-         line you read, not a line you press.
-
-         Edit is drawn while the cycle is OPEN only, which is the gate the
-         review point already had: a closed cycle's figures are filed under the
-         name it closed with (HISTORY keeps the name, §49.1), so renaming it
-         afterwards would leave this page and the history saying different
-         things. With it closed the strip carries "Open a new cycle..." exactly
-         as it did before. */
-      /* §273.2: AND A CLOSED CYCLE GETS THE PEN TOO. Islam picked it over a
-         Reopen button on the strip: the pen's far end holds the cycle's one
-         dangerous state change, whichever direction it goes -- Close while it
-         runs, Reopen once it has stopped -- so the strip goes on carrying
-         nothing that changes anything. `Open a new cycle...` stays beside it
-         because it is a different act with its own panel and its own
-         confirmation, and it is the only way to start one. */
-      /* §273.4: THE PEN SAYS WHICH WAY IT GOES, and lights up — the platform's
-         own `penBtn()` has read `on ? "Done editing" : "Edit"` since it was
-         written, and this control said Edit while you were editing. Islam:
-         "why is the edit button still there it should turn into done editing
-         so I click it and the box collapse saving what I did". */
-      (can
-        ? '<button class="editbtn' + (open && CYCLEEDIT ? ' penon' : '') +
-            '" data-editcycle="1">' +
-            (open && CYCLEEDIT ? 'Done editing' : 'Edit') + '</button>' +
-          (open ? '' : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
-        : '') +
-    '</div>' +
-    /* ── OPENING A NEW CYCLE (§47.8), PUT BACK ────────────────────
-       §261.2 replaced the `NEWCYCLE ? ... : CYCLEEDIT ? ...` chain with a
-       CYCLEEDIT-only branch and took this arm with it, so on `main` today
-       "Open a new cycle..." sets the draft and DRAWS NOTHING — §96 exactly, a
-       control that renders perfectly and does nothing, and it is the only way
-       to start a cycle at all. Found by `checks/repeat-project.py` hanging on
-       `#nc-name`; reproduced on the shipped build before anything was written,
-       so it is not this section's doing and it is this section's to fix
-       (§51.11 from the other side: the check was RIGHT and had been red for
-       exactly as long as the panel had been gone).
-
-       PUT BACK VERBATIM, not rebuilt on §273.4's `cycleField()`: this panel
-       is wired by ID in the shell and writes on `input` rather than `change`
-       for a stated reason (Open can be pressed from inside a field), so
-       re-expressing it would be a second change riding a restoration. It keeps
-       its Open/Cancel pair, and that is NOT the Save and Cancel §273.4
-       removed — this really is a draft, describing a cycle that does not exist
-       yet, and nothing reaches REVIEW until Open is pressed. */
-    (NEWCYCLE
-      ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
-        /* §307: THE SAME FOUR CONTROLS THE PEN DRAWS. This panel typed its
-           three dates and picked a fourth month that no longer exists, so it
-           was the one place in the product where a cycle could be opened with
-           an end its own arithmetic could not read. The dates go through
-           `cyclePick` and write into the draft through FIELDS; only the NAME
-           is still typed, so only the name is still read by id. */
-        /* ── THE REFUSAL IS UNDER THE BOX THAT REFUSED (§534.2) ──────
-           Both of this panel's refusals were browser boxes, and a box opens
-           OVER the form: the empty field could not be seen while the sentence
-           about it was on screen. The name's box then put the cursor in the
-           field afterwards and the month's did not — one form, two
-           behaviours, because a notice said away from its control has no
-           natural place to point.
-
-           DERIVED, NEVER STORED STALE (§48.2's instinct, one layer down):
-           `NEWCYCLE.why` names the field that was empty when Open was
-           pressed, and this reads it back against the CURRENT value, so
-           filling the box clears the line with no handler to remember. */
+  /* §693: THE HEADLINE STRIP, OVER THE BOARD. The cycle's name and dates
+     moved into the card's facts; what is left here is the four numbers
+     cycleTotals() answers (§108.1), drawn on the board's tab where the rows
+     they add up are. */
+  var strip =
+    '<div class="fstrip" style="margin-bottom:14px"><div class="fstrip-body">' +
+      '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
+      '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
+        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
+        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
+      '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
+    '</div></div>';
+  var filt = function(k, label, n){
+    var on = BOARDFILTER === k;
+    return '<button type="button" class="bfilt' + (on ? ' on' : '') + '" data-bfilter="' + k +
+      '" aria-pressed="' + on + '">' + label + '<span class="kbcount">' + n + '</span></button>';
+  };
+  var filters =
+    '<div class="bfilters" data-board-filters>' +
+      filt("all", "All", STATS.all) + filt("late", "Not started", STATS.late) +
+      filt("notes", "Needs a note", STATS.notes) + filt("part", "In progress", STATS.part) +
+      filt("done", "Submitted", STATS.done) +
+      '<input class="fld bfind" id="board-find" value="' + esc(BOARDFIND) + '" placeholder="Find a line…" ' +
+        'aria-label="Find a reporting line">' +
+    '</div>';
+  /* THE NEW-CYCLE PANEL (§47.8, put back at §261.2's cost) draws in the pen's
+     slot beside the card. Verbatim from there: wired by ID in the shell and
+     writing on `input`, so Open can read the name before the box is left. */
+  var newPanel = NEWCYCLE
+      ? '<div class="cfg newcycle cycdrawer" data-cycle-drawer><div class="nc-h">Open a new cycle</div>' +
         (function(){
           var why = NEWCYCLE.why;
           if (why === "name" && String(NEWCYCLE.name || "").trim()) why = null;
           if (why === "to" && String(NEWCYCLE.to || "").trim()) why = null;
-          return '<div class="nc-grid nc-1line">' +
+          return '<div class="nc-grid">' +
             '<label class="nm-lab"><span>Name</span><input class="fld' +
               (why === "name" ? " bad" : "") + '" id="nc-name"' +
               (why === "name" ? ' aria-invalid="true"' : '') + ' value="' +
@@ -8059,9 +8236,6 @@ function renderCycle(){
             ? '<p class="picerr"><b>The cycle needs a name.</b> It is what its figures ' +
               'are filed under once it closes, and what the next cycle compares against.</p>'
             : why === "to"
-            /* The band below already says what the month decides, and it is on
-               screen — so the refusal names the control and leaves the
-               explaining to the sentence that was always there. */
             ? '<p class="picerr"><b>Pick the month this cycle covers to.</b> ' +
               'It is the review point, and the line below says what it decides.</p>'
             : '');
@@ -8071,94 +8245,10 @@ function renderCycle(){
           'the share of it due by then, and a tactic whose span has not started yet is ' +
           'not asked for.</div>' +
         '<div class="nc-act">' +
-          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
-          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
-      : '') +
-    /* ── THE PEN ITSELF (§273, restructured by §273.4) ─────────────
-       Islam, of the shipped panel: "rather than having a save and cancel
-       buttons inside the box itself rearrange the buttons and think of
-       different structures of this banner" — and, of three drawn on his own
-       tenant, "C".
-
-       SAVE AND CANCEL ARE GONE, AND THAT IS THE WHOLE OF IT. Nowhere else in
-       this product has either: every bound field writes on `change`, which is
-       on blur (§35), and the pen only ever closed the mode. §273 invented a
-       second model — a draft, a Save, a Cancel and a guard to make the draft
-       safe — and needed two buttons nothing else here needs. The fields write
-       straight through `FIELDS` now, like every other field in the platform,
-       so there is no draft, nothing unsaved, and nothing for a guard to hold.
-
-       TWO COLUMNS, WHICH IS HIS PICK OVER EDITING IN PLACE AND OVER THE PLAIN
-       BOX: the fields on the left, and ENDING IT behind a rule on the right,
-       so the destructive act never shares a row with the boxes you are typing
-       in. The cost was measured before he chose — pressing Edit moves the page
-       below by 156px here against 12px for the in-place shape. */
-    (CYCLEEDIT && open
-      ? '<div class="cfg newcycle"><div class="cyc2">' +
-          '<div class="cyc2-f">' +
-            '<div class="nc-h">This cycle</div>' +
-            '<div class="nc-grid nc-1line">' +
-              cycleField("Name", REVIEW.name, "H1 2027", function(v){
-                /* TRIMMED, and an empty name is REFUSED rather than stored:
-                   it is what every snapshot and archived plan is filed under
-                   once the cycle closes. With no Save there is no press to
-                   refuse at, so the refusal is the name COMING BACK into the
-                   box — the value returning is the explanation (§124). */
-                var t = String(v).trim();
-                if (!t) return false;
-                REVIEW.name = t;
-              }, "nm-lab") +
-              /* ── EVERY DATE IS PICKED, AND THERE ARE THREE (§307) ────
-                 Islam: "all the dates should be date selector like the
-                 reporting as of. and why do we still have the reporting as
-                 of? ... the reports due is the only 1 with a day date as it's
-                 a cutt off dates. and if we set that they will be only 4 boxes
-                 can be in 1 line" — and then, deciding the question underneath
-                 it himself: "the cycle ending is the reporting as of so that's
-                 what the proration depend on ... if you are using reporting as
-                 of then this should replace the cover to."
-
-                 THE REPORTING AS OF BOX IS GONE, and its meaning is in `to`.
-                 Nothing keeps a second copy, so the two can never disagree
-                 again — which they could, and on his own tenant did: a cycle
-                 covering to Jun 2027 reporting as of Aug 2026, asking for work
-                 due to June and judging it against August.
-
-                 PICKED, NEVER TYPED, for §177's reason one field along: with
-                 no box there is nothing to mistype, and a cycle whose end
-                 cannot be read falls back — silently, until now — to a quarter
-                 nobody chose. `wide` because `cycleYear()` scrapes these
-                 strings for a four-digit year. */
-              cyclePick("Covers from", REVIEW.from, function(v){
-                REVIEW.from = String(v).trim();
-              }, { wide:true }) +
-              cyclePick("to", REVIEW.to, function(v){
-                REVIEW.to = String(v).trim();
-              }, { wide:true, cls:"tobtn" }) +
-              cyclePick("Reports due", REVIEW.due, function(v){
-                REVIEW.due = String(v).trim();
-              }, { day:true }) +
-            '</div>' +
-            '<div class="nc-why"><b>The month it covers to decides what every figure ' +
-              'is measured against.</b> A target that adds up across the year is compared ' +
-              'with the share of it due by then, and work dated after it is not asked for. ' +
-              'Changes are kept as you type.</div>' +
-          '</div>' +
-          '<div class="cyc2-d">' +
-            '<div class="nc-h">Ending it</div>' +
-            '<p class="cyc2-p">Closing files every figure under this name and stops ' +
-              'the units reporting.</p>' +
-            '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>' +
-          '</div>' +
-        '</div>' + reviewDayBlock() + '</div>'
-      : '') +
-    '<div class="fstrip-body">' +
-      '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
-      '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
-        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
-      '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
-    '</div></div>';
+          '<button class="linkbu" data-nc-cancel="1">Cancel</button>' +
+          '<button class="editbtn" data-nc-go="1">Open this cycle</button></div></div>'
+      : '';
+  var drawer = newPanel || cycleDrawer(can, open);
 
   /* CLAIM REQUESTS (spec 008 §5). The SMO answers them, not the holder — the
      holder has an interest in the answer, and the SMO is the only person who
@@ -8175,47 +8265,50 @@ function renderCycle(){
       '<td>' + esc((want && want.name) || c.set) + '</td>' +
       '<td class="why" style="margin:0">' + esc(personName(c.by) || c.by) + '</td>' +
       '<td class="cc">' + (can
-        ? '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button> ' +
-          '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button>'
+        ? '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button> ' +
+          '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button>'
         : '') + '</td></tr>';
   }).join("");
+
+  var board =
+    '<div class="cfg"><table><thead><tr><th style="width:17%">Reporting line</th><th>Reporting</th>' +
+      '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
+      '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
+      '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +
+    '<div class="note" data-board-empty hidden>No reporting line matches.</div>' +
+    (open
+      ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
+        'means never closing, and a cycle that never closes writes no history. Whatever is ' +
+        'unreported closes as unreported and stays visibly so.</div>'
+      : '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record. ' +
+        'Opening a new cycle asks every unit again and lets each score show what it was last time.</div>');
 
   return cfgHead("Planning & reporting cycle",
       ['<span class="pill kind">' + esc(REVIEW.cadence) + '</span>'].concat(
         claims.length ? ['<span class="pill attn">' + claims.length + ' claim request' +
           (claims.length === 1 ? "" : "s") + '</span>'] : []),
-      null, false) + planPeriodPanel(can) + head + contTakenSection() +
-    (claims.length
-      ? section("", "Claim requests", null,
-          '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +
-            '<th style="width:16%">Held by</th><th style="width:20%">Wanted by</th>' +
-            '<th style="width:18%">Asked by</th><th class="cc" style="width:12%"></th>' +
-          '</tr></thead><tbody>' + claimRows + '</tbody></table></div>' +
-          '<div class="note"><b>One figure belongs to one set</b>, so somebody has asked for ' +
-            'one that is already held. <b>Move it</b> puts the figure in the asking set; ' +
-            '<b>leave it</b> closes the request without moving anything. Either way the ' +
-            'conversation about whether it is the right number stays between the two ' +
-            'teams \u2014 this only decides who enters it.</div>')
-      : '') +
-    section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
-    section("", "Who has reported", null,
-      '<div class="cfg"><table><thead><tr><th style="width:17%">Reporting line</th><th>Reporting</th>' +
-        '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
-        '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +
-      (open
-        ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
-          'means never closing, and a cycle that never closes writes no history. Whatever is ' +
-          'unreported closes as unreported and stays visibly so.</div>'
-        : '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record. ' +
-          'Opening a new cycle asks every unit again and lets each score show what it was last time.</div>') +
-      (HISTORY.length
-        ? '<h4 class="mini">Closed cycles</h4><div class="cfg"><table><thead><tr><th>Cycle</th>' +
-          '<th class="cc">Group figure</th></tr></thead><tbody>' +
-          HISTORY.map(function(h){
-            return '<tr><td>' + esc(h.name) + '</td><td class="num">' + h.group + '%</td></tr>';
-          }).join("") + '</tbody></table></div>'
-        : ''));
+      null, false) + cycleTabs() +
+    (CYCLETAB === "board"
+      ? strip + filters + board
+      /* THE PEN IS A COLUMN OF ITS OWN beside everything on the tab — the
+         card AND the sections under it — so opening it moves nothing down
+         the page (§693): the sections narrow beside it, they do not drop. */
+      : '<div class="cycwrap' + (drawer ? ' editing' : '') + '"><div class="cycleft">' +
+        cycleCard(can, open) + contTakenSection() +
+        (claims.length
+          ? section("", "Claim requests", null,
+              '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +
+                '<th style="width:16%">Held by</th><th style="width:20%">Wanted by</th>' +
+                '<th style="width:18%">Asked by</th><th class="cc" style="width:12%"></th>' +
+              '</tr></thead><tbody>' + claimRows + '</tbody></table></div>' +
+              '<div class="note"><b>One figure belongs to one set</b>, so somebody has asked for ' +
+                'one that is already held. <b>Move it</b> puts the figure in the asking set; ' +
+                '<b>leave it</b> closes the request without moving anything. Either way the ' +
+                'conversation about whether it is the right number stays between the two ' +
+                'teams — this only decides who enters it.</div>')
+          : '') +
+        section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
+        '</div>' + drawer + '</div>');
 }
 
 /* ── Setup · Supporting functions ───────────────────────────────────
@@ -8434,7 +8527,7 @@ function fnKebab(fk, f, mayEdit){
   if (mayDestroy())
     acts.push('<button data-clear="fn|' + esc(fk) + '|plan">Clear plan</button>');
   acts.push('<hr>');
-  acts.push('<button class="danger" data-fnretire="' + esc(fk) + '">' +
+  acts.push('<button' + (f.active === false ? '' : ' class="danger"') + ' data-fnretire="' + esc(fk) + '">' +
     (f.active === false ? "Reinstate this function" : "Retire this function") + '</button>');
   if (mayDestroy())
     acts.push('<button class="danger" data-fndel="' + esc(fk) + '">Delete permanently</button>');
@@ -8493,7 +8586,7 @@ function fnPanels(fk, f){
         : "Nothing points at it and nothing has been reported against it. There is no " +
           "undo \u2014 Retire is the reversible one.") +
       '</div><div class="cbtns"><button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-fndelyes="' + esc(fk) + '">Yes, delete it</button></div></div>';
+      '<button class="danger" data-fndelyes="' + esc(fk) + '">Delete the function</button></div></div>';
   }
   var n = functionCapCount(fk);
   var caps = n + " " + (n === 1 ? "capability" : "capabilities");
@@ -8502,13 +8595,13 @@ function fnPanels(fk, f){
       L("keyobj") + ' and ' + L("project") + ' across ' + caps + '. The definitions stand, and each ' +
       'plan is archived first.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Yes, clear the plan</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Clear the plan</button>' +
       '</div></div>';
   if (CLEARING === "fn|" + fk + "|nums")
     return '<div class="kmenu kconfirm"><div class="cq"><b>Clear the reported progress?</b> ' +
       'Actuals and notes across ' + caps + '. The plan stands.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
-      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Yes, clear the progress</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Clear the progress</button>' +
       '</div></div>';
   return "";
 }
@@ -10123,8 +10216,8 @@ function tkBar(id, opts){
 function rowActions(table, key, ed, extra){
   if (ed) {
     return '<td class="cc tk-editcell">' +
-      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button>' +
-      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>' +
+      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button></td>';
   }
   return '<td class="cc">' +
     '<button class="ico tk-pen" data-rowedit="' + esc(table + "|" + key) + '" ' +

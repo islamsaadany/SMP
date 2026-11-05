@@ -1,0 +1,1271 @@
+<title>Processes Redesign</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: SMP's own frame (white top bar, grey section bar, rail + pane, navy-headed tables) drawn inside a review page under a dashed drawing band.
+   Palette and type are SMP's FOREFRONT tokens and Source Sans 3, copied from the platform's shared stylesheet, so the drawing reads as the product. */
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+  --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C; --focus:#8A6B22; --stone:#16325C;
+  --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+  --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+  --over-bg:#FBF6E9; --over-line:#D9C489;
+  --scrim:rgba(10,14,22,.12); --shadow:0 10px 28px rgba(15,23,42,.16);
+  --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.35); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.35); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--over-bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── the drawing band: the mockup's own, not the product ───────────── */
+.mk{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--over-bg);border-bottom:1px dashed var(--over-line)}
+.mk-in{max-width:1440px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
+.mk-id{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+.mk-id b{font-size:14px}
+.mk-id span{font-size:12px;color:var(--ink-2)}
+.mk-tag{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);border:1px dashed var(--gold-deep);border-radius:4px;padding:1px 6px}
+.mk-nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;max-width:100%;padding-bottom:1px}
+.mk-nav button{border:1px solid transparent;background:none;border-radius:6px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.mk-nav button:hover{background:var(--surface)}
+.mk-nav button[aria-current="page"]{background:var(--surface);border-color:var(--over-line);color:var(--ink)}
+
+.doc{max-width:1440px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 64px}
+
+/* what changes on this screen: the drawing's note, never the product */
+.why{border:1px dashed var(--over-line);background:var(--over-bg);border-radius:8px;margin-bottom:14px}
+.why summary{cursor:pointer;list-style:none;padding:9px 14px;display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.why summary::-webkit-details-marker{display:none}
+.why summary b{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);font-weight:800}
+.why summary::after{content:"▾";margin-left:auto;color:var(--ink-3);font-size:11px}
+.why:not([open]) summary::after{content:"▸"}
+.why ul{margin:0;padding:0 14px 12px 32px;display:grid;gap:4px;font-size:13px;color:var(--ink-2);max-width:110ch}
+
+/* ── the product frame ─────────────────────────────────────────────── */
+.frame{background:var(--ground);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgb(15 23 42/.06);position:relative}
+.tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 20px;min-height:40px}
+.trail{display:flex;align-items:center;gap:6px;margin-right:auto;min-width:0;overflow:hidden;font-size:13.5px;white-space:nowrap}
+.trail .ff{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.trail .sep{color:var(--ink-3)}
+.trail .step{position:relative}
+.trail .step>button{border:0;background:none;padding:3px 7px;border-radius:7px;font-weight:600;display:inline-flex;gap:5px;align-items:center}
+.trail .step>button:hover{background:var(--surface-2)}
+.trail .client>button{color:var(--ink-2)}
+.trail .dn{font-size:9px;color:var(--ink-3)}
+.tbacts{display:flex;align-items:center;gap:10px}
+.tbtheme{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink-2)}
+.tbtheme svg{width:14px;height:14px}
+.tbout{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap}
+@media (max-width:640px){.trail .ff,.trail .ff+.sep{display:none}}
+
+.sb{background:var(--surface-2);border-bottom:1px solid var(--line);display:flex;align-items:stretch;gap:24px;padding:0 20px;overflow-x:auto}
+.sb a{display:flex;align-items:center;padding:12px 1px 10px;border-bottom:3px solid transparent;font-size:14.5px;font-weight:500;color:var(--ink-2);text-decoration:none;white-space:nowrap}
+.sb a:hover{color:var(--ink)}
+.sb a.on{color:var(--ink);font-weight:700;border-bottom-color:var(--gold)}
+.sb .lang{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);white-space:nowrap}
+.sb .lang b{color:var(--ink);font-weight:700}
+
+.pg{padding:20px 24px 28px}
+@media (max-width:640px){.pg{padding:16px 14px 22px}.tb,.sb{padding:0 14px}}
+
+.phead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 16px;margin-bottom:16px}
+.crumb{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:3px}
+.crumb a{text-decoration:none}
+.crumb a:hover{text-decoration:underline}
+.phead h1{font-size:21px;font-weight:700;letter-spacing:-.01em}
+.phead .sub{font-size:13px;color:var(--ink-3);margin-top:2px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;text-decoration:none}
+.btn:hover{border-color:var(--gold)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--on-accent);font-weight:700}
+.btn.gold:hover{background:var(--gold-deep);border-color:var(--gold-deep);color:var(--panel-ink)}
+.btn.sm{padding:3px 9px;font-size:12px}
+.btn .dn{font-size:9px;opacity:.8}
+.btn[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+.pen{border:1px solid var(--line);background:var(--surface);border-radius:5px;padding:2px 9px;font-size:12px;font-weight:600;color:var(--ink-2)}
+.pen:hover{border-color:var(--gold)}
+
+.menu-wrap{position:relative;display:inline-block}
+.menu{position:absolute;right:0;top:calc(100% + 6px);z-index:20;min-width:250px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:4px 0;text-align:left}
+.menu.left{left:0;right:auto}
+.menu a,.menu button.mi{display:block;width:100%;border:0;background:none;text-align:left;padding:8px 14px;font-size:13.5px;color:var(--ink);text-decoration:none}
+.menu a:hover,.menu button.mi:hover{background:var(--surface-2)}
+.menu small{display:block;font-size:11.5px;color:var(--ink-3)}
+.menu .rule{height:1px;background:var(--line);margin:4px 0}
+.menu .here{font-weight:700}
+.menu .mh{padding:6px 14px 2px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+
+.cells{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+@media (max-width:980px){.cells{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.cells{grid-template-columns:1fr}}
+.cell{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 15px}
+.cell .k{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.cell .v{font-size:26px;font-weight:700;line-height:1.15;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums}
+.cell .v small{font-size:14px;font-weight:600;color:var(--ink-3);letter-spacing:0}
+.cell .w{font-size:12px;color:var(--ink-3);margin-top:2px}
+.cell .w .bad{color:var(--bad-tx);font-weight:600}
+.cell.attn .v{color:var(--attn-tx)}
+.cell.bad .v{color:var(--bad-tx)}
+.cell.good .v{color:var(--good-tx)}
+
+.sect{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.sect span{font-size:12px;font-weight:500;letter-spacing:0;text-transform:none}
+.sect .r{margin-left:auto}
+
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table.t{width:100%;border-collapse:collapse}
+table.t thead th{background:var(--panel);color:var(--panel-ink);font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;padding:9px 12px;white-space:nowrap}
+table.t tbody td{border-top:1px solid var(--line-soft);padding:10px 12px;vertical-align:top;font-size:13.5px}
+table.t tbody td+td{border-left:1px solid var(--line-soft)}
+table.t tbody tr:nth-child(even) td{background:var(--zebra)}
+table.t tbody tr.hov:hover td{background:var(--over-bg)}
+table.t td.c,table.t th.c{text-align:center}
+table.t td.r,table.t th.r{text-align:right}
+table.t .q{color:var(--ink-3);font-size:12px}
+table.t tr.sub td{font-size:13px}
+table.t tr.more td{text-align:center;color:var(--ink-3);font-size:12.5px;background:var(--surface)}
+
+.code{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--stone);white-space:nowrap}
+.pname{font-weight:700;text-decoration:none;border-bottom:1px solid transparent}
+.pname:hover{border-bottom-color:var(--gold)}
+.psub{display:block;font-size:12px;color:var(--ink-3);margin-top:1px}
+.psub.br{color:var(--attn-tx)}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;border-radius:99px;padding:1px 9px;white-space:nowrap;background:var(--surface-2);color:var(--ink-2)}
+.pill.good{background:var(--good-bg);color:var(--good-tx)}
+.pill.attn{background:var(--attn-bg);color:var(--attn-tx)}
+.pill.bad{background:var(--bad-bg);color:var(--bad-tx)}
+.pill.navy{background:var(--panel);color:var(--panel-ink)}
+.chip{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:4px;padding:1px 6px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.chip.gold{border-color:var(--gold);background:var(--over-bg);color:var(--gold-deep)}
+.chip.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad-tx)}
+.chip.attn{border-color:var(--attn);background:var(--attn-bg);color:var(--attn-tx)}
+.chip.good{border-color:var(--good);background:var(--good-bg);color:var(--good-tx)}
+.chip.navy{border-color:var(--panel);background:var(--panel);color:var(--panel-ink)}
+.quiet{color:var(--ink-3)}
+
+.marks{display:inline-flex;align-items:center;gap:3px;vertical-align:middle}
+.marks i{width:10px;height:10px;border-radius:2px;border:1px solid var(--field-line);display:inline-block}
+.marks i.on{background:var(--good);border-color:var(--good)}
+.marks b{font-size:12px;font-weight:700;margin-left:5px;font-variant-numeric:tabular-nums}
+
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow-x:auto;max-width:100%}
+.seg button{border:0;background:none;border-radius:6px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.seg button:hover{background:var(--surface-2)}
+.seg button.on{background:var(--panel);color:var(--panel-ink)}
+
+.filters{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:12px}
+.search{flex:1 1 280px;max-width:420px;display:flex;align-items:center;gap:8px;border:1px solid var(--field-line);border-radius:6px;background:var(--surface);padding:6px 10px}
+.search input{border:0;background:none;outline:0;font:inherit;color:var(--ink);width:100%;min-width:0}
+.search svg{width:14px;height:14px;color:var(--ink-3);flex:none}
+.fchip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:3px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.fchip b{font-variant-numeric:tabular-nums;margin-left:3px;color:var(--ink-3)}
+.fchip.on{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.fchip.on b{color:var(--panel-quiet)}
+.fchip.bad b{color:var(--bad-tx)}
+.lnk{font-size:12.5px;font-weight:600;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;background:none;border:0;padding:0}
+.fold{border:0;background:none;width:18px;height:18px;padding:0;margin-right:4px;border-radius:4px;color:var(--ink-3);font-size:11px;vertical-align:1px}
+.fold:hover{background:var(--surface-2);color:var(--ink)}
+.dots{border:1px solid transparent;background:none;border-radius:5px;padding:0 7px;font-size:16px;line-height:22px;color:var(--ink-3)}
+.dots:hover{border-color:var(--line);color:var(--ink)}
+
+/* overview */
+.ovgrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+@media (max-width:980px){.ovgrid{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.att{display:grid;grid-template-columns:116px minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:11px 14px;border-top:1px solid var(--line-soft)}
+.att:first-child{border-top:0}
+.att .what{font-size:13.5px}
+.att .what .w2{display:block;font-size:12px;color:var(--ink-3)}
+@media (max-width:560px){.att{grid-template-columns:1fr}.att .go{justify-self:start}}
+.dd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;padding:10px 14px;border-top:1px solid var(--line-soft);align-items:center}
+.dd:first-child{border-top:0}
+.dd .marks{justify-self:end}
+.dd .asp{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11.5px;color:var(--ink-3)}
+.dd .asp .ok{color:var(--good-tx)}
+.feed{padding:4px 14px}
+.feed li{list-style:none;padding:8px 0;border-top:1px solid var(--line-soft);font-size:13px;color:var(--ink-2)}
+.feed li:first-child{border-top:0}
+.feed time{display:inline-block;min-width:64px;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.feed ul{margin:0;padding:0}
+
+/* the process: rail + pane */
+.pwrap{display:flex;gap:16px;align-items:flex-start;position:relative}
+.rail{width:262px;flex:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.rail-h{background:var(--panel);color:var(--panel-ink);padding:10px 12px 10px 14px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.rail-h .n{color:var(--panel-quiet)}
+.rail-h button{margin-left:auto;border:0;background:none;color:var(--panel-accent);padding:2px 4px;border-radius:4px;line-height:0}
+.rail-h button svg{width:15px;height:15px}
+.rail-s{padding:10px 10px 8px}
+.rail-s .search{max-width:none;padding:5px 9px;font-size:13px}
+.rail-l{padding:0 10px 10px;display:grid;gap:6px;max-height:640px;overflow-y:auto}
+.ri{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 8px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px}
+.ri:hover{border-color:var(--field-line)}
+.ri .code{font-size:10.5px;color:var(--ink-2)}
+.ri .nm{grid-column:1;font-size:13.5px;line-height:1.3}
+.ri .fr{grid-row:1/3;grid-column:2;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.ri .fr.good{color:var(--good-tx)}.ri .fr.attn{color:var(--attn-tx)}.ri .fr.bad{color:var(--bad-tx)}
+.ri.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--gold)}
+.ri.on .nm{font-weight:700}
+.ri.sub{margin-left:18px;width:calc(100% - 18px);padding:5px 10px}
+.ri.sub .nm{font-size:13px}
+.railmsg{margin:0 10px 10px;font-size:12px;color:var(--ink-2);background:var(--over-bg);border:1px dashed var(--over-line);border-radius:6px;padding:6px 9px}
+.rail-f{border-top:1px solid var(--line);background:var(--surface-2);padding:8px 14px;font-size:12px;color:var(--ink-3)}
+.pwrap.railoff .rail{display:none}
+.railbtn{display:none}
+.pwrap.railoff .railbtn{display:inline-flex}
+@media (max-width:900px){.pwrap{flex-direction:column;align-items:stretch}.rail{width:100%}.rail-l{max-height:220px}}
+
+.pane{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pane-h{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--gold);border-bottom:1px solid var(--line);padding:14px 18px 12px}
+.ph1{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.ph1 .code{font-size:14px}
+.ph1 h2{font-size:20px;font-weight:600;letter-spacing:-.01em}
+.who{margin-left:auto;display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13px}
+.who em{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-right:6px}
+.ph2{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px}
+.rdl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.rdl b{color:var(--ink);font-size:13px;letter-spacing:0;text-transform:none;margin-left:4px}
+.rdm{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--good);background:var(--surface);color:var(--good-tx);border-radius:99px;padding:2px 10px 2px 7px;font-size:12.5px;font-weight:600}
+.rdm::before{content:"✓";font-size:11px;font-weight:800}
+.rdm.no{border-color:var(--attn);background:var(--attn-bg);color:var(--attn-tx)}
+.rdm.no::before{content:"○"}
+.rdm:hover{box-shadow:0 0 0 2px var(--scrim)}
+.next{font-size:12.5px;color:var(--ink-2)}
+.next a{font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.ph3{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+
+.pane-b{padding:16px 18px 20px}
+@media (max-width:640px){.pane-h{padding:12px 14px}.pane-b{padding:14px}}
+.stack{display:grid;gap:12px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.blk{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:12px 14px;min-width:0}
+.blk-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.lbl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.lbl .n{color:var(--ink-3);font-weight:700;margin-left:4px}
+.blk-h .pen,.blk-h .btn{margin-left:auto}
+.blk p,.blk li{font-size:13.5px}
+.blk ul{margin:0;padding-left:18px;display:grid;gap:3px}
+.dl{display:grid;grid-template-columns:130px minmax(0,1fr);gap:6px 12px;font-size:13.5px}
+.dl dt{color:var(--ink-3);font-size:12.5px}
+.dl dd{margin:0}
+.dl .miss{color:var(--attn-tx);font-weight:600}
+.flow{display:grid;gap:6px}
+.flow div{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px}
+.arrow{color:var(--ink-3)}
+.roles{display:flex;flex-wrap:wrap;gap:6px}
+.roles span{border:1px solid var(--line);border-radius:6px;padding:3px 9px;font-size:12.5px;background:var(--zebra)}
+.roles span b{font-weight:700}
+.note{font-size:12px;color:var(--ink-3)}
+.bar{height:8px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin:6px 0 4px}
+.bar i{display:block;height:100%;background:var(--gold)}
+.bar i.good{background:var(--good)}
+.bar i.bad{background:var(--bad)}
+
+/* map */
+.mapbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.mapbar .r{margin-left:auto;display:flex;gap:6px}
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;align-items:start}
+@media (max-width:1100px){.mapgrid{grid-template-columns:1fr}}
+.lanes-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.lanes{position:relative;display:grid;grid-template-columns:128px repeat(5,minmax(150px,1fr));grid-template-rows:repeat(3,118px);min-width:900px}
+.lane-bg{grid-column:1/-1;border-top:1px solid var(--line-soft)}
+.lane-bg:first-child{border-top:0}
+.lane-bg.z{background:var(--zebra)}
+.lane-l{grid-column:1;display:flex;align-items:center;padding:10px 12px;background:var(--surface-2);border-right:1px solid var(--line);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);z-index:1}
+.st{position:relative;z-index:2;align-self:center;justify-self:center;width:146px;text-align:left;border:1.5px solid var(--field-line);background:var(--surface);border-radius:8px;padding:7px 10px 8px}
+.st:hover{border-color:var(--stone)}
+.st .n{display:block;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-3);letter-spacing:.04em}
+.st b{display:block;font-size:13px;font-weight:700;line-height:1.25}
+.st .k{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
+.st.dec{border-style:dashed;border-color:var(--stone)}
+.st.on{box-shadow:0 0 0 3px var(--gold)}
+.st .flag{position:absolute;top:-9px;right:8px}
+.st .ho{position:absolute;bottom:-11px;left:8px}
+svg.edges{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible}
+svg.edges path{fill:none;stroke:var(--ink-3);stroke-width:1.5}
+svg.edges .ah{fill:var(--ink-3)}
+svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
+svg.edges rect{fill:var(--surface)}
+.drawer{border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow:hidden}
+.drawer-h{padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.drawer-h .n{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-3)}
+.drawer-h h3{font-size:16px;font-weight:700}
+.drawer-b{padding:12px 14px;display:grid;gap:10px}
+.drawer-b .dl{grid-template-columns:96px minmax(0,1fr);font-size:13px}
+.drawer-f{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+.steplist .t td:first-child{width:56px}
+
+/* raci */
+.rc{display:inline-grid;place-items:center;width:24px;height:22px;border-radius:5px;font-size:11.5px;font-weight:800}
+.rc.R{background:var(--panel);color:var(--panel-ink)}
+.rc.A{background:var(--gold);color:var(--on-accent)}
+.rc.C{border:1px solid var(--field-line);color:var(--ink-2)}
+.rc.I{background:var(--surface-2);color:var(--ink-3)}
+.rc.x{color:var(--ink-3);font-weight:400}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink-3);align-items:center}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+
+/* lifecycle */
+.track{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px}
+.track span{padding:3px 11px;border-radius:99px;border:1px solid var(--line);color:var(--ink-3);font-weight:600}
+.track span.done{color:var(--good-tx);border-color:var(--good)}
+.track span.done::before{content:"✓ "}
+.track span.now{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.track i{color:var(--ink-3);font-style:normal}
+.signs{display:grid;gap:6px}
+.signs div{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:10px;font-size:13px;align-items:center}
+.signs em{font-style:normal;color:var(--ink-3);font-size:12px}
+.copyrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.copyrow code{font-family:var(--mono);font-size:12px;background:var(--zebra);border:1px solid var(--line);border-radius:5px;padding:4px 8px;user-select:all;overflow-wrap:anywhere}
+
+/* ai panel */
+.aip{position:absolute;top:0;right:0;width:min(380px,100%);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);z-index:15}
+.aip-h{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);border-radius:10px 10px 0 0}
+.aip-h b{font-size:15px}
+.aip-h button{margin-left:auto}
+.aif{padding:11px 14px;border-top:1px solid var(--line-soft);display:grid;gap:6px;font-size:13px}
+.aif:first-of-type{border-top:0}
+.aif .acts{gap:6px}
+
+/* assessment page */
+.asx{max-width:1120px}
+.asx h2.hd{font-size:28px;font-weight:700;letter-spacing:-.015em;line-height:1.2}
+.lead{font-size:15.5px;color:var(--ink-2);max-width:72ch;margin-top:8px}
+.ms{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:20px 0 26px}
+@media (max-width:980px){.ms{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.ms{grid-template-columns:1fr}}
+.ms div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.ms b{display:block;font-size:30px;font-weight:800;line-height:1;letter-spacing:-.02em;color:var(--stone);font-variant-numeric:tabular-nums}
+.ms span{display:block;font-size:12.5px;color:var(--ink-2);margin-top:6px}
+.h3{font-size:17px;font-weight:700;margin:28px 0 4px}
+.h3+p.note{margin-bottom:12px;font-size:13px}
+.maps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.maps{grid-template-columns:1fr}}
+.mapcol{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px;min-width:0}
+.mapcol>.lbl{display:block;margin-bottom:10px}
+.mapcol.now>.lbl{color:var(--bad-tx)}
+.mapcol.new>.lbl{color:var(--good-tx)}
+.lv{border:1px solid var(--line-soft);border-radius:8px;padding:10px 12px;background:var(--zebra);margin-top:8px}
+.lv:first-of-type{margin-top:0}
+.lv h4{margin:0 0 6px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.lv h4 span{font-weight:500;color:var(--ink-3)}
+.items{display:flex;flex-wrap:wrap;gap:5px}
+.items span{font-size:12px;border:1px solid var(--line);background:var(--surface);border-radius:5px;padding:2px 8px}
+.items span.gone{text-decoration:line-through;color:var(--ink-3)}
+.items span.empty{border-style:dashed;color:var(--ink-3)}
+.items span.on{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.layer{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px;align-items:start;padding:6px 0;border-top:1px dashed var(--line)}
+.layer:first-of-type{border-top:0}
+.layer em{font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding-top:3px}
+.down{text-align:center;color:var(--ink-3);font-size:12px;margin:6px 0}
+.fd{display:grid;grid-template-columns:150px minmax(0,1fr);gap:4px 16px;padding:14px 0;border-top:1px solid var(--line)}
+.fd:first-of-type{border-top:0}
+@media (max-width:620px){.fd{grid-template-columns:1fr}}
+.fd h4{margin:0;font-size:15px;font-weight:700}
+.fd p{font-size:13.5px;color:var(--ink-2);margin-top:3px;max-width:78ch}
+.fd .fix{margin-top:6px;font-size:13px;color:var(--ink)}
+.fd .fix b{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--good-tx);margin-right:6px}
+.fd .fix button{border:0;background:none;padding:0;font-weight:600;text-decoration:underline;text-underline-offset:2px;color:var(--ink-2)}
+.sev{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.findings{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:2px 18px}
+.ts td:nth-child(2),.ts td:nth-child(3){min-width:220px}
+.ts .big{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.ts .big.bad{color:var(--bad-tx)}
+.ts .big.good{color:var(--good-tx)}
+
+/* decisions */
+.qs{display:grid;gap:12px;max-width:1040px}
+.qq{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 12px}
+.qq .qn{grid-row:1/4;width:28px;height:28px;border-radius:50%;background:var(--panel);color:var(--panel-ink);display:grid;place-items:center;font-weight:800;font-size:13px}
+.qq h4{margin:0;font-size:15.5px;font-weight:700}
+.qq p{font-size:13.5px;color:var(--ink-2);max-width:80ch}
+.opts{display:grid;gap:6px;margin-top:8px}
+.opt{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;font-size:13.5px;border:1px solid var(--line-soft);border-radius:8px;padding:8px 10px;background:var(--zebra)}
+.opt b.k{font-weight:800;color:var(--stone)}
+.opt.rec{border-color:var(--gold);background:var(--over-bg)}
+.opt .c{display:block;font-size:12.5px;color:var(--ink-3);margin-top:1px}
+.opt .rt{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);margin-left:6px}
+.order{counter-reset:o;display:grid;gap:8px;margin:0;padding:0;max-width:1040px}
+.order li{list-style:none;counter-increment:o;display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:4px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 14px;align-items:start}
+.order li::before{content:counter(o);width:24px;height:24px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--stone)}
+.order b{font-size:14px}
+.order p{font-size:13px;color:var(--ink-2);margin-top:2px}
+@media (max-width:620px){.order li{grid-template-columns:34px minmax(0,1fr)}.order li .chip{grid-column:2;justify-self:start}}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);color:var(--panel-ink);font-size:13px;padding:9px 14px;border-radius:8px;box-shadow:var(--shadow);z-index:30;max-width:min(560px,calc(100% - 32px))}
+</style>
+
+<div class="mk">
+  <div class="mk-in">
+    <div class="mk-id">
+      <span class="mk-tag">Mockup</span>
+      <b>Processes, redesigned in SMP's look</b>
+      <span>Nothing here is built. Every name, process and figure is invented sample data for Raya Trade.</span>
+    </div>
+    <nav class="mk-nav" aria-label="Screens of this mockup">
+      <button type="button" data-go="assessment">1 · How easy is it today</button>
+      <button type="button" data-go="overview">2 · Overview</button>
+      <button type="button" data-go="list">3 · Processes</button>
+      <button type="button" data-go="process">4 · A process</button>
+      <button type="button" data-go="governance">5 · Governance</button>
+      <button type="button" data-go="decisions">6 · Your decisions</button>
+    </nav>
+  </div>
+</div>
+
+<div class="doc">
+
+<!-- ═════════════════ 1 · ASSESSMENT ═════════════════ -->
+<section class="screen" data-screen="assessment">
+  <div class="asx">
+    <h2 class="hd">How easy is Processes to get around?</h2>
+    <p class="lead">Counted from the module as it stands on 23 October 2026, page by page. The parts are good. The paths between them are where the time goes, and most of that cost sits on a process's own page, where four kinds of navigation are stacked on one screen and change as you move.</p>
+
+    <div class="ms">
+      <div><b>8</b><span>items in the left menu, in one flat list that mixes the work, whole-company views, setup and output</span></div>
+      <div><b>4</b><span>ways to move around one process on the same screen: a line of links, a five-step strip, seven tabs and the left menu</span></div>
+      <div><b>11</b><span>places one process's information lives: seven tabs and four separate pages</span></div>
+      <div><b>3 of 7</b><span>tabs on a process are empty and offer no way to fill them</span></div>
+      <div><b>2</b><span>measures of how far a process has got, and they disagree</span></div>
+    </div>
+
+    <h3 class="h3">The structure, today and proposed</h3>
+    <p class="note">Same content, fewer doors. Nothing is removed; three things move, and the empty tabs wait until they hold something.</p>
+    <div class="maps">
+      <div class="mapcol now">
+        <span class="lbl">Today</span>
+        <div class="lv">
+          <h4>Left menu <span>· 8 items, a column of its own</span></h4>
+          <div class="items"><span>Dashboard</span><span>Org Directory</span><span>Processes</span><span>Priorities</span><span>Helicopter View</span><span>Value Chain</span><span>Governance</span><span>Export Report</span></div>
+        </div>
+        <div class="down">↓ Processes → find the row → <b>Open →</b> at the far right</div>
+        <div class="lv">
+          <h4>A process <span>· four layers of navigation</span></h4>
+          <div class="layer"><em>Links</em><div class="items"><span>Open process map →</span><span>RACI →</span><span>AI review →</span></div></div>
+          <div class="layer"><em>Strip</em><div class="items"><span>Process</span><span>Process Map</span><span>RACI Matrix</span><span>Authority Matrix</span><span>AI Review</span></div></div>
+          <div class="layer"><em>Tabs</em><div class="items"><span>Overview</span><span>Lifecycle</span><span>Risks &amp; controls</span><span>Quality</span><span class="empty">People</span><span class="empty">Compliance</span><span class="empty">Connections</span></div></div>
+          <div class="layer"><em>Menu</em><div class="items"><span>the 8 items above, still on the left</span></div></div>
+        </div>
+        <div class="down">↓ Map, RACI, Authority and AI review are separate pages</div>
+        <div class="lv">
+          <h4>On RACI, Authority and AI review <span>· the tabs disappear</span></h4>
+          <div class="items"><span>Strip only</span><span class="gone">Overview</span><span class="gone">Lifecycle</span><span class="gone">Risks &amp; controls</span><span class="gone">Quality</span></div>
+        </div>
+      </div>
+      <div class="mapcol new">
+        <span class="lbl">Proposed</span>
+        <div class="lv">
+          <h4>Section bar along the top <span>· 6 items, as Strategy has</span></h4>
+          <div class="items"><span class="on">Overview</span><span>Processes</span><span>Priorities</span><span>Landscape</span><span>Governance</span><span>Org directory</span></div>
+          <p class="note" style="margin-top:6px">Export becomes a button. Logo, colours and the client profile move to Processes settings in the top bar's module menu. Helicopter View and Value Chain become the two views of Landscape.</p>
+        </div>
+        <div class="down">↓ Processes → click the name</div>
+        <div class="lv">
+          <h4>A process <span>· one header, one row of tabs, the same on every tab</span></h4>
+          <div class="layer"><em>Rail</em><div class="items"><span>every process, on the left, as Strategy lists pillars</span></div></div>
+          <div class="layer"><em>Ready</em><div class="items"><span>Map</span><span>RACI</span><span>Authority</span><span>Controls</span><span>SOP</span><span>Approved</span></div></div>
+          <div class="layer"><em>Tabs</em><div class="items"><span class="on">Overview</span><span>Map</span><span>RACI</span><span>Authority</span><span>Risks &amp; controls</span><span>Quality</span><span>Lifecycle</span></div></div>
+          <div class="layer"><em>Button</em><div class="items"><span>Check with AI · opens beside whatever tab you are on</span></div></div>
+        </div>
+        <div class="down">↓ switching process keeps you on the same tab</div>
+        <div class="lv">
+          <h4>Where the three empty tabs went</h4>
+          <div class="items"><span>People → “Who is involved” on Overview</span><span>Connections → “Hand-overs” on Overview</span><span class="empty">Compliance → back as a tab once it holds something</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="h3">What makes it hard, worst first</h3>
+    <p class="note">Each one names what was counted, what it costs the consultant, and where the redesign answers it.</p>
+    <div class="findings">
+      <div class="fd"><div class="sev"><span class="chip bad">Confuses</span></div><div>
+        <h4>The navigation changes under you</h4>
+        <p>On a process's page and its map you get the tabs. Open RACI, Authority or AI review and the tabs are gone; the only way back to Risks, Quality or Lifecycle is the strip's “Process” step, which lands on Overview first.</p>
+        <div class="fix"><b>Fix</b>One header and one row of tabs on every view of a process. <button type="button" data-go="process" data-tab="raci">See RACI as a tab</button></div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip attn">Slows you down</span></div><div>
+        <h4>Read in one place, edited in another</h4>
+        <p>Purpose and scope are shown on Overview and document control on Lifecycle, but all three are edited on the map page, above the drawing. The Lifecycle tab says so in words: “Edit these on the process map page.”</p>
+        <div class="fix"><b>Fix</b>Edit where you read it, with a pen on each block, the way a Portfolio charter works. <button type="button" data-go="process" data-tab="overview">See the Overview tab</button></div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip attn">Slows you down</span></div><div>
+        <h4>Switching process means going back to the list</h4>
+        <p>To go from Order-to-Cash's RACI to Procure-to-Pay's RACI: left menu, find the row, Open, then RACI. Four clicks, and you pass through Overview on the way.</p>
+        <div class="fix"><b>Fix</b>A rail of processes beside the page, as Strategy lists a unit's pillars. Click another process and you stay on the tab you were on. <button type="button" data-go="process">See the rail</button></div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip bad">Confuses</span></div><div>
+        <h4>Two measures of progress that disagree</h4>
+        <p>The strip counts Process, Map, RACI, Authority, AI Review and marks one NEXT. The deep-dive plan counts Map, RACI, Authority, Controls, SOP, Approved. Authority never turns green on the strip, so a finished process says “Authority Matrix, NEXT” for ever.</p>
+        <div class="fix"><b>Fix</b>One readiness line, the six deep-dive marks, each a link to the tab where it is fixed. <button type="button" data-go="process">See the readiness line</button></div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip bad">Confuses</span></div><div>
+        <h4>Three tabs that lead nowhere</h4>
+        <p>People, Compliance and Connections each say “not recorded yet” and offer nothing to record it with. They look like work waiting to be done, and none of it can be.</p>
+        <div class="fix"><b>Fix</b>Take them off the row. Who is involved and the hand-overs go on Overview; Compliance comes back when it holds something.</div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip attn">Slows you down</span></div><div>
+        <h4>The main buttons are at the bottom</h4>
+        <p>New process, Draft with AI and Import sit under the whole list: with 48 processes, that is 48 rows down. Add step sits under the map.</p>
+        <div class="fix"><b>Fix</b>One New process button at the top, with the three ways to start in its menu. Add step in the map's own toolbar. <button type="button" data-go="list">See the list</button></div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip attn">Slows you down</span></div><div>
+        <h4>The list is hard to act on</h4>
+        <p>Nine columns squeezed into an 848-pixel column. Every row carries four text buttons (Edit, Clone, Delete, Open) and the name is not a link, so the most-used action is the small “Open →” at the far right. There is no owner column.</p>
+        <div class="fix"><b>Fix</b>The name opens the process. Edit, Clone and Delete go behind ⋯. Owner and readiness come in; the page takes SMP's full width. <button type="button" data-go="list">See the list</button></div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip attn">Slows you down</span></div><div>
+        <h4>The front page is a settings page</h4>
+        <p>“Dashboard” holds the logo and colours, industry and description, and three counts: processes, RACI drafts and members. Nothing on it says what needs doing this week.</p>
+        <div class="fix"><b>Fix</b>An Overview that opens on what needs attention and how far the deep dives have got. <button type="button" data-go="overview">See the Overview</button></div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip attn">Slows you down</span></div><div>
+        <h4>Governance is one long page</h4>
+        <p>Dashboard, review calendar, profile form, assessment, activity log, then a block for every single process, stacked in one scroll.</p>
+        <div class="fix"><b>Fix</b>Five views under one switch, the way a unit's Strategy splits Foundation, SWOT, Drivers and Plan. <button type="button" data-go="governance">See Governance</button></div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip attn">Slows you down</span></div><div>
+        <h4>No way up</h4>
+        <p>A sub-process names its parent in grey text that is not a link, and no process page has a trail back to the list. The left menu is the only way out.</p>
+        <div class="fix"><b>Fix</b>A trail on every page: Raya Trade · Processes › parent › this one, each part a link.</div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip navy">Another product</span></div><div>
+        <h4>It does not look like SMP</h4>
+        <p>Its own typeface (Geist, where SMP uses Source Sans), indigo and slate where SMP uses navy and gold, the client's colour as a gradient banner on some pages and a plain title on others, and a left menu where every other module has a bar along the top. Beside Strategy, Portfolio and the Tracker it reads as a different product.</p>
+        <div class="fix"><b>Fix</b>SMP's palette, type, tables, cards and section bar throughout, as drawn in screens 2 to 5.</div>
+      </div></div>
+      <div class="fd"><div class="sev"><span class="chip">Polish</span></div><div>
+        <h4>Names that need explaining</h4>
+        <p>“Helicopter View” is consultant shorthand, and “Export Report” is a thing you do, sitting in the menu as if it were a place.</p>
+        <div class="fix"><b>Fix</b>Landscape, holding the value chain and the map of connections. Export as a button in the header.</div>
+      </div></div>
+    </div>
+
+    <h3 class="h3">Six everyday jobs, counted</h3>
+    <p class="note">Clicks from wherever you would naturally be. A scroll is named where it is part of the job.</p>
+    <div class="tw">
+      <table class="t ts">
+        <thead><tr><th>Job</th><th>Today</th><th>Proposed</th></tr></thead>
+        <tbody>
+          <tr><td><b>See what needs doing this week</b></td><td><span class="big bad">Not on one page</span><br><span class="q">Overdue reviews are a word in the list's Status column and a row on Governance's calendar; RACI drafts are a count on Dashboard.</span></td><td><span class="big good">0 clicks</span><br><span class="q">It is the first block on Overview.</span></td></tr>
+          <tr><td><b>From Order-to-Cash's RACI to Procure-to-Pay's RACI</b></td><td><span class="big bad">4 clicks</span><br><span class="q">Menu, find the row, Open, RACI.</span></td><td><span class="big good">1 click</span><br><span class="q">Procure-to-Pay in the rail. RACI stays open.</span></td></tr>
+          <tr><td><b>Change a purpose you are reading</b></td><td><span class="big bad">2 clicks</span><br><span class="q">Open process map, then Edit on Documentation, on a different page from the one you were reading.</span></td><td><span class="big good">1 click</span><br><span class="q">The pen on the Purpose block.</span></td></tr>
+          <tr><td><b>Record a risk while on RACI</b></td><td><span class="big bad">2 clicks + scroll</span><br><span class="q">Strip's Process step, which opens Overview; Risks &amp; controls tab; the form at the bottom.</span></td><td><span class="big good">2 clicks</span><br><span class="q">Risks &amp; controls tab; Add a risk at the top. Same clicks, no detour, no scroll.</span></td></tr>
+          <tr><td><b>Start a new process</b></td><td><span class="big bad">Scroll past every row</span></td><td><span class="big good">1 click</span><br><span class="q">New process, top right.</span></td></tr>
+          <tr><td><b>See why a process is not ready</b></td><td><span class="big bad">2 pages</span><br><span class="q">Compare the strip with the deep-dive card on Priorities.</span></td><td><span class="big good">0 clicks</span><br><span class="q">The readiness line on the process header; each mark is a link.</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ 2 · OVERVIEW ═════════════════ -->
+<section class="screen" data-screen="overview" hidden>
+  <details class="why" open><summary><b>What changes here</b> The module's front page</summary>
+    <ul>
+      <li>Was “Dashboard”: logo, colours, industry, description and three counts. Now it opens on what needs doing.</li>
+      <li>The left menu becomes the grey section bar along the top, exactly as a unit's Strategy page draws it. Export becomes a button.</li>
+      <li>Logo, colours and the client profile move to <b>Processes settings</b> in the top bar's Processes menu. Try it.</li>
+    </ul>
+  </details>
+  <div class="frame">
+    <div class="tb" data-part="topbar"></div>
+    <nav class="sb" data-part="sections" data-on="overview"></nav>
+    <div class="pg">
+      <div class="phead">
+        <div><div class="crumb">Raya Trade · Processes</div><h1>Overview</h1></div>
+        <div class="acts" data-part="headacts"></div>
+      </div>
+      <div class="cells">
+        <div class="cell"><div class="k">Processes</div><div class="v">48</div><div class="w">14 main, 34 sub-processes · 31 mapped</div></div>
+        <div class="cell"><div class="k">Deep dives</div><div class="v">8</div><div class="w">Wave 1: 4 under way · Wave 2: 4 waiting</div></div>
+        <div class="cell attn"><div class="k">Reviews due in 60 days</div><div class="v">3</div><div class="w"><span class="bad">1 overdue:</span> New Store Opening</div></div>
+        <div class="cell"><div class="k">Read by staff</div><div class="v">76<small>%</small></div><div class="w">112 of 147 have confirmed the version in force</div></div>
+      </div>
+      <div class="ovgrid">
+        <div>
+          <div class="sect">Needs attention <span>· 5 things, most urgent first</span></div>
+          <div class="box">
+            <div class="att"><span class="chip bad">Review overdue</span><div class="what"><span class="code">SOP-009</span> <b>New Store Opening</b><span class="w2">Review was due 20 Sep, 33 days ago · owner Amr Hassan</span></div><a class="btn sm go" href="#" data-go="process" data-tab="lifecycle">Lifecycle →</a></div>
+            <div class="att"><span class="chip navy">Waiting to approve</span><div class="what"><span class="code">SOP-021</span> <b>Procure-to-Pay</b><span class="w2">v2.1 sent to Yara Kamal on 18 Oct · 5 days</span></div><a class="btn sm go" href="#" data-go="process" data-tab="lifecycle">Lifecycle →</a></div>
+            <div class="att"><span class="chip bad">No control</span><div class="what"><span class="code">SOP-014</span> <b>Order-to-Cash</b><span class="w2">Step 4 Deliver: “Proof of delivery missing” has no control</span></div><a class="btn sm go" href="#" data-go="process" data-tab="risks">Risks →</a></div>
+            <div class="att"><span class="chip attn">RACI draft</span><div class="what"><span class="code">SOP-018</span> <b>Inventory &amp; Stock Count</b><span class="w2">2 activities have nobody accountable</span></div><a class="btn sm go" href="#" data-go="process" data-tab="raci">RACI →</a></div>
+            <div class="att"><span class="chip attn">Not read</span><div class="what"><span class="code">SOP-014</span> <b>Order-to-Cash</b><span class="w2">6 of 44 have not confirmed v2.0</span></div><a class="btn sm go" href="#" data-go="process" data-tab="lifecycle">Lifecycle →</a></div>
+          </div>
+        </div>
+        <div>
+          <div class="sect">Deep dives · Wave 1 <span>· plan signed off by the client on 21 Oct</span><a class="lnk r" href="#" data-soon="Priorities">Priorities →</a></div>
+          <div class="box">
+            <div class="dd"><div><span class="code">SOP-014</span> <b>Order-to-Cash</b></div><span class="marks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i class="on"></i><b>5/6</b></span><div class="asp"><span class="ok">Map ✓</span><span class="ok">RACI ✓</span><span class="ok">Authority ✓</span><span class="ok">Controls ✓</span><span>SOP</span><span class="ok">Approved ✓</span></div></div>
+            <div class="dd"><div><span class="code">SOP-021</span> <b>Procure-to-Pay</b></div><span class="marks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><b>4/6</b></span><div class="asp"><span class="ok">Map ✓</span><span class="ok">RACI ✓</span><span class="ok">Authority ✓</span><span class="ok">Controls ✓</span><span>SOP</span><span>Approved</span></div></div>
+            <div class="dd"><div><span class="code">SOP-018</span> <b>Inventory &amp; Stock Count</b></div><span class="marks"><i class="on"></i><i></i><i class="on"></i><i class="on"></i><i></i><i></i><b>3/6</b></span><div class="asp"><span class="ok">Map ✓</span><span>RACI</span><span class="ok">Authority ✓</span><span class="ok">Controls ✓</span><span>SOP</span><span>Approved</span></div></div>
+            <div class="dd"><div><span class="code">SOP-024</span> <b>Credit &amp; Collections</b></div><span class="marks"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><b>2/6</b></span><div class="asp"><span class="ok">Map ✓</span><span class="ok">RACI ✓</span><span>Authority</span><span>Controls</span><span>SOP</span><span>Approved</span></div></div>
+          </div>
+          <div class="sect" style="margin-top:16px">Recently changed</div>
+          <div class="box feed"><ul>
+            <li><time>22 Oct</time> Karim Fouad finalised the RACI of <b>Procure-to-Pay</b></li>
+            <li><time>21 Oct</time> The client approved the deep-dive plan</li>
+            <li><time>18 Oct</time> <b>Procure-to-Pay</b> v2.1 sent for approval</li>
+            <li><time>04 Oct</time> Yara Kamal approved <b>Order-to-Cash</b> v3.0</li>
+          </ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ 3 · PROCESSES LIST ═════════════════ -->
+<section class="screen" data-screen="list" hidden>
+  <details class="why" open><summary><b>What changes here</b> The list of every process</summary>
+    <ul>
+      <li>The name opens the process. Edit, Clone and Delete move behind ⋯ (try one).</li>
+      <li>New process sits at the top, with Draft with AI and Import in its menu, instead of three forms under the last row.</li>
+      <li>Owner and readiness come in; Depth and Priority become one column. The page takes SMP's full width instead of an 848-pixel column.</li>
+      <li>The quick filters answer the questions the old Status column made you scan for.</li>
+    </ul>
+  </details>
+  <div class="frame">
+    <div class="tb" data-part="topbar"></div>
+    <nav class="sb" data-part="sections" data-on="list"></nav>
+    <div class="pg">
+      <div class="phead">
+        <div><div class="crumb">Raya Trade · Processes</div><h1>Processes</h1><div class="sub">48 processes · every one has its own code and can sit under a main process</div></div>
+        <div class="acts">
+          <div class="menu-wrap"><button class="btn" type="button" data-menu="m-exp-l">Export <span class="dn">▾</span></button>
+            <div class="menu" id="m-exp-l" hidden>
+              <a href="#" data-soon="Export">Report for several processes…<small>Pick processes, preview, print</small></a>
+              <a href="#" data-soon="Export">Every SOP in one file</a>
+              <a href="#" data-soon="Export">The list as Excel</a>
+            </div></div>
+          <div class="menu-wrap"><button class="btn gold" type="button" data-menu="m-new">+ New process <span class="dn">▾</span></button>
+            <div class="menu" id="m-new" hidden>
+              <a href="#" data-soon="New process">Blank process<small>Code, name, category, where it sits</small></a>
+              <a href="#" data-soon="Draft with AI">Draft with AI<small>From your notes and the org chart's roles</small></a>
+              <a href="#" data-soon="Import">Import from Excel<small>Many processes and steps at once</small></a>
+            </div></div>
+        </div>
+      </div>
+      <div class="filters">
+        <label class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="q-list" type="search" placeholder="Search by name, code, category, step or task" aria-label="Search processes"></label>
+        <div class="filters" style="margin:0" data-chips>
+          <button type="button" class="fchip on">All<b>48</b></button>
+          <button type="button" class="fchip">Deep dive<b>8</b></button>
+          <button type="button" class="fchip">In review<b>3</b></button>
+          <button type="button" class="fchip bad">Review overdue<b>1</b></button>
+          <button type="button" class="fchip">No owner<b>5</b></button>
+        </div>
+        <span style="margin-left:auto;display:flex;gap:14px;align-items:center"><button class="lnk" type="button" id="openall">Open all</button><a class="lnk" href="#" data-soon="Deleted processes">Deleted (2)</a></span>
+      </div>
+      <div class="tw">
+        <table class="t" id="plist">
+          <thead><tr><th>Code</th><th>Process</th><th>Owner</th><th>Stage</th><th>Depth</th><th>Ready for staff</th><th>Next review</th><th class="r"><span class="quiet" style="color:inherit">⋯</span></th></tr></thead>
+          <tbody>
+            <tr class="hov"><td><button class="fold" type="button" data-fold="p002" aria-label="Show sub-processes">▸</button><span class="code">SOP-002</span></td><td><a class="pname" href="#" data-go="process">Record-to-Report</a><span class="psub">Finance · 2 sub-processes</span></td><td>Hala Mansour</td><td><span class="pill good">Published · v2.0</span></td><td><span class="chip gold">Wave 2 · rank 5</span></td><td><span class="marks"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i class="on"></i><b>3/6</b></span></td><td class="num">14 Mar 2027</td><td class="r" data-part="dots"></td></tr>
+            <tr class="sub" data-parent="p002" hidden><td style="padding-left:38px"><span class="code">SOP-002.1</span></td><td><a class="pname" href="#" data-go="process">Month-end close</a></td><td>Hala Mansour</td><td><span class="pill">Draft</span></td><td class="q">High-level</td><td class="q">Map only</td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="sub" data-parent="p002" hidden><td style="padding-left:38px"><span class="code">SOP-002.2</span></td><td><a class="pname" href="#" data-go="process">Fixed assets</a></td><td class="q">No owner</td><td><span class="pill">Draft</span></td><td class="q">High-level</td><td class="q">Not mapped</td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="hov"><td style="padding-left:34px"><span class="code">SOP-006</span></td><td><a class="pname" href="#" data-go="process">Pricing &amp; Promotions</a><span class="psub">Commercial</span></td><td>Omar Fathy</td><td><span class="pill">Draft</span></td><td><span class="chip gold">Wave 2 · rank 8</span></td><td><span class="marks"><i></i><i></i><i></i><i></i><i></i><i></i><b>0/6</b></span></td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="hov"><td style="padding-left:34px"><span class="code">SOP-009</span></td><td><a class="pname" href="#" data-go="process">New Store Opening</a><span class="psub">Retail</span></td><td>Amr Hassan</td><td><span class="pill good">Published · v1.4</span></td><td><span class="chip gold">Wave 2 · rank 7</span></td><td><span class="marks"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i class="on"></i><b>4/6</b></span></td><td><span class="num">20 Sep 2026</span><span class="psub" style="color:var(--bad-tx);font-weight:600">33 days late</span></td><td class="r" data-part="dots"></td></tr>
+            <tr class="hov"><td><button class="fold" type="button" data-fold="p014" aria-label="Show sub-processes">▾</button><span class="code">SOP-014</span></td><td><a class="pname" href="#" data-go="process">Order-to-Cash</a><span class="psub">Finance · 2 sub-processes</span></td><td>Hend Mourad</td><td><span class="pill good">Approved · v3.0</span></td><td><span class="chip gold">Wave 1 · rank 1</span></td><td><span class="marks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i class="on"></i><b>5/6</b></span></td><td><span class="num">12 Nov 2026</span><span class="psub" style="color:var(--attn-tx)">in 20 days</span></td><td class="r" data-part="dots"></td></tr>
+            <tr class="sub" data-parent="p014"><td style="padding-left:38px"><span class="code">SOP-014.1</span></td><td><a class="pname" href="#" data-go="process">Returns &amp; refunds</a></td><td>Salma Adel</td><td><span class="pill">Draft</span></td><td class="q">High-level</td><td class="q">Map only</td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="sub" data-parent="p014"><td style="padding-left:38px"><span class="code">SOP-014.2</span></td><td><a class="pname" href="#" data-go="process">Customer credit setup</a><span class="psub br">↰ branches from SOP-014 · step 2 Credit check</span></td><td>Hend Mourad</td><td><span class="pill attn">In review</span></td><td class="q">High-level</td><td class="q">Map only</td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="hov"><td style="padding-left:34px"><span class="code">SOP-018</span></td><td><a class="pname" href="#" data-go="process">Inventory &amp; Stock Count</a><span class="psub">Supply Chain</span></td><td>Karim Fouad</td><td><span class="pill attn">In review · v0.9</span></td><td><span class="chip gold">Wave 1 · rank 2</span></td><td><span class="marks"><i class="on"></i><i></i><i class="on"></i><i class="on"></i><i></i><i></i><b>3/6</b></span></td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="hov"><td style="padding-left:34px"><span class="code">SOP-021</span></td><td><a class="pname" href="#" data-go="process">Procure-to-Pay</a><span class="psub">Supply Chain</span></td><td>Karim Fouad</td><td><span class="pill attn">In review · v2.1</span></td><td><span class="chip gold">Wave 1 · rank 3</span></td><td><span class="marks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><b>4/6</b></span></td><td class="num">03 Dec 2026</td><td class="r" data-part="dots"></td></tr>
+            <tr class="hov"><td style="padding-left:34px"><span class="code">SOP-024</span></td><td><a class="pname" href="#" data-go="process">Credit &amp; Collections</a><span class="psub">Finance</span></td><td>Hala Mansour</td><td><span class="pill">Draft</span></td><td><span class="chip gold">Wave 1 · rank 4</span></td><td><span class="marks"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><b>2/6</b></span></td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="hov"><td style="padding-left:34px"><span class="code">SOP-031</span></td><td><a class="pname" href="#" data-go="process">Customer Complaints</a><span class="psub">Care</span></td><td>Nour Samir</td><td><span class="pill">Draft · v0.3</span></td><td class="q">High-level</td><td class="q">Not mapped</td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="hov"><td style="padding-left:34px"><span class="code">SOP-033</span></td><td><a class="pname" href="#" data-go="process">Logistics &amp; Last-mile</a><span class="psub">Supply Chain</span></td><td>Omar Fathy</td><td><span class="pill">Draft</span></td><td><span class="chip gold">Wave 2 · rank 6</span></td><td><span class="marks"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><b>1/6</b></span></td><td class="q">—</td><td class="r" data-part="dots"></td></tr>
+            <tr class="more"><td colspan="8">5 more main processes and 30 more sub-processes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ 4 · A PROCESS ═════════════════ -->
+<section class="screen" data-screen="process" hidden>
+  <details class="why" open><summary><b>What changes here</b> One process, every view of it in one place</summary>
+    <ul>
+      <li>One header and one row of tabs, the same on all seven. Map, RACI and Authority stop being separate pages; the link line and the five-step strip go.</li>
+      <li>The readiness line is the six deep-dive marks. Each mark opens the tab that fixes it. “Next” says the one thing that is missing.</li>
+      <li>The rail lists every process, as Strategy lists a unit's pillars. Click one: you stay on the tab you are on. On Map it folds away to give the drawing the width.</li>
+      <li>Purpose, scope, measures and document control are edited where they are read. AI review becomes <b>Check with AI</b>, opening beside any tab.</li>
+    </ul>
+  </details>
+  <div class="frame">
+    <div class="tb" data-part="topbar"></div>
+    <nav class="sb" data-part="sections" data-on="list"></nav>
+    <div class="pg">
+      <div class="crumb" style="margin-bottom:10px"><a href="#" data-go="list">Raya Trade · Processes</a> › SOP-014 Order-to-Cash</div>
+      <div class="pwrap" id="pwrap">
+        <aside class="rail" aria-label="Processes">
+          <div class="rail-h">Processes <span class="n">48</span><button type="button" id="railhide" aria-label="Fold the list away" title="Fold the list away"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h9M2 12h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+          <div class="rail-s"><label class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="q-rail" type="search" placeholder="Find a process" aria-label="Find a process"></label></div>
+          <div class="railmsg" id="railmsg" hidden></div>
+          <div class="rail-l" id="raillist">
+            <button class="ri" type="button" data-p="SOP-002 Record-to-Report"><span class="code">SOP-002</span><span class="nm">Record-to-Report</span><span class="fr">3/6</span></button>
+            <button class="ri" type="button" data-p="SOP-006 Pricing &amp; Promotions"><span class="code">SOP-006</span><span class="nm">Pricing &amp; Promotions</span><span class="fr">0/6</span></button>
+            <button class="ri" type="button" data-p="SOP-009 New Store Opening"><span class="code">SOP-009</span><span class="nm">New Store Opening</span><span class="fr bad" title="Review overdue">4/6</span></button>
+            <button class="ri on" type="button" aria-current="true" data-p="SOP-014 Order-to-Cash"><span class="code">SOP-014</span><span class="nm">Order-to-Cash</span><span class="fr good">5/6</span></button>
+            <button class="ri sub" type="button" data-p="SOP-014.1 Returns &amp; refunds"><span class="code">SOP-014.1</span><span class="nm">Returns &amp; refunds</span><span class="fr">—</span></button>
+            <button class="ri sub" type="button" data-p="SOP-014.2 Customer credit setup"><span class="code">SOP-014.2</span><span class="nm">Customer credit setup</span><span class="fr">—</span></button>
+            <button class="ri" type="button" data-p="SOP-018 Inventory &amp; Stock Count"><span class="code">SOP-018</span><span class="nm">Inventory &amp; Stock Count</span><span class="fr">3/6</span></button>
+            <button class="ri" type="button" data-p="SOP-021 Procure-to-Pay"><span class="code">SOP-021</span><span class="nm">Procure-to-Pay</span><span class="fr">4/6</span></button>
+            <button class="ri" type="button" data-p="SOP-024 Credit &amp; Collections"><span class="code">SOP-024</span><span class="nm">Credit &amp; Collections</span><span class="fr">2/6</span></button>
+            <button class="ri" type="button" data-p="SOP-031 Customer Complaints"><span class="code">SOP-031</span><span class="nm">Customer Complaints</span><span class="fr">—</span></button>
+            <button class="ri" type="button" data-p="SOP-033 Logistics &amp; Last-mile"><span class="code">SOP-033</span><span class="nm">Logistics &amp; Last-mile</span><span class="fr">1/6</span></button>
+          </div>
+          <div class="rail-f">Deep dives show how many of six marks are done · “—” is high-level</div>
+        </aside>
+
+        <div class="pane">
+          <div class="pane-h">
+            <div class="ph1">
+              <button class="btn sm railbtn" type="button" id="railshow">☰ Processes</button>
+              <span class="code">SOP-014</span><h2>Order-to-Cash</h2>
+              <span class="pill good">Approved · v3.0</span><span class="quiet" style="font-size:12px">v2.0 in force for staff</span>
+              <a class="chip gold" href="#" data-soon="Priorities" style="text-decoration:none">Wave 1 · rank 1</a>
+              <div class="who"><span><em>Owner</em>Hend Mourad</span><span><em>Approver</em>Yara Kamal</span></div>
+            </div>
+            <div class="ph2">
+              <span class="rdl">Ready for staff <b>5 of 6</b></span>
+              <button type="button" class="rdm" data-tab="map">Map</button>
+              <button type="button" class="rdm" data-tab="raci">RACI</button>
+              <button type="button" class="rdm" data-tab="authority">Authority</button>
+              <button type="button" class="rdm" data-tab="risks">Controls</button>
+              <button type="button" class="rdm no" data-tab="lifecycle">SOP</button>
+              <button type="button" class="rdm" data-tab="lifecycle">Approved</button>
+              <span class="next">Next: <a href="#" data-tab="lifecycle">record the SOP version and effective date</a></span>
+            </div>
+            <div class="ph3">
+              <div class="seg" id="ptabs" role="tablist" aria-label="Views of this process">
+                <button type="button" role="tab" data-t="overview" class="on">Overview</button>
+                <button type="button" role="tab" data-t="map">Map</button>
+                <button type="button" role="tab" data-t="raci">RACI</button>
+                <button type="button" role="tab" data-t="authority">Authority</button>
+                <button type="button" role="tab" data-t="risks">Risks &amp; controls</button>
+                <button type="button" role="tab" data-t="quality">Quality</button>
+                <button type="button" role="tab" data-t="lifecycle">Lifecycle</button>
+              </div>
+              <div class="acts">
+                <button class="btn" type="button" id="aibtn">Check with AI</button>
+                <div class="menu-wrap"><button class="btn" type="button" data-menu="m-exp-p">Export <span class="dn">▾</span></button>
+                  <div class="menu" id="m-exp-p" hidden>
+                    <div class="mh">This process</div>
+                    <a href="#" data-soon="SOP">SOP document</a>
+                    <a href="#" data-soon="Printed map">Process map, printed</a>
+                    <a href="#" data-soon="RACI">RACI matrix · PDF or Excel</a>
+                    <a href="#" data-soon="Authority">Authority matrix · PDF or Excel</a>
+                    <div class="rule"></div>
+                    <a href="#" data-soon="Export">Report for several processes…</a>
+                  </div></div>
+                <button class="btn gold" type="button" data-soon="Publish to staff">Publish v3.0 to staff</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pane-b">
+            <!-- OVERVIEW -->
+            <div class="ptab" data-t="overview">
+              <div class="stack">
+                <div class="blk"><div class="blk-h"><span class="lbl">Purpose</span><button class="pen" type="button" data-soon="Edit purpose">Edit</button></div>
+                  <p>Take a confirmed customer order through the credit check, delivery, invoicing and collection, so that every order is delivered once and paid for within terms.</p></div>
+                <div class="two">
+                  <div class="blk"><div class="blk-h"><span class="lbl">In scope</span><button class="pen" type="button" data-soon="Edit scope">Edit</button></div>
+                    <ul><li>Orders from trade customers on credit terms</li><li>Deliveries from the central warehouse</li><li>Invoicing and collection in EGP</li></ul></div>
+                  <div class="blk"><div class="blk-h"><span class="lbl">Out of scope</span><button class="pen" type="button" data-soon="Edit scope">Edit</button></div>
+                    <ul><li>Cash sales in stores</li><li>Returns and refunds, in <a href="#" class="lnk" data-p-link>SOP-014.1</a></li><li>Export orders</li></ul></div>
+                </div>
+                <div class="blk"><div class="blk-h"><span class="lbl">Measures <span class="n">3</span></span><button class="pen" type="button" data-soon="Edit measures">Edit</button></div>
+                  <div class="tw"><table class="t"><thead><tr><th>Measure</th><th>Target</th><th>How often</th></tr></thead><tbody>
+                    <tr><td>Order to invoice</td><td class="num">2 days</td><td>Weekly</td></tr>
+                    <tr><td>Invoice accuracy</td><td class="num">98%</td><td>Monthly</td></tr>
+                    <tr><td>Days to collect</td><td class="num">45 days</td><td>Monthly</td></tr>
+                  </tbody></table></div></div>
+                <div class="two">
+                  <div class="blk"><div class="blk-h"><span class="lbl">Hand-overs</span><a class="lnk" href="#" data-tab="map" style="margin-left:auto">Set on the map →</a></div>
+                    <div class="flow">
+                      <div><span class="chip">In</span><span class="code">SOP-014.2</span> Customer credit setup <span class="arrow">→</span> step 2 Credit check</div>
+                      <div><span class="chip">Out</span>step 4 Deliver <span class="arrow">→</span> <span class="code">SOP-033</span> Logistics &amp; Last-mile</div>
+                      <div><span class="chip">Out</span>step 6 Collect payment <span class="arrow">→</span> <span class="code">SOP-002</span> Record-to-Report</div>
+                    </div></div>
+                  <div class="blk"><div class="blk-h"><span class="lbl">Who is involved</span></div>
+                    <div class="roles"><span><b>Finance</b> · 3 steps</span><span><b>Sales coordinator</b> · 2 steps</span><span><b>Logistics</b> · 1 step</span></div>
+                    <p class="note" style="margin-top:8px">44 people on the People register hold these roles. They are the ones asked to read and confirm each published version.</p></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MAP -->
+            <div class="ptab" data-t="map" hidden>
+              <div class="mapbar">
+                <div class="seg" id="mapview"><button type="button" class="on" data-v="diagram">Diagram</button><button type="button" data-v="list">Steps list</button></div>
+                <button class="btn gold sm" type="button" data-soon="Add step">+ Add step</button>
+                <button class="btn sm" type="button" data-soon="Add several steps">Add several</button>
+                <button class="btn sm" type="button" data-soon="Draft with AI">Draft with AI</button>
+                <span class="r"><button class="btn sm" type="button" data-soon="Zoom out">−</button><button class="btn sm" type="button" data-soon="Fit">Fit</button><button class="btn sm" type="button" data-soon="Zoom in">+</button></span>
+              </div>
+              <div class="mapgrid">
+                <div>
+                  <div class="mapv" data-v="diagram">
+                    <div class="lanes-wrap"><div class="lanes" id="lanes">
+                      <div class="lane-bg" style="grid-row:1"></div><div class="lane-bg z" style="grid-row:2"></div><div class="lane-bg" style="grid-row:3"></div>
+                      <div class="lane-l" style="grid-row:1">Sales coordinator</div>
+                      <div class="lane-l" style="grid-row:2">Finance</div>
+                      <div class="lane-l" style="grid-row:3">Logistics</div>
+                      <button type="button" class="st" id="s1" data-s="1" style="grid-row:1;grid-column:2"><span class="n">STEP 1</span><b>Confirm order</b><span class="k">Matches the quote</span></button>
+                      <button type="button" class="st dec on" id="s2" data-s="2" style="grid-row:2;grid-column:3"><span class="n">STEP 2 · DECISION</span><b>Credit check</b><span class="k">Within the limit?</span></button>
+                      <button type="button" class="st" id="s3" data-s="3" style="grid-row:1;grid-column:4"><span class="n">STEP 3</span><b>Ask for prepayment</b><span class="k">Over the limit only</span></button>
+                      <button type="button" class="st" id="s4" data-s="4" style="grid-row:3;grid-column:4"><span class="chip bad flag">No control</span><span class="n">STEP 4</span><b>Deliver</b><span class="k">Signed proof back</span><span class="chip ho">→ SOP-033</span></button>
+                      <button type="button" class="st" id="s5" data-s="5" style="grid-row:2;grid-column:5"><span class="n">STEP 5</span><b>Invoice</b><span class="k">Within 2 days</span></button>
+                      <button type="button" class="st" id="s6" data-s="6" style="grid-row:2;grid-column:6"><span class="n">STEP 6</span><b>Collect payment</b><span class="k">Within terms</span><span class="chip ho">→ SOP-002</span></button>
+                      <svg class="edges" id="edges" aria-hidden="true"></svg>
+                    </div></div>
+                  </div>
+                  <div class="mapv steplist" data-v="list" hidden>
+                    <div class="tw"><table class="t"><thead><tr><th>#</th><th>Step</th><th>Who</th><th>Rule</th><th>Control</th></tr></thead><tbody>
+                      <tr><td class="num">1</td><td><b>Confirm order</b></td><td>Sales coordinator</td><td class="q">—</td><td class="q">—</td></tr>
+                      <tr><td class="num">2</td><td><b>Credit check</b> <span class="chip">Decision</span></td><td>Finance</td><td>Over EGP 250,000 needs the CFO</td><td>Auto-block over limit</td></tr>
+                      <tr><td class="num">3</td><td><b>Ask for prepayment</b></td><td>Sales coordinator</td><td>Escalates after 5 days</td><td class="q">—</td></tr>
+                      <tr><td class="num">4</td><td><b>Deliver</b></td><td>Logistics</td><td class="q">—</td><td><span class="chip bad">No control</span></td></tr>
+                      <tr><td class="num">5</td><td><b>Invoice</b></td><td>Finance</td><td>Escalates after 2 days</td><td>Price list sign-off</td></tr>
+                      <tr><td class="num">6</td><td><b>Collect payment</b></td><td>Finance</td><td class="q">—</td><td class="q">—</td></tr>
+                    </tbody></table></div>
+                  </div>
+                  <p class="note" style="margin-top:8px">Click a step. Its detail opens beside the drawing, with what RACI, Authority and Risks say about it, instead of a form under the map.</p>
+                </div>
+                <aside class="drawer" id="drawer" aria-live="polite"></aside>
+              </div>
+            </div>
+
+            <!-- RACI -->
+            <div class="ptab" data-t="raci" hidden>
+              <div class="sect">RACI matrix <span>· 6 activities, 5 roles</span><span class="r"><span class="chip good">Final · 04 Oct</span></span></div>
+              <div class="tw"><table class="t">
+                <thead><tr><th>#</th><th>Activity</th><th class="c">Sales coordinator</th><th class="c">Finance</th><th class="c">Finance manager</th><th class="c">Logistics</th><th class="c">Warehouse</th></tr></thead>
+                <tbody>
+                  <tr><td class="num">1</td><td>Confirm order with the customer<span class="psub">Step 1</span></td><td class="c"><span class="rc R">R</span></td><td class="c"><span class="rc I">I</span></td><td class="c"><span class="rc A">A</span></td><td class="c"><span class="rc I">I</span></td><td class="c"><span class="rc x">·</span></td></tr>
+                  <tr><td class="num">2</td><td>Check the credit limit<span class="psub">Step 2</span></td><td class="c"><span class="rc C">C</span></td><td class="c"><span class="rc R">R</span></td><td class="c"><span class="rc A">A</span></td><td class="c"><span class="rc x">·</span></td><td class="c"><span class="rc x">·</span></td></tr>
+                  <tr><td class="num">3</td><td>Ask for prepayment<span class="psub">Step 3</span></td><td class="c"><span class="rc R">R</span></td><td class="c"><span class="rc C">C</span></td><td class="c"><span class="rc A">A</span></td><td class="c"><span class="rc x">·</span></td><td class="c"><span class="rc x">·</span></td></tr>
+                  <tr><td class="num">4</td><td>Deliver and bring back signed proof<span class="psub">Step 4</span></td><td class="c"><span class="rc I">I</span></td><td class="c"><span class="rc I">I</span></td><td class="c"><span class="rc x">·</span></td><td class="c"><span class="rc A">A</span></td><td class="c"><span class="rc R">R</span></td></tr>
+                  <tr><td class="num">5</td><td>Issue the invoice<span class="psub">Step 5</span></td><td class="c"><span class="rc I">I</span></td><td class="c"><span class="rc R">R</span></td><td class="c"><span class="rc A">A</span></td><td class="c"><span class="rc x">·</span></td><td class="c"><span class="rc x">·</span></td></tr>
+                  <tr><td class="num">6</td><td>Collect payment<span class="psub">Step 6</span></td><td class="c"><span class="rc C">C</span></td><td class="c"><span class="rc R">R</span></td><td class="c"><span class="rc A">A</span></td><td class="c"><span class="rc x">·</span></td><td class="c"><span class="rc x">·</span></td></tr>
+                </tbody>
+              </table></div>
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
+                <div class="legend"><span><span class="rc R">R</span> does it</span><span><span class="rc A">A</span> answers for it</span><span><span class="rc C">C</span> is asked</span><span><span class="rc I">I</span> is told</span></div>
+                <button class="btn sm" type="button" data-soon="Reopen RACI">Reopen to change</button>
+              </div>
+              <p class="note" style="margin-top:10px">PDF and Excel moved to Export in the header, so every tab has the same buttons in the same place.</p>
+            </div>
+
+            <!-- AUTHORITY -->
+            <div class="ptab" data-t="authority" hidden>
+              <div class="sect">Authority matrix <span>· 4 rules on 3 tasks</span><span class="r"><button class="btn sm gold" type="button" data-soon="Add a rule">+ Add a rule</button></span></div>
+              <div class="tw"><table class="t">
+                <thead><tr><th>Task</th><th>When</th><th>Then</th><th>Who</th></tr></thead>
+                <tbody>
+                  <tr><td>Check the credit limit<span class="psub">Step 2</span></td><td>Order above EGP 250,000</td><td><span class="chip navy">Needs approval</span></td><td>CFO · Yara Kamal</td></tr>
+                  <tr><td>Check the credit limit<span class="psub">Step 2</span></td><td>Not done within 4 hours</td><td><span class="chip attn">Escalates</span></td><td>Finance manager</td></tr>
+                  <tr><td>Ask for prepayment<span class="psub">Step 3</span></td><td>Not paid within 5 days</td><td><span class="chip attn">Escalates</span></td><td>Sales manager</td></tr>
+                  <tr><td>Issue the invoice<span class="psub">Step 5</span></td><td>Not issued within 2 days of delivery</td><td><span class="chip attn">Escalates</span></td><td>Finance manager</td></tr>
+                </tbody>
+              </table></div>
+            </div>
+
+            <!-- RISKS -->
+            <div class="ptab" data-t="risks" hidden>
+              <div class="cells" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+                <div class="cell"><div class="k">Risks recorded</div><div class="v">3</div></div>
+                <div class="cell bad"><div class="k">With no control</div><div class="v">1</div><div class="w">Step 4 Deliver</div></div>
+                <div class="cell attn"><div class="k">Steps with no control</div><div class="v">4</div><div class="w">Steps 1, 3, 4 and 6</div></div>
+              </div>
+              <div class="sect">Risks and their controls<span class="r"><button class="btn sm gold" type="button" data-soon="Add a risk">+ Add a risk</button></span></div>
+              <div class="tw"><table class="t">
+                <thead><tr><th>Step</th><th>Risk</th><th>Level</th><th>Control</th><th>Type</th><th>Last test</th></tr></thead>
+                <tbody>
+                  <tr><td>2 · Credit check</td><td>Order released to a customer over the limit</td><td><span class="pill bad">High</span></td><td>System blocks orders over the credit limit<span class="psub">Finance · every order</span></td><td>Preventive</td><td><span class="pill good">Pass · Aug 2026</span></td></tr>
+                  <tr><td>5 · Invoice</td><td>Invoice sent with the wrong price</td><td><span class="pill attn">Medium</span></td><td>Price list signed off before use<span class="psub">Finance · monthly</span></td><td>Detective</td><td class="q">Not tested</td></tr>
+                  <tr><td>4 · Deliver</td><td>Proof of delivery missing</td><td><span class="pill attn">Medium</span></td><td><b style="color:var(--bad-tx)">No control</b></td><td class="q">—</td><td class="q">—</td></tr>
+                </tbody>
+              </table></div>
+              <p class="note" style="margin-top:8px">Check with AI can suggest a risk and a control for each step. They stay suggestions until you accept them.</p>
+            </div>
+
+            <!-- QUALITY -->
+            <div class="ptab" data-t="quality" hidden>
+              <div class="cells" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+                <div class="cell attn"><div class="k">Open non-conformances</div><div class="v">1</div></div>
+                <div class="cell"><div class="k">Closed</div><div class="v">3</div></div>
+                <div class="cell"><div class="k">Failed control tests</div><div class="v">0</div></div>
+              </div>
+              <div class="sect">Non-conformances<span class="r"><button class="btn sm gold" type="button" data-soon="Record a non-conformance">+ Record one</button></span></div>
+              <div class="tw"><table class="t">
+                <thead><tr><th>Ref</th><th>What happened</th><th>Action</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td class="code">NC-07</td><td>Wrong price on 4 invoices</td><td>Re-sign the price list; credit the four customers</td><td>Finance</td><td class="num">30 Oct</td><td><span class="pill attn">Action open</span></td></tr>
+                  <tr><td class="code">NC-04</td><td>Delivery left without signed proof</td><td>Drivers briefed; proof photo added to the app</td><td>Logistics</td><td class="num">12 Sep</td><td><span class="pill good">Closed</span></td></tr>
+                </tbody>
+              </table></div>
+            </div>
+
+            <!-- LIFECYCLE -->
+            <div class="ptab" data-t="lifecycle" hidden>
+              <div class="stack">
+                <div class="blk">
+                  <div class="blk-h"><span class="lbl">Where v3.0 stands</span></div>
+                  <div class="track"><span class="done">Draft</span><i>›</i><span class="done">In review</span><i>›</i><span class="now">Approved</span><i>›</i><span>Published</span><i>›</i><span>Retired</span></div>
+                  <div class="signs" style="margin-top:12px">
+                    <div><em>Owner</em><span>Hend Mourad sent it for review</span><span class="pill">30 Sep</span></div>
+                    <div><em>Reviewer</em><span>Karim Fouad signed</span><span class="pill good">02 Oct</span></div>
+                    <div><em>Approver</em><span>Yara Kamal, CFO, approved</span><span class="pill good">04 Oct</span></div>
+                  </div>
+                  <p class="note" style="margin-top:10px">What changed in v3.0: the credit check now happens before delivery, and over-limit orders go to a prepayment step.</p>
+                </div>
+                <div class="two">
+                  <div class="blk"><div class="blk-h"><span class="lbl">Document control</span><button class="pen" type="button" data-soon="Edit document control">Edit</button></div>
+                    <dl class="dl"><dt>SOP version</dt><dd class="miss">Not recorded yet</dd><dt>Owner</dt><dd>Hend Mourad</dd><dt>Effective from</dt><dd class="miss">Not recorded yet</dd><dt>Approved by</dt><dd>Yara Kamal</dd><dt>Review every</dt><dd>12 months · next 12 Nov 2026</dd></dl>
+                    <p class="note" style="margin-top:8px">Edited here now. Today these are shown on this tab and changed on the map page.</p></div>
+                  <div class="blk"><div class="blk-h"><span class="lbl">Read and confirmed · v2.0</span><button class="btn sm" type="button" data-soon="Remind">Remind the 6</button></div>
+                    <p><b class="num">38</b> of 44 have confirmed they have read the version in force.</p>
+                    <div class="bar"><i class="good" style="width:86%"></i></div>
+                    <p class="note">Still to read: 4 in Logistics, 2 in Sales.</p>
+                    <div class="blk-h" style="margin:12px 0 6px"><span class="lbl">Link for staff</span></div>
+                    <div class="copyrow"><code id="stafflink">/raya/processes/read/sop-014</code><button class="btn sm" type="button" id="copybtn">Copy</button></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="sect">Versions</div>
+                  <div class="tw"><table class="t"><thead><tr><th>Version</th><th>Stage</th><th>What changed</th><th>By</th><th>Date</th></tr></thead><tbody>
+                    <tr><td class="code">v3.0</td><td><span class="pill good">Approved</span></td><td>Credit check moved before delivery; prepayment path added</td><td>Hend Mourad</td><td class="num">04 Oct 2026</td></tr>
+                    <tr><td class="code">v2.0</td><td><span class="pill navy">In force</span></td><td>Returns handling added</td><td>Hend Mourad</td><td class="num">03 Oct 2025</td></tr>
+                    <tr><td class="code">v1.0</td><td><span class="pill">Retired</span></td><td>First issue</td><td>Omar Fathy</td><td class="num">14 Jan 2025</td></tr>
+                  </tbody></table></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="aip" id="aip" hidden>
+          <div class="aip-h"><b>Check with AI</b><span class="chip">Order-to-Cash</span><button class="btn sm" type="button" id="aiclose">Close</button></div>
+          <div class="aif"><span class="chip bad" style="justify-self:start">Gap</span><div>Step 4 Deliver has a risk with no control. A photo of the signed proof, checked daily by Finance, would cover it.</div><div class="acts"><button class="btn sm gold" type="button" data-soon="Add control">Add as a control</button><button class="btn sm" type="button" data-soon="Dismiss">Dismiss</button></div></div>
+          <div class="aif"><span class="chip attn" style="justify-self:start">Repeat</span><div>The Finance manager answers for five of the six activities. When one person is accountable for nearly everything, some of it usually belongs lower down.</div><div class="acts"><button class="btn sm" type="button" data-tab="raci">Look at RACI</button><button class="btn sm" type="button" data-soon="Dismiss">Dismiss</button></div></div>
+          <div class="aif"><span class="chip" style="justify-self:start">Missing step</span><div>Most order-to-cash processes chase an overdue invoice before it goes to collections. Add “Send reminder” after step 5?</div><div class="acts"><button class="btn sm gold" type="button" data-soon="Add as a step">Add as a step</button><button class="btn sm" type="button" data-soon="Dismiss">Dismiss</button></div></div>
+          <p class="note" style="padding:8px 14px 12px">Opens over whichever tab you are on. Today it is a page of its own.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ 5 · GOVERNANCE ═════════════════ -->
+<section class="screen" data-screen="governance" hidden>
+  <details class="why" open><summary><b>What changes here</b> One long scroll becomes five views</summary>
+    <ul>
+      <li>Today: dashboard, review calendar, profile form, assessment, activity log, then a block per process, all on one page.</li>
+      <li>Proposed: the same sections under one switch, as a unit's Strategy splits Foundation, SWOT, Drivers and Plan. Nothing is taken out.</li>
+      <li>The governance profile (company size, jurisdiction) moves to Processes settings with the logo and colours.</li>
+    </ul>
+  </details>
+  <div class="frame">
+    <div class="tb" data-part="topbar"></div>
+    <nav class="sb" data-part="sections" data-on="governance"></nav>
+    <div class="pg">
+      <div class="phead">
+        <div><div class="crumb">Raya Trade · Processes</div><h1>Governance</h1><div class="sub">Reviews, policies, risks and controls across every process</div></div>
+        <div class="acts" data-part="headacts"></div>
+      </div>
+      <div class="seg" id="gseg" style="margin-bottom:16px">
+        <button type="button" class="on" data-g="dash">Dashboard</button>
+        <button type="button" data-g="cal">Review calendar</button>
+        <button type="button" data-g="pol">Risks &amp; policies</button>
+        <button type="button" data-g="ctl">Controls by process</button>
+        <button type="button" data-g="log">Activity</button>
+      </div>
+      <div class="gv" data-g="dash">
+        <div class="cells">
+          <div class="cell attn"><div class="k">Reviews due in 60 days</div><div class="v">3</div><div class="w"><span class="bad">1 overdue</span></div></div>
+          <div class="cell"><div class="k">Risks with a control</div><div class="v">82<small>%</small></div><div class="w">41 of 50 risks</div></div>
+          <div class="cell attn"><div class="k">Open non-conformances</div><div class="v">7</div><div class="w">2 past their due date</div></div>
+          <div class="cell"><div class="k">Read by staff</div><div class="v">76<small>%</small></div><div class="w">112 of 147</div></div>
+        </div>
+        <div class="ovgrid">
+          <div>
+            <div class="sect">Next reviews<a class="lnk r" href="#" data-g-go="cal">Whole calendar →</a></div>
+            <div class="tw"><table class="t"><thead><tr><th>Process</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody>
+              <tr><td><span class="code">SOP-009</span> New Store Opening</td><td>Amr Hassan</td><td class="num">20 Sep 2026</td><td><span class="pill bad">33 days late</span></td></tr>
+              <tr><td><span class="code">SOP-014</span> Order-to-Cash</td><td>Hend Mourad</td><td class="num">12 Nov 2026</td><td><span class="pill attn">In 20 days</span></td></tr>
+              <tr><td><span class="code">SOP-021</span> Procure-to-Pay</td><td>Karim Fouad</td><td class="num">03 Dec 2026</td><td><span class="pill attn">In 41 days</span></td></tr>
+              <tr><td><span class="code">SOP-002</span> Record-to-Report</td><td>Hala Mansour</td><td class="num">14 Mar 2027</td><td><span class="pill">Not due</span></td></tr>
+            </tbody></table></div>
+          </div>
+          <div>
+            <div class="sect">Policy coverage <span>· processes with a mapped control</span></div>
+            <div class="box" style="padding:12px 14px;display:grid;gap:10px">
+              <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Credit policy</span><b class="num">9 of 12</b></div><div class="bar"><i style="width:75%"></i></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Internal financial controls</span><b class="num">14 of 18</b></div><div class="bar"><i style="width:78%"></i></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Data protection</span><b class="num" style="color:var(--bad-tx)">3 of 8</b></div><div class="bar"><i class="bad" style="width:37.5%"></i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gv" data-g="cal" hidden><p class="blk">Today's review calendar, unchanged in content, as a view of its own: every process with an owner, a review date and how late or early it is.</p></div>
+      <div class="gv" data-g="pol" hidden><p class="blk">Today's assessment, risk register, heat map and policy library, unchanged in content, as one view.</p></div>
+      <div class="gv" data-g="ctl" hidden><p class="blk">Today's “KPIs and controls” blocks, one per process, become one table with a row per process that opens to its controls. The process's own Risks &amp; controls tab is where they are edited.</p></div>
+      <div class="gv" data-g="log" hidden><p class="blk">Today's activity log, unchanged, as a view of its own.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ 6 · DECISIONS ═════════════════ -->
+<section class="screen" data-screen="decisions" hidden>
+  <div class="asx">
+    <h2 class="hd">What I need from you before anything is built</h2>
+    <p class="lead">Seven product questions. Answer by number; “as recommended” is a fine answer to any of them. Nothing is built until you say so, and each answer is recorded in the decisions document with its reason.</p>
+    <div class="qs" style="margin-top:18px">
+      <div class="qq"><span class="qn">1</span><h4>Should Processes take SMP's look?</h4>
+        <p>On 1 October you chose to keep FFProcess's own design when it came into SMP. This would reverse that, and the reversal would be recorded as one.</p>
+        <div class="opts">
+          <div class="opt rec"><b class="k">A</b><span>SMP's look throughout: navy and gold, Source Sans, navy-headed tables, the section bar.<span class="rt">Recommended</span><span class="c">Every Processes page is restyled. The client's colour stops painting page titles; it stays where the rest of SMP uses it.</span></span></div>
+          <div class="opt"><b class="k">B</b><span>SMP's look, but keep the client's colour on each page title.<span class="c">Closer to today for clients who know it, and the one place Processes would differ from Portfolio and the Tracker.</span></span></div>
+        </div></div>
+      <div class="qq"><span class="qn">2</span><h4>Swap the left menu for a section bar along the top?</h4>
+        <p>Eight items become six: Overview, Processes, Priorities, Landscape, Governance, Org directory. Export becomes a button. Logo, colours and the client profile move to Processes settings in the top bar's Processes menu.</p>
+        <div class="opts">
+          <div class="opt rec"><b class="k">A</b><span>Yes, as drawn.<span class="rt">Recommended</span><span class="c">The page gets back the 224 pixels the menu takes, and Processes moves the way Strategy does.</span></span></div>
+          <div class="opt"><b class="k">B</b><span>Keep the left menu, restyled.<span class="c">Less change for people used to it; Processes stays the one module with a menu down the side.</span></span></div>
+        </div></div>
+      <div class="qq"><span class="qn">3</span><h4>Put Helicopter View and Value Chain together as “Landscape”?</h4>
+        <p>Both show the whole company's processes at once. As one section they would be two views under one switch: Value chain, and Connections (today's helicopter map and milestone rails).</p>
+        <div class="opts">
+          <div class="opt rec"><b class="k">A</b><span>One section, called Landscape, with two views.<span class="rt">Recommended</span><span class="c">The name is yours to choose; “Landscape” is a placeholder.</span></span></div>
+          <div class="opt"><b class="k">B</b><span>Keep them as two sections.<span class="c">Seven items on the bar instead of six.</span></span></div>
+        </div></div>
+      <div class="qq"><span class="qn">4</span><h4>Take the three empty tabs off a process for now?</h4>
+        <p>People, Compliance and Connections were in the structure you signed off on 14 October. Today they hold nothing and offer nothing to fill in. Who is involved and the hand-overs would show on Overview; Compliance comes back when it has something to hold.</p>
+        <div class="opts">
+          <div class="opt rec"><b class="k">A</b><span>Off for now, back as each one gets content.<span class="rt">Recommended</span><span class="c">Changes what you signed off on 14 October; recorded as a change, not a reversal of the plan for those tabs.</span></span></div>
+          <div class="opt"><b class="k">B</b><span>Keep all seven tabs as signed off.<span class="c">Three tabs keep saying “not recorded yet”.</span></span></div>
+        </div></div>
+      <div class="qq"><span class="qn">5</span><h4>One measure of readiness: the six deep-dive marks?</h4>
+        <p>The five-step strip (Process, Map, RACI, Authority, AI Review) goes, and the header shows Map, RACI, Authority, Controls, SOP and Approved, the same six the deep-dive plan already counts. “Next” then names what is missing rather than the next page in a fixed order.</p>
+        <div class="opts">
+          <div class="opt rec"><b class="k">A</b><span>Six marks on every process, deep dive or not.<span class="rt">Recommended</span><span class="c">A high-level process will show mostly empty marks. That is true, and the list says “High-level” beside it.</span></span></div>
+          <div class="opt"><b class="k">B</b><span>Six marks on deep dives only; high-level processes show no line.<span class="c">Quieter for high-level processes, and two kinds of process header.</span></span></div>
+        </div></div>
+      <div class="qq"><span class="qn">6</span><h4>A list of processes beside every process page?</h4>
+        <p>The rail, as Strategy lists a unit's pillars. Clicking another process keeps you on the same tab. On the Map tab it folds away by default so the drawing gets the width, and comes back with one click.</p>
+        <div class="opts">
+          <div class="opt rec"><b class="k">A</b><span>Yes, folded away on Map only.<span class="rt">Recommended</span></span></div>
+          <div class="opt"><b class="k">B</b><span>No rail; switch process from the list.<span class="c">Switching stays four clicks.</span></span></div>
+        </div></div>
+      <div class="qq"><span class="qn">7</span><h4>AI review as a button beside any tab, not a page?</h4>
+        <p>“Check with AI” opens a panel over whichever tab you are on, with each finding's “Add as a step” or “Add as a control” right there. Nothing about what it checks or how findings are stored changes.</p>
+        <div class="opts">
+          <div class="opt rec"><b class="k">A</b><span>A panel, from a button in the header.<span class="rt">Recommended</span></span></div>
+          <div class="opt"><b class="k">B</b><span>Keep it as its own page, reached from a tab.<span class="c">An eighth tab.</span></span></div>
+        </div></div>
+    </div>
+
+    <h3 class="h3">If you say go, the order I would build it in</h3>
+    <p class="note">Each step ships on its own and leaves the module working. The first changes how it looks and nothing about how it works.</p>
+    <ol class="order">
+      <li><div><b>The look and the frame</b><p>SMP's palette, type, tables and cards; the section bar in place of the left menu; one page header style. No behaviour changes.</p></div><span class="chip">Look only</span></li>
+      <li><div><b>One process page</b><p>Map, RACI and Authority become tabs under one header; the empty tabs come off; purpose, scope and document control are edited where they are read; the readiness line replaces the strip.</p></div><span class="chip gold">Biggest gain</span></li>
+      <li><div><b>The rail</b><p>The list of processes beside every process page, keeping the tab when you switch.</p></div><span class="chip">Navigation</span></li>
+      <li><div><b>The list</b><p>Name as the link, ⋯ menu, owner and readiness columns, quick filters, New process at the top.</p></div><span class="chip">Navigation</span></li>
+      <li><div><b>Overview</b><p>Needs attention, deep-dive progress and recent changes; logo, colours and profile move to Processes settings.</p></div><span class="chip">New page</span></li>
+      <li><div><b>Governance and Landscape</b><p>The long Governance page split into five views; Helicopter View and Value Chain under one section. Check with AI as a panel.</p></div><span class="chip">Navigation</span></li>
+    </ol>
+  </div>
+</section>
+
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  /* shared product parts: one copy, stamped into every frame, as the product does */
+  var TOP='<div class="trail"><span class="ff">Platform</span><span class="sep">›</span>'+
+    '<span class="step client"><button type="button" data-soon="Client menu">Raya Trade <span class="dn">▾</span></button></span><span class="sep">›</span>'+
+    '<span class="step menu-wrap"><button type="button" data-menu="@mod">Processes <span class="dn">▾</span></button>'+
+    '<div class="menu left" data-id="@mod" hidden>'+
+    '<a href="#" data-soon="Strategy">Strategy</a><a href="#" data-soon="Portfolio">Portfolio</a><a href="#" class="here">Processes</a><a href="#" data-soon="Tracker">Internal Tracker</a><a href="#" data-soon="Insights">Insights</a>'+
+    '<div class="rule"></div><a href="#" data-soon="Processes settings">Processes settings<small>Logo and colours, industry, description, governance profile</small></a><a href="#" data-soon="Client settings">Client settings</a></div></span></div>'+
+    '<div class="tbacts"><button class="tbtheme" type="button" data-theme-toggle aria-label="Light or dark"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.7" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/><path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g></svg></button>'+
+    '<button class="tbout" type="button" data-soon="Sign out">Sign out</button></div>';
+  var SECTIONS=[["overview","Overview"],["list","Processes"],["priorities","Priorities"],["landscape","Landscape"],["governance","Governance"],["org","Org directory"]];
+  var n=0;
+  $$('[data-part="topbar"]').forEach(function(el){ n++; el.innerHTML=TOP.replace(/@mod/g,'m-mod-'+n); var m=el.querySelector('.menu'); m.id=m.getAttribute('data-id'); });
+  $$('[data-part="sections"]').forEach(function(el){
+    var on=el.getAttribute('data-on');
+    el.innerHTML=SECTIONS.map(function(s){
+      var real=(s[0]==='overview'||s[0]==='list'||s[0]==='governance');
+      return '<a href="#" '+(real?'data-go="'+s[0]+'"':'data-soon="'+s[1]+'"')+(s[0]===on?' class="on" aria-current="page"':'')+'>'+s[1]+'</a>';
+    }).join('')+'<span class="lang"><b>English</b> · <span lang="ar">العربية</span></span>';
+  });
+  $$('[data-part="headacts"]').forEach(function(el,i){
+    el.innerHTML='<div class="menu-wrap"><button class="btn" type="button" data-menu="m-exp-h'+i+'">Export <span class="dn">▾</span></button>'+
+      '<div class="menu" id="m-exp-h'+i+'" hidden><a href="#" data-soon="Export">Report for several processes…<small>Pick processes, preview, print</small></a><a href="#" data-soon="Export">Every SOP in one file</a></div></div>'+
+      '<a class="btn gold" href="#" data-go="list">+ New process</a>';
+  });
+  $$('[data-part="dots"]').forEach(function(el,i){
+    el.innerHTML='<div class="menu-wrap"><button class="dots" type="button" aria-label="More" data-menu="m-row'+i+'">⋯</button>'+
+      '<div class="menu" id="m-row'+i+'" hidden style="min-width:170px"><button class="mi" type="button" data-soon="Edit details">Edit details</button><button class="mi" type="button" data-soon="Clone">Clone</button><div class="rule"></div><button class="mi" type="button" data-soon="Delete" style="color:var(--bad-tx)">Delete…</button></div></div>';
+  });
+
+  /* toast */
+  var tt;
+  function toast(msg){ var t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(tt); tt=setTimeout(function(){t.hidden=true},2600); }
+
+  /* screens */
+  var SCREENS=['assessment','overview','list','process','governance','decisions'];
+  function show(name, keepScroll){
+    if(SCREENS.indexOf(name)<0) name='assessment';
+    $$('.screen').forEach(function(s){ s.hidden = s.getAttribute('data-screen')!==name; });
+    $$('.mk-nav button').forEach(function(b){ b.setAttribute('aria-current', b.getAttribute('data-go')===name?'page':'false'); });
+    try{ history.replaceState(null,'','#'+name); }catch(e){}
+    closeMenus();
+    if(!keepScroll) window.scrollTo(0,0);
+    if(name==='process') requestAnimationFrame(drawEdges);
+  }
+
+  /* process tabs */
+  var railChoice=null;
+  function ptab(t){
+    $$('#ptabs button').forEach(function(b){ var on=b.getAttribute('data-t')===t; b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false'); });
+    $$('.ptab').forEach(function(p){ p.hidden=p.getAttribute('data-t')!==t; });
+    var off = railChoice===null ? (t==='map') : railChoice;
+    $('#pwrap').classList.toggle('railoff', off);
+    if(t==='map') requestAnimationFrame(drawEdges);
+  }
+
+  /* menus */
+  function closeMenus(except){ $$('.menu').forEach(function(m){ if(m!==except) m.hidden=true; }); }
+
+  document.addEventListener('click', function(e){
+    var el;
+    if((el=e.target.closest('[data-menu]'))){ e.preventDefault(); var m=document.getElementById(el.getAttribute('data-menu')); var was=m.hidden; closeMenus(); m.hidden=!was; return; }
+    if(!e.target.closest('.menu')) closeMenus();
+    if((el=e.target.closest('[data-go]'))){ e.preventDefault(); var tab=el.getAttribute('data-tab'); show(el.getAttribute('data-go')); if(tab) ptab(tab); return; }
+    if((el=e.target.closest('[data-tab]'))){ e.preventDefault(); ptab(el.getAttribute('data-tab')); if(el.closest('#aip')) $('#aip').hidden=true; return; }
+    if((el=e.target.closest('[data-soon]'))){ e.preventDefault(); closeMenus(); var w=el.getAttribute('data-soon');
+      var redrawn={Priorities:1,Landscape:1,'Org directory':1};
+      toast(redrawn[w] ? w+' is not redrawn in this mockup. It keeps its content and takes the new look.' : w+': not part of this drawing.'); return; }
+    if((el=e.target.closest('[data-theme-toggle]'))){ var r=document.documentElement; var cur=r.getAttribute('data-theme'); var dark=cur?cur==='dark':matchMedia('(prefers-color-scheme: dark)').matches; r.setAttribute('data-theme',dark?'light':'dark'); requestAnimationFrame(drawEdges); return; }
+    if((el=e.target.closest('#ptabs button'))){ ptab(el.getAttribute('data-t')); return; }
+    if((el=e.target.closest('.ri'))){ var msg=$('#railmsg'); var cur=$('#ptabs button.on').textContent;
+      if(el.classList.contains('on')){ msg.hidden=true; return; }
+      msg.innerHTML='In the product this opens <b>'+el.getAttribute('data-p')+'</b> on its <b>'+cur+'</b> tab. The tab you are on stays.'; msg.hidden=false; return; }
+    if(e.target.closest('#railhide')){ railChoice=true; $('#pwrap').classList.add('railoff'); requestAnimationFrame(drawEdges); return; }
+    if(e.target.closest('#railshow')){ railChoice=false; $('#pwrap').classList.remove('railoff'); requestAnimationFrame(drawEdges); return; }
+    if(e.target.closest('#aibtn')){ $('#aip').hidden=!$('#aip').hidden; return; }
+    if(e.target.closest('#aiclose')){ $('#aip').hidden=true; return; }
+    if((el=e.target.closest('.st'))){ pick(el.getAttribute('data-s')); return; }
+    if((el=e.target.closest('#mapview button'))){ var v=el.getAttribute('data-v'); $$('#mapview button').forEach(function(b){b.classList.toggle('on',b===el)}); $$('.mapv').forEach(function(p){p.hidden=p.getAttribute('data-v')!==v}); if(v==='diagram') requestAnimationFrame(drawEdges); return; }
+    if((el=e.target.closest('#gseg button'))){ gview(el.getAttribute('data-g')); return; }
+    if((el=e.target.closest('[data-g-go]'))){ e.preventDefault(); gview(el.getAttribute('data-g-go')); return; }
+    if((el=e.target.closest('[data-chips] .fchip'))){ $$('.fchip',el.parentNode).forEach(function(c){c.classList.toggle('on',c===el)}); return; }
+    if((el=e.target.closest('[data-fold]'))){ var id=el.getAttribute('data-fold'); var rows=$$('tr[data-parent="'+id+'"]'); var open=rows.length&&rows[0].hidden; rows.forEach(function(r){r.hidden=!open}); el.textContent=open?'▾':'▸'; return; }
+    if(e.target.closest('#openall')){ var any=$$('tr[data-parent]').some(function(r){return r.hidden}); $$('tr[data-parent]').forEach(function(r){r.hidden=!any}); $$('[data-fold]').forEach(function(b){b.textContent=any?'▾':'▸'}); e.target.textContent=any?'Fold all':'Open all'; return; }
+    if(e.target.closest('[data-p-link]')){ e.preventDefault(); toast('Opens SOP-014.1 Returns & refunds.'); return; }
+    if(e.target.closest('#copybtn')){ var txt=$('#stafflink').textContent;
+      var done=function(){ toast('Link copied.'); };
+      var fallback=function(){ var r=document.createRange(); r.selectNodeContents($('#stafflink')); var s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Selected. Press Ctrl+C or ⌘C to copy.'); };
+      try{ navigator.clipboard.writeText(txt).then(done,fallback); }catch(err){ fallback(); } return; }
+  });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeMenus(); $('#aip').hidden=true; } });
+
+  function gview(g){ $$('#gseg button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-g')===g)}); $$('.gv').forEach(function(p){p.hidden=p.getAttribute('data-g')!==g}); }
+
+  /* step detail beside the map */
+  var STEPS={
+    1:{n:'Step 1',t:'Confirm order',who:'Sales coordinator',inp:'Customer order, the quote',out:'Order confirmed in the ERP',rule:'—',ctl:'—',raci:'R Sales coordinator · A Finance manager · I Finance, Logistics',ho:'—'},
+    2:{n:'Step 2 · decision',t:'Credit check',who:'Finance (credit controller)',inp:'Confirmed order, the customer’s balance',out:'Order released, or sent to prepayment',rule:'Over EGP 250,000 needs the CFO. Not done in 4 hours: escalates to the Finance manager.',ctl:'System blocks orders over the credit limit · preventive · passed Aug 2026',raci:'R Finance · A Finance manager · C Sales coordinator',ho:'In from SOP-014.2 Customer credit setup'},
+    3:{n:'Step 3',t:'Ask for prepayment',who:'Sales coordinator',inp:'Held order',out:'Payment received, order released',rule:'Not paid in 5 days: escalates to the Sales manager.',ctl:'—',raci:'R Sales coordinator · A Finance manager · C Finance',ho:'—'},
+    4:{n:'Step 4',t:'Deliver',who:'Logistics',inp:'Released order, the pick list',out:'Goods delivered, signed proof returned',rule:'—',ctl:'none · the risk “Proof of delivery missing” has no control',raci:'R Warehouse · A Logistics · I Sales coordinator, Finance',ho:'Out to SOP-033 Logistics & Last-mile',gap:1},
+    5:{n:'Step 5',t:'Invoice',who:'Finance',inp:'Signed proof of delivery',out:'Invoice sent',rule:'Not issued within 2 days of delivery: escalates to the Finance manager.',ctl:'Price list signed off before use · detective · not tested',raci:'R Finance · A Finance manager · I Sales coordinator',ho:'—'},
+    6:{n:'Step 6',t:'Collect payment',who:'Finance',inp:'Open invoice',out:'Cash received and matched',rule:'—',ctl:'—',raci:'R Finance · A Finance manager · C Sales coordinator',ho:'Out to SOP-002 Record-to-Report'}
+  };
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function pick(id){
+    var s=STEPS[id]; if(!s) return;
+    $$('.st').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-s')===String(id)); });
+    $('#drawer').innerHTML='<div class="drawer-h"><div class="n">'+esc(s.n.toUpperCase())+'</div><h3>'+esc(s.t)+'</h3></div>'+
+      '<div class="drawer-b"><dl class="dl"><dt>Who</dt><dd>'+esc(s.who)+'</dd><dt>Takes in</dt><dd>'+esc(s.inp)+'</dd><dt>Hands on</dt><dd>'+esc(s.out)+'</dd></dl>'+
+      '<div><span class="lbl">From Authority</span><p style="font-size:13px;margin-top:3px">'+esc(s.rule)+'</p></div>'+
+      '<div><span class="lbl">From Risks &amp; controls</span><p style="font-size:13px;margin-top:3px'+(s.gap?';color:var(--bad-tx);font-weight:600':'')+'">'+esc(s.ctl)+'</p></div>'+
+      '<div><span class="lbl">From RACI</span><p style="font-size:13px;margin-top:3px">'+esc(s.raci)+'</p></div>'+
+      '<div><span class="lbl">Hand-over</span><p style="font-size:13px;margin-top:3px">'+esc(s.ho)+'</p></div></div>'+
+      '<div class="drawer-f"><button class="btn sm gold" type="button" data-soon="Edit step">Edit step</button>'+(s.gap?'<button class="btn sm" type="button" data-tab="risks">Add a control</button>':'')+'<button class="btn sm" type="button" data-soon="Delete step" style="margin-left:auto">Delete</button></div>';
+  }
+
+  /* arrows on the map, measured from the boxes so they follow any width */
+  var EDGES=[['s1','s2'],['s2','s4','within limit'],['s2','s3','over limit'],['s3','s4','once paid'],['s4','s5'],['s5','s6']];
+  function drawEdges(){
+    var L=$('#lanes'), svg=$('#edges'); if(!L||!L.offsetParent) return;
+    var o=L.getBoundingClientRect(), out='<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="ah" d="M0 0 8 4 0 8z"/></marker></defs>', labels='';
+    EDGES.forEach(function(e){
+      var a=document.getElementById(e[0]).getBoundingClientRect(), b=document.getElementById(e[1]).getBoundingClientRect();
+      var ax=a.left-o.left, ay=a.top-o.top, bx=b.left-o.left, by=b.top-o.top, d, lx, ly;
+      if(Math.abs((ax+a.width/2)-(bx+b.width/2))<8){
+        var x=ax+Math.round(a.width*0.3), y1=ay+a.height, y2=by-2; d='M'+x+' '+y1+'V'+y2; lx=x+6; ly=(y1+y2)/2;
+      } else {
+        var sx=ax+a.width, sy=ay+a.height/2, ex=bx-2, ey=by+b.height/2, mx=Math.round((sx+ex)/2);
+        d=Math.abs(sy-ey)<2 ? 'M'+sx+' '+sy+'H'+ex : 'M'+sx+' '+sy+'H'+mx+'V'+ey+'H'+ex;
+        lx=mx+6; ly=Math.abs(sy-ey)<2 ? sy-8 : (sy+ey)/2;
+      }
+      out+='<path d="'+d+'" marker-end="url(#ah)"/>';
+      if(e[2]){ var w=e[2].length*5.6+8; labels+='<rect x="'+(lx-3)+'" y="'+(ly-11)+'" width="'+w+'" height="15" rx="3"/><text x="'+lx+'" y="'+ly+'">'+e[2]+'</text>'; }
+    });
+    svg.innerHTML=out+labels;
+  }
+  window.addEventListener('resize', function(){ requestAnimationFrame(drawEdges); });
+
+  pick(2);
+  ptab('overview');
+  show(location.hash.slice(1), true);
+})();
+</script>

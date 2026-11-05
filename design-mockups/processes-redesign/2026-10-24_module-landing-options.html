@@ -1,0 +1,408 @@
+<title>Processes Landing Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: what a manager sees on opening the Processes module, drawn three ways under the same navy band (the Internal Tracker's masthead).
+   Palette and type: SMP's Forefront tokens and Source Sans 3, as in the process page mockup. */
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA; --head:#E4E9F0;
+  --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C; --focus:#8A6B22; --stone:#16325C;
+  --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+  --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+  --over-bg:#FBF6E9; --over-line:#D9C489;
+  --bar:#16325C; --bar-ink:#FFFFFF; --bar-quiet:#B9C2CE; --bar-accent:#E8A33A; --bar-late:#FF9B8F; --bar-hover:rgba(255,255,255,.1);
+  --scrim:rgba(10,14,22,.45); --shadow:0 10px 28px rgba(15,23,42,.16);
+  --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630; --head:#2C333E;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630; --head:#2C333E;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--over-bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+p,ul,ol{margin:0}
+[hidden]{display:none!important}
+
+/* drawing band */
+.mk{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--over-bg);border-bottom:1px dashed var(--over-line)}
+.mk-in{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.mk-tag{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);border:1px dashed var(--gold-deep);border-radius:4px;padding:1px 6px}
+.mk-id{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.mk-id b{font-size:14px}
+.mk-id span{font-size:12px;color:var(--ink-2)}
+.mk-sw{margin-left:auto;display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--over-line);border-radius:8px;flex-wrap:wrap}
+.mk-sw button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.mk-sw button.on{background:var(--panel);color:var(--panel-ink)}
+.doc{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 60px}
+.intro{font-size:13.5px;color:var(--ink-2);max-width:92ch;margin-bottom:12px}
+.intro b{color:var(--ink)}
+
+/* product frame */
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;overflow:clip;background:var(--ground)}
+/* the tab bar stays in place on scroll (agreed 24 Oct); it sits under the drawing band here, under SMP's top bar in the product */
+.vtbar{position:sticky;top:calc(var(--stick,0px) + env(safe-area-inset-top,0px));z-index:20;background:var(--ground);margin:0 -24px 14px;padding:6px 24px;transition:box-shadow .15s}
+.vtbar.stuck{box-shadow:0 1px 0 var(--line),0 8px 12px -10px rgba(15,23,42,.35)}
+.vtbar .vt{margin:0}
+@media (max-width:640px){.vtbar{margin:0 -12px 12px;padding:6px 12px}}
+
+.tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;min-height:40px}
+.tb .brand{font-weight:600;font-size:14px}
+.tb .read{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--surface-2)}
+.tbn{font-size:11.5px;font-weight:700;background:var(--over-bg);border:1px solid var(--gold);border-radius:99px;padding:0 7px;line-height:18px}
+.tb .who{margin-left:auto;font-size:12.5px;color:var(--ink-3)}
+.tb .out{border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+@media (max-width:620px){.tb .who,.tbn{display:none}.tb{padding:0 12px}}
+.pg{padding:20px 24px 28px}
+@media (max-width:640px){.pg{padding:14px 12px 22px}}
+
+/* the masthead (Internal Tracker), actions top right */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 18px;margin:0 0 14px;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mrow{display:flex;align-items:stretch;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.mside{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:14px}
+.wkof{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.mast h1{font-size:24px;font-weight:600;line-height:1.15}
+.msub{font-size:13px;color:var(--bar-quiet);margin-top:5px}
+.msub b{color:var(--bar-ink);font-weight:600}
+.mstrip{display:flex;gap:22px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.mtile{text-align:right;min-height:48px}
+.mtile b{display:block;font-size:22px;font-weight:600;line-height:1}
+.mtile span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.mtile.hot b{color:var(--bar-accent)}
+.mtile.late b{color:var(--bar-late)}
+.macts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bq{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:500;color:var(--bar-quiet);padding:6px 9px;border-radius:7px;background:none;border:0}
+.bq:hover{background:var(--bar-hover);color:var(--bar-ink)}
+.bgold{background:var(--bar-accent);color:var(--bar);border:0;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:700}
+.mwait{display:inline-flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:9px;font-size:13px;color:var(--bar-ink);background:rgba(232,163,58,.14);border:1px solid rgba(232,163,58,.45);border-radius:6px;padding:4px 10px}
+.mwait b{color:var(--bar-accent);font-weight:700}
+.mwait button{background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--bar-ink);text-decoration:underline;text-underline-offset:2px}
+@media (max-width:640px){.mast{padding:14px 14px 16px}.mtile{text-align:left}.mstrip{gap:14px}.mside{align-items:flex-start}}
+
+/* view tabs, under the band: style 2 (buttons), agreed 24 Oct */
+.vt{display:inline-flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:100%;margin:0 0 16px;flex-wrap:wrap}
+.vt button{border:0;background:none;border-radius:7px;padding:8px 18px;font-size:14.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;display:inline-flex;gap:8px;align-items:baseline}
+.vt button.on{background:var(--panel);color:var(--panel-ink)}
+.vt .ct{font-size:12px;font-weight:600;color:var(--ink-3)}
+.vt button.on .ct{color:var(--bar-quiet)}
+.vt .ct.hot,.vt button.on .ct.hot{background:var(--bar-accent);color:#16325C;border-radius:99px;padding:0 7px;line-height:18px;font-weight:700}
+@media (max-width:640px){.vt button{padding:7px 12px;font-size:14px}}
+.inl{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.v1 .inl{display:none}
+
+/* shared blocks */
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.lbl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.note{font-size:12.5px;color:var(--ink-3)}
+.code{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--stone)}
+.chip{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.chip.gold{border-color:var(--gold);background:var(--over-bg);color:var(--gold-deep)}
+.chip.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad-tx)}
+.chip.navy{border-color:var(--stone);color:var(--stone)}
+.pill{display:inline-flex;font-size:11.5px;font-weight:600;border-radius:99px;padding:1px 9px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good-tx)}
+.pill.attn{background:var(--attn-bg);color:var(--attn-tx)}
+.pill.bad{background:var(--bad-bg);color:var(--bad-tx)}
+.pill.q{background:var(--surface-2);color:var(--ink-2)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.btn:hover{border-color:var(--gold);color:var(--ink)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--on-accent);font-weight:700}
+.lnk{background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px}
+.lnk:hover{color:var(--ink)}
+.sect{display:flex;gap:8px;align-items:baseline;margin:18px 0 8px;flex-wrap:wrap}
+.sect:first-child{margin-top:0}
+.sect .r{margin-left:auto}
+.flags{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--ink-2)}
+.flags .bad{color:var(--bad-tx);font-weight:600}
+.flags .warn{color:var(--attn-tx);font-weight:600}
+
+/* waiting on you (A) and to-do (C) */
+.wt{border:1px solid var(--gold);background:var(--over-bg);border-radius:10px;padding:12px 14px}
+.wt h2{font-size:16px;display:flex;gap:8px;align-items:baseline}
+.wrow{display:grid;grid-template-columns:86px minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:9px 0;border-top:1px solid var(--over-line)}
+.wt .wrow:first-of-type{border-top:0}
+.wrow .t{font-size:13.5px}
+.wrow .t b{font-weight:700}
+.wrow .t small{display:block;font-size:12px;color:var(--ink-3)}
+@media (max-width:640px){.wrow{grid-template-columns:minmax(0,1fr)}.wrow .btn,.wrow .chip{justify-self:start}}
+
+/* my processes table (A) */
+.ptab{width:100%;border-collapse:collapse}
+.ptab th{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--head)}
+.ptab td{padding:11px 14px;border-top:1px solid var(--line-soft);vertical-align:top;font-size:13.5px}
+.ptab th+th,.ptab td+td{border-left:1px solid var(--line-soft)}
+.ptab tbody tr:nth-child(even) td{background:var(--zebra)}
+.ptab .nm{font-weight:700;font-size:14.5px}
+.ptab .pn{background:none;border:0;padding:0;font:inherit;color:var(--ink);border-bottom:1px solid transparent;cursor:pointer}
+.ptab .pn:hover{border-bottom-color:var(--gold)}
+.ptab .nm small{display:block;font-weight:400;font-size:12px;color:var(--ink-3)}
+@media (max-width:760px){
+  .ptab thead{display:none}
+  .ptab,.ptab tbody,.ptab tr,.ptab td{display:block;width:100%}
+  .ptab tr{padding:10px 12px;border-top:1px solid var(--line-soft)}
+  .ptab tr:first-child{border-top:0}
+  .ptab td{border:0!important;padding:2px 0}
+  .ptab tbody tr:nth-child(even){background:var(--zebra)}
+  .ptab tbody tr:nth-child(even) td{background:none}
+}
+
+/* the map (B) */
+.bgrid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;align-items:start}
+@media (max-width:1080px){.bgrid{grid-template-columns:minmax(0,1fr)}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);align-items:center;margin-bottom:10px}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:5px;border:1.5px solid var(--line);background:var(--surface)}
+.legend i.y{border-color:var(--gold);background:var(--over-bg)}
+.legend i.s{border-color:var(--stone);border-style:dashed}
+.area{margin-bottom:12px}
+.area-h{display:flex;gap:8px;align-items:baseline;margin-bottom:6px}
+.area-h b{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.lane{display:flex;gap:8px;flex-wrap:wrap}
+.lane.chev{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+.pc{flex:1 0 170px;max-width:260px;text-align:left;display:grid;gap:3px;align-content:start;border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 12px;position:relative}
+.lane.chev .pc{max-width:none;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%,14px 50%);border-radius:0;padding:10px 22px 10px 24px;border:0;background:var(--surface-2)}
+.lane.chev .pc:first-child{clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%);padding-left:14px}
+.pc b{font-size:14px;line-height:1.25}
+.pc .st{font-size:12px;color:var(--ink-3)}
+.pc.y{border-color:var(--gold);background:var(--over-bg)}
+.lane.chev .pc.y{background:var(--gold);color:var(--on-accent)}
+.lane.chev .pc.y .code,.lane.chev .pc.y .st{color:var(--on-accent)}
+.pc.s{border-color:var(--stone);border-style:dashed}
+.pc.on{outline:3px solid var(--gold);outline-offset:1px}
+.lane.chev .pc.on{outline:0;box-shadow:inset 0 -4px 0 var(--stone)}
+.pc .tag{position:absolute;top:8px;right:10px}
+.lane.chev .pc .tag{right:22px}
+.dim .pc:not(.y):not(.s){opacity:.35}
+.side{padding:14px 16px;display:grid;gap:9px;position:sticky;top:calc(var(--stick,0px) + 72px)}
+.side h3{font-size:17px}
+.dl{display:grid;grid-template-columns:90px minmax(0,1fr);gap:4px 10px;font-size:13px;margin:0}
+.dl dt{color:var(--ink-3);font-size:12.5px}
+.dl dd{margin:0}
+
+/* to-do (C) */
+.cgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:980px){.cgrid{grid-template-columns:minmax(0,1fr)}}
+.tgroup{margin-bottom:14px}
+.tcard{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-left:4px solid var(--gold);background:var(--surface);border-radius:8px;margin-top:6px}
+.tcard h3{font-size:15.5px;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+.tcard p{font-size:13.5px;color:var(--ink-2);margin-top:2px}
+.tcard blockquote{margin:6px 0 0;padding:6px 10px;border-left:3px solid var(--line);font-size:13px;color:var(--ink-2);background:var(--zebra)}
+.tcard .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:640px){.tcard{grid-template-columns:1fr}.tcard .acts{justify-content:flex-start}}
+.done{padding:12px 14px}
+.done li{font-size:13px;color:var(--ink-3);padding:5px 0;border-top:1px solid var(--line-soft);list-style:none}
+.done li:first-child{border-top:0}
+.done ul{padding:0;margin-top:6px}
+
+/* the note under each option */
+.verdict{margin-top:14px;border:1px dashed var(--over-line);background:var(--over-bg);border-radius:10px;padding:12px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.verdict{grid-template-columns:1fr}}
+.verdict h4{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:4px}
+.verdict ul{padding-left:16px;font-size:13px;color:var(--ink-2);display:grid;gap:3px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);color:var(--panel-ink);font-size:13px;padding:9px 14px;border-radius:8px;box-shadow:var(--shadow);z-index:60;max-width:min(560px,calc(100% - 32px))}
+</style>
+
+<div class="mk"><div class="mk-in">
+  <div class="mk-id"><span class="mk-tag">Mockup</span><b>Opening the Processes module: My processes</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
+</div></div>
+
+<div class="doc">
+  <p class="intro">You are <b>Hend Mourad</b>, Finance manager. You own two processes, approve one your team wrote, and have a step in three more. Agreed 24 Oct: the module opens on <b>My processes</b> (option A), with the tabs drawn as buttons. What is waiting on you has its own tab, <b>To do</b>, second in the row; the line in the band, the gold count and the button in each row point at it.</p>
+
+  <div class="frame" id="frame">
+    <div class="tb"><span class="brand">Raya Trade</span><span class="read">Processes <span class="tbn">4 waiting on you</span></span><span class="who">Hend Mourad</span><span class="out">Sign out</span></div>
+    <div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div style="min-width:0">
+            <p class="wkof">Raya Trade · Processes</p>
+            <h1>My processes</h1>
+            <p class="msub">Hend Mourad · Finance manager · <b>2</b> you own · <b>1</b> you approve · <b>3</b> you have a step in</p>
+            <p class="mwait" id="m-wait"><b>Waiting on you</b><span>4 things, the oldest from 21 Oct</span><button type="button" data-tab="todo">See them</button></p>
+          </div>
+          <div class="mside">
+            <div class="macts"><button class="bq" type="button" data-toast="Searches every process, step and role.">Search</button><button class="bgold" type="button" data-toast="Asks the Strategy Office for a new process. They draw it with you.">Ask for a new process</button></div>
+            <div class="mstrip"><div class="mtile"><b>2</b><span>You own</span></div><div class="mtile"><b>1</b><span>You approve</span></div><div class="mtile hot"><b>4</b><span>Waiting on you</span></div><div class="mtile late"><b>1</b><span>Risk, no control</span></div></div>
+          </div>
+        </div>
+      </header>
+      <div class="vtbar" id="vtbar"><div class="vt" id="vt" role="tablist" aria-label="Views"></div></div>
+
+      <!-- ── MY PROCESSES ── -->
+      <section data-view="mine" hidden>
+        <div class="wt" id="a-wait-box" style="margin-bottom:18px">
+          <h2>Waiting on you <span class="note">4</span></h2>
+          <div id="a-wait"></div>
+        </div>
+        <div class="sect"><span class="lbl">Yours</span><span class="note">you own or approve these</span></div>
+        <div class="box" style="overflow:hidden"><table class="ptab"><thead><tr><th>Process</th><th>Your part</th><th>Where it is</th><th>Needs attention</th></tr></thead><tbody id="a-mine"></tbody></table></div>
+        <div class="sect"><span class="lbl">You have a step in</span><span class="note">someone else owns these; your role does part of the work</span></div>
+        <div class="box" style="overflow:hidden"><table class="ptab"><thead><tr><th>Process</th><th>Your step</th><th>Where it is</th><th>For you</th></tr></thead><tbody id="a-part"></tbody></table></div>
+      </section>
+
+      <!-- ── TO DO (choice 2 only) ── -->
+      <section data-view="todo" hidden>
+        <div class="cgrid">
+          <div id="c-todo"></div>
+          <div>
+            <div class="box done"><span class="lbl">Done lately</span><ul><li>You read Record-to-Report v2.0 · 2 Oct</li><li>You answered the office on Customer credit setup · 28 Sep</li><li>You confirmed Order-to-Cash v2 still right · 12 Nov 2025</li></ul></div>
+            <p class="note" style="margin-top:12px">That is everything waiting on you. When it is empty, this tab says you are up to date.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── MAP ── -->
+      <section data-view="map" hidden>
+        <div class="legend"><span><i class="y"></i>Yours: you own or approve it</span><span><i class="s"></i>You have a step in it</span><span><i></i>Others</span><label style="margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-weight:600"><input type="checkbox" id="only-mine"> Only mine</label></div>
+        <div class="bgrid">
+          <div id="map"></div>
+          <aside class="box side" id="side" aria-live="polite"></aside>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="verdict" id="verdict"></div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const OPEN = (code) => 'Opens ' + code + ' on its Flow tab: the process page mockup.';
+  const REVIEW = 'Opens Order-to-Cash on its Summary tab, where you confirm it is still right or suggest a change.';
+  const REPLY = 'Opens the office’s question, pinned to step 4 of Order-to-Cash.';
+
+  const TODO = [
+    { kind: 'Approve', code: 'ORD101', name: 'Returns & refunds', what: 'Version 1 is ready for your approval', meta: 'Sent by Salma Adel, Credit controller, on 21 Oct', act: 'Open and approve', more: 'Read it', why: 'You approve the processes your team writes.', go: OPEN('ORD101') },
+    { kind: 'Review', code: 'ORD100', name: 'Order-to-Cash', what: 'The yearly review is due on 12 Nov', meta: 'Say whether it still describes how the work is done', act: 'Review it', more: '', why: 'You own it.', go: REVIEW },
+    { kind: 'Read', code: 'CRE100', name: 'Credit & Collections', what: 'Version 1.1 is in force since 20 Oct', meta: 'Your step changed: Finance manager now signs write-offs above $10,000', act: 'Read the change', more: '', why: 'You have a step in it.', go: OPEN('CRE100') },
+    { kind: 'Answer', code: 'ORD100', name: 'Order-to-Cash', what: 'The office answered your suggestion on step 4, Deliver', meta: 'Mona Farag, Strategy Office · 23 Oct', quote: 'Does the photo replace the signed paper, or come with it? We will draft it in v3 once we know.', act: 'Reply', more: '', why: 'You suggested a change.', go: REPLY },
+  ];
+  const MINE = [
+    { code: 'ORD100', name: 'Order-to-Cash', area: 'Finance', part: 'Owner', st: ['good', 'In force · v2'], st2: 'v3 approved, waiting for the office to publish', flags: [['bad', '1 risk with no control'], ['warn', '4 of 5 have read it'], ['', 'Review in 19 days']], inl: [['Review by 12 Nov', REVIEW, false], ['Reply to the office', REPLY, false]] },
+    { code: 'ORD102', name: 'Customer credit setup', area: 'Finance', part: 'Owner', st: ['q', 'Being drawn'], st2: 'The office is drawing it with your team; 2 of 6 marks done', flags: [['', 'Nothing for you yet']], inl: [] },
+    { code: 'ORD101', name: 'Returns & refunds', area: 'Finance', part: 'Approver', st: ['attn', 'Waiting for you'], st2: 'Owner Salma Adel · sent 21 Oct', flags: [['warn', 'Your approval']], inl: [['Open and approve', OPEN('ORD101'), true]] },
+  ];
+  const PART = [
+    { code: 'CRE100', name: 'Credit & Collections', step: 'Approve write-offs above $10,000', st: ['good', 'In force · v1.1'], owner: 'Hala Mansour', flags: [['warn', 'Your step changed: read it']], inl: [['Read the change', OPEN('CRE100'), false]] },
+    { code: 'REC100', name: 'Record-to-Report', step: 'Sign off the month-end close', st: ['good', 'In force · v2.0'], owner: 'Hala Mansour', flags: [['', 'Read · nothing new']], inl: [] },
+    { code: 'PRO100', name: 'Procure-to-Pay', step: 'Approve invoices above $50,000', st: ['attn', 'In review'], owner: 'Karim Fouad', flags: [['', 'Changes coming: you will be asked to read']], inl: [] },
+  ];
+  const MAP = [
+    { area: 'How we sell and deliver', chev: true, p: [['PRI100', 'Pricing & Promotions', 'Being drawn', '', 'Omar Fathy'], ['ORD100', 'Order-to-Cash', 'In force · v2', 'y', 'Hend Mourad'], ['LOG100', 'Logistics & Last-mile', 'Being drawn', '', 'Karim Fouad'], ['CUS100', 'Customer Complaints', 'Not started', '', 'Nour Samir']] },
+    { area: 'Buying and stock', p: [['PRO100', 'Procure-to-Pay', 'In review', 's', 'Karim Fouad'], ['INV100', 'Inventory & Stock Count', 'Being drawn', '', 'Karim Fouad']] },
+    { area: 'Stores', p: [['NEW100', 'New Store Opening', 'Review late', '', 'Amr Hassan', 'bad'], ['STO100', 'Store Cash Handling', 'In force · v1.0', '', 'Amr Hassan']] },
+    { area: 'Finance and people', p: [['ORD101', 'Returns & refunds', 'Waiting for you', 'y', 'Salma Adel', 'gold'], ['ORD102', 'Customer credit setup', 'Being drawn', 'y', 'Hend Mourad'], ['CRE100', 'Credit & Collections', 'In force · v1.1', 's', 'Hala Mansour'], ['REC100', 'Record-to-Report', 'In force · v2.0', 's', 'Hala Mansour'], ['HIR100', 'Hire-to-Retire', 'Being drawn', '', 'Laila Zaki']] },
+  ];
+  const ABOUT = {
+    ORD100: 'From a confirmed customer order to cash in the bank. Hands over to Logistics & Last-mile, then Record-to-Report.',
+    PRO100: 'From a purchase request to paying the supplier. Your role approves invoices above $50,000.',
+    CRE100: 'Setting credit limits and chasing what is overdue. Your role approves write-offs above $10,000.',
+    REC100: 'Closing the books each month and reporting. Your role signs off the close.',
+    ORD101: 'Taking back goods and refunding customers. Written by your team; waiting for your approval.',
+    ORD102: 'Opening a credit account for a new trade customer. The office is drawing it with your team.',
+  };
+
+  const flags = (f) => '<div class="flags">' + f.map(([c, t]) => '<span class="' + c + '">' + esc(t) + '</span>').join('') + '</div>';
+  const inl = (list) => list.length ? '<div class="inl">' + list.map(([l, m, g]) => '<button class="btn' + (g ? ' gold' : '') + '" type="button" data-toast="' + esc(m) + '">' + esc(l) + '</button>').join('') + '</div>' : '';
+  const kindChip = (k) => '<span class="chip ' + (k === 'Approve' || k === 'Review' ? 'gold' : 'navy') + '">' + k + '</span>';
+
+  $('#a-wait').innerHTML = TODO.map((t) => '<div class="wrow">' + kindChip(t.kind) + '<div class="t"><span class="code">' + t.code + '</span> <b>' + esc(t.name) + '</b> · ' + esc(t.what) + '<small>' + esc(t.meta) + '</small></div><button class="btn' + (t.kind === 'Approve' ? ' gold' : '') + '" type="button" data-toast="' + esc(t.go) + '">' + esc(t.act) + '</button></div>').join('');
+  $('#a-mine').innerHTML = MINE.map((p) => '<tr><td><div class="nm"><span class="code">' + p.code + '</span> <button class="pn" type="button" data-go="' + p.code + '">' + esc(p.name) + '</button><small>' + esc(p.area) + '</small></div></td><td><span class="chip ' + (p.part === 'Owner' ? 'gold' : 'navy') + '">' + p.part + '</span></td><td><span class="pill ' + p.st[0] + '">' + esc(p.st[1]) + '</span><div class="note" style="margin-top:3px">' + esc(p.st2) + '</div></td><td>' + flags(p.flags) + inl(p.inl) + '</td></tr>').join('');
+  $('#a-part').innerHTML = PART.map((p) => '<tr><td><div class="nm"><span class="code">' + p.code + '</span> <button class="pn" type="button" data-go="' + p.code + '">' + esc(p.name) + '</button><small>Owner ' + esc(p.owner) + '</small></div></td><td>' + esc(p.step) + '</td><td><span class="pill ' + p.st[0] + '">' + esc(p.st[1]) + '</span></td><td>' + flags(p.flags) + inl(p.inl) + '</td></tr>').join('');
+
+  const tgroup = (k, title) => { const items = TODO.filter((t) => t.kind === k); return '<div class="tgroup"><div class="sect" style="margin:0 0 2px"><span class="lbl">' + title + '</span><span class="note">' + items.length + '</span></div>' +
+    items.map((t) => '<div class="tcard"><div><h3><span class="code">' + t.code + '</span> ' + esc(t.name) + '</h3><p>' + esc(t.what) + '</p><p class="note">' + esc(t.meta) + ' · ' + esc(t.why) + '</p>' + (t.quote ? '<blockquote>' + esc(t.quote) + '</blockquote>' : '') + '</div><div class="acts">' + (t.more ? '<button class="btn" type="button" data-toast="' + esc(OPEN(t.code)) + '">' + esc(t.more) + '</button>' : '') + '<button class="btn gold" type="button" data-toast="' + esc(t.go) + '">' + esc(t.act) + '</button></div></div>').join('') + '</div>'; };
+  $('#c-todo').innerHTML = tgroup('Approve', 'To approve') + tgroup('Review', 'To review') + tgroup('Read', 'To read') + tgroup('Answer', 'Answers to your suggestions');
+
+  $('#map').innerHTML = MAP.map((a) => '<div class="area"><div class="area-h"><b>' + esc(a.area) + '</b>' + (a.chev ? '<span class="note">left to right, as the work flows</span>' : '') + '</div><div class="lane' + (a.chev ? ' chev' : '') + '">' +
+    a.p.map(([code, name, st, mine, , warn]) => '<button type="button" class="pc ' + mine + '" data-pick="' + code + '">' + (mine === 'y' ? '<span class="chip gold tag">Yours</span>' : mine === 's' ? '<span class="chip navy tag">Your step</span>' : '') + '<span class="code">' + code + '</span><b>' + esc(name) + '</b><span class="st"' + (warn === 'bad' ? ' style="color:var(--bad-tx);font-weight:600"' : warn === 'gold' ? ' style="color:var(--attn-tx);font-weight:600"' : '') + '>' + esc(st) + '</span></button>').join('') + '</div></div>').join('');
+  function pick(code) {
+    let hit; MAP.forEach((a) => a.p.forEach((p) => { if (p[0] === code) hit = p; }));
+    $$('.pc').forEach((b) => b.classList.toggle('on', b.dataset.pick === code));
+    const [c, name, st, mine, owner] = hit;
+    $('#side').innerHTML = '<span class="code">' + c + '</span><h3>' + esc(name) + '</h3><dl class="dl"><dt>Owner</dt><dd>' + esc(owner) + '</dd><dt>Where it is</dt><dd>' + esc(st) + '</dd><dt>You</dt><dd>' + (mine === 'y' ? 'Own or approve it' : mine === 's' ? 'Have a step in it' : 'No part in it') + '</dd></dl><p style="font-size:13px;color:var(--ink-2)">' + esc(ABOUT[c] || 'Owned by ' + owner + '. You can read it; you have no step in it.') + '</p><div><button class="btn gold" type="button" data-toast="' + esc(OPEN(c)) + '">Open</button></div>';
+  }
+
+  const TABS = {
+    1: [['mine', 'My processes', ''], ['map', 'Map', ''], ['all', 'All processes', '13']],
+    2: [['mine', 'My processes', ''], ['todo', 'To do', '4', 'hot'], ['map', 'Map', ''], ['all', 'All processes', '13']],
+  };
+  const NOTES = {
+    1: [['Good at', ['Impossible to miss: it is the first thing on the page', 'One page answers both “what do I do” and “how are mine doing”']], ['What it costs', ['The list pushes your processes down, and a busy week pushes them off the screen', 'The page changes shape as things come and go', 'Each item shows twice: in the list and in its process row']], ['Fits', ['Someone with a few processes and one or two things a week']]],
+    2: [['Agreed 24 Oct', ['Opens on My processes: yours, then the ones you have a step in', 'To do is its own tab, second in the row, with a gold count', 'Tabs drawn as buttons, as on the process page']], ['So it never hides', ['A “Waiting on you” line in the band opens To do', 'Each process row carries its own button: approve, review, read', 'The row and the To do tab must stay in step: acting in one clears the other']], ['Earlier versions of this page', ['Version 1: options A, B and C (my processes, company map, to-do only)', 'Version 2: to-do on the same page or on its own tab']]],
+  };
+  let VAR = '2', VIEW = 'mine';
+  function render() {
+    $('#frame').className = 'frame v' + VAR;
+    $$('.mk-sw [data-var]').forEach((b) => { const on = b.dataset.var === VAR; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    $('#m-wait').hidden = VAR === '1';
+    $('#a-wait-box').hidden = VAR === '2';
+    if (VAR === '1' && VIEW === 'todo') VIEW = 'mine';
+    $('#vt').innerHTML = TABS[VAR].map(([k, l, n, hot]) => '<button type="button" role="tab" aria-selected="' + (k === VIEW) + '" class="' + (k === VIEW ? 'on' : '') + '" data-tab="' + k + '">' + l + (n ? ' <span class="ct' + (hot ? ' hot' : '') + '">' + n + '</span>' : '') + '</button>').join('');
+    $$('[data-view]').forEach((v) => { v.hidden = v.dataset.view !== VIEW; });
+    $('#verdict').innerHTML = NOTES[VAR].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
+    try { history.replaceState(null, '', '#' + VAR + '-' + VIEW); } catch (e) {}
+  }
+
+  let tt;
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2800); }
+  document.addEventListener('click', (e) => {
+    const t = e.target, v = t.closest('[data-var]'), tab = t.closest('[data-tab]'), tst = t.closest('[data-toast]'), go = t.closest('[data-go]'), pk = t.closest('[data-pick]');
+    if (v) { VAR = v.dataset.var; render(); return; }
+    if (tab) { if (tab.dataset.tab === 'all') { toast('The full list of processes, with search and filters, as today. Not drawn here.'); return; } VIEW = tab.dataset.tab; render(); return; }
+    if (tst) { toast(tst.dataset.toast); return; }
+    if (go) { toast(OPEN(go.dataset.go)); return; }
+    if (pk) { pick(pk.dataset.pick); return; }
+  });
+  $('#only-mine').addEventListener('change', (e) => { $('#map').classList.toggle('dim', e.target.checked); });
+  pick('ORD100');
+  const m = /^#([12])-(mine|todo|map)$/.exec(location.hash);
+  if (m) { VAR = m[1]; VIEW = m[2]; }
+  render();
+})();
+</script>
+<script>
+/* keeps the tab bar just under the drawing band, and marks it once it is holding on */
+(function () {
+  const mk = document.querySelector('.mk'), bar = document.querySelector('.vtbar');
+  if (!bar) return;
+  const top = () => (mk ? mk.getBoundingClientRect().height : 0);
+  const place = () => document.documentElement.style.setProperty('--stick', top() + 'px');
+  const mark = () => bar.classList.toggle('stuck', window.scrollY > 0 && bar.getBoundingClientRect().top <= top() + 1);
+  place(); mark();
+  window.addEventListener('resize', () => { place(); mark(); });
+  window.addEventListener('scroll', mark, { passive: true });
+})();
+</script>

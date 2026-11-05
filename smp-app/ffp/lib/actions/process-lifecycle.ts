@@ -14,6 +14,7 @@ import {
   type ProcessLifecycleStatus,
 } from "@/ffp/lib/domain/process-lifecycle";
 import type { Revision } from "@/ffp/lib/domain/sop";
+import { asContent, inForce, liveContent, sameContent } from "@/ffp/lib/data/process-content";
 
 type Reviewer = { personId: string; name: string; role: string | null };
 
@@ -76,6 +77,11 @@ export async function submitProcessForReview(input: z.infer<typeof submitSchema>
   const process = await load(d.workspaceId, d.processId);
   if (!process) return notFound();
   if (!nextStatus(process.lifecycleStatus, "submit")) return refuse("Only a draft can be sent for review");
+  /* the next version of a process in force: only once something in it has changed (stage 5) */
+  if (process.lifecycleStatus === "PUBLISHED") {
+    const held = await inForce(d.processId), now = await liveContent(d.processId);
+    if (held && now && sameContent(held.content, now)) return refuse(`Nothing has changed since v${held.number}, so there is no new version to send`);
+  }
 
   const approver = await registerPerson(d.workspaceId, d.approverPersonId);
   if (!approver) return refuse("Pick the approver from the Client register");
@@ -96,7 +102,7 @@ export async function submitProcessForReview(input: z.infer<typeof submitSchema>
     return refuse("You cannot send a process to yourself for approval. Pick somebody else as the approver");
   }
 
-  const moved = await move(d.processId, "DRAFT", {
+  const moved = await move(d.processId, process.lifecycleStatus, {
     lifecycleStatus: "IN_REVIEW",
     approverPersonId: approver.id,
     approverName: approver.name,
@@ -150,6 +156,8 @@ export async function approveProcess(input: z.infer<typeof approveSchema>): Prom
 
   const moved = await move(d.processId, "IN_REVIEW", { lifecycleStatus: "APPROVED" });
   if (!moved) return { ok: false, error: "CONFLICT" };
+  /* what was approved, kept with the version: it is what gets published, and what readers then read (stage 5) */
+  const snapshot = await liveContent(d.processId);
   await prisma.processVersion.create({
     data: {
       processId: d.processId,
@@ -158,6 +166,7 @@ export async function approveProcess(input: z.infer<typeof approveSchema>): Prom
       submittedBy: process.submittedByName,
       approvedBy: approvedName,
       approvedRole,
+      ...(snapshot ? { snapshot } : {}),
     },
   });
   refresh(d.workspaceId, d.processId);
@@ -242,8 +251,15 @@ export async function publishProcess(input: z.infer<typeof base>): Promise<Actio
     sopRevisions: revisions,
   });
   if (!moved) return { ok: false, error: "CONFLICT" };
-  await prisma.processVersion.update({ where: { id: version.id }, data: { publishedAt: now } });
+  /* it is now the version in force: what was approved, with the version and date the SOP now carries (stage 5) */
+  const kept = asContent(version.snapshot) ?? (await liveContent(d.processId));
+  await prisma.processVersion.update({
+    where: { id: version.id },
+    data: { publishedAt: now, ...(kept ? { snapshot: { ...kept, sopVersion: `v${version.number}`, sopEffectiveDate: today } } : {}) },
+  });
   revalidatePath(`/${d.workspaceId}/processes/reports/sop`);
+  // Suggestions worked into this version are done (stage 4, spec 067 §3.2).
+  await prisma.processSuggestion.updateMany({ where: { processId: d.processId, state: "IN_DRAFT" }, data: { state: "CLOSED", closedAt: new Date() } });
   refresh(d.workspaceId, d.processId);
   return ok(null);
 }

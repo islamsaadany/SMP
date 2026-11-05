@@ -874,12 +874,6 @@ function ProcessReportSection({
     return step.assignedRole?.name ?? "—";
   }
 
-  // Only steps that actually carry documentation appear as narrative cards —
-  // an undocumented step is surfaced in the preview-only gaps banner instead
-  // of printing as an empty box.
-  const documentedSteps = process.steps.filter(
-    (s) => s.detailedAction.length > 0 || s.exceptionHandling?.trim()
-  );
   const control = documentControl(process);
 
   return (
@@ -952,7 +946,6 @@ function ProcessReportSection({
                   {renderProcessBlock(block.id, {
                     process,
                     workspaceId,
-                    documentedSteps,
                     stepOwnerLabel,
                     // Excluding either half of the RACI table drops columns
                     // rather than splitting it, which is why the pair is
@@ -1216,7 +1209,6 @@ function NothingRecorded() {
 type BlockContext = {
   process: ExportProcessData;
   workspaceId: string;
-  documentedSteps: ExportProcessData["steps"];
   labelWorkflow: boolean;
   stepOwnerLabel: (
     row: ExportProcessData["combinedRows"][number] | undefined,
@@ -1293,10 +1285,12 @@ const PROCESS_BLOCKS: Record<string, (ctx: BlockContext) => React.ReactNode> = {
     </>
   ),
 
-  narr: ({ process, documentedSteps, stepOwnerLabel }) => (
+  narr: ({ process, stepOwnerLabel }) => (
     <>
-      {documentedSteps.map((step) => {
+      <SubHeading>Step narrative</SubHeading>
+      {process.steps.map((step) => {
         const row = process.combinedRows.find((r) => r.rowId === step.id);
+        const documented = step.detailedAction.length > 0 || Boolean(step.exceptionHandling?.trim());
         return (
           // A rule between entries rather than a card around each one:
           // the box's border and its four sides of padding cost real
@@ -1309,28 +1303,33 @@ const PROCESS_BLOCKS: Record<string, (ctx: BlockContext) => React.ReactNode> = {
                 Step Owner: {stepOwnerLabel(row, step)}
               </span>
             </div>
-            <div className="mt-1 grid grid-cols-2 gap-4">
-              {step.detailedAction.length > 0 && (
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                    Detailed Action
+            {/* Every step is listed so the narrative always reads as the whole process; one with no written
+                detail says so in a line instead of printing an empty box. */}
+            {!documented && <p className="mt-0.5 text-xs italic text-slate-400">No detail recorded for this step yet.</p>}
+            {documented && (
+              <div className="mt-1 grid grid-cols-2 gap-4">
+                {step.detailedAction.length > 0 && (
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                      Detailed Action
+                    </div>
+                    <ol className="mt-1 list-decimal space-y-0.5 ps-4 text-sm text-slate-700">
+                      {step.detailedAction.map((action, i) => (
+                        <li key={i}>{action}</li>
+                      ))}
+                    </ol>
                   </div>
-                  <ol className="mt-1 list-decimal space-y-0.5 ps-4 text-sm text-slate-700">
-                    {step.detailedAction.map((action, i) => (
-                      <li key={i}>{action}</li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-              {step.exceptionHandling && (
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                    Risk if Mishandled
+                )}
+                {step.exceptionHandling && (
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                      Risk if Mishandled
+                    </div>
+                    <p className="mt-1 whitespace-pre-line text-sm text-slate-700">{step.exceptionHandling}</p>
                   </div>
-                  <p className="mt-1 whitespace-pre-line text-sm text-slate-700">{step.exceptionHandling}</p>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         );
       })}

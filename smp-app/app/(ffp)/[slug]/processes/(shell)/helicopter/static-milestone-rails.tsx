@@ -37,19 +37,23 @@ const LABEL_BLOCK_HEIGHT = 62;
  * button and no navigation link on a process's name, so it's safe to embed in
  * a preview/print page.
  */
+/**
+ * The tallest a framed box of rails may be on paper, in CSS pixels after scaling. A box taller than a
+ * printed page cannot sit on one, and Chrome then slices the transformed drawing at the page edge and
+ * lays the pieces over each other — which is what made a long chain print as a pile of overlapping
+ * labels. Rails are therefore cut into boxes that each fit a page; the page's own height is 182mm
+ * (210mm less the 14mm margins), and the heading above the first box takes the rest of the allowance.
+ */
+const MAX_BOX_PX = 520;
+
 export function StaticMilestoneRails({ processes }: { processes: RailProcess[] }) {
   // The width the rails have to fit, less the px-6 they are drawn inside. A
   // rail longer than this now folds onto another line rather than being
   // shrunk: at 22 milestones the shrink reached about 0.43, which put the
   // labels near 4px and made the view unreadable on the page it exists for.
-  const layout = buildMilestoneRails(processes, {
-    maxWidth: PAGE_CONTENT_WIDTH_PX - BOX_BORDER_PX - 48,
-  });
+  const options = { maxWidth: PAGE_CONTENT_WIDTH_PX - BOX_BORDER_PX - 48 };
+  const whole = buildMilestoneRails(processes, options);
 
-  // px-6 / py-5 on the drawing itself, counted here so the box the rails are
-  // fitted into is the one actually drawn rather than the bare layout size.
-  const boxWidth = layout.width + 48;
-  const boxHeight = layout.height + 40;
   // Fills the page width, up or down. It used to only ever shrink, which left
   // the common case drawn at three-quarters of the page: a chain of one or two
   // processes never reaches RAIL_WIDTH, so boxWidth sat at 768 against 1015 of
@@ -57,44 +61,83 @@ export function StaticMilestoneRails({ processes }: { processes: RailProcess[] }
   // natural ceiling here rather than an arbitrary one — buildMilestoneRails
   // floors its width at RAIL_WIDTH, so the most this can ever magnify is
   // (PAGE_CONTENT_WIDTH_PX - BOX_BORDER_PX) / (RAIL_WIDTH + 48), about 1.32.
-  const scale = (PAGE_CONTENT_WIDTH_PX - BOX_BORDER_PX) / boxWidth;
+  const wholeScale = (PAGE_CONTENT_WIDTH_PX - BOX_BORDER_PX) / (whole.width + 48);
+
+  // One box when it fits a page; otherwise as many boxes as it takes, each holding whole rails. A rail's
+  // drops to a rail in another box are not drawn (there is nothing on that page to drop to).
+  const groups: RailProcess[][] = [];
+  if ((whole.height + 40) * wholeScale <= MAX_BOX_PX || whole.rails.length <= 1) {
+    groups.push(processes);
+  } else {
+    const byId = new Map(processes.map((p) => [p.id, p]));
+    let current: RailProcess[] = [];
+    let startY = 0;
+    whole.rails.forEach((rail, i) => {
+      const next = whole.rails[i + 1];
+      const bottom = next ? next.y : rail.y + rail.height;
+      const p = byId.get(rail.processId);
+      if (!p) return;
+      if (current.length > 0 && (bottom - startY + 40) * wholeScale > MAX_BOX_PX) {
+        groups.push(current);
+        current = [];
+        startY = rail.y;
+      }
+      current.push(p);
+    });
+    if (current.length) groups.push(current);
+  }
 
   return (
     <div>
       <p className="mb-2 text-xs text-slate-500">
-        {layout.milestoneCount > 0
-          ? `${layout.milestoneCount} milestone${layout.milestoneCount === 1 ? "" : "s"} marked · steps another process depends on are always shown`
+        {whole.milestoneCount > 0
+          ? `${whole.milestoneCount} milestone${whole.milestoneCount === 1 ? "" : "s"} marked · steps another process depends on are always shown`
           : "No milestones marked yet."}
       </p>
-      {/* Scaled to fit the page rather than scrolled. This is a printed sheet:
-          a horizontal scrollbar is dead furniture in a PDF, and everything
-          past the container's edge was simply gone from the page — the rails
-          are laid out in fixed pixels, and a real chain is wider than A4. Same
-          answer the report's process diagram already gives with fitView. */}
-      <div dir="ltr" className="break-inside-avoid overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div style={{ width: boxWidth * scale, height: boxHeight * scale }}>
-          <div
-            className="relative bg-white px-6 py-5"
-            style={{
-              width: boxWidth,
-              minHeight: boxHeight,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
-            }}
-          >
-            {layout.drops.map((drop) => (
-              <div
-                key={drop.id}
-                aria-hidden="true"
-                className="pointer-events-none absolute w-0 border-s-[1.5px] border-dashed border-amber-400"
-                style={{ left: drop.x, top: drop.fromY + TRACK_Y, height: drop.toY - drop.fromY }}
-              />
-            ))}
+      {groups.map((group, i) => (
+        <RailsBox key={i} layout={buildMilestoneRails(group, options)} />
+      ))}
+    </div>
+  );
+}
 
-            {layout.rails.map((rail) => (
-              <StaticRailRow key={rail.processId} rail={rail} />
-            ))}
-          </div>
+/** One framed box of rails, scaled to the page width and never taller than a page. */
+function RailsBox({ layout }: { layout: ReturnType<typeof buildMilestoneRails> }) {
+  // px-6 / py-5 on the drawing itself, counted here so the box the rails are
+  // fitted into is the one actually drawn rather than the bare layout size.
+  const boxWidth = layout.width + 48;
+  const boxHeight = layout.height + 40;
+  const scale = Math.min((PAGE_CONTENT_WIDTH_PX - BOX_BORDER_PX) / boxWidth, MAX_BOX_PX / boxHeight);
+
+  return (
+    /* Scaled to fit the page rather than scrolled. This is a printed sheet:
+       a horizontal scrollbar is dead furniture in a PDF, and everything
+       past the container's edge was simply gone from the page — the rails
+       are laid out in fixed pixels, and a real chain is wider than A4. Same
+       answer the report's process diagram already gives with fitView. */
+    <div dir="ltr" className="mb-3 break-inside-avoid overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div style={{ width: boxWidth * scale, height: boxHeight * scale }}>
+        <div
+          className="relative bg-white px-6 py-5"
+          style={{
+            width: boxWidth,
+            minHeight: boxHeight,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          {layout.drops.map((drop) => (
+            <div
+              key={drop.id}
+              aria-hidden="true"
+              className="pointer-events-none absolute w-0 border-s-[1.5px] border-dashed border-amber-400"
+              style={{ left: drop.x, top: drop.fromY + TRACK_Y, height: drop.toY - drop.fromY }}
+            />
+          ))}
+
+          {layout.rails.map((rail) => (
+            <StaticRailRow key={rail.processId} rail={rail} />
+          ))}
         </div>
       </div>
     </div>

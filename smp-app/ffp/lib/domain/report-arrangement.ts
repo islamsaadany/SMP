@@ -336,9 +336,10 @@ const EMPTY_CHECKS: Record<string, (p: EmptinessInput) => boolean> = {
   ext: (p) => !has(p.externalEntities),
   scope: (p) => !has(p.inScope) && !has(p.outOfScope),
   diagram: (p) => !has(p.steps),
-  // The narrative prints only the steps that carry one, which is why an
-  // undocumented map makes this block empty while the diagram block is not.
-  narr: (p) => !(p.steps ?? []).some((s) => has(s.detailedAction) || text(s.exceptionHandling)),
+  // The narrative lists every step on the map, so it is empty only when the map has no steps. A step with
+  // no written detail still appears (as one line), rather than the whole narrative vanishing because the
+  // detail has not been typed yet.
+  narr: (p) => !has(p.steps),
   raciGrid: (p) => !has(p.combinedRows) || !has(p.matrixRoles),
   rules: (p) => !(p.combinedRows ?? []).some((r) => has(r.ruleSentences)),
   controls: (p) => !has(p.controlPoints),

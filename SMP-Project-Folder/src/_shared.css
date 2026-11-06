@@ -475,7 +475,7 @@
   .askbox .askyes { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
   .askbox .askno { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
   .askbox button:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
-  /* §750 THE ASKING BOX COMES OUT OF WHAT WAS PRESSED and goes back into it.
+  /* §751 THE ASKING BOX COMES OUT OF WHAT WAS PRESSED and goes back into it.
      Its growth point is its own arrow — askPlace (shell.html) sets the
      transform-origin at the arrow's tip, above or below — from .95 over
      180ms ease-out; back into it in 140ms (askClose holds the node for the
@@ -505,14 +505,14 @@
   .applywait::before, .applydone::before { content:""; width:7px; height:7px; border-radius:50%; flex:none; }
   .applywait::before { background:var(--attn); }
   .applydone::before { background:var(--good); }
-  /* §750 ONE RING ON APPLIED — the chat button's chring, once, on the green
+  /* §751 ONE RING ON APPLIED — the chat button's chring, once, on the green
      dot: the colour landed. The class is set by applyUndoLater on the press,
      never by the paint, so a repaint inside the Undo window does not ring
      again. */
   .applydone.pulse::before { animation:okring 1s cubic-bezier(0,0,.2,1) 1; }
   @keyframes okring { 0% { box-shadow:0 0 0 0 var(--good); } 100% { box-shadow:0 0 0 10px transparent; } }
   @media (prefers-reduced-motion:reduce) { .applydone.pulse::before { animation:none; } }
-  /* §750 A PRESS IS FELT: every button sinks to .97 the moment it is held —
+  /* §751 A PRESS IS FELT: every button sinks to .97 the moment it is held —
      no tween on the way down, a control that drifts under a held finger reads
      as lag — and eases back in 120ms on release. Low in the cascade on
      purpose: a button that carries its own transition keeps it and snaps

@@ -71250,7 +71250,7 @@ Now a send that fails on the line, or that the page stops waiting for (§472), *
 
 **Checked**: `checks/shell.mjs` section 4 **112 ok, 0 failed** — new: the add line is the card's last element and sits below the last group. Shell cache `smp-shell-v7.67-add-at-foot`.
 
-## §750 — Seven small motions, each the same way (2026-11-06)
+## §751 — Seven small motions, each the same way (2026-11-06)
 
 **Asked** (Islam, with a screenshot of a list headed "20 ways to make beautiful AI animations"): "For these UI tips what do you think fits us?" — seven did, drawn before/after in `design-mockups/motion/2026-11-06_seven-motion-changes.html`; then "do you think any of these might slow down the platform?" (no: opacity and transform only, a few hundred milliseconds on a press, off under reduced motion); then "ok go ahead and apply all seven".
 

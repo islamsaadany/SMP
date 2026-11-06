@@ -21,7 +21,7 @@
               box-shadow:0 6px 18px rgba(0,0,0,.14); position:relative; z-index:3; }
   tr.dragging td { background:var(--attn-bg); }
   .sorting { cursor:grabbing; }
-  /* §750 A MOVE EASES BOTH ENDS: the rows that shift to make room leave
+  /* §751 A MOVE EASES BOTH ENDS: the rows that shift to make room leave
      gently and arrive gently (ease-in-out, 180ms) instead of snapping. */
   .sorting .prow, .sorting tr { transition:transform .18s cubic-bezier(.4,0,.2,1); }
 
@@ -863,7 +863,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
                            min-width:290px; background:var(--surface);
                            border:1px solid var(--line); border-radius:var(--r);
                            box-shadow:0 8px 24px rgba(0,0,0,.16); padding:4px 0; }
-  /* §750 A DROPDOWN GROWS OUT OF ITS BUTTON: from .95 at the corner nearest
+  /* §751 A DROPDOWN GROWS OUT OF ITS BUTTON: from .95 at the corner nearest
      the button over 180ms ease-out, and shrinks back into it in 140ms. A closed
      <details> hides its content the same instant, so shell.html's dlMenuClose
      holds it open for the exit and shuts it after. The keyframes are

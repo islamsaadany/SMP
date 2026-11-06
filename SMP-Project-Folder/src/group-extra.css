@@ -411,7 +411,7 @@
      from the screen (§48.4). `opacity:0` left a "Close" button tabbable on
      every page and a permanently announced empty dialog. `visibility:hidden`
      removes both and still transitions, which `display:none` would not. */
-  /* §750 THE BOX ARRIVES RATHER THAN APPEARS: in over 180ms on an ease-out
+  /* §751 THE BOX ARRIVES RATHER THAN APPEARS: in over 180ms on an ease-out
      curve (quick to start, soft to land), the box settling up from 8px below;
      out over 140ms on ease-in. An exit is something already decided, so it is
      a fifth shorter than the entrance — the rule for every opening thing in

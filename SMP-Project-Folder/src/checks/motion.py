@@ -1,4 +1,4 @@
-"""MOTION: SEVEN SMALL THINGS, EACH THE SAME WAY (§750).
+"""MOTION: SEVEN SMALL THINGS, EACH THE SAME WAY (§751).
 
 qa-run: own-server — the asking box and Apply need a server that answers,
 so this serves the built file itself, as ask-and-apply.py does.

@@ -478,7 +478,7 @@
   .askbox .askyes { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
   .askbox .askno { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
   .askbox button:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
-  /* §750 THE ASKING BOX COMES OUT OF WHAT WAS PRESSED and goes back into it.
+  /* §751 THE ASKING BOX COMES OUT OF WHAT WAS PRESSED and goes back into it.
      Its growth point is its own arrow — askPlace (shell.html) sets the
      transform-origin at the arrow's tip, above or below — from .95 over
      180ms ease-out; back into it in 140ms (askClose holds the node for the
@@ -508,14 +508,14 @@
   .applywait::before, .applydone::before { content:""; width:7px; height:7px; border-radius:50%; flex:none; }
   .applywait::before { background:var(--attn); }
   .applydone::before { background:var(--good); }
-  /* §750 ONE RING ON APPLIED — the chat button's chring, once, on the green
+  /* §751 ONE RING ON APPLIED — the chat button's chring, once, on the green
      dot: the colour landed. The class is set by applyUndoLater on the press,
      never by the paint, so a repaint inside the Undo window does not ring
      again. */
   .applydone.pulse::before { animation:okring 1s cubic-bezier(0,0,.2,1) 1; }
   @keyframes okring { 0% { box-shadow:0 0 0 0 var(--good); } 100% { box-shadow:0 0 0 10px transparent; } }
   @media (prefers-reduced-motion:reduce) { .applydone.pulse::before { animation:none; } }
-  /* §750 A PRESS IS FELT: every button sinks to .97 the moment it is held —
+  /* §751 A PRESS IS FELT: every button sinks to .97 the moment it is held —
      no tween on the way down, a control that drifts under a held finger reads
      as lag — and eases back in 120ms on release. Low in the cascade on
      purpose: a button that carries its own transition keeps it and snaps
@@ -1467,7 +1467,7 @@ html[data-client-settings] .viewer { display:none; }
      from the screen (§48.4). `opacity:0` left a "Close" button tabbable on
      every page and a permanently announced empty dialog. `visibility:hidden`
      removes both and still transitions, which `display:none` would not. */
-  /* §750 THE BOX ARRIVES RATHER THAN APPEARS: in over 180ms on an ease-out
+  /* §751 THE BOX ARRIVES RATHER THAN APPEARS: in over 180ms on an ease-out
      curve (quick to start, soft to land), the box settling up from 8px below;
      out over 140ms on ease-in. An exit is something already decided, so it is
      a fifth shorter than the entrance — the rule for every opening thing in
@@ -4558,7 +4558,7 @@ html[data-client-settings] .viewer { display:none; }
                  width:290px; background:var(--surface); border:1px solid var(--line);
                  border-radius:var(--r); box-shadow:0 12px 30px rgba(0,0,0,.16);
                  padding:6px; text-align:left; }
-  /* §750 these open like the dropdown (arrange.css): from .95 at the corner
+  /* §751 these open like the dropdown (arrange.css): from .95 at the corner
      nearest their button. They are removed by a repaint rather than closed,
      so they have no exit of their own. positionRowMenu reads offsetWidth and
      offsetHeight, which a transform does not touch. */
@@ -6065,7 +6065,7 @@ tr.acoffice td { background:var(--surface-2); }
               box-shadow:0 6px 18px rgba(0,0,0,.14); position:relative; z-index:3; }
   tr.dragging td { background:var(--attn-bg); }
   .sorting { cursor:grabbing; }
-  /* §750 A MOVE EASES BOTH ENDS: the rows that shift to make room leave
+  /* §751 A MOVE EASES BOTH ENDS: the rows that shift to make room leave
      gently and arrive gently (ease-in-out, 180ms) instead of snapping. */
   .sorting .prow, .sorting tr { transition:transform .18s cubic-bezier(.4,0,.2,1); }
 
@@ -6907,7 +6907,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
                            min-width:290px; background:var(--surface);
                            border:1px solid var(--line); border-radius:var(--r);
                            box-shadow:0 8px 24px rgba(0,0,0,.16); padding:4px 0; }
-  /* §750 A DROPDOWN GROWS OUT OF ITS BUTTON: from .95 at the corner nearest
+  /* §751 A DROPDOWN GROWS OUT OF ITS BUTTON: from .95 at the corner nearest
      the button over 180ms ease-out, and shrinks back into it in 140ms. A closed
      <details> hides its content the same instant, so shell.html's dlMenuClose
      holds it open for the exit and shuts it after. The keyframes are

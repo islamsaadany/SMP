@@ -71250,6 +71250,22 @@ Now a send that fails on the line, or that the page stops waiting for (§472), *
 
 **Checked**: `checks/shell.mjs` section 4 **112 ok, 0 failed** — new: the add line is the card's last element and sits below the last group. Shell cache `smp-shell-v7.67-add-at-foot`.
 
+## §750 — The demo's Portfolio holds a full project (2026-11-05)
+
+**Asked** (Islam): "for the portfolio module for Meridian I need a full working sample project with plan and progress and analytics".
+
+- One project on the demo, **Retail operating model redesign**, written in the demo's own content file beside the tracker and the notes (`scripts/demo-content.js`, `portfolioProject`) and seeded with the rest of the demo by `smp-app/scripts/seed-demo.mjs` — replaced on `--replace` like everything else, under the same transaction, scanned by the same name refusal. Portfolio is switched on for the demo tenant.
+- **The charter in full**: brief, pain and gain drivers, scope in and out, deliverables, success criteria, resources, budget and risks, with the agreed window — and the plan runs a fortnight past it on purpose, because that pair is the fact the charter's window is there to show (§239, §344). A weekly checkpoint on Tuesdays. A team of nine on the project: Retail's head as Lead, five contributors, three viewers; nobody holding a seat, because a seat already reaches every project (§6.1).
+- **The plan**: four phases (Diagnose · Design · Pilot · Roll out, weighted 20/30/30/20), five work packages, seventeen activities — phase 1 and 3 hung straight off the phase, 2 and 4 under packages, so both numberings are drawn. Five activities carry a weighted breakdown, nine are commitments, dependencies run down the chain, two rows tag collaborators, six are billable.
+- **Progress has every section filled**: one activity done and waiting for the Lead; two past their date, one blocked by the other and said so on the row; one nobody is on; seven signed off, one of them three days late.
+- **Analytics draws a commitment in every one of its six states** (§9.12): on time ×2, late ×1, awaiting sign-off ×1, overdue ×2, due in twelve days ×1, planned ×2. Four commitments are dates and draw as diamonds; the rest run for weeks and draw as bars (§9.9); two finished rows overran their bar. The project rolls up to 47%, with the Design phase *Behind*.
+- **What is typed and what is not.** Dates are offsets from the day the demo is seeded, so it reads the same next month (spec 060 §13.9). The figure on an activity with a breakdown is worked out by `progressFromSubs` in the seeder and never typed, so the stored number and the steps under it cannot disagree (§3 №3). People are register keys (§48); the consultant on the plan is whoever holds the office seat on the demo, as the tracker's owner is. A row marked done and waiting has a real start and no real end; every accepted row has both dates and who accepted it, as the schema requires.
+- **Not done, said so**: one project rather than several (asked for one); the three client words (`portfolio_terminology`) left at their defaults; files, comments and history, which the module does not have.
+
+**Checked**: `checks/demo-seed.mjs` **46 ok, 0 failed** — eighteen new, the project read back through the product's own readers and rules (`listProjects`, `oneProject`, `planRows`, `rollUp`, `msState`, the four section rules, `nextCheckpoint`, every breakdown's figure against `progressFromSubs`) and the landing, the plan's time view, Progress and Analytics served as the route serves them. `checks/portfolio-module.mjs` **208 ok, 0 failed** with the browser; `checks/portfolio.mjs` 134/1, the one failure (*none left unbuilt*, §113.8's control) identical on the tree before this change. Seed dry-run: the refusal finds no real name in the new content.
+
+**§750 merged to main** (Islam: "merge"), a fast-forward: main had not moved since the branch was cut.
+
 ## §751 — Seven small motions, each the same way (2026-11-06)
 
 **Asked** (Islam, with a screenshot of a list headed "20 ways to make beautiful AI animations"): "For these UI tips what do you think fits us?" — seven did, drawn before/after in `design-mockups/motion/2026-11-06_seven-motion-changes.html`; then "do you think any of these might slow down the platform?" (no: opacity and transform only, a few hundred milliseconds on a press, off under reduced motion); then "ok go ahead and apply all seven".

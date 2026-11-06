@@ -80659,7 +80659,7 @@ var SYNC = (function () {
      `o.body` is HTML its caller built from escaped parts; the title and the
      two words are escaped here. */
   var ASK = null;
-  /* §750 THE DEVICE'S OWN WORD ON MOTION, read where an exit is scripted:
+  /* §751 THE DEVICE'S OWN WORD ON MOTION, read where an exit is scripted:
      CSS holds the box still under reduced motion, and the script must then
      not hold a finished box on screen for an animation that is not running. */
   function lessMotion(){
@@ -80696,7 +80696,7 @@ var SYNC = (function () {
     box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset / z) + "px";
     var ax = Math.max(10, Math.min(bw - 24, mid - left - 7));
     box.querySelector(".askarrow").style.left = ax + "px";
-    /* §750 the box grows from its arrow's tip, so it comes out of the control. */
+    /* §751 the box grows from its arrow's tip, so it comes out of the control. */
     box.style.transformOrigin = (ax + 7) + "px " + (below ? "0" : "100%");
   }
   function askFirst(anchor, o){
@@ -80795,7 +80795,7 @@ var SYNC = (function () {
      for (§75). */
   function applyUndoLater(k){
     var a = APPLY_AREAS[k], stamp = a.undoStamp();
-    /* §750 one ring on Applied's dot, on the press that applied it (the paint
+    /* §751 one ring on Applied's dot, on the press that applied it (the paint
        that draws the row is synchronous and done by the next frame). */
     requestAnimationFrame(function(){
       var d = document.querySelector('[data-applyrow="' + k + '"] .applydone');
@@ -88812,7 +88812,7 @@ var SYNC = (function () {
   function closeDlMenu(el){
     dlMenuClose(el.closest("details.dlmenu"));
   }
-  /* §750 A DROPDOWN GOES BACK INTO ITS BUTTON (arrange.css .menu.closing):
+  /* §751 A DROPDOWN GOES BACK INTO ITS BUTTON (arrange.css .menu.closing):
      the <details> is held open for the 140ms exit and shut after, since a
      closed one hides its content the same instant. Every way a dropdown
      shuts comes through here — its own button, an entry pressed, a click

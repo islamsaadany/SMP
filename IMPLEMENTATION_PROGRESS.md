@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-06 — Seven small motions (§751).** The details box, the dropdowns and the asking box ease in over 180ms from where they were pressed and go back in 140ms; rows that shift in a drag ease both ends; Applied's dot rings once on the press; every button sinks to .97 while held. No bounce anywhere, nothing under reduced motion. Mockup in design-mockups/motion. New checks/motion.py 22/0; ask-and-apply unchanged (9 pre-existing); shell cache v7.68.
+**2026-11-06 — Seven small motions (§751), merged to `main` on Islam's word.** The details box, the dropdowns and the asking box ease in over 180ms from where they were pressed and go back in 140ms; rows that shift in a drag ease both ends; Applied's dot rings once on the press; every button sinks to .97 while held. No bounce anywhere, nothing under reduced motion. Mockup in design-mockups/motion. New checks/motion.py 22/0; ask-and-apply unchanged (9 pre-existing); shell cache v7.68.
 
 **2026-11-05 — The demo's Portfolio holds a full project (§750), merged to `main` on Islam's word.** Retail operating model redesign on Meridian: the charter in full with a team of nine, four phases with work packages, breakdowns, dependencies and nine commitments; Progress has all four sections filled and Analytics a commitment in every one of its six states. Seeded with the demo, dates relative to the day it is seeded. Demo-seed 46/0, portfolio module 208/0.
 

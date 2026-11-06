@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-05 — The demo's Portfolio holds a full project (§750).** Retail operating model redesign on Meridian: the charter in full with a team of nine, four phases with work packages, breakdowns, dependencies and nine commitments; Progress has all four sections filled and Analytics a commitment in every one of its six states. Seeded with the demo, dates relative to the day it is seeded. Demo-seed 46/0, portfolio module 208/0. Branch only; not merged.
+**2026-11-05 — The demo's Portfolio holds a full project (§750), merged to `main` on Islam's word.** Retail operating model redesign on Meridian: the charter in full with a team of nine, four phases with work packages, breakdowns, dependencies and nine commitments; Progress has all four sections filled and Analytics a commitment in every one of its six states. Seeded with the demo, dates relative to the day it is seeded. Demo-seed 46/0, portfolio module 208/0.
 
 **2026-11-04 — My tasks' add line at the foot of the list (§749), merged to `main` on Islam's word.** Under the last group instead of between the card's head and its rows. Shell section 4 112/0.
 

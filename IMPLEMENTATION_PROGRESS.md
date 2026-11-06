@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-06 — Seven small motions (§750).** The details box, the dropdowns and the asking box ease in over 180ms from where they were pressed and go back in 140ms; rows that shift in a drag ease both ends; Applied's dot rings once on the press; every button sinks to .97 while held. No bounce anywhere, nothing under reduced motion. Mockup in design-mockups/motion. New checks/motion.py 22/0; ask-and-apply unchanged (9 pre-existing); shell cache v7.68.
+
 **2026-11-04 — My tasks' add line at the foot of the list (§749), merged to `main` on Islam's word.** Under the last group instead of between the card's head and its rows. Shell section 4 112/0.
 
 **2026-11-04 — Steps by place (§748), merged to `main` on Islam's word with §745–§747** (renumbered from §743–§746 at the merge: main took §743 and §744; migration 037 applies on deploy). The Tracker and My tasks plan steps in one view (the add line stays open once a task has steps); the weekly check ticks; Home has no steps in its opened task. Tracker 393/0; shell section 4 111/0.

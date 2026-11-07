@@ -2738,3 +2738,42 @@ key a phase offers; and it read `.dlg` unscoped, so it got the SHIFT dialog's
 **197/0, red twenty-six ways**, with `no-project` printing Islam's screenshot
 back verbatim &mdash; *Which project?* &mdash; and `no-empty-add` reddening
 exactly the three assertions about typing into something new.
+
+## 17 · The demo's own project, 2026-11-05
+
+**Islam:** *"for the portfolio module for Meridian I need a full working
+sample project with plan and progress and analytics."* Until now the demo
+tenant held the module switched off and its eight tables empty, so the six
+screens opened on *No plan yet*. Now it holds **one project, filled in end to
+end** — `scripts/demo-content.js` says what goes in it (`portfolioProject`),
+beside the tracker's and the notes' content, and `smp-app/scripts/seed-demo.mjs`
+writes it with the rest of the demo (§750).
+
+### 17.1 · Everything a screen reads has something to read
+
+The charter with every field written and an agreed window the plan runs past;
+a team of nine with one Lead and nobody holding a seat (§6.1); four phases,
+five work packages, seventeen activities, five of them with a weighted
+breakdown, nine commitments, dependencies down the chain. Progress has all
+four sections filled — one waiting for the Lead, two past their date (one
+blocked by the other), one nobody is on, seven signed off. Analytics draws a
+commitment in **every one of its six states** (§9.12), and the chart draws
+both a diamond and a bar for a commitment (§9.9) and an overrun past a bar.
+A demo that only shows the healthy case shows nothing about what the module
+is for.
+
+### 17.2 · Typed as little as possible
+
+Dates are offsets from the day the demo is seeded (§13.9), so what is late
+stays late. The figure on an activity with a breakdown is `progressFromSubs`'s
+answer, asked in the seeder and never typed (§3 №3). People are register keys
+(§48); the consultant on the plan is whoever holds the office seat, as the
+tracker's owner is. The name refusal scans it like everything else in the
+demo.
+
+### 17.3 · Proved
+
+`checks/demo-seed.mjs` **46/0**, eighteen new: the project read back through
+the product's own readers and rules, every breakdown's figure against the
+rule, and the landing, the plan's time view, Progress and Analytics served as
+the route serves them. `checks/portfolio-module.mjs` 208/0 with the browser.

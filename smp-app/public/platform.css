@@ -478,6 +478,19 @@
   .askbox .askyes { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
   .askbox .askno { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
   .askbox button:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
+  /* §751 THE ASKING BOX COMES OUT OF WHAT WAS PRESSED and goes back into it.
+     Its growth point is its own arrow — askPlace (shell.html) sets the
+     transform-origin at the arrow's tip, above or below — from .95 over
+     180ms ease-out; back into it in 140ms (askClose holds the node for the
+     exit and takes no press meanwhile). */
+  .askbox { animation:askin .18s cubic-bezier(0,0,.2,1); transform-origin:28px 0; }
+  .askbox.closing { animation:askout .14s ease-in forwards; pointer-events:none; }
+  @keyframes askin { from { opacity:0; transform:scale(.95); } }
+  @keyframes askout { to { opacity:0; transform:scale(.95); } }
+  /* Every menu's entrance, in one place (arrange.css, config.css use these). */
+  @keyframes menuin { from { opacity:0; transform:scale(.95) translateY(-4px); } }
+  @keyframes menuout { to { opacity:0; transform:scale(.95) translateY(-4px); } }
+  @media (prefers-reduced-motion:reduce) { .askbox, .askbox.closing { animation:none; } }
   /* ── A COLOUR AREA'S ROW, AND THE QUESTION ON THE WAY OUT (§621) ─────
      Apply is the platform's solid control (the panel's own fill and ink, so
      it follows a tenant's bar); Discard and Undo are its quiet neighbours.
@@ -495,6 +508,21 @@
   .applywait::before, .applydone::before { content:""; width:7px; height:7px; border-radius:50%; flex:none; }
   .applywait::before { background:var(--attn); }
   .applydone::before { background:var(--good); }
+  /* §751 ONE RING ON APPLIED — the chat button's chring, once, on the green
+     dot: the colour landed. The class is set by applyUndoLater on the press,
+     never by the paint, so a repaint inside the Undo window does not ring
+     again. */
+  .applydone.pulse::before { animation:okring 1s cubic-bezier(0,0,.2,1) 1; }
+  @keyframes okring { 0% { box-shadow:0 0 0 0 var(--good); } 100% { box-shadow:0 0 0 10px transparent; } }
+  @media (prefers-reduced-motion:reduce) { .applydone.pulse::before { animation:none; } }
+  /* §751 A PRESS IS FELT: every button sinks to .97 the moment it is held —
+     no tween on the way down, a control that drifts under a held finger reads
+     as lag — and eases back in 120ms on release. Low in the cascade on
+     purpose: a button that carries its own transition keeps it and snaps
+     back instead, which is the lesser of the two differences. */
+  button, summary.editbtn { transition:transform .12s cubic-bezier(0,0,.2,1); }
+  button:not(:disabled):active, summary.editbtn:active { transform:scale(.97); transition:none; }
+  @media (prefers-reduced-motion:reduce) { button:not(:disabled):active, summary.editbtn:active { transform:none; } }
   .leavestrip { position:fixed; z-index:65; left:max(16px, env(safe-area-inset-left, 0px)); right:96px;
                 bottom:max(18px, env(safe-area-inset-bottom, 0px));
                 display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px;
@@ -1439,8 +1467,19 @@ html[data-client-settings] .viewer { display:none; }
      from the screen (§48.4). `opacity:0` left a "Close" button tabbable on
      every page and a permanently announced empty dialog. `visibility:hidden`
      removes both and still transitions, which `display:none` would not. */
-  .overlay { visibility:hidden; transition:opacity .12s ease, visibility 0s linear .12s; }
-  .overlay.on { transition:opacity .12s ease, visibility 0s; }
+  /* §751 THE BOX ARRIVES RATHER THAN APPEARS: in over 180ms on an ease-out
+     curve (quick to start, soft to land), the box settling up from 8px below;
+     out over 140ms on ease-in. An exit is something already decided, so it is
+     a fifth shorter than the entrance — the rule for every opening thing in
+     the product (the dropdown, the asking box). Reduced motion keeps the fade
+     and loses the move, which is the rule every animation here follows. */
+  .overlay { visibility:hidden; transition:opacity .14s ease-in, visibility 0s linear .14s; }
+  .overlay.on { transition:opacity .18s cubic-bezier(0,0,.2,1), visibility 0s; }
+  .overlay .modal { transform:translateY(8px); transition:transform .14s ease-in; }
+  .overlay.on .modal { transform:none; transition:transform .18s cubic-bezier(0,0,.2,1); }
+  @media (prefers-reduced-motion:reduce) {
+    .overlay .modal, .overlay.on .modal { transform:none; transition:none; }
+  }
   .modal { background:var(--surface); border:1px solid var(--line); border-radius:3px;
            width:min(940px,100%); max-height:calc(var(--winh) * 0.88); display:flex; flex-direction:column;
            box-shadow:0 24px 60px rgba(0,0,0,.28); }
@@ -4519,6 +4558,13 @@ html[data-client-settings] .viewer { display:none; }
                  width:290px; background:var(--surface); border:1px solid var(--line);
                  border-radius:var(--r); box-shadow:0 12px 30px rgba(0,0,0,.16);
                  padding:6px; text-align:left; }
+  /* §751 these open like the dropdown (arrange.css): from .95 at the corner
+     nearest their button. They are removed by a repaint rather than closed,
+     so they have no exit of their own. positionRowMenu reads offsetWidth and
+     offsetHeight, which a transform does not touch. */
+  .kmenu { animation:menuin .18s cubic-bezier(0,0,.2,1); transform-origin:top left; }
+  .hmenu-panel { animation:menuin .18s cubic-bezier(0,0,.2,1); transform-origin:top right; }
+  @media (prefers-reduced-motion:reduce) { .kmenu, .hmenu-panel { animation:none; } }
   .hmenu-panel.cols { width:236px; }
   .hmenu-h { display:flex; justify-content:space-between; align-items:baseline;
              gap:10px; padding:5px 8px 7px; font:700 10px/1 var(--sans);
@@ -6019,7 +6065,9 @@ tr.acoffice td { background:var(--surface-2); }
               box-shadow:0 6px 18px rgba(0,0,0,.14); position:relative; z-index:3; }
   tr.dragging td { background:var(--attn-bg); }
   .sorting { cursor:grabbing; }
-  .sorting .prow, .sorting tr { transition:transform .12s ease; }
+  /* §751 A MOVE EASES BOTH ENDS: the rows that shift to make room leave
+     gently and arrive gently (ease-in-out, 180ms) instead of snapping. */
+  .sorting .prow, .sorting tr { transition:transform .18s cubic-bezier(.4,0,.2,1); }
 
   /* The number doubles as the handle's home, so reordering costs no column. */
   td.idx { white-space:nowrap; }
@@ -6081,7 +6129,7 @@ tr.acoffice td { background:var(--surface-2); }
   .gwrap .card-head { position:relative; }
   .gwrap .card-head .grip { position:absolute; left:8px; top:50%; transform:translateY(-50%); opacity:.75; }
   .gwrap .card-head .grip i { background:var(--panel-ink); }
-  .gauges.sorting .gwrap { transition:transform .12s ease; }
+  .gauges.sorting .gwrap { transition:transform .18s cubic-bezier(.4,0,.2,1); }
   .gwrap.dragging { opacity:.92; box-shadow:0 8px 22px rgba(0,0,0,.2); }
 
   /* Foundation and analysis in edit: the field replaces the text in place, so
@@ -6859,6 +6907,18 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
                            min-width:290px; background:var(--surface);
                            border:1px solid var(--line); border-radius:var(--r);
                            box-shadow:0 8px 24px rgba(0,0,0,.16); padding:4px 0; }
+  /* §751 A DROPDOWN GROWS OUT OF ITS BUTTON: from .95 at the corner nearest
+     the button over 180ms ease-out, and shrinks back into it in 140ms. A closed
+     <details> hides its content the same instant, so shell.html's dlMenuClose
+     holds it open for the exit and shuts it after. The keyframes are
+     _shared.css's `menuin`/`menuout`, shared with every other menu. */
+  details.dlmenu[open] > .menu { animation:menuin .18s cubic-bezier(0,0,.2,1); transform-origin:top left; }
+  details.dlmenu.right[open] > .menu { transform-origin:top right; }
+  details.dlmenu[open] > .menu.closing { animation:menuout .14s ease-in forwards; pointer-events:none; }
+  .iconwrap .menu { animation:menuin .18s cubic-bezier(0,0,.2,1); transform-origin:top right; }
+  @media (prefers-reduced-motion:reduce) {
+    details.dlmenu[open] > .menu, details.dlmenu[open] > .menu.closing, .iconwrap .menu { animation:none; }
+  }
   details.dlmenu > .menu button { display:block; width:100%; text-align:left; font:inherit;
                                   font-size:13.5px; color:var(--ink); background:none;
                                   border:0; padding:9px 14px; cursor:pointer; }

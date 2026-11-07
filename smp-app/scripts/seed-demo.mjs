@@ -124,7 +124,12 @@ export async function seedDemo({ url, replace = false, brk = null, log = (s) => 
    statement to the demo, and the explicit `tenant_id` below says it again,
    because a superuser connection bypasses the policy and "every row" would
    then mean every client's. */
-const MODULE_TABLES = ["tracker_progress", "tracker_events", "tracker_actions", "note_sends", "notes"];
+/* THE PORTFOLIO'S EIGHT ARE NAMED CHILDREN FIRST, though every one cascades
+   from the project: a list that relies on the cascade is a list that breaks
+   the day a table stops cascading, and saying it costs eight short lines. */
+const MODULE_TABLES = ["tracker_progress", "tracker_events", "tracker_actions", "note_sends", "notes",
+  "portfolio_collaborators", "portfolio_sub_activities", "portfolio_activities", "portfolio_work_packages",
+  "portfolio_phases", "portfolio_members", "portfolio_terminology", "portfolio_projects"];
 async function replaceContent(c, tenantId, graph) {
   const members = (await c.query(
     "SELECT person_key, seat FROM tenant_users WHERE tenant_id = $1", [tenantId])).rows;
@@ -168,7 +173,93 @@ async function replaceContent(c, tenantId, graph) {
       "INSERT INTO notes (title, met_on, attendees, raw, minutes, created_by) VALUES ($1,$2,$3::jsonb,$4,$5::jsonb,'demo')",
       [n.title, n.metOn, JSON.stringify(n.attendees), n.raw, JSON.stringify(n.minutes)]);
   }
+  await seedPortfolio(c, m.portfolio);
   return { keep, oldFiles };
+}
+
+/* ── THE PORTFOLIO'S PROJECT (spec 060, 2026-11-05) ──────────────────────
+   One project, written the way the tracker and the notes are: rows under
+   the tenant, inside the same transaction, from what `moduleContent` says
+   goes in them. The tables are migration 015's and nothing here names a
+   tenant — the row default and the policy do (§314).
+
+   THE FIGURE ON AN ACTIVITY WITH A BREAKDOWN IS THE RULE'S, NOT THE FILE'S:
+   `progressFromSubs` is the one answer to what a breakdown adds up to (§3
+   №3, lib/portfolio.ts), and it is asked here so the stored number and the
+   steps under it cannot disagree — a seed that typed 50 beside three steps
+   reading 60 would be the drift §9.8 records, planted on purpose. An
+   activity with no breakdown carries its own figure: 100 where it is done,
+   nought where it has not started.
+
+   THE TWO REAL DATES AND THE SIGN-OFF ARE WRITTEN TOGETHER, honestly: a
+   row marked done and waiting has a real start and no real end (the schema
+   refuses the other, `portfolio_activity_signed`), and an accepted row
+   carries the day it was accepted — three days after its date on one of
+   them, so Analytics has a commitment delivered late to draw. A dependency
+   names a code, resolved after every row is in, so the order of the file
+   is not a rule the file has to keep. */
+async function seedPortfolio(c, p) {
+  if (!p) return;
+  const { progressFromSubs } = await import("../lib/portfolio.ts");
+  const proj = (await c.query(
+    `INSERT INTO portfolio_projects
+       (name, brief, sponsors, consultants, stakeholders, pain_drivers, gain_drivers, in_scope, out_scope,
+        deliverables, success_criteria, resources, risks, budget, agreed_start, agreed_end,
+        checkpoint_cadence, checkpoint_day, created_by)
+     VALUES ($1,$2,$3::jsonb,$4::jsonb,$5::jsonb,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,'demo')
+     RETURNING id`,
+    [p.name, p.brief, JSON.stringify(p.sponsors), JSON.stringify(p.consultants), JSON.stringify(p.stakeholders),
+     p.painDrivers, p.gainDrivers, p.inScope, p.outScope, p.deliverables, p.successCriteria, p.resources,
+     p.risks, p.budget, p.agreedStart, p.agreedEnd, p.cadence, p.cadenceDay])).rows[0].id;
+  for (const [key, role] of p.members) {
+    await c.query("INSERT INTO portfolio_members (project_id, person_key, role, added_by) VALUES ($1,$2,$3,'demo')",
+      [proj, key, role]);
+  }
+  const ids = {};          /* code → activity id, for the dependencies */
+  const waits = [];        /* [code, code it waits for] */
+  const activity = async (a, phaseId, wpId, pos) => {
+    const subs = (a.subs || []).map(([name, weight, status]) => ({ name, weight, status }));
+    const pct = subs.length ? progressFromSubs(subs)
+      : a.status === "completed" || a.status === "done" ? 100 : 0;
+    const id = (await c.query(
+      `INSERT INTO portfolio_activities
+         (phase_id, work_package_id, name, description, deliverables, pos,
+          planned_start, planned_end, actual_start, actual_end,
+          assignee_key, status, progress, is_milestone, is_billable, signed_off_by, signed_off_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING id`,
+      [phaseId, wpId, a.name, a.about || "", a.produces || "", pos,
+       a.start, a.end, a.realStart, a.realEnd,
+       a.who || null, a.status, pct, a.milestone === true, a.billable === true,
+       a.signed ? a.signed[0] : "", a.signed ? a.signed[1] + "T09:00:00Z" : null])).rows[0].id;
+    ids[a.code] = id;
+    if (a.dep) waits.push([a.code, a.dep]);
+    for (let i = 0; i < subs.length; i++) {
+      await c.query("INSERT INTO portfolio_sub_activities (activity_id, name, pos, weight, status) VALUES ($1,$2,$3,$4,$5)",
+        [id, subs[i].name, i, subs[i].weight, subs[i].status]);
+    }
+    for (const key of a.with || []) {
+      await c.query("INSERT INTO portfolio_collaborators (activity_id, person_key) VALUES ($1,$2)", [id, key]);
+    }
+  };
+  for (let i = 0; i < p.phases.length; i++) {
+    const ph = p.phases[i];
+    const phaseId = (await c.query(
+      "INSERT INTO portfolio_phases (project_id, name, pos, weight) VALUES ($1,$2,$3,$4) RETURNING id",
+      [proj, ph.name, i, ph.weight == null ? null : ph.weight])).rows[0].id;
+    for (let j = 0; j < (ph.activities || []).length; j++) await activity(ph.activities[j], phaseId, null, j);
+    for (let j = 0; j < (ph.packages || []).length; j++) {
+      const wp = ph.packages[j];
+      const wpId = (await c.query(
+        "INSERT INTO portfolio_work_packages (phase_id, name, pos, weight) VALUES ($1,$2,$3,$4) RETURNING id",
+        [phaseId, wp.name, j, wp.weight == null ? null : wp.weight])).rows[0].id;
+      for (let k = 0; k < wp.activities.length; k++) await activity(wp.activities[k], null, wpId, k);
+    }
+  }
+  for (const [code, dep] of waits) {
+    if (!ids[dep]) throw new Error("portfolio: activity " + code + " waits for " + dep + ", which is not on the plan");
+    await c.query("UPDATE portfolio_activities SET depends_on = $2 WHERE id = $1", [ids[code], ids[dep]]);
+  }
+  return proj;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

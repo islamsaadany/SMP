@@ -80659,14 +80659,27 @@ var SYNC = (function () {
      `o.body` is HTML its caller built from escaped parts; the title and the
      two words are escaped here. */
   var ASK = null;
-  function askClose(){
+  /* §751 THE DEVICE'S OWN WORD ON MOTION, read where an exit is scripted:
+     CSS holds the box still under reduced motion, and the script must then
+     not hold a finished box on screen for an animation that is not running. */
+  function lessMotion(){
+    try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; }
+  }
+  /* `now` removes the box at once — askFirst opening the next one, and the
+     reduced-motion case; otherwise it goes back into the control over 140ms
+     (_shared.css .askbox.closing), taking no press while it goes. */
+  function askClose(now){
     if (!ASK) return;
     var a = ASK; ASK = null;
-    if (a.box.parentNode) a.box.parentNode.removeChild(a.box);
     document.removeEventListener("mousedown", a.away, true);
     document.removeEventListener("keydown", a.key, true);
     window.removeEventListener("scroll", a.move, true);
     window.removeEventListener("resize", a.move);
+    var box = a.box;
+    if (!box.parentNode) return;
+    if (now || lessMotion()) { box.parentNode.removeChild(box); return; }
+    box.classList.add("closing");
+    setTimeout(function(){ if (box.parentNode) box.parentNode.removeChild(box); }, 150);
   }
   function askPlace(){
     if (!ASK) return;
@@ -80681,10 +80694,13 @@ var SYNC = (function () {
     box.classList.toggle("above", !below);
     box.style.left = (left + window.pageXOffset / z) + "px";
     box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset / z) + "px";
-    box.querySelector(".askarrow").style.left = Math.max(10, Math.min(bw - 24, mid - left - 7)) + "px";
+    var ax = Math.max(10, Math.min(bw - 24, mid - left - 7));
+    box.querySelector(".askarrow").style.left = ax + "px";
+    /* §751 the box grows from its arrow's tip, so it comes out of the control. */
+    box.style.transformOrigin = (ax + 7) + "px " + (below ? "0" : "100%");
   }
   function askFirst(anchor, o){
-    askClose();
+    askClose(true);
     var box = document.createElement("div");
     box.className = "askbox";
     box.setAttribute("role", "alertdialog");
@@ -80705,7 +80721,8 @@ var SYNC = (function () {
     document.addEventListener("keydown", a.key, true);
     window.addEventListener("scroll", a.move, true);
     window.addEventListener("resize", a.move);
-    box.querySelector(".askno").addEventListener("click", askClose);
+    /* Wrapped: bound bare, the click event would arrive as askClose's `now`. */
+    box.querySelector(".askno").addEventListener("click", function(){ askClose(); });
     box.querySelector(".askyes").addEventListener("click", function(){ askClose(); o.go(); });
     askPlace();
     /* The safe answer under the cursor: Enter keeps. */
@@ -80778,6 +80795,12 @@ var SYNC = (function () {
      for (§75). */
   function applyUndoLater(k){
     var a = APPLY_AREAS[k], stamp = a.undoStamp();
+    /* §751 one ring on Applied's dot, on the press that applied it (the paint
+       that draws the row is synchronous and done by the next frame). */
+    requestAnimationFrame(function(){
+      var d = document.querySelector('[data-applyrow="' + k + '"] .applydone');
+      if (d) d.classList.add("pulse");
+    });
     setTimeout(function(){
       if (a.undoStamp() !== stamp) return;
       a.undoEnd();
@@ -88787,9 +88810,29 @@ var SYNC = (function () {
      inside its own click has not unmounted the button the click is still in —
      it hides it — so this is safe where removing the node would not be. */
   function closeDlMenu(el){
-    var d = el.closest("details.dlmenu");
-    if (d) d.open = false;
+    dlMenuClose(el.closest("details.dlmenu"));
   }
+  /* §751 A DROPDOWN GOES BACK INTO ITS BUTTON (arrange.css .menu.closing):
+     the <details> is held open for the 140ms exit and shut after, since a
+     closed one hides its content the same instant. Every way a dropdown
+     shuts comes through here — its own button, an entry pressed, a click
+     outside the bands panel. Under reduced motion it shuts at once. */
+  function dlMenuClose(d){
+    if (!d || !d.open) return;
+    var m = d.querySelector(":scope > .menu");
+    if (!m || lessMotion() || m.classList.contains("closing")) { d.open = false; return; }
+    m.classList.add("closing");
+    setTimeout(function(){ m.classList.remove("closing"); d.open = false; }, 140);
+  }
+  /* The summary's own press on an OPEN dropdown is taken over so the exit
+     can run; a press on a closed one is left to the <details>. Capture, and
+     on the document once, for the same reason as the bands rule below. */
+  document.addEventListener("click", function(e){
+    var s = e.target.closest && e.target.closest("details.dlmenu[open] > summary");
+    if (!s) return;
+    e.preventDefault();
+    dlMenuClose(s.parentNode);
+  }, true);
 
   /* THE BANDS PANEL SHUTS ON A CLICK OUTSIDE (§163, Islam: "close on clicking
      outside it or clicking on the button again"). The second half is what a
@@ -88809,7 +88852,7 @@ var SYNC = (function () {
      binding would stack (§24, §47.2). */
   document.addEventListener("pointerdown", function(e){
     document.querySelectorAll("details.bandsmenu[open]").forEach(function(d){
-      if (!d.contains(e.target)) d.open = false;
+      if (!d.contains(e.target)) dlMenuClose(d);
     });
   }, true);
 

@@ -193,7 +193,7 @@ export function BuilderFrame({
       <div className="sticky top-0 z-20 -mx-4 mb-3.5 flex flex-wrap items-center justify-between gap-2.5 bg-[var(--ground)] px-4 py-1.5 sm:-mx-6 sm:px-6">
         <span className="flex flex-wrap items-center gap-x-3.5 gap-y-1">
           {/* the way back to the list of all processes without having to save and exit */}
-          <Link href={`${home}/processes`} className="inline-flex items-center gap-1 text-[13px] font-bold text-[var(--ink-2)] hover:text-[var(--ink)]">
+          <Link href={`${home}/processes`} className="inline-flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-white px-3 py-1.5 text-[13px] font-bold text-[var(--ink)] hover:bg-[var(--surface-2)]">
             <span aria-hidden="true" className="rtl:rotate-180">←</span> {m.library}
           </Link>
           <span className="text-[12.5px] text-[var(--ink-3)]">{m.saved}</span>

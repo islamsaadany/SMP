@@ -1,0 +1,509 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>Setup table mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+  /* Layout: the platform's Setup page, cut down to one table — title line with the
+     page's controls on the right, the table, a status line under it. Tokens are the
+     platform's own (_shared.css), light and dark. */
+  :root {
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+    --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
+    --line:#E2E8F0; --line-soft:#F1F5F9;
+    --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
+    --panel:#0F172A; --panel-ink:#FFFFFF; --panel-quiet:#94A3B8;
+    --gold:#4F46E5; --gold-deep:#4338CA; --over-bg:#EEF2FF; --over-line:#C7D2FE; --on-accent:#FFFFFF;
+    --good-bg:#ECFDF5; --good-tx:#047857; --none:#636E7E;
+    --zebra:#F6F8FB; --shadow:0 12px 30px rgba(15,23,42,.16);
+    --kbd-bg:#FFFFFF; --kbd-line:#CBD5E1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
+      --line:#2B3852; --line-soft:#212C42;
+      --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
+      --panel:#060B16; --panel-ink:#E8EDF5; --panel-quiet:#8B97A9;
+      --gold:#818CF8; --gold-deep:#A5B4FC; --over-bg:#1E1B3A; --over-line:#3F3A72; --on-accent:#0B1120;
+      --good-bg:#0A2E22; --good-tx:#6EE7B7; --none:#8B97A9;
+      --zebra:#182339; --shadow:0 12px 30px rgba(0,0,0,.5);
+      --kbd-bg:#1C2740; --kbd-line:#3A4760;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
+    --line:#2B3852; --line-soft:#212C42;
+    --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
+    --panel:#060B16; --panel-ink:#E8EDF5; --panel-quiet:#8B97A9;
+    --gold:#818CF8; --gold-deep:#A5B4FC; --over-bg:#1E1B3A; --over-line:#3F3A72; --on-accent:#0B1120;
+    --good-bg:#0A2E22; --good-tx:#6EE7B7; --none:#8B97A9;
+    --zebra:#182339; --shadow:0 12px 30px rgba(0,0,0,.5);
+    --kbd-bg:#1C2740; --kbd-line:#3A4760;
+    color-scheme: dark;
+  }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px;
+         padding-block:28px 40px;
+         padding-left:max(16px, env(safe-area-inset-left, 0px));
+         padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  .page { max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+
+  /* ── Header line: title left, the page's controls right ─────────────────── */
+  .eyebrow { font:700 10px/1 var(--sans); letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); }
+  .head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .head h1 { margin:6px 0 0; font-size:20px; font-weight:700; letter-spacing:-.01em; text-wrap:balance; }
+  .acts { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .search { font:400 13px/1 var(--sans); color:var(--ink); background:var(--surface); border:1px solid var(--line);
+            border-radius:8px; padding:8px 10px; width:200px; min-width:0; }
+  .search:focus { outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold); }
+  .editbtn { font:700 11px/1 var(--sans); letter-spacing:.09em; text-transform:uppercase; color:var(--gold-deep);
+             background:var(--surface); border:1px solid var(--gold); border-radius:999px; padding:9px 14px; cursor:pointer; }
+  .editbtn:hover { background:var(--over-bg); }
+  .hmenu { position:relative; display:inline-flex; }
+  .hmenu-btn { font:600 12.5px/1 var(--sans); color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
+               border-radius:8px; padding:7px 10px; cursor:pointer; display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
+  .hmenu-btn:hover { border-color:var(--gold); color:var(--ink); }
+  .hmenu-btn:focus-visible, .seg button:focus-visible, .editbtn:focus-visible, .kebab:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .hmenu.open .hmenu-btn { border-color:var(--gold); background:var(--over-bg); color:var(--ink); }
+  .hmenu-btn .count { font:600 11px/1 var(--mono); color:var(--ink-3); background:var(--surface-2); border-radius:5px; padding:3px 5px; }
+  .hmenu.open .hmenu-btn .count { background:var(--surface); }
+  .hcar { font-size:10px; color:var(--ink-3); }
+  .hmenu-btn svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.6; }
+  .hmenu-panel { position:absolute; right:0; top:calc(100% + 5px); z-index:50; width:268px; background:var(--surface);
+                 border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow); padding:6px; text-align:left;
+                 animation:menuin .18s cubic-bezier(0,0,.2,1); transform-origin:top right; }
+  @keyframes menuin { from { opacity:0; transform:scale(.95); } to { opacity:1; transform:none; } }
+  .hmenu-h { display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:5px 8px 7px;
+             font:700 10px/1 var(--sans); letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); }
+  .linkbu { background:none; border:0; padding:0; font:600 11px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase;
+            color:var(--gold-deep); cursor:pointer; }
+  .linkbu:hover { text-decoration:underline; }
+  .colrow { display:flex; align-items:center; gap:9px; padding:6px 9px; border-radius:6px; cursor:pointer; font-size:13px; color:var(--ink-2); }
+  .colrow:hover { background:var(--surface-2); color:var(--ink); }
+  .colrow input { width:15px; height:15px; accent-color:var(--gold-deep); flex:none; margin:0; }
+  .colrow .lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .colrow .px { font:400 11px/1 var(--mono); color:var(--ink-3); }
+  .colrow.locked { cursor:default; color:var(--ink-3); }
+  .colrow.locked:hover { background:none; }
+  .hmenu-note { padding:8px 9px 5px; font-size:11.5px; line-height:1.45; color:var(--ink-3); border-top:1px solid var(--line-soft); margin-top:4px;
+                display:flex; flex-direction:column; gap:2px; }
+
+  /* Density: three choices, one of them lit */
+  .seg { display:inline-flex; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:2px; }
+  .seg button { font:600 12px/1 var(--sans); color:var(--ink-3); background:transparent; border:0; border-radius:6px;
+                padding:6px 10px; cursor:pointer; }
+  .seg button:hover { color:var(--ink); }
+  .seg button.on { background:var(--surface); color:var(--gold-deep); box-shadow:0 1px 2px rgba(15,23,42,.12); }
+  .resetbtn { position:relative; }
+  .resetbtn svg { width:13px; height:13px; }
+  .resetbtn[disabled] { color:var(--ink-3); cursor:default; opacity:.7; }
+  .resetbtn[disabled]:hover { border-color:var(--line); }
+  .resetbtn .dot { width:6px; height:6px; border-radius:50%; background:var(--gold); display:none; }
+  .resetbtn:not([disabled]) .dot { display:inline-block; }
+
+  /* ── The table ─────────────────────────────────────────────────────────── */
+  .cfg { background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow-x:auto; overflow-y:hidden;
+         position:relative; min-width:0; }
+  table { border-collapse:separate; border-spacing:0; table-layout:fixed; font-size:13px; }
+  thead th { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--panel-ink); font-weight:700;
+             background:var(--panel); white-space:nowrap; text-align:left; padding:0; position:relative;
+             border-right:1px solid rgba(255,255,255,.08); height:30px; vertical-align:middle; user-select:none; }
+  thead th:last-child { border-right:0; }
+  thead th.cc { text-align:center; }
+  thead th .hin { display:flex; align-items:center; gap:6px; padding:0 10px; height:30px; min-width:0; }
+  thead th.cc .hin { justify-content:center; }
+  thead th .ht { overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  thead th .arrow { font-size:9px; color:var(--panel-quiet); flex:none; }
+  thead th.sorted .arrow { color:var(--panel-ink); }
+  thead th.movable { cursor:grab; }
+  thead th.movable:hover .hin { background:rgba(255,255,255,.06); }
+  thead th.movable:focus-visible { outline:none; }
+  thead th.movable:focus-visible .hin { box-shadow:inset 0 0 0 2px var(--gold); }
+  thead th .grip { position:absolute; top:0; right:-4px; width:9px; height:100%; cursor:col-resize; z-index:3; touch-action:none; }
+  thead th .grip::after { content:""; position:absolute; top:7px; bottom:7px; left:3px; width:2px; border-radius:2px; background:transparent; }
+  thead th .grip:hover::after, thead th .grip.on::after { background:var(--gold); }
+  tbody td { padding:var(--py, 9px) 10px; border-bottom:1px solid var(--line-soft); color:var(--ink-2); vertical-align:middle;
+             overflow:hidden; white-space:nowrap; }
+  tbody tr:nth-child(even) td { background:var(--zebra); }
+  tbody tr:last-child td { border-bottom:0; }
+  td .ci { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  td.cc { text-align:center; }
+  td.cc .ci { display:flex; justify-content:center; align-items:center; gap:6px; }
+  td.idx, th.idx .hin { font-family:var(--mono); color:var(--ink-3); text-align:center; justify-content:center; }
+  td b { color:var(--ink); font-weight:700; }
+  .why { display:block; font:400 11px/1.3 var(--mono); color:var(--ink-3); margin-top:3px; }
+  table[data-density="compact"] .why { display:none; }
+  .mono { font-family:var(--mono); font-size:12px; }
+  .val { color:var(--ink); }
+  .soft { color:var(--ink-3); }
+  .pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .pill.good { background:var(--good-bg); color:var(--good-tx); }
+  .pill.kind { background:var(--surface-2); color:var(--ink-2); }
+  .kebab { width:24px; height:24px; border:1px solid transparent; border-radius:6px; background:none; color:var(--ink-2); cursor:pointer;
+           display:inline-flex; align-items:center; justify-content:center; }
+  .kebab:hover { border-color:var(--line); background:var(--surface-2); }
+  .kebab svg { width:14px; height:14px; fill:currentColor; }
+  table[data-density="comfortable"] { --py:14px; }
+  table[data-density="normal"] { --py:9px; }
+  table[data-density="compact"] { --py:4px; font-size:12.5px; }
+  tr[hidden] { display:none; }
+
+  /* Column being dragged: the original dims, a ghost follows the pointer, a line marks the drop */
+  .cfg.dragging { cursor:grabbing; user-select:none; }
+  .cfg.dragging thead th.movable { cursor:grabbing; }
+  col.lift ~ col {} /* no-op, keeps intent visible */
+  .lifted { opacity:.35; }
+  .ghost { position:absolute; top:0; z-index:40; pointer-events:none; background:var(--surface); box-shadow:var(--shadow);
+           border-radius:6px; overflow:hidden; opacity:.96; }
+  .ghost table { width:100%; }
+  .dropline { position:absolute; top:0; width:2px; z-index:41; background:var(--gold); pointer-events:none; display:none; border-radius:2px; }
+  .dropline::before { content:""; position:absolute; top:-1px; left:-3px; width:8px; height:8px; border-radius:50%; background:var(--gold); }
+  .pxtip { position:absolute; z-index:42; top:34px; transform:translateX(-50%); font:600 11px/1 var(--mono); color:var(--on-accent);
+           background:var(--gold); padding:4px 7px; border-radius:5px; pointer-events:none; display:none; white-space:nowrap; }
+
+  .addrow { margin-top:12px; }
+  /* ── Status line under the table ───────────────────────────────────────── */
+  .foot { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--ink-3); padding:0 2px; }
+  .foot b { color:var(--ink); font-weight:700; }
+  .hints { display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; }
+  kbd { font:600 10.5px/1 var(--mono); color:var(--ink-2); background:var(--kbd-bg); border:1px solid var(--kbd-line); border-bottom-width:2px;
+        border-radius:4px; padding:2px 5px; }
+  @media (prefers-reduced-motion:reduce) { .hmenu-panel { animation:none; } }
+  @media (max-width:640px) { .search { width:100%; } .head { align-items:stretch; } .foot .hints { display:none; } }
+</style>
+
+<div class="page">
+  <div class="head">
+    <div>
+      <div class="eyebrow">Setup · The organisation · Mockup</div>
+      <h1>Business units</h1>
+    </div>
+    <div class="acts">
+      <input id="q" class="search" type="search" placeholder="Search the units…" aria-label="Search the units">
+      <span class="hmenu" id="colmenu">
+        <button class="hmenu-btn" id="colbtn" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2"/><path d="M8 3.5v13M12.5 3.5v13"/></svg>
+          Columns <span class="count" id="colcount">10/10</span> <span class="hcar">&#9662;</span>
+        </button>
+        <div class="hmenu-panel" id="colpanel" hidden></div>
+      </span>
+      <span class="seg" id="density" role="group" aria-label="Row height">
+        <button data-d="comfortable">Comfortable</button>
+        <button data-d="normal">Normal</button>
+        <button data-d="compact">Compact</button>
+      </span>
+      <button class="hmenu-btn resetbtn" id="reset" title="Back to the table as it ships">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 9a6 6 0 1 1 1.8 4.3"/><path d="M4 5v4h4"/></svg>
+        Reset <span class="dot"></span>
+      </button>
+      <button class="editbtn" type="button">Arrange</button>
+    </div>
+  </div>
+
+  <div class="cfg" id="wrap">
+    <table id="tbl" data-density="normal">
+      <colgroup id="cols"></colgroup>
+      <thead><tr id="hrow"></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+    <div class="dropline" id="dropline"></div>
+    <div class="pxtip" id="pxtip"></div>
+  </div>
+
+  <div class="foot">
+    <div id="status"></div>
+    <div class="hints" id="hints">
+      <span>Focus a heading:</span>
+      <span><kbd>←</kbd> <kbd>→</kbd> between columns</span>
+      <span><kbd>Alt</kbd>+<kbd>←</kbd><kbd>→</kbd> move it</span>
+      <span><kbd>Shift</kbd>+<kbd>←</kbd><kbd>→</kbd> width</span>
+      <span><kbd>H</kbd> hide</span>
+      <span><kbd>Enter</kbd> fit to content</span>
+    </div>
+  </div>
+  <div class="addrow"><button class="editbtn" type="button">+ Add a business unit</button></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = "smp.mock.units.table";
+
+  /* The worked example's ten units. Weights are invented so a sort has something to sort. */
+  var UNITS = [
+    ["Mobile","mobile","Mobile","MB",4,4,22,"Distribution","Ashraf Laithy","Mennah Farouk"],
+    ["Retail Stores","retailstores","Retail Stores","RS",4,4,14,"B2C","Hossam Farid","Dalia Sabry"],
+    ["B2B Ecomm","b2becomm","B2B Ecomm","BE",3,4,8,"","Nour Selim","Kareem Hafez"],
+    ["Consumer Electronics","consumerelectronics","Consumer Electronics","CE",2,4,12,"Distribution","Tarek Nassar","Heba Salem"],
+    ["Online Shop","onlineshop","Online Shop","OS",2,4,10,"B2C","Sherif Adel","Nadia Fouad"],
+    ["Corporate","corporate","Corporate","CO",2,4,6,"","Amr Bakr","Laila Zaki"],
+    ["Care","care","Care","CA",2,4,8,"B2C","Mostafa Deif","Rania Fahmy"],
+    ["IT Dist.","it","IT Dist.","IT",2,4,6,"Distribution","Yasser Kamal","Dina Shawky"],
+    ["Logistics","logistics","Logistics","LG",2,4,8,"","Hazem Roushdy","Mai Sobhy"],
+    ["Nigeria","nigeria","Nigeria","NG",2,4,6,"","Chidi Okafor","Amaka Eze"]
+  ];
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  /* fixed: pinned to its end, never moved, hidden or resized (the row number, the menu).
+     lock: always shown, but it can be moved and sized. */
+  var COLS = [
+    { k:"idx",   label:"#",                 w:38,  fixed:true, cls:"idx",
+      cell:function(u,i){ return String(i+1); }, text:function(u,i){ return i+1; } },
+    { k:"unit",  label:"Unit",              w:180, lock:true,
+      cell:function(u){ return '<b>'+esc(u[0])+'</b><span class="why">key '+esc(u[1])+'</span>'; }, text:function(u){ return u[0]; } },
+    { k:"nav",   label:"Shown in the nav",  w:150,
+      cell:function(u){ return '<span class="soft">'+esc(u[2])+'</span>'; }, text:function(u){ return u[2]; } },
+    { k:"code",  label:"Code",              w:80,  cls:"cc",
+      cell:function(u){ return '<span class="mono">'+esc(u[3])+'</span>'; }, text:function(u){ return u[3]; } },
+    { k:"plans", label:"Plans in",          w:124, cls:"cc",
+      cell:function(u){ return '<span class="pill kind">Pillars</span><span class="mono">'+u[4]+'</span>'; }, text:function(u){ return u[4]; } },
+    { k:"kobj",  label:"Key Objectives",    w:140, cls:"cc",
+      cell:function(u){ return '<span class="mono">'+u[5]+'</span>'; }, text:function(u){ return u[5]; } },
+    { k:"weight",label:"Weight",            w:84,  cls:"cc",
+      cell:function(u){ return '<span class="mono">'+u[6]+'%</span>'; }, text:function(u){ return u[6]; } },
+    { k:"division",label:"Division",        w:130,
+      cell:function(u){ return u[7] ? '<span class="val">'+esc(u[7])+'</span>' : '<span class="soft">its own company</span>'; }, text:function(u){ return u[7] || "its own company"; } },
+    { k:"head",  label:"BU head",           w:140, cls:"cc",
+      cell:function(u){ return esc(u[8]); }, text:function(u){ return u[8]; } },
+    { k:"custodian",label:"Strategy custodian", w:170, cls:"cc",
+      cell:function(u){ return esc(u[9]); }, text:function(u){ return u[9]; } },
+    { k:"status",label:"Status",            w:84,  cls:"cc", lock:true,
+      cell:function(){ return '<span class="pill good">Active</span>'; }, text:function(){ return "Active"; } },
+    { k:"menu",  label:"",                  w:44,  fixed:true, cls:"cc",
+      cell:function(){ return '<button class="kebab" type="button" aria-label="Row menu"><svg viewBox="0 0 20 20"><circle cx="10" cy="4.5" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="10" cy="15.5" r="1.6"/></svg></button>'; }, text:function(){ return ""; } }
+  ];
+  var BY = {}; COLS.forEach(function(c){ BY[c.k] = c; });
+  var COUNTED = COLS.filter(function(c){ return !c.fixed; }).length;   /* 10: the columns a person can act on */
+
+  function defaults(){
+    var w = {}; COLS.forEach(function(c){ w[c.k] = c.w; });
+    return { order: COLS.map(function(c){ return c.k; }), hidden:{}, widths:w, density:"normal" };
+  }
+  var S = load();
+  var SORT = null, Q = "";
+
+  /* Remembered in THIS browser only — a saved shape is merged over the defaults so a
+     column added later still appears, and anything unreadable falls back to the shipped table. */
+  function load(){
+    var d = defaults(), saved = null;
+    try { saved = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { saved = null; }
+    if (!saved || typeof saved !== "object") return d;
+    if (Array.isArray(saved.order)) {
+      var seen = {}, order = saved.order.filter(function(k){ if (!BY[k] || seen[k]) return false; seen[k] = true; return true; });
+      d.order.forEach(function(k){ if (!seen[k]) order.splice(d.order.indexOf(k), 0, k); });
+      /* the two fixed ends stay at the ends whatever was saved */
+      order = order.filter(function(k){ return !BY[k].fixed; }); order.unshift("idx"); order.push("menu");
+      d.order = order;
+    }
+    if (saved.hidden) Object.keys(saved.hidden).forEach(function(k){ if (BY[k] && !BY[k].fixed && !BY[k].lock && saved.hidden[k]) d.hidden[k] = true; });
+    if (saved.widths) Object.keys(saved.widths).forEach(function(k){ var v = +saved.widths[k]; if (BY[k] && !BY[k].fixed && v >= 56 && v <= 900) d.widths[k] = Math.round(v); });
+    if (/^(comfortable|normal|compact)$/.test(saved.density)) d.density = saved.density;
+    return d;
+  }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function isDefault(){ return JSON.stringify(S) === JSON.stringify(defaults()); }
+
+  var wrap = document.getElementById("wrap"), tbl = document.getElementById("tbl");
+  var cols = document.getElementById("cols"), hrow = document.getElementById("hrow"), body = document.getElementById("body");
+  var MENU = false;
+
+  function visible(){ return S.order.filter(function(k){ return !S.hidden[k]; }); }
+  function sumW(){ return visible().reduce(function(a, k){ return a + S.widths[k]; }, 0); }
+
+  function render(focusKey){
+    var vis = visible();
+    tbl.dataset.density = S.density;
+    cols.innerHTML = vis.map(function(k){ return '<col data-k="'+k+'" style="width:'+S.widths[k]+'px">'; }).join("");
+    hrow.innerHTML = vis.map(function(k){
+      var c = BY[k], cls = (c.cls || "") + (c.fixed ? "" : " movable") + (SORT && SORT.k === k ? " sorted" : "");
+      /* the arrow is drawn on the sorted column only, so an unsorted heading keeps its whole width */
+      var arrow = (SORT && SORT.k === k) ? '<span class="arrow" aria-hidden="true">' + (SORT.dir > 0 ? "&#9650;" : "&#9660;") + '</span>' : "";
+      return '<th class="'+cls.trim()+'" data-k="'+k+'"'+(c.fixed ? '' : ' tabindex="0" aria-sort="'+(SORT && SORT.k === k ? (SORT.dir > 0 ? "ascending" : "descending") : "none")+'"')+
+        (c.lock ? ' title="'+esc(c.label)+' is always shown"' : '')+'>' +
+        '<div class="hin"><span class="ht">'+esc(c.label)+'</span>'+arrow+'</div>' +
+        (c.fixed ? '' : '<div class="grip" data-grip="'+k+'" title="Drag to change the width · double-click to fit"></div>') + '</th>';
+    }).join("");
+
+    var rows = UNITS.map(function(u, i){ return { u:u, i:i }; });
+    if (SORT) {
+      var c = BY[SORT.k];
+      rows.sort(function(a, b){
+        var x = c.text(a.u, a.i), y = c.text(b.u, b.i);
+        var r = (typeof x === "number" && typeof y === "number") ? x - y : String(x).localeCompare(String(y));
+        return r * SORT.dir;
+      });
+    }
+    var q = Q.trim().toLowerCase();
+    body.innerHTML = rows.map(function(r, n){
+      var hay = COLS.map(function(c){ return String(c.text(r.u, r.i)); }).join(" ").toLowerCase();
+      return '<tr'+(q && hay.indexOf(q) === -1 ? ' hidden' : '')+'>' + vis.map(function(k){
+        var c = BY[k];
+        return '<td class="'+(c.cls || "")+'" data-k="'+k+'"><div class="ci">'+c.cell(r.u, SORT ? n : r.i)+'</div></td>';
+      }).join("") + '</tr>';
+    }).join("");
+    fitWidth();
+    renderMenu();
+    renderStatus();
+    document.querySelectorAll("#density button").forEach(function(b){ b.classList.toggle("on", b.dataset.d === S.density); });
+    document.getElementById("reset").disabled = isDefault();
+    if (focusKey) { var th = hrow.querySelector('th[data-k="'+focusKey+'"]'); if (th) th.focus(); }
+  }
+  /* Narrower than the box: the table takes the whole width and the extra is shared out.
+     Wider: the box scrolls sideways, the way the register already does. */
+  function fitWidth(){ tbl.style.width = Math.max(sumW(), wrap.clientWidth) + "px"; }
+  window.addEventListener("resize", fitWidth);
+
+  function renderStatus(){
+    var vis = visible().filter(function(k){ return !BY[k].fixed; }).length;
+    var dens = { comfortable:"comfortable rows", normal:"normal rows", compact:"compact rows" }[S.density];
+    var shown = body.querySelectorAll("tr:not([hidden])").length;
+    document.getElementById("status").innerHTML = '<b>'+vis+'</b> of '+COUNTED+' columns · '+dens +
+      (Q.trim() ? ' · '+shown+' of '+UNITS.length+' units match' : '') + (isDefault() ? '' : ' · <span class="soft">changed from the default</span>');
+    document.getElementById("colcount").textContent = vis + "/" + COUNTED;
+  }
+
+  /* ── Columns menu ──────────────────────────────────────────────────────── */
+  function renderMenu(){
+    var m = document.getElementById("colmenu"), p = document.getElementById("colpanel"), b = document.getElementById("colbtn");
+    m.classList.toggle("open", MENU); b.setAttribute("aria-expanded", String(MENU)); p.hidden = !MENU;
+    if (!MENU) return;
+    var vis = visible().filter(function(k){ return !BY[k].fixed; }).length;
+    p.innerHTML = '<div class="hmenu-h"><span>Show columns</span><span><button class="linkbu" data-all="1">All</button> &middot; <button class="linkbu" data-none="1">None</button></span></div>' +
+      S.order.filter(function(k){ return !BY[k].fixed; }).map(function(k){
+        var c = BY[k], on = !S.hidden[k];
+        return '<label class="colrow'+(c.lock ? ' locked' : '')+'"><input type="checkbox" data-col="'+k+'"'+(on ? ' checked' : '')+(c.lock ? ' disabled' : '')+'>' +
+          '<span class="lbl">'+esc(c.label)+'</span><span class="px">'+(c.lock ? 'always' : on ? S.widths[k]+' px' : 'hidden')+'</span></label>';
+      }).join("") +
+      '<div class="hmenu-note"><span>'+vis+' of '+COUNTED+' shown · Unit and Status always stay.</span><span>Drag a heading to reorder.</span></div>';
+  }
+  document.getElementById("colbtn").addEventListener("click", function(){ MENU = !MENU; renderMenu(); });
+  document.getElementById("colpanel").addEventListener("change", function(e){
+    var k = e.target.dataset.col; if (!k) return;
+    if (e.target.checked) delete S.hidden[k]; else S.hidden[k] = true;
+    save(); render();
+  });
+  document.getElementById("colpanel").addEventListener("click", function(e){
+    if (e.target.dataset.all) { S.hidden = {}; save(); render(); }
+    if (e.target.dataset.none) { COLS.forEach(function(c){ if (!c.fixed && !c.lock) S.hidden[c.k] = true; }); save(); render(); }
+  });
+  document.addEventListener("pointerdown", function(e){ if (MENU && !e.target.closest("#colmenu")) { MENU = false; renderMenu(); } });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && MENU) { MENU = false; renderMenu(); document.getElementById("colbtn").focus(); } });
+
+  /* ── Density, Reset, search ────────────────────────────────────────────── */
+  document.getElementById("density").addEventListener("click", function(e){
+    var d = e.target.dataset.d; if (!d) return; S.density = d; save(); render();
+  });
+  document.getElementById("reset").addEventListener("click", function(){
+    S = defaults(); try { localStorage.removeItem(KEY); } catch (e) {} render();
+  });
+  document.getElementById("q").addEventListener("input", function(e){ Q = e.target.value; render(); });
+
+  /* ── Width: drag the edge, see the pixels, double-click to fit ─────────── */
+  var tip = document.getElementById("pxtip");
+  function showTip(k, x){ tip.style.display = "block"; tip.textContent = S.widths[k] + " px"; tip.style.left = x + "px"; }
+  function colEl(k){ return cols.querySelector('col[data-k="'+k+'"]'); }
+  hrow.addEventListener("pointerdown", function(e){
+    var g = e.target.closest(".grip"); if (!g) return;
+    e.preventDefault(); e.stopPropagation();
+    var k = g.dataset.grip, x0 = e.clientX, w0 = S.widths[k], th = g.parentNode;
+    g.classList.add("on"); g.setPointerCapture(e.pointerId);
+    var base = wrap.getBoundingClientRect();
+    function at(){ return th.getBoundingClientRect().right - base.left + wrap.scrollLeft; }
+    showTip(k, at());
+    function move(ev){ S.widths[k] = Math.max(56, Math.min(900, Math.round(w0 + ev.clientX - x0))); colEl(k).style.width = S.widths[k] + "px"; fitWidth(); showTip(k, at()); }
+    function up(){ g.classList.remove("on"); tip.style.display = "none"; g.removeEventListener("pointermove", move); g.removeEventListener("pointerup", up); g.removeEventListener("pointercancel", up); save(); render(); }
+    g.addEventListener("pointermove", move); g.addEventListener("pointerup", up); g.addEventListener("pointercancel", up);
+  });
+  hrow.addEventListener("dblclick", function(e){ var g = e.target.closest(".grip"); if (g) fit(g.dataset.grip); });
+  /* Fit = the widest thing in the column, plus the cell's padding. `scrollWidth` reads the
+     full content even where the ellipsis has cut it. */
+  function fit(k){
+    var w = 0, i = visible().indexOf(k);
+    body.querySelectorAll("tr:not([hidden])").forEach(function(tr){ var ci = tr.cells[i] && tr.cells[i].firstElementChild; if (ci) w = Math.max(w, ci.scrollWidth); });
+    var th = hrow.querySelector('th[data-k="'+k+'"] .ht'); if (th) w = Math.max(w, th.scrollWidth + 24);
+    S.widths[k] = Math.max(56, Math.min(900, w + 22)); save(); render(k);
+  }
+
+  /* ── Order: drag a heading; the column lifts and a line shows where it lands ── */
+  var drop = document.getElementById("dropline");
+  hrow.addEventListener("pointerdown", function(e){
+    var th = e.target.closest("th.movable"); if (!th || e.target.closest(".grip") || e.button !== 0) return;
+    var k = th.dataset.k, x0 = e.clientX, y0 = e.clientY, started = false, ghost = null, target = -1, grabX = 0;
+    var base, slots;
+    th.setPointerCapture(e.pointerId);
+    function start(){
+      started = true; wrap.classList.add("dragging");
+      base = wrap.getBoundingClientRect();
+      var r = th.getBoundingClientRect(); grabX = x0 - r.left;
+      /* the ghost is the column itself: its heading and its cells, at its own width */
+      var i = visible().indexOf(k);
+      ghost = document.createElement("div"); ghost.className = "ghost"; ghost.style.width = r.width + "px";
+      var g = '<table data-density="'+S.density+'" style="width:'+r.width+'px"><colgroup><col style="width:'+r.width+'px"></colgroup><thead><tr>'+th.outerHTML.replace(/ tabindex="0"/, "")+'</tr></thead><tbody>';
+      /* each ghost row is as tall as the real one, so the lifted column stays in step with the table */
+      body.querySelectorAll("tr:not([hidden])").forEach(function(tr){ g += '<tr style="height:'+tr.offsetHeight+'px">'+tr.cells[i].outerHTML+'</tr>'; });
+      ghost.innerHTML = g + '</tbody></table>'; wrap.appendChild(ghost);
+      ghost.style.height = tbl.offsetHeight + "px"; drop.style.height = tbl.offsetHeight + "px";
+      tbl.querySelectorAll('[data-k="'+k+'"]').forEach(function(el){ el.classList.add("lifted"); });
+      /* the boundaries a column may land on: between any two movable columns, never outside the two fixed ends */
+      slots = [];
+      var ths = [].slice.call(hrow.children);
+      ths.forEach(function(h, n){
+        if (n === 0) return;                                   /* before # */
+        if (BY[h.dataset.k].fixed && n === ths.length - 1) {}  /* before the menu is allowed */
+        slots.push({ idx:n, x: h.getBoundingClientRect().left - base.left + wrap.scrollLeft });
+      });
+    }
+    function move(ev){
+      if (!started) { if (Math.abs(ev.clientX - x0) < 5 && Math.abs(ev.clientY - y0) < 5) return; start(); }
+      ghost.style.left = (ev.clientX - base.left + wrap.scrollLeft - grabX) + "px";
+      var px = ev.clientX - base.left + wrap.scrollLeft, best = slots[0];
+      slots.forEach(function(s){ if (Math.abs(s.x - px) < Math.abs(best.x - px)) best = s; });
+      target = best.idx; drop.style.left = (best.x - 1) + "px"; drop.style.display = "block";
+    }
+    function up(){
+      th.removeEventListener("pointermove", move); th.removeEventListener("pointerup", up); th.removeEventListener("pointercancel", up);
+      if (!started) { sortBy(k); return; }
+      wrap.classList.remove("dragging"); drop.style.display = "none"; if (ghost) ghost.remove();
+      var vis = visible(), from = vis.indexOf(k);
+      if (target >= 0 && target !== from && target !== from + 1) {
+        var before = vis[target];                 /* the visible column it lands in front of */
+        var o = S.order.slice(); o.splice(o.indexOf(k), 1);
+        o.splice(before ? o.indexOf(before) : o.length, 0, k);
+        S.order = o; save();
+      }
+      render(k);
+    }
+    th.addEventListener("pointermove", move); th.addEventListener("pointerup", up); th.addEventListener("pointercancel", up);
+  });
+  function sortBy(k){
+    if (!SORT || SORT.k !== k) SORT = { k:k, dir:1 }; else if (SORT.dir === 1) SORT = { k:k, dir:-1 }; else SORT = null;
+    render(k);
+  }
+
+  /* ── Keyboard, on a focused heading ────────────────────────────────────── */
+  hrow.addEventListener("keydown", function(e){
+    var th = e.target.closest("th.movable"); if (!th) return;
+    var k = th.dataset.k, vis = visible(), i = vis.indexOf(k), dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (dir && e.altKey) {
+      e.preventDefault();
+      var j = i + dir; if (j < 1 || j > vis.length - 2) return;      /* the two fixed ends are not places */
+      var o = S.order.slice(); o.splice(o.indexOf(k), 1); o.splice(o.indexOf(vis[j]) + (dir > 0 ? 1 : 0), 0, k);
+      S.order = o; save(); render(k);
+    } else if (dir && e.shiftKey) {
+      e.preventDefault(); S.widths[k] = Math.max(56, Math.min(900, S.widths[k] + dir * 8)); save(); render(k);
+      var r = th.getBoundingClientRect(), b = wrap.getBoundingClientRect(); showTip(k, r.right - b.left + wrap.scrollLeft); clearTimeout(tip._t); tip._t = setTimeout(function(){ tip.style.display = "none"; }, 900);
+    } else if (dir) {
+      e.preventDefault(); var n = hrow.querySelectorAll("th.movable"), m = [].indexOf.call(n, th) + dir; if (n[m]) n[m].focus();
+    } else if (e.key === "Enter") { e.preventDefault(); fit(k); }
+    else if (e.key === " ") { e.preventDefault(); sortBy(k); }
+    else if (e.key.toLowerCase() === "h" && !BY[k].lock) {
+      e.preventDefault(); var n2 = hrow.querySelectorAll("th.movable"), m2 = [].indexOf.call(n2, th);
+      S.hidden[k] = true; save(); render((n2[m2 + 1] || n2[m2 - 1] || {}).dataset ? (n2[m2 + 1] || n2[m2 - 1]).dataset.k : null);
+    }
+  });
+
+  render();
+})();
+</script>
+</body></html>

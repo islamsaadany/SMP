@@ -859,6 +859,8 @@ const updateStepSchema = z.object({
   swimlaneRoleId: z.string().min(1).optional().or(z.literal("")),
   detailedAction: z.array(z.string().trim().min(1).max(500)).max(50).optional(),
   exceptionHandling: z.string().trim().max(2000).optional().or(z.literal("")),
+  // Escalation rules and notes — undefined leaves the stored value alone.
+  escalationNote: z.string().trim().max(2000).optional().or(z.literal("")),
   // SOP detail — undefined leaves the stored value alone.
   sopInputs: z.string().trim().max(2000).optional().or(z.literal("")),
   sopOutput: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -921,6 +923,7 @@ export async function updateProcessStep(
       ...(parsed.data.exceptionHandling !== undefined
         ? { exceptionHandling: parsed.data.exceptionHandling || null }
         : {}),
+      ...(parsed.data.escalationNote !== undefined ? { escalationNote: parsed.data.escalationNote || null } : {}),
       ...(parsed.data.sopInputs !== undefined ? { sopInputs: parsed.data.sopInputs || null } : {}),
       ...(parsed.data.sopOutput !== undefined ? { sopOutput: parsed.data.sopOutput || null } : {}),
       ...(parsed.data.sopErrors !== undefined ? { sopErrors: parsed.data.sopErrors || null } : {}),

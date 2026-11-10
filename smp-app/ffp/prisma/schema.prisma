@@ -571,6 +571,9 @@ model ProcessStep {
   /// Which wave this flagged step goes in. Empty means it goes with its process.
   deepDiveDecision   DeepDiveDecision?
 
+  /// When and to whom this step escalates, and any notes on it, in the office's own words (a note box on the Map's step form).
+  escalationNote String?
+
   createdAt DateTime @default(now())
 
   @@index([processId])

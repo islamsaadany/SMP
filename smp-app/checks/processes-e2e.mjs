@@ -667,6 +667,54 @@ const repN = await (await A.get("/" + S + "/processes/reports?ids=" + P1)).text(
 check(/Step narrative/.test(repN) && /Check the customer/.test(repN) && /Approve the credit limit/.test(repN) && /No detail recorded for this step yet/.test(repN) && /Open the file/.test(repN), "with only Scope, Workflow and Step narrative chosen, the narrative lists every step, and says so for one with no detail");
 await q(ffp, `update workspaces set "reportArrangement"=NULL where id=$1`, [S]);
 
+/* ── the Map's step form: the type up front, a title outside the structure, an escalation note, arrows in and out, hand-overs both ways ── */
+const s6 = await q(ffp, 'select id, label from process_steps where "processId"=$1 order by "order"', [P6]);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+check(await A.page.locator("label:has-text('Step type') select").first().isVisible(), "the step's type is on the form itself, not hidden under More");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("DECISION");
+await A.page.waitForFunction(() => /Saved|saved/.test(document.querySelector("[role=status]")?.textContent ?? ""), null, { timeout: 15000 }).catch(() => {});
+await A.page.waitForTimeout(800);
+check((await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type === "DECISION", "changing the type to Decision saves", JSON.stringify(s6[0]));
+await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(1200);
+check((await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type === "TASK", "…and back to Task");
+
+await A.page.click("button:text-is('+ A title that is not in the company structure')");
+await A.page.fill("input[placeholder='For example: Credit committee']", "Credit committee");
+await A.page.click("button:text-is('Add and use it')");
+await A.page.waitForTimeout(2000);
+const tt = await q(ffp, 'select r.id, r.name, (select count(*)::int from process_steps st where st.id=$2 and st."assignedRoleId"=r.id) used from roles r where r."workspaceId"=$1 and r.name=$3', [S, s6[0].id, "Credit committee"]);
+check(tt.length === 1 && tt[0].used === 1, "a title the company structure does not hold is made as a role and given to the step", JSON.stringify(tt));
+await A.page.click("button:text-is('+ A title that is not in the company structure')");
+await A.page.fill("input[placeholder='For example: Credit committee']", " credit  COMMITTEE ");
+await A.page.click("button:text-is('Add and use it')");
+await A.page.waitForTimeout(1500);
+check((await q(ffp, 'select count(*)::int n from roles where "workspaceId"=$1 and lower(name) like $2', [S, "credit%committee"]))[0].n === 1, "the same title written another way is found, not made twice");
+
+await A.page.fill("textarea[placeholder^='Who it goes to when it is stuck']", "After 2 days goes to the Head of Finance; over 50,000 to the CFO.");
+await A.page.locator("textarea[placeholder^='Who it goes to when it is stuck']").blur();
+await A.page.waitForTimeout(1500);
+check((await q(ffp, 'select "escalationNote" e from process_steps where id=$1', [s6[0].id]))[0].e === "After 2 days goes to the Head of Finance; over 50,000 to the CFO.", "the escalation note saves");
+const sopEsc = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P6)).text();
+check(/Escalation:/.test(sopEsc) && /Head of Finance; over 50,000/.test(sopEsc), "…and appears in the SOP");
+
+await A.page.click("summary:has-text('More')");
+await A.page.click("button:text-is('+ Add a step it comes from')");
+await A.page.locator("details[open] select[aria-label='+ Add a step it comes from']").selectOption(s6[1].id);
+await A.page.locator("details[open] button:text-is('Connect')").first().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select count(*)::int n from step_connections where "processId"=$1 and "fromStepId"=$2 and "toStepId"=$3', [P6, s6[1].id, s6[0].id]))[0].n === 1, "an arrow that comes into the step is added from the step's own form");
+await A.page.click("button:text-is('+ Add a step it goes to')");
+await A.page.locator("details[open] select[aria-label='+ Add a step it goes to']").selectOption(s6[2].id);
+await A.page.locator("details[open] button:text-is('Connect')").first().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select count(*)::int n from step_connections where "processId"=$1 and "fromStepId"=$2 and "toStepId"=$3', [P6, s6[0].id, s6[2].id]))[0].n === 1, "…and one that goes out of it");
+
+await A.page.locator("details[open] select[aria-label='Hands over to other processes']").selectOption({ index: 1 });
+await A.page.locator("details[open] button:text-is('Add')").last().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select count(*)::int n from step_handoffs where "fromStepId"=$1', [s6[0].id]))[0].n === 1, "a hand-over to a step in another process is added from this step");
+
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");
 check(rep.status() === 200 && !/AI Review|from AI review/.test(await rep.text()), "the office's report page opens and says nothing from the AI review", rep.status());

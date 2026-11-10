@@ -122,6 +122,11 @@ export function SopDocument({ workspaceId, companyName, firmName, sops }: { work
                     </td>
                     <td className="px-2 py-1.5">
                       <div>{s.approval ?? "—"}</div>
+                      {s.escalation && (
+                        <div className="mt-1 whitespace-pre-line text-slate-700">
+                          <span className="font-semibold">Escalation:</span> {s.escalation}
+                        </div>
+                      )}
                       {s.handoffIn && <div className="text-amber-700">{s.handoffIn}</div>}
                       {s.handoff && <div className="text-slate-600">{s.handoff}</div>}
                     </td>

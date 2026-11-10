@@ -343,6 +343,7 @@ export async function loadReportData(workspaceId: string, processIds: string[]):
           positionY: s.positionY,
           detailedAction: s.detailedAction,
           exceptionHandling: s.exceptionHandling,
+          escalationNote: s.escalationNote,
           sopInputs: s.sopInputs,
           sopOutput: s.sopOutput,
           sopErrors: s.sopErrors,

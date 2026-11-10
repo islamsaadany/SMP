@@ -28,6 +28,7 @@ export type SopSource = {
     sopInputs: string | null;
     sopOutput: string | null;
     sopErrors: string | null;
+    escalationNote?: string | null;
     assignedRole: { name: string } | null;
     slaDays: number | null;
     links: { targetProcess: { code: string; name: string } }[];
@@ -50,6 +51,8 @@ export type SopStep = {
   inputs: string | null;
   output: string | null;
   errors: string | null;
+  /** The office's own words on when and to whom this step escalates; null when none were written. */
+  escalation: string | null;
   /** Approval and time limit, e.g. "Approver: Finance Manager · within 2 days"; null when the step needs none. */
   approval: string | null;
   handoff: string | null;
@@ -125,6 +128,7 @@ export function compileSop(src: SopSource): Sop {
       inputs,
       output,
       errors: blank(s.sopErrors),
+      escalation: blank(s.escalationNote ?? null),
       approval: parts.length ? parts.join(" · ") : null,
       handoff: handoffParts.length ? handoffParts.join("; ") : null,
       handoffIn: inParts.length ? `from ${inParts.join(", ")}` : null,

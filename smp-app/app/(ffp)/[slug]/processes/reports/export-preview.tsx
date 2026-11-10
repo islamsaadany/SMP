@@ -110,6 +110,7 @@ export type ExportProcessData = {
     positionY: number;
     detailedAction: string[];
     exceptionHandling: string | null;
+    escalationNote: string | null;
     sopInputs: string | null;
     sopOutput: string | null;
     sopErrors: string | null;
@@ -1290,7 +1291,7 @@ const PROCESS_BLOCKS: Record<string, (ctx: BlockContext) => React.ReactNode> = {
       <SubHeading>Step narrative</SubHeading>
       {process.steps.map((step) => {
         const row = process.combinedRows.find((r) => r.rowId === step.id);
-        const documented = step.detailedAction.length > 0 || Boolean(step.exceptionHandling?.trim());
+        const documented = step.detailedAction.length > 0 || Boolean(step.exceptionHandling?.trim()) || Boolean(step.escalationNote?.trim());
         return (
           // A rule between entries rather than a card around each one:
           // the box's border and its four sides of padding cost real
@@ -1326,6 +1327,14 @@ const PROCESS_BLOCKS: Record<string, (ctx: BlockContext) => React.ReactNode> = {
                       Risk if Mishandled
                     </div>
                     <p className="mt-1 whitespace-pre-line text-sm text-slate-700">{step.exceptionHandling}</p>
+                  </div>
+                )}
+                {step.escalationNote?.trim() && (
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                      Escalation
+                    </div>
+                    <p className="mt-1 whitespace-pre-line text-sm text-slate-700">{step.escalationNote}</p>
                   </div>
                 )}
               </div>

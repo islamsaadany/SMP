@@ -909,6 +909,17 @@ await A.page.locator("label:has-text('Who does it') select").first().selectOptio
 await A.page.waitForTimeout(2200);
 check((await q(ffp, `select code from raci_assignments where "activityId"=$1 and "roleId"=$2`, [actId, target.id]))[0].code === "CONSULTED", "…and a letter somebody set is never overwritten");
 
+/* ── Download picture gives the WHOLE map, even when it is wider than the screen ── */
+await A.page.setViewportSize({ width: 520, height: 900 });
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+const gridW = await A.page.evaluate(() => { const g = document.querySelector("[data-lane-grid]"); return { sw: g.scrollWidth, cw: g.parentElement.clientWidth }; });
+const [dl] = await Promise.all([A.page.waitForEvent("download", { timeout: 30000 }), A.page.getByRole("button", { name: "Download picture" }).click()]);
+const dlPath = await dl.path();
+const png = (await import("node:fs")).readFileSync(dlPath);
+const pw = png.readUInt32BE(16), ph = png.readUInt32BE(20);
+check(gridW.sw > gridW.cw && Math.abs(pw - gridW.sw * 2) <= 4 && ph > 200, "Download picture holds the whole map, not just the part on screen", JSON.stringify({ gridW, pw, ph }));
+await A.page.setViewportSize({ width: 1300, height: 900 });
+
 /* ── a decision names its ways out: Yes and No, Approved and Rejected ── */
 await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
 await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).click();

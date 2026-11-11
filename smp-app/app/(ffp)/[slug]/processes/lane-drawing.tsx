@@ -38,6 +38,8 @@ export type DrawStep = {
   gap?: string | null;
   /** Proposed by the AI review, not a step until it is confirmed. */
   proposed?: boolean;
+  /** Drawn in the same column as the step before it, when its lane differs from every step already in that column. */
+  sameColumn?: boolean;
 };
 export type DrawArrow = { from: string; to: string; label: string | null; dashed?: boolean };
 
@@ -70,6 +72,19 @@ export function LaneDrawing({
   const grid = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState<Edge[]>([]);
 
+  /* a step's column: its own, or the one before it when it was set beside that step and sits in a lane nothing in that column uses */
+  const colOf: number[] = [];
+  const laneIn = new Map<number, Set<string>>();
+  steps.forEach((s, i) => {
+    const prev = i > 0 ? colOf[i - 1]! : -1;
+    const beside = i > 0 && !!s.sameColumn && !laneIn.get(prev)!.has(s.lane);
+    const col = beside ? prev : prev + 1;
+    colOf.push(col);
+    laneIn.set(col, (laneIn.get(col) ?? new Set()).add(s.lane));
+  });
+  const cols = steps.length ? colOf[colOf.length - 1]! + 1 : 0;
+  const colKey = colOf.join(",");
+
   useLayoutEffect(() => {
     const draw = () => {
       const L = grid.current;
@@ -79,21 +94,22 @@ export function LaneDrawing({
       const k = o.width ? L.offsetWidth / o.width : 1;
       const laneOf = (key: string) => Math.max(0, lanes.findIndex((l) => l.key === key));
       const boxes = new Map<string, Box>();
-      steps.forEach((s, col) => {
+      steps.forEach((s, idx) => {
+        const col = colOf[idx]!;
         const r = L.querySelector<HTMLElement>(`[data-step="${s.id}"]`)?.getBoundingClientRect();
         if (!r) return;
         const left = (r.left - o.left) * k, right = (r.right - o.left) * k, top = (r.top - o.top) * k, bottom = (r.bottom - o.top) * k;
         boxes.set(s.id, { left, right, top, bottom, cx: (left + right) / 2, cy: (top + bottom) / 2, col, lane: laneOf(s.lane) });
       });
       /* the columns share the width left of the lane labels; a box sits in the middle of its column */
-      const colW = (L.offsetWidth - LABEL_W) / Math.max(1, steps.length);
+      const colW = (L.offsetWidth - LABEL_W) / Math.max(1, cols);
       const gutterAfter = (col: number) => LABEL_W + colW * (col + 1);
       const channelBelow = (lane: number) => PAD + LANE_H * (lane + 1) - OFF;
       const channelAbove = (lane: number) => PAD + LANE_H * lane + OFF;
       /* a branch's label, just out of its box beside the turn: nearer the decision than the target, and off the lane's line */
       const byTurn = (a: Box, b: Box) => a.cy + Math.sign(b.cy - a.cy) * Math.min(24, Math.abs(b.cy - a.cy) / 2);
       /* a box in this lane in the columns strictly between the two */
-      const occupied = (lane: number, c1: number, c2: number) => steps.slice(c1 + 1, c2).some((s) => laneOf(s.lane) === lane);
+      const occupied = (lane: number, c1: number, c2: number) => steps.some((s, i) => colOf[i]! > c1 && colOf[i]! < c2 && laneOf(s.lane) === lane);
 
       const out: Edge[] = [];
       for (const c of connections) {
@@ -119,6 +135,18 @@ export function LaneDrawing({
             const g1 = gutterAfter(a.col), g2 = gutterAfter(b.col - 1);
             out.push({ d: `M${a.right} ${a.cy}H${g1}V${ch}H${g2}V${b.cy}H${end}`, lx: (g1 + g2) / 2, ly: ch, label: c.label, dashed });
           }
+        } else if (b.col === a.col) {
+          /* two steps in one column: straight down (or up) between the boxes, a little left of the middle so a loop leaving the middle of the box is not drawn over it;
+             when a box of that column sits in a lane between them, along the column's right margin instead, clear of the gutter the other arrows turn in */
+          const between = steps.some((s, i) => colOf[i] === a.col && laneOf(s.lane) > Math.min(a.lane, b.lane) && laneOf(s.lane) < Math.max(a.lane, b.lane));
+          if (!between) {
+            const x = Math.min(a.cx, b.cx) - 14;
+            const down = b.cy > a.cy;
+            out.push({ d: down ? `M${x} ${a.bottom}V${b.top - 2}` : `M${x} ${a.top}V${b.bottom + 2}`, lx: x, ly: (down ? a.bottom + b.top : a.top + b.bottom) / 2, label: c.label, dashed });
+          } else {
+            const x = Math.max(a.right, b.right) + 9;
+            out.push({ d: `M${a.right} ${a.cy}H${x}V${b.cy}H${b.right + 2}`, lx: x, ly: (a.cy + b.cy) / 2, label: c.label, dashed });
+          }
         } else {
           /* back: from under the source, along the channel under the lower lane, up into the target */
           const ch = channelBelow(Math.max(a.lane, b.lane)) + 2 * OFF;
@@ -133,9 +161,9 @@ export function LaneDrawing({
     if (grid.current) seen.observe(grid.current);
     document.fonts?.ready.then(draw);
     return () => seen.disconnect();
-  }, [connections, steps, lanes]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- colKey stands for colOf, which is rebuilt every render
+  }, [connections, steps, lanes, colKey]);
 
-  const cols = steps.length;
   return (
     <div className="overflow-x-auto rounded-lg border border-[var(--line)] bg-[var(--surface)]" dir="ltr">
       <div
@@ -162,7 +190,7 @@ export function LaneDrawing({
         ))}
         {steps.map((s, i) => {
           const ends = s.type === "START" || s.type === "END";
-          const pos = { gridRow: Math.max(1, lanes.findIndex((l) => l.key === s.lane) + 1), gridColumn: i + 2 };
+          const pos = { gridRow: Math.max(1, lanes.findIndex((l) => l.key === s.lane) + 1), gridColumn: colOf[i]! + 2 };
           const head = s.proposed ? proposedLabel : s.n ? m.step(s.n) : s.type === "START" ? m.start : s.type === "END" ? m.end : "";
           const inner = (
             <>

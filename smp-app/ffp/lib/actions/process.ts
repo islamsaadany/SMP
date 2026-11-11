@@ -863,6 +863,8 @@ const updateStepSchema = z.object({
   // Escalation rules and notes — undefined leaves the stored value alone.
   escalationNote: z.string().trim().max(2000).optional().or(z.literal("")),
   stepNote: z.string().trim().max(2000).optional().or(z.literal("")),
+  // Drawn beside the step before it (same column on the Map) — undefined leaves it alone.
+  sameColumn: z.boolean().optional(),
   // SOP detail — undefined leaves the stored value alone.
   sopInputs: z.string().trim().max(2000).optional().or(z.literal("")),
   sopOutput: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -927,6 +929,7 @@ export async function updateProcessStep(
         : {}),
       ...(parsed.data.escalationNote !== undefined ? { escalationNote: parsed.data.escalationNote || null } : {}),
       ...(parsed.data.stepNote !== undefined ? { stepNote: parsed.data.stepNote || null } : {}),
+      ...(parsed.data.sameColumn !== undefined ? { sameColumn: parsed.data.sameColumn } : {}),
       ...(parsed.data.sopInputs !== undefined ? { sopInputs: parsed.data.sopInputs || null } : {}),
       ...(parsed.data.sopOutput !== undefined ? { sopOutput: parsed.data.sopOutput || null } : {}),
       ...(parsed.data.sopErrors !== undefined ? { sopErrors: parsed.data.sopErrors || null } : {}),

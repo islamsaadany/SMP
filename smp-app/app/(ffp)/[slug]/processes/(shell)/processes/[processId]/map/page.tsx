@@ -134,6 +134,7 @@ export default async function ProcessMapPage(
       sop: { inputs: s.sopInputs ?? "", output: s.sopOutput ?? "", errors: s.sopErrors ?? "", risk: s.exceptionHandling ?? "" },
       escalation: s.escalationNote ?? "",
       note: s.stepNote ?? "",
+      sameColumn: s.sameColumn,
       links: s.links.map((l) => l.targetProcessId),
       branches: s.branchedProcesses,
       gaps: [...(gapsByStepId.get(s.id) ?? []), ...(own.some((c) => !c.control?.trim()) && !s.skippedGaps.includes("NO_CONTROL") ? (["NO_CONTROL"] as const) : [])],

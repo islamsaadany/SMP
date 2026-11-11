@@ -34,6 +34,8 @@ export type ContentStep = {
   escalation?: string;
   /** The office's notes on the step; present only when written. */
   note?: string;
+  /** Drawn in the same column as the step before it; present only when set, so a process that never uses it reads exactly as before. */
+  sameColumn?: true;
   controls: { risk: string; control: string | null }[];
 };
 
@@ -57,7 +59,7 @@ export async function liveContent(processId: string): Promise<Content | null> {
     where: { id: processId },
     select: {
       processPurpose: true, inScope: true, outOfScope: true, kpis: true, sopVersion: true, sopEffectiveDate: true,
-      steps: { orderBy: [{ order: "asc" }, { createdAt: "asc" }], select: { id: true, type: true, label: true, detailedAction: true, escalationNote: true, stepNote: true, skippedGaps: true, raciSkipped: true, assignedRoleId: true, assignedRole: { select: { name: true } } } },
+      steps: { orderBy: [{ order: "asc" }, { createdAt: "asc" }], select: { id: true, type: true, label: true, detailedAction: true, escalationNote: true, stepNote: true, sameColumn: true, skippedGaps: true, raciSkipped: true, assignedRoleId: true, assignedRole: { select: { name: true } } } },
       controls: { orderBy: [{ order: "asc" }, { createdAt: "asc" }], select: { stepId: true, risk: true, control: true } },
       activities: { orderBy: { order: "asc" }, select: { id: true, name: true, relatedStepId: true, order: true, raciAssignments: { select: { roleId: true, code: true } } } },
       authorityAssignments: { include: AUTHORITY_ASSIGNMENT_INCLUDE },
@@ -108,6 +110,7 @@ export async function liveContent(processId: string): Promise<Content | null> {
       time: say("TIME"),
       ...(s.escalationNote?.trim() ? { escalation: s.escalationNote.trim() } : {}),
       ...(s.stepNote?.trim() ? { note: s.stepNote.trim() } : {}),
+      ...(s.sameColumn ? { sameColumn: true as const } : {}),
       controls: p.controls.filter((c) => c.stepId === s.id).map((c) => ({ risk: c.risk, control: c.control?.trim() || null })),
     };
   });

@@ -754,6 +754,24 @@ check(await A.page.locator("label:has-text('Notes') textarea").first().isVisible
 await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
 await A.page.waitForTimeout(1200);
 
+/* ── steps that happen together can be drawn in one column ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+const bx = async (id) => (await A.page.locator(`[data-lane-grid] [data-step='${id}']`).boundingBox());
+const colB0 = await bx(s6[0].id), colB1 = await bx(s6[1].id);
+check(Math.abs((colB0.x + colB0.width / 2) - (colB1.x + colB1.width / 2)) > 40, "before: two neighbouring steps are in different columns");
+await A.page.locator(`[data-lane-grid] [data-step='${s6[1].id}']`).click();
+await A.page.locator("label:has-text('Draw it beside the step before it') input").check();
+await A.page.waitForTimeout(2200);
+check((await q(ffp, 'select "sameColumn" c from process_steps where id=$1', [s6[1].id]))[0].c === true, "the step can be set to be drawn beside the one before it");
+const colA0 = await bx(s6[0].id), colA1 = await bx(s6[1].id);
+check(Math.abs((colA0.x + colA0.width / 2) - (colA1.x + colA1.width / 2)) < 3 && Math.abs(colA0.y - colA1.y) > 20, "…and the two are then in one column, in their own lanes", JSON.stringify([colA0, colA1]));
+await A.page.locator("label:has-text('Draw it beside the step before it') input").uncheck();
+await A.page.waitForTimeout(1800);
+const colC1 = await bx(s6[1].id), colC0 = await bx(s6[0].id);
+check(Math.abs((colC0.x + colC0.width / 2) - (colC1.x + colC1.width / 2)) > 40 && (await q(ffp, 'select "sameColumn" c from process_steps where id=$1', [s6[1].id]))[0].c === false, "…and unticking puts it back");
+await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).click();
+check(await A.page.locator("label:has-text('Draw it beside the step before it')").count() === 0, "the first step has no such option");
+
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");
 check(rep.status() === 200 && !/AI Review|from AI review/.test(await rep.text()), "the office's report page opens and says nothing from the AI review", rep.status());

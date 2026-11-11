@@ -27,6 +27,7 @@ export type MapStep = DrawStep & {
   sop: { inputs: string; output: string; errors: string; risk: string };
   escalation: string;
   note: string;
+  sameColumn: boolean;
   links: string[];
   branches: { id: string; code: string; name: string }[];
   gaps: (StepGap | "NO_CONTROL")[];

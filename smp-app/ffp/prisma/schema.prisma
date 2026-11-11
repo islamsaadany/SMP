@@ -577,6 +577,9 @@ model ProcessStep {
   /// The office's own notes on the step, for any type of step (the Start and End have no other box to write in).
   stepNote String?
 
+  /// Drawn in the same column as the step before it on the Map, when the two are in different lanes (steps that happen together).
+  sameColumn Boolean @default(false)
+
   /// Gap marks the office has chosen to skip for this step ("not needed here"), each by its kind, so one can be skipped and the others kept.
   skippedGaps String[] @default([])
 

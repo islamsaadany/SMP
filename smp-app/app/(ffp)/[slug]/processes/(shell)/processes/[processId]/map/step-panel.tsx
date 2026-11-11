@@ -80,6 +80,7 @@ export function StepPanel({
   const [sop, setSop] = useState(step.sop);
   const [escalation, setEscalation] = useState(step.escalation);
   const [note, setNote] = useState(step.note);
+  const [beside, setBeside] = useState(step.sameColumn);
   const [newTitle, setNewTitle] = useState<string | null>(null);
   const [arrowAdd, setArrowAdd] = useState<{ dir: "in" | "out"; other: string; label: string } | null>(null);
   const [handOutPick, setHandOutPick] = useState("");
@@ -94,7 +95,7 @@ export function StepPanel({
   const base = { workspaceId, processId, stepId: step.id };
 
   /* every save sends what the step is now, with the one change in it */
-  const save = (patch: { type?: MapStep["type"]; label?: string; roleId?: string; escalationNote?: string; stepNote?: string; detailedAction?: string[]; joinRequiresAll?: boolean; linkedProcessIds?: string[]; sop?: MapStep["sop"] }) => {
+  const save = (patch: { type?: MapStep["type"]; label?: string; roleId?: string; escalationNote?: string; stepNote?: string; sameColumn?: boolean; detailedAction?: string[]; joinRequiresAll?: boolean; linkedProcessIds?: string[]; sop?: MapStep["sop"] }) => {
     const role = patch.roleId ?? roleId;
     const s = patch.sop;
     return run(() =>
@@ -107,6 +108,7 @@ export function StepPanel({
         ...(patch.detailedAction ? { detailedAction: patch.detailedAction } : {}),
         ...(patch.escalationNote !== undefined ? { escalationNote: patch.escalationNote } : {}),
         ...(patch.stepNote !== undefined ? { stepNote: patch.stepNote } : {}),
+        ...(patch.sameColumn !== undefined ? { sameColumn: patch.sameColumn } : {}),
         ...(patch.joinRequiresAll !== undefined ? { joinRequiresAll: patch.joinRequiresAll } : {}),
         ...(patch.linkedProcessIds ? { linkedProcessIds: patch.linkedProcessIds } : {}),
         ...(s ? { sopInputs: s.inputs, sopOutput: s.output, sopErrors: s.errors, exceptionHandling: s.risk } : {}),
@@ -304,6 +306,24 @@ export function StepPanel({
             </div>
           </div>
         ))}
+      {i > 0 && (
+        <div className="grid gap-0.5">
+          <label className="flex items-center gap-2 text-[12.5px]">
+            <input
+              type="checkbox"
+              checked={beside && steps[i - 1]!.lane !== step.lane}
+              disabled={ro || steps[i - 1]!.lane === step.lane}
+              onChange={(e) => {
+                setBeside(e.target.checked);
+                void save({ sameColumn: e.target.checked });
+              }}
+            />
+            {m.sameColumn}
+          </label>
+          {steps[i - 1]!.lane === step.lane && <span className="text-[11.5px] text-[var(--ink-3)]">{m.sameColumnLane}</span>}
+        </div>
+      )}
+
       {(type === "TASK" || type === "DECISION") && (
         <>
           <label className={lbl}>

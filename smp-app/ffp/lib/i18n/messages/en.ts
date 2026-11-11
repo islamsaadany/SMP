@@ -264,6 +264,8 @@ export const en = {
       more: "More: arrows, hand-overs, links and moving the step",
       type: "Type",
       typeLabel: "Step type",
+      sameColumn: "Draw it beside the step before it (same column on the Map)",
+      sameColumnLane: "The step before it is in the same lane, so there is no room beside it.",
       stepNote: "Notes",
       stepNotePh: "Anything worth saying about this step, for example what starts or ends the process.",
       skipGap: "Skip",

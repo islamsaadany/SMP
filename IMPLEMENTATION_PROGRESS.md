@@ -10752,3 +10752,7 @@ On the Map and readers' Flow, a decision's "No / Rejected / Denied…" way out i
 ## §762 — Click an arrow to see its two ends; a way back no longer shares a decision's line (2026-11-20)
 
 On the Map and readers' Flow, clicking an arrow thickens it, marks where it starts and shows "From: … / To: …" (click again to close). A decision's way back now leaves the bottom corner while forward ways leave the right corner first, so Yes and No no longer run on one line. Processes e2e 221 ok.
+
+## §763 — SOP page: AI drafts and Skip this SOP; milestone checkbox moved to the top (2026-11-21)
+
+SOP page: "Draft the empty boxes with AI" (all steps) and "Draft with AI" (one step) write drafts for the EMPTY boxes only, from the workspace's industry, the process and what is already entered on the steps (and the neighbouring steps, role, note, rules). Drafts are shown beside the step and are saved only when the person presses Use; each can be edited first or Deleted. "Skip this SOP" marks a step as needing no SOP (stored as "SOP" in the step's skippedGaps, no migration); a skipped step is not counted as lacking, is not drafted for, is left out of the SOP's "missing" count, and can be brought back. Tested against a modelled AI provider in the e2e (233 ok). The milestone checkbox is now at the top of the step form, above Who does it.

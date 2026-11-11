@@ -251,6 +251,18 @@ export function StepPanel({
           ))}
         </select>
       </label>
+      <label className="flex items-center gap-2 text-[12.5px]">
+        <input
+          type="checkbox"
+          checked={milestone}
+          disabled={ro}
+          onChange={(e) => {
+            setMilestone(e.target.checked);
+            void run(() => setStepMilestone({ ...base, milestone: e.target.checked }));
+          }}
+        />
+        {m.milestone}
+      </label>
       <label className={lbl}>
         {m.who}
         <select
@@ -601,19 +613,6 @@ export function StepPanel({
       <details className="rounded-md border border-[var(--line-soft)] px-2.5 py-2">
         <summary className="cursor-pointer text-[12.5px] font-semibold text-[var(--stone)]">{m.more}</summary>
         <div className="mt-2.5 grid gap-3">
-          <label className="flex items-center gap-2 text-[12.5px]">
-            <input
-              type="checkbox"
-              checked={milestone}
-              disabled={ro}
-              onChange={(e) => {
-                setMilestone(e.target.checked);
-                void run(() => setStepMilestone({ ...base, milestone: e.target.checked }));
-              }}
-            />
-            {m.milestone}
-          </label>
-
           {(
             [
               ["in", m.comesFrom, ins, (a: MapArrow) => a.from, m.arrowInAdd],

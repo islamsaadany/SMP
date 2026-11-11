@@ -47,7 +47,7 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
     getLocale(),
     getMessages(),
     officeSuggestions(workspaceId, ["IN_DRAFT"], processId),
-    prisma.processStep.findMany({ where: { processId, type: { in: ["TASK", "DECISION"] } }, select: { detailedAction: true, sopInputs: true, sopOutput: true, assignedRoleId: true } }),
+    prisma.processStep.findMany({ where: { processId, type: { in: ["TASK", "DECISION"] } }, select: { detailedAction: true, sopInputs: true, sopOutput: true, assignedRoleId: true, skippedGaps: true } }),
   ]);
   const m = all.builder.page;
   const g = gaps.get(processId) ?? { gaps: 0, kinds: new Set(), steps: 0, controls: 0, controlsMissing: 0 };
@@ -92,7 +92,7 @@ export default async function BuilderLayout(props: LayoutProps<"/[slug]/processe
     risks: !g.controls ? "q" : g.controlsMissing ? "bad" : "ok",
     quality: ncs.some((n) => n.status !== "closed") ? "bad" : kpis || ncs.length ? "ok" : "q",
     /* the SOP: what a task or decision still lacks (who, how, inputs, output) and the four lines of document control */
-    sop: !drawn ? "q" : sopSteps.some((x) => !x.assignedRoleId || x.detailedAction.length === 0 || !x.sopInputs?.trim() || !x.sopOutput?.trim()) || ![process.sopVersion, process.sopOwner, process.sopEffectiveDate, process.sopApprovedBy].every((v) => v && String(v).trim()) ? "bad" : "ok",
+    sop: !drawn ? "q" : sopSteps.some((x) => !x.skippedGaps.includes("SOP") && (!x.assignedRoleId || x.detailedAction.length === 0 || !x.sopInputs?.trim() || !x.sopOutput?.trim())) || ![process.sopVersion, process.sopOwner, process.sopEffectiveDate, process.sopApprovedBy].every((v) => v && String(v).trim()) ? "bad" : "ok",
     lifecycle: sentBack ? "bad" : held ? "ok" : "q",
     people: "q",
     compliance: "q",

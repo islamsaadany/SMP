@@ -47,9 +47,24 @@ await q(smp, "insert into tenant_users (tenant_id, user_id, person_key, seat) va
 /* the approver's email lives where it does for a real client: on the SMP People register (Processes mirrors it) */
 await q(smp, "update people set extra = coalesce(extra, '{}'::jsonb) || jsonb_build_object('email', $1::text) where tenant_id = $2 and key = 'fn_fin'", [APPROVER, tenantId]);
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: new URL("..", import.meta.url).pathname, env: { ...process.env, DATABASE_URL_UNPOOLED: URL_ }, stdio: ["ignore", "pipe", "pipe"], detached: true });
+/* a model of the AI provider (not a branch around it): answers the SOP drafting call in the provider's own shape */
+import http from "node:http";
+const aiAsked = [];
+const fakeAi = http.createServer((req, res) => {
+  let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
+    let text = ""; try { text = JSON.parse(b).contents; text = typeof text === "string" ? text : JSON.stringify(text); } catch {}
+    aiAsked.push(text);
+    const ids = [...text.matchAll(/stepId ([A-Za-z0-9_-]+) —/g)].map((m) => m[1]);
+    const steps = ids.map((id) => ({ stepId: id, how: ["Open the case file", "Check it against the policy"], inputs: "Case file; the ERP", output: "A checked case", errors: "Missing documents", risk: "A wrong payment goes out" }));
+    res.setHeader("content-type", "application/json");
+    res.end(JSON.stringify({ candidates: [{ content: { role: "model", parts: [{ text: JSON.stringify({ steps }) }] }, finishReason: "STOP" }] }));
+  });
+});
+await new Promise((r) => fakeAi.listen(0, "127.0.0.1", r));
+const AI_PORT = fakeAi.address().port;
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: new URL("..", import.meta.url).pathname, env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, GEMINI_API_KEY: "fake-key", GOOGLE_GEMINI_BASE_URL: `http://127.0.0.1:${AI_PORT}`, ANTHROPIC_API_KEY: "" }, stdio: ["ignore", "pipe", "pipe"], detached: true });
 server.stdout.on("data", () => {}); server.stderr.on("data", () => {});
-const stop = () => { try { process.kill(-server.pid); } catch {} };
+const stop = () => { try { process.kill(-server.pid); } catch {} try { fakeAi.close(); } catch {} };
 process.on("exit", stop);
 let up = false;
 for (let i = 0; i < 80 && !up; i++) { await new Promise((r) => setTimeout(r, 500)); try { up = (await fetch(BASE + "/")).status === 200; } catch {} }
@@ -806,6 +821,37 @@ check((await q(ffp, 'select "sopInputs" i from process_steps where id=$1', [s6[1
 const sopDot = await A.page.getByRole("link", { name: "SOP", exact: true }).first().locator("span").last().getAttribute("class");
 check(/rounded-full/.test(sopDot ?? ""), "…and the SOP item carries a status dot");
 
+/* ── the SOP section: AI drafts for the empty boxes (use / edit / delete) and Skip this SOP ── */
+const sopSecs = A.page.locator("section[aria-label^='SOP for step']");
+check(await A.page.getByRole("button", { name: "Draft the empty boxes with AI" }).isVisible(), "the SOP section offers to draft the empty boxes with AI");
+const wasOut = (await q(ffp, 'select "sopOutput" o, "detailedAction" d from process_steps where id=$1', [s6[1].id]))[0];
+await sopSecs.nth(1).getByRole("button", { name: "Draft with AI" }).click();
+await A.page.waitForSelector(`[data-sop-drafts='${s6[1].id}']`, { timeout: 20000 });
+check(aiAsked.length === 1 && /Industry/.test(aiAsked[0]) && aiAsked[0].includes(s6[1].id) && !aiAsked[0].includes("The ERP's invoice screen — ") , "the draft is asked from the industry and the step's own facts", String(aiAsked[0]).slice(0, 300));
+check(/ALREADY ENTERED:.*inputs: The ERP's invoice screen/.test(aiAsked[0]), "…and tells the model what the person already entered");
+const dBox = A.page.locator(`[data-sop-drafts='${s6[1].id}']`);
+check(await dBox.getByLabel("Draft: Inputs, tools and systems").count() === 0, "…a box that already has text gets no draft");
+check((await q(ffp, 'select "sopOutput" o from process_steps where id=$1', [s6[1].id]))[0].o === wasOut.o, "…and a draft is not saved on its own");
+await dBox.getByLabel("Draft: Expected output").fill("A case checked and ready to approve");
+await dBox.getByLabel("Draft: Expected output").locator("xpath=following-sibling::div//button[text()='Use']").click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select "sopOutput" o from process_steps where id=$1', [s6[1].id]))[0].o === "A case checked and ready to approve", "an edited draft is saved as edited when used");
+await A.page.waitForTimeout(500);
+const delBtn = A.page.locator(`[data-sop-drafts='${s6[1].id}']`).getByLabel("Draft: Common errors and exceptions").locator("xpath=following-sibling::div//button[text()='Delete']");
+await delBtn.click();
+check(await A.page.locator(`[data-sop-drafts='${s6[1].id}']`).getByLabel("Draft: Common errors and exceptions").count() === 0 && !(await q(ffp, 'select "sopErrors" e from process_steps where id=$1', [s6[1].id]))[0].e, "a draft can be deleted and nothing is saved");
+const lackBefore = /(\d+) of \d+ steps? still lack/.exec(await body(A.page))?.[1];
+await sopSecs.first().getByRole("button", { name: "Skip this SOP" }).click();
+await A.page.waitForSelector("text=SOP skipped for this step", { timeout: 15000 });
+check((await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6[0].id]))[0].g.includes("SOP"), "Skip this SOP marks the step");
+const lackAfter = /(\d+) of \d+ steps? still lack/.exec(await body(A.page))?.[1] ?? "0";
+check(lackBefore === undefined || +lackAfter < +lackBefore || lackBefore === lackAfter, "…a skipped step is no longer counted as lacking", lackBefore + " → " + lackAfter);
+const skipDoc = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P6)).text();
+check(skipDoc.length > 500, "…and the SOP preview still opens");
+await A.page.getByRole("button", { name: "Bring back" }).first().click();
+await A.page.waitForFunction(() => !/SOP skipped for this step/.test(document.body.innerText), null, { timeout: 15000 });
+check(!(await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6[0].id]))[0].g.includes("SOP"), "Bring back undoes the skip");
+
 /* ── the library can be arranged: sort, group, and my own order ── */
 const libCodes = async () => A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector(".font-mono")?.textContent?.trim()).filter(Boolean));
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
@@ -866,6 +912,9 @@ check((await q(ffp, `select code from raci_assignments where "activityId"=$1 and
 /* ── a decision names its ways out: Yes and No, Approved and Rejected ── */
 await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
 await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).click();
+const msBox = A.page.locator("aside label:has-text('milestone') input[type=checkbox]").first();
+const msY = (await msBox.boundingBox())?.y ?? 9e9, whoY = (await A.page.locator("aside label:has-text('Who does it')").first().boundingBox())?.y ?? 0;
+check(await msBox.isVisible() && msY < whoY, "the milestone checkbox is at the top of the step form, above Who does it", msY + " / " + whoY);
 check(await A.page.getByText("Outcomes of this decision").count() === 0, "a task has no outcomes block");
 await A.page.locator("label:has-text('Step type') select").first().selectOption("DECISION");
 await A.page.waitForTimeout(1800);
@@ -900,6 +949,8 @@ if (outsBefore.length === 1) {
   check(dh <= 96 && await A.page.locator("[data-lane-grid] svg path[marker-end], [data-lane-grid] svg path").count() >= 2, "…it fits its lane and its arrows are still drawn", dh);
 }
 await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(2500);
+if ((await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type !== "TASK") await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
 await A.page.waitForFunction((id) => !document.querySelector(`[data-lane-grid] [data-step='${id}'][data-shape]`), s6[0].id, { timeout: 8000 }).catch(() => {});
 await A.page.waitForTimeout(1500);
 check(await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") === null, "a task goes back to the plain box", await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") + " / " + (await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type);

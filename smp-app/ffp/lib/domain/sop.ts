@@ -30,6 +30,8 @@ export type SopSource = {
     sopErrors: string | null;
     escalationNote?: string | null;
     stepNote?: string | null;
+    /** "No SOP needed for this step": nothing about it is counted as missing. */
+    skipSop?: boolean;
     assignedRole: { name: string } | null;
     slaDays: number | null;
     links: { targetProcess: { code: string; name: string } }[];
@@ -116,7 +118,7 @@ export function compileSop(src: SopSource): Sop {
     const output = blank(s.sopOutput);
     const who = s.assignedRole?.name ?? null;
     const missing: SopStep["missing"] = [];
-    if (isWork) {
+    if (isWork && !s.skipSop) {
       if (!who) missing.push("who");
       if (how.length === 0) missing.push("how");
       if (!inputs) missing.push("inputs");

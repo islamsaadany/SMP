@@ -119,8 +119,9 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
     output: st.sopOutput ?? "",
     errors: st.sopErrors ?? "",
     risk: st.exceptionHandling ?? "",
+    skipped: st.skippedGaps.includes("SOP"),
   }));
-  const lackingSteps = work.filter((st) => !st.assignedRoleId || st.detailedAction.length === 0 || !st.sopInputs?.trim() || !st.sopOutput?.trim()).length;
+  const lackingSteps = work.filter((st) => !st.skippedGaps.includes("SOP") && (!st.assignedRoleId || st.detailedAction.length === 0 || !st.sopInputs?.trim() || !st.sopOutput?.trim())).length;
   const lackingControl = [process.sopVersion, process.sopOwner, process.sopEffectiveDate, process.sopApprovedBy].filter((v) => !(v && String(v).trim())).length;
 
   return (

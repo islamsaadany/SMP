@@ -345,6 +345,7 @@ export async function loadReportData(workspaceId: string, processIds: string[]):
           exceptionHandling: s.exceptionHandling,
           escalationNote: s.escalationNote,
           stepNote: s.stepNote,
+          skipSop: s.skippedGaps.includes("SOP"),
           sopInputs: s.sopInputs,
           sopOutput: s.sopOutput,
           sopErrors: s.sopErrors,

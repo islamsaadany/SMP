@@ -349,6 +349,11 @@ export function StepPanel({
           </div>
 
 
+        </>
+      )}
+
+      {/* who is involved, the approval rules and the escalation note belong to every step: the RACI and the Authority matrix list a Start and an End too, and mark them when these are empty */}
+      <>
           <div className="grid gap-1.5">
             <span className={lbl}>{m.involved}</span>
             {step.raci.activities > 1 ? (
@@ -444,6 +449,10 @@ export function StepPanel({
             />
           </label>
 
+      </>
+
+      {(type === "TASK" || type === "DECISION") && (
+        <>
           <div className="grid gap-1.5">
             <span className={lbl}>{m.risks}</span>
             {step.controls.length ? (

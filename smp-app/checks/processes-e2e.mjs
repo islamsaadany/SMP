@@ -741,16 +741,16 @@ check((await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6
 /* ── a notes box on a Start or End step ── */
 await A.page.locator("label:has-text('Step type') select").first().selectOption("START");
 await A.page.waitForTimeout(1500);
-check(await A.page.locator("label:has-text('Notes') textarea").first().isVisible(), "a Start step has a Notes box");
-await A.page.fill("label:has-text('Notes') textarea", "Starts when the month's books close.");
-await A.page.locator("label:has-text('Notes') textarea").blur();
+check(await A.page.locator("textarea[placeholder^='Anything worth saying']").first().isVisible(), "a Start step has a Notes box");
+await A.page.fill("textarea[placeholder^='Anything worth saying']", "Starts when the month's books close.");
+await A.page.locator("textarea[placeholder^='Anything worth saying']").blur();
 await A.page.waitForTimeout(1500);
 check((await q(ffp, 'select "stepNote" n from process_steps where id=$1', [s6[0].id]))[0].n === "Starts when the month's books close.", "…and what is written there is saved");
 const sopNote = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P6)).text();
 check(/Notes:/.test(sopNote) && /Starts when the month/.test(sopNote), "…and appears in the SOP");
 await A.page.locator("label:has-text('Step type') select").first().selectOption("END");
 await A.page.waitForTimeout(1200);
-check(await A.page.locator("label:has-text('Notes') textarea").first().isVisible(), "an End step has a Notes box too");
+check(await A.page.locator("textarea[placeholder^='Anything worth saying']").first().isVisible(), "an End step has a Notes box too");
 await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
 await A.page.waitForTimeout(1200);
 
@@ -834,6 +834,34 @@ check((await libCodes())[1] === third, "…and the order is kept when the page i
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
 check((await libCodes()).join() === byCodeNow.join(), "…while the default list is not touched by it");
 await q(ffp, 'update processes set "sortOrder"=null where "workspaceId"=$1', [S]);
+
+/* ── a Start or End step can be given who is involved and its approval rules, and a role set on the Map reaches the RACI ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+await A.page.locator(`[data-lane-grid] [data-step='${s6[1].id}']`).click();
+await A.page.locator("label:has-text('Step type') select").first().selectOption("START");
+await A.page.waitForTimeout(1800);
+check(await A.page.getByText("Who is involved").first().isVisible() && await A.page.getByText("Approval and time limit").first().isVisible(), "a Start step also shows who is involved and its approval rules");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(1500);
+const roles6 = await q(ffp, 'select id, name from roles where "workspaceId"=$1 and "archivedAt" is null order by name', [S]);
+const cur2 = (await q(ffp, 'select "assignedRoleId" r from process_steps where id=$1', [s6[2].id]))[0].r;
+const target = roles6.find((r) => r.id !== cur2 && r.name === "Head of Finance") ?? roles6.find((r) => r.id !== cur2);
+// a letter someone already set must not be changed by it
+const other = roles6.find((r) => r.id !== cur2 && r.id !== target.id);
+await A.page.locator(`[data-lane-grid] [data-step='${s6[2].id}']`).click();
+await A.page.locator("label:has-text('Who does it') select").first().selectOption(target.id);
+await A.page.waitForTimeout(2200);
+const rr = await q(ffp, `select ra."roleId" r, ra.code c from raci_assignments ra join activities a on a.id=ra."activityId" where a."relatedStepId"=$1`, [s6[2].id]);
+check(rr.some((x) => x.r === target.id && x.c === "RESPONSIBLE"), "a role set as who does the step on the Map becomes its Responsible in the RACI", JSON.stringify(rr));
+await A.page.locator("label:has-text('Who does it') select").first().selectOption(other.id);
+await A.page.waitForTimeout(2200);
+const rr2 = await q(ffp, `select ra."roleId" r, ra.code c from raci_assignments ra join activities a on a.id=ra."activityId" where a."relatedStepId"=$1`, [s6[2].id]);
+check(rr2.some((x) => x.r === other.id && x.c === "RESPONSIBLE") && rr2.some((x) => x.r === target.id), "…changing it adds the new role and leaves the old letter as it was", JSON.stringify(rr2));
+const actId = (await q(ffp, 'select id from activities where "relatedStepId"=$1 limit 1', [s6[2].id]))[0].id;
+await q(ffp, `update raci_assignments set code='CONSULTED' where "activityId"=$1 and "roleId"=$2`, [actId, target.id]);
+await A.page.locator("label:has-text('Who does it') select").first().selectOption(target.id);
+await A.page.waitForTimeout(2200);
+check((await q(ffp, `select code from raci_assignments where "activityId"=$1 and "roleId"=$2`, [actId, target.id]))[0].code === "CONSULTED", "…and a letter somebody set is never overwritten");
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

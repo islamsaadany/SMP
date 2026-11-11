@@ -779,8 +779,10 @@ export async function addProcessStep(
     return newStep;
   });
 
+  if (created.assignedRoleId) await makeOwnerResponsible(processId, created.id, created.assignedRoleId);
   await resetIfInForce(processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/map`);
+  revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/raci`);
   return ok({ id: created.id });
 }
 
@@ -849,6 +851,26 @@ export async function addProcessStepsBulk(
   await resetIfInForce(processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/map`);
   return ok({ ids });
+}
+
+/**
+ * A role given to a step on the Map is that step's Responsible in the RACI too, so the RACI does not have to be
+ * filled in again by hand. The same rule as the RACI page's "Fill from step owners": only into a cell nobody has
+ * filled (a letter someone set is never changed), never on a skipped row, and an old owner's letter is left as it
+ * is. A step with no RACI row yet gets one, named as the step, like the first letter set on it would.
+ */
+async function makeOwnerResponsible(processId: string, stepId: string, roleId: string): Promise<void> {
+  const step = await prisma.processStep.findUnique({ where: { id: stepId }, select: { raciSkipped: true, label: true } });
+  if (!step || step.raciSkipped) return;
+  let rows = await prisma.activity.findMany({ where: { relatedStepId: stepId }, select: { id: true } });
+  if (rows.length === 0) {
+    const count = await prisma.activity.count({ where: { processId } });
+    rows = [await prisma.activity.create({ data: { processId, name: step.label, relatedStepId: stepId, order: count }, select: { id: true } })];
+  }
+  for (const row of rows) {
+    const held = await prisma.raciAssignment.findUnique({ where: { activityId_roleId: { activityId: row.id, roleId } }, select: { id: true } });
+    if (!held) await prisma.raciAssignment.create({ data: { activityId: row.id, roleId, code: "RESPONSIBLE" } });
+  }
 }
 
 const updateStepSchema = z.object({
@@ -964,6 +986,12 @@ export async function updateProcessStep(
   // lane for every other step too, so the whole map's vertical placement is
   // recomputed rather than just this step's.
   await realignSwimlanes(parsed.data.processId);
+
+  // A role newly given to the step is its Responsible in the RACI (empty cells only; see makeOwnerResponsible).
+  if (parsed.data.assignedRoleId && parsed.data.assignedRoleId !== step.assignedRoleId) {
+    await makeOwnerResponsible(parsed.data.processId, parsed.data.stepId, parsed.data.assignedRoleId);
+    revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/raci`);
+  }
 
   await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);

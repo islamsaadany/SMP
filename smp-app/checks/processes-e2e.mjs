@@ -722,6 +722,38 @@ await A.page.locator("details[open] button:text-is('Add')").last().click();
 await A.page.waitForTimeout(1800);
 check((await q(ffp, 'select count(*)::int n from step_handoffs where "fromStepId"=$1', [s6[0].id]))[0].n === 1, "a hand-over to a step in another process is added from this step");
 
+/* ── skipping a gap mark, each one on its own ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+const skipBtns = () => A.page.locator("aside button[aria-label^='Skip:']");
+const nGaps = await skipBtns().count();
+check(nGaps >= 2, "a step with several marks has a Skip beside each one", String(nGaps));
+const firstText = (await skipBtns().first().getAttribute("aria-label")).replace(/^Skip: /, "");
+await skipBtns().first().click();
+await A.page.waitForTimeout(1800);
+const after1 = (await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6[0].id]))[0].g;
+check(after1.length === 1 && (await skipBtns().count()) === nGaps - 1, "skipping one mark skips only that one; the others stay", JSON.stringify([after1, await skipBtns().count()]));
+const asideTxt = (await A.page.locator("aside").innerText()).toLowerCase();
+check(asideTxt.includes("skipped for this step") && asideTxt.includes(firstText.toLowerCase()), "…and it is listed as skipped for this step");
+await A.page.locator("aside button[aria-label^='Bring back:']").first().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6[0].id]))[0].g.length === 0 && (await skipBtns().count()) === nGaps, "a skipped mark can be brought back");
+
+/* ── a notes box on a Start or End step ── */
+await A.page.locator("label:has-text('Step type') select").first().selectOption("START");
+await A.page.waitForTimeout(1500);
+check(await A.page.locator("label:has-text('Notes') textarea").first().isVisible(), "a Start step has a Notes box");
+await A.page.fill("label:has-text('Notes') textarea", "Starts when the month's books close.");
+await A.page.locator("label:has-text('Notes') textarea").blur();
+await A.page.waitForTimeout(1500);
+check((await q(ffp, 'select "stepNote" n from process_steps where id=$1', [s6[0].id]))[0].n === "Starts when the month's books close.", "…and what is written there is saved");
+const sopNote = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P6)).text();
+check(/Notes:/.test(sopNote) && /Starts when the month/.test(sopNote), "…and appears in the SOP");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("END");
+await A.page.waitForTimeout(1200);
+check(await A.page.locator("label:has-text('Notes') textarea").first().isVisible(), "an End step has a Notes box too");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(1200);
+
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");
 check(rep.status() === 200 && !/AI Review|from AI review/.test(await rep.text()), "the office's report page opens and says nothing from the AI review", rep.status());

@@ -32,6 +32,8 @@ export type ContentStep = {
   time: string[];
   /** The office's note on when and to whom this step escalates. Present only when one was written, so a process without one reads exactly as before. */
   escalation?: string;
+  /** The office's notes on the step; present only when written. */
+  note?: string;
   controls: { risk: string; control: string | null }[];
 };
 
@@ -55,7 +57,7 @@ export async function liveContent(processId: string): Promise<Content | null> {
     where: { id: processId },
     select: {
       processPurpose: true, inScope: true, outOfScope: true, kpis: true, sopVersion: true, sopEffectiveDate: true,
-      steps: { orderBy: [{ order: "asc" }, { createdAt: "asc" }], select: { id: true, type: true, label: true, detailedAction: true, escalationNote: true, raciSkipped: true, assignedRoleId: true, assignedRole: { select: { name: true } } } },
+      steps: { orderBy: [{ order: "asc" }, { createdAt: "asc" }], select: { id: true, type: true, label: true, detailedAction: true, escalationNote: true, stepNote: true, skippedGaps: true, raciSkipped: true, assignedRoleId: true, assignedRole: { select: { name: true } } } },
       controls: { orderBy: [{ order: "asc" }, { createdAt: "asc" }], select: { stepId: true, risk: true, control: true } },
       activities: { orderBy: { order: "asc" }, select: { id: true, name: true, relatedStepId: true, order: true, raciAssignments: { select: { roleId: true, code: true } } } },
       authorityAssignments: { include: AUTHORITY_ASSIGNMENT_INCLUDE },
@@ -105,13 +107,14 @@ export async function liveContent(processId: string): Promise<Content | null> {
       approval: say("MONEY"),
       time: say("TIME"),
       ...(s.escalationNote?.trim() ? { escalation: s.escalationNote.trim() } : {}),
+      ...(s.stepNote?.trim() ? { note: s.stepNote.trim() } : {}),
       controls: p.controls.filter((c) => c.stepId === s.id).map((c) => ({ risk: c.risk, control: c.control?.trim() || null })),
     };
   });
 
   /* the RACI's gaps, as the map and the RACI flag them (step-readiness.ts) */
   const byStep = deriveGapsByStep({
-    steps: p.steps.map((s) => ({ id: s.id, type: s.type, label: s.label, raciSkipped: s.raciSkipped })),
+    steps: p.steps.map((s) => ({ id: s.id, type: s.type, label: s.label, raciSkipped: s.raciSkipped, skippedGaps: s.skippedGaps })),
     activities: p.activities.map((a) => ({ id: a.id, name: a.name, relatedStepId: a.relatedStepId, order: a.order, assignments: a.raciAssignments })),
     authorityAssignments: p.authorityAssignments.map(toAuthorityAssignmentData),
     incomingStepIds: new Set(connections.map((c) => c.toStepId)),
@@ -149,7 +152,7 @@ export const sameContent = (a: Content, b: Content) => stable(a) === stable(b);
 /** The steps a new version changed or added, against the version before it (a step's number may move without it changing). */
 export function changedSteps(before: Content | null, now: Content): Set<string> {
   if (!before) return new Set();
-  const key = (s: ContentStep) => stable({ type: s.type, label: s.label, roleId: s.roleId, acts: s.acts, approval: s.approval, time: s.time, escalation: s.escalation ?? null, controls: s.controls });
+  const key = (s: ContentStep) => stable({ type: s.type, label: s.label, roleId: s.roleId, acts: s.acts, approval: s.approval, time: s.time, escalation: s.escalation ?? null, note: s.note ?? null, controls: s.controls });
   const was = new Map(before.steps.map((s) => [s.id, key(s)]));
   return new Set(now.steps.filter((s) => s.n && was.get(s.id) !== key(s)).map((s) => s.id));
 }

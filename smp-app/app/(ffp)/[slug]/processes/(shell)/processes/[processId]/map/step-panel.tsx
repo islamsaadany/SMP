@@ -9,7 +9,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useMessages } from "@/ffp/lib/i18n/client";
-import { deleteProcessStep, moveProcessStep, setStepMilestone, updateProcessStep, deleteStepConnection, createStepConnection } from "@/ffp/lib/actions/process";
+import { deleteProcessStep, moveProcessStep, setStepMilestone, updateProcessStep, deleteStepConnection, createStepConnection, setStepGapSkipped } from "@/ffp/lib/actions/process";
 import { setStepRaciCell } from "@/ffp/lib/actions/raci";
 import { addAuthorityRule, deleteAuthorityRule, updateAuthorityRule } from "@/ffp/lib/actions/authority";
 import { createProcessControl, updateProcessControl } from "@/ffp/lib/actions/process-quality";
@@ -79,6 +79,7 @@ export function StepPanel({
   const [acts, setActs] = useState(step.acts.join("\n"));
   const [sop, setSop] = useState(step.sop);
   const [escalation, setEscalation] = useState(step.escalation);
+  const [note, setNote] = useState(step.note);
   const [newTitle, setNewTitle] = useState<string | null>(null);
   const [arrowAdd, setArrowAdd] = useState<{ dir: "in" | "out"; other: string; label: string } | null>(null);
   const [handOutPick, setHandOutPick] = useState("");
@@ -93,7 +94,7 @@ export function StepPanel({
   const base = { workspaceId, processId, stepId: step.id };
 
   /* every save sends what the step is now, with the one change in it */
-  const save = (patch: { type?: MapStep["type"]; label?: string; roleId?: string; escalationNote?: string; detailedAction?: string[]; joinRequiresAll?: boolean; linkedProcessIds?: string[]; sop?: MapStep["sop"] }) => {
+  const save = (patch: { type?: MapStep["type"]; label?: string; roleId?: string; escalationNote?: string; stepNote?: string; detailedAction?: string[]; joinRequiresAll?: boolean; linkedProcessIds?: string[]; sop?: MapStep["sop"] }) => {
     const role = patch.roleId ?? roleId;
     const s = patch.sop;
     return run(() =>
@@ -105,6 +106,7 @@ export function StepPanel({
         swimlaneRoleId: role,
         ...(patch.detailedAction ? { detailedAction: patch.detailedAction } : {}),
         ...(patch.escalationNote !== undefined ? { escalationNote: patch.escalationNote } : {}),
+        ...(patch.stepNote !== undefined ? { stepNote: patch.stepNote } : {}),
         ...(patch.joinRequiresAll !== undefined ? { joinRequiresAll: patch.joinRequiresAll } : {}),
         ...(patch.linkedProcessIds ? { linkedProcessIds: patch.linkedProcessIds } : {}),
         ...(s ? { sopInputs: s.inputs, sopOutput: s.output, sopErrors: s.errors, exceptionHandling: s.risk } : {}),
@@ -122,6 +124,9 @@ export function StepPanel({
   };
   const saveSop = () => {
     if (JSON.stringify(sop) !== JSON.stringify(step.sop)) void save({ sop });
+  };
+  const saveNote = () => {
+    if (note.trim() !== step.note.trim()) void save({ stepNote: note.trim() });
   };
   const saveEscalation = () => {
     if (escalation.trim() !== step.escalation.trim()) void save({ escalationNote: escalation.trim() });
@@ -173,10 +178,41 @@ export function StepPanel({
           {type === "DECISION" ? ` · ${m.types.DECISION.toUpperCase()}` : ""}
         </span>
         {step.gaps.map((g) => (
-          <p key={g} className="mt-1 text-[12.5px] font-semibold text-[var(--bad-tx)]">
-            {m.gap[g]}
+          <p key={g} className="mt-1 flex items-start gap-2 text-[12.5px] font-semibold text-[var(--bad-tx)]">
+            <span className="flex-1">{m.gap[g]}</span>
+            {!ro && (
+              <button
+                type="button"
+                title={m.skipTip}
+                aria-label={`${m.skipGap}: ${m.gap[g]}`}
+                className="shrink-0 rounded border border-[var(--line)] bg-white px-1.5 py-px text-[11.5px] font-semibold text-[var(--ink-2)] hover:border-[var(--gold)]"
+                onClick={() => void run(() => setStepGapSkipped({ ...base, gap: g, skipped: true }))}
+              >
+                {m.skipGap}
+              </button>
+            )}
           </p>
         ))}
+        {step.skipped.length > 0 && (
+          <div className="mt-1.5 grid gap-1 rounded-md bg-[var(--surface-2)] px-2 py-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-[.08em] text-[var(--ink-3)]">{m.skippedTitle}</span>
+            {step.skipped.map((g) => (
+              <p key={g} className="flex items-start gap-2 text-[12.5px] text-[var(--ink-2)]">
+                <span className="flex-1">{m.gap[g]}</span>
+                {!ro && (
+                  <button
+                    type="button"
+                    aria-label={`${m.unskipGap}: ${m.gap[g]}`}
+                    className="shrink-0 text-[11.5px] font-semibold text-[var(--stone)] underline"
+                    onClick={() => void run(() => setStepGapSkipped({ ...base, gap: g, skipped: false }))}
+                  >
+                    {m.unskipGap}
+                  </button>
+                )}
+              </p>
+            ))}
+          </div>
+        )}
         {step.reviewNote && <p className="mt-1 rounded-md bg-[var(--over-bg)] px-2 py-1 text-[12.5px] text-[var(--ink-2)]">{m.reviewNote(step.reviewNote)}</p>}
       </div>
 
@@ -422,6 +458,11 @@ export function StepPanel({
           </div>
         </>
       )}
+
+      <label className={lbl}>
+        {m.stepNote}
+        <textarea className={`${field} min-h-[64px]`} value={note} disabled={ro} maxLength={2000} placeholder={m.stepNotePh} onChange={(e) => setNote(e.target.value)} onBlur={saveNote} />
+      </label>
 
       <details className="rounded-md border border-[var(--line-soft)] px-2.5 py-2">
         <summary className="cursor-pointer text-[12.5px] font-semibold text-[var(--stone)]">{m.more}</summary>

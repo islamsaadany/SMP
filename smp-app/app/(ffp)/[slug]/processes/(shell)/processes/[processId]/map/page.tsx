@@ -5,7 +5,7 @@ import { formatDate } from "@/ffp/lib/i18n/locale";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
-import { deriveGapsByStep } from "@/ffp/lib/domain/step-readiness";
+import { deriveGapsByStep, SKIPPABLE_GAPS, type SkippableGap } from "@/ffp/lib/domain/step-readiness";
 import { describeAuthorityRule } from "@/ffp/lib/domain/authority-table";
 import { changedSteps, inForce, liveContent, sameContent } from "@/ffp/lib/data/process-content";
 import { BulkAddStepsForm } from "./step-form";
@@ -96,7 +96,7 @@ export default async function ProcessMapPage(
   // What each step still needs, through the very builders the RACI and
   // Authority pages use, so the mark here and the flag there never disagree.
   const gapsByStepId = deriveGapsByStep({
-    steps: process.steps.map((s) => ({ id: s.id, type: s.type, label: s.label, raciSkipped: s.raciSkipped })),
+    steps: process.steps.map((s) => ({ id: s.id, type: s.type, label: s.label, raciSkipped: s.raciSkipped, skippedGaps: s.skippedGaps })),
     activities: activities.map((a) => ({ id: a.id, name: a.name, relatedStepId: a.relatedStepId, order: a.order, assignments: a.raciAssignments.map((x) => ({ roleId: x.roleId, code: x.code })) })),
     authorityAssignments: authorityData,
     incomingStepIds: new Set([...connections.map((c) => c.toStepId), ...handoffsIn.map((h) => h.toStepId)]),
@@ -133,9 +133,11 @@ export default async function ProcessMapPage(
       reviewNote: s.reviewNotes,
       sop: { inputs: s.sopInputs ?? "", output: s.sopOutput ?? "", errors: s.sopErrors ?? "", risk: s.exceptionHandling ?? "" },
       escalation: s.escalationNote ?? "",
+      note: s.stepNote ?? "",
       links: s.links.map((l) => l.targetProcessId),
       branches: s.branchedProcesses,
-      gaps: [...(gapsByStepId.get(s.id) ?? []), ...(own.some((c) => !c.control?.trim()) ? (["NO_CONTROL"] as const) : [])],
+      gaps: [...(gapsByStepId.get(s.id) ?? []), ...(own.some((c) => !c.control?.trim()) && !s.skippedGaps.includes("NO_CONTROL") ? (["NO_CONTROL"] as const) : [])],
+      skipped: s.skippedGaps.filter((g): g is SkippableGap => (SKIPPABLE_GAPS as readonly string[]).includes(g)),
       raci: { activities: mine.length, letters: Object.fromEntries((mine.length === 1 ? mine[0].raciAssignments : []).map((x) => [x.roleId, LETTER[x.code]])) },
       rules: {
         row,

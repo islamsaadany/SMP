@@ -574,6 +574,12 @@ model ProcessStep {
   /// When and to whom this step escalates, and any notes on it, in the office's own words (a note box on the Map's step form).
   escalationNote String?
 
+  /// The office's own notes on the step, for any type of step (the Start and End have no other box to write in).
+  stepNote String?
+
+  /// Gap marks the office has chosen to skip for this step ("not needed here"), each by its kind, so one can be skipped and the others kept.
+  skippedGaps String[] @default([])
+
   createdAt DateTime @default(now())
 
   @@index([processId])

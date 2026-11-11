@@ -21,15 +21,15 @@ export const processGaps = cache(async (workspaceId: string): Promise<Map<string
   const [steps, connections, activities, authorityAssignments, controls] = await Promise.all([
     prisma.processStep.findMany({
       where: { process: live },
-      select: { id: true, type: true, label: true, raciSkipped: true, processId: true },
+      select: { id: true, type: true, label: true, raciSkipped: true, skippedGaps: true, processId: true },
     }),
     prisma.stepConnection.findMany({ where: { toStep: { process: live } }, select: { toStepId: true } }),
     prisma.activity.findMany({ where: { process: live }, include: { raciAssignments: true }, orderBy: { order: "asc" } }),
     prisma.authorityAssignment.findMany({ where: { process: live }, include: AUTHORITY_ASSIGNMENT_INCLUDE }),
-    prisma.processControl.findMany({ where: { process: live }, select: { processId: true, control: true } }),
+    prisma.processControl.findMany({ where: { process: live }, select: { processId: true, stepId: true, control: true } }),
   ]);
   const byStep = deriveGapsByStep({
-    steps: steps.map((s) => ({ id: s.id, type: s.type, label: s.label, raciSkipped: s.raciSkipped })),
+    steps: steps.map((s) => ({ id: s.id, type: s.type, label: s.label, raciSkipped: s.raciSkipped, skippedGaps: s.skippedGaps })),
     activities: activities.map((a) => ({
       id: a.id,
       name: a.name,
@@ -52,10 +52,11 @@ export const processGaps = cache(async (workspaceId: string): Promise<Map<string
     d.gaps += g.length;
     for (const k of g) d.kinds.add(k);
   }
+  const noControlSkipped = new Set(steps.filter((s) => s.skippedGaps.includes("NO_CONTROL")).map((s) => s.id));
   for (const c of controls) {
     const d = of(c.processId);
     d.controls++;
-    if (!c.control?.trim()) { d.controlsMissing++; d.gaps++; }
+    if (!c.control?.trim() && !(c.stepId && noControlSkipped.has(c.stepId))) { d.controlsMissing++; d.gaps++; }
   }
   return out;
 });

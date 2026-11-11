@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useMessages } from "@/ffp/lib/i18n/client";
 import { addProcessStep, arrangeProcessStepsByFlow, createStepConnection } from "@/ffp/lib/actions/process";
 import { confirmProposedStep, deleteProposedStep } from "@/ffp/lib/actions/ai-review";
-import type { StepGap } from "@/ffp/lib/domain/step-readiness";
+import type { SkippableGap, StepGap } from "@/ffp/lib/domain/step-readiness";
 import { useCanEdit } from "../../../workspace-access";
 import { LaneDrawing, type DrawArrow, type DrawStep } from "../../../../lane-drawing";
 import { Modal } from "../../../../read/dialogs";
@@ -26,9 +26,12 @@ export type MapStep = DrawStep & {
   reviewNote: string | null;
   sop: { inputs: string; output: string; errors: string; risk: string };
   escalation: string;
+  note: string;
   links: string[];
   branches: { id: string; code: string; name: string }[];
   gaps: (StepGap | "NO_CONTROL")[];
+  /** The marks the office skipped for this step, each of which can be brought back. */
+  skipped: SkippableGap[];
   raci: { activities: number; letters: Record<string, "R" | "A" | "C" | "I"> };
   rules: { row: { id: string; kind: "activity" | "step" } | null; list: { id: string; text: string }[] };
   controls: { id: string; risk: string; control: string | null }[];

@@ -63,8 +63,13 @@ const GAP_ORDER: StepGap[] = [
   "INCOMPLETE_RULE",
 ];
 
+/** Every kind of mark a step can carry on the Map, the ones the office may skip for a step included. */
+export const SKIPPABLE_GAPS = ["PREDECESSOR", "ACCOUNTABLE", "TOO_MANY_ACCOUNTABLE", "RESPONSIBLE", "APPROVER", "INCOMPLETE_RULE", "NO_CONTROL"] as const;
+export type SkippableGap = (typeof SKIPPABLE_GAPS)[number];
+
 export type ReadinessInput = {
-  steps: TableStep[];
+  /** `skippedGaps`: the kinds of gap the office has chosen to skip for that step. They are left out of what it carries. */
+  steps: (TableStep & { skippedGaps?: readonly string[] })[];
   activities: (TableActivity & { assignments: { roleId: string; code: RaciCode }[] })[];
   authorityAssignments: AuthorityAssignmentData[];
   /** Ids of steps something connects into. */
@@ -115,7 +120,8 @@ export function deriveGapsByStep(input: ReadinessInput): Map<string, StepGap[]> 
     }
   }
 
+  const skipped = new Map(input.steps.map((step) => [step.id, new Set(step.skippedGaps ?? [])]));
   return new Map(
-    [...gaps].map(([stepId, set]) => [stepId, GAP_ORDER.filter((gap) => set.has(gap))])
+    [...gaps].map(([stepId, set]) => [stepId, GAP_ORDER.filter((gap) => set.has(gap) && !skipped.get(stepId)?.has(gap))])
   );
 }

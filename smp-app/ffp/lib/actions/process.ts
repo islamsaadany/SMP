@@ -13,6 +13,7 @@ import {
   wouldCreateCycle,
 } from "@/ffp/lib/domain/process-hierarchy";
 import { validateConnections } from "@/ffp/lib/domain/process-graph";
+import { SKIPPABLE_GAPS } from "@/ffp/lib/domain/step-readiness";
 import {
   summariseDeleteImpact,
   type ProcessDeleteImpact,
@@ -861,6 +862,7 @@ const updateStepSchema = z.object({
   exceptionHandling: z.string().trim().max(2000).optional().or(z.literal("")),
   // Escalation rules and notes — undefined leaves the stored value alone.
   escalationNote: z.string().trim().max(2000).optional().or(z.literal("")),
+  stepNote: z.string().trim().max(2000).optional().or(z.literal("")),
   // SOP detail — undefined leaves the stored value alone.
   sopInputs: z.string().trim().max(2000).optional().or(z.literal("")),
   sopOutput: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -924,6 +926,7 @@ export async function updateProcessStep(
         ? { exceptionHandling: parsed.data.exceptionHandling || null }
         : {}),
       ...(parsed.data.escalationNote !== undefined ? { escalationNote: parsed.data.escalationNote || null } : {}),
+      ...(parsed.data.stepNote !== undefined ? { stepNote: parsed.data.stepNote || null } : {}),
       ...(parsed.data.sopInputs !== undefined ? { sopInputs: parsed.data.sopInputs || null } : {}),
       ...(parsed.data.sopOutput !== undefined ? { sopOutput: parsed.data.sopOutput || null } : {}),
       ...(parsed.data.sopErrors !== undefined ? { sopErrors: parsed.data.sopErrors || null } : {}),
@@ -1367,3 +1370,37 @@ export async function createActivity(
 }
 
 export type { ActionError };
+
+
+const skipGapSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  stepId: z.string().min(1),
+  gap: z.enum(SKIPPABLE_GAPS),
+  skipped: z.boolean(),
+});
+
+/**
+ * Skips one kind of gap mark on one step ("not needed for this step"), or brings it back. Each kind is its own
+ * choice, so a step with several marks can have one skipped and keep the rest. Nothing else about the step
+ * changes; the mark simply stops being counted and drawn.
+ */
+export async function setStepGapSkipped(input: z.infer<typeof skipGapSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = skipGapSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, processId, stepId, gap, skipped } = parsed.data;
+
+  const access = await requireWorkspaceAccess(workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(workspaceId, processId);
+  if (!process) return notFound();
+  const step = await prisma.processStep.findUnique({ where: { id: stepId }, select: { processId: true, skippedGaps: true } });
+  if (!step || step.processId !== processId) return notFound();
+
+  const next = skipped ? [...new Set([...step.skippedGaps, gap])] : step.skippedGaps.filter((g) => g !== gap);
+  await prisma.processStep.update({ where: { id: stepId }, data: { skippedGaps: next } });
+
+  revalidatePath(`/${workspaceId}/processes/processes/${processId}`);
+  revalidatePath(`/${workspaceId}/processes/processes`);
+  return ok({ id: stepId });
+}

@@ -95,6 +95,7 @@ export function SopDocument({ workspaceId, companyName, firmName, sops }: { work
                     <td className="px-2 py-1.5">
                       <div className="font-semibold">{s.label}</div>
                       <div className="text-slate-600">{s.who ?? (work ? MISSING : "—")}</div>
+                      {s.note && <div className="mt-1 whitespace-pre-line text-slate-600"><span className="font-semibold">Notes:</span> {s.note}</div>}
                     </td>
                     <td className="px-2 py-1.5">
                       {s.how.length > 0 ? (

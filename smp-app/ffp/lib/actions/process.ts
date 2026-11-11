@@ -916,6 +916,13 @@ export async function updateProcessStep(
     if (validTargets !== targetProcessIds.length) return notFound();
   }
 
+  // A step's RACI row carries the name of its Activity, which was copied from the step when the first letter was
+  // set. Rename the Activity too when it still carries the step's old name, so the RACI never shows a name the
+  // step no longer has; an Activity the office named differently (a step split into finer lines) is left alone.
+  if (step.label !== parsed.data.label) {
+    await prisma.activity.updateMany({ where: { relatedStepId: parsed.data.stepId, name: step.label }, data: { name: parsed.data.label } });
+  }
+
   const updated = await prisma.processStep.update({
     where: { id: parsed.data.stepId },
     data: {

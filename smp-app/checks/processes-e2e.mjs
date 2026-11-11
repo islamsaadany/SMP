@@ -772,6 +772,22 @@ check(Math.abs((colC0.x + colC0.width / 2) - (colC1.x + colC1.width / 2)) > 40 &
 await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).click();
 check(await A.page.locator("label:has-text('Draw it beside the step before it')").count() === 0, "the first step has no such option");
 
+/* ── renaming a step on the Map renames its RACI row too ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+await A.page.locator(`[data-lane-grid] [data-step='${s6[2].id}']`).click();
+const roleOpt = await A.page.locator("select[aria-label='+ Add a role'] option").evaluateAll((o) => o.filter((x) => x.value).map((x) => x.value));
+await A.page.locator("select[aria-label='+ Add a role']").selectOption(roleOpt[0]);
+await A.page.waitForTimeout(1500);
+const actBefore = await q(ffp, 'select name from activities where "relatedStepId"=$1', [s6[2].id]);
+check(actBefore.length === 1, "setting a RACI letter on the Map makes the step's RACI row", JSON.stringify(actBefore));
+await A.page.fill("aside input[maxlength='200']", "Review journals before posting");
+await A.page.locator("aside input[maxlength='200']").blur();
+await A.page.waitForTimeout(1800);
+const actAfter = await q(ffp, 'select name from activities where "relatedStepId"=$1', [s6[2].id]);
+check(actAfter.length === 1 && actAfter[0].name === "Review journals before posting", "renaming the step renames its RACI row", JSON.stringify(actAfter));
+const raciHtml = await (await A.get("/" + S + "/processes/processes/" + P6 + "/raci")).text();
+check(raciHtml.includes("Review journals before posting") && !raciHtml.includes("Add a review of journals before posting"), "…and the RACI page shows the new name, not the old one");
+
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");
 check(rep.status() === 200 && !/AI Review|from AI review/.test(await rep.text()), "the office's report page opens and says nothing from the AI review", rep.status());

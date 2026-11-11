@@ -885,9 +885,15 @@ if (outsBefore.length === 1) {
   const outsAfter = await q(ffp, 'select "toStepId" t, label from step_connections where "fromStepId"=$1 order by label', [s6[0].id]);
   check(outsAfter.length === 2 && outsAfter.some((o) => o.label === "No" && o.t === s6[1].id) && outsAfter.some((o) => o.label === "Approved"), "…and goes to the step chosen, with the other way still there", JSON.stringify(outsAfter));
   check(!/two ways out/i.test(await A.page.locator("aside").innerText()), "…and the warning goes once there are two");
+  await A.page.waitForTimeout(500);
+  const dia = A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`);
+  check(await dia.getAttribute("data-shape") === "diamond" && await dia.locator("polygon").count() === 1, "a decision is drawn as the flowchart diamond");
+  const dh = (await dia.boundingBox()).height;
+  check(dh <= 96 && await A.page.locator("[data-lane-grid] svg path[marker-end], [data-lane-grid] svg path").count() >= 2, "…it fits its lane and its arrows are still drawn", dh);
 }
 await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
 await A.page.waitForTimeout(1500);
+check(await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") === null, "a task goes back to the plain box");
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

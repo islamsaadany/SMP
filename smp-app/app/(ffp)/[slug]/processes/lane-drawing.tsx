@@ -44,10 +44,12 @@ export type DrawStep = {
 export type DrawArrow = { from: string; to: string; label: string | null; dashed?: boolean };
 
 type Edge = { d: string; lx: number; ly: number; label: string | null; dashed: boolean };
-type Box = { left: number; right: number; top: number; bottom: number; cx: number; cy: number; col: number; lane: number };
+type Box = { left: number; right: number; top: number; bottom: number; cx: number; cy: number; col: number; lane: number; diamond: boolean };
 
 /** The grid's fixed measures: the lane label's column, a lane's height, the room above and below the lanes, a column's least width, and how far off a lane's line a channel run keeps. */
 const LABEL_W = 104, LANE_H = 96, PAD = 16, COL_MIN = 150, OFF = 5;
+/** A decision is the flowchart diamond: its four corners are where arrows meet it, so it is as wide as a box that still leaves a gutter, and short enough to keep clear of the channels between lanes. */
+const DIAMOND_W = 132, DIAMOND_H = 76;
 
 export function LaneDrawing({
   steps,
@@ -99,7 +101,7 @@ export function LaneDrawing({
         const r = L.querySelector<HTMLElement>(`[data-step="${s.id}"]`)?.getBoundingClientRect();
         if (!r) return;
         const left = (r.left - o.left) * k, right = (r.right - o.left) * k, top = (r.top - o.top) * k, bottom = (r.bottom - o.top) * k;
-        boxes.set(s.id, { left, right, top, bottom, cx: (left + right) / 2, cy: (top + bottom) / 2, col, lane: laneOf(s.lane) });
+        boxes.set(s.id, { left, right, top, bottom, cx: (left + right) / 2, cy: (top + bottom) / 2, col, lane: laneOf(s.lane), diamond: s.type === "DECISION" && !s.proposed });
       });
       /* the columns share the width left of the lane labels; a box sits in the middle of its column */
       const colW = (L.offsetWidth - LABEL_W) / Math.max(1, cols);
@@ -111,12 +113,27 @@ export function LaneDrawing({
       /* a box in this lane in the columns strictly between the two */
       const occupied = (lane: number, c1: number, c2: number) => steps.some((s, i) => colOf[i]! > c1 && colOf[i]! < c2 && laneOf(s.lane) === lane);
 
+      /* a decision's ways out, nearest first: the first leaves its right corner, the others its bottom or top corner, so Yes and No never share a line or a label */
+      const outsOf = new Map<string, DrawArrow[]>();
+      for (const c of connections) (outsOf.get(c.from) ?? outsOf.set(c.from, []).get(c.from)!).push(c);
+      for (const list of outsOf.values()) list.sort((x, y) => (boxes.get(x.to)?.col ?? 0) - (boxes.get(y.to)?.col ?? 0) || (boxes.get(x.to)?.lane ?? 0) - (boxes.get(y.to)?.lane ?? 0));
+
       const out: Edge[] = [];
       for (const c of connections) {
         const a = boxes.get(c.from), b = boxes.get(c.to);
         if (!a || !b) continue;
         const dashed = !!c.dashed;
         const end = b.left - 2;
+        const siblings = outsOf.get(c.from) ?? [];
+        if (a.diamond && siblings.length > 1 && siblings.indexOf(c) > 0 && b.col > a.col && b.lane !== a.lane) {
+          /* straight down (or up) from the corner, then level into the target; only when nothing sits in that column or along the run */
+          const blocked = steps.some((st, i) => colOf[i] === a.col && laneOf(st.lane) !== a.lane && (laneOf(st.lane) - a.lane) * (b.lane - a.lane) > 0 && Math.abs(laneOf(st.lane) - a.lane) <= Math.abs(b.lane - a.lane)) || occupied(b.lane, a.col, b.col);
+          if (!blocked) {
+            const down = b.lane > a.lane;
+            out.push({ d: `M${a.cx} ${down ? a.bottom : a.top}V${b.cy}H${end}`, lx: a.cx, ly: down ? (a.bottom + b.cy) / 2 : (a.top + b.cy) / 2, label: c.label, dashed });
+            continue;
+          }
+        }
         if (b.col > a.col) {
           const same = a.lane === b.lane;
           if (same && !occupied(a.lane, a.col, b.col)) {
@@ -140,7 +157,7 @@ export function LaneDrawing({
              when a box of that column sits in a lane between them, along the column's right margin instead, clear of the gutter the other arrows turn in */
           const between = steps.some((s, i) => colOf[i] === a.col && laneOf(s.lane) > Math.min(a.lane, b.lane) && laneOf(s.lane) < Math.max(a.lane, b.lane));
           if (!between) {
-            const x = Math.min(a.cx, b.cx) - 14;
+            const x = a.diamond || b.diamond ? a.cx : Math.min(a.cx, b.cx) - 14;
             const down = b.cy > a.cy;
             out.push({ d: down ? `M${x} ${a.bottom}V${b.top - 2}` : `M${x} ${a.top}V${b.bottom + 2}`, lx: x, ly: (down ? a.bottom + b.top : a.top + b.bottom) / 2, label: c.label, dashed });
           } else {
@@ -199,6 +216,42 @@ export function LaneDrawing({
             </>
           );
           const on = s.id === sel ? "shadow-[0_0_0_3px_var(--gold)]" : "";
+          if (s.type === "DECISION" && !s.proposed) {
+            const w = DIAMOND_W, h = DIAMOND_H;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                data-step={s.id}
+                data-shape="diamond"
+                style={{ ...pos, width: w, height: h }}
+                title={s.label}
+                aria-pressed={s.id === sel}
+                onClick={() => onPick(s.id)}
+                className="relative z-[2] self-center justify-self-center text-center"
+              >
+                <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
+                  <polygon
+                    points={`${w / 2},1.5 ${w - 1.5},${h / 2} ${w / 2},${h - 1.5} 1.5,${h / 2}`}
+                    strokeLinejoin="round"
+                    style={{ fill: "var(--surface)", stroke: s.id === sel ? "var(--gold)" : "var(--stone)", strokeWidth: s.id === sel ? 3 : 1.5 }}
+                  />
+                </svg>
+                <span className="relative flex h-full items-center justify-center px-[26px]">
+                  <span className="line-clamp-3 text-[10.5px] font-bold leading-[12px] text-[var(--ink)]">
+                    {s.n ? <span className="me-0.5 font-mono font-bold text-[var(--ink-3)]">{s.n}·</span> : null}
+                    {s.label}
+                  </span>
+                </span>
+                {s.changed && <span className="absolute left-1 top-0 rounded-[3px] bg-[var(--gold)] px-1 text-[9px] font-extrabold tracking-[.05em] text-[var(--on-accent)]">{m.changed.toUpperCase()}</span>}
+                {s.gap && (
+                  <span title={s.gap} className="absolute grid h-[18px] w-[18px] place-items-center rounded-full bg-[var(--bad)] text-[11px] font-extrabold text-white" style={{ right: 20, top: 2 }}>
+                    !
+                  </span>
+                )}
+              </button>
+            );
+          }
           if (ends && !pickEnds)
             return (
               <div key={s.id} data-step={s.id} style={pos} className="relative z-[2] w-[100px] self-center justify-self-center rounded-full border-[1.5px] border-[var(--field-line)] bg-[var(--surface-2)] px-[9px] py-1.5 text-center">

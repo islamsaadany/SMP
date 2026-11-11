@@ -170,15 +170,15 @@ check(/Status Draft/.test(rd1) && /Version —/.test(rd1) && /Approved By —/.t
 const nav = async (pg, path) => { await pg.goto(BASE + "/" + S + "/processes/processes/" + P2 + path, { waitUntil: "networkidle" }); return pg.$$eval("nav[aria-label='Process sections'] a", (a) => a.map((x) => x.textContent.trim())); };
 const current = (pg) => pg.$$eval("nav[aria-label='Process sections'] a[aria-current=page]", (a) => a.map((x) => x.textContent.trim()));
 const onMap = await nav(A.page, "/map");
-check(onMap.length === 10 && onMap[0] === "Map" && onMap.includes("Risks & controls") && onMap.includes("People") && /^Check with AI/.test(onMap[9]), "the Process Map page shows the builder's menu of the process's ten sections", JSON.stringify(onMap));
+check(onMap.length === 11 && onMap[0] === "Map" && onMap.includes("SOP") && onMap.includes("Risks & controls") && onMap.includes("People") && /^Check with AI/.test(onMap[10]), "the Process Map page shows the builder's menu of the process's eleven sections", JSON.stringify(onMap));
 for (const [pth, label] of [["/raci", "RACI"], ["/authority", "Authority"], ["/review", "Check with AI"]]) {
   const items = await nav(A.page, pth), on = await current(A.page);
-  check(items.length === 10 && on.length === 1 && on[0].startsWith(label), "…and " + pth.slice(1) + " carries the same menu, with " + label + " marked", JSON.stringify(on));
+  check(items.length === 11 && on.length === 1 && on[0].startsWith(label), "…and " + pth.slice(1) + " carries the same menu, with " + label + " marked", JSON.stringify(on));
 }
 const mapHref = await A.page.$eval("nav[aria-label='Process sections'] a:has-text('Map')", (a) => a.getAttribute("href")).catch(() => null);
 check(mapHref === "/" + S + "/processes/processes/" + P2 + "/map", "the menu's Map goes to this process's own map, not the list", mapHref);
 const onPage = await nav(A.page, "");
-check(new URL(A.page.url()).pathname.endsWith("/" + P2 + "/map") && onPage.length === 10, "the process's own address opens the builder on its Map", A.page.url());
+check(new URL(A.page.url()).pathname.endsWith("/" + P2 + "/map") && onPage.length === 11, "the process's own address opens the builder on its Map", A.page.url());
 await nav(A.page, "/map");
 await A.page.click("nav[aria-label='Process sections'] >> text=Risks & controls");
 await A.page.waitForURL(/tab=risks/, { timeout: 20000 });

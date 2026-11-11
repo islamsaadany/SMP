@@ -261,7 +261,7 @@ export const en = {
       removeAsk: (label: string) => `Remove “${label}”? Its RACI letters and rules go with it, and the steps either side are joined. Its risks stay on the process, no longer pinned to a step.`,
       removeYes: "Remove",
       cancel: "Cancel",
-      more: "More: type, arrows, hand-overs, links and the SOP",
+      more: "More: arrows, hand-overs, links and moving the step",
       type: "Type",
       typeLabel: "Step type",
       newTitle: "+ A title that is not in the company structure",

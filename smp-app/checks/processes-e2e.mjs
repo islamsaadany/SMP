@@ -698,6 +698,13 @@ check((await q(ffp, 'select "escalationNote" e from process_steps where id=$1', 
 const sopEsc = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P6)).text();
 check(/Escalation:/.test(sopEsc) && /Head of Finance; over 50,000/.test(sopEsc), "…and appears in the SOP");
 
+check(await A.page.locator("label:has-text('Inputs, tools and systems') textarea").isVisible() && await A.page.locator("label:has-text('Expected output') textarea").isVisible(), "the SOP's inputs and output boxes are on the step's form, not folded away");
+await A.page.fill("label:has-text('Inputs, tools and systems') textarea", "Trial balance, the ERP's journal screen");
+await A.page.fill("label:has-text('Expected output') textarea", "Posted and reviewed journals");
+await A.page.locator("label:has-text('Expected output') textarea").blur();
+await A.page.waitForTimeout(1500);
+const sopRow = (await q(ffp, 'select "sopInputs" i, "sopOutput" o from process_steps where id=$1', [s6[0].id]))[0];
+check(sopRow.i === "Trial balance, the ERP's journal screen" && sopRow.o === "Posted and reviewed journals", "…and they save", JSON.stringify(sopRow));
 await A.page.click("summary:has-text('More')");
 await A.page.click("button:text-is('+ Add a step it comes from')");
 await A.page.locator("details[open] select[aria-label='+ Add a step it comes from']").selectOption(s6[1].id);

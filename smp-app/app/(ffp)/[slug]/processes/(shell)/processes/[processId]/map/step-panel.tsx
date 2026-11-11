@@ -275,6 +275,24 @@ export function StepPanel({
             <textarea className={`${field} min-h-[64px]`} value={acts} disabled={ro} onChange={(e) => setActs(e.target.value)} onBlur={saveActs} />
           </label>
 
+          <div className="grid gap-2">
+            <span className={lbl}>{m.sop}</span>
+            {(
+              [
+                ["inputs", m.sopInputs],
+                ["output", m.sopOutput],
+                ["errors", m.sopErrors],
+                ["risk", m.sopRisk],
+              ] as const
+            ).map(([k, t]) => (
+              <label key={k} className={lbl}>
+                {t}
+                <textarea className={`${field} min-h-[48px]`} value={sop[k]} disabled={ro} maxLength={2000} onChange={(e) => setSop((x) => ({ ...x, [k]: e.target.value }))} onBlur={saveSop} />
+              </label>
+            ))}
+          </div>
+
+
           <div className="grid gap-1.5">
             <span className={lbl}>{m.involved}</span>
             {step.raci.activities > 1 ? (
@@ -623,23 +641,6 @@ export function StepPanel({
               </div>
             </div>
           )}
-
-          <div className="grid gap-2">
-            <span className={sub}>{m.sop}</span>
-            {(
-              [
-                ["inputs", m.sopInputs],
-                ["output", m.sopOutput],
-                ["errors", m.sopErrors],
-                ["risk", m.sopRisk],
-              ] as const
-            ).map(([k, t]) => (
-              <label key={k} className={lbl}>
-                {t}
-                <textarea className={`${field} min-h-[48px]`} value={sop[k]} disabled={ro} maxLength={2000} onChange={(e) => setSop((x) => ({ ...x, [k]: e.target.value }))} onBlur={saveSop} />
-              </label>
-            ))}
-          </div>
 
           {!ro && (
             <div className="flex flex-wrap gap-1.5">

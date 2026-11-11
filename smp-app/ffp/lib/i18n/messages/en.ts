@@ -509,6 +509,8 @@ export const en = {
       timeLimit: "Time limit",
       escalationLabel: "Escalation",
       noteLabel: "Notes",
+      arrowFrom: "From",
+      arrowTo: "To",
       control: (c: string) => `Control: ${c}`,
       noControlFor: (risk: string) => `“${risk}” has no control`,
       riskLine: (risk: string, control: string | null) => (control ? `Risk: ${risk} · Control: ${control}` : `Risk: ${risk} · no control yet`),

@@ -43,7 +43,7 @@ export type DrawStep = {
 };
 export type DrawArrow = { from: string; to: string; label: string | null; dashed?: boolean };
 
-type Edge = { d: string; lx: number; ly: number; label: string | null; dashed: boolean };
+type Edge = { from: string; to: string; d: string; lx: number; ly: number; label: string | null; dashed: boolean };
 type Box = { left: number; right: number; top: number; bottom: number; cx: number; cy: number; col: number; lane: number; diamond: boolean };
 
 /* a decision's ways out read at a glance: the "no" side red, the "yes" side green; any other name stays plain */
@@ -83,6 +83,9 @@ export function LaneDrawing({
   const marker = useId().replace(/:/g, "");
   const grid = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState<Edge[]>([]);
+  /* the arrow a click picked, to say where it starts and where it ends */
+  const [pickedEdge, setPickedEdge] = useState<number | null>(null);
+  const nameOf = (id: string) => { const st = steps.find((x) => x.id === id); return st ? (st.n ? `${st.n}· ` : "") + st.label : ""; };
 
   /* a step's column: its own, or the one before it when it was set beside that step and sits in a lane nothing in that column uses */
   const colOf: number[] = [];
@@ -123,10 +126,10 @@ export function LaneDrawing({
       /* a box in this lane in the columns strictly between the two */
       const occupied = (lane: number, c1: number, c2: number) => steps.some((s, i) => colOf[i]! > c1 && colOf[i]! < c2 && laneOf(s.lane) === lane);
 
-      /* a decision's ways out, nearest first: the first leaves its right corner, the others its bottom or top corner, so Yes and No never share a line or a label */
+      /* a decision's ways out, forward ones nearest first and a way back last (it leaves the bottom corner, so no forward one may share that line): the first leaves its right corner, the others its bottom or top corner, so Yes and No never share a line or a label */
       const outsOf = new Map<string, DrawArrow[]>();
       for (const c of connections) (outsOf.get(c.from) ?? outsOf.set(c.from, []).get(c.from)!).push(c);
-      for (const list of outsOf.values()) list.sort((x, y) => (boxes.get(x.to)?.col ?? 0) - (boxes.get(y.to)?.col ?? 0) || (boxes.get(x.to)?.lane ?? 0) - (boxes.get(y.to)?.lane ?? 0));
+      for (const list of outsOf.values()) list.sort((x, y) => Number((boxes.get(x.to)?.col ?? 0) <= (boxes.get(x.from)?.col ?? 0)) - Number((boxes.get(y.to)?.col ?? 0) <= (boxes.get(y.from)?.col ?? 0)) || (boxes.get(x.to)?.col ?? 0) - (boxes.get(y.to)?.col ?? 0) || (boxes.get(x.to)?.lane ?? 0) - (boxes.get(y.to)?.lane ?? 0));
 
       const out: Edge[] = [];
       for (const c of connections) {
@@ -140,27 +143,27 @@ export function LaneDrawing({
           const blocked = steps.some((st, i) => colOf[i] === a.col && laneOf(st.lane) !== a.lane && (laneOf(st.lane) - a.lane) * (b.lane - a.lane) > 0 && Math.abs(laneOf(st.lane) - a.lane) <= Math.abs(b.lane - a.lane)) || occupied(b.lane, a.col, b.col);
           if (!blocked) {
             const down = b.lane > a.lane;
-            out.push({ d: `M${a.cx} ${down ? a.bottom : a.top}V${b.cy}H${end}`, lx: a.cx, ly: down ? (a.bottom + b.cy) / 2 : (a.top + b.cy) / 2, label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.cx} ${down ? a.bottom : a.top}V${b.cy}H${end}`, lx: a.cx, ly: down ? (a.bottom + b.cy) / 2 : (a.top + b.cy) / 2, label: c.label, dashed });
             continue;
           }
         }
         if (b.col > a.col) {
           const same = a.lane === b.lane;
           if (same && !occupied(a.lane, a.col, b.col)) {
-            out.push({ d: `M${a.right} ${a.cy}H${end}`, lx: (a.right + end) / 2, ly: a.cy - 9, label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${end}`, lx: (a.right + end) / 2, ly: a.cy - 9, label: c.label, dashed });
           } else if (!same && !occupied(b.lane, a.col, b.col)) {
             /* turn in the gutter after the source, come in level with the target */
             const gx = gutterAfter(a.col);
-            out.push({ d: `M${a.right} ${a.cy}H${gx}V${b.cy}H${end}`, lx: gx, ly: byTurn(a, b), label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${gx}V${b.cy}H${end}`, lx: gx, ly: byTurn(a, b), label: c.label, dashed });
           } else if (!same && !occupied(a.lane, a.col, b.col)) {
             /* run level with the source, turn in the gutter before the target */
             const gx = gutterAfter(b.col - 1);
-            out.push({ d: `M${a.right} ${a.cy}H${gx}V${b.cy}H${end}`, lx: gx, ly: byTurn(b, a), label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${gx}V${b.cy}H${end}`, lx: gx, ly: byTurn(b, a), label: c.label, dashed });
           } else {
             /* a box in the way either way: along the channel beside the source's lane, toward the target's */
             const ch = !same ? (a.lane < b.lane ? channelBelow(a.lane) : channelAbove(a.lane)) : a.lane + 1 < lanes.length ? channelBelow(a.lane) : channelAbove(a.lane);
             const g1 = gutterAfter(a.col), g2 = gutterAfter(b.col - 1);
-            out.push({ d: `M${a.right} ${a.cy}H${g1}V${ch}H${g2}V${b.cy}H${end}`, lx: (g1 + g2) / 2, ly: ch, label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${g1}V${ch}H${g2}V${b.cy}H${end}`, lx: (g1 + g2) / 2, ly: ch, label: c.label, dashed });
           }
         } else if (b.col === a.col) {
           /* two steps in one column: straight down (or up) between the boxes, a little left of the middle so a loop leaving the middle of the box is not drawn over it;
@@ -169,15 +172,15 @@ export function LaneDrawing({
           if (!between) {
             const x = a.diamond || b.diamond ? a.cx : Math.min(a.cx, b.cx) - 14;
             const down = b.cy > a.cy;
-            out.push({ d: down ? `M${x} ${a.bottom}V${b.top - 2}` : `M${x} ${a.top}V${b.bottom + 2}`, lx: x, ly: (down ? a.bottom + b.top : a.top + b.bottom) / 2, label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: down ? `M${x} ${a.bottom}V${b.top - 2}` : `M${x} ${a.top}V${b.bottom + 2}`, lx: x, ly: (down ? a.bottom + b.top : a.top + b.bottom) / 2, label: c.label, dashed });
           } else {
             const x = Math.max(a.right, b.right) + 9;
-            out.push({ d: `M${a.right} ${a.cy}H${x}V${b.cy}H${b.right + 2}`, lx: x, ly: (a.cy + b.cy) / 2, label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${x}V${b.cy}H${b.right + 2}`, lx: x, ly: (a.cy + b.cy) / 2, label: c.label, dashed });
           }
         } else {
           /* back: from under the source, along the channel under the lower lane, up into the target */
           const ch = channelBelow(Math.max(a.lane, b.lane)) + 2 * OFF;
-          out.push({ d: `M${a.cx} ${a.bottom}V${ch}H${b.cx}V${b.bottom + 2}`, lx: (a.cx + b.cx) / 2, ly: ch, label: c.label, dashed });
+          out.push({ from: c.from, to: c.to, d: `M${a.cx} ${a.bottom}V${ch}H${b.cx}V${b.bottom + 2}`, lx: (a.cx + b.cx) / 2, ly: ch, label: c.label, dashed });
         }
       }
       setEdges(out);
@@ -309,6 +312,10 @@ export function LaneDrawing({
               <path d="M0 0 8 4 0 8z" style={{ fill: "var(--gold)" }} />
             </marker>
           </defs>
+          {edges.map((e, i) => (
+            <path key={`h${i}`} d={e.d} fill="none" stroke="transparent" strokeWidth="12" data-arrow-hit={i} style={{ pointerEvents: "stroke", cursor: "pointer" }}
+              onClick={(ev) => { ev.stopPropagation(); setPickedEdge(pickedEdge === i ? null : i); }} />
+          ))}
           {edges.map((e, i) => {
             const t = e.dashed ? null : tone(e.label);
             return (
@@ -316,7 +323,7 @@ export function LaneDrawing({
               key={i}
               d={e.d}
               fill="none"
-              strokeWidth={t ? 2 : 1.5}
+              strokeWidth={pickedEdge === i ? 3.5 : t ? 2 : 1.5}
               strokeLinejoin="round"
               strokeDasharray={e.dashed ? "4 3" : undefined}
               markerEnd={`url(#${marker}${e.dashed ? "g" : t ?? "a"})`}
@@ -338,6 +345,21 @@ export function LaneDrawing({
               </g>
             );
           })}
+          {pickedEdge !== null && edges[pickedEdge] ? (() => {
+            const e = edges[pickedEdge]!;
+            const [sx, sy] = e.d.slice(1).split(/[HV]/)[0]!.split(/[ ,]/).map(Number);
+            const a = `${m.arrowFrom}: ${nameOf(e.from)}`, b = `${m.arrowTo}: ${nameOf(e.to)}`;
+            const w = Math.min(260, Math.max(a.length, b.length) * 6.2 + 18);
+            const x = Math.max(LABEL_W + 6, e.lx - w / 2), y = e.ly + 14;
+            return (
+              <g data-arrow-info style={{ pointerEvents: "none" }}>
+                <circle cx={sx} cy={sy} r="4" style={{ fill: "var(--gold)" }} />
+                <rect x={x} y={y} width={w} height="38" rx="5" style={{ fill: "var(--surface)", stroke: "var(--gold)", strokeWidth: 1.5 }} />
+                <text x={x + 8} y={y + 15} fontSize="10.5" fontWeight="600" style={{ fill: "var(--ink)" }}>{a.length > 40 ? a.slice(0, 39) + "…" : a}</text>
+                <text x={x + 8} y={y + 30} fontSize="10.5" fontWeight="600" style={{ fill: "var(--ink)" }}>{b.length > 40 ? b.slice(0, 39) + "…" : b}</text>
+              </g>
+            );
+          })() : null}
         </svg>
       </div>
     </div>

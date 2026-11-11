@@ -891,12 +891,18 @@ if (outsBefore.length === 1) {
   const dh = (await dia.boundingBox()).height;
   const strokes = await A.page.locator("[data-lane-grid] svg path[marker-end]").evaluateAll((ps) => ps.map((x) => x.style.stroke));
   check(strokes.some((c) => /180, 35, 24|b42318/i.test(c)) && strokes.some((c) => /47, 125, 79|2f7d4f/i.test(c)), "the No way out is drawn red and the Approved one green", JSON.stringify(strokes));
+  await A.page.locator("[data-arrow-hit]").first().click({ force: true, position: { x: 2, y: 2 } }).catch(() => {});
+  await A.page.locator("[data-arrow-hit]").first().dispatchEvent("click");
+  await A.page.waitForTimeout(300);
+  const info = await A.page.locator("[data-arrow-info]").first().textContent().catch(() => "");
+  check(/From:/.test(info) && /To:/.test(info), "clicking an arrow says where it starts and where it ends", info);
   if (process.env.SHOT) await A.page.locator("[data-lane-grid]").screenshot({ path: process.env.SHOT });
   check(dh <= 96 && await A.page.locator("[data-lane-grid] svg path[marker-end], [data-lane-grid] svg path").count() >= 2, "…it fits its lane and its arrows are still drawn", dh);
 }
 await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForFunction((id) => !document.querySelector(`[data-lane-grid] [data-step='${id}'][data-shape]`), s6[0].id, { timeout: 8000 }).catch(() => {});
 await A.page.waitForTimeout(1500);
-check(await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") === null, "a task goes back to the plain box");
+check(await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") === null, "a task goes back to the plain box", await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") + " / " + (await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type);
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

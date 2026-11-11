@@ -10748,3 +10748,7 @@ On the Map and the readers' Flow, a Decision step is now the standard diamond (a
 ## §761 — Yes / No ways out are coloured (2026-11-19)
 
 On the Map and readers' Flow, a decision's "No / Rejected / Denied…" way out is drawn red and its "Yes / Approved…" way green (line, arrow head and label); any other name stays grey. Processes without named ways out are unchanged. Processes e2e 220 ok.
+
+## §762 — Click an arrow to see its two ends; a way back no longer shares a decision's line (2026-11-20)
+
+On the Map and readers' Flow, clicking an arrow thickens it, marks where it starts and shows "From: … / To: …" (click again to close). A decision's way back now leaves the bottom corner while forward ways leave the right corner first, so Yes and No no longer run on one line. Processes e2e 221 ok.

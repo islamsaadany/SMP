@@ -510,6 +510,8 @@ export const ar: Messages = {
       timeLimit: "المهلة",
       escalationLabel: "التصعيد",
       noteLabel: "ملاحظات",
+      arrowFrom: "من",
+      arrowTo: "إلى",
       control: (c: string) => `الضابط: ${c}`,
       noControlFor: (risk: string) => `«${risk}» بلا ضابط`,
       riskLine: (risk: string, control: string | null) => (control ? `الخطر: ${risk} · الضابط: ${control}` : `الخطر: ${risk} · لا ضابط بعد`),

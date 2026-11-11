@@ -1527,3 +1527,42 @@ export async function moveProcessInOrder(input: z.infer<typeof moveProcessSchema
   revalidatePath(`/${workspaceId}/processes/processes`);
   return ok({ id: processId });
 }
+
+
+const updateConnectionSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  connectionId: z.string().min(1),
+  /** The name of this way out of a decision ("Yes", "Approved"); empty clears it. Undefined leaves it. */
+  label: z.string().trim().max(60).optional(),
+  /** Where this arrow goes. Undefined leaves it. */
+  toStepId: z.string().min(1).optional(),
+});
+
+/** Renames an arrow or sends it to a different step of the same process (a decision's outcomes are edited in place). */
+export async function updateStepConnection(input: z.infer<typeof updateConnectionSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = updateConnectionSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, processId, connectionId, label, toStepId } = parsed.data;
+
+  const access = await requireWorkspaceAccess(workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(workspaceId, processId);
+  if (!process) return notFound();
+
+  const conn = await prisma.stepConnection.findUnique({ where: { id: connectionId } });
+  if (!conn || conn.processId !== processId) return notFound();
+  if (toStepId) {
+    if (toStepId === conn.fromStepId) return validationError("Pick a different step");
+    const target = await prisma.processStep.findUnique({ where: { id: toStepId }, select: { processId: true } });
+    if (!target || target.processId !== processId) return notFound();
+  }
+
+  await prisma.stepConnection.update({
+    where: { id: connectionId },
+    data: { ...(label !== undefined ? { label: label || null } : {}), ...(toStepId ? { toStepId } : {}) },
+  });
+  await resetIfInForce(processId);
+  revalidatePath(`/${workspaceId}/processes/processes/${processId}/map`);
+  return ok({ id: connectionId });
+}

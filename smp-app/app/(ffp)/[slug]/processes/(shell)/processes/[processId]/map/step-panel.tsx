@@ -9,7 +9,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useMessages } from "@/ffp/lib/i18n/client";
-import { deleteProcessStep, moveProcessStep, setStepMilestone, updateProcessStep, deleteStepConnection, createStepConnection, setStepGapSkipped } from "@/ffp/lib/actions/process";
+import { deleteProcessStep, moveProcessStep, setStepMilestone, updateProcessStep, deleteStepConnection, createStepConnection, setStepGapSkipped, updateStepConnection } from "@/ffp/lib/actions/process";
 import { setStepRaciCell } from "@/ffp/lib/actions/raci";
 import { addAuthorityRule, deleteAuthorityRule, updateAuthorityRule } from "@/ffp/lib/actions/authority";
 import { createProcessControl, updateProcessControl } from "@/ffp/lib/actions/process-quality";
@@ -84,6 +84,8 @@ export function StepPanel({
   const [newTitle, setNewTitle] = useState<string | null>(null);
   const [arrowAdd, setArrowAdd] = useState<{ dir: "in" | "out"; other: string; label: string } | null>(null);
   const [handOutPick, setHandOutPick] = useState("");
+  const [outLabels, setOutLabels] = useState<Record<string, string>>({});
+  const [newOutcome, setNewOutcome] = useState<{ label: string; to: string } | null>(null);
   const [letters, setLetters] = useState<Record<string, Letter>>(step.raci.letters);
   /* what is typed into each control, by risk, until it is saved: a risk added after the step was picked gets its own box too */
   const [controls, setControls] = useState<Record<string, string>>({});
@@ -321,6 +323,109 @@ export function StepPanel({
             {m.sameColumn}
           </label>
           {steps[i - 1]!.lane === step.lane && <span className="text-[11.5px] text-[var(--ink-3)]">{m.sameColumnLane}</span>}
+        </div>
+      )}
+
+      {type === "DECISION" && (
+        <div className="grid gap-1.5 rounded-md border border-[var(--line)] px-2.5 py-2">
+          <span className={lbl}>{m.outcomesTitle}</span>
+          <span className="text-[11.5px] text-[var(--ink-3)]">{m.outcomesHint}</span>
+          <datalist id={`outcome-names-${step.id}`}>
+            {["Yes", "No", "Approved", "Rejected"].map((x) => (
+              <option key={x} value={x} />
+            ))}
+          </datalist>
+          {outs.length === 0 && <span className="text-[12.5px] text-[var(--ink-3)]">{m.outcomeNone}</span>}
+          {outs.map((a) => (
+            <div key={a.id} className="grid gap-1 rounded-md bg-[var(--surface-2)] p-1.5">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5">
+                <input
+                  className={field}
+                  list={`outcome-names-${step.id}`}
+                  value={outLabels[a.id] ?? a.label ?? ""}
+                  disabled={ro}
+                  maxLength={60}
+                  aria-label={m.outcomeName}
+                  placeholder="Yes"
+                  onChange={(e) => setOutLabels((x) => ({ ...x, [a.id]: e.target.value }))}
+                  onBlur={() => {
+                    const v = outLabels[a.id];
+                    if (v !== undefined && v.trim() !== (a.label ?? "")) void run(() => updateStepConnection({ workspaceId, processId, connectionId: a.id, label: v.trim() }));
+                  }}
+                />
+                {!ro ? (
+                  <button type="button" className={xdel} aria-label={m.removeArrow} onClick={() => void run(() => deleteStepConnection({ workspaceId, processId, connectionId: a.id }))}>
+                    ×
+                  </button>
+                ) : (
+                  <span />
+                )}
+              </div>
+              <select
+                className={field}
+                value={a.to}
+                disabled={ro}
+                aria-label={m.outcomeTo}
+                onChange={(e) => void run(() => updateStepConnection({ workspaceId, processId, connectionId: a.id, toStepId: e.target.value }))}
+              >
+                {steps
+                  .filter((x) => x.id !== step.id)
+                  .map((x) => (
+                    <option key={x.id} value={x.id}>
+                      → {stepName(x)}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          ))}
+          {outs.length === 1 && <span className="text-[12px] font-semibold text-[var(--attn-tx)]">{m.outcomeNeedTwo}</span>}
+          {!ro &&
+            (newOutcome ? (
+              <div className="grid gap-1.5">
+                <input
+                  className={field}
+                  list={`outcome-names-${step.id}`}
+                  value={newOutcome.label}
+                  maxLength={60}
+                  aria-label={m.outcomeName}
+                  placeholder="Yes"
+                  onChange={(e) => setNewOutcome({ ...newOutcome, label: e.target.value })}
+                />
+                <select className={field} value={newOutcome.to} aria-label={m.outcomeTo} onChange={(e) => setNewOutcome({ ...newOutcome, to: e.target.value })}>
+                  <option value="">{m.arrowPick}</option>
+                  {steps
+                    .filter((x) => x.id !== step.id)
+                    .map((x) => (
+                      <option key={x.id} value={x.id}>
+                        {stepName(x)}
+                      </option>
+                    ))}
+                </select>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    className={btnGold}
+                    disabled={!newOutcome.to}
+                    onClick={() =>
+                      void run(() => createStepConnection({ workspaceId, processId, fromStepId: step.id, toStepId: newOutcome.to, label: newOutcome.label.trim() })).then((r) => {
+                        if (r.ok) setNewOutcome(null);
+                      })
+                    }
+                  >
+                    {m.connGo}
+                  </button>
+                  <button type="button" className={btn} onClick={() => setNewOutcome(null)}>
+                    {m.cancel}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <button type="button" className={btn} onClick={() => setNewOutcome({ label: outs.length === 0 ? "Yes" : outs.length === 1 ? "No" : "", to: "" })}>
+                  {m.outcomeAdd}
+                </button>
+              </div>
+            ))}
         </div>
       )}
 

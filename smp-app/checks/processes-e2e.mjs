@@ -863,6 +863,32 @@ await A.page.locator("label:has-text('Who does it') select").first().selectOptio
 await A.page.waitForTimeout(2200);
 check((await q(ffp, `select code from raci_assignments where "activityId"=$1 and "roleId"=$2`, [actId, target.id]))[0].code === "CONSULTED", "…and a letter somebody set is never overwritten");
 
+/* ── a decision names its ways out: Yes and No, Approved and Rejected ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).click();
+check(await A.page.getByText("Outcomes of this decision").count() === 0, "a task has no outcomes block");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("DECISION");
+await A.page.waitForTimeout(1800);
+check(await A.page.getByText("Outcomes of this decision").first().isVisible(), "a decision shows its Outcomes");
+const outsBefore = await q(ffp, 'select id, "toStepId" t, label from step_connections where "fromStepId"=$1', [s6[0].id]);
+check(outsBefore.length >= 1 && /two ways out/i.test(await A.page.locator("aside").innerText()) === (outsBefore.length === 1), "…and says it needs two ways out while it has only one", JSON.stringify(outsBefore));
+await A.page.locator("aside input[aria-label='Name of this way out']").first().fill("Approved");
+await A.page.locator("aside input[aria-label='Name of this way out']").first().blur();
+await A.page.waitForTimeout(1600);
+check((await q(ffp, 'select label from step_connections where id=$1', [outsBefore[0].id]))[0].label === "Approved", "a way out can be named in place");
+if (outsBefore.length === 1) {
+  await A.page.getByRole("button", { name: "+ Add an outcome" }).click();
+  check((await A.page.locator("aside input[aria-label='Name of this way out']").last().inputValue()) === "No", "…the second way out starts as No");
+  await A.page.locator("aside select[aria-label='Goes to']").last().selectOption(s6[1].id);
+  await A.page.locator("aside button:text-is('Connect')").last().click();
+  await A.page.waitForTimeout(1800);
+  const outsAfter = await q(ffp, 'select "toStepId" t, label from step_connections where "fromStepId"=$1 order by label', [s6[0].id]);
+  check(outsAfter.length === 2 && outsAfter.some((o) => o.label === "No" && o.t === s6[1].id) && outsAfter.some((o) => o.label === "Approved"), "…and goes to the step chosen, with the other way still there", JSON.stringify(outsAfter));
+  check(!/two ways out/i.test(await A.page.locator("aside").innerText()), "…and the warning goes once there are two");
+}
+await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(1500);
+
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");
 check(rep.status() === 200 && !/AI Review|from AI review/.test(await rep.text()), "the office's report page opens and says nothing from the AI review", rep.status());

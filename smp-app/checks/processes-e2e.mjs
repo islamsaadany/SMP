@@ -806,6 +806,35 @@ check((await q(ffp, 'select "sopInputs" i from process_steps where id=$1', [s6[1
 const sopDot = await A.page.getByRole("link", { name: "SOP", exact: true }).first().locator("span").last().getAttribute("class");
 check(/rounded-full/.test(sopDot ?? ""), "…and the SOP item carries a status dot");
 
+/* ── the library can be arranged: sort, group, and my own order ── */
+const libCodes = async () => A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector(".font-mono")?.textContent?.trim()).filter(Boolean));
+await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
+const byCodeNow = await libCodes();
+check(await A.page.locator("select").filter({ hasText: "My order" }).count() === 1 && byCodeNow.join() === [...byCodeNow].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).join(), "the library has an Arrange bar, and by default is still in code order", byCodeNow.join());
+await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name", { waitUntil: "networkidle" });
+const byName = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector("a.font-bold")?.textContent?.trim()).filter(Boolean));
+check(byName.length >= 5 && byName.join() === [...byName].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })).join(), "arranged by name, the mains are in name order", byName.join(" | "));
+await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name&adir=desc", { waitUntil: "networkidle" });
+const byNameDesc = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector("a.font-bold")?.textContent?.trim()).filter(Boolean));
+check(byNameDesc.join() === [...byName].reverse().join(), "…and reversed", byNameDesc.join(" | "));
+await A.page.goto(BASE + "/" + S + "/processes/processes?group=dept", { waitUntil: "networkidle" });
+check(/No department/i.test(await body(A.page)), "grouped by department, a process with none is under No department");
+
+await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=mine", { waitUntil: "networkidle" });
+const mine0 = await libCodes();
+check((await A.page.$$("button[aria-label^='Move '][aria-label$=' up']")).length >= 5, "in My order every process has move buttons");
+const third = mine0[2], second = mine0[1];
+const thirdName = await A.page.evaluate((c) => [...document.querySelectorAll("tbody tr")].find((r) => r.querySelector(".font-mono")?.textContent?.trim() === c)?.querySelector("a.font-bold")?.textContent?.trim(), third);
+await A.page.click(`button[aria-label='Move ${thirdName} up']`);
+await A.page.waitForTimeout(1800);
+const mine1 = await libCodes();
+check(mine1[1] === third && mine1[2] === second, "moving a process up puts it above the one before it", mine0.slice(0, 4).join() + " -> " + mine1.slice(0, 4).join());
+await A.page.reload({ waitUntil: "networkidle" });
+check((await libCodes())[1] === third, "…and the order is kept when the page is opened again");
+await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
+check((await libCodes()).join() === byCodeNow.join(), "…while the default list is not touched by it");
+await q(ffp, 'update processes set "sortOrder"=null where "workspaceId"=$1', [S]);
+
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");
 check(rep.status() === 200 && !/AI Review|from AI review/.test(await rep.text()), "the office's report page opens and says nothing from the AI review", rep.status());

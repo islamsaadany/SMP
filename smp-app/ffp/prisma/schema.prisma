@@ -379,6 +379,9 @@ model Process {
   priorityWhy        String?
   deepDiveDecision   DeepDiveDecision?
 
+  /// The office's own place for this process among its siblings in the library (a main among the mains, a sub among its main's subs). Empty until it is moved.
+  sortOrder Int?
+
   workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   category       ProcessCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   parentProcess  Process?         @relation("ProcessHierarchy", fields: [parentProcessId], references: [id])

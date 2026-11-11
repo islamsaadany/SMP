@@ -14,6 +14,7 @@ import {
 } from "@/ffp/lib/domain/process-hierarchy";
 import { validateConnections } from "@/ffp/lib/domain/process-graph";
 import { SKIPPABLE_GAPS } from "@/ffp/lib/domain/step-readiness";
+import { compareBy, moveWithin } from "@/ffp/lib/domain/process-arrange";
 import {
   summariseDeleteImpact,
   type ProcessDeleteImpact,
@@ -1457,4 +1458,44 @@ export async function updateStepSop(input: z.infer<typeof stepSopSchema>): Promi
   revalidatePath(`/${d.workspaceId}/processes/processes/${d.processId}`);
   revalidatePath(`/${d.workspaceId}/processes/reports/sop`);
   return ok({ id: d.stepId });
+}
+
+
+const moveProcessSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  direction: z.enum(["UP", "DOWN"]),
+});
+
+/**
+ * Moves a process one place up or down among its siblings in the library's "My order" (a main among the mains, a
+ * sub among its main's subs). Every sibling is given its position in the same step, so the ones nobody had placed
+ * stay where the list showed them. Nothing else about any process changes.
+ */
+export async function moveProcessInOrder(input: z.infer<typeof moveProcessSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = moveProcessSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, processId, direction } = parsed.data;
+
+  const access = await requireWorkspaceAccess(workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(workspaceId, processId);
+  if (!process) return notFound();
+
+  const all = await prisma.process.findMany({
+    where: { workspaceId, archivedAt: null },
+    select: { id: true, code: true, name: true, parentProcessId: true, sortOrder: true },
+  });
+  const present = new Set(all.map((p) => p.id));
+  const parentKey = (p: { parentProcessId: string | null }) => (p.parentProcessId && present.has(p.parentProcessId) ? p.parentProcessId : null);
+  const me = all.find((p) => p.id === processId);
+  if (!me) return notFound();
+  const arr = (p: (typeof all)[number]) => ({ ...p, dept: null, state: 0, steps: 0, updated: 0 });
+  const siblings = all.filter((p) => parentKey(p) === parentKey(me)).sort((a, b) => compareBy("mine", arr(a), arr(b)));
+  const next = moveWithin(siblings.map((p) => p.id), processId, direction);
+  if (next.join() === siblings.map((p) => p.id).join()) return ok({ id: processId });
+
+  await prisma.$transaction(next.map((id, i) => prisma.process.update({ where: { id }, data: { sortOrder: i } })));
+  revalidatePath(`/${workspaceId}/processes/processes`);
+  return ok({ id: processId });
 }

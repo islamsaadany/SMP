@@ -2,6 +2,7 @@ import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { isOverdueForReview, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
 import { registerReady } from "@/ffp/lib/register-sync";
 import Link from "next/link";
+import { Fragment } from "react";
 import { prisma } from "@/ffp/lib/db/client";
 import { Prisma } from "@/ffp/generated/prisma/client";
 import { CreateProcessForm, CloneProcessButton, EditProcessButton, ArchiveProcessButton } from "./process-forms";
@@ -15,6 +16,8 @@ import { clientSettings } from "@/ffp/lib/data/client-settings";
 import { READINESS_MARKS, READINESS_RULES, readinessMarks } from "@/ffp/lib/domain/process-readiness";
 import { hasSufficientAccess } from "@/ffp/lib/domain/access-control";
 import { orderProcessTree } from "@/ffp/lib/domain/process-hierarchy";
+import { ARRANGE_KEYS, arrangeProcessTree, groupBlocks, parseArrange } from "@/ffp/lib/domain/process-arrange";
+import { ArrangeBar, MoveButtons } from "./arrange-controls";
 
 export default async function ProcessesPage(props: PageProps<"/[slug]/processes/processes">) {
   const { slug: workspaceId } = await props.params;
@@ -28,6 +31,10 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   const sortRaw = typeof searchParams["sort"] === "string" ? searchParams["sort"] : "";
   const sort = (["name", "owner", "state", "ready", "gaps"] as const).find((k) => k === sortRaw) ?? null;
   const desc = searchParams["dir"] === "desc";
+  /* How the whole list is arranged (the Arrange bar): each level of the tree ordered by one key, optionally in department groups. */
+  const arrange = parseArrange(searchParams["arrange"]);
+  const arrangeDesc = searchParams["adir"] === "desc";
+  const group = searchParams["group"] === "dept";
 
   const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: workspaceId } });
 
@@ -149,9 +156,32 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
         return (desc ? -c : c) || a.code.localeCompare(b.code);
       })
     : processes;
+  /* The default (by code, as it has always been) is drawn exactly as before; every other arrangement keeps the tree and orders each level. */
+  const plain = arrange === "code" && !arrangeDesc && !group;
+  const arranged = arrangeProcessTree(
+    processes.map((p) => Object.assign(p, { dept: p.category?.name ?? null, state: factsById.get(p.id)!.state.rank, steps: p._count.steps, updated: p.updatedAt.getTime() })),
+    arrange,
+    arrangeDesc
+  );
+  /* departments in the client's own order, then any other alphabetically, and none last */
+  const deptOrder = [...departments, ...[...new Set(processes.map((p) => p.category?.name).filter((n): n is string => !!n && !departments.includes(n)))].sort((a, b) => a.localeCompare(b))];
+  const groupIndex = (p: (typeof processes)[number]) => (p.category?.name && deptOrder.includes(p.category.name) ? deptOrder.indexOf(p.category.name) : deptOrder.length);
   const rows = q || sort
     ? sorted.map((process) => ({ process, depth: 0 }))
-    : orderProcessTree(processes);
+    : plain
+      ? orderProcessTree(processes)
+      : group
+        ? groupBlocks(arranged, groupIndex)
+        : arranged;
+  const arrangeOn = !q && !sort;
+  /* "My order": a process can move among its own level when the list is in that order and not grouped */
+  const moving = arrangeOn && arrange === "mine" && !group && canEdit;
+  const levelOf = (p: (typeof processes)[number]) => (p.parentProcessId && rows.some((r) => r.process.id === p.parentProcessId) ? p.parentProcessId : "");
+  const levels = new Map<string, string[]>();
+  for (const r of rows) {
+    const k = levelOf(r.process);
+    levels.set(k, [...(levels.get(k) ?? []), r.process.id]);
+  }
 
   // Search results and sorted lists are flat and are never folded (process-fold.tsx).
   const { ancestorsOf, directSubs } = foldChains(rows);
@@ -202,6 +232,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
         </span>
       </form>
 
+      {arrangeOn && <ArrangeBar arrange={arrange} desc={arrangeDesc} group={group} keys={ARRANGE_KEYS} />}
+
       {canEdit && (
         <p className="mt-3 text-xs">
           <Link
@@ -245,9 +277,19 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
             </tr>
           </thead>
           <tbody className="ffp-zebra">
-            {rows.map(({ process: p, depth }) => {
+            {rows.map(({ process: p, depth }, rowIndex) => {
               const f = factsById.get(p.id)!;
+              const startsGroup = group && arrangeOn && depth === 0 && (rowIndex === 0 || (rows.slice(0, rowIndex).reverse().find((r) => r.depth === 0)?.process.category?.name ?? null) !== (p.category?.name ?? null));
+              const level = levels.get(levelOf(p)) ?? [];
               return (
+              <Fragment key={p.id}>
+              {startsGroup && (
+                <tr className="border-t border-[var(--line)] bg-[var(--surface-2)]">
+                  <td colSpan={6} className="px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.08em] text-[var(--ink-2)]">
+                    {p.category?.name ?? "No department"}
+                  </td>
+                </tr>
+              )}
               <FoldRow
                 key={p.id}
                 ancestors={ancestorsOf.get(p.id) ?? []}
@@ -261,6 +303,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                   style={depth > 0 ? { paddingInlineStart: 12 + depth * 30 } : undefined}
                 >
                   <div className="flex items-start">
+                    {moving && <MoveButtons workspaceId={workspaceId} processId={p.id} name={p.name} canUp={level.indexOf(p.id) > 0} canDown={level.indexOf(p.id) < level.length - 1} />}
                     <FoldToggle id={p.id} code={p.code} count={directSubs.get(p.id) ?? 0} />
                     <div className="min-w-0">
                       <span className="font-mono text-xs font-bold text-[var(--stone)]">{p.code}</span>{" "}
@@ -345,6 +388,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                   </div>
                 </td>
               </FoldRow>
+              </Fragment>
               );
             })}
             {rows.length === 0 && (

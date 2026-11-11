@@ -10756,3 +10756,7 @@ On the Map and readers' Flow, clicking an arrow thickens it, marks where it star
 ## §763 — SOP page: AI drafts and Skip this SOP; milestone checkbox moved to the top (2026-11-21)
 
 SOP page: "Draft the empty boxes with AI" (all steps) and "Draft with AI" (one step) write drafts for the EMPTY boxes only, from the workspace's industry, the process and what is already entered on the steps (and the neighbouring steps, role, note, rules). Drafts are shown beside the step and are saved only when the person presses Use; each can be edited first or Deleted. "Skip this SOP" marks a step as needing no SOP (stored as "SOP" in the step's skippedGaps, no migration); a skipped step is not counted as lacking, is not drafted for, is left out of the SOP's "missing" count, and can be brought back. Tested against a modelled AI provider in the e2e (233 ok). The milestone checkbox is now at the top of the step form, above Who does it.
+
+## §764 — Export PDF opens with the whole map as a picture (2026-11-22)
+
+On the Map, Export PDF now takes the same picture as Download picture (the whole drawing, wider than the screen too) and puts it on the first page of the PDF (A3 landscape), followed by the step list as before. The plain PDF link (no picture) still works. Processes e2e 236 ok.

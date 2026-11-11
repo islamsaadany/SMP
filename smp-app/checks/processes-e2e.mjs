@@ -918,6 +918,11 @@ const dlPath = await dl.path();
 const png = (await import("node:fs")).readFileSync(dlPath);
 const pw = png.readUInt32BE(16), ph = png.readUInt32BE(20);
 check(gridW.sw > gridW.cw && Math.abs(pw - gridW.sw * 2) <= 4 && ph > 200, "Download picture holds the whole map, not just the part on screen", JSON.stringify({ gridW, pw, ph }));
+const [dlPdf] = await Promise.all([A.page.waitForEvent("download", { timeout: 40000 }), A.page.getByRole("button", { name: "Export PDF" }).click()]);
+const pdfBuf = (await import("node:fs")).readFileSync(await dlPdf.path());
+check(/process-map\.pdf$/.test(dlPdf.suggestedFilename()) && pdfBuf.subarray(0, 4).toString() === "%PDF" && /\/Subtype\s*\/Image/.test(pdfBuf.toString("latin1")), "Export PDF opens with the whole map as a picture, then the step list", dlPdf.suggestedFilename() + " " + pdfBuf.length);
+const plain = await A.get("/api/ffp/export/process-map/" + P6);
+check(plain.status() === 200 && !/\/Subtype\s*\/Image/.test((await plain.body()).toString("latin1")), "…and the plain PDF link still works without it");
 await A.page.setViewportSize({ width: 1300, height: 900 });
 
 /* ── a decision names its ways out: Yes and No, Approved and Rejected ── */

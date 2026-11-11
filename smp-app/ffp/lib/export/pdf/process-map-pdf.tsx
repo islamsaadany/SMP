@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
   page: { padding: 32, fontSize: 9, fontFamily: "Helvetica" },
@@ -48,6 +48,9 @@ export type ProcessMapPdfProps = {
     links: { code: string; name: string }[];
   }[];
   generatedFor: string;
+  /** The map as the page draws it (a PNG data URL); when given it is the first page, the whole map on one page. */
+  mapImage?: string | null;
+  mapSize?: { w: number; h: number } | null;
 };
 
 export function ProcessMapPdfDocument({
@@ -56,9 +59,19 @@ export function ProcessMapPdfDocument({
   processName,
   steps,
   generatedFor,
+  mapImage,
 }: ProcessMapPdfProps) {
   return (
     <Document title={`${processCode} Process Map`}>
+      {mapImage ? (
+        <Page size="A3" orientation="landscape" style={styles.page}>
+          <View style={styles.header}>
+            <Text style={styles.eyebrow}>{workspaceName} · {processCode}</Text>
+            <Text style={styles.title}>{processName} — Process Map</Text>
+          </View>
+          <Image src={mapImage} style={{ width: "100%", objectFit: "contain" }} />
+        </Page>
+      ) : null}
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>{workspaceName} · {processCode}</Text>

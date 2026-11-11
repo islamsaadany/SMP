@@ -889,6 +889,9 @@ if (outsBefore.length === 1) {
   const dia = A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`);
   check(await dia.getAttribute("data-shape") === "diamond" && await dia.locator("polygon").count() === 1, "a decision is drawn as the flowchart diamond");
   const dh = (await dia.boundingBox()).height;
+  const strokes = await A.page.locator("[data-lane-grid] svg path[marker-end]").evaluateAll((ps) => ps.map((x) => x.style.stroke));
+  check(strokes.some((c) => /180, 35, 24|b42318/i.test(c)) && strokes.some((c) => /47, 125, 79|2f7d4f/i.test(c)), "the No way out is drawn red and the Approved one green", JSON.stringify(strokes));
+  if (process.env.SHOT) await A.page.locator("[data-lane-grid]").screenshot({ path: process.env.SHOT });
   check(dh <= 96 && await A.page.locator("[data-lane-grid] svg path[marker-end], [data-lane-grid] svg path").count() >= 2, "…it fits its lane and its arrows are still drawn", dh);
 }
 await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");

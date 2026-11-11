@@ -46,6 +46,16 @@ export type DrawArrow = { from: string; to: string; label: string | null; dashed
 type Edge = { d: string; lx: number; ly: number; label: string | null; dashed: boolean };
 type Box = { left: number; right: number; top: number; bottom: number; cx: number; cy: number; col: number; lane: number; diamond: boolean };
 
+/* a decision's ways out read at a glance: the "no" side red, the "yes" side green; any other name stays plain */
+const NO_COLOR = "#b42318";
+const YES_COLOR = "#2f7d4f";
+const tone = (label: string | null): "n" | "y" | null => {
+  const l = (label ?? "").trim().toLowerCase();
+  if (/^(no|reject(ed)?|denied|declined|fail(ed)?|not approved|refused)\b/.test(l)) return "n";
+  if (/^(yes|approved?|accepted|pass(ed)?|granted)\b/.test(l)) return "y";
+  return null;
+};
+
 /** The grid's fixed measures: the lane label's column, a lane's height, the room above and below the lanes, a column's least width, and how far off a lane's line a channel run keeps. */
 const LABEL_W = 104, LANE_H = 96, PAD = 16, COL_MIN = 150, OFF = 5;
 /** A decision is the flowchart diamond: its four corners are where arrows meet it, so it is as wide as a box that still leaves a gutter, and short enough to keep clear of the channels between lanes. */
@@ -289,29 +299,40 @@ export function LaneDrawing({
             <marker id={`${marker}a`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
               <path d="M0 0 8 4 0 8z" style={{ fill: "var(--field-line)" }} />
             </marker>
+            <marker id={`${marker}n`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M0 0 8 4 0 8z" style={{ fill: NO_COLOR }} />
+            </marker>
+            <marker id={`${marker}y`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M0 0 8 4 0 8z" style={{ fill: YES_COLOR }} />
+            </marker>
             <marker id={`${marker}g`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
               <path d="M0 0 8 4 0 8z" style={{ fill: "var(--gold)" }} />
             </marker>
           </defs>
-          {edges.map((e, i) => (
+          {edges.map((e, i) => {
+            const t = e.dashed ? null : tone(e.label);
+            return (
             <path
               key={i}
               d={e.d}
               fill="none"
-              strokeWidth="1.5"
+              strokeWidth={t ? 2 : 1.5}
               strokeLinejoin="round"
               strokeDasharray={e.dashed ? "4 3" : undefined}
-              markerEnd={`url(#${marker}${e.dashed ? "g" : "a"})`}
-              style={{ stroke: e.dashed ? "var(--gold)" : "var(--field-line)" }}
+              markerEnd={`url(#${marker}${e.dashed ? "g" : t ?? "a"})`}
+              style={{ stroke: e.dashed ? "var(--gold)" : t === "n" ? NO_COLOR : t === "y" ? YES_COLOR : "var(--field-line)" }}
             />
-          ))}
+            );
+          })}
           {edges.map((e, i) => {
             if (!e.label) return null;
             const w = e.label.length * 6 + 10;
+            const t = e.dashed ? null : tone(e.label);
+            const col = t === "n" ? NO_COLOR : t === "y" ? YES_COLOR : null;
             return (
               <g key={`l${i}`}>
-                <rect x={e.lx - w / 2} y={e.ly - 8} width={w} height="16" rx="3" style={{ fill: "var(--surface)", stroke: "var(--line)" }} />
-                <text x={e.lx} y={e.ly + 3.5} textAnchor="middle" fontSize="10.5" fontWeight="600" style={{ fill: "var(--ink-2)" }}>
+                <rect x={e.lx - w / 2} y={e.ly - 8} width={w} height="16" rx="3" style={{ fill: "var(--surface)", stroke: col ?? "var(--line)" }} />
+                <text x={e.lx} y={e.ly + 3.5} textAnchor="middle" fontSize="10.5" fontWeight="700" style={{ fill: col ?? "var(--ink-2)" }}>
                   {e.label}
                 </text>
               </g>

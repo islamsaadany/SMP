@@ -10744,3 +10744,7 @@ Checked: real run GREEN 216/0 (a task has none; a decision shows it, warns at on
 ## §760 — A decision is drawn as the flowchart diamond (2026-11-18)
 
 On the Map and the readers' Flow, a Decision step is now the standard diamond (arrows meet its corners; a second way out leaves from the bottom or top corner so Yes and No never share a line). Processes without decisions are pixel- and arrow-identical to before (compared before/after). The printed/exported Map keeps its own drawing and still uses the old decision card. Checks: processes e2e 219 ok, all other suites green.
+
+## §761 — Yes / No ways out are coloured (2026-11-19)
+
+On the Map and readers' Flow, a decision's "No / Rejected / Denied…" way out is drawn red and its "Yes / Approved…" way green (line, arrow head and label); any other name stays grey. Processes without named ways out are unchanged. Processes e2e 220 ok.

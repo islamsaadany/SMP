@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMessages } from "@/ffp/lib/i18n/client";
 import { Band, Sheet, bandGold, bandQuiet, type Tile } from "../../../band";
 
-export const SECTIONS = ["map", "raci", "authority", "risks", "quality", "lifecycle", "people", "compliance", "connections", "ai"] as const;
+export const SECTIONS = ["map", "raci", "authority", "sop", "risks", "quality", "lifecycle", "people", "compliance", "connections", "ai"] as const;
 export type SectionKey = (typeof SECTIONS)[number];
 export type Dot = "ok" | "bad" | "q";
 
@@ -211,7 +211,7 @@ export function BuilderFrame({
         >
           {SECTIONS.map((k, i) => (
             <div key={k} className="contents">
-              {(i === 6 || i === 9) && <span className="mx-1.5 my-1 h-px bg-[var(--line-soft)] max-[899px]:hidden" />}
+              {(i === 7 || i === 10) && <span className="mx-1.5 my-1 h-px bg-[var(--line-soft)] max-[899px]:hidden" />}
               <Link
                 href={sectionHref(base, k)}
                 aria-current={k === sec ? "page" : undefined}

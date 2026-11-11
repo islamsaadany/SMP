@@ -788,6 +788,24 @@ check(actAfter.length === 1 && actAfter[0].name === "Review journals before post
 const raciHtml = await (await A.get("/" + S + "/processes/processes/" + P6 + "/raci")).text();
 check(raciHtml.includes("Review journals before posting") && !raciHtml.includes("Add a review of journals before posting"), "…and the RACI page shows the new name, not the old one");
 
+/* ── the SOP is its own item in the builder's side list ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+check(await A.page.getByRole("link", { name: "SOP", exact: true }).first().isVisible(), "the builder's side list has an SOP item");
+await A.page.getByRole("link", { name: "SOP", exact: true }).first().click();
+await A.page.waitForURL(/tab=sop/, { timeout: 15000 });
+const sopTxt = await A.page.innerText("body");
+check(/The SOP for this process/.test(sopTxt) && /Document control/i.test(sopTxt) && /Preview the SOP/.test(sopTxt), "…and it opens the SOP: where it stands, the document control, and a preview");
+check((await A.page.locator("a:has-text('Preview the SOP')").first().getAttribute("href")).includes("/reports/sop?ids=" + P6), "…the preview opens this process's SOP");
+const wbBoxes = await A.page.locator("section[aria-label^='SOP for step'] textarea").count();
+check(wbBoxes >= 5 * 3, "…with every task's five SOP boxes in one place", String(wbBoxes));
+const secondInputs = A.page.locator("section[aria-label^='SOP for step']").nth(1).locator("label:has-text('Inputs, tools and systems') textarea");
+await secondInputs.fill("The ERP's invoice screen");
+await secondInputs.blur();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select "sopInputs" i from process_steps where id=$1', [s6[1].id]))[0].i === "The ERP's invoice screen", "a box filled in the SOP section is saved on that step");
+const sopDot = await A.page.getByRole("link", { name: "SOP", exact: true }).first().locator("span").last().getAttribute("class");
+check(/rounded-full/.test(sopDot ?? ""), "…and the SOP item carries a status dot");
+
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");
 check(rep.status() === 200 && !/AI Review|from AI review/.test(await rep.text()), "the office's report page opens and says nothing from the AI review", rep.status());

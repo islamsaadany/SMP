@@ -1414,3 +1414,47 @@ export async function setStepGapSkipped(input: z.infer<typeof skipGapSchema>): P
   revalidatePath(`/${workspaceId}/processes/processes`);
   return ok({ id: stepId });
 }
+
+
+const stepSopSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  stepId: z.string().min(1),
+  /** What they do, one entry per line. Undefined leaves each field alone. */
+  detailedAction: z.array(z.string().trim().min(1).max(500)).max(50).optional(),
+  sopInputs: z.string().trim().max(2000).optional(),
+  sopOutput: z.string().trim().max(2000).optional(),
+  sopErrors: z.string().trim().max(2000).optional(),
+  exceptionHandling: z.string().trim().max(2000).optional(),
+});
+
+/** Saves a step's SOP fields from the SOP section, touching nothing else about the step (its name, who does it and where it sits stay as they are). */
+export async function updateStepSop(input: z.infer<typeof stepSopSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = stepSopSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const d = parsed.data;
+
+  const access = await requireWorkspaceAccess(d.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(d.workspaceId, d.processId);
+  if (!process) return notFound();
+  const step = await prisma.processStep.findUnique({ where: { id: d.stepId }, select: { processId: true } });
+  if (!step || step.processId !== d.processId) return notFound();
+
+  await prisma.processStep.update({
+    where: { id: d.stepId },
+    data: {
+      ...(d.detailedAction !== undefined ? { detailedAction: d.detailedAction } : {}),
+      ...(d.sopInputs !== undefined ? { sopInputs: d.sopInputs || null } : {}),
+      ...(d.sopOutput !== undefined ? { sopOutput: d.sopOutput || null } : {}),
+      ...(d.sopErrors !== undefined ? { sopErrors: d.sopErrors || null } : {}),
+      ...(d.exceptionHandling !== undefined ? { exceptionHandling: d.exceptionHandling || null } : {}),
+    },
+  });
+
+  await resetIfInForce(d.processId);
+  revalidatePath(`/${d.workspaceId}/processes/processes/${d.processId}/map`);
+  revalidatePath(`/${d.workspaceId}/processes/processes/${d.processId}`);
+  revalidatePath(`/${d.workspaceId}/processes/reports/sop`);
+  return ok({ id: d.stepId });
+}

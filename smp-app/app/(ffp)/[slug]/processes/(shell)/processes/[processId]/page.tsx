@@ -12,10 +12,12 @@ import { LifecyclePanel } from "./lifecycle-panel";
 import { AddControlForm, DeleteControlButton, AddNonConformanceForm, NonConformanceStatus } from "./quality-forms";
 import { getMessages } from "@/ffp/lib/i18n/server";
 import { OwnerPicker } from "./owner-picker";
+import { SopDocumentControl } from "./map/sop-document-control";
+import { SopWorkbench, type SopRow } from "./sop-workbench";
 import { inForce as heldVersion, liveContent, sameContent } from "@/ffp/lib/data/process-content";
 
 /* The process page's own sections in the builder's menu (builder-frame.tsx); the Map, RACI, Authority and Check with AI are pages of their own. */
-const TABS = ["lifecycle", "risks", "quality", "people", "compliance", "connections"] as const;
+const TABS = ["sop", "lifecycle", "risks", "quality", "people", "compliance", "connections"] as const;
 type Tab = (typeof TABS)[number];
 
 type Kpi = { metric: string; target: string; frequency: string };
@@ -103,9 +105,62 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
   const kpis = (process.kpis as unknown as Kpi[]) ?? [];
   const revisions = (process.sopRevisions as unknown as Revision[]) ?? [];
 
+  /* the SOP section: every task and decision with the fields the written procedure needs, and what is still lacking */
+  const roleNames = tab === "sop" ? new Map((await prisma.role.findMany({ where: { workspaceId }, select: { id: true, name: true } })).map((r) => [r.id, r.name])) : new Map<string, string>();
+  const work = stepList.filter((st) => st.type === "TASK" || st.type === "DECISION");
+  const sopRows: SopRow[] = work.map((st, i) => ({
+    id: st.id,
+    n: i + 1,
+    label: st.label,
+    type: st.type as "TASK" | "DECISION",
+    role: st.assignedRoleId ? (roleNames.get(st.assignedRoleId) ?? null) : null,
+    acts: st.detailedAction,
+    inputs: st.sopInputs ?? "",
+    output: st.sopOutput ?? "",
+    errors: st.sopErrors ?? "",
+    risk: st.exceptionHandling ?? "",
+  }));
+  const lackingSteps = work.filter((st) => !st.assignedRoleId || st.detailedAction.length === 0 || !st.sopInputs?.trim() || !st.sopOutput?.trim()).length;
+  const lackingControl = [process.sopVersion, process.sopOwner, process.sopEffectiveDate, process.sopApprovedBy].filter((v) => !(v && String(v).trim())).length;
+
   return (
     <main className="w-full">
       <div className="w-full">
+
+        {tab === "sop" && (
+          <>
+            <Card title="The SOP for this process">
+              <p className="text-sm text-slate-700">
+                {lackingSteps + lackingControl === 0
+                  ? "Nothing is missing: the SOP is complete."
+                  : `${lackingSteps} of ${work.length} step${work.length === 1 ? "" : "s"} still lack something, and ${lackingControl} of 4 document control lines are empty.`}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  href={`/${workspaceId}/processes/reports/sop?ids=${processId}`}
+                  className="rounded-md border border-[var(--gold)] bg-[var(--gold)] px-3 py-1.5 text-[13px] font-bold text-[var(--on-accent)]"
+                >
+                  Preview the SOP
+                </Link>
+                <Link href={`${base}/map`} className="rounded-md border border-[var(--line)] bg-white px-3 py-1.5 text-[13px] font-semibold text-[var(--ink)]">
+                  Open the Map
+                </Link>
+              </div>
+            </Card>
+            <div className="mb-4">
+              <SopDocumentControl
+                workspaceId={workspaceId}
+                processId={processId}
+                sopVersion={process.sopVersion}
+                sopOwner={process.sopOwner}
+                sopEffectiveDate={process.sopEffectiveDate}
+                sopApprovedBy={process.sopApprovedBy}
+                revisions={revisions}
+              />
+            </div>
+            <SopWorkbench workspaceId={workspaceId} processId={processId} rows={sopRows} />
+          </>
+        )}
 
         {tab === "lifecycle" && (
           <>

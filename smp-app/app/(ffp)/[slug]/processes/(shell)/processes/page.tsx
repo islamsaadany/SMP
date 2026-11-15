@@ -16,7 +16,7 @@ import { clientSettings } from "@/ffp/lib/data/client-settings";
 import { READINESS_MARKS, READINESS_RULES, readinessMarks } from "@/ffp/lib/domain/process-readiness";
 import { hasSufficientAccess } from "@/ffp/lib/domain/access-control";
 import { orderProcessTree } from "@/ffp/lib/domain/process-hierarchy";
-import { ARRANGE_KEYS, arrangeProcessTree, groupBlocks, parseArrange } from "@/ffp/lib/domain/process-arrange";
+import { ARRANGE_KEYS, arrangeProcessTree, groupBlocks, parseArrange, treeOrderBy } from "@/ffp/lib/domain/process-arrange";
 import { ArrangeBar, MoveButtons } from "./arrange-controls";
 
 export default async function ProcessesPage(props: PageProps<"/[slug]/processes/processes">) {
@@ -166,16 +166,26 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   /* departments in the client's own order, then any other alphabetically, and none last */
   const deptOrder = [...departments, ...[...new Set(processes.map((p) => p.category?.name).filter((n): n is string => !!n && !departments.includes(n)))].sort((a, b) => a.localeCompare(b))];
   const groupIndex = (p: (typeof processes)[number]) => (p.category?.name && deptOrder.includes(p.category.name) ? deptOrder.indexOf(p.category.name) : deptOrder.length);
-  const rows = q || sort
+  /* a heading's sort keeps the tree: each sub-process stays under its main, and each level is ordered by that heading */
+  const headingRows = sort && !q
+    ? treeOrderBy(processes, (a, b) => {
+        const x = KEY[sort](a), y = KEY[sort](b);
+        const c = typeof x === "number" ? x - (y as number) : String(x).localeCompare(String(y));
+        return (desc ? -c : c) || a.code.localeCompare(b.code, undefined, { numeric: true });
+      })
+    : null;
+  const rows = q
     ? sorted.map((process) => ({ process, depth: 0 }))
-    : plain
+    : headingRows
+      ? headingRows
+      : plain
       ? orderProcessTree(processes)
       : group
         ? groupBlocks(arranged, groupIndex)
         : arranged;
-  const arrangeOn = !q && !sort;
+  const arrangeOn = !q;
   /* "My order": a process can move among its own level when the list is in that order and not grouped */
-  const moving = arrangeOn && arrange === "mine" && !group && canEdit;
+  const moving = arrangeOn && !sort && arrange === "mine" && !group && canEdit;
   const levelOf = (p: (typeof processes)[number]) => (p.parentProcessId && rows.some((r) => r.process.id === p.parentProcessId) ? p.parentProcessId : "");
   const levels = new Map<string, string[]>();
   for (const r of rows) {
@@ -185,7 +195,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
 
   // Search results and sorted lists are flat and are never folded (process-fold.tsx).
   const { ancestorsOf, directSubs } = foldChains(rows);
-  const folding = !q && !sort;
+  const folding = !q;
   const totalCount = await prisma.process.count({ where: { workspaceId, archivedAt: null } });
   const sortHref = (k: NonNullable<typeof sort>) => {
     const next = new URLSearchParams();

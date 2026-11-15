@@ -860,6 +860,11 @@ check(await A.page.locator("select").filter({ hasText: "My order" }).count() ===
 await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name", { waitUntil: "networkidle" });
 const byName = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector("a.font-bold")?.textContent?.trim()).filter(Boolean));
 check(byName.length >= 5 && byName.join() === [...byName].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })).join(), "arranged by name, the mains are in name order", byName.join(" | "));
+await A.page.goto(BASE + "/" + S + "/processes/processes?sort=name", { waitUntil: "networkidle" });
+const headRows = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => ({ n: r.querySelector("a.font-bold")?.textContent?.trim(), sub: !!r.querySelector("[data-fold-count]") })));
+check(await A.page.locator("[role=group][aria-label='Arrange the list']").count() === 1 && headRows.length >= 5, "sorting by a heading keeps the Arrange bar and the folded sub-processes", JSON.stringify(headRows.length));
+const hrBase = (await q(ffp, 'select code from processes where "workspaceId"=$1 and "parentProcessId" is not null limit 1', [S]))[0];
+check(hrBase === undefined || (await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).length)) >= 5, "…a heading sort is no longer a flat list");
 await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name&adir=desc", { waitUntil: "networkidle" });
 const byNameDesc = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector("a.font-bold")?.textContent?.trim()).filter(Boolean));
 check(byNameDesc.join() === [...byName].reverse().join(), "…and reversed", byNameDesc.join(" | "));

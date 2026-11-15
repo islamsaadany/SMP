@@ -10760,3 +10760,7 @@ SOP page: "Draft the empty boxes with AI" (all steps) and "Draft with AI" (one s
 ## §764 — Export PDF opens with the whole map as a picture (2026-11-22)
 
 On the Map, Export PDF now takes the same picture as Download picture (the whole drawing, wider than the screen too) and puts it on the first page of the PDF (A3 landscape), followed by the step list as before. The plain PDF link (no picture) still works. Processes e2e 236 ok.
+
+## §765 — A column heading's sort in the library keeps sub-processes under their mains (2026-11-23)
+
+In the process library, clicking a heading (name, owner, where it is, ready, gaps) used to flatten the list and hide the Arrange bar. It now orders each level by that heading with every sub-process kept under its main, folding still works and the Arrange bar stays. A search is still a flat list. Pure test 23 passed; processes e2e 238 ok. NOT MERGED (the user said to leave the arranging for now).

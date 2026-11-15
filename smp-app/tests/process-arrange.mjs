@@ -48,5 +48,10 @@ check("moving the first up, or the last down, changes nothing", A.moveWithin(["a
 check("an unknown id changes nothing", A.moveWithin(["a", "b"], "z", "UP").join() === "a,b");
 check("an unknown key is the default", A.parseArrange("nonsense") === "code" && A.parseArrange("mine") === "mine");
 
+/* a column heading's sort keeps each sub-process under its main */
+const byNameDesc = A.treeOrderBy(list, (a, b) => b.name.localeCompare(a.name));
+check("a heading sort orders each level and keeps every sub under its main", ids(byNameDesc) === "rhi,it,hr,hr1,hr3,fin", ids(byNameDesc));
+check("…every process once", byNameDesc.length === list.length && byNameDesc.filter((r) => r.process.parentProcessId).every((r) => r.depth === 1));
+
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

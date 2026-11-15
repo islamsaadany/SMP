@@ -75,6 +75,11 @@ export function compareBy(key: ArrangeKey, a: Arrangeable, b: Arrangeable): numb
  * whose parent is not in the list is a root rather than lost, as in orderProcessTree.
  */
 export function arrangeProcessTree<T extends Arrangeable>(processes: T[], key: ArrangeKey, desc = false): { process: T; depth: number }[] {
+  return treeOrderBy(processes, (a, b) => (desc ? -1 : 1) * compareBy(key, a, b));
+}
+
+/** The same tree walk with any comparison of two siblings (a column heading's sort keeps each sub-process under its main). */
+export function treeOrderBy<T extends HierarchyNode>(processes: T[], cmp: (a: T, b: T) => number): { process: T; depth: number }[] {
   const present = new Set(processes.map((p) => p.id));
   const children = new Map<string | null, T[]>();
   for (const p of processes) {
@@ -84,7 +89,7 @@ export function arrangeProcessTree<T extends Arrangeable>(processes: T[], key: A
   const out: { process: T; depth: number }[] = [];
   const placed = new Set<string>();
   const walk = (parent: string | null, depth: number) => {
-    const level = [...(children.get(parent) ?? [])].sort((a, b) => (desc ? -1 : 1) * compareBy(key, a, b));
+    const level = [...(children.get(parent) ?? [])].sort(cmp);
     for (const p of level) {
       if (placed.has(p.id)) continue;
       placed.add(p.id);

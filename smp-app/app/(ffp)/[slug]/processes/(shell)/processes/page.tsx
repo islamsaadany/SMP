@@ -34,6 +34,10 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   /* How the whole list is arranged (the Arrange bar): each level of the tree ordered by one key, optionally in department groups. */
   const arrange = parseArrange(searchParams["arrange"]);
   const arrangeDesc = searchParams["adir"] === "desc";
+  /* the sub-processes can be arranged on their own; without a choice they follow the main processes */
+  const subKeyRaw = searchParams["sarrange"];
+  const subArrange = (ARRANGE_KEYS as readonly string[]).includes(subKeyRaw as string) ? (subKeyRaw as (typeof ARRANGE_KEYS)[number]) : null;
+  const subDesc = searchParams["sdir"] === "desc";
   const group = searchParams["group"] === "dept";
 
   const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: workspaceId } });
@@ -157,11 +161,12 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
       })
     : processes;
   /* The default (by code, as it has always been) is drawn exactly as before; every other arrangement keeps the tree and orders each level. */
-  const plain = arrange === "code" && !arrangeDesc && !group;
+  const plain = arrange === "code" && !arrangeDesc && !group && !subArrange;
   const arranged = arrangeProcessTree(
     processes.map((p) => Object.assign(p, { dept: p.category?.name ?? null, state: factsById.get(p.id)!.state.rank, steps: p._count.steps, updated: p.updatedAt.getTime() })),
     arrange,
-    arrangeDesc
+    arrangeDesc,
+    subArrange ? { key: subArrange, desc: subDesc } : undefined
   );
   /* departments in the client's own order, then any other alphabetically, and none last */
   const deptOrder = [...departments, ...[...new Set(processes.map((p) => p.category?.name).filter((n): n is string => !!n && !departments.includes(n)))].sort((a, b) => a.localeCompare(b))];
@@ -185,7 +190,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
         : arranged;
   const arrangeOn = !q;
   /* "My order": a process can move among its own level when the list is in that order and not grouped */
-  const moving = arrangeOn && !sort && arrange === "mine" && !group && canEdit;
+  const movingMains = arrangeOn && !sort && arrange === "mine" && !group && canEdit;
+  const movingSubs = arrangeOn && !sort && (subArrange ?? arrange) === "mine" && !group && canEdit;
   const levelOf = (p: (typeof processes)[number]) => (p.parentProcessId && rows.some((r) => r.process.id === p.parentProcessId) ? p.parentProcessId : "");
   const levels = new Map<string, string[]>();
   for (const r of rows) {
@@ -242,7 +248,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
         </span>
       </form>
 
-      {arrangeOn && <ArrangeBar arrange={arrange} desc={arrangeDesc} group={group} keys={ARRANGE_KEYS} />}
+      {arrangeOn && <ArrangeBar arrange={arrange} desc={arrangeDesc} group={group} keys={ARRANGE_KEYS} subArrange={subArrange} subDesc={subDesc} />}
 
       {canEdit && (
         <p className="mt-3 text-xs">
@@ -313,7 +319,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                   style={depth > 0 ? { paddingInlineStart: 12 + depth * 30 } : undefined}
                 >
                   <div className="flex items-start">
-                    {moving && <MoveButtons workspaceId={workspaceId} processId={p.id} name={p.name} canUp={level.indexOf(p.id) > 0} canDown={level.indexOf(p.id) < level.length - 1} />}
+                    {(levelOf(p) ? movingSubs : movingMains) && <MoveButtons workspaceId={workspaceId} processId={p.id} name={p.name} canUp={level.indexOf(p.id) > 0} canDown={level.indexOf(p.id) < level.length - 1} />}
                     <FoldToggle id={p.id} code={p.code} count={directSubs.get(p.id) ?? 0} />
                     <div className="min-w-0">
                       <span className="font-mono text-xs font-bold text-[var(--stone)]">{p.code}</span>{" "}

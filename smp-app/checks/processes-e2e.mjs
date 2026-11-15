@@ -856,7 +856,7 @@ check(!(await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s
 const libCodes = async () => A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector(".font-mono")?.textContent?.trim()).filter(Boolean));
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
 const byCodeNow = await libCodes();
-check(await A.page.locator("select").filter({ hasText: "My order" }).count() === 1 && byCodeNow.join() === [...byCodeNow].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).join(), "the library has an Arrange bar, and by default is still in code order", byCodeNow.join());
+check(await A.page.locator("select").filter({ hasText: "My order" }).count() === 2 && byCodeNow.join() === [...byCodeNow].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).join(), "the library has an Arrange bar, and by default is still in code order", byCodeNow.join());
 await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name", { waitUntil: "networkidle" });
 const byName = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector("a.font-bold")?.textContent?.trim()).filter(Boolean));
 check(byName.length >= 5 && byName.join() === [...byName].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })).join(), "arranged by name, the mains are in name order", byName.join(" | "));
@@ -865,6 +865,11 @@ const headRows = await A.page.evaluate(() => [...document.querySelectorAll("tbod
 check(await A.page.locator("[role=group][aria-label='Arrange the list']").count() === 1 && headRows.length >= 5, "sorting by a heading keeps the Arrange bar and the folded sub-processes", JSON.stringify(headRows.length));
 const hrBase = (await q(ffp, 'select code from processes where "workspaceId"=$1 and "parentProcessId" is not null limit 1', [S]))[0];
 check(hrBase === undefined || (await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).length)) >= 5, "…a heading sort is no longer a flat list");
+await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name&sarrange=steps", { waitUntil: "networkidle" });
+check(await A.page.getByLabel("Arrange the sub-processes").inputValue() === "steps", "the Arrange bar has its own choice for the sub-processes");
+await A.page.getByLabel("Arrange the sub-processes").selectOption("name");
+await A.page.waitForURL(/sarrange=name/, { timeout: 15000 });
+check(/arrange=name/.test(A.page.url()) && /sarrange=name/.test(A.page.url()), "…and choosing it changes only the sub-processes' arrangement in the address");
 await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name&adir=desc", { waitUntil: "networkidle" });
 const byNameDesc = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector("a.font-bold")?.textContent?.trim()).filter(Boolean));
 check(byNameDesc.join() === [...byName].reverse().join(), "…and reversed", byNameDesc.join(" | "));

@@ -12,10 +12,10 @@ import { ARRANGE_LABEL, type ArrangeKey } from "@/ffp/lib/domain/process-arrange
 /** The keys where the biggest or the newest is what one looks for first. */
 const BIGGEST_FIRST: ArrangeKey[] = ["steps", "updated"];
 
-export function ArrangeBar({ arrange, desc, group, keys }: { arrange: ArrangeKey; desc: boolean; group: boolean; keys: readonly ArrangeKey[] }) {
+export function ArrangeBar({ arrange, desc, group, keys, subArrange, subDesc }: { arrange: ArrangeKey; desc: boolean; group: boolean; keys: readonly ArrangeKey[]; subArrange: ArrangeKey | null; subDesc: boolean }) {
   const router = useRouter();
   const path = usePathname();
-  const go = (next: { arrange?: ArrangeKey; desc?: boolean; group?: boolean }) => {
+  const go = (next: { arrange?: ArrangeKey; desc?: boolean; group?: boolean; sub?: ArrangeKey | "same"; subDesc?: boolean }) => {
     const a = next.arrange ?? arrange;
     const d = next.desc ?? (next.arrange ? BIGGEST_FIRST.includes(next.arrange) : desc);
     const g = next.group ?? group;
@@ -23,12 +23,18 @@ export function ArrangeBar({ arrange, desc, group, keys }: { arrange: ArrangeKey
     if (a !== "code") q.set("arrange", a);
     if (d) q.set("adir", "desc");
     if (g) q.set("group", "dept");
+    const sk = next.sub === "same" ? null : (next.sub ?? subArrange);
+    if (sk) {
+      q.set("sarrange", sk);
+      const sd = next.subDesc ?? (next.sub && next.sub !== "same" ? BIGGEST_FIRST.includes(next.sub) : subDesc);
+      if (sd) q.set("sdir", "desc");
+    }
     router.push(q.size ? `${path}?${q}` : path);
   };
   return (
     <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12.5px]" role="group" aria-label="Arrange the list">
       <label className="flex items-center gap-2 font-semibold text-[var(--ink-2)]">
-        Arrange
+        Processes
         <select
           value={arrange}
           onChange={(e) => go({ arrange: e.target.value as ArrangeKey })}
@@ -51,11 +57,38 @@ export function ArrangeBar({ arrange, desc, group, keys }: { arrange: ArrangeKey
       >
         {desc ? "↓ Reversed" : "↑ As is"}
       </button>
+      <label className="flex items-center gap-2 font-semibold text-[var(--ink-2)]">
+        Sub-processes
+        <select
+          value={subArrange ?? "same"}
+          onChange={(e) => go({ sub: e.target.value as ArrangeKey | "same" })}
+          className="rounded-md border border-[var(--field-line)] bg-white px-2 py-1 text-[12.5px] font-normal text-[var(--ink)]"
+          aria-label="Arrange the sub-processes"
+        >
+          <option value="same">Same as processes</option>
+          {keys.map((k) => (
+            <option key={k} value={k}>
+              {ARRANGE_LABEL[k]}
+            </option>
+          ))}
+        </select>
+      </label>
+      {subArrange && (
+        <button
+          type="button"
+          onClick={() => go({ subDesc: !subDesc })}
+          disabled={subArrange === "mine"}
+          aria-label={subDesc ? "Reverse sub-processes, now reversed" : "Reverse sub-processes"}
+          className="rounded-md border border-[var(--line)] bg-white px-2 py-1 font-semibold text-[var(--ink)] hover:border-[var(--gold)] disabled:opacity-40"
+        >
+          {subDesc ? "↓ Reversed" : "↑ As is"}
+        </button>
+      )}
       <label className="flex items-center gap-1.5 text-[var(--ink-2)]">
         <input type="checkbox" checked={group} onChange={(e) => go({ group: e.target.checked })} />
         Group by department
       </label>
-      {arrange === "mine" && !group && <span className="text-[var(--ink-3)]">Use the ▲ ▼ beside a process to move it among its own level.</span>}
+      {(arrange === "mine" || subArrange === "mine") && !group && <span className="text-[var(--ink-3)]">Use the ▲ ▼ beside a process to move it among its own level.</span>}
     </div>
   );
 }

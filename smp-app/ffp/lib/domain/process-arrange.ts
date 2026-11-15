@@ -74,8 +74,19 @@ export function compareBy(key: ArrangeKey, a: Arrangeable, b: Arrangeable): numb
  * Every process exactly once, in tree order, with each level ordered by `key` (reversed when `desc`). A process
  * whose parent is not in the list is a root rather than lost, as in orderProcessTree.
  */
-export function arrangeProcessTree<T extends Arrangeable>(processes: T[], key: ArrangeKey, desc = false): { process: T; depth: number }[] {
-  return treeOrderBy(processes, (a, b) => (desc ? -1 : 1) * compareBy(key, a, b));
+export function arrangeProcessTree<T extends Arrangeable>(
+  processes: T[],
+  key: ArrangeKey,
+  desc = false,
+  /** The sub-processes' own arrangement; left out, they follow the same one as the main processes. */
+  subs?: { key: ArrangeKey; desc: boolean }
+): { process: T; depth: number }[] {
+  const present = new Set(processes.map((p) => p.id));
+  const isSub = (p: T) => !!p.parentProcessId && present.has(p.parentProcessId);
+  return treeOrderBy(processes, (a, b) => {
+    const s = subs && isSub(a) ? subs : { key, desc };
+    return (s.desc ? -1 : 1) * compareBy(s.key, a, b);
+  });
 }
 
 /** The same tree walk with any comparison of two siblings (a column heading's sort keeps each sub-process under its main). */

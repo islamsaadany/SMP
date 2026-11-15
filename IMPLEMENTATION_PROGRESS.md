@@ -10764,3 +10764,7 @@ On the Map, Export PDF now takes the same picture as Download picture (the whole
 ## §765 — A column heading's sort in the library keeps sub-processes under their mains (2026-11-23)
 
 In the process library, clicking a heading (name, owner, where it is, ready, gaps) used to flatten the list and hide the Arrange bar. It now orders each level by that heading with every sub-process kept under its main, folding still works and the Arrange bar stays. A search is still a flat list. Pure test 23 passed; processes e2e 238 ok. NOT MERGED (the user said to leave the arranging for now).
+
+## §766 — Processes and sub-processes arranged separately (2026-11-24)
+
+The library's Arrange bar now has two choices: "Processes" (the mains) and "Sub-processes" (everything under a main), each with its own key and direction (address: arrange/adir and sarrange/sdir; left alone, the sub-processes follow the processes as before). "My order" move buttons appear on the mains when Processes is My order and on the subs when Sub-processes is My order. Pure test 24 passed; processes e2e 240 ok. NOT MERGED yet.

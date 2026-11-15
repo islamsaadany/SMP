@@ -53,5 +53,9 @@ const byNameDesc = A.treeOrderBy(list, (a, b) => b.name.localeCompare(a.name));
 check("a heading sort orders each level and keeps every sub under its main", ids(byNameDesc) === "rhi,it,hr,hr1,hr3,fin", ids(byNameDesc));
 check("…every process once", byNameDesc.length === list.length && byNameDesc.filter((r) => r.process.parentProcessId).every((r) => r.depth === 1));
 
+/* processes and sub-processes arranged separately */
+const sep = A.arrangeProcessTree(list, "name", false, { key: "name", desc: true });
+check("mains by name A–Z while the subs run Z–A under their main", ids(sep) === "fin,hr,hr1,hr3,it,rhi" && ids(A.arrangeProcessTree(list, "name", false)) === "fin,hr,hr3,hr1,it,rhi", ids(sep));
+
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

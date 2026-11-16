@@ -8796,7 +8796,7 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
    page from the right on a narrow one. Tokens only (§38.4). */
 .penwrap { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:14px; align-items:start; }
 .penmain { min-width:0; }
-.tacpanel { position:sticky; top:12px; max-height:calc(100vh - 24px); display:flex; flex-direction:column; min-width:0;
+.tacpanel { position:sticky; top:12px; max-height:calc(100vh - 24px); margin-top:14px; display:flex; flex-direction:column; min-width:0;
   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow-md); }
 .tph { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--line); }
 .tpk { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-3); white-space:nowrap; }

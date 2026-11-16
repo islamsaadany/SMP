@@ -39445,7 +39445,7 @@ function unitPlanBody(it, u, railed, bare){
         '</div>'
     : pillarBand(code, it.name, yearsMarks(it) +
         (u.ukey === "group" ? topSeats(it) : ""), it.kind, "planband") + paneActs("plan", "u_plan");
-  return (penOpen ? '<div class="penwrap"><div class="penmain">' : '') + head +
+  return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
        "the pillar as well yes". It has been READ-ONLY EVERYWHERE since the
@@ -39572,6 +39572,10 @@ function unitPlanBody(it, u, railed, bare){
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
     /* …and a rule above it, so the two blocks read as two blocks of one card. */
+    /* §769.1: the panel stands beside the TACTICS alone (Islam: it should not
+       push the direction's head, nor sit beside the measures), so the wrap
+       opens here, at the tactics' heading, and closes after their legend. */
+    (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was

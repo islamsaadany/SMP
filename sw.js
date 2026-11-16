@@ -685,7 +685,9 @@
    it supports, by number; past main's v7.75 at the merge. */
 /* v7.78-tactic-panel — §769: with the pen on, the tactics are a list and
    the one being edited opens in a panel beside the table. */
-const SHELL = "smp-shell-v7.78-tactic-panel";
+/* v7.79-panel-beside-tactics — §769.1: the panel stands beside the tactics
+   alone, not the direction's head or its measures. */
+const SHELL = "smp-shell-v7.79-panel-beside-tactics";
 const ASSETS = [
   "/",
   "/index.html",

@@ -2,43 +2,48 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
-  /* Layout: the platform's Setup page, cut down to one table — title line with the
-     page's controls on the right, the table, a status line under it. Tokens are the
-     platform's own (_shared.css), light and dark. */
+  /* Layout: the platform's Setup page, cut down to one table — title line with the page's
+     controls on the right, the table, a status line under it. Tokens are the platform's own
+     Forefront palette (_shared.css), light and dark. --panel is the tenant's colour: in the
+     product it is written on the root from the tenant's branding; here it is El Abd's, sampled
+     from Islam's screenshot, with the ink the platform would choose to read on it. */
   :root {
     --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-    --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
-    --line:#E2E8F0; --line-soft:#F1F5F9;
-    --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
-    --panel:#0F172A; --panel-ink:#FFFFFF; --panel-quiet:#94A3B8;
-    --gold:#4F46E5; --gold-deep:#4338CA; --over-bg:#EEF2FF; --over-line:#C7D2FE; --on-accent:#FFFFFF;
-    --good-bg:#ECFDF5; --good-tx:#047857; --none:#636E7E;
-    --zebra:#F6F8FB; --shadow:0 12px 30px rgba(15,23,42,.16);
-    --kbd-bg:#FFFFFF; --kbd-line:#CBD5E1;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#DBACB6; --panel-ink:#171B22; --panel-quiet:#5A4348; --panel-rule:rgba(255,255,255,.35);
+    --gold:#C9A24D; --gold-deep:#8A6B22; --over-bg:#FBF6E9; --over-line:#E8D9AE; --on-accent:#16325C;
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+    --good-bg:#E4F0EA; --good-tx:#1F6248; --none:#676C73;
+    --zebra:#F5F7FA; --shadow:0 12px 30px rgba(22,50,92,.16);
+    --kbd-bg:#FFFFFF; --kbd-line:#D6DCE5;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
-      --line:#2B3852; --line-soft:#212C42;
-      --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
-      --panel:#060B16; --panel-ink:#E8EDF5; --panel-quiet:#8B97A9;
-      --gold:#818CF8; --gold-deep:#A5B4FC; --over-bg:#1E1B3A; --over-line:#3F3A72; --on-accent:#0B1120;
-      --good-bg:#0A2E22; --good-tx:#6EE7B7; --none:#8B97A9;
-      --zebra:#182339; --shadow:0 12px 30px rgba(0,0,0,.5);
-      --kbd-bg:#1C2740; --kbd-line:#3A4760;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --panel:#DBACB6; --panel-ink:#171B22; --panel-quiet:#5A4348; --panel-rule:rgba(255,255,255,.35);
+      --gold:#D9B665; --gold-deep:#C9A24D; --over-bg:#332C16; --over-line:#4A3F1E; --on-accent:#14161A;
+      --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+      --good-bg:#1B3129; --good-tx:#8FD3B0; --none:#8E97A3;
+      --zebra:#212630; --shadow:0 12px 30px rgba(0,0,0,.5);
+      --kbd-bg:#242932; --kbd-line:#3A4150;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
-    --line:#2B3852; --line-soft:#212C42;
-    --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
-    --panel:#060B16; --panel-ink:#E8EDF5; --panel-quiet:#8B97A9;
-    --gold:#818CF8; --gold-deep:#A5B4FC; --over-bg:#1E1B3A; --over-line:#3F3A72; --on-accent:#0B1120;
-    --good-bg:#0A2E22; --good-tx:#6EE7B7; --none:#8B97A9;
-    --zebra:#182339; --shadow:0 12px 30px rgba(0,0,0,.5);
-    --kbd-bg:#1C2740; --kbd-line:#3A4760;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --panel:#DBACB6; --panel-ink:#171B22; --panel-quiet:#5A4348; --panel-rule:rgba(255,255,255,.35);
+    --gold:#D9B665; --gold-deep:#C9A24D; --over-bg:#332C16; --over-line:#4A3F1E; --on-accent:#14161A;
+    --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+    --good-bg:#1B3129; --good-tx:#8FD3B0; --none:#8E97A3;
+    --zebra:#212630; --shadow:0 12px 30px rgba(0,0,0,.5);
+    --kbd-bg:#242932; --kbd-line:#3A4150;
     color-scheme: dark;
   }
 
@@ -49,20 +54,22 @@
          padding-right:max(16px, env(safe-area-inset-right, 0px)); }
   .page { max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
 
-  /* ── Header line: title left, the page's controls right ─────────────────── */
+  /* ── Header line: title left, the page's controls right (the platform's cfgHead) ─────── */
   .eyebrow { font:700 10px/1 var(--sans); letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); }
-  .head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap;
+          padding-bottom:12px; border-bottom:1px solid var(--line); }
   .head h1 { margin:6px 0 0; font-size:20px; font-weight:700; letter-spacing:-.01em; text-wrap:balance; }
   .acts { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .search { font:400 13px/1 var(--sans); color:var(--ink); background:var(--surface); border:1px solid var(--line);
-            border-radius:8px; padding:8px 10px; width:200px; min-width:0; }
+  .search { font:400 14px/1 var(--sans); color:var(--ink); background:var(--surface); border:1px solid var(--field-line);
+            border-radius:8px; padding:9px 11px; width:220px; min-width:0; }
+  .search::placeholder { color:var(--ink-3); }
   .search:focus { outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold); }
-  .editbtn { font:700 11px/1 var(--sans); letter-spacing:.09em; text-transform:uppercase; color:var(--gold-deep);
-             background:var(--surface); border:1px solid var(--gold); border-radius:999px; padding:9px 14px; cursor:pointer; }
+  .editbtn { font:700 12px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--gold-deep);
+             background:none; border:1px solid var(--gold); border-radius:99px; padding:9px 15px; cursor:pointer; }
   .editbtn:hover { background:var(--over-bg); }
   .hmenu { position:relative; display:inline-flex; }
   .hmenu-btn { font:600 12.5px/1 var(--sans); color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
-               border-radius:8px; padding:7px 10px; cursor:pointer; display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
+               border-radius:8px; padding:8px 10px; cursor:pointer; display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
   .hmenu-btn:hover { border-color:var(--gold); color:var(--ink); }
   .hmenu-btn:focus-visible, .seg button:focus-visible, .editbtn:focus-visible, .kebab:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .hmenu.open .hmenu-btn { border-color:var(--gold); background:var(--over-bg); color:var(--ink); }
@@ -92,9 +99,9 @@
   /* Density: three choices, one of them lit */
   .seg { display:inline-flex; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:2px; }
   .seg button { font:600 12px/1 var(--sans); color:var(--ink-3); background:transparent; border:0; border-radius:6px;
-                padding:6px 10px; cursor:pointer; }
+                padding:7px 10px; cursor:pointer; }
   .seg button:hover { color:var(--ink); }
-  .seg button.on { background:var(--surface); color:var(--gold-deep); box-shadow:0 1px 2px rgba(15,23,42,.12); }
+  .seg button.on { background:var(--surface); color:var(--gold-deep); box-shadow:0 1px 2px rgba(22,50,92,.12); }
   .resetbtn { position:relative; }
   .resetbtn svg { width:13px; height:13px; }
   .resetbtn[disabled] { color:var(--ink-3); cursor:default; opacity:.7; }
@@ -102,37 +109,37 @@
   .resetbtn .dot { width:6px; height:6px; border-radius:50%; background:var(--gold); display:none; }
   .resetbtn:not([disabled]) .dot { display:inline-block; }
 
-  /* ── The table ─────────────────────────────────────────────────────────── */
-  .cfg { background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow-x:auto; overflow-y:hidden;
-         position:relative; min-width:0; }
-  table { border-collapse:separate; border-spacing:0; table-layout:fixed; font-size:13px; }
+  /* ── The table: the platform's own rules (_shared.css th/td, arrange.css thead, config.css .unitcfg) ── */
+  .cfg { overflow-x:auto; overflow-y:hidden; position:relative; min-width:0; }
+  table { border-collapse:collapse; table-layout:fixed; font-size:12.5px; background:var(--surface); }
+  th, td { text-align:left; padding:9px 8px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  th + th, td + td { border-left:1px solid var(--line-soft); }
   thead th { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--panel-ink); font-weight:700;
-             background:var(--panel); white-space:nowrap; text-align:left; padding:0; position:relative;
-             border-right:1px solid rgba(255,255,255,.08); height:30px; vertical-align:middle; user-select:none; }
-  thead th:last-child { border-right:0; }
+             background:var(--panel); white-space:nowrap; padding:0; position:relative; border-bottom:0; user-select:none; }
+  thead th + th { border-left:1px solid var(--panel-rule); }
+  thead th:first-child { border-top-left-radius:8px; }
+  thead th:last-child { border-top-right-radius:8px; }
   thead th.cc { text-align:center; }
-  thead th .hin { display:flex; align-items:center; gap:6px; padding:0 10px; height:30px; min-width:0; }
+  thead th .hin { display:flex; align-items:center; gap:6px; padding:0 8px; height:var(--th-h, 34px); min-width:0; }
   thead th.cc .hin { justify-content:center; }
   thead th .ht { overflow:hidden; text-overflow:ellipsis; min-width:0; }
-  thead th .arrow { font-size:9px; color:var(--panel-quiet); flex:none; }
-  thead th.sorted .arrow { color:var(--panel-ink); }
+  thead th .arrow { font-size:9px; color:var(--panel-ink); flex:none; }
   thead th.movable { cursor:grab; }
-  thead th.movable:hover .hin { background:rgba(255,255,255,.06); }
+  thead th.movable:hover .hin { background:rgba(0,0,0,.05); }
   thead th.movable:focus-visible { outline:none; }
-  thead th.movable:focus-visible .hin { box-shadow:inset 0 0 0 2px var(--gold); }
+  thead th.movable:focus-visible .hin { box-shadow:inset 0 0 0 2px var(--gold-deep); }
   thead th .grip { position:absolute; top:0; right:-5px; width:11px; height:100%; cursor:col-resize; z-index:3; touch-action:none; }
-  thead th .grip::after { content:""; position:absolute; top:7px; bottom:7px; left:3px; width:2px; border-radius:2px; background:transparent; }
-  thead th .grip:hover::after, thead th .grip.on::after { background:var(--gold); }
-  tbody td { padding:var(--py, 9px) 10px; border-bottom:1px solid var(--line-soft); color:var(--ink-2); vertical-align:middle;
-             overflow:hidden; white-space:nowrap; }
+  thead th .grip::after { content:""; position:absolute; top:7px; bottom:7px; left:4px; width:2px; border-radius:2px; background:transparent; }
+  thead th .grip:hover::after, thead th .grip.on::after { background:var(--gold-deep); }
+  tbody td { padding-top:var(--py, 6px); padding-bottom:var(--py, 6px); color:var(--ink-2); overflow:hidden; white-space:nowrap; vertical-align:middle; }
   tbody tr:nth-child(even) td { background:var(--zebra); }
-  tbody tr:last-child td { border-bottom:0; }
+  tbody tr:last-child td { border-bottom:1px solid var(--line-soft); }
   td .ci { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
   td.cc { text-align:center; }
   td.cc .ci { display:flex; justify-content:center; align-items:center; gap:6px; }
   td.idx, th.idx .hin { font-family:var(--mono); color:var(--ink-3); text-align:center; justify-content:center; }
   td b { color:var(--ink); font-weight:700; }
-  .why { display:block; font:400 11px/1.3 var(--mono); color:var(--ink-3); margin-top:3px; }
+  .why { display:block; font:400 12px/1.3 var(--mono); color:var(--ink-3); margin-top:3px; }
   table[data-density="compact"] .why { display:none; }
   .mono { font-family:var(--mono); font-size:12px; }
   .val { color:var(--ink); }
@@ -140,53 +147,30 @@
   .pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px; white-space:nowrap; }
   .pill.good { background:var(--good-bg); color:var(--good-tx); }
   .pill.kind { background:var(--surface-2); color:var(--ink-2); }
-  .kebab { width:24px; height:24px; border:1px solid transparent; border-radius:6px; background:none; color:var(--ink-2); cursor:pointer;
+  .kebab { width:24px; height:24px; border:1px solid transparent; border-radius:6px; background:none; color:var(--ink-3); cursor:pointer; padding:0;
            display:inline-flex; align-items:center; justify-content:center; }
-  .kebab:hover { border-color:var(--line); background:var(--surface-2); }
+  .kebab:hover { border-color:var(--line); background:var(--surface-2); color:var(--ink); }
   .kebab svg { width:14px; height:14px; fill:currentColor; }
-  table[data-density="comfortable"] { --py:14px; }
-  table[data-density="normal"] { --py:9px; }
-  table[data-density="compact"] { --py:4px; font-size:12.5px; }
+  /* Row height: the platform's units table pads 6px top and bottom; the other two are the reel's steps either side */
+  table[data-density="comfortable"] { --py:12px; }
+  table[data-density="normal"] { --py:6px; }
+  table[data-density="compact"] { --py:3px; }
   tr[hidden] { display:none; }
 
   /* Column being dragged: the original dims, a ghost follows the pointer, a line marks the drop */
   .cfg.dragging { cursor:grabbing; user-select:none; }
   .cfg.dragging thead th.movable { cursor:grabbing; }
-  col.lift ~ col {} /* no-op, keeps intent visible */
   .lifted { opacity:.35; }
   .ghost { position:absolute; top:0; z-index:40; pointer-events:none; background:var(--surface); box-shadow:var(--shadow);
            border-radius:6px; overflow:hidden; opacity:.96; }
   .ghost table { width:100%; }
-  .dropline { position:absolute; top:0; width:2px; z-index:41; background:var(--gold); pointer-events:none; display:none; border-radius:2px; }
-  .dropline::before { content:""; position:absolute; top:-1px; left:-3px; width:8px; height:8px; border-radius:50%; background:var(--gold); }
-  .pxtip { position:absolute; z-index:42; top:34px; transform:translateX(-50%); font:600 11px/1 var(--mono); color:var(--on-accent);
+  .ghost thead th:first-child, .ghost thead th:last-child { border-radius:0; }
+  .dropline { position:absolute; top:0; width:2px; z-index:41; background:var(--gold-deep); pointer-events:none; display:none; border-radius:2px; }
+  .dropline::before { content:""; position:absolute; top:-1px; left:-3px; width:8px; height:8px; border-radius:50%; background:var(--gold-deep); }
+  .pxtip { position:absolute; z-index:42; top:38px; transform:translateX(-50%); font:600 11px/1 var(--mono); color:var(--on-accent);
            background:var(--gold); padding:4px 7px; border-radius:5px; pointer-events:none; display:none; white-space:nowrap; }
 
   .addrow { margin-top:12px; }
-
-  /* ── The look switch: mockup only, for choosing. "today" is the Setup tables as built. ── */
-  .lookpick { display:flex; align-items:center; gap:8px; order:3; width:100%; justify-content:flex-end; }
-  .lookpick .seg button { padding:5px 9px; font-size:11.5px; }
-  /* Quiet heading: the band the platform's other tables already wear */
-  .page[data-look="quiet"] thead th { background:var(--surface-2); color:var(--ink-2); border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
-  .page[data-look="quiet"] thead th .arrow { color:var(--ink-3); }
-  .page[data-look="quiet"] thead th.sorted .arrow { color:var(--ink); }
-  .page[data-look="quiet"] thead th.movable:hover .hin { background:rgba(15,23,42,.05); }
-  .page[data-look="quiet"] thead th.sorted { color:var(--ink); }
-  /* Hairline: the reel's look — white heading, grey labels, thin rules, no stripes, a hover */
-  .page[data-look="hairline"] thead th { background:var(--surface); color:var(--ink-3); border-right:0; border-bottom:1px solid var(--line); height:34px; letter-spacing:.08em; }
-  .page[data-look="hairline"] thead th .hin { height:34px; }
-  .page[data-look="hairline"] thead th.sorted { color:var(--ink); }
-  .page[data-look="hairline"] thead th .arrow { color:var(--ink-3); }
-  .page[data-look="hairline"] thead th.sorted .arrow { color:var(--gold-deep); }
-  .page[data-look="hairline"] thead th.movable:hover .hin { background:var(--surface-2); }
-  .page[data-look="hairline"] tbody tr:nth-child(even) td { background:transparent; }
-  .page[data-look="hairline"] tbody tr:hover td { background:var(--surface-2); }
-  .page[data-look="hairline"] tbody td { border-bottom:1px solid var(--line-soft); }
-  .page[data-look="hairline"] .ghost tbody tr:hover td { background:transparent; }
-  .page[data-look="hairline"] .cfg { border-color:var(--line-soft); box-shadow:0 1px 3px rgba(15,23,42,.06); }
-  .page[data-look="hairline"] thead th .grip:hover::after, .page[data-look="hairline"] thead th .grip.on::after { background:var(--gold); }
-  .page[data-look="hairline"] thead th .grip::after { background:var(--line); top:9px; bottom:9px; }
   /* ── Status line under the table ───────────────────────────────────────── */
   .foot { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--ink-3); padding:0 2px; }
   .foot b { color:var(--ink); font-weight:700; }
@@ -195,6 +179,30 @@
         border-radius:4px; padding:2px 5px; }
   @media (prefers-reduced-motion:reduce) { .hmenu-panel { animation:none; } }
   @media (max-width:640px) { .search { width:100%; } .head { align-items:stretch; } .foot .hints { display:none; } .lookpick { justify-content:flex-start; } }
+
+  /* ── The look switch: mockup only, for choosing. "today" is the Setup tables as built. ── */
+  .lookpick { display:flex; align-items:center; gap:8px; order:3; width:100%; justify-content:flex-end; }
+  .lookpick .seg button { padding:5px 9px; font-size:11.5px; }
+  /* Quiet heading: the band the platform's other tables wear before the Setup override */
+  .page[data-look="quiet"] thead th { background:var(--surface-2); color:var(--ink-2); border-bottom:1px solid var(--line); }
+  .page[data-look="quiet"] thead th + th { border-left:1px solid var(--line); }
+  .page[data-look="quiet"] thead th .arrow { color:var(--ink-3); }
+  .page[data-look="quiet"] thead th.sorted { color:var(--ink); }
+  .page[data-look="quiet"] thead th.sorted .arrow { color:var(--ink); }
+  .page[data-look="quiet"] thead th.movable:hover .hin { background:rgba(22,50,92,.06); }
+  /* Hairline: the reel's look — white heading, grey labels, thin rules, no grid, no stripes, a hover */
+  .page[data-look="hairline"] thead th { background:var(--surface); color:var(--ink-3); border-bottom:1px solid var(--line); letter-spacing:.08em; }
+  .page[data-look="hairline"] thead th + th { border-left:0; }
+  .page[data-look="hairline"] thead th.sorted { color:var(--ink); }
+  .page[data-look="hairline"] thead th .arrow { color:var(--ink-3); }
+  .page[data-look="hairline"] thead th.sorted .arrow { color:var(--gold-deep); }
+  .page[data-look="hairline"] thead th.movable:hover .hin { background:var(--surface-2); }
+  .page[data-look="hairline"] td + td { border-left:0; }
+  .page[data-look="hairline"] tbody tr:nth-child(even) td { background:transparent; }
+  .page[data-look="hairline"] tbody tr:hover td { background:var(--surface-2); }
+  .page[data-look="hairline"] .ghost tbody tr:hover td { background:transparent; }
+  .page[data-look="hairline"] thead th .grip::after { background:var(--line); top:10px; bottom:10px; }
+  .page[data-look="hairline"] thead th .grip:hover::after, .page[data-look="hairline"] thead th .grip.on::after { background:var(--gold-deep); }
 </style>
 
 <div class="page">

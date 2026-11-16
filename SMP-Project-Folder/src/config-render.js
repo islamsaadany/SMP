@@ -1549,6 +1549,20 @@ function weightingSwitch(){
     'The tab is not shown; the factors and every ' + L("unitword") + '\'s weights are kept, ' +
     'and the group compile still reads them.</div>';
 }
+/* ── THE READER'S OWN SHAPE (§754): what each column is called in the Columns
+   menu, and which never move. # and the name are the frozen pair (§151) and
+   the ⋮ is the far end; the rest may be hidden, sized and moved. The words are
+   the client's where the heading's are (`labelWord`, never `L`: the menu
+   escapes what it draws). */
+TABLECOLS.define("units", [
+  { k:"idx", fixed:true },
+  { k:"name", lock:true, label:function(){ return labelWord("unitword", "bu"); } },
+  { k:"nav", label:"In navigation" }, { k:"code", label:"Code" }, { k:"plans", label:"Plans in" },
+  { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } }, { k:"weight", label:"Weight" },
+  { k:"division", label:function(){ return labelWord("division", "group"); } },
+  { k:"head", label:"BU head" }, { k:"custodian", label:"Strategy custodian" },
+  { k:"status", label:"Status" }, { k:"menu", fixed:true }
+]);
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -1576,7 +1590,7 @@ function renderUnits(){
       ocell("units", k, "nav", may,
         (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
                    : '<span class="why" style="margin:0">' + esc(u.name) + '</span>'),
-        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "Shown in the nav" }); }) +
+        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "In navigation" }); }) +
       ocell("units", k, "code", may, '<span class="mono">' + esc(u.codePrefix) + '</span>',
         function(){ return ocellBox("data-upx", k, u.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") +
       /* §405: WHAT THE UNIT PLANS IN, AND HOW MANY OF THEM — the column that
@@ -1610,7 +1624,7 @@ function renderUnits(){
   }).join("");
 
   return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
-      ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit)) +
+      ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit) + TABLECOLS.tools("units")) +
     weightingSwitch() +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
@@ -1635,7 +1649,7 @@ function renderUnits(){
            30px into its neighbour at 1440 (46px at 1280) while Key Objectives'
            heading ran into Weight — measured. The short name gives up the
            room: it holds a short name. */
-        '<th style="width:11%">Shown in the nav</th>' +
+        '<th style="width:11%">In navigation</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
@@ -1644,6 +1658,7 @@ function renderUnits(){
         '<th class="cc" style="width:7%">Status</th>' +
         '<th class="cc kebcell" style="width:44px"></th>' +
       '</tr></thead>' + setArrangeBody("units", "units") + rows + '</tbody></table></div>' +
+      TABLECOLS.foot("units") +
       /* ADD IS THE PAGE'S, NOT A ROW'S — and it is not drawn while arranging,
          because a row minted mid-drag lands at the end of a list somebody is in
          the middle of ordering. */
@@ -1727,7 +1742,7 @@ var ROWDLG_SPECS = {
       return pdSect("What it is") +
         pdField("Name", '<input class="fld tk-firstfield" value="' + esc(u.name) +
                         '" data-uname="' + esc(k) + '">') +
-        pdField("Shown in the nav", '<input class="fld" value="' + esc(u.navName || "") +
+        pdField("In navigation", '<input class="fld" value="' + esc(u.navName || "") +
                         '" data-unav="' + esc(k) + '" placeholder="' + esc(u.name) + '">') +
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
@@ -2212,7 +2227,8 @@ function saidWhereCount(){
    `Person` is not in the list. A register with the names hidden is not a
    register, and HR_ERP reaches the same answer by marking `name` non-hideable
    rather than by trusting nobody to untick it. */
-var PCOLS_KEY = "smp.people.columns";
+/* `smp.people.columns`, the store this chooser kept, is read ONCE by tablecols.js
+   as the starting point of `smp.table.people` and then superseded (§754). */
 /* RENAMED TWICE IN ONE VERSION, and both are Islam's words (§54.1).
    `belongs` → `bu`: "belongs to is not good naming" — a strategy platform's
    word for a part of the business is BU, and the column says which one the
@@ -2297,27 +2313,23 @@ var PEOPLE_COLS = [
   { k:"status",   label:"Status" },
   { k:"password", label:"Password", live:true }
 ];
-var PCOLS = null;      /* {key:bool}, loaded once */
-
-function peopleCols(){
-  if (PCOLS) return PCOLS;
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(PCOLS_KEY) || "null"); } catch (e) { saved = null; }
-  PCOLS = {};
-  /* MERGED, not replaced. A column added later is not in a map written before
-     it existed, and reading a missing key as `false` would hide every new
-     column from everybody who had ever opened the chooser — §30.2's lesson
-     about the access map, one surface further out. */
-  PEOPLE_COLS.forEach(function(c){
-    PCOLS[c.k] = (saved && typeof saved[c.k] === "boolean") ? saved[c.k] : !c.off;
-  });
-  return PCOLS;
-}
-function setPeopleCol(k, on){
-  peopleCols()[k] = on;
-  try { localStorage.setItem(PCOLS_KEY, JSON.stringify(PCOLS)); } catch (e) {}
-}
-function showCol(k){ return peopleCols()[k] !== false; }
+/* ── THE CHOOSER IS TABLECOLS's NOW (§754) ─────────────────────────────
+   `PEOPLE_COLS` stays the list — the keys, the labels, which are off until
+   asked for — and tablecols.js keeps the answer, draws the menu and takes
+   the same three questions the register asked of its own store: shown or
+   not, merged over the defaults, a saved choice winning. Name is the frozen
+   column and never hides; Password is on offer only where the platform is
+   served (the same `live` the head and the row read). */
+TABLECOLS.define("people", function(){
+  return [{ k:"idx", fixed:true }, { k:"name", lock:true, label:"Name" }].concat(
+    PEOPLE_COLS.map(function(c){
+      return { k:c.k, off:!!c.off,
+               label: c.k === "bu" ? sitsInWord : c.label,
+               offered: c.live ? function(){ return typeof SYNC !== "undefined" && SYNC.isLive() && inOffice(); } : null };
+    }),
+    [{ k:"menu", fixed:true }]);
+}, { omit:true });
+function showCol(k){ return TABLECOLS.shown("people", k); }
 
 /* The mark itself, and it NAMES THE OTHER ROWS rather than saying "duplicate".
    "Emp ID 10154 is on two rows" is a fact somebody can act on; a red dot is a
@@ -3867,27 +3879,9 @@ function renderPeople(){
         : '') +
     '</span>';
 
-  var colMenu =
-    '<span class="hmenu' + (PCOLMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-colmenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + PCOLMENU + '">Columns <span class="hcar">&#9662;</span></button>' +
-      (PCOLMENU
-        ? '<div class="hmenu-panel cols">' +
-            '<div class="hmenu-h"><span>Show columns</span>' +
-              '<span><button class="linkbu" data-colall="1">All</button> &middot; ' +
-              '<button class="linkbu" data-colnone="1">None</button></span></div>' +
-            PEOPLE_COLS.filter(function(c){ return !c.live || live; }).map(function(c){
-              /* The Unit column's name is the client's (§563), so the chooser
-                 asks the same word its heading does. */
-              return '<label class="colrow"><input type="checkbox" data-col="' + c.k + '"' +
-                (showCol(c.k) ? " checked" : "") + '><span>' +
-                esc(c.k === "bu" ? sitsInWord() : c.label) + '</span></label>';
-            }).join("") +
-            '<div class="hmenu-note">Person is always shown &mdash; a register ' +
-            'with the names hidden is not a register.</div>' +
-          '</div>'
-        : '') +
-    '</span>';
+  /* The Columns menu is the shared one (§754): the same button, in the same
+     place in the cluster, now also carrying the row height and Reset. */
+  var colMenu = TABLECOLS.tools("people");
 
   var pwMenu = !live ? "" :
     '<span class="hmenu' + (PWMENU ? " open" : "") + '">' +
@@ -4156,7 +4150,7 @@ function renderPeople(){
         (showCol("status")   ? th("Status", "cc") : '') +
         (live && showCol("password") ? th("Password", "cc", false) : '') +
         th("", "cc kebcell") +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>';
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' + TABLECOLS.foot("people");
       })() +
 
       "") +
@@ -4603,6 +4597,10 @@ function renderPeopleFile(mayEdit){
    same person maintains both, and inventing a fourteenth access key for a
    ten-row table would be a switch nobody ever moves.
    ══════════════════════════════════════════════════════════════════ */
+TABLECOLS.define("mainbu", [
+  { k:"idx", fixed:true }, { k:"name", lock:true, label:"Official BU" },
+  { k:"points", label:"Points at" }, { k:"people", label:"People" }, { k:"menu", fixed:true }
+]);
 function renderMainbus(){
   /* §85. A name has two editable things — what it is called and what it points
      at — and the second is chips with their own × plus a dropdown, which is
@@ -4723,7 +4721,7 @@ function renderMainbus(){
         mbth("Points at") +
         mbth("People", "cc") +
         mbth("", "cc", false) +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>'
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' + TABLECOLS.foot("mainbu")
     : '<div class="note"><b>Empty.</b> Names arrive by themselves the first time an employee ' +
       'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
       'nothing, for you to map. Or type them in with Edit.</div>';
@@ -4735,7 +4733,7 @@ function renderMainbus(){
   return cfgHead("Official BU list",
       strays.length ? ['<span class="pill warn">' + plural(strays.length, "name") +
                        ' on people and not on this list</span>'] : [],
-      "people", mayEdit) +
+      "people", mayEdit, null, null, TABLECOLS.tools("mainbu")) +
 
     section("", "Your names, and what they point at",
       null,
@@ -4826,6 +4824,12 @@ function coFlagSelect(ck, field, val){
     '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
     '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
 }
+TABLECOLS.define("companies", [
+  { k:"idx", fixed:true },
+  { k:"name", lock:true, label:function(){ return labelWord("division", "group"); } },
+  { k:"units", label:"Units" }, { k:"others", label:"Sees other companies" },
+  { k:"group", label:"Sees the group" }, { k:"status", label:"Status" }, { k:"menu", fixed:true }
+]);
 function renderCompanies(){
   /* §85's pen per row became a dialog per row (§261): what a company is called
      and what its CEO sees are three fields, and they are opened from the row's
@@ -4833,7 +4837,7 @@ function renderCompanies(){
      anything on this page at all. */
   var mayEdit = grant("c_units") === "edit";
   var live = activeCompanyKeys().length;
-  return cfgHead(L("division"), [], null, mayEdit) +
+  return cfgHead(L("division"), [], null, mayEdit, null, null, TABLECOLS.tools("companies")) +
     section("", L("division"), null,
       /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
          nothing and costs a header — the threshold is in the spec (§2.2) and
@@ -4877,7 +4881,7 @@ function renderCompanies(){
           '<td class="cc"><span class="pill ' + (on ? "good" : "none") + '">' +
             (on ? "Active" : "Retired") + '</span></td>' +
           coKebab(ck, co, on, mayEdit) + '</tr>';
-      }).join("") + '</tbody></table></div>' +
+      }).join("") + '</tbody></table></div>' + TABLECOLS.foot("companies") +
       (mayEdit ? '<div class="addrow"><button class="editbtn" id="addcompany">+ Add a company</button></div>' : '') +
       '<div class="note"><b>A ' + L1("division") + ' groups ' + L("unitword") + ' so its CEO sees their own.</b> ' +
       'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
@@ -6196,6 +6200,11 @@ function lineOwnersSwitch(mayEdit, editing){
     '</span></div>';
 }
 
+TABLECOLS.define("sets", [
+  { k:"idx", fixed:true }, { k:"name", lock:true, label:"Set" },
+  { k:"team", label:"Team" }, { k:"owner", label:"Owner" }, { k:"picks", label:"Who picks its figures" },
+  { k:"figures", label:"Figures" }, { k:"menu", fixed:true }
+]);
 function renderSetsSetup(){
   var mayEdit = grant("c_sets") === "edit";
   var editing = mayEdit && EDITING.sets;
@@ -6280,7 +6289,7 @@ function renderSetsSetup(){
 
   var claimed = SMPRules.sourceRows(world()).length;
 
-  return cfgHead("Figure sets", [], "sets", mayEdit, null, null) +
+  return cfgHead("Figure sets", [], "sets", mayEdit, null, null, TABLECOLS.tools("sets")) +
     /* §84. NO SEARCH, NO SORT, and both are the spec (§2.2, §6.2) rather than
        an omission. One set today: a search box above one row is furniture. And
        the order of the sets is the order somebody put them in — the same
@@ -6297,7 +6306,7 @@ function renderSetsSetup(){
     '</tr></thead><tbody>' + (rows || (mayEdit ? "" :
       '<tr><td colspan="7" class="why">No sets yet. A set is how a number that ' +
       'belongs to Finance stops being typed by every ' + L1("unitword") + '.</td></tr>')) +
-      addRow + '</tbody></table></div>' +
+      addRow + '</tbody></table></div>' + TABLECOLS.foot("sets") +
     namingSwitch(mayEdit, editing) +
     '<div class="note"><b>Who picks is a security setting, not a convenience.</b> ' +
       'Ticking from the full list means reading every number in the group \u2014 which ' +
@@ -6518,7 +6527,7 @@ function renderMyLines(){
     return '<div class="note">No line is yours to report. A ' + L1("tactic") + ' is yours when the plan ' +
       'names you as its <b>Owner</b> \u2014 the SMO sets that on the unit\u2019s plan.</div>';
   }
-  var open = REVIEW.state === "open" && !(CYCLE.locked && !inOffice());
+  var open = cycleTakesFigures();   /* §755 */
   var byT = {}, order = [];
   rows.forEach(function(r){
     if (!byT[r.target]) { byT[r.target] = []; order.push(r.target); }
@@ -6637,7 +6646,7 @@ function renderMySources(){
       '<b>sets</b>, and a set\u2019s owner enters everything in it \u2014 the SMO creates ' +
       'them on <b>Setup &rsaquo; Figure sets</b>.</div>';
   }
-  var open = REVIEW.state === "open" && !(CYCLE.locked && !inOffice());
+  var open = cycleTakesFigures();   /* §755 */
   var byUnit = {};
   rows.forEach(function(r){ (byUnit[r.unit] = byUnit[r.unit] || []).push(r); });
 
@@ -6924,10 +6933,13 @@ function impPicked(){
    `REVIEW.name`), so this list is read rather than invented.
 
    Uploading has no such list, deliberately: *"the upload only makes sense for
-   new cycles not closed ones"*. A closed cycle takes no figures from anyone,
-   office included — `canReport()` and `canReportFn()` both open with
-   `REVIEW.state !== "open"` — and reopening one is its own deliberate control
-   on Setup › Reporting cycle (§273.2). So the Upload tab STATES its cycle. */
+   new cycles not closed ones"*. A closed cycle takes no figures from anyone
+   but the office (§755 — before it, nobody: `canReport()` and `canReportFn()`
+   both opened with `REVIEW.state !== "open"`), and reopening one is its own
+   deliberate control on Setup › Reporting cycle (§273.2). A progress FILE
+   still lands on the open cycle alone, on Islam's word above; the office's
+   correction to a closed one is typed on the Reporting page. So the Upload
+   tab STATES its cycle. */
 function impCycles(){
   var out = [{ v:"", label:(REVIEW.name || "This cycle") + " — open" }];
   (ARCHIVES || []).forEach(function(a){
@@ -8486,7 +8498,8 @@ function planUnderCell(fk, f, editable){
    substituted — a column added later is absent from a map written before it
    existed, and reading absent as `false` would hide every new column from
    everybody who had ever opened the control (§30.2). */
-var FNCOLS_KEY = "smp.fns.columns";
+/* `smp.fns.columns`, the store this chooser kept, is read ONCE by tablecols.js
+   as the starting point of `smp.table.fns` and then superseded (§754). */
 var FN_COLS = [
   { k:"key",     label:"Key", off:true },
   { k:"nav",     label:"Nav name" },
@@ -8497,21 +8510,6 @@ var FN_COLS = [
   { k:"head",    label:"Head" },
   { k:"cust",    label:"Custodian" }
 ];
-var FNCOLS = null;
-function fnCols(){
-  if (FNCOLS) return FNCOLS;
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(FNCOLS_KEY) || "null"); } catch (e) { saved = null; }
-  FNCOLS = {};
-  FN_COLS.forEach(function(c){
-    FNCOLS[c.k] = (saved && typeof saved[c.k] === "boolean") ? saved[c.k] : !c.off;
-  });
-  return FNCOLS;
-}
-function setFnCol(k, on){
-  fnCols()[k] = on;
-  try { localStorage.setItem(FNCOLS_KEY, JSON.stringify(FNCOLS)); } catch (e) {}
-}
 /* §624: THE CAPS COLUMN ONLY WHERE A FUNCTION HOLDS ONE. It counts the
    capabilities filed under a function, and since §544.13 nothing files one
    there — a capability is the company's — so on every live client it was a
@@ -8521,7 +8519,19 @@ function fnCapsHeld(){
   return (FUNCTION_KEYS || []).some(function(fk){ return capsOfFunction(fk).length > 0; });
 }
 function fnColOffered(k){ return k !== "caps" || fnCapsHeld(); }
-function fnShowCol(k){ return fnColOffered(k) && fnCols()[k] !== false; }
+/* THE CHOOSER IS TABLECOLS's NOW (§754), the register's rule word for word:
+   Function is the frozen column and never hides; Status stays shown but may
+   move; the company column is headed with the client's own word. */
+TABLECOLS.define("fns", function(){
+  return [{ k:"idx", fixed:true }, { k:"name", lock:true, label:"Function" }].concat(
+    FN_COLS.map(function(c){
+      return { k:c.k, off:!!c.off,
+               label: c.k === "company" ? function(){ return labelWord("division", "group"); } : c.label,
+               offered: c.k === "caps" ? fnCapsHeld : null };
+    }),
+    [{ k:"status", keep:true, label:"Status" }, { k:"menu", fixed:true }]);
+}, { omit:true });
+function fnShowCol(k){ return fnColOffered(k) && TABLECOLS.shown("fns", k); }
 
 /* ── THE ROW'S ACTIONS, IN ONE MENU (§93.14) ──────────────────────────
    The register's kebab, on the table §69.22's argument had not reached. The
@@ -8730,25 +8740,9 @@ function renderFunctions(){
      say at the foot and in which column can never be hidden, and a helper
      taking two lists and two sentences is longer than the thing it replaces.
      If a third table wants one, that is when it becomes a function. */
-  var fnColMenu = !mayEdit ? "" :
-    '<span class="hmenu' + (FNCOLMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-fncolmenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + FNCOLMENU + '">Columns <span class="hcar">&#9662;</span></button>' +
-      (FNCOLMENU
-        ? '<div class="hmenu-panel cols">' +
-            '<div class="hmenu-h"><span>Show columns</span>' +
-              '<span><button class="linkbu" data-fncolall="1">All</button> &middot; ' +
-              '<button class="linkbu" data-fncolnone="1">None</button></span></div>' +
-            FN_COLS.filter(function(c){ return fnColOffered(c.k); }).map(function(c){
-              return '<label class="colrow"><input type="checkbox" data-fncol="' + c.k + '"' +
-                (fnShowCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
-            }).join("") +
-            '<div class="hmenu-note">Function and Status are always shown. ' +
-            '<b>Key</b> is the identifier written into a project code and a person\u2019s ' +
-            'row \u2014 turn it on when something does not line up.</div>' +
-          '</div>'
-        : '') +
-    '</span>';
+  /* The Columns menu is the shared one (§754): the register's shape, the same
+     place in the cluster, now also carrying the row height and Reset. */
+  var fnColMenu = TABLECOLS.tools("fns");
 
   return cfgHead(navWord("fnword", "Functions"), [], null, mayEdit, "fnall",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("fns", mayEdit) + fnColMenu) +
@@ -8790,7 +8784,7 @@ function renderFunctions(){
                     rule, which the register applies to Roles and Password). */
                  h("", "cc kebcell", false); })() +
         '</tr></thead>' +
-        setArrangeBody("fns", "fns") + rows + '</tbody></table></div>' +
+        setArrangeBody("fns", "fns") + rows + '</tbody></table></div>' + TABLECOLS.foot("fns") +
       /* The three notes that sat here are in the knowledge base now (§30). A
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
@@ -8863,6 +8857,21 @@ function capSeatSelect(id, seat, v){
     optionsHtml(ownerChoices(v, true), function(x){ return String(v == null ? "" : v) === x; }) +
   '</select>';
 }
+/* Two renderers share `data-tktable="caps"` and never both draw for one
+   tenant: the table carries `data-tcvariant` and the declaration answers by it. */
+TABLECOLS.define("caps", function(variant){
+  return variant === "pillars"
+    ? [{ k:"idx", fixed:true }, { k:"code", lock:true, label:"Code" },
+       { k:"name", label:function(){ return labelWord("capability", "group"); } },
+       { k:"owner", label:"Owner" }, { k:"custodian", label:"Custodian" },
+       { k:"measures", label:function(){ return labelWord("measure", "bu"); } },
+       { k:"tactics", label:function(){ return labelWord("tactic", "bu"); } }, { k:"menu", fixed:true }]
+    : [{ k:"idx", fixed:true }, { k:"name", lock:true, label:function(){ return labelWord("capability", "group"); } },
+       { k:"owner", label:"Owner" }, { k:"custodian", label:"Custodian" }, { k:"plansin", label:"Plans in" },
+       { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
+       { k:"proj", label:function(){ return labelWord("project", "bu") + " / " + labelWord("pillar", "bu"); } },
+       { k:"menu", fixed:true }];
+});
 function renderCapPillars(){
   var u = topAsUnit();
   var may = mayEditCapPillars();
@@ -8887,14 +8896,14 @@ function renderCapPillars(){
         "", p.name || code, 'data-cpmenu="' + esc(id) + '"') +
     '</tr>';
   }).join("");
-  return cfgHead(L("capability"), [], null, false) +
+  return cfgHead(L("capability"), [], null, false, null, null, TABLECOLS.tools("caps", "pillars")) +
     section("", L("capability"), null,
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
-      '<div class="cfg"><table class="cappcfg" data-tktable="caps"><thead><tr>' +
+      '<div class="cfg"><table class="cappcfg" data-tktable="caps" data-tcvariant="pillars"><thead><tr>' +
         (function(){ var h = tkHead("caps");
           return h("#", "idx", false) + h("Code") + h(L1("capability")) + h("Owner") + h("Custodian") +
                  h(L("measure","bu"), "cc") + h(L("tactic","bu"), "cc") + h("", "cc kebcell", false); })() +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + TABLECOLS.foot("caps") +
       (may ? '<div class="addrow"><button class="editbtn" id="addcappillar">+ Add a ' +
         L1("capability") + '</button></div>' : ''));
 }
@@ -8964,7 +8973,7 @@ function renderCaps(){
      mark. What is left is drawn only when there IS an orphan. */
   return cfgHead(L("capability"),
       orphan ? ['<span class="pill none">' + orphan + ' with no owner</span>'] : [],
-      null, false) +
+      null, false, null, null, TABLECOLS.tools("caps")) +
     section("", L("capability"), null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
          wrap and leave one row taller than the rest, which reads as broken
@@ -8979,7 +8988,7 @@ function renderCaps(){
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div>' +
+        '<tbody>' + rows + '</tbody></table></div>' + TABLECOLS.foot("caps") +
       (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +

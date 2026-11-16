@@ -1,0 +1,213 @@
+<title>SWOT title and points</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: one column of cases; each case is the box as typed beside the box as printed. */
+  :root{
+    --sans:"Source Sans 3",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#C4CDDA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79; --none:#9AA3B0;
+    --good:#2E7D5B; --bad:#B04434; --bad-tx:#8C3327;
+    --panel:#0B1A33; --panel-ink:#FFFFFF; --slide:#FFFFFF; --slide-ink:#171B22;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --none:#6E7785;
+      --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93;
+      --panel:#07101F; --slide:#1C2027; --slide-ink:#E9ECF1;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --none:#6E7785;
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93;
+    --panel:#07101F; --slide:#1C2027; --slide-ink:#E9ECF1;
+    color-scheme:dark;
+  }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+  .wrap{ max-width:1060px; margin:0 auto; padding-block:34px;
+         padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); }
+  h1{ font-size:26px; margin:0 0 6px; letter-spacing:-.2px; text-wrap:balance; }
+  .lede{ font-size:14.5px; color:var(--ink-2); margin:0 0 6px; max-width:66ch; line-height:1.55; }
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:36px 0 10px; display:block; }
+  .key b{ color:var(--ink-3); font-weight:600; letter-spacing:0; text-transform:none; font-size:12.5px; }
+  .note{ font-size:13px; color:var(--ink-3); margin:9px 0 0; max-width:66ch; line-height:1.5; }
+  .note b{ color:var(--ink-2); font-weight:600; }
+  .pair{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:720px){ .pair{ grid-template-columns:1fr; } }
+  .pair > *{ min-width:0; }
+  .cap{ font:600 10.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; }
+
+  /* the SWOT box, as the platform draws it */
+  .box{ border:1px solid var(--line); border-top:3px solid var(--good); border-radius:4px; background:var(--surface); padding:14px 16px; }
+  .box.w{ border-top-color:var(--bad); }
+  .box h3{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); font-weight:700; margin:0 0 9px; }
+  .swotlist{ list-style:none; margin:0; padding:0; }
+  .swotlist li{ display:grid; grid-template-columns:22px 1fr; gap:8px; align-items:baseline; padding:5px 0; font-size:13.5px; }
+  .swotlist li.ed{ grid-template-columns:22px 1fr auto; align-items:start; }
+  .swotlist li.ed .swot-n{ padding-top:7px; }
+  .swot-n{ font-family:var(--mono); font-size:11.5px; color:var(--none); font-variant-numeric:tabular-nums; }
+  .swot-t b{ font-weight:700; }
+  /* a point: its own block, the bullet in a column of its own, the text in a
+     column of its own — so a point that wraps lines up under its first word */
+  .swot-p{ display:block; position:relative; padding-left:14px; margin-top:3px; }
+  .swot-p::before{ content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
+  .swot-t b + .swot-p{ margin-top:5px; }
+  .fld{ font:inherit; font-size:13px; line-height:1.45; width:100%; padding:6px 9px; border:1px solid var(--field-line); border-radius:4px;
+        background:var(--surface); color:var(--ink); white-space:pre-wrap; box-sizing:border-box; min-height:34px; }
+  .xbtn{ color:var(--ink-3); font-size:14px; padding:6px 4px 0; }
+  .addrow{ margin-top:8px; }
+  .editbtn{ display:inline-block; font:700 10.5px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--gold-deep);
+            border:1px solid var(--gold); border-radius:999px; padding:7px 12px; }
+
+  /* the review deck, one slide */
+  .deck{ background:var(--panel); padding:16px; border-radius:6px; }
+  .slide{ background:var(--slide); color:var(--slide-ink); aspect-ratio:16/9; max-width:100%; border-radius:3px; padding:4% 5%; box-sizing:border-box; overflow:hidden; }
+  .slide h2{ font-size:clamp(16px,2.6vw,26px); margin:0 0 4%; padding-left:12px; border-left:4px solid var(--good); }
+  ol.dswot{ list-style:none; margin:0; padding:0; columns:2; column-gap:5%; }
+  ol.dswot li{ display:grid; grid-template-columns:22px 1fr; gap:8px; align-items:baseline; padding:2.5% 0; border-bottom:1px solid var(--line-soft);
+               font-size:clamp(11px,1.5vw,16px); break-inside:avoid; }
+  ol.dswot .n{ font-family:var(--mono); color:var(--none); font-size:.8em; }
+  ol.dswot .swot-p{ margin-top:.45em; padding-left:1.1em; line-height:1.35; }
+  ol.dswot .swot-t b + .swot-p{ margin-top:.55em; }
+
+  .verdict{ border-left:3px solid var(--gold); padding:2px 0 2px 13px; margin:10px 0 0; font-size:13px; color:var(--ink-2); max-width:66ch; line-height:1.5; }
+  .rule{ border:0; border-top:1px solid var(--line); margin:40px 0 0; }
+</style>
+
+<div class="wrap">
+  <h1>A SWOT line: its title and its points</h1>
+  <p class="lede">What you type in the box, and what the page prints once the pen closes. The first line is the title; every line under it is a point. Six cases, each one as typed beside the same line as printed.</p>
+
+  <span class="key">1 · A title with points under it <b>— the case you showed</b></span>
+  <div class="pair">
+    <div>
+      <p class="cap">As typed · pen open</p>
+      <div class="box"><h3>Strengths</h3><ol class="swotlist">
+        <li class="ed"><span class="swot-n">1</span><div class="fld">TRUSTED BRAND LEGACY
+
+- RHI is the undisputed "Go-To Entity" in the cement industry, providing stability, superior integrity, and unquestioned technical expertise.
+
+- This advantage stems from the Chairman's respected reputation and RHI's commitment to client shielding, ensuring quality operations without burdening the customer.
+
+- RHI possesses complete technical mastery and exceptional client-facing agility.</div><span class="xbtn">×</span></li>
+      </ol></div>
+    </div>
+    <div>
+      <p class="cap">As printed · pen closed</p>
+      <div class="box"><h3>Strengths</h3><ol class="swotlist">
+        <li><span class="swot-n">1</span><span class="swot-t"><b>TRUSTED BRAND LEGACY</b><span class="swot-p">RHI is the undisputed "Go-To Entity" in the cement industry, providing stability, superior integrity, and unquestioned technical expertise.</span><span class="swot-p">This advantage stems from the Chairman's respected reputation and RHI's commitment to client shielding, ensuring quality operations without burdening the customer.</span><span class="swot-p">RHI possesses complete technical mastery and exceptional client-facing agility.</span></span></li>
+      </ol></div>
+    </div>
+  </div>
+  <p class="note"><b>Title bold, points as bullets, each in line with itself.</b> The dash you typed is taken off the front of the line and drawn as the bullet in a column of its own; the words sit in their own column, so a point that runs to a second line lines up under its first word, not under the dash. The empty lines you left between points are dropped, so the points sit close under their title.</p>
+
+  <span class="key">2 · One line, no points <b>— every line written so far</b></span>
+  <div class="pair">
+    <div>
+      <p class="cap">As typed</p>
+      <div class="box w"><h3>Weaknesses</h3><ol class="swotlist">
+        <li class="ed"><span class="swot-n">1</span><div class="fld">Limited control over the value chain</div><span class="xbtn">×</span></li>
+        <li class="ed"><span class="swot-n">2</span><div class="fld">Low margin on devices</div><span class="xbtn">×</span></li>
+      </ol></div>
+    </div>
+    <div>
+      <p class="cap">As printed</p>
+      <div class="box w"><h3>Weaknesses</h3><ol class="swotlist">
+        <li><span class="swot-n">1</span><span class="swot-t">Limited control over the value chain</span></li>
+        <li><span class="swot-n">2</span><span class="swot-t">Low margin on devices</span></li>
+      </ol></div>
+    </div>
+  </div>
+  <p class="note"><b>Exactly as before: plain.</b> A line with nothing under it is not made bold, so the SWOTs already written across the units do not change their look. This is what is built. The alternative, every first line bold whether or not points follow, is drawn as case 6 for comparison.</p>
+
+  <span class="key">3 · Both shapes in one box</span>
+  <div class="pair">
+    <div>
+      <p class="cap">As typed</p>
+      <div class="box"><h3>Strengths</h3><ol class="swotlist">
+        <li class="ed"><span class="swot-n">1</span><div class="fld">HIGHLY SKILLED TEAM
+- RHI possesses a high-caliber workforce whose extensive experience provides a critical competitive edge in handling complex projects.</div><span class="xbtn">×</span></li>
+        <li class="ed"><span class="swot-n">2</span><div class="fld">Over 90% of revenue from local manufacturing</div><span class="xbtn">×</span></li>
+        <li class="ed"><span class="swot-n">3</span><div class="fld">SUBCONTRACTOR LEVERAGE (Mansour &amp; El Seefy)
+- RHI benefits from reliable partnerships that ensure operational continuity and resource flexibility.
+- These relationships are secured by strong executive alignment (Mansour/CFO) and the Chairman's deep historical ties (e.g., El Seefy).</div><span class="xbtn">×</span></li>
+      </ol><div class="addrow"><span class="editbtn">+ Add</span></div></div>
+    </div>
+    <div>
+      <p class="cap">As printed</p>
+      <div class="box"><h3>Strengths</h3><ol class="swotlist">
+        <li><span class="swot-n">1</span><span class="swot-t"><b>HIGHLY SKILLED TEAM</b><span class="swot-p">RHI possesses a high-caliber workforce whose extensive experience provides a critical competitive edge in handling complex projects.</span></span></li>
+        <li><span class="swot-n">2</span><span class="swot-t">Over 90% of revenue from local manufacturing</span></li>
+        <li><span class="swot-n">3</span><span class="swot-t"><b>SUBCONTRACTOR LEVERAGE (Mansour &amp; El Seefy)</b><span class="swot-p">RHI benefits from reliable partnerships that ensure operational continuity and resource flexibility.</span><span class="swot-p">These relationships are secured by strong executive alignment (Mansour/CFO) and the Chairman's deep historical ties (e.g., El Seefy).</span></span></li>
+      </ol></div>
+    </div>
+  </div>
+  <p class="note">A box can mix the two. Line 2 stays plain because it has no points; lines 1 and 3 get their title in bold.</p>
+
+  <span class="key">4 · Points without dashes, and a title in sentence case</span>
+  <div class="pair">
+    <div>
+      <p class="cap">As typed</p>
+      <div class="box"><h3>Strengths</h3><ol class="swotlist">
+        <li class="ed"><span class="swot-n">1</span><div class="fld">Trust in leadership
+RHI's stability is anchored by a profound, familial trust and loyalty directed toward the Chairman.
+The Chairman acts as the paternal anchor, providing crucial personal support that ties employees emotionally to the company.
+The CEO champions individual initiative and acts as an executive development driver.</div><span class="xbtn">×</span></li>
+      </ol></div>
+    </div>
+    <div>
+      <p class="cap">As printed</p>
+      <div class="box"><h3>Strengths</h3><ol class="swotlist">
+        <li><span class="swot-n">1</span><span class="swot-t"><b>Trust in leadership</b><span class="swot-p">RHI's stability is anchored by a profound, familial trust and loyalty directed toward the Chairman.</span><span class="swot-p">The Chairman acts as the paternal anchor, providing crucial personal support that ties employees emotionally to the company.</span><span class="swot-p">The CEO champions individual initiative and acts as an executive development driver.</span></span></li>
+      </ol></div>
+    </div>
+  </div>
+  <p class="note"><b>The first line is the title whatever it looks like.</b> Capitals are not required, and a dash is not required on a point: a point typed without one gets the same bullet as a point typed with one, so a box reads the same however its lines were typed. A leading dash, bullet or asterisk is taken as the marker; anything else is the point's own words.</p>
+
+  <span class="key">5 · The same line on the review deck</span>
+  <div class="deck"><div class="slide">
+    <h2>Strengths</h2>
+    <ol class="dswot">
+      <li><span class="n">1</span><span class="swot-t"><b>TRUSTED BRAND LEGACY</b><span class="swot-p">RHI is the undisputed "Go-To Entity" in the cement industry, providing stability, superior integrity, and unquestioned technical expertise.</span><span class="swot-p">This advantage stems from the Chairman's respected reputation and RHI's commitment to client shielding.</span><span class="swot-p">RHI possesses complete technical mastery and exceptional client-facing agility.</span></span></li>
+      <li><span class="n">2</span><span class="swot-t"><b>HIGHLY SKILLED TEAM</b><span class="swot-p">RHI possesses a high-caliber workforce whose extensive experience provides a critical competitive edge.</span></span></li>
+      <li><span class="n">3</span><span class="swot-t">Over 90% of revenue from local manufacturing</span></li>
+      <li><span class="n">4</span><span class="swot-t">Nationwide distribution &amp; retail reach</span></li>
+      <li><span class="n">5</span><span class="swot-t">Integrated Raya Trade ecosystem</span></li>
+    </ol>
+  </div></div>
+  <p class="note">The slide prints the same shape: title in bold, points as bullets lined up under their first word, a one-liner plain. This is the unit's SWOT slide; the company's Analysis slide and a function's S&amp;W slide print the same way.</p>
+
+  <span class="key">6 · The alternative, not built <b>— every first line bold</b></span>
+  <div class="pair">
+    <div>
+      <p class="cap">Built · bold only when points follow</p>
+      <div class="box w"><h3>Weaknesses</h3><ol class="swotlist">
+        <li><span class="swot-n">1</span><span class="swot-t"><b>THIN BENCH</b><span class="swot-p">Two people hold every client relationship.</span></span></li>
+        <li><span class="swot-n">2</span><span class="swot-t">Limited control over the value chain</span></li>
+        <li><span class="swot-n">3</span><span class="swot-t">Low margin on devices</span></li>
+      </ol></div>
+    </div>
+    <div>
+      <p class="cap">Alternative · every entry's first line bold</p>
+      <div class="box w"><h3>Weaknesses</h3><ol class="swotlist">
+        <li><span class="swot-n">1</span><span class="swot-t"><b>THIN BENCH</b><span class="swot-p">Two people hold every client relationship.</span></span></li>
+        <li><span class="swot-n">2</span><span class="swot-t"><b>Limited control over the value chain</b></span></li>
+        <li><span class="swot-n">3</span><span class="swot-t"><b>Low margin on devices</b></span></li>
+      </ol></div>
+    </div>
+  </div>
+  <p class="verdict">The left is what is built and pushed: a one-line entry keeps the look it has had all along, and only a line that carries points gets its title in bold. The right makes every entry read as a heading, which also changes every SWOT already written. Say which you want; switching to the right is a one-line change.</p>
+
+  <hr class="rule">
+  <p class="note">What does not change: the box you type in. A text box cannot show one of its lines in bold, so while the pen is open the title looks like the rest of the text. The spreadsheet and PowerPoint downloads keep the raw text with its line breaks.</p>
+</div>

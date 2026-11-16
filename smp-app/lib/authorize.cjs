@@ -1858,6 +1858,26 @@ function authorize(stored, incoming, person) {
      passwords for the office's own people). */
   const office = R.isOffice(w, person);
   const locked = !!((stored.cycle || {}).locked);
+  /* ── §756: A CLOSED CYCLE IS SHUT THE SAME WAY, FROM HERE TOO ─────────
+     Islam: *"close the door on the server too."* §755 made the screen's
+     rule ONE reading — open takes figures from everybody, closed and locked
+     from the office alone — and this file had only ever asked the lock: a
+     closed cycle refused nobody here, because until §755 no screen offered
+     a figure on one and the fault had nowhere to show (§61's trap, the
+     server side). So `shut` is the lock's test with the state beside it,
+     read from the STORED review (§42: never the incoming one, or a save
+     that reopens the cycle and enters a figure in one body would judge
+     itself open), and every reporting refusal below that asked
+     `locked && !office` asks `shut` instead — the same set of changes the
+     lock has gated since spec 006 §7.1, no more and no fewer. The refusal
+     names the state it found: a closed cycle says *closed*, so the person
+     is sent to the right control (Reopen on Setup, §273.2) and not to a
+     lock nobody set. A review with no state at all reads as closed: a
+     tenant that has never opened a cycle has nothing to take a figure
+     into, and the screen offers none (canReport). */
+  const closed = String((stored.review || {}).state || "") !== "open";
+  const shut = (locked || closed) && !office;
+  const shutWord = closed ? "closed" : "locked";
   const roleKeys = R.personRoleKeys(w, person);
   /* The register, for the refusals that have to name a person. rules.js
      answers from the WORLD, which holds no people — the key is all it can
@@ -2009,8 +2029,8 @@ function authorize(stored, incoming, person) {
       case "focus":
         if (roleKeys.indexOf("super") === -1)
           no("Focus measures are marked by the Super user.");
-        else if (locked && !office)
-          no("This cycle is locked, so its focus measures can no longer be changed.");
+        else if (shut)
+          no("This cycle is " + shutWord + ", so its focus measures can no longer be changed.");
         return;
 
       /* ── THE STRATEGY TAB IS THE OFFICE'S (§94) ──────────────────
@@ -2124,8 +2144,8 @@ function authorize(stored, incoming, person) {
         const id = String(ch.target || "").slice(4);
         const p = ((stored.group || {}).items || []).filter(function (x) { return x && x.id === id; })[0];
         if (!p) { no("That direction is not in the plan."); return; }
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before adding slides.");
+        if (shut) {
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before adding slides.");
           return;
         }
         if (R.mayReportTop(w, person)) return;
@@ -2144,8 +2164,8 @@ function authorize(stored, incoming, person) {
          this row's note before still cannot. A locked cycle takes it from
          neither. */
       case "lineNote":
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+        if (shut) {
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
           return;
         }
         if (smo || (ch.rows || []).every(function (r) {
@@ -2158,8 +2178,8 @@ function authorize(stored, incoming, person) {
            a rule and not a matrix cell, asked through the one function the
            screen draws its boxes from (§42). */
         if (t === "group") {
-          if (locked && !office) {
-            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          if (shut) {
+            no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
             return;
           }
           if (R.mayReportTop(w, person)) return;
@@ -2189,8 +2209,8 @@ function authorize(stored, incoming, person) {
           no("You cannot report for " + targetWord(w, t) + ".");
           return;
         }
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+        if (shut) {
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
           return;
         }
         /* Submitting, and the subject's own note on the cycle, speak for the
@@ -2242,8 +2262,8 @@ function authorize(stored, incoming, person) {
         if (t === "group") {
           if (!R.mayReportTop(w, person))
             no("The top layer's own plan is reported by the SMO team and the CEO.");
-          else if (locked && !office)
-            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          else if (shut)
+            no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
           return;
         }
         /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
@@ -2255,8 +2275,8 @@ function authorize(stored, incoming, person) {
           no("You cannot report for " + targetWord(w, t) + ".");
           return;
         }
-        if (locked && !office)
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+        if (shut)
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
         return;
       }
 
@@ -2278,8 +2298,8 @@ function authorize(stored, incoming, person) {
            whoever reports the whole top layer (the office and the CEO) —
            the same two rules its figures are judged by, never a matrix cell. */
         if (t === "group") {
-          if (locked && !office) {
-            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          if (shut) {
+            no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
             return;
           }
           if (!R.mayReportTop(w, person) &&
@@ -2297,8 +2317,8 @@ function authorize(stored, incoming, person) {
           no("You cannot report for " + targetWord(w, t) + ".");
           return;
         }
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+        if (shut) {
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
           return;
         }
         if (!R.mayMarkDone(w, person, isFn ? "fn" : "unit", t, c.owner, c.custodian))
@@ -2313,8 +2333,8 @@ function authorize(stored, incoming, person) {
          it is not a source of anything. */
       case "sourceReporting": {
         const t = String(ch.target || "");
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+        if (shut) {
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
           return;
         }
         if (smo) return;
@@ -2333,8 +2353,8 @@ function authorize(stored, incoming, person) {
          reasoning: parking, submitting, the note and the slides stay the
          unit's). */
       case "lineDone": {
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+        if (shut) {
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
           return;
         }
         if (smo) return;
@@ -2352,8 +2372,8 @@ function authorize(stored, incoming, person) {
          The office still enters anything; the unit does not, which is the
          whole of what the switch turns on. */
       case "lineReporting": {
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+        if (shut) {
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
           return;
         }
         if (smo) return;
@@ -2501,8 +2521,8 @@ function authorize(stored, incoming, person) {
            rows of their own project and nothing else (§301's rule). Found
            through the STORED top plan (§42), never the incoming one. */
         if (capT === "group") {
-          if (locked && !office) {
-            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          if (shut) {
+            no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
             return;
           }
           if (R.mayReportTop(w, person)) return;
@@ -2521,8 +2541,8 @@ function authorize(stored, incoming, person) {
         }
         const capArea = R.boxRef(capT).area;
         if (!edits(w, person, capArea, ch.target)) { no("You cannot report for " + where.trim() + "."); return; }
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+        if (shut) {
+          no("This cycle is " + shutWord + ". Ask the SMO to reopen it before entering figures.");
           return;
         }
         /* ── A CUSTODIAN PER PROJECT (§147) ──────────────────────────

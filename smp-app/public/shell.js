@@ -66377,8 +66377,8 @@ var COPILOT = (function(){
   function when(iso){ return dateDay(iso); }
 
   /* ── THE PANE ────────────────────────────────────────────────────────── */
-  /* §746 — THREE LAYOUTS, TO COMPARE LIVE (Islam: "let's build B & A as well,
-     keep both so I can compare live"). One window (§745), A — one chat that
+  /* §753 — THREE LAYOUTS, TO COMPARE LIVE (Islam: "let's build B & A as well,
+     keep both so I can compare live"). One window (§752), A — one chat that
      opens the work when it is asked for — and B — the Copilot on the plan,
      opened from the part in view on the Strategy tab. Chosen per browser;
      nothing on the server knows which. */
@@ -66507,7 +66507,7 @@ var COPILOT = (function(){
       others.map(function(x){ var a = areaState(x.k), c = x.k === "foundation" ? ["Build or refine the Foundation", ""] : STARTS[x.k] || [WORKFLOW_WORD[x.k] || stripWord(x.k), ""];
         return '<button type="button" class="coppcard copareacard" data-cop-area-card="' + x.k + '">' + icon(x.k === "foundation" ? PATH_CARDS[0].i : PLANMARK) + '<span class="coppt"><span class="coptag">' + E(stripWord(x.k)) + (x.k === nx ? ' · next step' : '') + '</span>' + E(c[0]) + '</span>' +
           '<span class="coppd">' + E(a.says || "") + '</span></button>'; }).join("") + '</div></details>';
-    /* §746 B — in the panel on the plan, the start screen is about the part in view, and only it */
+    /* §753 B — in the panel on the plan, the start screen is about the part in view, and only it */
     var bare = inPanel();
     if (bare) { more = ""; focus = '<div class="copfocus"><span class="copm">' + E(areaState(s).says || "") + '</span></div>'; }
     return '<div class="copstart" data-cop-startscreen>' +
@@ -66524,7 +66524,7 @@ var COPILOT = (function(){
       '<div class="copor">or start step by step</div>' + unfinishedHtml() + focus +
       '<div class="coppaths copstartcards">' + cards + '</div>' + more + '</div>';
   }
-  /* §746 A — ONE CHAT: the box, and a few suggestions read off where the
+  /* §753 A — ONE CHAT: the box, and a few suggestions read off where the
      place stands; a suggestion opens that area's work, as saying it would.
      The area's own cards are drawn hidden, so a suggestion starts exactly
      what the card would. */
@@ -68961,7 +68961,7 @@ var COPILOT = (function(){
       loadAll(!!force);
     }, function(){ LISTS[k] = { failed: true }; if (askedFor === k) draw(); });
   }
-  /* §745 — THE COPILOT IN ONE WINDOW (Islam: "the copilot with a split by
+  /* §752 — THE COPILOT IN ONE WINDOW (Islam: "the copilot with a split by
      area is a bit confusing for the team, they need 1 window"; the signed-off
      design-mockups/copilot-layout/2026-11-04_one-window.html, "build the one
      window"). The area tabs go; every area's chats and deliverables stand in
@@ -69050,7 +69050,7 @@ var COPILOT = (function(){
         '<span class="copstepk">' + E(k) + '</span><b>' + E(stripWord(s.k)) + '</b><small>' + E(a.says || "…") + '</small></button>';
     }).join("");
   }
-  /* §746 B — THE COPILOT ON THE PLAN. On the Strategy tab, ✦ Copilot beside
+  /* §753 B — THE COPILOT ON THE PLAN. On the Strategy tab, ✦ Copilot beside
      Edit opens the Copilot's own pane in a panel on the right, on the part in
      view: Foundation → the Foundation, SWOT → the SWOT, Plan → Pillars/
      Directions or Tactical Plans (a switch in the panel's head). Apply writes
@@ -70701,7 +70701,7 @@ var COPILOT = (function(){
   function startFree(file){
     var t = document.querySelector("[data-cop-starttext]"), text = t ? t.value : "", k = key();
     if ((!text.trim() && !file) || THINKING || !canEdit()) { if (t) t.focus(); return; }
-    /* §746 A — said, the work it asks for opens; or the conversation goes to the area it is about */
+    /* §753 A — said, the work it asks for opens; or the conversation goes to the area it is about */
     if (layout() !== "window" && !inPanel() && !file) {
       var r = routeArea(text);
       if (r.area && r.work) { delete STARTTEXT[k]; if (t) t.value = ""; startWorkflow(r.area); return; }
@@ -78152,7 +78152,7 @@ var SYNC = (function () {
      document (COPILOT.shown); `everywhere` because, like the reports, being
      able to open it is never a reason to be offered a destination (§383).
      Declared once and referenced four times, the file's own idiom. */
-  /* §745 — `oneWindow`: the Copilot's areas still route the address
+  /* §752 — `oneWindow`: the Copilot's areas still route the address
      (…/copilot/directions), but their row is not drawn; the Copilot draws
      the method as its own strip (Islam: "they need 1 window"). */
   var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true, oneWindow:true,
@@ -81641,7 +81641,7 @@ var SYNC = (function () {
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
-    /* §745 — the TAB, kept before `def` becomes a section (below): its
+    /* §752 — the TAB, kept before `def` becomes a section (below): its
        one-window flag decides whether its sections draw a row. */
     var tabDef = def;
     /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§121.1). Twenty
@@ -81943,7 +81943,7 @@ var SYNC = (function () {
        Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    /* §745 — `allowed()` hands back copies of the tab definitions, so the
+    /* §752 — `allowed()` hands back copies of the tab definitions, so the
        one-window flag is read off the Copilot's own definition by its key,
        and off the TAB, not the section `def` has become by here. */
     var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
@@ -82157,7 +82157,7 @@ var SYNC = (function () {
        (§173): every navigation ends in a paint, so one line covers a door
        added tomorrow and there is no list of handlers to keep up to date. */
     rememberWhere();
-    /* §746 — the Copilot on the plan (layout B): its button beside Edit and its
+    /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
        panel follow every paint, as the page's own parts do. */
     if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
     /* Every mutation repaints, so this is where a change becomes a save. */

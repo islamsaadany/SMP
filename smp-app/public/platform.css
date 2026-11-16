@@ -13770,7 +13770,7 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copmsg.ai.copbad .copbody { border-left-color:var(--bad); }
 .copmsg.ai.copbad .copbody > b:first-child { color:var(--bad-tx); }
 
-/* §745 — THE COPILOT IN ONE WINDOW. The method as a strip above the pane,
+/* §752 — THE COPILOT IN ONE WINDOW. The method as a strip above the pane,
    each step saying where the place stands, the next one outlined; the
    rail's area tags and filter chips; the start screen's focus line and the
    other areas folded under its cards. */
@@ -13805,7 +13805,7 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copachip { font-size:11px; line-height:1.6; }
 .copareacard .coptag { display:block; }
 
-/* §746 — THREE LAYOUTS TO COMPARE LIVE: the switch above the pane; A's
+/* §753 — THREE LAYOUTS TO COMPARE LIVE: the switch above the pane; A's
    start screen (one box, suggestions); B's button beside Edit and its panel
    on the right of the Strategy tab, the plan narrowing beside it. */
 .coplayout { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin:0 0 8px; font-size:12.5px; }

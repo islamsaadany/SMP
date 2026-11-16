@@ -8993,7 +8993,9 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 /* the list */
 .penlist tbody tr[data-tacopen] { cursor:pointer; }
 .penlist tbody tr[data-tacopen]:hover td { background:var(--surface-2); }
-.penlist tbody tr.penon td { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+/* (the first mark — a grey tint and a bar on every cell — gave way to §774's, above:
+   it came later in this file and won, which is why the tenant saw bars at every
+   column edge and no tint; §774.2) */
 .penlist .tacopenb { background:none; border:0; padding:0; margin:0; font:inherit; text-align:left; cursor:pointer; color:inherit; display:block; }
 .penlist .tacopenb:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:4px; }
 .penlist .tacopenb .tacname { display:block; }

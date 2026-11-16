@@ -1,0 +1,226 @@
+<title>Tactic Side Panel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: the pen's tactics table as a plain list, one line per tactic, and a side panel
+     that edits one tactic at a time in short sections. Navy/gold house palette. */
+  :root {
+    --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --mark:#C58B1E;
+    --good:#2E7D5B; --attn:#B8860B; --bad:#B04434; --good-bg:#E4F0EA; --bad-bg:#F7E3E0; --bad-tx:#8F3328;
+    --tag-bg:#EEF2F8; --tag-ink:#16325C; --tag-line:#C9D4E6; --shadow:0 10px 30px rgba(15,23,42,.18);
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91;
+    --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A; --mark:#D9A441;
+    --good-bg:#15332A; --bad-bg:#371C1A; --bad-tx:#E79A93; --tag-bg:#1C2A42; --tag-ink:#C9D8F2; --tag-line:#34496E; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark; } }
+  :root[data-theme="dark"] {
+    --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91;
+    --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A; --mark:#D9A441;
+    --good-bg:#15332A; --bad-bg:#371C1A; --bad-tx:#E79A93; --tag-bg:#1C2A42; --tag-ink:#C9D8F2; --tag-line:#34496E; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark; }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45; }
+  .wrap { max-width:1280px; margin:0 auto; padding-block:24px 60px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size:22px; margin:0 0 4px; text-wrap:balance; }
+  .lede { color:var(--ink-3); margin:0 0 16px; max-width:80ch; }
+  h2.part { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:28px 0 10px; }
+
+  /* the page: pen on, the table, the panel beside it */
+  .stage { display:grid; grid-template-columns:minmax(0,1fr) 460px; gap:16px; align-items:start; }
+  @media (max-width:980px) { .stage { grid-template-columns:1fr; } }
+  .pillar { background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden; min-width:0; }
+  .phead { background:var(--panel); color:var(--panel-ink); padding:12px 16px; display:flex; gap:14px; align-items:baseline; }
+  .phead .code { font-family:var(--mono); font-size:12px; opacity:.8; } .phead b { font-size:15px; }
+  .phead .done { margin-left:auto; background:var(--gold); color:#14161A; border:0; border-radius:8px; font:inherit; font-weight:700; font-size:12px; padding:5px 12px; }
+  .sect { padding:14px 16px 4px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); display:flex; gap:8px; align-items:center; }
+  .sect .n { color:var(--ink-3); font-weight:600; }
+  .scroll { overflow-x:auto; margin:8px 12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:13px; min-width:640px; }
+  th, td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:middle; }
+  th + th, td + td { border-left:1px solid var(--line-soft); }
+  thead th { background:var(--panel); color:var(--panel-ink); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; border-bottom:0; }
+  tbody tr:nth-child(even) td { background:var(--zebra); }
+  tbody tr:last-child td { border-bottom:0; }
+  tbody tr.on td { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+  td.idx { width:52px; font-family:var(--mono); color:var(--ink-3); white-space:nowrap; }
+  td.idx .grip { color:var(--line); margin-right:4px; }
+  .tacname { font-weight:650; display:block; }
+  .why { display:block; font-size:12px; color:var(--ink-3); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:380px; }
+  .q { display:inline-flex; gap:3px; }
+  .q i { font-style:normal; font-family:var(--mono); font-size:10.5px; width:22px; height:18px; line-height:18px; text-align:center; border-radius:4px; border:1px solid var(--line); color:var(--ink-3); }
+  .q i.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
+  .kmtag { display:inline-block; font-family:var(--mono); font-size:10.5px; line-height:1; padding:4px 6px; border-radius:5px; background:var(--tag-bg); color:var(--tag-ink); border:1px solid var(--tag-line); white-space:nowrap; font-weight:600; margin-right:3px; }
+  .outn { color:var(--ink-2); } .outn small { color:var(--ink-3); }
+  .pen { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid var(--line); border-radius:7px; background:var(--surface); cursor:pointer; color:var(--ink-2); font-size:13px; }
+  .pen:hover, tr.on .pen { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
+  .rowtools { display:flex; gap:6px; align-items:center; white-space:nowrap; }
+  .rowtools .x { color:var(--ink-3); cursor:pointer; font-size:14px; padding:0 4px; }
+  .addrow td { color:var(--gold-deep); font-weight:700; cursor:pointer; }
+  .miss { color:var(--bad); font-style:italic; font-size:12px; }
+
+  /* the panel */
+  .side { background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); position:sticky; top:12px; max-height:calc(100vh - 24px); display:flex; flex-direction:column; min-width:0; }
+  .shead { padding:12px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
+  .shead .k { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-3); }
+  .shead b { font-size:14px; }
+  .shead .nav { margin-left:auto; display:flex; gap:4px; }
+  .shead .nav button, .shead .close { font:inherit; font-size:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); border-radius:7px; padding:4px 9px; cursor:pointer; }
+  .shead .close { font-size:16px; line-height:1; padding:3px 8px; }
+  .sbody { overflow:auto; padding:6px 16px 10px; }
+  .sec { padding:12px 0; border-bottom:1px solid var(--line-soft); }
+  .sec:last-child { border-bottom:0; }
+  .sec h3 { margin:0 0 8px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); display:flex; align-items:center; gap:8px; }
+  .sec h3 .hint { font-weight:400; letter-spacing:0; text-transform:none; color:var(--ink-3); font-size:12px; }
+  .bxkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); margin:8px 0 3px; }
+  .bxkey:first-child { margin-top:0; }
+  .fld { font:inherit; font-size:13px; width:100%; border:1px solid var(--field-line); border-radius:8px; padding:7px 10px; background:var(--surface); color:var(--ink); }
+  .fld:focus { outline:2px solid var(--gold); outline-offset:1px; }
+  textarea.fld { resize:none; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .out { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; background:var(--surface); }
+  .out .oh { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .out .oh .kmtag { margin:0; }
+  .out .oh .x { margin-left:auto; color:var(--ink-3); cursor:pointer; }
+  .out .grid4 { display:grid; grid-template-columns:1fr 70px 56px 1fr; gap:6px; margin-top:6px; }
+  .out .grid4 .fld { padding:6px 8px; font-size:12.5px; }
+  .out .months { display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-size:12px; color:var(--ink-3); }
+  .out .months i { display:inline-grid; grid-template-columns:repeat(4,4px); gap:2px; } .out .months i b { width:4px; height:4px; background:var(--ink-3); border-radius:1px; }
+  .linkbu { background:none; border:0; font:inherit; font-weight:700; color:var(--gold-deep); text-decoration:underline; cursor:pointer; padding:0; font-size:13px; }
+  .qpick { display:inline-flex; gap:6px; } .qpick i { font-style:normal; font-family:var(--mono); font-size:12px; width:34px; height:28px; line-height:26px; text-align:center; border-radius:6px; border:1px solid var(--field-line); color:var(--ink-2); cursor:pointer; }
+  .qpick i.on { background:var(--gold); border-color:var(--gold); color:#14161A; font-weight:700; }
+  .kmdrop { border:1px solid var(--field-line); border-radius:8px; }
+  .kmdrop summary { list-style:none; display:flex; align-items:center; gap:6px; padding:6px 8px; min-height:32px; cursor:pointer; }
+  .kmdrop summary::-webkit-details-marker { display:none; }
+  .kmdrop .chev { margin-left:auto; width:8px; height:8px; border-right:1.5px solid var(--ink-3); border-bottom:1.5px solid var(--ink-3); transform:rotate(45deg); margin-top:-3px; }
+  .kmdrop label { display:flex; gap:8px; align-items:flex-start; padding:7px 9px; border-top:1px solid var(--line-soft); font-size:12.5px; cursor:pointer; }
+  .kmdrop input { width:14px; height:14px; margin:2px 0 0; accent-color:var(--panel); }
+  .sfoot { padding:10px 16px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
+  .sfoot .done { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:8px; font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
+  .new { outline:2px solid var(--mark); outline-offset:4px; border-radius:10px; }
+  .ask { margin-top:28px; background:var(--surface); border:1px dashed var(--mark); border-radius:10px; padding:14px 18px; }
+  .ask h2 { margin:0 0 8px; font-size:15px; } .ask ul { margin:0; padding-left:1.2rem; } .ask li { margin:5px 0; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+
+<div class="wrap">
+  <h1>Editing a tactic in a side panel</h1>
+  <p class="lede">The pen is on. The tactics table is a plain list again, one line per tactic, and the tactic being edited opens in a panel on the right in short sections. Press a pencil in the table to move the panel to that tactic. The pillar is Mobile's first; the extra outcomes, key measures and requirements are invented so the panel has something to show.</p>
+
+  <div class="stage">
+    <div class="pillar">
+      <div class="phead"><span class="code">MB01</span><b>Digital &amp; Data-Driven Operations</b><button class="done" type="button">Done editing</button></div>
+      <div class="sect">Tactics <span class="n">5</span></div>
+      <div class="scroll new"><table>
+        <thead><tr><th>#</th><th>Tactic</th><th>Outcomes</th><th>Owner</th><th>Quarters</th><th>Key measures</th><th></th></tr></thead>
+        <tbody id="rows">
+          <tr class="on" data-i="0"><td class="idx"><span class="grip">☰</span>1</td><td><b class="tacname">Clean and standardize customer and SKU base</b><span class="why">Clean the master data before the ERP cutover; duplicates removed, SKUs on one code</span></td>
+            <td class="outn">4 <small>· 1 without a target</small></td><td>Ramy Behairy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><span class="kmtag">KM 1</span><span class="kmtag">KM 2</span></td>
+            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x" title="Remove">×</span></span></td></tr>
+          <tr data-i="1"><td class="idx"><span class="grip">☰</span>2</td><td><b class="tacname">End-to-end order-to-cash digitization</b></td>
+            <td class="outn">1</td><td>Mohamed Rizk</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><span class="kmtag">KM 2</span></td>
+            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x">×</span></span></td></tr>
+          <tr data-i="2"><td class="idx"><span class="grip">☰</span>3</td><td><b class="tacname">Digitize sales reporting via Power BI</b></td>
+            <td class="outn">1</td><td>Ramy Behairy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><span class="kmtag">KM 4</span></td>
+            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x">×</span></span></td></tr>
+          <tr data-i="3"><td class="idx"><span class="grip">☰</span>4</td><td><b class="tacname">Scale Mobile Digital App across merchants</b></td>
+            <td class="outn">1</td><td>Ashraf Laithy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td><span class="kmtag">KM 2</span><span class="kmtag">KM 3</span></td>
+            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x">×</span></span></td></tr>
+          <tr data-i="4"><td class="idx"><span class="grip">☰</span>5</td><td><b class="tacname">Data integration across business units</b></td>
+            <td class="outn"><span class="miss">Missing</span></td><td><span class="miss">Missing</span></td><td><span class="q"><i>Q1</i><i>Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td><span style="color:var(--ink-3)">—</span></td>
+            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x">×</span></span></td></tr>
+          <tr class="addrow"><td colspan="7">+ Add a tactic</td></tr>
+        </tbody>
+      </table></div>
+      <p style="margin:0 16px 14px; font-size:12px; color:var(--ink-3)">The key measures table above it and the rest of the pillar stay exactly as they are today. Reordering by the handle, the eye and the × stay on the row.</p>
+    </div>
+
+    <aside class="side new" id="side">
+      <div class="shead"><span class="k">Tactic <span id="sn">1</span> of 5</span><b id="sname">Clean and standardize customer and SKU base</b>
+        <span class="nav"><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
+        <button class="close" type="button" title="Close">×</button></div>
+      <div class="sbody">
+        <div class="sec">
+          <h3>The tactic</h3>
+          <span class="bxkey">Tactic</span><input class="fld" id="f-name" value="Clean and standardize customer and SKU base">
+          <span class="bxkey">Description</span><textarea class="fld" id="f-desc" rows="2">Clean the master data before the ERP cutover; duplicates removed, SKUs on one code</textarea>
+        </div>
+        <div class="sec">
+          <h3>Outcomes <span class="hint">what it should leave behind</span></h3>
+          <div class="out"><div class="oh"><span class="kmtag">O1</span><b>Duplicate customer and SKU records removed</b></div>
+            <div class="grid4"><input class="fld" value="12,000"><input class="fld" value="#"><select class="fld"><option>≥</option><option>≤</option></select><select class="fld"><option>Sum</option><option>Latest</option></select></div>
+            <span class="months"><i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i> by month or by quarter</span></div>
+          <div class="out"><div class="oh"><span class="kmtag">O2</span><b>Customer records matched to one tax id</b><span class="x">×</span></div>
+            <div class="grid4"><input class="fld" value="100"><input class="fld" value="%"><select class="fld"><option>≥</option></select><select class="fld"><option>Latest</option></select></div></div>
+          <div class="out"><div class="oh"><span class="kmtag">O3</span><b>SKU codes unified across the warehouses</b><span class="x">×</span></div>
+            <div class="grid4"><input class="fld" value="100"><input class="fld" value="%"><select class="fld"><option>≥</option></select><select class="fld"><option>Latest</option></select></div></div>
+          <div class="out"><div class="oh"><span class="kmtag">O4</span><b>Data owners named per master table</b><span class="x">×</span></div>
+            <div class="grid4"><input class="fld" placeholder="Target"><input class="fld" placeholder="Unit"><select class="fld"><option>≥</option></select><select class="fld"><option>—</option></select></div>
+            <span class="miss">Target missing</span></div>
+          <button class="linkbu" type="button">+ Add an outcome</button>
+        </div>
+        <div class="sec">
+          <h3>Who</h3>
+          <div class="two"><div><span class="bxkey">Owner</span><select class="fld" id="f-owner"><option>Ramy Behairy</option><option>Mohamed Rizk</option></select></div>
+            <div><span class="bxkey">Collaborators</span><select class="fld" id="f-col" multiple size="2"><option selected>Nour</option><option>Hossam</option><option>Dina</option></select></div></div>
+        </div>
+        <div class="sec">
+          <h3>When</h3>
+          <span class="qpick" id="f-q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span>
+        </div>
+        <div class="sec">
+          <h3>Key measures <span class="hint">which ones it supports</span></h3>
+          <details class="kmdrop"><summary><span class="kmtag">KM 1</span><span class="kmtag">KM 2</span><span class="chev"></span></summary>
+            <label><input type="checkbox" id="k1" checked><span class="kmtag">KM 1</span> Data duplicate rate</label>
+            <label><input type="checkbox" id="k2" checked><span class="kmtag">KM 2</span> Orders processed digitally</label>
+            <label><input type="checkbox" id="k3"><span class="kmtag">KM 3</span> App coverage rate</label>
+            <label><input type="checkbox" id="k4"><span class="kmtag">KM 4</span> Dependency on automated reports</label></details>
+        </div>
+        <div class="sec">
+          <h3>Requirements <span class="hint">what it needs, one per line</span></h3>
+          <textarea class="fld" id="f-req" rows="2">Two data analysts
+Budget sign-off from Finance</textarea>
+        </div>
+      </div>
+      <div class="sfoot"><span>Saves as you type, like the rest of the pen.</span><button class="done" type="button">Done</button></div>
+    </aside>
+  </div>
+
+  <div class="ask">
+    <h2>What this changes, and what it does not</h2>
+    <ul>
+      <li><b>The table in the pen</b> becomes one line per tactic: name, how many outcomes (and how many lack a target), owner, quarters, key measures, a pencil. Nothing is typed in the table itself any more.</li>
+      <li><b>The panel</b> holds every field a tactic has, in six short sections. It sticks to the right as the page scrolls; ↑ ↓ move to the previous and next tactic; × or Done closes it. One tactic open at a time.</li>
+      <li><b>Not changed:</b> read mode, the key measures table, reporting, the deck, Excel. The gap count and the Next-gap walk still land on the field, now inside the panel.</li>
+      <li><b>To decide:</b> whether the panel also serves the key measures rows (same pencil, same panel), or only tactics for now.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+  var T = [
+    { n:"Clean and standardize customer and SKU base", d:"Clean the master data before the ERP cutover; duplicates removed, SKUs on one code" },
+    { n:"End-to-end order-to-cash digitization", d:"" }, { n:"Digitize sales reporting via Power BI", d:"" },
+    { n:"Scale Mobile Digital App across merchants", d:"" }, { n:"Data integration across business units", d:"" } ];
+  var cur = 0, rows = document.querySelectorAll("#rows tr[data-i]");
+  function go(i){
+    cur = (i + T.length) % T.length;
+    rows.forEach(function(r){ r.classList.toggle("on", +r.dataset.i === cur); });
+    document.getElementById("sn").textContent = cur + 1;
+    document.getElementById("sname").textContent = T[cur].n;
+    document.getElementById("f-name").value = T[cur].n;
+    document.getElementById("f-desc").value = T[cur].d;
+    document.getElementById("side").style.display = "";
+  }
+  rows.forEach(function(r){ r.querySelector(".pen").addEventListener("click", function(){ go(+r.dataset.i); }); });
+  document.getElementById("prev").addEventListener("click", function(){ go(cur - 1); });
+  document.getElementById("next").addEventListener("click", function(){ go(cur + 1); });
+  document.querySelector(".side .close").addEventListener("click", function(){ document.getElementById("side").style.display = "none"; rows.forEach(function(r){ r.classList.remove("on"); }); });
+  document.querySelectorAll(".qpick i").forEach(function(q){ q.addEventListener("click", function(){ q.classList.toggle("on"); }); });
+})();
+</script>

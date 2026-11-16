@@ -35,13 +35,14 @@
   .page { display:grid; grid-template-columns:150px minmax(0,1fr); gap:14px; padding:12px 18px 18px; align-items:start; }
   /* the rail: its own scroll inside the window */
   .rail { position:sticky; top:88px; max-height:calc(620px - 88px - 18px); overflow:auto; display:grid; gap:6px; align-content:start; padding-right:4px; }
+  .rail .railhd { position:sticky; top:0; z-index:2; background:var(--ground); padding:4px 0 6px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); display:flex; gap:6px; align-items:center; border-bottom:1px solid var(--line); }
   .rail .pc { border:1px solid var(--wire); background:var(--surface); border-radius:8px; padding:8px 8px; font-size:11px; color:var(--ink-2); }
   .rail .pc.on { border-color:var(--panel); box-shadow:inset 3px 0 0 var(--gold); color:var(--ink); font-weight:700; }
   .rail .pc .code { font-family:var(--mono); font-size:9.5px; color:var(--ink-3); display:block; }
   .rail .add { font-size:11px; color:var(--ink-2); text-decoration:underline; padding:4px 2px; }
   /* the direction */
-  .pillar { background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; min-width:0; }
-  .band { position:sticky; top:0; z-index:5; background:var(--surface-2); border-top:2px solid var(--line-strong); border-bottom:1px solid var(--line); padding:10px 14px; display:flex; gap:12px; align-items:center; font-weight:700; }
+  .pillar { background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:clip; min-width:0; }
+  .band { position:sticky; top:88px; z-index:5; background:var(--surface-2); border-top:2px solid var(--line-strong); border-bottom:1px solid var(--line); padding:10px 14px; display:flex; gap:12px; align-items:center; font-weight:700; }
   .band .code { font-family:var(--mono); font-size:11px; color:var(--panel); } .band .r { margin-left:auto; font-weight:400; font-size:11px; color:var(--ink-3); }
   .sect { padding:12px 14px 4px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); }
   .box { margin:6px 12px 12px; border:1px solid var(--wire); border-radius:8px; background:var(--surface); overflow:hidden; }
@@ -54,7 +55,7 @@
   /* the tactics and the panel */
   .tacwrap { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:12px; align-items:start; margin:6px 12px 12px; }
   .tacwrap .box { margin:0; }
-  .side { position:sticky; top:52px; max-height:calc(620px - 52px - 60px); display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--line-strong); border-radius:10px; min-width:0; }
+  .side { position:sticky; top:138px; max-height:calc(620px - 138px - 24px); display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--line-strong); border-radius:10px; min-width:0; }
   .side .sh { padding:9px 12px; border-bottom:1px solid var(--line); font-size:11px; font-weight:700; display:flex; gap:8px; align-items:center; }
   .side .sh .k { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); } .side .sh .nav { margin-left:auto; color:var(--ink-3); font-size:11px; }
   .side .sb { overflow:auto; padding:6px 12px; }
@@ -84,7 +85,7 @@
     </div>
     <div class="page">
       <div class="rail" id="rail">
-        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);display:flex;gap:6px;align-items:center"><span class="co">2</span>Directions 15</div>
+        <div class="railhd"><span class="co">2</span>Directions 15</div>
         <div class="pc on"><span class="code">D001</span>Developing Brand Presence</div>
         <div class="pc"><span class="code">D002</span>Building Processes, OD &amp; Governance</div>
         <div class="pc"><span class="code">D003</span>Launch Training Academy</div>
@@ -142,8 +143,8 @@
 
   <div class="notes">
     <div class="note"><span class="co">1</span><div><b>The bars stay put.</b> The top bar, the Strategy tabs and the Plan line with Edit / Done editing are pinned; everything else scrolls under them.</div></div>
-    <div class="note"><span class="co">2</span><div><b>The directions rail scrolls inside its own column.</b> It is never taller than the window, so the page never runs on past the direction to make room for the rail. Scroll inside it to reach D015 and Add a Direction.</div></div>
-    <div class="note"><span class="co">3</span><div><b>The direction's banner has a clear line on its top edge</b> and stays pinned under the bars while the direction scrolls, as it does today.</div></div>
+    <div class="note"><span class="co">2</span><div><b>The directions rail scrolls inside its own column, under its own frozen heading.</b> "Directions 15" stays at the top of the rail while the list scrolls; the rail is never taller than the window, so the page never runs on past the direction to make room for it. Scroll inside it to reach D015 and Add a Direction.</div></div>
+    <div class="note"><span class="co">3</span><div><b>The direction's banner has a clear line on its top edge and is frozen under the bars</b> while the direction scrolls down: the code, the name, the years, the owner and the custodian stay in view the whole way.</div></div>
     <div class="note"><span class="co">4</span><div><b>The front matter and the key measures run the full width.</b> The panel never narrows them.</div></div>
     <div class="note"><span class="co">5</span><div><b>The tactics list and the panel share one row.</b> The panel's top edge is on the tactics table's own top line, not on the heading above it.</div></div>
     <div class="note"><span class="co">6</span><div><b>The panel stays put beside the list</b> as the page scrolls, and is never taller than the window: a long tactic scrolls inside the panel, with its head and its Done editing always in view.</div></div>

@@ -77,7 +77,7 @@ export async function dirsAct(c: any, b: any, who: Who): Promise<Out> {
     if (!isPlace(place)) return refused(400, "Which place?");
     const mode = b.mode === "capabilities" ? "capabilities" : "directions";
     const hadPlan = Math.max(0, Math.min(99, Number(b.hadPlan) || 0));
-    const chat = await newChat(c, { place, section: mode, title: oneLine(b.title).slice(0, MAX_TITLE) || (mode === "capabilities" ? "Capabilities" : "Directions"), by });
+    const chat = await newChat(c, { place, section: mode, title: oneLine(b.title).slice(0, MAX_TITLE) || (mode === "capabilities" ? "Capabilities" : "Pillars/Directions"), by });
     await writeDirs(c, chat.id, newDirs(mode, !!b.withCaps, hadPlan));
     return out(200, { ok: true, chat: { ...chat, dirs: true }, ...(await dirsView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }

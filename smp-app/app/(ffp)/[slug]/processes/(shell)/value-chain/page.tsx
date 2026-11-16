@@ -46,6 +46,7 @@ export default async function ValueChainPage(props: PageProps<"/[slug]/processes
         milestone: true,
         type: true,
         raciSkipped: true,
+        skippedGaps: true,
         processId: true,
         process: { select: { code: true } },
         assignedRole: { select: { id: true, name: true } },
@@ -77,6 +78,7 @@ export default async function ValueChainPage(props: PageProps<"/[slug]/processes
       type: step.type,
       label: step.label,
       raciSkipped: step.raciSkipped,
+      skippedGaps: step.skippedGaps,
     })),
     activities: activities.map((activity) => ({
       id: activity.id,

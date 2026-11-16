@@ -379,6 +379,9 @@ model Process {
   priorityWhy        String?
   deepDiveDecision   DeepDiveDecision?
 
+  /// The office's own place for this process among its siblings in the library (a main among the mains, a sub among its main's subs). Empty until it is moved.
+  sortOrder Int?
+
   workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   category       ProcessCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   parentProcess  Process?         @relation("ProcessHierarchy", fields: [parentProcessId], references: [id])
@@ -570,6 +573,18 @@ model ProcessStep {
   priorityWhy        String?
   /// Which wave this flagged step goes in. Empty means it goes with its process.
   deepDiveDecision   DeepDiveDecision?
+
+  /// When and to whom this step escalates, and any notes on it, in the office's own words (a note box on the Map's step form).
+  escalationNote String?
+
+  /// The office's own notes on the step, for any type of step (the Start and End have no other box to write in).
+  stepNote String?
+
+  /// Drawn in the same column as the step before it on the Map, when the two are in different lanes (steps that happen together).
+  sameColumn Boolean @default(false)
+
+  /// Gap marks the office has chosen to skip for this step ("not needed here"), each by its kind, so one can be skipped and the others kept.
+  skippedGaps String[] @default([])
 
   createdAt DateTime @default(now())
 

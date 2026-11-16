@@ -80,7 +80,7 @@ export async function execAct(c: any, b: any, who: Who): Promise<Out> {
     /* §697 — with the measures and tactics the plan holds under each, marked
        as the plan's; and the road: build (the default) or refine. */
     const items = planItemsOf(b.items);
-    const chat = await newChat(c, { place, section: "execution", title: oneLine(b.title).slice(0, MAX_TITLE) || "Execution", by });
+    const chat = await newChat(c, { place, section: "execution", title: oneLine(b.title).slice(0, MAX_TITLE) || "Tactical Plans", by });
     await writeExec(c, chat.id, newExec(items, roadOf(b.road)));
     return out(200, { ok: true, chat: { ...chat, exec: true }, ...(await execView(c, chat, oneLine(b.placeWord).slice(0, 120))) });
   }

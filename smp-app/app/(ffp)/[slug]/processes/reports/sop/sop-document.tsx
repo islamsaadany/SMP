@@ -95,6 +95,7 @@ export function SopDocument({ workspaceId, companyName, firmName, sops }: { work
                     <td className="px-2 py-1.5">
                       <div className="font-semibold">{s.label}</div>
                       <div className="text-slate-600">{s.who ?? (work ? MISSING : "—")}</div>
+                      {s.note && <div className="mt-1 whitespace-pre-line text-slate-600"><span className="font-semibold">Notes:</span> {s.note}</div>}
                     </td>
                     <td className="px-2 py-1.5">
                       {s.how.length > 0 ? (
@@ -122,6 +123,11 @@ export function SopDocument({ workspaceId, companyName, firmName, sops }: { work
                     </td>
                     <td className="px-2 py-1.5">
                       <div>{s.approval ?? "—"}</div>
+                      {s.escalation && (
+                        <div className="mt-1 whitespace-pre-line text-slate-700">
+                          <span className="font-semibold">Escalation:</span> {s.escalation}
+                        </div>
+                      )}
                       {s.handoffIn && <div className="text-amber-700">{s.handoffIn}</div>}
                       {s.handoff && <div className="text-slate-600">{s.handoff}</div>}
                     </td>

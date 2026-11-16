@@ -47,9 +47,24 @@ await q(smp, "insert into tenant_users (tenant_id, user_id, person_key, seat) va
 /* the approver's email lives where it does for a real client: on the SMP People register (Processes mirrors it) */
 await q(smp, "update people set extra = coalesce(extra, '{}'::jsonb) || jsonb_build_object('email', $1::text) where tenant_id = $2 and key = 'fn_fin'", [APPROVER, tenantId]);
 
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: new URL("..", import.meta.url).pathname, env: { ...process.env, DATABASE_URL_UNPOOLED: URL_ }, stdio: ["ignore", "pipe", "pipe"], detached: true });
+/* a model of the AI provider (not a branch around it): answers the SOP drafting call in the provider's own shape */
+import http from "node:http";
+const aiAsked = [];
+const fakeAi = http.createServer((req, res) => {
+  let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
+    let text = ""; try { text = JSON.parse(b).contents; text = typeof text === "string" ? text : JSON.stringify(text); } catch {}
+    aiAsked.push(text);
+    const ids = [...text.matchAll(/stepId ([A-Za-z0-9_-]+) —/g)].map((m) => m[1]);
+    const steps = ids.map((id) => ({ stepId: id, how: ["Open the case file", "Check it against the policy"], inputs: "Case file; the ERP", output: "A checked case", errors: "Missing documents", risk: "A wrong payment goes out" }));
+    res.setHeader("content-type", "application/json");
+    res.end(JSON.stringify({ candidates: [{ content: { role: "model", parts: [{ text: JSON.stringify({ steps }) }] }, finishReason: "STOP" }] }));
+  });
+});
+await new Promise((r) => fakeAi.listen(0, "127.0.0.1", r));
+const AI_PORT = fakeAi.address().port;
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: new URL("..", import.meta.url).pathname, env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, GEMINI_API_KEY: "fake-key", GOOGLE_GEMINI_BASE_URL: `http://127.0.0.1:${AI_PORT}`, ANTHROPIC_API_KEY: "" }, stdio: ["ignore", "pipe", "pipe"], detached: true });
 server.stdout.on("data", () => {}); server.stderr.on("data", () => {});
-const stop = () => { try { process.kill(-server.pid); } catch {} };
+const stop = () => { try { process.kill(-server.pid); } catch {} try { fakeAi.close(); } catch {} };
 process.on("exit", stop);
 let up = false;
 for (let i = 0; i < 80 && !up; i++) { await new Promise((r) => setTimeout(r, 500)); try { up = (await fetch(BASE + "/")).status === 200; } catch {} }
@@ -170,15 +185,15 @@ check(/Status Draft/.test(rd1) && /Version —/.test(rd1) && /Approved By —/.t
 const nav = async (pg, path) => { await pg.goto(BASE + "/" + S + "/processes/processes/" + P2 + path, { waitUntil: "networkidle" }); return pg.$$eval("nav[aria-label='Process sections'] a", (a) => a.map((x) => x.textContent.trim())); };
 const current = (pg) => pg.$$eval("nav[aria-label='Process sections'] a[aria-current=page]", (a) => a.map((x) => x.textContent.trim()));
 const onMap = await nav(A.page, "/map");
-check(onMap.length === 10 && onMap[0] === "Map" && onMap.includes("Risks & controls") && onMap.includes("People") && /^Check with AI/.test(onMap[9]), "the Process Map page shows the builder's menu of the process's ten sections", JSON.stringify(onMap));
+check(onMap.length === 11 && onMap[0] === "Map" && onMap.includes("SOP") && onMap.includes("Risks & controls") && onMap.includes("People") && /^Check with AI/.test(onMap[10]), "the Process Map page shows the builder's menu of the process's eleven sections", JSON.stringify(onMap));
 for (const [pth, label] of [["/raci", "RACI"], ["/authority", "Authority"], ["/review", "Check with AI"]]) {
   const items = await nav(A.page, pth), on = await current(A.page);
-  check(items.length === 10 && on.length === 1 && on[0].startsWith(label), "…and " + pth.slice(1) + " carries the same menu, with " + label + " marked", JSON.stringify(on));
+  check(items.length === 11 && on.length === 1 && on[0].startsWith(label), "…and " + pth.slice(1) + " carries the same menu, with " + label + " marked", JSON.stringify(on));
 }
 const mapHref = await A.page.$eval("nav[aria-label='Process sections'] a:has-text('Map')", (a) => a.getAttribute("href")).catch(() => null);
 check(mapHref === "/" + S + "/processes/processes/" + P2 + "/map", "the menu's Map goes to this process's own map, not the list", mapHref);
 const onPage = await nav(A.page, "");
-check(new URL(A.page.url()).pathname.endsWith("/" + P2 + "/map") && onPage.length === 10, "the process's own address opens the builder on its Map", A.page.url());
+check(new URL(A.page.url()).pathname.endsWith("/" + P2 + "/map") && onPage.length === 11, "the process's own address opens the builder on its Map", A.page.url());
 await nav(A.page, "/map");
 await A.page.click("nav[aria-label='Process sections'] >> text=Risks & controls");
 await A.page.waitForURL(/tab=risks/, { timeout: 20000 });
@@ -505,8 +520,8 @@ await A.page.click("button:text-is('Clear entries…')");
 await A.page.click("[aria-label='Clear entries'] label:text-is('Risk') input");
 await A.page.click("button:text-is('Untick all')");
 await A.page.click("input[aria-label='Clear Hire to Retire']");
-A.page.once("dialog", (d) => d.accept());
 await A.page.click("button:text-is('Clear the selected')");
+await A.page.click("[data-ffp-confirm] button:text-is('Clear them')");
 await A.page.waitForSelector("[role=status]:has-text('Cleared 1')", { timeout: 20000 });
 const cl = Object.fromEntries((await q(ffp, 'select code, "priorityRisk" r, "priorityImportance" i from processes where "workspaceId"=$1', [S])).map((r) => [r.code, r]));
 check(cl["P5.1"].r == null && cl["P5.1"].i === 5 && cl["P1.1"].r === 5, "Clear entries empties only the kind picked, on only the processes ticked", JSON.stringify(cl["P5.1"]) + JSON.stringify(cl["P1.1"]));
@@ -620,8 +635,9 @@ check(fsr.some((r) => r[ci("Step")] === "Raise the invoice" && r[ci("Flagged")] 
 check((await T.get("/api/ffp/export/priorities/" + S + "/flagged-steps")).status() === 403, "…and a client's own person cannot download it");
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
 await A.page.locator("button:has-text('Steps inside')").first().click();
-A.page.once("dialog", (d) => d.accept("Approve the credit limit"));
-await A.page.click("button:text-is('Make it a process')");
+await A.page.click("tr button:text-is('Make it a process')");
+await A.page.fill("[data-ffp-confirm] input", "Approve the credit limit");
+await A.page.click("[data-ffp-confirm] button:text-is('Make it a process')");
 await A.page.waitForSelector("[role=status]:has-text('Made')", { timeout: 20000 });
 const np = (await q(ffp, 'select p.code, p."priorityImportance" i, p."priorityRisk" r, p."parentProcessId" pp, p."branchFromStepId" b, s."priorityFlagged" f from processes p join process_steps s on s.id=p."branchFromStepId" where p."workspaceId"=$1 and p."branchFromStepId"=$2', [S, decStep]))[0];
 check(!!np && np.pp === P1 && np.b === decStep && np.i === 5 && np.r === 4 && np.f === false, "making it a process creates a sub-process branching from the step, carries the scores, and keeps the step as the link", JSON.stringify(np));
@@ -654,6 +670,316 @@ check(after6 === 3, "Confirm creates the real step", String(after6));
 
 const sopHtml = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P1)).text();
 check(/Back to picker/.test(sopHtml) && /\/processes\/export/.test(sopHtml), "the SOP page has a Back to picker link");
+
+/* ── a way back to the process library from inside a process; the report's step narrative lists every step ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P1 + "/map", { waitUntil: "networkidle" });
+const libHref = await A.page.locator("a:has-text('Back to process library')").first().getAttribute("href");
+check(!!libHref && libHref.endsWith("/" + S + "/processes/processes"), "inside a process there is a Back to process library link to the list", libHref);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P1, { waitUntil: "networkidle" });
+check((await A.page.$$("a:has-text('Back to process library')")).length >= 1, "…on the process page too");
+await q(ffp, `update workspaces set "reportArrangement"=$2::jsonb where id=$1`, [S, JSON.stringify({ version: 1, pack: [], sections: [{ id: "exec", on: false }, { id: "map", on: true }, { id: "raci", on: false }, { id: "gov", on: false }], blocks: [{ id: "scope", on: true, sec: "map" }, { id: "diagram", on: true, sec: "map" }, { id: "narr", on: true, sec: "map" }] })]);
+const repN = await (await A.get("/" + S + "/processes/reports?ids=" + P1)).text();
+check(/Step narrative/.test(repN) && /Check the customer/.test(repN) && /Approve the credit limit/.test(repN) && /No detail recorded for this step yet/.test(repN) && /Open the file/.test(repN), "with only Scope, Workflow and Step narrative chosen, the narrative lists every step, and says so for one with no detail");
+await q(ffp, `update workspaces set "reportArrangement"=NULL where id=$1`, [S]);
+
+/* ── the Map's step form: the type up front, a title outside the structure, an escalation note, arrows in and out, hand-overs both ways ── */
+const s6 = await q(ffp, 'select id, label from process_steps where "processId"=$1 order by "order"', [P6]);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+check(await A.page.locator("label:has-text('Step type') select").first().isVisible(), "the step's type is on the form itself, not hidden under More");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("DECISION");
+await A.page.waitForFunction(() => /Saved|saved/.test(document.querySelector("[role=status]")?.textContent ?? ""), null, { timeout: 15000 }).catch(() => {});
+await A.page.waitForTimeout(800);
+check((await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type === "DECISION", "changing the type to Decision saves", JSON.stringify(s6[0]));
+await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(1200);
+check((await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type === "TASK", "…and back to Task");
+
+await A.page.click("button:text-is('+ A title that is not in the company structure')");
+await A.page.fill("input[placeholder='For example: Credit committee']", "Credit committee");
+await A.page.click("button:text-is('Add and use it')");
+await A.page.waitForTimeout(2000);
+const tt = await q(ffp, 'select r.id, r.name, (select count(*)::int from process_steps st where st.id=$2 and st."assignedRoleId"=r.id) used from roles r where r."workspaceId"=$1 and r.name=$3', [S, s6[0].id, "Credit committee"]);
+check(tt.length === 1 && tt[0].used === 1, "a title the company structure does not hold is made as a role and given to the step", JSON.stringify(tt));
+await A.page.click("button:text-is('+ A title that is not in the company structure')");
+await A.page.fill("input[placeholder='For example: Credit committee']", " credit  COMMITTEE ");
+await A.page.click("button:text-is('Add and use it')");
+await A.page.waitForTimeout(1500);
+check((await q(ffp, 'select count(*)::int n from roles where "workspaceId"=$1 and lower(name) like $2', [S, "credit%committee"]))[0].n === 1, "the same title written another way is found, not made twice");
+
+await A.page.fill("textarea[placeholder^='Who it goes to when it is stuck']", "After 2 days goes to the Head of Finance; over 50,000 to the CFO.");
+await A.page.locator("textarea[placeholder^='Who it goes to when it is stuck']").blur();
+await A.page.waitForTimeout(1500);
+check((await q(ffp, 'select "escalationNote" e from process_steps where id=$1', [s6[0].id]))[0].e === "After 2 days goes to the Head of Finance; over 50,000 to the CFO.", "the escalation note saves");
+const sopEsc = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P6)).text();
+check(/Escalation:/.test(sopEsc) && /Head of Finance; over 50,000/.test(sopEsc), "…and appears in the SOP");
+
+check(await A.page.locator("label:has-text('Inputs, tools and systems') textarea").isVisible() && await A.page.locator("label:has-text('Expected output') textarea").isVisible(), "the SOP's inputs and output boxes are on the step's form, not folded away");
+await A.page.fill("label:has-text('Inputs, tools and systems') textarea", "Trial balance, the ERP's journal screen");
+await A.page.fill("label:has-text('Expected output') textarea", "Posted and reviewed journals");
+await A.page.locator("label:has-text('Expected output') textarea").blur();
+await A.page.waitForTimeout(1500);
+const sopRow = (await q(ffp, 'select "sopInputs" i, "sopOutput" o from process_steps where id=$1', [s6[0].id]))[0];
+check(sopRow.i === "Trial balance, the ERP's journal screen" && sopRow.o === "Posted and reviewed journals", "…and they save", JSON.stringify(sopRow));
+await A.page.click("summary:has-text('More')");
+await A.page.click("button:text-is('+ Add a step it comes from')");
+await A.page.locator("details[open] select[aria-label='+ Add a step it comes from']").selectOption(s6[1].id);
+await A.page.locator("details[open] button:text-is('Connect')").first().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select count(*)::int n from step_connections where "processId"=$1 and "fromStepId"=$2 and "toStepId"=$3', [P6, s6[1].id, s6[0].id]))[0].n === 1, "an arrow that comes into the step is added from the step's own form");
+await A.page.click("button:text-is('+ Add a step it goes to')");
+await A.page.locator("details[open] select[aria-label='+ Add a step it goes to']").selectOption(s6[2].id);
+await A.page.locator("details[open] button:text-is('Connect')").first().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select count(*)::int n from step_connections where "processId"=$1 and "fromStepId"=$2 and "toStepId"=$3', [P6, s6[0].id, s6[2].id]))[0].n === 1, "…and one that goes out of it");
+
+await A.page.locator("details[open] select[aria-label='Hands over to other processes']").selectOption({ index: 1 });
+await A.page.locator("details[open] button:text-is('Add')").last().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select count(*)::int n from step_handoffs where "fromStepId"=$1', [s6[0].id]))[0].n === 1, "a hand-over to a step in another process is added from this step");
+
+/* ── skipping a gap mark, each one on its own ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+const skipBtns = () => A.page.locator("aside button[aria-label^='Skip:']");
+const nGaps = await skipBtns().count();
+check(nGaps >= 2, "a step with several marks has a Skip beside each one", String(nGaps));
+const firstText = (await skipBtns().first().getAttribute("aria-label")).replace(/^Skip: /, "");
+await skipBtns().first().click();
+await A.page.waitForTimeout(1800);
+const after1 = (await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6[0].id]))[0].g;
+check(after1.length === 1 && (await skipBtns().count()) === nGaps - 1, "skipping one mark skips only that one; the others stay", JSON.stringify([after1, await skipBtns().count()]));
+const asideTxt = (await A.page.locator("aside").innerText()).toLowerCase();
+check(asideTxt.includes("skipped for this step") && asideTxt.includes(firstText.toLowerCase()), "…and it is listed as skipped for this step");
+await A.page.locator("aside button[aria-label^='Bring back:']").first().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6[0].id]))[0].g.length === 0 && (await skipBtns().count()) === nGaps, "a skipped mark can be brought back");
+
+/* ── a notes box on a Start or End step ── */
+await A.page.locator("label:has-text('Step type') select").first().selectOption("START");
+await A.page.waitForTimeout(1500);
+check(await A.page.locator("textarea[placeholder^='Anything worth saying']").first().isVisible(), "a Start step has a Notes box");
+await A.page.fill("textarea[placeholder^='Anything worth saying']", "Starts when the month's books close.");
+await A.page.locator("textarea[placeholder^='Anything worth saying']").blur();
+await A.page.waitForTimeout(1500);
+check((await q(ffp, 'select "stepNote" n from process_steps where id=$1', [s6[0].id]))[0].n === "Starts when the month's books close.", "…and what is written there is saved");
+const sopNote = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P6)).text();
+check(/Notes:/.test(sopNote) && /Starts when the month/.test(sopNote), "…and appears in the SOP");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("END");
+await A.page.waitForTimeout(1200);
+check(await A.page.locator("textarea[placeholder^='Anything worth saying']").first().isVisible(), "an End step has a Notes box too");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(1200);
+
+/* ── steps that happen together can be drawn in one column ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+const bx = async (id) => (await A.page.locator(`[data-lane-grid] [data-step='${id}']`).boundingBox());
+const colB0 = await bx(s6[0].id), colB1 = await bx(s6[1].id);
+check(Math.abs((colB0.x + colB0.width / 2) - (colB1.x + colB1.width / 2)) > 40, "before: two neighbouring steps are in different columns");
+await A.page.locator(`[data-lane-grid] [data-step='${s6[1].id}']`).click();
+await A.page.locator("label:has-text('Draw it beside the step before it') input").check();
+await A.page.waitForTimeout(2200);
+check((await q(ffp, 'select "sameColumn" c from process_steps where id=$1', [s6[1].id]))[0].c === true, "the step can be set to be drawn beside the one before it");
+const colA0 = await bx(s6[0].id), colA1 = await bx(s6[1].id);
+check(Math.abs((colA0.x + colA0.width / 2) - (colA1.x + colA1.width / 2)) < 3 && Math.abs(colA0.y - colA1.y) > 20, "…and the two are then in one column, in their own lanes", JSON.stringify([colA0, colA1]));
+await A.page.locator("label:has-text('Draw it beside the step before it') input").uncheck();
+await A.page.waitForTimeout(1800);
+const colC1 = await bx(s6[1].id), colC0 = await bx(s6[0].id);
+check(Math.abs((colC0.x + colC0.width / 2) - (colC1.x + colC1.width / 2)) > 40 && (await q(ffp, 'select "sameColumn" c from process_steps where id=$1', [s6[1].id]))[0].c === false, "…and unticking puts it back");
+await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).click();
+check(await A.page.locator("label:has-text('Draw it beside the step before it')").count() === 0, "the first step has no such option");
+
+/* ── renaming a step on the Map renames its RACI row too ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+await A.page.locator(`[data-lane-grid] [data-step='${s6[2].id}']`).click();
+const roleOpt = await A.page.locator("select[aria-label='+ Add a role'] option").evaluateAll((o) => o.filter((x) => x.value).map((x) => x.value));
+await A.page.locator("select[aria-label='+ Add a role']").selectOption(roleOpt[0]);
+await A.page.waitForTimeout(1500);
+const actBefore = await q(ffp, 'select name from activities where "relatedStepId"=$1', [s6[2].id]);
+check(actBefore.length === 1, "setting a RACI letter on the Map makes the step's RACI row", JSON.stringify(actBefore));
+await A.page.fill("aside input[maxlength='200']", "Review journals before posting");
+await A.page.locator("aside input[maxlength='200']").blur();
+await A.page.waitForTimeout(1800);
+const actAfter = await q(ffp, 'select name from activities where "relatedStepId"=$1', [s6[2].id]);
+check(actAfter.length === 1 && actAfter[0].name === "Review journals before posting", "renaming the step renames its RACI row", JSON.stringify(actAfter));
+const raciHtml = await (await A.get("/" + S + "/processes/processes/" + P6 + "/raci")).text();
+check(raciHtml.includes("Review journals before posting") && !raciHtml.includes("Add a review of journals before posting"), "…and the RACI page shows the new name, not the old one");
+
+/* ── the SOP is its own item in the builder's side list ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+check(await A.page.getByRole("link", { name: "SOP", exact: true }).first().isVisible(), "the builder's side list has an SOP item");
+await A.page.getByRole("link", { name: "SOP", exact: true }).first().click();
+await A.page.waitForURL(/tab=sop/, { timeout: 15000 });
+const sopTxt = await A.page.innerText("body");
+check(/The SOP for this process/.test(sopTxt) && /Document control/i.test(sopTxt) && /Preview the SOP/.test(sopTxt), "…and it opens the SOP: where it stands, the document control, and a preview");
+check((await A.page.locator("a:has-text('Preview the SOP')").first().getAttribute("href")).includes("/reports/sop?ids=" + P6), "…the preview opens this process's SOP");
+const wbBoxes = await A.page.locator("section[aria-label^='SOP for step'] textarea").count();
+check(wbBoxes >= 5 * 3, "…with every task's five SOP boxes in one place", String(wbBoxes));
+const secondInputs = A.page.locator("section[aria-label^='SOP for step']").nth(1).locator("label:has-text('Inputs, tools and systems') textarea");
+await secondInputs.fill("The ERP's invoice screen");
+await secondInputs.blur();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select "sopInputs" i from process_steps where id=$1', [s6[1].id]))[0].i === "The ERP's invoice screen", "a box filled in the SOP section is saved on that step");
+const sopDot = await A.page.getByRole("link", { name: "SOP", exact: true }).first().locator("span").last().getAttribute("class");
+check(/rounded-full/.test(sopDot ?? ""), "…and the SOP item carries a status dot");
+
+/* ── the SOP section: AI drafts for the empty boxes (use / edit / delete) and Skip this SOP ── */
+const sopSecs = A.page.locator("section[aria-label^='SOP for step']");
+check(await A.page.getByRole("button", { name: "Draft the empty boxes with AI" }).isVisible(), "the SOP section offers to draft the empty boxes with AI");
+const wasOut = (await q(ffp, 'select "sopOutput" o, "detailedAction" d from process_steps where id=$1', [s6[1].id]))[0];
+await sopSecs.nth(1).getByRole("button", { name: "Draft with AI" }).click();
+await A.page.waitForSelector(`[data-sop-drafts='${s6[1].id}']`, { timeout: 20000 });
+check(aiAsked.length === 1 && /Industry/.test(aiAsked[0]) && aiAsked[0].includes(s6[1].id) && !aiAsked[0].includes("The ERP's invoice screen — ") , "the draft is asked from the industry and the step's own facts", String(aiAsked[0]).slice(0, 300));
+check(/ALREADY ENTERED:.*inputs: The ERP's invoice screen/.test(aiAsked[0]), "…and tells the model what the person already entered");
+const dBox = A.page.locator(`[data-sop-drafts='${s6[1].id}']`);
+check(await dBox.getByLabel("Draft: Inputs, tools and systems").count() === 0, "…a box that already has text gets no draft");
+check((await q(ffp, 'select "sopOutput" o from process_steps where id=$1', [s6[1].id]))[0].o === wasOut.o, "…and a draft is not saved on its own");
+await dBox.getByLabel("Draft: Expected output").fill("A case checked and ready to approve");
+await dBox.getByLabel("Draft: Expected output").locator("xpath=following-sibling::div//button[text()='Use']").click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select "sopOutput" o from process_steps where id=$1', [s6[1].id]))[0].o === "A case checked and ready to approve", "an edited draft is saved as edited when used");
+await A.page.waitForTimeout(500);
+const delBtn = A.page.locator(`[data-sop-drafts='${s6[1].id}']`).getByLabel("Draft: Common errors and exceptions").locator("xpath=following-sibling::div//button[text()='Delete']");
+await delBtn.click();
+check(await A.page.locator(`[data-sop-drafts='${s6[1].id}']`).getByLabel("Draft: Common errors and exceptions").count() === 0 && !(await q(ffp, 'select "sopErrors" e from process_steps where id=$1', [s6[1].id]))[0].e, "a draft can be deleted and nothing is saved");
+const lackBefore = /(\d+) of \d+ steps? still lack/.exec(await body(A.page))?.[1];
+await sopSecs.first().getByRole("button", { name: "Skip this SOP" }).click();
+await A.page.waitForSelector("text=SOP skipped for this step", { timeout: 15000 });
+check((await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6[0].id]))[0].g.includes("SOP"), "Skip this SOP marks the step");
+const lackAfter = /(\d+) of \d+ steps? still lack/.exec(await body(A.page))?.[1] ?? "0";
+check(lackBefore === undefined || +lackAfter < +lackBefore || lackBefore === lackAfter, "…a skipped step is no longer counted as lacking", lackBefore + " → " + lackAfter);
+const skipDoc = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P6)).text();
+check(skipDoc.length > 500, "…and the SOP preview still opens");
+await A.page.getByRole("button", { name: "Bring back" }).first().click();
+await A.page.waitForFunction(() => !/SOP skipped for this step/.test(document.body.innerText), null, { timeout: 15000 });
+check(!(await q(ffp, 'select "skippedGaps" g from process_steps where id=$1', [s6[0].id]))[0].g.includes("SOP"), "Bring back undoes the skip");
+
+/* ── the library can be arranged: sort, group, and my own order ── */
+const libCodes = async () => A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector(".font-mono")?.textContent?.trim()).filter(Boolean));
+await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
+const byCodeNow = await libCodes();
+check(await A.page.locator("select").filter({ hasText: "My order" }).count() === 2 && byCodeNow.join() === [...byCodeNow].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).join(), "the library has an Arrange bar, and by default is still in code order", byCodeNow.join());
+await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name", { waitUntil: "networkidle" });
+const byName = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector("a.font-bold")?.textContent?.trim()).filter(Boolean));
+check(byName.length >= 5 && byName.join() === [...byName].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })).join(), "arranged by name, the mains are in name order", byName.join(" | "));
+await A.page.goto(BASE + "/" + S + "/processes/processes?sort=name", { waitUntil: "networkidle" });
+const headRows = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => ({ n: r.querySelector("a.font-bold")?.textContent?.trim(), sub: !!r.querySelector("[data-fold-count]") })));
+check(await A.page.locator("[role=group][aria-label='Arrange the list']").count() === 1 && headRows.length >= 5, "sorting by a heading keeps the Arrange bar and the folded sub-processes", JSON.stringify(headRows.length));
+const hrBase = (await q(ffp, 'select code from processes where "workspaceId"=$1 and "parentProcessId" is not null limit 1', [S]))[0];
+check(hrBase === undefined || (await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).length)) >= 5, "…a heading sort is no longer a flat list");
+await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name&sarrange=steps", { waitUntil: "networkidle" });
+check(await A.page.getByLabel("Arrange the sub-processes").inputValue() === "steps", "the Arrange bar has its own choice for the sub-processes");
+await A.page.getByLabel("Arrange the sub-processes").selectOption("name");
+await A.page.waitForURL(/sarrange=name/, { timeout: 15000 });
+check(/arrange=name/.test(A.page.url()) && /sarrange=name/.test(A.page.url()), "…and choosing it changes only the sub-processes' arrangement in the address");
+await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=name&adir=desc", { waitUntil: "networkidle" });
+const byNameDesc = await A.page.evaluate(() => [...document.querySelectorAll("tbody tr")].filter((r) => r.offsetParent !== null).map((r) => r.querySelector("a.font-bold")?.textContent?.trim()).filter(Boolean));
+check(byNameDesc.join() === [...byName].reverse().join(), "…and reversed", byNameDesc.join(" | "));
+await A.page.goto(BASE + "/" + S + "/processes/processes?group=dept", { waitUntil: "networkidle" });
+check(/No department/i.test(await body(A.page)), "grouped by department, a process with none is under No department");
+
+await A.page.goto(BASE + "/" + S + "/processes/processes?arrange=mine", { waitUntil: "networkidle" });
+const mine0 = await libCodes();
+check((await A.page.$$("button[aria-label^='Move '][aria-label$=' up']")).length >= 5, "in My order every process has move buttons");
+const third = mine0[2], second = mine0[1];
+const thirdName = await A.page.evaluate((c) => [...document.querySelectorAll("tbody tr")].find((r) => r.querySelector(".font-mono")?.textContent?.trim() === c)?.querySelector("a.font-bold")?.textContent?.trim(), third);
+await A.page.click(`button[aria-label='Move ${thirdName} up']`);
+await A.page.waitForTimeout(1800);
+const mine1 = await libCodes();
+check(mine1[1] === third && mine1[2] === second, "moving a process up puts it above the one before it", mine0.slice(0, 4).join() + " -> " + mine1.slice(0, 4).join());
+await A.page.reload({ waitUntil: "networkidle" });
+check((await libCodes())[1] === third, "…and the order is kept when the page is opened again");
+await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
+check((await libCodes()).join() === byCodeNow.join(), "…while the default list is not touched by it");
+await q(ffp, 'update processes set "sortOrder"=null where "workspaceId"=$1', [S]);
+
+/* ── a Start or End step can be given who is involved and its approval rules, and a role set on the Map reaches the RACI ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+await A.page.locator(`[data-lane-grid] [data-step='${s6[1].id}']`).click();
+await A.page.locator("label:has-text('Step type') select").first().selectOption("START");
+await A.page.waitForTimeout(1800);
+check(await A.page.getByText("Who is involved").first().isVisible() && await A.page.getByText("Approval and time limit").first().isVisible(), "a Start step also shows who is involved and its approval rules");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(1500);
+const roles6 = await q(ffp, 'select id, name from roles where "workspaceId"=$1 and "archivedAt" is null order by name', [S]);
+const cur2 = (await q(ffp, 'select "assignedRoleId" r from process_steps where id=$1', [s6[2].id]))[0].r;
+const target = roles6.find((r) => r.id !== cur2 && r.name === "Head of Finance") ?? roles6.find((r) => r.id !== cur2);
+// a letter someone already set must not be changed by it
+const other = roles6.find((r) => r.id !== cur2 && r.id !== target.id);
+await A.page.locator(`[data-lane-grid] [data-step='${s6[2].id}']`).click();
+await A.page.locator("label:has-text('Who does it') select").first().selectOption(target.id);
+await A.page.waitForTimeout(2200);
+const rr = await q(ffp, `select ra."roleId" r, ra.code c from raci_assignments ra join activities a on a.id=ra."activityId" where a."relatedStepId"=$1`, [s6[2].id]);
+check(rr.some((x) => x.r === target.id && x.c === "RESPONSIBLE"), "a role set as who does the step on the Map becomes its Responsible in the RACI", JSON.stringify(rr));
+await A.page.locator("label:has-text('Who does it') select").first().selectOption(other.id);
+await A.page.waitForTimeout(2200);
+const rr2 = await q(ffp, `select ra."roleId" r, ra.code c from raci_assignments ra join activities a on a.id=ra."activityId" where a."relatedStepId"=$1`, [s6[2].id]);
+check(rr2.some((x) => x.r === other.id && x.c === "RESPONSIBLE") && rr2.some((x) => x.r === target.id), "…changing it adds the new role and leaves the old letter as it was", JSON.stringify(rr2));
+const actId = (await q(ffp, 'select id from activities where "relatedStepId"=$1 limit 1', [s6[2].id]))[0].id;
+await q(ffp, `update raci_assignments set code='CONSULTED' where "activityId"=$1 and "roleId"=$2`, [actId, target.id]);
+await A.page.locator("label:has-text('Who does it') select").first().selectOption(target.id);
+await A.page.waitForTimeout(2200);
+check((await q(ffp, `select code from raci_assignments where "activityId"=$1 and "roleId"=$2`, [actId, target.id]))[0].code === "CONSULTED", "…and a letter somebody set is never overwritten");
+
+/* ── Download picture gives the WHOLE map, even when it is wider than the screen ── */
+await A.page.setViewportSize({ width: 520, height: 900 });
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+const gridW = await A.page.evaluate(() => { const g = document.querySelector("[data-lane-grid]"); return { sw: g.scrollWidth, cw: g.parentElement.clientWidth }; });
+const [dl] = await Promise.all([A.page.waitForEvent("download", { timeout: 30000 }), A.page.getByRole("button", { name: "Download picture" }).click()]);
+const dlPath = await dl.path();
+const png = (await import("node:fs")).readFileSync(dlPath);
+const pw = png.readUInt32BE(16), ph = png.readUInt32BE(20);
+check(gridW.sw > gridW.cw && Math.abs(pw - gridW.sw * 2) <= 4 && ph > 200, "Download picture holds the whole map, not just the part on screen", JSON.stringify({ gridW, pw, ph }));
+const [dlPdf] = await Promise.all([A.page.waitForEvent("download", { timeout: 40000 }), A.page.getByRole("button", { name: "Export PDF" }).click()]);
+const pdfBuf = (await import("node:fs")).readFileSync(await dlPdf.path());
+check(/process-map\.pdf$/.test(dlPdf.suggestedFilename()) && pdfBuf.subarray(0, 4).toString() === "%PDF" && /\/Subtype\s*\/Image/.test(pdfBuf.toString("latin1")), "Export PDF opens with the whole map as a picture, then the step list", dlPdf.suggestedFilename() + " " + pdfBuf.length);
+const plain = await A.get("/api/ffp/export/process-map/" + P6);
+check(plain.status() === 200 && !/\/Subtype\s*\/Image/.test((await plain.body()).toString("latin1")), "…and the plain PDF link still works without it");
+await A.page.setViewportSize({ width: 1300, height: 900 });
+
+/* ── a decision names its ways out: Yes and No, Approved and Rejected ── */
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).click();
+const msBox = A.page.locator("aside label:has-text('milestone') input[type=checkbox]").first();
+const msY = (await msBox.boundingBox())?.y ?? 9e9, whoY = (await A.page.locator("aside label:has-text('Who does it')").first().boundingBox())?.y ?? 0;
+check(await msBox.isVisible() && msY < whoY, "the milestone checkbox is at the top of the step form, above Who does it", msY + " / " + whoY);
+check(await A.page.getByText("Outcomes of this decision").count() === 0, "a task has no outcomes block");
+await A.page.locator("label:has-text('Step type') select").first().selectOption("DECISION");
+await A.page.waitForTimeout(1800);
+check(await A.page.getByText("Outcomes of this decision").first().isVisible(), "a decision shows its Outcomes");
+const outsBefore = await q(ffp, 'select id, "toStepId" t, label from step_connections where "fromStepId"=$1', [s6[0].id]);
+check(outsBefore.length >= 1 && /two ways out/i.test(await A.page.locator("aside").innerText()) === (outsBefore.length === 1), "…and says it needs two ways out while it has only one", JSON.stringify(outsBefore));
+await A.page.locator("aside input[aria-label='Name of this way out']").first().fill("Approved");
+await A.page.locator("aside input[aria-label='Name of this way out']").first().blur();
+await A.page.waitForTimeout(1600);
+check((await q(ffp, 'select label from step_connections where id=$1', [outsBefore[0].id]))[0].label === "Approved", "a way out can be named in place");
+if (outsBefore.length === 1) {
+  await A.page.getByRole("button", { name: "+ Add an outcome" }).click();
+  check((await A.page.locator("aside input[aria-label='Name of this way out']").last().inputValue()) === "No", "…the second way out starts as No");
+  await A.page.locator("aside select[aria-label='Goes to']").last().selectOption(s6[1].id);
+  await A.page.locator("aside button:text-is('Connect')").last().click();
+  await A.page.waitForTimeout(1800);
+  const outsAfter = await q(ffp, 'select "toStepId" t, label from step_connections where "fromStepId"=$1 order by label', [s6[0].id]);
+  check(outsAfter.length === 2 && outsAfter.some((o) => o.label === "No" && o.t === s6[1].id) && outsAfter.some((o) => o.label === "Approved"), "…and goes to the step chosen, with the other way still there", JSON.stringify(outsAfter));
+  check(!/two ways out/i.test(await A.page.locator("aside").innerText()), "…and the warning goes once there are two");
+  await A.page.waitForTimeout(500);
+  const dia = A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`);
+  check(await dia.getAttribute("data-shape") === "diamond" && await dia.locator("polygon").count() === 1, "a decision is drawn as the flowchart diamond");
+  const dh = (await dia.boundingBox()).height;
+  const strokes = await A.page.locator("[data-lane-grid] svg path[marker-end]").evaluateAll((ps) => ps.map((x) => x.style.stroke));
+  check(strokes.some((c) => /180, 35, 24|b42318/i.test(c)) && strokes.some((c) => /47, 125, 79|2f7d4f/i.test(c)), "the No way out is drawn red and the Approved one green", JSON.stringify(strokes));
+  await A.page.locator("[data-arrow-hit]").first().click({ force: true, position: { x: 2, y: 2 } }).catch(() => {});
+  await A.page.locator("[data-arrow-hit]").first().dispatchEvent("click");
+  await A.page.waitForTimeout(300);
+  const info = await A.page.locator("[data-arrow-info]").first().textContent().catch(() => "");
+  check(/From:/.test(info) && /To:/.test(info), "clicking an arrow says where it starts and where it ends", info);
+  if (process.env.SHOT) await A.page.locator("[data-lane-grid]").screenshot({ path: process.env.SHOT });
+  check(dh <= 96 && await A.page.locator("[data-lane-grid] svg path[marker-end], [data-lane-grid] svg path").count() >= 2, "…it fits its lane and its arrows are still drawn", dh);
+}
+await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(2500);
+if ((await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type !== "TASK") await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForFunction((id) => !document.querySelector(`[data-lane-grid] [data-step='${id}'][data-shape]`), s6[0].id, { timeout: 8000 }).catch(() => {});
+await A.page.waitForTimeout(1500);
+check(await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") === null, "a task goes back to the plain box", await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") + " / " + (await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type);
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

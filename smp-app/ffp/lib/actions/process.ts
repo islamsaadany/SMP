@@ -13,6 +13,8 @@ import {
   wouldCreateCycle,
 } from "@/ffp/lib/domain/process-hierarchy";
 import { validateConnections } from "@/ffp/lib/domain/process-graph";
+import { SKIPPABLE_GAPS } from "@/ffp/lib/domain/step-readiness";
+import { compareBy, moveWithin } from "@/ffp/lib/domain/process-arrange";
 import {
   summariseDeleteImpact,
   type ProcessDeleteImpact,
@@ -777,8 +779,10 @@ export async function addProcessStep(
     return newStep;
   });
 
+  if (created.assignedRoleId) await makeOwnerResponsible(processId, created.id, created.assignedRoleId);
   await resetIfInForce(processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/map`);
+  revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/raci`);
   return ok({ id: created.id });
 }
 
@@ -849,6 +853,26 @@ export async function addProcessStepsBulk(
   return ok({ ids });
 }
 
+/**
+ * A role given to a step on the Map is that step's Responsible in the RACI too, so the RACI does not have to be
+ * filled in again by hand. The same rule as the RACI page's "Fill from step owners": only into a cell nobody has
+ * filled (a letter someone set is never changed), never on a skipped row, and an old owner's letter is left as it
+ * is. A step with no RACI row yet gets one, named as the step, like the first letter set on it would.
+ */
+async function makeOwnerResponsible(processId: string, stepId: string, roleId: string): Promise<void> {
+  const step = await prisma.processStep.findUnique({ where: { id: stepId }, select: { raciSkipped: true, label: true } });
+  if (!step || step.raciSkipped) return;
+  let rows = await prisma.activity.findMany({ where: { relatedStepId: stepId }, select: { id: true } });
+  if (rows.length === 0) {
+    const count = await prisma.activity.count({ where: { processId } });
+    rows = [await prisma.activity.create({ data: { processId, name: step.label, relatedStepId: stepId, order: count }, select: { id: true } })];
+  }
+  for (const row of rows) {
+    const held = await prisma.raciAssignment.findUnique({ where: { activityId_roleId: { activityId: row.id, roleId } }, select: { id: true } });
+    if (!held) await prisma.raciAssignment.create({ data: { activityId: row.id, roleId, code: "RESPONSIBLE" } });
+  }
+}
+
 const updateStepSchema = z.object({
   workspaceId: z.string().min(1),
   processId: z.string().min(1),
@@ -859,6 +883,11 @@ const updateStepSchema = z.object({
   swimlaneRoleId: z.string().min(1).optional().or(z.literal("")),
   detailedAction: z.array(z.string().trim().min(1).max(500)).max(50).optional(),
   exceptionHandling: z.string().trim().max(2000).optional().or(z.literal("")),
+  // Escalation rules and notes — undefined leaves the stored value alone.
+  escalationNote: z.string().trim().max(2000).optional().or(z.literal("")),
+  stepNote: z.string().trim().max(2000).optional().or(z.literal("")),
+  // Drawn beside the step before it (same column on the Map) — undefined leaves it alone.
+  sameColumn: z.boolean().optional(),
   // SOP detail — undefined leaves the stored value alone.
   sopInputs: z.string().trim().max(2000).optional().or(z.literal("")),
   sopOutput: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -910,6 +939,13 @@ export async function updateProcessStep(
     if (validTargets !== targetProcessIds.length) return notFound();
   }
 
+  // A step's RACI row carries the name of its Activity, which was copied from the step when the first letter was
+  // set. Rename the Activity too when it still carries the step's old name, so the RACI never shows a name the
+  // step no longer has; an Activity the office named differently (a step split into finer lines) is left alone.
+  if (step.label !== parsed.data.label) {
+    await prisma.activity.updateMany({ where: { relatedStepId: parsed.data.stepId, name: step.label }, data: { name: parsed.data.label } });
+  }
+
   const updated = await prisma.processStep.update({
     where: { id: parsed.data.stepId },
     data: {
@@ -921,6 +957,9 @@ export async function updateProcessStep(
       ...(parsed.data.exceptionHandling !== undefined
         ? { exceptionHandling: parsed.data.exceptionHandling || null }
         : {}),
+      ...(parsed.data.escalationNote !== undefined ? { escalationNote: parsed.data.escalationNote || null } : {}),
+      ...(parsed.data.stepNote !== undefined ? { stepNote: parsed.data.stepNote || null } : {}),
+      ...(parsed.data.sameColumn !== undefined ? { sameColumn: parsed.data.sameColumn } : {}),
       ...(parsed.data.sopInputs !== undefined ? { sopInputs: parsed.data.sopInputs || null } : {}),
       ...(parsed.data.sopOutput !== undefined ? { sopOutput: parsed.data.sopOutput || null } : {}),
       ...(parsed.data.sopErrors !== undefined ? { sopErrors: parsed.data.sopErrors || null } : {}),
@@ -947,6 +986,12 @@ export async function updateProcessStep(
   // lane for every other step too, so the whole map's vertical placement is
   // recomputed rather than just this step's.
   await realignSwimlanes(parsed.data.processId);
+
+  // A role newly given to the step is its Responsible in the RACI (empty cells only; see makeOwnerResponsible).
+  if (parsed.data.assignedRoleId && parsed.data.assignedRoleId !== step.assignedRoleId) {
+    await makeOwnerResponsible(parsed.data.processId, parsed.data.stepId, parsed.data.assignedRoleId);
+    revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/raci`);
+  }
 
   await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
@@ -1364,3 +1409,160 @@ export async function createActivity(
 }
 
 export type { ActionError };
+
+
+const skipGapSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  stepId: z.string().min(1),
+  gap: z.enum(SKIPPABLE_GAPS),
+  skipped: z.boolean(),
+});
+
+/**
+ * Skips one kind of gap mark on one step ("not needed for this step"), or brings it back. Each kind is its own
+ * choice, so a step with several marks can have one skipped and keep the rest. Nothing else about the step
+ * changes; the mark simply stops being counted and drawn.
+ */
+export async function setStepGapSkipped(input: z.infer<typeof skipGapSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = skipGapSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, processId, stepId, gap, skipped } = parsed.data;
+
+  const access = await requireWorkspaceAccess(workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(workspaceId, processId);
+  if (!process) return notFound();
+  const step = await prisma.processStep.findUnique({ where: { id: stepId }, select: { processId: true, skippedGaps: true } });
+  if (!step || step.processId !== processId) return notFound();
+
+  const next = skipped ? [...new Set([...step.skippedGaps, gap])] : step.skippedGaps.filter((g) => g !== gap);
+  await prisma.processStep.update({ where: { id: stepId }, data: { skippedGaps: next } });
+
+  revalidatePath(`/${workspaceId}/processes/processes/${processId}`);
+  revalidatePath(`/${workspaceId}/processes/processes`);
+  return ok({ id: stepId });
+}
+
+
+const stepSopSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  stepId: z.string().min(1),
+  /** What they do, one entry per line. Undefined leaves each field alone. */
+  detailedAction: z.array(z.string().trim().min(1).max(500)).max(50).optional(),
+  sopInputs: z.string().trim().max(2000).optional(),
+  sopOutput: z.string().trim().max(2000).optional(),
+  sopErrors: z.string().trim().max(2000).optional(),
+  exceptionHandling: z.string().trim().max(2000).optional(),
+});
+
+/** Saves a step's SOP fields from the SOP section, touching nothing else about the step (its name, who does it and where it sits stay as they are). */
+export async function updateStepSop(input: z.infer<typeof stepSopSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = stepSopSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const d = parsed.data;
+
+  const access = await requireWorkspaceAccess(d.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(d.workspaceId, d.processId);
+  if (!process) return notFound();
+  const step = await prisma.processStep.findUnique({ where: { id: d.stepId }, select: { processId: true } });
+  if (!step || step.processId !== d.processId) return notFound();
+
+  await prisma.processStep.update({
+    where: { id: d.stepId },
+    data: {
+      ...(d.detailedAction !== undefined ? { detailedAction: d.detailedAction } : {}),
+      ...(d.sopInputs !== undefined ? { sopInputs: d.sopInputs || null } : {}),
+      ...(d.sopOutput !== undefined ? { sopOutput: d.sopOutput || null } : {}),
+      ...(d.sopErrors !== undefined ? { sopErrors: d.sopErrors || null } : {}),
+      ...(d.exceptionHandling !== undefined ? { exceptionHandling: d.exceptionHandling || null } : {}),
+    },
+  });
+
+  await resetIfInForce(d.processId);
+  revalidatePath(`/${d.workspaceId}/processes/processes/${d.processId}/map`);
+  revalidatePath(`/${d.workspaceId}/processes/processes/${d.processId}`);
+  revalidatePath(`/${d.workspaceId}/processes/reports/sop`);
+  return ok({ id: d.stepId });
+}
+
+
+const moveProcessSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  direction: z.enum(["UP", "DOWN"]),
+});
+
+/**
+ * Moves a process one place up or down among its siblings in the library's "My order" (a main among the mains, a
+ * sub among its main's subs). Every sibling is given its position in the same step, so the ones nobody had placed
+ * stay where the list showed them. Nothing else about any process changes.
+ */
+export async function moveProcessInOrder(input: z.infer<typeof moveProcessSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = moveProcessSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, processId, direction } = parsed.data;
+
+  const access = await requireWorkspaceAccess(workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(workspaceId, processId);
+  if (!process) return notFound();
+
+  const all = await prisma.process.findMany({
+    where: { workspaceId, archivedAt: null },
+    select: { id: true, code: true, name: true, parentProcessId: true, sortOrder: true },
+  });
+  const present = new Set(all.map((p) => p.id));
+  const parentKey = (p: { parentProcessId: string | null }) => (p.parentProcessId && present.has(p.parentProcessId) ? p.parentProcessId : null);
+  const me = all.find((p) => p.id === processId);
+  if (!me) return notFound();
+  const arr = (p: (typeof all)[number]) => ({ ...p, dept: null, state: 0, steps: 0, updated: 0 });
+  const siblings = all.filter((p) => parentKey(p) === parentKey(me)).sort((a, b) => compareBy("mine", arr(a), arr(b)));
+  const next = moveWithin(siblings.map((p) => p.id), processId, direction);
+  if (next.join() === siblings.map((p) => p.id).join()) return ok({ id: processId });
+
+  await prisma.$transaction(next.map((id, i) => prisma.process.update({ where: { id }, data: { sortOrder: i } })));
+  revalidatePath(`/${workspaceId}/processes/processes`);
+  return ok({ id: processId });
+}
+
+
+const updateConnectionSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  connectionId: z.string().min(1),
+  /** The name of this way out of a decision ("Yes", "Approved"); empty clears it. Undefined leaves it. */
+  label: z.string().trim().max(60).optional(),
+  /** Where this arrow goes. Undefined leaves it. */
+  toStepId: z.string().min(1).optional(),
+});
+
+/** Renames an arrow or sends it to a different step of the same process (a decision's outcomes are edited in place). */
+export async function updateStepConnection(input: z.infer<typeof updateConnectionSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = updateConnectionSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, processId, connectionId, label, toStepId } = parsed.data;
+
+  const access = await requireWorkspaceAccess(workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(workspaceId, processId);
+  if (!process) return notFound();
+
+  const conn = await prisma.stepConnection.findUnique({ where: { id: connectionId } });
+  if (!conn || conn.processId !== processId) return notFound();
+  if (toStepId) {
+    if (toStepId === conn.fromStepId) return validationError("Pick a different step");
+    const target = await prisma.processStep.findUnique({ where: { id: toStepId }, select: { processId: true } });
+    if (!target || target.processId !== processId) return notFound();
+  }
+
+  await prisma.stepConnection.update({
+    where: { id: connectionId },
+    data: { ...(label !== undefined ? { label: label || null } : {}), ...(toStepId ? { toStepId } : {}) },
+  });
+  await resetIfInForce(processId);
+  revalidatePath(`/${workspaceId}/processes/processes/${processId}/map`);
+  return ok({ id: connectionId });
+}

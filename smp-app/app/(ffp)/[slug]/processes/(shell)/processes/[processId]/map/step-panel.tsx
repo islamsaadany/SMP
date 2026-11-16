@@ -9,11 +9,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useMessages } from "@/ffp/lib/i18n/client";
-import { deleteProcessStep, moveProcessStep, setStepMilestone, updateProcessStep, deleteStepConnection } from "@/ffp/lib/actions/process";
+import { deleteProcessStep, moveProcessStep, setStepMilestone, updateProcessStep, deleteStepConnection, createStepConnection, setStepGapSkipped, updateStepConnection } from "@/ffp/lib/actions/process";
 import { setStepRaciCell } from "@/ffp/lib/actions/raci";
 import { addAuthorityRule, deleteAuthorityRule, updateAuthorityRule } from "@/ffp/lib/actions/authority";
 import { createProcessControl, updateProcessControl } from "@/ffp/lib/actions/process-quality";
 import { createStepHandoff, deleteStepHandoff } from "@/ffp/lib/actions/step-handoff";
+import { createStepTitle } from "@/ffp/lib/actions/step-title";
 import { Modal } from "../../../../read/dialogs";
 import { btn, btnGold, field, lbl, type MapArrow, type MapStep, type Run } from "./map-editor";
 import type { HandoffStepOption, HandoffT } from "./handoff-types";
@@ -77,6 +78,14 @@ export function StepPanel({
   const [links, setLinks] = useState(step.links);
   const [acts, setActs] = useState(step.acts.join("\n"));
   const [sop, setSop] = useState(step.sop);
+  const [escalation, setEscalation] = useState(step.escalation);
+  const [note, setNote] = useState(step.note);
+  const [beside, setBeside] = useState(step.sameColumn);
+  const [newTitle, setNewTitle] = useState<string | null>(null);
+  const [arrowAdd, setArrowAdd] = useState<{ dir: "in" | "out"; other: string; label: string } | null>(null);
+  const [handOutPick, setHandOutPick] = useState("");
+  const [outLabels, setOutLabels] = useState<Record<string, string>>({});
+  const [newOutcome, setNewOutcome] = useState<{ label: string; to: string } | null>(null);
   const [letters, setLetters] = useState<Record<string, Letter>>(step.raci.letters);
   /* what is typed into each control, by risk, until it is saved: a risk added after the step was picked gets its own box too */
   const [controls, setControls] = useState<Record<string, string>>({});
@@ -88,7 +97,7 @@ export function StepPanel({
   const base = { workspaceId, processId, stepId: step.id };
 
   /* every save sends what the step is now, with the one change in it */
-  const save = (patch: { type?: MapStep["type"]; label?: string; roleId?: string; detailedAction?: string[]; joinRequiresAll?: boolean; linkedProcessIds?: string[]; sop?: MapStep["sop"] }) => {
+  const save = (patch: { type?: MapStep["type"]; label?: string; roleId?: string; escalationNote?: string; stepNote?: string; sameColumn?: boolean; detailedAction?: string[]; joinRequiresAll?: boolean; linkedProcessIds?: string[]; sop?: MapStep["sop"] }) => {
     const role = patch.roleId ?? roleId;
     const s = patch.sop;
     return run(() =>
@@ -99,6 +108,9 @@ export function StepPanel({
         assignedRoleId: role,
         swimlaneRoleId: role,
         ...(patch.detailedAction ? { detailedAction: patch.detailedAction } : {}),
+        ...(patch.escalationNote !== undefined ? { escalationNote: patch.escalationNote } : {}),
+        ...(patch.stepNote !== undefined ? { stepNote: patch.stepNote } : {}),
+        ...(patch.sameColumn !== undefined ? { sameColumn: patch.sameColumn } : {}),
         ...(patch.joinRequiresAll !== undefined ? { joinRequiresAll: patch.joinRequiresAll } : {}),
         ...(patch.linkedProcessIds ? { linkedProcessIds: patch.linkedProcessIds } : {}),
         ...(s ? { sopInputs: s.inputs, sopOutput: s.output, sopErrors: s.errors, exceptionHandling: s.risk } : {}),
@@ -116,6 +128,31 @@ export function StepPanel({
   };
   const saveSop = () => {
     if (JSON.stringify(sop) !== JSON.stringify(step.sop)) void save({ sop });
+  };
+  const saveNote = () => {
+    if (note.trim() !== step.note.trim()) void save({ stepNote: note.trim() });
+  };
+  const saveEscalation = () => {
+    if (escalation.trim() !== step.escalation.trim()) void save({ escalationNote: escalation.trim() });
+  };
+  /* a title the company structure does not hold: made as a role, then given to this step */
+  const addTitle = async () => {
+    const name = (newTitle ?? "").trim();
+    if (!name) return;
+    const made = await run(() => createStepTitle({ workspaceId, name }));
+    if (made.ok) {
+      setRoleId(made.data.id);
+      setNewTitle(null);
+      void save({ roleId: made.data.id });
+    }
+  };
+  /* an arrow in or out of this step, saved as soon as the other end is picked */
+  const addArrow = async () => {
+    if (!arrowAdd?.other) return;
+    const from = arrowAdd.dir === "in" ? arrowAdd.other : step.id;
+    const to = arrowAdd.dir === "in" ? step.id : arrowAdd.other;
+    const r = await run(() => createStepConnection({ workspaceId, processId, fromStepId: from, toStepId: to, label: arrowAdd.label.trim() }));
+    if (r.ok) setArrowAdd(null);
   };
 
   /* the RACI letters: the role in the lane first, then everyone else who has one */
@@ -145,10 +182,41 @@ export function StepPanel({
           {type === "DECISION" ? ` · ${m.types.DECISION.toUpperCase()}` : ""}
         </span>
         {step.gaps.map((g) => (
-          <p key={g} className="mt-1 text-[12.5px] font-semibold text-[var(--bad-tx)]">
-            {m.gap[g]}
+          <p key={g} className="mt-1 flex items-start gap-2 text-[12.5px] font-semibold text-[var(--bad-tx)]">
+            <span className="flex-1">{m.gap[g]}</span>
+            {!ro && (
+              <button
+                type="button"
+                title={m.skipTip}
+                aria-label={`${m.skipGap}: ${m.gap[g]}`}
+                className="shrink-0 rounded border border-[var(--line)] bg-white px-1.5 py-px text-[11.5px] font-semibold text-[var(--ink-2)] hover:border-[var(--gold)]"
+                onClick={() => void run(() => setStepGapSkipped({ ...base, gap: g, skipped: true }))}
+              >
+                {m.skipGap}
+              </button>
+            )}
           </p>
         ))}
+        {step.skipped.length > 0 && (
+          <div className="mt-1.5 grid gap-1 rounded-md bg-[var(--surface-2)] px-2 py-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-[.08em] text-[var(--ink-3)]">{m.skippedTitle}</span>
+            {step.skipped.map((g) => (
+              <p key={g} className="flex items-start gap-2 text-[12.5px] text-[var(--ink-2)]">
+                <span className="flex-1">{m.gap[g]}</span>
+                {!ro && (
+                  <button
+                    type="button"
+                    aria-label={`${m.unskipGap}: ${m.gap[g]}`}
+                    className="shrink-0 text-[11.5px] font-semibold text-[var(--stone)] underline"
+                    onClick={() => void run(() => setStepGapSkipped({ ...base, gap: g, skipped: false }))}
+                  >
+                    {m.unskipGap}
+                  </button>
+                )}
+              </p>
+            ))}
+          </div>
+        )}
         {step.reviewNote && <p className="mt-1 rounded-md bg-[var(--over-bg)] px-2 py-1 text-[12.5px] text-[var(--ink-2)]">{m.reviewNote(step.reviewNote)}</p>}
       </div>
 
@@ -163,6 +231,37 @@ export function StepPanel({
           onBlur={saveLabel}
           onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
         />
+      </label>
+      <label className={lbl}>
+        {m.typeLabel}
+        <select
+          className={field}
+          value={type}
+          disabled={ro}
+          onChange={(e) => {
+            const t = e.target.value as MapStep["type"];
+            setType(t);
+            void save({ type: t });
+          }}
+        >
+          {(["TASK", "DECISION", "START", "END"] as const).map((t) => (
+            <option key={t} value={t}>
+              {m.types[t]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex items-center gap-2 text-[12.5px]">
+        <input
+          type="checkbox"
+          checked={milestone}
+          disabled={ro}
+          onChange={(e) => {
+            setMilestone(e.target.checked);
+            void run(() => setStepMilestone({ ...base, milestone: e.target.checked }));
+          }}
+        />
+        {m.milestone}
       </label>
       <label className={lbl}>
         {m.who}
@@ -183,6 +282,165 @@ export function StepPanel({
           ))}
         </select>
       </label>
+      {!ro &&
+        (newTitle === null ? (
+          <div>
+            <button type="button" className={btn} onClick={() => setNewTitle("")}>
+              {m.newTitle}
+            </button>
+          </div>
+        ) : (
+          <div className="grid gap-1.5 rounded-md border border-[var(--line)] px-2.5 py-2">
+            <label className={lbl}>
+              {m.newTitleLabel}
+              <input
+                className={field}
+                autoFocus
+                value={newTitle}
+                maxLength={160}
+                placeholder={m.newTitlePh}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void addTitle();
+                  }
+                  if (e.key === "Escape") setNewTitle(null);
+                }}
+              />
+            </label>
+            <span className="text-[11.5px] text-[var(--ink-3)]">{m.newTitleNote}</span>
+            <div className="flex gap-1.5">
+              <button type="button" className={btnGold} disabled={!newTitle.trim()} onClick={() => void addTitle()}>
+                {m.newTitleAdd}
+              </button>
+              <button type="button" className={btn} onClick={() => setNewTitle(null)}>
+                {m.cancel}
+              </button>
+            </div>
+          </div>
+        ))}
+      {i > 0 && (
+        <div className="grid gap-0.5">
+          <label className="flex items-center gap-2 text-[12.5px]">
+            <input
+              type="checkbox"
+              checked={beside && steps[i - 1]!.lane !== step.lane}
+              disabled={ro || steps[i - 1]!.lane === step.lane}
+              onChange={(e) => {
+                setBeside(e.target.checked);
+                void save({ sameColumn: e.target.checked });
+              }}
+            />
+            {m.sameColumn}
+          </label>
+          {steps[i - 1]!.lane === step.lane && <span className="text-[11.5px] text-[var(--ink-3)]">{m.sameColumnLane}</span>}
+        </div>
+      )}
+
+      {type === "DECISION" && (
+        <div className="grid gap-1.5 rounded-md border border-[var(--line)] px-2.5 py-2">
+          <span className={lbl}>{m.outcomesTitle}</span>
+          <span className="text-[11.5px] text-[var(--ink-3)]">{m.outcomesHint}</span>
+          <datalist id={`outcome-names-${step.id}`}>
+            {["Yes", "No", "Approved", "Rejected"].map((x) => (
+              <option key={x} value={x} />
+            ))}
+          </datalist>
+          {outs.length === 0 && <span className="text-[12.5px] text-[var(--ink-3)]">{m.outcomeNone}</span>}
+          {outs.map((a) => (
+            <div key={a.id} className="grid gap-1 rounded-md bg-[var(--surface-2)] p-1.5">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5">
+                <input
+                  className={field}
+                  list={`outcome-names-${step.id}`}
+                  value={outLabels[a.id] ?? a.label ?? ""}
+                  disabled={ro}
+                  maxLength={60}
+                  aria-label={m.outcomeName}
+                  placeholder="Yes"
+                  onChange={(e) => setOutLabels((x) => ({ ...x, [a.id]: e.target.value }))}
+                  onBlur={() => {
+                    const v = outLabels[a.id];
+                    if (v !== undefined && v.trim() !== (a.label ?? "")) void run(() => updateStepConnection({ workspaceId, processId, connectionId: a.id, label: v.trim() }));
+                  }}
+                />
+                {!ro ? (
+                  <button type="button" className={xdel} aria-label={m.removeArrow} onClick={() => void run(() => deleteStepConnection({ workspaceId, processId, connectionId: a.id }))}>
+                    ×
+                  </button>
+                ) : (
+                  <span />
+                )}
+              </div>
+              <select
+                className={field}
+                value={a.to}
+                disabled={ro}
+                aria-label={m.outcomeTo}
+                onChange={(e) => void run(() => updateStepConnection({ workspaceId, processId, connectionId: a.id, toStepId: e.target.value }))}
+              >
+                {steps
+                  .filter((x) => x.id !== step.id)
+                  .map((x) => (
+                    <option key={x.id} value={x.id}>
+                      → {stepName(x)}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          ))}
+          {outs.length === 1 && <span className="text-[12px] font-semibold text-[var(--attn-tx)]">{m.outcomeNeedTwo}</span>}
+          {!ro &&
+            (newOutcome ? (
+              <div className="grid gap-1.5">
+                <input
+                  className={field}
+                  list={`outcome-names-${step.id}`}
+                  value={newOutcome.label}
+                  maxLength={60}
+                  aria-label={m.outcomeName}
+                  placeholder="Yes"
+                  onChange={(e) => setNewOutcome({ ...newOutcome, label: e.target.value })}
+                />
+                <select className={field} value={newOutcome.to} aria-label={m.outcomeTo} onChange={(e) => setNewOutcome({ ...newOutcome, to: e.target.value })}>
+                  <option value="">{m.arrowPick}</option>
+                  {steps
+                    .filter((x) => x.id !== step.id)
+                    .map((x) => (
+                      <option key={x.id} value={x.id}>
+                        {stepName(x)}
+                      </option>
+                    ))}
+                </select>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    className={btnGold}
+                    disabled={!newOutcome.to}
+                    onClick={() =>
+                      void run(() => createStepConnection({ workspaceId, processId, fromStepId: step.id, toStepId: newOutcome.to, label: newOutcome.label.trim() })).then((r) => {
+                        if (r.ok) setNewOutcome(null);
+                      })
+                    }
+                  >
+                    {m.connGo}
+                  </button>
+                  <button type="button" className={btn} onClick={() => setNewOutcome(null)}>
+                    {m.cancel}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <button type="button" className={btn} onClick={() => setNewOutcome({ label: outs.length === 0 ? "Yes" : outs.length === 1 ? "No" : "", to: "" })}>
+                  {m.outcomeAdd}
+                </button>
+              </div>
+            ))}
+        </div>
+      )}
+
       {(type === "TASK" || type === "DECISION") && (
         <>
           <label className={lbl}>
@@ -190,6 +448,29 @@ export function StepPanel({
             <textarea className={`${field} min-h-[64px]`} value={acts} disabled={ro} onChange={(e) => setActs(e.target.value)} onBlur={saveActs} />
           </label>
 
+          <div className="grid gap-2">
+            <span className={lbl}>{m.sop}</span>
+            {(
+              [
+                ["inputs", m.sopInputs],
+                ["output", m.sopOutput],
+                ["errors", m.sopErrors],
+                ["risk", m.sopRisk],
+              ] as const
+            ).map(([k, t]) => (
+              <label key={k} className={lbl}>
+                {t}
+                <textarea className={`${field} min-h-[48px]`} value={sop[k]} disabled={ro} maxLength={2000} onChange={(e) => setSop((x) => ({ ...x, [k]: e.target.value }))} onBlur={saveSop} />
+              </label>
+            ))}
+          </div>
+
+
+        </>
+      )}
+
+      {/* who is involved, the approval rules and the escalation note belong to every step: the RACI and the Authority matrix list a Start and an End too, and mark them when these are empty */}
+      <>
           <div className="grid gap-1.5">
             <span className={lbl}>{m.involved}</span>
             {step.raci.activities > 1 ? (
@@ -272,6 +553,23 @@ export function StepPanel({
             )}
           </div>
 
+          <label className={lbl}>
+            {m.escalation}
+            <textarea
+              className={`${field} min-h-[64px]`}
+              value={escalation}
+              disabled={ro}
+              maxLength={2000}
+              placeholder={m.escalationPh}
+              onChange={(e) => setEscalation(e.target.value)}
+              onBlur={saveEscalation}
+            />
+          </label>
+
+      </>
+
+      {(type === "TASK" || type === "DECISION") && (
+        <>
           <div className="grid gap-1.5">
             <span className={lbl}>{m.risks}</span>
             {step.controls.length ? (
@@ -307,52 +605,27 @@ export function StepPanel({
         </>
       )}
 
+      <label className={lbl}>
+        {m.stepNote}
+        <textarea className={`${field} min-h-[64px]`} value={note} disabled={ro} maxLength={2000} placeholder={m.stepNotePh} onChange={(e) => setNote(e.target.value)} onBlur={saveNote} />
+      </label>
+
       <details className="rounded-md border border-[var(--line-soft)] px-2.5 py-2">
         <summary className="cursor-pointer text-[12.5px] font-semibold text-[var(--stone)]">{m.more}</summary>
         <div className="mt-2.5 grid gap-3">
-          <label className={lbl}>
-            {m.type}
-            <select
-              className={field}
-              value={type}
-              disabled={ro}
-              onChange={(e) => {
-                const t = e.target.value as MapStep["type"];
-                setType(t);
-                void save({ type: t });
-              }}
-            >
-              {(["TASK", "DECISION", "START", "END"] as const).map((t) => (
-                <option key={t} value={t}>
-                  {m.types[t]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex items-center gap-2 text-[12.5px]">
-            <input
-              type="checkbox"
-              checked={milestone}
-              disabled={ro}
-              onChange={(e) => {
-                setMilestone(e.target.checked);
-                void run(() => setStepMilestone({ ...base, milestone: e.target.checked }));
-              }}
-            />
-            {m.milestone}
-          </label>
-
-          {[
-            [m.comesFrom, ins, (a: MapArrow) => a.from],
-            [m.goesTo, outs, (a: MapArrow) => a.to],
-          ].map(([title, list, other]) => (
-            <div key={title as string} className="grid gap-1">
-              <span className={sub}>{title as string}</span>
-              {(list as MapArrow[]).length ? (
-                (list as MapArrow[]).map((a) => (
+          {(
+            [
+              ["in", m.comesFrom, ins, (a: MapArrow) => a.from, m.arrowInAdd],
+              ["out", m.goesTo, outs, (a: MapArrow) => a.to, m.arrowOutAdd],
+            ] as const
+          ).map(([dir, title, list, other, addText]) => (
+            <div key={dir} className="grid gap-1">
+              <span className={sub}>{title}</span>
+              {list.length ? (
+                list.map((a) => (
                   <div key={a.id} className="flex items-center gap-1.5 text-[12.5px]">
                     <span className="flex-1">
-                      {nameOf((other as (a: MapArrow) => string)(a))}
+                      {nameOf(other(a))}
                       {a.label && <span className="ms-1 rounded bg-[var(--surface-2)] px-1 text-[11.5px] font-semibold">{a.label}</span>}
                     </span>
                     {!ro && (
@@ -365,6 +638,36 @@ export function StepPanel({
               ) : (
                 <span className="text-[12.5px] text-[var(--ink-3)]">{m.noArrows}</span>
               )}
+              {!ro &&
+                (arrowAdd?.dir === dir ? (
+                  <div className="grid gap-1.5 rounded-md border border-[var(--line)] px-2 py-2">
+                    <select className={field} value={arrowAdd.other} aria-label={addText} onChange={(e) => setArrowAdd({ ...arrowAdd, other: e.target.value })}>
+                      <option value="">{m.arrowPick}</option>
+                      {steps
+                        .filter((x) => x.id !== step.id)
+                        .map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {stepName(x)}
+                          </option>
+                        ))}
+                    </select>
+                    <input className={field} value={arrowAdd.label} maxLength={60} placeholder={m.connLabelPh} aria-label={m.connLabel} onChange={(e) => setArrowAdd({ ...arrowAdd, label: e.target.value })} />
+                    <div className="flex gap-1.5">
+                      <button type="button" className={btnGold} disabled={!arrowAdd.other} onClick={() => void addArrow()}>
+                        {m.connGo}
+                      </button>
+                      <button type="button" className={btn} onClick={() => setArrowAdd(null)}>
+                        {m.cancel}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <button type="button" className={btn} onClick={() => setArrowAdd({ dir, other: "", label: "" })}>
+                      {addText}
+                    </button>
+                  </div>
+                ))}
             </div>
           ))}
           {!ro && (
@@ -435,15 +738,47 @@ export function StepPanel({
               </div>
             )}
           </div>
-          {handoffsOut.length > 0 && (
+          {(handoffsOut.length > 0 || (!ro && handoffOptions.length > 0)) && (
             <div className="grid gap-1">
               <span className={sub}>{m.handOut}</span>
               {handoffsOut.map((h) => (
-                <span key={h.id} className="text-[12.5px]">
-                  {h.otherProcessCode} · {all.reading.page.step(h.otherStepNumber)}, {h.otherStepLabel}
-                </span>
+                <div key={h.id} className="flex items-center gap-1.5 text-[12.5px]">
+                  <span className="flex-1">
+                    {h.otherProcessCode} · {all.reading.page.step(h.otherStepNumber)}, {h.otherStepLabel}
+                    {h.label && <span className="ms-1 rounded bg-[var(--surface-2)] px-1 text-[11.5px] font-semibold">{h.label}</span>}
+                  </span>
+                  {!ro && (
+                    <button type="button" className={xdel} aria-label={m.removeHand} onClick={() => void run(() => deleteStepHandoff({ workspaceId, processId, handoffId: h.id }))}>
+                      ×
+                    </button>
+                  )}
+                </div>
               ))}
-              <span className="text-[11.5px] text-[var(--ink-3)]">{m.handOutNote}</span>
+              {!ro && handoffOptions.length > 0 && (
+                <div className="flex gap-1.5">
+                  <select className={field} value={handOutPick} aria-label={m.handOut} onChange={(e) => setHandOutPick(e.target.value)}>
+                    <option value="">{m.handOutPick}</option>
+                    {handoffOptions.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.processCode} · {o.number}. {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className={btn}
+                    disabled={!handOutPick}
+                    onClick={() =>
+                      /* the step waiting at the other end belongs to the other process, which the action names as the one being edited */
+                      void run(() => createStepHandoff({ workspaceId, processId: handoffOptions.find((o) => o.id === handOutPick)?.processId ?? processId, fromStepId: step.id, toStepId: handOutPick, label: "" })).then((r) => {
+                        if (r.ok) setHandOutPick("");
+                      })
+                    }
+                  >
+                    {m.handAdd}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -480,23 +815,6 @@ export function StepPanel({
               </div>
             </div>
           )}
-
-          <div className="grid gap-2">
-            <span className={sub}>{m.sop}</span>
-            {(
-              [
-                ["inputs", m.sopInputs],
-                ["output", m.sopOutput],
-                ["errors", m.sopErrors],
-                ["risk", m.sopRisk],
-              ] as const
-            ).map(([k, t]) => (
-              <label key={k} className={lbl}>
-                {t}
-                <textarea className={`${field} min-h-[48px]`} value={sop[k]} disabled={ro} maxLength={2000} onChange={(e) => setSop((x) => ({ ...x, [k]: e.target.value }))} onBlur={saveSop} />
-              </label>
-            ))}
-          </div>
 
           {!ro && (
             <div className="flex flex-wrap gap-1.5">

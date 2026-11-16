@@ -28,6 +28,10 @@ export type SopSource = {
     sopInputs: string | null;
     sopOutput: string | null;
     sopErrors: string | null;
+    escalationNote?: string | null;
+    stepNote?: string | null;
+    /** "No SOP needed for this step": nothing about it is counted as missing. */
+    skipSop?: boolean;
     assignedRole: { name: string } | null;
     slaDays: number | null;
     links: { targetProcess: { code: string; name: string } }[];
@@ -50,6 +54,10 @@ export type SopStep = {
   inputs: string | null;
   output: string | null;
   errors: string | null;
+  /** The office's own words on when and to whom this step escalates; null when none were written. */
+  escalation: string | null;
+  /** The office's notes on the step, whatever its type. */
+  note: string | null;
   /** Approval and time limit, e.g. "Approver: Finance Manager · within 2 days"; null when the step needs none. */
   approval: string | null;
   handoff: string | null;
@@ -110,7 +118,7 @@ export function compileSop(src: SopSource): Sop {
     const output = blank(s.sopOutput);
     const who = s.assignedRole?.name ?? null;
     const missing: SopStep["missing"] = [];
-    if (isWork) {
+    if (isWork && !s.skipSop) {
       if (!who) missing.push("who");
       if (how.length === 0) missing.push("how");
       if (!inputs) missing.push("inputs");
@@ -125,6 +133,8 @@ export function compileSop(src: SopSource): Sop {
       inputs,
       output,
       errors: blank(s.sopErrors),
+      escalation: blank(s.escalationNote ?? null),
+      note: blank(s.stepNote ?? null),
       approval: parts.length ? parts.join(" · ") : null,
       handoff: handoffParts.length ? handoffParts.join("; ") : null,
       handoffIn: inParts.length ? `from ${inParts.join(", ")}` : null,

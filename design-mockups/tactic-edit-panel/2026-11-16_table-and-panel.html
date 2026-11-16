@@ -1,0 +1,294 @@
+<title>Table and Panel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: the Plan page as it is — top bar, tabs, pillar rail, the pillar's two tables — and, with the pen on,
+     the tactics as one line each and the panel beside them. Navy/gold house palette. */
+  :root {
+    --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF; --nav:#0F2240;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --mark:#C58B1E; --cta:#B5471E;
+    --good:#2E7D5B; --bad:#B04434; --bad-bg:#F7E3E0; --bad-tx:#8F3328;
+    --tag-bg:#EEF2F8; --tag-ink:#16325C; --tag-line:#C9D4E6; --shadow:0 10px 30px rgba(15,23,42,.18);
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91;
+    --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --nav:#070F1E; --gold:#D4B468; --gold-deep:#E2C98A; --mark:#D9A441;
+    --bad-bg:#371C1A; --bad-tx:#E79A93; --tag-bg:#1C2A42; --tag-ink:#C9D8F2; --tag-line:#34496E; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark; } }
+  :root[data-theme="dark"] {
+    --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91;
+    --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --nav:#070F1E; --gold:#D4B468; --gold-deep:#E2C98A; --mark:#D9A441;
+    --bad-bg:#371C1A; --bad-tx:#E79A93; --tag-bg:#1C2A42; --tag-ink:#C9D8F2; --tag-line:#34496E; --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark; }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45; }
+  /* the shell */
+  .top { background:var(--nav); color:#fff; display:flex; align-items:center; gap:14px; height:40px; padding-left:max(10px, env(safe-area-inset-left, 0px)); padding-right:max(10px, env(safe-area-inset-right, 0px)); font-size:13px; }
+  .top .home { width:30px; height:30px; border-radius:7px; background:var(--good); display:grid; place-items:center; font-size:14px; }
+  .top b { font-size:14px; padding:0 6px; border-bottom:3px solid var(--gold); line-height:37px; }
+  .top .sw { display:inline-flex; background:rgba(255,255,255,.08); border-radius:6px; padding:2px; }
+  .top .sw span { padding:3px 9px; border-radius:5px; font-weight:700; opacity:.75; } .top .sw span.on { background:rgba(255,255,255,.18); opacity:1; }
+  .top .u { opacity:.75; } .top .u.on { opacity:1; }
+  .tabs { background:var(--surface); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:22px; height:40px; padding-left:max(20px, env(safe-area-inset-left, 0px)); padding-right:max(20px, env(safe-area-inset-right, 0px)); font-weight:700; font-size:13.5px; }
+  .tabs span { color:var(--ink-3); } .tabs span.on { color:var(--ink); border-bottom:3px solid var(--gold); line-height:37px; }
+  .tabs .rep { background:var(--cta); color:#fff; border-radius:7px; padding:5px 12px; font-size:12.5px; }
+  .subrow { display:flex; align-items:center; margin:12px 20px 0; }
+  .subs { display:inline-flex; gap:4px; background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:4px; font-size:12.5px; font-weight:600; }
+  .subs span { padding:4px 12px; border-radius:6px; color:var(--ink-2); } .subs span.on { background:var(--panel); color:var(--panel-ink); }
+  .editbtn { margin-left:auto; font:inherit; font-size:12.5px; font-weight:700; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:6px 14px; cursor:pointer; }
+  .pen-on .editbtn { background:var(--gold); border-color:var(--gold); color:#14161A; }
+  .page { display:grid; grid-template-columns:168px minmax(0,1fr); gap:14px; padding:12px 20px 40px; align-items:start; }
+  .pen-on.panel-open .page { grid-template-columns:168px minmax(0,1fr) 440px; }
+  @media (max-width:1100px) { .page, .pen-on.panel-open .page { grid-template-columns:minmax(0,1fr); } .rail { display:none; } }
+  /* the rail */
+  .rail { display:grid; gap:6px; }
+  .rail .pc { background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:8px 8px 8px 10px; font-size:12px; }
+  .rail .pc.on { border-color:var(--panel); box-shadow:inset 3px 0 0 var(--gold); }
+  .rail .pc .code { font-family:var(--mono); font-size:10px; color:var(--ink-3); display:block; }
+  .rail .pc .nm { display:flex; justify-content:space-between; gap:6px; align-items:flex-start; margin-top:2px; }
+  .rail .pc .nm span { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .rail .pc .yr { font-family:var(--mono); font-size:9.5px; border:1px solid var(--line); border-radius:4px; padding:1px 4px; white-space:nowrap; flex:none; }
+  .rail .pc .st { display:block; color:var(--ink-3); font-size:10.5px; margin-top:4px; }
+  /* the pillar */
+  .pillar { background:var(--surface); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; }
+  .phead { background:var(--surface-2); padding:12px 16px; display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; border-bottom:1px solid var(--line); }
+  .phead .code { font-family:var(--mono); font-size:12px; color:var(--panel); font-weight:700; } .phead h2 { margin:0; font-size:16px; }
+  .phead .kind { margin-left:auto; font-size:11px; border:1px solid var(--line); border-radius:999px; padding:2px 9px; background:var(--surface); }
+  .phead .meta { font-size:11px; color:var(--ink-3); } .phead .meta u { color:var(--gold-deep); }
+  .phead .k { font-size:10px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--ink-3); } .phead .v { font-size:12.5px; }
+  .phead .yrs i { display:inline-block; font-style:normal; font-family:var(--mono); font-size:10px; width:20px; height:18px; line-height:16px; text-align:center; border:1px solid var(--panel); border-radius:5px; margin-left:2px; }
+  .sect { padding:14px 16px 4px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); } .sect .n { color:var(--ink-3); font-weight:600; margin-left:6px; }
+  .scroll { overflow-x:auto; margin:8px 12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:13px; min-width:720px; }
+  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  th + th, td + td { border-left:1px solid var(--line-soft); }
+  thead th { background:var(--panel); color:var(--panel-ink); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; border-bottom:0; }
+  tbody tr:nth-child(even) td { background:var(--zebra); } tbody tr:last-child td { border-bottom:0; }
+  tbody tr.on td { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+  td.idx, th.idx { width:40px; text-align:center; font-family:var(--mono); color:var(--ink-3); } td.idx .grip { color:var(--line); margin-right:3px; }
+  .cc { text-align:center; } .num { text-align:center; font-family:var(--mono); white-space:nowrap; }
+  .tacname { font-weight:650; display:block; } td.outc b { font-weight:650; }
+  .why { display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
+  .pen-on .why { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:360px; }
+  .repnote { display:block; margin-top:6px; padding-left:10px; border-left:2px solid var(--line); font-size:12px; color:var(--ink-3); }
+  .repkey { font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); margin-right:6px; }
+  ul.reqs { margin:3px 0 0; padding-left:16px; color:var(--ink-2); line-height:1.35; }
+  .q { display:inline-flex; gap:3px; } .q i { font-style:normal; font-family:var(--mono); font-size:10.5px; width:18px; height:18px; line-height:16px; text-align:center; border-radius:4px; border:1px solid var(--line); color:var(--ink-3); }
+  .q i.on { border-color:var(--panel); color:var(--panel); font-weight:700; }
+  .kmtag { display:inline-block; font-family:var(--mono); font-size:10.5px; line-height:1; padding:4px 6px; border-radius:5px; background:var(--tag-bg); color:var(--tag-ink); border:1px solid var(--tag-line); white-space:nowrap; font-weight:600; margin:0 3px 0 0; }
+  .kmnums, .kmcount { display:block; margin-top:6px; } .kmcount.none { color:var(--bad-tx); font-style:italic; font-size:11px; }
+  .miss { color:var(--bad); font-style:italic; font-size:12px; } .nobody { color:var(--ink-3); }
+  .otag { display:inline-block; font-family:var(--mono); font-size:9.5px; border:1px solid var(--line); border-radius:4px; padding:1px 4px; margin-right:6px; color:var(--ink-3); }
+  .kmlegend { margin:0 12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2); font-size:12px; color:var(--ink-2); padding:8px 14px; }
+  .outn small { color:var(--ink-3); } .rowtools .x { color:var(--ink-3); cursor:pointer; font-size:14px; padding:0 4px; }
+  .addrow td { color:var(--gold-deep); font-weight:700; cursor:pointer; }
+  .pen-on .tactable tbody tr[data-i] { cursor:pointer; } .pen-on .tactable tbody tr[data-i]:hover td { background:var(--surface-2); }
+  .tactable td .fld.rowfld { width:100%; min-width:180px; font-size:13px; padding:6px 9px; }
+  .tactable td .pick .fld { min-width:150px; font-size:12.5px; padding:5px 8px; }
+  .tactable td .qpick i { width:26px; height:24px; line-height:22px; font-size:11px; }
+  .tactable td.rowout { color:var(--ink-2); min-width:230px; } .tactable td .rowout small { display:block; color:var(--ink-3); font-size:11px; }
+  .tactable td .openb { font:inherit; font-size:11px; font-weight:700; color:var(--gold-deep); background:none; border:1px solid var(--line); border-radius:6px; padding:3px 8px; cursor:pointer; white-space:nowrap; }
+  .tactable tr.on td .openb { background:var(--gold); border-color:var(--gold); color:#14161A; }
+  /* the panel */
+  .side { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); position:sticky; top:12px; max-height:calc(100vh - 24px); display:flex; flex-direction:column; min-width:0; }
+  .side[hidden] { display:none !important; } .backdrop { display:none; }
+  @media (max-width:1100px) {
+    .side { position:fixed; top:0; right:0; bottom:0; left:auto; width:min(440px, 100%); max-height:none; border-radius:0; z-index:60; border:0; border-left:1px solid var(--line); }
+    .backdrop { display:block; position:fixed; inset:0; background:rgba(15,23,42,.35); z-index:50; } .backdrop[hidden] { display:none !important; } }
+  .shead { padding:12px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
+  .shead .k { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-3); white-space:nowrap; } .shead b { font-size:13.5px; min-width:0; }
+  .shead .nav { margin-left:auto; display:flex; gap:4px; }
+  .shead .nav button, .shead .close { font:inherit; font-size:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); border-radius:7px; padding:4px 9px; cursor:pointer; }
+  .shead .close { font-size:16px; line-height:1; padding:3px 8px; }
+  .sbody { overflow:auto; padding:6px 16px 10px; }
+  .sec { padding:12px 0; border-bottom:1px solid var(--line-soft); } .sec:last-child { border-bottom:0; }
+  .sec h3 { margin:0 0 8px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); display:flex; gap:8px; align-items:center; }
+  .sec h3 .hint { font-weight:400; letter-spacing:0; text-transform:none; color:var(--ink-3); font-size:12px; }
+  .bxkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); margin:8px 0 3px; } .bxkey:first-child { margin-top:0; }
+  .fld { font:inherit; font-size:13px; width:100%; border:1px solid var(--field-line); border-radius:8px; padding:7px 10px; background:var(--surface); color:var(--ink); }
+  .fld:focus { outline:2px solid var(--gold); outline-offset:1px; } textarea.fld { resize:none; }
+  .out { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; }
+  .out .oh { display:flex; align-items:center; gap:8px; margin-bottom:6px; } .out .oh .x { margin-left:auto; color:var(--ink-3); cursor:pointer; }
+  .out .grid4 { display:grid; grid-template-columns:1fr 70px 56px 1fr; gap:6px; margin-top:6px; } .out .grid4 .fld { padding:6px 8px; font-size:12.5px; }
+  .out .months { display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-size:12px; color:var(--ink-3); }
+  .out .months i { display:inline-grid; grid-template-columns:repeat(4,4px); gap:2px; } .out .months i b { width:4px; height:4px; background:var(--ink-3); border-radius:1px; }
+  .linkbu { background:none; border:0; font:inherit; font-weight:700; color:var(--gold-deep); text-decoration:underline; cursor:pointer; padding:0; font-size:13px; }
+  .qpick { display:inline-flex; gap:6px; } .qpick i { font-style:normal; font-family:var(--mono); font-size:12px; width:34px; height:28px; line-height:26px; text-align:center; border-radius:6px; border:1px solid var(--field-line); color:var(--ink-2); cursor:pointer; }
+  .qpick i.on { background:var(--gold); border-color:var(--gold); color:#14161A; font-weight:700; }
+  .kmdrop { border:1px solid var(--field-line); border-radius:8px; } .kmdrop summary { list-style:none; display:flex; align-items:center; gap:6px; padding:6px 8px; min-height:32px; cursor:pointer; }
+  .kmdrop summary::-webkit-details-marker { display:none; } .kmdrop .chev { margin-left:auto; width:8px; height:8px; border-right:1.5px solid var(--ink-3); border-bottom:1.5px solid var(--ink-3); transform:rotate(45deg); margin-top:-3px; }
+  .kmdrop label { display:flex; gap:8px; align-items:flex-start; padding:7px 9px; border-top:1px solid var(--line-soft); font-size:12.5px; cursor:pointer; } .kmdrop label:hover { background:var(--surface-2); }
+  .kmdrop input { width:14px; height:14px; margin:2px 0 0; accent-color:var(--panel); }
+  .pick { position:relative; } .pick .chips { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px; }
+  .pick .chip { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:3px 8px; border-radius:999px; background:var(--tag-bg); color:var(--tag-ink); border:1px solid var(--tag-line); } .pick .chip b { cursor:pointer; color:var(--ink-3); }
+  .pick .menu { position:absolute; left:0; right:0; top:100%; z-index:5; background:var(--surface); border:1px solid var(--field-line); border-radius:8px; box-shadow:var(--shadow); max-height:180px; overflow:auto; margin-top:3px; }
+  .pick .menu[hidden] { display:none; } .pick .menu div { padding:6px 10px; font-size:13px; cursor:pointer; } .pick .menu div:hover { background:var(--surface-2); } .pick .menu .none { color:var(--ink-3); font-style:italic; cursor:default; }
+  .sfoot { padding:10px 16px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
+  .sfoot .done { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:8px; font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
+  .toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--panel); color:var(--panel-ink); font-size:12px; padding:6px 12px; border-radius:999px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:70; } .toast.on { opacity:1; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+
+<div class="top"><span class="home">⌂</span><b>Company</b><span class="sw"><span class="on">Units</span><span>Functions</span></span><span class="u">PEC</span><span class="u">O&amp;M</span><span class="u">Geo.Mining</span></div>
+<div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+<div class="subrow"><span class="subs"><span>Foundation</span><span>SWOT</span><span class="on">Plan</span></span><button class="editbtn" id="penbtn" type="button">Edit</button></div>
+
+<div class="page">
+  <div class="rail" id="rail"></div>
+  <div class="pillar">
+    <div class="phead"><span class="code">D002</span><h2>Building Processes, OD &amp; Governance</h2><span class="kind">Direction</span>
+      <span class="meta">Last changed by <b>Islam Saadany</b>, today 18:32 · <u>See history</u> · <u>As it stood on…</u></span>
+      <span class="yrs"><span class="k">Years</span> <i>1</i><i>2</i><i>3</i></span><span><span class="k">Owner</span> <span class="v">Maryam Elnahas</span> · <span class="k">Custodian</span> <span class="v">Sarah Elnahas</span></span></div>
+    <div class="sect">Key measures<span class="n">3</span></div>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Key measure</th><th class="cc">Dir.</th><th class="cc">Target</th><th class="cc">Compiled</th></tr></thead>
+      <tbody id="krows"></tbody></table></div>
+    <div class="sect">Tactics<span class="n" id="tcount">6</span></div>
+    <div class="scroll"><table class="tactable"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
+    <div class="kmlegend">▸ Which number is which key measure</div>
+  </div>
+  <div class="backdrop" id="backdrop" hidden></div>
+  <aside class="side" id="side" hidden>
+    <div class="shead"><span class="k">Tactic <span id="sn">1</span> of <span id="sof">6</span></span><b id="sname"></b>
+      <span class="nav"><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
+      <button class="close" type="button" id="close" title="Close">×</button></div>
+    <div class="sbody" id="sbody"></div>
+    <div class="sfoot"><span>Saves as you type, like the rest of the pen.</span><button class="done" type="button" id="done">Done editing</button></div>
+  </aside>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var KM = [ { n:"SOP coverage across core functions", dir:"≥", t:"70 %", c:"Latest" },
+             { n:"Updated organizational structure approved", dir:"", t:"Yes / No", c:"" },
+             { n:"ERP Phase 1 activated with at least 2 modules going live (e.g., Finance, Inventory).", dir:"≥", t:"100 %", c:"Latest" } ];
+  var PEOPLE = ["Maryam Elnahas", "Sarah Elnahas", "Islam Saadany", "Ahmed Fathy", "Nour Hassan", "Omar Khalil", "Dina Samir"];
+  var T = [
+    { name:"Build company-wide SOP framework", desc:"Document processes across Finance, HR, Procurement, Warehouse, Commercial, and BUs.",
+      outs:[{name:"SOP coverage completed across core functions", target:"70", unit:"%", dir:"≥", compile:"Latest"}], owner:"Sarah Elnahas", col:[], q:[1,1,1,1], km:[0], req:"Process engineer time\nSOP consultant (optional)\nDocumentation tools" },
+    { name:"Begin ERP activation (Phase 1)", desc:"Deploy first modules to unify reporting (Finance, Inventory).",
+      outs:[{name:"ERP Phase 1 activated with at least 2 modules going live (e.g. Finance, Inventory)", target:"100", unit:"%", dir:"≥", compile:"Latest"}], owner:"Sarah Elnahas", col:[], q:[1,1,1,0], km:[], req:"Vendor\nData cleanup\nUser training" },
+    { name:"Build HR & Admin Governance Framework", desc:"", outs:[{name:"HR & Admin Governance Framework Completed and Approved", target:"100", unit:"%", dir:"≥", compile:"Latest"}], owner:"Maryam Elnahas", col:[], q:[1,1,0,0], km:[], req:"" },
+    { name:"Finalize organizational structure", desc:"", outs:[{name:"Approval of the updated organizational structure", target:"Y/N", unit:"", dir:"", compile:""}], owner:"Maryam Elnahas", col:[], q:[1,1,0,0], km:[1], req:"" },
+    { name:"Hire Strategy Deployment Leaders", desc:"", outs:[{name:"Talent Management Manager and Training Academy Manager onboarded", target:"Y/N", unit:"", dir:"", compile:""}], owner:"Maryam Elnahas", col:[], q:[1,1,0,0], km:[], req:"" },
+    { name:"Launch Performance Management Process & Training Needs Analysis", desc:"- Launch first KPI and TNA implementation demo (to be submitted by September 1) - Run second implementation to prepare for end-of-year performance appraisals",
+      outs:[{name:"Performance appraisal submission", target:"80", unit:"%", dir:"≥", compile:"Latest"}, {name:"KPI and TNA submission", target:"60", unit:"%", dir:"≥", compile:"Latest"}], owner:"Maryam Elnahas", col:[], q:[1,1,0,0], km:[], req:"" } ];
+  var RAIL = [["D001","Grow the Core Business","Y1–3",""],["D002","Building Processes, OD & Governance","Y1–3",""],["D003","Launch Training Academy","Y1–3",""],["D004","Establishment of the Best Total Solution Provider","Y1",""],["D005","Standardize Current PEC Offering & Delivery","Y1",""],["D006","Enhance Current Mining Offering & Delivery","Y1",""],["D007","Optimize Current O&M Services","Y1",""],["D008","Enter GCC & African Project Markets","Y2–3","Starts in Year 2"],["D009","Enter KSA & African Mining Markets","Y2–3","Starts in Year 2"],["D010","Enter KSA & African O&M Markets","Y2–3","Starts in Year 2"],["D011","Expand into Non-Cement Industrial Sectors","Y3","Starts in Year 3"],["D012","Expand Across other Minerals Mining","Y3","Starts in Year 3"]];
+  var cur = -1, pen = false;
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function toast(m){ var t = document.getElementById("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("on"); }, 1400); }
+  function qs(t){ return '<span class="q">' + t.q.map(function(v, i){ return '<i class="' + (v ? "on" : "") + '">' + (i + 1) + '</i>'; }).join("") + '</span>'; }
+  function kmTags(t){ return t.km.slice().sort().map(function(i){ return '<span class="kmtag">KM ' + (i + 1) + '</span>'; }).join(""); }
+  function tgt(o){ return o.target === "Y/N" ? 'Yes / No' : (String(o.target).trim() ? esc(o.target) + ' <span style="color:var(--ink-3);font-size:11px">' + esc(o.unit) + '</span>' : '<span class="miss">Missing</span>'); }
+  function reqs(t){ var a = t.req.split(/\r?\n/).map(function(x){ return x.trim(); }).filter(Boolean); return a.length ? '<span class="repnote"><span class="repkey">Requirements</span><ul class="reqs">' + a.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></span>' : ''; }
+  document.getElementById("rail").innerHTML = RAIL.map(function(r){ return '<div class="pc' + (r[0] === "D002" ? " on" : "") + '"><span class="code">' + r[0] + '</span><span class="nm"><span>' + esc(r[1]) + '</span><span class="yr">' + r[2] + '</span></span>' + (r[3] ? '<span class="st">' + r[3] + '</span>' : '') + '</div>'; }).join("");
+  function drawK(){
+    document.getElementById("krows").innerHTML = KM.map(function(m, i){
+      var by = T.map(function(t, k){ return t.km.indexOf(i) >= 0 ? k : -1; }).filter(function(k){ return k >= 0; });
+      return '<tr><td class="idx">' + (i + 1) + '</td><td><b>' + esc(m.n) + '</b>' + (by.length ? '<span class="kmcount">' + by.map(function(k){ return '<span class="kmtag">T' + (k + 1) + '</span>'; }).join("") + '</span>' : '<span class="kmcount none">No tactic supports it yet</span>') + '</td>' +
+        '<td class="cc">' + (m.dir || '<span class="nobody">—</span>') + '</td><td class="num">' + m.t + '</td><td class="cc">' + (m.c || '<span class="nobody">—</span>') + '</td></tr>'; }).join("");
+  }
+  function readRow(t, i){
+    var rs = t.outs.length > 1 ? ' rowspan="' + t.outs.length + '"' : '';
+    var first = '<tr data-i="' + i + '"><td class="idx"' + rs + '>' + (i + 1) + '</td><td' + rs + '><b class="tacname">' + esc(t.name) + '</b>' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') +
+      (t.km.length ? '<span class="kmnums">' + kmTags(t) + '</span>' : '') + reqs(t) + '</td>' +
+      '<td class="outc">' + (t.outs.length > 1 ? '<span class="otag">O1</span>' : '') + '<b>' + (t.outs[0] ? esc(t.outs[0].name) : '<span class="miss">Missing</span>') + '</b></td><td class="num">' + (t.outs[0] ? tgt(t.outs[0]) : '') + '</td>' +
+      '<td' + rs + '>' + (t.owner ? esc(t.owner) : '<span class="miss">Missing</span>') + '</td><td' + rs + '><span class="nobody">' + (t.col.length ? esc(t.col.join(", ")) : '—') + '</span></td><td' + rs + '>' + qs(t) + '</td></tr>';
+    return first + t.outs.slice(1).map(function(o, k){ return '<tr><td class="outc"><span class="otag">O' + (k + 2) + '</span><b>' + esc(o.name) + '</b></td><td class="num">' + tgt(o) + '</td></tr>'; }).join("");
+  }
+  /* the pen row: the name is typed here, the owner picked here, the quarters pressed here;
+     the outcome reads here and is edited in the panel; the rest is the panel's */
+  function penRow(t, i){
+    var n = t.outs.length, miss = t.outs.filter(function(o){ return !String(o.target).trim(); }).length;
+    var o1 = t.outs[0];
+    return '<tr' + (i === cur ? ' class="on"' : '') + ' data-i="' + i + '"><td class="idx"><span class="grip">☰</span>' + (i + 1) + '</td>' +
+      '<td><input class="fld rowfld" data-rowname="' + i + '" value="' + esc(t.name) + '" placeholder="The work itself, as a sentence">' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') + '</td>' +
+      '<td class="rowout">' + (o1 ? esc(o1.name) + (n > 1 ? '<small>and ' + (n - 1) + ' more</small>' : '') + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') : '<span class="miss">Missing</span>') + '</td>' +
+      '<td>' + picker("rowowner" + i, t.owner, false) + '</td>' +
+      '<td><span class="qpick">' + t.q.map(function(v, k){ return '<i class="' + (v ? "on" : "") + '" data-rq="' + i + ':' + k + '">Q' + (k + 1) + '</i>'; }).join("") + '</span></td>' +
+      '<td>' + (t.km.length ? kmTags(t) : '<span class="nobody">—</span>') + '</td>' +
+      '<td><span class="rowtools"><button type="button" class="openb" data-open="' + i + '">Details</button><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
+  }
+  function drawRows(){
+    document.body.classList.toggle("pen-on", pen);
+    document.getElementById("penbtn").textContent = pen ? "Done editing" : "Edit";
+    document.getElementById("thead").innerHTML = pen
+      ? '<tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th>Key measures</th><th></th></tr>'
+      : '<tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr>';
+    var tb = document.getElementById("rows");
+    tb.innerHTML = T.map(pen ? penRow : readRow).join("") + (pen ? '<tr class="addrow"><td colspan="8" id="add">+ Add a tactic</td></tr>' : '');
+    document.getElementById("tcount").textContent = T.length;
+    drawK();
+    if (!pen) return;
+    tb.querySelectorAll("tr[data-i]").forEach(function(r){ r.addEventListener("click", function(e){ if (e.target.closest(".x, input, select, .pick, .qpick, label")) return; open(+r.dataset.i); }); });
+    tb.querySelectorAll("[data-rowname]").forEach(function(f){ f.addEventListener("input", function(){ T[+f.dataset.rowname].name = f.value; var h = document.getElementById("sname"); if (cur === +f.dataset.rowname && h) h.textContent = f.value || "New tactic"; }); f.addEventListener("change", function(){ toast("Saved"); }); });
+    tb.querySelectorAll("[data-rq]").forEach(function(q){ q.addEventListener("click", function(e){ e.stopPropagation(); var a = q.dataset.rq.split(":"), t = T[+a[0]]; t.q[+a[1]] = t.q[+a[1]] ? 0 : 1; q.classList.toggle("on"); toast("Saved"); }); });
+    T.forEach(function(t, i){ if (document.getElementById("rowowner" + i)) wirePicker("rowowner" + i, function(){ return t.owner; }, function(v){ t.owner = v; }, false); });
+    tb.querySelectorAll("[data-x]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); var i = +b.dataset.x; T.splice(i, 1);
+      if (cur === i) cur = Math.min(i, T.length - 1); else if (cur > i) cur--; if (cur < 0) close(); else open(cur); toast("Tactic removed"); }); });
+    document.getElementById("add").addEventListener("click", function(){ T.push({ name:"", desc:"", outs:[], owner:"", col:[], q:[0,0,0,0], km:[], req:"" }); open(T.length - 1); setTimeout(function(){ var f = document.querySelector('[data-rowname="' + (T.length - 1) + '"]'); if (f) f.focus(); }, 0); });
+  }
+  function picker(id, chosen, many){
+    var vals = many ? chosen.slice() : (chosen ? [chosen] : []);
+    return '<div class="pick" id="' + id + '">' + (many ? '<div class="chips">' + vals.map(function(v){ return '<span class="chip">' + esc(v) + '<b data-rm="' + esc(v) + '" title="Remove">×</b></span>'; }).join("") + '</div>' : '') +
+      '<input class="fld" placeholder="' + (many ? "Type a name to add" : "Type a name") + '" value="' + (many ? "" : esc(vals[0] || "")) + '" autocomplete="off"><div class="menu" hidden></div></div>';
+  }
+  function wirePicker(id, get, set, many){
+    var box = document.getElementById(id), inp = box.querySelector("input"), menu = box.querySelector(".menu");
+    function show(){ var q = inp.value.trim().toLowerCase(), have = many ? get() : [];
+      var hits = PEOPLE.filter(function(p){ return have.indexOf(p) < 0 && (!q || p.toLowerCase().indexOf(q) >= 0); });
+      menu.innerHTML = hits.length ? hits.map(function(p){ return '<div data-p="' + esc(p) + '">' + esc(p) + '</div>'; }).join("") : '<div class="none">Nobody in the register matches</div>';
+      menu.hidden = false; menu.querySelectorAll("[data-p]").forEach(function(d){ d.addEventListener("mousedown", function(e){ e.preventDefault(); choose(d.dataset.p); }); }); }
+    function choose(p){ if (many) { set(get().concat([p])); inp.value = ""; } else { set(p); inp.value = p; } menu.hidden = true; toast("Saved"); drawRows(); if (many) drawPanel(); }
+    inp.addEventListener("focus", function(){ if (!many) inp.select(); show(); }); inp.addEventListener("input", show);
+    inp.addEventListener("blur", function(){ menu.hidden = true; if (!many) { var v = inp.value.trim(); if (!v) { set(""); drawRows(); } else if (PEOPLE.indexOf(v) < 0) inp.value = get() || ""; } });
+    inp.addEventListener("keydown", function(e){ if (e.key === "Enter") { var f = menu.querySelector("[data-p]"); if (f) choose(f.dataset.p); e.preventDefault(); } });
+    box.querySelectorAll("[data-rm]").forEach(function(b){ b.addEventListener("click", function(){ set(get().filter(function(x){ return x !== b.dataset.rm; })); drawRows(); drawPanel(); toast("Saved"); }); });
+  }
+  function sel(opts, val, extra){ return '<select class="fld"' + (extra || "") + '>' + opts.map(function(o){ return '<option' + (o === val ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join("") + '</select>'; }
+  function drawPanel(){
+    var t = T[cur], sb = document.getElementById("sbody");
+    document.getElementById("sn").textContent = cur + 1; document.getElementById("sof").textContent = T.length;
+    document.getElementById("sname").textContent = t.name || "New tactic";
+    sb.innerHTML =
+      '<div class="sec"><h3>Description</h3><textarea class="fld" id="f-desc" rows="2" placeholder="One sentence under the tactic">' + esc(t.desc) + '</textarea></div>' +
+      '<div class="sec"><h3>Outcomes <span class="hint">what it should leave behind</span></h3>' +
+        t.outs.map(function(o, k){ var yn = o.target === "Y/N";
+          return '<div class="out"><div class="oh"><span class="kmtag">O' + (k + 1) + '</span><input class="fld" data-o="' + k + '" data-f="name" value="' + esc(o.name) + '" placeholder="What it should produce" style="flex:1">' + (k ? '<span class="x" data-ox="' + k + '" title="Remove this outcome">×</span>' : '') + '</div>' +
+            '<div class="grid4"><input class="fld" data-o="' + k + '" data-f="target" value="' + esc(yn ? "Yes / No" : o.target) + '" placeholder="Target"><input class="fld" data-o="' + k + '" data-f="unit" value="' + esc(o.unit) + '" placeholder="Unit"' + (yn ? ' disabled' : '') + '>' +
+            sel(["≥","≤"], o.dir, ' data-o="' + k + '" data-f="dir"' + (yn ? ' disabled' : '')) + sel(["—","Latest","Sum","Count","Average"], o.compile || "—", ' data-o="' + k + '" data-f="compile"' + (yn ? ' disabled' : '')) + '</div>' +
+            (yn ? '' : String(o.target).trim() ? '<span class="months"><i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i> by month or by quarter</span>' : '<span class="miss">Target missing</span>') + '</div>';
+        }).join("") + '<button class="linkbu" type="button" id="addout">+ Add an outcome</button></div>' +
+      '<div class="sec"><h3>Collaborators <span class="hint">the people supporting the owner</span></h3>' + picker("f-col", t.col, true) + '</div>' +
+      '<div class="sec"><h3>Key measures <span class="hint">which ones it supports</span></h3><details class="kmdrop"><summary><span id="kmsum">' + (t.km.length ? kmTags(t) : '<span class="nobody" style="font-size:12.5px">Pick key measures</span>') + '</span><span class="chev"></span></summary>' +
+        KM.map(function(m, i){ return '<label><input type="checkbox" data-km="' + i + '"' + (t.km.indexOf(i) >= 0 ? ' checked' : '') + '><span class="kmtag">KM ' + (i + 1) + '</span> ' + esc(m.n) + '</label>'; }).join("") + '</details></div>' +
+      '<div class="sec"><h3>Requirements <span class="hint">what it needs, one per line</span></h3><textarea class="fld" id="f-req" rows="3" placeholder="One per line">' + esc(t.req) + '</textarea></div>';
+    var live = function(){ drawRows(); document.getElementById("sname").textContent = t.name || "New tactic"; };
+    document.getElementById("f-desc").addEventListener("input", function(e){ t.desc = e.target.value; var r = document.querySelector('#rows tr[data-i="' + cur + '"] td:nth-child(2)'); if (r) { var w = r.querySelector('.why'); if (!w && e.target.value) { w = document.createElement('span'); w.className = 'why'; r.appendChild(w); } if (w) { w.textContent = e.target.value; if (!e.target.value) w.remove(); } } });
+    document.getElementById("f-req").addEventListener("input", function(e){ t.req = e.target.value; });
+    wirePicker("f-col", function(){ return t.col; }, function(v){ t.col = v; }, true);
+    sb.querySelectorAll("[data-km]").forEach(function(c){ c.addEventListener("change", function(){ var i = +c.dataset.km, at = t.km.indexOf(i); if (c.checked && at < 0) t.km.push(i); if (!c.checked && at >= 0) t.km.splice(at, 1);
+      document.getElementById("kmsum").innerHTML = t.km.length ? kmTags(t) : '<span class="nobody" style="font-size:12.5px">Pick key measures</span>'; live(); toast("Saved"); }); });
+    sb.querySelectorAll("[data-o]").forEach(function(f){ f.addEventListener(f.tagName === "SELECT" ? "change" : "input", function(){ var o = t.outs[+f.dataset.o]; if (o.target === "Y/N" && f.dataset.f === "target") { if (/^yes\s*\/\s*no$/i.test(f.value)) return; } o[f.dataset.f] = f.value === "—" ? "" : f.value; drawRows(); }); });
+    sb.querySelectorAll("[data-ox]").forEach(function(x){ x.addEventListener("click", function(){ t.outs.splice(+x.dataset.ox, 1); drawRows(); drawPanel(); toast("Outcome removed"); }); });
+    document.getElementById("addout").addEventListener("click", function(){ t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); drawRows(); drawPanel(); var last = sb.querySelectorAll('[data-f="name"]'); last[last.length - 1].focus(); });
+  }
+  function open(i){ cur = i; document.getElementById("side").hidden = false; document.getElementById("backdrop").hidden = false; document.body.classList.add("panel-open"); drawRows(); drawPanel(); }
+  function close(){ cur = -1; document.getElementById("side").hidden = true; document.getElementById("backdrop").hidden = true; document.body.classList.remove("panel-open"); drawRows(); }
+  function penOn(){ pen = true; if (T.length) open(0); else drawRows(); window.scrollTo({ top: 0 }); }
+  document.addEventListener("click", function(e){ var b = e.target.closest && e.target.closest("[data-open]"); if (b) { e.stopPropagation(); open(+b.dataset.open); } }, true);
+  function penOff(){ pen = false; close(); toast("Done editing"); }
+  document.getElementById("penbtn").addEventListener("click", function(){ pen ? penOff() : penOn(); });
+  document.getElementById("prev").addEventListener("click", function(){ open((cur - 1 + T.length) % T.length); });
+  document.getElementById("next").addEventListener("click", function(){ open((cur + 1) % T.length); });
+  document.getElementById("close").addEventListener("click", close);
+  document.getElementById("done").addEventListener("click", penOff);
+  document.getElementById("backdrop").addEventListener("click", close);
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && cur >= 0) close(); });
+  drawRows();
+})();
+</script>

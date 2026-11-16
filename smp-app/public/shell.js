@@ -29068,9 +29068,49 @@ function setOr(row, field, v){
    eighty letters, and written out they buried the reported note. The data
    helpers sit in config-data.js beside the requirements' (§415). */
 function kmTag(n, name, kind){
-  return '<span class="kmtag ' + (kind === "t" ? "t" : "m") + '" title="' + esc(name || "") + '" tabindex="0">' +
+  return '<span class="kmtag ' + (kind === "t" ? "t" : "m") + '" data-name="' + esc(name || "") +
+    '" aria-label="' + esc(name || "") + '" tabindex="0">' +
     (kind === "t" ? "T" + n : "KM " + n) + '</span>';
 }
+/* §767.1: THE NAME SHOWS THE MOMENT THE POINTER TOUCHES THE TAG. Islam: *"the
+   message appear slowly on hovering it needs to appear quicker"* — it was the
+   browser's own `title` tooltip, which waits about a second by a rule no page
+   can change. So the tag carries the name in `data-name` and ONE floating
+   label, made once and moved, is shown on mouseover and on keyboard focus,
+   below the tag (above it when the tag sits near the foot of the window),
+   fixed to the viewport so the table's own scroll box cannot clip it. One
+   listener on the document, so a tag drawn by any surface — the Plan page,
+   Performance, the readers' view — is covered without a wire per paint. */
+(function(){
+  if (typeof document === "undefined") return;
+  var tip = null;
+  function tagOf(e){
+    var t = e.target;
+    return t && t.closest ? t.closest(".kmtag[data-name]") : null;
+  }
+  function show(el){
+    var name = el.getAttribute("data-name");
+    if (!name) return;
+    if (!tip) {
+      tip = document.createElement("div");
+      tip.className = "kmtip"; tip.setAttribute("role", "tooltip");
+      document.body.appendChild(tip);
+    }
+    tip.textContent = name;
+    tip.classList.add("on");
+    var r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+    var top = r.bottom + 6;
+    if (top + h > window.innerHeight - 8) top = r.top - 6 - h;
+    tip.style.left = left + "px"; tip.style.top = top + "px";
+  }
+  function hide(){ if (tip) tip.classList.remove("on"); }
+  document.addEventListener("mouseover", function(e){ var t = tagOf(e); if (t) show(t); });
+  document.addEventListener("mouseout",  function(e){ if (tagOf(e)) hide(); });
+  document.addEventListener("focusin",   function(e){ var t = tagOf(e); if (t) show(t); });
+  document.addEventListener("focusout",  function(e){ if (tagOf(e)) hide(); });
+  document.addEventListener("scroll", hide, true);
+})();
 function supportsLine(t, p){
   var s = supportsOf(t, p);
   if (!s.length) return '';
@@ -29101,11 +29141,25 @@ function supportsLegend(p){
    and on a checkbox a change is exactly one toggle (§71.2: written and
    saved, not repainted). Emptied, the key is deleted (§50.6). A pillar with
    no measure yet has nothing to offer and says so. */
+/* §767.2: A CLOSED BOX THAT OPENS TO THE TICKS. Islam: *"the boxes with the
+   list of key measures is taking a lot of space for the row. shall we make it
+   a checkbox drop down?"* The list is now inside a `<details>`: closed, one
+   line showing the chosen tags (or "Pick key measures"); open, the same tick
+   list, in the flow of the row rather than floating over it, so the table's
+   scroll box can never clip the last tactic's list. The summary's tags are
+   redrawn on each tick by the document listener below (§71.2: the pen does
+   not repaint on a change), and an open box closes on a click elsewhere. */
+function supportsSummary(t, p){
+  var s = supportsOf(t, p);
+  return s.length ? s.map(function(x){ return '<span class="kmtag m">KM ' + x.n + '</span>'; }).join('')
+                  : '<span class="kmnone">Pick ' + L("measure").toLowerCase() + '</span>';
+}
 function supportsEdit(t, p){
   var ms = (p && p.measures) || [], have = supportsIds(t);
   return '<span class="kmpick">' + bxkey("Supports these " + L("measure").toLowerCase()) +
     (ms.length
-      ? '<span class="kmlist" role="group" aria-label="' + L("measure") + ' this ' + L1("tactic").toLowerCase() + ' supports">' +
+      ? '<details class="kmdrop"><summary><span class="kmsum">' + supportsSummary(t, p) + '</span><span class="kmchev" aria-hidden="true"></span></summary>' +
+        '<span class="kmlist" role="group" aria-label="' + L("measure") + ' this ' + L1("tactic").toLowerCase() + ' supports">' +
         ms.map(function(m, i){
           var i2 = FIELDS.push(function(){
             var ids = supportsIds(t), id = String(m.id);
@@ -29115,10 +29169,28 @@ function supportsEdit(t, p){
             (m.id == null ? ' disabled' : '') +
             (m.id != null && have.indexOf(String(m.id)) >= 0 ? ' checked' : '') + '>' +
             '<span class="kmtag m">KM ' + (i + 1) + '</span><span class="kmname">' + esc(m.name || "") + '</span></label>';
-        }).join('') + '</span>'
+        }).join('') + '</span></details>'
       : '<span class="why">No ' + L("measure").toLowerCase() + ' on this ' + L1("pillar").toLowerCase() + ' yet</span>') +
     '</span>';
 }
+/* §767.2: the closed line follows the ticks, and a box left open closes when
+   the click lands anywhere else (one listener, every pen). */
+(function(){
+  if (typeof document === "undefined") return;
+  document.addEventListener("change", function(e){
+    var d = e.target && e.target.closest ? e.target.closest(".kmdrop") : null;
+    if (!d) return;
+    var on = Array.prototype.filter.call(d.querySelectorAll(".kmlist input"), function(i){ return i.checked; })
+      .map(function(i){ return i.closest("label").querySelector(".kmtag").outerHTML; });
+    var sum = d.querySelector(".kmsum");
+    if (sum) sum.innerHTML = on.length ? on.join("") : '<span class="kmnone">Pick ' + L("measure").toLowerCase() + '</span>';
+  });
+  document.addEventListener("click", function(e){
+    document.querySelectorAll("details.kmdrop[open]").forEach(function(d){
+      if (!d.contains(e.target)) d.removeAttribute("open");
+    });
+  });
+})();
 /* The outcome's four controls, in ONE cell and ONE grid (Islam: "the 4 boxes
    should be the same size ... so we can give space for the other columns").
    Equal boxes sized by what the compile select needs for its longest word, so

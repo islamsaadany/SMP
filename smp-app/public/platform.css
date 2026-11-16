@@ -8755,6 +8755,11 @@ td .reqbox textarea.reqfld { width:100%; box-sizing:border-box; margin-top:3px; 
   border-radius:5px; background:var(--surface-2); color:var(--stone); border:1px solid var(--line);
   white-space:nowrap; cursor:default; font-weight:600; }
 .kmtag:hover, .kmtag:focus-visible { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); outline:0; }
+/* §767.1: the tag's name, shown at once (the browser's own tooltip waits a second). */
+.kmtip { position:fixed; z-index:9999; display:none; max-width:380px; padding:7px 11px; border-radius:var(--r);
+  background:var(--panel); color:var(--panel-ink); font-size:12.5px; line-height:1.4; box-shadow:var(--shadow-md);
+  pointer-events:none; white-space:normal; }
+.kmtip.on { display:block; }
 td .kmnums { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:6px; }
 td .kmcount { display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:4px; font-size:11px; color:var(--ink-3); }
 td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
@@ -8767,7 +8772,17 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .kmlegend .kmrows { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; padding:2px 14px 12px; }
 .kmlegend .kmrows .kmtag { align-self:start; }
 td .kmpick { display:block; margin-top:8px; }
-td .kmlist { display:block; border:1px solid var(--field-line); border-radius:var(--r); overflow:hidden; background:var(--surface); }
+/* §767.2: the closed box, one line; the ticks open under it in the flow. */
+td .kmdrop { display:block; border:1px solid var(--field-line); border-radius:var(--r); background:var(--surface); }
+td .kmdrop summary { display:flex; align-items:center; gap:6px; padding:6px 8px; cursor:pointer; list-style:none; min-height:32px; }
+td .kmdrop summary::-webkit-details-marker { display:none; }
+td .kmdrop .kmsum { display:flex; flex-wrap:wrap; gap:4px; flex:1 1 auto; min-width:0; }
+td .kmdrop .kmnone { color:var(--ink-3); font-size:12.5px; }
+td .kmdrop .kmchev { flex:none; width:8px; height:8px; border-right:1.5px solid var(--ink-3); border-bottom:1.5px solid var(--ink-3);
+  transform:rotate(45deg); margin:-3px 4px 0 0; }
+td .kmdrop[open] .kmchev { transform:rotate(-135deg); margin-top:3px; }
+td .kmdrop[open] summary { border-bottom:1px solid var(--line-soft); }
+td .kmlist { display:block; background:var(--surface); }
 td .kmlist label { display:flex; gap:8px; align-items:flex-start; padding:6px 8px; border-bottom:1px solid var(--line-soft);
   cursor:pointer; font-size:12.5px; line-height:1.35; font-weight:400; color:var(--ink); }
 td .kmlist label:last-child { border-bottom:0; }

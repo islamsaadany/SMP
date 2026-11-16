@@ -681,7 +681,11 @@
    supports, by number; the built platform file changed. */
 /* v7.75-weighting-off — §768: the weighting is off for every client;
    the built platform file changed. */
-const SHELL = "smp-shell-v7.76-weighting-default-off";
+/* v7.77-measures-dropdown — §767–§767.2: a tactic names the key measures
+   it supports, by number; past main's v7.75 at the merge. */
+/* v7.78-weighting-default-off — §769: the weighting stays in Setup, off by
+   default; past main's v7.77 at the merge. */
+const SHELL = "smp-shell-v7.78-weighting-default-off";
 const ASSETS = [
   "/",
   "/index.html",

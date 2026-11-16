@@ -679,11 +679,11 @@
    held, never disabled, and says why in the platform's bubble. */
 /* v7.74-tactic-supports — §767: a tactic names the key measures it
    supports, by number; the built platform file changed. */
-/* v7.75-tag-name-at-once — §767.1: the tag's name shows the moment the
-   pointer arrives, in the platform's own label. */
-/* v7.76-measures-dropdown — §767.2: the pen's tick list is a closed box
-   that opens to the ticks. */
-const SHELL = "smp-shell-v7.76-measures-dropdown";
+/* v7.75-weighting-off — §768: the weighting is off for every client;
+   the built platform file changed. */
+/* v7.77-measures-dropdown — §767–§767.2: a tactic names the key measures
+   it supports, by number; past main's v7.75 at the merge. */
+const SHELL = "smp-shell-v7.77-measures-dropdown";
 const ASSETS = [
   "/",
   "/index.html",

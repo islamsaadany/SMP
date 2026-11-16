@@ -1923,7 +1923,7 @@ function unitsTable(keys){
     var u = UNITS[k], ko = unitObjectives(u), r = unitRatio(u);
     return '<tr><td><button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>' +
       (u.real ? '' : '<span class="why">illustrative</span>') + '</td>' +
-      '<td class="num">' + u.weight + '%</td>' +
+      (weightingOn() ? '<td class="num">' + u.weight + '%</td>' : '') +
       /* §405: a unit that plans otherwise counts no pillars. */
       '<td class="num">' + (unitOwnWay(u) ? '&mdash;' : u.items.length) + '</td>' +
       '<td class="num">' + pct(r) + '</td>' +
@@ -1931,7 +1931,7 @@ function unitsTable(keys){
       '<td class="num final" style="color:' + bandInk(ko) + '">' + pct(ko) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
-    '<th style="width:30%">' + L1("unitword") + '</th><th class="num">Weight</th>' +
+    '<th style="width:30%">' + L1("unitword") + '</th>' + (weightingOn() ? '<th class="num">Weight</th>' : '') +
     '<th class="num">' + L("pillar","bu") + '</th><th class="num">Execution of plan</th>' +
     '<th class="num">Var.</th><th class="num">Objectives</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -2306,7 +2306,9 @@ function computeWeights(){
   var anySet = us.some(function(u){
     return w.factors.some(function(f){ return num(u[f.key]) != null; });
   });
-  if (!anySet) {
+  /* §768: and the same answer while the feature is off — every unit counts
+     the same, whatever the stored rows say; they are kept, not read. */
+  if (!anySet || !weightingOn()) {
     var even = us.map(function(){ return Math.floor(100 / (us.length || 1)); });
     return { shares: sh, composite: settle(even), entered: false };
   }
@@ -2460,8 +2462,8 @@ function unitCards(keys){
           '<td class="num">' + tgtShown(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + pct(measureScore(m)) + '</td></tr>';
       }).join("")) +
-      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its ' + L("keyobj") + '. Contributes at <b>' +
-      u.weight + '%</b> weight to the group.</p>' +
+      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its ' + L("keyobj") + '.' +
+      (weightingOn() ? ' Contributes at <b>' + u.weight + '%</b> weight to the group.' : '') + '</p>' +
       (unitOwnWay(u)
         /* §405: its pillars are hidden and kept; what explains its number is
            the way it plans, said in one line rather than an empty table. */
@@ -2490,7 +2492,7 @@ function unitCards(keys){
       unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
     return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
       splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
-        u.weight + "% weight &middot; " + unitPlanCountWord(k) + (u.real ? "" : " &middot; illustrative"),
+        (weightingOn() ? u.weight + "% weight &middot; " : "") + unitPlanCountWord(k) + (u.real ? "" : " &middot; illustrative"),
         unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name,
         arranging("group") ? handle("Reorder " + u.name) : '',
         /* §405: its execution is already a reading against what was due, so
@@ -2585,38 +2587,43 @@ function renderCompanyPerformance(coKey){
       pl = companyPlan(ck), r = companyRatio(ck);
   var share = companyWeight(ck);
 
-  var perfDrill = miniTable([L1("unitword"), "Objectives performance", "Weight in " + esc(co.name), "Weighted contribution"],
+  /* §768: the weight column, its footer and its sentence go while the
+     feature is off; the contribution column stays, every unit counting equally. */
+  var wOn = weightingOn(), wCol = function(v){ return wOn ? '<td class="num">' + v + '</td>' : ''; };
+  var perfDrill = miniTable([L1("unitword"), "Objectives performance"].concat(wOn ? ["Weight in " + esc(co.name)] : []).concat(["Weighted contribution"]),
     keys.map(function(k){
       var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
         '<td class="num">' + pct(unitObjectives(u)) + '</td>' +
-        '<td class="num">' + w + '%</td>' +
+        wCol(w + '%') +
         '<td class="num">' + (unitObjectives(u) == null ? "&mdash;"
           : (Math.round(unitObjectives(u) * w) / 100).toFixed(1)) + '</td></tr>';
     }).join("") +
     '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td>' +
-    '<td class="num">100%</td><td class="num"><b>' + pct(perf) + '</b></td></tr>') +
-    '<p class="sub">Each unit\u2019s own ' + L("keyobj","bu") + ', weighted by the weight it ' +
+    wCol('100%') + '<td class="num"><b>' + pct(perf) + '</b></td></tr>') +
+    (wOn ? '' : '<p class="sub">Each unit\u2019s own ' + L("keyobj","bu") + ', every unit counting equally.</p>') +
+    (!wOn ? '' : '<p class="sub">Each unit\u2019s own ' + L("keyobj","bu") + ', weighted by the weight it ' +
     'already carries at group level and <b>re-normalised</b> so this company\u2019s units sum ' +
     'to 100%. Nothing is weighted twice and nothing is set here \u2014 the weights are composed ' +
-    'on the group\u2019s <b>Weighting</b> tab.</p>';
+    'on the group\u2019s <b>Weighting</b> tab.</p>');
 
-  var execDrill = miniTable([L1("unitword"), "Of plan", "Weight in " + esc(co.name), "Delivered", "Planned", "Var."],
+  var execDrill = miniTable([L1("unitword"), "Of plan"].concat(wOn ? ["Weight in " + esc(co.name)] : []).concat(["Delivered", "Planned", "Var."]),
     keys.map(function(k){
       var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
         '<td class="num">' + pct(unitRatio(u)) + '</td>' +
-        '<td class="num">' + w + '%</td>' +
+        wCol(w + '%') +
         '<td class="num">' + pct(unitExec(u)) + '</td>' +
         '<td class="num">' + pct(unitPlan(u)) + '</td>' +
         '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td></tr>';
     }).join("") +
     '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td>' +
-    '<td class="num"><b>' + pct(r) + '</b></td><td class="num">100%</td>' +
+    '<td class="num"><b>' + pct(r) + '</b></td>' + wCol('100%') +
     '<td class="num"><b>' + pct(ex) + '</b></td><td class="num"><b>' + pct(pl) + '</b></td>' +
     '<td class="num"><b>' + varCell(ex, pl) + '</b></td></tr>') +
-    '<p class="sub">' + L1("tactic") + ' completion under every ' + L1("pillar") + ' in these units, weighted identically ' +
-    'to performance; the company\u2019s figure is the weighted average of the <b>Of plan</b> column. ' +
+    '<p class="sub">' + L1("tactic") + ' completion under every ' + L1("pillar") + ' in these units' +
+    (wOn ? ', weighted identically to performance; the company\u2019s figure is the weighted average of the <b>Of plan</b> column. '
+         : '; the company\u2019s figure is the average of the <b>Of plan</b> column, every unit counting equally. ') +
     'The planned line is derived from each ' + L1("tactic") + '\u2019s quarter span, never ' +
     'entered.</p>';
 
@@ -2698,34 +2705,37 @@ function renderGroupPerformance(){
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
       pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
 
-  var perfDrill = miniTable([L1("unitword"),"Objectives performance","Weight","Weighted contribution"],
+  /* §768: as on a company's drills — no weight column while the feature is off. */
+  var wOn = weightingOn(), wCol = function(v){ return wOn ? '<td class="num">' + v + '</td>' : ''; };
+  var perfDrill = miniTable([L1("unitword"),"Objectives performance"].concat(wOn ? ["Weight"] : []).concat(["Weighted contribution"]),
     keys.map(function(k){
       var u = UNITS[k];
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
         '<td class="num">' + unitObjectives(u) + '%</td>' +
-        '<td class="num">' + u.weight + '%</td>' +
+        wCol(u.weight + '%') +
         '<td class="num">' + (Math.round(unitObjectives(u) * u.weight) / 100).toFixed(1) + '</td></tr>';
     }).join("") +
-    '<tr style="background:var(--surface-2)"><td><b>Group</b></td><td></td><td class="num">100%</td>' +
+    '<tr style="background:var(--surface-2)"><td><b>Group</b></td><td></td>' + wCol('100%') +
     '<td class="num"><b>' + groupUnitsObjectives() + '%</b></td></tr>') +
-    '<p class="sub">Each unit\'s own ' + L("keyobj") + ' &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>';
+    (wOn ? '<p class="sub">Each unit\'s own ' + L("keyobj") + ' &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>'
+         : '<p class="sub">Each unit\'s own ' + L("keyobj") + ', every unit counting equally.</p>');
 
-  var execDrill = miniTable([L1("unitword"),"Of plan","Weight","Delivered","Planned","Variance"],
+  var execDrill = miniTable([L1("unitword"),"Of plan"].concat(wOn ? ["Weight"] : []).concat(["Delivered","Planned","Variance"]),
     keys.map(function(k){
       var u = UNITS[k];
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
         '<td class="num">' + unitRatio(u) + '%</td>' +
-        '<td class="num">' + u.weight + '%</td>' +
+        wCol(u.weight + '%') +
         '<td class="num">' + unitExec(u) + '%</td>' +
         '<td class="num">' + unitPlan(u) + '%</td>' +
         '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td></tr>';
     }).join("") +
     '<tr style="background:var(--surface-2)"><td><b>Group</b></td>' +
-    '<td class="num"><b>' + groupRatio() + '%</b></td><td class="num">100%</td>' +
+    '<td class="num"><b>' + groupRatio() + '%</b></td>' + wCol('100%') +
     '<td class="num"><b>' + groupExec() + '%</b></td>' +
     '<td class="num"><b>' + groupPlan() + '%</b></td>' +
     '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
-    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + ', weighted identically to performance. The group\'s figure is the weighted average of the <b>Of plan</b> column. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
+    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + (wOn ? ', weighted identically to performance. The group\'s figure is the weighted average of the <b>Of plan</b> column.' : '. The group\'s figure is the average of the <b>Of plan</b> column, every unit counting equally.') + ' The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var units = unitCards(keys);
 
@@ -3696,7 +3706,7 @@ function renderUnitPerformance(u){
     '<p class="sub">' + (ws
       ? 'Weighted mean across <b>' + u.keyObjectives.length + '</b> objectives: <b>' + ko + '%</b>. Weights are set on the unit\'s Foundation.'
       : 'Mean across <b>' + u.keyObjectives.length + '</b> objectives, equally weighted: <b>' + ko + '%</b>.') +
-    ' This unit contributes at <b>' + u.weight + '%</b> weight to the group figure.</p>';
+    (weightingOn() ? ' This unit contributes at <b>' + u.weight + '%</b> weight to the group figure.' : '') + '</p>';
 
   /* ── THE THIRD NUMBER (§64) ────────────────────────────────────────
      Islam: "add to the 2 main numbers of the objectives and the execution a
@@ -7277,7 +7287,7 @@ function renderFocusBoard(){
       totals[st.key]++; totals.total++;
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
         (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
-                   (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
+                   (u ? (weightingOn() ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>' : '')
                       : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
                         (boxRef(sub.key).kind === "cap"

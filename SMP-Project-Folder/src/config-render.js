@@ -1537,7 +1537,8 @@ function unitCompanySelect(k, u){
    says what it keeps, so it never looks like a delete. */
 function weightingSwitch(){
   var on = weightingOn();
-  if (!inOffice()) return '';
+  /* §768: no control for a feature that is off everywhere. */
+  if (!inOffice() || !SMPRules.WEIGHTING) return '';
   PAGE_ACTS +=
     '<span class="segsw" role="group" aria-label="Weighting page on or off">' +
       '<button type="button" class="seg' + (on ? ' on' : '') + '" data-weightswitch="1" ' +
@@ -1558,7 +1559,10 @@ TABLECOLS.define("units", [
   { k:"idx", fixed:true },
   { k:"name", lock:true, label:function(){ return labelWord("unitword", "bu"); } },
   { k:"nav", label:"In navigation" }, { k:"code", label:"Code" }, { k:"plans", label:"Plans in" },
-  { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } }, { k:"weight", label:"Weight" },
+  { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
+  /* §768: the Weight column goes with the feature; `offered` is what keeps
+     the declaration and the drawing in step. */
+  { k:"weight", label:"Weight", offered:function(){ return SMPRules.WEIGHTING; } },
   { k:"division", label:function(){ return labelWord("division", "group"); } },
   { k:"head", label:"BU head" }, { k:"custodian", label:"Strategy custodian" },
   { k:"status", label:"Status" }, { k:"menu", fixed:true }
@@ -1599,7 +1603,7 @@ function renderUnits(){
       ocell("units", k, "plans", may, unitPlansInCell(k, u),
         function(){ return unitFormatSelect(k, u); }, "cc plansin") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
-      '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
+      (SMPRules.WEIGHTING ? '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' : '') +
       /* A unit belongs to a company or is its own — never neither. "Its own"
          is an explicit choice rather than an empty cell, because an empty cell
          reads as somebody having forgotten and standing alone is a decision. */
@@ -1652,7 +1656,7 @@ function renderUnits(){
         '<th style="width:11%">In navigation</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
-        '<th class="cc" style="width:7%">Weight</th>' +
+        (SMPRules.WEIGHTING ? '<th class="cc" style="width:7%">Weight</th>' : '') +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:7%">Status</th>' +

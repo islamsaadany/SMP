@@ -913,7 +913,7 @@
          inside still asks the real grant it needs. */
       /* §435: Setup › Structure is gone — its per-item exceptions sit under
          each layer's card on Client set-up › Structure ("Except for"). */
-      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
@@ -978,6 +978,12 @@
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
       { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
+      /* §770: THE WEIGHTING IS THE STRATEGY'S (Islam: *"it's a strategy
+         performance weighting"*), so its switch and its table sit in this
+         module's Setup, under Measurement, and not beside the units' creation
+         in the client's. The key is the company tab's (§30.2): the impact
+         buttons' repaint names "weighting" and lands on whichever is open. */
+      { k:"weighting", ac:"c_bands", grp:"meas", mod:"strategy", label:"Weighting", glyph:"⚖", find:"weighting weight weights units count group figure factors revenue profit impact growth on off switch", render:renderWeightingSetup },
       /* §621: TERMINOLOGY LEFT SETUP (Islam: *"yes remove terminology"*).
          Client set-up › The shape names every word, layer by layer — End in
          Mind, the one it did not, included — and an empty box there shows
@@ -4353,6 +4359,7 @@
        anyway — §327 says why that is the only question that can be asked
        here, and why the observer this used to be could not answer it. */
     pinWatch();
+    stickWatch();
     watchTailFold();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
@@ -4486,6 +4493,67 @@
        position that does not move, so no scroll event is coming. Kept, and
        known to be unproven. */
     window.addEventListener("resize", pinSoon, { passive: true });
+  }
+  /* ── §771 · WHAT THE TWO FROZEN HEADS NEED MEASURED ─────────────────
+     Islam: *"the header needs to stay freezed on scrolling down"*, and asked
+     which, *"freeze both headers"*: the open direction's title band and the
+     plan tables' own heads. On the squeezed window (§609) the band scrolled
+     away on purpose; now it pins UNDER the strip, and a table head pins
+     under the band, reading or editing. Two heights nothing in CSS can
+     know are published the way `--chrome-h` is (§29.4's rule — observed,
+     never measured at chosen moments): the strip's, because its names wrap
+     to one, two or three lines, and the band's, because a name can too.
+     Both are re-observed after every paint, as the bands are; the observer
+     is one object, disconnected and pointed at the new nodes.
+
+     AND A TABLE HEAD CAN ONLY PIN TO THE WINDOW WHEN ITS BOX IS NOT A
+     SCROLL BOX (§273.1 records the fault the other way round: a page offset
+     inside an `overflow:auto` wrapper lands the head partway down its own
+     body). So each `.scroll` in a pane is marked `fits` while its table
+     needs no sideways scrolling, and only then does the wrapper let the
+     head out and the head pin. A table wider than its pane keeps its scroll
+     box and its head scrolls with it, exactly as before — reachable beats
+     pinned. Re-read on resize, because that is what changes the answer. */
+  var STICKRO = typeof ResizeObserver === "function" ? new ResizeObserver(function(){ stickPublish(); }) : null;
+  function stickNodes(){
+    return {
+      strip: document.querySelector("#panel .split:not(.setupsplit) > .rail:not(.setuprail)"),
+      band: document.querySelector("#panel .pane > .pband, #panel .pane > .ptitle.edhead")
+    };
+  }
+  function stickPublish(){
+    var n = stickNodes(), st = document.documentElement.style;
+    st.setProperty("--strip-h", (n.strip ? n.strip.offsetHeight : 0) + "px");
+    st.setProperty("--band-h", (n.band ? n.band.offsetHeight : 0) + "px");
+    fitPaint();
+  }
+  function fitPaint(){
+    /* BOTH boxes round a table: the renderer's `.scroll` and the `.tblscroll`
+       §151 wraps every table in after the paint — a head pins to the window
+       only once neither is a scroll box. */
+    Array.prototype.forEach.call(document.querySelectorAll("#panel .pane:not(.setuppane) .scroll, #panel .pane:not(.setuppane) .tblscroll"), function(b){
+      /* a confirmation's own list (`.rmconfirm`) pins its head to its box on purpose */
+      if (b.closest(".rmconfirm")) return;
+      b.classList.toggle("fits", b.scrollWidth <= b.clientWidth + 1);
+    });
+  }
+  var FITSOON = 0;
+  function fitSoon(){
+    if (FITSOON || typeof requestAnimationFrame !== "function") return;
+    FITSOON = requestAnimationFrame(function(){ FITSOON = 0; fitPaint(); });
+  }
+  var STICKARMED = false;
+  function stickWatch(){
+    if (STICKRO) {
+      STICKRO.disconnect();
+      var n = stickNodes();
+      if (n.strip) STICKRO.observe(n.strip);
+      if (n.band) STICKRO.observe(n.band);
+    }
+    stickPublish();
+    if (STICKARMED || typeof window === "undefined") return;
+    STICKARMED = true;
+    window.addEventListener("resize", fitSoon, { passive: true });
   }
   /* ── AND A WINDOW THAT CHANGES SIZE HAS TO REACH THE FOLD (§267) ─────
      `tailFolds()` is read while the plan table is being BUILT, because what
@@ -4672,9 +4740,10 @@
       }
       return;
     }
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu],[data-railopts]");
     if (btn) {
       MENURETURN = btn.dataset.pmenu ? '[data-pmenu="' + btn.dataset.pmenu + '"]'
+                : btn.dataset.railopts ? '[data-railopts="' + btn.dataset.railopts + '"]'
                 : btn.hasAttribute("data-colmenu") ? "[data-colmenu]" : "[data-pwmenu]";
     }
     /* Only when the menu has just appeared under the keyboard — a mouse user
@@ -5989,10 +6058,28 @@
         setKoThisYear(!SHOW_KO_THIS_YEAR); paint();
       });
     });
+    /* §771: the button opens the rail's options; the terse switch is a tick
+       inside it, and so are the years to show. The menu's state is the rail
+       key, so two rails on one page (§556's reporting halves) open one each.
+       The years are a moment's choice in memory; terse stays in localStorage. */
+    document.querySelectorAll("[data-railopts]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        RAILMENU = RAILMENU === b.dataset.railopts ? null : b.dataset.railopts;
+        paint();
+      });
+    });
     document.querySelectorAll("[data-railterse]").forEach(function(b){
-      b.addEventListener("click", function(){
-        RAIL_TERSE = !RAIL_TERSE;
+      b.addEventListener("change", function(){
+        RAIL_TERSE = !b.checked;
         try { localStorage.setItem("smp.rail.terse", RAIL_TERSE ? "1" : "0"); } catch(e){}
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-railyear]").forEach(function(b){
+      b.addEventListener("change", function(){
+        var p = b.dataset.railyear.split("|");
+        railYearSet(p[0], +p[1], b.checked);
         paint();
       });
     });
@@ -10607,13 +10694,9 @@
       b.addEventListener("click", gapWalk);
     });
 
-    /* §773: the direction's banner height, for the panel to pin under it. Read
-       after the paint that drew it; the band's height depends on nothing the
-       panel does, so there is no loop to close (§28.3's worry does not apply). */
-    (function(){
-      var band = document.querySelector(".pane > .pband, .pane .ptitle.edhead");
-      if (band) document.documentElement.style.setProperty("--band-h", band.offsetHeight + "px");
-    })();
+    /* §773 read the banner's height here for the panel to pin under; main's
+       §771 (stickWatch) publishes `--band-h` for the table heads, so the
+       panel reads that one and this measurement is gone — one writer. */
     /* §772: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
     document.querySelectorAll("[data-tacopen]").forEach(function(b){
       b.addEventListener("click", function(e){
@@ -13489,6 +13572,11 @@
       PWMENU = false; PFILEMENU = false;
       paint();
     }
+    /* §771: the rail's options menu closes on a click anywhere outside it. */
+    if (typeof RAILMENU !== "undefined" && RAILMENU !== null &&
+        !(e.target.closest && e.target.closest(".railopts"))) {
+      RAILMENU = null; paint();
+    }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
@@ -13501,6 +13589,7 @@
       PWMENU = false; PFILEMENU = false;
       paint();
     }
+    if (typeof RAILMENU !== "undefined" && RAILMENU !== null) { RAILMENU = null; paint(); }
   });
 
   /* The switcher lists the people the platform actually has. It was filled

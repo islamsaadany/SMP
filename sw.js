@@ -683,20 +683,16 @@
    the built platform file changed. */
 /* v7.77-measures-dropdown — §767–§767.2: a tactic names the key measures
    it supports, by number; past main's v7.75 at the merge. */
-/* v7.78-tactic-panel — §772: with the pen on, the tactics are a list and
-   the one being edited opens in a panel beside the table. */
-/* v7.79-panel-beside-tactics — §772.1: the panel stands beside the tactics
-   alone, not the direction's head or its measures. */
-/* v7.80-page-contained — §773: the banner pinned beside the rail with a
-   clear top line, the rail capped to the window, the panel on the table's
-   line and pinned under the banner. */
-/* v7.81-no-foot-under-a-rail — §773.1: the page foot is the pane's under
-   any rail, and the arranging hint is gone. */
-/* v7.82-label-by-the-pointer — §773.2: the legend under the tactics is
-   gone; the tag's name sits beside the pointer. */
-/* v7.83-table-and-panel — §774: the tactic's main fields typed in the
-   table, the extras in the panel; removing asks first. */
-const SHELL = "smp-shell-v7.83-table-and-panel";
+/* v7.78-weighting-default-off — §769: the weighting stays in Setup, off by
+   default; past main's v7.77 at the merge. */
+/* v7.79-weighting-in-strategy-setup — §770: Setup › Weighting under
+   Measurement. */
+/* v7.80-strip-years — §771: the rail's button is an options menu that can
+   hide years, and the band and the table heads pin under the strip; the
+   built platform file changed. */
+/* v7.84-table-and-panel — §772–§774: the tactic panel, the page contained,
+   the main fields in the table; past main's v7.80 at the merge. */
+const SHELL = "smp-shell-v7.84-table-and-panel";
 const ASSETS = [
   "/",
   "/index.html",

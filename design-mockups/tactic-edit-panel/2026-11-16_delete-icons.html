@@ -1,0 +1,70 @@
+<title>Delete Icons</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: one row of the pen's table, drawn four times, each with a different remove icon on the tactic's name box and on its outcome boxes. */
+  :root { --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F; --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF; --gold:#C9A24D; --gold-deep:#8A6B22; --gold-bg:#FBF5E6; --bad:#B04434; --bad-bg:#F7E3E0; --mark:#C58B1E; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91; --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A; --gold-bg:#2A2410; --bad:#E79A93; --bad-bg:#371C1A; --mark:#D9A441; color-scheme:dark; } }
+  :root[data-theme="dark"] { --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91; --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A; --gold-bg:#2A2410; --bad:#E79A93; --bad-bg:#371C1A; --mark:#D9A441; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45; }
+  .wrap { max-width:1100px; margin:0 auto; padding-block:24px 60px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size:22px; margin:0 0 4px; } .lede { color:var(--ink-3); margin:0 0 18px; max-width:78ch; }
+  h2.part { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:24px 0 8px; display:flex; gap:10px; align-items:center; }
+  h2.part .rec { font-size:10.5px; letter-spacing:.08em; background:var(--gold); color:#14161A; border-radius:999px; padding:2px 9px; }
+  .say { color:var(--ink-2); margin:0 0 10px; max-width:80ch; }
+  .scroll { border:1px solid var(--line); border-radius:12px; background:var(--surface); overflow:hidden; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); vertical-align:top; } th + th, td + td { border-left:1px solid var(--line-soft); }
+  thead th { background:var(--panel); color:var(--panel-ink); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; border-bottom:0; }
+  tbody tr:last-child td { border-bottom:0; } tbody tr.on td { background:var(--gold-bg); } tbody tr.on td:first-child { box-shadow:inset 4px 0 0 var(--gold); }
+  td.idx { width:40px; text-align:center; font-family:var(--mono); color:var(--ink-3); }
+  .fld { font:inherit; font-size:12.5px; border:1px solid var(--field-line); border-radius:7px; padding:5px 8px; background:var(--surface); color:var(--ink); width:100%; min-width:0; }
+  .line { display:flex; align-items:center; gap:6px; } .line + .line { margin-top:4px; }
+  .why { display:block; font-size:11.5px; color:var(--ink-3); margin-top:3px; }
+  .add { display:inline-block; margin-top:5px; font-size:11.5px; color:var(--gold-deep); text-decoration:underline; }
+  .q { display:inline-flex; gap:3px; } .q i { font-style:normal; font-family:var(--mono); font-size:10.5px; width:24px; height:20px; line-height:18px; text-align:center; border-radius:4px; border:1px solid var(--line); color:var(--ink-3); } .q i.on { background:var(--gold); border-color:var(--gold); color:#14161A; font-weight:700; }
+  /* the icons: one 24px square, grey, red on hover, the same on the name box and on an outcome box */
+  .rm { flex:none; width:24px; height:24px; display:inline-grid; place-items:center; border:0; background:none; border-radius:6px; color:var(--ink-3); cursor:pointer; padding:0; }
+  .rm svg { width:14px; height:14px; } .rm:hover { color:var(--bad); background:var(--bad-bg); }
+  .rm.ring { border:1px solid var(--line); width:22px; height:22px; } .rm.ring svg { width:11px; height:11px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; } @media (max-width:860px) { .grid { grid-template-columns:1fr; } }
+  .lab { font-size:12px; color:var(--ink-3); margin:4px 0 0; }
+</style>
+<div class="wrap">
+  <h1>The remove icon, on the tactic and on its outcomes</h1>
+  <p class="lede">One icon, used the same way in both places: at the right end of the tactic's name box, and at the right end of each outcome box. Grey, 24px square, red on hover, and every press asks first. Four shapes to choose from.</p>
+
+  <h2 class="part">A · A lighter bin <span class="rec">Recommended</span></h2>
+  <p class="say">The bin as it is, drawn thinner and smaller, with no lid line crossing the body: the usual sign for "throw away", light enough to sit beside a box without pulling the eye.</p>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr></thead><tbody>
+    <tr class="on"><td class="idx">2</td><td><span class="line"><input class="fld" value="Begin ERP activation (Phase 1)"><button class="rm" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.3a.9.9 0 0 0 .9.8h4a.9.9 0 0 0 .9-.8l.6-8.3"/></svg></button></span><span class="why">Deploy first modules to unify reporting (Finance, Inventory).</span></td>
+      <td><span class="line"><input class="fld" value="ERP Phase 1 activated with at least 2 modules"><button class="rm" title="Remove this outcome"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.3a.9.9 0 0 0 .9.8h4a.9.9 0 0 0 .9-.8l.6-8.3"/></svg></button></span><span class="line"><input class="fld" value="Finance and Inventory users trained"><button class="rm" title="Remove this outcome"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.3a.9.9 0 0 0 .9.8h4a.9.9 0 0 0 .9-.8l.6-8.3"/></svg></button></span><span class="add">+ Add an outcome</span></td>
+      <td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td></tr>
+  </tbody></table></div>
+
+  <h2 class="part">B · A minus in a ring</h2>
+  <p class="say">"Take it off the list": a circled minus. Calmer than a bin, and reads as removal from a list rather than destruction; the question that follows says what really happens.</p>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr></thead><tbody>
+    <tr class="on"><td class="idx">2</td><td><span class="line"><input class="fld" value="Begin ERP activation (Phase 1)"><button class="rm" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5 8h6"/></svg></button></span><span class="why">Deploy first modules to unify reporting (Finance, Inventory).</span></td>
+      <td><span class="line"><input class="fld" value="ERP Phase 1 activated with at least 2 modules"><button class="rm" title="Remove this outcome"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5 8h6"/></svg></button></span><span class="line"><input class="fld" value="Finance and Inventory users trained"><button class="rm" title="Remove this outcome"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5 8h6"/></svg></button></span><span class="add">+ Add an outcome</span></td>
+      <td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td></tr>
+  </tbody></table></div>
+
+  <h2 class="part">C · A cross in a ring</h2>
+  <p class="say">The × the product already uses to take a row away, given a thin ring so it reads as a button rather than a stray mark, and the same size in both places.</p>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr></thead><tbody>
+    <tr class="on"><td class="idx">2</td><td><span class="line"><input class="fld" value="Begin ERP activation (Phase 1)"><button class="rm ring" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></span><span class="why">Deploy first modules to unify reporting (Finance, Inventory).</span></td>
+      <td><span class="line"><input class="fld" value="ERP Phase 1 activated with at least 2 modules"><button class="rm ring" title="Remove this outcome"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></span><span class="line"><input class="fld" value="Finance and Inventory users trained"><button class="rm ring" title="Remove this outcome"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></span><span class="add">+ Add an outcome</span></td>
+      <td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td></tr>
+  </tbody></table></div>
+
+  <h2 class="part">D · A filled bin</h2>
+  <p class="say">The bin as a solid shape, the way phone apps draw it: unmistakable at a glance, and the heaviest of the four beside a box.</p>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr></thead><tbody>
+    <tr class="on"><td class="idx">2</td><td><span class="line"><input class="fld" value="Begin ERP activation (Phase 1)"><button class="rm" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 2h4l.5 1.5H13V5H3V3.5h2.5zM4 6h8l-.6 7.3a1 1 0 0 1-1 .7H5.6a1 1 0 0 1-1-.7z"/></svg></button></span><span class="why">Deploy first modules to unify reporting (Finance, Inventory).</span></td>
+      <td><span class="line"><input class="fld" value="ERP Phase 1 activated with at least 2 modules"><button class="rm" title="Remove this outcome"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 2h4l.5 1.5H13V5H3V3.5h2.5zM4 6h8l-.6 7.3a1 1 0 0 1-1 .7H5.6a1 1 0 0 1-1-.7z"/></svg></button></span><span class="line"><input class="fld" value="Finance and Inventory users trained"><button class="rm" title="Remove this outcome"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 2h4l.5 1.5H13V5H3V3.5h2.5zM4 6h8l-.6 7.3a1 1 0 0 1-1 .7H5.6a1 1 0 0 1-1-.7z"/></svg></button></span><span class="add">+ Add an outcome</span></td>
+      <td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td></tr>
+  </tbody></table></div>
+</div>

@@ -1,24 +1,34 @@
-"""THE TACTIC PANEL (§769).
+"""THE TACTIC'S MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL (§772, §774).
 
-Islam, with a picture of the pen: "can we work on a cleaner approach to edit
-the tactic. as it became very complex." From the working mockup he tried:
-with the pen on, the tactics table is a plain list — one line per tactic —
-and the tactic being edited opens in a panel beside the table, in sections.
-The one Edit button turns the pen on and opens the panel on the first
-tactic; any row press moves it; Done editing turns the pen off.
+Islam, on the §772 list: make the tactic's main info editable in the table
+and the extra details in the panel. Settled over eleven rounds on the
+working mockup (design-mockups/tactic-edit-panel/2026-11-16_table-and-
+panel.html). With the pen on, one line per tactic: the name, each outcome's
+name (and + Add an outcome), the owner and the quarters typed in the row; a
+ringed × on the name box and on each outcome box that ASKS first. The panel
+beside the table holds the description, each outcome's target, the
+collaborators, the key measures and the requirements; its head is the
+tactic's name and the arrows, with no close and no Done — the top's Done
+editing is the one. The open row is tinted and joined to the panel.
 
   1 · READ MODE IS WHAT IT WAS: no list, no panel.
-  2 · EDIT: the list has eight heads, one line per tactic, the first marked;
-      the panel is there with the name box, the outcome boxes, the owner and
-      collaborator pickers, the quarters, the key measures dropdown.
-  3 · A ROW PRESS moves the panel; ↑ ↓ walk; the typed name reaches the row
-      and the stored tactic; a target typed in the panel is stored.
-  4 · × closes the panel and keeps the pen; a row press opens it again;
-      Done editing in the panel turns the pen off.
-  5 · ADD A TACTIC opens the new one; × on a row removes it.
-  6 · THE GAP WALK: a tactic owing a gap carries the mark on its row while
-      it is not open; the open one carries it on its fields.
-  7 · FILL MODE (a filler, not the office) is untouched: the table, not the list.
+  2 · EDIT: five heads, one line per tactic, the first marked, the panel
+      beside it with the name in its head and the extras in its sections;
+      the row holds the name box, the outcome boxes, the owner picker and
+      the quarters; the panel holds no name box, no owner, no quarters, no
+      close, no Done.
+  3 · THE ROW IS WHERE THE MAIN FIELDS ARE TYPED: the name typed in the row
+      reaches the panel's head at once and the stored tactic on leaving;
+      the outcome's name typed in the row reaches the panel's read line.
+  4 · THE PANEL FOLLOWS THE ROW YOU WORK IN: a row press, the focus landing
+      in another row's box (the focus kept), ↓ in the head.
+  5 · REMOVING ASKS FIRST: the tactic's × opens the question, Cancel keeps
+      it, Remove takes it; the outcome's × the same, the first outcome
+      included, the next moving up into its place.
+  6 · ADD A TACTIC opens the new one; Done editing at the top turns the
+      pen off.
+  7 · THE GAP WALK: a tactic whose target is missing says so on its row,
+      with the walk mark, while it is not the open one.
 
 SMP_BUILT points it at another build (§276).
 """
@@ -46,79 +56,91 @@ with sync_playwright() as p:
     pg.add_init_script("try{sessionStorage.setItem('smp.welcome.seen','1');sessionStorage.setItem('smp.welcome.done','1');localStorage.setItem('smp.tour.never','1')}catch(e){}")
     errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto("file://" + os.path.abspath(F)); pg.wait_for_timeout(900)
-    safe(pg, "()=>{delete GROUP.structure;}")
+    safe(pg, "()=>{GROUP.structure={details:{outcomes:true}};}")
     def go(ed=False):
         safe(pg, "()=>{ current='mobile'; EDIT_PAGE={}; REPORTING=null; PEN_TACTIC=null; paint(); }"); pg.wait_for_timeout(250)
         click(pg, "[data-s='strategy']"); click(pg, "[data-sub2='plan']")
         if ed: click(pg, "[data-page='plan']", 700)
     def q(js): return safe(pg, "()=>" + js)
+    def row(i): return "#panel .penlist tr[data-tacrow]:nth-child(%d)" % (i + 1)
 
     print("\n1 · read mode is what it was")
     go()
     ok("no list, no panel", q("document.querySelectorAll('#panel .penlist, #panel .tacpanel').length") == 0)
-    ok("the tactics table still carries its read columns", q("[...document.querySelectorAll('#panel table')].some(t=>t.querySelector('.tacname')) && !document.querySelector('#panel .penwrap')") is True)
 
     print("\n2 · Edit: the list and the panel")
     go(True)
     st = q("""({heads:[...document.querySelectorAll('#panel .penlist thead th')].map(x=>x.textContent.trim()), rows:document.querySelectorAll('#panel .penlist tr[data-tacrow]').length,
       n:%s.tactics.length, on:(document.querySelector('#panel tr.penon')||{dataset:{}}).dataset.tacrow, first:%s.tactics[0].id, panel:!!document.querySelector('#panel .tacpanel')})""" % (P, P))
-    ok("eight heads, one line per tactic, the first marked, the panel beside",
-       st and st["heads"] == ["#", "Tactic", "Outcomes", "Owner", "Collabs.", "Quarters", "Key measures", ""] and st["rows"] == st["n"] and st["on"] == st["first"] and st["panel"], st)
-    pn = q("""({name:!!document.querySelector('.tacpanel .tacpn'), desc:!!document.querySelector('.tacpanel .tacpd'), out:!!document.querySelector('.tacpanel .tpout'), tgrid:!!document.querySelector('.tacpanel .tgrid'),
-      owner:!!document.querySelector('.tacpanel .ownersel'), collab:!!document.querySelector('.tacpanel .collabsel'), qs:!!document.querySelector('.tacpanel .qs-edit'), km:!!document.querySelector('.tacpanel .kmdrop'),
-      head:(document.querySelector('.tacpanel .tpk')||{}).textContent, done:!!document.querySelector('.tacpanel .tpdone[data-page=\"plan\"]')})""")
-    ok("the panel holds the name, description, outcome boxes, owner and collaborator pickers, quarters, key measures and Done",
-       pn and all(pn[k] for k in ["name","desc","out","tgrid","owner","collab","qs","km","done"]) and pn["head"] and pn["head"].endswith("1 of 5"), pn)
-    ok("no field is left in the list's rows", q("document.querySelectorAll('#panel .penlist input, #panel .penlist select, #panel .penlist textarea').length") == 0)
+    ok("five heads, one line per tactic, the first marked, the panel beside",
+       st and st["heads"] == ["#", "Tactic", "Outcome", "Owner", "Quarters"] and st["rows"] == st["n"] and st["on"] == st["first"] and st["panel"], st)
+    rw = q("""(function(r){ return {name:!!r.querySelector('.namerow .tacpn'), rm:r.querySelectorAll('.rm').length, outs:r.querySelectorAll('.outline .outpn').length, add:!!r.querySelector('[data-outadd]'),
+      owner:!!r.querySelector('.ownersel'), qs:!!r.querySelector('.qs-edit'), collab:!!r.querySelector('.collabsel'), km:!!r.querySelector('.kmpick')}; })(document.querySelector('%s'))""" % row(0))
+    ok("the first row holds the name box with its ×, the outcome box with its ×, + Add an outcome, the owner picker and the quarters — no collaborators, no key measures",
+       rw and rw["name"] and rw["rm"] == 2 and rw["outs"] == 1 and rw["add"] and rw["owner"] and rw["qs"] and not rw["collab"] and not rw["km"], rw)
+    pn = q("""({head:(document.querySelector('.tacpanel .tpname')||{}).textContent, secs:[...document.querySelectorAll('.tacpanel .tpsec h4')].map(h=>h.textContent),
+      desc:!!document.querySelector('.tacpanel .tacpd'), oname:document.querySelectorAll('.tacpanel .oname').length, tgrid:!!document.querySelector('.tacpanel .tgrid'), collab:!!document.querySelector('.tacpanel .collabsel'), km:!!document.querySelector('.tacpanel .kmdrop'),
+      namebox:!!document.querySelector('.tacpanel .tacpn'), owner:!!document.querySelector('.tacpanel .ownersel'), qs:!!document.querySelector('.tacpanel .qs-edit'), close:!!document.querySelector('.tacpanel [data-tacclose]'), done:!!document.querySelector('.tacpanel .tpdone'), arrows:document.querySelectorAll('.tacpanel .tpnav [data-tacopen]').length, eye:!!document.querySelector('.tacpanel .eyebtn')})""")
+    ok("the panel's head is the name, the eye and the arrows; its sections Description, Outcomes, Collaborators, then the key measures and requirements",
+       pn and pn["head"] == q("%s.tactics[0].name" % P) and pn["secs"][:3] == ["Description", "Outcomes", "Collaborators"] and pn["desc"] and pn["oname"] >= 1 and pn["tgrid"] and pn["collab"] and pn["km"] and pn["arrows"] == 2 and pn["eye"], pn)
+    ok("…and holds no name box, no owner, no quarters, no close, no Done", pn and not pn["namebox"] and not pn["owner"] and not pn["qs"] and not pn["close"] and not pn["done"], pn)
 
-    print("\n3 · a row press moves the panel; typing reaches the row")
+    print("\n3 · the main fields are typed in the row")
     try:
-        pg.click("#panel .penlist tr[data-tacrow]:nth-child(3) td:nth-child(2)"); pg.wait_for_timeout(500)
-    except Exception as e: print("   (click)", str(e)[:80])
-    mv = q("({on:document.querySelector('#panel tr.penon').dataset.tacrow, id:%s.tactics[2].id, head:document.querySelector('.tacpanel .tpk').textContent})" % P)
-    ok("the third row opens in the panel", mv and mv["on"] == mv["id"] and "3 of 5" in mv["head"], mv)
-    click(pg, ".tacpanel .tpnav button[title^=\"Next\"]", 500)
-    ok("↓ moves to the fourth", q("document.querySelector('#panel tr.penon').dataset.tacrow") == q("%s.tactics[3].id" % P))
-    try:
-        pg.fill(".tacpanel .tacpn", "Scale the app, phase two"); pg.wait_for_timeout(150)
-        live = q("({row:document.querySelector('#panel tr.penon .tacname').textContent, head:document.querySelector('.tacpanel .tpname').textContent})")
+        pg.fill(row(0) + " .namerow .tacpn", "Clean the customer base"); pg.wait_for_timeout(150)
+        live = q("document.querySelector('.tacpanel .tpname').textContent")
         pg.click("h1, body", position={"x": 5, "y": 5}); pg.wait_for_timeout(300)
-        stored = q("%s.tactics[3].name" % P)
-        tg = pg.locator(".tacpanel .tgrid input").first; tg.fill("2000"); pg.click("h1, body", position={"x": 5, "y": 5}); pg.wait_for_timeout(300)
-        tstored = q("%s.tactics[3].outTarget" % P)
-    except Exception as e: live = "ERR " + str(e)[:100]; stored = tstored = None
-    ok("the typed name is on the row and in the panel's head at once", live and live["row"] == "Scale the app, phase two" and live["head"] == "Scale the app, phase two", live)
-    ok("…and stored on leaving the box", stored == "Scale the app, phase two", stored)
-    ok("a target typed in the panel is stored on the tactic", tstored and str(tstored).startswith("2000"), tstored)
+        stored = q("%s.tactics[0].name" % P)
+        pg.fill(row(0) + " .outline .outpn", "Duplicates gone from the base"); pg.wait_for_timeout(150)
+        oline = q("document.querySelector('.tacpanel .oname[data-oname=\"first\"]').textContent")
+        pg.click("h1, body", position={"x": 5, "y": 5}); pg.wait_for_timeout(300)
+        ostored = q("%s.tactics[0].outcome" % P)
+    except Exception as e: live = "ERR " + str(e)[:100]; stored = oline = ostored = None
+    ok("the name typed in the row reaches the panel's head at once", live == "Clean the customer base", live)
+    ok("…and the stored tactic on leaving the box", stored == "Clean the customer base", stored)
+    ok("the outcome's name typed in the row reaches the panel's read line at once", oline == "Duplicates gone from the base", oline)
+    ok("…and the stored tactic on leaving", ostored == "Duplicates gone from the base", ostored)
 
-    print("\n4 · close, reopen, Done")
-    click(pg, ".tacpanel [data-tacclose]", 500)
-    ok("× closes the panel and keeps the pen and the list", q("!document.querySelector('#panel .tacpanel') && !!EDIT_PAGE.plan && !!document.querySelector('#panel .penlist')") is True)
-    try: pg.click("#panel .penlist tr[data-tacrow]:nth-child(2) td:nth-child(2)"); pg.wait_for_timeout(500)
-    except Exception: pass
-    ok("a row press opens it again", q("!!document.querySelector('#panel .tacpanel') && document.querySelector('#panel tr.penon').dataset.tacrow===%s.tactics[1].id" % P) is True)
-    click(pg, ".tacpanel .tpdone", 600)
-    ok("Done editing in the panel turns the pen off: read mode, no list, no panel", q("!EDIT_PAGE.plan && !document.querySelector('#panel .penlist') && !document.querySelector('#panel .tacpanel')") is True)
+    print("\n4 · the panel follows the row you work in")
+    try: pg.click(row(2) + " td.idx"); pg.wait_for_timeout(500)
+    except Exception as e: print("   (click)", str(e)[:80])
+    ok("a row press opens that tactic", q("document.querySelector('#panel tr.penon').dataset.tacrow") == q("%s.tactics[2].id" % P))
+    try:
+        pg.click(row(3) + " .namerow .tacpn"); pg.wait_for_timeout(500)
+        fo = q("({on:document.querySelector('#panel tr.penon').dataset.tacrow, focusIn:!!(document.activeElement && document.activeElement.closest('%s')), isName:!!(document.activeElement && document.activeElement.classList.contains('tacpn'))})" % row(3))
+    except Exception as e: fo = "ERR " + str(e)[:80]
+    ok("the focus landing in another row's name box moves the panel there and keeps the focus", fo and fo["on"] == q("%s.tactics[3].id" % P) and fo["focusIn"] and fo["isName"], fo)
+    click(pg, ".tacpanel .tpnav button[title^='Next']", 500)
+    ok("↓ moves to the next", q("document.querySelector('#panel tr.penon').dataset.tacrow") == q("%s.tactics[4].id" % P))
 
-    print("\n5 · add and remove")
-    go(True)
+    print("\n5 · removing asks first")
     n0 = q("%s.tactics.length" % P)
+    click(pg, row(1) + " .namerow .rm", 400)
+    asked = q("!!document.querySelector('[data-rmyes]')")
+    ok("the tactic's × opens the question", asked is True)
+    click(pg, "[data-rmno]", 400)
+    ok("Cancel keeps it", q("%s.tactics.length" % P) == n0 and q("!document.querySelector('[data-rmyes]')") is True)
+    click(pg, row(1) + " .namerow .rm", 400); click(pg, "[data-rmyes]", 600)
+    ok("Remove takes it", q("%s.tactics.length" % P) == n0 - 1, q("%s.tactics.length" % P))
+    safe(pg, "()=>{var t=%s.tactics[0]; t.outs=[{id:'O2', outcome:'Second thing', outTarget:'5#', outDir:'\\u2265', outCompile:'Sum'}]; PEN_TACTIC=t.id; paint();}" % P); pg.wait_for_timeout(400)
+    ok("a tactic with two outcomes shows two boxes in its row, each with a ×", q("document.querySelector('%s').querySelectorAll('.outline .rm').length" % row(0)) == 2)
+    click(pg, row(0) + " .outline[data-oid='first'] .rm", 400); ok("the FIRST outcome's × opens the question too", q("!!document.querySelector('[data-rmyes]')") is True); click(pg, "[data-rmyes]", 600)
+    pr = q("({name:%s.tactics[0].outcome, tgt:%s.tactics[0].outTarget, outs:'outs' in %s.tactics[0]})" % (P, P, P))
+    ok("removing the first moves the next up into its place, and the lists go (§50.6)", pr and pr["name"] == "Second thing" and pr["tgt"] == "5#" and pr["outs"] is False, pr)
+
+    print("\n6 · add, and Done at the top")
+    n1 = q("%s.tactics.length" % P)
     click(pg, "#panel .penlist [data-rowadd^='tactic|']", 600)
-    ad = q("({n:%s.tactics.length, on:document.querySelector('#panel tr.penon').dataset.tacrow, last:%s.tactics[%s.tactics.length-1].id, head:document.querySelector('.tacpanel .tpname').textContent})" % (P, P, P))
-    ok("Add a tactic adds one and opens it in the panel", ad and ad["n"] == n0 + 1 and ad["on"] == ad["last"] and ad["head"].startswith("New"), ad)
-    safe(pg, "()=>{var b=document.querySelector('#panel tr.penon [data-rowoff]'); b&&b.click();}"); pg.wait_for_timeout(500)
-    ok("× on its row removes it", q("%s.tactics.length" % P) == n0, q("%s.tactics.length" % P))
+    ad = q("({n:%s.tactics.length, on:document.querySelector('#panel tr.penon').dataset.tacrow, last:%s.tactics[%s.tactics.length-1].id})" % (P, P, P))
+    ok("Add a tactic adds one and opens it", ad and ad["n"] == n1 + 1 and ad["on"] == ad["last"], ad)
+    click(pg, "[data-page='plan']", 600)
+    ok("Done editing at the top turns the pen off: no list, no panel", q("!EDIT_PAGE.plan && !document.querySelector('#panel .penlist') && !document.querySelector('#panel .tacpanel')") is True)
 
-    print("\n6 · the gap walk")
-    safe(pg, "()=>{var t=%s.tactics[2]; t._o=t.owner; delete t.owner; PEN_TACTIC=%s.tactics[0].id; paint();}" % (P, P)); pg.wait_for_timeout(400)
-    gw = q("({row:!!document.querySelector('#panel .penlist tr[data-tacrow=\"'+%s.tactics[2].id+'\"] .tacopenb.gapwalk'), says:(document.querySelector('#panel .penlist tr[data-tacrow=\"'+%s.tactics[2].id+'\"] .tacgaps')||{}).textContent, open:!!document.querySelector('#panel tr.penon .tacopenb.gapwalk')})" % (P, P))
-    ok("a tactic owing an owner carries the walk mark and says '1 missing' on its row; the open one does not", gw and gw["row"] and gw["says"] == "1 missing" and not gw["open"], gw)
-    safe(pg, "()=>{var t=%s.tactics[2]; t.owner=t._o; delete t._o;}" % P)
-
-    print("\n7 · fill mode is untouched")
-    go()
-    fm = q("({pen:!!EDIT_PAGE.plan, list:!!document.querySelector('#panel .penlist'), tactable:!!document.querySelector('#panel .tactable')})")
-    ok("with the pen off the tactics table is the table it was", fm and not fm["pen"] and not fm["list"], fm)
+    print("\n7 · the gap walk")
+    safe(pg, "()=>{var t=%s.tactics[1]; t._tg=t.outTarget; delete t.outTarget; EDIT_PAGE.plan=true; PEN_TACTIC=%s.tactics[0].id; paint();}" % (P, P)); pg.wait_for_timeout(500)
+    gw = q("({mark:!!document.querySelector('%s .tacgap.gapwalk'), says:(document.querySelector('%s .tacgap')||{}).textContent, open:!!document.querySelector('#panel tr.penon .tacgap')})" % (row(1), row(1)))
+    ok("a tactic whose target is missing says so on its row, with the walk mark, while it is not the open one", gw and gw["mark"] and "Target missing" in gw["says"] and not gw["open"], gw)
+    safe(pg, "()=>{var t=%s.tactics[1]; t.outTarget=t._tg; delete t._tg;}" % P)
     b.close()
 
 ok("no page errors", not errs, errs[:3])

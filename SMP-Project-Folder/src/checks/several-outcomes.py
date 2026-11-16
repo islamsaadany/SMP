@@ -137,13 +137,15 @@ with sync_playwright() as p:
     ok("pressing it adds O3 to the stored tactic", safe(pg, "()=>%s.outs.map(x=>x.id).join(',')" % T) == "O2,O3",
        safe(pg, "()=>JSON.stringify(%s.outs)" % T))
     try:
-        box = pg.locator("#panel tr.osub").nth(1).locator("textarea, input").first
+        # §774: an outcome's name is typed in the tactic's ROW, on its own line
+        box = pg.locator("#panel .penlist .outline[data-oid='O3'] .outpn").first
         box.fill("Stores re-fitted"); box.blur(); pg.wait_for_timeout(300)
     except Exception as e: print("   (typing failed: %s)" % str(e)[:100])
     ok("a name typed on O3's line reaches the stored outcome",
        safe(pg, "()=>(%s.outs[1]||{}).outcome" % T) == "Stores re-fitted", safe(pg, "()=>JSON.stringify(%s.outs)" % T))
-    click(pg, "#panel [data-outoff$='|O3']", 500)
-    ok("its × removes it", safe(pg, "()=>%s.outs.map(x=>x.id).join(',')" % T) == "O2")
+    # §774.1: the × on its line asks first; Remove takes it
+    click(pg, "#panel [data-rmout$='|O3']", 500); click(pg, "[data-rmyes]", 600)
+    ok("its × asks, and Remove takes it", safe(pg, "()=>%s.outs.map(x=>x.id).join(',')" % T) == "O2")
 
     print("\n4 · on, Reporting")
     go("report")

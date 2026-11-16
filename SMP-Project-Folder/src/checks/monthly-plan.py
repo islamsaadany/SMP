@@ -666,7 +666,7 @@ with sync_playwright() as p:
     surf = ev(pg, """() => {
       const out = {};
       // a tactic's outcome, on the page already open
-      // §769: the tactic's fields are in the panel; open it there
+      // §772: the tactic's fields are in the panel; open it there
       const t = UNITS.mobile.items.find(p => p.code === '03').tactics[0];
       PEN_TACTIC = t.id; paint();
       const tr = document.querySelector('.tacpanel');

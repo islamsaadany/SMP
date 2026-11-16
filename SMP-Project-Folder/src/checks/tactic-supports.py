@@ -74,7 +74,7 @@ with sync_playwright() as p:
     w0 = cols()
     go(True)
     nt = safe(pg, "()=>%s.tactics.length" % P)
-    # §769: the pen opens the first tactic in the panel; the tick list is there, one per measure
+    # §772: the pen opens the first tactic in the panel; the tick list is there, one per measure
     pk = safe(pg, """()=>{var p=[...document.querySelectorAll('#panel .tacpanel .kmpick')]; var first=p[0];
       return {n:p.length, ticks:first?first.querySelectorAll('input[type=checkbox]').length:0,
               on:[...document.querySelectorAll('#panel .kmpick input:checked')].length,
@@ -98,7 +98,7 @@ with sync_playwright() as p:
     try:
         tag = pg.locator("#panel .kmnums .kmtag").first; tag.hover()
         tp = safe(pg, "()=>{var t=document.querySelector('.kmtip'); return t?[t.classList.contains('on'), t.textContent, getComputedStyle(t).display]:null}")
-        # §770.2: beside the pointer — the label's top-left sits just below and right of where the mouse is
+        # §773.2: beside the pointer — the label's top-left sits just below and right of where the mouse is
         bb = tag.bounding_box(); mx = bb["x"] + bb["width"] / 2; my = bb["y"] + bb["height"] / 2
         pg.mouse.move(mx, my); pg.wait_for_timeout(100)
         near = safe(pg, "()=>{var r=document.querySelector('.kmtip').getBoundingClientRect(); return [r.left, r.top]}")
@@ -116,12 +116,12 @@ with sync_playwright() as p:
        ct and ct[0]["tags"] == ["T1"] and ct[1]["tags"] == ["T1", "T2"] and ct[1]["text"] == "T1T2", ct)
     ok("measures 3 and 4 say no tactic supports them yet", ct and ct[2]["none"] and ct[3]["none"] and "supports it yet" in ct[2]["text"], ct)
     lg = safe(pg, """()=>{var l=document.querySelector('#panel .kmlegend'); return l?{open:l.open, rows:[...l.querySelectorAll('.kmrows > span:nth-child(even)')].map(x=>x.textContent)}:null}""")
-    ok("no legend any more (§770.2: the tags' hover names the measure)", lg is None and count(".kmlegend") == 0, [lg, count(".kmlegend")])
+    ok("no legend any more (§773.2: the tags' hover names the measure)", lg is None and count(".kmlegend") == 0, [lg, count(".kmlegend")])
     ok("no column moves", w0 and cols() == w0, [w0, cols()])
 
     print("\n3 · the pen")
     go(True)
-    # §769: one tactic open at a time — each is opened in the panel and its ticks read there
+    # §772: one tactic open at a time — each is opened in the panel and its ticks read there
     def openT(i): safe(pg, "()=>{PEN_TACTIC=%s.tactics[%d].id; paint();}" % (P, i)); pg.wait_for_timeout(300)
     tk = []; dd = []
     for i in range(3):

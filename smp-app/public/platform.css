@@ -344,7 +344,7 @@
      below the fold — and it is exactly what made the page run 60px past the
      window and slide the rail, with its pinned head, under the chrome. */
   .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
-  /* §770.1: and under ANY rail beside a pane, for the reason written at
+  /* §773.1: and under ANY rail beside a pane, for the reason written at
      --page-foot (group-extra.css): the rail is capped against --pane-foot, so
      a page foot of 80 is 60px the pane scrolls past the rail — which pushed
      the pinned rail up under the chrome at the page's end (Islam: *"on
@@ -1927,7 +1927,7 @@ html[data-client-settings] .viewer { display:none; }
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
     position:sticky; top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px));
     align-self:start; }
-  /* §770: THE RAIL IS NEVER TALLER THAN THE WINDOW. Islam, from the built
+  /* §773: THE RAIL IS NEVER TALLER THAN THE WINDOW. Islam, from the built
      page: *"there shouldn't be a scrolled down area like this, the page
      should be well contained, even for the left pane of the directions"* —
      with the pen on, a short tactics list left the rail of fifteen
@@ -2122,7 +2122,7 @@ html[data-client-settings] .viewer { display:none; }
     margin:calc(var(--pane-pad) * -1) -18px 15px;
     border-radius:var(--r) var(--r) 0 0;
     box-shadow:inset 3px 0 0 var(--gold), 0 1px 0 var(--line);
-    /* §770: a clear line on the band's top edge (Islam: "why not a clear
+    /* §773: a clear line on the band's top edge (Islam: "why not a clear
        line?") — the pane's own hairline was all that marked it. */
     border-top:1px solid var(--field-line);
     padding-left:18px; }
@@ -2318,7 +2318,7 @@ html[data-client-settings] .viewer { display:none; }
   .pane .ptitle.edhead {
     position:sticky; z-index:4;
     top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px);
-    border-top:1px solid var(--field-line);   /* §770: the same clear line as the band's */
+    border-top:1px solid var(--field-line);   /* §773: the same clear line as the band's */
     background:var(--surface-2);
     margin:calc(var(--pane-pad) * -1) -18px 14px;
     padding:11px 18px 11px 18px;
@@ -8820,13 +8820,13 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .tpsec .kmlist input, td .kmlist input { width:14px; height:14px; margin:2px 0 0; flex:none; accent-color:var(--panel); }
 .tpsec .kmlist .kmname, td .kmlist .kmname { min-width:0; }
 
-/* ── §769: THE TACTIC PANEL AND THE PEN'S LIST ──────────────────────────
+/* ── §772: THE TACTIC PANEL AND THE PEN'S LIST ──────────────────────────
    From the working mockup Islam tried (design-mockups/tactic-edit-panel/
    2026-11-16_full-page.html). Beside the pillar on a wide window; over the
    page from the right on a narrow one. Tokens only (§38.4). */
 .penwrap { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:14px; align-items:start; }
 .penmain { min-width:0; }
-/* §770: pinned UNDER the direction's banner, which is itself pinned under the
+/* §773: pinned UNDER the direction's banner, which is itself pinned under the
    chrome; `--band-h` is the banner's measured height (shell.html, after each
    paint). Never taller than what is left of the window: a long tactic scrolls
    inside the panel, its head and its Done editing always in view, and its
@@ -8857,6 +8857,43 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .tpout .kmpick { margin-top:0; }
 .tpfoot { padding:10px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
 .tpdone { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:var(--r); font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
+
+/* ── §774: THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL ──────────
+   The pen's list as Islam settled it on the working mockup (design-mockups/
+   tactic-edit-panel/2026-11-16_table-and-panel.html): the name, the outcome
+   names, the owner and the quarters typed in the row; a ringed × on the name
+   box and on each outcome box; the open row tinted and joined to the panel
+   (his pick, D). Tokens only (§38.4). */
+.penlist td .namerow, .penlist td .outline { display:flex; align-items:center; gap:6px; }
+.penlist td .outline + .outline { margin-top:4px; }
+.penlist td .namerow > .fld, .penlist td .outline > .fld, .penlist td .outline > .gapwrap,
+.penlist td .namerow > textarea, .penlist td .outline > textarea { flex:1 1 auto; min-width:0; width:auto; }
+.penlist td .rm { flex:none; display:inline-grid; place-items:center; width:22px; height:22px; border:1px solid var(--line);
+  border-radius:6px; background:transparent; color:var(--ink-3); cursor:pointer; padding:0; }
+.penlist td .rm:hover, .penlist td .rm:focus-visible { color:var(--bad-tx); border-color:var(--bad); background:var(--bad-bg); outline:0; }
+.penlist td .addout { display:block; margin-top:5px; }
+.penlist td .addout .linkbu { font-weight:400; font-size:12px; }
+.penlist td .tacgap { display:block; margin-top:5px; font-size:11.5px; cursor:pointer; }
+.penlist td .tacwhy { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:360px; }
+.penlist td.outc { min-width:220px; }
+/* D: the open row, tinted, with one bar, run out to the panel's gold edge */
+.penlist tbody tr.penon td { background:var(--attn-bg); box-shadow:none; }
+.penlist tbody tr.penon td:first-child { box-shadow:inset 4px 0 0 var(--gold); }
+@media (min-width:1181px) {
+  .penwrap .penmain > .scroll { overflow:visible; }
+  .penwrap .penmain table.tactable { min-width:0; }
+  .penlist tbody tr.penon td:last-child { position:relative; }
+  .penlist tbody tr.penon td:last-child::after { content:""; position:absolute; top:-1px; bottom:-1px; left:100%; width:15px;
+    background:var(--attn-bg); border-top:1px solid var(--gold); border-bottom:1px solid var(--gold); }
+  .penwrap .tacpanel { border-left:3px solid var(--gold); border-radius:0 var(--r-lg) var(--r-lg) 0; }
+}
+/* the panel: the name in the head, the outcomes read over their targets */
+.tph .tpname { font-size:14px; }
+.tpout .oname { font-weight:600; font-size:13px; display:block; }
+.tpout .oname .nobody { font-weight:400; font-style:italic; }
+/* read mode: the tactic and the outcome share the width (Islam: "why is the tactic column that wide?") */
+.tactable:not(.penlist) th:nth-child(2) { width:34%; }
+.tactable:not(.penlist) th:nth-child(3) { width:30%; }
 /* the list */
 .penlist tbody tr[data-tacopen] { cursor:pointer; }
 .penlist tbody tr[data-tacopen]:hover td { background:var(--surface-2); }

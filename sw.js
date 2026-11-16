@@ -683,18 +683,20 @@
    the built platform file changed. */
 /* v7.77-measures-dropdown — §767–§767.2: a tactic names the key measures
    it supports, by number; past main's v7.75 at the merge. */
-/* v7.78-tactic-panel — §769: with the pen on, the tactics are a list and
+/* v7.78-tactic-panel — §772: with the pen on, the tactics are a list and
    the one being edited opens in a panel beside the table. */
-/* v7.79-panel-beside-tactics — §769.1: the panel stands beside the tactics
+/* v7.79-panel-beside-tactics — §772.1: the panel stands beside the tactics
    alone, not the direction's head or its measures. */
-/* v7.80-page-contained — §770: the banner pinned beside the rail with a
+/* v7.80-page-contained — §773: the banner pinned beside the rail with a
    clear top line, the rail capped to the window, the panel on the table's
    line and pinned under the banner. */
-/* v7.81-no-foot-under-a-rail — §770.1: the page foot is the pane's under
+/* v7.81-no-foot-under-a-rail — §773.1: the page foot is the pane's under
    any rail, and the arranging hint is gone. */
-/* v7.82-label-by-the-pointer — §770.2: the legend under the tactics is
+/* v7.82-label-by-the-pointer — §773.2: the legend under the tactics is
    gone; the tag's name sits beside the pointer. */
-const SHELL = "smp-shell-v7.82-label-by-the-pointer";
+/* v7.83-table-and-panel — §774: the tactic's main fields typed in the
+   table, the extras in the panel; removing asks first. */
+const SHELL = "smp-shell-v7.83-table-and-panel";
 const ASSETS = [
   "/",
   "/index.html",

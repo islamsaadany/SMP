@@ -29092,7 +29092,7 @@ function kmTag(n, name, kind){
     var t = e.target;
     return t && t.closest ? t.closest(".kmtag[data-name]") : null;
   }
-  /* §770.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
+  /* §773.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
      hovering should appear close to the mouse, not in the top like that"*).
      With a pointer, the label sits just below and right of it and follows
      it across the tag; flipped to the left or above only where the window
@@ -29157,7 +29157,7 @@ function supportedLine(m, p){
 /* The legend — which number is which measure — folded, so the page costs one
    line until it is asked. Drawn only while the mapping is in use. */
 function supportsLegend(p){
-  /* §770.2: GONE (Islam: *"remove this part of which number is key
+  /* §773.2: GONE (Islam: *"remove this part of which number is key
      measures"*). The tags' own hover names the measure; the folded list
      under the tactics was a second telling. Kept as a function that draws
      nothing, so the three places that called it need no edit and the
@@ -29190,7 +29190,7 @@ function supportsSummary(t, p){
 }
 function supportsEdit(t, p){
   var ms = (p && p.measures) || [], have = supportsIds(t);
-  return '<span class="kmpick">' + bxkey("Supports these " + L("measure").toLowerCase()) +
+  return '<span class="kmpick">' + bxkey(L("measure")) +
     (ms.length
       ? '<details class="kmdrop"><summary><span class="kmsum">' + supportsSummary(t, p) + '</span><span class="kmchev" aria-hidden="true"></span></summary>' +
         '<span class="kmlist" role="group" aria-label="' + L("measure") + ' this ' + L1("tactic").toLowerCase() + ' supports">' +
@@ -29226,7 +29226,7 @@ function supportsEdit(t, p){
   });
 })();
 
-/* ── §769: THE TACTIC PANEL ─────────────────────────────────────────────
+/* ── §772: THE TACTIC PANEL ─────────────────────────────────────────────
    Islam, with a picture of the pen: *"can we work on a cleaner approach to
    edit the tactic. as it became very complex."* One tactic's row held its
    name, description, key measures, requirements, four outcomes with four
@@ -29260,17 +29260,25 @@ var PEN_TACTIC = null;
   }
   document.addEventListener("input", function(e){
     var f = e.target;
-    if (!f || !f.classList || !f.closest(".tacpanel")) return;
-    var row = rowOf(), v = String(f.value || "").trim();
+    if (!f || !f.classList) return;
+    var v = String(f.value || "").trim(), word = "New " + L1("tactic").toLowerCase();
+    /* §774: the name is typed in the ROW; the panel's head follows it */
     if (f.classList.contains("tacpn")) {
-      var nm = row && row.querySelector(".tacname"), hd = document.querySelector(".tacpanel .tpname");
-      if (nm) nm.textContent = v || "New " + L1("tactic").toLowerCase();
-      if (hd) hd.textContent = v || "New " + L1("tactic").toLowerCase();
-    } else if (f.classList.contains("tacpd") && row) {
-      var cell = row.querySelector(".tacname") && row.querySelector(".tacname").closest("td");
-      var why = cell && cell.querySelector(".why");
+      var tr = f.closest("[data-tacrow]"), hd = document.querySelector(".tacpanel .tpname");
+      if (tr && hd && String(PEN_TACTIC) === tr.dataset.tacrow) hd.textContent = v || word;
+    /* an outcome's name is typed in the ROW; the panel reads it over the target */
+    } else if (f.classList.contains("outpn")) {
+      var ln = f.closest(".outline"), tr2 = f.closest("[data-tacrow]");
+      if (ln && tr2 && String(PEN_TACTIC) === tr2.dataset.tacrow) {
+        var nm = document.querySelector('.tacpanel .oname[data-oname="' + ln.dataset.oid.replace(/"/g, '\\"') + '"]');
+        if (nm) nm.textContent = v || "Not named yet — type it in the table";
+      }
+    /* the description is typed in the PANEL; the grey line under the row's name follows */
+    } else if (f.classList.contains("tacpd") && f.closest(".tacpanel")) {
+      var row = rowOf(), cell = row && row.querySelector(".namerow") && row.querySelector(".namerow").closest("td");
       if (!cell) return;
-      if (!why && v) { why = document.createElement("span"); why.className = "why"; cell.querySelector(".tacopenb").after(why); }
+      var why = cell.querySelector(".tacwhy");
+      if (!why && v) { why = document.createElement("span"); why.className = "why tacwhy"; cell.appendChild(why); }
       if (why) { why.textContent = v; if (!v) why.remove(); }
     }
   });
@@ -39144,7 +39152,7 @@ function unitPlanBody(it, u, railed, bare){
   /* §267: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
      row's span and every row have to agree about how many columns there are. */
 
-  /* ── §769: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
+  /* ── §772: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
   var penOpen = null;
   if (ed) {
     if (PEN_TACTIC === null && it.tactics.length) PEN_TACTIC = it.tactics[0].id;
@@ -39154,38 +39162,58 @@ function unitPlanBody(it, u, railed, bare){
       if (!penOpen && it.tactics.length) { PEN_TACTIC = it.tactics[0].id; penOpen = it.tactics[0]; }
     }
   } else PEN_TACTIC = null;
-  /* One line per tactic. The name is a button so the keyboard and the gap
-     walk can reach it; the row as a whole opens too. A tactic still owing a
-     gap says how many and carries the walk mark on its name while it is not
-     the open one, so Next gap lands on the row and opening it continues the
-     walk inside the panel. */
+  /* §774 — THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL. Islam, on
+     the §772 list: *"how about we make the tactic main info editable in the
+     main table and the extra details in the left pane to make the table on
+     the left usable and the pan for extras"*, then eleven rounds on the
+     working mockup (design-mockups/tactic-edit-panel/2026-11-16_table-and-
+     panel.html) and *"go ahead and build it"*. One line per tactic, typed in:
+     the NAME, each OUTCOME's name (and + Add an outcome), the OWNER (the
+     register-fed picker, §130.1) and the QUARTERS; a ringed × on the name box
+     and on each outcome box that ASKS before anything goes (§774.1 in
+     shell.html). The description reads under the name and is typed in the
+     panel. The panel holds the extras: the description, each outcome's
+     target, unit, direction, rule and months, the collaborators (the
+     searchable tick list), the key measures and the requirements. The open
+     row is tinted and runs out of the table's edge to meet the panel (his
+     pick, D). The panel's head is the tactic's name and the arrows; no close
+     and no Done — the top's Done editing is the one. */
+  var RM_X = '<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  var outLine = function(t, x, inner, oid, extra){
+    return '<span class="outline" data-oid="' + esc(oid) + '">' + inner +
+      '<button type="button" class="rm" data-rmout="' + esc(t.id) + '|' + esc(oid) + '" title="Remove this ' +
+      esc(detailWord("outcomes", "one", t).toLowerCase()) + '">' + RM_X + '</button>' + (extra || '') + '</span>';
+  };
   var penTacticRow = function(t, i){
-    var open = penOpen === t, gaps = SMPRules.gapMissing("tactic", t).length;
-    var outs = (t.outcome || t.outTarget ? 1 : 0) + tacticExtras(t).length;
-    var noTgt = (t.outcome && SMPRules.gapEmpty("outTarget", t) ? 1 : 0) +
-      tacticExtras(t).filter(function(x){ return SMPRules.gapBlank(x.outTarget); }).length;
-    var word = "New " + L1("tactic").toLowerCase();
+    var open = penOpen === t;
+    /* the first outcome's name, through gapCell (its lifecycle, red word and walk mark) */
+    var first = gapCell("plan", "u_plan", t, "outcome", {
+      ctx: pctx(t), del: true, fillKind: "tactic",
+      read: function(v){ return '<b>' + esc(v) + '</b>'; },
+      control: function(set, pendCls){ return textOr("plan", t.outcome || "", "outpn " + (pendCls || ""), set); } });
+    var extras = tacticExtras(t).map(function(x){
+      var emptyName = !x.outcome || !String(x.outcome).trim();
+      return outLine(t, x, textOr("plan", x.outcome || "", "outpn" + (emptyName ? " gapwalk" : ""),
+        function(v){ setOr(x, "outcome", v); }), x.id);
+    }).join('');
+    /* the target lives in the panel: a tactic not open says so where the walk can land */
+    var tgtGap = !open && t.outcome && SMPRules.gapEmpty("outTarget", t)
+      ? '<span class="missing tacgap gapwalk" data-tacopen="' + esc(t.id) + '" tabindex="0">Target missing — set it in the panel</span>' : '';
     return '<tr data-oi="' + i + '" data-tacrow="' + esc(t.id) + '" data-tacopen="' + esc(t.id) + '"' +
       hidCls(t, open ? " penon" : "") + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') + '<span class="idx-n">' + (i + 1) + '</span></td>' +
-      '<td><button type="button" class="tacopenb' + (gaps && !open ? ' gapwalk' : '') + '" title="Open this ' +
-        esc(L1("tactic").toLowerCase()) + ' in the panel"><b class="tacname">' + (t.name ? esc(t.name) : esc(word)) + '</b></button>' +
-        (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
-        (gaps ? '<span class="tacgaps">' + gaps + ' missing</span>' : '') + '</td>' +
-      '<td class="outn">' + (outs ? outs + (noTgt ? '<span class="why">' + noTgt + ' without a target</span>' : '')
-                                  : '<span class="missing">Missing</span>') + '</td>' +
-      '<td>' + (t.owner ? ownerShown(t.owner) : '<span class="missing">Missing</span>') + '</td>' +
-      '<td class="collabs">' + (collabNames(t).length ? collabShown(t.collaborators) : '<span class="nobody">&mdash;</span>') + '</td>' +
-      '<td>' + qs(t) + '</td>' +
-      '<td>' + (supportsOf(t, it).length ? supportsOf(t, it).map(function(x){ return kmTag(x.n, x.m.name, "m"); }).join('')
-                                         : '<span class="nobody">&mdash;</span>') + '</td>' +
-      '<td class="tools">' + eyeBtn(t, "plan", "u_plan") + xb("tactics", t.id) + '</td></tr>';
+      '<td><span class="namerow">' + textOr("plan", t.name, "tacpn", function(v){ t.name = v; }) +
+        '<button type="button" class="rm" data-rmrow="tactic|' + esc(u.ukey) + '|' + esc(t.id) + '" title="Remove this ' +
+        esc(L1("tactic").toLowerCase()) + '">' + RM_X + '</button></span>' +
+        (t.description ? '<span class="why tacwhy">' + esc(t.description) + '</span>' : '') + '</td>' +
+      '<td class="outc">' + outLine(t, t, first, "first") + extras +
+        '<span class="addout">' + outAddBtn(t) + '</span>' + tgtGap + '</td>' +
+      '<td>' + gapCell("plan", "u_plan", t, "owner", {
+        ctx: pctx(t), readEmpty: '<span class="missing">Missing</span>', read: ownerShown,
+        control: function(set, pendCls){
+          return selectOr("plan", t.owner == null ? "" : t.owner, ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set); } }) + '</td>' +
+      '<td><span role="group" aria-label="Quarters this ' + esc(L1("tactic").toLowerCase()) + ' runs in">' + qsEdit(t) + '</span></td></tr>';
   };
-  /* The panel: every field the row used to hold, in sections, through the
-     SAME builders — gapCell keeps the lifecycle, the red word and the walk
-     mark; the outcomes keep their own small table so §248's four boxes,
-     §278's months and §414's extra lines are drawn by the code that already
-     draws them. */
   var tacticPanel = function(t){
     var i = it.tactics.indexOf(t), n = it.tactics.length;
     var prev = it.tactics[(i - 1 + n) % n], next = it.tactics[(i + 1) % n];
@@ -39195,20 +39223,18 @@ function unitPlanBody(it, u, railed, bare){
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
       ctx: pctx(t), del: true, fillKind: "tactic", read: tgtShown,
       control: function(set, pendCls){ tgtOpen = true; return outcomeEdit(t, set, pendCls, false); } });
-    var nEx = tacticExtras(t).length, tdCls = tgtOpen ? 'tgtcell' : 'tgtcol num';
-    var outRows = '<tr><td>' + (nEx ? otag("O1") : '') +
-      gapCell("plan", "u_plan", t, "outcome", {
-        ctx: pctx(t), del: true, fillKind: "tactic",
-        read: function(v){ return '<b>' + esc(v) + '</b>'; },
-        control: function(set, pendCls){ return textOr("plan", t.outcome || "", pendCls || "", set); } }) +
-      (!nEx ? outAddBtn(t) : '') + '</td>' +
+    var tdCls = tgtOpen ? 'tgtcell' : 'tgtcol num';
+    var named = function(v, oid){
+      return '<b class="oname" data-oname="' + esc(oid) + '">' + (v && String(v).trim() ? esc(v)
+        : '<span class="nobody">Not named yet — type it in the table</span>') + '</b>'; };
+    var outRows = '<tr><td>' + (tacticExtras(t).length ? otag("O1") : '') + named(t.outcome, "first") + '</td>' +
       monthlyTgtCell(tdCls, t, "outMonthly", tgtCell, !SMPRules.isYesNo(t.outTarget), true) + '</tr>' +
-      planOutRows(t, true, tdCls) +
+      tacticExtras(t).map(function(x){
+        var emptyTgt = SMPRules.gapEmpty("outTarget", x);
+        return '<tr class="' + outSubCls(t) + '"><td>' + otag(x.id) + named(x.outcome, x.id) + '</td>' +
+          '<td class="tgtcell">' + outcomeEdit(x, null, emptyTgt ? "gapwalk" : "", false) + '</td></tr>';
+      }).join('') + outPad(tacticExtras(t).length) +
       (!SMPRules.isYesNo(t.outTarget) ? monthlyRowFor(t, "outMonthly", "outTarget", 2, t.outcome || t.name) : "");
-    var owner = gapCell("plan", "u_plan", t, "owner", {
-      ctx: pctx(t), readEmpty: '<span class="missing">Missing</span>', read: ownerShown,
-      control: function(set, pendCls){
-        return selectOr("plan", t.owner == null ? "" : t.owner, ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set); } });
     var collabs = gapCell("plan", "u_plan", t, "collaborators", {
       ctx: pctx(t), text: collabText,
       parse: function(v){ return Array.isArray(v) ? v.map(function(x){ return String(x).trim(); }).filter(Boolean) : collabParse(v); },
@@ -39217,31 +39243,26 @@ function unitPlanBody(it, u, railed, bare){
         return selectManyOr("plan", collabNames(t), ownerChoices(collabNames(t), false), "collabsel " + (pendCls || ""), set,
           "Collaborators on this " + word); } });
     return '<aside class="tacpanel" aria-label="' + esc(word) + ' being edited">' +
-      '<div class="tph"><span class="tpk">' + word + ' ' + (i + 1) + ' of ' + n + '</span>' +
-        '<b class="tpname">' + (t.name ? esc(t.name) : 'New ' + esc(word.toLowerCase())) + '</b>' +
-        '<span class="tpnav">' + (n > 1
+      '<div class="tph"><b class="tpname">' + (t.name ? esc(t.name) : 'New ' + esc(word.toLowerCase())) + '</b>' +
+        '<span class="tpnav">' + eyeBtn(t, "plan", "u_plan") + (n > 1
           ? '<button type="button" class="tpbtn" data-tacopen="' + esc(prev.id) + '" title="Previous ' + esc(word.toLowerCase()) + '">&uarr;</button>' +
             '<button type="button" class="tpbtn" data-tacopen="' + esc(next.id) + '" title="Next ' + esc(word.toLowerCase()) + '">&darr;</button>' : '') +
-          '<button type="button" class="tpbtn tpx" data-tacclose="1" title="Close the panel">&times;</button></span></div>' +
+        '</span></div>' +
       '<div class="tpbody">' +
-        sec('The ' + esc(word.toLowerCase()),
-          bxkey(word) + textOr("plan", t.name, "tacpn", function(v){ t.name = v; }) +
-          bxkey("Description") + textOr("plan", t.description || "", "tacdesc tacpd", function(v){ setOr(t, "description", v); })) +
+        sec('Description', textOr("plan", t.description || "", "tacdesc tacpd", function(v){ setOr(t, "description", v); })) +
         sec(DW("outcomes", "many", t),
           '<div class="scroll tpout"><table><thead><tr><th>' + DW("outcomes", "one", t) + '</th><th class="cc">Target</th></tr></thead>' +
           '<tbody>' + outRows + '</tbody></table></div>') +
-        sec('Who', bxkey("Owner") + '<div class="tpfield">' + owner + '</div>' + bxkey("Collaborators") + '<div class="tpfield collabs">' + collabs + '</div>') +
-        sec('When', '<span role="group" aria-label="Quarters this ' + esc(word.toLowerCase()) + ' runs in">' + qsEdit(t) + '</span>') +
+        sec('Collaborators', '<div class="tpfield collabs">' + collabs + '</div>') +
         sec('', supportsEdit(t, it)) +
         (requirementsOn(t) ? sec('', reqsCell(t, true)) : '') +
       '</div>' +
-      '<div class="tpfoot"><span>Saves as you leave each box.</span>' +
-        '<button type="button" class="tpdone" data-page="plan" data-pageset="' + esc(secPagesOpen().join("|")) + '">Done editing</button></div>' +
+      '<div class="tpfoot"><span>Saves as you leave each box.</span></div>' +
       '</aside>';
   };
   var fold = ed && tailFolds();
   var tRows = it.tactics.map(function(t, i){
-    /* §769: with the pen on, one line; the fields are in the panel. */
+    /* §772: with the pen on, one line; the fields are in the panel. */
     if (ed) return penTacticRow(t, i);
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
        predicting it. `.tgtcell` is what stops the Target column folding below
@@ -39602,11 +39623,11 @@ function unitPlanBody(it, u, railed, bare){
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
     /* …and a rule above it, so the two blocks read as two blocks of one card. */
-    /* §769.1: the panel stands beside the TACTICS alone (Islam: it should not
+    /* §772.1: the panel stands beside the TACTICS alone (Islam: it should not
        push the direction's head, nor sit beside the measures), so the wrap
        opens here, at the tactics' heading, and closes after their legend. */
     '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
-    /* §770: and opens UNDER the heading, so the panel's top edge is the
+    /* §773: and opens UNDER the heading, so the panel's top edge is the
        table's own top line (the wireframe's fifth point). */
     (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     /* §248: Description and Outcome are stored on every tactic and the upload
@@ -39624,9 +39645,9 @@ function unitPlanBody(it, u, railed, bare){
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
     (ed
-      /* §769: the list — one line per tactic — and the panel beside it. */
-      ? miniTable(["#", L1("tactic"), DW("outcomes", "many", it), "Owner", "Collabs.", "Quarters", L("measure"), ""],
-          tRows + addRow(7, "tactic", "Add a " + L1("tactic")),
+      /* §772: the list — one line per tactic — and the panel beside it. */
+      ? miniTable(["#", L1("tactic"), DW("outcomes", "one", it), "Owner", "Quarters"],
+          tRows + addRow(4, "tactic", "Add a " + L1("tactic")),
           sortAttr("tactics"), "tactable penlist")
       : miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
                 .concat(fold ? [] : ["Collabs.","Quarters"]),
@@ -39765,7 +39786,7 @@ function renderUnitPlanBody(u){
     /* §540: the count and the rail are of the list AS DRAWN — on a split box
        this tab holds one half of it, and a hint reading "15 Directions" over
        a rail of five is the kind of disagreement §116.2 exists to stop. */
-    /* §770.1: the hint that stood here while arranging — "15 Directions ·
+    /* §773.1: the hint that stood here while arranging — "15 Directions ·
        drag by the handle to reorder, here and inside each Direction" — is
        gone (Islam: *"the statement 15 directions … should be removed"*). The
        handles say it; the rail's head carries the count. */
@@ -89494,7 +89515,7 @@ var SYNC = (function () {
           var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
           if (what === "measure") addMeasure(it);
-          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §769: the new one opens in the panel */
+          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §772: the new one opens in the panel */
         }
         else if (what === "project") {
           /* §326: holderByIdWritable, not capById — a project may be added to
@@ -89650,19 +89671,56 @@ var SYNC = (function () {
       b.addEventListener("click", gapWalk);
     });
 
-    /* §770: the direction's banner height, for the panel to pin under it. Read
+    /* §773: the direction's banner height, for the panel to pin under it. Read
        after the paint that drew it; the band's height depends on nothing the
        panel does, so there is no loop to close (§28.3's worry does not apply). */
     (function(){
       var band = document.querySelector(".pane > .pband, .pane .ptitle.edhead");
       if (band) document.documentElement.style.setProperty("--band-h", band.offsetHeight + "px");
     })();
-    /* §769: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
+    /* §772: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
     document.querySelectorAll("[data-tacopen]").forEach(function(b){
       b.addEventListener("click", function(e){
-        if (b.tagName === "TR" && e.target.closest("select, input, textarea, a, .grip, .ssbtn, label, .eyebtn, .xbtn, [data-rowoff], [data-hiderow]")) return;
+        if (b.tagName === "TR" && e.target.closest("select, input, textarea, button, a, .grip, .ssbtn, label, .eyebtn, .xbtn, .rm, [data-rowoff], [data-hiderow], [data-rmrow], [data-rmout], [data-outadd]")) return;
         if (String(PEN_TACTIC) === b.dataset.tacopen && b.tagName === "TR") return;
         PEN_TACTIC = b.dataset.tacopen; paint();
+      });
+    });
+    /* §774: THE PANEL FOLLOWS THE ROW YOU WORK IN. The focus landing in a box
+       of another tactic's row moves the panel there — a paint, since the panel
+       is drawn by the page — and the focus is put back in the same box of the
+       same row afterwards, so typing goes on where it was. Buttons and the
+       pickers' own buttons are left out: a press on them is a click that a
+       paint under the pointer would swallow. */
+    /* ONLY A PRESS OR A TAB COUNTS. A paint puts the focus back in the box
+       that had it (§35), and that is a focusin too — measured: the panel's ↓
+       and Add a tactic each painted, the focus went back to the row being
+       typed in, and the panel sprang back to it. So the row is followed only
+       within a moment of a mousedown or a Tab, which is what a person moving
+       to another row does and a paint never does. */
+    if (!window.__penFollowWired) {
+      window.__penFollowWired = true; window.__penFollowAt = 0;
+      document.addEventListener("mousedown", function(){ window.__penFollowAt = Date.now(); }, true);
+      document.addEventListener("keydown", function(e){ if (e.key === "Tab") window.__penFollowAt = Date.now(); }, true);
+    }
+    document.querySelectorAll(".penlist tr[data-tacrow]").forEach(function(tr){
+      tr.addEventListener("focusin", function(e){
+        var f = e.target;
+        if (!f || !f.matches || !f.matches("input, textarea, select")) return;
+        if (String(PEN_TACTIC) === tr.dataset.tacrow) return;
+        if (Date.now() - (window.__penFollowAt || 0) > 150) return;   /* a press or a Tab lands its focus at once; a paint comes later */
+        var cell = f.closest("td"); if (!cell) return;
+        var cells = Array.prototype.slice.call(tr.children), ci = cells.indexOf(cell);
+        var ctrls = Array.prototype.slice.call(cell.querySelectorAll("input, textarea, select")), ki = ctrls.indexOf(f);
+        var id = tr.dataset.tacrow;
+        PEN_TACTIC = id; paint();
+        requestAnimationFrame(function(){
+          var row = document.querySelector('.penlist tr[data-tacrow="' + id.replace(/"/g, '\\"') + '"]');
+          var c2 = row && row.children[ci], k2 = c2 && c2.querySelectorAll("input, textarea, select")[ki];
+          if (!k2) return;
+          k2.focus({ preventScroll: true });
+          try { if (k2.setSelectionRange && k2.type !== "number") { var L = k2.value.length; k2.setSelectionRange(L, L); } } catch (x) {}
+        });
       });
     });
     document.querySelectorAll("[data-tacclose]").forEach(function(b){
@@ -89704,6 +89762,17 @@ var SYNC = (function () {
           var box = f && f.parentNode.querySelector("textarea, input");
           if (box) box.focus();
         }, 0);
+      });
+    });
+    /* §774.1: an outcome's ringed × in the row asks before it goes — the first
+       outcome included (Islam: "why am I able to remove the new outcome but not
+       the old one?"); when the first goes, the next moves up into its place. */
+    document.querySelectorAll("[data-rmout]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rmout.split("|");
+        confirmRemoveOutcome(a[0], a[1]);
       });
     });
     document.querySelectorAll("[data-outoff]").forEach(function(b){
@@ -89768,6 +89837,7 @@ var SYNC = (function () {
         if (!mayEditPlan()) return;
         var a = this.dataset.rmrow.split("|");
         if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
+        else if (a[0] === "tactic") confirmRemoveTactic(a[1], a[2]);   /* §774.1 */
         else confirmRemoveProject(a[1]);
       });
     });
@@ -92160,6 +92230,70 @@ var SYNC = (function () {
     if (!removeCapability(id, destId)) return;
     if (RAIL[key]) delete RAIL[key];
     paint();
+  }
+  /* §774.1: A TACTIC ASKS BEFORE IT GOES, the pillar's own way: what it holds,
+     what was reported against it, the archive taken first. Islam: *"the
+     removal of a tactic or outcome should prompt me with a message"*. */
+  function confirmRemoveTactic(ukey, id){
+    var u = unitLikeWritable(ukey), t = null;
+    (u && u.items || []).forEach(function(p){ (p.tactics || []).forEach(function(x){ if (x && x.id === id) t = x; }); });
+    if (!t) return;
+    var word = L1("tactic"), nOut = (t.outcome || t.outTarget ? 1 : 0) + tacticExtras(t).length;
+    var rep = (t.actual != null && t.actual !== "") || (t.outActual != null && t.outActual !== "") ? 1 : 0;
+    rmConfirmOpen("Remove this " + word + "?", t.name || "Untitled",
+      '<b>' + esc(t.name || "This " + word) + '</b>' + (nOut ? ' holds ' + plural(nOut, detailWord("outcomes", "one", t), detailWord("outcomes", "many", t)) : ' holds no outcome yet') + '.',
+      rep, boxRef(ukey).kind === "fn" ? "the function's scores" : "the unit's scores", "Remove the " + word,
+      function(){
+        var u2 = unitLikeWritable(ukey);
+        if (!u2) return;
+        var p2 = null;
+        (u2.items || []).forEach(function(p){ if ((p.tactics || []).some(function(x){ return x && x.id === id; })) p2 = p; });
+        if (!p2) return;
+        archiveUnitPlan(u2, "before " + (t.name || "a " + word.toLowerCase()) + " was removed");
+        removeRowById(p2.tactics, id);
+        if (String(PEN_TACTIC) === String(id)) PEN_TACTIC = null;   /* the pen opens on the first again */
+        paint();
+      });
+  }
+  /* The outcome: its name and target go; its figure with them. The FIRST
+     outcome is the tactic's own fields (§248) and the extras a list (§414),
+     so removing the first moves the first extra up into its place, figure
+     and all, and removing the last extra deletes the lists (§50.6). */
+  function confirmRemoveOutcome(tid, oid){
+    var t = hideableById(tid);
+    if (!t) return;
+    var isFirst = oid === "first";
+    var x = isFirst ? null : (t.outs || []).filter(function(o){ return o && o.id === oid; })[0];
+    if (!isFirst && !x) return;
+    var name = isFirst ? t.outcome : x.outcome, word = detailWord("outcomes", "one", t);
+    var rep = isFirst ? ((t.outActual != null && t.outActual !== "") ? 1 : 0)
+                      : ((t.outActs && t.outActs[oid] != null && t.outActs[oid] !== "") ? 1 : 0);
+    rmConfirmOpen("Remove this " + word.toLowerCase() + "?", name || "Unnamed",
+      '<b>' + esc(name || "This " + word.toLowerCase()) + '</b> and its target go with it.',
+      rep, "the unit's scores", "Remove the " + word.toLowerCase(),
+      function(){
+        var t2 = hideableById(tid); if (!t2) return;
+        if (isFirst) {
+          var ex = Array.isArray(t2.outs) ? t2.outs : [];
+          ["outcome", "outDir", "outTarget", "outCompile", "outActual", "outMonthly", "outQuarterly"].forEach(function(k){ delete t2[k]; });
+          if (ex.length) {
+            var up = ex[0];
+            if (up.outcome) t2.outcome = up.outcome;
+            if (up.outDir) t2.outDir = up.outDir;
+            if (up.outTarget) t2.outTarget = up.outTarget;
+            if (up.outCompile) t2.outCompile = up.outCompile;
+            if (t2.outActs && t2.outActs[up.id] != null && t2.outActs[up.id] !== "") t2.outActual = t2.outActs[up.id];
+            setExtraFigure(t2, up.id, "");
+            t2.outs = ex.slice(1);
+            if (!t2.outs.length) delete t2.outs;
+          }
+        } else {
+          t2.outs = t2.outs.filter(function(o){ return o.id !== oid; });
+          if (!t2.outs.length) delete t2.outs;
+          setExtraFigure(t2, oid, "");
+        }
+        paint();
+      });
   }
   function confirmRemovePillar(ukey, id){
     var u = unitLikeWritable(ukey);

@@ -414,7 +414,7 @@ with sync_playwright() as p:
       t.outcome = 'Attach rate'; t.outTarget = '6#'; t.outCompile = 'Sum'; t.outDir = '\\u2265';
       MONTHOPEN = null; PEN_TACTIC = t.id; paint(); return t.name; }""")
     pg.wait_for_timeout(300)
-    # §769: the tactic's chip is in the panel, open on that tactic
+    # §772: the tactic's chip is in the panel, open on that tactic
     ev(pg, "() => { const c = document.querySelector('.tacpanel .mpopen'); if (c) c.click(); }"); pg.wait_for_timeout(450)
     mode(pg, "q")
     typeboxes(pg, [0, 2, 2, 2])

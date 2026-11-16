@@ -161,24 +161,24 @@ with sync_playwright() as p:
     # write the name, then the target, then the unit, then the rules — and ASK THE DATA
     wrote = pg.evaluate("""()=>{ try{
       function t0(){ return UNITS.mobile.items[0].tactics[0]; }
-      /* §769: the pen's fields are in the panel, open on the first tactic */
+      /* §772: the pen's fields are in the panel, open on the first tactic */
       var p=document.querySelector('.tacpanel');
       function fire(el,v){ if(el.tagName==='SELECT'){el.value=v;} else {el.value=v;}
         el.dispatchEvent(new Event('change',{bubbles:true})); }
       var out={};
-      /* the description is the second box of the panel's first section, under the name */
+      /* §774: the panel's first section is the description alone; the outcome's name is typed in the ROW */
       var sec = p.querySelector('.tpsec');
       var boxes = sec.querySelectorAll('textarea, input.fld');
       out.boxesInNameCell = boxes.length;
       fire(sec.querySelector('.tacpd'), 'Why we chose it');
       out.description = t0().description;
-      fire(p.querySelector('.tpout textarea'), 'Stores opened');
+      fire(document.querySelector('.penlist tr.penon .outline[data-oid="first"] .outpn'), 'Stores opened');
       out.outcome = t0().outcome;
       var g = p.querySelector('td.tgtcell .tgrid');
       fire(g.querySelector('input'), '6');
       out.targetAfterNumber = t0().outTarget;
       return out; }catch(e){ return {err:String(e)}; } }""")
-    ck("the description sits under the name in the panel's first section (§769)", wrote.get("boxesInNameCell")==2, wrote)
+    ck("the description is the panel's first section, on its own (§774)", wrote.get("boxesInNameCell")==1, wrote)
     ck("the description reaches the plan", wrote.get("description")=="Why we chose it", wrote)
     ck("the outcome reaches the plan", wrote.get("outcome")=="Stores opened", wrote)
     ck("the target reaches the plan", wrote.get("targetAfterNumber") not in (None,""), wrote)
@@ -208,7 +208,7 @@ with sync_playwright() as p:
     ck("the compile rule reaches the plan", rest.get("compile")=="Sum", rest)
     order = pg.evaluate("""()=>{ try{
       function t0(){ return UNITS.mobile.items[0].tactics[1]; }
-      /* §769: the second tactic is opened in the panel first */
+      /* §772: the second tactic is opened in the panel first */
       PEN_TACTIC = t0().id; paint();
       var g=document.querySelector('.tacpanel td.tgtcell .tgrid');
       function fire(el,v){ el.value=v; el.dispatchEvent(new Event('change',{bubbles:true})); }

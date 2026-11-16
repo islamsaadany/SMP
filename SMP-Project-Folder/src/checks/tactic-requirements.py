@@ -113,7 +113,7 @@ with sync_playwright() as p:
     print("\n4 · on, the pen")
     go(True)
     nt = safe(pg, "()=>UNITS.mobile.items[0].tactics.length")
-    # §769: one tactic is open in the panel at a time; each is opened and its box read there
+    # §772: one tactic is open in the panel at a time; each is opened and its box read there
     bx = []
     for i in range(nt):
         safe(pg, "()=>{PEN_TACTIC=UNITS.mobile.items[0].tactics[%d].id; paint();}" % i); pg.wait_for_timeout(250)

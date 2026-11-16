@@ -2727,7 +2727,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      stored and the group compile goes on reading them, because a switch
      that changed the scores would be a change of method wearing a
      switch's clothes. The SMO's alone, classified `setup` (authorize.cjs). */
-  function weightingOn(w) { return !w || w.weightingOff !== true; }
+  function weightingWanted(w) { return !w || w.weightingOff !== true; }
+  /* §760: AND THE WHOLE FEATURE IS OFF, FOR EVERY CLIENT (Islam, 2026-11-16:
+     *"the weighting is not relevant and a feature that is not used. let's
+     turn the whole thing off in general and I can revive it later"*).
+     ONE constant, read by everything the feature draws — the tab, the
+     Weight column on Setup › Business units, the weight lines on the cards
+     and the drills, the per-client switch above — and by the compile, which
+     counts every unit equally while it is off (`computeWeights`). Nothing
+     stored moves: the factors, the rows and the weights stay for the day
+     this reads `true` again, and §759's per-client switch comes back with it. */
+  var WEIGHTING = false;
+  function weightingOn(w) { return WEIGHTING && weightingWanted(w); }
 
   /* ── IS THERE ANYTHING TO TOUR (spec 042 §6.2) ───────────────────
      §107's onboarding tour walked a FILLED platform by switching the page to
@@ -6120,7 +6131,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
     reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
-    focusOn: focusOn, weightingOn: weightingOn, tourReady: tourReady, unitLikeOf: unitLikeOf,
+    focusOn: focusOn, weightingOn: weightingOn, weightingWanted: weightingWanted, WEIGHTING: WEIGHTING, tourReady: tourReady, unitLikeOf: unitLikeOf,
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_FILLABLE: GAP_FILLABLE,
     isGapField: isGapField,

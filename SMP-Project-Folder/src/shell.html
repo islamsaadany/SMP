@@ -10612,6 +10612,8 @@
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
         var arr = listById(list, id);
         removeRowById(arr, id);
+        /* §767: a measure taken away is forgotten by the tactics that named it. */
+        if (list === "measures") forgetSupport(id);
         /* §343: and a breakdown with nothing left in it stops being one
            (§50.6) — a pillar that never had one and a pillar that had one
            removed must be byte-identical, or every save carries a change

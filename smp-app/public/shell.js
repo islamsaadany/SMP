@@ -16576,6 +16576,93 @@ function setReqs(t, v){
   var a = reqsParse(v);
   if (a.length) t.reqs = a; else delete t.reqs;
 }
+
+/* §767 — A TACTIC NAMES THE KEY MEASURES IT SUPPORTS. Islam: the tactics
+   should be linked to the key measures "regardless of the outcomes", as a
+   mapping. Stored on the tactic as `supports`, a list of its pillar's own
+   measure IDS riding `tactics.extra` (no migration), DELETED when emptied
+   (§50.6). A plan fact and never a figure: it is not in REPORT.tactic, so it
+   falls to the plan on the server and only the pen writes it. Never scored,
+   never asked for, never counted as missing (Islam chose not, to start).
+
+   EVERY SURFACE SHOWS THE MEASURE'S NUMBER, not its name (mockup A2,
+   design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html): a client's
+   measure names run to eighty letters and written out under a tactic they
+   buried the reported note. The number is the measure's PLACE in its own
+   table, read at draw time, so a measure moved up or down carries its
+   tactics' lines with it; the id is what is stored because a position
+   changes and a name can be retyped. */
+function supportsIds(t){
+  return t && Array.isArray(t.supports)
+    ? t.supports.map(function(x){ return String(x == null ? "" : x).trim(); }).filter(Boolean)
+    : [];
+}
+function setSupports(t, ids){
+  var seen = {}, a = [];
+  (ids || []).forEach(function(x){
+    x = String(x == null ? "" : x).trim();
+    if (x && !seen[x]) { seen[x] = 1; a.push(x); }
+  });
+  if (a.length) t.supports = a; else delete t.supports;
+}
+/* The pillar's measures this tactic supports, in the table's order, each with
+   the number the table prints. A stored id naming no measure of the pillar is
+   simply not drawn, which is what makes removing a measure safe. */
+function supportsOf(t, p){
+  var ids = supportsIds(t), out = [];
+  if (!ids.length || !p) return out;
+  (p.measures || []).forEach(function(m, i){
+    if (m && m.id != null && ids.indexOf(String(m.id)) >= 0) out.push({ m:m, n:i + 1 });
+  });
+  return out;
+}
+function supportedBy(m, p){
+  var out = [];
+  if (!m || m.id == null || !p) return out;
+  (p.tactics || []).forEach(function(t, i){
+    if (supportsIds(t).indexOf(String(m.id)) >= 0) out.push({ t:t, n:i + 1 });
+  });
+  return out;
+}
+/* Whether the mapping is IN USE on this pillar: some tactic names a measure
+   it has. The count under a measure is drawn only then, so a plan nobody has
+   mapped is pixel-identical to what it was (§113.8) rather than red under
+   every measure the day this shipped. */
+function mappingOn(p){
+  return !!(p && (p.tactics || []).some(function(t){ return supportsOf(t, p).length; }));
+}
+/* The pillar holding a row, by identity — the row objects on every page are
+   the stored ones (§384's note on pctx), so no id walk is needed. */
+function pillarHolding(u, row){
+  var hit = null;
+  (u && u.items || []).forEach(function(p){
+    if (!hit && p && ((p.tactics || []).indexOf(row) >= 0 || (p.measures || []).indexOf(row) >= 0)) hit = p;
+  });
+  return hit;
+}
+/* When a measure's id changes — renumbering, a fold onto the company plan —
+   every tactic pointing at the old id points at the new one. */
+function remapSupports(p, oldToNew){
+  (p && p.tactics || []).forEach(function(t){
+    var ids = supportsIds(t);
+    if (!ids.length) return;
+    setSupports(t, ids.map(function(x){ return oldToNew[x] || x; }));
+  });
+}
+/* A measure removed with the pen leaves no tactic pointing at it (§50.6): a
+   tactic that supported it and one that never did must be byte-identical. */
+function forgetSupport(id){
+  if (!id) return;
+  pillarHolderTargets().forEach(function(tg){
+    var u = unitLike(tg);
+    (u && u.items || []).forEach(function(p){
+      (p.tactics || []).forEach(function(t){
+        var ids = supportsIds(t);
+        if (ids.indexOf(String(id)) >= 0) setSupports(t, ids.filter(function(x){ return x !== String(id); }));
+      });
+    });
+  });
+}
 /* §416 — YEARS 1 · 2 · 3 (RHI step 6). A direction marks the years it runs
    in (`p.years`, riding `pillars.extra`, no migration; absent or all three is
    every year and is stored as an ABSENCE, §50.6). The plan stands in one year
@@ -17992,8 +18079,15 @@ function buFoldIntoTop(){
       c.id = mintRowId(GROUP.items, "group-P");
       c.fromUnit = k; c.fromId = p.id;
       if (!c.owner && head) c.owner = head.name;
-      (c.measures || []).forEach(function(m, i){ m.id = c.id + "-M" + (i + 1); });
+      /* §767: the copy's tactics point at the copy's measures. */
+      var fMap = {};
+      (c.measures || []).forEach(function(m, i){
+        var nid = c.id + "-M" + (i + 1);
+        if (m.id != null) fMap[String(m.id)] = nid;
+        m.id = nid;
+      });
       (c.tactics || []).forEach(function(t, i){ t.id = c.id + "-T" + (i + 1); });
+      remapSupports(c, fMap);
       /* §541: coded after the push, so a folded pillar marked Capability
          takes a C and not the next D (see the fold above). */
       GROUP.items.push(c);
@@ -18635,8 +18729,15 @@ function renumberUnit(u){
        An existing code is left alone: nine units carry hand-set ones and
        renumbering them would rewrite codes that are already in decks. */
     if (!p.code) p.code = pillarCode(u, pi);
-    p.measures.forEach(function(m, mi){ m.id = p.id + "-M" + (mi + 1); });
+    /* §767: the tactics' pointers at their measures follow the new ids. */
+    var mMap = {};
+    p.measures.forEach(function(m, mi){
+      var nid = p.id + "-M" + (mi + 1);
+      if (m.id != null && String(m.id) !== nid) mMap[String(m.id)] = nid;
+      m.id = nid;
+    });
     p.tactics.forEach(function(t, ti){ t.id = p.id + "-T" + (ti + 1); });
+    remapSupports(p, mMap);
   });
 }
 UNIT_KEYS.forEach(function(k){ UNITS[k].ukey = k; renumberUnit(UNITS[k]); });
@@ -22723,7 +22824,9 @@ if (typeof module !== "undefined" && module.exports) {
 var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","outcome",
                  "outcome_direction","outcome_target","outcome_compiled",
                  "owner","collaborators","direction","value","value_3y","unit","horizon",
-                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly","quarterly"];
+                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly","quarterly",
+                 /* §767: the key measures a tactic supports, by name, "|"-separated. */
+                 "key_measures"];
 
 /* ── THE TWELVE, ON THE WAY IN (§278) ──────────────────────────────────
    The workbook writes twelve columns and the reader joins them into one
@@ -22923,6 +23026,7 @@ function planTemplate(u){
         outcome_compiled:t.outCompile, owner:t.owner,
         collaborators:(t.collaborators || []).join("|"),
         q1:t.q1 ? 1 : 0, q2:t.q2 ? 1 : 0, q3:t.q3 ? 1 : 0, q4:t.q4 ? 1 : 0,
+        key_measures:supportsOf(t, p).map(function(x){ return x.m.name; }).join("|"),
         source_slide:t.slide, notes:t.notes }));
     });
   });
@@ -23137,6 +23241,26 @@ function ownerProblems(rows){
   });
   return out;
 }
+/* §767: the key measures a tactic's cell names, read against the measures the
+   SAME file puts under the same pillar — a name (case and spacing aside) or
+   the measure's number in that list. Answers the matched measures' indexes
+   (0-based) and the tokens that matched nothing, so the reader can say which
+   (§96.2: said, never dropped). */
+function kmTokens(v){
+  return String(v == null ? "" : v).split(/[|\r\n]/)
+    .map(function(x){ return x.trim(); }).filter(Boolean);
+}
+function kmMatch(v, names){
+  var hit = [], miss = [];
+  var norm = function(s){ return String(s == null ? "" : s).replace(/\s+/g, " ").trim().toLowerCase(); };
+  var keys = (names || []).map(norm);
+  kmTokens(v).forEach(function(tok){
+    var i = /^(?:km\s*)?(\d+)$/i.test(tok) ? +(/(\d+)$/.exec(tok)[1]) - 1 : keys.indexOf(norm(tok));
+    if (i >= 0 && i < keys.length) { if (hit.indexOf(i) < 0) hit.push(i); }
+    else miss.push(tok);
+  });
+  return { hit:hit, miss:miss };
+}
 function validatePlan(u, rows){
   var problems = [], notices = [], themes = GROUP.themes.map(function(x){ return x.ab; });
   var pillars = rows.filter(function(r){ return r.type === "PILLAR"; });
@@ -23170,6 +23294,17 @@ function validatePlan(u, rows){
     if (r.type === "OUTORPHAN")
       problems.push({ at:at, msg:"an outcome on the Outcomes sheet whose tactic could not be matched \u2014 name a tactic from the Tactics sheet, under its pillar" });
     if (r.type === "TACTIC") {
+      /* §767: a key measure named that the file does not put under the
+         same pillar is said, never dropped (§96.2). */
+      var kmv = r.kms || r.key_measures;
+      if (kmv) {
+        var kmNames = rows.filter(function(m){ return m.type === "MEASURE" && m.parent_id === r.parent_id; })
+          .map(function(m){ return m.name; });
+        kmMatch(kmv, kmNames).miss.forEach(function(tok){
+          problems.push({ at:at, msg:'key measure "' + tok + '" is not on the Measures sheet under this pillar \u2014 ' +
+            'write the measure\'s name as that sheet has it, or its number there' });
+        });
+      }
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "" && r[q] != null && ["0","1"].indexOf(String(r[q])) < 0)
           problems.push({ at:at, msg:q + ' is "' + r[q] + '", not 0 or 1' });
@@ -23437,6 +23572,16 @@ function createFromPlan(u, d){
       if (x.outs && x.outs.length) tRow.outs = x.outs.map(function(o){ return Object.assign({}, o); });
       /* §415: requirements only where the file carried some (§50.6). */
       if (x.reqs && reqsParse(x.reqs).length) tRow.reqs = reqsParse(x.reqs);
+      /* §767: the key measures it supports, by name or number against the
+         measures already under this pillar (measures arrive before tactics:
+         the sort above puts both at 2 and keeps the sheets' order). Set only
+         where the file named some (§50.6). */
+      var kmv2 = x.kms || x.key_measures;
+      if (kmv2) {
+        var kmHit = kmMatch(kmv2, p2.measures.map(function(m){ return m.name; })).hit
+          .map(function(i){ return p2.measures[i] && p2.measures[i].id; }).filter(Boolean);
+        if (kmHit.length) tRow.supports = kmHit.map(String);
+      }
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {
@@ -25134,16 +25279,23 @@ function planWorkbook(u){
        client's file is byte-for-byte what it was. */
     var rq = (typeof requirementsOn === "function" && requirementsOn(u)) ||
       u.items.some(function(p){ return (p.tactics || []).some(function(t){ return reqsOf(t).length; }); });
+    /* §767: the key measures a tactic supports, BY NAME — a sheet is read by
+       name (§22: no ids in a file) and the Measures sheet beside it carries
+       the names. Several are "|"-separated, never by comma, which a measure's
+       own name may hold. The column exists only once some tactic names a
+       measure, for §415's reason: every other client's file is byte-for-byte
+       what it was. */
+    var km = u.items.some(function(p){ return (p.tactics || []).some(function(t){ return supportsOf(t, p).length; }); });
     return { name:"Tactics",
       widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
-        .concat(planWidths(9)).concat(rq ? [40] : []),
+        .concat(planWidths(9)).concat(km ? [40] : []).concat(rq ? [40] : []),
       /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
          already says so of the outcome's other three columns — a bare "Jan"
          beside a tactic's own quarters would read as the tactic's month. */
       head:["Pillar", "Tactic", "Description", "Outcome",
             "Outcome direction", "Outcome target", "Outcome compiled",
             "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
-        .concat(planHead("Outcome ")).concat(rq ? ["Requirements"] : []),
+        .concat(planHead("Outcome ")).concat(km ? ["Key measures"] : []).concat(rq ? ["Requirements"] : []),
       numCols:planNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
@@ -25158,6 +25310,7 @@ function planWorkbook(u){
             t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
             SMPRules.isHidden(t) ? "Yes" : ""].concat(planCells(t, "outMonthly", "outQuarterly"))
+            .concat(km ? [supportsOf(t, p).map(function(x){ return x.m.name; }).join(" | ")] : [])
             .concat(rq ? [reqsOf(t).join("\n")] : []));
         });
         return acc;
@@ -25596,7 +25749,11 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "",
       /* §415: a line per item; blank says nothing (a file written before
          this existed carries no such column). */
-      reqs:r["Requirements"] || "" });
+      reqs:r["Requirements"] || "",
+      /* §767: the key measures it supports, as the cell says them — names,
+         or the measure's number on the Measures sheet under the same pillar;
+         resolved against the plan's own measures when the plan is made. */
+      kms:r["Key measures"] || "" });
   });
 
   /* §414: a tactic's extra outcomes ride ON the tactic's row, minted O2,
@@ -28807,6 +28964,8 @@ function measureRows(ms, opts){
                '<span class="idx-n">' + (i+1) + '</span></td><td>' +
                (opts.unscored ? esc(m.name) : '<b class="mname">' + esc(m.name) + '</b>') + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
+               /* §767: the tactics behind it, while the pillar's mapping is in use. */
+               supportedLine(m, opts.pillar) +
                /* THE MERGE NEEDED BOTH SIDES, and git could not know it: this
                   branch names the reported note (§255) and main reads the
                   target at its own scale (§254's `tgtShown`). Taking either
@@ -28900,6 +29059,69 @@ function collabParse(v){
 function setOr(row, field, v){
   v = (v == null ? "" : String(v)).trim();
   if (v) row[field] = v; else delete row[field];
+}
+
+/* ── §767: A TACTIC'S KEY MEASURES, BY NUMBER ──────────────────────────
+   The mapping Islam asked for, drawn the way the A2 mockup was signed off
+   (design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html): under the
+   tactic's name one line of tags, "KM 1 KM 2"; under the measure's name
+   "T1 T5" (Islam, on the built page: no word and no count before the tags);
+   the full name on hover; a folded legend under the
+   tactics table saying which number is which. ONE LINE WHATEVER THE NAMES
+   ARE — the whole reason for the number: a client's measure names run to
+   eighty letters, and written out they buried the reported note. The data
+   helpers sit in config-data.js beside the requirements' (§415). */
+function kmTag(n, name, kind){
+  return '<span class="kmtag ' + (kind === "t" ? "t" : "m") + '" title="' + esc(name || "") + '" tabindex="0">' +
+    (kind === "t" ? "T" + n : "KM " + n) + '</span>';
+}
+function supportsLine(t, p){
+  var s = supportsOf(t, p);
+  if (!s.length) return '';
+  /* Islam, on the built page: no word before the tags — the tags are the line. */
+  return '<span class="kmnums">' + s.map(function(x){ return kmTag(x.n, x.m.name, "m"); }).join('') + '</span>';
+}
+/* The count under a measure, only while the mapping is in use on its pillar
+   (`mappingOn`); a measure nobody is working on says so (Islam's mockup). */
+function supportedLine(m, p){
+  if (!p || !mappingOn(p)) return '';
+  var s = supportedBy(m, p);
+  if (!s.length) return '<span class="kmcount none">No ' + L1("tactic").toLowerCase() + ' supports it yet</span>';
+  /* Islam, on the built page: the tags alone, no "2 tactics" before them. */
+  return '<span class="kmcount">' + s.map(function(x){ return kmTag(x.n, x.t.name, "t"); }).join('') + '</span>';
+}
+/* The legend — which number is which measure — folded, so the page costs one
+   line until it is asked. Drawn only while the mapping is in use. */
+function supportsLegend(p){
+  if (!p || !mappingOn(p)) return '';
+  return '<details class="kmlegend"><summary>Which number is which ' + L1("measure").toLowerCase() + '</summary><div class="kmrows">' +
+    (p.measures || []).map(function(m, i){
+      return '<span class="kmtag m">KM ' + (i + 1) + '</span><span>' + esc(m.name || "") + '</span>';
+    }).join('') + '</div></details>';
+}
+/* THE PEN: a tick list of the pillar's own measures in the tactic's cell,
+   under its description. Each tick is its own `data-fld`, bound to a setter
+   that TOGGLES the id — the shell's one handler fires the setter on change,
+   and on a checkbox a change is exactly one toggle (§71.2: written and
+   saved, not repainted). Emptied, the key is deleted (§50.6). A pillar with
+   no measure yet has nothing to offer and says so. */
+function supportsEdit(t, p){
+  var ms = (p && p.measures) || [], have = supportsIds(t);
+  return '<span class="kmpick">' + bxkey("Supports these " + L("measure").toLowerCase()) +
+    (ms.length
+      ? '<span class="kmlist" role="group" aria-label="' + L("measure") + ' this ' + L1("tactic").toLowerCase() + ' supports">' +
+        ms.map(function(m, i){
+          var i2 = FIELDS.push(function(){
+            var ids = supportsIds(t), id = String(m.id);
+            setSupports(t, ids.indexOf(id) >= 0 ? ids.filter(function(x){ return x !== id; }) : ids.concat([id]));
+          }) - 1;
+          return '<label><input type="checkbox" data-fld="' + i2 + '"' +
+            (m.id == null ? ' disabled' : '') +
+            (m.id != null && have.indexOf(String(m.id)) >= 0 ? ' checked' : '') + '>' +
+            '<span class="kmtag m">KM ' + (i + 1) + '</span><span class="kmname">' + esc(m.name || "") + '</span></label>';
+        }).join('') + '</span>'
+      : '<span class="why">No ' + L("measure").toLowerCase() + ' on this ' + L1("pillar").toLowerCase() + ' yet</span>') +
+    '</span>';
 }
 /* The outcome's four controls, in ONE cell and ONE grid (Islam: "the 4 boxes
    should be the same size ... so we can give space for the other columns").
@@ -29162,7 +29384,7 @@ function planOutRows(t, ed, tdCls){
 /* Tactic, owner and quarters read left; the rest centres. A tactic whose
    quarters have not begun is not behind \u2014 it is not yet due, and scoring it
    would say otherwise. */
-function tacticRows(ts, unitKey){
+function tacticRows(ts, unitKey, p){
   var on = arranging("unit", unitKey);
   return ts.map(function(t, i){
     var pl = tacticPlanned(t), due = tacticDue(t);
@@ -29233,6 +29455,8 @@ function tacticRows(ts, unitKey){
       /* §255: the description stays a plain grey — it is the plan's, and the
          name above it is what it belongs to. The NOTE is the one line in this
          cell that was written this cycle, so it is the one that says so. */
+      /* §767: the key measures it supports, by number, above the note. */
+      supportsLine(t, p) +
       repNote(t) + '</td>' +
       '<td class="outc">' + (nEx ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       '<td' + rs + '>' + esc(t.owner) + '</td><td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
@@ -29523,7 +29747,7 @@ function pillarBody(it, u){
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
-      measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+      measureRows(it.measures, { unit: uk, pillar: it }) + '</tbody></table></div>' +
     /* §343: and the breakdown, where there is one — between the measures it
        is part of and the tactics it is not. A pillar without one adds nothing
        at all: no heading, no empty section (Islam, on the mockup). */
@@ -29533,7 +29757,7 @@ function pillarBody(it, u){
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
-      tacticRows(it.tactics, uk) + '</tbody></table></div>' +
+      tacticRows(it.tactics, uk, it) + '</tbody></table></div>' + supportsLegend(it) +
   '</div>';
 }
 
@@ -35762,6 +35986,8 @@ function renderReport(u, opt){
             var xs = scoredExtras(x.obj), nEx = xs.length, rs = outRowspan(nEx);
             var nameCell = '<td' + rs + '><b class="tacname">' + esc(x.obj.name) + '</b>' +
               (x.obj.description ? '<span class="why">' + esc(x.obj.description) + '</span>' : '') +
+              /* §767: the key measures it supports, as the Plan page says it. */
+              supportsLine(x.obj, pillarHolding(u, x.obj)) +
               '</td><td>' + (nEx ? otag("O1") : '') + outcomeCell(x.obj) + '</td>';
             var subs = function(asked){
               return xs.map(function(ex){
@@ -38687,7 +38913,9 @@ function unitPlanBody(it, u, railed, bare){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         (ed ? eyeBtn(m, "plan", "u_plan") : hidChip(m)) +
-        xb("measures", m.id) + '</td>' +
+        xb("measures", m.id) +
+        /* §767: the tactics behind it, while the pillar's mapping is in use. */
+        supportedLine(m, it) + '</td>' +
       /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
          direction and the compile rule because "they change what a figure
          MEANS" — the right worry while the pen could fall to the person being
@@ -38853,6 +39081,9 @@ function unitPlanBody(it, u, railed, bare){
         (ed ? bxkey("Description") + textOr("plan", t.description || "", "tacdesc",
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
+        /* §767: the key measures it supports — the tick list in the pen, the
+           numbers otherwise. */
+        (ed ? supportsEdit(t, it) : supportsLine(t, it)) +
         /* §415: what the tactic needs, under the description. */
         reqsCell(t, ed) +
         /* §267: AND THE TAIL, when the window is too narrow for it to be two
@@ -39138,7 +39369,9 @@ function unitPlanBody(it, u, railed, bare){
     miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
                 .concat(fold ? [] : ["Collabs.","Quarters"]),
       tRows + addRow(fold ? 4 : 6, "tactic", "Add a " + L1("tactic")),
-      sortAttr("tactics"), "tactable");
+      sortAttr("tactics"), "tactable") +
+    /* §767: which number is which measure, folded under the tactics. */
+    supportsLegend(it);
 }
 /* §405: the way a real business unit plans when it is not pillars, or null.
    Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
@@ -39873,7 +40106,7 @@ function unitPerfPane(it, u, railed){
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
-      measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+      measureRows(it.measures, { unit: uk, pillar: it }) + '</tbody></table></div>' +
     /* §343: and the breakdown, where there is one — between the measures it
        is part of and the tactics it is not. A pillar without one adds nothing
        at all: no heading, no empty section (Islam, on the mockup). */
@@ -39883,7 +40116,7 @@ function unitPerfPane(it, u, railed){
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
-      tacticRows(it.tactics, uk) + '</tbody></table></div>';
+      tacticRows(it.tactics, uk, it) + '</tbody></table></div>' + supportsLegend(it);
 }
 
 /* ── tablecols.js ── */
@@ -53233,7 +53466,7 @@ function pillarSlidesOf(u, p, pi, named){
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + hidChip(t) + '</td>' +
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + deckSupports(t, p) + hidChip(t) + '</td>' +
       '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
       (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
@@ -53555,6 +53788,13 @@ function planReqs(t){
   var rq = DECK_PLAN && requirementsOn(t) ? reqsOf(t) : [];
   return rq.length ? '<span class="dsub">' + esc(detailWord("requirements", "many", t)) + ': ' +
     esc(rq.join("  \u00b7  ")) + '</span>' : '';
+}
+/* §767: the key measures a tactic supports, by number, as the page says it —
+   the measures table on the slide before carries the same numbers. */
+function deckSupports(t, p){
+  var s = supportsOf(t, p);
+  return s.length ? '<span class="dsub">' +
+    s.map(function(x){ return 'KM ' + x.n; }).join('  \u00b7  ') + '</span>' : '';
 }
 function deckPillarHead(u, p, pi, which){
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
@@ -57222,7 +57462,10 @@ var READING = (function () {
      under every row, its header the only title — no label over it saying
      the same word — and the columns kept to the width the figures need
      rather than spread to the card's edge. */
-  function measureRows(list) {
+  /* §767: `p` is the pillar, for the tags of the tactics behind a measure and
+     of the measures a tactic supports — the same numbers the Plan page prints,
+     and the legend under the tactics says which is which. */
+  function measureRows(list, p) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No measures yet.</p>';
     return '<table class="rtable rmeas"><thead><tr><th>Measure</th><th class="num">Target</th><th class="num">Actual</th><th>Standing</th></tr></thead><tbody>' +
@@ -57230,16 +57473,16 @@ var READING = (function () {
         var sc = measureScore(m);
         /* a measure not yet given a target or a figure shows a dash, never a bare direction sign over nothing (El Abd, 2026-10-29) */
         var tgt = String(m.target == null ? "" : m.target).trim(), fig = String(figShown(m) || "").trim();
-        return '<tr><td>' + esc(m.name || "") + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
+        return '<tr><td>' + esc(m.name || "") + supportedLine(m, p) + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
           '<td class="num">' + (fig ? fig : '\u2014') + '</td><td class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></td></tr>';
       }).join("") + '</tbody></table>';
   }
-  function tacticRows(list) {
+  function tacticRows(list, p) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No tactics yet.</p>';
     return '<table class="rtable rtacs"><thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Status</th></tr></thead><tbody>' +
       rows.map(function (t) {
-        return '<tr><td>' + esc(t.name || "") + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
+        return '<tr><td>' + esc(t.name || "") + supportsLine(t, p) + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
           '<td><span class="rq">' + [t.q1, t.q2, t.q3, t.q4].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span></td>' +
           '<td><span class="rsts">' + esc(t.status || "\u2014") + '</span></td></tr>';
       }).join("") + '</tbody></table>';
@@ -57337,7 +57580,7 @@ var READING = (function () {
           '<span class="rsum"><b>' + ms + '</b> measure' + (ms === 1 ? "" : "s") + ' · <b>' + ts + '</b> tactic' + (ts === 1 ? "" : "s") +
           ' · <b style="color:' + bandInk(sc) + '">' + pct(sc) + '</b></span>' + stand(sc) +
           '<span class="rchev" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></span></div>' +
-          '<div class="rmore">' + measureRows(it.measures) + tacticRows(it.tactics) + '</div></div>';
+          '<div class="rmore">' + measureRows(it.measures, it) + tacticRows(it.tactics, it) + supportsLegend(it) + '</div></div>';
       }).join("") + '</div>';
   }
 
@@ -65749,6 +65992,7 @@ var TRAIL = (function(){
                 outTarget:"Outcome target", outcome:"Outcome", note:"Note", pct:"% complete",
                 status:"Status", compile:"Compile rule", dir:"Direction", quarters:"Quarters",
                 owner:"Owner", collaborators:"Collaborators", name:"Name", description:"Description",
+                supports:"Key measures supported",
                 weight:"Weight", finish:"Due date", start:"Start", end:"End", def:"Definition",
                 aspiration:"Aspiration", progress:"Progress", measureAt:"Measure date",
                 horizon:"Horizon", kind:"Measured as", hide:"Hidden", endInMind:"End in mind",
@@ -89148,6 +89392,8 @@ var SYNC = (function () {
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
         var arr = listById(list, id);
         removeRowById(arr, id);
+        /* §767: a measure taken away is forgotten by the tactics that named it. */
+        if (list === "measures") forgetSupport(id);
         /* §343: and a breakdown with nothing left in it stops being one
            (§50.6) — a pillar that never had one and a pillar that had one
            removed must be byte-identical, or every save carries a change

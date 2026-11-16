@@ -8112,6 +8112,93 @@ function setReqs(t, v){
   var a = reqsParse(v);
   if (a.length) t.reqs = a; else delete t.reqs;
 }
+
+/* §767 — A TACTIC NAMES THE KEY MEASURES IT SUPPORTS. Islam: the tactics
+   should be linked to the key measures "regardless of the outcomes", as a
+   mapping. Stored on the tactic as `supports`, a list of its pillar's own
+   measure IDS riding `tactics.extra` (no migration), DELETED when emptied
+   (§50.6). A plan fact and never a figure: it is not in REPORT.tactic, so it
+   falls to the plan on the server and only the pen writes it. Never scored,
+   never asked for, never counted as missing (Islam chose not, to start).
+
+   EVERY SURFACE SHOWS THE MEASURE'S NUMBER, not its name (mockup A2,
+   design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html): a client's
+   measure names run to eighty letters and written out under a tactic they
+   buried the reported note. The number is the measure's PLACE in its own
+   table, read at draw time, so a measure moved up or down carries its
+   tactics' lines with it; the id is what is stored because a position
+   changes and a name can be retyped. */
+function supportsIds(t){
+  return t && Array.isArray(t.supports)
+    ? t.supports.map(function(x){ return String(x == null ? "" : x).trim(); }).filter(Boolean)
+    : [];
+}
+function setSupports(t, ids){
+  var seen = {}, a = [];
+  (ids || []).forEach(function(x){
+    x = String(x == null ? "" : x).trim();
+    if (x && !seen[x]) { seen[x] = 1; a.push(x); }
+  });
+  if (a.length) t.supports = a; else delete t.supports;
+}
+/* The pillar's measures this tactic supports, in the table's order, each with
+   the number the table prints. A stored id naming no measure of the pillar is
+   simply not drawn, which is what makes removing a measure safe. */
+function supportsOf(t, p){
+  var ids = supportsIds(t), out = [];
+  if (!ids.length || !p) return out;
+  (p.measures || []).forEach(function(m, i){
+    if (m && m.id != null && ids.indexOf(String(m.id)) >= 0) out.push({ m:m, n:i + 1 });
+  });
+  return out;
+}
+function supportedBy(m, p){
+  var out = [];
+  if (!m || m.id == null || !p) return out;
+  (p.tactics || []).forEach(function(t, i){
+    if (supportsIds(t).indexOf(String(m.id)) >= 0) out.push({ t:t, n:i + 1 });
+  });
+  return out;
+}
+/* Whether the mapping is IN USE on this pillar: some tactic names a measure
+   it has. The count under a measure is drawn only then, so a plan nobody has
+   mapped is pixel-identical to what it was (§113.8) rather than red under
+   every measure the day this shipped. */
+function mappingOn(p){
+  return !!(p && (p.tactics || []).some(function(t){ return supportsOf(t, p).length; }));
+}
+/* The pillar holding a row, by identity — the row objects on every page are
+   the stored ones (§384's note on pctx), so no id walk is needed. */
+function pillarHolding(u, row){
+  var hit = null;
+  (u && u.items || []).forEach(function(p){
+    if (!hit && p && ((p.tactics || []).indexOf(row) >= 0 || (p.measures || []).indexOf(row) >= 0)) hit = p;
+  });
+  return hit;
+}
+/* When a measure's id changes — renumbering, a fold onto the company plan —
+   every tactic pointing at the old id points at the new one. */
+function remapSupports(p, oldToNew){
+  (p && p.tactics || []).forEach(function(t){
+    var ids = supportsIds(t);
+    if (!ids.length) return;
+    setSupports(t, ids.map(function(x){ return oldToNew[x] || x; }));
+  });
+}
+/* A measure removed with the pen leaves no tactic pointing at it (§50.6): a
+   tactic that supported it and one that never did must be byte-identical. */
+function forgetSupport(id){
+  if (!id) return;
+  pillarHolderTargets().forEach(function(tg){
+    var u = unitLike(tg);
+    (u && u.items || []).forEach(function(p){
+      (p.tactics || []).forEach(function(t){
+        var ids = supportsIds(t);
+        if (ids.indexOf(String(id)) >= 0) setSupports(t, ids.filter(function(x){ return x !== String(id); }));
+      });
+    });
+  });
+}
 /* §416 — YEARS 1 · 2 · 3 (RHI step 6). A direction marks the years it runs
    in (`p.years`, riding `pillars.extra`, no migration; absent or all three is
    every year and is stored as an ABSENCE, §50.6). The plan stands in one year
@@ -9528,8 +9615,15 @@ function buFoldIntoTop(){
       c.id = mintRowId(GROUP.items, "group-P");
       c.fromUnit = k; c.fromId = p.id;
       if (!c.owner && head) c.owner = head.name;
-      (c.measures || []).forEach(function(m, i){ m.id = c.id + "-M" + (i + 1); });
+      /* §767: the copy's tactics point at the copy's measures. */
+      var fMap = {};
+      (c.measures || []).forEach(function(m, i){
+        var nid = c.id + "-M" + (i + 1);
+        if (m.id != null) fMap[String(m.id)] = nid;
+        m.id = nid;
+      });
       (c.tactics || []).forEach(function(t, i){ t.id = c.id + "-T" + (i + 1); });
+      remapSupports(c, fMap);
       /* §541: coded after the push, so a folded pillar marked Capability
          takes a C and not the next D (see the fold above). */
       GROUP.items.push(c);
@@ -10171,8 +10265,15 @@ function renumberUnit(u){
        An existing code is left alone: nine units carry hand-set ones and
        renumbering them would rewrite codes that are already in decks. */
     if (!p.code) p.code = pillarCode(u, pi);
-    p.measures.forEach(function(m, mi){ m.id = p.id + "-M" + (mi + 1); });
+    /* §767: the tactics' pointers at their measures follow the new ids. */
+    var mMap = {};
+    p.measures.forEach(function(m, mi){
+      var nid = p.id + "-M" + (mi + 1);
+      if (m.id != null && String(m.id) !== nid) mMap[String(m.id)] = nid;
+      m.id = nid;
+    });
     p.tactics.forEach(function(t, ti){ t.id = p.id + "-T" + (ti + 1); });
+    remapSupports(p, mMap);
   });
 }
 UNIT_KEYS.forEach(function(k){ UNITS[k].ukey = k; renumberUnit(UNITS[k]); });

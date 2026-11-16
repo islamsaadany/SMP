@@ -127,6 +127,8 @@ declare namespace SMP {
     outCompile?: string;
     outActual?: any;
     note?: string;
+    /** §767: the ids of its pillar's key measures this tactic supports. */
+    supports?: string[];
   }
 
   /* ── THE COMPANY: its own plan, and every setting the client holds (§625) ── */

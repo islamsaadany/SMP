@@ -103,8 +103,9 @@
   .panel-open table.tactable { min-width:0; }
   .tactable td .fld.rowfld { width:100%; min-width:140px; font-size:13px; padding:6px 9px; }
   .tactable td .namerow { display:flex; align-items:center; gap:6px; }
-  .tactable td .binb { flex:none; display:inline-grid; place-items:center; width:26px; height:26px; border:0; background:none; color:var(--ink-3); cursor:pointer; border-radius:6px; }
-  .tactable td .binb:hover { color:var(--bad); background:var(--surface-2); }
+  /* C (Islam's pick): the x in a thin ring, one 22px button, grey, red on hover, on the name box and on each outcome box */
+  .tactable td .rm { flex:none; display:inline-grid; place-items:center; width:22px; height:22px; border:1px solid var(--line); border-radius:6px; background:none; color:var(--ink-3); cursor:pointer; padding:0; }
+  .tactable td .rm:hover { color:var(--bad); border-color:var(--bad); background:var(--bad-bg, #F7E3E0); }
   .tactable td .dd .ddbtn { font-size:12.5px; padding:5px 8px; min-height:30px; }
   .tactable td .dd { min-width:130px; }
   .tactable td .qpick { white-space:nowrap; }
@@ -163,7 +164,7 @@
   .dd .ddlist input { width:14px; height:14px; margin:0; accent-color:var(--panel); }
   .dd .ddlist .none { color:var(--ink-3); font-style:italic; cursor:default; }
   .tactable td .outline { display:flex; align-items:center; gap:4px; margin-top:4px; } .tactable td .outline:first-child { margin-top:0; }
-  .tactable td .outline .fld { flex:1; min-width:0; } .tactable td .outline .x { color:var(--ink-3); cursor:pointer; padding:0 3px; }
+  .tactable td .outline .fld { flex:1; min-width:0; }
   .tactable td.rowout small.miss { display:block; margin-top:3px; }
   .tactable td .addout { display:inline-block; margin-top:5px; font-size:11.5px; font-weight:400; color:var(--gold-deep); text-decoration:underline; cursor:pointer; }
   /* the collaborators: a searchable checklist — type to narrow, tick to choose */
@@ -271,10 +272,10 @@
     var n = t.outs.length, miss = t.outs.filter(function(o){ return !String(o.target).trim(); }).length;
     var o1 = t.outs[0];
     return '<tr' + (i === cur ? ' class="on"' : '') + ' data-i="' + i + '"><td class="idx"><span class="grip">☰</span>' + (i + 1) + '</td>' +
-      '<td><span class="namerow"><input class="fld rowfld" data-rowname="' + i + '" value="' + esc(t.name) + '" placeholder="The work itself, as a sentence"><button type="button" class="binb" data-x="' + i + '" title="Remove this tactic"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg></button></span>' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') + '</td>' +
+      '<td><span class="namerow"><input class="fld rowfld" data-rowname="' + i + '" value="' + esc(t.name) + '" placeholder="The work itself, as a sentence"><button type="button" class="rm" data-x="' + i + '" title="Remove this tactic"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></span>' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') + '</td>' +
       '<td class="rowout">' + (t.outs.length ? t.outs.map(function(o, k){
           return '<span class="outline"><input class="fld rowfld" data-rowout="' + i + ':' + k + '" value="' + esc(o.name) + '" placeholder="What it should produce">' +
-            '<span class="x" data-rowox="' + i + ':' + k + '" title="Remove this outcome">×</span></span>'; }).join("")
+            '<button type="button" class="rm" data-rowox="' + i + ':' + k + '" title="Remove this outcome"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></span>'; }).join("")
         : '<span class="outline"><input class="fld rowfld" data-rowout="' + i + ':0" value="" placeholder="What it should produce"></span>') +
         '<span class="addout" data-rowadd="' + i + '">+ Add an outcome</span>' + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') + '</td>' +
       '<td>' + dd("rowowner" + i, function(){ return t.owner; }, false) + '</td>' +

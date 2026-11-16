@@ -70,7 +70,15 @@
   th + th, td + td { border-left:1px solid var(--line-soft); }
   thead th { background:var(--panel); color:var(--panel-ink); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; border-bottom:0; }
   tbody tr:nth-child(even) td { background:var(--zebra); } tbody tr:last-child td { border-bottom:0; }
-  tbody tr.on td { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+  /* option D (Islam's pick): the open row tinted gold, one gold bar on its first cell, and the row run out of the
+     table's right edge to meet the panel, whose left edge is gold */
+  tbody tr.on td { background:var(--gold-bg, #FBF5E6); }
+  tbody tr.on td:first-child { box-shadow:inset 4px 0 0 var(--gold); }
+  .panel-open .tacwrap > .scroll { overflow:visible; }
+  .panel-open tbody tr.on td:last-child { position:relative; }
+  .panel-open tbody tr.on td:last-child::after { content:""; position:absolute; top:-1px; bottom:-1px; left:100%; width:13px;
+    background:var(--gold-bg, #FBF5E6); border-top:1px solid var(--gold); border-bottom:1px solid var(--gold); }
+  .panel-open .side { border-left:3px solid var(--gold); border-radius:0 14px 14px 0; }
   td.idx, th.idx { width:40px; text-align:center; font-family:var(--mono); color:var(--ink-3); } td.idx .grip { color:var(--line); margin-right:3px; }
   .cc { text-align:center; } .num { text-align:center; font-family:var(--mono); white-space:nowrap; }
   .tacname { font-weight:650; display:block; } td.outc b { font-weight:650; }
@@ -101,6 +109,7 @@
   .tactable td.rowout { color:var(--ink-2); min-width:170px; } .tactable td .rowout small { display:block; color:var(--ink-3); font-size:11px; }
   .tactable td .openb { font:inherit; font-size:11px; font-weight:700; color:var(--gold-deep); background:none; border:1px solid var(--line); border-radius:6px; padding:3px 8px; cursor:pointer; white-space:nowrap; }
   .tactable tr.on td .openb { background:var(--gold); border-color:var(--gold); color:#14161A; }
+  :root { --gold-bg:#FBF5E6; } @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --gold-bg:#2A2410; } } :root[data-theme="dark"] { --gold-bg:#2A2410; }
   /* the panel */
   .side { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); position:sticky; top:92px; max-height:calc(100vh - 104px); display:flex; flex-direction:column; min-width:0; }
   .side[hidden] { display:none !important; } .backdrop { display:none; }

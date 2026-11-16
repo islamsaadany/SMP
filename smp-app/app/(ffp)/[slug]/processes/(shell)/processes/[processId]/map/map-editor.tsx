@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useMessages } from "@/ffp/lib/i18n/client";
 import { addProcessStep, arrangeProcessStepsByFlow, createStepConnection } from "@/ffp/lib/actions/process";
 import { confirmProposedStep, deleteProposedStep } from "@/ffp/lib/actions/ai-review";
-import type { StepGap } from "@/ffp/lib/domain/step-readiness";
+import type { SkippableGap, StepGap } from "@/ffp/lib/domain/step-readiness";
 import { useCanEdit } from "../../../workspace-access";
 import { LaneDrawing, type DrawArrow, type DrawStep } from "../../../../lane-drawing";
 import { Modal } from "../../../../read/dialogs";
@@ -25,9 +25,14 @@ export type MapStep = DrawStep & {
   joinRequiresAll: boolean;
   reviewNote: string | null;
   sop: { inputs: string; output: string; errors: string; risk: string };
+  escalation: string;
+  note: string;
+  sameColumn: boolean;
   links: string[];
   branches: { id: string; code: string; name: string }[];
   gaps: (StepGap | "NO_CONTROL")[];
+  /** The marks the office skipped for this step, each of which can be brought back. */
+  skipped: SkippableGap[];
   raci: { activities: number; letters: Record<string, "R" | "A" | "C" | "I"> };
   rules: { row: { id: string; kind: "activity" | "step" } | null; list: { id: string; text: string }[] };
   controls: { id: string; risk: string; control: string | null }[];
@@ -146,6 +151,27 @@ export function MapEditor({
     a.click();
   };
 
+  /* the PDF opens with the whole map as drawn here (the same picture), then the step list */
+  const pdf = async () => {
+    const el = wrap.current?.querySelector<HTMLElement>("[data-lane-grid]");
+    if (!el) return;
+    setErr(null);
+    try {
+      const { toPng } = await import("html-to-image");
+      const image = await toPng(el, { backgroundColor: getComputedStyle(el).backgroundColor || "#ffffff", pixelRatio: 2 });
+      const res = await fetch(`/api/ffp/export/process-map/${processId}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ image }) });
+      if (!res.ok) throw new Error("export");
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${processCode}-process-map.pdf`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch {
+      window.location.href = `/api/ffp/export/process-map/${processId}`;
+    }
+  };
+
   const picked = sel?.startsWith("prop:") ? proposals.find((p) => `prop:${p.id}` === sel) : null;
   const step = steps.find((s) => s.id === sel);
 
@@ -168,9 +194,9 @@ export function MapEditor({
           <button type="button" className={btn} disabled={!steps.length} onClick={() => void picture()}>
             {m.picture}
           </button>
-          <a className={btn} href={`/api/ffp/export/process-map/${processId}`}>
+          <button type="button" className={btn} disabled={!steps.length} onClick={() => void pdf()}>
             {m.pdf}
-          </a>
+          </button>
           <span className="flex-1" />
           <span role="status" className={`text-[12px] ${err ? "font-semibold text-[var(--bad-tx)]" : "text-[var(--ink-3)]"}`}>
             {err ?? (busy || refreshing ? m.saving : m.status)}

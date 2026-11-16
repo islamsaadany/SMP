@@ -173,6 +173,7 @@ export const APP_JS = `(function () {
     if (s && k && k.srch) s.value = k.srch;
     countWas = null; sift();
     if (tb) barFoot();
+    stepsAfterSwap();
     if (k && k.panel) showPanel(true);
     if (k && k.focus) {
       if (k.focus.srch) { if (s) s.focus(); }
@@ -483,9 +484,123 @@ export const APP_JS = `(function () {
      drawn again with it at the top, the box empty and still under the
      cursor for the next one. Escape clears it. The key and the Enter button
      beside the box (§678) do the same one thing. */
+  /* §745: after a step press the page is drawn again — the task's Steps tab
+     stays open (tabOf), the add line keeps the cursor, and "Not yet" keeps
+     the Done question folded for that task */
+  var stepBack = null, notYet = new Set();
+  /* §746 A TICK WRITES INTO THIS WEEK'S BOX (Islam: "once you click it, it
+     should be added automatically to the what happened this week box as if
+     I'm writing something and the person can adjust before pressing
+     enter"): "Done: <step>" goes into the task's progress box, the cursor at
+     its end; several ticks join in one line; an untick takes its own words
+     back out while the box has not been typed in by hand. Nothing is saved
+     until Enter (or Save and next). The box keeps its words across the
+     redraw the tick brings (keep(), §657). */
+  var autoBox = {}, boxFocus = null;
+  function tickToBox(tid, name, on) {
+    var pn = progBox(tid); if (!pn || !name) return;
+    var a = autoBox[tid] || (autoBox[tid] = { names: [], edited: false });
+    if (pn.value && !a.names.length) a.edited = true;
+    if (on) {
+      if (!a.edited) { a.names.push(name); pn.value = "Done: " + a.names.join("; "); }
+      else pn.value = pn.value + (pn.value.trim() ? "; " : "") + "Done: " + name;
+      boxFocus = tid;
+    } else if (!a.edited) {
+      a.names = a.names.filter(function (x) { return x !== name; });
+      pn.value = a.names.length ? "Done: " + a.names.join("; ") : "";
+    }
+  }
+  document.addEventListener("input", function (e) {
+    var t = e.target; if (!t || !t.classList || !t.classList.contains("pnew")) return;
+    var tid = rowOf(t); if (tid) { var a = autoBox[tid] || (autoBox[tid] = { names: [], edited: false }); a.edited = true; }
+  });
+  function stepsAfterSwap() {
+    notYet.forEach(function (tid) { document.querySelectorAll('.open[data-id="' + tid + '"] .sdone').forEach(function (x) { x.hidden = true; }); });
+    /* §746: a box the meeting had folded behind "+ Add to this week" opens
+       when a tick has written into it, and the cursor goes to its end */
+    document.querySelectorAll("#body .mopen .pbox.mq[hidden]").forEach(function (bx) {
+      var pi = bx.querySelector(".pnew");
+      if (pi && pi.value) { bx.hidden = false; var ad = bx.closest(".mopen").querySelector("[data-act=madd]"); if (ad) ad.hidden = true; }
+    });
+    if (boxFocus) {
+      var fb = progBox(boxFocus); boxFocus = null;
+      if (fb) { fb.focus(); fb.setSelectionRange(fb.value.length, fb.value.length); }
+      stepBack = null; addBack = false;
+      return;
+    }
+    if (!stepBack) return;
+    var o = document.querySelector('#body .open[data-id="' + stepBack + '"]');
+    stepBack = null;
+    /* after an add, the line stays open for the next step */
+    if (o && addBack) stepsOpen(o.querySelector(".psec"), true);
+    addBack = false;
+  }
+  /* §747 THE ADD LINE OPENS AND SHUTS: + Add steps (or + Add a step)
+     opens it, with the Steps title and This week's label when the task had
+     none; Escape, or leaving it empty, puts the link back */
+  var addBack = false;
+  function stepsOpen(sec, on) {
+    if (!sec) return;
+    var sx = sec.querySelector(".sadd"), lk = sec.querySelector(".slinks"), empty = sec.classList.contains("empty");
+    if (!sx) return;
+    /* with steps the line stays open (§748): Escape only clears it */
+    if (!on && !empty) { var sv = sx.querySelector(".snew"); if (sv) sv.value = ""; return; }
+    sx.hidden = !on;
+    if (lk) lk.hidden = on;
+    if (empty) {
+      var h = sec.querySelector(".psh"), tw = sec.parentNode && sec.parentNode.querySelector(".pthis");
+      if (h) h.hidden = !on;
+      if (tw) tw.hidden = !on;
+    }
+    var si = sx.querySelector(".snew");
+    if (on && si) si.focus();
+    if (!on && si) si.value = "";
+  }
+  document.addEventListener("focusout", function (e) {
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains("snew") || t.disabled) return;
+    setTimeout(function () {
+      if (!t.isConnected || document.activeElement === t || t.value.trim() || t.disabled) return;
+      stepsOpen(t.closest(".psec"), false);
+    }, 150);
+  });
+  function stepRename(el, tid) {
+    if (el.querySelector("input")) return;
+    var sl = el.closest(".sline"), sid = sl && sl.getAttribute("data-sid"), was = el.textContent;
+    var inp = document.createElement("input"); inp.value = was; inp.maxLength = 300; inp.setAttribute("aria-label", "Rename the step");
+    el.textContent = ""; el.appendChild(inp); inp.focus(); inp.select();
+    var done = false, finish = function (keep) {
+      if (done) return; done = true;
+      var v = inp.value.replace(/\s+/g, " ").trim();
+      if (keep && v && v !== was) { stepBack = tid; post({ act: "step-rename", stepId: sid, title: v }); }
+      else el.textContent = was;
+    };
+    inp.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
+      else if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); finish(false); }
+    });
+    inp.addEventListener("blur", function () { finish(true); });
+  }
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (!t || !t.classList) return;
+    if (t.classList.contains("snew") && e.key === "Escape") {
+      e.preventDefault(); e.stopPropagation();
+      stepsOpen(t.closest(".psec"), false);
+    } else if (t.classList.contains("snew") && e.key === "Enter") {
+      e.preventDefault();
+      var v = t.value.replace(/\s+/g, " ").trim(), tid = rowOf(t);
+      if (!v || !tid) return;
+      stepBack = tid; addBack = true; t.disabled = true;
+      post({ act: "step-add", id: tid, title: v }, null, function (j) { if (!j) { t.disabled = false; t.focus(); } });
+    } else if (t.classList.contains("snm") && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault(); stepRename(t, rowOf(t));
+    }
+  });
   function addProgress(t) {
     var v = t.value.replace(/\\s+/g, " ").trim(), id = rowOf(t);
     if (!v || !id) { t.focus(); return; }
+    delete autoBox[id];
     var k = keep();
     k.prog = k.prog.filter(function (st) { return st.id !== id; });
     k.focus = { prog: id };
@@ -569,6 +684,8 @@ export const APP_JS = `(function () {
       var m = d.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = true;
     });
     var tp = panelEl(); if (tp && !tp.hidden) tp.hidden = true;
+    /* §745: a step's week list */
+    document.querySelectorAll(".swl").forEach(function (x) { if (!except || !except.contains || !x.parentNode.contains(except)) x.hidden = true; });
   }
   /* THE TOPICS PANEL (§533) hangs where the settings menu hangs, off the same
      ⋯, and only one of the two is ever open: "Topics" shuts the menu and
@@ -678,7 +795,7 @@ export const APP_JS = `(function () {
     var fd = e.target.closest && e.target.closest(".chd .find");
     if (fd && !e.target.closest("input, button")) { var si = fd.querySelector(".srch"); if (si) si.focus(); }
     var b = e.target.closest("[data-act]");
-    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots, .rdots")) closePops(null);
+    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots, .rdots, .swk")) closePops(null);
     if (!b) return;
     var act = b.getAttribute("data-act"), id = rowOf(b), ar = inAdd(b);
     if (act === "tick") {
@@ -827,6 +944,33 @@ export const APP_JS = `(function () {
     } else if (act === "skip") {
       /* Skip moves on without saving, carrying or counting (§732) */
       stepTask(1, false);
+    } else if (act === "step-tick" || act === "step-move" || act === "step-delete" || act === "step-due") {
+      /* §745 STEPS: each press is the server's; the list comes back drawn */
+      var sl = b.closest(".sline"), sid = sl && sl.getAttribute("data-sid");
+      if (!sid) return;
+      stepBack = id;
+      if (act === "step-tick") {
+        var on7 = b.getAttribute("aria-pressed") !== "true", nm7 = sl.querySelector(".snm");
+        tickToBox(id, nm7 ? nm7.textContent : "", on7);
+        post({ act: "step-tick", stepId: sid, done: on7 });
+      }
+      else if (act === "step-move") post({ act: "step-move", stepId: sid, dir: Number(b.getAttribute("data-dir")) || 1 });
+      else if (act === "step-delete") post({ act: "step-delete", stepId: sid });
+      else post({ act: "step-due", stepId: sid, due: b.getAttribute("data-day") || null });
+    } else if (act === "step-week") {
+      var wl = b.parentNode.querySelector(".swl"), on8 = wl && wl.hidden;
+      document.querySelectorAll(".swl").forEach(function (x) { x.hidden = true; });
+      document.querySelectorAll("[data-act=step-week]").forEach(function (x) { x.setAttribute("aria-expanded", "false"); });
+      if (wl && on8) { wl.hidden = false; b.setAttribute("aria-expanded", "true"); }
+    } else if (act === "step-rename") {
+      stepRename(b, id);
+    } else if (act === "sadd-open") {
+      /* §747: "+ Add steps" brings out the Steps title and the add line */
+      stepsOpen(b.closest(".psec"), true);
+    } else if (act === "steps-done") {
+      post({ act: "status", id: id, status: "done" });
+    } else if (act === "steps-notyet") {
+      notYet.add(id); var sd = b.closest(".sdone"); if (sd) sd.hidden = true;
     } else if (act === "pmore") {
       /* §739: the earlier updates open in place, and fold again */
       var pl = b.previousElementSibling, on9 = b.getAttribute("aria-expanded") !== "true";

@@ -203,6 +203,99 @@ try {
     check(t && ["tracker", "notes"].every((m) => (t.modules || []).includes(m)), "and both modules are switched on", t && t.modules);
   }
 
+  /* THE PORTFOLIO'S PROJECT (spec 060, 2026-11-05). Read back through the
+     product's OWN readers and rules — `planRows`, `rollUp`, `msState`, the
+     four sections of Progress — and never through a count typed here, so
+     what is asserted is that the demo exercises the module rather than that
+     a file has a certain number of lines (§94.8). Then the four screens are
+     served the way the route serves them, because a plan that reads right
+     and draws wrong is a demo that goes wrong in front of a client. */
+  console.log("── the Portfolio's project");
+  {
+    const PF = await import("../lib/portfolio.ts");
+    const PIO = await import("../lib/portfolio-io.ts");
+    const { todayIn } = await import("../lib/day.ts");
+    const today = todayIn();
+    const projects = await withTenant(row.id, (c) => PIO.listProjects(c, { office: true, personKey: null }));
+    check(projects.length === 1 && projects[0].name === D.moduleContent([]).portfolio.name,
+      "one project, the demo's own, on the landing", projects.map((x) => x.name));
+    const pr = projects[0] || { id: "00000000-0000-0000-0000-000000000000" };
+    const charter = await withTenant(row.id, (c) => PIO.oneProject(c, pr.id));
+    const blank = charter ? Object.keys(PIO.CHARTER_FIELDS).filter((f) => !charter[f]) : ["(no charter)"];
+    check(blank.length === 0, "the charter is written in full, every field and the agreed window", blank);
+    check(pr.cadence && PF.nextCheckpoint(pr.cadence, pr.cadenceDay, today),
+      "it has a checkpoint rhythm of its own, and the next one is a date", [pr.cadence, pr.cadenceDay]);
+    const seatKeys = new Set((await owner.query(
+      "SELECT person_key FROM tenant_users WHERE tenant_id = $1 AND seat IN ('super','smoteam')", [row.id])).rows.map((r) => r.person_key));
+    const members = await withTenant(row.id, async (c) =>
+      (await c.query("SELECT person_key, role FROM portfolio_members WHERE project_id = $1", [pr.id])).rows);
+    check(members.length >= 6 && members.filter((m) => m.role === "lead").length === 1 &&
+      members.some((m) => m.role === "contributor") && members.some((m) => m.role === "viewer"),
+      "a team is named on it — one Lead, contributors and viewers", members.length);
+    check(members.every((m) => !seatKeys.has(m.person_key)),
+      "and nobody holding a seat is on the list — a seat already reaches every project (§6.1)",
+      members.filter((m) => seatKeys.has(m.person_key)).map((m) => m.person_key));
+    const rows = PF.rollUp(await withTenant(row.id, (c) => PIO.planRows(c, pr.id)));
+    const acts = rows.filter((r) => r.lvl === 2);
+    check(rows.filter((r) => r.lvl === 0).length === 4 && rows.some((r) => r.lvl === 1) && acts.length >= 15,
+      "a plan of four phases, with work packages, and activities hung both ways",
+      { phases: rows.filter((r) => r.lvl === 0).length, packages: rows.filter((r) => r.lvl === 1).length, activities: acts.length });
+    check(charter && charter.agreedEnd && acts.some((r) => r.end && r.end > charter.agreedEnd),
+      "and the plan runs past what was agreed, which is the fact the charter's window is there to show",
+      charter && [charter.agreedStart, charter.agreedEnd]);
+    const pct = PF.overall(rows);
+    check(pct != null && pct > 0 && pct < 100, "rolled up by the rule, it is under way and not finished", pct);
+    const states = new Set(PF.commitments(rows).map((r) => PF.msState(r, today)));
+    check(PF.MS_STATES.every((st) => states.has(st)),
+      "a commitment in every one of the six states Analytics draws (§9.12)", [...states]);
+    const owed = { wait: PF.waitingSignOff(rows).length, late: PF.overdue(rows, today).length,
+                   free: PF.nobodyOn(rows).length, done: PF.signedOff(rows).length };
+    check(owed.wait >= 1 && owed.late >= 1 && owed.free >= 1 && owed.done >= 5,
+      "Progress has something in all four of its sections", owed);
+    check(acts.some((r) => r.dependsOn) && acts.some((r) => r.actualEnd && r.end && r.actualEnd > r.end),
+      "dependencies to draw elbows for, and an overrun past its planned bar", null);
+    /* THE FIGURE BEHIND EVERY BREAKDOWN IS THE RULE'S OWN (§3 №3). */
+    const subs = await withTenant(row.id, async (c) =>
+      (await c.query("SELECT activity_id, status, weight FROM portfolio_sub_activities")).rows);
+    const bySub = new Map();
+    for (const sb of subs) (bySub.get(sb.activity_id) || bySub.set(sb.activity_id, []).get(sb.activity_id))
+      .push({ status: sb.status, weight: sb.weight == null ? null : Number(sb.weight) });
+    const wrong = acts.filter((r) => bySub.has(r.id) && r.pct !== PF.progressFromSubs(bySub.get(r.id)));
+    check(bySub.size >= 4 && wrong.length === 0,
+      "every activity with a breakdown carries the figure the breakdown gives", wrong.map((r) => [r.name, r.pct]));
+    check(acts.some((r) => r.status === "done" && !r.actualEnd) &&
+      acts.filter((r) => r.status === "completed").every((r) => r.actualStart && r.actualEnd && r.signedOffAt),
+      "a row waiting for a Lead has no real end yet, and every accepted one has both dates and who accepted it", null);
+    const mods = (await owner.query("SELECT modules FROM tenants WHERE id = $1", [row.id])).rows[0].modules;
+    check((mods || []).includes("portfolio"), "and Portfolio is switched on for the demo", mods);
+
+    /* THE FOUR SCREENS, served as the route serves them. */
+    const { serve } = await import("../modules/portfolio/index.ts");
+    const { offerable } = await import("../lib/modules.ts");
+    const page = async (rest, query = "") => {
+      const r = await serve({
+        req: new Request("https://smp.example/demo/portfolio" + rest.map((x) => "/" + x).join("") + query),
+        slug: "demo", module: "portfolio", tenantId: row.id, tenantName: row.name, have: offerable(),
+        rest, personKey: "smo", seat: "super", consultant: false });
+      return { status: r.status, html: r.status === 200 ? await r.text() : "" };
+    };
+    const landing = await page([]);
+    check(landing.status === 200 && landing.html.includes(pr.name) && /What is owed next/.test(landing.html),
+      "the landing lists it and says what is owed next", landing.status);
+    const plan = await page([pr.id, "plan"], "?view=time");
+    check(plan.status === 200 && /class="dia/.test(plan.html) && /class="over"/.test(plan.html),
+      "the plan's chart has a commitment diamond and an overrun to draw", plan.status);
+    const progress = await page([pr.id, "progress"]);
+    check(progress.status === 200 && /Sign off as complete/.test(progress.html) && /blocked by/.test(progress.html) &&
+      /Next checkpoint/.test(progress.html),
+      "Progress offers the seat a sign-off, names what is blocked, and shows the next checkpoint", progress.status);
+    const analytics = await page([pr.id, "analytics"]);
+    const words = ["On time", "late", "Awaiting sign-off", "overdue", "In ", "Planned"];
+    check(analytics.status === 200 && words.every((w) => analytics.html.includes(w)) && /Behind/.test(analytics.html),
+      "Analytics draws all six commitment states, and a part that is behind",
+      words.filter((w) => !analytics.html.includes(w)));
+  }
+
   /* THE INSIGHTS REPORTS (point 19). The real store is not reachable from a
      check, so a stand-in records what the seeder hands it — the seeder's own
      path through the library's functions is what runs. Both ends (§94.2): a

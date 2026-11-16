@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMessages } from "@/ffp/lib/i18n/client";
 import { Band, Sheet, bandGold, bandQuiet, type Tile } from "../../../band";
 
-export const SECTIONS = ["map", "raci", "authority", "risks", "quality", "lifecycle", "people", "compliance", "connections", "ai"] as const;
+export const SECTIONS = ["map", "raci", "authority", "sop", "risks", "quality", "lifecycle", "people", "compliance", "connections", "ai"] as const;
 export type SectionKey = (typeof SECTIONS)[number];
 export type Dot = "ok" | "bad" | "q";
 
@@ -191,7 +191,13 @@ export function BuilderFrame({
       </div>
 
       <div className="sticky top-0 z-20 -mx-4 mb-3.5 flex flex-wrap items-center justify-between gap-2.5 bg-[var(--ground)] px-4 py-1.5 sm:-mx-6 sm:px-6">
-        <span className="text-[12.5px] text-[var(--ink-3)]">{m.saved}</span>
+        <span className="flex flex-wrap items-center gap-x-3.5 gap-y-1">
+          {/* the way back to the list of all processes without having to save and exit */}
+          <Link href={`${home}/processes`} className="inline-flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-white px-3 py-1.5 text-[13px] font-bold text-[var(--ink)] hover:bg-[var(--surface-2)]">
+            <span aria-hidden="true" className="rtl:rotate-180">←</span> {m.library}
+          </Link>
+          <span className="text-[12.5px] text-[var(--ink-3)]">{m.saved}</span>
+        </span>
         <button type="button" onClick={exit} className="rounded-md border border-[var(--gold)] bg-[var(--gold)] px-3 py-1.5 text-[13px] font-bold text-[var(--on-accent)]">
           {m.exit}
         </button>
@@ -205,7 +211,7 @@ export function BuilderFrame({
         >
           {SECTIONS.map((k, i) => (
             <div key={k} className="contents">
-              {(i === 6 || i === 9) && <span className="mx-1.5 my-1 h-px bg-[var(--line-soft)] max-[899px]:hidden" />}
+              {(i === 7 || i === 10) && <span className="mx-1.5 my-1 h-px bg-[var(--line-soft)] max-[899px]:hidden" />}
               <Link
                 href={sectionHref(base, k)}
                 aria-current={k === sec ? "page" : undefined}

@@ -5,11 +5,22 @@ import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { ProcessMapPdfDocument } from "@/ffp/lib/export/pdf/process-map-pdf";
 import { auth } from "@/ffp/lib/auth/config";
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ processId: string }> }
-) {
-  const { processId } = await params;
+export async function GET(_request: Request, ctx: { params: Promise<{ processId: string }> }) {
+  return build(await ctx.params, null);
+}
+
+/** The same PDF with the map's own drawing (a picture the page took) as its first page, so the PDF shows the whole map as it is drawn. */
+export async function POST(request: Request, ctx: { params: Promise<{ processId: string }> }) {
+  let image: string | null = null;
+  try {
+    const body = (await request.json()) as { image?: unknown };
+    if (typeof body.image === "string" && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(body.image) && body.image.length < 12_000_000) image = body.image;
+  } catch {}
+  if (!image) return NextResponse.json({ error: "VALIDATION_ERROR" }, { status: 400 });
+  return build(await ctx.params, image);
+}
+
+async function build({ processId }: { processId: string }, mapImage: string | null) {
 
   const process = await prisma.process.findUnique({ where: { id: processId } });
   if (!process) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
@@ -48,6 +59,7 @@ export async function GET(
         links: s.links.map((l) => ({ code: l.targetProcess.code, name: l.targetProcess.name })),
       })),
       generatedFor: session?.user?.email ?? "Unknown",
+      mapImage,
     })
   );
 

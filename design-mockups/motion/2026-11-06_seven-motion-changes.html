@@ -1,0 +1,428 @@
+<title>SMP Motion Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+  /* Layout: one column of seven numbered sections; each section is a Before/After pair of live
+     platform controls drawn with the platform's own Forefront palette. */
+  :root {
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --good:#2E7D5B; --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --attn:#B8860B; --attn-bg:#F7EFD6; --attn-tx:#7A5D1C;
+    --over-bg:#FBF6E9; --over-line:#E8D9AE;
+    --cta:#A4512C; --cta-ink:#FFFFFF;
+    --shade:rgba(10,14,20,.55);
+    --shadow-pop:0 12px 32px rgba(10,20,40,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --good:#5FB68C; --good-bg:#1B3129; --good-tx:#8FD3B0;
+      --attn:#D9B23C; --attn-bg:#332C16; --attn-tx:#E8CA6A;
+      --over-bg:#2A2718; --over-line:#5A4D23;
+      --cta:#E1935F; --cta-ink:#14161A;
+      --shade:rgba(0,0,0,.6);
+      --shadow-pop:0 12px 32px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --good:#5FB68C; --good-bg:#1B3129; --good-tx:#8FD3B0;
+    --attn:#D9B23C; --attn-bg:#332C16; --attn-tx:#E8CA6A;
+    --over-bg:#2A2718; --over-line:#5A4D23;
+    --cta:#E1935F; --cta-ink:#14161A;
+    --shade:rgba(0,0,0,.6);
+    --shadow-pop:0 12px 32px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.5;
+         padding-block:28px 64px;
+         padding-left:max(16px, env(safe-area-inset-left, 0px));
+         padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  .wrap { max-width:1040px; margin:0 auto; display:flex; flex-direction:column; gap:36px; }
+  h1 { font-size:22px; font-weight:700; margin:0; text-wrap:balance; }
+  .lead { color:var(--ink-3); margin:4px 0 0; max-width:65ch; }
+  .lead b { color:var(--ink); font-weight:600; }
+
+  section { display:grid; gap:12px; }
+  .shead { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .shead .n { font-family:var(--mono); font-size:12px; color:var(--gold-deep); font-weight:700; }
+  .shead h2 { font-size:17px; font-weight:700; margin:0; }
+  .shead .tip { font-size:12px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.12em; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:720px) { .pair { grid-template-columns:1fr; } }
+  .half { min-width:0; background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden; display:flex; flex-direction:column; }
+  .half > header { display:flex; justify-content:space-between; align-items:center; gap:8px;
+                   padding:8px 14px; border-bottom:1px solid var(--line-soft); font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
+  .half.before > header { color:var(--ink-3); }
+  .half.after > header { color:var(--gold-deep); background:var(--over-bg); border-bottom-color:var(--over-line); }
+  .half > header span { font-family:var(--mono); text-transform:none; letter-spacing:0; font-weight:400; font-size:11px; color:var(--ink-3); }
+  .stage { position:relative; padding:18px 14px; min-height:150px; display:flex; flex-direction:column; gap:12px; align-items:flex-start; }
+  .note { font-size:13px; color:var(--ink-3); max-width:70ch; }
+
+  /* ── platform controls ───────────────────────────────── */
+  .btn { font:600 12px/1.3 var(--sans); padding:7px 14px; border-radius:7px; cursor:pointer;
+         border:1px solid var(--line); background:var(--surface); color:var(--ink); }
+  .btn.primary { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+  .btn.cta { background:var(--cta); border-color:var(--cta); color:var(--cta-ink); }
+  .btn:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+  .tbl { width:100%; border-collapse:collapse; font-size:13px; }
+  .tbl td { padding:8px 10px; border-bottom:1px solid var(--line-soft); }
+  .tbl td.idx { color:var(--ink-3); width:28px; font-family:var(--mono); font-size:12px; }
+
+  /* 1 · Modal: entrance easing */
+  .ov { position:absolute; inset:0; background:var(--shade); display:flex; align-items:center; justify-content:center; padding:16px;
+        opacity:0; visibility:hidden; z-index:5; }
+  .ov .modal { background:var(--surface); border:1px solid var(--line); border-radius:4px; width:min(300px,100%); padding:16px;
+               box-shadow:0 24px 60px rgba(0,0,0,.28); }
+  .ov .modal h3 { margin:0 0 6px; font-size:16px; }
+  .ov .modal p { margin:0 0 12px; color:var(--ink-3); font-size:13px; }
+  /* before: today's rule — plain ease, in and out both 150ms, nothing moves */
+  .before .ov { transition:opacity .15s ease, visibility 0s linear .15s; }
+  .before .ov.on { opacity:1; visibility:visible; transition:opacity .15s ease, visibility 0s; }
+  /* after: ease-out in (180ms), the box settles down 8px; exit 20% shorter (140ms), ease-in */
+  .after .ov { transition:opacity .14s ease-in, visibility 0s linear .14s; }
+  .after .ov .modal { transform:translateY(8px) scale(.98); transition:transform .14s ease-in; }
+  .after .ov.on { opacity:1; visibility:visible; transition:opacity .18s cubic-bezier(0,0,.2,1), visibility 0s; }
+  .after .ov.on .modal { transform:none; transition:transform .18s cubic-bezier(0,0,.2,1); }
+
+  /* 1b · Row move: ease-in-out */
+  .mv tr { position:relative; }
+  .before .mv tr.moving { transition:transform .12s ease; }
+  .after  .mv tr.moving { transition:transform .22s cubic-bezier(.4,0,.2,1); }
+
+  /* 2 · Dropdown */
+  .dd { position:relative; }
+  .menu { position:absolute; z-index:4; top:calc(100% + 6px); left:0; min-width:230px; background:var(--surface);
+          border:1px solid var(--line); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.16); padding:4px 0; }
+  .menu button { display:block; width:100%; text-align:left; font:inherit; font-size:13.5px; color:var(--ink); background:none; border:0; padding:9px 14px; cursor:pointer; }
+  .menu button:hover { background:var(--surface-2); }
+  .menu[hidden] { display:none; }
+  .before .menu { /* today: appears and vanishes with no transition at all */ }
+  .after .menu { transform-origin:top left; opacity:1; transform:scale(1);
+                 transition:opacity .18s cubic-bezier(0,0,.2,1), transform .18s cubic-bezier(0,0,.2,1); }
+  .after .menu.closing, .after .menu.pre { opacity:0; transform:scale(.95) translateY(-4px); }
+  .after .menu.closing { transition-duration:.14s; transition-timing-function:ease-in; }
+
+  /* 3 · The asking box, from the trigger */
+  .askbox { position:absolute; z-index:6; width:max-content; max-width:min(300px, calc(100% - 28px)); padding:12px 14px; border-radius:10px;
+            border:1px solid var(--attn); background:var(--surface); color:var(--ink); box-shadow:var(--shadow-pop); font-size:12.5px; line-height:1.5; }
+  .askbox .arrow { position:absolute; top:-8px; left:22px; width:14px; height:14px; transform:rotate(45deg);
+                   background:var(--surface); border-left:1px solid var(--attn); border-top:1px solid var(--attn); }
+  .askbox .t { font-weight:700; color:var(--attn-tx); margin-bottom:2px; }
+  .askbox .b { margin-bottom:10px; }
+  .askbox .acts { display:flex; gap:8px; flex-wrap:wrap; }
+  .askbox[hidden] { display:none; }
+  .after .askbox { transform-origin:29px -8px; transition:opacity .18s cubic-bezier(0,0,.2,1), transform .18s cubic-bezier(0,0,.2,1); }
+  .after .askbox.pre, .after .askbox.closing { opacity:0; transform:scale(.95); }
+  .after .askbox.closing { transition-duration:.14s; transition-timing-function:ease-in; }
+
+  /* 4 · Exit timing readout */
+  .stamp { font-family:var(--mono); font-size:12px; color:var(--ink-3); display:flex; gap:14px; flex-wrap:wrap; }
+  .stamp b { color:var(--ink); font-weight:600; }
+
+  /* 5 · Bounce vs none: a folding card */
+  .fold { width:100%; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .fold > button { width:100%; display:flex; align-items:center; gap:8px; text-align:left; font:inherit; font-weight:600; font-size:13px;
+                   padding:10px 12px; background:var(--surface-2); border:0; color:var(--ink); cursor:pointer; }
+  .fold .chev { display:inline-block; font-size:12px; color:var(--ink-3); }
+  .fold .body { padding:10px 12px; font-size:13px; color:var(--ink-2); transform-origin:top; }
+  .fold .body[hidden] { display:none; }
+  .before .fold .chev { transition:transform .35s cubic-bezier(.34,1.56,.64,1); }
+  .before .fold .body { animation:springIn .4s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes springIn { from { transform:translateY(-10px) scaleY(.9); opacity:0; } }
+  .after .fold .chev { transition:transform .15s ease; }
+  .after .fold .body { animation:plainIn .15s cubic-bezier(0,0,.2,1); }
+  @keyframes plainIn { from { opacity:0; } }
+  .fold.open .chev { transform:rotate(90deg); }
+
+  /* 6 · Applied · Undo */
+  .applied { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; width:100%;
+             background:var(--good-bg); border:1px solid var(--good); border-radius:8px; padding:10px 14px; font-size:13.5px; color:var(--good-tx); }
+  .applied b { font-weight:700; }
+  .applied a { color:inherit; text-decoration:underline; cursor:pointer; }
+  .applied[hidden] { display:none; }
+  .after .applied.pulse { animation:okpulse 1s cubic-bezier(0,0,.2,1); }
+  @keyframes okpulse { 0% { box-shadow:0 0 0 0 var(--good); } 100% { box-shadow:0 0 0 10px transparent; } }
+
+  /* 7 · Press */
+  .after .btn.press { transition:transform .12s cubic-bezier(0,0,.2,1); }
+  .after .btn.press:active { transform:scale(.97); transition:none; }
+
+  .legend { font-size:12px; color:var(--ink-3); border-top:1px solid var(--line-soft); padding-top:14px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .after .ov, .after .ov .modal, .after .menu, .after .askbox, .after .fold .chev, .after .btn.press,
+    .before .ov, .before .fold .chev, .mv tr.moving { transition:none !important; }
+    .after .fold .body, .before .fold .body, .after .applied.pulse { animation:none !important; }
+    .after .btn.press:active { transform:none; }
+  }
+</style>
+
+<div class="wrap">
+  <div>
+    <h1>SMP Motion Mockup</h1>
+    <p class="lead">Seven small motion changes, each shown as it is today (<b>Before</b>) and as proposed (<b>After</b>). Every control is built the way the platform builds it. Click the buttons on both sides and compare.</p>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <div class="shead"><span class="n">1</span><h2>Ease-out for entrances, ease-in-out for moves</h2><span class="tip">tips 1 and 9</span></div>
+    <div class="pair">
+      <div class="half before" id="s1b"><header>Before <span>opacity only · ease · 150ms</span></header>
+        <div class="stage">
+          <button class="btn primary" onclick="openModal('s1b')">Open the details box</button>
+          <table class="tbl mv" style="width:100%"><tbody>
+            <tr><td class="idx">1</td><td>Grow regional revenue</td></tr>
+            <tr><td class="idx">2</td><td>Reduce time to onboard</td></tr>
+            <tr><td class="idx">3</td><td>Improve audit readiness</td></tr>
+          </tbody></table>
+          <button class="btn" onclick="swapRows('s1b')">Move row 1 down</button>
+          <div class="ov"><div class="modal"><h3>Objective details</h3><p>Fades in with a plain ease and sits still.</p><button class="btn" onclick="closeModal('s1b')">Close</button></div></div>
+        </div>
+      </div>
+      <div class="half after" id="s1a"><header>After <span>ease-out · 180ms · settles down 8px</span></header>
+        <div class="stage">
+          <button class="btn primary" onclick="openModal('s1a')">Open the details box</button>
+          <table class="tbl mv" style="width:100%"><tbody>
+            <tr><td class="idx">1</td><td>Grow regional revenue</td></tr>
+            <tr><td class="idx">2</td><td>Reduce time to onboard</td></tr>
+            <tr><td class="idx">3</td><td>Improve audit readiness</td></tr>
+          </tbody></table>
+          <button class="btn" onclick="swapRows('s1a')">Move row 1 down</button>
+          <div class="ov"><div class="modal"><h3>Objective details</h3><p>Starts fast, lands softly, and arrives from slightly below.</p><button class="btn" onclick="closeModal('s1a')">Close</button></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">The box: ease-out means it starts quickly and slows as it lands. The row move: ease-in-out, 220ms instead of 120ms, so the row leaves gently and arrives gently.</p>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <div class="shead"><span class="n">2</span><h2>Dropdowns at 150–250ms, starting at 0.95</h2><span class="tip">tips 2 and 10</span></div>
+    <div class="pair">
+      <div class="half before" id="s2b"><header>Before <span>no transition · appears instantly</span></header>
+        <div class="stage">
+          <div class="dd">
+            <button class="btn" onclick="toggleMenu('s2b')">Perspective: Financial ▾</button>
+            <div class="menu" hidden>
+              <button>Financial</button><button>Customer</button><button>Internal process</button><button>Learning and growth</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="half after" id="s2a"><header>After <span>opens 180ms · closes 140ms · scale .95 → 1</span></header>
+        <div class="stage">
+          <div class="dd">
+            <button class="btn" onclick="toggleMenu('s2a')">Perspective: Financial ▾</button>
+            <div class="menu" hidden>
+              <button>Financial</button><button>Customer</button><button>Internal process</button><button>Learning and growth</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">The menu grows from its top-left corner, the corner nearest the button, and fades in at the same time. Closing is quicker than opening.</p>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <div class="shead"><span class="n">3</span><h2>The asking box enters from, and exits to, the control</h2><span class="tip">tips 11 and 12</span></div>
+    <div class="pair">
+      <div class="half before" id="s3b"><header>Before <span>appears instantly beside the control</span></header>
+        <div class="stage">
+          <div class="dd">
+            <button class="btn cta" onclick="toggleAsk('s3b')">Remove the Customer perspective</button>
+            <div class="askbox" hidden><i class="arrow"></i>
+              <div class="t">Remove this perspective?</div>
+              <div class="b">4 objectives and 11 measures sit under it. They will be hidden, not deleted.</div>
+              <div class="acts"><button class="btn primary" onclick="toggleAsk('s3b')">Keep it</button><button class="btn" onclick="toggleAsk('s3b')">Remove</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="half after" id="s3a"><header>After <span>grows from the arrow · 180ms out · 140ms back</span></header>
+        <div class="stage">
+          <div class="dd">
+            <button class="btn cta" onclick="toggleAsk('s3a')">Remove the Customer perspective</button>
+            <div class="askbox" hidden><i class="arrow"></i>
+              <div class="t">Remove this perspective?</div>
+              <div class="b">4 objectives and 11 measures sit under it. They will be hidden, not deleted.</div>
+              <div class="acts"><button class="btn primary" onclick="toggleAsk('s3a')">Keep it</button><button class="btn" onclick="toggleAsk('s3a')">Remove</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">The box's growth point is its own arrow, which already points at the control. So it visibly comes out of the thing you pressed and goes back into it.</p>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <div class="shead"><span class="n">4</span><h2>Exits 20% shorter than entrances</h2><span class="tip">tip 15</span></div>
+    <div class="pair">
+      <div class="half before" id="s4b"><header>Before <span>in 150ms · out 150ms</span></header>
+        <div class="stage">
+          <div class="row"><button class="btn primary" onclick="openModal('s4b')">Open</button><button class="btn" onclick="cycle('s4b')">Open, then close</button></div>
+          <div class="stamp" id="s4b-stamp"><span>open <b>150</b> ms</span><span>close <b>150</b> ms</span></div>
+          <div class="ov"><div class="modal"><h3>Edit measure</h3><p>Closing takes exactly as long as opening.</p><button class="btn" onclick="closeModal('s4b')">Close</button></div></div>
+        </div>
+      </div>
+      <div class="half after" id="s4a"><header>After <span>in 180ms · out 140ms</span></header>
+        <div class="stage">
+          <div class="row"><button class="btn primary" onclick="openModal('s4a')">Open</button><button class="btn" onclick="cycle('s4a')">Open, then close</button></div>
+          <div class="stamp" id="s4a-stamp"><span>open <b>180</b> ms</span><span>close <b>140</b> ms</span></div>
+          <div class="ov"><div class="modal"><h3>Edit measure</h3><p>Closing is a touch quicker. You asked for it to go, so it goes.</p><button class="btn" onclick="closeModal('s4a')">Close</button></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Same rule applies to the dropdown and the asking box above. Opening is something to watch; closing is something you already decided.</p>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <div class="shead"><span class="n">5</span><h2>No bounce, no stretch, no rubber band</h2><span class="tip">tips 13, 5, 19 · we already do this</span></div>
+    <div class="pair">
+      <div class="half before" id="s5b"><header>What we are not doing <span>spring overshoot</span></header>
+        <div class="stage">
+          <div class="fold"><button onclick="toggleFold('s5b')"><span class="chev">▸</span> Perspective: Internal process</button>
+            <div class="body" hidden>3 objectives · 8 measures · 2 initiatives. The chevron and the panel overshoot and spring back.</div></div>
+        </div>
+      </div>
+      <div class="half after" id="s5a"><header>Keep as is <span>plain ease · 150ms</span></header>
+        <div class="stage">
+          <div class="fold"><button onclick="toggleFold('s5a')"><span class="chev">▸</span> Perspective: Internal process</button>
+            <div class="body" hidden>3 objectives · 8 measures · 2 initiatives. The chevron turns and the panel fades in, nothing more.</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Shown only to confirm the choice. The platform is a working tool, so motion stays quiet. This is already how it behaves and nothing changes.</p>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <div class="shead"><span class="n">6</span><h2>Pulse to confirm success</h2><span class="tip">tip 8</span></div>
+    <div class="pair">
+      <div class="half before" id="s6b"><header>Before <span>row appears, no motion</span></header>
+        <div class="stage">
+          <button class="btn primary" onclick="applyColours('s6b')">Apply</button>
+          <div class="applied" hidden><b>Applied</b> · <a>Undo</a></div>
+        </div>
+      </div>
+      <div class="half after" id="s6a"><header>After <span>one soft ring · 1s · ease-out</span></header>
+        <div class="stage">
+          <button class="btn primary" onclick="applyColours('s6a')">Apply</button>
+          <div class="applied" hidden><b>Applied</b> · <a>Undo</a></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">The green row after Apply gets the same single ring the chat button and the copilot already use. One pulse, then still. Press Apply again to replay.</p>
+  </section>
+
+  <!-- 7 -->
+  <section>
+    <div class="shead"><span class="n">7</span><h2>Scale to 0.97 on press</h2><span class="tip">tips 4 and 14</span></div>
+    <div class="pair">
+      <div class="half before" id="s7b"><header>Before <span>no press state</span></header>
+        <div class="stage">
+          <div class="row">
+            <button class="btn primary">Save</button><button class="btn">Discard</button><button class="btn cta">Remove</button>
+          </div>
+          <p class="note">Press and hold any button. Nothing acknowledges the press until the click lands.</p>
+        </div>
+      </div>
+      <div class="half after" id="s7a"><header>After <span>held: .97 at once · release: eases back 120ms</span></header>
+        <div class="stage">
+          <div class="row">
+            <button class="btn primary press">Save</button><button class="btn press">Discard</button><button class="btn cta press">Remove</button>
+          </div>
+          <p class="note">Press and hold. The button sinks the moment it is held, with no tween on the way down, and eases back when released.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="legend">Every "After" animation is switched off when the device asks for reduced motion, which is the rule the platform already follows for all its animations.</p>
+</div>
+
+<script>
+  const $ = (id, sel) => document.getElementById(id).querySelector(sel);
+
+  function openModal(id) { $(id, '.ov').classList.add('on'); }
+  function closeModal(id) { $(id, '.ov').classList.remove('on'); }
+  function cycle(id) { openModal(id); setTimeout(() => closeModal(id), 700); }
+
+  function swapRows(id) {
+    const tb = $(id, '.mv tbody');
+    const rows = [...tb.rows];
+    const a = rows[0], b = rows[1];
+    const h = a.getBoundingClientRect().height;
+    a.classList.add('moving'); b.classList.add('moving');
+    requestAnimationFrame(() => {
+      a.style.transform = `translateY(${h}px)`; b.style.transform = `translateY(${-h}px)`;
+      const done = () => {
+        a.classList.remove('moving'); b.classList.remove('moving');
+        a.style.transform = ''; b.style.transform = '';
+        tb.insertBefore(b, a);
+        [...tb.rows].forEach((r, i) => r.querySelector('.idx').textContent = i + 1);
+      };
+      const ms = id.endsWith('a') ? 230 : 130;
+      setTimeout(done, ms);
+    });
+  }
+
+  function animatedShow(el, isAfter) {
+    if (!isAfter) { el.hidden = false; return; }
+    el.classList.add('pre'); el.hidden = false;
+    el.getBoundingClientRect(); // commit the start state
+    el.classList.remove('pre');
+  }
+  function animatedHide(el, isAfter) {
+    if (!isAfter) { el.hidden = true; return; }
+    el.classList.add('closing');
+    setTimeout(() => { el.classList.remove('closing'); el.hidden = true; }, 150);
+  }
+  function toggleMenu(id) {
+    const m = $(id, '.menu'); const after = id.endsWith('a');
+    if (m.hidden) animatedShow(m, after); else animatedHide(m, after);
+  }
+  function toggleAsk(id) {
+    const m = $(id, '.askbox'); const after = id.endsWith('a');
+    if (m.hidden) animatedShow(m, after); else animatedHide(m, after);
+  }
+  function toggleFold(id) {
+    const f = $(id, '.fold'); const body = f.querySelector('.body');
+    const open = f.classList.toggle('open');
+    body.hidden = !open;
+  }
+  function applyColours(id) {
+    const r = $(id, '.applied');
+    r.hidden = false;
+    if (id.endsWith('a')) { r.classList.remove('pulse'); r.getBoundingClientRect(); r.classList.add('pulse'); }
+  }
+  // close menus and asking boxes when clicking elsewhere
+  document.addEventListener('click', e => {
+    document.querySelectorAll('.menu:not([hidden]), .askbox:not([hidden])').forEach(m => {
+      const dd = m.closest('.dd');
+      if (dd && !dd.contains(e.target)) animatedHide(m, m.closest('.after') !== null);
+    });
+  });
+</script>

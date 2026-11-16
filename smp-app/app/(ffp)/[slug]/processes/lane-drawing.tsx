@@ -38,14 +38,28 @@ export type DrawStep = {
   gap?: string | null;
   /** Proposed by the AI review, not a step until it is confirmed. */
   proposed?: boolean;
+  /** Drawn in the same column as the step before it, when its lane differs from every step already in that column. */
+  sameColumn?: boolean;
 };
 export type DrawArrow = { from: string; to: string; label: string | null; dashed?: boolean };
 
-type Edge = { d: string; lx: number; ly: number; label: string | null; dashed: boolean };
-type Box = { left: number; right: number; top: number; bottom: number; cx: number; cy: number; col: number; lane: number };
+type Edge = { from: string; to: string; d: string; lx: number; ly: number; label: string | null; dashed: boolean };
+type Box = { left: number; right: number; top: number; bottom: number; cx: number; cy: number; col: number; lane: number; diamond: boolean };
+
+/* a decision's ways out read at a glance: the "no" side red, the "yes" side green; any other name stays plain */
+const NO_COLOR = "#b42318";
+const YES_COLOR = "#2f7d4f";
+const tone = (label: string | null): "n" | "y" | null => {
+  const l = (label ?? "").trim().toLowerCase();
+  if (/^(no|reject(ed)?|denied|declined|fail(ed)?|not approved|refused)\b/.test(l)) return "n";
+  if (/^(yes|approved?|accepted|pass(ed)?|granted)\b/.test(l)) return "y";
+  return null;
+};
 
 /** The grid's fixed measures: the lane label's column, a lane's height, the room above and below the lanes, a column's least width, and how far off a lane's line a channel run keeps. */
 const LABEL_W = 104, LANE_H = 96, PAD = 16, COL_MIN = 150, OFF = 5;
+/** A decision is the flowchart diamond: its four corners are where arrows meet it, so it is as wide as a box that still leaves a gutter, and short enough to keep clear of the channels between lanes. */
+const DIAMOND_W = 132, DIAMOND_H = 76;
 
 export function LaneDrawing({
   steps,
@@ -69,6 +83,22 @@ export function LaneDrawing({
   const marker = useId().replace(/:/g, "");
   const grid = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState<Edge[]>([]);
+  /* the arrow a click picked, to say where it starts and where it ends */
+  const [pickedEdge, setPickedEdge] = useState<number | null>(null);
+  const nameOf = (id: string) => { const st = steps.find((x) => x.id === id); return st ? (st.n ? `${st.n}· ` : "") + st.label : ""; };
+
+  /* a step's column: its own, or the one before it when it was set beside that step and sits in a lane nothing in that column uses */
+  const colOf: number[] = [];
+  const laneIn = new Map<number, Set<string>>();
+  steps.forEach((s, i) => {
+    const prev = i > 0 ? colOf[i - 1]! : -1;
+    const beside = i > 0 && !!s.sameColumn && !laneIn.get(prev)!.has(s.lane);
+    const col = beside ? prev : prev + 1;
+    colOf.push(col);
+    laneIn.set(col, (laneIn.get(col) ?? new Set()).add(s.lane));
+  });
+  const cols = steps.length ? colOf[colOf.length - 1]! + 1 : 0;
+  const colKey = colOf.join(",");
 
   useLayoutEffect(() => {
     const draw = () => {
@@ -79,21 +109,27 @@ export function LaneDrawing({
       const k = o.width ? L.offsetWidth / o.width : 1;
       const laneOf = (key: string) => Math.max(0, lanes.findIndex((l) => l.key === key));
       const boxes = new Map<string, Box>();
-      steps.forEach((s, col) => {
+      steps.forEach((s, idx) => {
+        const col = colOf[idx]!;
         const r = L.querySelector<HTMLElement>(`[data-step="${s.id}"]`)?.getBoundingClientRect();
         if (!r) return;
         const left = (r.left - o.left) * k, right = (r.right - o.left) * k, top = (r.top - o.top) * k, bottom = (r.bottom - o.top) * k;
-        boxes.set(s.id, { left, right, top, bottom, cx: (left + right) / 2, cy: (top + bottom) / 2, col, lane: laneOf(s.lane) });
+        boxes.set(s.id, { left, right, top, bottom, cx: (left + right) / 2, cy: (top + bottom) / 2, col, lane: laneOf(s.lane), diamond: s.type === "DECISION" && !s.proposed });
       });
       /* the columns share the width left of the lane labels; a box sits in the middle of its column */
-      const colW = (L.offsetWidth - LABEL_W) / Math.max(1, steps.length);
+      const colW = (L.offsetWidth - LABEL_W) / Math.max(1, cols);
       const gutterAfter = (col: number) => LABEL_W + colW * (col + 1);
       const channelBelow = (lane: number) => PAD + LANE_H * (lane + 1) - OFF;
       const channelAbove = (lane: number) => PAD + LANE_H * lane + OFF;
       /* a branch's label, just out of its box beside the turn: nearer the decision than the target, and off the lane's line */
       const byTurn = (a: Box, b: Box) => a.cy + Math.sign(b.cy - a.cy) * Math.min(24, Math.abs(b.cy - a.cy) / 2);
       /* a box in this lane in the columns strictly between the two */
-      const occupied = (lane: number, c1: number, c2: number) => steps.slice(c1 + 1, c2).some((s) => laneOf(s.lane) === lane);
+      const occupied = (lane: number, c1: number, c2: number) => steps.some((s, i) => colOf[i]! > c1 && colOf[i]! < c2 && laneOf(s.lane) === lane);
+
+      /* a decision's ways out, forward ones nearest first and a way back last (it leaves the bottom corner, so no forward one may share that line): the first leaves its right corner, the others its bottom or top corner, so Yes and No never share a line or a label */
+      const outsOf = new Map<string, DrawArrow[]>();
+      for (const c of connections) (outsOf.get(c.from) ?? outsOf.set(c.from, []).get(c.from)!).push(c);
+      for (const list of outsOf.values()) list.sort((x, y) => Number((boxes.get(x.to)?.col ?? 0) <= (boxes.get(x.from)?.col ?? 0)) - Number((boxes.get(y.to)?.col ?? 0) <= (boxes.get(y.from)?.col ?? 0)) || (boxes.get(x.to)?.col ?? 0) - (boxes.get(y.to)?.col ?? 0) || (boxes.get(x.to)?.lane ?? 0) - (boxes.get(y.to)?.lane ?? 0));
 
       const out: Edge[] = [];
       for (const c of connections) {
@@ -101,28 +137,50 @@ export function LaneDrawing({
         if (!a || !b) continue;
         const dashed = !!c.dashed;
         const end = b.left - 2;
+        const siblings = outsOf.get(c.from) ?? [];
+        if (a.diamond && siblings.length > 1 && siblings.indexOf(c) > 0 && b.col > a.col && b.lane !== a.lane) {
+          /* straight down (or up) from the corner, then level into the target; only when nothing sits in that column or along the run */
+          const blocked = steps.some((st, i) => colOf[i] === a.col && laneOf(st.lane) !== a.lane && (laneOf(st.lane) - a.lane) * (b.lane - a.lane) > 0 && Math.abs(laneOf(st.lane) - a.lane) <= Math.abs(b.lane - a.lane)) || occupied(b.lane, a.col, b.col);
+          if (!blocked) {
+            const down = b.lane > a.lane;
+            out.push({ from: c.from, to: c.to, d: `M${a.cx} ${down ? a.bottom : a.top}V${b.cy}H${end}`, lx: a.cx, ly: down ? (a.bottom + b.cy) / 2 : (a.top + b.cy) / 2, label: c.label, dashed });
+            continue;
+          }
+        }
         if (b.col > a.col) {
           const same = a.lane === b.lane;
           if (same && !occupied(a.lane, a.col, b.col)) {
-            out.push({ d: `M${a.right} ${a.cy}H${end}`, lx: (a.right + end) / 2, ly: a.cy - 9, label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${end}`, lx: (a.right + end) / 2, ly: a.cy - 9, label: c.label, dashed });
           } else if (!same && !occupied(b.lane, a.col, b.col)) {
             /* turn in the gutter after the source, come in level with the target */
             const gx = gutterAfter(a.col);
-            out.push({ d: `M${a.right} ${a.cy}H${gx}V${b.cy}H${end}`, lx: gx, ly: byTurn(a, b), label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${gx}V${b.cy}H${end}`, lx: gx, ly: byTurn(a, b), label: c.label, dashed });
           } else if (!same && !occupied(a.lane, a.col, b.col)) {
             /* run level with the source, turn in the gutter before the target */
             const gx = gutterAfter(b.col - 1);
-            out.push({ d: `M${a.right} ${a.cy}H${gx}V${b.cy}H${end}`, lx: gx, ly: byTurn(b, a), label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${gx}V${b.cy}H${end}`, lx: gx, ly: byTurn(b, a), label: c.label, dashed });
           } else {
             /* a box in the way either way: along the channel beside the source's lane, toward the target's */
             const ch = !same ? (a.lane < b.lane ? channelBelow(a.lane) : channelAbove(a.lane)) : a.lane + 1 < lanes.length ? channelBelow(a.lane) : channelAbove(a.lane);
             const g1 = gutterAfter(a.col), g2 = gutterAfter(b.col - 1);
-            out.push({ d: `M${a.right} ${a.cy}H${g1}V${ch}H${g2}V${b.cy}H${end}`, lx: (g1 + g2) / 2, ly: ch, label: c.label, dashed });
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${g1}V${ch}H${g2}V${b.cy}H${end}`, lx: (g1 + g2) / 2, ly: ch, label: c.label, dashed });
+          }
+        } else if (b.col === a.col) {
+          /* two steps in one column: straight down (or up) between the boxes, a little left of the middle so a loop leaving the middle of the box is not drawn over it;
+             when a box of that column sits in a lane between them, along the column's right margin instead, clear of the gutter the other arrows turn in */
+          const between = steps.some((s, i) => colOf[i] === a.col && laneOf(s.lane) > Math.min(a.lane, b.lane) && laneOf(s.lane) < Math.max(a.lane, b.lane));
+          if (!between) {
+            const x = a.diamond || b.diamond ? a.cx : Math.min(a.cx, b.cx) - 14;
+            const down = b.cy > a.cy;
+            out.push({ from: c.from, to: c.to, d: down ? `M${x} ${a.bottom}V${b.top - 2}` : `M${x} ${a.top}V${b.bottom + 2}`, lx: x, ly: (down ? a.bottom + b.top : a.top + b.bottom) / 2, label: c.label, dashed });
+          } else {
+            const x = Math.max(a.right, b.right) + 9;
+            out.push({ from: c.from, to: c.to, d: `M${a.right} ${a.cy}H${x}V${b.cy}H${b.right + 2}`, lx: x, ly: (a.cy + b.cy) / 2, label: c.label, dashed });
           }
         } else {
           /* back: from under the source, along the channel under the lower lane, up into the target */
           const ch = channelBelow(Math.max(a.lane, b.lane)) + 2 * OFF;
-          out.push({ d: `M${a.cx} ${a.bottom}V${ch}H${b.cx}V${b.bottom + 2}`, lx: (a.cx + b.cx) / 2, ly: ch, label: c.label, dashed });
+          out.push({ from: c.from, to: c.to, d: `M${a.cx} ${a.bottom}V${ch}H${b.cx}V${b.bottom + 2}`, lx: (a.cx + b.cx) / 2, ly: ch, label: c.label, dashed });
         }
       }
       setEdges(out);
@@ -133,9 +191,9 @@ export function LaneDrawing({
     if (grid.current) seen.observe(grid.current);
     document.fonts?.ready.then(draw);
     return () => seen.disconnect();
-  }, [connections, steps, lanes]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- colKey stands for colOf, which is rebuilt every render
+  }, [connections, steps, lanes, colKey]);
 
-  const cols = steps.length;
   return (
     <div className="overflow-x-auto rounded-lg border border-[var(--line)] bg-[var(--surface)]" dir="ltr">
       <div
@@ -162,7 +220,7 @@ export function LaneDrawing({
         ))}
         {steps.map((s, i) => {
           const ends = s.type === "START" || s.type === "END";
-          const pos = { gridRow: Math.max(1, lanes.findIndex((l) => l.key === s.lane) + 1), gridColumn: i + 2 };
+          const pos = { gridRow: Math.max(1, lanes.findIndex((l) => l.key === s.lane) + 1), gridColumn: colOf[i]! + 2 };
           const head = s.proposed ? proposedLabel : s.n ? m.step(s.n) : s.type === "START" ? m.start : s.type === "END" ? m.end : "";
           const inner = (
             <>
@@ -171,6 +229,42 @@ export function LaneDrawing({
             </>
           );
           const on = s.id === sel ? "shadow-[0_0_0_3px_var(--gold)]" : "";
+          if (s.type === "DECISION" && !s.proposed) {
+            const w = DIAMOND_W, h = DIAMOND_H;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                data-step={s.id}
+                data-shape="diamond"
+                style={{ ...pos, width: w, height: h }}
+                title={s.label}
+                aria-pressed={s.id === sel}
+                onClick={() => onPick(s.id)}
+                className="relative z-[2] self-center justify-self-center text-center"
+              >
+                <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
+                  <polygon
+                    points={`${w / 2},1.5 ${w - 1.5},${h / 2} ${w / 2},${h - 1.5} 1.5,${h / 2}`}
+                    strokeLinejoin="round"
+                    style={{ fill: "var(--surface)", stroke: s.id === sel ? "var(--gold)" : "var(--stone)", strokeWidth: s.id === sel ? 3 : 1.5 }}
+                  />
+                </svg>
+                <span className="relative flex h-full items-center justify-center px-[26px]">
+                  <span className="line-clamp-3 text-[10.5px] font-bold leading-[12px] text-[var(--ink)]">
+                    {s.n ? <span className="me-0.5 font-mono font-bold text-[var(--ink-3)]">{s.n}·</span> : null}
+                    {s.label}
+                  </span>
+                </span>
+                {s.changed && <span className="absolute left-1 top-0 rounded-[3px] bg-[var(--gold)] px-1 text-[9px] font-extrabold tracking-[.05em] text-[var(--on-accent)]">{m.changed.toUpperCase()}</span>}
+                {s.gap && (
+                  <span title={s.gap} className="absolute grid h-[18px] w-[18px] place-items-center rounded-full bg-[var(--bad)] text-[11px] font-extrabold text-white" style={{ right: 20, top: 2 }}>
+                    !
+                  </span>
+                )}
+              </button>
+            );
+          }
           if (ends && !pickEnds)
             return (
               <div key={s.id} data-step={s.id} style={pos} className="relative z-[2] w-[100px] self-center justify-self-center rounded-full border-[1.5px] border-[var(--field-line)] bg-[var(--surface-2)] px-[9px] py-1.5 text-center">
@@ -208,34 +302,64 @@ export function LaneDrawing({
             <marker id={`${marker}a`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
               <path d="M0 0 8 4 0 8z" style={{ fill: "var(--field-line)" }} />
             </marker>
+            <marker id={`${marker}n`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M0 0 8 4 0 8z" style={{ fill: NO_COLOR }} />
+            </marker>
+            <marker id={`${marker}y`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M0 0 8 4 0 8z" style={{ fill: YES_COLOR }} />
+            </marker>
             <marker id={`${marker}g`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
               <path d="M0 0 8 4 0 8z" style={{ fill: "var(--gold)" }} />
             </marker>
           </defs>
           {edges.map((e, i) => (
+            <path key={`h${i}`} d={e.d} fill="none" stroke="transparent" strokeWidth="12" data-arrow-hit={i} style={{ pointerEvents: "stroke", cursor: "pointer" }}
+              onClick={(ev) => { ev.stopPropagation(); setPickedEdge(pickedEdge === i ? null : i); }} />
+          ))}
+          {edges.map((e, i) => {
+            const t = e.dashed ? null : tone(e.label);
+            return (
             <path
               key={i}
               d={e.d}
               fill="none"
-              strokeWidth="1.5"
+              strokeWidth={pickedEdge === i ? 3.5 : t ? 2 : 1.5}
               strokeLinejoin="round"
               strokeDasharray={e.dashed ? "4 3" : undefined}
-              markerEnd={`url(#${marker}${e.dashed ? "g" : "a"})`}
-              style={{ stroke: e.dashed ? "var(--gold)" : "var(--field-line)" }}
+              markerEnd={`url(#${marker}${e.dashed ? "g" : t ?? "a"})`}
+              style={{ stroke: e.dashed ? "var(--gold)" : t === "n" ? NO_COLOR : t === "y" ? YES_COLOR : "var(--field-line)" }}
             />
-          ))}
+            );
+          })}
           {edges.map((e, i) => {
             if (!e.label) return null;
             const w = e.label.length * 6 + 10;
+            const t = e.dashed ? null : tone(e.label);
+            const col = t === "n" ? NO_COLOR : t === "y" ? YES_COLOR : null;
             return (
               <g key={`l${i}`}>
-                <rect x={e.lx - w / 2} y={e.ly - 8} width={w} height="16" rx="3" style={{ fill: "var(--surface)", stroke: "var(--line)" }} />
-                <text x={e.lx} y={e.ly + 3.5} textAnchor="middle" fontSize="10.5" fontWeight="600" style={{ fill: "var(--ink-2)" }}>
+                <rect x={e.lx - w / 2} y={e.ly - 8} width={w} height="16" rx="3" style={{ fill: "var(--surface)", stroke: col ?? "var(--line)" }} />
+                <text x={e.lx} y={e.ly + 3.5} textAnchor="middle" fontSize="10.5" fontWeight="700" style={{ fill: col ?? "var(--ink-2)" }}>
                   {e.label}
                 </text>
               </g>
             );
           })}
+          {pickedEdge !== null && edges[pickedEdge] ? (() => {
+            const e = edges[pickedEdge]!;
+            const [sx, sy] = e.d.slice(1).split(/[HV]/)[0]!.split(/[ ,]/).map(Number);
+            const a = `${m.arrowFrom}: ${nameOf(e.from)}`, b = `${m.arrowTo}: ${nameOf(e.to)}`;
+            const w = Math.min(260, Math.max(a.length, b.length) * 6.2 + 18);
+            const x = Math.max(LABEL_W + 6, e.lx - w / 2), y = e.ly + 14;
+            return (
+              <g data-arrow-info style={{ pointerEvents: "none" }}>
+                <circle cx={sx} cy={sy} r="4" style={{ fill: "var(--gold)" }} />
+                <rect x={x} y={y} width={w} height="38" rx="5" style={{ fill: "var(--surface)", stroke: "var(--gold)", strokeWidth: 1.5 }} />
+                <text x={x + 8} y={y + 15} fontSize="10.5" fontWeight="600" style={{ fill: "var(--ink)" }}>{a.length > 40 ? a.slice(0, 39) + "…" : a}</text>
+                <text x={x + 8} y={y + 30} fontSize="10.5" fontWeight="600" style={{ fill: "var(--ink)" }}>{b.length > 40 ? b.slice(0, 39) + "…" : b}</text>
+              </g>
+            );
+          })() : null}
         </svg>
       </div>
     </div>

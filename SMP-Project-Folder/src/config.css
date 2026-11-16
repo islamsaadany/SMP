@@ -1872,6 +1872,13 @@
                  width:290px; background:var(--surface); border:1px solid var(--line);
                  border-radius:var(--r); box-shadow:0 12px 30px rgba(0,0,0,.16);
                  padding:6px; text-align:left; }
+  /* §751 these open like the dropdown (arrange.css): from .95 at the corner
+     nearest their button. They are removed by a repaint rather than closed,
+     so they have no exit of their own. positionRowMenu reads offsetWidth and
+     offsetHeight, which a transform does not touch. */
+  .kmenu { animation:menuin .18s cubic-bezier(0,0,.2,1); transform-origin:top left; }
+  .hmenu-panel { animation:menuin .18s cubic-bezier(0,0,.2,1); transform-origin:top right; }
+  @media (prefers-reduced-motion:reduce) { .kmenu, .hmenu-panel { animation:none; } }
   .hmenu-panel.cols { width:236px; }
   .hmenu-h { display:flex; justify-content:space-between; align-items:baseline;
              gap:10px; padding:5px 8px 7px; font:700 10px/1 var(--sans);

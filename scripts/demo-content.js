@@ -31,9 +31,9 @@
      7 · monthly phasing, one pillar breakdown, objective weights for every
          unit, a `≤ Sum` measure, and Focus marks across more units.
 
-   The module tables (tracker, notes) are not the graph and are written by
-   the seeder that owns the tenant — `moduleContent()` below only says what
-   goes in them. */
+   The module tables (tracker, notes, portfolio) are not the graph and are
+   written by the seeder that owns the tenant — `moduleContent()` below only
+   says what goes in them. */
 
 /* ── Small builders ──────────────────────────────────────────────
    PROGRESS IS STORED FOR THE OLD READERS ONLY. Every score the product draws
@@ -616,6 +616,189 @@ function enrich(g) {
   return g;
 }
 
+/* ── 9 · the Portfolio's own project (spec 060, 2026-11-05) ────────
+   Islam: *"for the portfolio module for Meridian I need a full working
+   sample project with plan and progress and analytics."* One project,
+   filled in end to end, so every screen the module has reads something:
+   the charter with every field written, a team with one Lead, a plan of
+   four phases with work packages, activities, breakdowns, dependencies
+   and commitments, and enough of it done, late, waiting and unassigned
+   that Progress has all four sections and Analytics draws a commitment in
+   every one of its six states (§9.12). A demo that only shows the healthy
+   case shows nothing about what the module is for.
+
+   WHAT IS TYPED HERE AND WHAT IS NOT. Dates are offsets from the day the
+   demo is seeded, so what was late last month is still late next month
+   (spec 060 §13.9). People are REGISTER KEYS, never names (§48). The figure
+   on an activity with a breakdown is NOT typed: the seeder works it out
+   with the product's own `progressFromSubs`, so the stored number cannot
+   disagree with the steps under it (§3 №3). The consultant on the plan is
+   whoever holds the office seat on the demo, as the tracker's owner is.
+
+   ORDER IS THE CONTRACT, as it is for everything above: this is written in
+   the invented world and the refusal scans it. */
+function portfolioProject(officeKeys) {
+  const owners = officeKeys && officeKeys.length ? officeKeys : ["smo"];
+  const consultant = owners[0];
+  const day = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  /* An activity: dates as offsets, resolved here; `dep` names the code of
+     the one it waits for; `subs` is [name, weight, status]; `with` is who
+     else is tagged on it; `signed` is [by, day] for an accepted one. */
+  const A = (o) => Object.assign({}, o, {
+    start: o.start == null ? null : day(o.start), end: o.end == null ? null : day(o.end),
+    realStart: o.realStart == null ? null : day(o.realStart),
+    realEnd: o.realEnd == null ? null : day(o.realEnd),
+    signed: o.signed ? [o.signed[0], day(o.signed[1])] : null,
+  });
+  return {
+    name: "Retail operating model redesign",
+    brief: "Redesign how Meridian's stores are run — roles, standards, range and the hand-over with the " +
+      "online shop — and prove it in three pilot stores before it goes to every store.",
+    sponsors: [{ key: "co_b2c" }],
+    consultants: owners.map((k) => ({ key: k })),
+    stakeholders: [{ key: "rethead" }, { key: "mrchead" }, { key: "oshead" }, { key: "cahead" }, { key: "fn_hr" }, { key: "fn_fin" }],
+    painDrivers:
+      "- Revenue per store is ahead of plan, but five stores carry the rest: the gap between the best and the worst store is 2.4x on the same footprint.\n" +
+      "- Store managers spend a third of their week on stock paperwork that Merchandising already holds.\n" +
+      "- Online orders returned in a store are refused or handled by hand, and the customer leaves.\n" +
+      "- No written standard for opening, closing, cash or replenishment — each store does it its own way.",
+    gainDrivers:
+      "- One way of running a store, written down, so a new manager is productive in weeks rather than a year.\n" +
+      "- Returns from the online shop taken in any store from Q3, which the H1 review agreed.\n" +
+      "- A range set by store cluster rather than by what the last buyer ordered.\n" +
+      "- Store staff rostered to footfall rather than to opening hours.",
+    inScope:
+      "All 38 Meridian stores: the operating model (roles, staffing, standards), the range and planogram " +
+      "standards with Merchandising, the online-returns hand-over with Online Shop, and the training that " +
+      "goes with it. A pilot in three stores before the roll-out.",
+    outScope:
+      "Store leases and the property plan; the point-of-sale system itself (its set-up for the new " +
+      "processes is in); the Nigeria outlets; and Customer Care's own contact-centre processes.",
+    deliverables:
+      "- Diagnostic report with the store economics baseline\n" +
+      "- Store operating model: role profiles, staffing model, written standards\n" +
+      "- Range and planogram standards by store cluster\n" +
+      "- Online returns taken in store, agreed with Online Shop\n" +
+      "- Pilot readout with the measured effect in three stores\n" +
+      "- Roll-out in two waves, with a handover pack for the Strategy Office",
+    successCriteria:
+      "- Revenue per store in the bottom ten stores up 15% on the baseline within two quarters of roll-out\n" +
+      "- Store manager time on stock paperwork halved\n" +
+      "- Online returns accepted in every store, with the refund made inside 48 hours\n" +
+      "- Every store audited against the written standard at least once in the roll-out quarter",
+    resources:
+      "Retail's head as project lead; one store operations manager and one merchandising manager " +
+      "half-time; HR for the role profiles; Finance for the baseline; two consultants through the pilot, " +
+      "one through the roll-out.",
+    budget: "EGP 4.2m fees and expenses, store fit-out excluded",
+    risks:
+      "- Peak season sits across the pilot, so store managers' time is the first thing to go\n" +
+      "- Merchandising's planogram standards are late, and the pilot stores cannot be issued them until they are done\n" +
+      "- Online returns in store depend on a point-of-sale change IT has not yet scheduled\n" +
+      "- Fatigue: this is the third change programme the stores have seen in two years",
+    /* What was agreed, beside what is happening: the plan runs a fortnight
+       past the agreed end, which is the fact the row is there to show. */
+    agreedStart: day(-120), agreedEnd: day(60),
+    cadence: "weekly", cadenceDay: 2,   /* Tuesdays, Sunday first */
+    members: [
+      ["rethead", "lead"], ["own_ret", "contributor"], ["mrchead", "contributor"], ["own_mrc", "contributor"],
+      ["oshead", "contributor"], ["fn_hr", "contributor"], ["cahead", "viewer"], ["fn_fin", "viewer"], ["co_b2c", "viewer"],
+    ],
+    phases: [
+      /* 1 · finished and accepted, one of them three days late. */
+      { name: "Diagnose", weight: 20, activities: [
+        A({ code: "1.1", name: "Store visits and interviews", who: "own_ret", billable: true,
+            start: -120, end: -106, realStart: -120, realEnd: -104, status: "completed", signed: ["rethead", -104],
+            about: "Twelve stores, chosen to cover the best and the worst on revenue per square metre.",
+            produces: "Store visit notes and an interview summary by theme.",
+            subs: [["Visit twelve stores across the clusters", 40, "done"], ["Interview every store manager", 40, "done"], ["Write up what was found", 20, "done"]] }),
+        A({ code: "1.2", name: "Baseline of store economics", who: "fn_fin",
+            start: -112, end: -98, realStart: -110, realEnd: -97, status: "completed", signed: ["rethead", -97],
+            about: "Revenue, margin, staffing cost and stock days per store, on one basis.",
+            produces: "The baseline workbook, one line per store." }),
+        A({ code: "1.3", name: "Diagnostic report", who: consultant, milestone: true, billable: true,
+            start: -100, end: -85, realStart: -99, realEnd: -82, status: "completed", signed: ["rethead", -82],
+            about: "What the visits and the numbers say together, and the case for the redesign.",
+            produces: "The diagnostic report, presented to the company CEO." }),
+      ] },
+      /* 2 · three work packages: one finished, one with the late piece, one blocked by it. */
+      { name: "Design", weight: 30, packages: [
+        { name: "Store operating model", activities: [
+          A({ code: "2.1.1", name: "Role profiles and staffing model", who: "fn_hr", with: ["own_ret"],
+              start: -84, end: -70, realStart: -83, realEnd: -70, status: "completed", signed: ["rethead", -70],
+              produces: "A role profile for every store post and the staffing model by store size." }),
+          A({ code: "2.1.2", name: "Written store standards", who: "own_ret", with: ["cahead"], milestone: true,
+              start: -78, end: -56, realStart: -78, realEnd: -58, status: "completed", signed: ["rethead", -58],
+              about: "One standard for every store: how it opens, closes, replenishes, serves and handles cash.",
+              produces: "The store standards manual, signed by Retail's head.",
+              subs: [["Opening and closing", 25, "done"], ["Stock and replenishment", 25, "done"],
+                     ["Customer service standard", 25, "done"], ["Cash and controls", 25, "done"]] }),
+          A({ code: "2.1.3", name: "Online returns taken in store", who: "oshead", milestone: true, billable: true, dep: "2.1.2",
+              start: -62, end: -45, realStart: -60, status: "done",
+              about: "A customer returns an online order in any store and the refund is made from there.",
+              produces: "The returns process, the point-of-sale change request and the staff guide." }),
+        ] },
+        { name: "Range and merchandising", activities: [
+          A({ code: "2.2.1", name: "Range review by store cluster", who: "mrchead",
+              start: -70, end: -50, realStart: -70, realEnd: -52, status: "completed", signed: ["rethead", -52],
+              subs: [["Cluster the stores", 30, "done"], ["Review the range in each cluster", 50, "done"], ["Agree the exits with Merchandising", 20, "done"]] }),
+          A({ code: "2.2.2", name: "Planogram standards", who: "own_mrc", milestone: true, dep: "2.2.1",
+              start: -40, end: -12, realStart: -38, status: "in_progress",
+              about: "How each cluster's range sits on the shelf, store by store.",
+              produces: "Planogram standards by cluster, with the two test stores' photographs.",
+              subs: [["Draft the standards", 50, "done"], ["Test them in two stores", 30, "in_progress"], ["Merchandising signs them off", 20, "todo"]] }),
+        ] },
+        { name: "Hand-over to the pilot", activities: [
+          A({ code: "2.3.1", name: "Planograms issued to the pilot stores", who: "mrchead", milestone: true, dep: "2.2.2",
+              start: -4, end: -4, status: "not_started",
+              about: "The three pilot stores get their planograms and the range changes that go with them.",
+              produces: "Planograms on the shelf in the three stores." }),
+        ] },
+      ] },
+      /* 3 · under way: one accepted, one in its third week, one nobody is on, one due soon. */
+      { name: "Pilot", weight: 30, activities: [
+        A({ code: "3.1", name: "Pilot stores chosen and briefed", who: "own_ret", milestone: true,
+            start: -20, end: -14, realStart: -20, realEnd: -15, status: "completed", signed: ["rethead", -15],
+            produces: "Three stores, one from each cluster, and their managers briefed." }),
+        A({ code: "3.2", name: "Pilot in three stores", who: "own_ret", with: ["mrchead", "oshead"], billable: true,
+            start: -12, end: 9, realStart: -12, status: "in_progress",
+            about: "Three stores, one from each cluster, run the new model for six weeks.",
+            produces: "Weekly pilot notes and the measured effect against the baseline.",
+            subs: [["Weeks 1–2: new rota and the standards", 30, "done"], ["Weeks 3–4: planograms and range", 40, "in_progress"],
+                   ["Weeks 5–6: online returns in store", 30, "todo"]] }),
+        A({ code: "3.3", name: "Store staff training for the pilot", who: null,
+            start: -5, end: 3, status: "not_started",
+            about: "Half a day per store team on the standards and the returns process.",
+            produces: "Trained staff in the three stores, with the sign-in sheets." }),
+        A({ code: "3.4", name: "Pilot readout", who: consultant, milestone: true, billable: true, dep: "3.2",
+            start: 12, end: 12, status: "not_started",
+            about: "What the six weeks showed, and the go or no-go for the roll-out.",
+            produces: "The pilot readout and the roll-out decision." }),
+      ] },
+      /* 4 · planned, in two waves. A GO-LIVE IS A DATE, NOT A STRETCH OF WORK
+         (§9.9): the chart draws a commitment of a day as a diamond and one
+         that runs for weeks as a bar, so the plan carries both kinds. */
+      { name: "Roll out", weight: 20, packages: [
+        { name: "Wave 1 · city stores", activities: [
+          A({ code: "4.1.1", name: "Roll-out plan by wave", who: "own_ret", dep: "3.4",
+              start: 13, end: 20, status: "not_started" }),
+          A({ code: "4.1.2", name: "Wave 1 stores live", who: "rethead", milestone: true, dep: "4.1.1",
+              start: 45, end: 45, status: "not_started",
+              about: "Eighteen city stores on the new model, store by store." }),
+        ] },
+        { name: "Wave 2 · regional stores", activities: [
+          A({ code: "4.2.1", name: "Wave 2 stores live", who: "rethead", milestone: true, dep: "4.1.2",
+              start: 72, end: 72, status: "not_started",
+              about: "The remaining twenty stores." }),
+          A({ code: "4.2.2", name: "Handover to the Strategy Office", who: consultant, billable: true,
+              start: 66, end: 75, status: "not_started",
+              produces: "The handover pack: the standards, the audit checklist and the measures to keep." }),
+        ] },
+      ] },
+    ],
+  };
+}
+
 /* ── 8 · the Tracker and Meeting Notes (spec 054, 055) ────────────
    Not the graph, so the seeder writes them. Owners are REGISTER KEYS (§48);
    the tracker's owner must hold an office seat on this client, which a fresh
@@ -685,7 +868,8 @@ function moduleContent(officeKeys) {
         next: "",
       } },
   ];
-  return { tracker, notes, modules: ["strategy", "tracker", "notes"] };
+  return { tracker, notes, portfolio: portfolioProject(officeKeys),
+           modules: ["strategy", "tracker", "notes", "portfolio"] };
 }
 
-module.exports = { enrich, moduleContent, THIRD_PILLARS };
+module.exports = { enrich, moduleContent, portfolioProject, THIRD_PILLARS };

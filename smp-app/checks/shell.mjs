@@ -3339,6 +3339,9 @@ await section("4 · Forefront's own pages", async () => {
   await ta("MW late one", "smo", -14, "in_progress");
   await ta("MW this week", "smo", 0, "not_started");
   await ta("MW far off", "smo", 30, "not_started");
+  /* §745: two steps on one task, one ticked — the row says 1 of 2 steps */
+  await owner.query("INSERT INTO tracker_steps (tenant_id, action_id, title, pos, done_at) SELECT $1, id, 'First step', 1, now() FROM tracker_actions WHERE tenant_id = $1 AND title = 'MW far off'", [tenantId]);
+  await owner.query("INSERT INTO tracker_steps (tenant_id, action_id, title, pos) SELECT $1, id, 'Second step', 2 FROM tracker_actions WHERE tenant_id = $1 AND title = 'MW far off'", [tenantId]);
   await ta("MW finished", "smo", -3, "done");
   /* when each was finished, as the Tracker stamps it: one this week, one
      three weeks ago (for My tasks' Show done, round three) */
@@ -3394,6 +3397,9 @@ await section("4 · Forefront's own pages", async () => {
       "\u2026the Done menu is shut until pressed, and a hover greys the first row as it does the others (\u00a7729)", JSON.stringify({ menu729, hov729 }));
     await page.click(".mwcardhd .mwfind svg");
     check((await page.evaluate("Math.round(document.querySelector('.mwcardhd .mwsearch').getBoundingClientRect().width)")) > 100, "\u2026a press on the search icon opens its box (\u00a7725)", "");
+    /* §745: a task's steps on its row, as the Tracker's */
+    const st743 = await page.evaluate(() => { const r = Array.from(document.querySelectorAll(".mwlist .mwrow")).find((x) => /MW far off/.test(x.textContent)); const s = r && r.querySelector(".mwmeta .stc"); return s ? s.textContent : ""; });
+    check(st743 === "1 of 2 steps", "\u2026a task with steps says how far they have got on its row \u2014 1 of 2 steps (\u00a7745)", st743);
     await page.fill(".mwsearch", "far off");
     const found = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwrow")).filter((r) => !r.hidden).map((r) => r.querySelector(".t").textContent));
     check(JSON.stringify(found) === JSON.stringify(["MW far off"]), "\u2026and its search finds a task by its words", JSON.stringify(found));
@@ -3835,6 +3841,94 @@ await section("4 · Forefront's own pages", async () => {
       check(m2 === "No plan", "\u2026and the same client with no directions anywhere is", m2);
     } finally {
       await owner.query("DELETE FROM tenants WHERE key = 'plan-top'");
+    }
+    /* §746 ADD A TASK: My tasks' line (type, Enter; its client and week come
+       out on focus) and Home's + New task pop-up, each stored in the client's
+       Tracker as one's own, this week by default */
+    {
+      const tkey = (await owner.query("SELECT key FROM tenants WHERE id = $1", [tenantId])).rows[0].key;
+      const stored744 = (t) => owner.query("SELECT owner_key, to_char(due, 'YYYY-MM-DD') AS due FROM tracker_actions WHERE tenant_id = $1 AND title = $2", [tenantId, t]).then((r) => r.rows[0] || null);
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+      await page.waitForSelector("body.ready", { timeout: 8000 }).catch(() => {});
+      await page.locator("#nav button", { hasText: "My tasks" }).click();
+      await page.waitForSelector("[data-mwadd]", { timeout: 8000 }).catch(() => {});
+      const shut744 = await page.evaluate(() => { const c = document.querySelector(".mwadd .mwaddc"); return c ? getComputedStyle(c).display : "gone"; });
+      /* §749 the add line sits under the tasks, the last thing in the card — never between its head and its rows */
+      const foot749 = await page.evaluate(() => { const card = document.querySelector(".mwlist"), add = card && card.querySelector(".mwadd"), secs = card ? card.querySelectorAll(".mwsec") : [];
+        const last = secs.length ? secs[secs.length - 1] : null;
+        return { last: !!add && card.lastElementChild === add, below: !!add && !!last && add.getBoundingClientRect().top >= last.getBoundingClientRect().bottom }; });
+      if (process.env.SMP_SHOT749) await page.screenshot({ path: process.env.SMP_SHOT749, fullPage: false });
+      check(foot749.last && foot749.below, "My tasks' add line is at the foot of the list, under the last group (\u00a7749)", JSON.stringify(foot749));
+      await page.click("[data-mwadd]");
+      await page.waitForSelector('.mwadd select[data-add="client"] option', { state: "attached", timeout: 5000 }).catch(() => {});
+      const open744 = await page.evaluate(() => { const c = document.querySelector(".mwadd .mwaddc"); return c ? { d: getComputedStyle(c).display, n: c.querySelectorAll("select").length, wk: (c.querySelector('[data-add="week"] option:checked') || {}).textContent || "", own: (c.querySelector('[data-add="owner"] option:checked') || {}).textContent || "" } : null; });
+      check(shut744 === "none" && !!open744 && open744.d === "flex" && open744.n === 4 && open744.wk === "This week" && open744.own === "Me",
+        "My tasks has an add line; a click opens its client, week (this week), topic and owner (Me) (\u00a7746)", JSON.stringify({ shut744, open744 }));
+      await page.selectOption('.mwadd select[data-add="client"]', tkey).catch(() => {});
+      await page.fill("[data-mwadd]", "MW added by the line");
+      await page.press("[data-mwadd]", "Enter");
+      await page.waitForFunction(() => Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), null, { timeout: 8000 }).catch(() => {});
+      await page.waitForFunction(() => document.activeElement && document.activeElement.hasAttribute("data-mwadd"), null, { timeout: 3000 }).catch(() => {});
+      const line744 = await page.evaluate(() => ({ row: Array.from(document.querySelectorAll(".mwlist .mwrow .t")).some((t) => t.textContent === "MW added by the line"), focus: document.activeElement && document.activeElement.hasAttribute("data-mwadd"), on: document.activeElement ? document.activeElement.tagName + "." + document.activeElement.className : "" }));
+      const db744 = await stored744("MW added by the line");
+      check(line744.row && line744.focus && !!db744 && !!db744.due && !!db744.owner_key,
+        "\u2026Enter stores it in that client's Tracker as one's own, this week, the row comes in and the line is ready for the next (\u00a7746)", JSON.stringify({ line744, db744 }));
+      /* §747 STEPS IN MY TASKS' OPENED TASK: quiet until asked for (+ Add
+         steps, grey words and a blue +), then the Tracker's own — Enter adds
+         and keeps the line, Escape shuts it, a tick writes "Done: <step>"
+         into this week's box with the cursor in it, nothing saved */
+      await page.locator(".mwlist .mwrow .t", { hasText: "MW added by the line" }).click();
+      await page.waitForSelector(".mwrow.on .mwdet [data-steps] [data-sadd]", { timeout: 8000 }).catch(() => {});
+      const q745 = await page.evaluate(() => { const r = document.querySelector(".mwrow.on .mwdet"), lk = r && r.querySelector("[data-steps] [data-sadd]"), b = lk && lk.querySelector("b");
+        return r ? { link: lk ? lk.textContent.replace(/\s+/g, " ").trim() : "", title: !!r.querySelector(".mwsteps .mwssh"), wk: Array.from(r.querySelectorAll(".mwssh")).some((x) => x.textContent === "This week"), cols: lk && b ? [getComputedStyle(lk).color, getComputedStyle(b).color] : [] } : null; });
+      await page.click(".mwrow.on [data-sadd]");
+      await page.waitForFunction(() => document.activeElement && document.activeElement.hasAttribute("data-snew"), null, { timeout: 3000 }).catch(() => {});
+      const o745 = await page.evaluate(() => ({ focus: !!document.activeElement && document.activeElement.hasAttribute("data-snew"), title: !!document.querySelector(".mwrow.on .mwsteps .mwssh") }));
+      await page.keyboard.type("Line step"); await page.keyboard.press("Enter");
+      await page.waitForFunction(() => Array.from(document.querySelectorAll(".mwrow.on .mwsnm")).some((x) => x.textContent === "Line step") && document.activeElement && document.activeElement.hasAttribute("data-snew"), null, { timeout: 8000 }).catch(() => {});
+      const a745 = await page.evaluate(() => ({ step: Array.from(document.querySelectorAll(".mwrow.on .mwsnm")).map((x) => x.textContent), focus: !!document.activeElement && document.activeElement.hasAttribute("data-snew"), count: ((document.querySelector(".mwrow.on .mwmeta .stc") || {}).textContent || "") }));
+      const sdb745 = (await owner.query("SELECT s.title, s.done_at IS NOT NULL AS done FROM tracker_steps s JOIN tracker_actions a ON a.id = s.action_id WHERE a.tenant_id = $1 AND a.title = 'MW added by the line'", [tenantId])).rows;
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(400);
+      /* §748: with steps the line stays open, no link */
+      const e745 = await page.evaluate(() => ({ line: !!document.querySelector(".mwrow.on [data-snew]"), link: !!document.querySelector(".mwrow.on [data-sadd]") }));
+      check(!!q745 && q745.link === "+ Add steps" && !q745.title && !q745.wk && q745.cols.length === 2 && q745.cols[0] !== q745.cols[1] && o745.focus && o745.title &&
+        a745.step.join("|") === "Line step" && a745.focus && sdb745.length === 1 && e745.line && !e745.link,
+        "My tasks' opened task, as the Tracker's: a task without steps shows only + Add steps; pressed, the title and line come out, Enter stores a step and keeps the line, which stays open once there are steps (\u00a7747, \u00a7748)", JSON.stringify({ q745, o745, a745, sdb745, e745 }));
+      await page.click(".mwrow.on .mwsline .mwscb");
+      await page.waitForFunction(() => { const i = document.querySelector(".mwrow.on .mwcompose input"); return i && i.value === "Done: Line step" && document.activeElement === i && !!document.querySelector(".mwrow.on .mwsline.done"); }, null, { timeout: 8000 }).catch(() => {});
+      const t745 = await page.evaluate(() => { const i = document.querySelector(".mwrow.on .mwcompose input"); return { v: i ? i.value : null, focus: document.activeElement === i, done: !!document.querySelector(".mwrow.on .mwsline.done"), wk: Array.from(document.querySelectorAll(".mwrow.on .mwssh")).some((x) => x.textContent === "This week") }; });
+      const tdb745 = (await owner.query("SELECT s.done_at IS NOT NULL AS done, a.status, (SELECT count(*) FROM tracker_progress p WHERE p.action_id = a.id)::int AS notes FROM tracker_steps s JOIN tracker_actions a ON a.id = s.action_id WHERE a.tenant_id = $1 AND a.title = 'MW added by the line'", [tenantId])).rows[0] || {};
+      check(t745.v === "Done: Line step" && t745.focus && t745.done && t745.wk && tdb745.done === true && tdb745.status === "in_progress" && tdb745.notes === 0,
+        "\u2026a tick there is stored (the task moves to In progress) and writes \"Done: Line step\" into this week's box, the cursor in it, nothing saved (\u00a7747)", JSON.stringify({ t745, tdb745 }));
+      await page.locator("#nav button", { hasText: "Home" }).click();
+      await page.waitForSelector("[data-newtask]", { timeout: 8000 }).catch(() => {});
+      /* §748: Home is for quick updates — its opened task has no steps; the row keeps its count */
+      await page.waitForFunction(() => Array.from(document.querySelectorAll('[data-home="tasks"] .mwrow .t')).some((t) => t.textContent === "MW added by the line"), null, { timeout: 8000 }).catch(() => {});
+      const hrows746 = await page.evaluate(() => Array.from(document.querySelectorAll('[data-home="tasks"] .mwrow .t, [data-home="tasks"] .t')).map((t) => t.textContent).slice(0, 8));
+      /* (it may still be open from My tasks — the open task is shared — so a press can fold it) */
+      if (!(await page.$('[data-home="tasks"] .mwrow.on .mwtabs'))) await page.locator('[data-home="tasks"] .mwrow .t', { hasText: "MW added by the line" }).click({ timeout: 5000 }).catch(() => {});
+      await page.waitForSelector('[data-home="tasks"] .mwrow.on .mwtabs', { timeout: 8000 }).catch(() => {});
+      const h746 = await page.evaluate(() => { const r = document.querySelector('[data-home="tasks"] .mwrow.on'); return r ? { steps: !!r.querySelector("[data-steps]"), box: !!r.querySelector(".mwcompose input"), count: ((r.querySelector(".mwmeta .stc") || {}).textContent || "") } : null; });
+      check(!!h746 && !h746.steps && h746.box && h746.count === "1 of 1 steps", "Home's opened task has no steps \u2014 this week's box only; the row keeps its count (\u00a7748)", JSON.stringify({ h746, hrows746 }));
+      await page.click("[data-newtask]");
+      await page.waitForSelector(".ntpop", { timeout: 4000 }).catch(() => {});
+      const pop744 = await page.evaluate(() => { const p = document.querySelector(".ntpop"); return p ? { labels: Array.from(p.querySelectorAll("label > span")).map((s) => s.textContent.trim()), focus: document.activeElement && document.activeElement.getAttribute("data-add") } : null; });
+      await page.keyboard.press("Escape");
+      const gone744 = await page.evaluate(() => !document.querySelector(".ntpop") && !document.querySelector(".ntscrim"));
+      check(!!pop744 && pop744.labels.join("|") === "Task|Client|Week|Topic optional|Owner" && pop744.focus === "title" && gone744,
+        "Home's + New task opens a pop-up \u2014 Task, Client, Week, Topic (optional), Owner \u2014 and Escape closes it (\u00a7746)", JSON.stringify({ pop744, gone744 }));
+      await page.click("[data-newtask]");
+      await page.waitForSelector(".ntpop", { timeout: 4000 }).catch(() => {});
+      await page.selectOption('.ntpop select[data-add="client"]', tkey).catch(() => {});
+      await page.fill('.ntpop [data-add="title"]', "MW added by the pop-up");
+      await page.selectOption('.ntpop select[data-add="week"]', "");
+      await page.click(".ntpop [data-create]");
+      await page.waitForFunction(() => !document.querySelector(".ntpop"), null, { timeout: 8000 }).catch(() => {});
+      const db744b = await stored744("MW added by the pop-up");
+      check(!!db744b && db744b.due === null && !(await page.$(".ntpop")),
+        "\u2026Create stores it (No date chosen: no week) and closes the pop-up (\u00a7746)", JSON.stringify(db744b));
     }
   } finally {
     await owner.query("DELETE FROM tracker_actions WHERE tenant_id = $1", [tenantId]);

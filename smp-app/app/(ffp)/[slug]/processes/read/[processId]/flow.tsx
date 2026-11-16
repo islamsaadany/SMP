@@ -42,6 +42,18 @@ export function StepDetail({ step }: { step: ReadStep | undefined }) {
             <dd className="m-0">{step.time.join(" ")}</dd>
           </>
         )}
+        {step.note && (
+          <>
+            <dt className="text-[12.5px] text-[var(--ink-3)]">{m.noteLabel}</dt>
+            <dd className="m-0 whitespace-pre-line">{step.note}</dd>
+          </>
+        )}
+        {step.escalation && (
+          <>
+            <dt className="text-[12.5px] text-[var(--ink-3)]">{m.escalationLabel}</dt>
+            <dd className="m-0 whitespace-pre-line">{step.escalation}</dd>
+          </>
+        )}
       </dl>
       {step.acts.length > 0 && (
         <ul className="list-disc ps-[18px] text-[13px]">

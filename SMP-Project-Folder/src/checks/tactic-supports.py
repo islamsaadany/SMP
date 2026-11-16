@@ -118,14 +118,31 @@ with sync_playwright() as p:
     go(True)
     tk = safe(pg, """()=>[...document.querySelectorAll('#panel .kmpick')].slice(0,3).map(p=>[...p.querySelectorAll('input')].map(i=>i.checked))""")
     ok("the ticks read the stored list", tk == [[True, True, False, False], [False, True, False, False], [False, False, False, False]], tk)
+    # §767.2: a closed box, one line, showing the chosen tags; it opens to the ticks
+    dd = safe(pg, """()=>[...document.querySelectorAll('#panel .kmpick')].slice(0,3).map(p=>{var d=p.querySelector('details.kmdrop');
+      return d?[d.open, [...d.querySelectorAll('.kmsum .kmtag')].map(x=>x.textContent), !!d.querySelector('.kmsum .kmnone')]:null})""")
+    ok("each tactic's list is a closed box showing its chosen tags, or 'Pick' when none",
+       dd == [[False, ["KM 1", "KM 2"], False], [False, ["KM 2"], False], [False, [], True]], dd)
+    h0 = safe(pg, "()=>document.querySelectorAll('#panel .kmpick')[2].getBoundingClientRect().height")
     try:
+        pg.locator("#panel .kmpick").nth(2).locator("summary").click(); pg.wait_for_timeout(200)
+        opened = safe(pg, "()=>document.querySelectorAll('#panel .kmdrop')[2].open")
+        h1 = safe(pg, "()=>document.querySelectorAll('#panel .kmpick')[2].getBoundingClientRect().height")
         pg.locator("#panel .kmpick").nth(2).locator("input").nth(2).click(); pg.wait_for_timeout(300)
         v1 = safe(pg, "()=>JSON.stringify(%s.tactics[2].supports||null)" % P)
+        s1 = safe(pg, "()=>[...document.querySelectorAll('#panel .kmdrop')[2].querySelectorAll('.kmsum .kmtag')].map(x=>x.textContent)")
         pg.locator("#panel .kmpick").nth(2).locator("input").nth(2).click(); pg.wait_for_timeout(300)
         v2 = safe(pg, "()=>'supports' in %s.tactics[2]" % P)
-    except Exception as e: v1 = "ERR " + str(e)[:100]; v2 = None
+        s2 = safe(pg, "()=>!!document.querySelectorAll('#panel .kmdrop')[2].querySelector('.kmsum .kmnone')")
+        pg.click("h1, body", position={"x": 5, "y": 5}); pg.wait_for_timeout(200)
+        closed = safe(pg, "()=>document.querySelectorAll('#panel .kmdrop')[2].open")
+    except Exception as e: v1 = "ERR " + str(e)[:100]; v2 = None; opened = h1 = s1 = s2 = closed = None
+    ok("pressing the box opens the ticks under it, and the row grows only then", opened is True and h0 and h1 and h1 > h0 + 60, [h0, h1, opened])
     ok("a tick stores the measure's id on the tactic", v1 == '["%s"]' % ids[2], v1)
+    ok("…and the closed line shows the tag at once", s1 == ["KM 3"], s1)
     ok("the last untick DELETES the key (§50.6)", v2 is False, v2)
+    ok("…and the line says Pick again", s2 is True, s2)
+    ok("a click elsewhere closes the box", closed is False, closed)
 
     print("\n4 · not an obligation")
     ok("the gap count is unmoved", safe(pg, "()=>gapTotalAll('mobile')") == g0, [g0, safe(pg, "()=>gapTotalAll('mobile')")])

@@ -41,8 +41,11 @@
   .editbtn { margin-left:auto; font:inherit; font-size:12.5px; font-weight:700; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:6px 14px; cursor:pointer; }
   .pen-on .editbtn { background:var(--gold); border-color:var(--gold); color:#14161A; }
   .page { display:grid; grid-template-columns:168px minmax(0,1fr); gap:14px; padding:12px 20px 40px; align-items:start; }
-  .pen-on.panel-open .page { grid-template-columns:168px minmax(0,1fr) 440px; }
-  @media (max-width:1100px) { .page, .pen-on.panel-open .page { grid-template-columns:minmax(0,1fr); } .rail { display:none; } }
+  /* the panel sits in the tactics' own row, beside the table — the head and the key measures run full width */
+  .tacwrap { margin:8px 12px 14px; }
+  .tacwrap > .scroll { margin:0; }
+  .panel-open .tacwrap { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:12px; align-items:start; }
+  @media (max-width:1100px) { .page { grid-template-columns:minmax(0,1fr); } .rail { display:none; } .panel-open .tacwrap { display:block; } }
   /* the rail */
   .rail { display:grid; gap:6px; }
   .rail .pc { background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:8px 8px 8px 10px; font-size:12px; }
@@ -86,14 +89,17 @@
   .outn small { color:var(--ink-3); } .rowtools .x { color:var(--ink-3); cursor:pointer; font-size:14px; padding:0 4px; }
   .addrow td { color:var(--gold-deep); font-weight:700; cursor:pointer; }
   .pen-on .tactable tbody tr[data-i] { cursor:pointer; } .pen-on .tactable tbody tr[data-i]:hover td { background:var(--surface-2); }
-  .tactable td .fld.rowfld { width:100%; min-width:180px; font-size:13px; padding:6px 9px; }
-  .tactable td .pick .fld { min-width:150px; font-size:12.5px; padding:5px 8px; }
+  .panel-open table.tactable { min-width:0; }
+  .tactable td .fld.rowfld { width:100%; min-width:140px; font-size:13px; padding:6px 9px; }
+  .tactable td .pick .fld { min-width:120px; font-size:12.5px; padding:5px 8px; }
+  .tactable td .pick { min-width:120px; }
+  .tactable td .qpick { white-space:nowrap; }
   .tactable td .qpick i { width:26px; height:24px; line-height:22px; font-size:11px; }
-  .tactable td.rowout { color:var(--ink-2); min-width:230px; } .tactable td .rowout small { display:block; color:var(--ink-3); font-size:11px; }
+  .tactable td.rowout { color:var(--ink-2); min-width:170px; } .tactable td .rowout small { display:block; color:var(--ink-3); font-size:11px; }
   .tactable td .openb { font:inherit; font-size:11px; font-weight:700; color:var(--gold-deep); background:none; border:1px solid var(--line); border-radius:6px; padding:3px 8px; cursor:pointer; white-space:nowrap; }
   .tactable tr.on td .openb { background:var(--gold); border-color:var(--gold); color:#14161A; }
   /* the panel */
-  .side { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); position:sticky; top:12px; max-height:calc(100vh - 24px); display:flex; flex-direction:column; min-width:0; }
+  .side { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); position:sticky; top:92px; max-height:calc(100vh - 104px); display:flex; flex-direction:column; min-width:0; }
   .side[hidden] { display:none !important; } .backdrop { display:none; }
   @media (max-width:1100px) {
     .side { position:fixed; top:0; right:0; bottom:0; left:auto; width:min(440px, 100%); max-height:none; border-radius:0; z-index:60; border:0; border-left:1px solid var(--line); }
@@ -147,9 +153,8 @@
       <thead><tr><th class="idx">#</th><th>Key measure</th><th class="cc">Dir.</th><th class="cc">Target</th><th class="cc">Compiled</th></tr></thead>
       <tbody id="krows"></tbody></table></div>
     <div class="sect">Tactics<span class="n" id="tcount">6</span></div>
+    <div class="tacwrap" id="tacwrap">
     <div class="scroll"><table class="tactable"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
-    <div class="kmlegend">▸ Which number is which key measure</div>
-  </div>
   <div class="backdrop" id="backdrop" hidden></div>
   <aside class="side" id="side" hidden>
     <div class="shead"><span class="k">Tactic <span id="sn">1</span> of <span id="sof">6</span></span><b id="sname"></b>
@@ -158,6 +163,8 @@
     <div class="sbody" id="sbody"></div>
     <div class="sfoot"><span>Saves as you type, like the rest of the pen.</span><button class="done" type="button" id="done">Done editing</button></div>
   </aside>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -210,17 +217,16 @@
       '<td class="rowout">' + (o1 ? esc(o1.name) + (n > 1 ? '<small>and ' + (n - 1) + ' more</small>' : '') + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') : '<span class="miss">Missing</span>') + '</td>' +
       '<td>' + picker("rowowner" + i, t.owner, false) + '</td>' +
       '<td><span class="qpick">' + t.q.map(function(v, k){ return '<i class="' + (v ? "on" : "") + '" data-rq="' + i + ':' + k + '">Q' + (k + 1) + '</i>'; }).join("") + '</span></td>' +
-      '<td>' + (t.km.length ? kmTags(t) : '<span class="nobody">—</span>') + '</td>' +
       '<td><span class="rowtools"><button type="button" class="openb" data-open="' + i + '">Details</button><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
   }
   function drawRows(){
     document.body.classList.toggle("pen-on", pen);
     document.getElementById("penbtn").textContent = pen ? "Done editing" : "Edit";
     document.getElementById("thead").innerHTML = pen
-      ? '<tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th>Key measures</th><th></th></tr>'
+      ? '<tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th></th></tr>'
       : '<tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr>';
     var tb = document.getElementById("rows");
-    tb.innerHTML = T.map(pen ? penRow : readRow).join("") + (pen ? '<tr class="addrow"><td colspan="8" id="add">+ Add a tactic</td></tr>' : '');
+    tb.innerHTML = T.map(pen ? penRow : readRow).join("") + (pen ? '<tr class="addrow"><td colspan="6" id="add">+ Add a tactic</td></tr>' : '');
     document.getElementById("tcount").textContent = T.length;
     drawK();
     if (!pen) return;

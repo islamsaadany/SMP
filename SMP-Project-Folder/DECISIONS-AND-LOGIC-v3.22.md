@@ -71410,7 +71410,7 @@ Islam: *"I need to have option to disable the weighting panel somehow."* Weighti
 
 **§758–§759 MERGED TO `main`, 2026-11-16, on Islam's word (*"merge to main"*).** `main` had taken §754–§757 (the Setup tables' columns, the office on a closed cycle, the server's closed cycle, a SWOT line's points) meanwhile — merged in first, ours renumbered §754 → §758 and §755 → §759, the records joined, `sw.js` bumped to v7.73-weighting-switch past main's v7.72, the built shell and the served copies rebuilt on the merged tree and checked there: `tests/authorize.cjs` 14b passes and the file's 23 failures are main's own; `scripts/test-authorize.js` 1090 passed, the same 60 failed as on main; `generated-in-step` and `release-stamp` all clear; the built shell parses. Setup › Business units carries both sides' header tools: main's Columns menu and ours Weighting on | Off. Not run: `checks/shell.mjs` and a served sign-in (no database in this session). No migrations; nobody signed out.
 
-## §760 — The weighting is off, for every client (2026-11-16)
+## §768 — The weighting is off, for every client (2026-11-16)
 
 Islam, asked whether a hidden weighting should go on shaping the group score (§759): *"actually the weighting is not relevant and a feature that is not used. let's turn the whole thing off in general and I can revive it later if needed"*, then of the way to do it, *"the switch to shut off would be good"*.
 

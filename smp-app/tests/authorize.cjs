@@ -1351,9 +1351,9 @@ refuses(headKey, function (s) { s.group.weightingOff = true; },
         kinds.length > 0 && kinds.indexOf("setup") > -1 && kinds.indexOf("unknown") === -1,
         "got: " + JSON.stringify(kinds));
 })();
-/* §760: the feature is off for every client until the constant is flipped;
+/* §768: the feature is off for every client until the constant is flipped;
    the per-client rule stays testable on its own for the day it is. */
-check("the weighting feature is off everywhere (§760)", R.WEIGHTING === false);
+check("the weighting feature is off everywhere (§768)", R.WEIGHTING === false);
 check("while off, no client reads as on", R.weightingOn(R.worldOf({ group: {} })) === false &&
       R.weightingOn(R.worldOf({ group: { weightingOff: false } })) === false);
 check("an absent weighting key reads as WANTED", R.weightingWanted(R.worldOf({ group: {} })) === true);

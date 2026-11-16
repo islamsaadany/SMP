@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-16 — The weighting is off, for every client (§760).** One constant in the shared rules, off: the Weighting tab, the Weight column on Setup › Business units, every weight line and column on the group, company and unit pages go, and every unit counts equally in the group figure. Nothing stored moves; set the constant to `true` to bring it all back. Rules tests pass; shell check pending a session with a database.
+**2026-11-16 — The weighting is off, for every client (§768).** One constant in the shared rules, off: the Weighting tab, the Weight column on Setup › Business units, every weight line and column on the group, company and unit pages go, and every unit counts equally in the group figure. Nothing stored moves; set the constant to `true` to bring it all back. Rules tests pass; shell check pending a session with a database.
 
 **2026-11-16 — The Weighting page can be switched off (§759), merged to `main` on Islam's word.** A *Weighting on | Off* pair on Setup › Business units, the office's alone, Focus's shape: Off hides the Weighting tab and keeps everything stored; the compile still reads the weights. `tests/authorize.cjs` 14b new, passing; shell check pending a session with a database.
 

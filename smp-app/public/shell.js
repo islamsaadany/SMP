@@ -2730,7 +2730,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      that changed the scores would be a change of method wearing a
      switch's clothes. The SMO's alone, classified `setup` (authorize.cjs). */
   function weightingWanted(w) { return !w || w.weightingOff !== true; }
-  /* §760: AND THE WHOLE FEATURE IS OFF, FOR EVERY CLIENT (Islam, 2026-11-16:
+  /* §768: AND THE WHOLE FEATURE IS OFF, FOR EVERY CLIENT (Islam, 2026-11-16:
      *"the weighting is not relevant and a feature that is not used. let's
      turn the whole thing off in general and I can revive it later"*).
      ONE constant, read by everything the feature draws — the tab, the
@@ -30343,7 +30343,7 @@ function computeWeights(){
   var anySet = us.some(function(u){
     return w.factors.some(function(f){ return num(u[f.key]) != null; });
   });
-  /* §760: and the same answer while the feature is off — every unit counts
+  /* §768: and the same answer while the feature is off — every unit counts
      the same, whatever the stored rows say; they are kept, not read. */
   if (!anySet || !weightingOn()) {
     var even = us.map(function(){ return Math.floor(100 / (us.length || 1)); });
@@ -30624,7 +30624,7 @@ function renderCompanyPerformance(coKey){
       pl = companyPlan(ck), r = companyRatio(ck);
   var share = companyWeight(ck);
 
-  /* §760: the weight column, its footer and its sentence go while the
+  /* §768: the weight column, its footer and its sentence go while the
      feature is off; the contribution column stays, every unit counting equally. */
   var wOn = weightingOn(), wCol = function(v){ return wOn ? '<td class="num">' + v + '</td>' : ''; };
   var perfDrill = miniTable([L1("unitword"), "Objectives performance"].concat(wOn ? ["Weight in " + esc(co.name)] : []).concat(["Weighted contribution"]),
@@ -30742,7 +30742,7 @@ function renderGroupPerformance(){
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
       pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
 
-  /* §760: as on a company's drills — no weight column while the feature is off. */
+  /* §768: as on a company's drills — no weight column while the feature is off. */
   var wOn = weightingOn(), wCol = function(v){ return wOn ? '<td class="num">' + v + '</td>' : ''; };
   var perfDrill = miniTable([L1("unitword"),"Objectives performance"].concat(wOn ? ["Weight"] : []).concat(["Weighted contribution"]),
     keys.map(function(k){
@@ -42020,7 +42020,7 @@ function unitCompanySelect(k, u){
    says what it keeps, so it never looks like a delete. */
 function weightingSwitch(){
   var on = weightingOn();
-  /* §760: no control for a feature that is off everywhere. */
+  /* §768: no control for a feature that is off everywhere. */
   if (!inOffice() || !SMPRules.WEIGHTING) return '';
   PAGE_ACTS +=
     '<span class="segsw" role="group" aria-label="Weighting page on or off">' +
@@ -42043,7 +42043,7 @@ TABLECOLS.define("units", [
   { k:"name", lock:true, label:function(){ return labelWord("unitword", "bu"); } },
   { k:"nav", label:"In navigation" }, { k:"code", label:"Code" }, { k:"plans", label:"Plans in" },
   { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
-  /* §760: the Weight column goes with the feature; `offered` is what keeps
+  /* §768: the Weight column goes with the feature; `offered` is what keeps
      the declaration and the drawing in step. */
   { k:"weight", label:"Weight", offered:function(){ return SMPRules.WEIGHTING; } },
   { k:"division", label:function(){ return labelWord("division", "group"); } },

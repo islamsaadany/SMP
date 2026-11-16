@@ -2167,7 +2167,7 @@ function computeWeights(){
   var anySet = us.some(function(u){
     return w.factors.some(function(f){ return num(u[f.key]) != null; });
   });
-  /* §760: and the same answer while the feature is off — every unit counts
+  /* §768: and the same answer while the feature is off — every unit counts
      the same, whatever the stored rows say; they are kept, not read. */
   if (!anySet || !weightingOn()) {
     var even = us.map(function(){ return Math.floor(100 / (us.length || 1)); });
@@ -2448,7 +2448,7 @@ function renderCompanyPerformance(coKey){
       pl = companyPlan(ck), r = companyRatio(ck);
   var share = companyWeight(ck);
 
-  /* §760: the weight column, its footer and its sentence go while the
+  /* §768: the weight column, its footer and its sentence go while the
      feature is off; the contribution column stays, every unit counting equally. */
   var wOn = weightingOn(), wCol = function(v){ return wOn ? '<td class="num">' + v + '</td>' : ''; };
   var perfDrill = miniTable([L1("unitword"), "Objectives performance"].concat(wOn ? ["Weight in " + esc(co.name)] : []).concat(["Weighted contribution"]),
@@ -2566,7 +2566,7 @@ function renderGroupPerformance(){
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
       pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
 
-  /* §760: as on a company's drills — no weight column while the feature is off. */
+  /* §768: as on a company's drills — no weight column while the feature is off. */
   var wOn = weightingOn(), wCol = function(v){ return wOn ? '<td class="num">' + v + '</td>' : ''; };
   var perfDrill = miniTable([L1("unitword"),"Objectives performance"].concat(wOn ? ["Weight"] : []).concat(["Weighted contribution"]),
     keys.map(function(k){

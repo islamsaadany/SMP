@@ -1537,7 +1537,7 @@ function unitCompanySelect(k, u){
    says what it keeps, so it never looks like a delete. */
 function weightingSwitch(){
   var on = weightingOn();
-  /* §760: no control for a feature that is off everywhere. */
+  /* §768: no control for a feature that is off everywhere. */
   if (!inOffice() || !SMPRules.WEIGHTING) return '';
   PAGE_ACTS +=
     '<span class="segsw" role="group" aria-label="Weighting page on or off">' +
@@ -1560,7 +1560,7 @@ TABLECOLS.define("units", [
   { k:"name", lock:true, label:function(){ return labelWord("unitword", "bu"); } },
   { k:"nav", label:"In navigation" }, { k:"code", label:"Code" }, { k:"plans", label:"Plans in" },
   { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
-  /* §760: the Weight column goes with the feature; `offered` is what keeps
+  /* §768: the Weight column goes with the feature; `offered` is what keeps
      the declaration and the drawing in step. */
   { k:"weight", label:"Weight", offered:function(){ return SMPRules.WEIGHTING; } },
   { k:"division", label:function(){ return labelWord("division", "group"); } },

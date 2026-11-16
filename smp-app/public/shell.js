@@ -83705,8 +83705,11 @@ var SYNC = (function () {
        §151 wraps every table in after the paint — a head pins to the window
        only once neither is a scroll box. */
     Array.prototype.forEach.call(document.querySelectorAll("#panel .pane:not(.setuppane) .scroll, #panel .pane:not(.setuppane) .tblscroll"), function(b){
-      /* a confirmation's own list (`.rmconfirm`) pins its head to its box on purpose */
-      if (b.closest(".rmconfirm")) return;
+      /* a confirmation's own list (`.rmconfirm`) pins its head to its box on
+         purpose; the tactic panel (§772) is a pinned box that scrolls inside
+         itself, so a head pinned to the window would float mid-list — Islam:
+         "the outcome and target title is floating" (§774.3). */
+      if (b.closest(".rmconfirm, .tacpanel")) { b.classList.remove("fits"); return; }
       b.classList.toggle("fits", b.scrollWidth <= b.clientWidth + 1);
     });
   }

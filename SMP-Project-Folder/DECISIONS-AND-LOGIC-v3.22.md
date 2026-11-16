@@ -71565,3 +71565,11 @@ Islam, on the §772 list: *"how about we make the tactic main info editable in t
 ## §774.2 — The open row is tinted whole, as agreed (2026-11-16)
 
 Islam, on the built page: *"the coloring of the tactic that is being edited in the details is not as you showed me, the whole row is not colored as agreed."* §772's first mark — a grey tint and a gold bar on EVERY cell — sat later in `arrange.css` than §774's rule for the same row, and at equal specificity the later one wins: the tenant saw a bar at every column edge and no tint. The old rule is gone; the open row is `--attn-bg` across, one bar on its first cell, and bridged to the panel (D). Measured on the built page: every cell of the open row the tint, the bar on the first alone. Shell cache v7.85. On the branch, not merged.
+
+## §774.3 — The panel's Outcome head stays put; the rail's filter menu shows whole; the squeezed panel sits under the chrome (2026-11-16)
+
+Islam, on the built page: *"there is a glitch in the details panel, the outcome and target title is floating"* and *"the filter of the directions is hidden."*
+
+1. **The floating head.** The shell marks every plan table that fits its pane `fits` so its navy head pins under the band (§771). The panel's Outcomes table got the mark too, and the panel is a pinned box that scrolls inside itself — so its head pinned to the window and floated mid-list. The shell now leaves the panel's tables alone, and a rule inside the panel keeps their heads static. Measured: the head's position is `static` in the built page.
+2. **The hidden menu.** §773's rail cap gave the rail `overflow:hidden` so its list would scroll inside. The filter menu pops out past the rail's right edge from its head, and the cap cut it off. The rail is `overflow:visible` again; only the list below scrolls. Measured: the menu's three far corners hit the menu itself.
+3. **The squeezed panel.** Below 1181px the panel is a fixed sheet from the window's top, which covered the Done editing button and the strip's right half; the strip-stays check caught it (the wheel over the panel moved nothing, as the panel keeps its own scroll). The sheet now starts where the pinned pane does — the band's own offset. strip-stays, strip-years, tactic-panel, setup-squeezed, several-outcomes, the four rail checks: all pass. Shell cache v7.86. On the branch, not merged.

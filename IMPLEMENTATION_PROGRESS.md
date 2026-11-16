@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-16 — Panel head in place, rail menu whole, squeezed panel under the chrome (§774.3).** Islam: the Outcome/Target head floated in the panel and the directions' filter menu was hidden. The panel's tables are left out of the head pinning; the rail is overflow-visible again with only its list scrolling; the squeezed panel starts under the chrome and strip. All strip, panel and rail checks pass. On the branch, not merged.
+
 **2026-11-16 — The open row is tinted whole (§774.2).** Islam: the row being edited was not coloured as agreed; an older rule later in the stylesheet was winning. Gone; the whole row takes the tint with one bar. On the branch, not merged.
 
 **2026-11-16 — The tactic's main fields in the table, the extras in the panel (§774).** Islam's idea, settled over eleven rounds on the working mockup: with the pen on, the name, each outcome's name, the owner and the quarters are typed in the row, a ringed × on the name box and on each outcome box asks before anything goes; the panel beside the tactics holds the description, the outcomes' targets, the collaborators, the key measures and the requirements, its head the tactic's name and the arrows; the panel follows the row you work in; the open row is tinted and joined to the panel. `tactic-panel.py` rewritten 22/0; two older checks pointed at the row. On the branch, not merged.

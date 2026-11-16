@@ -693,7 +693,8 @@
 /* v7.84-table-and-panel — §772–§774: the tactic panel, the page contained,
    the main fields in the table; past main's v7.80 at the merge. */
 /* v7.85-open-row-tinted — §774.2: the open row is tinted whole, one bar. */
-const SHELL = "smp-shell-v7.85-open-row-tinted";
+/* v7.86-panel-head-and-rail-menu — §774.3: the panel head stays in its flow, the rail menu shows whole. */
+const SHELL = "smp-shell-v7.86-panel-head-and-rail-menu";
 const ASSETS = [
   "/",
   "/index.html",

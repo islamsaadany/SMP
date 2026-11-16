@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-16 — The legend goes; the tag's name sits beside the pointer (§770.2).** Islam: remove the "which number is which key measure" line; the hover box should appear by the mouse. Both done; the page's zoom was the reason the label landed short, now allowed for. `tactic-supports.py` 38/0. On the branch, not merged.
+
 **2026-11-16 — No empty band under the boxes (§770.1).** Islam: space below the boxes, the rail moving at the page's end, and the "15 Directions · drag by the handle" line to go. The page under any rail now ends 20px below the pane, as the Setup page already did, so the rail is never pushed and no band is left; the arranging hint is removed. On the branch, not merged.
 
 **2026-11-16 — The page contained (§770).** Islam's three points on the built page and his wireframe corrections: a clear line on the direction's banner; the banner frozen beside the rail as the page scrolls (it already was on a wide window; §609's squeezed layout untouched); the directions rail never taller than the window, its list scrolling inside it and never moving the page; the tactic panel starting on the table's own line and pinned under the banner, never taller than the window. From `design-mockups/tactic-edit-panel/2026-11-16_page-wireframe.html`. `tactic-panel.py` 20/0, neighbours unchanged. On the branch, not merged.

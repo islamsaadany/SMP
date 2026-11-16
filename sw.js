@@ -692,7 +692,9 @@
    line and pinned under the banner. */
 /* v7.81-no-foot-under-a-rail — §770.1: the page foot is the pane's under
    any rail, and the arranging hint is gone. */
-const SHELL = "smp-shell-v7.81-no-foot-under-a-rail";
+/* v7.82-label-by-the-pointer — §770.2: the legend under the tactics is
+   gone; the tag's name sits beside the pointer. */
+const SHELL = "smp-shell-v7.82-label-by-the-pointer";
 const ASSETS = [
   "/",
   "/index.html",

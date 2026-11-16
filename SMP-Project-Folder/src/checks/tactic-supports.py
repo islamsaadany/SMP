@@ -96,8 +96,13 @@ with sync_playwright() as p:
     ok("the second says KM 2 alone", ln and ln[1]["tags"] == [["KM 2", mn[1]]], ln and ln[1]["tags"])
     # §767.1: the name shows the moment the pointer arrives — read with no wait at all
     try:
-        pg.locator("#panel .kmnums .kmtag").first.hover()
+        tag = pg.locator("#panel .kmnums .kmtag").first; tag.hover()
         tp = safe(pg, "()=>{var t=document.querySelector('.kmtip'); return t?[t.classList.contains('on'), t.textContent, getComputedStyle(t).display]:null}")
+        # §770.2: beside the pointer — the label's top-left sits just below and right of where the mouse is
+        bb = tag.bounding_box(); mx = bb["x"] + bb["width"] / 2; my = bb["y"] + bb["height"] / 2
+        pg.mouse.move(mx, my); pg.wait_for_timeout(100)
+        near = safe(pg, "()=>{var r=document.querySelector('.kmtip').getBoundingClientRect(); return [r.left, r.top]}")
+        ok("…beside the pointer, not over the tag", near and 8 <= near[0] - mx <= 20 and 8 <= near[1] - my <= 24, [near, mx, my])
         pg.mouse.move(5, 5)
         tp2 = safe(pg, "()=>{var t=document.querySelector('.kmtip'); return t?t.classList.contains('on'):null}")
     except Exception as e: tp = "ERR " + str(e)[:80]; tp2 = None
@@ -111,8 +116,7 @@ with sync_playwright() as p:
        ct and ct[0]["tags"] == ["T1"] and ct[1]["tags"] == ["T1", "T2"] and ct[1]["text"] == "T1T2", ct)
     ok("measures 3 and 4 say no tactic supports them yet", ct and ct[2]["none"] and ct[3]["none"] and "supports it yet" in ct[2]["text"], ct)
     lg = safe(pg, """()=>{var l=document.querySelector('#panel .kmlegend'); return l?{open:l.open, rows:[...l.querySelectorAll('.kmrows > span:nth-child(even)')].map(x=>x.textContent)}:null}""")
-    ok("one legend, folded, listing all four measures in order", lg and not lg["open"] and lg["rows"] == mn, lg)
-    ok("no other pillar draws a count or legend", count(".kmlegend") == 1, count(".kmlegend"))
+    ok("no legend any more (§770.2: the tags' hover names the measure)", lg is None and count(".kmlegend") == 0, [lg, count(".kmlegend")])
     ok("no column moves", w0 and cols() == w0, [w0, cols()])
 
     print("\n3 · the pen")

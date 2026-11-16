@@ -759,7 +759,12 @@ function kmTag(n, name, kind){
     var t = e.target;
     return t && t.closest ? t.closest(".kmtag[data-name]") : null;
   }
-  function show(el){
+  /* §770.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
+     hovering should appear close to the mouse, not in the top like that"*).
+     With a pointer, the label sits just below and right of it and follows
+     it across the tag; flipped to the left or above only where the window
+     ends. From the keyboard there is no pointer, so it sits under the tag. */
+  function show(el, e){
     var name = el.getAttribute("data-name");
     if (!name) return;
     if (!tip) {
@@ -769,14 +774,33 @@ function kmTag(n, name, kind){
     }
     tip.textContent = name;
     tip.classList.add("on");
-    var r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
-    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
-    var top = r.bottom + 6;
-    if (top + h > window.innerHeight - 8) top = r.top - 6 - h;
-    tip.style.left = left + "px"; tip.style.top = top + "px";
+    place(el, e);
+  }
+  /* THE PAGE IS ZOOMED (`html { zoom:.8 }`, _shared.css), so the pointer,
+     the rects and the window are in the screen's pixels while a fixed box's
+     `left`/`top` and its offsetWidth are in the page's: worked in the
+     screen's and divided by the zoom on the way into the style, or the label
+     lands four fifths of the way to the pointer (measured: asked for 278,
+     drawn at 222). */
+  function place(el, e){
+    if (!tip) return;
+    var z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    var w = tip.offsetWidth * z, h = tip.offsetHeight * z, left, top;
+    if (e && typeof e.clientX === "number") {
+      left = e.clientX + 14; top = e.clientY + 16;
+      if (left + w > window.innerWidth - 8) left = e.clientX - 14 - w;
+      if (top + h > window.innerHeight - 8) top = e.clientY - 12 - h;
+    } else {
+      var r = el.getBoundingClientRect();
+      left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+      top = r.bottom + 6;
+      if (top + h > window.innerHeight - 8) top = r.top - 6 - h;
+    }
+    tip.style.left = (Math.max(8, left) / z) + "px"; tip.style.top = (Math.max(8, top) / z) + "px";
   }
   function hide(){ if (tip) tip.classList.remove("on"); }
-  document.addEventListener("mouseover", function(e){ var t = tagOf(e); if (t) show(t); });
+  document.addEventListener("mouseover", function(e){ var t = tagOf(e); if (t) show(t, e); });
+  document.addEventListener("mousemove", function(e){ if (tip && tip.classList.contains("on") && tagOf(e)) place(null, e); });
   document.addEventListener("mouseout",  function(e){ if (tagOf(e)) hide(); });
   document.addEventListener("focusin",   function(e){ var t = tagOf(e); if (t) show(t); });
   document.addEventListener("focusout",  function(e){ if (tagOf(e)) hide(); });
@@ -800,6 +824,12 @@ function supportedLine(m, p){
 /* The legend — which number is which measure — folded, so the page costs one
    line until it is asked. Drawn only while the mapping is in use. */
 function supportsLegend(p){
+  /* §770.2: GONE (Islam: *"remove this part of which number is key
+     measures"*). The tags' own hover names the measure; the folded list
+     under the tactics was a second telling. Kept as a function that draws
+     nothing, so the three places that called it need no edit and the
+     check that counts it reads zero. */
+  return '';
   if (!p || !mappingOn(p)) return '';
   return '<details class="kmlegend"><summary>Which number is which ' + L1("measure").toLowerCase() + '</summary><div class="kmrows">' +
     (p.measures || []).map(function(m, i){

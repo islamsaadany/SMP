@@ -121,6 +121,8 @@
   .shead .nav { margin-left:auto; display:flex; gap:4px; }
   .shead .nav button, .shead .close { font:inherit; font-size:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); border-radius:7px; padding:4px 9px; cursor:pointer; }
   .shead .close { font-size:16px; line-height:1; padding:3px 8px; }
+  .shead .bin { display:inline-grid; place-items:center; color:var(--ink-3); margin-right:6px; }
+  .shead .bin:hover { color:var(--bad); border-color:var(--bad); }
   .sbody { overflow:auto; padding:6px 16px 10px; }
   .sec { padding:12px 0; border-bottom:1px solid var(--line-soft); } .sec:last-child { border-bottom:0; }
   .sec h3 { margin:0 0 8px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); display:flex; gap:8px; align-items:center; }
@@ -196,7 +198,7 @@
   <div class="backdrop" id="backdrop" hidden></div>
   <aside class="side" id="side" hidden>
     <div class="shead"><span class="k">Tactic <span id="sn">1</span></span><b id="sname"></b>
-      <span class="nav"><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
+      <span class="nav"><button type="button" class="bin" id="bin" title="Remove this tactic"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg></button><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
       <button class="close" type="button" id="close" title="Close">×</button></div>
     <div class="sbody" id="sbody"></div>
     <div class="sfoot"><span>Saves as you type, like the rest of the pen.</span></div>
@@ -259,16 +261,16 @@
         '<span class="addout" data-rowadd="' + i + '">+ Add an outcome</span>' + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') + '</td>' +
       '<td>' + dd("rowowner" + i, function(){ return t.owner; }, false) + '</td>' +
       '<td><span class="qpick">' + t.q.map(function(v, k){ return '<i class="' + (v ? "on" : "") + '" data-rq="' + i + ':' + k + '">Q' + (k + 1) + '</i>'; }).join("") + '</span></td>' +
-      '<td><span class="rowtools"><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
+      '</tr>';
   }
   function drawRows(){
     document.body.classList.toggle("pen-on", pen);
     document.getElementById("penbtn").textContent = pen ? "Done editing" : "Edit";
     document.getElementById("thead").innerHTML = pen
-      ? '<tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th></th></tr>'
+      ? '<tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr>'
       : '<tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr>';
     var tb = document.getElementById("rows");
-    tb.innerHTML = T.map(pen ? penRow : readRow).join("") + (pen ? '<tr class="addrow"><td colspan="6" id="add">+ Add a tactic</td></tr>' : '');
+    tb.innerHTML = T.map(pen ? penRow : readRow).join("") + (pen ? '<tr class="addrow"><td colspan="5" id="add">+ Add a tactic</td></tr>' : '');
     document.getElementById("tcount").textContent = T.length;
     drawK();
     if (!pen) return;
@@ -382,6 +384,7 @@
   document.getElementById("prev").addEventListener("click", function(){ open((cur - 1 + T.length) % T.length); });
   document.getElementById("next").addEventListener("click", function(){ open((cur + 1) % T.length); });
   document.getElementById("close").addEventListener("click", close);
+  document.getElementById("bin").addEventListener("click", function(){ if (cur < 0) return; T.splice(cur, 1); cur = Math.min(cur, T.length - 1); if (cur < 0) close(); else open(cur); toast("Tactic removed"); });
   document.getElementById("backdrop").addEventListener("click", close);
   document.addEventListener("keydown", function(e){ if (e.key === "Escape" && cur >= 0) close(); });
   drawRows();

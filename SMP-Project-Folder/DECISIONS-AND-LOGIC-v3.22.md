@@ -71313,7 +71313,7 @@ Islam, of the one window (§752): *"it seems very complex and I'm not sure this 
 
 **§752–§753 MERGED TO `main`** 2026-11-16, Islam: *"would merging now remove any work done on the current copilot?"* — no: `main`'s commits since the last merge touched none of the Copilot's files, and its shell change merged beside ours — then *"merge to main"*. `main` had taken §745–§751 meanwhile — merged in first, ours renumbered §745 → §752 and §746 → §753, the shell version bumped past main's (v7.69), the builds rebuilt on the merged tree and both suites run there: **369 passed, 0 failed**; **594 ok, 10 failed**, the known ten; `generated-in-step` and `release-stamp` all clear — then `07aa520a..ae7aaa40`. No migrations; nobody signed out. The Copilot opens in the one window; the switch above it offers A and B, per browser.
 
-## §754 — A unit's or a function's Strategy tab names its one section (2026-11-16)
+## §758 — A unit's or a function's Strategy tab names its one section (2026-11-16)
 
 Islam, with the business-unit layer's Plan section switched off on the shape screen and Geo.Mining open on its SWOT: *"when I removed the plans from the shape the choices of plan or SWOT disappeared despite I'm showing the swot it should show"*.
 
@@ -71323,7 +71323,7 @@ Islam, with the business-unit layer's Plan section switched off on the shape scr
 
 **Checked**: the built shell parses; `checks/shell.mjs` needs the database this session does not have and was not run — to be run on the next session that has one.
 
-## §755 — The Weighting page can be switched off (2026-11-16)
+## §759 — The Weighting page can be switched off (2026-11-16)
 
 Islam: *"I need to have option to disable the weighting panel somehow."* Weighting showed on the company page whenever the client had business units (§447) and nothing could hide it.
 

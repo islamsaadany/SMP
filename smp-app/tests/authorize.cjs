@@ -1300,7 +1300,7 @@ check("and `false` reads as ON too, so a stale write cannot hide the feature",
 check("only `true` switches it off",
       R.focusOn(R.worldOf({ group: { focusOff: true } })) === false);
 
-/* ── 14b · THE WEIGHTING PAGE'S SWITCH IS NOT A BIGGER EDIT (§755) ──
+/* ── 14b · THE WEIGHTING PAGE'S SWITCH IS NOT A BIGGER EDIT (§759) ──
    Editing the weights is the g_weight grant's; hiding the page for the whole
    client is the SMO's alone, as focus's switch is — and it is classified
    `setup`, so a stale write of `false` cannot hide the page either. */

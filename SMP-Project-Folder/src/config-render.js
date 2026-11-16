@@ -1529,7 +1529,7 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
-/* §755: THE WEIGHTING PAGE'S SWITCH LIVES HERE, on Setup › Business units,
+/* §759: THE WEIGHTING PAGE'S SWITCH LIVES HERE, on Setup › Business units,
    for focus's reason (§102, §61): the Weighting tab itself goes while the
    page is off, so a switch on that page could be turned off and never back
    on. The units are what the weighting weighs, and this page is always

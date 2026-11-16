@@ -693,7 +693,7 @@
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
         /* §520: and it is neither the owner's own part nor the Foundation,
            so it goes with the rest for a narrowed part owner. */
-        /* §755: and the office may switch the page off (Setup › Business
+        /* §759: and the office may switch the page off (Setup › Business
            units); off means it disappears, as Focus does (§102). */
         when: function(){ return buExists() && weightingOn() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
@@ -4163,7 +4163,7 @@
        one-window flag is read off the Copilot's own definition by its key,
        and off the TAB, not the section `def` has become by here. */
     var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
-    /* §754: EXCEPT ON A UNIT'S OR A FUNCTION'S STRATEGY TAB, where one
+    /* §758: EXCEPT ON A UNIT'S OR A FUNCTION'S STRATEGY TAB, where one
        section still names itself. Islam, with a layer's Plan section
        switched off and its Foundation not counting (2026-11-16): *"the
        choices of plan or SWOT disappeared despite I'm showing the swot"*.
@@ -5784,7 +5784,7 @@
         setFocusOn(this.dataset.focusswitch === "1"); paint();
       });
     });
-    /* §755: the Weighting page's switch, the same pair and the same shape. */
+    /* §759: the Weighting page's switch, the same pair and the same shape. */
     document.querySelectorAll("[data-weightswitch]").forEach(function(wsw){
       wsw.addEventListener("click", function(){
         setWeightingOn(this.dataset.weightswitch === "1"); paint();

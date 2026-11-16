@@ -29061,9 +29061,49 @@ function setOr(row, field, v){
    eighty letters, and written out they buried the reported note. The data
    helpers sit in config-data.js beside the requirements' (§415). */
 function kmTag(n, name, kind){
-  return '<span class="kmtag ' + (kind === "t" ? "t" : "m") + '" title="' + esc(name || "") + '" tabindex="0">' +
+  return '<span class="kmtag ' + (kind === "t" ? "t" : "m") + '" data-name="' + esc(name || "") +
+    '" aria-label="' + esc(name || "") + '" tabindex="0">' +
     (kind === "t" ? "T" + n : "KM " + n) + '</span>';
 }
+/* §767.1: THE NAME SHOWS THE MOMENT THE POINTER TOUCHES THE TAG. Islam: *"the
+   message appear slowly on hovering it needs to appear quicker"* — it was the
+   browser's own `title` tooltip, which waits about a second by a rule no page
+   can change. So the tag carries the name in `data-name` and ONE floating
+   label, made once and moved, is shown on mouseover and on keyboard focus,
+   below the tag (above it when the tag sits near the foot of the window),
+   fixed to the viewport so the table's own scroll box cannot clip it. One
+   listener on the document, so a tag drawn by any surface — the Plan page,
+   Performance, the readers' view — is covered without a wire per paint. */
+(function(){
+  if (typeof document === "undefined") return;
+  var tip = null;
+  function tagOf(e){
+    var t = e.target;
+    return t && t.closest ? t.closest(".kmtag[data-name]") : null;
+  }
+  function show(el){
+    var name = el.getAttribute("data-name");
+    if (!name) return;
+    if (!tip) {
+      tip = document.createElement("div");
+      tip.className = "kmtip"; tip.setAttribute("role", "tooltip");
+      document.body.appendChild(tip);
+    }
+    tip.textContent = name;
+    tip.classList.add("on");
+    var r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+    var top = r.bottom + 6;
+    if (top + h > window.innerHeight - 8) top = r.top - 6 - h;
+    tip.style.left = left + "px"; tip.style.top = top + "px";
+  }
+  function hide(){ if (tip) tip.classList.remove("on"); }
+  document.addEventListener("mouseover", function(e){ var t = tagOf(e); if (t) show(t); });
+  document.addEventListener("mouseout",  function(e){ if (tagOf(e)) hide(); });
+  document.addEventListener("focusin",   function(e){ var t = tagOf(e); if (t) show(t); });
+  document.addEventListener("focusout",  function(e){ if (tagOf(e)) hide(); });
+  document.addEventListener("scroll", hide, true);
+})();
 function supportsLine(t, p){
   var s = supportsOf(t, p);
   if (!s.length) return '';

@@ -679,7 +679,9 @@
    held, never disabled, and says why in the platform's bubble. */
 /* v7.74-tactic-supports — §767: a tactic names the key measures it
    supports, by number; the built platform file changed. */
-const SHELL = "smp-shell-v7.74-tactic-supports";
+/* v7.75-tag-name-at-once — §767.1: the tag's name shows the moment the
+   pointer arrives, in the platform's own label. */
+const SHELL = "smp-shell-v7.75-tag-name-at-once";
 const ASSETS = [
   "/",
   "/index.html",

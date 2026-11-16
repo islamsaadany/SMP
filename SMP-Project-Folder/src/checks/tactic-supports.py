@@ -87,12 +87,22 @@ with sync_playwright() as p:
     go()
     ln = safe(pg, """()=>[...document.querySelectorAll('#panel .kmnums')].map(x=>({
       cell:!!x.closest('td') && !!x.closest('td').querySelector('.tacname'), key:(x.querySelector('.repkey')||{textContent:null}).textContent,
-      tags:[...x.querySelectorAll('.kmtag')].map(t=>[t.textContent, t.getAttribute('title')])}))""")
+      tags:[...x.querySelectorAll('.kmtag')].map(t=>[t.textContent, t.getAttribute('data-name')])}))""")
     ok("two tactics carry a line of tags, in their own cell under the name, with no word before them", ln and len(ln) == 2 and all(x["cell"] and x["key"] is None for x in ln), ln)
     mn = safe(pg, "()=>%s.measures.map(m=>m.name)" % P)
     ok("the first says KM 1 and KM 2, each tag's hover being the measure's name",
        ln and ln[0]["tags"] == [["KM 1", mn[0]], ["KM 2", mn[1]]], ln and ln[0]["tags"])
     ok("the second says KM 2 alone", ln and ln[1]["tags"] == [["KM 2", mn[1]]], ln and ln[1]["tags"])
+    # §767.1: the name shows the moment the pointer arrives — read with no wait at all
+    try:
+        pg.locator("#panel .kmnums .kmtag").first.hover()
+        tp = safe(pg, "()=>{var t=document.querySelector('.kmtip'); return t?[t.classList.contains('on'), t.textContent, getComputedStyle(t).display]:null}")
+        pg.mouse.move(5, 5)
+        tp2 = safe(pg, "()=>{var t=document.querySelector('.kmtip'); return t?t.classList.contains('on'):null}")
+    except Exception as e: tp = "ERR " + str(e)[:80]; tp2 = None
+    ok("hovering a tag shows the measure's name at once, in the platform's own label", tp and tp[0] is True and tp[1] == mn[0] and tp[2] == "block", tp)
+    ok("and it goes when the pointer leaves", tp2 is False, tp2)
+    ok("no browser tooltip is left on the tag to appear late", safe(pg, "()=>[...document.querySelectorAll('#panel .kmtag')].every(t=>!t.hasAttribute('title'))") is True)
     ct = safe(pg, """()=>[...document.querySelectorAll('#panel .kmcount')].map(x=>({none:x.classList.contains('none'), text:x.textContent.trim(),
       tags:[...x.querySelectorAll('.kmtag')].map(t=>t.textContent)}))""")
     ok("every measure of the pillar carries a count line", ct and len(ct) == 4, ct)

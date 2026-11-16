@@ -13946,7 +13946,7 @@ var HISTORY = [
             corporate:71, care:66, it:63, logistics:69, nigeria:44 } }
 ];
 function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null; }
-/* §754: THE CLOSING RECORD FOLLOWS THE FIGURES. Closing files a score
+/* §755: THE CLOSING RECORD FOLLOWS THE FIGURES. Closing files a score
    snapshot (shell.html, the close press) and leaves every figure live; the
    office may now correct a figure on the closed cycle (cycleTakesFigures),
    so the snapshot taken at the press would say what the cycle scored BEFORE
@@ -14017,7 +14017,7 @@ function planEditable(){
    contributor row of the access page could not do anything even when the SMO
    set it to edit — a control that changes nothing is worse than no control.
    It also means the screen and the server answer from the same function. */
-/* ── §754: A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE ──────────
+/* ── §755: A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE ──────────
    Islam: *"we agreed that the SMO can report even if the cycle is closed."*
    §690 kept the Reporting tab for the office on a closed cycle, and the page
    it opened onto said the figures were a record and could not be changed
@@ -14042,7 +14042,7 @@ function cycleTakesFigures(){
   return true;
 }
 function canReport(unitKey){
-  if (!cycleTakesFigures()) return false;   /* §754 */
+  if (!cycleTakesFigures()) return false;   /* §755 */
   /* §428: the top layer's own plan is reported by the office and the group's
      CEO — a rule, the same one the server asks. */
   if (unitKey === "group") {
@@ -14054,7 +14054,7 @@ function canReport(unitKey){
        one rule the server asks; which rows they type on is each part's. */
     return SMPRules.mayReportTopOrPart(world(), viewer());
   }
-  /* The lock is asked by cycleTakesFigures() above (spec 006 §7.1, §754). */
+  /* The lock is asked by cycleTakesFigures() above (spec 006 §7.1, §755). */
   /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
      This asked `u_report` for every target, and u_report's area is "unit" —
      so for an fn: target the screen read the own-UNIT cell while the server
@@ -14134,7 +14134,7 @@ function canReportFn(target){
   /* §405: a unit's own holder reports on the UNIT's column, through the gate
      a unit's own page already asks — never the function's. */
   if (isUnitHolderId(target)) return canReport(subjKey(target));
-  if (!cycleTakesFigures()) return false;   /* §754 */
+  if (!cycleTakesFigures()) return false;   /* §755 */
   return grantAt("k_report", holderTarget(target)) === "edit";
 }
 function canReportFnRow(target, project, rowObj){
@@ -14212,7 +14212,7 @@ function dirPillar(t){
    (ownsTopPillar with the stored pillar's own two seats). */
 function canSpeakForDir(t){
   var d = dirPillar(t);
-  if (!d || !cycleTakesFigures() || !planOn("group")) return false;   /* §754 */
+  if (!d || !cycleTakesFigures() || !planOn("group")) return false;   /* §755 */
   return SMPRules.mayReportTop(world(), viewer()) ||
          SMPRules.ownsTopPillar(world(), viewer(), d.p.owner || "", d.p.custodian || "");
 }
@@ -35345,7 +35345,7 @@ function renderFocusBoard(){
 function reportBar(target){
   var t = String(target || "");
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
-  if (!REVIEW || !cycleTakesFigures() || reportClosed(t)) return "";   /* §754 */
+  if (!REVIEW || !cycleTakesFigures() || reportClosed(t)) return "";   /* §755 */
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
   if (!places.length) return "";
   var total = 0, walk = 0;
@@ -35498,7 +35498,7 @@ function repOutTarget(t, x){
    a pillars function already report through, with every gate below asking
    `u.ukey` = "cap:<id>" (§53.5, §59). A second body for the same tables is how
    the Plan page came to know both shapes while this page knew one. */
-/* §754: THE CLOSED NOTE, IN TWO VOICES. To everybody the cycle shuts out it
+/* §755: THE CLOSED NOTE, IN TWO VOICES. To everybody the cycle shuts out it
    says the figures are a record and names the way back; to the office, who
    can still type on the page under it (cycleTakesFigures), it says the cycle
    is closed and what a figure entered now does to the record
@@ -35529,7 +35529,7 @@ function renderReport(u, opt){
   var subd = !!REVIEW.submitted[u.ukey];
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
 
-  /* §754: closed, the page stands for the office with the note above it;
+  /* §755: closed, the page stands for the office with the note above it;
      for everybody else the note IS the page. §520.7: inside the company's
      page the closed note is already above, so the pane carries none. */
   var shut = paneOnly ? "" : cycleClosedNote();
@@ -37655,7 +37655,7 @@ function renderFnObjReport(fk){
   /* §405: REVIEW, the chrome and Submit are keyed by the SUBJECT — the bare
      unit key for a unit, `fn:<key>` for a function (§48). */
   var target = subjKey(holderTarget(fk));
-  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §754 */
+  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §755 */
   var c = fnObjReported(fk);
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
   var mayAll = canSpeakFor(target);
@@ -37991,7 +37991,7 @@ function renderFnReport(fnKey){
   if (plansInPillars(target)) return renderReport(unitLike(target));
   if (plansInObjectives(target)) return renderFnObjReport(fk);
   if (!caps.length) return fnNothingBehind(target);
-  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §754 */
+  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §755 */
   var done = 0, total = 0;
   caps.forEach(function(c){ var r = capReported(c); done += r.done; total += r.total; });
   var pctDone = total ? Math.round(done / total * 100) : 0;
@@ -46313,7 +46313,7 @@ function renderMyLines(){
     return '<div class="note">No line is yours to report. A ' + L1("tactic") + ' is yours when the plan ' +
       'names you as its <b>Owner</b> \u2014 the SMO sets that on the unit\u2019s plan.</div>';
   }
-  var open = cycleTakesFigures();   /* §754 */
+  var open = cycleTakesFigures();   /* §755 */
   var byT = {}, order = [];
   rows.forEach(function(r){
     if (!byT[r.target]) { byT[r.target] = []; order.push(r.target); }
@@ -46432,7 +46432,7 @@ function renderMySources(){
       '<b>sets</b>, and a set\u2019s owner enters everything in it \u2014 the SMO creates ' +
       'them on <b>Setup &rsaquo; Figure sets</b>.</div>';
   }
-  var open = cycleTakesFigures();   /* §754 */
+  var open = cycleTakesFigures();   /* §755 */
   var byUnit = {};
   rows.forEach(function(r){ (byUnit[r.unit] = byUnit[r.unit] || []).push(r); });
 
@@ -46720,7 +46720,7 @@ function impPicked(){
 
    Uploading has no such list, deliberately: *"the upload only makes sense for
    new cycles not closed ones"*. A closed cycle takes no figures from anyone
-   but the office (§754 — before it, nobody: `canReport()` and `canReportFn()`
+   but the office (§755 — before it, nobody: `canReport()` and `canReportFn()`
    both opened with `REVIEW.state !== "open"`), and reopening one is its own
    deliberate control on Setup › Reporting cycle (§273.2). A progress FILE
    still lands on the open cycle alone, on Islam's word above; the office's
@@ -82213,7 +82213,7 @@ var SYNC = (function () {
     /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
        panel follow every paint, as the page's own parts do. */
     if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
-    /* §754: a figure corrected on a closed cycle re-takes its closing
+    /* §755: a figure corrected on a closed cycle re-takes its closing
        record before the save leaves (closeRecordFollow, config-data.js). */
     if (typeof closeRecordFollow === "function") closeRecordFollow();
     /* Every mutation repaints, so this is where a change becomes a save. */

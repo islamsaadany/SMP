@@ -7199,7 +7199,7 @@ function renderFocusBoard(){
 function reportBar(target){
   var t = String(target || "");
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
-  if (!REVIEW || !cycleTakesFigures() || reportClosed(t)) return "";   /* §754 */
+  if (!REVIEW || !cycleTakesFigures() || reportClosed(t)) return "";   /* §755 */
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
   if (!places.length) return "";
   var total = 0, walk = 0;
@@ -7352,7 +7352,7 @@ function repOutTarget(t, x){
    a pillars function already report through, with every gate below asking
    `u.ukey` = "cap:<id>" (§53.5, §59). A second body for the same tables is how
    the Plan page came to know both shapes while this page knew one. */
-/* §754: THE CLOSED NOTE, IN TWO VOICES. To everybody the cycle shuts out it
+/* §755: THE CLOSED NOTE, IN TWO VOICES. To everybody the cycle shuts out it
    says the figures are a record and names the way back; to the office, who
    can still type on the page under it (cycleTakesFigures), it says the cycle
    is closed and what a figure entered now does to the record
@@ -7383,7 +7383,7 @@ function renderReport(u, opt){
   var subd = !!REVIEW.submitted[u.ukey];
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
 
-  /* §754: closed, the page stands for the office with the note above it;
+  /* §755: closed, the page stands for the office with the note above it;
      for everybody else the note IS the page. §520.7: inside the company's
      page the closed note is already above, so the pane carries none. */
   var shut = paneOnly ? "" : cycleClosedNote();
@@ -9509,7 +9509,7 @@ function renderFnObjReport(fk){
   /* §405: REVIEW, the chrome and Submit are keyed by the SUBJECT — the bare
      unit key for a unit, `fn:<key>` for a function (§48). */
   var target = subjKey(holderTarget(fk));
-  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §754 */
+  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §755 */
   var c = fnObjReported(fk);
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
   var mayAll = canSpeakFor(target);
@@ -9845,7 +9845,7 @@ function renderFnReport(fnKey){
   if (plansInPillars(target)) return renderReport(unitLike(target));
   if (plansInObjectives(target)) return renderFnObjReport(fk);
   if (!caps.length) return fnNothingBehind(target);
-  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §754 */
+  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §755 */
   var done = 0, total = 0;
   caps.forEach(function(c){ var r = capReported(c); done += r.done; total += r.total; });
   var pctDone = total ? Math.round(done / total * 100) : 0;

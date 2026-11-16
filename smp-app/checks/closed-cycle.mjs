@@ -1,4 +1,4 @@
-/* A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE (§754, Islam
+/* A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE (§755, Islam
    2026-11-16: *"we agreed that the SMO can report even if the cycle is
    closed"*).
 
@@ -21,7 +21,7 @@
         their page is the old note with no box under it — both ends (§94.2);
      6. reopened, the note goes and the boxes are as at 1.
 
-   Proved able to fail: against the build before §754 it is 8 red (the note
+   Proved able to fail: against the build before §755 it is 8 red (the note
    in the old words, no boxes, no figure written, the record unmoved).
 
      node checks/closed-cycle.mjs

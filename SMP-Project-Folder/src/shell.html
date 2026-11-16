@@ -4374,7 +4374,7 @@
     /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
        panel follow every paint, as the page's own parts do. */
     if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
-    /* §754: a figure corrected on a closed cycle re-takes its closing
+    /* §755: a figure corrected on a closed cycle re-takes its closing
        record before the save leaves (closeRecordFollow, config-data.js). */
     if (typeof closeRecordFollow === "function") closeRecordFollow();
     /* Every mutation repaints, so this is where a change becomes a save. */

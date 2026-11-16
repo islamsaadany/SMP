@@ -6497,7 +6497,7 @@ function renderMyLines(){
     return '<div class="note">No line is yours to report. A ' + L1("tactic") + ' is yours when the plan ' +
       'names you as its <b>Owner</b> \u2014 the SMO sets that on the unit\u2019s plan.</div>';
   }
-  var open = cycleTakesFigures();   /* §754 */
+  var open = cycleTakesFigures();   /* §755 */
   var byT = {}, order = [];
   rows.forEach(function(r){
     if (!byT[r.target]) { byT[r.target] = []; order.push(r.target); }
@@ -6616,7 +6616,7 @@ function renderMySources(){
       '<b>sets</b>, and a set\u2019s owner enters everything in it \u2014 the SMO creates ' +
       'them on <b>Setup &rsaquo; Figure sets</b>.</div>';
   }
-  var open = cycleTakesFigures();   /* §754 */
+  var open = cycleTakesFigures();   /* §755 */
   var byUnit = {};
   rows.forEach(function(r){ (byUnit[r.unit] = byUnit[r.unit] || []).push(r); });
 
@@ -6904,7 +6904,7 @@ function impPicked(){
 
    Uploading has no such list, deliberately: *"the upload only makes sense for
    new cycles not closed ones"*. A closed cycle takes no figures from anyone
-   but the office (§754 — before it, nobody: `canReport()` and `canReportFn()`
+   but the office (§755 — before it, nobody: `canReport()` and `canReportFn()`
    both opened with `REVIEW.state !== "open"`), and reopening one is its own
    deliberate control on Setup › Reporting cycle (§273.2). A progress FILE
    still lands on the open cycle alone, on Islam's word above; the office's

@@ -5506,7 +5506,7 @@ var HISTORY = [
             corporate:71, care:66, it:63, logistics:69, nigeria:44 } }
 ];
 function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null; }
-/* §754: THE CLOSING RECORD FOLLOWS THE FIGURES. Closing files a score
+/* §755: THE CLOSING RECORD FOLLOWS THE FIGURES. Closing files a score
    snapshot (shell.html, the close press) and leaves every figure live; the
    office may now correct a figure on the closed cycle (cycleTakesFigures),
    so the snapshot taken at the press would say what the cycle scored BEFORE
@@ -5577,7 +5577,7 @@ function planEditable(){
    contributor row of the access page could not do anything even when the SMO
    set it to edit — a control that changes nothing is worse than no control.
    It also means the screen and the server answer from the same function. */
-/* ── §754: A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE ──────────
+/* ── §755: A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE ──────────
    Islam: *"we agreed that the SMO can report even if the cycle is closed."*
    §690 kept the Reporting tab for the office on a closed cycle, and the page
    it opened onto said the figures were a record and could not be changed
@@ -5602,7 +5602,7 @@ function cycleTakesFigures(){
   return true;
 }
 function canReport(unitKey){
-  if (!cycleTakesFigures()) return false;   /* §754 */
+  if (!cycleTakesFigures()) return false;   /* §755 */
   /* §428: the top layer's own plan is reported by the office and the group's
      CEO — a rule, the same one the server asks. */
   if (unitKey === "group") {
@@ -5614,7 +5614,7 @@ function canReport(unitKey){
        one rule the server asks; which rows they type on is each part's. */
     return SMPRules.mayReportTopOrPart(world(), viewer());
   }
-  /* The lock is asked by cycleTakesFigures() above (spec 006 §7.1, §754). */
+  /* The lock is asked by cycleTakesFigures() above (spec 006 §7.1, §755). */
   /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
      This asked `u_report` for every target, and u_report's area is "unit" —
      so for an fn: target the screen read the own-UNIT cell while the server
@@ -5694,7 +5694,7 @@ function canReportFn(target){
   /* §405: a unit's own holder reports on the UNIT's column, through the gate
      a unit's own page already asks — never the function's. */
   if (isUnitHolderId(target)) return canReport(subjKey(target));
-  if (!cycleTakesFigures()) return false;   /* §754 */
+  if (!cycleTakesFigures()) return false;   /* §755 */
   return grantAt("k_report", holderTarget(target)) === "edit";
 }
 function canReportFnRow(target, project, rowObj){
@@ -5772,7 +5772,7 @@ function dirPillar(t){
    (ownsTopPillar with the stored pillar's own two seats). */
 function canSpeakForDir(t){
   var d = dirPillar(t);
-  if (!d || !cycleTakesFigures() || !planOn("group")) return false;   /* §754 */
+  if (!d || !cycleTakesFigures() || !planOn("group")) return false;   /* §755 */
   return SMPRules.mayReportTop(world(), viewer()) ||
          SMPRules.ownsTopPillar(world(), viewer(), d.p.owner || "", d.p.custodian || "");
 }

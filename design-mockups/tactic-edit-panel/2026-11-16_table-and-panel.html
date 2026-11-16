@@ -208,9 +208,9 @@
     <div class="scroll"><table class="tactable"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
   <div class="backdrop" id="backdrop" hidden></div>
   <aside class="side" id="side" hidden>
-    <div class="shead"><span class="k">Tactic <span id="sn">1</span></span><b id="sname"></b>
+    <div class="shead"><span id="sn" hidden></span><b id="sname"></b>
       <span class="nav"><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
-      <button class="close" type="button" id="close" title="Close">×</button></div>
+    </div>
     <div class="sbody" id="sbody"></div>
     <div class="sfoot"><span>Saves as you type, like the rest of the pen.</span></div>
   </aside>
@@ -404,10 +404,8 @@
   document.getElementById("penbtn").addEventListener("click", function(){ pen ? penOff() : penOn(); });
   document.getElementById("prev").addEventListener("click", function(){ open((cur - 1 + T.length) % T.length); });
   document.getElementById("next").addEventListener("click", function(){ open((cur + 1) % T.length); });
-  document.getElementById("close").addEventListener("click", close);
 
   document.getElementById("backdrop").addEventListener("click", close);
-  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && cur >= 0) close(); });
   drawRows();
 })();
 </script>

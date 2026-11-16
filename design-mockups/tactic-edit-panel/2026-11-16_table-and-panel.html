@@ -259,7 +259,7 @@
         '<span class="addout" data-rowadd="' + i + '">+ Add an outcome</span>' + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') + '</td>' +
       '<td>' + dd("rowowner" + i, function(){ return t.owner; }, false) + '</td>' +
       '<td><span class="qpick">' + t.q.map(function(v, k){ return '<i class="' + (v ? "on" : "") + '" data-rq="' + i + ':' + k + '">Q' + (k + 1) + '</i>'; }).join("") + '</span></td>' +
-      '<td><span class="rowtools"><button type="button" class="openb" data-open="' + i + '">Details</button><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
+      '<td><span class="rowtools"><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
   }
   function drawRows(){
     document.body.classList.toggle("pen-on", pen);
@@ -272,7 +272,13 @@
     document.getElementById("tcount").textContent = T.length;
     drawK();
     if (!pen) return;
-    tb.querySelectorAll("tr[data-i]").forEach(function(r){ r.addEventListener("click", function(e){ if (e.target.closest(".x, input, select, .pick, .dd, .qpick, label, small, .addout")) return; open(+r.dataset.i); }); });
+    tb.querySelectorAll("tr[data-i]").forEach(function(r){
+      r.addEventListener("click", function(e){ if (e.target.closest(".x, input, select, .pick, .dd, .qpick, label, small, .addout")) return; open(+r.dataset.i); });
+      /* the panel follows the row you work in: focus landing in any box of another row moves it there, without taking the focus */
+      r.addEventListener("focusin", function(e){ var i = +r.dataset.i; if (i === cur || !e.target.closest("input, button, select")) return;
+        var keep = e.target; cur = i; document.getElementById("side").hidden = false; document.getElementById("backdrop").hidden = false; document.body.classList.add("panel-open");
+        tb.querySelectorAll("tr[data-i]").forEach(function(x){ x.classList.toggle("on", +x.dataset.i === i); }); drawPanel(); keep.focus(); });
+    });
     tb.querySelectorAll("[data-rowname]").forEach(function(f){ f.addEventListener("input", function(){ T[+f.dataset.rowname].name = f.value; var h = document.getElementById("sname"); if (cur === +f.dataset.rowname && h) h.textContent = f.value || "New tactic"; }); f.addEventListener("change", function(){ toast("Saved"); }); });
     tb.querySelectorAll("[data-rowout]").forEach(function(f){ f.addEventListener("input", function(){ var a = f.dataset.rowout.split(":"), t = T[+a[0]], k = +a[1]; while (t.outs.length <= k) t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); t.outs[k].name = f.value;
       if (cur === +a[0]) { var pf = document.querySelector('#sbody [data-o="' + k + '"][data-f="name"]'); if (pf && pf.value !== f.value) pf.value = f.value; } }); f.addEventListener("change", function(){ toast("Saved"); }); });

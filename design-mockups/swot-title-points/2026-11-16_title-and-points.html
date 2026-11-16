@@ -57,7 +57,10 @@
   .swotlist li.ed .swot-n{ padding-top:7px; }
   .swot-n{ font-family:var(--mono); font-size:11.5px; color:var(--none); font-variant-numeric:tabular-nums; }
   .swot-t b{ font-weight:700; }
-  .swot-p{ display:block; margin-top:3px; }
+  /* a point: its own block, the bullet in a column of its own, the text in a
+     column of its own — so a point that wraps lines up under its first word */
+  .swot-p{ display:block; position:relative; padding-left:14px; margin-top:3px; }
+  .swot-p::before{ content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
   .swot-t b + .swot-p{ margin-top:5px; }
   .fld{ font:inherit; font-size:13px; line-height:1.45; width:100%; padding:6px 9px; border:1px solid var(--field-line); border-radius:4px;
         background:var(--surface); color:var(--ink); white-space:pre-wrap; box-sizing:border-box; min-height:34px; }
@@ -74,7 +77,7 @@
   ol.dswot li{ display:grid; grid-template-columns:22px 1fr; gap:8px; align-items:baseline; padding:2.5% 0; border-bottom:1px solid var(--line-soft);
                font-size:clamp(11px,1.5vw,16px); break-inside:avoid; }
   ol.dswot .n{ font-family:var(--mono); color:var(--none); font-size:.8em; }
-  ol.dswot .swot-p{ margin-top:2px; }
+  ol.dswot .swot-p{ margin-top:2px; padding-left:1.1em; }
 
   .verdict{ border-left:3px solid var(--gold); padding:2px 0 2px 13px; margin:10px 0 0; font-size:13px; color:var(--ink-2); max-width:66ch; line-height:1.5; }
   .rule{ border:0; border-top:1px solid var(--line); margin:40px 0 0; }
@@ -101,11 +104,11 @@
     <div>
       <p class="cap">As printed · pen closed</p>
       <div class="box"><h3>Strengths</h3><ol class="swotlist">
-        <li><span class="swot-n">1</span><span class="swot-t"><b>TRUSTED BRAND LEGACY</b><span class="swot-p">- RHI is the undisputed "Go-To Entity" in the cement industry, providing stability, superior integrity, and unquestioned technical expertise.</span><span class="swot-p">- This advantage stems from the Chairman's respected reputation and RHI's commitment to client shielding, ensuring quality operations without burdening the customer.</span><span class="swot-p">- RHI possesses complete technical mastery and exceptional client-facing agility.</span></span></li>
+        <li><span class="swot-n">1</span><span class="swot-t"><b>TRUSTED BRAND LEGACY</b><span class="swot-p">RHI is the undisputed "Go-To Entity" in the cement industry, providing stability, superior integrity, and unquestioned technical expertise.</span><span class="swot-p">This advantage stems from the Chairman's respected reputation and RHI's commitment to client shielding, ensuring quality operations without burdening the customer.</span><span class="swot-p">RHI possesses complete technical mastery and exceptional client-facing agility.</span></span></li>
       </ol></div>
     </div>
   </div>
-  <p class="note"><b>Title bold, points one under the other.</b> The empty lines you left between points are dropped, so the points sit close under their title. The dashes are yours and are printed as typed; nothing is added or taken away from the words.</p>
+  <p class="note"><b>Title bold, points as bullets, each in line with itself.</b> The dash you typed is taken off the front of the line and drawn as the bullet in a column of its own; the words sit in their own column, so a point that runs to a second line lines up under its first word, not under the dash. The empty lines you left between points are dropped, so the points sit close under their title.</p>
 
   <span class="key">2 · One line, no points <b>— every line written so far</b></span>
   <div class="pair">
@@ -142,9 +145,9 @@
     <div>
       <p class="cap">As printed</p>
       <div class="box"><h3>Strengths</h3><ol class="swotlist">
-        <li><span class="swot-n">1</span><span class="swot-t"><b>HIGHLY SKILLED TEAM</b><span class="swot-p">- RHI possesses a high-caliber workforce whose extensive experience provides a critical competitive edge in handling complex projects.</span></span></li>
+        <li><span class="swot-n">1</span><span class="swot-t"><b>HIGHLY SKILLED TEAM</b><span class="swot-p">RHI possesses a high-caliber workforce whose extensive experience provides a critical competitive edge in handling complex projects.</span></span></li>
         <li><span class="swot-n">2</span><span class="swot-t">Over 90% of revenue from local manufacturing</span></li>
-        <li><span class="swot-n">3</span><span class="swot-t"><b>SUBCONTRACTOR LEVERAGE (Mansour &amp; El Seefy)</b><span class="swot-p">- RHI benefits from reliable partnerships that ensure operational continuity and resource flexibility.</span><span class="swot-p">- These relationships are secured by strong executive alignment (Mansour/CFO) and the Chairman's deep historical ties (e.g., El Seefy).</span></span></li>
+        <li><span class="swot-n">3</span><span class="swot-t"><b>SUBCONTRACTOR LEVERAGE (Mansour &amp; El Seefy)</b><span class="swot-p">RHI benefits from reliable partnerships that ensure operational continuity and resource flexibility.</span><span class="swot-p">These relationships are secured by strong executive alignment (Mansour/CFO) and the Chairman's deep historical ties (e.g., El Seefy).</span></span></li>
       </ol></div>
     </div>
   </div>
@@ -168,27 +171,27 @@ The CEO champions individual initiative and acts as an executive development dri
       </ol></div>
     </div>
   </div>
-  <p class="note"><b>The first line is the title whatever it looks like.</b> Capitals are not required, and a dash is not required on a point. Each line you start is a point on its own line; no dash or bullet is added for you.</p>
+  <p class="note"><b>The first line is the title whatever it looks like.</b> Capitals are not required, and a dash is not required on a point: a point typed without one gets the same bullet as a point typed with one, so a box reads the same however its lines were typed. A leading dash, bullet or asterisk is taken as the marker; anything else is the point's own words.</p>
 
   <span class="key">5 · The same line on the review deck</span>
   <div class="deck"><div class="slide">
     <h2>Strengths</h2>
     <ol class="dswot">
-      <li><span class="n">1</span><span class="swot-t"><b>TRUSTED BRAND LEGACY</b><span class="swot-p">- RHI is the undisputed "Go-To Entity" in the cement industry, providing stability, superior integrity, and unquestioned technical expertise.</span><span class="swot-p">- This advantage stems from the Chairman's respected reputation and RHI's commitment to client shielding.</span><span class="swot-p">- RHI possesses complete technical mastery and exceptional client-facing agility.</span></span></li>
-      <li><span class="n">2</span><span class="swot-t"><b>HIGHLY SKILLED TEAM</b><span class="swot-p">- RHI possesses a high-caliber workforce whose extensive experience provides a critical competitive edge.</span></span></li>
+      <li><span class="n">1</span><span class="swot-t"><b>TRUSTED BRAND LEGACY</b><span class="swot-p">RHI is the undisputed "Go-To Entity" in the cement industry, providing stability, superior integrity, and unquestioned technical expertise.</span><span class="swot-p">This advantage stems from the Chairman's respected reputation and RHI's commitment to client shielding.</span><span class="swot-p">RHI possesses complete technical mastery and exceptional client-facing agility.</span></span></li>
+      <li><span class="n">2</span><span class="swot-t"><b>HIGHLY SKILLED TEAM</b><span class="swot-p">RHI possesses a high-caliber workforce whose extensive experience provides a critical competitive edge.</span></span></li>
       <li><span class="n">3</span><span class="swot-t">Over 90% of revenue from local manufacturing</span></li>
       <li><span class="n">4</span><span class="swot-t">Nationwide distribution &amp; retail reach</span></li>
       <li><span class="n">5</span><span class="swot-t">Integrated Raya Trade ecosystem</span></li>
     </ol>
   </div></div>
-  <p class="note">The slide prints the same shape: title in bold, points under it, a one-liner plain. This is the unit's SWOT slide; the company's Analysis slide and a function's S&amp;W slide print the same way.</p>
+  <p class="note">The slide prints the same shape: title in bold, points as bullets lined up under their first word, a one-liner plain. This is the unit's SWOT slide; the company's Analysis slide and a function's S&amp;W slide print the same way.</p>
 
   <span class="key">6 · The alternative, not built <b>— every first line bold</b></span>
   <div class="pair">
     <div>
       <p class="cap">Built · bold only when points follow</p>
       <div class="box w"><h3>Weaknesses</h3><ol class="swotlist">
-        <li><span class="swot-n">1</span><span class="swot-t"><b>THIN BENCH</b><span class="swot-p">- Two people hold every client relationship.</span></span></li>
+        <li><span class="swot-n">1</span><span class="swot-t"><b>THIN BENCH</b><span class="swot-p">Two people hold every client relationship.</span></span></li>
         <li><span class="swot-n">2</span><span class="swot-t">Limited control over the value chain</span></li>
         <li><span class="swot-n">3</span><span class="swot-t">Low margin on devices</span></li>
       </ol></div>
@@ -196,7 +199,7 @@ The CEO champions individual initiative and acts as an executive development dri
     <div>
       <p class="cap">Alternative · every entry's first line bold</p>
       <div class="box w"><h3>Weaknesses</h3><ol class="swotlist">
-        <li><span class="swot-n">1</span><span class="swot-t"><b>THIN BENCH</b><span class="swot-p">- Two people hold every client relationship.</span></span></li>
+        <li><span class="swot-n">1</span><span class="swot-t"><b>THIN BENCH</b><span class="swot-p">Two people hold every client relationship.</span></span></li>
         <li><span class="swot-n">2</span><span class="swot-t"><b>Limited control over the value chain</b></span></li>
         <li><span class="swot-n">3</span><span class="swot-t"><b>Low margin on devices</b></span></li>
       </ol></div>

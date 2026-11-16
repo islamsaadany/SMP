@@ -29,7 +29,9 @@
 var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","outcome",
                  "outcome_direction","outcome_target","outcome_compiled",
                  "owner","collaborators","direction","value","value_3y","unit","horizon",
-                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly","quarterly"];
+                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly","quarterly",
+                 /* §767: the key measures a tactic supports, by name, "|"-separated. */
+                 "key_measures"];
 
 /* ── THE TWELVE, ON THE WAY IN (§278) ──────────────────────────────────
    The workbook writes twelve columns and the reader joins them into one
@@ -229,6 +231,7 @@ function planTemplate(u){
         outcome_compiled:t.outCompile, owner:t.owner,
         collaborators:(t.collaborators || []).join("|"),
         q1:t.q1 ? 1 : 0, q2:t.q2 ? 1 : 0, q3:t.q3 ? 1 : 0, q4:t.q4 ? 1 : 0,
+        key_measures:supportsOf(t, p).map(function(x){ return x.m.name; }).join("|"),
         source_slide:t.slide, notes:t.notes }));
     });
   });
@@ -443,6 +446,26 @@ function ownerProblems(rows){
   });
   return out;
 }
+/* §767: the key measures a tactic's cell names, read against the measures the
+   SAME file puts under the same pillar — a name (case and spacing aside) or
+   the measure's number in that list. Answers the matched measures' indexes
+   (0-based) and the tokens that matched nothing, so the reader can say which
+   (§96.2: said, never dropped). */
+function kmTokens(v){
+  return String(v == null ? "" : v).split(/[|\r\n]/)
+    .map(function(x){ return x.trim(); }).filter(Boolean);
+}
+function kmMatch(v, names){
+  var hit = [], miss = [];
+  var norm = function(s){ return String(s == null ? "" : s).replace(/\s+/g, " ").trim().toLowerCase(); };
+  var keys = (names || []).map(norm);
+  kmTokens(v).forEach(function(tok){
+    var i = /^(?:km\s*)?(\d+)$/i.test(tok) ? +(/(\d+)$/.exec(tok)[1]) - 1 : keys.indexOf(norm(tok));
+    if (i >= 0 && i < keys.length) { if (hit.indexOf(i) < 0) hit.push(i); }
+    else miss.push(tok);
+  });
+  return { hit:hit, miss:miss };
+}
 function validatePlan(u, rows){
   var problems = [], notices = [], themes = GROUP.themes.map(function(x){ return x.ab; });
   var pillars = rows.filter(function(r){ return r.type === "PILLAR"; });
@@ -476,6 +499,17 @@ function validatePlan(u, rows){
     if (r.type === "OUTORPHAN")
       problems.push({ at:at, msg:"an outcome on the Outcomes sheet whose tactic could not be matched \u2014 name a tactic from the Tactics sheet, under its pillar" });
     if (r.type === "TACTIC") {
+      /* §767: a key measure named that the file does not put under the
+         same pillar is said, never dropped (§96.2). */
+      var kmv = r.kms || r.key_measures;
+      if (kmv) {
+        var kmNames = rows.filter(function(m){ return m.type === "MEASURE" && m.parent_id === r.parent_id; })
+          .map(function(m){ return m.name; });
+        kmMatch(kmv, kmNames).miss.forEach(function(tok){
+          problems.push({ at:at, msg:'key measure "' + tok + '" is not on the Measures sheet under this pillar \u2014 ' +
+            'write the measure\'s name as that sheet has it, or its number there' });
+        });
+      }
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "" && r[q] != null && ["0","1"].indexOf(String(r[q])) < 0)
           problems.push({ at:at, msg:q + ' is "' + r[q] + '", not 0 or 1' });
@@ -743,6 +777,16 @@ function createFromPlan(u, d){
       if (x.outs && x.outs.length) tRow.outs = x.outs.map(function(o){ return Object.assign({}, o); });
       /* §415: requirements only where the file carried some (§50.6). */
       if (x.reqs && reqsParse(x.reqs).length) tRow.reqs = reqsParse(x.reqs);
+      /* §767: the key measures it supports, by name or number against the
+         measures already under this pillar (measures arrive before tactics:
+         the sort above puts both at 2 and keeps the sheets' order). Set only
+         where the file named some (§50.6). */
+      var kmv2 = x.kms || x.key_measures;
+      if (kmv2) {
+        var kmHit = kmMatch(kmv2, p2.measures.map(function(m){ return m.name; })).hit
+          .map(function(i){ return p2.measures[i] && p2.measures[i].id; }).filter(Boolean);
+        if (kmHit.length) tRow.supports = kmHit.map(String);
+      }
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {

@@ -1406,7 +1406,7 @@ function pillarSlidesOf(u, p, pi, named){
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + hidChip(t) + '</td>' +
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + deckSupports(t, p) + hidChip(t) + '</td>' +
       '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
       (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
@@ -1728,6 +1728,13 @@ function planReqs(t){
   var rq = DECK_PLAN && requirementsOn(t) ? reqsOf(t) : [];
   return rq.length ? '<span class="dsub">' + esc(detailWord("requirements", "many", t)) + ': ' +
     esc(rq.join("  \u00b7  ")) + '</span>' : '';
+}
+/* §767: the key measures a tactic supports, by number, as the page says it —
+   the measures table on the slide before carries the same numbers. */
+function deckSupports(t, p){
+  var s = supportsOf(t, p);
+  return s.length ? '<span class="dsub">' +
+    s.map(function(x){ return 'KM ' + x.n; }).join('  \u00b7  ') + '</span>' : '';
 }
 function deckPillarHead(u, p, pi, which){
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +

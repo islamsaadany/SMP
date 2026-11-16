@@ -12,7 +12,7 @@ WHAT IS ASSERTED IS THE PROMISE, NOT THE MECHANISM (§94.8):
   1 · THE STRIP STAYS. Scrolled, the strip is where it was at rest — the
       scroll is asserted to have happened first (§113.8), or a page too short
       to scroll passes for the wrong reason.
-  2 · THE TITLE PINS UNDER THE STRIP (§769, reversing §609's "the title
+  2 · THE TITLE PINS UNDER THE STRIP (§771, reversing §609's "the title
       goes" on Islam's word: *"freeze both headers"*). Scrolled, the open
       direction's band sits a gutter under the strip, not where the scroll
       would have carried it; while editing, the head that replaces the band
@@ -180,7 +180,7 @@ def edges(pg, s):
         return tuple(img["data"][i:i + 3])
     mid = s["left"] + (s["right"] - s["left"]) * 0.7      # over a closed item
     midy = s["top"] + (s["bottom"] - s["top"]) / 2
-    # §769: the strip's bottom edge can fall mid-pixel (names wrap beside the
+    # §771: the strip's bottom edge can fall mid-pixel (names wrap beside the
     # head's cell), so the last whole row inside the border is sampled.
     line = {"top": px(mid, s["top"]), "bottom": px(mid, s["bottom"] - 0.5),
             "right": px(s["right"] - 1, midy), "left": px(s["left"], s["top"] + 12)}
@@ -218,7 +218,7 @@ with sync_playwright() as p:
         ok("%d · the page scrolled (so what follows is measured pinned)" % w, s["sy"] > 100, s["sy"])
         ok("%d · the strip stays where it stood" % w, abs(s["top"] - rest["top"]) <= 1,
            {"rest": rest["top"], "now": s["top"]})
-        ok("%d · the title pins a gutter under the strip (§769)" % w,
+        ok("%d · the title pins a gutter under the strip (§771)" % w,
            s["band"] is not None and s["band"] > rest["band"] - s["sy"] + 1
            and abs(s["band"] - (s["bottom"] + GAP(pg) + 1)) <= 1.5,
            {"rest": rest["band"], "now": s["band"], "strip bottom": s["bottom"], "sy": s["sy"]})
@@ -277,7 +277,7 @@ with sync_playwright() as p:
        # §631: the box is the window's pixels, its `top` the page's
        s and abs(s["top"] - pg.evaluate("()=>parseFloat(getComputedStyle(document.querySelector('.split > .rail')).top) * (parseFloat(getComputedStyle(document.documentElement).zoom)||1)")) <= 1,
        s and s["top"])
-    ok("editing · the head being edited pins a gutter under the strip (§769)",
+    ok("editing · the head being edited pins a gutter under the strip (§771)",
        s and rest and s["band"] is not None and s["band"] > rest["band"] - (s["sy"] - rest["sy"]) + 1
        and abs(s["band"] - (s["bottom"] + GAP(pg) + 1)) <= 1.5,
        s and {"rest": rest["band"], "now": s["band"], "strip bottom": s["bottom"]})

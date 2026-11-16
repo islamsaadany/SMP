@@ -7894,7 +7894,7 @@ function renderReport(u, opt){
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
     var rpf = partFilter(u);          /* §517: skipped, never renumbered */
-    var ryf = railYearsFilter(u);     /* §769: the years unticked, the same way */
+    var ryf = railYearsFilter(u);     /* §771: the years unticked, the same way */
     var rshows = function(p){ return (!rpf || rpf(p)) && (!ryf || ryf(p)); };
     var railRow = function(p, pi){
       var t = pillarTally(p), code = pillarCode(u, pi);
@@ -8441,7 +8441,7 @@ function railName(code, name, kind){
 var RAIL_TERSE = (function(){
   try { return localStorage.getItem("smp.rail.terse") !== "0"; } catch(e){ return true; }
 })();
-/* ── §769 · THE RAIL'S BUTTON IS AN OPTIONS MENU, AND IT CAN HIDE YEARS ──
+/* ── §771 · THE RAIL'S BUTTON IS AN OPTIONS MENU, AND IT CAN HIDE YEARS ──
    Islam, of a plan whose directions run in different years: *"we need a way
    to filter which directions to see from the directions left pan"*, and of
    the shape, *"part of the options beside the word directions where we make
@@ -10253,7 +10253,7 @@ function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
    stored order — so the page opens on the rail's first row, not the plan's. */
 function unitRailPick(u, order){
   var k = unitRailKey(u), want = RAIL[k], list = order || partItems(u);
-  /* §769: a direction hidden by the years ticks is not opened — the page
+  /* §771: a direction hidden by the years ticks is not opened — the page
      opens on the first one showing, exactly as the rail draws it. */
   var yf = railYearsFilter(u);
   if (yf) { var shown = list.filter(yf); if (shown.length) list = shown; }
@@ -10281,7 +10281,7 @@ function unitRailFor(u, sel){
      skipped here rather than filtered out of the list, so `i` stays the
      pillar's real position and its code does not change. */
   var pf = partFilter(u);
-  /* §769: and the years unticked in the head's menu, skipped the same way. */
+  /* §771: and the years unticked in the head's menu, skipped the same way. */
   var yf = railYearsFilter(u);
   var shows = function(it){ return (!pf || pf(it)) && (!yf || yf(it)); };
   var rows = list.map(function(it, i){
@@ -11858,7 +11858,7 @@ function unitPerfRail(u){
   if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
   var pf = partFilter(u);            /* §517: skipped, never renumbered */
-  var yf = railYearsFilter(u);       /* §769: the years unticked, the same way */
+  var yf = railYearsFilter(u);       /* §771: the years unticked, the same way */
   var shows = function(it){ return (!pf || pf(it)) && (!yf || yf(it)); };
   var rows = u.items.map(function(it, i){
     if (!shows(it)) return "";

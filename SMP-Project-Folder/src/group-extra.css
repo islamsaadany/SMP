@@ -956,7 +956,7 @@
   .railterse.on { color:var(--gold); }
   /* The panel's own quiet ink. --none on the panel is 2.6:1 (§38.5). */
   .rail .rhead span { color:var(--panel-quiet); font-weight:600; }
-  /* ── §769 · THE HEAD'S BUTTON OPENS THE RAIL'S OPTIONS ──────────────
+  /* ── §771 · THE HEAD'S BUTTON OPENS THE RAIL'S OPTIONS ──────────────
      The ≡ that WAS the terse switch (§60) opens a menu that holds it, and
      on a list whose years are marked, a tick per year (group-render.js,
      railHead). The panel is `.hmenu-panel` (config.css) anchored to the
@@ -1093,7 +1093,7 @@
   .pane > .pband::before {
     content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
-  /* ── §769 · A TABLE'S HEAD PINS UNDER THE BAND ──────────────────────
+  /* ── §771 · A TABLE'S HEAD PINS UNDER THE BAND ──────────────────────
      Islam: *"freeze both headers"* — the band above and the plan tables'
      own navy heads. `--band-h` is the band's measured height (shell.html,
      stickWatch), because a wrapped name makes it taller; the rest of the
@@ -1466,7 +1466,7 @@
           var(--ground) var(--r)) right 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
         linear-gradient(var(--ground), var(--ground)) left bottom / 100% var(--split-gap, 16px) no-repeat; }
     .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
-    /* §769: THE HEAD KEEPS ITS BUTTON ON THE STRIP. The word and the count
+    /* §771: THE HEAD KEEPS ITS BUTTON ON THE STRIP. The word and the count
        stay hidden as §609 left them; the ≡ stands in its own cell at the
        strip's left end, in the strip's quiet ink rather than the panel's,
        and "5 of 9" beside it only while a year is unticked. The detail
@@ -1586,7 +1586,7 @@
        editing — the band §53.7 pinned and the head §194 pinned in its place.
        Not sticky means it never leaves its flow position, so `pinWatch()`
        never marks it and its corner fill (§130.6) never paints. */
-    /* §769 UNDOES THAT, ON ISLAM'S WORD: *"the header needs to stay freezed
+    /* §771 UNDOES THAT, ON ISLAM'S WORD: *"the header needs to stay freezed
        on scrolling down"* — *"freeze both headers"*. The band and the
        editing head pin again, UNDER the strip: the strip's own offset, plus
        its measured height (`--strip-h`, shell.html — the names wrap to one,

@@ -1,0 +1,231 @@
+<title>Tactics to Key Measures</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: one pillar from Mobile's real plan, drawn the way the Plan page draws it,
+     three times over, each time with the mapping shown one way. Navy/gold house palette. */
+  :root {
+    --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --mark:#C58B1E;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --good-tx:#1F6B4A; --attn-tx:#8A6300; --warn-tx:#A8502A; --bad-tx:#8F3328;
+    --chip-bg:#EEF2F8; --chip-ink:#16325C; --chip-line:#C9D4E6;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B;
+    --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91;
+    --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3;
+    --panel:#0B1A33; --panel-ink:#E8EDF5;
+    --gold:#D4B468; --gold-deep:#E2C98A; --mark:#D9A441;
+    --good-bg:#15332A; --attn-bg:#33290F; --warn-bg:#36211A; --bad-bg:#371C1A;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --chip-bg:#1C2A42; --chip-ink:#C9D8F2; --chip-line:#34496E;
+    color-scheme:dark; } }
+  :root[data-theme="dark"] {
+    --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B;
+    --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91;
+    --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3;
+    --panel:#0B1A33; --panel-ink:#E8EDF5;
+    --gold:#D4B468; --gold-deep:#E2C98A; --mark:#D9A441;
+    --good-bg:#15332A; --attn-bg:#33290F; --warn-bg:#36211A; --bad-bg:#371C1A;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --chip-bg:#1C2A42; --chip-ink:#C9D8F2; --chip-line:#34496E;
+    color-scheme:dark; }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45; }
+  .wrap { max-width:1180px; margin:0 auto; padding-block:28px 60px;
+          padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size:22px; margin:0 0 4px; text-wrap:balance; }
+  .lede { color:var(--ink-3); margin:0 0 22px; max-width:70ch; }
+  h2.part { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:34px 0 10px; display:flex; align-items:center; gap:10px; }
+  h2.part .rec { font-size:10.5px; letter-spacing:.08em; background:var(--gold); color:#14161A; border-radius:999px; padding:2px 9px; }
+  .say { color:var(--ink-2); margin:0 0 12px; max-width:78ch; }
+
+  /* the pillar band, as on the Plan page */
+  .pillar { background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+  .phead { background:var(--panel); color:var(--panel-ink); padding:12px 16px; display:flex; flex-wrap:wrap; gap:6px 18px; align-items:baseline; }
+  .phead .code { font-family:var(--mono); font-size:12px; opacity:.8; }
+  .phead b { font-size:15px; }
+  .phead .sub { opacity:.8; font-size:13px; }
+  .phead .kind { margin-left:auto; font-size:11px; letter-spacing:.08em; text-transform:uppercase; border:1px solid rgba(255,255,255,.4); border-radius:999px; padding:2px 9px; }
+  .sect { padding:14px 16px 4px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); }
+  .scroll { overflow-x:auto; margin:8px 12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:13px; min-width:760px; }
+  th, td { text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  th + th, td + td { border-left:1px solid var(--line-soft); }
+  thead th { background:var(--panel); color:var(--panel-ink); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; border-bottom:0; }
+  tbody tr:nth-child(even) td { background:var(--zebra); }
+  tbody tr:last-child td { border-bottom:0; }
+  th.idx, td.idx { width:38px; text-align:center; font-family:var(--mono); color:var(--ink-3); }
+  .cc { text-align:center; }
+  .num { text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .tacname { font-weight:650; display:block; }
+  .why { display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
+  .pill { display:inline-flex; align-items:center; font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .pill.good { background:var(--good-bg); color:var(--good-tx); }
+  .pill.attn { background:var(--attn-bg); color:var(--attn-tx); }
+  .pill.warn { background:var(--warn-bg); color:var(--warn-tx); }
+  .pill.bad  { background:var(--bad-bg);  color:var(--bad-tx); }
+  .prog { font-size:17px; font-weight:700; }
+  .q { display:inline-flex; gap:3px; }
+  .q i { font-style:normal; font-family:var(--mono); font-size:10.5px; width:22px; height:18px; line-height:18px; text-align:center; border-radius:4px; border:1px solid var(--line); color:var(--ink-3); }
+  .q i.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
+  .nobody { color:var(--ink-3); }
+  .repnote { display:block; margin-top:6px; padding-left:10px; border-left:2px solid var(--line); font-size:12px; color:var(--ink-3); }
+  .repkey { font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); margin-right:6px; white-space:nowrap; }
+  td.outc b { font-weight:400; }
+  .subhd { display:block; font-size:.86em; color:var(--ink-3); margin-top:2px; }
+
+  /* THE NEW THING, marked the way every mockup here marks it */
+  .new { outline:2px solid var(--mark); outline-offset:3px; border-radius:6px; }
+  .kmline { display:block; margin-top:6px; padding-left:10px; border-left:2px solid var(--gold); font-size:12px; color:var(--ink-2); }
+  .kmline .repkey { color:var(--gold-deep); }
+  .kmline .km + .km::before { content:" · "; color:var(--ink-3); }
+  .chip { display:inline-block; font-size:11.5px; line-height:1.2; padding:3px 8px; border-radius:6px; background:var(--chip-bg); color:var(--chip-ink); border:1px solid var(--chip-line); margin:0 4px 4px 0; white-space:normal; }
+  .count { display:inline-block; font-size:11px; color:var(--ink-3); margin-top:3px; }
+  .count b { color:var(--ink-2); font-weight:650; }
+  .count.none { color:var(--bad-tx); font-style:italic; }
+  .count .tn { font-family:var(--mono); font-size:10.5px; color:var(--ink-3); }
+
+  /* the grid (option C) */
+  table.grid { min-width:720px; }
+  table.grid th.rot { font-size:10px; letter-spacing:.06em; text-transform:none; line-height:1.3; vertical-align:bottom; max-width:120px; }
+  table.grid td.tick { text-align:center; font-size:16px; color:var(--panel); }
+  table.grid td.tick.off { color:var(--line); }
+  table.grid tfoot td { background:var(--surface-2); font-size:12px; color:var(--ink-2); border-top:2px solid var(--line); }
+  table.grid tfoot td.cc b { font-size:14px; }
+
+  /* the pen */
+  .pen { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:760px) { .pen { grid-template-columns:1fr; } }
+  .pencard { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .pencard h3 { margin:0 0 10px; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); }
+  .bxkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); margin:8px 0 3px; }
+  .fld { font:inherit; font-size:13px; width:100%; border:1px solid var(--field-line); border-radius:8px; padding:7px 10px; background:var(--surface); color:var(--ink); }
+  .fld:focus { outline:2px solid var(--gold); outline-offset:1px; }
+  .picklist { border:1px solid var(--field-line); border-radius:8px; overflow:hidden; }
+  .picklist label { display:flex; gap:10px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--line-soft); cursor:pointer; font-size:13px; }
+  .picklist label:last-child { border-bottom:0; }
+  .picklist label:hover { background:var(--surface-2); }
+  .picklist input { width:15px; height:15px; accent-color:var(--panel); margin:0; }
+  .picklist .m { color:var(--ink-3); font-size:11.5px; margin-left:auto; font-family:var(--mono); white-space:nowrap; }
+  .hint { color:var(--ink-3); font-size:12px; margin:8px 0 0; }
+
+  .ask { margin-top:28px; background:var(--surface); border:1px dashed var(--mark); border-radius:10px; padding:14px 18px; }
+  .ask h2 { margin:0 0 8px; font-size:15px; }
+  .ask ul { margin:0; padding-left:1.2rem; }
+  .ask li { margin:5px 0; }
+  .ask li b { font-weight:700; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+
+<div class="wrap">
+  <h1>A tactic names the key measures it supports</h1>
+  <p class="lede">Mobile's first pillar, drawn as the Plan page draws it today. The same mapping is shown three ways below. Everything inside a gold outline is new; everything else is as it is now. The outcome column is untouched in all three.</p>
+
+  <h2 class="part">Option A · a line under the tactic, a count on the measure <span class="rec">Recommended</span></h2>
+  <p class="say">The tactic gets a "Supports" line in its own cell, the same shape as the requirements and the reported note already under a tactic. Each key measure gets a small count of the tactics behind it, so the mapping reads both ways without a new column anywhere.</p>
+
+  <div class="pillar">
+    <div class="phead"><span class="code">01</span><b>Digital &amp; Data-Driven Operations</b><span class="sub">End-state: unified market intelligence engine</span><span class="kind">Capability · Ramy Behairy</span></div>
+    <div class="sect">Key measures</div>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Key measure</th><th class="cc">Dir.</th><th class="cc">Annual target</th><th class="cc">Compile</th><th class="cc">YTD actual</th><th class="cc">Progress</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td><b>Data duplicate rate</b><span class="count new"><b>1</b> tactic supports it <span class="tn">T1</span></span></td><td class="cc">≤</td><td class="num">1%</td><td class="cc">Latest</td><td class="num">1.4%</td><td class="num prog" style="color:var(--attn)">71%</td></tr>
+        <tr><td class="idx">2</td><td><b>Orders processed digitally</b><span class="count new"><b>3</b> tactics support it <span class="tn">T1 · T2 · T4</span></span><span class="repnote"><span class="repkey">Reported</span>ERP cutover moved to Q3 with the principal. 48% is the pre-cutover ceiling.</span></td><td class="cc">≥</td><td class="num">90%</td><td class="cc">Latest</td><td class="num">48%</td><td class="num prog" style="color:var(--warn)">53%</td></tr>
+        <tr><td class="idx">3</td><td><b>App coverage rate</b><span class="count new"><b>1</b> tactic supports it <span class="tn">T4</span></span><span class="repnote"><span class="repkey">Reported</span>Merchant rollout is paused while the ERP cutover lands; coverage resumes from Q3.</span></td><td class="cc">≥</td><td class="num">50%</td><td class="cc">Latest</td><td class="num">22%</td><td class="num prog" style="color:var(--bad)">44%</td></tr>
+        <tr><td class="idx">4</td><td><b>Dependency on automated reports</b><span class="count new"><b>2</b> tactics support it <span class="tn">T3 · T5</span></span><span class="repnote"><span class="repkey">Reported</span>Power BI live for sales; finance still manual until the warehouse lands.</span></td><td class="cc">≥</td><td class="num">90%</td><td class="cc">Latest</td><td class="num">58%</td><td class="num prog" style="color:var(--attn)">64%</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="sect">Tactics</div>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD actual</th><th class="cc">Progress</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td><b class="tacname">Clean and standardize customer and SKU base</b><span class="kmline new"><span class="repkey">Supports</span><span class="km">Data duplicate rate</span><span class="km">Orders processed digitally</span></span></td><td class="outc"><b>Duplicate customer and SKU records removed</b><span class="subhd">≥ 12,000 #</span></td><td>Ramy Behairy</td><td><span class="nobody">—</span></td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td class="cc"><span class="pill attn">In progress</span></td><td class="num">5,400<span class="subhd">due 6,000</span></td><td class="num prog" style="color:var(--attn)">90%</td></tr>
+        <tr><td class="idx">2</td><td><b class="tacname">End-to-end order-to-cash digitization</b><span class="kmline new"><span class="repkey">Supports</span><span class="km">Orders processed digitally</span></span><span class="repnote"><span class="repkey">Reported</span>Cycle time still carries the manual credit check; the automated check goes live with the Q3 cutover.</span></td><td class="outc"><b>Order-to-cash cycle time</b><span class="subhd">≤ 5 d</span></td><td>Mohamed Rizk</td><td><span class="nobody">—</span></td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td class="cc"><span class="pill warn">Behind</span></td><td class="num">8 d<span class="subhd">due 6.5 d</span></td><td class="num prog" style="color:var(--warn)">63%</td></tr>
+        <tr><td class="idx">3</td><td><b class="tacname">Digitize sales reporting via Power BI</b><span class="kmline new"><span class="repkey">Supports</span><span class="km">Dependency on automated reports</span></span><span class="repnote"><span class="repkey">Reported</span>Sales and stock reports are live; the finance reports wait on the group data warehouse.</span></td><td class="outc"><b>Management reports live on Power BI</b><span class="subhd">≥ 18 #</span></td><td>Ramy Behairy</td><td><span class="nobody">—</span></td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td class="cc"><span class="pill warn">Behind</span></td><td class="num">4<span class="subhd">due 9</span></td><td class="num prog" style="color:var(--bad)">44%</td></tr>
+        <tr><td class="idx">4</td><td><b class="tacname">Scale Mobile Digital App across merchants</b><span class="kmline new"><span class="repkey">Supports</span><span class="km">App coverage rate</span><span class="km">Orders processed digitally</span></span><span class="repnote"><span class="repkey">Reported</span>Onboarding is running at about 90 merchants a month against the 180 needed; two field agents join in Q3.</span></td><td class="outc"><b>Merchants ordering through the app</b><span class="subhd">≥ 1,500 #</span></td><td>Ashraf Laithy</td><td><span class="nobody">—</span></td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td class="cc"><span class="pill warn">Behind</span></td><td class="num">430<span class="subhd">due 500</span></td><td class="num prog" style="color:var(--attn)">86%</td></tr>
+        <tr><td class="idx">5</td><td><b class="tacname">Data integration across business units</b><span class="kmline new"><span class="repkey">Supports</span><span class="km">Dependency on automated reports</span></span></td><td class="outc"><b>Business units on the shared data model</b><span class="subhd">≥ 5 #</span></td><td>Abdelhamid</td><td><span class="nobody">—</span></td><td><span class="q"><i>Q1</i><i>Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td class="cc"><span class="pill">Not due</span></td><td class="cc" colspan="2"></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <h2 class="part">Option A · in the pen</h2>
+  <p class="say">Where the office writes the plan, the Supports line is a tick list of the pillar's own key measures, in the tactic's cell under its description, next to the requirements box. Nothing is typed, so a tactic can only point at a measure that exists. Untick everything and the line disappears.</p>
+  <div class="pen">
+    <div class="pencard">
+      <h3>Tactic 1 · as edited today</h3>
+      <span class="bxkey">Tactic</span><input class="fld" id="t1name" value="Clean and standardize customer and SKU base">
+      <span class="bxkey">Description</span><input class="fld" id="t1desc" placeholder="One sentence under the tactic">
+      <span class="bxkey">Requirements</span><textarea class="fld" id="t1req" rows="2" placeholder="One per line"></textarea>
+    </div>
+    <div class="pencard">
+      <h3>Tactic 1 · with the new box</h3>
+      <span class="bxkey">Tactic</span><input class="fld" id="t1name2" value="Clean and standardize customer and SKU base">
+      <span class="bxkey">Description</span><input class="fld" id="t1desc2" placeholder="One sentence under the tactic">
+      <div class="new" style="margin-top:10px">
+        <span class="bxkey" style="margin-top:0">Supports these key measures</span>
+        <div class="picklist" role="group" aria-label="Key measures this tactic supports">
+          <label><input type="checkbox" id="km1" checked> Data duplicate rate <span class="m">≤ 1%</span></label>
+          <label><input type="checkbox" id="km2" checked> Orders processed digitally <span class="m">≥ 90%</span></label>
+          <label><input type="checkbox" id="km3"> App coverage rate <span class="m">≥ 50%</span></label>
+          <label><input type="checkbox" id="km4"> Dependency on automated reports <span class="m">≥ 90%</span></label>
+        </div>
+        <p class="hint">Only this pillar's key measures are offered. Saves as you tick.</p>
+      </div>
+      <span class="bxkey">Requirements</span><textarea class="fld" id="t1req2" rows="2" placeholder="One per line"></textarea>
+    </div>
+  </div>
+
+  <h2 class="part">Option B · a column of its own</h2>
+  <p class="say">The same mapping as a "Key measures" column between Outcome and Owner, drawn as chips. Easier to scan down, but it is a tenth column on a table that already folds two of them away on a narrow window, so the Tactic and Outcome prose get narrower. The measures table is unchanged in this option.</p>
+  <div class="pillar">
+    <div class="phead"><span class="code">01</span><b>Digital &amp; Data-Driven Operations</b><span class="kind">Tactics</span></div>
+    <div class="scroll"><table style="min-width:900px">
+      <thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th class="new" style="outline-offset:-3px">Key measures</th><th>Owner</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD actual</th><th class="cc">Progress</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td><b class="tacname">Clean and standardize customer and SKU base</b></td><td class="outc"><b>Duplicate customer and SKU records removed</b><span class="subhd">≥ 12,000 #</span></td><td><span class="chip">Data duplicate rate</span><span class="chip">Orders processed digitally</span></td><td>Ramy Behairy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td class="cc"><span class="pill attn">In progress</span></td><td class="num">5,400</td><td class="num prog" style="color:var(--attn)">90%</td></tr>
+        <tr><td class="idx">2</td><td><b class="tacname">End-to-end order-to-cash digitization</b></td><td class="outc"><b>Order-to-cash cycle time</b><span class="subhd">≤ 5 d</span></td><td><span class="chip">Orders processed digitally</span></td><td>Mohamed Rizk</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td class="cc"><span class="pill warn">Behind</span></td><td class="num">8 d</td><td class="num prog" style="color:var(--warn)">63%</td></tr>
+        <tr><td class="idx">3</td><td><b class="tacname">Digitize sales reporting via Power BI</b></td><td class="outc"><b>Management reports live on Power BI</b><span class="subhd">≥ 18 #</span></td><td><span class="chip">Dependency on automated reports</span></td><td>Ramy Behairy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td class="cc"><span class="pill warn">Behind</span></td><td class="num">4</td><td class="num prog" style="color:var(--bad)">44%</td></tr>
+        <tr><td class="idx">4</td><td><b class="tacname">Scale Mobile Digital App across merchants</b></td><td class="outc"><b>Merchants ordering through the app</b><span class="subhd">≥ 1,500 #</span></td><td><span class="chip">App coverage rate</span><span class="chip">Orders processed digitally</span></td><td>Ashraf Laithy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td class="cc"><span class="pill warn">Behind</span></td><td class="num">430</td><td class="num prog" style="color:var(--attn)">86%</td></tr>
+        <tr><td class="idx">5</td><td><b class="tacname">Data integration across business units</b></td><td class="outc"><b>Business units on the shared data model</b><span class="subhd">≥ 5 #</span></td><td><span class="chip">Dependency on automated reports</span></td><td>Abdelhamid</td><td><span class="q"><i>Q1</i><i>Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td class="cc"><span class="pill">Not due</span></td><td class="cc" colspan="2"></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <h2 class="part">Option C · a mapping grid under the pillar</h2>
+  <p class="say">A third block under Tactics: the pillar's tactics down the side, its key measures across the top, a mark where one supports the other. The whole mapping in one look, and a measure nobody is working on shows as an empty column with a zero at its foot. Costs a block of height per pillar, and the plan page already runs long on a pillar with eight measures. Ticks here would be set in the pen the same way as option A.</p>
+  <div class="pillar">
+    <div class="phead"><span class="code">01</span><b>Digital &amp; Data-Driven Operations</b><span class="kind">Capability · Ramy Behairy</span></div>
+    <div class="sect new" style="display:inline-block; margin:12px 16px 0; outline-offset:4px">Which tactic supports which key measure</div>
+    <div class="scroll"><table class="grid">
+      <thead><tr><th class="idx">#</th><th>Tactic</th><th class="rot cc">Data duplicate rate<br><span style="opacity:.7">≤ 1%</span></th><th class="rot cc">Orders processed digitally<br><span style="opacity:.7">≥ 90%</span></th><th class="rot cc">App coverage rate<br><span style="opacity:.7">≥ 50%</span></th><th class="rot cc">Dependency on automated reports<br><span style="opacity:.7">≥ 90%</span></th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Clean and standardize customer and SKU base</td><td class="tick">●</td><td class="tick">●</td><td class="tick off">·</td><td class="tick off">·</td></tr>
+        <tr><td class="idx">2</td><td>End-to-end order-to-cash digitization</td><td class="tick off">·</td><td class="tick">●</td><td class="tick off">·</td><td class="tick off">·</td></tr>
+        <tr><td class="idx">3</td><td>Digitize sales reporting via Power BI</td><td class="tick off">·</td><td class="tick off">·</td><td class="tick off">·</td><td class="tick">●</td></tr>
+        <tr><td class="idx">4</td><td>Scale Mobile Digital App across merchants</td><td class="tick off">·</td><td class="tick">●</td><td class="tick">●</td><td class="tick off">·</td></tr>
+        <tr><td class="idx">5</td><td>Data integration across business units</td><td class="tick off">·</td><td class="tick off">·</td><td class="tick off">·</td><td class="tick">●</td></tr>
+      </tbody>
+      <tfoot><tr><td></td><td>Tactics behind each measure</td><td class="cc"><b>1</b></td><td class="cc"><b>3</b></td><td class="cc"><b>1</b></td><td class="cc"><b>2</b></td></tr></tfoot>
+    </table></div>
+  </div>
+
+  <div class="ask">
+    <h2>What to decide</h2>
+    <ul>
+      <li><b>Which look:</b> A (line under the tactic, count on the measure), B (a column), or C (the grid). A and C can also go together: the line on the tactic, and the grid as a fold-out under the pillar.</li>
+      <li><b>Which measures are offered:</b> the mockup offers only the pillar's own key measures. Any key measure in the unit's plan is possible, but the line then has to say which pillar the measure belongs to.</li>
+      <li><b>Missing or not:</b> here a tactic with no key measure simply has no Supports line. It could count as missing instead, with the red word and the Next-gap walk, like a missing owner.</li>
+      <li><b>Where else it shows:</b> the same line on the Performance page and the deck's tactics slide, and a Key measures column on the Tactics sheet in Excel (by name, so the upload and download carry it). The mockup shows the Plan page only.</li>
+    </ul>
+  </div>
+</div>

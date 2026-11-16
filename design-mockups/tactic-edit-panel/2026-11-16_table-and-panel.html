@@ -132,6 +132,15 @@
   .pick .chip { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:3px 8px; border-radius:999px; background:var(--tag-bg); color:var(--tag-ink); border:1px solid var(--tag-line); } .pick .chip b { cursor:pointer; color:var(--ink-3); }
   .pick .menu { position:absolute; left:0; right:0; top:100%; z-index:5; background:var(--surface); border:1px solid var(--field-line); border-radius:8px; box-shadow:var(--shadow); max-height:180px; overflow:auto; margin-top:3px; }
   .pick .menu[hidden] { display:none; } .pick .menu div { padding:6px 10px; font-size:13px; cursor:pointer; } .pick .menu div:hover { background:var(--surface-2); } .pick .menu .none { color:var(--ink-3); font-style:italic; cursor:default; }
+  /* the collaborators: a searchable checklist — type to narrow, tick to choose */
+  .chk { border:1px solid var(--field-line); border-radius:8px; overflow:hidden; }
+  .chk input.fld { border:0; border-bottom:1px solid var(--line-soft); border-radius:0; }
+  .chk .list { max-height:168px; overflow:auto; }
+  .chk label { display:flex; gap:8px; align-items:center; padding:6px 10px; font-size:13px; cursor:pointer; border-top:1px solid var(--line-soft); }
+  .chk label:first-child { border-top:0; } .chk label:hover { background:var(--surface-2); } .chk label[hidden] { display:none; }
+  .chk label input { width:14px; height:14px; margin:0; accent-color:var(--panel); }
+  .chk .none { padding:8px 10px; font-size:12.5px; color:var(--ink-3); font-style:italic; }
+  .chk .chosen { padding:6px 10px; font-size:12px; color:var(--ink-2); border-top:1px solid var(--line-soft); background:var(--surface-2); }
   .sfoot { padding:10px 16px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
   .sfoot .done { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:8px; font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
   .toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--panel); color:var(--panel-ink); font-size:12px; padding:6px 12px; border-radius:999px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:70; } .toast.on { opacity:1; }
@@ -157,7 +166,7 @@
     <div class="scroll"><table class="tactable"><thead id="thead"></thead><tbody id="rows"></tbody></table></div>
   <div class="backdrop" id="backdrop" hidden></div>
   <aside class="side" id="side" hidden>
-    <div class="shead"><span class="k">Tactic <span id="sn">1</span> of <span id="sof">6</span></span><b id="sname"></b>
+    <div class="shead"><span class="k">Tactic <span id="sn">1</span></span><b id="sname"></b>
       <span class="nav"><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
       <button class="close" type="button" id="close" title="Close">×</button></div>
     <div class="sbody" id="sbody"></div>
@@ -214,7 +223,8 @@
     var o1 = t.outs[0];
     return '<tr' + (i === cur ? ' class="on"' : '') + ' data-i="' + i + '"><td class="idx"><span class="grip">☰</span>' + (i + 1) + '</td>' +
       '<td><input class="fld rowfld" data-rowname="' + i + '" value="' + esc(t.name) + '" placeholder="The work itself, as a sentence">' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') + '</td>' +
-      '<td class="rowout">' + (o1 ? esc(o1.name) + (n > 1 ? '<small>and ' + (n - 1) + ' more</small>' : '') + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') : '<span class="miss">Missing</span>') + '</td>' +
+      '<td class="rowout"><input class="fld rowfld" data-rowout="' + i + '" value="' + esc(o1 ? o1.name : '') + '" placeholder="What it should produce">' +
+        (n > 1 ? '<small>and ' + (n - 1) + ' more in the panel</small>' : '') + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') + '</td>' +
       '<td>' + picker("rowowner" + i, t.owner, false) + '</td>' +
       '<td><span class="qpick">' + t.q.map(function(v, k){ return '<i class="' + (v ? "on" : "") + '" data-rq="' + i + ':' + k + '">Q' + (k + 1) + '</i>'; }).join("") + '</span></td>' +
       '<td><span class="rowtools"><button type="button" class="openb" data-open="' + i + '">Details</button><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
@@ -230,8 +240,10 @@
     document.getElementById("tcount").textContent = T.length;
     drawK();
     if (!pen) return;
-    tb.querySelectorAll("tr[data-i]").forEach(function(r){ r.addEventListener("click", function(e){ if (e.target.closest(".x, input, select, .pick, .qpick, label")) return; open(+r.dataset.i); }); });
+    tb.querySelectorAll("tr[data-i]").forEach(function(r){ r.addEventListener("click", function(e){ if (e.target.closest(".x, input, select, .pick, .qpick, label, small")) return; open(+r.dataset.i); }); });
     tb.querySelectorAll("[data-rowname]").forEach(function(f){ f.addEventListener("input", function(){ T[+f.dataset.rowname].name = f.value; var h = document.getElementById("sname"); if (cur === +f.dataset.rowname && h) h.textContent = f.value || "New tactic"; }); f.addEventListener("change", function(){ toast("Saved"); }); });
+    tb.querySelectorAll("[data-rowout]").forEach(function(f){ f.addEventListener("input", function(){ var t = T[+f.dataset.rowout]; if (!t.outs.length) t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); t.outs[0].name = f.value;
+      if (cur === +f.dataset.rowout) { var pf = document.querySelector('#sbody [data-o="0"][data-f="name"]'); if (pf && pf.value !== f.value) pf.value = f.value; } }); f.addEventListener("change", function(){ toast("Saved"); }); });
     tb.querySelectorAll("[data-rq]").forEach(function(q){ q.addEventListener("click", function(e){ e.stopPropagation(); var a = q.dataset.rq.split(":"), t = T[+a[0]]; t.q[+a[1]] = t.q[+a[1]] ? 0 : 1; q.classList.toggle("on"); toast("Saved"); }); });
     T.forEach(function(t, i){ if (document.getElementById("rowowner" + i)) wirePicker("rowowner" + i, function(){ return t.owner; }, function(v){ t.owner = v; }, false); });
     tb.querySelectorAll("[data-x]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); var i = +b.dataset.x; T.splice(i, 1);
@@ -255,10 +267,24 @@
     inp.addEventListener("keydown", function(e){ if (e.key === "Enter") { var f = menu.querySelector("[data-p]"); if (f) choose(f.dataset.p); e.preventDefault(); } });
     box.querySelectorAll("[data-rm]").forEach(function(b){ b.addEventListener("click", function(){ set(get().filter(function(x){ return x !== b.dataset.rm; })); drawRows(); drawPanel(); toast("Saved"); }); });
   }
+  function checklist(id, chosen){
+    return '<div class="chk" id="' + id + '"><input class="fld" placeholder="Type a name to find them" autocomplete="off"><div class="list">' +
+      PEOPLE.map(function(p){ return '<label><input type="checkbox" value="' + esc(p) + '"' + (chosen.indexOf(p) >= 0 ? ' checked' : '') + '>' + esc(p) + '</label>'; }).join("") +
+      '<div class="none" hidden>Nobody in the register matches</div></div>' +
+      '<div class="chosen">' + (chosen.length ? esc(chosen.join(", ")) : 'Nobody yet') + '</div></div>';
+  }
+  function wireChecklist(id, get, set){
+    var box = document.getElementById(id), inp = box.querySelector("input.fld"), labels = box.querySelectorAll("label"), none = box.querySelector(".none"), chosen = box.querySelector(".chosen");
+    inp.addEventListener("input", function(){ var q = inp.value.trim().toLowerCase(), n = 0;
+      labels.forEach(function(l){ var hit = !q || l.textContent.toLowerCase().indexOf(q) >= 0; l.hidden = !hit; if (hit) n++; }); none.hidden = n > 0; });
+    labels.forEach(function(l){ l.querySelector("input").addEventListener("change", function(e){
+      var v = e.target.value, have = get().slice(); if (e.target.checked && have.indexOf(v) < 0) have.push(v); if (!e.target.checked) have = have.filter(function(x){ return x !== v; });
+      set(have); chosen.textContent = have.length ? have.join(", ") : "Nobody yet"; toast("Saved"); }); });
+  }
   function sel(opts, val, extra){ return '<select class="fld"' + (extra || "") + '>' + opts.map(function(o){ return '<option' + (o === val ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join("") + '</select>'; }
   function drawPanel(){
     var t = T[cur], sb = document.getElementById("sbody");
-    document.getElementById("sn").textContent = cur + 1; document.getElementById("sof").textContent = T.length;
+    document.getElementById("sn").textContent = cur + 1;
     document.getElementById("sname").textContent = t.name || "New tactic";
     sb.innerHTML =
       '<div class="sec"><h3>Description</h3><textarea class="fld" id="f-desc" rows="2" placeholder="One sentence under the tactic">' + esc(t.desc) + '</textarea></div>' +
@@ -269,17 +295,18 @@
             sel(["≥","≤"], o.dir, ' data-o="' + k + '" data-f="dir"' + (yn ? ' disabled' : '')) + sel(["—","Latest","Sum","Count","Average"], o.compile || "—", ' data-o="' + k + '" data-f="compile"' + (yn ? ' disabled' : '')) + '</div>' +
             (yn ? '' : String(o.target).trim() ? '<span class="months"><i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i> by month or by quarter</span>' : '<span class="miss">Target missing</span>') + '</div>';
         }).join("") + '<button class="linkbu" type="button" id="addout">+ Add an outcome</button></div>' +
-      '<div class="sec"><h3>Collaborators <span class="hint">the people supporting the owner</span></h3>' + picker("f-col", t.col, true) + '</div>' +
+      '<div class="sec"><h3>Collaborators <span class="hint">the people supporting the owner — type to find, tick to choose</span></h3>' + checklist("f-col", t.col) + '</div>' +
       '<div class="sec"><h3>Key measures <span class="hint">which ones it supports</span></h3><details class="kmdrop"><summary><span id="kmsum">' + (t.km.length ? kmTags(t) : '<span class="nobody" style="font-size:12.5px">Pick key measures</span>') + '</span><span class="chev"></span></summary>' +
         KM.map(function(m, i){ return '<label><input type="checkbox" data-km="' + i + '"' + (t.km.indexOf(i) >= 0 ? ' checked' : '') + '><span class="kmtag">KM ' + (i + 1) + '</span> ' + esc(m.n) + '</label>'; }).join("") + '</details></div>' +
       '<div class="sec"><h3>Requirements <span class="hint">what it needs, one per line</span></h3><textarea class="fld" id="f-req" rows="3" placeholder="One per line">' + esc(t.req) + '</textarea></div>';
     var live = function(){ drawRows(); document.getElementById("sname").textContent = t.name || "New tactic"; };
     document.getElementById("f-desc").addEventListener("input", function(e){ t.desc = e.target.value; var r = document.querySelector('#rows tr[data-i="' + cur + '"] td:nth-child(2)'); if (r) { var w = r.querySelector('.why'); if (!w && e.target.value) { w = document.createElement('span'); w.className = 'why'; r.appendChild(w); } if (w) { w.textContent = e.target.value; if (!e.target.value) w.remove(); } } });
     document.getElementById("f-req").addEventListener("input", function(e){ t.req = e.target.value; });
-    wirePicker("f-col", function(){ return t.col; }, function(v){ t.col = v; }, true);
+    wireChecklist("f-col", function(){ return t.col; }, function(v){ t.col = v; });
     sb.querySelectorAll("[data-km]").forEach(function(c){ c.addEventListener("change", function(){ var i = +c.dataset.km, at = t.km.indexOf(i); if (c.checked && at < 0) t.km.push(i); if (!c.checked && at >= 0) t.km.splice(at, 1);
       document.getElementById("kmsum").innerHTML = t.km.length ? kmTags(t) : '<span class="nobody" style="font-size:12.5px">Pick key measures</span>'; live(); toast("Saved"); }); });
-    sb.querySelectorAll("[data-o]").forEach(function(f){ f.addEventListener(f.tagName === "SELECT" ? "change" : "input", function(){ var o = t.outs[+f.dataset.o]; if (o.target === "Y/N" && f.dataset.f === "target") { if (/^yes\s*\/\s*no$/i.test(f.value)) return; } o[f.dataset.f] = f.value === "—" ? "" : f.value; drawRows(); }); });
+    sb.querySelectorAll("[data-o]").forEach(function(f){ f.addEventListener(f.tagName === "SELECT" ? "change" : "input", function(){ var o = t.outs[+f.dataset.o]; if (o.target === "Y/N" && f.dataset.f === "target") { if (/^yes\s*\/\s*no$/i.test(f.value)) return; } o[f.dataset.f] = f.value === "—" ? "" : f.value;
+      if (f.dataset.o === "0" && f.dataset.f === "name") { var rb = document.querySelector('[data-rowout="' + cur + '"]'); if (rb && rb.value !== f.value) rb.value = f.value; } else drawRows(); }); });
     sb.querySelectorAll("[data-ox]").forEach(function(x){ x.addEventListener("click", function(){ t.outs.splice(+x.dataset.ox, 1); drawRows(); drawPanel(); toast("Outcome removed"); }); });
     document.getElementById("addout").addEventListener("click", function(){ t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); drawRows(); drawPanel(); var last = sb.querySelectorAll('[data-f="name"]'); last[last.length - 1].focus(); });
   }

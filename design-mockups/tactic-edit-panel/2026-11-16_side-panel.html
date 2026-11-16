@@ -65,6 +65,16 @@
 
   /* the panel */
   .side { background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); position:sticky; top:12px; max-height:calc(100vh - 24px); display:flex; flex-direction:column; min-width:0; }
+  .side[hidden] { display:none !important; }
+  .backdrop { display:none; }
+  /* a narrow window: the panel slides in over the page from the right, with a dim behind it */
+  @media (max-width:980px) {
+    .side { position:fixed; top:0; right:0; bottom:0; left:auto; width:min(460px, 100%); max-height:none; border-radius:0; z-index:60; border:0; border-left:1px solid var(--line); }
+    .backdrop { display:block; position:fixed; inset:0; background:rgba(15,23,42,.35); z-index:50; }
+    .backdrop[hidden] { display:none !important; }
+  }
+  .tactable tbody tr[data-i] { cursor:pointer; }
+  .tactable tbody tr[data-i]:hover td { background:var(--surface-2); }
   .shead { padding:12px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
   .shead .k { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-3); }
   .shead b { font-size:14px; }
@@ -114,7 +124,7 @@
 
 <div class="wrap">
   <h1>Editing a tactic in a side panel</h1>
-  <p class="lede">A working copy to try. The pen is on. Press a pencil to open a tactic in the panel; everything you type there shows in the table at once. Add and remove tactics and outcomes, tick key measures, press the quarters. Nothing here is saved anywhere. The pillar is Mobile's first; the extra outcomes, key measures and requirements are invented.</p>
+  <p class="lede">A working copy to try. The pen is on. Press a tactic's row or its pencil to open it in the panel; everything you type there shows in the table at once. Add and remove tactics and outcomes, tick key measures, press the quarters. Nothing here is saved anywhere. The pillar is Mobile's first; the extra outcomes, key measures and requirements are invented.</p>
 
   <div class="stage">
     <div class="pillar">
@@ -127,6 +137,7 @@
       <p style="margin:0 16px 14px; font-size:12px; color:var(--ink-3)">The key measures table above it and the rest of the pillar stay exactly as they are today. Reordering by the handle, the eye and the × stay on the row.</p>
     </div>
 
+    <div class="backdrop" id="backdrop" hidden></div>
     <aside class="side new" id="side" hidden>
       <div class="shead"><span class="k">Tactic <span id="sn">1</span> of <span id="sof">5</span></span><b id="sname"></b>
         <span class="nav"><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
@@ -140,7 +151,7 @@
   <div class="ask">
     <h2>What to try</h2>
     <ul>
-      <li>Press a pencil: the panel opens on that tactic and the row is marked. Change the name: the row follows as you type.</li>
+      <li>Press a row or its pencil: the panel opens on that tactic (beside the table on a wide window, over the page on a narrow one) and the row is marked. Change the name: the row follows as you type. ×, Done, Esc or a press outside closes it.</li>
       <li>Add an outcome and give it a target: the Outcomes cell counts it and stops saying one is without a target.</li>
       <li>Tick a key measure in the panel: the tag appears on the row. Press a quarter: the row's quarters follow.</li>
       <li>↑ ↓ move through the tactics. + Add a tactic opens the panel on the new one. × on a row removes it (the panel closes if it was open on it).</li>
@@ -183,9 +194,11 @@
         '<td><span class="rowtools"><button class="pen" type="button" data-pen="' + i + '" title="Edit this tactic">✎</button><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
     }).join("") + '<tr class="addrow"><td colspan="7" id="add">+ Add a tactic</td></tr>';
     document.getElementById("tcount").textContent = T.length;
-    tb.querySelectorAll("[data-pen]").forEach(function(b){ b.addEventListener("click", function(){ open(+b.dataset.pen); }); });
-    tb.querySelectorAll("[data-x]").forEach(function(b){ b.addEventListener("click", function(){
-      var i = +b.dataset.x; T.splice(i, 1);
+    tb.querySelectorAll("[data-pen]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); open(+b.dataset.pen); }); });
+    /* the whole row opens it too, not only the pencil */
+    tb.querySelectorAll("tr[data-i]").forEach(function(r){ r.addEventListener("click", function(e){ if (e.target.closest(".x")) return; open(+r.dataset.i); }); });
+    tb.querySelectorAll("[data-x]").forEach(function(b){ b.addEventListener("click", function(e){
+      e.stopPropagation(); var i = +b.dataset.x; T.splice(i, 1);
       if (cur === i) { close(); } else if (cur > i) cur--;
       drawRows(); if (cur >= 0) drawPanel(); toast("Tactic removed"); }); });
     document.getElementById("add").addEventListener("click", function(){
@@ -227,13 +240,15 @@
     sb.querySelectorAll("[data-ox]").forEach(function(x){ x.addEventListener("click", function(){ t.outs.splice(+x.dataset.ox, 1); drawRows(); drawPanel(); toast("Outcome removed"); }); });
     document.getElementById("addout").addEventListener("click", function(){ t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); drawRows(); drawPanel(); var last = sb.querySelectorAll('[data-f="name"]'); last[last.length - 1].focus(); });
   }
-  function open(i){ cur = i; document.getElementById("side").hidden = false; drawRows(); drawPanel(); }
-  function close(){ cur = -1; document.getElementById("side").hidden = true; drawRows(); }
+  function open(i){ cur = i; document.getElementById("side").hidden = false; document.getElementById("backdrop").hidden = false; drawRows(); drawPanel(); }
+  function close(){ cur = -1; document.getElementById("side").hidden = true; document.getElementById("backdrop").hidden = true; drawRows(); }
+  document.getElementById("backdrop").addEventListener("click", close);
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && cur >= 0) close(); });
   document.getElementById("prev").addEventListener("click", function(){ open((cur - 1 + T.length) % T.length); });
   document.getElementById("next").addEventListener("click", function(){ open((cur + 1) % T.length); });
   document.getElementById("close").addEventListener("click", close);
   document.getElementById("done").addEventListener("click", close);
   document.getElementById("doneall").addEventListener("click", function(){ close(); toast("Done editing — the plan would show in read mode now"); });
-  drawRows(); open(0);
+  drawRows();
 })();
 </script>

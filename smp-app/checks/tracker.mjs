@@ -1480,7 +1480,9 @@ try {
     check("...a status button writes the status, and is drawn pressed", (await asTenant(A, (c) => oneAction(c, mTask))).status === toSt &&
       (await pg.locator('.mopen [data-act=set-status][data-value="' + toSt + '"]').getAttribute("aria-pressed")) === "true" && await stayed());
     await pg.locator(".mopen .pnew").fill("Talked through at the check.");
+    if (process.env.SMP_SHOTX) await pg.screenshot({ path: process.env.SMP_SHOTX + "-before.png" });
     await pg.locator(".mopen [data-act=step][data-dir='1']").click(); await settle();
+    if (process.env.SMP_SHOTX) await pg.screenshot({ path: process.env.SMP_SHOTX + "-after.png" });
     const saidM = await asTenant(A, (c) => progressOf(c, mTask));
     check("Save and next writes what was typed on that task and opens the next one",
       saidM.some((e) => e.body === "Talked through at the check.") && (await pg.locator(".mopen").getAttribute("data-id")) === mIds[mAt + 1] && await stayed(),

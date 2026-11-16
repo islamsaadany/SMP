@@ -4,6 +4,10 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-16 — The Weighting page can be switched off (§755).** A *Weighting on | Off* pair on Setup › Business units, the office's alone, Focus's shape: Off hides the Weighting tab and keeps everything stored; the compile still reads the weights. `tests/authorize.cjs` 14b new, passing; shell check pending a session with a database.
+
+**2026-11-16 — A unit's or a function's Strategy tab names its one section (§754).** With a layer's Plan off and its Foundation not counting, the SWOT was drawn with no row over it; the Strategy tab of a unit or function now draws its row with one section. Other tabs unchanged. Shell check pending a session with a database.
+
 **2026-11-04 — Three layouts to compare live (§753).** A switch above the Copilot: the one window (§752, the default), A — one chat with suggestions that opens the work when it is asked for — and B — ✦ Copilot beside Edit on the Strategy tab, opening the Copilot in a panel on the part in view, the plan narrowing beside it. Same workflows in all three; chosen per browser.
 
 **2026-11-04 — The Copilot in one window; Tactical Plans and Pillars/Directions (§752).** No area tabs: the method is a strip above the pane saying where the place stands and which step is next; one rail holds every area's chats and deliverables, tagged, with chips to narrow it; one start screen with the focus area's cards and the others folded beneath. Execution is called Tactical Plans and Directions Pillars/Directions; old versions go on as the same deliverables. Mockup `design-mockups/copilot-layout/2026-11-04_one-window.html`.

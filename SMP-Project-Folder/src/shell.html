@@ -693,7 +693,9 @@
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
         /* §520: and it is neither the owner's own part nor the Foundation,
            so it goes with the rest for a narrowed part owner. */
-        when: function(){ return buExists() && !partOnly(); } },
+        /* §755: and the office may switch the page off (Setup › Business
+           units); off means it disappears, as Focus does (§102). */
+        when: function(){ return buExists() && weightingOn() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
@@ -4161,12 +4163,23 @@
        one-window flag is read off the Copilot's own definition by its key,
        and off the TAB, not the section `def` has become by here. */
     var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
-    if (!railed && !oneWin && secs && secs.length && (secs.length > 1 || tailHTML)) {
+    /* §754: EXCEPT ON A UNIT'S OR A FUNCTION'S STRATEGY TAB, where one
+       section still names itself. Islam, with a layer's Plan section
+       switched off and its Foundation not counting (2026-11-16): *"the
+       choices of plan or SWOT disappeared despite I'm showing the swot"*.
+       The SWOT was drawn and nothing said so — a page whose only section
+       is unnamed reads as a page that lost its sections, not as a tab of
+       one. The company (§68) and every other tab keep the rule above:
+       Performance's single section is the tab's own reading and would
+       only repeat the tab's word. */
+    var lone = !!(tabDef && (tabDef.k === "strategy" || tabDef.k === "fnstrat") &&
+                  current !== "group" && !isCo(current));
+    if (!railed && !oneWin && secs && secs.length && (secs.length > 1 || tailHTML || lone)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
       document.getElementById("secrow-in").innerHTML =
-        (secs.length > 1 ? '<span class="secseg">' + secs.map(function(s){
+        (secs.length > 1 || lone ? '<span class="secseg">' + secs.map(function(s){
           return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
             ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
         }).join("") + '</span>' : "") + tailHTML;
@@ -5769,6 +5782,12 @@
     document.querySelectorAll("[data-focusswitch]").forEach(function(fsw){
       fsw.addEventListener("click", function(){
         setFocusOn(this.dataset.focusswitch === "1"); paint();
+      });
+    });
+    /* §755: the Weighting page's switch, the same pair and the same shape. */
+    document.querySelectorAll("[data-weightswitch]").forEach(function(wsw){
+      wsw.addEventListener("click", function(){
+        setWeightingOn(this.dataset.weightswitch === "1"); paint();
       });
     });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button

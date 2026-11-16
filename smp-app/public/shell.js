@@ -597,6 +597,7 @@
    * @property {Object<string, Company>} companies
    * @property {Object<string, Object<string, Grant>>} access
    * @property {boolean} focusOff
+   * @property {boolean} weightingOff
    * @property {boolean} naming
    * @property {boolean} lineOwners
    * @property {Capability[]} capabilities
@@ -621,6 +622,8 @@
          the default, which for a switch means "on". Found by driving the real
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
+      /* §755: the Weighting page's own switch, focus's shape exactly. */
+      weightingOff: !!o.weightingOff,
       naming: !!o.naming,
       /* §382: REPORTING FOLLOWS THE OWNER COLUMN, and it is a switch because
          turning it on MOVES who enters a figure — 26 tactics change hands on
@@ -667,6 +670,7 @@
                   sees undefined and answers the default. Add the key here in
                   the same edit as the rule that reads it. */
                focusOff: (state.group || {}).focusOff,
+               weightingOff: (state.group || {}).weightingOff,
                naming: (state.group || {}).naming,
                lineOwners: (state.group || {}).lineOwners,
                capabilities: (state.group || {}).capabilities,
@@ -2717,6 +2721,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      — a CEO who may mark a measure must not be able to turn the whole feature
      off for the tenant, and a switch anybody could flip would be no switch. */
   function focusOn(w) { return !w || w.focusOff !== true; }
+  /* §755: WHETHER THE WEIGHTING PAGE IS SHOWN AT ALL (Islam, 2026-11-16:
+     *"I need to have option to disable the weighting panel somehow"*).
+     Focus's switch, to the letter: stored as an ABSENCE (`GROUP.weightingOff`
+     exists only while the page is off), only an explicit `true` hides it,
+     and Off HIDES AND KEEPS — the factors, the rows and the weights stay
+     stored and the group compile goes on reading them, because a switch
+     that changed the scores would be a change of method wearing a
+     switch's clothes. The SMO's alone, classified `setup` (authorize.cjs). */
+  function weightingOn(w) { return !w || w.weightingOff !== true; }
 
   /* ── IS THERE ANYTHING TO TOUR (spec 042 §6.2) ───────────────────
      §107's onboarding tour walked a FILLED platform by switching the page to
@@ -6109,7 +6122,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
     reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
-    focusOn: focusOn, tourReady: tourReady, unitLikeOf: unitLikeOf,
+    focusOn: focusOn, weightingOn: weightingOn, tourReady: tourReady, unitLikeOf: unitLikeOf,
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_FILLABLE: GAP_FILLABLE,
     isGapField: isGapField,
@@ -12696,6 +12709,13 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
    byte-identical — otherwise every save afterwards carries a phantom change. */
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
+}
+/* §755: THE WEIGHTING PAGE, ON OR OFF FOR THE CLIENT — focus's reader and
+   writer, to the letter: the rule is the shared module's, Off deletes the
+   key (§50.6), and nothing stored moves. */
+function weightingOn(){ return SMPRules.weightingOn(world()); }
+function setWeightingOn(on){
+  if (on) delete GROUP.weightingOff; else GROUP.weightingOff = true;
 }
 /* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 063, 2026-09-23). The rule
    is the shared module's (only an explicit true is on); this reads it off the
@@ -41295,6 +41315,26 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
+/* §755: THE WEIGHTING PAGE'S SWITCH LIVES HERE, on Setup › Business units,
+   for focus's reason (§102, §61): the Weighting tab itself goes while the
+   page is off, so a switch on that page could be turned off and never back
+   on. The units are what the weighting weighs, and this page is always
+   the office's to reach. The pinned On|Off pair is focus's (§135.5); Off
+   says what it keeps, so it never looks like a delete. */
+function weightingSwitch(){
+  var on = weightingOn();
+  if (!inOffice()) return '';
+  PAGE_ACTS +=
+    '<span class="segsw" role="group" aria-label="Weighting page on or off">' +
+      '<button type="button" class="seg' + (on ? ' on' : '') + '" data-weightswitch="1" ' +
+        'aria-pressed="' + on + '">Weighting on</button>' +
+      '<button type="button" class="seg' + (on ? '' : ' on') + '" data-weightswitch="0" ' +
+        'aria-pressed="' + (!on) + '">Off</button>' +
+    '</span>';
+  return on ? '' : '<div class="note"><b>The Weighting page is off for this client.</b> ' +
+    'The tab is not shown; the factors and every ' + L("unitword") + '\'s weights are kept, ' +
+    'and the group compile still reads them.</div>';
+}
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -41357,6 +41397,7 @@ function renderUnits(){
 
   return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit)) +
+    weightingSwitch() +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
        the units appear in the navigation and on the group page — somebody
@@ -78479,7 +78520,9 @@ var SYNC = (function () {
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
         /* §520: and it is neither the owner's own part nor the Foundation,
            so it goes with the rest for a narrowed part owner. */
-        when: function(){ return buExists() && !partOnly(); } },
+        /* §755: and the office may switch the page off (Setup › Business
+           units); off means it disappears, as Focus does (§102). */
+        when: function(){ return buExists() && weightingOn() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
@@ -81947,12 +81990,23 @@ var SYNC = (function () {
        one-window flag is read off the Copilot's own definition by its key,
        and off the TAB, not the section `def` has become by here. */
     var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
-    if (!railed && !oneWin && secs && secs.length && (secs.length > 1 || tailHTML)) {
+    /* §754: EXCEPT ON A UNIT'S OR A FUNCTION'S STRATEGY TAB, where one
+       section still names itself. Islam, with a layer's Plan section
+       switched off and its Foundation not counting (2026-11-16): *"the
+       choices of plan or SWOT disappeared despite I'm showing the swot"*.
+       The SWOT was drawn and nothing said so — a page whose only section
+       is unnamed reads as a page that lost its sections, not as a tab of
+       one. The company (§68) and every other tab keep the rule above:
+       Performance's single section is the tab's own reading and would
+       only repeat the tab's word. */
+    var lone = !!(tabDef && (tabDef.k === "strategy" || tabDef.k === "fnstrat") &&
+                  current !== "group" && !isCo(current));
+    if (!railed && !oneWin && secs && secs.length && (secs.length > 1 || tailHTML || lone)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
       document.getElementById("secrow-in").innerHTML =
-        (secs.length > 1 ? '<span class="secseg">' + secs.map(function(s){
+        (secs.length > 1 || lone ? '<span class="secseg">' + secs.map(function(s){
           return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
             ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
         }).join("") + '</span>' : "") + tailHTML;
@@ -83555,6 +83609,12 @@ var SYNC = (function () {
     document.querySelectorAll("[data-focusswitch]").forEach(function(fsw){
       fsw.addEventListener("click", function(){
         setFocusOn(this.dataset.focusswitch === "1"); paint();
+      });
+    });
+    /* §755: the Weighting page's switch, the same pair and the same shape. */
+    document.querySelectorAll("[data-weightswitch]").forEach(function(wsw){
+      wsw.addEventListener("click", function(){
+        setWeightingOn(this.dataset.weightswitch === "1"); paint();
       });
     });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button

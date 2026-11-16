@@ -1529,6 +1529,26 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
+/* §755: THE WEIGHTING PAGE'S SWITCH LIVES HERE, on Setup › Business units,
+   for focus's reason (§102, §61): the Weighting tab itself goes while the
+   page is off, so a switch on that page could be turned off and never back
+   on. The units are what the weighting weighs, and this page is always
+   the office's to reach. The pinned On|Off pair is focus's (§135.5); Off
+   says what it keeps, so it never looks like a delete. */
+function weightingSwitch(){
+  var on = weightingOn();
+  if (!inOffice()) return '';
+  PAGE_ACTS +=
+    '<span class="segsw" role="group" aria-label="Weighting page on or off">' +
+      '<button type="button" class="seg' + (on ? ' on' : '') + '" data-weightswitch="1" ' +
+        'aria-pressed="' + on + '">Weighting on</button>' +
+      '<button type="button" class="seg' + (on ? '' : ' on') + '" data-weightswitch="0" ' +
+        'aria-pressed="' + (!on) + '">Off</button>' +
+    '</span>';
+  return on ? '' : '<div class="note"><b>The Weighting page is off for this client.</b> ' +
+    'The tab is not shown; the factors and every ' + L("unitword") + '\'s weights are kept, ' +
+    'and the group compile still reads them.</div>';
+}
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -1591,6 +1611,7 @@ function renderUnits(){
 
   return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit)) +
+    weightingSwitch() +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
        the units appear in the navigation and on the group page — somebody

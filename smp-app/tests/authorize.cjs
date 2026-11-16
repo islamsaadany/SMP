@@ -1300,6 +1300,28 @@ check("and `false` reads as ON too, so a stale write cannot hide the feature",
 check("only `true` switches it off",
       R.focusOn(R.worldOf({ group: { focusOff: true } })) === false);
 
+/* ── 14b · THE WEIGHTING PAGE'S SWITCH IS NOT A BIGGER EDIT (§755) ──
+   Editing the weights is the g_weight grant's; hiding the page for the whole
+   client is the SMO's alone, as focus's switch is — and it is classified
+   `setup`, so a stale write of `false` cannot hide the page either. */
+console.log("\n14b · the weighting switch");
+allows("smo", function (s) { s.group.weightingOff = true; },
+  "the SMO may switch the weighting page off");
+refuses("ceo", function (s) { s.group.weightingOff = true; },
+  "the CEO may NOT switch the weighting page off");
+refuses(headKey, function (s) { s.group.weightingOff = true; },
+  "a unit head may NOT switch the weighting page off");
+(function () {
+  const inc = clone(SEED); inc.group.weightingOff = true;
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("the weighting switch is classified `setup`, and never `unknown`",
+        kinds.length > 0 && kinds.indexOf("setup") > -1 && kinds.indexOf("unknown") === -1,
+        "got: " + JSON.stringify(kinds));
+})();
+check("an absent weighting key reads as ON", R.weightingOn(R.worldOf({ group: {} })) === true);
+check("and `false` reads as ON too", R.weightingOn(R.worldOf({ group: { weightingOff: false } })) === true);
+check("only `true` hides the weighting page", R.weightingOn(R.worldOf({ group: { weightingOff: true } })) === false);
+
 console.log("\n15 · the strategy | reporting split (§117)");
 /* The own columns are two questions now. The old stored key kept meaning the
    Reporting half — every §13 assertion above already proves a custodian's

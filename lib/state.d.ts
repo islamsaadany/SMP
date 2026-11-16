@@ -196,6 +196,8 @@ declare namespace SMP {
     naming?: boolean;
     /** true, or absent: focus marks are off. */
     focusOff?: boolean;
+    /** true, or absent: the Weighting page is hidden (§755). */
+    weightingOff?: boolean;
     /** Hosts whose links play on a slide. Read by the deck; NOTHING WRITES
         IT YET — §261.1 left the storage page's control for later. */
     videoHosts?: string[];

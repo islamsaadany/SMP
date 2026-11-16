@@ -89,6 +89,9 @@
   .outn small { color:var(--ink-3); } .rowtools .x { color:var(--ink-3); cursor:pointer; font-size:14px; padding:0 4px; }
   .addrow td { color:var(--gold-deep); font-weight:700; cursor:pointer; }
   .pen-on .tactable tbody tr[data-i] { cursor:pointer; } .pen-on .tactable tbody tr[data-i]:hover td { background:var(--surface-2); }
+  /* read mode: no width was set, so the browser gave the longest text the most room; the tactic and the outcome now share it */
+  body:not(.pen-on) .tactable th:nth-child(2) { width:34%; }
+  body:not(.pen-on) .tactable th:nth-child(3) { width:32%; }
   .panel-open table.tactable { min-width:0; }
   .tactable td .fld.rowfld { width:100%; min-width:140px; font-size:13px; padding:6px 9px; }
   .tactable td .dd .ddbtn { font-size:12.5px; padding:5px 8px; min-height:30px; }

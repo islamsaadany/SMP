@@ -337,7 +337,7 @@ function unitSwotSlides(u){
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+        return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
       }).join("");
       /* The LAST category keeps the old key "swot", which stored slides
          already name (§236.3). */
@@ -1572,7 +1572,7 @@ function companyAnalysisSlides(u){
       var items = has(q);
       return '<div class="dswcol t-' + hues[q] + '"><h3>' + esc(LTraw("group", SMPRules.QUAD_KEYS[q])) + '</h3>' +
         (items.length ? '<ol class="dswot">' + items.map(function(t, i){
-          return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+          return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
         }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
     }).join("") + '</div></section>'];
 }
@@ -1756,7 +1756,7 @@ function fnSWSlide(f){
     var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
     return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
       (items.length ? '<ol class="dswot">' + items.map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+        return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
       }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
   };
   var any = quads.some(function(k){

@@ -190,6 +190,8 @@
                 padding:22px 0; font-size:29px; line-height:1.35; break-inside:avoid;
                 border-bottom:1px solid var(--line-soft); }
   ol.dswot .n { font-family:var(--mono); font-size:18px; color:var(--none); }
+  /* §754: the same shape on the slide — title bold, points under it. */
+  ol.dswot .swot-p { display:block; margin-top:4px; }
   .d-swot h2 { padding-left:18px; }
   .d-swot.t-good h2 { border-left:5px solid var(--good); }
   .d-swot.t-bad h2 { border-left:5px solid var(--bad); }

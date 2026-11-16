@@ -25,6 +25,25 @@
    are; every other "&" is still escaped. Still safe: those five decode to
    text, never to markup, so nothing written through here can open a tag. */
 function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+/* §754: A SWOT LINE IS A TITLE AND ITS POINTS. Islam writes each line in
+   the box as a title on the first line and the points under it, one per
+   line ("TRUSTED BRAND LEGACY" and then three dashes). The box kept the
+   line breaks — a textarea does — but the page printed the line through
+   `esc()` inside one span, which folds every break into a space, so once
+   the pen closed the title and its points ran together as one paragraph
+   (Islam: "when done editing they get merged"). This prints what was
+   typed: the first line bold, each line after it on its own line, blank
+   lines dropped. A line typed as ONE line is printed exactly as before —
+   plain — so the lists already written do not change their look; only a
+   line that carries points under its title gets the title in bold. Used by
+   the SWOT page, a function's S&W (the same boxes), and the three deck
+   slides; the workbooks and the PPTX keep the raw text. */
+function swotText(x){
+  var ls = String(x == null ? "" : x).split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+  if (ls.length < 2) return '<span class="swot-t">' + esc(ls[0] || "") + '</span>';
+  return '<span class="swot-t"><b>' + esc(ls[0]) + '</b>' +
+    ls.slice(1).map(function(l){ return '<span class="swot-p">' + esc(l) + '</span>'; }).join("") + '</span>';
+}
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
@@ -6524,7 +6543,7 @@ function swotBoxes(u, quads, page, ac){
               '<button class="xbtn" data-swrm="' + esc(swt) +
               '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
               rmStrip("swrm", swt, RMASK ? RMASK.say : "")
-            : '<span>' + esc(x) + '</span>') + '</li>';
+            : swotText(x)) + '</li>';
       }).join("") + '</ol>' +
       (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
         '">+ Add</button></div>' : '') + '</section>';

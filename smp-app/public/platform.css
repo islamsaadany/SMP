@@ -7110,6 +7110,10 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
                  align-items:baseline; padding:5px 0; font-size:13.5px; }
   .swot-n { font-family:var(--mono); font-size:11.5px; color:var(--none);
             font-variant-numeric:tabular-nums; }
+  /* §754: a line's title bold, its points one under the other. */
+  .swot-t b { font-weight:700; }
+  .swot-p { display:block; margin-top:3px; }
+  .swot-t b + .swot-p { margin-top:5px; }
 
   /* Temple editing: tables, with the statements in labelled rows above them. */
   .templeedit h4.mini:first-child { margin-top:0; }
@@ -9480,6 +9484,8 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
                 padding:22px 0; font-size:29px; line-height:1.35; break-inside:avoid;
                 border-bottom:1px solid var(--line-soft); }
   ol.dswot .n { font-family:var(--mono); font-size:18px; color:var(--none); }
+  /* §754: the same shape on the slide — title bold, points under it. */
+  ol.dswot .swot-p { display:block; margin-top:4px; }
   .d-swot h2 { padding-left:18px; }
   .d-swot.t-good h2 { border-left:5px solid var(--good); }
   .d-swot.t-bad h2 { border-left:5px solid var(--bad); }

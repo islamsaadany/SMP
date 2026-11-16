@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-16 — A SWOT line keeps its title and its points (§754).** A line written as a title with points under it printed as one paragraph once the pen closed. Now the first line is bold and each point stays on its own line, on the SWOT page, a function's S&W and the review deck. A one-line entry looks exactly as before. Five SWOT and deck checks green.
+
 **2026-11-04 — Three layouts to compare live (§753).** A switch above the Copilot: the one window (§752, the default), A — one chat with suggestions that opens the work when it is asked for — and B — ✦ Copilot beside Edit on the Strategy tab, opening the Copilot in a panel on the part in view, the plan narrowing beside it. Same workflows in all three; chosen per browser.
 
 **2026-11-04 — The Copilot in one window; Tactical Plans and Pillars/Directions (§752).** No area tabs: the method is a strip above the pane saying where the place stands and which step is next; one rail holds every area's chats and deliverables, tagged, with chips to narrow it; one start screen with the focus area's cards and the others folded beneath. Execution is called Tactical Plans and Directions Pillars/Directions; old versions go on as the same deliverables. Mockup `design-mockups/copilot-layout/2026-11-04_one-window.html`.

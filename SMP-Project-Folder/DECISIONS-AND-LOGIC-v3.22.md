@@ -71322,3 +71322,13 @@ Islam, with two pictures of a SWOT box — the line open in the pen reading *TRU
 **What is built.** One builder, `swotText()` in group-render.js, prints a SWOT line as it was typed: the first line in bold, each line after it on its own line, blank lines dropped. It is used wherever a SWOT line is read — the SWOT page, a function's S&W (the same boxes), and the three deck slides (a unit's SWOT, the company's Analysis, a function's S&W). A line typed as ONE line prints exactly as before, plain, so nothing already written changes its look; only a line that carries points under its title gets the title in bold. The pen itself is untouched — the title cannot be bold inside a textarea, and the first line IS the title. The workbooks and the PPTX keep the raw text.
 
 **Checked**: function-sw, fn-sw-default, deck-model, deck-dividers, direction-decks — all green on the rebuilt file; the page and the Strengths slide looked at with a three-point line and a one-line entry beside it.
+
+### §754.1 — The points are bullets, each in line with itself (2026-11-16)
+
+Islam, of §754 on the mockup: *"the points under the main title should act like bullet points with proper alignment of the lines. either in the plan view or the deck."* A point that wrapped ran its second line back under the dash. Then, of the slide: *"the points looks too tight together in the presentation not like the as printed it has some space."*
+
+**What is built.** A point is its own block with two columns: the bullet in a narrow column on the left, the words in a column of their own, so a point that runs to a second line continues under its first word. The dash Islam typed is taken off the front of the line and the stylesheet draws the bullet (an en dash in the quiet ink), so a point typed without one gets the same bullet and a box reads the same however its lines were typed; a leading -, –, —, •, * or · is the marker, anything else is the words. On the slides the gaps scale with the slide's type (.45em between points, .55em under the title, line height 1.35) instead of a fixed 2px, which is why they read tight. The page view's 3px/5px gaps stay. One-line entries are untouched; the workbooks and the PPTX keep the raw text.
+
+Mockup, approved: `design-mockups/swot-title-points/2026-11-16_title-and-points.html` (six cases — a title with points, one line, both in one box, points without dashes, the slide, and the every-line-bold alternative that was not taken). Islam: *"apply it to the platform."*
+
+**Checked**: function-sw, fn-sw-default, deck-model, deck-dividers, direction-decks — all green on the rebuilt file; the page and the Strengths slide looked at with a three-point line that wraps.

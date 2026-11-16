@@ -28140,14 +28140,28 @@ function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;
    typed: the first line bold, each line after it on its own line, blank
    lines dropped. A line typed as ONE line is printed exactly as before —
    plain — so the lists already written do not change their look; only a
-   line that carries points under its title gets the title in bold. Used by
-   the SWOT page, a function's S&W (the same boxes), and the three deck
-   slides; the workbooks and the PPTX keep the raw text. */
+   line that carries points under its title gets the title in bold.
+
+   §754.1 — THE POINTS ARE BULLETS, EACH IN LINE WITH ITSELF. Islam, of the
+   first cut: *"the points under the main title should act like bullet
+   points with proper alignment of the lines"*. A point that wrapped ran its
+   second line back under the dash. So a point is its own block with two
+   columns — the bullet in a narrow column, the words in their own — and a
+   wrapped point continues under its first word (`.swot-p`, arrange.css and
+   present.css). The dash Islam typed is taken off the front of the line and
+   the stylesheet draws the bullet, so a point typed without one gets the
+   same bullet and a box reads the same however its lines were typed. A
+   leading -, –, —, •, * or · is the marker; anything else is the words.
+   Mockup: design-mockups/swot-title-points/2026-11-16_title-and-points.html.
+   Used by the SWOT page, a function's S&W (the same boxes), and the three
+   deck slides; the workbooks and the PPTX keep the raw text. */
 function swotText(x){
   var ls = String(x == null ? "" : x).split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
   if (ls.length < 2) return '<span class="swot-t">' + esc(ls[0] || "") + '</span>';
   return '<span class="swot-t"><b>' + esc(ls[0]) + '</b>' +
-    ls.slice(1).map(function(l){ return '<span class="swot-p">' + esc(l) + '</span>'; }).join("") + '</span>';
+    ls.slice(1).map(function(l){
+      return '<span class="swot-p">' + esc(l.replace(/^[-\u2013\u2014\u2022*\u00b7]+\s*/, "")) + '</span>';
+    }).join("") + '</span>';
 }
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;

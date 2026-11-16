@@ -25,7 +25,7 @@
    are; every other "&" is still escaped. Still safe: those five decode to
    text, never to markup, so nothing written through here can open a tag. */
 function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
-/* §754: A SWOT LINE IS A TITLE AND ITS POINTS. Islam writes each line in
+/* §757: A SWOT LINE IS A TITLE AND ITS POINTS. Islam writes each line in
    the box as a title on the first line and the points under it, one per
    line ("TRUSTED BRAND LEGACY" and then three dashes). The box kept the
    line breaks — a textarea does — but the page printed the line through
@@ -37,7 +37,7 @@ function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;
    plain — so the lists already written do not change their look; only a
    line that carries points under its title gets the title in bold.
 
-   §754.1 — THE POINTS ARE BULLETS, EACH IN LINE WITH ITSELF. Islam, of the
+   §757.1 — THE POINTS ARE BULLETS, EACH IN LINE WITH ITSELF. Islam, of the
    first cut: *"the points under the main title should act like bullet
    points with proper alignment of the lines"*. A point that wrapped ran its
    second line back under the dash. So a point is its own block with two

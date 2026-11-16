@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-16 — A SWOT line keeps its title and its points (§754, §754.1).** A line written as a title with points under it printed as one paragraph once the pen closed. Now the first line is bold and each point is a bullet on its own line, a wrapped point continuing under its first word, on the SWOT page, a function's S&W and the review deck; the slide's points are spaced to its type. A one-line entry looks exactly as before. Mockup approved (design-mockups/swot-title-points). Five SWOT and deck checks green.
+**2026-11-16 — A SWOT line keeps its title and its points (§757, §757.1; §754 on the branch, renumbered at the merge: main took §754–§756).** A line written as a title with points under it printed as one paragraph once the pen closed. Now the first line is bold and each point is a bullet on its own line, a wrapped point continuing under its first word, on the SWOT page, a function's S&W and the review deck; the slide's points are spaced to its type. A one-line entry looks exactly as before. Mockup approved (design-mockups/swot-title-points). Five SWOT and deck checks green.
 
 **2026-11-04 — Three layouts to compare live (§753).** A switch above the Copilot: the one window (§752, the default), A — one chat with suggestions that opens the work when it is asked for — and B — ✦ Copilot beside Edit on the Strategy tab, opening the Copilot in a panel on the part in view, the plan narrowing beside it. Same workflows in all three; chosen per browser.
 

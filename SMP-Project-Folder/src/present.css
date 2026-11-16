@@ -190,8 +190,8 @@
                 padding:22px 0; font-size:29px; line-height:1.35; break-inside:avoid;
                 border-bottom:1px solid var(--line-soft); }
   ol.dswot .n { font-family:var(--mono); font-size:18px; color:var(--none); }
-  /* §754: the same shape on the slide — title bold, points under it.
-     §754.1: bullets with a hanging indent; the gaps scale with the slide's
+  /* §757: the same shape on the slide — title bold, points under it.
+     §757.1: bullets with a hanging indent; the gaps scale with the slide's
      type (Islam: the points "looks too tight together in the presentation"). */
   ol.dswot .swot-p { display:block; position:relative; padding-left:1.1em; margin-top:.45em; line-height:1.35; }
   ol.dswot .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }

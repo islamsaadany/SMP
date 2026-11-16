@@ -71313,7 +71313,7 @@ Islam, of the one window (§752): *"it seems very complex and I'm not sure this 
 
 **§752–§753 MERGED TO `main`** 2026-11-16, Islam: *"would merging now remove any work done on the current copilot?"* — no: `main`'s commits since the last merge touched none of the Copilot's files, and its shell change merged beside ours — then *"merge to main"*. `main` had taken §745–§751 meanwhile — merged in first, ours renumbered §745 → §752 and §746 → §753, the shell version bumped past main's (v7.69), the builds rebuilt on the merged tree and both suites run there: **369 passed, 0 failed**; **594 ok, 10 failed**, the known ten; `generated-in-step` and `release-stamp` all clear — then `07aa520a..ae7aaa40`. No migrations; nobody signed out. The Copilot opens in the one window; the switch above it offers A and B, per browser.
 
-## §754 — A SWOT line keeps its title and its points (2026-11-16)
+## §757 — A SWOT line keeps its title and its points (2026-11-16; §754 on the branch, renumbered at the merge: main took §754–§756)
 
 Islam, with two pictures of a SWOT box — the line open in the pen reading *TRUSTED BRAND LEGACY* on its first line and three dashed points under it, and the same line with the pen closed, run together as one paragraph: *"in the swot view in the editing view I have a main point and sub points as you see and I need to make the main title bold. when done editing they get merged. the title needs to stay bold and the points stay points."*
 
@@ -71323,9 +71323,9 @@ Islam, with two pictures of a SWOT box — the line open in the pen reading *TRU
 
 **Checked**: function-sw, fn-sw-default, deck-model, deck-dividers, direction-decks — all green on the rebuilt file; the page and the Strengths slide looked at with a three-point line and a one-line entry beside it.
 
-### §754.1 — The points are bullets, each in line with itself (2026-11-16)
+### §757.1 — The points are bullets, each in line with itself (2026-11-16)
 
-Islam, of §754 on the mockup: *"the points under the main title should act like bullet points with proper alignment of the lines. either in the plan view or the deck."* A point that wrapped ran its second line back under the dash. Then, of the slide: *"the points looks too tight together in the presentation not like the as printed it has some space."*
+Islam, of §757 on the mockup: *"the points under the main title should act like bullet points with proper alignment of the lines. either in the plan view or the deck."* A point that wrapped ran its second line back under the dash. Then, of the slide: *"the points looks too tight together in the presentation not like the as printed it has some space."*
 
 **What is built.** A point is its own block with two columns: the bullet in a narrow column on the left, the words in a column of their own, so a point that runs to a second line continues under its first word. The dash Islam typed is taken off the front of the line and the stylesheet draws the bullet (an en dash in the quiet ink), so a point typed without one gets the same bullet and a box reads the same however its lines were typed; a leading -, –, —, •, * or · is the marker, anything else is the words. On the slides the gaps scale with the slide's type (.45em between points, .55em under the title, line height 1.35) instead of a fixed 2px, which is why they read tight. The page view's 3px/5px gaps stay. One-line entries are untouched; the workbooks and the PPTX keep the raw text.
 

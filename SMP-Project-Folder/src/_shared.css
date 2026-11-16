@@ -341,6 +341,14 @@
      below the fold — and it is exactly what made the page run 60px past the
      window and slide the rail, with its pinned head, under the chrome. */
   .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
+  /* §770.1: and under ANY rail beside a pane, for the reason written at
+     --page-foot (group-extra.css): the rail is capped against --pane-foot, so
+     a page foot of 80 is 60px the pane scrolls past the rail — which pushed
+     the pinned rail up under the chrome at the page's end (Islam: *"on
+     scrolling in the direction box the left directions pane shouldn't
+     scroll"*) and left an empty band below the boxes (*"there is space in
+     the bottom of the page below the boxes"*). */
+  .wrap:has(.split) { padding-bottom:var(--pane-foot, 20px); }
 
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }

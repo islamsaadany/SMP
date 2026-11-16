@@ -11402,10 +11402,10 @@ function renderUnitPlanBody(u){
     /* §540: the count and the rail are of the list AS DRAWN — on a split box
        this tab holds one half of it, and a hint reading "15 Directions" over
        a rail of five is the kind of disagreement §116.2 exists to stop. */
-    (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + partItems(u).length + ' ' + halfWord(u) +
-        ' &middot; drag by the handle to reorder, here and inside each ' +
-        halfWord1(u) + '</p>' : '') +
+    /* §770.1: the hint that stood here while arranging — "15 Directions ·
+       drag by the handle to reorder, here and inside each Direction" — is
+       gone (Islam: *"the statement 15 directions … should be removed"*). The
+       handles say it; the rail's head carries the count. */
     (railWorthIt(partItems(u))
       ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'

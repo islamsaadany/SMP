@@ -690,7 +690,9 @@
 /* v7.80-page-contained — §770: the banner pinned beside the rail with a
    clear top line, the rail capped to the window, the panel on the table's
    line and pinned under the banner. */
-const SHELL = "smp-shell-v7.80-page-contained";
+/* v7.81-no-foot-under-a-rail — §770.1: the page foot is the pane's under
+   any rail, and the arranging hint is gone. */
+const SHELL = "smp-shell-v7.81-no-foot-under-a-rail";
 const ASSETS = [
   "/",
   "/index.html",

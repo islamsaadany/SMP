@@ -683,7 +683,10 @@
    the built platform file changed. */
 /* v7.77-measures-dropdown — §767–§767.2: a tactic names the key measures
    it supports, by number; past main's v7.75 at the merge. */
-const SHELL = "smp-shell-v7.77-measures-dropdown";
+/* v7.78-strip-years — §769: the rail's button is an options menu that can
+   hide years, and the band and the table heads pin under the strip; the
+   built platform file changed. */
+const SHELL = "smp-shell-v7.78-strip-years";
 const ASSETS = [
   "/",
   "/index.html",

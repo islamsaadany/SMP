@@ -36227,6 +36227,8 @@ function renderReport(u, opt){
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
     var rpf = partFilter(u);          /* §517: skipped, never renumbered */
+    var ryf = railYearsFilter(u);     /* §769: the years unticked, the same way */
+    var rshows = function(p){ return (!rpf || rpf(p)) && (!ryf || ryf(p)); };
     var railRow = function(p, pi){
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
@@ -36254,7 +36256,7 @@ function renderReport(u, opt){
     };
     var rowsOf = function(keep){
       return u.items.map(function(p, pi){
-        return (rpf && !rpf(p)) || (keep && !keep(p)) ? "" : railRow(p, pi);
+        return !rshows(p) || (keep && !keep(p)) ? "" : railRow(p, pi);
       }).join("");
     };
     var railRows = !one ? rowsOf(null) : ["dir", "cap"].map(function(h){
@@ -36262,7 +36264,10 @@ function renderReport(u, opt){
         ' <span class="rgn">' + order.filter(inHalf(h)).length + '</span></div>' + rowsOf(inHalf(h));
     }).join("");
     var rail = '<div class="rail">' +
-      railHead(one ? L("pillar","bu") + " &amp; " + L("capability","bu") : halfWord(u), partItems(u).length) +
+      railHead(one ? L("pillar","bu") + " &amp; " + L("capability","bu") : halfWord(u),
+        partItems(u).filter(rshows).length,
+        { key: unitRailKey(u), of: rpf ? partItems(u).filter(rpf).length : partItems(u).length,
+          u: railYearsOn(u) ? u : null }) +
       railRows + '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
@@ -36769,14 +36774,103 @@ function railName(code, name, kind){
 var RAIL_TERSE = (function(){
   try { return localStorage.getItem("smp.rail.terse") !== "0"; } catch(e){ return true; }
 })();
-function railHead(label, n){
-  return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n + '</span></span>' +
-    '<button class="railterse' + (RAIL_TERSE ? " on" : "") + '" data-railterse="1" ' +
-    'title="' + (RAIL_TERSE ? "Show the detail under each name" : "Just the names") + '" ' +
-    'aria-pressed="' + (RAIL_TERSE ? "true" : "false") + '">' +
+/* ── §769 · THE RAIL'S BUTTON IS AN OPTIONS MENU, AND IT CAN HIDE YEARS ──
+   Islam, of a plan whose directions run in different years: *"we need a way
+   to filter which directions to see from the directions left pan"*, and of
+   the shape, *"part of the options beside the word directions where we make
+   the button an options drop down that shows details or set which years to
+   show in a sub list with checks. and we can have the same options button
+   somehow in the horizontal view"* (design-mockups/strip-years, E).
+
+   The ≡ button §60 gave the head keeps its place and opens a menu: the
+   detail switch it used to BE, then — on a list whose years are marked —
+   "Years to show", one tick a year with how many directions run in it. A
+   direction shows while it runs in ANY ticked year; a tick whose removal
+   would leave the list empty is held, so the rail can never show nothing.
+   With a year unticked the head reads "5 of 9" and the button wears a dot,
+   because a short list must never read as a short plan (§60's own rule: a
+   control that hides something has to say so).
+
+   THE TICKS ARE A MOMENT'S CHOICE, NOT A PREFERENCE: kept in memory by the
+   box's key for as long as the page is open, never in localStorage beside
+   the terse switch (§25) and never in the graph. The three rails onto one
+   list — the plan's, the performance's and the report's — read the same
+   key, so a year hidden on one is hidden on all (§324's rule, §53.5).
+
+   ON THE SQUEEZED STRIP the head's word is hidden (§609) and the button
+   stands alone at the strip's left end, the "5 of 9" beside it only while
+   a year is unticked — the same button, the same menu (group-extra.css). */
+var RAILMENU = null;      /* the rail key whose options menu is open */
+var RAIL_YEARS = {};      /* box key → the years ticked; absent means all */
+function railYears(ukey){
+  var ys = RAIL_YEARS[ukey];
+  return Array.isArray(ys) && ys.length ? ys : [1, 2, 3];
+}
+/* Whether this box's list marks years at all — asked of a row, the path
+   every years tag already takes (`yearsTagHtml`), so the menu and the tags
+   can never disagree about whether years are on. */
+function railYearsOn(u){
+  var items = u ? partItems(u) : [];
+  return !!items.length && yearsOn(items[0]);
+}
+/* The filter, or null where nothing is hidden. */
+function railYearsFilter(u){
+  if (!railYearsOn(u)) return null;
+  var ys = railYears(u.ukey);
+  if (ys.length === 3) return null;
+  return function(p){ return pillarYears(p).some(function(y){ return ys.indexOf(y) >= 0; }); };
+}
+function railYearSet(ukey, y, on){
+  var ys = railYears(ukey).slice(), i = ys.indexOf(y);
+  if (on && i < 0) ys.push(y);
+  if (!on && i >= 0) ys.splice(i, 1);
+  ys.sort();
+  if (ys.length === 3 || !ys.length) delete RAIL_YEARS[ukey]; else RAIL_YEARS[ukey] = ys;
+}
+/* `o.key` names the rail (which menu is open); `o.of` is how many the list
+   holds before the years filter, so the head can say "5 of 9"; `o.u` is
+   the box whose years the menu offers, or null for a rail without them. */
+function railHead(label, n, o){
+  o = o || {};
+  var key = o.key || label, open = RAILMENU === key;
+  var filtered = o.of != null && o.of !== n;
+  var panel = "";
+  if (open) {
+    panel = '<div class="hmenu-panel railopts-panel">' +
+      '<label class="railopt"><input type="checkbox" data-railterse="1"' +
+        (RAIL_TERSE ? '' : ' checked') + '> Show the detail under each name</label>';
+    if (o.u) {
+      var ys = railYears(o.u.ukey), items = partItems(o.u), now = planYear();
+      panel += '<div class="hmenu-sep"></div><div class="railopt-h">Years to show</div>' +
+        [1, 2, 3].map(function(y){
+          var inY = function(p){ return pillarYears(p).indexOf(y) >= 0; };
+          var cnt = items.filter(inY).length, on = ys.indexOf(y) >= 0;
+          /* Held while it is the only tick, or while the others leave no
+             direction showing: the rail never shows nothing. */
+          var left = items.filter(function(p){
+            return pillarYears(p).some(function(z){ return z !== y && ys.indexOf(z) >= 0; }); }).length;
+          var held = on && !left;
+          return '<label class="railopt' + (held ? ' held' : '') + '"' +
+            (held ? ' title="The last year showing cannot be unticked"' : '') + '>' +
+            '<input type="checkbox" data-railyear="' + esc(o.u.ukey) + '|' + y + '"' +
+            (on ? ' checked' : '') + (held ? ' disabled' : '') + '> ' +
+            esc(planYearLabel(y)) + (y === now ? ' <i>this year</i>' : '') +
+            '<small>' + cnt + '</small></label>';
+        }).join("");
+    }
+    panel += '</div>';
+  }
+  return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n +
+    (filtered ? ' <i class="rof">of ' + o.of + '</i>' : '') + '</span></span>' +
+    '<span class="hmenu railopts' + (open ? " open" : "") + '">' +
+    '<button class="railterse' + (RAIL_TERSE ? " on" : "") + (filtered ? " filtered" : "") +
+    '" data-railopts="' + esc(key) + '" title="Options" aria-haspopup="true" ' +
+    'aria-expanded="' + (open ? "true" : "false") + '">' +
     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h7" ' +
     'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>' +
-    '</button></div>';
+    '</button>' +
+    (filtered ? '<span class="rof strip">' + n + ' of ' + o.of + '</span>' : '') +
+    panel + '</span></div>';
 }
 function railSub(html, alarm){
   /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§119). Collapsed is the default
@@ -38492,6 +38586,10 @@ function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
    stored order — so the page opens on the rail's first row, not the plan's. */
 function unitRailPick(u, order){
   var k = unitRailKey(u), want = RAIL[k], list = order || partItems(u);
+  /* §769: a direction hidden by the years ticks is not opened — the page
+     opens on the first one showing, exactly as the rail draws it. */
+  var yf = railYearsFilter(u);
+  if (yf) { var shown = list.filter(yf); if (shown.length) list = shown; }
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
@@ -38516,8 +38614,11 @@ function unitRailFor(u, sel){
      skipped here rather than filtered out of the list, so `i` stays the
      pillar's real position and its code does not change. */
   var pf = partFilter(u);
+  /* §769: and the years unticked in the head's menu, skipped the same way. */
+  var yf = railYearsFilter(u);
+  var shows = function(it){ return (!pf || pf(it)) && (!yf || yf(it)); };
   var rows = list.map(function(it, i){
-    if (pf && !pf(it)) return "";
+    if (!shows(it)) return "";
     /* THE CODE SHOWN IS DERIVED; THE CODE STORED IS AN IDENTIFIER, and they
        are not the same thing (found 2026-08-22, §46.3). `it.code` is what the
        plan arrived with — "01" for Mobile, because its pillars predate the
@@ -38583,7 +38684,8 @@ function unitRailFor(u, sel){
      in the first place: nothing here has been reported. */
   return '<div class="rail' + (on ? ' arranging' : '') + '">' +
     /* §542: the half's own word over the half's own count. */
-    railHead(halfWord(u), pf ? list.filter(pf).length : list.length) +
+    railHead(halfWord(u), list.filter(shows).length,
+      { key: unitRailKey(u), of: pf ? list.filter(pf).length : list.length, u: railYearsOn(u) ? u : null }) +
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
       esc(u.ukey) + '">' + rows + '</div>' +
     /* ADD, in the rail that holds them (§69.13). The same place the projects
@@ -40089,8 +40191,10 @@ function unitPerfRail(u){
   if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
   var pf = partFilter(u);            /* §517: skipped, never renumbered */
+  var yf = railYearsFilter(u);       /* §769: the years unticked, the same way */
+  var shows = function(it){ return (!pf || pf(it)) && (!yf || yf(it)); };
   var rows = u.items.map(function(it, i){
-    if (pf && !pf(it)) return "";
+    if (!shows(it)) return "";
     /* §416: a direction that does not run this year is not scored, so its
        rail row reads a dash and says when it runs rather than a figure. */
     var now = runsNow(it);
@@ -40111,7 +40215,8 @@ function unitPerfRail(u){
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(halfWord(u), partItems(u).length) +
+    railHead(halfWord(u), partItems(u).filter(shows).length,
+      { key: unitRailKey(u), of: pf ? partItems(u).filter(pf).length : partItems(u).length, u: railYearsOn(u) ? u : null }) +
     /* `.ritem`, NOT `.prow-wrap` (§63.5). The rail's four grips rendered and
        were bound to NOTHING: the shell chose the item selector from `data-kind`
        and "pillars" meant the accordion's `.prow-wrap`, which does not exist
@@ -83205,6 +83310,7 @@ var SYNC = (function () {
        anyway — §327 says why that is the only question that can be asked
        here, and why the observer this used to be could not answer it. */
     pinWatch();
+    stickWatch();
     watchTailFold();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
@@ -83338,6 +83444,67 @@ var SYNC = (function () {
        position that does not move, so no scroll event is coming. Kept, and
        known to be unproven. */
     window.addEventListener("resize", pinSoon, { passive: true });
+  }
+  /* ── §769 · WHAT THE TWO FROZEN HEADS NEED MEASURED ─────────────────
+     Islam: *"the header needs to stay freezed on scrolling down"*, and asked
+     which, *"freeze both headers"*: the open direction's title band and the
+     plan tables' own heads. On the squeezed window (§609) the band scrolled
+     away on purpose; now it pins UNDER the strip, and a table head pins
+     under the band, reading or editing. Two heights nothing in CSS can
+     know are published the way `--chrome-h` is (§29.4's rule — observed,
+     never measured at chosen moments): the strip's, because its names wrap
+     to one, two or three lines, and the band's, because a name can too.
+     Both are re-observed after every paint, as the bands are; the observer
+     is one object, disconnected and pointed at the new nodes.
+
+     AND A TABLE HEAD CAN ONLY PIN TO THE WINDOW WHEN ITS BOX IS NOT A
+     SCROLL BOX (§273.1 records the fault the other way round: a page offset
+     inside an `overflow:auto` wrapper lands the head partway down its own
+     body). So each `.scroll` in a pane is marked `fits` while its table
+     needs no sideways scrolling, and only then does the wrapper let the
+     head out and the head pin. A table wider than its pane keeps its scroll
+     box and its head scrolls with it, exactly as before — reachable beats
+     pinned. Re-read on resize, because that is what changes the answer. */
+  var STICKRO = typeof ResizeObserver === "function" ? new ResizeObserver(function(){ stickPublish(); }) : null;
+  function stickNodes(){
+    return {
+      strip: document.querySelector("#panel .split:not(.setupsplit) > .rail:not(.setuprail)"),
+      band: document.querySelector("#panel .pane > .pband, #panel .pane > .ptitle.edhead")
+    };
+  }
+  function stickPublish(){
+    var n = stickNodes(), st = document.documentElement.style;
+    st.setProperty("--strip-h", (n.strip ? n.strip.offsetHeight : 0) + "px");
+    st.setProperty("--band-h", (n.band ? n.band.offsetHeight : 0) + "px");
+    fitPaint();
+  }
+  function fitPaint(){
+    /* BOTH boxes round a table: the renderer's `.scroll` and the `.tblscroll`
+       §151 wraps every table in after the paint — a head pins to the window
+       only once neither is a scroll box. */
+    Array.prototype.forEach.call(document.querySelectorAll("#panel .pane:not(.setuppane) .scroll, #panel .pane:not(.setuppane) .tblscroll"), function(b){
+      /* a confirmation's own list (`.rmconfirm`) pins its head to its box on purpose */
+      if (b.closest(".rmconfirm")) return;
+      b.classList.toggle("fits", b.scrollWidth <= b.clientWidth + 1);
+    });
+  }
+  var FITSOON = 0;
+  function fitSoon(){
+    if (FITSOON || typeof requestAnimationFrame !== "function") return;
+    FITSOON = requestAnimationFrame(function(){ FITSOON = 0; fitPaint(); });
+  }
+  var STICKARMED = false;
+  function stickWatch(){
+    if (STICKRO) {
+      STICKRO.disconnect();
+      var n = stickNodes();
+      if (n.strip) STICKRO.observe(n.strip);
+      if (n.band) STICKRO.observe(n.band);
+    }
+    stickPublish();
+    if (STICKARMED || typeof window === "undefined") return;
+    STICKARMED = true;
+    window.addEventListener("resize", fitSoon, { passive: true });
   }
   /* ── AND A WINDOW THAT CHANGES SIZE HAS TO REACH THE FOLD (§267) ─────
      `tailFolds()` is read while the plan table is being BUILT, because what
@@ -83524,9 +83691,10 @@ var SYNC = (function () {
       }
       return;
     }
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu],[data-railopts]");
     if (btn) {
       MENURETURN = btn.dataset.pmenu ? '[data-pmenu="' + btn.dataset.pmenu + '"]'
+                : btn.dataset.railopts ? '[data-railopts="' + btn.dataset.railopts + '"]'
                 : btn.hasAttribute("data-colmenu") ? "[data-colmenu]" : "[data-pwmenu]";
     }
     /* Only when the menu has just appeared under the keyboard — a mouse user
@@ -84841,10 +85009,28 @@ var SYNC = (function () {
         setKoThisYear(!SHOW_KO_THIS_YEAR); paint();
       });
     });
+    /* §769: the button opens the rail's options; the terse switch is a tick
+       inside it, and so are the years to show. The menu's state is the rail
+       key, so two rails on one page (§556's reporting halves) open one each.
+       The years are a moment's choice in memory; terse stays in localStorage. */
+    document.querySelectorAll("[data-railopts]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        RAILMENU = RAILMENU === b.dataset.railopts ? null : b.dataset.railopts;
+        paint();
+      });
+    });
     document.querySelectorAll("[data-railterse]").forEach(function(b){
-      b.addEventListener("click", function(){
-        RAIL_TERSE = !RAIL_TERSE;
+      b.addEventListener("change", function(){
+        RAIL_TERSE = !b.checked;
         try { localStorage.setItem("smp.rail.terse", RAIL_TERSE ? "1" : "0"); } catch(e){}
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-railyear]").forEach(function(b){
+      b.addEventListener("change", function(){
+        var p = b.dataset.railyear.split("|");
+        railYearSet(p[0], +p[1], b.checked);
         paint();
       });
     });
@@ -92209,6 +92395,11 @@ var SYNC = (function () {
       PWMENU = false; PFILEMENU = false;
       paint();
     }
+    /* §769: the rail's options menu closes on a click anywhere outside it. */
+    if (typeof RAILMENU !== "undefined" && RAILMENU !== null &&
+        !(e.target.closest && e.target.closest(".railopts"))) {
+      RAILMENU = null; paint();
+    }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
@@ -92221,6 +92412,7 @@ var SYNC = (function () {
       PWMENU = false; PFILEMENU = false;
       paint();
     }
+    if (typeof RAILMENU !== "undefined" && RAILMENU !== null) { RAILMENU = null; paint(); }
   });
 
   /* The switcher lists the people the platform actually has. It was filled

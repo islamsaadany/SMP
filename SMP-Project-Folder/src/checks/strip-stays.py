@@ -12,9 +12,11 @@ WHAT IS ASSERTED IS THE PROMISE, NOT THE MECHANISM (§94.8):
   1 · THE STRIP STAYS. Scrolled, the strip is where it was at rest — the
       scroll is asserted to have happened first (§113.8), or a page too short
       to scroll passes for the wrong reason.
-  2 · THE TITLE GOES. The open direction's band has moved by the scroll, so
-      nothing but the strip is held under the chrome; while editing, the head
-      that replaces the band goes the same way.
+  2 · THE TITLE PINS UNDER THE STRIP (§769, reversing §609's "the title
+      goes" on Islam's word: *"freeze both headers"*). Scrolled, the open
+      direction's band sits a gutter under the strip, not where the scroll
+      would have carried it; while editing, the head that replaces the band
+      pins the same way.
   3 · EVERY DIRECTION IS ON IT. One row, each item inside the strip's own
       box, nothing to scroll sideways to — at 1100, 900 and 760.
   4 · NO NAME IS CUT. Each name's whole text is painted (nothing clamped),
@@ -107,6 +109,11 @@ DECODE = r"""async (b64) => {
 }"""
 
 
+def GAP(pg):
+    """§618's gutter under the strip, read off the page rather than typed."""
+    return pg.evaluate("()=>parseFloat(getComputedStyle(document.querySelector('.split')).gap)||16")
+
+
 def rgb(css):
     return tuple(int(v) for v in css[css.index("(") + 1:css.index(")")].split(",")[:3])
 
@@ -173,7 +180,9 @@ def edges(pg, s):
         return tuple(img["data"][i:i + 3])
     mid = s["left"] + (s["right"] - s["left"]) * 0.7      # over a closed item
     midy = s["top"] + (s["bottom"] - s["top"]) / 2
-    line = {"top": px(mid, s["top"]), "bottom": px(mid, s["bottom"] - 1),
+    # §769: the strip's bottom edge can fall mid-pixel (names wrap beside the
+    # head's cell), so the last whole row inside the border is sampled.
+    line = {"top": px(mid, s["top"]), "bottom": px(mid, s["bottom"] - 0.5),
             "right": px(s["right"] - 1, midy), "left": px(s["left"], s["top"] + 12)}
     gutter = [px(mid, s["bottom"] + d) for d in (3, 8, 13)]
     return line, gutter
@@ -209,9 +218,10 @@ with sync_playwright() as p:
         ok("%d · the page scrolled (so what follows is measured pinned)" % w, s["sy"] > 100, s["sy"])
         ok("%d · the strip stays where it stood" % w, abs(s["top"] - rest["top"]) <= 1,
            {"rest": rest["top"], "now": s["top"]})
-        ok("%d · the title went with the plan" % w,
-           s["band"] is not None and abs((rest["band"] - s["sy"]) - s["band"]) <= 1,
-           {"rest": rest["band"], "now": s["band"], "sy": s["sy"]})
+        ok("%d · the title pins a gutter under the strip (§769)" % w,
+           s["band"] is not None and s["band"] > rest["band"] - s["sy"] + 1
+           and abs(s["band"] - (s["bottom"] + GAP(pg) + 1)) <= 1.5,
+           {"rest": rest["band"], "now": s["band"], "strip bottom": s["bottom"], "sy": s["sy"]})
         if w == 1100:
             g = rgb(tok["--ground"])
             c = corners(pg, s, g)
@@ -267,9 +277,10 @@ with sync_playwright() as p:
        # §631: the box is the window's pixels, its `top` the page's
        s and abs(s["top"] - pg.evaluate("()=>parseFloat(getComputedStyle(document.querySelector('.split > .rail')).top) * (parseFloat(getComputedStyle(document.documentElement).zoom)||1)")) <= 1,
        s and s["top"])
-    ok("editing · the head being edited went with the plan",
-       s and rest and s["band"] is not None and abs((rest["band"] - (s["sy"] - rest["sy"])) - s["band"]) <= 1,
-       s and {"rest": rest["band"], "now": s["band"]})
+    ok("editing · the head being edited pins a gutter under the strip (§769)",
+       s and rest and s["band"] is not None and s["band"] > rest["band"] - (s["sy"] - rest["sy"]) + 1
+       and abs(s["band"] - (s["bottom"] + GAP(pg) + 1)) <= 1.5,
+       s and {"rest": rest["band"], "now": s["band"], "strip bottom": s["bottom"]})
     ok("editing · the reorder handles sit on the strip's one row",
        s and s["rows"] == 1 and pg.evaluate("()=>document.querySelectorAll('.split > .rail .ritem .grip').length") == s["n"])
     pg.close()

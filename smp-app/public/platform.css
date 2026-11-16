@@ -2012,6 +2012,40 @@ html[data-client-settings] .viewer { display:none; }
   .railterse.on { color:var(--gold); }
   /* The panel's own quiet ink. --none on the panel is 2.6:1 (§38.5). */
   .rail .rhead span { color:var(--panel-quiet); font-weight:600; }
+  /* ── §769 · THE HEAD'S BUTTON OPENS THE RAIL'S OPTIONS ──────────────
+     The ≡ that WAS the terse switch (§60) opens a menu that holds it, and
+     on a list whose years are marked, a tick per year (group-render.js,
+     railHead). The panel is `.hmenu-panel` (config.css) anchored to the
+     button's LEFT, because the head is 196px wide and the panel is not.
+     A gold dot on the button says a year is unticked — the same lit-gold
+     the terse switch wears, ringed in the head's own panel colour so it
+     reads on a lit button too. The count "5 of 9" sits in the head's own
+     line here, and beside the button on the strip (below). */
+  .rail .rhead .railopts { position:relative; display:inline-flex; align-items:center; gap:6px; }
+  .rail .rhead .rof { font-weight:400; font-style:normal; font-size:10.5px; letter-spacing:0;
+    text-transform:none; color:var(--panel-quiet); }
+  .rail .rhead .rof.strip { display:none; }
+  .railterse { position:relative; }
+  .railterse.filtered::after { content:""; position:absolute; top:-2px; right:-2px;
+    width:6px; height:6px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 0 1.5px var(--panel); }
+  .rail .railopts .hmenu-panel { left:0; right:auto; width:238px; transform-origin:top left;
+    letter-spacing:0; text-transform:none; font-weight:400; }
+  /* The panel is wider than the rail and the pane comes later in the
+     document, so while the menu is open the rail rises above the pane's
+     own layer (its corner acts sit at 5) and stays under the chrome's 9. */
+  .rail:has(.railopts.open) { z-index:7; }
+  .railopt { display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:var(--r-sm);
+    cursor:pointer; font:400 12.5px/1.35 var(--sans); color:var(--ink); }
+  .railopt:hover { background:var(--surface-2); }
+  .railopt input { accent-color:var(--good); width:14px; height:14px; margin:0; flex:none; }
+  .railopt i { font-style:normal; color:var(--ink-3); margin-left:4px; }
+  .railopt small { margin-left:auto; color:var(--ink-3); font-size:11px;
+    font-variant-numeric:tabular-nums; }
+  .railopt.held { cursor:not-allowed; }
+  .railopt.held input { opacity:.45; }
+  .railopt-h { padding:6px 8px 2px; font:700 10px/1 var(--sans); letter-spacing:.13em;
+    text-transform:uppercase; color:var(--ink-3); }
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
@@ -2115,6 +2149,20 @@ html[data-client-settings] .viewer { display:none; }
   .pane > .pband::before {
     content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
+  /* ── §769 · A TABLE'S HEAD PINS UNDER THE BAND ──────────────────────
+     Islam: *"freeze both headers"* — the band above and the plan tables'
+     own navy heads. `--band-h` is the band's measured height (shell.html,
+     stickWatch), because a wrapped name makes it taller; the rest of the
+     offset is the band's own. z-index 3: under the band's 4, over the rows.
+
+     ONLY WHILE THE TABLE FITS (`fits`, set by the shell): a `.scroll` is an
+     `overflow:auto` box, and a sticky head inside one pins to the box, not
+     the window (§273.1). So a table that needs no sideways scroll has its
+     wrapper opened and its head pinned; one wider than its pane keeps its
+     scroll box and its head scrolls away with it, as it always did. */
+  #panel .pane .scroll.fits, #panel .pane .tblscroll.fits { overflow-x:visible; }
+  #panel .pane .tblscroll.fits thead th { position:sticky; z-index:3;
+    top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px + var(--band-h, 0px)); }
   /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§130.3) ─────────────
      Islam: "the title has round corners so the scrolled up appears in the
      right and left top corners." Measured before touching it: 13px² of the
@@ -2473,7 +2521,29 @@ html[data-client-settings] .viewer { display:none; }
         radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px),
           var(--ground) var(--r)) right 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
         linear-gradient(var(--ground), var(--ground)) left bottom / 100% var(--split-gap, 16px) no-repeat; }
-    .rail:not(.setuprail) .rhead, .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
+    .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
+    /* §769: THE HEAD KEEPS ITS BUTTON ON THE STRIP. The word and the count
+       stay hidden as §609 left them; the ≡ stands in its own cell at the
+       strip's left end, in the strip's quiet ink rather than the panel's,
+       and "5 of 9" beside it only while a year is unticked. The detail
+       switch is left out of the menu here: a strip has no detail line to
+       switch (`.rsub` is hidden two rules down). */
+    .rail:not(.setuprail) .rhead { flex:none; display:flex; align-items:center; gap:4px;
+      padding:0 8px 0 10px; background:none; color:var(--ink-3);
+      border-right:1px solid var(--line); letter-spacing:0; text-transform:none; }
+    .rail:not(.setuprail) .rhead .rhl { display:none; }
+    .rail:not(.setuprail) .rhead span { color:var(--ink-3); }
+    .rail:not(.setuprail) .rhead .rof.strip { display:inline; white-space:nowrap; }
+    .rail:not(.setuprail) .railterse { color:var(--ink-3); margin:0; padding:4px;
+      border:1px solid transparent; }
+    .rail:not(.setuprail) .railterse.on { color:var(--ink-3); }
+    .rail:not(.setuprail) .railterse:hover,
+    .rail:not(.setuprail) .railopts.open .railterse { color:var(--ink); background:var(--surface-2);
+      border-color:var(--line); }
+    .rail:not(.setuprail) .railterse.filtered::after { box-shadow:0 0 0 1.5px var(--surface); }
+    .rail:not(.setuprail) .railopts .hmenu-panel { top:calc(100% + 9px); }
+    .rail:not(.setuprail) .railopt:has([data-railterse]),
+    .rail:not(.setuprail) .railopt:has([data-railterse]) + .hmenu-sep { display:none; }
     /* ONE ROW, AND THE NAMES WRAP RATHER THAN RUN OFF THE END (§609). Islam:
        *"the text needs to wrap"*. A flex row of the item's own parts in their
        own order — handle, code, name, years, Missing, score — so every rail
@@ -2572,10 +2642,26 @@ html[data-client-settings] .viewer { display:none; }
        editing — the band §53.7 pinned and the head §194 pinned in its place.
        Not sticky means it never leaves its flow position, so `pinWatch()`
        never marks it and its corner fill (§130.6) never paints. */
+    /* §769 UNDOES THAT, ON ISLAM'S WORD: *"the header needs to stay freezed
+       on scrolling down"* — *"freeze both headers"*. The band and the
+       editing head pin again, UNDER the strip: the strip's own offset, plus
+       its measured height (`--strip-h`, shell.html — the names wrap to one,
+       two or three lines), plus the gutter §618 keeps under it, plus the
+       pane's border, exactly as the wide rule adds its 1px. The ground
+       above the band is the gutter's depth now rather than the rail gap's,
+       so pinned, the plan slides into page ground under the strip and
+       nothing shows through the seam. The table heads take the same
+       offset, plus the band's. */
     .split:not(.setupsplit) > .pane > .pband,
-    .split:not(.setupsplit) > .pane > .ptitle.edhead { position:relative; top:auto; }
+    .split:not(.setupsplit) > .pane > .ptitle.edhead {
+      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + var(--strip-h, 0px) +
+               var(--split-gap, 16px) + 1px); }
     .split:not(.setupsplit) > .pane > .pband::before,
-    .split:not(.setupsplit) > .pane > .ptitle.edhead::before { display:none; }
+    .split:not(.setupsplit) > .pane > .ptitle.edhead::before {
+      height:calc(var(--split-gap, 16px) + 2px); }
+    #panel .split:not(.setupsplit) > .pane .tblscroll.fits thead th {
+      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + var(--strip-h, 0px) +
+               var(--split-gap, 16px) + 1px + var(--band-h, 0px)); }
   }
 
   /* The Report section in the third row. Gold while a cycle is asking for

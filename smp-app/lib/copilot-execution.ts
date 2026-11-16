@@ -240,7 +240,7 @@ export async function nextExecVersion(c: Q, chat: { place: string; section: stri
     "WHERE d.place = $1 AND d.section = $2 AND lower(d.title) IN (lower($3), lower($4))", [chat.place, chat.section, execTitle(placeWord), execTitleWas(placeWord)]);
   return Number(r.rows[0]?.n) || 1;
 }
-/* §745 — the area is called Tactical Plans now (Islam: "make execution named
+/* §752 — the area is called Tactical Plans now (Islam: "make execution named
    Tactical Plans"); a version saved as Execution goes on as the same
    deliverable, which takes the new name with its next version. */
 export const execTitle = (placeWord: string) => ("Tactical Plans — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);

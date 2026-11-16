@@ -269,7 +269,7 @@ export async function nextDirsVersion(c: Q, chat: { place: string; section: stri
 }
 export const dirsTitle = (s: Dirs, placeWord: string) =>
   ((s.mode === "capabilities" ? "Capabilities — " : "Pillars/Directions — ") + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
-/* §745 — the area is called Pillars/Directions now (Islam: "Directions make it
+/* §752 — the area is called Pillars/Directions now (Islam: "Directions make it
    Pillars/Directions"); a version saved under the old name goes on as the
    same deliverable, which takes the new name with its next version. */
 export const dirsTitleWas = (s: Dirs, placeWord: string) =>

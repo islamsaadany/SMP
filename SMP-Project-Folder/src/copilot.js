@@ -169,8 +169,8 @@ var COPILOT = (function(){
   function when(iso){ return dateDay(iso); }
 
   /* ── THE PANE ────────────────────────────────────────────────────────── */
-  /* §746 — THREE LAYOUTS, TO COMPARE LIVE (Islam: "let's build B & A as well,
-     keep both so I can compare live"). One window (§745), A — one chat that
+  /* §753 — THREE LAYOUTS, TO COMPARE LIVE (Islam: "let's build B & A as well,
+     keep both so I can compare live"). One window (§752), A — one chat that
      opens the work when it is asked for — and B — the Copilot on the plan,
      opened from the part in view on the Strategy tab. Chosen per browser;
      nothing on the server knows which. */
@@ -299,7 +299,7 @@ var COPILOT = (function(){
       others.map(function(x){ var a = areaState(x.k), c = x.k === "foundation" ? ["Build or refine the Foundation", ""] : STARTS[x.k] || [WORKFLOW_WORD[x.k] || stripWord(x.k), ""];
         return '<button type="button" class="coppcard copareacard" data-cop-area-card="' + x.k + '">' + icon(x.k === "foundation" ? PATH_CARDS[0].i : PLANMARK) + '<span class="coppt"><span class="coptag">' + E(stripWord(x.k)) + (x.k === nx ? ' · next step' : '') + '</span>' + E(c[0]) + '</span>' +
           '<span class="coppd">' + E(a.says || "") + '</span></button>'; }).join("") + '</div></details>';
-    /* §746 B — in the panel on the plan, the start screen is about the part in view, and only it */
+    /* §753 B — in the panel on the plan, the start screen is about the part in view, and only it */
     var bare = inPanel();
     if (bare) { more = ""; focus = '<div class="copfocus"><span class="copm">' + E(areaState(s).says || "") + '</span></div>'; }
     return '<div class="copstart" data-cop-startscreen>' +
@@ -316,7 +316,7 @@ var COPILOT = (function(){
       '<div class="copor">or start step by step</div>' + unfinishedHtml() + focus +
       '<div class="coppaths copstartcards">' + cards + '</div>' + more + '</div>';
   }
-  /* §746 A — ONE CHAT: the box, and a few suggestions read off where the
+  /* §753 A — ONE CHAT: the box, and a few suggestions read off where the
      place stands; a suggestion opens that area's work, as saying it would.
      The area's own cards are drawn hidden, so a suggestion starts exactly
      what the card would. */
@@ -2753,7 +2753,7 @@ var COPILOT = (function(){
       loadAll(!!force);
     }, function(){ LISTS[k] = { failed: true }; if (askedFor === k) draw(); });
   }
-  /* §745 — THE COPILOT IN ONE WINDOW (Islam: "the copilot with a split by
+  /* §752 — THE COPILOT IN ONE WINDOW (Islam: "the copilot with a split by
      area is a bit confusing for the team, they need 1 window"; the signed-off
      design-mockups/copilot-layout/2026-11-04_one-window.html, "build the one
      window"). The area tabs go; every area's chats and deliverables stand in
@@ -2842,7 +2842,7 @@ var COPILOT = (function(){
         '<span class="copstepk">' + E(k) + '</span><b>' + E(stripWord(s.k)) + '</b><small>' + E(a.says || "…") + '</small></button>';
     }).join("");
   }
-  /* §746 B — THE COPILOT ON THE PLAN. On the Strategy tab, ✦ Copilot beside
+  /* §753 B — THE COPILOT ON THE PLAN. On the Strategy tab, ✦ Copilot beside
      Edit opens the Copilot's own pane in a panel on the right, on the part in
      view: Foundation → the Foundation, SWOT → the SWOT, Plan → Pillars/
      Directions or Tactical Plans (a switch in the panel's head). Apply writes
@@ -4493,7 +4493,7 @@ var COPILOT = (function(){
   function startFree(file){
     var t = document.querySelector("[data-cop-starttext]"), text = t ? t.value : "", k = key();
     if ((!text.trim() && !file) || THINKING || !canEdit()) { if (t) t.focus(); return; }
-    /* §746 A — said, the work it asks for opens; or the conversation goes to the area it is about */
+    /* §753 A — said, the work it asks for opens; or the conversation goes to the area it is about */
     if (layout() !== "window" && !inPanel() && !file) {
       var r = routeArea(text);
       if (r.area && r.work) { delete STARTTEXT[k]; if (t) t.value = ""; startWorkflow(r.area); return; }

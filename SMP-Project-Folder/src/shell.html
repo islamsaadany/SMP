@@ -366,7 +366,7 @@
      document (COPILOT.shown); `everywhere` because, like the reports, being
      able to open it is never a reason to be offered a destination (§383).
      Declared once and referenced four times, the file's own idiom. */
-  /* §745 — `oneWindow`: the Copilot's areas still route the address
+  /* §752 — `oneWindow`: the Copilot's areas still route the address
      (…/copilot/directions), but their row is not drawn; the Copilot draws
      the method as its own strip (Islam: "they need 1 window"). */
   var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true, oneWindow:true,
@@ -3832,7 +3832,7 @@
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
-    /* §745 — the TAB, kept before `def` becomes a section (below): its
+    /* §752 — the TAB, kept before `def` becomes a section (below): its
        one-window flag decides whether its sections draw a row. */
     var tabDef = def;
     /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§121.1). Twenty
@@ -4134,7 +4134,7 @@
        Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    /* §745 — `allowed()` hands back copies of the tab definitions, so the
+    /* §752 — `allowed()` hands back copies of the tab definitions, so the
        one-window flag is read off the Copilot's own definition by its key,
        and off the TAB, not the section `def` has become by here. */
     var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
@@ -4348,7 +4348,7 @@
        (§173): every navigation ends in a paint, so one line covers a door
        added tomorrow and there is no list of handlers to keep up to date. */
     rememberWhere();
-    /* §746 — the Copilot on the plan (layout B): its button beside Edit and its
+    /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
        panel follow every paint, as the page's own parts do. */
     if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
     /* Every mutation repaints, so this is where a change becomes a save. */

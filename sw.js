@@ -677,9 +677,9 @@
    (option D), and the console's loading shape is the console as it is. */
 /* v7.27-held-says-why — §649: a Copilot button that cannot be pressed is
    held, never disabled, and says why in the platform's bubble. */
-/* v7.70-tactic-supports — §767: a tactic names the key measures it
+/* v7.74-tactic-supports — §767: a tactic names the key measures it
    supports, by number; the built platform file changed. */
-const SHELL = "smp-shell-v7.70-tactic-supports";
+const SHELL = "smp-shell-v7.74-tactic-supports";
 const ASSETS = [
   "/",
   "/index.html",

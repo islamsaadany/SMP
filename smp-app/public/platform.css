@@ -6042,6 +6042,81 @@ tr.acoffice td { background:var(--surface-2); }
 .acland-opt:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 .cfg.acgrid.acgrid-ladder td.acmeans b { display:inline; }
 
+/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§754, tablecols.js) ════
+   The table keeps every rule it had — the tenant's heading, the grid, the
+   zebra, the frozen pair. These add the edge you drag, the ghost of a column
+   being moved, the line where it lands, the pixel label, the row heights and
+   the status line under the table. Nothing here changes a table nobody has
+   touched. */
+  .tc-host { position:relative; }
+  /* A positioned heading, for the edge inside it. The frozen pair is sticky
+     by more specific rules (`.tblscroll th.idx + th`, `.peoplecfg thead
+     th.namecell`) and sticky is positioned, so those keep theirs. */
+  th.tcth { position:relative; }
+  th.tcmove { cursor:grab; }
+  .tcgrip { position:absolute; top:0; right:-5px; width:11px; height:100%; cursor:col-resize;
+            z-index:3; touch-action:none; }
+  .tcgrip::after { content:""; position:absolute; top:6px; bottom:6px; left:4px; width:2px;
+                   border-radius:2px; background:transparent; }
+  .tcgrip:hover::after, .tcgrip.on::after { background:var(--gold); }
+  thead th.tcth:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .tc-hidden { display:none !important; }
+  /* While a column is being moved: the original dims, a ghost follows the
+     pointer, a line marks the drop. The ghost is the column itself — its
+     heading and its cells at their own heights — so it reads as the thing
+     being carried rather than a label of it. */
+  .tc-dragging, .tc-dragging th.tcmove { cursor:grabbing; user-select:none; }
+  .tc-lifted { opacity:.35; }
+  .tcghost { position:absolute; left:0; z-index:40; pointer-events:none; background:var(--surface);
+             box-shadow:0 12px 30px rgba(0,0,0,.18); border-radius:var(--r-sm); overflow:hidden; opacity:.96; }
+  .tcghost table { width:100%; min-width:0; table-layout:fixed; }
+  .tcghost td, .tcghost th { position:static !important; }
+  .tcdrop { position:absolute; left:0; width:2px; z-index:41; background:var(--gold-deep); pointer-events:none; display:none; border-radius:2px; }
+  .tcdrop::before { content:""; position:absolute; top:-1px; left:-3px; width:8px; height:8px; border-radius:50%; background:var(--gold-deep); }
+  .tctip { position:absolute; z-index:42; transform:translateX(-50%); font:600 11px/1 var(--mono);
+           color:var(--on-accent); background:var(--gold); padding:4px 7px; border-radius:5px;
+           pointer-events:none; white-space:nowrap; }
+  /* The measuring copy a fit reads: laid out at its own width, never seen. */
+  .tcmeasure { position:absolute; left:0; top:0; visibility:hidden; width:max-content; white-space:nowrap;
+               display:inline-block; pointer-events:none; }
+  .tcmeasure b, .tcmeasure .why, .tcmeasure .val { display:block; width:max-content; max-width:none; overflow:visible; }
+  /* Row height. Comfortable and Compact are steps either side of each table's
+     own padding (6px on the units, 5px on the register), written at a
+     specificity that beats both without naming either. */
+  .cfg table.tc-comfortable td { padding-top:12px; padding-bottom:12px; }
+  .cfg table.tc-compact td { padding-top:3px; padding-bottom:3px; }
+  .cfg table.tc-compact td .why { margin-top:1px; }
+  /* The table laid out from stored widths: the sum is its width, so a column
+     made narrower is seen narrower (the spare room goes to the name column). */
+  .cfg table.tc-sized { min-width:0; }
+  /* The menu's own rows: the width beside a column, the row-height switch, the way back. */
+  /* Wider than the register's chooser was: the row-height switch needs the room. */
+  .hmenu-panel.cols.tcpanel { width:272px; }
+  .tcpanel .colrow .lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tcpanel .colrow .px { font:400 11px/1 var(--mono); color:var(--ink-3); }
+  .tcpanel .colrow.locked { cursor:default; color:var(--ink-3); }
+  .tcpanel .colrow.locked:hover { background:none; }
+  .tcmenu .hmenu-btn { position:relative; }
+  .tccount { position:absolute; top:-7px; right:-7px; font:600 9.5px/1 var(--mono); color:var(--ink-2);
+             background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:2px 4px; }
+  .hmenu.open .tccount { background:var(--surface); border-color:var(--gold); color:var(--gold-deep); }
+  .tcrows { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 9px; }
+  .tcrows-l { font:700 10px/1 var(--sans); letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); }
+  .tcrows .segsw .seg { padding:5px 9px; font-size:11.5px; }
+  .tcback { display:flex; flex-direction:column; gap:6px; padding:4px 9px 6px; }
+  .tcback .linkbu { align-self:flex-start; font-size:11.5px; }
+  .tcback .linkbu[disabled] { color:var(--ink-3); cursor:default; text-decoration:none; opacity:.7; }
+  .tcback .hmenu-note { padding:0; }
+  /* The line under the table: what is shown, and the keys. */
+  .tcfoot { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px 16px;
+            font-size:11.5px; color:var(--ink-3); padding:8px 2px 0; }
+  .tcfoot b { color:var(--ink); font-weight:700; }
+  .tcchanged { color:var(--gold-deep); }
+  .tckeys { display:flex; flex-wrap:wrap; gap:3px 9px; align-items:center; }
+  .tckeys kbd { font:600 10px/1 var(--mono); color:var(--ink-2); background:var(--surface);
+                border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:2px 4px; margin-right:1px; }
+  @media (max-width:900px) { .tckeys { display:none; } }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -7110,6 +7185,13 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
                  align-items:baseline; padding:5px 0; font-size:13.5px; }
   .swot-n { font-family:var(--mono); font-size:11.5px; color:var(--none);
             font-variant-numeric:tabular-nums; }
+  /* §757: a line's title bold, its points one under the other. §757.1: a
+     point is a block with the bullet in a column of its own, so a point that
+     wraps continues under its first word, not under the dash. */
+  .swot-t b { font-weight:700; }
+  .swot-p { display:block; position:relative; padding-left:14px; margin-top:3px; }
+  .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
+  .swot-t b + .swot-p { margin-top:5px; }
 
   /* Temple editing: tables, with the statements in labelled rows above them. */
   .templeedit h4.mini:first-child { margin-top:0; }
@@ -9510,6 +9592,12 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
                 padding:22px 0; font-size:29px; line-height:1.35; break-inside:avoid;
                 border-bottom:1px solid var(--line-soft); }
   ol.dswot .n { font-family:var(--mono); font-size:18px; color:var(--none); }
+  /* §757: the same shape on the slide — title bold, points under it.
+     §757.1: bullets with a hanging indent; the gaps scale with the slide's
+     type (Islam: the points "looks too tight together in the presentation"). */
+  ol.dswot .swot-p { display:block; position:relative; padding-left:1.1em; margin-top:.45em; line-height:1.35; }
+  ol.dswot .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
+  ol.dswot .swot-t b + .swot-p { margin-top:.55em; }
   .d-swot h2 { padding-left:18px; }
   .d-swot.t-good h2 { border-left:5px solid var(--good); }
   .d-swot.t-bad h2 { border-left:5px solid var(--bad); }

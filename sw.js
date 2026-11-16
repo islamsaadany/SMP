@@ -683,6 +683,10 @@
    the built platform file changed. */
 /* v7.77-measures-dropdown — §767–§767.2: a tactic names the key measures
    it supports, by number; past main's v7.75 at the merge. */
+/* v7.78-weighting-default-off — §769: the weighting stays in Setup, off by
+   default; past main's v7.77 at the merge. */
+/* v7.79-weighting-in-strategy-setup — §770: Setup › Weighting under
+   Measurement. */
 /* v7.80-strip-years — §771: the rail's button is an options menu that can
    hide years, and the band and the table heads pin under the strip; the
    built platform file changed. */

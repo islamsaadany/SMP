@@ -1529,16 +1529,17 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
-/* §759: THE WEIGHTING PAGE'S SWITCH LIVES HERE, on Setup › Business units,
-   for focus's reason (§102, §61): the Weighting tab itself goes while the
-   page is off, so a switch on that page could be turned off and never back
-   on. The units are what the weighting weighs, and this page is always
-   the office's to reach. The pinned On|Off pair is focus's (§135.5); Off
-   says what it keeps, so it never looks like a delete. */
+/* §759, §770: THE WEIGHTING'S SWITCH, on the pinned line of the Strategy
+   module's Setup › Weighting (it sat on the client's Business units for a
+   day; Islam: *"the weighting should be under strategy"* — it measures the
+   strategy, not the company). The page stays reachable while off, for
+   focus's reason (§102, §61): the Weighting tab on the company page goes
+   while the switch is off, so a switch on that tab could be turned off and
+   never back on. The pinned On|Off pair is focus's (§135.5); Off says what
+   On would bring, so it never looks like a delete. */
 function weightingSwitch(){
   var on = weightingOn();
-  /* §768: no control for a feature that is off everywhere. */
-  if (!inOffice() || !SMPRules.WEIGHTING) return '';
+  if (!inOffice()) return '';
   PAGE_ACTS +=
     '<span class="segsw" role="group" aria-label="Weighting page on or off">' +
       '<button type="button" class="seg' + (on ? ' on' : '') + '" data-weightswitch="1" ' +
@@ -1546,9 +1547,17 @@ function weightingSwitch(){
       '<button type="button" class="seg' + (on ? '' : ' on') + '" data-weightswitch="0" ' +
         'aria-pressed="' + (!on) + '">Off</button>' +
     '</span>';
-  return on ? '' : '<div class="note"><b>The Weighting page is off for this client.</b> ' +
-    'The tab is not shown; the factors and every ' + L("unitword") + '\'s weights are kept, ' +
-    'and the group compile still reads them.</div>';
+  /* §769: off is the default, so the note says what On would bring. */
+  return on ? '' : '<div class="note"><b>The weighting is off for this client.</b> Every ' +
+    L("unitword") + ' counts equally in the group figure. On brings the table here and the Weighting tab ' +
+    'to the company page; anything entered before is kept.</div>';
+}
+/* §770: Setup › Weighting — the switch, and while on, the same table the
+   company page's Weighting tab draws (one renderer, two doors, as Focus
+   measures are marked in Setup and read on the pages). */
+function renderWeightingSetup(){
+  return cfgHead("Weighting", [], null, inOffice()) + weightingSwitch() +
+    (weightingOn() ? renderWeighting() : '');
 }
 /* ── THE READER'S OWN SHAPE (§754): what each column is called in the Columns
    menu, and which never move. # and the name are the frozen pair (§151) and
@@ -1560,9 +1569,9 @@ TABLECOLS.define("units", [
   { k:"name", lock:true, label:function(){ return labelWord("unitword", "bu"); } },
   { k:"nav", label:"In navigation" }, { k:"code", label:"Code" }, { k:"plans", label:"Plans in" },
   { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
-  /* §768: the Weight column goes with the feature; `offered` is what keeps
-     the declaration and the drawing in step. */
-  { k:"weight", label:"Weight", offered:function(){ return SMPRules.WEIGHTING; } },
+  /* §768, §769: the Weight column goes with the switch; `offered` is what
+     keeps the declaration and the drawing in step. */
+  { k:"weight", label:"Weight", offered:function(){ return weightingOn(); } },
   { k:"division", label:function(){ return labelWord("division", "group"); } },
   { k:"head", label:"BU head" }, { k:"custodian", label:"Strategy custodian" },
   { k:"status", label:"Status" }, { k:"menu", fixed:true }
@@ -1603,7 +1612,7 @@ function renderUnits(){
       ocell("units", k, "plans", may, unitPlansInCell(k, u),
         function(){ return unitFormatSelect(k, u); }, "cc plansin") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
-      (SMPRules.WEIGHTING ? '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' : '') +
+      (weightingOn() ? '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' : '') +
       /* A unit belongs to a company or is its own — never neither. "Its own"
          is an explicit choice rather than an empty cell, because an empty cell
          reads as somebody having forgotten and standing alone is a decision. */
@@ -1629,7 +1638,6 @@ function renderUnits(){
 
   return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit) + TABLECOLS.tools("units")) +
-    weightingSwitch() +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
        the units appear in the navigation and on the group page — somebody
@@ -1656,7 +1664,7 @@ function renderUnits(){
         '<th style="width:11%">In navigation</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
-        (SMPRules.WEIGHTING ? '<th class="cc" style="width:7%">Weight</th>' : '') +
+        (weightingOn() ? '<th class="cc" style="width:7%">Weight</th>' : '') +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:7%">Status</th>' +

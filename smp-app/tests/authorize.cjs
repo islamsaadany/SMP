@@ -1338,27 +1338,24 @@ check("only `true` switches it off",
    client is the SMO's alone, as focus's switch is — and it is classified
    `setup`, so a stale write of `false` cannot hide the page either. */
 console.log("\n14b · the weighting switch");
-allows("smo", function (s) { s.group.weightingOff = true; },
-  "the SMO may switch the weighting page off");
-refuses("ceo", function (s) { s.group.weightingOff = true; },
-  "the CEO may NOT switch the weighting page off");
-refuses(headKey, function (s) { s.group.weightingOff = true; },
-  "a unit head may NOT switch the weighting page off");
+allows("smo", function (s) { s.group.weightingOn = true; },
+  "the SMO may switch the weighting on");
+refuses("ceo", function (s) { s.group.weightingOn = true; },
+  "the CEO may NOT switch the weighting on");
+refuses(headKey, function (s) { s.group.weightingOn = true; },
+  "a unit head may NOT switch the weighting on");
 (function () {
-  const inc = clone(SEED); inc.group.weightingOff = true;
+  const inc = clone(SEED); inc.group.weightingOn = true;
   const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
   check("the weighting switch is classified `setup`, and never `unknown`",
         kinds.length > 0 && kinds.indexOf("setup") > -1 && kinds.indexOf("unknown") === -1,
         "got: " + JSON.stringify(kinds));
 })();
-/* §768: the feature is off for every client until the constant is flipped;
-   the per-client rule stays testable on its own for the day it is. */
-check("the weighting feature is off everywhere (§768)", R.WEIGHTING === false);
-check("while off, no client reads as on", R.weightingOn(R.worldOf({ group: {} })) === false &&
-      R.weightingOn(R.worldOf({ group: { weightingOff: false } })) === false);
-check("an absent weighting key reads as WANTED", R.weightingWanted(R.worldOf({ group: {} })) === true);
-check("and `false` reads as wanted too", R.weightingWanted(R.worldOf({ group: { weightingOff: false } })) === true);
-check("only `true` turns a client's weighting off", R.weightingWanted(R.worldOf({ group: { weightingOff: true } })) === false);
+/* §769: OFF BY DEFAULT — an absent key is off, a stale `false` is off, and
+   only an explicit `true` turns a client's weighting on (the drivers' rule). */
+check("an absent weighting key reads as OFF (§769)", R.weightingOn(R.worldOf({ group: {} })) === false);
+check("and `false` reads as off too", R.weightingOn(R.worldOf({ group: { weightingOn: false } })) === false);
+check("only `true` turns a client's weighting on", R.weightingOn(R.worldOf({ group: { weightingOn: true } })) === true);
 
 console.log("\n15 · the strategy | reporting split (§117)");
 /* The own columns are two questions now. The old stored key kept meaning the

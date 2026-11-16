@@ -1,0 +1,79 @@
+<title>Bin Placement</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: the pen's tactics list and its panel, drawn four times, the bin somewhere different each time. Navy/gold palette. */
+  :root { --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA; --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79; --panel:#16325C; --panel-ink:#FFFFFF; --gold:#C9A24D; --gold-deep:#8A6B22; --gold-bg:#FBF5E6; --bad:#B04434; --mark:#C58B1E; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91; --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A; --gold-bg:#2A2410; --bad:#E79A93; --mark:#D9A441; color-scheme:dark; } }
+  :root[data-theme="dark"] { --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91; --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A; --gold-bg:#2A2410; --bad:#E79A93; --mark:#D9A441; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45; }
+  .wrap { max-width:1180px; margin:0 auto; padding-block:24px 60px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size:22px; margin:0 0 4px; } .lede { color:var(--ink-3); margin:0 0 18px; max-width:78ch; }
+  h2.part { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:26px 0 8px; display:flex; gap:10px; align-items:center; }
+  h2.part .rec { font-size:10.5px; letter-spacing:.08em; background:var(--gold); color:#14161A; border-radius:999px; padding:2px 9px; }
+  .say { color:var(--ink-2); margin:0 0 10px; max-width:80ch; }
+  .demo { display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:12px; align-items:start; }
+  .scroll { overflow:visible; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); vertical-align:middle; }
+  th + th, td + td { border-left:1px solid var(--line-soft); }
+  thead th { background:var(--panel); color:var(--panel-ink); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; border-bottom:0; }
+  tbody tr:nth-child(even) td { background:var(--zebra); } tbody tr:last-child td { border-bottom:0; }
+  tbody tr.on td { background:var(--gold-bg) !important; } tbody tr.on td:first-child { box-shadow:inset 4px 0 0 var(--gold); }
+  tbody tr.on td:last-child { position:relative; } tbody tr.on td:last-child::after { content:""; position:absolute; top:-1px; bottom:-1px; left:100%; width:13px; background:var(--gold-bg); border-top:1px solid var(--gold); border-bottom:1px solid var(--gold); }
+  td.idx { width:40px; text-align:center; font-family:var(--mono); color:var(--ink-3); }
+  .fld { font:inherit; font-size:12.5px; border:1px solid var(--field-line); border-radius:7px; padding:5px 8px; background:var(--surface); color:var(--ink); width:100%; }
+  .why { display:block; font-size:11.5px; color:var(--ink-3); margin-top:3px; }
+  .q { display:inline-flex; gap:3px; } .q i { font-style:normal; font-family:var(--mono); font-size:10.5px; width:24px; height:20px; line-height:18px; text-align:center; border-radius:4px; border:1px solid var(--line); color:var(--ink-3); }
+  .q i.on { background:var(--gold); border-color:var(--gold); color:#14161A; font-weight:700; }
+  .side { border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:0 10px 10px 0; background:var(--surface); font-size:12px; color:var(--ink-3); min-height:150px; display:flex; flex-direction:column; }
+  .side .sh { padding:8px 10px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:6px; color:var(--ink); font-weight:700; font-size:12.5px; }
+  .side .sh .k { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); } .side .sh .nav { margin-left:auto; display:flex; gap:3px; }
+  .side .sh .nav button, .side .sf button { font:inherit; font-size:11px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); border-radius:6px; padding:2px 7px; }
+  .side .sb { padding:8px 10px; flex:1; } .side .sb i { display:block; height:22px; border:1px solid var(--line); border-radius:6px; margin-top:6px; }
+  .side .sf { padding:8px 10px; border-top:1px solid var(--line); display:flex; align-items:center; gap:8px; }
+  .bin { display:inline-flex; align-items:center; gap:5px; color:var(--ink-3); cursor:pointer; font-size:11.5px; white-space:nowrap; } .bin:hover { color:var(--bad); }
+  .bin svg { width:13px; height:13px; }
+  .bin.btn { border:1px solid var(--line); border-radius:6px; padding:3px 7px; background:var(--surface); }
+  .namerow { display:flex; align-items:center; gap:6px; }
+  .mark { outline:2px solid var(--mark); outline-offset:3px; border-radius:6px; }
+  .red { color:var(--bad); }
+</style>
+<div class="wrap">
+  <h1>Where the bin goes</h1>
+  <p class="lede">The same list with the second tactic open; the bin, which removes a tactic, is somewhere different in each. The gold outline marks it. One bin per tactic in the table (A, B) or one bin for the open tactic (C, D).</p>
+
+  <h2 class="part">A · In the tactic column, beside the name box</h2>
+  <p class="say">A small bin at the right end of the name box, on every row. Always to hand; it costs the name box a little width and puts a destructive control next to the thing most typed in.</p>
+  <div class="demo"><div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr></thead><tbody>
+    <tr><td class="idx">1</td><td><span class="namerow"><input class="fld" value="Build company-wide SOP framework"><span class="bin" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg></span></span><span class="why">Document processes across Finance, HR, Procurement…</span></td><td><input class="fld" value="SOP coverage completed"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td></tr>
+    <tr class="on"><td class="idx">2</td><td><span class="namerow"><input class="fld" value="Begin ERP activation (Phase 1)"><span class="bin mark" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg></span></span><span class="why">Deploy first modules to unify reporting.</span></td><td><input class="fld" value="ERP Phase 1 activated"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td></tr>
+    <tr><td class="idx">3</td><td><span class="namerow"><input class="fld" value="Build HR &amp; Admin Governance Framework"><span class="bin" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg></span></span></td><td><input class="fld" value="Framework Completed"></td><td><input class="fld" value="Maryam Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i>Q3</i><i>Q4</i></span></td></tr>
+  </tbody></table></div><div class="side"><div class="sh"><span class="k">Tactic 2</span>Begin ERP activation<span class="nav"><button>↑</button><button>↓</button><button>×</button></span></div><div class="sb">Description<i></i>Outcomes<i></i></div><div class="sf">Saves as you leave each box.</div></div></div>
+
+  <h2 class="part">B · In the tactic column, under the name, on the open row only</h2>
+  <p class="say">A quiet "Remove this tactic" line under the description, drawn only on the row that is open. Out of the way until you are working on that tactic, and in the tactic's own column.</p>
+  <div class="demo"><div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr></thead><tbody>
+    <tr><td class="idx">1</td><td><input class="fld" value="Build company-wide SOP framework"><span class="why">Document processes across Finance, HR, Procurement…</span></td><td><input class="fld" value="SOP coverage completed"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td></tr>
+    <tr class="on"><td class="idx">2</td><td><input class="fld" value="Begin ERP activation (Phase 1)"><span class="why">Deploy first modules to unify reporting.</span><span class="bin mark" style="margin-top:6px" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg>Remove this tactic</span></td><td><input class="fld" value="ERP Phase 1 activated"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td></tr>
+    <tr><td class="idx">3</td><td><input class="fld" value="Build HR &amp; Admin Governance Framework"></td><td><input class="fld" value="Framework Completed"></td><td><input class="fld" value="Maryam Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i>Q3</i><i>Q4</i></span></td></tr>
+  </tbody></table></div><div class="side"><div class="sh"><span class="k">Tactic 2</span>Begin ERP activation<span class="nav"><button>↑</button><button>↓</button><button>×</button></span></div><div class="sb">Description<i></i>Outcomes<i></i></div><div class="sf">Saves as you leave each box.</div></div></div>
+
+  <h2 class="part">C · At the foot of the panel <span class="rec">Recommended</span></h2>
+  <p class="say">"Remove this tactic" with the bin at the foot of the panel, on the left, away from the arrows and the ×. The place a destructive control usually lives: last, apart, and only for the tactic you are looking at.</p>
+  <div class="demo"><div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr></thead><tbody>
+    <tr><td class="idx">1</td><td><input class="fld" value="Build company-wide SOP framework"><span class="why">Document processes across Finance, HR, Procurement…</span></td><td><input class="fld" value="SOP coverage completed"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td></tr>
+    <tr class="on"><td class="idx">2</td><td><input class="fld" value="Begin ERP activation (Phase 1)"><span class="why">Deploy first modules to unify reporting.</span></td><td><input class="fld" value="ERP Phase 1 activated"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td></tr>
+    <tr><td class="idx">3</td><td><input class="fld" value="Build HR &amp; Admin Governance Framework"></td><td><input class="fld" value="Framework Completed"></td><td><input class="fld" value="Maryam Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i>Q3</i><i>Q4</i></span></td></tr>
+  </tbody></table></div><div class="side"><div class="sh"><span class="k">Tactic 2</span>Begin ERP activation<span class="nav"><button>↑</button><button>↓</button><button>×</button></span></div><div class="sb">Description<i></i>Outcomes<i></i></div><div class="sf"><span class="bin btn mark"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg>Remove this tactic</span><span style="margin-left:auto">Saves as you leave each box.</span></div></div></div>
+
+  <h2 class="part">D · In the number cell of the open row</h2>
+  <p class="say">The open row's number gives way to the bin, in the gold-barred first cell; every other row keeps its number. In the table, in the tactic's own row, and never on a row you are not working on.</p>
+  <div class="demo"><div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th></tr></thead><tbody>
+    <tr><td class="idx">1</td><td><input class="fld" value="Build company-wide SOP framework"><span class="why">Document processes across Finance, HR, Procurement…</span></td><td><input class="fld" value="SOP coverage completed"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td></tr>
+    <tr class="on"><td class="idx"><span class="bin mark" title="Remove this tactic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg></span></td><td><input class="fld" value="Begin ERP activation (Phase 1)"><span class="why">Deploy first modules to unify reporting.</span></td><td><input class="fld" value="ERP Phase 1 activated"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td></tr>
+    <tr><td class="idx">3</td><td><input class="fld" value="Build HR &amp; Admin Governance Framework"></td><td><input class="fld" value="Framework Completed"></td><td><input class="fld" value="Maryam Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i>Q3</i><i>Q4</i></span></td></tr>
+  </tbody></table></div><div class="side"><div class="sh"><span class="k">Tactic 2</span>Begin ERP activation<span class="nav"><button>↑</button><button>↓</button><button>×</button></span></div><div class="sb">Description<i></i>Outcomes<i></i></div><div class="sf">Saves as you leave each box.</div></div></div>
+</div>

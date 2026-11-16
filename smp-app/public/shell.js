@@ -597,7 +597,7 @@
    * @property {Object<string, Company>} companies
    * @property {Object<string, Object<string, Grant>>} access
    * @property {boolean} focusOff
-   * @property {boolean} weightingOff
+   * @property {boolean} weightingOn
    * @property {boolean} naming
    * @property {boolean} lineOwners
    * @property {Capability[]} capabilities
@@ -622,8 +622,9 @@
          the default, which for a switch means "on". Found by driving the real
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
-      /* §759: the Weighting page's own switch, focus's shape exactly. */
-      weightingOff: !!o.weightingOff,
+      /* §769: the Weighting page's own switch — the drivers' shape: only an
+         explicit true is on. */
+      weightingOn: o.weightingOn === true,
       naming: !!o.naming,
       /* §382: REPORTING FOLLOWS THE OWNER COLUMN, and it is a switch because
          turning it on MOVES who enters a figure — 26 tactics change hands on
@@ -670,7 +671,7 @@
                   sees undefined and answers the default. Add the key here in
                   the same edit as the rule that reads it. */
                focusOff: (state.group || {}).focusOff,
-               weightingOff: (state.group || {}).weightingOff,
+               weightingOn: (state.group || {}).weightingOn,
                naming: (state.group || {}).naming,
                lineOwners: (state.group || {}).lineOwners,
                capabilities: (state.group || {}).capabilities,
@@ -2721,26 +2722,21 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      — a CEO who may mark a measure must not be able to turn the whole feature
      off for the tenant, and a switch anybody could flip would be no switch. */
   function focusOn(w) { return !w || w.focusOff !== true; }
-  /* §759: WHETHER THE WEIGHTING PAGE IS SHOWN AT ALL (Islam, 2026-11-16:
-     *"I need to have option to disable the weighting panel somehow"*).
-     Focus's switch, to the letter: stored as an ABSENCE (`GROUP.weightingOff`
-     exists only while the page is off), only an explicit `true` hides it,
-     and Off HIDES AND KEEPS — the factors, the rows and the weights stay
-     stored and the group compile goes on reading them, because a switch
-     that changed the scores would be a change of method wearing a
-     switch's clothes. The SMO's alone, classified `setup` (authorize.cjs). */
-  function weightingWanted(w) { return !w || w.weightingOff !== true; }
-  /* §768: AND THE WHOLE FEATURE IS OFF, FOR EVERY CLIENT (Islam, 2026-11-16:
-     *"the weighting is not relevant and a feature that is not used. let's
-     turn the whole thing off in general and I can revive it later"*).
-     ONE constant, read by everything the feature draws — the tab, the
-     Weight column on Setup › Business units, the weight lines on the cards
-     and the drills, the per-client switch above — and by the compile, which
-     counts every unit equally while it is off (`computeWeights`). Nothing
-     stored moves: the factors, the rows and the weights stay for the day
-     this reads `true` again, and §759's per-client switch comes back with it. */
-  var WEIGHTING = false;
-  function weightingOn(w) { return WEIGHTING && weightingWanted(w); }
+  /* §759, §768, §769: WHETHER THE WEIGHTING IS USED AT ALL, per client, OFF
+     UNTIL THE OFFICE TURNS IT ON (Islam, 2026-11-16: *"keep it in the
+     settings but turn it off by default"*, closing §768's everywhere-off
+     constant). The revenue drivers' shape (§DRIVERS_ON): `GROUP.weightingOn`
+     exists only while a client uses it, only an explicit `true` is on, and
+     Off deletes the key (§50.6) — so a client nobody asked and one switched
+     on and off again are byte-identical, and every client today reads OFF.
+     Read by everything the feature draws — the Weighting tab, the Weight
+     column on Setup › Business units, the weight lines on the cards and the
+     drills — and by the compile, which counts every unit equally while it
+     is off (`computeWeights`). Off HIDES AND KEEPS: the factors, the rows
+     and the weights stay stored. The switch itself is on Setup › Business
+     units, the SMO's alone, classified `setup` (authorize.cjs). */
+  var WEIGHTING_ON = "weightingOn";
+  function weightingOn(w) { return !!w && w.weightingOn === true; }
 
   /* ── IS THERE ANYTHING TO TOUR (spec 042 §6.2) ───────────────────
      §107's onboarding tour walked a FILLED platform by switching the page to
@@ -6133,7 +6129,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
     reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
-    focusOn: focusOn, weightingOn: weightingOn, weightingWanted: weightingWanted, WEIGHTING: WEIGHTING, tourReady: tourReady, unitLikeOf: unitLikeOf,
+    focusOn: focusOn, weightingOn: weightingOn, WEIGHTING_ON: WEIGHTING_ON, tourReady: tourReady, unitLikeOf: unitLikeOf,
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_FILLABLE: GAP_FILLABLE,
     isGapField: isGapField,
@@ -12720,12 +12716,12 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
 }
-/* §759: THE WEIGHTING PAGE, ON OR OFF FOR THE CLIENT — focus's reader and
-   writer, to the letter: the rule is the shared module's, Off deletes the
-   key (§50.6), and nothing stored moves. */
+/* §759, §769: THE WEIGHTING, ON OR OFF FOR THE CLIENT, off by default — the
+   drivers' reader and writer: the rule is the shared module's, On writes
+   `true`, Off deletes the key (§50.6), and nothing stored moves. */
 function weightingOn(){ return SMPRules.weightingOn(world()); }
 function setWeightingOn(on){
-  if (on) delete GROUP.weightingOff; else GROUP.weightingOff = true;
+  if (on) GROUP[SMPRules.WEIGHTING_ON] = true; else delete GROUP[SMPRules.WEIGHTING_ON];
 }
 /* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 063, 2026-09-23). The rule
    is the shared module's (only an explicit true is on); this reads it off the
@@ -42253,8 +42249,7 @@ function unitCompanySelect(k, u){
    says what it keeps, so it never looks like a delete. */
 function weightingSwitch(){
   var on = weightingOn();
-  /* §768: no control for a feature that is off everywhere. */
-  if (!inOffice() || !SMPRules.WEIGHTING) return '';
+  if (!inOffice()) return '';
   PAGE_ACTS +=
     '<span class="segsw" role="group" aria-label="Weighting page on or off">' +
       '<button type="button" class="seg' + (on ? ' on' : '') + '" data-weightswitch="1" ' +
@@ -42262,9 +42257,10 @@ function weightingSwitch(){
       '<button type="button" class="seg' + (on ? '' : ' on') + '" data-weightswitch="0" ' +
         'aria-pressed="' + (!on) + '">Off</button>' +
     '</span>';
-  return on ? '' : '<div class="note"><b>The Weighting page is off for this client.</b> ' +
-    'The tab is not shown; the factors and every ' + L("unitword") + '\'s weights are kept, ' +
-    'and the group compile still reads them.</div>';
+  /* §769: off is the default, so the note says what On would bring. */
+  return on ? '' : '<div class="note"><b>The weighting is off for this client.</b> Every ' +
+    L("unitword") + ' counts equally in the group figure. On adds the Weighting tab to the company page ' +
+    'and a Weight column here; anything entered before is kept.</div>';
 }
 /* ── THE READER'S OWN SHAPE (§754): what each column is called in the Columns
    menu, and which never move. # and the name are the frozen pair (§151) and
@@ -42276,9 +42272,9 @@ TABLECOLS.define("units", [
   { k:"name", lock:true, label:function(){ return labelWord("unitword", "bu"); } },
   { k:"nav", label:"In navigation" }, { k:"code", label:"Code" }, { k:"plans", label:"Plans in" },
   { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
-  /* §768: the Weight column goes with the feature; `offered` is what keeps
-     the declaration and the drawing in step. */
-  { k:"weight", label:"Weight", offered:function(){ return SMPRules.WEIGHTING; } },
+  /* §768, §769: the Weight column goes with the switch; `offered` is what
+     keeps the declaration and the drawing in step. */
+  { k:"weight", label:"Weight", offered:function(){ return weightingOn(); } },
   { k:"division", label:function(){ return labelWord("division", "group"); } },
   { k:"head", label:"BU head" }, { k:"custodian", label:"Strategy custodian" },
   { k:"status", label:"Status" }, { k:"menu", fixed:true }
@@ -42319,7 +42315,7 @@ function renderUnits(){
       ocell("units", k, "plans", may, unitPlansInCell(k, u),
         function(){ return unitFormatSelect(k, u); }, "cc plansin") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
-      (SMPRules.WEIGHTING ? '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' : '') +
+      (weightingOn() ? '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' : '') +
       /* A unit belongs to a company or is its own — never neither. "Its own"
          is an explicit choice rather than an empty cell, because an empty cell
          reads as somebody having forgotten and standing alone is a decision. */
@@ -42372,7 +42368,7 @@ function renderUnits(){
         '<th style="width:11%">In navigation</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
-        (SMPRules.WEIGHTING ? '<th class="cc" style="width:7%">Weight</th>' : '') +
+        (weightingOn() ? '<th class="cc" style="width:7%">Weight</th>' : '') +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:7%">Status</th>' +

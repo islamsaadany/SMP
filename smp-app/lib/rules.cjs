@@ -595,7 +595,7 @@
    * @property {Object<string, Company>} companies
    * @property {Object<string, Object<string, Grant>>} access
    * @property {boolean} focusOff
-   * @property {boolean} weightingOff
+   * @property {boolean} weightingOn
    * @property {boolean} naming
    * @property {boolean} lineOwners
    * @property {Capability[]} capabilities
@@ -620,8 +620,9 @@
          the default, which for a switch means "on". Found by driving the real
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
-      /* §759: the Weighting page's own switch, focus's shape exactly. */
-      weightingOff: !!o.weightingOff,
+      /* §769: the Weighting page's own switch — the drivers' shape: only an
+         explicit true is on. */
+      weightingOn: o.weightingOn === true,
       naming: !!o.naming,
       /* §382: REPORTING FOLLOWS THE OWNER COLUMN, and it is a switch because
          turning it on MOVES who enters a figure — 26 tactics change hands on
@@ -668,7 +669,7 @@
                   sees undefined and answers the default. Add the key here in
                   the same edit as the rule that reads it. */
                focusOff: (state.group || {}).focusOff,
-               weightingOff: (state.group || {}).weightingOff,
+               weightingOn: (state.group || {}).weightingOn,
                naming: (state.group || {}).naming,
                lineOwners: (state.group || {}).lineOwners,
                capabilities: (state.group || {}).capabilities,
@@ -2719,26 +2720,21 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      — a CEO who may mark a measure must not be able to turn the whole feature
      off for the tenant, and a switch anybody could flip would be no switch. */
   function focusOn(w) { return !w || w.focusOff !== true; }
-  /* §759: WHETHER THE WEIGHTING PAGE IS SHOWN AT ALL (Islam, 2026-11-16:
-     *"I need to have option to disable the weighting panel somehow"*).
-     Focus's switch, to the letter: stored as an ABSENCE (`GROUP.weightingOff`
-     exists only while the page is off), only an explicit `true` hides it,
-     and Off HIDES AND KEEPS — the factors, the rows and the weights stay
-     stored and the group compile goes on reading them, because a switch
-     that changed the scores would be a change of method wearing a
-     switch's clothes. The SMO's alone, classified `setup` (authorize.cjs). */
-  function weightingWanted(w) { return !w || w.weightingOff !== true; }
-  /* §768: AND THE WHOLE FEATURE IS OFF, FOR EVERY CLIENT (Islam, 2026-11-16:
-     *"the weighting is not relevant and a feature that is not used. let's
-     turn the whole thing off in general and I can revive it later"*).
-     ONE constant, read by everything the feature draws — the tab, the
-     Weight column on Setup › Business units, the weight lines on the cards
-     and the drills, the per-client switch above — and by the compile, which
-     counts every unit equally while it is off (`computeWeights`). Nothing
-     stored moves: the factors, the rows and the weights stay for the day
-     this reads `true` again, and §759's per-client switch comes back with it. */
-  var WEIGHTING = false;
-  function weightingOn(w) { return WEIGHTING && weightingWanted(w); }
+  /* §759, §768, §769: WHETHER THE WEIGHTING IS USED AT ALL, per client, OFF
+     UNTIL THE OFFICE TURNS IT ON (Islam, 2026-11-16: *"keep it in the
+     settings but turn it off by default"*, closing §768's everywhere-off
+     constant). The revenue drivers' shape (§DRIVERS_ON): `GROUP.weightingOn`
+     exists only while a client uses it, only an explicit `true` is on, and
+     Off deletes the key (§50.6) — so a client nobody asked and one switched
+     on and off again are byte-identical, and every client today reads OFF.
+     Read by everything the feature draws — the Weighting tab, the Weight
+     column on Setup › Business units, the weight lines on the cards and the
+     drills — and by the compile, which counts every unit equally while it
+     is off (`computeWeights`). Off HIDES AND KEEPS: the factors, the rows
+     and the weights stay stored. The switch itself is on Setup › Business
+     units, the SMO's alone, classified `setup` (authorize.cjs). */
+  var WEIGHTING_ON = "weightingOn";
+  function weightingOn(w) { return !!w && w.weightingOn === true; }
 
   /* ── IS THERE ANYTHING TO TOUR (spec 042 §6.2) ───────────────────
      §107's onboarding tour walked a FILLED platform by switching the page to
@@ -6131,7 +6127,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
     reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
-    focusOn: focusOn, weightingOn: weightingOn, weightingWanted: weightingWanted, WEIGHTING: WEIGHTING, tourReady: tourReady, unitLikeOf: unitLikeOf,
+    focusOn: focusOn, weightingOn: weightingOn, WEIGHTING_ON: WEIGHTING_ON, tourReady: tourReady, unitLikeOf: unitLikeOf,
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_FILLABLE: GAP_FILLABLE,
     isGapField: isGapField,

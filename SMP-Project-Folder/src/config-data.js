@@ -4256,12 +4256,12 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
 }
-/* §759: THE WEIGHTING PAGE, ON OR OFF FOR THE CLIENT — focus's reader and
-   writer, to the letter: the rule is the shared module's, Off deletes the
-   key (§50.6), and nothing stored moves. */
+/* §759, §769: THE WEIGHTING, ON OR OFF FOR THE CLIENT, off by default — the
+   drivers' reader and writer: the rule is the shared module's, On writes
+   `true`, Off deletes the key (§50.6), and nothing stored moves. */
 function weightingOn(){ return SMPRules.weightingOn(world()); }
 function setWeightingOn(on){
-  if (on) delete GROUP.weightingOff; else GROUP.weightingOff = true;
+  if (on) GROUP[SMPRules.WEIGHTING_ON] = true; else delete GROUP[SMPRules.WEIGHTING_ON];
 }
 /* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 063, 2026-09-23). The rule
    is the shared module's (only an explicit true is on); this reads it off the

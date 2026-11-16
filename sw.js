@@ -681,7 +681,7 @@
    supports, by number; the built platform file changed. */
 /* v7.75-weighting-off — §768: the weighting is off for every client;
    the built platform file changed. */
-const SHELL = "smp-shell-v7.75-weighting-off";
+const SHELL = "smp-shell-v7.76-weighting-default-off";
 const ASSETS = [
   "/",
   "/index.html",

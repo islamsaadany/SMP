@@ -555,9 +555,9 @@ function collect(stored, incoming, w) {
      one — it is the same argument as `naming` directly above. */
   if (!same(sg.focusOff, ig.focusOff))
     add("setup", null, "whether focus measures are used at all");
-  /* §759: the Weighting page's switch, the same argument — hiding the page
+  /* §759, §769: the Weighting switch, the same argument — using the page
      for the whole client is the office's, not the CEO's who may edit weights. */
-  if (!same(sg.weightingOff, ig.weightingOff))
+  if (!same(sg.weightingOn, ig.weightingOn))
     add("setup", null, "whether the weighting page is shown at all");
   /* §382: whether reporting follows the Owner column. SETUP, and the same
      argument as the two switches above it — it decides whether a whole second
@@ -684,7 +684,7 @@ function collect(stored, incoming, w) {
     collectUnit("group", topView(sg), topView(ig), add, w);
 
   const gExtra = GROUP_OWN.concat(["items", "swot", "compete", "capabilities", "branding", "sets", "claims",
-                                   "naming", "focusOff", "weightingOff", "lineOwners", "mainbus", "comms", "kb", "logo",
+                                   "naming", "focusOff", "weightingOn", "lineOwners", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
                                    SEASONS, DRIVERS_ON, DIR_SCOPE, "planYear", "topProjects", SLIDE_COLS_OFF,
                                    SLIDE_BUILD]);

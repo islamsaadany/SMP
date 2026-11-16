@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-16 — The weighting is the strategy's: Setup › Weighting under Measurement (§770).** The On | Off pair and, while on, the table, on a page of the Strategy module's Setup beside Focus measures and Revenue drivers; it leaves Client settings › Business units, which keeps the units' creation. Shell check pending a session with a database.
+**2026-11-16 — The weighting is the strategy's: Setup › Weighting under Measurement (§770), merged to `main` on Islam's word.** The On | Off pair and, while on, the table, on a page of the Strategy module's Setup beside Focus measures and Revenue drivers; it leaves Client settings › Business units, which keeps the units' creation. Shell check pending a session with a database.
 
 **2026-11-16 — The weighting stays in Setup, off by default (§769), merged to `main` on Islam's word.** §768's constant goes; one key per client, on only when the office presses Weighting on | Off on Setup › Business units. Off by default for every client; On brings the tab, the columns and the weights back; nothing stored moves. Rules tests pass; shell check pending a session with a database.
 

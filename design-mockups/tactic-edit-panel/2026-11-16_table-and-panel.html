@@ -177,6 +177,14 @@
   .chk .chosen { padding:6px 10px; font-size:12px; color:var(--ink-2); border-top:1px solid var(--line-soft); background:var(--surface-2); }
   .sfoot { padding:10px 16px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
   .sfoot .done { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:8px; font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
+  /* the question before a removal */
+  .askwrap { position:fixed; inset:0; z-index:90; background:rgba(15,23,42,.35); display:grid; place-items:center; }
+  .askwrap[hidden] { display:none; }
+  .askbox { background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); width:min(420px, calc(100% - 32px)); padding:16px 18px; }
+  .askbox h4 { margin:0 0 6px; font-size:15px; } .askbox p { margin:0 0 14px; color:var(--ink-2); font-size:13.5px; }
+  .askbox .row { display:flex; gap:8px; justify-content:flex-end; }
+  .askbox button { font:inherit; font-size:13px; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:6px 14px; cursor:pointer; }
+  .askbox button.yes { background:var(--bad); border-color:var(--bad); color:#fff; font-weight:700; }
   .toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--panel); color:var(--panel-ink); font-size:12px; padding:6px 12px; border-radius:999px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:70; } .toast.on { opacity:1; }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 </style>
@@ -210,6 +218,7 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="askwrap" id="ask" hidden><div class="askbox" role="dialog" aria-modal="true"><h4 id="askh"></h4><p id="askp"></p><div class="row"><button type="button" id="askno">Keep it</button><button type="button" class="yes" id="askyes">Remove</button></div></div></div>
 
 <script>
 (function(){
@@ -230,6 +239,12 @@
   var RAIL = [["D001","Grow the Core Business","Y1–3",""],["D002","Building Processes, OD & Governance","Y1–3",""],["D003","Launch Training Academy","Y1–3",""],["D004","Establishment of the Best Total Solution Provider","Y1",""],["D005","Standardize Current PEC Offering & Delivery","Y1",""],["D006","Enhance Current Mining Offering & Delivery","Y1",""],["D007","Optimize Current O&M Services","Y1",""],["D008","Enter GCC & African Project Markets","Y2–3","Starts in Year 2"],["D009","Enter KSA & African Mining Markets","Y2–3","Starts in Year 2"],["D010","Enter KSA & African O&M Markets","Y2–3","Starts in Year 2"],["D011","Expand into Non-Cement Industrial Sectors","Y3","Starts in Year 3"],["D012","Expand Across other Minerals Mining","Y3","Starts in Year 3"]];
   var cur = -1, pen = false;
   function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  /* nothing is removed on one press: the question first, Remove or Keep it */
+  var askYes = null;
+  function ask(h, p, yes){ document.getElementById("askh").textContent = h; document.getElementById("askp").textContent = p; askYes = yes; document.getElementById("ask").hidden = false; document.getElementById("askno").focus(); }
+  document.getElementById("askno").addEventListener("click", function(){ document.getElementById("ask").hidden = true; askYes = null; });
+  document.getElementById("askyes").addEventListener("click", function(){ document.getElementById("ask").hidden = true; var f = askYes; askYes = null; if (f) f(); });
+  document.getElementById("ask").addEventListener("click", function(e){ if (e.target.id === "ask") { document.getElementById("ask").hidden = true; askYes = null; } });
   function toast(m){ var t = document.getElementById("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("on"); }, 1400); }
   function qs(t){ return '<span class="q">' + t.q.map(function(v, i){ return '<i class="' + (v ? "on" : "") + '">' + (i + 1) + '</i>'; }).join("") + '</span>'; }
   function kmTags(t){ return t.km.slice().sort().map(function(i){ return '<span class="kmtag">KM ' + (i + 1) + '</span>'; }).join(""); }
@@ -288,11 +303,15 @@
     tb.querySelectorAll("[data-rowout]").forEach(function(f){ f.addEventListener("input", function(){ var a = f.dataset.rowout.split(":"), t = T[+a[0]], k = +a[1]; while (t.outs.length <= k) t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); t.outs[k].name = f.value;
       if (cur === +a[0]) { var pf = document.querySelector('#sbody [data-oname="' + k + '"]'); if (pf) pf.textContent = f.value || "Not named yet"; } }); f.addEventListener("change", function(){ toast("Saved"); }); });
     tb.querySelectorAll("[data-rowadd]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); var t = T[+b.dataset.rowadd]; if (!t.outs.length) t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); drawRows(); if (cur === +b.dataset.rowadd) drawPanel(); var last = document.querySelectorAll('[data-rowout^="' + b.dataset.rowadd + ':"]'); last[last.length - 1].focus(); }); });
-    tb.querySelectorAll("[data-rowox]").forEach(function(x){ x.addEventListener("click", function(e){ e.stopPropagation(); var a = x.dataset.rowox.split(":"), t = T[+a[0]]; t.outs.splice(+a[1], 1); drawRows(); if (cur === +a[0]) drawPanel(); toast("Outcome removed"); }); });
+    tb.querySelectorAll("[data-rowox]").forEach(function(x){ x.addEventListener("click", function(e){ e.stopPropagation(); var a = x.dataset.rowox.split(":"), t = T[+a[0]], o = t.outs[+a[1]];
+      ask("Remove this outcome?", (o && o.name ? "“" + o.name + "”" : "This outcome") + " and its target will be taken off the tactic.", function(){
+        t.outs.splice(+a[1], 1); drawRows(); if (cur === +a[0]) drawPanel(); toast("Outcome removed"); }); }); });
     tb.querySelectorAll("[data-rq]").forEach(function(q){ q.addEventListener("click", function(e){ e.stopPropagation(); var a = q.dataset.rq.split(":"), t = T[+a[0]]; t.q[+a[1]] = t.q[+a[1]] ? 0 : 1; q.classList.toggle("on"); toast("Saved"); }); });
     T.forEach(function(t, i){ wireDd("rowowner" + i, function(){ return t.owner; }, function(v){ t.owner = v; }, false); });
-    tb.querySelectorAll("[data-x]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); var i = +b.dataset.x; T.splice(i, 1);
-      if (cur === i) cur = Math.min(i, T.length - 1); else if (cur > i) cur--; if (cur < 0) close(); else open(cur); toast("Tactic removed"); }); });
+    tb.querySelectorAll("[data-x]").forEach(function(b){ b.addEventListener("click", function(e){
+      e.stopPropagation(); var i = +b.dataset.x, t = T[i];
+      ask("Remove this tactic?", (t.name ? "“" + t.name + "”" : "This tactic") + (t.outs.length ? " and its " + t.outs.length + " outcome" + (t.outs.length === 1 ? "" : "s") : "") + " will be taken off the plan. The figures reported against it so far are kept in the archive.", function(){
+        T.splice(i, 1); if (cur === i) cur = Math.min(i, T.length - 1); else if (cur > i) cur--; if (cur < 0) close(); else open(cur); toast("Tactic removed"); }); }); });
     document.getElementById("add").addEventListener("click", function(){ T.push({ name:"", desc:"", outs:[], owner:"", col:[], q:[0,0,0,0], km:[], req:"" }); open(T.length - 1); setTimeout(function(){ var f = document.querySelector('[data-rowname="' + (T.length - 1) + '"]'); if (f) f.focus(); }, 0); });
   }
   function picker(id, chosen, many){

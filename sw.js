@@ -685,7 +685,7 @@
    it supports, by number; past main's v7.75 at the merge. */
 /* v7.78-weighting-default-off — §769: the weighting stays in Setup, off by
    default; past main's v7.77 at the merge. */
-const SHELL = "smp-shell-v7.78-weighting-default-off";
+const SHELL = "smp-shell-v7.79-weighting-in-strategy-setup";
 const ASSETS = [
   "/",
   "/index.html",

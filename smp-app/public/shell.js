@@ -42313,12 +42313,14 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
-/* §759: THE WEIGHTING PAGE'S SWITCH LIVES HERE, on Setup › Business units,
-   for focus's reason (§102, §61): the Weighting tab itself goes while the
-   page is off, so a switch on that page could be turned off and never back
-   on. The units are what the weighting weighs, and this page is always
-   the office's to reach. The pinned On|Off pair is focus's (§135.5); Off
-   says what it keeps, so it never looks like a delete. */
+/* §759, §770: THE WEIGHTING'S SWITCH, on the pinned line of the Strategy
+   module's Setup › Weighting (it sat on the client's Business units for a
+   day; Islam: *"the weighting should be under strategy"* — it measures the
+   strategy, not the company). The page stays reachable while off, for
+   focus's reason (§102, §61): the Weighting tab on the company page goes
+   while the switch is off, so a switch on that tab could be turned off and
+   never back on. The pinned On|Off pair is focus's (§135.5); Off says what
+   On would bring, so it never looks like a delete. */
 function weightingSwitch(){
   var on = weightingOn();
   if (!inOffice()) return '';
@@ -42331,8 +42333,15 @@ function weightingSwitch(){
     '</span>';
   /* §769: off is the default, so the note says what On would bring. */
   return on ? '' : '<div class="note"><b>The weighting is off for this client.</b> Every ' +
-    L("unitword") + ' counts equally in the group figure. On adds the Weighting tab to the company page ' +
-    'and a Weight column here; anything entered before is kept.</div>';
+    L("unitword") + ' counts equally in the group figure. On brings the table here and the Weighting tab ' +
+    'to the company page; anything entered before is kept.</div>';
+}
+/* §770: Setup › Weighting — the switch, and while on, the same table the
+   company page's Weighting tab draws (one renderer, two doors, as Focus
+   measures are marked in Setup and read on the pages). */
+function renderWeightingSetup(){
+  return cfgHead("Weighting", [], null, inOffice()) + weightingSwitch() +
+    (weightingOn() ? renderWeighting() : '');
 }
 /* ── THE READER'S OWN SHAPE (§754): what each column is called in the Columns
    menu, and which never move. # and the name are the frozen pair (§151) and
@@ -42413,7 +42422,6 @@ function renderUnits(){
 
   return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit) + TABLECOLS.tools("units")) +
-    weightingSwitch() +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
        the units appear in the navigation and on the group page — somebody
@@ -79761,7 +79769,7 @@ var SYNC = (function () {
          inside still asks the real grant it needs. */
       /* §435: Setup › Structure is gone — its per-item exceptions sit under
          each layer's card on Client set-up › Structure ("Except for"). */
-      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
@@ -79826,6 +79834,12 @@ var SYNC = (function () {
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
       { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
+      /* §770: THE WEIGHTING IS THE STRATEGY'S (Islam: *"it's a strategy
+         performance weighting"*), so its switch and its table sit in this
+         module's Setup, under Measurement, and not beside the units' creation
+         in the client's. The key is the company tab's (§30.2): the impact
+         buttons' repaint names "weighting" and lands on whichever is open. */
+      { k:"weighting", ac:"c_bands", grp:"meas", mod:"strategy", label:"Weighting", glyph:"⚖", find:"weighting weight weights units count group figure factors revenue profit impact growth on off switch", render:renderWeightingSetup },
       /* §621: TERMINOLOGY LEFT SETUP (Islam: *"yes remove terminology"*).
          Client set-up › The shape names every word, layer by layer — End in
          Mind, the one it did not, included — and an empty box there shows

@@ -1529,12 +1529,14 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
-/* §759: THE WEIGHTING PAGE'S SWITCH LIVES HERE, on Setup › Business units,
-   for focus's reason (§102, §61): the Weighting tab itself goes while the
-   page is off, so a switch on that page could be turned off and never back
-   on. The units are what the weighting weighs, and this page is always
-   the office's to reach. The pinned On|Off pair is focus's (§135.5); Off
-   says what it keeps, so it never looks like a delete. */
+/* §759, §770: THE WEIGHTING'S SWITCH, on the pinned line of the Strategy
+   module's Setup › Weighting (it sat on the client's Business units for a
+   day; Islam: *"the weighting should be under strategy"* — it measures the
+   strategy, not the company). The page stays reachable while off, for
+   focus's reason (§102, §61): the Weighting tab on the company page goes
+   while the switch is off, so a switch on that tab could be turned off and
+   never back on. The pinned On|Off pair is focus's (§135.5); Off says what
+   On would bring, so it never looks like a delete. */
 function weightingSwitch(){
   var on = weightingOn();
   if (!inOffice()) return '';
@@ -1547,8 +1549,15 @@ function weightingSwitch(){
     '</span>';
   /* §769: off is the default, so the note says what On would bring. */
   return on ? '' : '<div class="note"><b>The weighting is off for this client.</b> Every ' +
-    L("unitword") + ' counts equally in the group figure. On adds the Weighting tab to the company page ' +
-    'and a Weight column here; anything entered before is kept.</div>';
+    L("unitword") + ' counts equally in the group figure. On brings the table here and the Weighting tab ' +
+    'to the company page; anything entered before is kept.</div>';
+}
+/* §770: Setup › Weighting — the switch, and while on, the same table the
+   company page's Weighting tab draws (one renderer, two doors, as Focus
+   measures are marked in Setup and read on the pages). */
+function renderWeightingSetup(){
+  return cfgHead("Weighting", [], null, inOffice()) + weightingSwitch() +
+    (weightingOn() ? renderWeighting() : '');
 }
 /* ── THE READER'S OWN SHAPE (§754): what each column is called in the Columns
    menu, and which never move. # and the name are the frozen pair (§151) and
@@ -1629,7 +1638,6 @@ function renderUnits(){
 
   return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit) + TABLECOLS.tools("units")) +
-    weightingSwitch() +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
        the units appear in the navigation and on the group page — somebody

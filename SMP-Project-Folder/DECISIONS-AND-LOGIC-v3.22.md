@@ -71282,7 +71282,7 @@ Now a send that fails on the line, or that the page stops waiting for (§472), *
 
 **Checked**: `checks/motion.py` (new, qa-run own-server) **22 ok, 0 failed** — one red first, the Keep binding above. `checks/ask-and-apply.py` unchanged from before the change (the same 9 pre-existing failures on this seed, before and after). `checks/built-in-step.py` all good. `qa.py` stops in this environment after the first viewer's 30 destinations on a click the open reading screen intercepts — run on the untouched build in a second worktree it stops at the same line with the same error, so it is the sweep's own state on this seed, not this change; left for its own round. `checks/shell.mjs` not run here (no database). Shell cache `smp-shell-v7.68-motion`.
 
-## §752 — The shape of a Setup table is the reader's own (2026-11-16)
+## §754 — The shape of a Setup table is the reader's own (2026-11-16; §752 on the branch, renumbered at the merge: main took §752–§753)
 
 **Asked** (Islam, 2026-11-06, with a reel of a table whose columns the viewer shapes — width, order, pinning, density): "have a look so we can see what we can do with our settings tables"; 2026-11-08: "Do all make them all personal and show me a working mockup first"; 2026-11-16, of the mockup (`mockups/mock-tablecols.html`): "on double clicking the edge of the column it should expand or squeeze to fit content as well", then "the same look and feel of the current tables" (the mockup had copied the demo tenant's navy heading; the real rule is the tenant's own colour, the grid, the Forefront palette — corrected and signed off), then "go ahead with as today look, build it into the setup tables (but for the 1st column Shown in the nav make it In Navigation only)".
 

@@ -9039,7 +9039,7 @@ function cyclePastPlan(){
   var to = reviewAsOf(), fr = monthsOf(REVIEW.from);
   return (to != null && to > planTo()) || (fr != null && fr < planFrom());
 }
-var PWMENU = false, PFILEMENU = false;   /* the Columns menu is tablecols.js's own (§752) */
+var PWMENU = false, PFILEMENU = false;   /* the Columns menu is tablecols.js's own (§754) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
    other header menu: two open panels on one row cover each other. */
 var PICKING = null, PICKQ = "";
@@ -39763,7 +39763,7 @@ function unitPerfPane(it, u, railed){
 }
 
 /* ── tablecols.js ── */
-/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§752) ═══════════════════
+/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§754) ═══════════════════
    Islam, 2026-11-06, with a reel of a table whose columns the viewer shapes:
    "have a look so we can see what we can do with our settings tables"; then
    "Do all make them all personal"; then, of the mockup
@@ -41888,7 +41888,7 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
-/* ── THE READER'S OWN SHAPE (§752): what each column is called in the Columns
+/* ── THE READER'S OWN SHAPE (§754): what each column is called in the Columns
    menu, and which never move. # and the name are the frozen pair (§151) and
    the ⋮ is the far end; the rest may be hidden, sized and moved. The words are
    the client's where the heading's are (`labelWord`, never `L`: the menu
@@ -42566,7 +42566,7 @@ function saidWhereCount(){
    register, and HR_ERP reaches the same answer by marking `name` non-hideable
    rather than by trusting nobody to untick it. */
 /* `smp.people.columns`, the store this chooser kept, is read ONCE by tablecols.js
-   as the starting point of `smp.table.people` and then superseded (§752). */
+   as the starting point of `smp.table.people` and then superseded (§754). */
 /* RENAMED TWICE IN ONE VERSION, and both are Islam's words (§54.1).
    `belongs` → `bu`: "belongs to is not good naming" — a strategy platform's
    word for a part of the business is BU, and the column says which one the
@@ -42651,7 +42651,7 @@ var PEOPLE_COLS = [
   { k:"status",   label:"Status" },
   { k:"password", label:"Password", live:true }
 ];
-/* ── THE CHOOSER IS TABLECOLS's NOW (§752) ─────────────────────────────
+/* ── THE CHOOSER IS TABLECOLS's NOW (§754) ─────────────────────────────
    `PEOPLE_COLS` stays the list — the keys, the labels, which are off until
    asked for — and tablecols.js keeps the answer, draws the menu and takes
    the same three questions the register asked of its own store: shown or
@@ -44217,7 +44217,7 @@ function renderPeople(){
         : '') +
     '</span>';
 
-  /* The Columns menu is the shared one (§752): the same button, in the same
+  /* The Columns menu is the shared one (§754): the same button, in the same
      place in the cluster, now also carrying the row height and Reset. */
   var colMenu = TABLECOLS.tools("people");
 
@@ -48834,7 +48834,7 @@ function planUnderCell(fk, f, editable){
    existed, and reading absent as `false` would hide every new column from
    everybody who had ever opened the control (§30.2). */
 /* `smp.fns.columns`, the store this chooser kept, is read ONCE by tablecols.js
-   as the starting point of `smp.table.fns` and then superseded (§752). */
+   as the starting point of `smp.table.fns` and then superseded (§754). */
 var FN_COLS = [
   { k:"key",     label:"Key", off:true },
   { k:"nav",     label:"Nav name" },
@@ -48854,7 +48854,7 @@ function fnCapsHeld(){
   return (FUNCTION_KEYS || []).some(function(fk){ return capsOfFunction(fk).length > 0; });
 }
 function fnColOffered(k){ return k !== "caps" || fnCapsHeld(); }
-/* THE CHOOSER IS TABLECOLS's NOW (§752), the register's rule word for word:
+/* THE CHOOSER IS TABLECOLS's NOW (§754), the register's rule word for word:
    Function is the frozen column and never hides; Status stays shown but may
    move; the company column is headed with the client's own word. */
 TABLECOLS.define("fns", function(){
@@ -49075,7 +49075,7 @@ function renderFunctions(){
      say at the foot and in which column can never be hidden, and a helper
      taking two lists and two sentences is longer than the thing it replaces.
      If a third table wants one, that is when it becomes a function. */
-  /* The Columns menu is the shared one (§752): the register's shape, the same
+  /* The Columns menu is the shared one (§754): the register's shape, the same
      place in the cluster, now also carrying the row height and Reset. */
   var fnColMenu = TABLECOLS.tools("fns");
 
@@ -82294,7 +82294,7 @@ var SYNC = (function () {
     /* The builder's band, once the navigation above has settled (§129). */
     paintBuildBand();
     wire();
-    /* §752: the reader's own shape of each Setup table — AFTER wire(), whose
+    /* §754: the reader's own shape of each Setup table — AFTER wire(), whose
        sort reads the cells in the order the renderer drew them. */
     TABLECOLS.apply();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
@@ -86765,7 +86765,7 @@ var SYNC = (function () {
       });
     });
     /* The Columns menu — a tick that keeps it open, All, None, the row height
-       and Reset — is tablecols.js's, bound once on the document (§752). */
+       and Reset — is tablecols.js's, bound once on the document (§754). */
     /* Edit the whole page, cursor in this person's name. The focus is applied
        AFTER the repaint that creates the input — focusing a node the paint is
        about to replace focuses nothing. */

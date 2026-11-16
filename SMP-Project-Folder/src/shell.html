@@ -4182,7 +4182,7 @@
     /* The builder's band, once the navigation above has settled (§129). */
     paintBuildBand();
     wire();
-    /* §752: the reader's own shape of each Setup table — AFTER wire(), whose
+    /* §754: the reader's own shape of each Setup table — AFTER wire(), whose
        sort reads the cells in the order the renderer drew them. */
     TABLECOLS.apply();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
@@ -8653,7 +8653,7 @@
       });
     });
     /* The Columns menu — a tick that keeps it open, All, None, the row height
-       and Reset — is tablecols.js's, bound once on the document (§752). */
+       and Reset — is tablecols.js's, bound once on the document (§754). */
     /* Edit the whole page, cursor in this person's name. The focus is applied
        AFTER the repaint that creates the input — focusing a node the paint is
        about to replace focuses nothing. */

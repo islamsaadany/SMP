@@ -6042,7 +6042,7 @@ tr.acoffice td { background:var(--surface-2); }
 .acland-opt:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 .cfg.acgrid.acgrid-ladder td.acmeans b { display:inline; }
 
-/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§752, tablecols.js) ════
+/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§754, tablecols.js) ════
    The table keeps every rule it had — the tenant's heading, the grid, the
    zebra, the frozen pair. These add the edge you drag, the ghost of a column
    being moved, the line where it lands, the pixel label, the row heights and

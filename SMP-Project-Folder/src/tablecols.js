@@ -1,4 +1,4 @@
-/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§752) ═══════════════════
+/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§754) ═══════════════════
    Islam, 2026-11-06, with a reel of a table whose columns the viewer shapes:
    "have a look so we can see what we can do with our settings tables"; then
    "Do all make them all personal"; then, of the mockup

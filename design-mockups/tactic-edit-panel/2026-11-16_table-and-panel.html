@@ -91,8 +91,8 @@
   .pen-on .tactable tbody tr[data-i] { cursor:pointer; } .pen-on .tactable tbody tr[data-i]:hover td { background:var(--surface-2); }
   .panel-open table.tactable { min-width:0; }
   .tactable td .fld.rowfld { width:100%; min-width:140px; font-size:13px; padding:6px 9px; }
-  .tactable td .pick .fld { min-width:120px; font-size:12.5px; padding:5px 8px; }
-  .tactable td .pick { min-width:120px; }
+  .tactable td .dd .ddbtn { font-size:12.5px; padding:5px 8px; min-height:30px; }
+  .tactable td .dd { min-width:130px; }
   .tactable td .qpick { white-space:nowrap; }
   .tactable td .qpick i { width:26px; height:24px; line-height:22px; font-size:11px; }
   .tactable td.rowout { color:var(--ink-2); min-width:170px; } .tactable td .rowout small { display:block; color:var(--ink-3); font-size:11px; }
@@ -132,6 +132,23 @@
   .pick .chip { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:3px 8px; border-radius:999px; background:var(--tag-bg); color:var(--tag-ink); border:1px solid var(--tag-line); } .pick .chip b { cursor:pointer; color:var(--ink-3); }
   .pick .menu { position:absolute; left:0; right:0; top:100%; z-index:5; background:var(--surface); border:1px solid var(--field-line); border-radius:8px; box-shadow:var(--shadow); max-height:180px; overflow:auto; margin-top:3px; }
   .pick .menu[hidden] { display:none; } .pick .menu div { padding:6px 10px; font-size:13px; cursor:pointer; } .pick .menu div:hover { background:var(--surface-2); } .pick .menu .none { color:var(--ink-3); font-style:italic; cursor:default; }
+  /* the searchable dropdowns: a closed box with a chevron; open, a search box over the list (one pick, or ticks) */
+  .dd { position:relative; min-width:150px; }
+  .dd .ddbtn { display:flex; align-items:center; gap:6px; width:100%; text-align:left; cursor:pointer; min-height:32px; }
+  .dd .ddval { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .dd .ddval.none { color:var(--ink-3); }
+  .dd .chev { flex:none; width:7px; height:7px; border-right:1.5px solid var(--ink-3); border-bottom:1.5px solid var(--ink-3); transform:rotate(45deg); margin:-3px 2px 0 0; }
+  .dd .ddpop { position:absolute; left:0; top:100%; z-index:8; min-width:100%; width:max(100%, 240px); background:var(--surface); border:1px solid var(--field-line); border-radius:8px; box-shadow:var(--shadow); margin-top:3px; overflow:hidden; }
+  .dd .ddpop[hidden] { display:none; }
+  .dd .ddq { border:0; border-bottom:1px solid var(--line-soft); border-radius:0; }
+  .dd .ddlist { max-height:190px; overflow:auto; }
+  .dd .ddlist > * { display:flex; gap:8px; align-items:center; padding:6px 10px; font-size:13px; cursor:pointer; border-top:1px solid var(--line-soft); }
+  .dd .ddlist > *:first-child { border-top:0; } .dd .ddlist > *:hover { background:var(--surface-2); } .dd .ddlist > *.on { font-weight:700; }
+  .dd .ddlist input { width:14px; height:14px; margin:0; accent-color:var(--panel); }
+  .dd .ddlist .none { color:var(--ink-3); font-style:italic; cursor:default; }
+  .tactable td .outline { display:flex; align-items:center; gap:4px; margin-top:4px; } .tactable td .outline:first-child { margin-top:0; }
+  .tactable td .outline .fld { flex:1; min-width:0; } .tactable td .outline .x { color:var(--ink-3); cursor:pointer; padding:0 3px; }
+  .tactable td.rowout small.miss { display:block; margin-top:3px; }
+  .tactable td .addout { display:inline-block; margin-top:5px; font-size:11.5px; font-weight:700; color:var(--gold-deep); text-decoration:underline; cursor:pointer; }
   /* the collaborators: a searchable checklist — type to narrow, tick to choose */
   .chk { border:1px solid var(--field-line); border-radius:8px; overflow:hidden; }
   .chk input.fld { border:0; border-bottom:1px solid var(--line-soft); border-radius:0; }
@@ -223,9 +240,12 @@
     var o1 = t.outs[0];
     return '<tr' + (i === cur ? ' class="on"' : '') + ' data-i="' + i + '"><td class="idx"><span class="grip">☰</span>' + (i + 1) + '</td>' +
       '<td><input class="fld rowfld" data-rowname="' + i + '" value="' + esc(t.name) + '" placeholder="The work itself, as a sentence">' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') + '</td>' +
-      '<td class="rowout"><input class="fld rowfld" data-rowout="' + i + '" value="' + esc(o1 ? o1.name : '') + '" placeholder="What it should produce">' +
-        (n > 1 ? '<small>and ' + (n - 1) + ' more in the panel</small>' : '') + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') + '</td>' +
-      '<td>' + picker("rowowner" + i, t.owner, false) + '</td>' +
+      '<td class="rowout">' + (t.outs.length ? t.outs.map(function(o, k){
+          return '<span class="outline"><input class="fld rowfld" data-rowout="' + i + ':' + k + '" value="' + esc(o.name) + '" placeholder="What it should produce">' +
+            (k ? '<span class="x" data-rowox="' + i + ':' + k + '" title="Remove this outcome">×</span>' : '') + '</span>'; }).join("")
+        : '<span class="outline"><input class="fld rowfld" data-rowout="' + i + ':0" value="" placeholder="What it should produce"></span>') +
+        '<span class="addout" data-rowadd="' + i + '">+ Add an outcome</span>' + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') + '</td>' +
+      '<td>' + dd("rowowner" + i, function(){ return t.owner; }, false) + '</td>' +
       '<td><span class="qpick">' + t.q.map(function(v, k){ return '<i class="' + (v ? "on" : "") + '" data-rq="' + i + ':' + k + '">Q' + (k + 1) + '</i>'; }).join("") + '</span></td>' +
       '<td><span class="rowtools"><button type="button" class="openb" data-open="' + i + '">Details</button><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
   }
@@ -240,12 +260,14 @@
     document.getElementById("tcount").textContent = T.length;
     drawK();
     if (!pen) return;
-    tb.querySelectorAll("tr[data-i]").forEach(function(r){ r.addEventListener("click", function(e){ if (e.target.closest(".x, input, select, .pick, .qpick, label, small")) return; open(+r.dataset.i); }); });
+    tb.querySelectorAll("tr[data-i]").forEach(function(r){ r.addEventListener("click", function(e){ if (e.target.closest(".x, input, select, .pick, .dd, .qpick, label, small, .addout")) return; open(+r.dataset.i); }); });
     tb.querySelectorAll("[data-rowname]").forEach(function(f){ f.addEventListener("input", function(){ T[+f.dataset.rowname].name = f.value; var h = document.getElementById("sname"); if (cur === +f.dataset.rowname && h) h.textContent = f.value || "New tactic"; }); f.addEventListener("change", function(){ toast("Saved"); }); });
-    tb.querySelectorAll("[data-rowout]").forEach(function(f){ f.addEventListener("input", function(){ var t = T[+f.dataset.rowout]; if (!t.outs.length) t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); t.outs[0].name = f.value;
-      if (cur === +f.dataset.rowout) { var pf = document.querySelector('#sbody [data-o="0"][data-f="name"]'); if (pf && pf.value !== f.value) pf.value = f.value; } }); f.addEventListener("change", function(){ toast("Saved"); }); });
+    tb.querySelectorAll("[data-rowout]").forEach(function(f){ f.addEventListener("input", function(){ var a = f.dataset.rowout.split(":"), t = T[+a[0]], k = +a[1]; while (t.outs.length <= k) t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); t.outs[k].name = f.value;
+      if (cur === +a[0]) { var pf = document.querySelector('#sbody [data-o="' + k + '"][data-f="name"]'); if (pf && pf.value !== f.value) pf.value = f.value; } }); f.addEventListener("change", function(){ toast("Saved"); }); });
+    tb.querySelectorAll("[data-rowadd]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); var t = T[+b.dataset.rowadd]; if (!t.outs.length) t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); drawRows(); if (cur === +b.dataset.rowadd) drawPanel(); var last = document.querySelectorAll('[data-rowout^="' + b.dataset.rowadd + ':"]'); last[last.length - 1].focus(); }); });
+    tb.querySelectorAll("[data-rowox]").forEach(function(x){ x.addEventListener("click", function(e){ e.stopPropagation(); var a = x.dataset.rowox.split(":"), t = T[+a[0]]; t.outs.splice(+a[1], 1); drawRows(); if (cur === +a[0]) drawPanel(); toast("Outcome removed"); }); });
     tb.querySelectorAll("[data-rq]").forEach(function(q){ q.addEventListener("click", function(e){ e.stopPropagation(); var a = q.dataset.rq.split(":"), t = T[+a[0]]; t.q[+a[1]] = t.q[+a[1]] ? 0 : 1; q.classList.toggle("on"); toast("Saved"); }); });
-    T.forEach(function(t, i){ if (document.getElementById("rowowner" + i)) wirePicker("rowowner" + i, function(){ return t.owner; }, function(v){ t.owner = v; }, false); });
+    T.forEach(function(t, i){ wireDd("rowowner" + i, function(){ return t.owner; }, function(v){ t.owner = v; }, false); });
     tb.querySelectorAll("[data-x]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); var i = +b.dataset.x; T.splice(i, 1);
       if (cur === i) cur = Math.min(i, T.length - 1); else if (cur > i) cur--; if (cur < 0) close(); else open(cur); toast("Tactic removed"); }); });
     document.getElementById("add").addEventListener("click", function(){ T.push({ name:"", desc:"", outs:[], owner:"", col:[], q:[0,0,0,0], km:[], req:"" }); open(T.length - 1); setTimeout(function(){ var f = document.querySelector('[data-rowname="' + (T.length - 1) + '"]'); if (f) f.focus(); }, 0); });
@@ -267,6 +289,29 @@
     inp.addEventListener("keydown", function(e){ if (e.key === "Enter") { var f = menu.querySelector("[data-p]"); if (f) choose(f.dataset.p); e.preventDefault(); } });
     box.querySelectorAll("[data-rm]").forEach(function(b){ b.addEventListener("click", function(){ set(get().filter(function(x){ return x !== b.dataset.rm; })); drawRows(); drawPanel(); toast("Saved"); }); });
   }
+  function dd(id, get, many){
+    var v = get(), label = many ? (v.length ? esc(v.join(", ")) : 'Nobody yet') : (v ? esc(v) : 'Pick a name');
+    return '<div class="dd" id="' + id + '"><button type="button" class="fld ddbtn"><span class="ddval' + ((many ? !v.length : !v) ? ' none' : '') + '">' + label + '</span><span class="chev"></span></button>' +
+      '<div class="ddpop" hidden><input class="fld ddq" placeholder="Type a name to find them" autocomplete="off"><div class="ddlist"></div></div></div>';
+  }
+  function wireDd(id, get, set, many){
+    var box = document.getElementById(id); if (!box) return;
+    var btn = box.querySelector(".ddbtn"), pop = box.querySelector(".ddpop"), q = box.querySelector(".ddq"), list = box.querySelector(".ddlist"), val = box.querySelector(".ddval");
+    function label(){ var v = get(); var none = many ? !v.length : !v; val.textContent = many ? (v.length ? v.join(", ") : "Nobody yet") : (v || "Pick a name"); val.classList.toggle("none", none); }
+    function draw(){ var s = q.value.trim().toLowerCase(), v = get();
+      var hits = PEOPLE.filter(function(p){ return !s || p.toLowerCase().indexOf(s) >= 0; });
+      list.innerHTML = hits.length ? hits.map(function(p){ return many
+        ? '<label><input type="checkbox" value="' + esc(p) + '"' + (v.indexOf(p) >= 0 ? ' checked' : '') + '>' + esc(p) + '</label>'
+        : '<div data-p="' + esc(p) + '"' + (v === p ? ' class="on"' : '') + '>' + esc(p) + '</div>'; }).join("") : '<div class="none">Nobody in the register matches</div>';
+      list.querySelectorAll("[data-p]").forEach(function(d){ d.addEventListener("click", function(){ set(d.dataset.p); label(); close(); toast("Saved"); }); });
+      list.querySelectorAll("input").forEach(function(c){ c.addEventListener("change", function(){ var have = get().slice(); if (c.checked && have.indexOf(c.value) < 0) have.push(c.value); if (!c.checked) have = have.filter(function(x){ return x !== c.value; }); set(have); label(); toast("Saved"); }); }); }
+    function open(){ document.querySelectorAll(".dd .ddpop:not([hidden])").forEach(function(p){ p.hidden = true; }); pop.hidden = false; q.value = ""; draw(); q.focus(); }
+    function close(){ pop.hidden = true; }
+    btn.addEventListener("click", function(e){ e.stopPropagation(); pop.hidden ? open() : close(); });
+    q.addEventListener("input", draw); q.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); if (e.key === "Enter" && !many) { var f = list.querySelector("[data-p]"); if (f) f.click(); e.preventDefault(); } });
+    pop.addEventListener("click", function(e){ e.stopPropagation(); });
+  }
+  document.addEventListener("click", function(){ document.querySelectorAll(".dd .ddpop:not([hidden])").forEach(function(p){ p.hidden = true; }); });
   function checklist(id, chosen){
     return '<div class="chk" id="' + id + '"><input class="fld" placeholder="Type a name to find them" autocomplete="off"><div class="list">' +
       PEOPLE.map(function(p){ return '<label><input type="checkbox" value="' + esc(p) + '"' + (chosen.indexOf(p) >= 0 ? ' checked' : '') + '>' + esc(p) + '</label>'; }).join("") +
@@ -295,18 +340,18 @@
             sel(["≥","≤"], o.dir, ' data-o="' + k + '" data-f="dir"' + (yn ? ' disabled' : '')) + sel(["—","Latest","Sum","Count","Average"], o.compile || "—", ' data-o="' + k + '" data-f="compile"' + (yn ? ' disabled' : '')) + '</div>' +
             (yn ? '' : String(o.target).trim() ? '<span class="months"><i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i> by month or by quarter</span>' : '<span class="miss">Target missing</span>') + '</div>';
         }).join("") + '<button class="linkbu" type="button" id="addout">+ Add an outcome</button></div>' +
-      '<div class="sec"><h3>Collaborators <span class="hint">the people supporting the owner — type to find, tick to choose</span></h3>' + checklist("f-col", t.col) + '</div>' +
+      '<div class="sec"><h3>Collaborators <span class="hint">the people supporting the owner — open, type to find, tick to choose</span></h3>' + dd("f-col", function(){ return t.col; }, true) + '</div>' +
       '<div class="sec"><h3>Key measures <span class="hint">which ones it supports</span></h3><details class="kmdrop"><summary><span id="kmsum">' + (t.km.length ? kmTags(t) : '<span class="nobody" style="font-size:12.5px">Pick key measures</span>') + '</span><span class="chev"></span></summary>' +
         KM.map(function(m, i){ return '<label><input type="checkbox" data-km="' + i + '"' + (t.km.indexOf(i) >= 0 ? ' checked' : '') + '><span class="kmtag">KM ' + (i + 1) + '</span> ' + esc(m.n) + '</label>'; }).join("") + '</details></div>' +
       '<div class="sec"><h3>Requirements <span class="hint">what it needs, one per line</span></h3><textarea class="fld" id="f-req" rows="3" placeholder="One per line">' + esc(t.req) + '</textarea></div>';
     var live = function(){ drawRows(); document.getElementById("sname").textContent = t.name || "New tactic"; };
     document.getElementById("f-desc").addEventListener("input", function(e){ t.desc = e.target.value; var r = document.querySelector('#rows tr[data-i="' + cur + '"] td:nth-child(2)'); if (r) { var w = r.querySelector('.why'); if (!w && e.target.value) { w = document.createElement('span'); w.className = 'why'; r.appendChild(w); } if (w) { w.textContent = e.target.value; if (!e.target.value) w.remove(); } } });
     document.getElementById("f-req").addEventListener("input", function(e){ t.req = e.target.value; });
-    wireChecklist("f-col", function(){ return t.col; }, function(v){ t.col = v; });
+    wireDd("f-col", function(){ return t.col; }, function(v){ t.col = v; }, true);
     sb.querySelectorAll("[data-km]").forEach(function(c){ c.addEventListener("change", function(){ var i = +c.dataset.km, at = t.km.indexOf(i); if (c.checked && at < 0) t.km.push(i); if (!c.checked && at >= 0) t.km.splice(at, 1);
       document.getElementById("kmsum").innerHTML = t.km.length ? kmTags(t) : '<span class="nobody" style="font-size:12.5px">Pick key measures</span>'; live(); toast("Saved"); }); });
     sb.querySelectorAll("[data-o]").forEach(function(f){ f.addEventListener(f.tagName === "SELECT" ? "change" : "input", function(){ var o = t.outs[+f.dataset.o]; if (o.target === "Y/N" && f.dataset.f === "target") { if (/^yes\s*\/\s*no$/i.test(f.value)) return; } o[f.dataset.f] = f.value === "—" ? "" : f.value;
-      if (f.dataset.o === "0" && f.dataset.f === "name") { var rb = document.querySelector('[data-rowout="' + cur + '"]'); if (rb && rb.value !== f.value) rb.value = f.value; } else drawRows(); }); });
+      if (f.dataset.f === "name") { var rb = document.querySelector('[data-rowout="' + cur + ':' + f.dataset.o + '"]'); if (rb && rb.value !== f.value) rb.value = f.value; } else drawRows(); }); });
     sb.querySelectorAll("[data-ox]").forEach(function(x){ x.addEventListener("click", function(){ t.outs.splice(+x.dataset.ox, 1); drawRows(); drawPanel(); toast("Outcome removed"); }); });
     document.getElementById("addout").addEventListener("click", function(){ t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); drawRows(); drawPanel(); var last = sb.querySelectorAll('[data-f="name"]'); last[last.length - 1].focus(); });
   }

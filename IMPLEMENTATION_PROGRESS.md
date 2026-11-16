@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-16 — The weighting stays in Setup, off by default (§769).** §768's constant goes; one key per client, on only when the office presses Weighting on | Off on Setup › Business units. Off by default for every client; On brings the tab, the columns and the weights back; nothing stored moves. Rules tests pass; shell check pending a session with a database.
+**2026-11-16 — The weighting stays in Setup, off by default (§769), merged to `main` on Islam's word.** §768's constant goes; one key per client, on only when the office presses Weighting on | Off on Setup › Business units. Off by default for every client; On brings the tab, the columns and the weights back; nothing stored moves. Rules tests pass; shell check pending a session with a database.
 
 **2026-11-16 — The pen's key measures list is a dropdown (§767.2)., merged to `main` on Islam's word.** Islam: the tick list took too much of the row; shall it be a checkbox dropdown. It is: one closed line showing the chosen tags or "Pick key measures", opening to the ticks under it, closing on a click elsewhere. `tactic-supports.py` 38/0. Merged over `main`'s §768, builds rebuilt; shell cache v7.77.
 

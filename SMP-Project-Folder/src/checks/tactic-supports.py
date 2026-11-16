@@ -74,12 +74,13 @@ with sync_playwright() as p:
     w0 = cols()
     go(True)
     nt = safe(pg, "()=>%s.tactics.length" % P)
-    pk = safe(pg, """()=>{var p=[...document.querySelectorAll('#panel .kmpick')]; var first=p[0];
+    # §769: the pen opens the first tactic in the panel; the tick list is there, one per measure
+    pk = safe(pg, """()=>{var p=[...document.querySelectorAll('#panel .tacpanel .kmpick')]; var first=p[0];
       return {n:p.length, ticks:first?first.querySelectorAll('input[type=checkbox]').length:0,
               on:[...document.querySelectorAll('#panel .kmpick input:checked')].length,
-              names:first?[...first.querySelectorAll('.kmname')].map(x=>x.textContent):[]}}""")
-    ok("the pen offers a tick list on every tactic of the first pillar, one tick per measure, none ticked",
-       pk and pk["n"] >= nt and pk["ticks"] == 4 and pk["on"] == 0, pk)
+              names:first?[...first.querySelectorAll('.kmname')].map(x=>x.textContent):[], rows:document.querySelectorAll('#panel .penlist tr[data-tacrow]').length}}""")
+    ok("the pen opens the first tactic in the panel with a tick list, one tick per measure, none ticked; the list holds every tactic",
+       pk and pk["n"] == 1 and pk["ticks"] == 4 and pk["on"] == 0 and pk["rows"] == nt, pk)
     ok("…naming the measures in the table's order", pk and pk["names"] == safe(pg, "()=>%s.measures.map(m=>m.name)" % P), pk and pk["names"])
 
     print("\n2 · stored, read mode")
@@ -116,28 +117,33 @@ with sync_playwright() as p:
 
     print("\n3 · the pen")
     go(True)
-    tk = safe(pg, """()=>[...document.querySelectorAll('#panel .kmpick')].slice(0,3).map(p=>[...p.querySelectorAll('input')].map(i=>i.checked))""")
+    # §769: one tactic open at a time — each is opened in the panel and its ticks read there
+    def openT(i): safe(pg, "()=>{PEN_TACTIC=%s.tactics[%d].id; paint();}" % (P, i)); pg.wait_for_timeout(300)
+    tk = []; dd = []
+    for i in range(3):
+        openT(i)
+        tk.append(safe(pg, """()=>[...document.querySelectorAll('#panel .tacpanel .kmpick input')].map(i=>i.checked)"""))
+        dd.append(safe(pg, """()=>{var d=document.querySelector('#panel .tacpanel details.kmdrop');
+          return d?[d.open, [...d.querySelectorAll('.kmsum .kmtag')].map(x=>x.textContent), !!d.querySelector('.kmsum .kmnone')]:null}"""))
     ok("the ticks read the stored list", tk == [[True, True, False, False], [False, True, False, False], [False, False, False, False]], tk)
     # §767.2: a closed box, one line, showing the chosen tags; it opens to the ticks
-    dd = safe(pg, """()=>[...document.querySelectorAll('#panel .kmpick')].slice(0,3).map(p=>{var d=p.querySelector('details.kmdrop');
-      return d?[d.open, [...d.querySelectorAll('.kmsum .kmtag')].map(x=>x.textContent), !!d.querySelector('.kmsum .kmnone')]:null})""")
     ok("each tactic's list is a closed box showing its chosen tags, or 'Pick' when none",
        dd == [[False, ["KM 1", "KM 2"], False], [False, ["KM 2"], False], [False, [], True]], dd)
-    h0 = safe(pg, "()=>document.querySelectorAll('#panel .kmpick')[2].getBoundingClientRect().height")
+    h0 = safe(pg, "()=>document.querySelector('#panel .tacpanel .kmpick').getBoundingClientRect().height")
     try:
-        pg.locator("#panel .kmpick").nth(2).locator("summary").click(); pg.wait_for_timeout(200)
-        opened = safe(pg, "()=>document.querySelectorAll('#panel .kmdrop')[2].open")
-        h1 = safe(pg, "()=>document.querySelectorAll('#panel .kmpick')[2].getBoundingClientRect().height")
-        pg.locator("#panel .kmpick").nth(2).locator("input").nth(2).click(); pg.wait_for_timeout(300)
+        pg.locator("#panel .tacpanel .kmpick summary").click(); pg.wait_for_timeout(200)
+        opened = safe(pg, "()=>document.querySelector('#panel .tacpanel .kmdrop').open")
+        h1 = safe(pg, "()=>document.querySelector('#panel .tacpanel .kmpick').getBoundingClientRect().height")
+        pg.locator("#panel .tacpanel .kmpick input").nth(2).click(); pg.wait_for_timeout(300)
         v1 = safe(pg, "()=>JSON.stringify(%s.tactics[2].supports||null)" % P)
-        s1 = safe(pg, "()=>[...document.querySelectorAll('#panel .kmdrop')[2].querySelectorAll('.kmsum .kmtag')].map(x=>x.textContent)")
-        pg.locator("#panel .kmpick").nth(2).locator("input").nth(2).click(); pg.wait_for_timeout(300)
+        s1 = safe(pg, "()=>[...document.querySelector('#panel .tacpanel .kmdrop').querySelectorAll('.kmsum .kmtag')].map(x=>x.textContent)")
+        pg.locator("#panel .tacpanel .kmpick input").nth(2).click(); pg.wait_for_timeout(300)
         v2 = safe(pg, "()=>'supports' in %s.tactics[2]" % P)
-        s2 = safe(pg, "()=>!!document.querySelectorAll('#panel .kmdrop')[2].querySelector('.kmsum .kmnone')")
+        s2 = safe(pg, "()=>!!document.querySelector('#panel .tacpanel .kmdrop').querySelector('.kmsum .kmnone')")
         pg.click("h1, body", position={"x": 5, "y": 5}); pg.wait_for_timeout(200)
-        closed = safe(pg, "()=>document.querySelectorAll('#panel .kmdrop')[2].open")
+        closed = safe(pg, "()=>document.querySelector('#panel .tacpanel .kmdrop').open")
     except Exception as e: v1 = "ERR " + str(e)[:100]; v2 = None; opened = h1 = s1 = s2 = closed = None
-    ok("pressing the box opens the ticks under it, and the row grows only then", opened is True and h0 and h1 and h1 > h0 + 60, [h0, h1, opened])
+    ok("pressing the box opens the ticks under it, and the panel's section grows only then", opened is True and h0 and h1 and h1 > h0 + 60, [h0, h1, opened])
     ok("a tick stores the measure's id on the tactic", v1 == '["%s"]' % ids[2], v1)
     ok("…and the closed line shows the tag at once", s1 == ["KM 3"], s1)
     ok("the last untick DELETES the key (§50.6)", v2 is False, v2)

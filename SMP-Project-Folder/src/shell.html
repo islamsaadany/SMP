@@ -10450,7 +10450,8 @@
              screen, written nowhere (§50.6's fault through a fresh door). */
           var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
-          if (what === "measure") addMeasure(it); else addTactic(it);
+          if (what === "measure") addMeasure(it);
+          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §769: the new one opens in the panel */
         }
         else if (what === "project") {
           /* §326: holderByIdWritable, not capById — a project may be added to
@@ -10606,6 +10607,17 @@
       b.addEventListener("click", gapWalk);
     });
 
+    /* §769: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
+    document.querySelectorAll("[data-tacopen]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        if (b.tagName === "TR" && e.target.closest("select, input, textarea, a, .grip, .ssbtn, label, .eyebtn, .xbtn, [data-rowoff], [data-hiderow]")) return;
+        if (String(PEN_TACTIC) === b.dataset.tacopen && b.tagName === "TR") return;
+        PEN_TACTIC = b.dataset.tacopen; paint();
+      });
+    });
+    document.querySelectorAll("[data-tacclose]").forEach(function(b){
+      b.addEventListener("click", function(){ PEN_TACTIC = false; paint(); });
+    });
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;

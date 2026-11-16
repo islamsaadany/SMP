@@ -146,7 +146,7 @@ with sync_playwright() as p:
       paint(); }""")
     pg.wait_for_timeout(400)
     box = pg.evaluate("""()=>{ try{
-      var g=document.querySelector('td.tgtcell .tgrid'); if(!g) return null;
+      var g=document.querySelector('.tacpanel td.tgtcell .tgrid'); if(!g) return null;
       /* the native half of a searchable select stays in the DOM, out of flow
          and clipped (§45.5) — it is not one of the four boxes. */
       var kids=Array.from(g.children).filter(c=>!c.classList.contains('ss-native'));
@@ -161,27 +161,24 @@ with sync_playwright() as p:
     # write the name, then the target, then the unit, then the rules — and ASK THE DATA
     wrote = pg.evaluate("""()=>{ try{
       function t0(){ return UNITS.mobile.items[0].tactics[0]; }
-      var t=null; document.querySelectorAll('.tblscroll table').forEach(function(x){
-        var hh=x.querySelector('thead tr'); if(!hh||t) return;
-        if(Array.from(hh.children).map(c=>c.textContent.trim()).indexOf('Outcome')>-1) t=x;});
-      var hd=Array.from(t.querySelector('thead tr').children).map(c=>c.textContent.trim());
-      var row=t.querySelector('tbody tr');
+      /* §769: the pen's fields are in the panel, open on the first tactic */
+      var p=document.querySelector('.tacpanel');
       function fire(el,v){ if(el.tagName==='SELECT'){el.value=v;} else {el.value=v;}
         el.dispatchEvent(new Event('change',{bubbles:true})); }
       var out={};
-      /* the description is the SECOND box in the tactic's own cell */
-      var tcell = row.children[hd.indexOf('Tactic')];
-      var boxes = tcell.querySelectorAll('textarea');
+      /* the description is the second box of the panel's first section, under the name */
+      var sec = p.querySelector('.tpsec');
+      var boxes = sec.querySelectorAll('textarea, input.fld');
       out.boxesInNameCell = boxes.length;
-      fire(boxes[boxes.length-1], 'Why we chose it');
+      fire(sec.querySelector('.tacpd'), 'Why we chose it');
       out.description = t0().description;
-      fire(row.children[hd.indexOf('Outcome')].querySelector('textarea'), 'Stores opened');
+      fire(p.querySelector('.tpout textarea'), 'Stores opened');
       out.outcome = t0().outcome;
-      var g = document.querySelector('td.tgtcell .tgrid');
+      var g = p.querySelector('td.tgtcell .tgrid');
       fire(g.querySelector('input'), '6');
       out.targetAfterNumber = t0().outTarget;
       return out; }catch(e){ return {err:String(e)}; } }""")
-    ck("the description sits in the tactic's own cell", wrote.get("boxesInNameCell")==2, wrote)
+    ck("the description sits under the name in the panel's first section (§769)", wrote.get("boxesInNameCell")==2, wrote)
     ck("the description reaches the plan", wrote.get("description")=="Why we chose it", wrote)
     ck("the outcome reaches the plan", wrote.get("outcome")=="Stores opened", wrote)
     ck("the target reaches the plan", wrote.get("targetAfterNumber") not in (None,""), wrote)
@@ -193,7 +190,7 @@ with sync_playwright() as p:
     pg.evaluate("()=>paint()"); pg.wait_for_timeout(250)
     rest = pg.evaluate("""()=>{ try{
       function t0(){ return UNITS.mobile.items[0].tactics[0]; }
-      var g=document.querySelector('td.tgtcell .tgrid');
+      var g=document.querySelector('.tacpanel td.tgtcell .tgrid');
       var sels=Array.from(g.querySelectorAll('select')).filter(s=>!s.classList.contains('ss-native'));
       var uni=g.querySelector('select.ss-native') ||
               Array.from(g.querySelectorAll('select')).filter(function(x){
@@ -211,7 +208,9 @@ with sync_playwright() as p:
     ck("the compile rule reaches the plan", rest.get("compile")=="Sum", rest)
     order = pg.evaluate("""()=>{ try{
       function t0(){ return UNITS.mobile.items[0].tactics[1]; }
-      var rows=Array.from(document.querySelectorAll('td.tgtcell')); var g=rows[1].querySelector('.tgrid');
+      /* §769: the second tactic is opened in the panel first */
+      PEN_TACTIC = t0().id; paint();
+      var g=document.querySelector('.tacpanel td.tgtcell .tgrid');
       function fire(el,v){ el.value=v; el.dispatchEvent(new Event('change',{bubbles:true})); }
       var uni=Array.from(g.querySelectorAll('select')).filter(s=>Array.from(s.options).some(o=>o.text==='M EGP'))[0];
       var out={};

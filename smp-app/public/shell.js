@@ -29195,6 +29195,57 @@ function supportsEdit(t, p){
     });
   });
 })();
+
+/* ── §769: THE TACTIC PANEL ─────────────────────────────────────────────
+   Islam, with a picture of the pen: *"can we work on a cleaner approach to
+   edit the tactic. as it became very complex."* One tactic's row held its
+   name, description, key measures, requirements, four outcomes with four
+   controls each, owner, collaborators and quarters in one cell, taller than
+   the screen. From the working mockup he tried (design-mockups/
+   tactic-edit-panel/2026-11-16_full-page.html): with the pen on, the tactics
+   table is a plain LIST — one line per tactic — and the tactic being edited
+   opens in a PANEL beside the table, in short sections. The one Edit button
+   at the top turns the pen on and opens the panel on the first tactic;
+   pressing any row moves it; Done editing, at the top or at the foot of the
+   panel, turns the pen off. The owner and the collaborators are the same
+   register-fed pickers (§130.1); the key measures the dropdown (§767.2).
+
+   WHICH TACTIC IS OPEN: `null` is "not chosen yet" (the pen opens on the
+   first of the pillar drawn), `false` is "closed by hand" (× on the panel —
+   the pen stays on, the list stays), else the tactic's id. Reset to null
+   whenever the pen is drawn off, so the next Edit opens on the first again.
+
+   THE ROW FOLLOWS THE PANEL AS YOU TYPE — name and description only, by a
+   direct patch of the row's own text (§71.2: the pen never repaints on a
+   keystroke, and a repaint would take the cursor, §35). Everything else on
+   the row (owner, quarters, tags, the outcome count) is read on the next
+   paint, which every row press and every close causes. */
+var PEN_TACTIC = null;
+(function(){
+  if (typeof document === "undefined") return;
+  function rowOf(){
+    if (!PEN_TACTIC) return null;
+    var id = String(PEN_TACTIC).replace(/"/g, '\\"');
+    return document.querySelector('[data-tacrow="' + id + '"]');
+  }
+  document.addEventListener("input", function(e){
+    var f = e.target;
+    if (!f || !f.classList || !f.closest(".tacpanel")) return;
+    var row = rowOf(), v = String(f.value || "").trim();
+    if (f.classList.contains("tacpn")) {
+      var nm = row && row.querySelector(".tacname"), hd = document.querySelector(".tacpanel .tpname");
+      if (nm) nm.textContent = v || "New " + L1("tactic").toLowerCase();
+      if (hd) hd.textContent = v || "New " + L1("tactic").toLowerCase();
+    } else if (f.classList.contains("tacpd") && row) {
+      var cell = row.querySelector(".tacname") && row.querySelector(".tacname").closest("td");
+      var why = cell && cell.querySelector(".why");
+      if (!cell) return;
+      if (!why && v) { why = document.createElement("span"); why.className = "why"; cell.querySelector(".tacopenb").after(why); }
+      if (why) { why.textContent = v; if (!v) why.remove(); }
+    }
+  });
+})();
+
 /* The outcome's four controls, in ONE cell and ONE grid (Islam: "the 4 boxes
    should be the same size ... so we can give space for the other columns").
    Equal boxes sized by what the compile select needs for its longest word, so
@@ -39062,8 +39113,106 @@ function unitPlanBody(it, u, railed, bare){
   }).join("");
   /* §267: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
      row's span and every row have to agree about how many columns there are. */
+
+  /* ── §769: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
+  var penOpen = null;
+  if (ed) {
+    if (PEN_TACTIC === null && it.tactics.length) PEN_TACTIC = it.tactics[0].id;
+    if (PEN_TACTIC) {
+      penOpen = it.tactics.filter(function(t){ return t.id === PEN_TACTIC; })[0] || null;
+      /* another pillar's tactic was open: this pillar opens on its first */
+      if (!penOpen && it.tactics.length) { PEN_TACTIC = it.tactics[0].id; penOpen = it.tactics[0]; }
+    }
+  } else PEN_TACTIC = null;
+  /* One line per tactic. The name is a button so the keyboard and the gap
+     walk can reach it; the row as a whole opens too. A tactic still owing a
+     gap says how many and carries the walk mark on its name while it is not
+     the open one, so Next gap lands on the row and opening it continues the
+     walk inside the panel. */
+  var penTacticRow = function(t, i){
+    var open = penOpen === t, gaps = SMPRules.gapMissing("tactic", t).length;
+    var outs = (t.outcome || t.outTarget ? 1 : 0) + tacticExtras(t).length;
+    var noTgt = (t.outcome && SMPRules.gapEmpty("outTarget", t) ? 1 : 0) +
+      tacticExtras(t).filter(function(x){ return SMPRules.gapBlank(x.outTarget); }).length;
+    var word = "New " + L1("tactic").toLowerCase();
+    return '<tr data-oi="' + i + '" data-tacrow="' + esc(t.id) + '" data-tacopen="' + esc(t.id) + '"' +
+      hidCls(t, open ? " penon" : "") + '><td class="idx">' +
+      (on ? handle("Reorder " + t.name) : '') + '<span class="idx-n">' + (i + 1) + '</span></td>' +
+      '<td><button type="button" class="tacopenb' + (gaps && !open ? ' gapwalk' : '') + '" title="Open this ' +
+        esc(L1("tactic").toLowerCase()) + ' in the panel"><b class="tacname">' + (t.name ? esc(t.name) : esc(word)) + '</b></button>' +
+        (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
+        (gaps ? '<span class="tacgaps">' + gaps + ' missing</span>' : '') + '</td>' +
+      '<td class="outn">' + (outs ? outs + (noTgt ? '<span class="why">' + noTgt + ' without a target</span>' : '')
+                                  : '<span class="missing">Missing</span>') + '</td>' +
+      '<td>' + (t.owner ? ownerShown(t.owner) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="collabs">' + (collabNames(t).length ? collabShown(t.collaborators) : '<span class="nobody">&mdash;</span>') + '</td>' +
+      '<td>' + qs(t) + '</td>' +
+      '<td>' + (supportsOf(t, it).length ? supportsOf(t, it).map(function(x){ return kmTag(x.n, x.m.name, "m"); }).join('')
+                                         : '<span class="nobody">&mdash;</span>') + '</td>' +
+      '<td class="tools">' + eyeBtn(t, "plan", "u_plan") + xb("tactics", t.id) + '</td></tr>';
+  };
+  /* The panel: every field the row used to hold, in sections, through the
+     SAME builders — gapCell keeps the lifecycle, the red word and the walk
+     mark; the outcomes keep their own small table so §248's four boxes,
+     §278's months and §414's extra lines are drawn by the code that already
+     draws them. */
+  var tacticPanel = function(t){
+    var i = it.tactics.indexOf(t), n = it.tactics.length;
+    var prev = it.tactics[(i - 1 + n) % n], next = it.tactics[(i + 1) % n];
+    var word = L1("tactic");
+    var sec = function(title, body){ return '<div class="tpsec">' + (title ? '<h4>' + title + '</h4>' : '') + body + '</div>'; };
+    var tgtOpen = false;
+    var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
+      ctx: pctx(t), del: true, fillKind: "tactic", read: tgtShown,
+      control: function(set, pendCls){ tgtOpen = true; return outcomeEdit(t, set, pendCls, false); } });
+    var nEx = tacticExtras(t).length, tdCls = tgtOpen ? 'tgtcell' : 'tgtcol num';
+    var outRows = '<tr><td>' + (nEx ? otag("O1") : '') +
+      gapCell("plan", "u_plan", t, "outcome", {
+        ctx: pctx(t), del: true, fillKind: "tactic",
+        read: function(v){ return '<b>' + esc(v) + '</b>'; },
+        control: function(set, pendCls){ return textOr("plan", t.outcome || "", pendCls || "", set); } }) +
+      (!nEx ? outAddBtn(t) : '') + '</td>' +
+      monthlyTgtCell(tdCls, t, "outMonthly", tgtCell, !SMPRules.isYesNo(t.outTarget), true) + '</tr>' +
+      planOutRows(t, true, tdCls) +
+      (!SMPRules.isYesNo(t.outTarget) ? monthlyRowFor(t, "outMonthly", "outTarget", 2, t.outcome || t.name) : "");
+    var owner = gapCell("plan", "u_plan", t, "owner", {
+      ctx: pctx(t), readEmpty: '<span class="missing">Missing</span>', read: ownerShown,
+      control: function(set, pendCls){
+        return selectOr("plan", t.owner == null ? "" : t.owner, ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set); } });
+    var collabs = gapCell("plan", "u_plan", t, "collaborators", {
+      ctx: pctx(t), text: collabText,
+      parse: function(v){ return Array.isArray(v) ? v.map(function(x){ return String(x).trim(); }).filter(Boolean) : collabParse(v); },
+      del: true, readEmpty: '<span class="nobody">&mdash;</span>', read: collabShown,
+      control: function(set, pendCls){
+        return selectManyOr("plan", collabNames(t), ownerChoices(collabNames(t), false), "collabsel " + (pendCls || ""), set,
+          "Collaborators on this " + word); } });
+    return '<aside class="tacpanel" aria-label="' + esc(word) + ' being edited">' +
+      '<div class="tph"><span class="tpk">' + word + ' ' + (i + 1) + ' of ' + n + '</span>' +
+        '<b class="tpname">' + (t.name ? esc(t.name) : 'New ' + esc(word.toLowerCase())) + '</b>' +
+        '<span class="tpnav">' + (n > 1
+          ? '<button type="button" class="tpbtn" data-tacopen="' + esc(prev.id) + '" title="Previous ' + esc(word.toLowerCase()) + '">&uarr;</button>' +
+            '<button type="button" class="tpbtn" data-tacopen="' + esc(next.id) + '" title="Next ' + esc(word.toLowerCase()) + '">&darr;</button>' : '') +
+          '<button type="button" class="tpbtn tpx" data-tacclose="1" title="Close the panel">&times;</button></span></div>' +
+      '<div class="tpbody">' +
+        sec('The ' + esc(word.toLowerCase()),
+          bxkey(word) + textOr("plan", t.name, "tacpn", function(v){ t.name = v; }) +
+          bxkey("Description") + textOr("plan", t.description || "", "tacdesc tacpd", function(v){ setOr(t, "description", v); })) +
+        sec(DW("outcomes", "many", t),
+          '<div class="scroll tpout"><table><thead><tr><th>' + DW("outcomes", "one", t) + '</th><th class="cc">Target</th></tr></thead>' +
+          '<tbody>' + outRows + '</tbody></table></div>') +
+        sec('Who', bxkey("Owner") + '<div class="tpfield">' + owner + '</div>' + bxkey("Collaborators") + '<div class="tpfield collabs">' + collabs + '</div>') +
+        sec('When', '<span role="group" aria-label="Quarters this ' + esc(word.toLowerCase()) + ' runs in">' + qsEdit(t) + '</span>') +
+        sec('', supportsEdit(t, it)) +
+        (requirementsOn(t) ? sec('', reqsCell(t, true)) : '') +
+      '</div>' +
+      '<div class="tpfoot"><span>Saves as you leave each box.</span>' +
+        '<button type="button" class="tpdone" data-page="plan" data-pageset="' + esc(secPagesOpen().join("|")) + '">Done editing</button></div>' +
+      '</aside>';
+  };
   var fold = ed && tailFolds();
   var tRows = it.tactics.map(function(t, i){
+    /* §769: with the pen on, one line; the fields are in the panel. */
+    if (ed) return penTacticRow(t, i);
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
        predicting it. `.tgtcell` is what stops the Target column folding below
        880 (arrange.css) and the fold must never take the only way to SET a
@@ -39296,7 +39445,7 @@ function unitPlanBody(it, u, railed, bare){
         '</div>'
     : pillarBand(code, it.name, yearsMarks(it) +
         (u.ukey === "group" ? topSeats(it) : ""), it.kind, "planband") + paneActs("plan", "u_plan");
-  return head +
+  return (penOpen ? '<div class="penwrap"><div class="penmain">' : '') + head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
        "the pillar as well yes". It has been READ-ONLY EVERYWHERE since the
@@ -39438,12 +39587,18 @@ function unitPlanBody(it, u, railed, bare){
        haeders"*. `fold` is read here, where the row builder read it, so the
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
-    miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
+    (ed
+      /* §769: the list — one line per tactic — and the panel beside it. */
+      ? miniTable(["#", L1("tactic"), DW("outcomes", "many", it), "Owner", "Collabs.", "Quarters", L("measure"), ""],
+          tRows + addRow(7, "tactic", "Add a " + L1("tactic")),
+          sortAttr("tactics"), "tactable penlist")
+      : miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
                 .concat(fold ? [] : ["Collabs.","Quarters"]),
       tRows + addRow(fold ? 4 : 6, "tactic", "Add a " + L1("tactic")),
-      sortAttr("tactics"), "tactable") +
+      sortAttr("tactics"), "tactable")) +
     /* §767: which number is which measure, folded under the tactics. */
-    supportsLegend(it);
+    supportsLegend(it) +
+    (penOpen ? '</div>' + tacticPanel(penOpen) + '</div>' : '');
 }
 /* §405: the way a real business unit plans when it is not pillars, or null.
    Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
@@ -89302,7 +89457,8 @@ var SYNC = (function () {
              screen, written nowhere (§50.6's fault through a fresh door). */
           var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
-          if (what === "measure") addMeasure(it); else addTactic(it);
+          if (what === "measure") addMeasure(it);
+          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §769: the new one opens in the panel */
         }
         else if (what === "project") {
           /* §326: holderByIdWritable, not capById — a project may be added to
@@ -89458,6 +89614,17 @@ var SYNC = (function () {
       b.addEventListener("click", gapWalk);
     });
 
+    /* §769: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
+    document.querySelectorAll("[data-tacopen]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        if (b.tagName === "TR" && e.target.closest("select, input, textarea, a, .grip, .ssbtn, label, .eyebtn, .xbtn, [data-rowoff], [data-hiderow]")) return;
+        if (String(PEN_TACTIC) === b.dataset.tacopen && b.tagName === "TR") return;
+        PEN_TACTIC = b.dataset.tacopen; paint();
+      });
+    });
+    document.querySelectorAll("[data-tacclose]").forEach(function(b){
+      b.addEventListener("click", function(){ PEN_TACTIC = false; paint(); });
+    });
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;

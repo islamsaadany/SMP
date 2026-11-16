@@ -112,13 +112,18 @@ with sync_playwright() as p:
 
     print("\n4 · on, the pen")
     go(True)
-    nt = safe(pg, "()=>UNITS.mobile.items[0].tactics.filter(t=>!SMPRules.isHidden(t)).length")
-    bx = safe(pg, "()=>[...document.querySelectorAll('#panel .reqbox textarea')].map(t=>[t.value, t.classList.contains('grow')])")
-    ok("a box on every tactic, the empty ones included (§61)", bx and len(bx) == nt, [len(bx or []), nt])
-    ok("the first holds one line per item", bx and bx[0][0] == "Two data analysts\nBudget sign-off from Finance", bx and bx[0])
-    ok("and none is a one-line .grow box, so Enter is a newline", bx and not any(x[1] for x in bx), bx)
+    nt = safe(pg, "()=>UNITS.mobile.items[0].tactics.length")
+    # §769: one tactic is open in the panel at a time; each is opened and its box read there
+    bx = []
+    for i in range(nt):
+        safe(pg, "()=>{PEN_TACTIC=UNITS.mobile.items[0].tactics[%d].id; paint();}" % i); pg.wait_for_timeout(250)
+        bx.append(safe(pg, "()=>{var t=document.querySelector('#panel .tacpanel .reqbox textarea'); return t?[t.value, t.classList.contains('grow')]:null}"))
+    ok("a box on every tactic once opened, the empty ones included (§61)", bx and len(bx) == nt and all(bx), [len(bx or []), nt, bx])
+    ok("the first holds one line per item", bx and bx[0] and bx[0][0] == "Two data analysts\nBudget sign-off from Finance", bx and bx[0])
+    ok("and none is a one-line .grow box, so Enter is a newline", bx and not any(x and x[1] for x in bx), bx)
+    safe(pg, "()=>{PEN_TACTIC=UNITS.mobile.items[0].tactics[1].id; paint();}"); pg.wait_for_timeout(250)
     try:
-        box = pg.locator("#panel .reqbox textarea").nth(1)
+        box = pg.locator("#panel .tacpanel .reqbox textarea")
         box.click(); box.press("End")
         box.type("Legal review"); box.press("Enter"); box.type("  "); box.press("Enter"); box.type(" Vendor shortlist ")
         v = box.input_value()
@@ -128,7 +133,7 @@ with sync_playwright() as p:
     ok("typed lines reach the STORED tactic trimmed, blanks dropped",
        safe(pg, "()=>JSON.stringify(UNITS.mobile.items[0].tactics[1].reqs||null)") == '["Legal review","Vendor shortlist"]',
        safe(pg, "()=>JSON.stringify(UNITS.mobile.items[0].tactics[1].reqs||null)"))
-    safe(pg, "()=>{ var i=[...document.querySelectorAll('#panel .reqbox textarea')][1]; i.value='  \\n '; i.dispatchEvent(new Event('change',{bubbles:true})); }")
+    safe(pg, "()=>{ var i=document.querySelector('#panel .tacpanel .reqbox textarea'); i.value='  \\n '; i.dispatchEvent(new Event('change',{bubbles:true})); }")
     pg.wait_for_timeout(300)
     ok("emptied, the key is DELETED (§50.6)", safe(pg, "()=>'reqs' in UNITS.mobile.items[0].tactics[1]") is False)
 

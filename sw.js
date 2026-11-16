@@ -683,7 +683,9 @@
    the built platform file changed. */
 /* v7.77-measures-dropdown — §767–§767.2: a tactic names the key measures
    it supports, by number; past main's v7.75 at the merge. */
-const SHELL = "smp-shell-v7.77-measures-dropdown";
+/* v7.78-tactic-panel — §769: with the pen on, the tactics are a list and
+   the one being edited opens in a panel beside the table. */
+const SHELL = "smp-shell-v7.78-tactic-panel";
 const ASSETS = [
   "/",
   "/index.html",

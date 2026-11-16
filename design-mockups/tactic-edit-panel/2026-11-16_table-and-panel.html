@@ -375,17 +375,17 @@
     document.getElementById("sname").textContent = t.name || "New tactic";
     sb.innerHTML =
       '<div class="sec"><h3>Description</h3><textarea class="fld" id="f-desc" rows="2" placeholder="One sentence under the tactic">' + esc(t.desc) + '</textarea></div>' +
-      '<div class="sec"><h3>Outcomes <span class="hint">what it should leave behind</span></h3>' +
+      '<div class="sec"><h3>Outcomes</h3>' +
         t.outs.map(function(o, k){ var yn = o.target === "Y/N";
           return '<div class="out"><div class="oh"><span class="kmtag">O' + (k + 1) + '</span><b class="oname" data-oname="' + k + '">' + (o.name ? esc(o.name) : '<span class="nobody">Not named yet — type it in the table</span>') + '</b></div>' +
             '<div class="grid4"><input class="fld" data-o="' + k + '" data-f="target" value="' + esc(yn ? "Yes / No" : o.target) + '" placeholder="Target"><input class="fld" data-o="' + k + '" data-f="unit" value="' + esc(o.unit) + '" placeholder="Unit"' + (yn ? ' disabled' : '') + '>' +
             sel(["≥","≤"], o.dir, ' data-o="' + k + '" data-f="dir"' + (yn ? ' disabled' : '')) + sel(["—","Latest","Sum","Count","Average"], o.compile || "—", ' data-o="' + k + '" data-f="compile"' + (yn ? ' disabled' : '')) + '</div>' +
             (yn ? '' : String(o.target).trim() ? '<span class="months"><i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i> by month or by quarter</span>' : '<span class="miss">Target missing</span>') + '</div>';
         }).join("") + (t.outs.length ? '' : '<p class="hint">Add an outcome in the table; its target and rule are set here.</p>') + '</div>' +
-      '<div class="sec"><h3>Collaborators <span class="hint">the people supporting the owner — open, type to find, tick to choose</span></h3>' + dd("f-col", function(){ return t.col; }, true) + '</div>' +
-      '<div class="sec"><h3>Key measures <span class="hint">which ones it supports</span></h3><details class="kmdrop"><summary><span id="kmsum">' + (t.km.length ? kmTags(t) : '<span class="nobody" style="font-size:12.5px">Pick key measures</span>') + '</span><span class="chev"></span></summary>' +
+      '<div class="sec"><h3>Collaborators</h3>' + dd("f-col", function(){ return t.col; }, true) + '</div>' +
+      '<div class="sec"><h3>Key measures</h3><details class="kmdrop"><summary><span id="kmsum">' + (t.km.length ? kmTags(t) : '<span class="nobody" style="font-size:12.5px">Pick key measures</span>') + '</span><span class="chev"></span></summary>' +
         KM.map(function(m, i){ return '<label><input type="checkbox" data-km="' + i + '"' + (t.km.indexOf(i) >= 0 ? ' checked' : '') + '><span class="kmtag">KM ' + (i + 1) + '</span> ' + esc(m.n) + '</label>'; }).join("") + '</details></div>' +
-      '<div class="sec"><h3>Requirements <span class="hint">what it needs, one per line</span></h3><textarea class="fld" id="f-req" rows="3" placeholder="One per line">' + esc(t.req) + '</textarea></div>';
+      '<div class="sec"><h3>Requirements</h3><textarea class="fld" id="f-req" rows="3" placeholder="One per line">' + esc(t.req) + '</textarea></div>';
     var live = function(){ drawRows(); document.getElementById("sname").textContent = t.name || "New tactic"; };
     document.getElementById("f-desc").addEventListener("input", function(e){ t.desc = e.target.value; var r = document.querySelector('#rows tr[data-i="' + cur + '"] td:nth-child(2)'); if (r) { var w = r.querySelector('.why'); if (!w && e.target.value) { w = document.createElement('span'); w.className = 'why'; r.appendChild(w); } if (w) { w.textContent = e.target.value; if (!e.target.value) w.remove(); } } });
     document.getElementById("f-req").addEventListener("input", function(e){ t.req = e.target.value; });

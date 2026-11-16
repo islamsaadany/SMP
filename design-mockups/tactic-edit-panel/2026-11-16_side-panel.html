@@ -104,123 +104,136 @@
   .new { outline:2px solid var(--mark); outline-offset:4px; border-radius:10px; }
   .ask { margin-top:28px; background:var(--surface); border:1px dashed var(--mark); border-radius:10px; padding:14px 18px; }
   .ask h2 { margin:0 0 8px; font-size:15px; } .ask ul { margin:0; padding-left:1.2rem; } .ask li { margin:5px 0; }
+  .tactable td .kmtag { cursor:default; }
+  .toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--panel); color:var(--panel-ink); font-size:12px; padding:6px 12px; border-radius:999px; opacity:0; transition:opacity .2s; pointer-events:none; }
+  .toast.on { opacity:1; }
+  .sbody .kmdrop label:hover { background:var(--surface-2); }
+  .empty { padding:40px 20px; text-align:center; color:var(--ink-3); font-size:13px; }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 </style>
 
 <div class="wrap">
   <h1>Editing a tactic in a side panel</h1>
-  <p class="lede">The pen is on. The tactics table is a plain list again, one line per tactic, and the tactic being edited opens in a panel on the right in short sections. Press a pencil in the table to move the panel to that tactic. The pillar is Mobile's first; the extra outcomes, key measures and requirements are invented so the panel has something to show.</p>
+  <p class="lede">A working copy to try. The pen is on. Press a pencil to open a tactic in the panel; everything you type there shows in the table at once. Add and remove tactics and outcomes, tick key measures, press the quarters. Nothing here is saved anywhere. The pillar is Mobile's first; the extra outcomes, key measures and requirements are invented.</p>
 
   <div class="stage">
     <div class="pillar">
-      <div class="phead"><span class="code">MB01</span><b>Digital &amp; Data-Driven Operations</b><button class="done" type="button">Done editing</button></div>
-      <div class="sect">Tactics <span class="n">5</span></div>
-      <div class="scroll new"><table>
+      <div class="phead"><span class="code">MB01</span><b>Digital &amp; Data-Driven Operations</b><button class="done" type="button" id="doneall">Done editing</button></div>
+      <div class="sect">Tactics <span class="n" id="tcount">5</span></div>
+      <div class="scroll new"><table class="tactable">
         <thead><tr><th>#</th><th>Tactic</th><th>Outcomes</th><th>Owner</th><th>Quarters</th><th>Key measures</th><th></th></tr></thead>
-        <tbody id="rows">
-          <tr class="on" data-i="0"><td class="idx"><span class="grip">☰</span>1</td><td><b class="tacname">Clean and standardize customer and SKU base</b><span class="why">Clean the master data before the ERP cutover; duplicates removed, SKUs on one code</span></td>
-            <td class="outn">4 <small>· 1 without a target</small></td><td>Ramy Behairy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><span class="kmtag">KM 1</span><span class="kmtag">KM 2</span></td>
-            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x" title="Remove">×</span></span></td></tr>
-          <tr data-i="1"><td class="idx"><span class="grip">☰</span>2</td><td><b class="tacname">End-to-end order-to-cash digitization</b></td>
-            <td class="outn">1</td><td>Mohamed Rizk</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><span class="kmtag">KM 2</span></td>
-            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x">×</span></span></td></tr>
-          <tr data-i="2"><td class="idx"><span class="grip">☰</span>3</td><td><b class="tacname">Digitize sales reporting via Power BI</b></td>
-            <td class="outn">1</td><td>Ramy Behairy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><span class="kmtag">KM 4</span></td>
-            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x">×</span></span></td></tr>
-          <tr data-i="3"><td class="idx"><span class="grip">☰</span>4</td><td><b class="tacname">Scale Mobile Digital App across merchants</b></td>
-            <td class="outn">1</td><td>Ashraf Laithy</td><td><span class="q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td><span class="kmtag">KM 2</span><span class="kmtag">KM 3</span></td>
-            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x">×</span></span></td></tr>
-          <tr data-i="4"><td class="idx"><span class="grip">☰</span>5</td><td><b class="tacname">Data integration across business units</b></td>
-            <td class="outn"><span class="miss">Missing</span></td><td><span class="miss">Missing</span></td><td><span class="q"><i>Q1</i><i>Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td><span style="color:var(--ink-3)">—</span></td>
-            <td><span class="rowtools"><button class="pen" type="button" title="Edit this tactic">✎</button><span class="x">×</span></span></td></tr>
-          <tr class="addrow"><td colspan="7">+ Add a tactic</td></tr>
-        </tbody>
+        <tbody id="rows"></tbody>
       </table></div>
       <p style="margin:0 16px 14px; font-size:12px; color:var(--ink-3)">The key measures table above it and the rest of the pillar stay exactly as they are today. Reordering by the handle, the eye and the × stay on the row.</p>
     </div>
 
-    <aside class="side new" id="side">
-      <div class="shead"><span class="k">Tactic <span id="sn">1</span> of 5</span><b id="sname">Clean and standardize customer and SKU base</b>
+    <aside class="side new" id="side" hidden>
+      <div class="shead"><span class="k">Tactic <span id="sn">1</span> of <span id="sof">5</span></span><b id="sname"></b>
         <span class="nav"><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
-        <button class="close" type="button" title="Close">×</button></div>
-      <div class="sbody">
-        <div class="sec">
-          <h3>The tactic</h3>
-          <span class="bxkey">Tactic</span><input class="fld" id="f-name" value="Clean and standardize customer and SKU base">
-          <span class="bxkey">Description</span><textarea class="fld" id="f-desc" rows="2">Clean the master data before the ERP cutover; duplicates removed, SKUs on one code</textarea>
-        </div>
-        <div class="sec">
-          <h3>Outcomes <span class="hint">what it should leave behind</span></h3>
-          <div class="out"><div class="oh"><span class="kmtag">O1</span><b>Duplicate customer and SKU records removed</b></div>
-            <div class="grid4"><input class="fld" value="12,000"><input class="fld" value="#"><select class="fld"><option>≥</option><option>≤</option></select><select class="fld"><option>Sum</option><option>Latest</option></select></div>
-            <span class="months"><i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i> by month or by quarter</span></div>
-          <div class="out"><div class="oh"><span class="kmtag">O2</span><b>Customer records matched to one tax id</b><span class="x">×</span></div>
-            <div class="grid4"><input class="fld" value="100"><input class="fld" value="%"><select class="fld"><option>≥</option></select><select class="fld"><option>Latest</option></select></div></div>
-          <div class="out"><div class="oh"><span class="kmtag">O3</span><b>SKU codes unified across the warehouses</b><span class="x">×</span></div>
-            <div class="grid4"><input class="fld" value="100"><input class="fld" value="%"><select class="fld"><option>≥</option></select><select class="fld"><option>Latest</option></select></div></div>
-          <div class="out"><div class="oh"><span class="kmtag">O4</span><b>Data owners named per master table</b><span class="x">×</span></div>
-            <div class="grid4"><input class="fld" placeholder="Target"><input class="fld" placeholder="Unit"><select class="fld"><option>≥</option></select><select class="fld"><option>—</option></select></div>
-            <span class="miss">Target missing</span></div>
-          <button class="linkbu" type="button">+ Add an outcome</button>
-        </div>
-        <div class="sec">
-          <h3>Who</h3>
-          <div class="two"><div><span class="bxkey">Owner</span><select class="fld" id="f-owner"><option>Ramy Behairy</option><option>Mohamed Rizk</option></select></div>
-            <div><span class="bxkey">Collaborators</span><select class="fld" id="f-col" multiple size="2"><option selected>Nour</option><option>Hossam</option><option>Dina</option></select></div></div>
-        </div>
-        <div class="sec">
-          <h3>When</h3>
-          <span class="qpick" id="f-q"><i>Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span>
-        </div>
-        <div class="sec">
-          <h3>Key measures <span class="hint">which ones it supports</span></h3>
-          <details class="kmdrop"><summary><span class="kmtag">KM 1</span><span class="kmtag">KM 2</span><span class="chev"></span></summary>
-            <label><input type="checkbox" id="k1" checked><span class="kmtag">KM 1</span> Data duplicate rate</label>
-            <label><input type="checkbox" id="k2" checked><span class="kmtag">KM 2</span> Orders processed digitally</label>
-            <label><input type="checkbox" id="k3"><span class="kmtag">KM 3</span> App coverage rate</label>
-            <label><input type="checkbox" id="k4"><span class="kmtag">KM 4</span> Dependency on automated reports</label></details>
-        </div>
-        <div class="sec">
-          <h3>Requirements <span class="hint">what it needs, one per line</span></h3>
-          <textarea class="fld" id="f-req" rows="2">Two data analysts
-Budget sign-off from Finance</textarea>
-        </div>
-      </div>
-      <div class="sfoot"><span>Saves as you type, like the rest of the pen.</span><button class="done" type="button">Done</button></div>
+        <button class="close" type="button" id="close" title="Close">×</button></div>
+      <div class="sbody" id="sbody"></div>
+      <div class="sfoot"><span>Saves as you type, like the rest of the pen.</span><button class="done" type="button" id="done">Done</button></div>
     </aside>
   </div>
+  <div class="toast" id="toast"></div>
 
   <div class="ask">
-    <h2>What this changes, and what it does not</h2>
+    <h2>What to try</h2>
     <ul>
-      <li><b>The table in the pen</b> becomes one line per tactic: name, how many outcomes (and how many lack a target), owner, quarters, key measures, a pencil. Nothing is typed in the table itself any more.</li>
-      <li><b>The panel</b> holds every field a tactic has, in six short sections. It sticks to the right as the page scrolls; ↑ ↓ move to the previous and next tactic; × or Done closes it. One tactic open at a time.</li>
-      <li><b>Not changed:</b> read mode, the key measures table, reporting, the deck, Excel. The gap count and the Next-gap walk still land on the field, now inside the panel.</li>
-      <li><b>To decide:</b> whether the panel also serves the key measures rows (same pencil, same panel), or only tactics for now.</li>
+      <li>Press a pencil: the panel opens on that tactic and the row is marked. Change the name: the row follows as you type.</li>
+      <li>Add an outcome and give it a target: the Outcomes cell counts it and stops saying one is without a target.</li>
+      <li>Tick a key measure in the panel: the tag appears on the row. Press a quarter: the row's quarters follow.</li>
+      <li>↑ ↓ move through the tactics. + Add a tactic opens the panel on the new one. × on a row removes it (the panel closes if it was open on it).</li>
     </ul>
   </div>
 </div>
 
 <script>
 (function(){
+  var KM = ["Data duplicate rate", "Orders processed digitally", "App coverage rate", "Dependency on automated reports"];
+  var PEOPLE = ["Ramy Behairy", "Mohamed Rizk", "Ashraf Laithy", "Abdelhamid", "Nour", "Hossam", "Dina"];
   var T = [
-    { n:"Clean and standardize customer and SKU base", d:"Clean the master data before the ERP cutover; duplicates removed, SKUs on one code" },
-    { n:"End-to-end order-to-cash digitization", d:"" }, { n:"Digitize sales reporting via Power BI", d:"" },
-    { n:"Scale Mobile Digital App across merchants", d:"" }, { n:"Data integration across business units", d:"" } ];
-  var cur = 0, rows = document.querySelectorAll("#rows tr[data-i]");
-  function go(i){
-    cur = (i + T.length) % T.length;
-    rows.forEach(function(r){ r.classList.toggle("on", +r.dataset.i === cur); });
-    document.getElementById("sn").textContent = cur + 1;
-    document.getElementById("sname").textContent = T[cur].n;
-    document.getElementById("f-name").value = T[cur].n;
-    document.getElementById("f-desc").value = T[cur].d;
-    document.getElementById("side").style.display = "";
+    { name:"Clean and standardize customer and SKU base", desc:"Clean the master data before the ERP cutover; duplicates removed, SKUs on one code",
+      outs:[ {name:"Duplicate customer and SKU records removed", target:"12,000", unit:"#", dir:"≥", compile:"Sum"},
+             {name:"Customer records matched to one tax id", target:"100", unit:"%", dir:"≥", compile:"Latest"},
+             {name:"SKU codes unified across the warehouses", target:"100", unit:"%", dir:"≥", compile:"Latest"},
+             {name:"Data owners named per master table", target:"", unit:"", dir:"≥", compile:""} ],
+      owner:"Ramy Behairy", col:["Nour"], q:[0,1,1,0], km:[0,1], req:"Two data analysts\nBudget sign-off from Finance" },
+    { name:"End-to-end order-to-cash digitization", desc:"", outs:[{name:"Order-to-cash cycle time", target:"5", unit:"d", dir:"≤", compile:"Latest"}], owner:"Mohamed Rizk", col:[], q:[0,1,1,0], km:[1], req:"" },
+    { name:"Digitize sales reporting via Power BI", desc:"", outs:[{name:"Management reports live on Power BI", target:"18", unit:"#", dir:"≥", compile:"Count"}], owner:"Ramy Behairy", col:[], q:[0,1,1,0], km:[3], req:"" },
+    { name:"Scale Mobile Digital App across merchants", desc:"", outs:[{name:"Merchants ordering through the app", target:"1,500", unit:"#", dir:"≥", compile:"Latest"}], owner:"Ashraf Laithy", col:["Hossam"], q:[0,1,1,1], km:[1,2], req:"" },
+    { name:"Data integration across business units", desc:"", outs:[], owner:"", col:[], q:[0,0,1,1], km:[], req:"" } ];
+  var cur = -1;
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function toast(m){ var t = document.getElementById("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("on"); }, 1400); }
+  function qs(t){ return '<span class="q">' + t.q.map(function(v, i){ return '<i class="' + (v ? "on" : "") + '">Q' + (i + 1) + '</i>'; }).join("") + '</span>'; }
+  function kmTags(t){ return t.km.length ? t.km.slice().sort().map(function(i){ return '<span class="kmtag">KM ' + (i + 1) + '</span>'; }).join("") : '<span style="color:var(--ink-3)">—</span>'; }
+  function outsCell(t){
+    var n = t.outs.length, miss = t.outs.filter(function(o){ return !String(o.target).trim(); }).length;
+    if (!n) return '<span class="miss">Missing</span>';
+    return n + (miss ? ' <small>· ' + miss + ' without a target</small>' : '');
   }
-  rows.forEach(function(r){ r.querySelector(".pen").addEventListener("click", function(){ go(+r.dataset.i); }); });
-  document.getElementById("prev").addEventListener("click", function(){ go(cur - 1); });
-  document.getElementById("next").addEventListener("click", function(){ go(cur + 1); });
-  document.querySelector(".side .close").addEventListener("click", function(){ document.getElementById("side").style.display = "none"; rows.forEach(function(r){ r.classList.remove("on"); }); });
-  document.querySelectorAll(".qpick i").forEach(function(q){ q.addEventListener("click", function(){ q.classList.toggle("on"); }); });
+  function drawRows(){
+    var tb = document.getElementById("rows");
+    tb.innerHTML = T.map(function(t, i){
+      return '<tr' + (i === cur ? ' class="on"' : '') + ' data-i="' + i + '"><td class="idx"><span class="grip">☰</span>' + (i + 1) + '</td>' +
+        '<td><b class="tacname">' + (t.name ? esc(t.name) : '<span class="miss">New tactic</span>') + '</b>' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') + '</td>' +
+        '<td class="outn">' + outsCell(t) + '</td><td>' + (t.owner ? esc(t.owner) : '<span class="miss">Missing</span>') + '</td>' +
+        '<td>' + qs(t) + '</td><td>' + kmTags(t) + '</td>' +
+        '<td><span class="rowtools"><button class="pen" type="button" data-pen="' + i + '" title="Edit this tactic">✎</button><span class="x" data-x="' + i + '" title="Remove">×</span></span></td></tr>';
+    }).join("") + '<tr class="addrow"><td colspan="7" id="add">+ Add a tactic</td></tr>';
+    document.getElementById("tcount").textContent = T.length;
+    tb.querySelectorAll("[data-pen]").forEach(function(b){ b.addEventListener("click", function(){ open(+b.dataset.pen); }); });
+    tb.querySelectorAll("[data-x]").forEach(function(b){ b.addEventListener("click", function(){
+      var i = +b.dataset.x; T.splice(i, 1);
+      if (cur === i) { close(); } else if (cur > i) cur--;
+      drawRows(); if (cur >= 0) drawPanel(); toast("Tactic removed"); }); });
+    document.getElementById("add").addEventListener("click", function(){
+      T.push({ name:"", desc:"", outs:[], owner:"", col:[], q:[0,0,0,0], km:[], req:"" });
+      open(T.length - 1); setTimeout(function(){ var f = document.getElementById("f-name"); if (f) f.focus(); }, 0); });
+  }
+  function sel(id, opts, val, extra){ return '<select class="fld" id="' + id + '"' + (extra || "") + '>' + opts.map(function(o){ return '<option' + (o === val ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join("") + '</select>'; }
+  function drawPanel(){
+    var t = T[cur], sb = document.getElementById("sbody");
+    document.getElementById("sn").textContent = cur + 1; document.getElementById("sof").textContent = T.length;
+    document.getElementById("sname").textContent = t.name || "New tactic";
+    sb.innerHTML =
+      '<div class="sec"><h3>The tactic</h3><span class="bxkey">Tactic</span><input class="fld" id="f-name" value="' + esc(t.name) + '" placeholder="The work itself, as a sentence">' +
+      '<span class="bxkey">Description</span><textarea class="fld" id="f-desc" rows="2" placeholder="One sentence under the tactic">' + esc(t.desc) + '</textarea></div>' +
+      '<div class="sec"><h3>Outcomes <span class="hint">what it should leave behind</span></h3>' +
+        t.outs.map(function(o, k){
+          return '<div class="out"><div class="oh"><span class="kmtag">O' + (k + 1) + '</span><input class="fld" data-o="' + k + '" data-f="name" value="' + esc(o.name) + '" placeholder="What it should produce" style="flex:1">' + (k ? '<span class="x" data-ox="' + k + '" title="Remove this outcome">×</span>' : '') + '</div>' +
+            '<div class="grid4"><input class="fld" data-o="' + k + '" data-f="target" value="' + esc(o.target) + '" placeholder="Target"><input class="fld" data-o="' + k + '" data-f="unit" value="' + esc(o.unit) + '" placeholder="Unit">' +
+            sel("", ["≥","≤"], o.dir, ' data-o="' + k + '" data-f="dir"') + sel("", ["—","Latest","Sum","Count","Average"], o.compile || "—", ' data-o="' + k + '" data-f="compile"') + '</div>' +
+            (String(o.target).trim() ? '<span class="months"><i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i> by month or by quarter</span>' : '<span class="miss">Target missing</span>') + '</div>';
+        }).join("") + '<button class="linkbu" type="button" id="addout">+ Add an outcome</button></div>' +
+      '<div class="sec"><h3>Who</h3><div class="two"><div><span class="bxkey">Owner</span>' + sel("f-owner", [""].concat(PEOPLE), t.owner) + '</div>' +
+        '<div><span class="bxkey">Collaborators</span><select class="fld" id="f-col" multiple size="3">' + PEOPLE.map(function(p){ return '<option' + (t.col.indexOf(p) >= 0 ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join("") + '</select></div></div></div>' +
+      '<div class="sec"><h3>When</h3><span class="qpick" id="f-q">' + t.q.map(function(v, i){ return '<i class="' + (v ? "on" : "") + '" data-q="' + i + '">Q' + (i + 1) + '</i>'; }).join("") + '</span></div>' +
+      '<div class="sec"><h3>Key measures <span class="hint">which ones it supports</span></h3><details class="kmdrop"><summary><span id="kmsum">' + (t.km.length ? kmTags(t) : '<span style="color:var(--ink-3);font-size:12.5px">Pick key measures</span>') + '</span><span class="chev"></span></summary>' +
+        KM.map(function(n, i){ return '<label><input type="checkbox" data-km="' + i + '"' + (t.km.indexOf(i) >= 0 ? ' checked' : '') + '><span class="kmtag">KM ' + (i + 1) + '</span> ' + esc(n) + '</label>'; }).join("") + '</details></div>' +
+      '<div class="sec"><h3>Requirements <span class="hint">what it needs, one per line</span></h3><textarea class="fld" id="f-req" rows="2" placeholder="One per line">' + esc(t.req) + '</textarea></div>';
+    /* bind */
+    var live = function(){ drawRows(); document.getElementById("sname").textContent = t.name || "New tactic"; };
+    document.getElementById("f-name").addEventListener("input", function(e){ t.name = e.target.value; live(); });
+    document.getElementById("f-desc").addEventListener("input", function(e){ t.desc = e.target.value; live(); });
+    document.getElementById("f-req").addEventListener("input", function(e){ t.req = e.target.value; });
+    document.getElementById("f-owner").addEventListener("change", function(e){ t.owner = e.target.value; live(); toast("Saved"); });
+    document.getElementById("f-col").addEventListener("change", function(e){ t.col = Array.prototype.filter.call(e.target.options, function(o){ return o.selected; }).map(function(o){ return o.value; }); toast("Saved"); });
+    sb.querySelectorAll("[data-q]").forEach(function(q){ q.addEventListener("click", function(){ t.q[+q.dataset.q] = t.q[+q.dataset.q] ? 0 : 1; q.classList.toggle("on"); live(); toast("Saved"); }); });
+    sb.querySelectorAll("[data-km]").forEach(function(c){ c.addEventListener("change", function(){ var i = +c.dataset.km; var at = t.km.indexOf(i); if (c.checked && at < 0) t.km.push(i); if (!c.checked && at >= 0) t.km.splice(at, 1);
+      document.getElementById("kmsum").innerHTML = t.km.length ? kmTags(t) : '<span style="color:var(--ink-3);font-size:12.5px">Pick key measures</span>'; live(); toast("Saved"); }); });
+    sb.querySelectorAll("[data-o]").forEach(function(f){ f.addEventListener(f.tagName === "SELECT" ? "change" : "input", function(){ t.outs[+f.dataset.o][f.dataset.f] = f.value === "—" ? "" : f.value; drawRows(); if (f.dataset.f === "target") { var o = f.closest(".out"); var m = o.querySelector(".months, .miss"); if (m) m.outerHTML = String(f.value).trim() ? '<span class="months"><i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i> by month or by quarter</span>' : '<span class="miss">Target missing</span>'; } }); });
+    sb.querySelectorAll("[data-ox]").forEach(function(x){ x.addEventListener("click", function(){ t.outs.splice(+x.dataset.ox, 1); drawRows(); drawPanel(); toast("Outcome removed"); }); });
+    document.getElementById("addout").addEventListener("click", function(){ t.outs.push({ name:"", target:"", unit:"", dir:"≥", compile:"" }); drawRows(); drawPanel(); var last = sb.querySelectorAll('[data-f="name"]'); last[last.length - 1].focus(); });
+  }
+  function open(i){ cur = i; document.getElementById("side").hidden = false; drawRows(); drawPanel(); }
+  function close(){ cur = -1; document.getElementById("side").hidden = true; drawRows(); }
+  document.getElementById("prev").addEventListener("click", function(){ open((cur - 1 + T.length) % T.length); });
+  document.getElementById("next").addEventListener("click", function(){ open((cur + 1) % T.length); });
+  document.getElementById("close").addEventListener("click", close);
+  document.getElementById("done").addEventListener("click", close);
+  document.getElementById("doneall").addEventListener("click", function(){ close(); toast("Done editing — the plan would show in read mode now"); });
+  drawRows(); open(0);
 })();
 </script>

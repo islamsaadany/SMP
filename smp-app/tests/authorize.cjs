@@ -247,6 +247,39 @@ console.log("\n5 · a locked cycle");
   check("the SMO still can", v2.ok, v2.refusals.join(" / "));
 })();
 
+/* ── 5b · A CLOSED cycle takes figures from the office alone (§756) ──
+   The screen's rule since §755, asked here for the first time: until then
+   this file asked only the lock, so a closed cycle refused nobody. BOTH
+   ENDS (§94.2): the head is refused and the word is "closed", the office is
+   let through, submitting is refused the same way, and the SAME figure on
+   the open seed lands — so the refusal is the state's and not the figure's. */
+console.log("\n5b · a closed cycle (§756)");
+(function () {
+  const closed = clone(SEED);
+  closed.review = Object.assign({}, closed.review, { state: "closed" });
+  const inc = clone(closed); inc.units[UNIT].items[0].measures[0].actual = 5;
+  const v = A.authorize(closed, inc, personOf(closed, headKey));
+  check("a unit head cannot report into a closed cycle", !v.ok, "was ALLOWED");
+  check("...and the refusal says closed, not locked",
+        /closed/.test(v.refusals.join(" ")) && !/locked/.test(v.refusals.join(" ")), v.refusals.join(" / "));
+  const v2 = A.authorize(closed, inc, personOf(closed, "smo"));
+  check("the SMO still can", v2.ok, v2.refusals.join(" / "));
+  const sub = clone(closed);
+  sub.review = Object.assign({}, sub.review, { submitted: Object.assign({}, sub.review.submitted, { [UNIT]: true }) });
+  const v3 = A.authorize(closed, sub, personOf(closed, headKey));
+  check("nor can the head submit into one", !v3.ok, "was ALLOWED");
+  check("...which is a change the differ actually sees", v3.changes.length > 0,
+        JSON.stringify(v3.changes.map(function (c) { return c.kind; })));
+  const open = clone(SEED); open.units[UNIT].items[0].measures[0].actual = 5;
+  const v4 = A.authorize(SEED, open, personOf(SEED, headKey));
+  check("the same figure lands on the open cycle", v4.ok, v4.refusals.join(" / "));
+  /* The state is read from the STORED cycle: a body that reopens the cycle
+     and enters a figure at once is judged on the closed one it was sent to. */
+  const both = clone(inc); both.review = Object.assign({}, both.review, { state: "open" });
+  const v5 = A.authorize(closed, both, personOf(closed, headKey));
+  check("reopening and entering in one body is still refused for the head", !v5.ok, "was ALLOWED");
+})();
+
 /* ── 6 · A contributor writes their own lines only ──────────────── */
 console.log("\n6 · a contributor");
 (function () {

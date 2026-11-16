@@ -21,7 +21,7 @@ for tag, f in [("RULES","../../lib/rules.js"), ("DIFF","../../lib/graph-diff.js"
                ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("RECIPES","recipes.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
                ("PPTX","pptx.js"),
                ("MAIL","../../lib/mail-html.js"),
-               ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("PRESENT","present.js"), ("READING","reading.js"), ("SLIDES","slides.js"),
+               ("RENDER","group-render.js"), ("TABLECOLS","tablecols.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("PRESENT","present.js"), ("READING","reading.js"), ("SLIDES","slides.js"),
                ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("HISTORY","history.js"), ("UNSAVED","unsaved.js"), ("LIBRARY","insights.js"), ("COPILOT","copilot.js"), ("SAFETY","safety.js"), ("CONTINGENCY","contingency.js"), ("CLIENTSETUP","client-setup.js"), ("KEYSHEET","keysheet.js"), ("TABKEYS","tabkeys.js"), ("ACTIONKEYS","actionkeys.js"), ("GOTO","goto.js"), ("SYNC","sync.js")]:
     shell = shell.replace('<script src="%s"></script>' % tag, '<script>\n' + open(f).read() + '\n</script>')
 # The icon travels INSIDE the built file, as a data URI, because the file has

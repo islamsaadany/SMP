@@ -599,8 +599,7 @@ function cyclePastPlan(){
   var to = reviewAsOf(), fr = monthsOf(REVIEW.from);
   return (to != null && to > planTo()) || (fr != null && fr < planFrom());
 }
-var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
-var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
+var PWMENU = false, PFILEMENU = false;   /* the Columns menu is tablecols.js's own (§754) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
    other header menu: two open panels on one row cover each other. */
 var PICKING = null, PICKQ = "";
@@ -5506,6 +5505,28 @@ var HISTORY = [
             corporate:71, care:66, it:63, logistics:69, nigeria:44 } }
 ];
 function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null; }
+/* §755: THE CLOSING RECORD FOLLOWS THE FIGURES. Closing files a score
+   snapshot (shell.html, the close press) and leaves every figure live; the
+   office may now correct a figure on the closed cycle (cycleTakesFigures),
+   so the snapshot taken at the press would say what the cycle scored BEFORE
+   the correction — and the next cycle's "what it was last time" (deltaFor)
+   and the Closed cycles chips would read the stale number. Reopen · correct
+   · close again re-took it; this is that, collapsed: while the cycle stands
+   closed and its record is the last one filed, every paint re-takes the
+   record from the live figures before the save leaves (paint() calls this
+   ahead of SYNC.afterPaint()). Opening the next cycle replaces REVIEW, so
+   from then on the record is fixed. Matched by NAME, as reopening matches
+   it (§273.2), never the last entry blind. Unchanged figures re-take an
+   identical record, so nothing is saved for nothing. The server already lets
+   the office change the record (a `cycle` change, a_cycle). */
+function closeRecordFollow(){
+  if (!REVIEW || REVIEW.state !== "closed" || !HISTORY || !HISTORY.length) return;
+  var h = HISTORY[HISTORY.length - 1];
+  if (!h || h.name !== REVIEW.name) return;
+  h.group = groupUnitsObjectives();
+  h.units = {};
+  activeKeys().forEach(function(k){ h.units[k] = unitObjectives(UNITS[k]); });
+}
 /* A TARGET IS A UNIT KEY OR "fn:<key>", and everything that takes one has to
    resolve it the same way (§59). `UNITS[key]` alone was right until spec 010
    let a function be drawn by the unit's pages: `UNITS["fn:merchandising"]` is
@@ -5555,13 +5576,36 @@ function planEditable(){
    contributor row of the access page could not do anything even when the SMO
    set it to edit — a control that changes nothing is worse than no control.
    It also means the screen and the server answer from the same function. */
+/* ── §755: A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE ──────────
+   Islam: *"we agreed that the SMO can report even if the cycle is closed."*
+   §690 kept the Reporting tab for the office on a closed cycle, and the page
+   it opened onto said the figures were a record and could not be changed
+   here — a door onto a wall, for the one hand that runs the cycle. Closed
+   now shuts everybody BUT the office, exactly as the lock has since spec 006
+   §7.1: ONE reading of "does this cycle take figures from this person",
+   asked by every gate below it (canReport, canReportFn, canSpeakForDir, the
+   two My reporting pages, the what's-left bar), so the figure box, the note
+   box, Submit and the bar cannot disagree about it (§53.5). The server has
+   never refused a figure for the cycle being closed — authorize.js asks the
+   lock alone, which the office passes — so the screen was the one saying no
+   (§61's trap, from the other side). The closing record is kept true by
+   `closeRecordFollow()`. The dot on Performance (`reportPending`) and the
+   tab's Submitted badge (`reportSectionState`) still follow an OPEN cycle:
+   a closed cycle owes nobody a submission. */
+function cycleTakesFigures(){
+  if (!REVIEW) return false;
+  if (REVIEW.state !== "open" && !inOffice()) return false;
+  /* A locked cycle takes no more figures, from anyone but the SMO — the
+     server refuses them, so the screen must not offer them (spec 006 §7.1). */
+  if (CYCLE.locked && !inOffice()) return false;
+  return true;
+}
 function canReport(unitKey){
-  if (REVIEW.state !== "open") return false;
+  if (!cycleTakesFigures()) return false;   /* §755 */
   /* §428: the top layer's own plan is reported by the office and the group's
      CEO — a rule, the same one the server asks. */
   if (unitKey === "group") {
     if (!topHasPlan() || !planOn("group")) return false;
-    if (CYCLE.locked && !inOffice()) return false;
     /* §447: with the units off each direction's owner reports their own
        direction here; canReportRow narrows them to it. */
     /* §595: whoever reports all of it, or holds a seat on any part of it —
@@ -5569,9 +5613,7 @@ function canReport(unitKey){
        one rule the server asks; which rows they type on is each part's. */
     return SMPRules.mayReportTopOrPart(world(), viewer());
   }
-  /* A locked cycle takes no more figures, from anyone but the SMO — the
-     server refuses them, so the screen must not offer them (spec 006 §7.1). */
-  if (CYCLE.locked && !inOffice()) return false;
+  /* The lock is asked by cycleTakesFigures() above (spec 006 §7.1, §755). */
   /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
      This asked `u_report` for every target, and u_report's area is "unit" —
      so for an fn: target the screen read the own-UNIT cell while the server
@@ -5651,8 +5693,7 @@ function canReportFn(target){
   /* §405: a unit's own holder reports on the UNIT's column, through the gate
      a unit's own page already asks — never the function's. */
   if (isUnitHolderId(target)) return canReport(subjKey(target));
-  if (REVIEW.state !== "open") return false;
-  if (CYCLE.locked && !inOffice()) return false;
+  if (!cycleTakesFigures()) return false;   /* §755 */
   return grantAt("k_report", holderTarget(target)) === "edit";
 }
 function canReportFnRow(target, project, rowObj){
@@ -5730,8 +5771,7 @@ function dirPillar(t){
    (ownsTopPillar with the stored pillar's own two seats). */
 function canSpeakForDir(t){
   var d = dirPillar(t);
-  if (!d || REVIEW.state !== "open" || !planOn("group")) return false;
-  if (CYCLE.locked && !inOffice()) return false;
+  if (!d || !cycleTakesFigures() || !planOn("group")) return false;   /* §755 */
   return SMPRules.mayReportTop(world(), viewer()) ||
          SMPRules.ownsTopPillar(world(), viewer(), d.p.owner || "", d.p.custodian || "");
 }

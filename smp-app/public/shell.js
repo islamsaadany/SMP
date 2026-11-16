@@ -9039,8 +9039,7 @@ function cyclePastPlan(){
   var to = reviewAsOf(), fr = monthsOf(REVIEW.from);
   return (to != null && to > planTo()) || (fr != null && fr < planFrom());
 }
-var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
-var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
+var PWMENU = false, PFILEMENU = false;   /* the Columns menu is tablecols.js's own (§754) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
    other header menu: two open panels on one row cover each other. */
 var PICKING = null, PICKQ = "";
@@ -39813,6 +39812,600 @@ function unitPerfPane(it, u, railed){
       tacticRows(it.tactics, uk) + '</tbody></table></div>';
 }
 
+/* ── tablecols.js ── */
+/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§754) ═══════════════════
+   Islam, 2026-11-06, with a reel of a table whose columns the viewer shapes:
+   "have a look so we can see what we can do with our settings tables"; then
+   "Do all make them all personal"; then, of the mockup
+   (mockups/mock-tablecols.html), "go ahead with as today look, build it into
+   the setup tables".
+
+   FOUR THINGS A READER MAY DO TO A SETUP TABLE, AND ONE WAY BACK:
+     show or hide a column   — the Columns menu the register has had since §47.2,
+                               now on every list table;
+     set a column's width    — drag a heading's edge; the pixels show while it
+                               moves; a double-click on the edge, or F on the
+                               focused heading, fits the column to its content,
+                               narrower or wider;
+     move a column           — drag a heading; the column lifts as a ghost and a
+                               line marks where it lands;
+     set the row height      — Comfortable · Normal · Compact, under Rows in
+                               the same menu;
+     Reset                   — the table as it ships, lit only while something
+                               differs.
+   Every act also works from the keyboard on a focused heading (the hints under
+   the table), because a drag is not a thing everybody can do.
+
+   PERSONAL, PER BROWSER, NEVER THE TENANT'S (his decision): localStorage under
+   `smp.table.<id>`, merged over the shipped defaults the way the register's
+   chooser always was (§30.2) — a column added later appears, a saved choice
+   wins, anything unreadable falls back to the shipped table. The register's
+   and the functions page's own stores (`smp.people.columns`, `smp.fns.columns`)
+   are read once as the starting point and then superseded, so nobody who had
+   set their columns loses them.
+
+   ONE MECHANISM FOR SEVEN TABLES (§53.5). The renderers draw their table as
+   they always did, in the shipped order; this file reads the drawn table after
+   each paint and bends it to the reader's shape — moves the cells, hides the
+   hidden, sets the widths, classes the density — and draws the menu and the
+   status line. A renderer that wants it declares its columns once (`define`)
+   and places `tools(id)` in its header line and `foot(id)` under its table.
+   Nothing about what a cell holds or how a row is edited changes.
+
+   TWO WAYS A HIDDEN COLUMN IS NOT DRAWN, AND BOTH READ ONE STORE. The register
+   and Functions OMIT a hidden column at render (`showCol`, `fnShowCol`): their
+   add row, their frozen pair and their sort index were built around that and
+   are left as they are. The other five draw every column and this file hides
+   the cell. The menu, the store and the count are the same either way.
+
+   WHAT NEVER MOVES OR HIDES: the row number and the ⋮ (the two ends — `fixed`),
+   and the name column (`lock`), because `.tblscroll` freezes # and the name
+   on every Setup table (§151, §631) and a frozen column has to be where the
+   freeze expects it. A `keep` column (Status on Functions) stays shown but may
+   move. The name column may still be made wider or narrower.
+
+   THE SORT STILL READS THE SHIPPED ORDER. `tkSort` reorders rows by
+   `cells[st.col]` inside wire(), which runs BEFORE this file moves anything,
+   and every repaint rebuilds the table in shipped order first — so a column
+   index baked into `data-tksort` at render stays true. This is why `apply()`
+   is called after wire() and never before.
+
+   WIDTHS ARE TAKEN AS A SET. The first time a width is set by hand, every
+   visible column's width as drawn is written down with it, and from then on
+   the table is laid out from those numbers (fixed layout, the sum as its
+   width). Taken one at a time, a stored width beside columns still sized by
+   content would jump with the data. Spare room, where the columns are
+   narrower than the box, goes to the name column alone, so a column made
+   narrower is seen to be narrower (the mockup's finding, 2026-11-16).
+   ═══════════════════════════════════════════════════════════════════════════ */
+var TABLECOLS = (function(){
+  "use strict";
+
+  var SPECS = {};          /* id → array of columns, or a function(variant) returning one */
+  var OMIT = {};           /* id → true where the renderer omits a hidden column itself */
+  var STATE = {};          /* id → the saved shape, loaded once */
+  var MENU = null;         /* the table whose Columns menu is open */
+  var DENSITIES = ["comfortable", "normal", "compact"];
+  var DENSITY_WORD = { comfortable:"comfortable rows", normal:"normal rows", compact:"compact rows" };
+  var MINW = 56, MAXW = 900, STEP = 8;
+  var OLD_STORES = { people:"smp.people.columns", fns:"smp.fns.columns" };
+  var LASTGRIP = null;     /* the last edge pressed, for the double-click (see startResize) */
+  var SWALLOW = false;     /* the click that follows a drag must not sort the column */
+
+  function storeKey(id){ return "smp.table." + id; }
+  function html(s){
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+    });
+  }
+  function repaint(){ if (typeof paint === "function") paint(); }
+  /* THE PAGE IS ZOOMED (_shared.css §601: `html { zoom:.8 }` under 1000px and
+     wherever the console's rule applies), so a rectangle is in screen pixels
+     and a width set in CSS is not. Widths are read and written in layout
+     pixels (`offsetWidth`), and a pointer's movement is divided by the zoom
+     before it becomes one. Measured, not assumed: the first run wrote every
+     column back four fifths as wide. */
+  function zoomOf(el){
+    var r = el.getBoundingClientRect().width, w = el.offsetWidth;
+    return (r && w) ? r / w : 1;
+  }
+
+  /* ── The declaration ───────────────────────────────────────────────────── */
+  function define(id, cols, opts){
+    SPECS[id] = cols;
+    OMIT[id] = !!(opts && opts.omit);
+  }
+  /* The columns on offer right now: a column with an `offered` function that
+     answers no (Caps on Functions, Password when not served) is neither drawn
+     nor listed — the renderer and this file ask the same question. */
+  function spec(id, variant){
+    var cols = typeof SPECS[id] === "function" ? SPECS[id](variant) : SPECS[id];
+    return (cols || []).filter(function(c){ return !c.offered || c.offered(); });
+  }
+  function labelOf(c){ return typeof c.label === "function" ? c.label() : (c.label || ""); }
+  function pinned(c){ return !!(c.fixed || c.lock); }
+  function hideable(c){ return !(c.fixed || c.lock || c.keep); }
+
+  /* ── The store ─────────────────────────────────────────────────────────── */
+  function load(id){
+    if (STATE[id]) return STATE[id];
+    var raw = null, migrated = false;
+    try { raw = JSON.parse(localStorage.getItem(storeKey(id)) || "null"); } catch (e) { raw = null; }
+    if ((!raw || typeof raw !== "object") && OLD_STORES[id]) {
+      /* The chooser this replaces kept {key: shown}; this keeps {key: hidden}. */
+      var old = null;
+      try { old = JSON.parse(localStorage.getItem(OLD_STORES[id]) || "null"); } catch (e) { old = null; }
+      if (old && typeof old === "object") {
+        raw = { hidden:{} };
+        Object.keys(old).forEach(function(k){ if (typeof old[k] === "boolean") raw.hidden[k] = !old[k]; });
+        migrated = true;
+      }
+    }
+    if (!raw || typeof raw !== "object") raw = {};
+    STATE[id] = {
+      order: Array.isArray(raw.order) ? raw.order.filter(function(k){ return typeof k === "string"; }) : [],
+      hidden: (raw.hidden && typeof raw.hidden === "object") ? raw.hidden : {},
+      widths: (raw.widths && typeof raw.widths === "object") ? raw.widths : {},
+      density: DENSITIES.indexOf(raw.density) >= 0 ? raw.density : "normal"
+    };
+    if (migrated) save(id);
+    return STATE[id];
+  }
+  function save(id){
+    try { localStorage.setItem(storeKey(id), JSON.stringify(STATE[id])); } catch (e) {}
+  }
+  function reset(id){
+    delete STATE[id];
+    try { localStorage.removeItem(storeKey(id)); } catch (e) {}
+    if (OLD_STORES[id]) { try { localStorage.removeItem(OLD_STORES[id]); } catch (e) {} }
+  }
+
+  /* The saved shape read against the columns on offer: hidden answers for every
+     column (saved, else the shipped default), widths only where set by hand. */
+  function hiddenOf(id, c){
+    var st = load(id), v = st.hidden[c.k];
+    if (!hideable(c)) return false;
+    return typeof v === "boolean" ? v : !!c.off;
+  }
+  function widthOf(id, c){
+    var w = +load(id).widths[c.k];
+    return (!c.fixed && w >= MINW && w <= MAXW) ? Math.round(w) : 0;
+  }
+  function shown(id, k, variant){
+    var c = spec(id, variant).filter(function(x){ return x.k === k; })[0];
+    return c ? !hiddenOf(id, c) : true;
+  }
+  function setShown(id, k, on){
+    load(id).hidden[k] = !on; save(id);
+  }
+  /* The order the columns are shown in: the leading pinned ones as shipped,
+     the movable ones as saved (a movable column the store has never seen
+     takes its shipped place), the trailing fixed ones as shipped. */
+  function displayOrder(id, cols){
+    var first = 0, last = cols.length - 1;
+    while (first < cols.length && pinned(cols[first])) first++;
+    while (last >= 0 && pinned(cols[last])) last--;
+    var lead = cols.slice(0, first), mid = cols.slice(first, last + 1), tail = cols.slice(last + 1);
+    var saved = load(id).order, byKey = {};
+    mid.forEach(function(c){ byKey[c.k] = c; });
+    var out = saved.filter(function(k){ return byKey[k]; }).map(function(k){ return byKey[k]; });
+    mid.forEach(function(c, i){
+      if (out.indexOf(c) >= 0) return;
+      /* its shipped neighbour on the left, if that one is placed; else the front */
+      var at = 0;
+      for (var j = i - 1; j >= 0; j--) { var p = out.indexOf(mid[j]); if (p >= 0) { at = p + 1; break; } }
+      out.splice(at, 0, c);
+    });
+    return lead.concat(out, tail);
+  }
+  function isDefault(id, cols){
+    var st = load(id);
+    if (st.density !== "normal") return false;
+    if (cols.some(function(c){ return widthOf(id, c) > 0; })) return false;
+    if (cols.some(function(c){ return hiddenOf(id, c) !== !!c.off; })) return false;
+    var shipped = cols.filter(function(c){ return !pinned(c); }).map(function(c){ return c.k; });
+    var now = displayOrder(id, cols).filter(function(c){ return !pinned(c); }).map(function(c){ return c.k; });
+    return shipped.join("|") === now.join("|");
+  }
+  function counts(id, cols){
+    var all = cols.filter(function(c){ return !c.fixed; });
+    var on = all.filter(function(c){ return !hiddenOf(id, c); });
+    return { shown: on.length, of: all.length };
+  }
+
+  /* ── What the renderers place: the menu in the header line, the status line under the table ── */
+  function tools(id, variant){
+    var cols = spec(id, variant), n = counts(id, cols), open = MENU === id, st = load(id);
+    var out = '<span class="hmenu tcmenu' + (open ? " open" : "") + '">' +
+      '<button class="hmenu-btn" data-colmenu="' + html(id) + '" aria-haspopup="true" aria-expanded="' + open + '" ' +
+        'title="Columns, row height, and the table as it ships">Columns <span class="hcar">&#9662;</span>' +
+        /* The count rides the button's corner and takes no width: the register's
+           header line is full (§135, checks/identity-merge.py measures every
+           menu as reachable), and a button that grew by a chip pushed itself
+           under the pane's edge. Shown only while something is hidden — when
+           every column is there, there is nothing to count. */
+        (n.shown < n.of ? '<span class="tccount">' + n.shown + '/' + n.of + '</span>' : '') + '</button>';
+    if (open) {
+      out += '<div class="hmenu-panel cols tcpanel">' +
+        '<div class="hmenu-h"><span>Show columns</span><span>' +
+          '<button class="linkbu" data-tcall="' + html(id) + '">All</button> &middot; ' +
+          '<button class="linkbu" data-tcnone="' + html(id) + '">None</button></span></div>' +
+        cols.filter(function(c){ return !c.fixed; }).map(function(c){
+          var on = !hiddenOf(id, c), w = widthOf(id, c), can = hideable(c);
+          return '<label class="colrow' + (can ? "" : " locked") + '">' +
+            '<input type="checkbox" data-col="' + html(c.k) + '" data-coltable="' + html(id) + '"' +
+              (on ? " checked" : "") + (can ? "" : " disabled") + '>' +
+            '<span class="lbl">' + html(labelOf(c)) + '</span>' +
+            '<span class="px">' + (!can ? "always" : on ? (w ? w + " px" : "") : "hidden") + '</span></label>';
+        }).join("") +
+        '<div class="hmenu-sep"></div>' +
+        '<div class="tcrows"><span class="tcrows-l">Rows</span><span class="segsw">' +
+          DENSITIES.map(function(d){
+            return '<button class="seg' + (st.density === d ? " on" : "") + '" data-tcdens="' + html(id + "|" + d) + '">' +
+              d.charAt(0).toUpperCase() + d.slice(1) + '</button>';
+          }).join("") + '</span></div>' +
+        '<div class="hmenu-sep"></div>' +
+        '<div class="tcback"><button class="linkbu" data-tcreset="' + html(id) + '"' +
+          (isDefault(id, cols) ? " disabled" : "") + '>Reset the table</button>' +
+          '<span class="hmenu-note">Drag a heading to move its column, its edge to set the width; ' +
+          'double-click the edge to fit. Yours on this browser only.</span></div>' +
+      '</div>';
+    }
+    return out + '</span>';
+  }
+  function foot(id){
+    return '<div class="tcfoot" data-tcfoot="' + html(id) + '"><span class="tcstate"></span>' +
+      '<span class="tckeys" aria-label="Keyboard, on a focused heading">' +
+        '<span>Heading focused:</span>' +
+        '<span><kbd>&larr;</kbd><kbd>&rarr;</kbd> next</span>' +
+        '<span><kbd>Alt</kbd>+<kbd>&larr;</kbd><kbd>&rarr;</kbd> move</span>' +
+        '<span><kbd>Shift</kbd>+<kbd>&larr;</kbd><kbd>&rarr;</kbd> width</span>' +
+        '<span><kbd>F</kbd> fit</span><span><kbd>H</kbd> hide</span>' +
+      '</span></div>';
+  }
+
+  /* ── After each paint: bend every declared table to its reader's shape ──── */
+  function headCells(t){ return t.tHead && t.tHead.rows[0] ? [].slice.call(t.tHead.rows[0].cells) : []; }
+  function hostOf(t){ return t.closest(".tblscroll, .cfg") || t.parentNode; }
+  function plainRow(tr, n){
+    if (tr.cells.length !== n) return false;
+    for (var i = 0; i < tr.cells.length; i++) if (tr.cells[i].colSpan > 1) return false;
+    return true;
+  }
+  function apply(root){
+    (root || document).querySelectorAll("table[data-tktable]").forEach(function(t){
+      if (SPECS[t.dataset.tktable]) applyOne(t);
+    });
+  }
+  function applyOne(t){
+    var id = t.dataset.tktable, cols = spec(id, t.dataset.tcvariant);
+    var rendered = OMIT[id] ? cols.filter(function(c){ return !hiddenOf(id, c); }) : cols;
+    var ths = headCells(t);
+    /* A renderer and its declaration that disagree on how many columns there
+       are leave the table exactly as drawn: bending the wrong cells is worse
+       than bending none, and the count under the table says nothing. */
+    if (!ths.length || ths.length !== rendered.length) return;
+    var host = hostOf(t); if (host) host.classList.add("tc-host");
+
+    ths.forEach(function(th, i){
+      var c = rendered[i];
+      th.setAttribute("data-col", c.k);
+      if (c.fixed) return;
+      th.classList.add("tcth");
+      /* The edge is positioned inside its heading. A Setup heading is pinned
+         `position:static` by a rule more specific than any class here
+         (config.css §130.2), so the heading is made relative INLINE — and only
+         where it is static: a frozen heading is sticky, which is positioned
+         already and must stay so. */
+      if (getComputedStyle(th).position === "static") {
+        /* ...and its offsets with it: the freeze rule leaves a `left` on the
+           name heading that static ignores and relative would obey — measured
+           as the heading sliding 38px over its neighbour. */
+        th.style.position = "relative"; th.style.left = "auto"; th.style.top = "auto";
+      }
+      if (!th.hasAttribute("tabindex")) th.setAttribute("tabindex", "0");
+      if (!pinned(c)) th.classList.add("tcmove");
+      th.insertAdjacentHTML("beforeend",
+        '<span class="tcgrip" data-tcgrip="' + html(c.k) + '" title="Drag to set the width · double-click to fit"></span>');
+    });
+
+    /* Hidden (where the renderer drew it anyway) and moved, row by row. */
+    var hide = {};
+    rendered.forEach(function(c){ if (!OMIT[id] && hideable(c) && hiddenOf(id, c)) hide[c.k] = true; });
+    var order = displayOrder(id, rendered);
+    [].slice.call(t.rows).forEach(function(tr){
+      if (!plainRow(tr, rendered.length)) return;
+      var byKey = {};
+      rendered.forEach(function(c, i){ byKey[c.k] = tr.cells[i]; });
+      order.forEach(function(c){
+        var cell = byKey[c.k];
+        if (hide[c.k]) cell.classList.add("tc-hidden");
+        tr.appendChild(cell);
+      });
+    });
+
+    if (cols.some(function(c){ return widthOf(id, c) > 0; })) sizeTable(t, id, cols);
+
+    var d = load(id).density;
+    t.classList.remove("tc-comfortable", "tc-compact");
+    if (d !== "normal") t.classList.add("tc-" + d);
+
+    var n = counts(id, cols), dflt = isDefault(id, cols);
+    var f = document.querySelector('[data-tcfoot="' + id + '"] .tcstate');
+    if (f) f.innerHTML = '<b>' + n.shown + '</b> of ' + n.of + ' columns · ' + DENSITY_WORD[d] +
+      (dflt ? '' : ' · <span class="tcchanged">changed from the shipped table</span>');
+  }
+
+  /* Lay the table out from the stored widths. Measured first, set second: a
+     column the store has no number for keeps the width it was drawn at. */
+  function sizeTable(t, id, cols){
+    var ths = headCells(t), byKey = {}, natural = {};
+    cols.forEach(function(c){ byKey[c.k] = c; });
+    ths.forEach(function(th){ natural[th.dataset.col] = th.offsetWidth; });
+    t.classList.add("tc-sized");
+    t.style.tableLayout = "fixed"; t.style.minWidth = "0";
+    var sum = 0, lockTh = null;
+    ths.forEach(function(th){
+      var k = th.dataset.col, c = byKey[k];
+      /* Border-box, so the number set is the number measured: a cell's own
+         `width` is its content and leaves out 16px of padding, and twelve
+         of those summed into the table's width scaled every column by four
+         fifths (found on the first run). */
+      th.style.boxSizing = "border-box";
+      if (th.classList.contains("tc-hidden")) { th.style.width = ""; return; }
+      var w = Math.round((c && widthOf(id, c)) || natural[k]);
+      th.style.width = w + "px"; sum += w;
+      if (c && c.lock && !lockTh) lockTh = th;
+    });
+    var host = hostOf(t), room = host ? host.clientWidth : 0;
+    if (room > sum && lockTh) {
+      lockTh.style.width = (parseInt(lockTh.style.width, 10) + room - sum) + "px";
+      sum = room;
+    }
+    t.style.width = sum + "px";
+  }
+  /* The first width set by hand writes every visible column down with it. */
+  function takeWidths(t, id, cols){
+    if (cols.some(function(c){ return widthOf(id, c) > 0; })) return;
+    var st = load(id), byKey = {};
+    cols.forEach(function(c){ byKey[c.k] = c; });
+    headCells(t).forEach(function(th){
+      var c = byKey[th.dataset.col];
+      if (!c || c.fixed || th.classList.contains("tc-hidden")) return;
+      st.widths[c.k] = Math.max(MINW, Math.min(MAXW, th.offsetWidth));
+    });
+  }
+  function setWidth(t, id, cols, k, w){
+    takeWidths(t, id, cols);
+    load(id).widths[k] = Math.max(MINW, Math.min(MAXW, Math.round(w)));
+    sizeTable(t, id, cols);
+  }
+
+  /* ── The pixel label beside a moving edge ───────────────────────────────── */
+  var TIP = null, TIP_T = null;
+  function tipAt(host, th, text){
+    if (!TIP) { TIP = document.createElement("div"); TIP.className = "tctip"; }
+    if (TIP.parentNode !== host) host.appendChild(TIP);
+    var hr = host.getBoundingClientRect(), r = th.getBoundingClientRect(), z = zoomOf(host);
+    TIP.textContent = text;
+    TIP.style.left = ((r.right - hr.left) / z + host.scrollLeft) + "px";
+    TIP.style.top = ((r.bottom - hr.top) / z + host.scrollTop + 4) + "px";
+  }
+  function tipGone(){ if (TIP && TIP.parentNode) TIP.parentNode.removeChild(TIP); }
+
+  /* ── Width: drag the edge; a second press on it within 400ms fits ─────────
+     The double-click is counted here rather than left to the browser: the
+     repaint after the first release puts a NEW edge under the pointer, so the
+     browser never sees a second click on the same element (the mockup's
+     finding). */
+  function startResize(e, grip){
+    var th = grip.parentNode, t = th.closest("table"), id = t.dataset.tktable, k = grip.dataset.tcgrip;
+    var cols = spec(id, t.dataset.tcvariant), host = hostOf(t);
+    e.preventDefault(); e.stopPropagation();
+    var now = Date.now();
+    if (LASTGRIP && LASTGRIP.id === id && LASTGRIP.k === k && now - LASTGRIP.t < 400) {
+      LASTGRIP = null; fit(t, id, cols, k); return;
+    }
+    LASTGRIP = { id:id, k:k, t:now };
+    takeWidths(t, id, cols); sizeTable(t, id, cols);
+    var w0 = parseInt(th.style.width, 10) || th.offsetWidth, x0 = e.clientX, z = zoomOf(host);
+    grip.classList.add("on");
+    try { grip.setPointerCapture(e.pointerId); } catch (x) {}
+    tipAt(host, th, w0 + " px");
+    function move(ev){
+      var w = Math.max(MINW, Math.min(MAXW, Math.round(w0 + (ev.clientX - x0) / z)));
+      load(id).widths[k] = w; sizeTable(t, id, cols); tipAt(host, th, w + " px");
+    }
+    function up(){
+      grip.removeEventListener("pointermove", move); grip.removeEventListener("pointerup", up); grip.removeEventListener("pointercancel", up);
+      grip.classList.remove("on"); tipGone(); save(id); repaint(); refocus(id, k);
+    }
+    grip.addEventListener("pointermove", move); grip.addEventListener("pointerup", up); grip.addEventListener("pointercancel", up);
+  }
+  /* Fit = the widest thing in the column plus the cell's own padding, whether
+     that is wider or narrower than the column is now. Measured on a copy laid
+     out at its natural width, because a cell reports the width it was GIVEN. */
+  function contentWidth(cell){
+    var c = document.createElement("div"); c.className = "tcmeasure"; c.innerHTML = cell.innerHTML;
+    [].forEach.call(c.querySelectorAll(".tcgrip, .tk-arrow"), function(g){ g.parentNode.removeChild(g); });
+    cell.appendChild(c);
+    var w = c.offsetWidth, cs = getComputedStyle(cell);
+    cell.removeChild(c);
+    return w + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  }
+  function fit(t, id, cols, k){
+    var th = headCells(t).filter(function(h){ return h.dataset.col === k; })[0]; if (!th) return;
+    var i = th.cellIndex, w = contentWidth(th) + 14;
+    [].slice.call(t.tBodies[0] ? t.tBodies[0].rows : []).forEach(function(tr){
+      if (tr.hidden || tr.classList.contains("newrow") || !tr.cells[i] || tr.cells.length !== th.parentNode.cells.length) return;
+      w = Math.max(w, contentWidth(tr.cells[i]));
+    });
+    setWidth(t, id, cols, k, w + 2); save(id); repaint(); refocus(id, k);
+  }
+  function refocus(id, k){
+    var th = document.querySelector('table[data-tktable="' + id + '"] th[data-col="' + k + '"]');
+    if (th) { try { th.focus({ preventScroll:true }); } catch (e) { th.focus(); } }
+  }
+
+  /* ── Order: drag a heading; the column lifts and a line shows where it lands ── */
+  function startMove(e, th){
+    var t = th.closest("table"), id = t.dataset.tktable, k = th.dataset.col, host = hostOf(t);
+    var cols = spec(id, t.dataset.tcvariant);
+    var x0 = e.clientX, y0 = e.clientY, started = false, ghost = null, line = null, slots = [], target = null, grabX = 0, hr = null, z = 1;
+    try { th.setPointerCapture(e.pointerId); } catch (x) {}
+    function colCells(idx){
+      return [].slice.call(t.rows).filter(function(tr){ return plainRow(tr, th.parentNode.cells.length); })
+        .map(function(tr){ return tr.cells[idx]; });
+    }
+    function start(){
+      started = true; host.classList.add("tc-dragging");
+      hr = host.getBoundingClientRect(); z = zoomOf(host);
+      var r = th.getBoundingClientRect(), w = th.offsetWidth; grabX = (x0 - r.left) / z;
+      var idx = th.cellIndex, cells = colCells(idx);
+      ghost = document.createElement("div"); ghost.className = "tcghost"; ghost.style.width = w + "px";
+      var g = '<table class="' + html(t.className) + '" style="width:' + w + 'px"><thead><tr>' + th.outerHTML + '</tr></thead><tbody>';
+      cells.slice(1).forEach(function(td){
+        g += '<tr style="height:' + td.parentNode.offsetHeight + 'px">' + td.outerHTML + '</tr>';
+      });
+      ghost.innerHTML = g + '</tbody></table>';
+      [].forEach.call(ghost.querySelectorAll(".tcgrip"), function(x){ x.parentNode.removeChild(x); });
+      ghost.style.height = t.offsetHeight + "px";
+      ghost.style.top = ((t.getBoundingClientRect().top - hr.top) / z + host.scrollTop) + "px";
+      host.appendChild(ghost);
+      cells.forEach(function(c){ c.classList.add("tc-lifted"); });
+      line = document.createElement("div"); line.className = "tcdrop";
+      line.style.height = ghost.style.height; line.style.top = ghost.style.top;
+      host.appendChild(line);
+      /* where a column may land: before each movable heading, and after the last one */
+      var hs = [].slice.call(th.parentNode.cells).filter(function(h){ return !h.classList.contains("tc-hidden"); });
+      var movers = hs.filter(function(h){ return h.classList.contains("tcmove"); });
+      movers.forEach(function(h){ slots.push({ before:h.dataset.col, x:(h.getBoundingClientRect().left - hr.left) / z + host.scrollLeft }); });
+      var lastM = movers[movers.length - 1];
+      if (lastM) slots.push({ before:null, x:(lastM.getBoundingClientRect().right - hr.left) / z + host.scrollLeft });
+    }
+    function move(ev){
+      if (!started) { if (Math.abs(ev.clientX - x0) < 5 && Math.abs(ev.clientY - y0) < 5) return; start(); }
+      var px = (ev.clientX - hr.left) / z + host.scrollLeft;
+      ghost.style.left = (px - grabX) + "px";
+      var best = slots[0];
+      slots.forEach(function(s){ if (Math.abs(s.x - px) < Math.abs(best.x - px)) best = s; });
+      target = best; line.style.left = (best.x - 1) + "px"; line.style.display = "block";
+    }
+    function up(){
+      th.removeEventListener("pointermove", move); th.removeEventListener("pointerup", up); th.removeEventListener("pointercancel", up);
+      if (!started) return;              /* a plain press: the heading's own click sorts, as before */
+      SWALLOW = true;
+      host.classList.remove("tc-dragging");
+      if (ghost) ghost.parentNode.removeChild(ghost);
+      if (line) line.parentNode.removeChild(line);
+      [].forEach.call(t.querySelectorAll(".tc-lifted"), function(c){ c.classList.remove("tc-lifted"); });
+      if (target && target.before !== k) placeBefore(id, cols, k, target.before);
+      repaint(); refocus(id, k);
+    }
+    th.addEventListener("pointermove", move); th.addEventListener("pointerup", up); th.addEventListener("pointercancel", up);
+  }
+  /* The movable keys, in display order, with k taken out and put back before
+     `before` (null: at the end). Written as the whole movable order, so the
+     store never holds a half-list. */
+  function placeBefore(id, cols, k, before){
+    var mid = displayOrder(id, cols).filter(function(c){ return !pinned(c); }).map(function(c){ return c.k; });
+    mid.splice(mid.indexOf(k), 1);
+    var at = before == null ? mid.length : mid.indexOf(before);
+    if (at < 0) at = mid.length;
+    mid.splice(at, 0, k);
+    load(id).order = mid; save(id);
+  }
+
+  /* ── The keyboard, on a focused heading ─────────────────────────────────── */
+  function onKey(e, th){
+    var t = th.closest("table"), id = t.dataset.tktable, k = th.dataset.col;
+    var cols = spec(id, t.dataset.tcvariant), c = cols.filter(function(x){ return x.k === k; })[0];
+    if (!c) return;
+    var dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    var heads = [].slice.call(th.parentNode.cells).filter(function(h){
+      return h.classList.contains("tcth") && !h.classList.contains("tc-hidden"); });
+    if (dir && e.altKey) {
+      if (pinned(c)) return;
+      e.preventDefault();
+      var movers = heads.filter(function(h){ return h.classList.contains("tcmove"); });
+      var at = movers.indexOf(th), other = movers[at + dir];
+      if (!other) return;
+      placeBefore(id, cols, k, dir < 0 ? other.dataset.col : (movers[at + 2] ? movers[at + 2].dataset.col : null));
+      repaint(); refocus(id, k);
+    } else if (dir && e.shiftKey) {
+      e.preventDefault();
+      var w = (parseInt(th.style.width, 10) || th.offsetWidth) + dir * STEP;
+      setWidth(t, id, cols, k, w); save(id); repaint(); refocus(id, k);
+      var nt = document.querySelector('table[data-tktable="' + id + '"] th[data-col="' + k + '"]');
+      if (nt) { tipAt(hostOf(nt.closest("table")), nt, parseInt(nt.style.width, 10) + " px"); clearTimeout(TIP_T); TIP_T = setTimeout(tipGone, 900); }
+    } else if (dir) {
+      e.preventDefault();
+      var n = heads[heads.indexOf(th) + dir]; if (n) n.focus();
+    } else if (e.key === "f" || e.key === "F") {
+      e.preventDefault(); fit(t, id, cols, k);
+    } else if ((e.key === "h" || e.key === "H") && hideable(c)) {
+      e.preventDefault();
+      var next = heads[heads.indexOf(th) + 1] || heads[heads.indexOf(th) - 1];
+      setShown(id, k, false); repaint(); if (next) refocus(id, next.dataset.col);
+    }
+  }
+
+  /* ── Bound once, on the document: the headings are rebuilt by every paint ── */
+  document.addEventListener("pointerdown", function(e){
+    var grip = e.target.closest && e.target.closest(".tcgrip");
+    if (grip) { startResize(e, grip); return; }
+    var th = e.target.closest && e.target.closest("th.tcmove");
+    if (th && e.button === 0 && !e.target.closest("button, a, input, select")) startMove(e, th);
+  });
+  document.addEventListener("click", function(e){
+    if (SWALLOW) { SWALLOW = false; e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  document.addEventListener("click", function(e){
+    var el = e.target.closest ? e.target : null; if (!el) return;
+    var b;
+    if ((b = el.closest("[data-colmenu]"))) {
+      e.stopPropagation();
+      MENU = MENU === b.dataset.colmenu ? null : b.dataset.colmenu;
+      /* one header menu open at a time, the register's own rule (§90) */
+      if (typeof PWMENU !== "undefined") PWMENU = false;
+      if (typeof PFILEMENU !== "undefined") PFILEMENU = false;
+      repaint(); return;
+    }
+    if ((b = el.closest("[data-tcall],[data-tcnone]"))) {
+      e.stopPropagation();
+      var id = b.dataset.tcall || b.dataset.tcnone, on = b.hasAttribute("data-tcall");
+      var tbl = document.querySelector('table[data-tktable="' + id + '"]');
+      spec(id, tbl && tbl.dataset.tcvariant).forEach(function(c){ if (hideable(c)) setShown(id, c.k, on); });
+      repaint(); return;
+    }
+    if ((b = el.closest("[data-tcdens]"))) {
+      e.stopPropagation();
+      var bits = b.dataset.tcdens.split("|");
+      load(bits[0]).density = bits[1]; save(bits[0]); repaint(); return;
+    }
+    if ((b = el.closest("[data-tcreset]"))) {
+      e.stopPropagation(); reset(b.dataset.tcreset); repaint(); return;
+    }
+    if (MENU && !el.closest(".hmenu")) { MENU = null; repaint(); }
+  });
+  /* A tick repaints the table and keeps the menu open — you come here to set
+     several columns (§47.2). */
+  document.addEventListener("change", function(e){
+    var cb = e.target;
+    if (!cb || !cb.matches || !cb.matches("input[data-col][data-coltable]")) return;
+    e.stopPropagation();
+    setShown(cb.dataset.coltable, cb.dataset.col, cb.checked); repaint();
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && MENU) { MENU = null; repaint(); return; }
+    var th = e.target && e.target.closest && e.target.closest("th.tcth");
+    if (th && !e.ctrlKey && !e.metaKey) onKey(e, th);
+  });
+
+  return { define:define, spec:spec, shown:shown, setShown:setShown, tools:tools, foot:foot,
+           apply:apply, reset:reset, shut:function(){ MENU = null; }, isOpen:function(){ return MENU; } };
+})();
+
 /* ── config-render.js ── */
 /* ── CONFIGURATION SCREENS ───────────────────────────────────────────────
    Labels · Roles & access · and the factor editor that extends Weighting.
@@ -41345,6 +41938,20 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
+/* ── THE READER'S OWN SHAPE (§754): what each column is called in the Columns
+   menu, and which never move. # and the name are the frozen pair (§151) and
+   the ⋮ is the far end; the rest may be hidden, sized and moved. The words are
+   the client's where the heading's are (`labelWord`, never `L`: the menu
+   escapes what it draws). */
+TABLECOLS.define("units", [
+  { k:"idx", fixed:true },
+  { k:"name", lock:true, label:function(){ return labelWord("unitword", "bu"); } },
+  { k:"nav", label:"In navigation" }, { k:"code", label:"Code" }, { k:"plans", label:"Plans in" },
+  { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } }, { k:"weight", label:"Weight" },
+  { k:"division", label:function(){ return labelWord("division", "group"); } },
+  { k:"head", label:"BU head" }, { k:"custodian", label:"Strategy custodian" },
+  { k:"status", label:"Status" }, { k:"menu", fixed:true }
+]);
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -41372,7 +41979,7 @@ function renderUnits(){
       ocell("units", k, "nav", may,
         (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
                    : '<span class="why" style="margin:0">' + esc(u.name) + '</span>'),
-        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "Shown in the nav" }); }) +
+        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "In navigation" }); }) +
       ocell("units", k, "code", may, '<span class="mono">' + esc(u.codePrefix) + '</span>',
         function(){ return ocellBox("data-upx", k, u.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") +
       /* §405: WHAT THE UNIT PLANS IN, AND HOW MANY OF THEM — the column that
@@ -41406,7 +42013,7 @@ function renderUnits(){
   }).join("");
 
   return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
-      ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit)) +
+      ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit) + TABLECOLS.tools("units")) +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
        the units appear in the navigation and on the group page — somebody
@@ -41430,7 +42037,7 @@ function renderUnits(){
            30px into its neighbour at 1440 (46px at 1280) while Key Objectives'
            heading ran into Weight — measured. The short name gives up the
            room: it holds a short name. */
-        '<th style="width:11%">Shown in the nav</th>' +
+        '<th style="width:11%">In navigation</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
@@ -41439,6 +42046,7 @@ function renderUnits(){
         '<th class="cc" style="width:7%">Status</th>' +
         '<th class="cc kebcell" style="width:44px"></th>' +
       '</tr></thead>' + setArrangeBody("units", "units") + rows + '</tbody></table></div>' +
+      TABLECOLS.foot("units") +
       /* ADD IS THE PAGE'S, NOT A ROW'S — and it is not drawn while arranging,
          because a row minted mid-drag lands at the end of a list somebody is in
          the middle of ordering. */
@@ -41522,7 +42130,7 @@ var ROWDLG_SPECS = {
       return pdSect("What it is") +
         pdField("Name", '<input class="fld tk-firstfield" value="' + esc(u.name) +
                         '" data-uname="' + esc(k) + '">') +
-        pdField("Shown in the nav", '<input class="fld" value="' + esc(u.navName || "") +
+        pdField("In navigation", '<input class="fld" value="' + esc(u.navName || "") +
                         '" data-unav="' + esc(k) + '" placeholder="' + esc(u.name) + '">') +
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
@@ -42007,7 +42615,8 @@ function saidWhereCount(){
    `Person` is not in the list. A register with the names hidden is not a
    register, and HR_ERP reaches the same answer by marking `name` non-hideable
    rather than by trusting nobody to untick it. */
-var PCOLS_KEY = "smp.people.columns";
+/* `smp.people.columns`, the store this chooser kept, is read ONCE by tablecols.js
+   as the starting point of `smp.table.people` and then superseded (§754). */
 /* RENAMED TWICE IN ONE VERSION, and both are Islam's words (§54.1).
    `belongs` → `bu`: "belongs to is not good naming" — a strategy platform's
    word for a part of the business is BU, and the column says which one the
@@ -42092,27 +42701,23 @@ var PEOPLE_COLS = [
   { k:"status",   label:"Status" },
   { k:"password", label:"Password", live:true }
 ];
-var PCOLS = null;      /* {key:bool}, loaded once */
-
-function peopleCols(){
-  if (PCOLS) return PCOLS;
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(PCOLS_KEY) || "null"); } catch (e) { saved = null; }
-  PCOLS = {};
-  /* MERGED, not replaced. A column added later is not in a map written before
-     it existed, and reading a missing key as `false` would hide every new
-     column from everybody who had ever opened the chooser — §30.2's lesson
-     about the access map, one surface further out. */
-  PEOPLE_COLS.forEach(function(c){
-    PCOLS[c.k] = (saved && typeof saved[c.k] === "boolean") ? saved[c.k] : !c.off;
-  });
-  return PCOLS;
-}
-function setPeopleCol(k, on){
-  peopleCols()[k] = on;
-  try { localStorage.setItem(PCOLS_KEY, JSON.stringify(PCOLS)); } catch (e) {}
-}
-function showCol(k){ return peopleCols()[k] !== false; }
+/* ── THE CHOOSER IS TABLECOLS's NOW (§754) ─────────────────────────────
+   `PEOPLE_COLS` stays the list — the keys, the labels, which are off until
+   asked for — and tablecols.js keeps the answer, draws the menu and takes
+   the same three questions the register asked of its own store: shown or
+   not, merged over the defaults, a saved choice winning. Name is the frozen
+   column and never hides; Password is on offer only where the platform is
+   served (the same `live` the head and the row read). */
+TABLECOLS.define("people", function(){
+  return [{ k:"idx", fixed:true }, { k:"name", lock:true, label:"Name" }].concat(
+    PEOPLE_COLS.map(function(c){
+      return { k:c.k, off:!!c.off,
+               label: c.k === "bu" ? sitsInWord : c.label,
+               offered: c.live ? function(){ return typeof SYNC !== "undefined" && SYNC.isLive() && inOffice(); } : null };
+    }),
+    [{ k:"menu", fixed:true }]);
+}, { omit:true });
+function showCol(k){ return TABLECOLS.shown("people", k); }
 
 /* The mark itself, and it NAMES THE OTHER ROWS rather than saying "duplicate".
    "Emp ID 10154 is on two rows" is a fact somebody can act on; a red dot is a
@@ -43662,27 +44267,9 @@ function renderPeople(){
         : '') +
     '</span>';
 
-  var colMenu =
-    '<span class="hmenu' + (PCOLMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-colmenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + PCOLMENU + '">Columns <span class="hcar">&#9662;</span></button>' +
-      (PCOLMENU
-        ? '<div class="hmenu-panel cols">' +
-            '<div class="hmenu-h"><span>Show columns</span>' +
-              '<span><button class="linkbu" data-colall="1">All</button> &middot; ' +
-              '<button class="linkbu" data-colnone="1">None</button></span></div>' +
-            PEOPLE_COLS.filter(function(c){ return !c.live || live; }).map(function(c){
-              /* The Unit column's name is the client's (§563), so the chooser
-                 asks the same word its heading does. */
-              return '<label class="colrow"><input type="checkbox" data-col="' + c.k + '"' +
-                (showCol(c.k) ? " checked" : "") + '><span>' +
-                esc(c.k === "bu" ? sitsInWord() : c.label) + '</span></label>';
-            }).join("") +
-            '<div class="hmenu-note">Person is always shown &mdash; a register ' +
-            'with the names hidden is not a register.</div>' +
-          '</div>'
-        : '') +
-    '</span>';
+  /* The Columns menu is the shared one (§754): the same button, in the same
+     place in the cluster, now also carrying the row height and Reset. */
+  var colMenu = TABLECOLS.tools("people");
 
   var pwMenu = !live ? "" :
     '<span class="hmenu' + (PWMENU ? " open" : "") + '">' +
@@ -43951,7 +44538,7 @@ function renderPeople(){
         (showCol("status")   ? th("Status", "cc") : '') +
         (live && showCol("password") ? th("Password", "cc", false) : '') +
         th("", "cc kebcell") +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>';
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' + TABLECOLS.foot("people");
       })() +
 
       "") +
@@ -44398,6 +44985,10 @@ function renderPeopleFile(mayEdit){
    same person maintains both, and inventing a fourteenth access key for a
    ten-row table would be a switch nobody ever moves.
    ══════════════════════════════════════════════════════════════════ */
+TABLECOLS.define("mainbu", [
+  { k:"idx", fixed:true }, { k:"name", lock:true, label:"Official BU" },
+  { k:"points", label:"Points at" }, { k:"people", label:"People" }, { k:"menu", fixed:true }
+]);
 function renderMainbus(){
   /* §85. A name has two editable things — what it is called and what it points
      at — and the second is chips with their own × plus a dropdown, which is
@@ -44518,7 +45109,7 @@ function renderMainbus(){
         mbth("Points at") +
         mbth("People", "cc") +
         mbth("", "cc", false) +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>'
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' + TABLECOLS.foot("mainbu")
     : '<div class="note"><b>Empty.</b> Names arrive by themselves the first time an employee ' +
       'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
       'nothing, for you to map. Or type them in with Edit.</div>';
@@ -44530,7 +45121,7 @@ function renderMainbus(){
   return cfgHead("Official BU list",
       strays.length ? ['<span class="pill warn">' + plural(strays.length, "name") +
                        ' on people and not on this list</span>'] : [],
-      "people", mayEdit) +
+      "people", mayEdit, null, null, TABLECOLS.tools("mainbu")) +
 
     section("", "Your names, and what they point at",
       null,
@@ -44621,6 +45212,12 @@ function coFlagSelect(ck, field, val){
     '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
     '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
 }
+TABLECOLS.define("companies", [
+  { k:"idx", fixed:true },
+  { k:"name", lock:true, label:function(){ return labelWord("division", "group"); } },
+  { k:"units", label:"Units" }, { k:"others", label:"Sees other companies" },
+  { k:"group", label:"Sees the group" }, { k:"status", label:"Status" }, { k:"menu", fixed:true }
+]);
 function renderCompanies(){
   /* §85's pen per row became a dialog per row (§261): what a company is called
      and what its CEO sees are three fields, and they are opened from the row's
@@ -44628,7 +45225,7 @@ function renderCompanies(){
      anything on this page at all. */
   var mayEdit = grant("c_units") === "edit";
   var live = activeCompanyKeys().length;
-  return cfgHead(L("division"), [], null, mayEdit) +
+  return cfgHead(L("division"), [], null, mayEdit, null, null, TABLECOLS.tools("companies")) +
     section("", L("division"), null,
       /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
          nothing and costs a header — the threshold is in the spec (§2.2) and
@@ -44672,7 +45269,7 @@ function renderCompanies(){
           '<td class="cc"><span class="pill ' + (on ? "good" : "none") + '">' +
             (on ? "Active" : "Retired") + '</span></td>' +
           coKebab(ck, co, on, mayEdit) + '</tr>';
-      }).join("") + '</tbody></table></div>' +
+      }).join("") + '</tbody></table></div>' + TABLECOLS.foot("companies") +
       (mayEdit ? '<div class="addrow"><button class="editbtn" id="addcompany">+ Add a company</button></div>' : '') +
       '<div class="note"><b>A ' + L1("division") + ' groups ' + L("unitword") + ' so its CEO sees their own.</b> ' +
       'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
@@ -45991,6 +46588,11 @@ function lineOwnersSwitch(mayEdit, editing){
     '</span></div>';
 }
 
+TABLECOLS.define("sets", [
+  { k:"idx", fixed:true }, { k:"name", lock:true, label:"Set" },
+  { k:"team", label:"Team" }, { k:"owner", label:"Owner" }, { k:"picks", label:"Who picks its figures" },
+  { k:"figures", label:"Figures" }, { k:"menu", fixed:true }
+]);
 function renderSetsSetup(){
   var mayEdit = grant("c_sets") === "edit";
   var editing = mayEdit && EDITING.sets;
@@ -46075,7 +46677,7 @@ function renderSetsSetup(){
 
   var claimed = SMPRules.sourceRows(world()).length;
 
-  return cfgHead("Figure sets", [], "sets", mayEdit, null, null) +
+  return cfgHead("Figure sets", [], "sets", mayEdit, null, null, TABLECOLS.tools("sets")) +
     /* §84. NO SEARCH, NO SORT, and both are the spec (§2.2, §6.2) rather than
        an omission. One set today: a search box above one row is furniture. And
        the order of the sets is the order somebody put them in — the same
@@ -46092,7 +46694,7 @@ function renderSetsSetup(){
     '</tr></thead><tbody>' + (rows || (mayEdit ? "" :
       '<tr><td colspan="7" class="why">No sets yet. A set is how a number that ' +
       'belongs to Finance stops being typed by every ' + L1("unitword") + '.</td></tr>')) +
-      addRow + '</tbody></table></div>' +
+      addRow + '</tbody></table></div>' + TABLECOLS.foot("sets") +
     namingSwitch(mayEdit, editing) +
     '<div class="note"><b>Who picks is a security setting, not a convenience.</b> ' +
       'Ticking from the full list means reading every number in the group \u2014 which ' +
@@ -48284,7 +48886,8 @@ function planUnderCell(fk, f, editable){
    substituted — a column added later is absent from a map written before it
    existed, and reading absent as `false` would hide every new column from
    everybody who had ever opened the control (§30.2). */
-var FNCOLS_KEY = "smp.fns.columns";
+/* `smp.fns.columns`, the store this chooser kept, is read ONCE by tablecols.js
+   as the starting point of `smp.table.fns` and then superseded (§754). */
 var FN_COLS = [
   { k:"key",     label:"Key", off:true },
   { k:"nav",     label:"Nav name" },
@@ -48295,21 +48898,6 @@ var FN_COLS = [
   { k:"head",    label:"Head" },
   { k:"cust",    label:"Custodian" }
 ];
-var FNCOLS = null;
-function fnCols(){
-  if (FNCOLS) return FNCOLS;
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(FNCOLS_KEY) || "null"); } catch (e) { saved = null; }
-  FNCOLS = {};
-  FN_COLS.forEach(function(c){
-    FNCOLS[c.k] = (saved && typeof saved[c.k] === "boolean") ? saved[c.k] : !c.off;
-  });
-  return FNCOLS;
-}
-function setFnCol(k, on){
-  fnCols()[k] = on;
-  try { localStorage.setItem(FNCOLS_KEY, JSON.stringify(FNCOLS)); } catch (e) {}
-}
 /* §624: THE CAPS COLUMN ONLY WHERE A FUNCTION HOLDS ONE. It counts the
    capabilities filed under a function, and since §544.13 nothing files one
    there — a capability is the company's — so on every live client it was a
@@ -48319,7 +48907,19 @@ function fnCapsHeld(){
   return (FUNCTION_KEYS || []).some(function(fk){ return capsOfFunction(fk).length > 0; });
 }
 function fnColOffered(k){ return k !== "caps" || fnCapsHeld(); }
-function fnShowCol(k){ return fnColOffered(k) && fnCols()[k] !== false; }
+/* THE CHOOSER IS TABLECOLS's NOW (§754), the register's rule word for word:
+   Function is the frozen column and never hides; Status stays shown but may
+   move; the company column is headed with the client's own word. */
+TABLECOLS.define("fns", function(){
+  return [{ k:"idx", fixed:true }, { k:"name", lock:true, label:"Function" }].concat(
+    FN_COLS.map(function(c){
+      return { k:c.k, off:!!c.off,
+               label: c.k === "company" ? function(){ return labelWord("division", "group"); } : c.label,
+               offered: c.k === "caps" ? fnCapsHeld : null };
+    }),
+    [{ k:"status", keep:true, label:"Status" }, { k:"menu", fixed:true }]);
+}, { omit:true });
+function fnShowCol(k){ return fnColOffered(k) && TABLECOLS.shown("fns", k); }
 
 /* ── THE ROW'S ACTIONS, IN ONE MENU (§93.14) ──────────────────────────
    The register's kebab, on the table §69.22's argument had not reached. The
@@ -48528,25 +49128,9 @@ function renderFunctions(){
      say at the foot and in which column can never be hidden, and a helper
      taking two lists and two sentences is longer than the thing it replaces.
      If a third table wants one, that is when it becomes a function. */
-  var fnColMenu = !mayEdit ? "" :
-    '<span class="hmenu' + (FNCOLMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-fncolmenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + FNCOLMENU + '">Columns <span class="hcar">&#9662;</span></button>' +
-      (FNCOLMENU
-        ? '<div class="hmenu-panel cols">' +
-            '<div class="hmenu-h"><span>Show columns</span>' +
-              '<span><button class="linkbu" data-fncolall="1">All</button> &middot; ' +
-              '<button class="linkbu" data-fncolnone="1">None</button></span></div>' +
-            FN_COLS.filter(function(c){ return fnColOffered(c.k); }).map(function(c){
-              return '<label class="colrow"><input type="checkbox" data-fncol="' + c.k + '"' +
-                (fnShowCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
-            }).join("") +
-            '<div class="hmenu-note">Function and Status are always shown. ' +
-            '<b>Key</b> is the identifier written into a project code and a person\u2019s ' +
-            'row \u2014 turn it on when something does not line up.</div>' +
-          '</div>'
-        : '') +
-    '</span>';
+  /* The Columns menu is the shared one (§754): the register's shape, the same
+     place in the cluster, now also carrying the row height and Reset. */
+  var fnColMenu = TABLECOLS.tools("fns");
 
   return cfgHead(navWord("fnword", "Functions"), [], null, mayEdit, "fnall",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("fns", mayEdit) + fnColMenu) +
@@ -48588,7 +49172,7 @@ function renderFunctions(){
                     rule, which the register applies to Roles and Password). */
                  h("", "cc kebcell", false); })() +
         '</tr></thead>' +
-        setArrangeBody("fns", "fns") + rows + '</tbody></table></div>' +
+        setArrangeBody("fns", "fns") + rows + '</tbody></table></div>' + TABLECOLS.foot("fns") +
       /* The three notes that sat here are in the knowledge base now (§30). A
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
@@ -48661,6 +49245,21 @@ function capSeatSelect(id, seat, v){
     optionsHtml(ownerChoices(v, true), function(x){ return String(v == null ? "" : v) === x; }) +
   '</select>';
 }
+/* Two renderers share `data-tktable="caps"` and never both draw for one
+   tenant: the table carries `data-tcvariant` and the declaration answers by it. */
+TABLECOLS.define("caps", function(variant){
+  return variant === "pillars"
+    ? [{ k:"idx", fixed:true }, { k:"code", lock:true, label:"Code" },
+       { k:"name", label:function(){ return labelWord("capability", "group"); } },
+       { k:"owner", label:"Owner" }, { k:"custodian", label:"Custodian" },
+       { k:"measures", label:function(){ return labelWord("measure", "bu"); } },
+       { k:"tactics", label:function(){ return labelWord("tactic", "bu"); } }, { k:"menu", fixed:true }]
+    : [{ k:"idx", fixed:true }, { k:"name", lock:true, label:function(){ return labelWord("capability", "group"); } },
+       { k:"owner", label:"Owner" }, { k:"custodian", label:"Custodian" }, { k:"plansin", label:"Plans in" },
+       { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
+       { k:"proj", label:function(){ return labelWord("project", "bu") + " / " + labelWord("pillar", "bu"); } },
+       { k:"menu", fixed:true }];
+});
 function renderCapPillars(){
   var u = topAsUnit();
   var may = mayEditCapPillars();
@@ -48685,14 +49284,14 @@ function renderCapPillars(){
         "", p.name || code, 'data-cpmenu="' + esc(id) + '"') +
     '</tr>';
   }).join("");
-  return cfgHead(L("capability"), [], null, false) +
+  return cfgHead(L("capability"), [], null, false, null, null, TABLECOLS.tools("caps", "pillars")) +
     section("", L("capability"), null,
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
-      '<div class="cfg"><table class="cappcfg" data-tktable="caps"><thead><tr>' +
+      '<div class="cfg"><table class="cappcfg" data-tktable="caps" data-tcvariant="pillars"><thead><tr>' +
         (function(){ var h = tkHead("caps");
           return h("#", "idx", false) + h("Code") + h(L1("capability")) + h("Owner") + h("Custodian") +
                  h(L("measure","bu"), "cc") + h(L("tactic","bu"), "cc") + h("", "cc kebcell", false); })() +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + TABLECOLS.foot("caps") +
       (may ? '<div class="addrow"><button class="editbtn" id="addcappillar">+ Add a ' +
         L1("capability") + '</button></div>' : ''));
 }
@@ -48762,7 +49361,7 @@ function renderCaps(){
      mark. What is left is drawn only when there IS an orphan. */
   return cfgHead(L("capability"),
       orphan ? ['<span class="pill none">' + orphan + ' with no owner</span>'] : [],
-      null, false) +
+      null, false, null, null, TABLECOLS.tools("caps")) +
     section("", L("capability"), null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
          wrap and leave one row taller than the rest, which reads as broken
@@ -48777,7 +49376,7 @@ function renderCaps(){
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div>' +
+        '<tbody>' + rows + '</tbody></table></div>' + TABLECOLS.foot("caps") +
       (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
@@ -82030,6 +82629,9 @@ var SYNC = (function () {
     /* The builder's band, once the navigation above has settled (§129). */
     paintBuildBand();
     wire();
+    /* §754: the reader's own shape of each Setup table — AFTER wire(), whose
+       sort reads the cells in the order the renderer drew them. */
+    TABLECOLS.apply();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
        searchable button in front of it once its list passes five options
        (searchsel.js) — the native control stays where it is, so nothing wire()
@@ -86487,17 +87089,12 @@ var SYNC = (function () {
        menus keep with a single PMENU key. */
     document.querySelectorAll("[data-filemenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PFILEMENU = !PFILEMENU; PCOLMENU = false; PWMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-colmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation(); PCOLMENU = !PCOLMENU; PWMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PFILEMENU = !PFILEMENU; TABLECOLS.shut(); PWMENU = false; paint();
       });
     });
     document.querySelectorAll("[data-pwmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PWMENU = !PWMENU; TABLECOLS.shut(); PFILEMENU = false; paint();
       });
     });
     /* §629: the Forefront switch. Kept on this device, repainted in place;
@@ -86508,22 +87105,8 @@ var SYNC = (function () {
         e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
       });
     });
-    /* A tick repaints the table but MUST NOT close the menu — you come here to
-       set several columns, and a chooser that shuts after each one is a chooser
-       you reopen six times. */
-    document.querySelectorAll("[data-col]").forEach(function(b){
-      b.addEventListener("change", function(e){
-        e.stopPropagation(); setPeopleCol(b.dataset.col, b.checked); paint();
-      });
-    });
-    document.querySelectorAll("[data-colall],[data-colnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-colall");
-        PEOPLE_COLS.forEach(function(c){ setPeopleCol(c.k, on); });
-        paint();
-      });
-    });
+    /* The Columns menu — a tick that keeps it open, All, None, the row height
+       and Reset — is tablecols.js's, bound once on the document (§754). */
     /* Edit the whole page, cursor in this person's name. The focus is applied
        AFTER the repaint that creates the input — focusing a node the paint is
        about to replace focuses nothing. */
@@ -86885,26 +87468,6 @@ var SYNC = (function () {
         e.stopPropagation();
         var bits = b.dataset.rowdlg.split("|");
         openRowDialog(bits[0], bits.slice(1).join("|"));
-      });
-    });
-    document.querySelectorAll("[data-fncolmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        FNCOLMENU = !FNCOLMENU; PCOLMENU = false; PWMENU = false; PFILEMENU = false;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fncol]").forEach(function(b){
-      b.addEventListener("change", function(){ setFnCol(this.dataset.fncol, this.checked); paint(); });
-    });
-    /* stopPropagation, or the document click-away above closes the panel
-       before the paint that would show the boxes changing (§47.2). */
-    document.querySelectorAll("[data-fncolall],[data-fncolnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-fncolall");
-        FN_COLS.forEach(function(c){ setFnCol(c.k, on); });
-        paint();
       });
     });
     /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
@@ -91204,10 +91767,10 @@ var SYNC = (function () {
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU) &&
+    if (typeof PWMENU !== "undefined" &&
+        (PWMENU || PFILEMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+      PWMENU = false; PFILEMENU = false;
       paint();
     }
   });
@@ -91217,9 +91780,9 @@ var SYNC = (function () {
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
     if (typeof UMENU !== "undefined" && UMENU !== null) { UMENU = null; paint(); }
     if (typeof COMENU !== "undefined" && COMENU !== null) { COMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+    if (typeof PWMENU !== "undefined" &&
+        (PWMENU || PFILEMENU)) {
+      PWMENU = false; PFILEMENU = false;
       paint();
     }
   });

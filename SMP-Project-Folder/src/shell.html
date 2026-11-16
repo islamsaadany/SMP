@@ -295,6 +295,7 @@
 <script src="PPTX"></script>
 <script src="MAIL"></script>
 <script src="RENDER"></script>
+<script src="TABLECOLS"></script>
 <script src="CONFIGRENDER"></script>
 <script src="BUILDER"></script>
 <script src="PRESENT"></script>
@@ -4191,6 +4192,9 @@
     /* The builder's band, once the navigation above has settled (§129). */
     paintBuildBand();
     wire();
+    /* §754: the reader's own shape of each Setup table — AFTER wire(), whose
+       sort reads the cells in the order the renderer drew them. */
+    TABLECOLS.apply();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
        searchable button in front of it once its list passes five options
        (searchsel.js) — the native control stays where it is, so nothing wire()
@@ -8648,17 +8652,12 @@
        menus keep with a single PMENU key. */
     document.querySelectorAll("[data-filemenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PFILEMENU = !PFILEMENU; PCOLMENU = false; PWMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-colmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation(); PCOLMENU = !PCOLMENU; PWMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PFILEMENU = !PFILEMENU; TABLECOLS.shut(); PWMENU = false; paint();
       });
     });
     document.querySelectorAll("[data-pwmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PWMENU = !PWMENU; TABLECOLS.shut(); PFILEMENU = false; paint();
       });
     });
     /* §629: the Forefront switch. Kept on this device, repainted in place;
@@ -8669,22 +8668,8 @@
         e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
       });
     });
-    /* A tick repaints the table but MUST NOT close the menu — you come here to
-       set several columns, and a chooser that shuts after each one is a chooser
-       you reopen six times. */
-    document.querySelectorAll("[data-col]").forEach(function(b){
-      b.addEventListener("change", function(e){
-        e.stopPropagation(); setPeopleCol(b.dataset.col, b.checked); paint();
-      });
-    });
-    document.querySelectorAll("[data-colall],[data-colnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-colall");
-        PEOPLE_COLS.forEach(function(c){ setPeopleCol(c.k, on); });
-        paint();
-      });
-    });
+    /* The Columns menu — a tick that keeps it open, All, None, the row height
+       and Reset — is tablecols.js's, bound once on the document (§754). */
     /* Edit the whole page, cursor in this person's name. The focus is applied
        AFTER the repaint that creates the input — focusing a node the paint is
        about to replace focuses nothing. */
@@ -9046,26 +9031,6 @@
         e.stopPropagation();
         var bits = b.dataset.rowdlg.split("|");
         openRowDialog(bits[0], bits.slice(1).join("|"));
-      });
-    });
-    document.querySelectorAll("[data-fncolmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        FNCOLMENU = !FNCOLMENU; PCOLMENU = false; PWMENU = false; PFILEMENU = false;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fncol]").forEach(function(b){
-      b.addEventListener("change", function(){ setFnCol(this.dataset.fncol, this.checked); paint(); });
-    });
-    /* stopPropagation, or the document click-away above closes the panel
-       before the paint that would show the boxes changing (§47.2). */
-    document.querySelectorAll("[data-fncolall],[data-fncolnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-fncolall");
-        FN_COLS.forEach(function(c){ setFnCol(c.k, on); });
-        paint();
       });
     });
     /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
@@ -13365,10 +13330,10 @@
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU) &&
+    if (typeof PWMENU !== "undefined" &&
+        (PWMENU || PFILEMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+      PWMENU = false; PFILEMENU = false;
       paint();
     }
   });
@@ -13378,9 +13343,9 @@
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
     if (typeof UMENU !== "undefined" && UMENU !== null) { UMENU = null; paint(); }
     if (typeof COMENU !== "undefined" && COMENU !== null) { COMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+    if (typeof PWMENU !== "undefined" &&
+        (PWMENU || PFILEMENU)) {
+      PWMENU = false; PFILEMENU = false;
       paint();
     }
   });

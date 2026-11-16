@@ -102,6 +102,9 @@
   body:not(.pen-on) .tactable th:nth-child(3) { width:32%; }
   .panel-open table.tactable { min-width:0; }
   .tactable td .fld.rowfld { width:100%; min-width:140px; font-size:13px; padding:6px 9px; }
+  .tactable td .namerow { display:flex; align-items:center; gap:6px; }
+  .tactable td .binb { flex:none; display:inline-grid; place-items:center; width:26px; height:26px; border:0; background:none; color:var(--ink-3); cursor:pointer; border-radius:6px; }
+  .tactable td .binb:hover { color:var(--bad); background:var(--surface-2); }
   .tactable td .dd .ddbtn { font-size:12.5px; padding:5px 8px; min-height:30px; }
   .tactable td .dd { min-width:130px; }
   .tactable td .qpick { white-space:nowrap; }
@@ -198,7 +201,7 @@
   <div class="backdrop" id="backdrop" hidden></div>
   <aside class="side" id="side" hidden>
     <div class="shead"><span class="k">Tactic <span id="sn">1</span></span><b id="sname"></b>
-      <span class="nav"><button type="button" class="bin" id="bin" title="Remove this tactic"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg></button><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
+      <span class="nav"><button type="button" id="prev" title="Previous tactic">↑</button><button type="button" id="next" title="Next tactic">↓</button></span>
       <button class="close" type="button" id="close" title="Close">×</button></div>
     <div class="sbody" id="sbody"></div>
     <div class="sfoot"><span>Saves as you type, like the rest of the pen.</span></div>
@@ -253,10 +256,10 @@
     var n = t.outs.length, miss = t.outs.filter(function(o){ return !String(o.target).trim(); }).length;
     var o1 = t.outs[0];
     return '<tr' + (i === cur ? ' class="on"' : '') + ' data-i="' + i + '"><td class="idx"><span class="grip">☰</span>' + (i + 1) + '</td>' +
-      '<td><input class="fld rowfld" data-rowname="' + i + '" value="' + esc(t.name) + '" placeholder="The work itself, as a sentence">' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') + '</td>' +
+      '<td><span class="namerow"><input class="fld rowfld" data-rowname="' + i + '" value="' + esc(t.name) + '" placeholder="The work itself, as a sentence"><button type="button" class="binb" data-x="' + i + '" title="Remove this tactic"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6.5 4V2.5h3V4M4 4l.7 9.2a1 1 0 0 0 1 .8h4.6a1 1 0 0 0 1-.8L12 4M6.6 7v4.2M9.4 7v4.2"/></svg></button></span>' + (t.desc ? '<span class="why">' + esc(t.desc) + '</span>' : '') + '</td>' +
       '<td class="rowout">' + (t.outs.length ? t.outs.map(function(o, k){
           return '<span class="outline"><input class="fld rowfld" data-rowout="' + i + ':' + k + '" value="' + esc(o.name) + '" placeholder="What it should produce">' +
-            (k ? '<span class="x" data-rowox="' + i + ':' + k + '" title="Remove this outcome">×</span>' : '') + '</span>'; }).join("")
+            '<span class="x" data-rowox="' + i + ':' + k + '" title="Remove this outcome">×</span></span>'; }).join("")
         : '<span class="outline"><input class="fld rowfld" data-rowout="' + i + ':0" value="" placeholder="What it should produce"></span>') +
         '<span class="addout" data-rowadd="' + i + '">+ Add an outcome</span>' + (miss ? '<small class="miss">' + miss + ' without a target</small>' : '') + '</td>' +
       '<td>' + dd("rowowner" + i, function(){ return t.owner; }, false) + '</td>' +
@@ -383,7 +386,7 @@
   document.getElementById("prev").addEventListener("click", function(){ open((cur - 1 + T.length) % T.length); });
   document.getElementById("next").addEventListener("click", function(){ open((cur + 1) % T.length); });
   document.getElementById("close").addEventListener("click", close);
-  document.getElementById("bin").addEventListener("click", function(){ if (cur < 0) return; T.splice(cur, 1); cur = Math.min(cur, T.length - 1); if (cur < 0) close(); else open(cur); toast("Tactic removed"); });
+
   document.getElementById("backdrop").addEventListener("click", close);
   document.addEventListener("keydown", function(e){ if (e.key === "Escape" && cur >= 0) close(); });
   drawRows();

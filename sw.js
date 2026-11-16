@@ -687,7 +687,10 @@
    the one being edited opens in a panel beside the table. */
 /* v7.79-panel-beside-tactics — §769.1: the panel stands beside the tactics
    alone, not the direction's head or its measures. */
-const SHELL = "smp-shell-v7.79-panel-beside-tactics";
+/* v7.80-page-contained — §770: the banner pinned beside the rail with a
+   clear top line, the rail capped to the window, the panel on the table's
+   line and pinned under the banner. */
+const SHELL = "smp-shell-v7.80-page-contained";
 const ASSETS = [
   "/",
   "/index.html",

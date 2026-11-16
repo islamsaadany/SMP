@@ -10607,6 +10607,13 @@
       b.addEventListener("click", gapWalk);
     });
 
+    /* §770: the direction's banner height, for the panel to pin under it. Read
+       after the paint that drew it; the band's height depends on nothing the
+       panel does, so there is no loop to close (§28.3's worry does not apply). */
+    (function(){
+      var band = document.querySelector(".pane > .pband, .pane .ptitle.edhead");
+      if (band) document.documentElement.style.setProperty("--band-h", band.offsetHeight + "px");
+    })();
     /* §769: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
     document.querySelectorAll("[data-tacopen]").forEach(function(b){
       b.addEventListener("click", function(e){

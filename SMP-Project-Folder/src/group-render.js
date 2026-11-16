@@ -11242,8 +11242,10 @@ function unitPlanBody(it, u, railed, bare){
     /* §769.1: the panel stands beside the TACTICS alone (Islam: it should not
        push the direction's head, nor sit beside the measures), so the wrap
        opens here, at the tactics' heading, and closes after their legend. */
-    (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
+    /* §770: and opens UNDER the heading, so the panel's top edge is the
+       table's own top line (the wireframe's fifth point). */
+    (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
        displayed on NO screen at all and the outcome only as a grey line under

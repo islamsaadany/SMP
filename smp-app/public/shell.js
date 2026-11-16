@@ -39575,8 +39575,10 @@ function unitPlanBody(it, u, railed, bare){
     /* §769.1: the panel stands beside the TACTICS alone (Islam: it should not
        push the direction's head, nor sit beside the measures), so the wrap
        opens here, at the tactics' heading, and closes after their legend. */
-    (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
+    /* §770: and opens UNDER the heading, so the panel's top edge is the
+       table's own top line (the wireframe's fifth point). */
+    (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
        displayed on NO screen at all and the outcome only as a grey line under
@@ -89618,6 +89620,13 @@ var SYNC = (function () {
       b.addEventListener("click", gapWalk);
     });
 
+    /* §770: the direction's banner height, for the panel to pin under it. Read
+       after the paint that drew it; the band's height depends on nothing the
+       panel does, so there is no loop to close (§28.3's worry does not apply). */
+    (function(){
+      var band = document.querySelector(".pane > .pband, .pane .ptitle.edhead");
+      if (band) document.documentElement.style.setProperty("--band-h", band.offsetHeight + "px");
+    })();
     /* §769: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
     document.querySelectorAll("[data-tacopen]").forEach(function(b){
       b.addEventListener("click", function(e){

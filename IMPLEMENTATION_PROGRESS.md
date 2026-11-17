@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-17 — The whole strategy on paper, from the reading window (§787).** A Print control in the reading window's strip, for the SMO alone, prints the subject being read as one document — cover, then every tab in order, every direction opened — through the browser's print dialog, so paper or Save as PDF. The paper is built from the same code as the tabs, so it cannot differ from the screen.
+
 **2026-11-17 — Free chats answer on Claude again (§786).** §784 had put the plan's shape into the answer's schema, which Claude refuses past its optional-field cap, so every free chat failed on main. The shape is now asked for in a second, small request of its own.
 
 **2026-11-17 — Every part laid out as the plan; rename from the header (§785).** Pillars/Directions and Tactical Plans now draft in the plan's shape too and go on the plan by name (a Direction updated, not added twice; an item tied to its Direction, one the plan lacks left out and said). An older draft offers Lay it out for the plan. A chat's name is renamed by pressing it in its header.

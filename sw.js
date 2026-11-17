@@ -707,7 +707,8 @@
 /* v7.96-put-on-plan — §784: a chat's work laid out as the plan, and put on it. */
 /* v7.97-all-parts — §785: every part laid out as the plan and put on it; rename from the header; an older draft laid out for the plan. */
 /* v7.98-plan-shape-ask — §786: the plan's shape asked on its own; free chats answer on Claude again. */
-const SHELL = "smp-shell-v7.98-plan-shape-ask";
+/* v7.99-reading-print — §787: the whole strategy on paper from the reading window, the office's alone. */
+const SHELL = "smp-shell-v7.99-reading-print";
 const ASSETS = [
   "/",
   "/index.html",

@@ -67558,7 +67558,7 @@ var COPILOT = (function(){
      opens the work when it is asked for — and B — the Copilot on the plan,
      opened from the part in view on the Strategy tab. Chosen per browser;
      nothing on the server knows which. */
-  /* §754 — BUILDER AND REFINE (Islam: "for a new project the people go step
+  /* §772 — BUILDER AND REFINE (Islam: "for a new project the people go step
      by step… once there is a plan in place and we are refining, the one chat
      is working better"; "the builder should be always there if an element is
      not there… the foundation, the SWOT, the competitive discipline, the
@@ -67729,7 +67729,7 @@ var COPILOT = (function(){
     var l = allList(), prog = (l && l.swotProgress) || {}, open = l ? l.chats.filter(function(c){ var sp = prog[c.id]; return sp && sp.of > 0 && sp.done < sp.of; })[0] : null;
     var sug = [];
     if (open) sug.push('<button type="button" class="copopt rec" data-cop-chat="' + E(open.id) + '" data-cop-chat-sec="' + E(open._sec) + '">Continue ' + E(open.title) + '</button>');
-    /* §754 — a part not on the plan comes first, said so */
+    /* §772 — a part not on the plan comes first, said so */
     var miss = modeParts().filter(function(k){ return !onPlan(k); });
     var order = miss.concat(here().map(function(x){ return x.k; }).filter(function(k){ return miss.indexOf(k) < 0; }));
     order.forEach(function(k, i){ if (!SUGGEST[k] || (open && open._sec === k)) return; var gap = miss.indexOf(k) >= 0;
@@ -70301,7 +70301,7 @@ var COPILOT = (function(){
   var RAILF = {};
   function railF(){ return RAILF[place()] || ""; }
   function chipsHtml(){
-    /* §754 — no chips: the strip above narrows the rail (Islam: "no need to have it again in the chat"); a line says so and undoes it */
+    /* §772 — no chips: the strip above narrows the rail (Islam: "no need to have it again in the chat"); a line says so and undoes it */
     if (archView() || layout() !== "window" || inPanel() || !railF()) return "";
     return '<div class="copachips" data-cop-chips><span class="copm">Showing ' + E(stripWord(railF())) + '</span><button type="button" class="linkbu" data-cop-chip="">Show all</button></div>';
     return '<div class="copachips" data-cop-chips><button type="button" class="copachip" data-cop-chip="" aria-pressed="' + !railF() + '">All</button>' +

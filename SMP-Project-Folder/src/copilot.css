@@ -1243,3 +1243,8 @@ body.copB-wide #copPanel .copPgrip { display:none; }
 .copnamebtn { border:0; background:none; padding:1px 4px; margin:0 -4px; font:inherit; color:inherit; cursor:text; border-radius:5px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
 .copnamebtn:hover { background:var(--surface-2, #EFF2F6); }
 .copheadone .coprenhead { flex:1 1 auto; min-width:0; max-width:520px; font-size:15px; font-weight:600; padding:3px 6px; }
+
+/* §787 — an older draft laying itself out as the plan: said while it happens, nothing to press */
+.copdlaying { font-style:italic; animation:copfade 1.4s ease-in-out infinite alternate; }
+@keyframes copfade { from { opacity:.55; } to { opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .copdlaying { animation:none; } }

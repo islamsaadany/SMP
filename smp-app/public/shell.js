@@ -67990,7 +67990,7 @@ var COPILOT = (function(){
   /* §779 — words said in the panel on a part the plan holds: the part's own
      "start from existing" opens, and the words are its first change, sent as
      soon as the chat can take one; until then they wait in its box. */
-  var PENDSAY = null, PENDAPPLY = "", PENDLAY = "";
+  var PENDSAY = null, PENDAPPLY = "";
   function sayToPlan(text, file){
     var c = document.querySelector("[data-cop-hiddencards] .copplan"); if (!c) return false;
     PENDSAY = { sec: section(), text: text, file: file || null, at: Date.now() }; delete STARTTEXT[key()]; c.click(); return true;
@@ -68538,9 +68538,17 @@ var COPILOT = (function(){
   }
   var GAPWORD = { compete: [" value has no measure yet.", " values have no measure yet."], directions: [" Direction is not fully scored yet.", " Directions are not fully scored yet."], execution: [" item has no measure yet.", " items have no measure yet."] };
   function gapLine(plan){ var n = planGaps(plan), w = GAPWORD[plan && plan.section]; return n && w ? " " + n + w[n === 1 ? 0 : 1] : ""; }
-  /* §785 — A DRAFT MADE BEFORE THE PLAN'S SHAPE (Islam: "I still have a chat with a deliverable with no add to plan"): one press asks the Copilot to lay the latest draft out in the plan's shape, in the same chat, so it can be put on the plan */
-  var LAYTEXT = "Lay the latest draft out in the plan’s shape, ready to put on the plan.";
+  /* §787 — A DRAFT MADE BEFORE THE PLAN'S SHAPE LAYS ITSELF OUT when its panel shows it (Islam: "isn't that a view change? why are we adding a feature for an exceptional case?"): one quiet ask, kept on the message, nothing said in the chat */
   function canLay(sec){ return !!PLAN_TYPE[sec]; }
+  var LAYING = {};
+  function layDraft(){
+    if (!PANE || !PANE.chat) return;
+    var m = draftMsg(); if (!m || !m.part || m.part.plan || m.part.planTried || LAYING[m.id]) return;
+    var cid = PANE.chat.id, mid = m.id; LAYING[mid] = true;
+    post({ act:"planShape", id: cid, messageId: mid, placeWord: placeWord(), context: (contextOf() || {}).line || "" }, WAIT_MS).then(function(x){
+      if (x.st === 200 && x.j && x.j.ok && PANE && PANE.chat && PANE.chat.id === cid) { PANE.messages = x.j.messages || PANE.messages; if (x.j.laid) loadList(true); draw(); }
+    }, function(){});
+  }
   function draftPanelHtml(m){
     var p = m.part, latest = true;
     for (var i = PANE.messages.length - 1; i >= 0; i--) if (hasDraft(PANE.messages[i])) { latest = PANE.messages[i] === m; break; }
@@ -68552,8 +68560,8 @@ var COPILOT = (function(){
          it came in the plan's own shape: then it can go on from here. */
       (p.plan ? (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-putplan="' + E(m.id) + '">Put on ' + E(placeWord()) + '’s plan</button>' : '') +
           '<span class="copm copdstay" data-cop-draftstay>Laid out as the plan’s ' + E(stripWord(PANE.chat.section || section())) + '.' + gapLine(p.plan) + '</span>'
-        : canLay(PANE.chat.section || section()) && canEdit() && !PANE.chat.archived
-          ? '<button type="button" class="copopt rec" data-cop-layout-plan>Lay it out for the plan</button><span class="copm copdstay" data-cop-draftstay>This draft is not in the plan’s shape yet, so it cannot go on the plan as it is.</span>'
+        : canLay(PANE.chat.section || section()) && !p.planTried
+          ? '<span class="copm copdstay copdlaying" data-cop-draftstay data-cop-laying>Laying it out as the plan…</span>'
           : '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
             (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : ''));
     return '<section class="copout" data-cop-out aria-label="Draft">' +
@@ -69644,8 +69652,6 @@ var COPILOT = (function(){
        Foundation's page, §524, as the pattern): the rail is a library only
        if what it holds can be read and applied from here. */
     var typed = !editing && cur && cur.body && typeof cur.body === "object" ? typedBodyHtml(d, cur.body) : "";
-    if (!typed && !editing && d.type === "free" && fchat && canLay(d.section) && canEdit())
-      body += '<div class="copplanrow" data-cop-planrow><span class="copsvst warn">Not in the plan’s shape, so it cannot go on the plan as it is</span><button type="button" class="copbtn solid" data-cop-layfromdeliv="' + E(fchat) + '" data-cop-laysec="' + E(d.section) + '">Lay it out for the plan</button></div>';
     if (typed) {
       var onN = d.applied ? d.applied.n : 0;
       body = typed + '<div class="copplanrow" data-cop-planrow>' + (onN
@@ -69800,7 +69806,7 @@ var COPILOT = (function(){
     fitPane(); fitBox();
     applyRoad(); applyStart();
     if (PENDSAY) setTimeout(pendingSay, 0);
-    if (PENDLAY && PANE && PANE.chat && PANE.chat.id === PENDLAY && PANE.messages && !THINKING) { PENDLAY = ""; setTimeout(function(){ send(LAYTEXT); }, 0); }
+    var lay = document.querySelector("[data-cop-out] [data-cop-laying]"); if (lay) layDraft();
     if (PENDAPPLY && PANE && PANE.deliverable && PANE.deliverable.id === PENDAPPLY && PANE.versions && PANE.versions.length) {
       PENDAPPLY = ""; setTimeout(function(){ var ab = document.querySelector("[data-cop-dapply], [data-cop-fapply]"); if (ab) ab.click(); }, 0); }
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
@@ -72648,8 +72654,6 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-notnow]"))) { NOTNOW[b.getAttribute("data-cop-notnow")] = true; draw(); return; }
-    if ((b = hit(ev, "[data-cop-layout-plan]"))) { if (PANE && PANE.chat && !THINKING) send(LAYTEXT); return; }
-    if ((b = hit(ev, "[data-cop-layfromdeliv]"))) { var lc = b.getAttribute("data-cop-layfromdeliv"), ls = b.getAttribute("data-cop-laysec"); PENDLAY = lc; openIn(ls, "chat", lc); return; }
     if ((b = hit(ev, "[data-cop-putplan]"))) {
       if (!PANE || !PANE.chat) return;
       var cid5 = PANE.chat.id, mid5 = b.getAttribute("data-cop-putplan"), msg5 = (PANE.messages || []).filter(function(x){ return String(x.id) === String(mid5); })[0];

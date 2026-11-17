@@ -71745,3 +71745,14 @@ The full browser run on §786: `checks/shell.mjs` **621 ok, 10 failed**, the kno
 
 **§786 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §785, so the merge is a fast-forward. No migrations; nobody signed out.
 
+## §787 — An older draft lays itself out as the plan; no button (2026-11-17)
+
+Islam, of the *Lay it out for the plan* button (§785) on a draft made before the plan's shape: *"why are we doing this with a button, isn't that a view change? why are we adding a feature for an exceptional case?"* — and, to the proposal, *"go ahead"*.
+
+- **No button.** A draft in one of the five parts that has no plan shape — made before §784, or one whose §786 second ask came back empty — lays itself out when its panel shows it: one quiet ask (`planShape`, the same small ask a new draft gets), with *Laying it out as the plan…* in the draft's foot while it runs, then the cards and Put on the plan. Nothing is said in the chat.
+- **Once.** The shape is kept on the message; a draft that cannot be laid out is marked so (`planTried`) and is not asked for again — it shows as it is, saying it stays in the Copilot.
+- **A draft already saved as text** is saved again as its part from then on: its saved mark goes when it is laid out, so Save and Put on the plan make the part's own deliverable (the text version stays in Deliverables as it was).
+- The button, the message it sent (*Lay the latest draft out in the plan's shape…*) and the version page's button of §785 go.
+
+**Checked**: `checks/copilot.mjs` **389 passed, 0 failed** — a draft without the shape laid out once when asked, kept on its message, the chat's messages unchanged, a second ask not made. `checks/shell.mjs` 3q (**11 ok, 0 failed**) — an older draft put into a chat lays itself out as the plan when the chat opens, no button, nothing said, the shape stored, Put on the plan offered; 3j2 **12 ok, 0 failed**.
+

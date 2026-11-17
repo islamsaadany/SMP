@@ -31,7 +31,7 @@ import {
   waitingFiles, takeFiles, waitingWords,
 } from "../../lib/copilot.ts";
 import { kindOf, mimeOf, asParts, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
-import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
+import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured, askPlanShape, PLAN_SCHEMAS } from "../../lib/copilot-ask.ts";
 import {
   FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, addTalk, withQa, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
@@ -174,6 +174,10 @@ export async function serve(a: ServeArgs): Promise<Response> {
     if (!body || typeof body !== "object") return no(400, "Nothing arrived.");
     if (body.act === "say") {
       const r = await sayFlow(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (body.act === "planShape") {
+      const r = await planShapeFlow(a.tenantId, body, who);
       return json(r.status, r.body);
     }
     if (body.act === "flowDraft" || body.act === "flowRefine" || body.act === "flowCheck") {
@@ -489,6 +493,37 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
    chat's section first, so a long plan loses the far sections and never the
    one being asked about. A whole unit's plan is ~8,000 characters. */
 const MAX_CONTEXT = 24_000;
+/* §787 — AN OLDER DRAFT LAYS ITSELF OUT, ONCE (Islam: "isn't that a view
+   change? why are we adding a feature for an exceptional case?"). A draft
+   made before the plan's shape (§784), in one of the five parts, is laid out
+   by the same small ask a new one gets (§786) when its panel first shows it,
+   and the shape is kept on the message — or `planTried`, so a draft that
+   cannot be laid out is not asked for again. Nothing is said in the chat. A
+   draft already saved as text is saved again, as its part, from here on: its
+   `saved` mark goes, so Save and Put on the plan make the part's deliverable. */
+async function planShapeFlow(tenantId: string, b: any, _who: Who): Promise<Out> {
+  const id = String(b.id || ""), mid = String(b.messageId || "").replace(/\D/g, "") || "0";
+  if (!UUID.test(id)) return refused(400, "Which chat?");
+  const got = await withTenant(tenantId, async (c) => {
+    const chat = await oneChat(c, id); if (!chat) return null;
+    const m = await oneMessage(c, id, mid); const p: any = m && m.part;
+    if (!m || m.who !== "ai" || !p || p.kind !== "answer" || !p.draft || p.plan || p.planTried) return { chat, skip: true as const };
+    return { chat, p, skip: false as const };
+  });
+  if (!got) return refused(404, "That chat is not here any more.");
+  if (got.skip || !PLAN_SCHEMAS[got.chat.section] || !configured()) return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)) });
+  const plan = await askPlanShape({ section: got.chat.section, place: got.chat.place, placeWord: oneLine(b.placeWord).slice(0, 120), context: String(b.context ?? "").slice(0, MAX_CONTEXT),
+    question: "", pasted: false, history: [], assumptions: [], files: [] }, got.p.draft);
+  return withTenant(tenantId, async (c) => {
+    const patch: any = plan ? { plan } : { planTried: true };
+    if (plan && got.p.saved && got.p.saved.deliverableId) {
+      const d = await c.query("SELECT type FROM copilot_deliverables WHERE id = $1", [got.p.saved.deliverableId]);
+      if (d.rows[0] && d.rows[0].type === "free") patch.saved = null;
+    }
+    await c.query("UPDATE copilot_messages SET part = part || $3::jsonb WHERE chat_id = $1 AND id = $2", [id, mid, JSON.stringify(patch)]);
+    return out(200, { ok: true, laid: !!plan, messages: await messagesOf(c, id) });
+  });
+}
 async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   const id = String(b.id || "");
   if (!UUID.test(id)) return refused(400, "Which chat?");

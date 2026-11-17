@@ -3294,19 +3294,18 @@ await section("3q · a chat's work laid out as the plan, and put on it (§784)",
     await page.waitForFunction(() => /Vendor value proposition/.test((document.querySelector(".copheadone .coph") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
     const rn = (await asTenant(tenantId, (c) => c.query("select title from copilot_chats order by created_at desc limit 1"))).rows[0];
     check(!!rn && rn.title === "Vendor value proposition" && /Vendor value proposition/.test(await page.evaluate(() => (document.querySelector(".copheadone .coph") || {}).textContent || "")), "§785 a chat is renamed from its header — its name pressed becomes a box, Enter keeps it", JSON.stringify(rn));
-    /* §785 — a draft not in the plan's shape (made before §784) is laid out for the plan with one press */
-    const shapedAns = JSON.parse(JSON.stringify(MODEL_ANSWER));
-    delete MODEL_ANSWER.plan;
-    await page.fill("[data-cop-text]", "Lay it out with the four values we discussed");
-    await page.press("[data-cop-text]", "Enter");
-    await page.waitForSelector("[data-cop-layout-plan]", { timeout: 15000 }).catch(() => {});
-    const ly = await page.evaluate(() => ({ btn: !!document.querySelector("[data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-putplan]"), stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }));
-    check(ly.btn && !ly.put && /not in the plan’s shape yet/.test(ly.stay), "§785 a draft not in the plan's shape says so and offers Lay it out for the plan", JSON.stringify(ly));
-    Object.assign(MODEL_ANSWER, shapedAns);
-    const nL = MODEL_SEEN.length;
-    await page.click("[data-cop-layout-plan]");
-    await page.waitForSelector("[data-cop-dplan] [data-cop-val]", { timeout: 15000 }).catch(() => {});
-    check(JSON.stringify(MODEL_SEEN.slice(nL)).includes("Lay the latest draft out in the plan"), "§785 ...pressed, it asks the Copilot to lay the latest draft out in the plan's shape");
+    /* §787 — a draft made before the plan's shape (§784) lays itself out when its panel shows it: nothing to press, nothing said in the chat */
+    const cid = (await asTenant(tenantId, (c) => c.query("select id from copilot_chats order by created_at desc limit 1"))).rows[0].id;
+    await asTenant(tenantId, (c) => c.query("insert into copilot_messages (chat_id, who, body, part) values ($1, 'ai', 'Here is the table.', $2)", [cid, JSON.stringify({ kind: "answer", missing: [], options: [], assumptions: [], pastedBelongsTo: null, following: "",
+      draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ title: "Vendor Growth Partner", text: "How: joint planning. Measure: Tier 2 revenue growth ≥ 100% (today 60%)." }] }] } })]));
+    const nMsg = (await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_messages where chat_id = $1", [cid]))).rows[0].n;
+    await page.goto("about:blank");
+    await open("/raya-trade/strategy/mobile/copilot/compete#cop=chat-" + cid);
+    await page.waitForSelector("[data-cop-dplan] [data-cop-val]", { timeout: 20000 }).catch(() => {});
+    const ly = await page.evaluate(() => ({ cards: document.querySelectorAll("[data-cop-dplan] [data-cop-val]").length, btn: !!document.querySelector("[data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-putplan]") }));
+    const after = await asTenant(tenantId, (c) => c.query("select count(*)::int n, bool_or(part ? 'plan') laid from copilot_messages where chat_id = $1", [cid]));
+    check(ly.cards >= 1 && !ly.btn && ly.put && after.rows[0].n === nMsg && after.rows[0].laid === true,
+      "§787 an older draft lays itself out as the plan when it is shown — no button, nothing said in the chat, the shape kept on it — and can be put on the plan", JSON.stringify({ ly, nMsg, after: after.rows[0] }));
     const dp = await page.evaluate(() => { const d = document.querySelector("[data-cop-dplan]"); if (!d) return null;
       return { disc: (d.querySelector(".copdisc h4") || {}).textContent || "", vals: Array.from(d.querySelectorAll("[data-cop-val] h5")).map((h) => h.textContent), gap: d.querySelectorAll("[data-cop-gap]").length,
         today: Array.from(d.querySelectorAll(".copmrow .copm")).map((x) => x.textContent).join("|"), ev: !!d.querySelector("details.copev"), put: (document.querySelector("[data-cop-putplan]") || {}).textContent || "", stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }; });

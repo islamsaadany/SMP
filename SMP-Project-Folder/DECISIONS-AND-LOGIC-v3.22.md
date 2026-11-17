@@ -71731,3 +71731,5 @@ Islam, of §784: *"do the same for all phases"*; and while it was built, *"allow
 
 The full run on §785 and §785.1: `checks/copilot.mjs` **387 passed, 0 failed**; `checks/shell.mjs` **621 ok, 10 failed**, the known ten — the Advisory tab and §654 B3 green in it; `generated-in-step` and `release-stamp` clear.
 
+**§785 AND §785.1 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"* — held until the full run above came back with the known ten only. `main` had not moved since §784, so the merge is a fast-forward — `24c1004c..e1720bd1`. No migrations; nobody signed out.
+

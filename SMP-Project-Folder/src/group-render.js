@@ -759,7 +759,12 @@ function kmTag(n, name, kind){
     var t = e.target;
     return t && t.closest ? t.closest(".kmtag[data-name]") : null;
   }
-  function show(el){
+  /* §774.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
+     hovering should appear close to the mouse, not in the top like that"*).
+     With a pointer, the label sits just below and right of it and follows
+     it across the tag; flipped to the left or above only where the window
+     ends. From the keyboard there is no pointer, so it sits under the tag. */
+  function show(el, e){
     var name = el.getAttribute("data-name");
     if (!name) return;
     if (!tip) {
@@ -769,14 +774,33 @@ function kmTag(n, name, kind){
     }
     tip.textContent = name;
     tip.classList.add("on");
-    var r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
-    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
-    var top = r.bottom + 6;
-    if (top + h > window.innerHeight - 8) top = r.top - 6 - h;
-    tip.style.left = left + "px"; tip.style.top = top + "px";
+    place(el, e);
+  }
+  /* THE PAGE IS ZOOMED (`html { zoom:.8 }`, _shared.css), so the pointer,
+     the rects and the window are in the screen's pixels while a fixed box's
+     `left`/`top` and its offsetWidth are in the page's: worked in the
+     screen's and divided by the zoom on the way into the style, or the label
+     lands four fifths of the way to the pointer (measured: asked for 278,
+     drawn at 222). */
+  function place(el, e){
+    if (!tip) return;
+    var z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    var w = tip.offsetWidth * z, h = tip.offsetHeight * z, left, top;
+    if (e && typeof e.clientX === "number") {
+      left = e.clientX + 14; top = e.clientY + 16;
+      if (left + w > window.innerWidth - 8) left = e.clientX - 14 - w;
+      if (top + h > window.innerHeight - 8) top = e.clientY - 12 - h;
+    } else {
+      var r = el.getBoundingClientRect();
+      left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+      top = r.bottom + 6;
+      if (top + h > window.innerHeight - 8) top = r.top - 6 - h;
+    }
+    tip.style.left = (Math.max(8, left) / z) + "px"; tip.style.top = (Math.max(8, top) / z) + "px";
   }
   function hide(){ if (tip) tip.classList.remove("on"); }
-  document.addEventListener("mouseover", function(e){ var t = tagOf(e); if (t) show(t); });
+  document.addEventListener("mouseover", function(e){ var t = tagOf(e); if (t) show(t, e); });
+  document.addEventListener("mousemove", function(e){ if (tip && tip.classList.contains("on") && tagOf(e)) place(null, e); });
   document.addEventListener("mouseout",  function(e){ if (tagOf(e)) hide(); });
   document.addEventListener("focusin",   function(e){ var t = tagOf(e); if (t) show(t); });
   document.addEventListener("focusout",  function(e){ if (tagOf(e)) hide(); });
@@ -800,6 +824,12 @@ function supportedLine(m, p){
 /* The legend — which number is which measure — folded, so the page costs one
    line until it is asked. Drawn only while the mapping is in use. */
 function supportsLegend(p){
+  /* §774.2: GONE (Islam: *"remove this part of which number is key
+     measures"*). The tags' own hover names the measure; the folded list
+     under the tactics was a second telling. Kept as a function that draws
+     nothing, so the three places that called it need no edit and the
+     check that counts it reads zero. */
+  return '';
   if (!p || !mappingOn(p)) return '';
   return '<details class="kmlegend"><summary>Which number is which ' + L1("measure").toLowerCase() + '</summary><div class="kmrows">' +
     (p.measures || []).map(function(m, i){
@@ -827,7 +857,7 @@ function supportsSummary(t, p){
 }
 function supportsEdit(t, p){
   var ms = (p && p.measures) || [], have = supportsIds(t);
-  return '<span class="kmpick">' + bxkey("Supports these " + L("measure").toLowerCase()) +
+  return '<span class="kmpick">' + bxkey(L("measure")) +
     (ms.length
       ? '<details class="kmdrop"><summary><span class="kmsum">' + supportsSummary(t, p) + '</span><span class="kmchev" aria-hidden="true"></span></summary>' +
         '<span class="kmlist" role="group" aria-label="' + L("measure") + ' this ' + L1("tactic").toLowerCase() + ' supports">' +
@@ -862,6 +892,65 @@ function supportsEdit(t, p){
     });
   });
 })();
+
+/* ── §773: THE TACTIC PANEL ─────────────────────────────────────────────
+   Islam, with a picture of the pen: *"can we work on a cleaner approach to
+   edit the tactic. as it became very complex."* One tactic's row held its
+   name, description, key measures, requirements, four outcomes with four
+   controls each, owner, collaborators and quarters in one cell, taller than
+   the screen. From the working mockup he tried (design-mockups/
+   tactic-edit-panel/2026-11-16_full-page.html): with the pen on, the tactics
+   table is a plain LIST — one line per tactic — and the tactic being edited
+   opens in a PANEL beside the table, in short sections. The one Edit button
+   at the top turns the pen on and opens the panel on the first tactic;
+   pressing any row moves it; Done editing, at the top or at the foot of the
+   panel, turns the pen off. The owner and the collaborators are the same
+   register-fed pickers (§130.1); the key measures the dropdown (§767.2).
+
+   WHICH TACTIC IS OPEN: `null` is "not chosen yet" (the pen opens on the
+   first of the pillar drawn), `false` is "closed by hand" (× on the panel —
+   the pen stays on, the list stays), else the tactic's id. Reset to null
+   whenever the pen is drawn off, so the next Edit opens on the first again.
+
+   THE ROW FOLLOWS THE PANEL AS YOU TYPE — name and description only, by a
+   direct patch of the row's own text (§71.2: the pen never repaints on a
+   keystroke, and a repaint would take the cursor, §35). Everything else on
+   the row (owner, quarters, tags, the outcome count) is read on the next
+   paint, which every row press and every close causes. */
+var PEN_TACTIC = null;
+(function(){
+  if (typeof document === "undefined") return;
+  function rowOf(){
+    if (!PEN_TACTIC) return null;
+    var id = String(PEN_TACTIC).replace(/"/g, '\\"');
+    return document.querySelector('[data-tacrow="' + id + '"]');
+  }
+  document.addEventListener("input", function(e){
+    var f = e.target;
+    if (!f || !f.classList) return;
+    var v = String(f.value || "").trim(), word = "New " + L1("tactic").toLowerCase();
+    /* §775: the name is typed in the ROW; the panel's head follows it */
+    if (f.classList.contains("tacpn")) {
+      var tr = f.closest("[data-tacrow]"), hd = document.querySelector(".tacpanel .tpname");
+      if (tr && hd && String(PEN_TACTIC) === tr.dataset.tacrow) hd.textContent = v || word;
+    /* an outcome's name is typed in the ROW; the panel reads it over the target */
+    } else if (f.classList.contains("outpn")) {
+      var ln = f.closest(".outline"), tr2 = f.closest("[data-tacrow]");
+      if (ln && tr2 && String(PEN_TACTIC) === tr2.dataset.tacrow) {
+        var nm = document.querySelector('.tacpanel .oname[data-oname="' + ln.dataset.oid.replace(/"/g, '\\"') + '"]');
+        if (nm) nm.textContent = v || "Not named yet — type it in the table";
+      }
+    /* the description is typed in the PANEL; the grey line under the row's name follows */
+    } else if (f.classList.contains("tacpd") && f.closest(".tacpanel")) {
+      var row = rowOf(), cell = row && row.querySelector(".namerow") && row.querySelector(".namerow").closest("td");
+      if (!cell) return;
+      var why = cell.querySelector(".tacwhy");
+      if (!why && v) { why = document.createElement("span"); why.className = "why tacwhy"; cell.appendChild(why); }
+      if (why) { why.textContent = v; if (!v) why.remove(); }
+    }
+  });
+})();
+
 /* The outcome's four controls, in ONE cell and ONE grid (Islam: "the 4 boxes
    should be the same size ... so we can give space for the other columns").
    Equal boxes sized by what the compile select needs for its longest word, so
@@ -10831,8 +10920,119 @@ function unitPlanBody(it, u, railed, bare){
   }).join("");
   /* §267: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
      row's span and every row have to agree about how many columns there are. */
+
+  /* ── §773: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
+  var penOpen = null;
+  if (ed) {
+    if (PEN_TACTIC === null && it.tactics.length) PEN_TACTIC = it.tactics[0].id;
+    if (PEN_TACTIC) {
+      penOpen = it.tactics.filter(function(t){ return t.id === PEN_TACTIC; })[0] || null;
+      /* another pillar's tactic was open: this pillar opens on its first */
+      if (!penOpen && it.tactics.length) { PEN_TACTIC = it.tactics[0].id; penOpen = it.tactics[0]; }
+    }
+  } else PEN_TACTIC = null;
+  /* §775 — THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL. Islam, on
+     the §773 list: *"how about we make the tactic main info editable in the
+     main table and the extra details in the left pane to make the table on
+     the left usable and the pan for extras"*, then eleven rounds on the
+     working mockup (design-mockups/tactic-edit-panel/2026-11-16_table-and-
+     panel.html) and *"go ahead and build it"*. One line per tactic, typed in:
+     the NAME, each OUTCOME's name (and + Add an outcome), the OWNER (the
+     register-fed picker, §130.1) and the QUARTERS; a ringed × on the name box
+     and on each outcome box that ASKS before anything goes (§775.1 in
+     shell.html). The description reads under the name and is typed in the
+     panel. The panel holds the extras: the description, each outcome's
+     target, unit, direction, rule and months, the collaborators (the
+     searchable tick list), the key measures and the requirements. The open
+     row is tinted and runs out of the table's edge to meet the panel (his
+     pick, D). The panel's head is the tactic's name and the arrows; no close
+     and no Done — the top's Done editing is the one. */
+  var RM_X = '<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  var outLine = function(t, x, inner, oid, extra){
+    return '<span class="outline" data-oid="' + esc(oid) + '">' + inner +
+      '<button type="button" class="rm" data-rmout="' + esc(t.id) + '|' + esc(oid) + '" title="Remove this ' +
+      esc(detailWord("outcomes", "one", t).toLowerCase()) + '">' + RM_X + '</button>' + (extra || '') + '</span>';
+  };
+  var penTacticRow = function(t, i){
+    var open = penOpen === t;
+    /* the first outcome's name, through gapCell (its lifecycle, red word and walk mark) */
+    var first = gapCell("plan", "u_plan", t, "outcome", {
+      ctx: pctx(t), del: true, fillKind: "tactic",
+      read: function(v){ return '<b>' + esc(v) + '</b>'; },
+      control: function(set, pendCls){ return textOr("plan", t.outcome || "", "outpn " + (pendCls || ""), set); } });
+    var extras = tacticExtras(t).map(function(x){
+      var emptyName = !x.outcome || !String(x.outcome).trim();
+      return outLine(t, x, textOr("plan", x.outcome || "", "outpn" + (emptyName ? " gapwalk" : ""),
+        function(v){ setOr(x, "outcome", v); }), x.id);
+    }).join('');
+    /* the target lives in the panel: a tactic not open says so where the walk can land */
+    var tgtGap = !open && t.outcome && SMPRules.gapEmpty("outTarget", t)
+      ? '<span class="missing tacgap gapwalk" data-tacopen="' + esc(t.id) + '" tabindex="0">Target missing — set it in the panel</span>' : '';
+    return '<tr data-oi="' + i + '" data-tacrow="' + esc(t.id) + '" data-tacopen="' + esc(t.id) + '"' +
+      hidCls(t, open ? " penon" : "") + '><td class="idx">' +
+      (on ? handle("Reorder " + t.name) : '') + '<span class="idx-n">' + (i + 1) + '</span></td>' +
+      '<td><span class="namerow">' + textOr("plan", t.name, "tacpn", function(v){ t.name = v; }) +
+        '<button type="button" class="rm" data-rmrow="tactic|' + esc(u.ukey) + '|' + esc(t.id) + '" title="Remove this ' +
+        esc(L1("tactic").toLowerCase()) + '">' + RM_X + '</button></span>' +
+        (t.description ? '<span class="why tacwhy">' + esc(t.description) + '</span>' : '') + '</td>' +
+      '<td class="outc">' + outLine(t, t, first, "first") + extras +
+        '<span class="addout">' + outAddBtn(t) + '</span>' + tgtGap + '</td>' +
+      '<td>' + gapCell("plan", "u_plan", t, "owner", {
+        ctx: pctx(t), readEmpty: '<span class="missing">Missing</span>', read: ownerShown,
+        control: function(set, pendCls){
+          return selectOr("plan", t.owner == null ? "" : t.owner, ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set); } }) + '</td>' +
+      '<td><span role="group" aria-label="Quarters this ' + esc(L1("tactic").toLowerCase()) + ' runs in">' + qsEdit(t) + '</span></td></tr>';
+  };
+  var tacticPanel = function(t){
+    var i = it.tactics.indexOf(t), n = it.tactics.length;
+    var prev = it.tactics[(i - 1 + n) % n], next = it.tactics[(i + 1) % n];
+    var word = L1("tactic");
+    var sec = function(title, body){ return '<div class="tpsec">' + (title ? '<h4>' + title + '</h4>' : '') + body + '</div>'; };
+    var tgtOpen = false;
+    var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
+      ctx: pctx(t), del: true, fillKind: "tactic", read: tgtShown,
+      control: function(set, pendCls){ tgtOpen = true; return outcomeEdit(t, set, pendCls, false); } });
+    var tdCls = tgtOpen ? 'tgtcell' : 'tgtcol num';
+    var named = function(v, oid){
+      return '<b class="oname" data-oname="' + esc(oid) + '">' + (v && String(v).trim() ? esc(v)
+        : '<span class="nobody">Not named yet — type it in the table</span>') + '</b>'; };
+    var outRows = '<tr><td>' + (tacticExtras(t).length ? otag("O1") : '') + named(t.outcome, "first") + '</td>' +
+      monthlyTgtCell(tdCls, t, "outMonthly", tgtCell, !SMPRules.isYesNo(t.outTarget), true) + '</tr>' +
+      tacticExtras(t).map(function(x){
+        var emptyTgt = SMPRules.gapEmpty("outTarget", x);
+        return '<tr class="' + outSubCls(t) + '"><td>' + otag(x.id) + named(x.outcome, x.id) + '</td>' +
+          '<td class="tgtcell">' + outcomeEdit(x, null, emptyTgt ? "gapwalk" : "", false) + '</td></tr>';
+      }).join('') + outPad(tacticExtras(t).length) +
+      (!SMPRules.isYesNo(t.outTarget) ? monthlyRowFor(t, "outMonthly", "outTarget", 2, t.outcome || t.name) : "");
+    var collabs = gapCell("plan", "u_plan", t, "collaborators", {
+      ctx: pctx(t), text: collabText,
+      parse: function(v){ return Array.isArray(v) ? v.map(function(x){ return String(x).trim(); }).filter(Boolean) : collabParse(v); },
+      del: true, readEmpty: '<span class="nobody">&mdash;</span>', read: collabShown,
+      control: function(set, pendCls){
+        return selectManyOr("plan", collabNames(t), ownerChoices(collabNames(t), false), "collabsel " + (pendCls || ""), set,
+          "Collaborators on this " + word); } });
+    return '<aside class="tacpanel" aria-label="' + esc(word) + ' being edited">' +
+      '<div class="tph"><b class="tpname">' + (t.name ? esc(t.name) : 'New ' + esc(word.toLowerCase())) + '</b>' +
+        '<span class="tpnav">' + eyeBtn(t, "plan", "u_plan") + (n > 1
+          ? '<button type="button" class="tpbtn" data-tacopen="' + esc(prev.id) + '" title="Previous ' + esc(word.toLowerCase()) + '">&uarr;</button>' +
+            '<button type="button" class="tpbtn" data-tacopen="' + esc(next.id) + '" title="Next ' + esc(word.toLowerCase()) + '">&darr;</button>' : '') +
+        '</span></div>' +
+      '<div class="tpbody">' +
+        sec('Description', textOr("plan", t.description || "", "tacdesc tacpd", function(v){ setOr(t, "description", v); })) +
+        sec(DW("outcomes", "many", t),
+          '<div class="scroll tpout"><table><thead><tr><th>' + DW("outcomes", "one", t) + '</th><th class="cc">Target</th></tr></thead>' +
+          '<tbody>' + outRows + '</tbody></table></div>') +
+        sec('Collaborators', '<div class="tpfield collabs">' + collabs + '</div>') +
+        sec('', supportsEdit(t, it)) +
+        (requirementsOn(t) ? sec('', reqsCell(t, true)) : '') +
+      '</div>' +
+      '<div class="tpfoot"><span>Saves as you leave each box.</span></div>' +
+      '</aside>';
+  };
   var fold = ed && tailFolds();
   var tRows = it.tactics.map(function(t, i){
+    /* §773: with the pen on, one line; the fields are in the panel. */
+    if (ed) return penTacticRow(t, i);
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
        predicting it. `.tgtcell` is what stops the Target column folding below
        880 (arrange.css) and the fold must never take the only way to SET a
@@ -11192,7 +11392,13 @@ function unitPlanBody(it, u, railed, bare){
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
     /* …and a rule above it, so the two blocks read as two blocks of one card. */
+    /* §773.1: the panel stands beside the TACTICS alone (Islam: it should not
+       push the direction's head, nor sit beside the measures), so the wrap
+       opens here, at the tactics' heading, and closes after their legend. */
     '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
+    /* §774: and opens UNDER the heading, so the panel's top edge is the
+       table's own top line (the wireframe's fifth point). */
+    (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
        displayed on NO screen at all and the outcome only as a grey line under
@@ -11207,12 +11413,18 @@ function unitPlanBody(it, u, railed, bare){
        haeders"*. `fold` is read here, where the row builder read it, so the
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
-    miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
+    (ed
+      /* §773: the list — one line per tactic — and the panel beside it. */
+      ? miniTable(["#", L1("tactic"), DW("outcomes", "one", it), "Owner", "Quarters"],
+          tRows + addRow(4, "tactic", "Add a " + L1("tactic")),
+          sortAttr("tactics"), "tactable penlist")
+      : miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
                 .concat(fold ? [] : ["Collabs.","Quarters"]),
       tRows + addRow(fold ? 4 : 6, "tactic", "Add a " + L1("tactic")),
-      sortAttr("tactics"), "tactable") +
+      sortAttr("tactics"), "tactable")) +
     /* §767: which number is which measure, folded under the tactics. */
-    supportsLegend(it);
+    supportsLegend(it) +
+    (penOpen ? '</div>' + tacticPanel(penOpen) + '</div>' : '');
 }
 /* §405: the way a real business unit plans when it is not pillars, or null.
    Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
@@ -11343,10 +11555,10 @@ function renderUnitPlanBody(u){
     /* §540: the count and the rail are of the list AS DRAWN — on a split box
        this tab holds one half of it, and a hint reading "15 Directions" over
        a rail of five is the kind of disagreement §116.2 exists to stop. */
-    (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + partItems(u).length + ' ' + halfWord(u) +
-        ' &middot; drag by the handle to reorder, here and inside each ' +
-        halfWord1(u) + '</p>' : '') +
+    /* §774.1: the hint that stood here while arranging — "15 Directions ·
+       drag by the handle to reorder, here and inside each Direction" — is
+       gone (Islam: *"the statement 15 directions … should be removed"*). The
+       handles say it; the rail's head carries the count. */
     (railWorthIt(partItems(u))
       ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'

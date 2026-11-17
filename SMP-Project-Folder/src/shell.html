@@ -4532,8 +4532,11 @@
        §151 wraps every table in after the paint — a head pins to the window
        only once neither is a scroll box. */
     Array.prototype.forEach.call(document.querySelectorAll("#panel .pane:not(.setuppane) .scroll, #panel .pane:not(.setuppane) .tblscroll"), function(b){
-      /* a confirmation's own list (`.rmconfirm`) pins its head to its box on purpose */
-      if (b.closest(".rmconfirm")) return;
+      /* a confirmation's own list (`.rmconfirm`) pins its head to its box on
+         purpose; the tactic panel (§773) is a pinned box that scrolls inside
+         itself, so a head pinned to the window would float mid-list — Islam:
+         "the outcome and target title is floating" (§775.3). */
+      if (b.closest(".rmconfirm, .tacpanel")) { b.classList.remove("fits"); return; }
       b.classList.toggle("fits", b.scrollWidth <= b.clientWidth + 1);
     });
   }
@@ -10537,7 +10540,8 @@
              screen, written nowhere (§50.6's fault through a fresh door). */
           var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
-          if (what === "measure") addMeasure(it); else addTactic(it);
+          if (what === "measure") addMeasure(it);
+          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §773: the new one opens in the panel */
         }
         else if (what === "project") {
           /* §326: holderByIdWritable, not capById — a project may be added to
@@ -10693,6 +10697,57 @@
       b.addEventListener("click", gapWalk);
     });
 
+    /* §774 read the banner's height here for the panel to pin under; main's
+       §771 (stickWatch) publishes `--band-h` for the table heads, so the
+       panel reads that one and this measurement is gone — one writer. */
+    /* §773: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
+    document.querySelectorAll("[data-tacopen]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        if (b.tagName === "TR" && e.target.closest("select, input, textarea, button, a, .grip, .ssbtn, label, .eyebtn, .xbtn, .rm, [data-rowoff], [data-hiderow], [data-rmrow], [data-rmout], [data-outadd]")) return;
+        if (String(PEN_TACTIC) === b.dataset.tacopen && b.tagName === "TR") return;
+        PEN_TACTIC = b.dataset.tacopen; paint();
+      });
+    });
+    /* §775: THE PANEL FOLLOWS THE ROW YOU WORK IN. The focus landing in a box
+       of another tactic's row moves the panel there — a paint, since the panel
+       is drawn by the page — and the focus is put back in the same box of the
+       same row afterwards, so typing goes on where it was. Buttons and the
+       pickers' own buttons are left out: a press on them is a click that a
+       paint under the pointer would swallow. */
+    /* ONLY A PRESS OR A TAB COUNTS. A paint puts the focus back in the box
+       that had it (§35), and that is a focusin too — measured: the panel's ↓
+       and Add a tactic each painted, the focus went back to the row being
+       typed in, and the panel sprang back to it. So the row is followed only
+       within a moment of a mousedown or a Tab, which is what a person moving
+       to another row does and a paint never does. */
+    if (!window.__penFollowWired) {
+      window.__penFollowWired = true; window.__penFollowAt = 0;
+      document.addEventListener("mousedown", function(){ window.__penFollowAt = Date.now(); }, true);
+      document.addEventListener("keydown", function(e){ if (e.key === "Tab") window.__penFollowAt = Date.now(); }, true);
+    }
+    document.querySelectorAll(".penlist tr[data-tacrow]").forEach(function(tr){
+      tr.addEventListener("focusin", function(e){
+        var f = e.target;
+        if (!f || !f.matches || !f.matches("input, textarea, select")) return;
+        if (String(PEN_TACTIC) === tr.dataset.tacrow) return;
+        if (Date.now() - (window.__penFollowAt || 0) > 150) return;   /* a press or a Tab lands its focus at once; a paint comes later */
+        var cell = f.closest("td"); if (!cell) return;
+        var cells = Array.prototype.slice.call(tr.children), ci = cells.indexOf(cell);
+        var ctrls = Array.prototype.slice.call(cell.querySelectorAll("input, textarea, select")), ki = ctrls.indexOf(f);
+        var id = tr.dataset.tacrow;
+        PEN_TACTIC = id; paint();
+        requestAnimationFrame(function(){
+          var row = document.querySelector('.penlist tr[data-tacrow="' + id.replace(/"/g, '\\"') + '"]');
+          var c2 = row && row.children[ci], k2 = c2 && c2.querySelectorAll("input, textarea, select")[ki];
+          if (!k2) return;
+          k2.focus({ preventScroll: true });
+          try { if (k2.setSelectionRange && k2.type !== "number") { var L = k2.value.length; k2.setSelectionRange(L, L); } } catch (x) {}
+        });
+      });
+    });
+    document.querySelectorAll("[data-tacclose]").forEach(function(b){
+      b.addEventListener("click", function(){ PEN_TACTIC = false; paint(); });
+    });
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
@@ -10729,6 +10784,17 @@
           var box = f && f.parentNode.querySelector("textarea, input");
           if (box) box.focus();
         }, 0);
+      });
+    });
+    /* §775.1: an outcome's ringed × in the row asks before it goes — the first
+       outcome included (Islam: "why am I able to remove the new outcome but not
+       the old one?"); when the first goes, the next moves up into its place. */
+    document.querySelectorAll("[data-rmout]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rmout.split("|");
+        confirmRemoveOutcome(a[0], a[1]);
       });
     });
     document.querySelectorAll("[data-outoff]").forEach(function(b){
@@ -10793,6 +10859,7 @@
         if (!mayEditPlan()) return;
         var a = this.dataset.rmrow.split("|");
         if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
+        else if (a[0] === "tactic") confirmRemoveTactic(a[1], a[2]);   /* §775.1 */
         else confirmRemoveProject(a[1]);
       });
     });
@@ -13185,6 +13252,70 @@
     if (!removeCapability(id, destId)) return;
     if (RAIL[key]) delete RAIL[key];
     paint();
+  }
+  /* §775.1: A TACTIC ASKS BEFORE IT GOES, the pillar's own way: what it holds,
+     what was reported against it, the archive taken first. Islam: *"the
+     removal of a tactic or outcome should prompt me with a message"*. */
+  function confirmRemoveTactic(ukey, id){
+    var u = unitLikeWritable(ukey), t = null;
+    (u && u.items || []).forEach(function(p){ (p.tactics || []).forEach(function(x){ if (x && x.id === id) t = x; }); });
+    if (!t) return;
+    var word = L1("tactic"), nOut = (t.outcome || t.outTarget ? 1 : 0) + tacticExtras(t).length;
+    var rep = (t.actual != null && t.actual !== "") || (t.outActual != null && t.outActual !== "") ? 1 : 0;
+    rmConfirmOpen("Remove this " + word + "?", t.name || "Untitled",
+      '<b>' + esc(t.name || "This " + word) + '</b>' + (nOut ? ' holds ' + plural(nOut, detailWord("outcomes", "one", t), detailWord("outcomes", "many", t)) : ' holds no outcome yet') + '.',
+      rep, boxRef(ukey).kind === "fn" ? "the function's scores" : "the unit's scores", "Remove the " + word,
+      function(){
+        var u2 = unitLikeWritable(ukey);
+        if (!u2) return;
+        var p2 = null;
+        (u2.items || []).forEach(function(p){ if ((p.tactics || []).some(function(x){ return x && x.id === id; })) p2 = p; });
+        if (!p2) return;
+        archiveUnitPlan(u2, "before " + (t.name || "a " + word.toLowerCase()) + " was removed");
+        removeRowById(p2.tactics, id);
+        if (String(PEN_TACTIC) === String(id)) PEN_TACTIC = null;   /* the pen opens on the first again */
+        paint();
+      });
+  }
+  /* The outcome: its name and target go; its figure with them. The FIRST
+     outcome is the tactic's own fields (§248) and the extras a list (§414),
+     so removing the first moves the first extra up into its place, figure
+     and all, and removing the last extra deletes the lists (§50.6). */
+  function confirmRemoveOutcome(tid, oid){
+    var t = hideableById(tid);
+    if (!t) return;
+    var isFirst = oid === "first";
+    var x = isFirst ? null : (t.outs || []).filter(function(o){ return o && o.id === oid; })[0];
+    if (!isFirst && !x) return;
+    var name = isFirst ? t.outcome : x.outcome, word = detailWord("outcomes", "one", t);
+    var rep = isFirst ? ((t.outActual != null && t.outActual !== "") ? 1 : 0)
+                      : ((t.outActs && t.outActs[oid] != null && t.outActs[oid] !== "") ? 1 : 0);
+    rmConfirmOpen("Remove this " + word.toLowerCase() + "?", name || "Unnamed",
+      '<b>' + esc(name || "This " + word.toLowerCase()) + '</b> and its target go with it.',
+      rep, "the unit's scores", "Remove the " + word.toLowerCase(),
+      function(){
+        var t2 = hideableById(tid); if (!t2) return;
+        if (isFirst) {
+          var ex = Array.isArray(t2.outs) ? t2.outs : [];
+          ["outcome", "outDir", "outTarget", "outCompile", "outActual", "outMonthly", "outQuarterly"].forEach(function(k){ delete t2[k]; });
+          if (ex.length) {
+            var up = ex[0];
+            if (up.outcome) t2.outcome = up.outcome;
+            if (up.outDir) t2.outDir = up.outDir;
+            if (up.outTarget) t2.outTarget = up.outTarget;
+            if (up.outCompile) t2.outCompile = up.outCompile;
+            if (t2.outActs && t2.outActs[up.id] != null && t2.outActs[up.id] !== "") t2.outActual = t2.outActs[up.id];
+            setExtraFigure(t2, up.id, "");
+            t2.outs = ex.slice(1);
+            if (!t2.outs.length) delete t2.outs;
+          }
+        } else {
+          t2.outs = t2.outs.filter(function(o){ return o.id !== oid; });
+          if (!t2.outs.length) delete t2.outs;
+          setExtraFigure(t2, oid, "");
+        }
+        paint();
+      });
   }
   function confirmRemovePillar(ukey, id){
     var u = unitLikeWritable(ukey);

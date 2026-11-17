@@ -1,0 +1,81 @@
+<title>Selected Row Marks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: four small copies of the pen's tactics list, each marking the open tactic a different way. Navy/gold palette. */
+  :root { --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA; --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79; --panel:#16325C; --panel-ink:#FFFFFF; --gold:#C9A24D; --gold-deep:#8A6B22; --gold-bg:#FBF5E6; --mark:#C58B1E; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91; --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A; --gold-bg:#2A2410; --mark:#D9A441; color-scheme:dark; } }
+  :root[data-theme="dark"] { --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531; --zebra:#19202B; --line:#2C3644; --line-soft:#232C38; --field-line:#6B7A91; --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3; --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A; --gold-bg:#2A2410; --mark:#D9A441; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45; }
+  .wrap { max-width:1180px; margin:0 auto; padding-block:24px 60px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size:22px; margin:0 0 4px; } .lede { color:var(--ink-3); margin:0 0 18px; max-width:78ch; }
+  h2.part { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:26px 0 8px; display:flex; gap:10px; align-items:center; }
+  h2.part .rec { font-size:10.5px; letter-spacing:.08em; background:var(--gold); color:#14161A; border-radius:999px; padding:2px 9px; }
+  .say { color:var(--ink-2); margin:0 0 10px; max-width:80ch; }
+  .demo { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:12px; align-items:start; }
+  .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:13px; min-width:620px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); vertical-align:middle; }
+  th + th, td + td { border-left:1px solid var(--line-soft); }
+  thead th { background:var(--panel); color:var(--panel-ink); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:700; border-bottom:0; }
+  tbody tr:nth-child(even) td { background:var(--zebra); } tbody tr:last-child td { border-bottom:0; }
+  td.idx { width:40px; text-align:center; font-family:var(--mono); color:var(--ink-3); }
+  .fld { font:inherit; font-size:12.5px; border:1px solid var(--field-line); border-radius:7px; padding:5px 8px; background:var(--surface); color:var(--ink); width:100%; }
+  .q { display:inline-flex; gap:3px; } .q i { font-style:normal; font-family:var(--mono); font-size:10.5px; width:24px; height:20px; line-height:18px; text-align:center; border-radius:4px; border:1px solid var(--line); color:var(--ink-3); }
+  .q i.on { background:var(--gold); border-color:var(--gold); color:#14161A; font-weight:700; }
+  .openb { font:inherit; font-size:11px; font-weight:700; color:var(--gold-deep); background:none; border:1px solid var(--line); border-radius:6px; padding:3px 8px; white-space:nowrap; }
+  .side { border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:10px 12px; font-size:12px; color:var(--ink-3); min-height:150px; }
+  .side b { display:block; color:var(--ink); font-size:12.5px; margin-bottom:6px; }
+  .side i { display:block; height:22px; border:1px solid var(--line); border-radius:6px; margin-top:6px; }
+  /* A · today, stronger: a wider gold bar, a warmer tint */
+  .a tr.on td { background:var(--gold-bg) !important; } .a tr.on td:first-child { box-shadow:inset 4px 0 0 var(--gold); }
+  /* B · a ring round the row */
+  .b tr.on td { background:var(--surface-2) !important; border-top:2px solid var(--gold); border-bottom:2px solid var(--gold); }
+  .b tr.on td:first-child { border-left:2px solid var(--gold); } .b tr.on td:last-child { border-right:2px solid var(--gold); }
+  /* C · the number cell in navy, like the table's own head, and the Details button lit */
+  .c tr.on td { background:var(--surface-2) !important; } .c tr.on td.idx { background:var(--panel) !important; color:var(--panel-ink); font-weight:700; }
+  .c tr.on .openb { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+  /* D · the row and the panel joined: the row tinted gold, its right edge open onto a gold panel edge */
+  .d .scroll { overflow:visible; } .d tr.on td { background:var(--gold-bg) !important; } .d tr.on td:last-child { position:relative; }
+  .d tr.on td:last-child::after { content:""; position:absolute; top:-1px; bottom:-1px; left:100%; width:13px; background:var(--gold-bg); border-top:1px solid var(--gold); border-bottom:1px solid var(--gold); }
+  .d .side { border-left:3px solid var(--gold); border-radius:0 10px 10px 0; }
+  .d tr.on td:first-child { box-shadow:inset 4px 0 0 var(--gold); }
+</style>
+<div class="wrap">
+  <h1>Marking the open tactic</h1>
+  <p class="lede">Four ways to say which tactic the panel is showing. Each is the same list with the second tactic open; the box on the right stands for the panel.</p>
+
+  <h2 class="part">A · Today, stronger</h2>
+  <p class="say">The gold bar on the left grows from 3px to 4px and the row takes a warm gold tint instead of the grey one, so it reads apart from the striped rows.</p>
+  <div class="demo a"><div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th></th></tr></thead><tbody>
+    <tr><td class="idx">1</td><td><input class="fld" value="Build company-wide SOP framework"></td><td><input class="fld" value="SOP coverage completed across core functions"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+    <tr class="on"><td class="idx">2</td><td><input class="fld" value="Begin ERP activation (Phase 1)"></td><td><input class="fld" value="ERP Phase 1 activated with at least 2 modules"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+    <tr><td class="idx">3</td><td><input class="fld" value="Build HR &amp; Admin Governance Framework"></td><td><input class="fld" value="HR &amp; Admin Governance Framework Completed"></td><td><input class="fld" value="Maryam Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i>Q3</i><i>Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+  </tbody></table></div><div class="side"><b>Tactic 2 · Begin ERP activation (Phase 1)</b>Description<i></i>Outcomes<i></i><i></i></div></div>
+
+  <h2 class="part">B · A ring round the row</h2>
+  <p class="say">A 2px gold line all the way round the open row, on a grey tint. The row is boxed; nothing else in the table has a box.</p>
+  <div class="demo b"><div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th></th></tr></thead><tbody>
+    <tr><td class="idx">1</td><td><input class="fld" value="Build company-wide SOP framework"></td><td><input class="fld" value="SOP coverage completed across core functions"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+    <tr class="on"><td class="idx">2</td><td><input class="fld" value="Begin ERP activation (Phase 1)"></td><td><input class="fld" value="ERP Phase 1 activated with at least 2 modules"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+    <tr><td class="idx">3</td><td><input class="fld" value="Build HR &amp; Admin Governance Framework"></td><td><input class="fld" value="HR &amp; Admin Governance Framework Completed"></td><td><input class="fld" value="Maryam Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i>Q3</i><i>Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+  </tbody></table></div><div class="side"><b>Tactic 2 · Begin ERP activation (Phase 1)</b>Description<i></i>Outcomes<i></i><i></i></div></div>
+
+  <h2 class="part">C · The number in navy, the button lit <span class="rec">Recommended</span></h2>
+  <p class="say">The open row's number cell takes the table's own navy, white on it, and its Details button is lit the same way, on a grey tint. Two firm marks at both ends of the row, in the colour the table already uses for what matters.</p>
+  <div class="demo c"><div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th></th></tr></thead><tbody>
+    <tr><td class="idx">1</td><td><input class="fld" value="Build company-wide SOP framework"></td><td><input class="fld" value="SOP coverage completed across core functions"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+    <tr class="on"><td class="idx">2</td><td><input class="fld" value="Begin ERP activation (Phase 1)"></td><td><input class="fld" value="ERP Phase 1 activated with at least 2 modules"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+    <tr><td class="idx">3</td><td><input class="fld" value="Build HR &amp; Admin Governance Framework"></td><td><input class="fld" value="HR &amp; Admin Governance Framework Completed"></td><td><input class="fld" value="Maryam Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i>Q3</i><i>Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+  </tbody></table></div><div class="side"><b>Tactic 2 · Begin ERP activation (Phase 1)</b>Description<i></i>Outcomes<i></i><i></i></div></div>
+
+  <h2 class="part">D · The row joined to the panel</h2>
+  <p class="say">The open row takes the gold tint and runs out of the table's right edge to meet the panel, whose left edge is gold: the eye follows the row straight into its details.</p>
+  <div class="demo d"><div class="scroll"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th></th></tr></thead><tbody>
+    <tr><td class="idx">1</td><td><input class="fld" value="Build company-wide SOP framework"></td><td><input class="fld" value="SOP coverage completed across core functions"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i class="on">Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+    <tr class="on"><td class="idx">2</td><td><input class="fld" value="Begin ERP activation (Phase 1)"></td><td><input class="fld" value="ERP Phase 1 activated with at least 2 modules"></td><td><input class="fld" value="Sarah Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i class="on">Q3</i><i>Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+    <tr><td class="idx">3</td><td><input class="fld" value="Build HR &amp; Admin Governance Framework"></td><td><input class="fld" value="HR &amp; Admin Governance Framework Completed"></td><td><input class="fld" value="Maryam Elnahas"></td><td><span class="q"><i class="on">Q1</i><i class="on">Q2</i><i>Q3</i><i>Q4</i></span></td><td><button class="openb">Details</button></td></tr>
+  </tbody></table></div><div class="side"><b>Tactic 2 · Begin ERP activation (Phase 1)</b>Description<i></i>Outcomes<i></i><i></i></div></div>
+</div>

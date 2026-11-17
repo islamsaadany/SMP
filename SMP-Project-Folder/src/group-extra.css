@@ -863,6 +863,24 @@
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
     position:sticky; top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px));
     align-self:start; }
+  /* §774: THE RAIL IS NEVER TALLER THAN THE WINDOW. Islam, from the built
+     page: *"there shouldn't be a scrolled down area like this, the page
+     should be well contained, even for the left pane of the directions"* —
+     with the pen on, a short tactics list left the rail of fifteen
+     directions hanging below the direction's card, and the page ran on past
+     it with nothing beside. The head stays and the list scrolls, the Setup
+     rail's own shape (§108.5, config.css): the cap is safe for the reason
+     written there — `--chrome-h` is a constant since the condense went in
+     v3.3, so nothing above the rail moves when the rail gets shorter. The
+     list contains its own overscroll, so reaching its end never moves the
+     page (the wireframe's second point). */
+  @media (min-width:1201px) {   /* the rail beside the pane; squeezed, it is the strip across the top (§162) and keeps its own rules */
+    .rail:not(.setuprail) { display:flex; flex-direction:column; overflow:visible;   /* visible, not hidden: the rail's filter menu pops out past its edge and was cut off (§775.3); the list below is the one that scrolls */
+      max-height:calc(var(--wind) - var(--chrome-h, 118px) - var(--rail-gap, 12px) - var(--pane-foot, 20px));
+      min-height:260px; }
+    .rail:not(.setuprail) > .rhead, .rail:not(.setuprail) > .railadd { flex:none; }
+    .rail:not(.setuprail) > .sortable { overflow-y:auto; min-height:0; overscroll-behavior:contain; }
+  }
 
   /* ZERO TRAVEL. A sticky element sits where the flow puts it until scrolling
      carries it up to its offset, and only then pins - so if the flow puts it
@@ -1074,6 +1092,9 @@
     margin:calc(var(--pane-pad) * -1) -18px 15px;
     border-radius:var(--r) var(--r) 0 0;
     box-shadow:inset 3px 0 0 var(--gold), 0 1px 0 var(--line);
+    /* §774: a clear line on the band's top edge (Islam: "why not a clear
+       line?") — the pane's own hairline was all that marked it. */
+    border-top:1px solid var(--field-line);
     padding-left:18px; }
   /* THE GAP ABOVE A PINNED HEADER IS A WINDOW. The band pins `--rail-gap`
      below the chrome, so once the pane's own top has scrolled away there is a
@@ -1107,6 +1128,9 @@
   #panel .pane .scroll.fits, #panel .pane .tblscroll.fits { overflow-x:visible; }
   #panel .pane .tblscroll.fits thead th { position:sticky; z-index:3;
     top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px + var(--band-h, 0px)); }
+  /* Not inside the tactic panel (§773): it is pinned itself and scrolls
+     inside, so its tables' heads stay in their flow (§775.3). */
+  #panel .pane .tacpanel .tblscroll thead th { position:static; top:auto; }
   /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§130.3) ─────────────
      Islam: "the title has round corners so the scrolled up appears in the
      right and left top corners." Measured before touching it: 13px² of the
@@ -1281,6 +1305,7 @@
   .pane .ptitle.edhead {
     position:sticky; z-index:4;
     top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px);
+    border-top:1px solid var(--field-line);   /* §774: the same clear line as the band's */
     background:var(--surface-2);
     margin:calc(var(--pane-pad) * -1) -18px 14px;
     padding:11px 18px 11px 18px;

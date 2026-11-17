@@ -142,6 +142,15 @@ def fresh(browser, port):
     pg = ctx.new_page()
     _no_tour(pg)
     pg.goto("http://127.0.0.1:%d/raya-trade" % port)
+    # §776: THE SCREEN IS ASKED FOR, NEVER OFFERED. The platform lands on the
+    # module's page with nothing over it, and the house mark opens Home — so
+    # every section that reads the screen presses the house first, and the
+    # landing is asserted bare before it does.
+    pg.wait_for_selector("#units [data-welcomego]", timeout=15000)
+    pg.wait_for_timeout(1500)
+    ck("the platform lands on the page, with no welcome over it (§776)",
+       pg.locator(".welcomeover").count() == 0)
+    pg.click("#units [data-welcomego]")
     pg.wait_for_selector(".welcomeover", timeout=15000)
     return ctx, pg
 
@@ -205,10 +214,21 @@ def main():
         # The gaps row, against gapTotal — the demo plan owes gaps of its own
         # (§119.1's Missing marks), so the made three only guarantee nonzero;
         # what is asserted is that the row and the function AGREE (§94.8).
-        gaps_n = pg.evaluate("gapTotal('mobile')")
-        ck("the made state owes gaps at all", gaps_n >= 3, gaps_n)
-        ck("the gaps row carries the same number with its noun",
-           ("%d missing elements" % gaps_n) in acts, acts[:300])
+        # REWRITTEN, NEVER LOOSENED (§218, §704, §776). This asserted that the
+        # custodian with a fill grant is shown "N missing elements". The
+        # ladder (§704) made the plan the office's alone: a holder enters and
+        # submits figures and never fills the plan, and the fill grant the
+        # seed set is a cell the rule no longer reads. So BOTH ENDS (§113.8):
+        # the plan still owes the made gaps (gapTotalAll, whoever is looking)
+        # while this custodian is counted none (gapTotal) and is shown no
+        # gaps row — a row that sent them to a field they cannot type in is
+        # §61's trap, which is what the ladder's rule closes.
+        owed = pg.evaluate("gapTotalAll('mobile')")
+        ck("the made state owes gaps at all (counted whoever is looking)", owed >= 3, owed)
+        ck("...which are the office's to fill (§704): the custodian is counted none",
+           pg.evaluate("gapTotal('mobile')") == 0 and pg.evaluate("seesGaps('mobile')") is False)
+        ck("...so no gaps row is drawn on their screen",
+           "missing element" not in acts and pg.locator(".wacts .wact", has_text="Fill").count() == 0, acts[:300])
         # No bare number: every digit on the list sits inside a sentence chip-free.
         ck("no count badge boxes exist (round 3, variation C)",
            pg.locator(".wacts .cnt, .wacts .stchip").count() == 0)
@@ -294,7 +314,7 @@ def main():
            pg.evaluate("typeof REPORTING!=='undefined' && REPORTING==='mobile'"))
         pg.reload()
         pg.wait_for_timeout(2500)
-        ck("a reload in the same session is not greeted twice",
+        ck("a reload is not greeted either (§776: never unasked)",
            pg.locator(".welcomeover").count() == 0)
         ctx.close()
 
@@ -318,6 +338,13 @@ def main():
         # drawn and the lit place loses its underline — only the house says
         # where you are. The way out is the PLACE on the destination row,
         # which must still be reachable, or Home is a trap (§61).
+        # The place's underline drops through a 150ms colour transition
+        # (_shared.css); read once it has settled, or the mid-way colour is
+        # taken for the rule (§215: a read in flight is not a verdict).
+        for _ in range(12):
+            if pg.evaluate("getComputedStyle(document.querySelector('.units button[aria-selected=\"true\"][data-u]')).borderBottomColor") in ("rgba(0, 0, 0, 0)", "transparent"):
+                break
+            pg.wait_for_timeout(100)
         geo = pg.evaluate("""(function(){
           var o=document.querySelector('.welcomeover'), c=document.querySelector('.chrome'),
               t=document.querySelector('.units button[aria-selected="true"][data-u]');
@@ -495,13 +522,22 @@ def main():
         # exists to catch IS "no welcome ever appears", so waiting for the
         # selector would raise instead of reporting, and a "prove it can fail"
         # run would end in a stack trace with nothing counted.
+        # REWRITTEN, NEVER LOOSENED (§218, §776). §179 asserted that signing
+        # in again greets you; §776 stopped the screen offering itself at
+        # all, at Islam's word. What survives: a sign-in lands on the page
+        # with nothing over it, and the house mark still opens the screen
+        # for whoever asks — so a build that lost the screen fails here.
         greeted = False
         for _ in range(30):
-            if pg.locator(".welcomeover").count() == 1:
-                greeted = True
+            if pg.locator("#units [data-welcomego]").count() == 1:
                 break
             pg.wait_for_timeout(500)
-        ck("signing in again greets you, with the tab already marked", greeted)
+        pg.wait_for_timeout(1500)
+        greeted = pg.locator(".welcomeover").count() == 1
+        ck("signing in again lands on the page and does not greet you (§776)", not greeted)
+        pg.click("#units [data-welcomego]")
+        pg.wait_for_selector(".welcomeover", timeout=8000)
+        ck("…and the house opens the screen on asking", pg.locator(".welcomeover").count() == 1)
         ctx.close()
 
         # AND A RESUME IS NOT A SIGN-IN. Opening the gate with a live session
@@ -516,6 +552,8 @@ def main():
         # evaluated against on this path — it redirects before a script can
         # run — and walking it is the honest reproduction anyway.
         pg.goto("http://127.0.0.1:%d/raya-trade" % port)
+        pg.wait_for_selector("#units [data-welcomego]", timeout=15000)
+        pg.click("#units [data-welcomego]")                      # §776: asked for
         pg.wait_for_selector(".welcomeover", timeout=15000)
         # Leaving Home is pressing the place (§403: the tab row is not drawn
         # under Home, so it cannot be the way out).
@@ -529,10 +567,18 @@ def main():
         try: pg.wait_for_load_state("networkidle", timeout=8000)
         except Exception: pass
         pg.wait_for_timeout(800)
+        # The gate's last redirect can still be landing here (the race the
+        # comment above names, §215): a read that dies with the context is
+        # asked again once the page has settled, up to five times.
+        kept = None
+        for _ in range(5):
+            try:
+                kept = pg.evaluate("sessionStorage.getItem('smp.welcome.done')"); break
+            except Exception:
+                pg.wait_for_timeout(800)
         ck("…but resuming a live session does not",
            pg.locator(".welcomeover").count() == 0)
-        ck("…and the memory it was told to keep is still there",
-           pg.evaluate("sessionStorage.getItem('smp.welcome.done')") == "1")
+        ck("…and the memory it was told to keep is still there", kept == "1", kept)
         ctx.close()
         GATEMODE = "stub"
         AUTHGET = {"ok": False}
@@ -619,6 +665,12 @@ def main():
         # CEO, because a build that kept the CEO's old grant passes both
         # halves above.
         PERSON = {"key": "ceo", "name": "Group CEO"}
+        # §687: a seat that edits nothing lands in the reading window, where
+        # the house mark is not drawn; the client's own first-screen switch
+        # (§704, SMPRules.readersOpen) sends readers to the workbench instead,
+        # which is the state this section needs — MADE, not assumed (§94.2).
+        STATE = copy.deepcopy(BASE)
+        STATE["group"].setdefault("structure", {})["readers"] = "workbench"
         ctx, pg = fresh(browser, port)
         g = pg.evaluate("""() => ({
           grant: grant('c_cycle'),
@@ -627,6 +679,7 @@ def main():
         ck("the group CEO may NOT open the cycle page (§516.3)", g["grant"] == "none", g)
         ck("...so the cycle summary is not drawn for them", g["screen"] and not g["block"], g)
         ctx.close()
+        STATE = BASE
 
         # ── 11 · THE CLIENT SETUP BLOCK AND YOUR MODULES ARE THE SERVED
         #         LANDING'S, NEVER THIS ONE'S (spec 056 §4.1, §9.3) ─────────

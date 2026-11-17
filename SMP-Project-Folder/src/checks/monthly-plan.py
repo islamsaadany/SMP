@@ -666,10 +666,10 @@ with sync_playwright() as p:
     surf = ev(pg, """() => {
       const out = {};
       // a tactic's outcome, on the page already open
-      const rows = [...document.querySelectorAll('.pane table tbody tr')];
+      // §773: the tactic's fields are in the panel; open it there
       const t = UNITS.mobile.items.find(p => p.code === '03').tactics[0];
-      const tr = rows.find(x => { const a = x.querySelector('td:nth-child(2) textarea');
-                                  return a && a.value === t.name; });
+      PEN_TACTIC = t.id; paint();
+      const tr = document.querySelector('.tacpanel');
       out.tactic = !!(tr && tr.querySelector('.mpopen'));
       return out;
     }""")
@@ -678,10 +678,8 @@ with sync_playwright() as p:
     tw = ev(pg, """() => {
       const t = UNITS.mobile.items.find(p => p.code === '03').tactics[0];
       t.outcome = 'Attach rate'; t.outTarget = '6#'; t.outCompile = 'Sum'; t.outDir = '\\u2265';
-      paint();
-      const rows = [...document.querySelectorAll('.pane table tbody tr')];
-      const tr = rows.find(x => { const a = x.querySelector('td:nth-child(2) textarea');
-                                  return a && a.value === t.name; });
+      PEN_TACTIC = t.id; paint();
+      const tr = document.querySelector('.tacpanel');
       const c = tr && tr.querySelector('.mpopen'); if (c) c.click();
       return { opened: !!c };
     }""")
@@ -707,10 +705,8 @@ with sync_playwright() as p:
     # if it is wrong: the box locks either way and only the FIGURE is off.
     trule = ev(pg, """() => {
       const t = UNITS.mobile.items.find(p => p.code === '03').tactics[0];
-      t.outTarget = "99#"; delete t.outCompile; paint();
-      const rows = [...document.querySelectorAll('.pane table tbody tr')];
-      const tr = rows.find(x => { const a = x.querySelector('td:nth-child(2) textarea');
-                                  return a && a.value === t.name; });
+      t.outTarget = "99#"; delete t.outCompile; PEN_TACTIC = t.id; paint();
+      const tr = document.querySelector('.tacpanel');
       const sel = tr && [...tr.querySelectorAll('select')]
         .find(s => [...s.options].some(o => o.value === 'Sum'));
       if (!sel) return { none: true };

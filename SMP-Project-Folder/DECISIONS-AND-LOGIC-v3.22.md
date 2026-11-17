@@ -71792,3 +71792,5 @@ Islam: *"Same for a company planned strategy like elabd"*. The paper already too
 - **Checked**: `checks/reading-print.py` **32/0** — §10 makes the shape, prints it, and asserts the name once on the cover and in the title, the company's own directions open with each line kept with its first table, the tabs in order.
 - **On the branch, not merged.**
 
+**§789 AND §789.1 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had moved — another session's §787 and §788 (this week's tasks; the draft that lays itself out) — so this work was renumbered from §787 to §789 first, the branch merged onto `main` with a merge commit `main` alone holds (§91), the built file REBUILT from the merged sources rather than taken from git's splice, and the app's generated files (shell.js, platform.css, sw.js, asset-stamps.json) regenerated after it. `checks/reading-print.py` **32/0** on the merged build. The shell is v8.00. No migrations; nobody signed out.
+

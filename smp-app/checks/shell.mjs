@@ -1005,8 +1005,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(lay.lines === 2 && lay.inBubble === 0 && lay.panel.length === 1 && lay.panel[0] === "Save to Foundation deliverables" && lay.side === true && lay.boxes !== null && lay.boxes <= 2,
       "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line, and the box is as wide as the conversation", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");
-    const stay = await page.evaluate(() => ({ note: (document.querySelector("[data-cop-out] [data-cop-draftstay]") || {}).textContent || "", go: !!document.querySelector("[data-cop-out] [data-cop-home]") }));
-    check(/Stays in the Copilot/.test(stay.note) && /step by step/.test(stay.note) && stay.go, "§654 B3 a free chat's draft says it stays in the Copilot, and offers to start step by step", JSON.stringify(stay));
+    const stay = await page.evaluate(() => ({ note: (document.querySelector("[data-cop-out] [data-cop-draftstay]") || {}).textContent || "", lay: !!document.querySelector("[data-cop-out] [data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-out] [data-cop-putplan]") }));
+    check(/not in the plan’s shape yet/.test(stay.note) && stay.lay && !stay.put, "§654 B3, §785 a free chat's draft that is not in the plan's shape says so, and offers to lay it out for the plan — it cannot go on as it is", JSON.stringify(stay));
     await page.locator("[data-cop-out] [data-cop-savedraft]").click();
     await page.waitForFunction(() => document.querySelector("[data-cop-out] .copsaved"), null, { timeout: 10000 }).catch(() => {});
     await page.waitForFunction(() => /Mobile foundation/.test([...document.querySelectorAll(".coprail [data-cop-deliv]")].map((x) => x.textContent).join("|")), null, { timeout: 8000 }).catch(() => {});
@@ -3186,6 +3186,7 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     /* §782 — Advisory is a tab of its own beside Builder */
     await page.click('#subtabs [data-cop-to="advisory"]');
     await page.waitForFunction(() => CURSEC.copilot === "advisory", null, { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1500);   /* the lists come in after the press; the method's next step must not pull the window off Advisory (§785) */
     const av = await page.evaluate(() => ({ sec: CURSEC.copilot, sel: (document.querySelector('#subtabs [aria-selected="true"]') || {}).textContent || "", steps: document.querySelectorAll(".copsteps").length,
       h: (document.querySelector(".copstarth") || {}).textContent || "", rail: Array.from(document.querySelectorAll("[data-cop-chats] [data-cop-chat]")).map((b) => b.getAttribute("data-cop-chat-sec")) }));
     check(av.sec === "advisory" && /Advisory/.test(av.sel) && av.steps === 0 && /What decision are you weighing for Mobile\?/.test(av.h) && av.rail.every((x) => x === "advisory"),

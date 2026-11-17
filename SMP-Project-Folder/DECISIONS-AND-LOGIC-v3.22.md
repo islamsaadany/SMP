@@ -71771,3 +71771,5 @@ Islam, of the *Lay it out for the plan* button (§785) on a draft made before th
 
 **§788 AND §788.1 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. Built as §787 and §787.1; `main` had meanwhile taken another session's §787 (the Internal Tracker's Save and next), so this work was renumbered §788 before the merge (§N rule), and `main` merged in: its record block first in this file, this one first in IMPLEMENTATION_PROGRESS, the generated files made again and committed. The two touch no file in common but the records. On the merged tree: `checks/copilot.mjs` **389 passed, 0 failed** (before the merge); 3f the known four, 3j2 and 3q green; `checks/tracker.mjs` **392 passed, 1 failed** — *"…and counts the task left as gone through, ticked on the left — 0 of 4"*, main's own §787 territory, which this merge does not touch; `generated-in-step` and `release-stamp` clear. No migrations; nobody signed out.
 
+The full browser run of §788.1 (begun before the renumber, on the same code): `checks/shell.mjs` **620 ok, 10 failed**, the known ten.
+

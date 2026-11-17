@@ -57844,6 +57844,12 @@ var READING = (function () {
     { k: "perf", label: function () { return "Overall performance"; } }
   ];
   function tabsFor(key) { return TABS.filter(function (t) { return !t.when || t.when(key); }); }
+  /* what a tab holds — asked by the window for the open tab and by the paper
+     for every tab (§789), so the two can never say different things */
+  function tabBody(key, k) {
+    return k === "found" ? foundation(key) : k === "swot" ? analysis(key) : k === "dir" ? directions(key, false)
+      : k === "cap" ? directions(key, true) : k === "proj" ? projects(key) : k === "obj" ? objectives(key) : performance(key);
+  }
 
   /* ── the pieces ── */
   function stand(v) {
@@ -58161,14 +58167,14 @@ var READING = (function () {
       '<span class="rco">' + esc(GROUP.org || "") + '</span>' +
       '<span class="rsp"></span>' +
       (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
+      /* §789: the whole strategy on paper, the office's alone */
+      (mayPrint() ? '<button type="button" class="rexit rprint" data-rprint title="Print or save as PDF">Print</button>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
     r.querySelector(".rwnav").innerHTML = rowHTML(key);
     r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
     }).join("");
-    var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false)
-      : tab.k === "cap" ? directions(key, true) : tab.k === "proj" ? projects(key) : tab.k === "obj" ? objectives(key) : performance(key);
-    r.querySelector(".rwbody").innerHTML = body;
+    r.querySelector(".rwbody").innerHTML = tabBody(key, tab.k);
     r.querySelector(".rwbody").scrollTop = 0;
     ST.tab = tab.k;
     rowSettle();
@@ -58230,6 +58236,98 @@ var READING = (function () {
     paint();
   }
 
+  /* ── THE WHOLE STRATEGY ON PAPER (§789) ────────────────────────────────
+     Islam, 2026-11-17: *"can we have printing options from the reading
+     option as a printing option. to print the strategy in a good format"*;
+     of two shapes drawn, *"option 1, the whole strategy"*; of who may,
+     *"smo only"*.
+
+     IT PRINTS WHAT THE WINDOW SHOWS, WHICH IS THE WHOLE ARGUMENT (§305's,
+     for the deck): every section is the same builder the tab calls
+     (tabBody), so the paper cannot disagree with the screen. One document
+     for the subject being read — a cover with the client's name, the
+     subject, the review period and the day it was printed; then every tab
+     the subject offers, in the tabs' own order, each on a page of its own,
+     every direction and project opened and the fold's own controls gone,
+     since paper has no press. The way out is the browser's print dialog,
+     paper and Save as PDF alike: the platform never holds PDF bytes (§305),
+     and a builder of its own would be a second answer to "what is in this
+     tab" that drifts at the next change. The browser's own header and
+     footer, where the reader keeps them on, carry the page number and the
+     document's name — so the title is set for the dialog's lifetime,
+     "Strategy · <client> · <subject>", and put back.
+
+     THE OFFICE'S ALONE (*"smo only"*): the button is drawn for a seat the
+     rules call the office (SMPRules.isOffice — the Super user and the SMO
+     team) and for nobody else; a reader reads on the screen, and what
+     leaves on paper is the SMO's to send. The gate is the button and the
+     key (Ctrl/⌘+P in the window); the browser's own print of the screen is
+     not refused, since a screenshot never was.
+
+     THE THEME IS SET TO LIGHT FOR THE DIALOG AND PUT BACK, as the deck
+     turns fit-to-window off and puts it back (deckPrint): the window's
+     colours are tokens that follow the theme, and a dark page printed is a
+     dark page. The document is built on the press and removed when the
+     dialog closes — `afterprint` fires on Save and on Cancel alike — so
+     nothing of it is on the screen before or after. */
+  function mayPrint() {
+    try { return !!SMPRules.isOffice(world(), viewer()); } catch (e) { return false; }
+  }
+  function subjectName(key) {
+    var kind = kindOf(key);
+    if (kind === "unit") return String((UNITS[key] || {}).name || "");
+    if (kind === "fn") return String((FUNCTIONS[fnKey(key)] || {}).name || "");
+    if (kind === "co") return String((COMPANIES[key.slice(3)] || {}).name || "");
+    /* the top layer: the client's own word for it where it holds units; a company that plans
+       its own strategy with no units (§570 names its button Strategy) is named by its name */
+    try { if (!buExists()) return String(GROUP.org || ""); return String(topNavWord() || GROUP.org || ""); } catch (e) { return String(GROUP.org || ""); }
+  }
+  function printDoc(key) {
+    var org = String(GROUP.org || "").trim(), subj = subjectName(key);
+    var cover = '<div class="rpcover">' +
+      '<span class="rpmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span>' +
+      (org && org !== subj ? '<p class="rporg">' + esc(org) + '</p>' : '') +
+      '<h1>' + esc(subj || "Strategy") + '</h1>' +
+      '<p class="rpline">Strategy' + (REVIEW && REVIEW.name ? ' · ' + esc(REVIEW.name) : '') + '</p>' +
+      '<p class="rpday">Printed ' + esc(dateDay(new Date())) + '</p></div>';
+    return cover + tabsFor(key).map(function (t) {
+      return '<section class="rpsec" data-rptab="' + t.k + '"><h2>' + esc(t.label(key)) + '</h2>' + tabBody(key, t.k) + '</section>';
+    }).join("");
+  }
+  function printAll() {
+    var r = root(); if (!r || !isOpen() || !mayPrint()) return false;
+    var key = norm(ST.target); if (!key) return false;
+    var doc = document.createElement("div");
+    doc.className = "rprintdoc";
+    doc.innerHTML = printDoc(key);
+    doc.querySelectorAll(".rdir").forEach(function (d) {
+      d.classList.add("open");
+      var f = d.querySelector(".rfold"); if (f) { f.setAttribute("aria-expanded", "true"); f.removeAttribute("role"); f.removeAttribute("tabindex"); }
+      /* a direction's line and its first table are kept on one page together (.rpkeep): a
+         keep-with-next on the line alone made the browser move the whole direction (measured) */
+      var more = d.querySelector(".rmore"), first = more && more.firstElementChild;
+      if (f && first) { var keep = document.createElement("div"); keep.className = "rpkeep"; d.insertBefore(keep, f); keep.appendChild(f); keep.appendChild(first); }
+    });
+    doc.querySelectorAll(".rtools").forEach(function (x) { x.parentNode.removeChild(x); });
+    r.appendChild(doc);
+    var html = document.documentElement, wasTheme = html.getAttribute("data-theme"), wasTitle = document.title;
+    if (wasTheme === "dark") html.setAttribute("data-theme", "light");
+    var org = String(GROUP.org || "").trim(), subj = subjectName(key);
+    document.title = ["Strategy", org, subj === org ? "" : subj].filter(Boolean).join(" · ");
+    document.body.classList.add("rprinting");
+    var done = function () {
+      window.removeEventListener("afterprint", done);
+      if (doc.parentNode) doc.parentNode.removeChild(doc);
+      if (wasTheme) html.setAttribute("data-theme", wasTheme);
+      document.title = wasTitle;
+      document.body.classList.remove("rprinting");
+    };
+    window.addEventListener("afterprint", done);
+    /* one tick, so the document is laid out before the browser is asked to lay it out for paper (deckPrint) */
+    setTimeout(function () { window.print(); }, 50);
+    return true;
+  }
+
   /* WHAT THE WINDOW SHOWS, SAID TO WHOEVER LISTENS (§689): shell/route.js
      writes it into the address and reads an address back into it. */
   function state() { return { open: isOpen(), target: ST.target, tab: TAB_WORD[ST.tab] || "foundation" }; }
@@ -58269,6 +58367,7 @@ var READING = (function () {
       var t = e.target.closest ? e.target : null; if (!t) return;
       var tab = t.closest("[data-rtab]"); if (tab) { ST.tab = tab.getAttribute("data-rtab"); paint(); return; }
       if (t.closest("[data-rexit]")) { close(); return; }
+      if (t.closest("[data-rprint]")) { printAll(); return; }
       /* the row (§692): a name or a top goes there; a side opens its list,
          and a side that carries a division opens that division's page too
          (§464), where the viewer reaches it */
@@ -58302,6 +58401,7 @@ var READING = (function () {
     document.addEventListener("keydown", function (e) {
       if (!r.classList.contains("on")) return;
       if (e.key === "Escape") { e.preventDefault(); close(); }
+      else if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P") && mayPrint()) { e.preventDefault(); printAll(); }
       else if (e.key === "Enter" || e.key === " ") { var el = e.target; if (el instanceof HTMLElement && el.classList.contains("rfold")) { e.preventDefault(); el.click(); } }
       e.stopPropagation();
     }, true);
@@ -58360,7 +58460,7 @@ var READING = (function () {
     return !!open(null);
   }
 
-  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen };
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen, print: printAll, mayPrint: mayPrint };
 })();
 
 /* ── slides.js ── */
@@ -83278,7 +83378,7 @@ var SYNC = (function () {
     /* \u00a7132.14: the Strategy tab wears NO number (Islam: "remove the number
        from the strategy word") \u2014 the missing bar in the section row below
        carries the total, the places and the action, through missBar(). */
-    /* §789 — named for what each does, as ✦ Refine on the plan is (Islam: "builder to be build and advisory to be advise like refine"). */
+    /* §790 — named for what each does, as ✦ Refine on the plan is (Islam: "builder to be build and advisory to be advise like refine"). */
     /* §782 — BUILDER AND ADVISORY AT THE FAR RIGHT (Islam: "the builder should
        be on the far right of the tabs as it's not something similar, and it
        matches the placement of the copilot when we get in the plan on the

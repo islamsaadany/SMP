@@ -142,13 +142,13 @@ def fresh(browser, port):
     pg = ctx.new_page()
     _no_tour(pg)
     pg.goto("http://127.0.0.1:%d/raya-trade" % port)
-    # §775: THE SCREEN IS ASKED FOR, NEVER OFFERED. The platform lands on the
+    # §776: THE SCREEN IS ASKED FOR, NEVER OFFERED. The platform lands on the
     # module's page with nothing over it, and the house mark opens Home — so
     # every section that reads the screen presses the house first, and the
     # landing is asserted bare before it does.
     pg.wait_for_selector("#units [data-welcomego]", timeout=15000)
     pg.wait_for_timeout(1500)
-    ck("the platform lands on the page, with no welcome over it (§775)",
+    ck("the platform lands on the page, with no welcome over it (§776)",
        pg.locator(".welcomeover").count() == 0)
     pg.click("#units [data-welcomego]")
     pg.wait_for_selector(".welcomeover", timeout=15000)
@@ -214,7 +214,7 @@ def main():
         # The gaps row, against gapTotal — the demo plan owes gaps of its own
         # (§119.1's Missing marks), so the made three only guarantee nonzero;
         # what is asserted is that the row and the function AGREE (§94.8).
-        # REWRITTEN, NEVER LOOSENED (§218, §704, §775). This asserted that the
+        # REWRITTEN, NEVER LOOSENED (§218, §704, §776). This asserted that the
         # custodian with a fill grant is shown "N missing elements". The
         # ladder (§704) made the plan the office's alone: a holder enters and
         # submits figures and never fills the plan, and the fill grant the
@@ -314,7 +314,7 @@ def main():
            pg.evaluate("typeof REPORTING!=='undefined' && REPORTING==='mobile'"))
         pg.reload()
         pg.wait_for_timeout(2500)
-        ck("a reload is not greeted either (§775: never unasked)",
+        ck("a reload is not greeted either (§776: never unasked)",
            pg.locator(".welcomeover").count() == 0)
         ctx.close()
 
@@ -522,8 +522,8 @@ def main():
         # exists to catch IS "no welcome ever appears", so waiting for the
         # selector would raise instead of reporting, and a "prove it can fail"
         # run would end in a stack trace with nothing counted.
-        # REWRITTEN, NEVER LOOSENED (§218, §775). §179 asserted that signing
-        # in again greets you; §775 stopped the screen offering itself at
+        # REWRITTEN, NEVER LOOSENED (§218, §776). §179 asserted that signing
+        # in again greets you; §776 stopped the screen offering itself at
         # all, at Islam's word. What survives: a sign-in lands on the page
         # with nothing over it, and the house mark still opens the screen
         # for whoever asks — so a build that lost the screen fails here.
@@ -534,7 +534,7 @@ def main():
             pg.wait_for_timeout(500)
         pg.wait_for_timeout(1500)
         greeted = pg.locator(".welcomeover").count() == 1
-        ck("signing in again lands on the page and does not greet you (§775)", not greeted)
+        ck("signing in again lands on the page and does not greet you (§776)", not greeted)
         pg.click("#units [data-welcomego]")
         pg.wait_for_selector(".welcomeover", timeout=8000)
         ck("…and the house opens the screen on asking", pg.locator(".welcomeover").count() == 1)
@@ -553,7 +553,7 @@ def main():
         # run — and walking it is the honest reproduction anyway.
         pg.goto("http://127.0.0.1:%d/raya-trade" % port)
         pg.wait_for_selector("#units [data-welcomego]", timeout=15000)
-        pg.click("#units [data-welcomego]")                      # §775: asked for
+        pg.click("#units [data-welcomego]")                      # §776: asked for
         pg.wait_for_selector(".welcomeover", timeout=15000)
         # Leaving Home is pressing the place (§403: the tab row is not drawn
         # under Home, so it cannot be the way out).

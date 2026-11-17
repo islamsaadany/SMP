@@ -341,7 +341,7 @@
      below the fold — and it is exactly what made the page run 60px past the
      window and slide the rail, with its pinned head, under the chrome. */
   .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
-  /* §773.1: and under ANY rail beside a pane, for the reason written at
+  /* §774.1: and under ANY rail beside a pane, for the reason written at
      --page-foot (group-extra.css): the rail is capped against --pane-foot, so
      a page foot of 80 is 60px the pane scrolls past the rail — which pushed
      the pinned rail up under the chrome at the page's end (Islam: *"on

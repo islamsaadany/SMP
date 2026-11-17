@@ -690,11 +690,11 @@
 /* v7.80-strip-years — §771: the rail's button is an options menu that can
    hide years, and the band and the table heads pin under the strip; the
    built platform file changed. */
-/* v7.84-table-and-panel — §772–§774: the tactic panel, the page contained,
+/* v7.84-table-and-panel — §773–§775: the tactic panel, the page contained,
    the main fields in the table; past main's v7.80 at the merge. */
-/* v7.85-open-row-tinted — §774.2: the open row is tinted whole, one bar. */
-/* v7.86-panel-head-and-rail-menu — §774.3: the panel head stays in its flow, the rail menu shows whole. */
-/* v7.87-welcome-asked-for — §775: the welcome no longer opens on its own; the house mark opens it. */
+/* v7.85-open-row-tinted — §775.2: the open row is tinted whole, one bar. */
+/* v7.86-panel-head-and-rail-menu — §775.3: the panel head stays in its flow, the rail menu shows whole. */
+/* v7.87-welcome-asked-for — §776: the welcome no longer opens on its own; the house mark opens it. */
 const SHELL = "smp-shell-v7.87-welcome-asked-for";
 const ASSETS = [
   "/",

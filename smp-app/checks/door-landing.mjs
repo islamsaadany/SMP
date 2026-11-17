@@ -224,12 +224,12 @@ await section("3 · sign in and land", async () => {
   check(hop.status() >= 300 && hop.status() < 400 && /\/raya-trade\/strategy$/.test(loc), "…/<client> is a redirect into it and no page of its own (§360)", hop.status() + " " + loc);
   check(loc.endsWith("/" + DEFAULT_MODULE), "…the first module the person may open — Strategy, for a unit head (openableModules, §359.5)", loc);
   await booted(page);
-  /* §775: THE WELCOME IS ASKED FOR, NEVER OFFERED — the landing is bare and
+  /* §776: THE WELCOME IS ASKED FOR, NEVER OFFERED — the landing is bare and
      the house mark opens it. Both ends: nothing over the page, then the screen. */
   await page.waitForTimeout(1200);
-  check((await page.locator(".welcomeover").count()) === 0, "Strategy lands bare: the welcome is not offered on its own (§775)");
+  check((await page.locator(".welcomeover").count()) === 0, "Strategy lands bare: the welcome is not offered on its own (§776)");
   await page.click("#units [data-welcomego]"); await page.waitForSelector(".welcomeover", { timeout: 8000 }).catch(() => {});
-  check((await page.locator(".welcomeover").count()) === 1, "…and the house mark opens Strategy's own welcome (welcome.js, §185, §775)");
+  check((await page.locator(".welcomeover").count()) === 1, "…and the house mark opens Strategy's own welcome (welcome.js, §185, §776)");
   check((await page.locator(".welcomeover h2").textContent().catch(() => "")).trim() === "Welcome, " + want.name, "the greeting names the register's first name", await page.locator(".welcomeover h2").textContent().catch(() => ""));
   const chips = await text(page, ".wwho .wchip:not(.wcycle)");
   const wantChips = want.chips.map((c) => c.role + (c.where ? " · " + c.where : ""));
@@ -354,7 +354,7 @@ await section("5 · the office", async () => {
   check((await page.$$eval(".ccard[data-client] .ctop h2, .ccard[data-client] .ctop img.cmark", (els) => els.map((e) => e.tagName === "IMG" ? e.alt : e.textContent.trim()))).includes("Raya Trade"), "…and one press away lists the clients they may open");
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" }); await inModule(page); await booted(page);
   check(page.url().startsWith(BASE + IN_MODULE), "the office opening a client is sent into its first module too (§360)", page.url());
-  await page.click("#units [data-welcomego]").catch(() => {}); await page.waitForSelector(".welcomeover", { timeout: 8000 }).catch(() => {});   /* §775: asked for */
+  await page.click("#units [data-welcomego]").catch(() => {}); await page.waitForSelector(".welcomeover", { timeout: 8000 }).catch(() => {});   /* §776: asked for */
   const officeWant = frozen.landing(graph, "smo");
   check((await page.locator(".welcomeover h2").textContent().catch(() => "")).trim() === "Welcome, " + officeWant.name, "the office's welcome on a client is theirs", await page.locator(".welcomeover h2").textContent().catch(() => ""));
   const trailText = ((await page.locator("nav.trail").textContent().catch(() => "")) || "").replace(/\s+/g, " ");
@@ -692,12 +692,12 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
      welcome altogether would pass every assertion above. */
   await page.goto(BASE + "/raya-trade/strategy", { waitUntil: "load" }); await booted(page); await page.waitForTimeout(900);
   r = await readRail();
-  /* REWRITTEN, NEVER LOOSENED (§218, §775): the home is no longer greeted
+  /* REWRITTEN, NEVER LOOSENED (§218, §776): the home is no longer greeted
      unasked; what is asserted is that it is the home (no deep mark) and that
      the screen is still whole there, one press of the house away. */
-  check(r.welcome === 0 && r.deep === null, "…and at the module's own home nothing is offered either (§775), and the address is not a deep one (§360.9)", JSON.stringify([r.welcome, r.deep, r.path]));
+  check(r.welcome === 0 && r.deep === null, "…and at the module's own home nothing is offered either (§776), and the address is not a deep one (§360.9)", JSON.stringify([r.welcome, r.deep, r.path]));
   await page.click("#units [data-welcomego]").catch(() => {}); await page.waitForSelector(".welcomeover", { timeout: 8000 }).catch(() => {});
-  check((await page.locator(".welcomeover").count()) === 1, "…while the house mark opens the welcome there (§185, §775)");
+  check((await page.locator(".welcomeover").count()) === 1, "…while the house mark opens the welcome there (§185, §776)");
   await ctx.close();
   /* A CLIENT'S OWN PERSON asking for the client's rail: MEASURED. The route
      gates a MODULE's address and serves the spine's pages to anybody the

@@ -4533,9 +4533,9 @@
        only once neither is a scroll box. */
     Array.prototype.forEach.call(document.querySelectorAll("#panel .pane:not(.setuppane) .scroll, #panel .pane:not(.setuppane) .tblscroll"), function(b){
       /* a confirmation's own list (`.rmconfirm`) pins its head to its box on
-         purpose; the tactic panel (§772) is a pinned box that scrolls inside
+         purpose; the tactic panel (§773) is a pinned box that scrolls inside
          itself, so a head pinned to the window would float mid-list — Islam:
-         "the outcome and target title is floating" (§774.3). */
+         "the outcome and target title is floating" (§775.3). */
       if (b.closest(".rmconfirm, .tacpanel")) { b.classList.remove("fits"); return; }
       b.classList.toggle("fits", b.scrollWidth <= b.clientWidth + 1);
     });
@@ -10541,7 +10541,7 @@
           var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
           if (what === "measure") addMeasure(it);
-          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §772: the new one opens in the panel */
+          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §773: the new one opens in the panel */
         }
         else if (what === "project") {
           /* §326: holderByIdWritable, not capById — a project may be added to
@@ -10697,10 +10697,10 @@
       b.addEventListener("click", gapWalk);
     });
 
-    /* §773 read the banner's height here for the panel to pin under; main's
+    /* §774 read the banner's height here for the panel to pin under; main's
        §771 (stickWatch) publishes `--band-h` for the table heads, so the
        panel reads that one and this measurement is gone — one writer. */
-    /* §772: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
+    /* §773: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
     document.querySelectorAll("[data-tacopen]").forEach(function(b){
       b.addEventListener("click", function(e){
         if (b.tagName === "TR" && e.target.closest("select, input, textarea, button, a, .grip, .ssbtn, label, .eyebtn, .xbtn, .rm, [data-rowoff], [data-hiderow], [data-rmrow], [data-rmout], [data-outadd]")) return;
@@ -10708,7 +10708,7 @@
         PEN_TACTIC = b.dataset.tacopen; paint();
       });
     });
-    /* §774: THE PANEL FOLLOWS THE ROW YOU WORK IN. The focus landing in a box
+    /* §775: THE PANEL FOLLOWS THE ROW YOU WORK IN. The focus landing in a box
        of another tactic's row moves the panel there — a paint, since the panel
        is drawn by the page — and the focus is put back in the same box of the
        same row afterwards, so typing goes on where it was. Buttons and the
@@ -10786,7 +10786,7 @@
         }, 0);
       });
     });
-    /* §774.1: an outcome's ringed × in the row asks before it goes — the first
+    /* §775.1: an outcome's ringed × in the row asks before it goes — the first
        outcome included (Islam: "why am I able to remove the new outcome but not
        the old one?"); when the first goes, the next moves up into its place. */
     document.querySelectorAll("[data-rmout]").forEach(function(b){
@@ -10859,7 +10859,7 @@
         if (!mayEditPlan()) return;
         var a = this.dataset.rmrow.split("|");
         if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
-        else if (a[0] === "tactic") confirmRemoveTactic(a[1], a[2]);   /* §774.1 */
+        else if (a[0] === "tactic") confirmRemoveTactic(a[1], a[2]);   /* §775.1 */
         else confirmRemoveProject(a[1]);
       });
     });
@@ -13253,7 +13253,7 @@
     if (RAIL[key]) delete RAIL[key];
     paint();
   }
-  /* §774.1: A TACTIC ASKS BEFORE IT GOES, the pillar's own way: what it holds,
+  /* §775.1: A TACTIC ASKS BEFORE IT GOES, the pillar's own way: what it holds,
      what was reported against it, the archive taken first. Islam: *"the
      removal of a tactic or outcome should prompt me with a message"*. */
   function confirmRemoveTactic(ukey, id){

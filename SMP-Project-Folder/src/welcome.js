@@ -759,7 +759,7 @@ var WELCOME = (function(){
     catch(e){ return false; }
   }
 
-  /* ── §775 · IT NO LONGER OFFERS ITSELF ─────────────────────────────
+  /* ── §776 · IT NO LONGER OFFERS ITSELF ─────────────────────────────
      Islam, opening a client and meeting the screen over Strategy: *"why is
      the client opening on the welcome window? didn't we make it open on the
      strategy earlier as a default?"* — and, of the three ways put to him,
@@ -782,7 +782,7 @@ var WELCOME = (function(){
     if (document.body && document.body.classList.contains("presenting")) return false;
     if (deepAddress()) return false;
     if (seenThisSession()) return false;
-    return false;   /* §775: asked for, never offered */
+    return false;   /* §776: asked for, never offered */
   }
 
   /* ── ASKING FOR IT BACK (§185) ──────────────────────────────────────

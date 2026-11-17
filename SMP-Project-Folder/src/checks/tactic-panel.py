@@ -1,6 +1,6 @@
-"""THE TACTIC'S MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL (§772, §774).
+"""THE TACTIC'S MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL (§773, §775).
 
-Islam, on the §772 list: make the tactic's main info editable in the table
+Islam, on the §773 list: make the tactic's main info editable in the table
 and the extra details in the panel. Settled over eleven rounds on the
 working mockup (design-mockups/tactic-edit-panel/2026-11-16_table-and-
 panel.html). With the pen on, one line per tactic: the name, each outcome's

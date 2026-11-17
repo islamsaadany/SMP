@@ -2671,13 +2671,13 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .tpsec .kmlist input, td .kmlist input { width:14px; height:14px; margin:2px 0 0; flex:none; accent-color:var(--panel); }
 .tpsec .kmlist .kmname, td .kmlist .kmname { min-width:0; }
 
-/* ── §772: THE TACTIC PANEL AND THE PEN'S LIST ──────────────────────────
+/* ── §773: THE TACTIC PANEL AND THE PEN'S LIST ──────────────────────────
    From the working mockup Islam tried (design-mockups/tactic-edit-panel/
    2026-11-16_full-page.html). Beside the pillar on a wide window; over the
    page from the right on a narrow one. Tokens only (§38.4). */
 .penwrap { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:14px; align-items:start; }
 .penmain { min-width:0; }
-/* §773: pinned UNDER the direction's banner, which is itself pinned under the
+/* §774: pinned UNDER the direction's banner, which is itself pinned under the
    chrome; `--band-h` is the banner's measured height (shell.html, after each
    paint). Never taller than what is left of the window: a long tactic scrolls
    inside the panel, its head and its Done editing always in view, and its
@@ -2709,7 +2709,7 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .tpfoot { padding:10px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
 .tpdone { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:var(--r); font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
 
-/* ── §774: THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL ──────────
+/* ── §775: THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL ──────────
    The pen's list as Islam settled it on the working mockup (design-mockups/
    tactic-edit-panel/2026-11-16_table-and-panel.html): the name, the outcome
    names, the owner and the quarters typed in the row; a ringed × on the name
@@ -2748,9 +2748,9 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 /* the list */
 .penlist tbody tr[data-tacopen] { cursor:pointer; }
 .penlist tbody tr[data-tacopen]:hover td { background:var(--surface-2); }
-/* (the first mark — a grey tint and a bar on every cell — gave way to §774's, above:
+/* (the first mark — a grey tint and a bar on every cell — gave way to §775's, above:
    it came later in this file and won, which is why the tenant saw bars at every
-   column edge and no tint; §774.2) */
+   column edge and no tint; §775.2) */
 .penlist .tacopenb { background:none; border:0; padding:0; margin:0; font:inherit; text-align:left; cursor:pointer; color:inherit; display:block; }
 .penlist .tacopenb:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:4px; }
 .penlist .tacopenb .tacname { display:block; }
@@ -2762,7 +2762,7 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .penlist td.collabs { white-space:normal; }
 @media (max-width:1180px) {
   .penwrap { display:block; }
-  /* Under the chrome and the strip, not over them (§774.3): a panel from the
+  /* Under the chrome and the strip, not over them (§775.3): a panel from the
      window's top covered the Done editing button and the strip's right half,
      and a wheel over it moved nothing — the panel keeps its own scroll. It
      starts where the pane does once pinned (the band's own offset, group-extra.css §771). */

@@ -759,7 +759,7 @@ function kmTag(n, name, kind){
     var t = e.target;
     return t && t.closest ? t.closest(".kmtag[data-name]") : null;
   }
-  /* §773.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
+  /* §774.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
      hovering should appear close to the mouse, not in the top like that"*).
      With a pointer, the label sits just below and right of it and follows
      it across the tag; flipped to the left or above only where the window
@@ -824,7 +824,7 @@ function supportedLine(m, p){
 /* The legend — which number is which measure — folded, so the page costs one
    line until it is asked. Drawn only while the mapping is in use. */
 function supportsLegend(p){
-  /* §773.2: GONE (Islam: *"remove this part of which number is key
+  /* §774.2: GONE (Islam: *"remove this part of which number is key
      measures"*). The tags' own hover names the measure; the folded list
      under the tactics was a second telling. Kept as a function that draws
      nothing, so the three places that called it need no edit and the
@@ -893,7 +893,7 @@ function supportsEdit(t, p){
   });
 })();
 
-/* ── §772: THE TACTIC PANEL ─────────────────────────────────────────────
+/* ── §773: THE TACTIC PANEL ─────────────────────────────────────────────
    Islam, with a picture of the pen: *"can we work on a cleaner approach to
    edit the tactic. as it became very complex."* One tactic's row held its
    name, description, key measures, requirements, four outcomes with four
@@ -929,7 +929,7 @@ var PEN_TACTIC = null;
     var f = e.target;
     if (!f || !f.classList) return;
     var v = String(f.value || "").trim(), word = "New " + L1("tactic").toLowerCase();
-    /* §774: the name is typed in the ROW; the panel's head follows it */
+    /* §775: the name is typed in the ROW; the panel's head follows it */
     if (f.classList.contains("tacpn")) {
       var tr = f.closest("[data-tacrow]"), hd = document.querySelector(".tacpanel .tpname");
       if (tr && hd && String(PEN_TACTIC) === tr.dataset.tacrow) hd.textContent = v || word;
@@ -10921,7 +10921,7 @@ function unitPlanBody(it, u, railed, bare){
   /* §267: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
      row's span and every row have to agree about how many columns there are. */
 
-  /* ── §772: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
+  /* ── §773: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
   var penOpen = null;
   if (ed) {
     if (PEN_TACTIC === null && it.tactics.length) PEN_TACTIC = it.tactics[0].id;
@@ -10931,15 +10931,15 @@ function unitPlanBody(it, u, railed, bare){
       if (!penOpen && it.tactics.length) { PEN_TACTIC = it.tactics[0].id; penOpen = it.tactics[0]; }
     }
   } else PEN_TACTIC = null;
-  /* §774 — THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL. Islam, on
-     the §772 list: *"how about we make the tactic main info editable in the
+  /* §775 — THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL. Islam, on
+     the §773 list: *"how about we make the tactic main info editable in the
      main table and the extra details in the left pane to make the table on
      the left usable and the pan for extras"*, then eleven rounds on the
      working mockup (design-mockups/tactic-edit-panel/2026-11-16_table-and-
      panel.html) and *"go ahead and build it"*. One line per tactic, typed in:
      the NAME, each OUTCOME's name (and + Add an outcome), the OWNER (the
      register-fed picker, §130.1) and the QUARTERS; a ringed × on the name box
-     and on each outcome box that ASKS before anything goes (§774.1 in
+     and on each outcome box that ASKS before anything goes (§775.1 in
      shell.html). The description reads under the name and is typed in the
      panel. The panel holds the extras: the description, each outcome's
      target, unit, direction, rule and months, the collaborators (the
@@ -11031,7 +11031,7 @@ function unitPlanBody(it, u, railed, bare){
   };
   var fold = ed && tailFolds();
   var tRows = it.tactics.map(function(t, i){
-    /* §772: with the pen on, one line; the fields are in the panel. */
+    /* §773: with the pen on, one line; the fields are in the panel. */
     if (ed) return penTacticRow(t, i);
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
        predicting it. `.tgtcell` is what stops the Target column folding below
@@ -11392,11 +11392,11 @@ function unitPlanBody(it, u, railed, bare){
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
     /* …and a rule above it, so the two blocks read as two blocks of one card. */
-    /* §772.1: the panel stands beside the TACTICS alone (Islam: it should not
+    /* §773.1: the panel stands beside the TACTICS alone (Islam: it should not
        push the direction's head, nor sit beside the measures), so the wrap
        opens here, at the tactics' heading, and closes after their legend. */
     '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
-    /* §773: and opens UNDER the heading, so the panel's top edge is the
+    /* §774: and opens UNDER the heading, so the panel's top edge is the
        table's own top line (the wireframe's fifth point). */
     (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     /* §248: Description and Outcome are stored on every tactic and the upload
@@ -11414,7 +11414,7 @@ function unitPlanBody(it, u, railed, bare){
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
     (ed
-      /* §772: the list — one line per tactic — and the panel beside it. */
+      /* §773: the list — one line per tactic — and the panel beside it. */
       ? miniTable(["#", L1("tactic"), DW("outcomes", "one", it), "Owner", "Quarters"],
           tRows + addRow(4, "tactic", "Add a " + L1("tactic")),
           sortAttr("tactics"), "tactable penlist")
@@ -11555,7 +11555,7 @@ function renderUnitPlanBody(u){
     /* §540: the count and the rail are of the list AS DRAWN — on a split box
        this tab holds one half of it, and a hint reading "15 Directions" over
        a rail of five is the kind of disagreement §116.2 exists to stop. */
-    /* §773.1: the hint that stood here while arranging — "15 Directions ·
+    /* §774.1: the hint that stood here while arranging — "15 Directions ·
        drag by the handle to reorder, here and inside each Direction" — is
        gone (Islam: *"the statement 15 directions … should be removed"*). The
        handles say it; the rail's head carries the count. */

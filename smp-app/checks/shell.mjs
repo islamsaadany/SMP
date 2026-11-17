@@ -1398,8 +1398,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector('.copstart [data-cop-road="plan"]', { timeout: 10000 });
     const pc = await page.evaluate(() => { const c = document.querySelector('.copstart [data-cop-road="plan"]'); const all = Array.from(document.querySelectorAll(".copstart > .copstartcards .coppcard"));
       return { first: all[0] === c, t: c.querySelector(".coppt").textContent, meta: (c.querySelector(".copmeta") || {}).textContent || "", tag: (c.querySelector(".coptag") || {}).textContent || "", n: all.length }; });
-    check(pc.first && /Start from the existing plan/.test(pc.t) && /On the plan today/.test(pc.tag) && /Foundation · \d+ parts/.test(pc.meta) && pc.n === 3,
-      "§653 Start from the existing plan is the start screen's first card of three, marked On the plan today, saying what it holds", JSON.stringify(pc));
+    check(pc.first && /Start from existing/.test(pc.t) && /On the plan today/.test(pc.tag) && /Foundation · \d+ parts/.test(pc.meta) && pc.n === 3,
+      "§653 Start from existing (§778) is the start screen's first card of three, marked On the plan today, saying what it holds", JSON.stringify(pc));
     await page.click('.copstart [data-cop-road="plan"]');
     /* the first chat's own cards are still on screen, so wait for the NEW
        chat to be the current one before reading its id (§222). */
@@ -2410,7 +2410,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     /* §653: Mobile's plan holds a SWOT, so Start from the existing plan is
        the first card, then the workflow's. */
     /* §752 — one window: the heading names the place's strategy; the area is the focus line's */
-    check(/Mobile/.test(st.head) && /strategy/.test(st.head) && st.cards.length === 2 && /Start from the existing plan/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
+    check(/Mobile/.test(st.head) && /strategy/.test(st.head) && st.cards.length === 2 && /Start from existing/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
       "§639, §653 the area opens on its start screen: a box to just ask, the plan card first and the SWOT workflow as a card under it, no menu, at the reading width", JSON.stringify(st));
     /* §691 — the SWOT's four ways in, said on its card as chips that are words, not buttons */
     const ways = await page.evaluate(() => ({ chips: Array.from(document.querySelectorAll(".copstart [data-cop-newchat] .copway")).map((x) => x.textContent), btns: document.querySelectorAll(".copstart [data-cop-newchat] button").length,
@@ -2516,7 +2516,7 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await page.waitForSelector(".copstart [data-cop-newchat]", { timeout: 15000 });
     const cps = await page.evaluate(() => { let w = null; try { w = (typeof UNITS !== "undefined" && UNITS.mobile && UNITS.mobile.compete) || (typeof competeWritable === "function" ? competeWritable("mobile") : null); } catch (e) {} const held = !!(w && w.discipline && (w.values || []).some((v) => v && v.title));
       const c = document.querySelector('.copstart [data-cop-newplan="compete"]'); return { held, card: !!c, t: c ? c.textContent : "" }; });
-    check(cps.card === cps.held && (!cps.held || /Start from the existing plan/.test(cps.t) && /values/.test(cps.t)), "§697 Competitive Discipline's start screen offers Start from the existing plan exactly when the plan holds a discipline and values", JSON.stringify(cps));
+    check(cps.card === cps.held && (!cps.held || /Start from existing/.test(cps.t) && /values/.test(cps.t)), "§697 Competitive Discipline's start screen offers Start from the existing plan exactly when the plan holds a discipline and values", JSON.stringify(cps));
     if (cps.held) {
       await page.click('.copstart [data-cop-newplan="compete"]');
       await page.waitForSelector("[data-cop-cppane] table.cmptab", { timeout: 15000 });
@@ -3170,6 +3170,15 @@ await section("3p · Builder until the five parts are on the plan, then Refine; 
       strip: p.querySelectorAll("[data-cop-strip]").length, mode: p.querySelectorAll("[data-cop-layout]").length, beside: mw ? mw.getBoundingClientRect().right <= p.getBoundingClientRect().left + 2 : false } : null; });
     await shot("b-swot-open");
     check(!!bp && bp.sec === "analysis" && bp.start && /Mobile’s SWOT/.test(bp.head) && bp.strip === 0 && bp.mode === 0 && bp.beside, "§753 B: the panel opens on the SWOT beside the page, about the SWOT only — no strip, no toggle in it", JSON.stringify(bp));
+    /* §778 — expand: the panel takes over the page; minimize: back to the side */
+    const w0 = await page.evaluate(() => Math.round(document.getElementById("copPanel").getBoundingClientRect().width));
+    await page.click("#copPanel [data-cop-panelexpand]"); await page.waitForTimeout(300);
+    const wx = await page.evaluate(() => { const r = document.getElementById("copPanel").getBoundingClientRect(), b = document.querySelector("#copPanel [data-cop-panelexpand]"); return { left: Math.round(r.left), w: Math.round(r.width), vw: innerWidth, label: b.getAttribute("aria-label"), pane: !!document.querySelector("#copPanel [data-cop-pane]") }; });
+    await shot("b-wide");
+    await page.click("#copPanel [data-cop-panelexpand]"); await page.waitForTimeout(300);
+    const w1 = await page.evaluate(() => ({ w: Math.round(document.getElementById("copPanel").getBoundingClientRect().width), label: document.querySelector("#copPanel [data-cop-panelexpand]").getAttribute("aria-label") }));
+    check(wx.left <= 1 && wx.w >= wx.vw - 20 && wx.w > w0 + 300 && /Minimize/.test(wx.label) && wx.pane && Math.abs(w1.w - w0) <= 2 && /Expand/.test(w1.label),
+      "§778 B: expand makes the panel take over the page, the Copilot still in it; minimize puts it back to the side", JSON.stringify({ w0, wx, w1 }));
     await page.click('[data-sub2="plan"]');
     await page.waitForFunction(() => CURSEC.copilot === "directions" && !!document.querySelector("#copPanel [data-cop-pane]"), null, { timeout: 10000 }).catch(() => {});
     await page.click('#copPanel [data-cop-panelarea="execution"]');

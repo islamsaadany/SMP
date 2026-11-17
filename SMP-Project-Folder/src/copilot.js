@@ -287,7 +287,7 @@ var COPILOT = (function(){
        reads "Refine the existing execution": the measures and tactics the
        plan holds, on each card, drafts adding to them. */
     else if (s === "compete") { var cw = cpPlanHeld(); if (!cw) return ""; attr = 'data-cop-newplan="compete"'; meta = cpWord(cw.discipline) + " · " + cw.values.length + (cw.values.length === 1 ? " value" : " values");
-      return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) + '<span class="coppt"><span class="coptag">On the plan today</span>Start from the existing plan</span>' +
+      return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) + '<span class="coppt"><span class="coptag">On the plan today</span>Start from existing</span>' +
         '<span class="coppd">Load the discipline and the values the plan holds as the table, and change any part. Score the disciplines anew to check the choice. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>'; }
     else if (s === "execution") { var ei = exItems(), withL = ei.filter(function(it){ return it.measures.length || it.tactics.length; }).length; if (!withL) return ""; attr = 'data-cop-newplan="execution"';
       meta = withL + (withL === 1 ? " item" : " items") + " with measures · " + (ei.length - withL) + " without";
@@ -295,7 +295,7 @@ var COPILOT = (function(){
         '<span class="coppd">Load the measures and tactics the plan holds, on each Direction’s and Capability’s card, and change any part; a draft adds to them. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>'; }
     else return "";
     return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) +
-      '<span class="coppt"><span class="coptag">On the plan today</span>Start from the existing plan</span>' +
+      '<span class="coppt"><span class="coptag">On the plan today</span>Start from existing</span>' +
       '<span class="coppd">Load what is on the plan and change any part. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>';
   }
   function startHtml(){
@@ -2875,7 +2875,9 @@ var COPILOT = (function(){
      the plan and the page repaints beside it. The panel lives outside the
      page the shell repaints; the shell calls afterPaint() at the end of every
      paint, which puts the button back and follows the part. */
-  var PANEL = { open: false, planArea: "directions", rendering: false, area: "" };
+  var PANEL = { open: false, planArea: "directions", rendering: false, area: "", wide: false };
+  var EXPMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9.5 2.5h4v4M13.5 2.5l-5 5M6.5 13.5h-4v-4M2.5 13.5l5-5"/></svg>';
+  var MINMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13.5 6.5h-4v-4M9.5 6.5l4.5-4.5M2.5 9.5h4v4M6.5 9.5L2 14"/></svg>';
   var STRAT_AREA = { found: "foundation", swot: "analysis" };
   var AREA_STRAT = { foundation: "found", analysis: "swot", directions: "plan", execution: "plan", capabilities: "plan" };
   function inPanel(){ return !!(PANEL.rendering || (PANEL.open && document.querySelector("#copPanel [data-cop-pane]"))); }
@@ -2885,7 +2887,7 @@ var COPILOT = (function(){
     var a = s === "plan" ? PANEL.planArea : STRAT_AREA[s] || "";
     return a && here().some(function(x){ return x.k === a; }) ? a : "";
   }
-  function closePanelDom(){ var el = document.getElementById("copPanel"); if (el) el.remove(); document.body.classList.remove("copB-open"); }
+  function closePanelDom(){ var el = document.getElementById("copPanel"); if (el) el.remove(); document.body.classList.remove("copB-open"); document.body.classList.remove("copB-wide"); PANEL.wide = false; }
   function placePanel(el){
     var top = 0; document.querySelectorAll("#secrow-in button, #secrow-in .secseg").forEach(function(x){ var r = x.getBoundingClientRect(); if (r.height) top = Math.max(top, r.bottom); });
     var z = typeof pageZoom === "function" ? pageZoom() : 1; el.style.top = Math.max(60, Math.round(((top || 150) + 8) / z)) + "px";
@@ -2901,13 +2903,15 @@ var COPILOT = (function(){
     if (!PANEL.open) { closePanelDom(); return; }
     var el = document.getElementById("copPanel");
     if (!el) { el = document.createElement("aside"); el.id = "copPanel"; el.setAttribute("aria-label", "Copilot"); document.body.appendChild(el); PANEL.area = ""; }
-    document.body.classList.add("copB-open"); placePanel(el);
+    document.body.classList.add("copB-open"); document.body.classList.toggle("copB-wide", !!PANEL.wide); placePanel(el);
     var a = panelArea();
     if (a !== PANEL.area || !el.querySelector("[data-cop-pane], [data-cop-panelnone]")) {
       PANEL.area = a;
       var partWord = { found: "Foundation", swot: "SWOT", plan: "Plan", drivers: "Drivers" }[CURSEC.strategy] || "This part";
       var head = '<div class="copPhead"><div><b>✦ Copilot</b><small>' + E(partWord) + ' · ' + E(placeWord()) + '</small></div>' +
         (CURSEC.strategy === "plan" ? '<span class="copPseg">' + [["directions", "Pillars/Directions"], ["execution", "Tactical Plans"]].map(function(x){ return '<button type="button" data-cop-panelarea="' + x[0] + '" aria-pressed="' + (PANEL.planArea === x[0]) + '">' + x[1] + '</button>'; }).join("") + '</span>' : '') +
+        /* §778 — expand to take over the page, as the Copilot tab does, and minimize back to the side (Islam) */
+        '<button type="button" class="copPexp" data-cop-panelexpand aria-pressed="' + !!PANEL.wide + '" aria-label="' + (PANEL.wide ? "Minimize the Copilot" : "Expand the Copilot") + '" title="' + (PANEL.wide ? "Minimize" : "Expand") + '">' + (PANEL.wide ? MINMARK : EXPMARK) + '</button>' +
         '<button type="button" class="copPx" data-cop-panelclose aria-label="Close the Copilot" title="Close">×</button></div>';
       if (!a) { el.innerHTML = head + '<div class="copnone" data-cop-panelnone>The Copilot works on the Foundation, the SWOT and the Plan here. For anything else, ask on the Copilot tab.</div>'; return; }
       if (CURSEC.copilot !== a) { CURSEC.copilot = a; PANE = null; }
@@ -4739,6 +4743,11 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-layout]"))) { setLayout(b.getAttribute("data-cop-layout")); return; }
     if ((b = hit(ev, "[data-cop-suggest]"))) { startWorkflow(b.getAttribute("data-cop-suggest")); return; }
     if ((b = hit(ev, "[data-cop-panelbtn]"))) { PANEL.open = !PANEL.open; PANEL.area = ""; RAILKEPT = false; b.setAttribute("aria-pressed", String(PANEL.open)); afterPaint(); return; }
+    if ((b = hit(ev, "[data-cop-panelexpand]"))) {
+      PANEL.wide = !PANEL.wide; document.body.classList.toggle("copB-wide", PANEL.wide);
+      b.setAttribute("aria-pressed", String(PANEL.wide)); b.setAttribute("aria-label", PANEL.wide ? "Minimize the Copilot" : "Expand the Copilot"); b.title = PANEL.wide ? "Minimize" : "Expand"; b.innerHTML = PANEL.wide ? MINMARK : EXPMARK;
+      SHEET = ""; draw(); return;
+    }
     if ((b = hit(ev, "[data-cop-panelclose]"))) { PANEL.open = false; closePanelDom(); var pb = document.querySelector("[data-cop-panelbtn]"); if (pb) pb.setAttribute("aria-pressed", "false"); return; }
     if ((b = hit(ev, "[data-cop-panelarea]"))) { PANEL.planArea = b.getAttribute("data-cop-panelarea"); PANEL.area = ""; PANE = null; afterPaint(); return; }
     if ((b = hit(ev, "[data-cop-strip]"))) { var sk = b.getAttribute("data-cop-strip"); RAILF[place()] = railF() === sk && section() === sk && !OPEN[key()] ? "" : sk; AREA_CHOSEN[place()] = true; goSection(sk); return; }

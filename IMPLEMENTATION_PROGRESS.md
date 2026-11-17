@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-17 — Start from existing; the plan's Copilot panel expands (§778).** The plan card reads "Start from existing"; the Copilot panel on the Strategy tab has an expand button that makes it take over the page, and minimize puts it back at the side.
+
 **2026-11-17 — Build, not Builder; the strip over the chat box (§777).** The toggle reads Build · Refine; "All chats on this client" is off the rail; the method's strip sits over the chat box on the right, the chats rail running the full height beside it.
 **2026-11-17 — The welcome check green (§776.1).** Its three reds and its death were main's: the ladder made the plan the office's (no gaps row for a custodian), the underline was read mid-transition, the group CEO lands in the reading window, and the sign-in's last read raced a redirect. Each rewritten to the rule as it stands, never loosened. welcome: OK, twice.
 

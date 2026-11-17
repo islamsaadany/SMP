@@ -698,7 +698,8 @@
 /* v7.81-builder-refine — main's §772: Builder until the five parts are on the plan, then Refine. */
 /* v7.88-merged-main — §773–§776.1 merged over main's §772; past main's v7.81. */
 /* v7.89-build-strip — §777: Build · Refine, no All chats link, the strip over the chat box; past main's v7.88. */
-const SHELL = "smp-shell-v7.89-build-strip";
+/* v7.90-start-from-existing — §778: Start from existing; the plan's Copilot panel expands and minimizes. */
+const SHELL = "smp-shell-v7.90-start-from-existing";
 const ASSETS = [
   "/",
   "/index.html",

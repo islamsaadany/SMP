@@ -1121,3 +1121,13 @@ body.copB-open #mainwrap { margin-right:560px; }
 .coppane > .copmain { grid-column:2; grid-row:2; align-self:stretch; }
 /* one column below 821px — unless the rail is folded, which keeps its 24px strip beside the rest (.copshut) */
 @media (max-width:820px){ .coppane:not(.copshut) > .copslim, .coppane:not(.copshut) > .coprails, .coppane:not(.copshut) > .copstrip, .coppane:not(.copshut) > .copmain { grid-column:1; grid-row:auto; } }
+
+/* §778 — the panel on the plan expands to take over the page, as the
+   Copilot tab does (the chat, the work and the to-do side by side), and
+   minimizes back to the side. */
+#copPanel .copPexp { margin-left:auto; border:1px solid var(--line); background:var(--surface); border-radius:6px; width:28px; height:26px; display:inline-grid; place-items:center; color:var(--ink-2); cursor:pointer; }
+#copPanel .copPexp:hover { border-color:var(--gold); color:var(--ink); }
+#copPanel .copPexp svg { width:14px; height:14px; }
+#copPanel .copPseg + .copPexp { margin-left:6px; }
+#copPanel .copPexp + .copPx { margin-left:2px; }
+body.copB-wide #copPanel { left:0; width:auto; box-shadow:none; border-left:0; }

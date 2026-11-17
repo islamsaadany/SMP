@@ -6,7 +6,7 @@
    fetch handler (§701) touches page loads alone, and only when the network
    fails: then it answers SMP's own offline page, written into this file. */
 
-/* release fc548983ebfc3141 — changes whenever a file a tab holds changes (§397) */
+/* release 805edcb70c0fe856 — changes whenever a file a tab holds changes (§397) */
 
 self.addEventListener("install", () => self.skipWaiting());
 

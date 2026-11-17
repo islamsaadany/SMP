@@ -18,7 +18,7 @@ const at = (marks: Marks | undefined, word: string, fallback: number) => (marks 
 
 export type EndTreatment = "current" | "clear" | "box" | "band" | "under";
 
-export const S0Strategy: React.FC<{ marks?: Marks; end?: EndTreatment }> = ({ marks, end = "current" }) => {
+export const S0Strategy: React.FC<{ marks?: Marks; end?: EndTreatment }> = ({ marks, end = "under" }) => {
   const { t, length } = useRealClock();
   const word = ease(t, 0.3, 1.2);
   const stages: [string, string, number][] = [["workshop", "agreed in a workshop", 2.2], ["board", "presented to the board", 3.6], ["meets", "then it meets the year", 5.2]];

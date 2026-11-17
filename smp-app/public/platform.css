@@ -14067,4 +14067,5 @@ body.copB-open #mainwrap { margin-right:560px; }
 .coppane > .copstrip { grid-column:2; grid-row:1; margin:0 0 8px; min-width:0; }
 .coppane > .copstrip:empty { display:none; }
 .coppane > .copmain { grid-column:2; grid-row:2; align-self:stretch; }
-@media (max-width:820px){ .coppane > .copslim, .coppane > .coprails, .coppane > .copstrip, .coppane > .copmain { grid-column:1; grid-row:auto; } }
+/* one column below 821px — unless the rail is folded, which keeps its 24px strip beside the rest (.copshut) */
+@media (max-width:820px){ .coppane:not(.copshut) > .copslim, .coppane:not(.copshut) > .coprails, .coppane:not(.copshut) > .copstrip, .coppane:not(.copshut) > .copmain { grid-column:1; grid-row:auto; } }

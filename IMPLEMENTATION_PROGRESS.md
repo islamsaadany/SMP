@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-17 — Build only; Details on the right; the plan panel sends empty parts to Build (§779).** The Copilot tab is Build only and reads the plan itself (a plan made on the platform counts); only the step in focus shows its cards, under "Or choose another way to start"; deliverables sit on the right below the to-do; ✦ Copilot on an empty part sends you to build it, on a built part it opens on the box to say what to change; the panel is resized from its left edge.
+
 **2026-11-17 — Start from existing; the plan's Copilot panel expands (§778).** The plan card reads "Start from existing"; the Copilot panel on the Strategy tab has an expand button that makes it take over the page, and minimize puts it back at the side.
 
 **2026-11-17 — Build, not Builder; the strip over the chat box (§777).** The toggle reads Build · Refine; "All chats on this client" is off the rail; the method's strip sits over the chat box on the right, the chats rail running the full height beside it.

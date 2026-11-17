@@ -69761,7 +69761,7 @@ var COPILOT = (function(){
     var b = document.querySelector("[data-cop-send]");
     if (b) { b.hidden = !t.value.trim() && !(PANE && PANE.pending && PANE.pending.length); setHeld(b, THINKING ? BUSY : ""); if (b.getAttribute("aria-disabled")) b.removeAttribute("title"); else b.setAttribute("title", "Send"); }
   }
-  window.addEventListener("resize", function(){ fitPane(); fitBox(); syncRail(); });
+  window.addEventListener("resize", function(){ fitPane(); fitBox(); syncRail(); placeDetails(); });
 
   /* ── THE SWOT FLOW (§490, Islam 4 Oct 2026, from the signed-off
      design-mockups/copilot-swot-flow/2026-10-04_v2.html) ──────────────
@@ -70391,7 +70391,10 @@ var COPILOT = (function(){
   function placeDetails(){
     var pane = document.querySelector("[data-cop-pane]"), m = document.querySelector("[data-cop-main]"); if (!pane || !m) return;
     var det = pane.querySelector(":scope > [data-cop-details]"); if (!det) return;
+    m.querySelectorAll("[data-cop-delbox]").forEach(function(x){ x.remove(); });
     var td = m.querySelector(".copftodo");
+    /* a to-do folded into a sheet (a narrow window) would hide them: then they keep their own column */
+    if (td && getComputedStyle(td).display === "none") td = null;
     if (td) { var bx = document.createElement("div"); bx.className = "copdelbox"; bx.setAttribute("data-cop-delbox", ""); bx.innerHTML = detailsInner(); td.appendChild(bx); det.innerHTML = ""; }
     else det.innerHTML = detailsInner();
     pane.classList.toggle("copwithdet", !td);
@@ -70578,7 +70581,7 @@ var COPILOT = (function(){
       PANEL.rendering = true;
       try { el.innerHTML = head + '<div class="copPbody">' + renderPane() + '</div>'; } finally { PANEL.rendering = false; }
       draw();
-    }
+    } else if (el.querySelector("[data-cop-startscreen]")) draw();   /* §779 — the plan may have come in since: built or not is read again */
   }
   /* the rail's filter, per place: every area, or one */
   var RAILF = {};

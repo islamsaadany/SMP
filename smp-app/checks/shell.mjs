@@ -3123,11 +3123,13 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     check(m.items ? /On the plan · \d+ Directions?/.test(m.dirs) : /Not started/.test(m.dirs), "§779 the strip reads the plan itself: Pillars/Directions says what the plan holds", JSON.stringify(m));
     /* a Direction typed on the platform, not in the Copilot, counts */
     const n0 = +(m.line.match(/(\d) of 5/) || [])[1];
-    await page.evaluate(() => { const u = unitLike("mobile"); window.__items779 = u.items; u.items = [{ id: "chk779", name: "Grow the accessories business" }]; paint(); });
-    await page.waitForTimeout(300);
-    const m2 = await read();
-    check(/On the plan · 1 Direction$/.test(m2.dirs) && +(m2.line.match(/(\d) of 5/) || [])[1] === (m.items ? n0 : n0 + 1), "§779 …a Direction made on the platform shows as on the plan, and is counted", JSON.stringify({ n0, m2 }));
-    await page.evaluate(() => { unitLike("mobile").items = window.__items779; paint(); });
+    /* changed in memory, read and put back in one step, so nothing of it is ever saved */
+    const m2 = await page.evaluate(() => { const u = unitLike("mobile"), was = u.items, step = (k) => ((document.querySelector('[data-cop-strip="' + k + '"] small') || {}).textContent || "");
+      const count = () => Array.from(document.querySelectorAll("[data-cop-strip]")).filter((b) => b.getAttribute("data-cop-strip") !== "advisory" && /^On the plan/.test((b.querySelector("small") || {}).textContent || "")).length;
+      u.items = [{ id: "chk779", name: "Grow the accessories business" }]; paint();
+      const out = { dirs: step("directions"), line: (document.querySelector("[data-cop-planline]") || {}).textContent || "", on: count() };
+      u.items = was; paint(); return out; });
+    check(/On the plan · 1 Direction$/.test(m2.dirs) && +(m2.line.match(/(\d) of 5/) || [])[1] === m2.on, "§779 …a Direction made on the platform shows as on the plan, and the line counts what the strip shows on it", JSON.stringify({ n0, m2 }));
     /* all five on the plan: said once, the cards still there for a step chosen */
     await asTenant(tenantId, (c) => c.query("insert into copilot_deliverables (place, section, type, kind, title, approach, created_by, extra) select 'mobile', s, s, 'promotable', s || ' — Mobile', '', 'office', jsonb_build_object('applied', jsonb_build_object('n', 1, 'at', now(), 'by', 'office')) from unnest(array['foundation','analysis','compete','directions','execution']) s"));
     await open("/raya-trade/strategy/mobile/copilot/foundation");
@@ -3143,22 +3145,25 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     /* B — ✦ Copilot on a part the plan does not hold: build it in the Copilot */
     await open("/raya-trade/strategy/mobile/strategy/swot");
     await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});
-    await page.evaluate(() => { const u = unitLike("mobile"); window.__sw779 = u.swot; u.swot = { s: [], w: [], o: [], t: [] }; });
-    await page.click("[data-cop-panelbtn]");
-    await page.waitForSelector("#copPanel [data-cop-pane]", { timeout: 15000 }).catch(() => {});
-    await page.waitForSelector("#copPanel [data-cop-notbuilt]", { timeout: 8000 }).catch(() => {});
-    const nb = await page.evaluate(() => { const p = document.getElementById("copPanel"); return p ? { sec: CURSEC.copilot, nb: !!p.querySelector("[data-cop-notbuilt]"), h: (p.querySelector(".copstarth") || {}).textContent || "", box: !!p.querySelector("[data-cop-starttext]"), btn: (p.querySelector("[data-cop-buildin]") || {}).textContent || "", strip: p.querySelectorAll("[data-cop-strip]").length } : null; });
+    const nbAll = await page.evaluate(async () => { const u = unitLike("mobile"), was = u.swot; u.swot = { s: [], w: [], o: [], t: [] };
+      try {
+        document.querySelector("[data-cop-panelbtn]").click();
+        for (let i = 0; i < 40 && !document.querySelector("#copPanel [data-cop-notbuilt]"); i++) await new Promise((r) => setTimeout(r, 100));
+        const p = document.getElementById("copPanel");
+        const nb = p ? { sec: CURSEC.copilot, nb: !!p.querySelector("[data-cop-notbuilt]"), h: (p.querySelector(".copstarth") || {}).textContent || "", box: !!p.querySelector("[data-cop-starttext]"), btn: (p.querySelector("[data-cop-buildin]") || {}).textContent || "", strip: p.querySelectorAll("[data-cop-strip]").length } : null;
+        const b = p && p.querySelector("[data-cop-buildin]"); if (b) b.click();
+        return nb;
+      } finally { u.swot = was; } });
+    const nb = nbAll;
     await shot("3-panel-empty");
     check(!!nb && nb.sec === "analysis" && nb.nb && /Mobile’s SWOT isn’t built yet/.test(nb.h) && !nb.box && /Build it in the Copilot/.test(nb.btn) && nb.strip === 0,
       "§779 B: on a part the plan does not hold, the panel says it isn't built yet and sends you to Build — no building in the panel", JSON.stringify(nb));
-    await page.click("#copPanel [data-cop-buildin]");
     await page.waitForFunction(() => currentSub === "copilot" && !document.getElementById("copPanel"), null, { timeout: 10000 }).catch(() => {});
     const bi = await page.evaluate(() => ({ sub: currentSub, sec: CURSEC.copilot, panel: !!document.getElementById("copPanel"), focus: (document.querySelector(".copfocus") || {}).textContent || "", cur: (document.querySelector('[data-cop-strip][aria-current="true"]') || { getAttribute: () => "" }).getAttribute("data-cop-strip") }));
     check(bi.sub === "copilot" && bi.sec === "analysis" && !bi.panel && /SWOT/.test(bi.focus) && bi.cur === "analysis", "§779 …“Build it in the Copilot” opens the Copilot tab on that step", JSON.stringify(bi));
     /* B — on a part the plan holds: the box at the top, no cards; what is said starts from the plan */
     await open("/raya-trade/strategy/mobile/strategy/swot");
     await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});
-    await page.evaluate(() => { const u = unitLike("mobile"); u.swot = { s: ["Local manufacturing"], w: ["Low margin on devices"], o: ["Accessories market"], t: ["Grey market"] }; });
     await page.click("[data-cop-panelbtn]");
     await page.waitForSelector("#copPanel [data-cop-sayto]", { timeout: 15000 }).catch(() => {});
     const sy = await page.evaluate(() => { const p = document.getElementById("copPanel"); if (!p) return null; const st = p.querySelector("[data-cop-startscreen]"), box = p.querySelector("[data-cop-starttext]"), cards = Array.from(p.querySelectorAll(".coppcard")).filter((c) => c.offsetParent);
@@ -3189,7 +3194,6 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     const w1 = await page.evaluate(() => ({ w: Math.round(document.getElementById("copPanel").getBoundingClientRect().width), label: document.querySelector("#copPanel [data-cop-panelexpand]").getAttribute("aria-label") }));
     check(wx.left <= 1 && wx.w >= wx.vw - 20 && wx.w > w0 + 300 && /Minimize/.test(wx.label) && wx.pane && Math.abs(w1.w - w0) <= 2 && /Expand/.test(w1.label),
       "§778 B: expand makes the panel take over the page, the Copilot still in it; minimize puts it back to the side", JSON.stringify({ w0, wx, w1 }));
-    await page.evaluate(() => { unitLike("mobile").swot = window.__sw779; });
     await page.click('[data-sub2="plan"]');
     await page.waitForFunction(() => CURSEC.copilot === "directions" && !!document.querySelector("#copPanel [data-cop-pane]"), null, { timeout: 10000 }).catch(() => {});
     await page.click('#copPanel [data-cop-panelarea="execution"]');

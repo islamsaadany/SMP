@@ -3121,15 +3121,11 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     check(m.toggle === 0 && m.sug === 0 && /\d of 5 parts on Mobile’s plan/.test(m.line) && !/Refine/.test(await page.evaluate(() => (document.querySelector("[data-cop-modebar]") || {}).textContent || "")),
       "§779 the Copilot tab is Build only: no Build · Refine toggle, no suggestions; one line says how many of the five parts are on the plan", JSON.stringify(m));
     check(m.items ? /On the plan · \d+ Directions?/.test(m.dirs) : /Not started/.test(m.dirs), "§779 the strip reads the plan itself: Pillars/Directions says what the plan holds", JSON.stringify(m));
-    /* a Direction typed on the platform, not in the Copilot, counts */
-    const n0 = +(m.line.match(/(\d) of 5/) || [])[1];
-    /* changed in memory, read and put back in one step, so nothing of it is ever saved */
-    const m2 = await page.evaluate(() => { const u = unitLike("mobile"), was = u.items, step = (k) => ((document.querySelector('[data-cop-strip="' + k + '"] small') || {}).textContent || "");
-      const count = () => Array.from(document.querySelectorAll("[data-cop-strip]")).filter((b) => b.getAttribute("data-cop-strip") !== "advisory" && /^On the plan/.test((b.querySelector("small") || {}).textContent || "")).length;
-      u.items = [{ id: "chk779", name: "Grow the accessories business" }]; paint();
-      const out = { dirs: step("directions"), line: (document.querySelector("[data-cop-planline]") || {}).textContent || "", on: count() };
-      u.items = was; paint(); return out; });
-    check(/On the plan · 1 Direction$/.test(m2.dirs) && +(m2.line.match(/(\d) of 5/) || [])[1] === m2.on, "§779 …a Direction made on the platform shows as on the plan, and the line counts what the strip shows on it", JSON.stringify({ n0, m2 }));
+    /* §779 — the Copilot's tables are empty here, so what the strip says is on the plan was read off the plan itself (typed on the platform) */
+    const m2 = await page.evaluate(() => { const on = Array.from(document.querySelectorAll("[data-cop-strip]")).filter((b) => b.getAttribute("data-cop-strip") !== "advisory" && /^On the plan/.test((b.querySelector("small") || {}).textContent || ""));
+      return { on: on.map((b) => b.getAttribute("data-cop-strip")), line: (document.querySelector("[data-cop-planline]") || {}).textContent || "" }; });
+    const cop = +(await asTenant(tenantId, (c) => c.query("select count(*) n from copilot_deliverables"))).rows[0].n;
+    check(cop === 0 && m2.on.length >= 3 && +(m2.line.match(/(\d) of 5/) || [])[1] === m2.on.length, "§779 …a plan made on the platform, with nothing from the Copilot, shows its parts on the plan, and the line counts them", JSON.stringify({ cop, m2 }));
     /* all five on the plan: said once, the cards still there for a step chosen */
     await asTenant(tenantId, (c) => c.query("insert into copilot_deliverables (place, section, type, kind, title, approach, created_by, extra) select 'mobile', s, s, 'promotable', s || ' — Mobile', '', 'office', jsonb_build_object('applied', jsonb_build_object('n', 1, 'at', now(), 'by', 'office')) from unnest(array['foundation','analysis','compete','directions','execution']) s"));
     await open("/raya-trade/strategy/mobile/copilot/foundation");
@@ -3145,15 +3141,17 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     /* B — ✦ Copilot on a part the plan does not hold: build it in the Copilot */
     await open("/raya-trade/strategy/mobile/strategy/swot");
     await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});
-    const nbAll = await page.evaluate(async () => { const u = unitLike("mobile"), was = u.swot; u.swot = { s: [], w: [], o: [], t: [] };
+    /* emptied, read and put back in one synchronous step — the panel draws at once — so no paint or save ever sees it */
+    const nbAll = await page.evaluate(() => { const u = unitLike("mobile"), was = u.swot; let nb = null, b = null;
+      u.swot = { s: [], w: [], o: [], t: [] };
       try {
         document.querySelector("[data-cop-panelbtn]").click();
-        for (let i = 0; i < 40 && !document.querySelector("#copPanel [data-cop-notbuilt]"); i++) await new Promise((r) => setTimeout(r, 100));
         const p = document.getElementById("copPanel");
-        const nb = p ? { sec: CURSEC.copilot, nb: !!p.querySelector("[data-cop-notbuilt]"), h: (p.querySelector(".copstarth") || {}).textContent || "", box: !!p.querySelector("[data-cop-starttext]"), btn: (p.querySelector("[data-cop-buildin]") || {}).textContent || "", strip: p.querySelectorAll("[data-cop-strip]").length } : null;
-        const b = p && p.querySelector("[data-cop-buildin]"); if (b) b.click();
-        return nb;
-      } finally { u.swot = was; } });
+        nb = p ? { sec: CURSEC.copilot, nb: !!p.querySelector("[data-cop-notbuilt]"), h: (p.querySelector(".copstarth") || {}).textContent || "", box: !!p.querySelector("[data-cop-starttext]"), btn: (p.querySelector("[data-cop-buildin]") || {}).textContent || "", strip: p.querySelectorAll("[data-cop-strip]").length } : null;
+        b = p && p.querySelector("[data-cop-buildin]");
+      } finally { u.swot = was; }
+      if (b) b.click();
+      return nb; });
     const nb = nbAll;
     await shot("3-panel-empty");
     check(!!nb && nb.sec === "analysis" && nb.nb && /Mobile’s SWOT isn’t built yet/.test(nb.h) && !nb.box && /Build it in the Copilot/.test(nb.btn) && nb.strip === 0,

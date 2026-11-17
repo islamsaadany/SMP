@@ -70414,8 +70414,7 @@ var COPILOT = (function(){
     var det = pane.querySelector(":scope > [data-cop-details]"); if (!det) return;
     m.querySelectorAll("[data-cop-delbox]").forEach(function(x){ x.remove(); });
     var td = m.querySelector(".copftodo");
-    /* a to-do folded into a sheet (a narrow window) would hide them: then they keep their own column */
-    if (td && getComputedStyle(td).display === "none") td = null;
+    /* a to-do folded into its sheet (a smaller window) carries them too, opened by its own button: a column of their own would squeeze the chat's work into a sheet as well */
     if (td) { var bx = document.createElement("div"); bx.className = "copdelbox"; bx.setAttribute("data-cop-delbox", ""); bx.innerHTML = detailsInner(); td.appendChild(bx); det.innerHTML = ""; }
     else {
       var shut = detShut();

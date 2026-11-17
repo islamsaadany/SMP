@@ -71666,3 +71666,7 @@ Islam: *"in the builder or refiner allow me to paste pictures as well with data 
 
 **Checked**: `checks/copilot.mjs` **378 passed, 0 failed** — pictures known by name or type, an SVG or GIF not; a picture not read and a false one refused; it rides as an image of its own type; a pasted screenshot in a chat reaches the model as itself, named as a picture to read; a picture waiting above a guided Foundation chat goes with its draft and is then taken. `checks/shell.mjs` 3p **18 ok, 0 failed** — Details beside the chat at 960 and 900px windows with no sideways scroll; they fold and open, the fold kept; a screenshot pasted in the start box opens a chat with its thumbnail waiting.
 
+- **Under a folded to-do, not beside it.** When a smaller window folds a step-by-step chat's to-do into its button (§670), the deliverables go into that same sheet, opened by the same button; given a column of their own, they squeezed the chat's cards into a sheet too, which the full run caught (§670 at a 980px window).
+
+The full run: `checks/copilot.mjs` **378 passed, 0 failed**; `checks/shell.mjs` **602 ok, 11 failed** — the known ten and that §670 red, since fixed (3i **100 ok, 1 failed**, the known slim strip; 3p **18 ok, 0 failed**); `tsc`, `generated-in-step` and `release-stamp` clear.
+

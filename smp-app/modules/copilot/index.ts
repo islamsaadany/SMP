@@ -493,7 +493,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
    chat's section first, so a long plan loses the far sections and never the
    one being asked about. A whole unit's plan is ~8,000 characters. */
 const MAX_CONTEXT = 24_000;
-/* §787 — AN OLDER DRAFT LAYS ITSELF OUT, ONCE (Islam: "isn't that a view
+/* §788 — AN OLDER DRAFT LAYS ITSELF OUT, ONCE (Islam: "isn't that a view
    change? why are we adding a feature for an exceptional case?"). A draft
    made before the plan's shape (§784), in one of the five parts, is laid out
    by the same small ask a new one gets (§786) when its panel first shows it,

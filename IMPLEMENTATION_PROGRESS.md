@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-17 — An older draft lays itself out (§787).** No *Lay it out for the plan* button: a draft made before the plan's shape lays itself out as the plan when its panel shows it, once, with nothing said in the chat.
+**2026-11-17 — An older draft lays itself out (§788).** No *Lay it out for the plan* button: a draft made before the plan's shape lays itself out as the plan when its panel shows it, once, with nothing said in the chat.
 
 **2026-11-17 — Free chats answer on Claude again (§786).** §784 had put the plan's shape into the answer's schema, which Claude refuses past its optional-field cap, so every free chat failed on main. The shape is now asked for in a second, small request of its own.
 

@@ -923,7 +923,7 @@ var COPILOT = (function(){
   }
   var GAPWORD = { compete: [" value has no measure yet.", " values have no measure yet."], directions: [" Direction is not fully scored yet.", " Directions are not fully scored yet."], execution: [" item has no measure yet.", " items have no measure yet."] };
   function gapLine(plan){ var n = planGaps(plan), w = GAPWORD[plan && plan.section]; return n && w ? " " + n + w[n === 1 ? 0 : 1] : ""; }
-  /* §787 — A DRAFT MADE BEFORE THE PLAN'S SHAPE LAYS ITSELF OUT when its panel shows it (Islam: "isn't that a view change? why are we adding a feature for an exceptional case?"): one quiet ask, kept on the message, nothing said in the chat */
+  /* §788 — A DRAFT MADE BEFORE THE PLAN'S SHAPE LAYS ITSELF OUT when its panel shows it (Islam: "isn't that a view change? why are we adding a feature for an exceptional case?"): one quiet ask, kept on the message, nothing said in the chat */
   function canLay(sec){ return !!PLAN_TYPE[sec]; }
   var LAYING = {};
   function layDraft(){

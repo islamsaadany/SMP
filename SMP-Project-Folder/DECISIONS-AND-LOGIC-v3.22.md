@@ -71745,7 +71745,7 @@ The full browser run on §786: `checks/shell.mjs` **621 ok, 10 failed**, the kno
 
 **§786 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §785, so the merge is a fast-forward. No migrations; nobody signed out.
 
-## §787 — An older draft lays itself out as the plan; no button (2026-11-17)
+## §788 — An older draft lays itself out as the plan; no button (2026-11-17)
 
 Islam, of the *Lay it out for the plan* button (§785) on a draft made before the plan's shape: *"why are we doing this with a button, isn't that a view change? why are we adding a feature for an exceptional case?"* — and, to the proposal, *"go ahead"*.
 
@@ -71756,7 +71756,5 @@ Islam, of the *Lay it out for the plan* button (§785) on a draft made before th
 
 **Checked**: `checks/copilot.mjs` **389 passed, 0 failed** — a draft without the shape laid out once when asked, kept on its message, the chat's messages unchanged, a second ask not made. `checks/shell.mjs` 3q (**11 ok, 0 failed**) — an older draft put into a chat lays itself out as the plan when the chat opens, no button, nothing said, the shape stored, Put on the plan offered; 3j2 **12 ok, 0 failed**.
 
-**§787.1 — free chats only.** The full run caught the automatic layout firing on a plain (pre-§633) chat's draft in the Foundation as well: an extra ask the quick-reply check counted, and a redraw mid-typing that cut the Shift + Enter check's second line. It lays out a free chat's draft only, on the page and on the server, as §786's second ask does. The §654 B3 check is rewritten to §787 as it stands (§218): no button, and a draft that cannot be laid out stays in the Copilot. 3f the known four, 3j2 **12 ok**, 3q **11 ok**, `checks/copilot.mjs` **389 passed, 0 failed**.
-
-**§787 AND §787.1 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"* — on the targeted runs above (API 389/0; 3f the known four, 3j2, 3q green), the full browser run of §787.1 still going and to be reported. `main` had not moved since §786, so the merge is a fast-forward. No migrations; nobody signed out.
+**§788.1 — free chats only.** The full run caught the automatic layout firing on a plain (pre-§633) chat's draft in the Foundation as well: an extra ask the quick-reply check counted, and a redraw mid-typing that cut the Shift + Enter check's second line. It lays out a free chat's draft only, on the page and on the server, as §786's second ask does. The §654 B3 check is rewritten to §788 as it stands (§218): no button, and a draft that cannot be laid out stays in the Copilot. 3f the known four, 3j2 **12 ok**, 3q **11 ok**, `checks/copilot.mjs` **389 passed, 0 failed**.
 

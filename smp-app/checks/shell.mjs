@@ -1006,7 +1006,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line, and the box is as wide as the conversation", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");
     const stay = await page.evaluate(() => ({ note: (document.querySelector("[data-cop-out] [data-cop-draftstay]") || {}).textContent || "", lay: !!document.querySelector("[data-cop-out] [data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-out] [data-cop-putplan]") }));
-    check(!stay.lay && !stay.put && /Laying it out as the plan|Stays in the Copilot/.test(stay.note), "§654 B3, §787 a free chat's draft not in the plan's shape lays itself out — no button — and one that cannot be stays in the Copilot; it cannot go on as it is", JSON.stringify(stay));
+    check(!stay.lay && !stay.put && /Laying it out as the plan|Stays in the Copilot/.test(stay.note), "§654 B3, §788 a free chat's draft not in the plan's shape lays itself out — no button — and one that cannot be stays in the Copilot; it cannot go on as it is", JSON.stringify(stay));
     await page.locator("[data-cop-out] [data-cop-savedraft]").click();
     await page.waitForFunction(() => document.querySelector("[data-cop-out] .copsaved"), null, { timeout: 10000 }).catch(() => {});
     await page.waitForFunction(() => /Mobile foundation/.test([...document.querySelectorAll(".coprail [data-cop-deliv]")].map((x) => x.textContent).join("|")), null, { timeout: 8000 }).catch(() => {});
@@ -3294,7 +3294,7 @@ await section("3q · a chat's work laid out as the plan, and put on it (§784)",
     await page.waitForFunction(() => /Vendor value proposition/.test((document.querySelector(".copheadone .coph") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
     const rn = (await asTenant(tenantId, (c) => c.query("select title from copilot_chats order by created_at desc limit 1"))).rows[0];
     check(!!rn && rn.title === "Vendor value proposition" && /Vendor value proposition/.test(await page.evaluate(() => (document.querySelector(".copheadone .coph") || {}).textContent || "")), "§785 a chat is renamed from its header — its name pressed becomes a box, Enter keeps it", JSON.stringify(rn));
-    /* §787 — a draft made before the plan's shape (§784) lays itself out when its panel shows it: nothing to press, nothing said in the chat */
+    /* §788 — a draft made before the plan's shape (§784) lays itself out when its panel shows it: nothing to press, nothing said in the chat */
     const cid = (await asTenant(tenantId, (c) => c.query("select id from copilot_chats order by created_at desc limit 1"))).rows[0].id;
     await asTenant(tenantId, (c) => c.query("insert into copilot_messages (chat_id, who, body, part) values ($1, 'ai', 'Here is the table.', $2)", [cid, JSON.stringify({ kind: "answer", missing: [], options: [], assumptions: [], pastedBelongsTo: null, following: "",
       draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ title: "Vendor Growth Partner", text: "How: joint planning. Measure: Tier 2 revenue growth ≥ 100% (today 60%)." }] }] } })]));
@@ -3305,7 +3305,7 @@ await section("3q · a chat's work laid out as the plan, and put on it (§784)",
     const ly = await page.evaluate(() => ({ cards: document.querySelectorAll("[data-cop-dplan] [data-cop-val]").length, btn: !!document.querySelector("[data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-putplan]") }));
     const after = await asTenant(tenantId, (c) => c.query("select count(*)::int n, bool_or(part ? 'plan') laid from copilot_messages where chat_id = $1", [cid]));
     check(ly.cards >= 1 && !ly.btn && ly.put && after.rows[0].n === nMsg && after.rows[0].laid === true,
-      "§787 an older draft lays itself out as the plan when it is shown — no button, nothing said in the chat, the shape kept on it — and can be put on the plan", JSON.stringify({ ly, nMsg, after: after.rows[0] }));
+      "§788 an older draft lays itself out as the plan when it is shown — no button, nothing said in the chat, the shape kept on it — and can be put on the plan", JSON.stringify({ ly, nMsg, after: after.rows[0] }));
     const dp = await page.evaluate(() => { const d = document.querySelector("[data-cop-dplan]"); if (!d) return null;
       return { disc: (d.querySelector(".copdisc h4") || {}).textContent || "", vals: Array.from(d.querySelectorAll("[data-cop-val] h5")).map((h) => h.textContent), gap: d.querySelectorAll("[data-cop-gap]").length,
         today: Array.from(d.querySelectorAll(".copmrow .copm")).map((x) => x.textContent).join("|"), ev: !!d.querySelector("details.copev"), put: (document.querySelector("[data-cop-putplan]") || {}).textContent || "", stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }; });

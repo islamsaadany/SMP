@@ -506,6 +506,12 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
     if (chat.archived) return "archived" as const;
     const said = await recordSaid(c, id, { body: text, by, fileIds, pasted });
     if (said === "badFile") return "badFile" as const;
+    /* §782 — a free chat is named for what it is about, from its first words, never "Free chat" (Islam) */
+    if (chat.free && /^(Free|New) chat\b/.test(chat.title) && text.trim()) {
+      const words = oneLine(text).replace(/^(hi|hello|please|can you|could you)\b[,!. ]*/i, "").split(" ").slice(0, 7).join(" ").replace(/[.,;:!?]+$/, "");
+      const place = chat.title.replace(/^(Free|New) chat\s*[—-]\s*/, "").trim();
+      if (words) { chat.title = (place ? place + " — " : "") + (words.charAt(0).toUpperCase() + words.slice(1)).slice(0, 70); await renameChat(c, id, chat.title); }
+    }
     return { chat, said, material: await materialOf(c, id, said.messageId) };
   });
   if (!step1) return refused(404, "That chat is not here any more.");
@@ -526,7 +532,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
         : "Saved: " + r.title + ", v" + r.n + ". It is on the left under Deliverables.";
       await recordAnswer(c, id, { body, part: { kind: "saved" } });
     });
-    return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
+    return out(200, { ok: true, title: step1.chat.title, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
       assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
   }
 
@@ -595,7 +601,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
       await recordAnswer(c, id, { body: failedLine(r.why), part: { kind: "failed" } });
     }
   });
-  return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
+  return out(200, { ok: true, title: step1.chat.title, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
     assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
 }
 

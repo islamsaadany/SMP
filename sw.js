@@ -702,7 +702,8 @@
 /* v7.91-build-only — §779: Build only, read off the plan; Details on the right; the plan panel sends an empty part to Build and is resized from its edge. */
 /* v7.92-pictures — §780: pictures in the Copilot (paste, drop, attach), read by the model as themselves; Details stay on the right on a smaller window and fold. */
 /* v7.93-working-left — §781: the working word stands at the left of the conversation. */
-const SHELL = "smp-shell-v7.93-working-left";
+/* v7.94-builder-advisory — §782: one-line chat header; the stepper line; Builder and Advisory at the far right of the tabs. */
+const SHELL = "smp-shell-v7.94-builder-advisory";
 const ASSETS = [
   "/",
   "/index.html",

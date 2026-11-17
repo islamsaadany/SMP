@@ -896,14 +896,16 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     const p = await place();
     check(p[0] === "mobile" && p[1] === "copilot" && p[2] === "foundation", "the address opens Mobile's Copilot, Foundation section", JSON.stringify(p));
-    const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s));
-    const ci = tabs.indexOf("copilot");
-    check(ci >= 0 && ci === tabs.length - 1, "the Copilot tab is the last tab, after Reporting and Insights (Islam, 2026-10-01)", tabs.join("|"));
+    const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s + ":" + (b.dataset.copTo || "") + ":" + b.textContent.trim()));
+    const tg = await page.evaluate(() => { const row = document.getElementById("subtabs").getBoundingClientRect(), bl = document.querySelector('#subtabs [data-cop-to="build"]'), ins = Array.from(document.querySelectorAll("#subtabs button[data-s]")).filter((b) => !b.dataset.copTo).pop();
+      return bl && ins ? { gap: Math.round(bl.getBoundingClientRect().left - ins.getBoundingClientRect().right), rightGap: Math.round(row.right - document.querySelector("#subtabs .coptabs").getBoundingClientRect().right) } : null; });
+    check(tabs.length >= 2 && /^copilot:build:✦ Builder$/.test(tabs[tabs.length - 2]) && /^copilot:advisory:Advisory$/.test(tabs[tabs.length - 1]) && !!tg && tg.gap > 80 && tg.rightGap < 40,
+      "§782 ✦ Builder and Advisory are the last two tabs, set apart at the far right of the row (Islam)", JSON.stringify({ tabs, tg }));
     /* §752 — ONE WINDOW: no row of area tabs; the method is the Copilot's own strip */
     const secs = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-strip] b")).map((b) => b.textContent.trim()));
     const row = await page.evaluate(() => Array.from(document.querySelectorAll("[data-sub2]")).filter((b) => b.offsetParent).map((b) => b.textContent.trim()));
-    check(["Foundation", "SWOT", "Pillars/Directions", "Tactical Plans", "Advisory"].every((w) => secs.includes(w)) && !row.some((w) => /Foundation|Tactical Plans|Advisory/.test(w)),
-      "§752 …with its areas as a strip in one window, no row of area tabs", JSON.stringify({ secs, row }));
+    check(["Foundation", "SWOT", "Pillars/Directions", "Tactical Plans"].every((w) => secs.includes(w)) && !secs.includes("Advisory") && !row.some((w) => /Foundation|Tactical Plans|Advisory/.test(w)),
+      "§752 …with its areas as a strip in one window, no row of area tabs (§782: Advisory is a tab of its own, not a step)", JSON.stringify({ secs, row }));
     const rails = await page.evaluate(() => Array.from(document.querySelectorAll(".coprail")).map((r) => ({ t: r.getBoundingClientRect().top, h: r.querySelector("h3,.coprh,header") ? r.textContent.slice(0, 40) : r.textContent.slice(0, 40) })));
     check(rails.length === 2 && rails[0].t < rails[1].t && /Chats/i.test(rails[0].h) && /Deliverables/i.test(rails[1].h),
       "two rails, Chats above Deliverables", JSON.stringify(rails));
@@ -2441,9 +2443,11 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(300);
     const v = await page.evaluate(() => ({ sw: !!document.querySelector(".copsw-grid, [data-cop-sw-start]"),
-      tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || ""), start: !!document.querySelector("[data-cop-startscreen]") }));
+      tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || ""), title: ((document.querySelector(".copitem[aria-current] .copt") || {}).textContent || ""), start: !!document.querySelector("[data-cop-startscreen]") }));
     await shot("1-open");
-    check(!v.sw && !v.start && /Free chat/.test(v.tag), "§639 typing there and pressing Enter opens a free chat, a plain conversation the rail calls Free chat", JSON.stringify(v));
+    const fr1 = (await asTenant(tenantId, (c) => c.query("select extra, title from copilot_chats order by created_at desc limit 1"))).rows[0];
+    check(!v.sw && !v.start && !!fr1 && fr1.extra && fr1.extra.free === true && /^Mobile — Which weakness hurts us most$/.test(fr1.title) && !/Free chat/.test(v.tag + v.title),
+      "§639 typing there and pressing Enter opens a free chat, a plain conversation — §782: named from its first words, never called Free chat", JSON.stringify({ v, title: fr1 && fr1.title }));
     const row = (await asTenant(tenantId, (c) => c.query("select c.section, c.extra, (select string_agg(m.body, '|' order by m.id) from copilot_messages m where m.chat_id = c.id and m.who = 'person') said from copilot_chats c order by c.created_at desc limit 1"))).rows[0];
     check(row && row.section === "analysis" && row.extra && row.extra.free === true && row.said === "Which weakness hurts us most?",
       "…kept in its area, marked free, with what was typed as its first message, said once", JSON.stringify(row));
@@ -2479,7 +2483,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     const att = await page.evaluate(() => ({ chip: ((document.querySelector(".coppend") || {}).textContent || ""), kept: (document.querySelector("[data-cop-text]") || {}).value || "",
       tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || "") }));
     const frow = (await asTenant(tenantId, (c) => c.query("select c.extra, (select count(*)::int from copilot_files f where f.chat_id = c.id) files from copilot_chats c order by c.created_at desc limit 1"))).rows[0];
-    check(/notes\.docx/.test(att.chip) && att.kept === "Here are my notes" && /Free chat/.test(att.tag) && frow && frow.extra && frow.extra.free === true && frow.files === 1,
+    check(/notes\.docx/.test(att.chip) && att.kept === "Here are my notes" && frow && frow.extra && frow.extra.free === true && frow.files === 1,
       "§640 notes attached on the start screen open a free chat with the file waiting above its box and the typed words kept", JSON.stringify({ att, frow }));
     const sent = MODEL_SEEN.slice(n0).find(Boolean);
     const sys = sent ? JSON.stringify(sent.systemInstruction || sent.system || "") : "";
@@ -3121,7 +3125,7 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     await page.waitForFunction(() => /parts on/.test((document.querySelector("[data-cop-planline]") || {}).textContent || "") && document.querySelectorAll("[data-cop-strip]").length >= 5, null, { timeout: 15000 }).catch(() => {});
     let m = await read();
     await shot("1-tab");
-    check(m.toggle === 0 && m.sug === 0 && /\d of 5 parts on Mobile’s plan/.test(m.line) && !/Refine/.test(await page.evaluate(() => (document.querySelector("[data-cop-modebar]") || {}).textContent || "")),
+    check(m.toggle === 0 && m.sug === 0 && /\d of 5 on Mobile’s plan/.test(m.line) && !/Refine/.test(await page.evaluate(() => (document.querySelector("[data-cop-modebar]") || {}).textContent || "")),
       "§779 the Copilot tab is Build only: no Build · Refine toggle, no suggestions; one line says how many of the five parts are on the plan", JSON.stringify(m));
     check(m.items ? /On the plan · \d+ Directions?/.test(m.dirs) : /Not started/.test(m.dirs), "§779 the strip reads the plan itself: Pillars/Directions says what the plan holds", JSON.stringify(m));
     /* §779 — the Copilot's tables are empty here, so what the strip says is on the plan was read off the plan itself (typed on the platform) */
@@ -3138,7 +3142,7 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     const det = await page.evaluate(() => { const d = document.querySelector("[data-cop-details]"), mn = document.querySelector("[data-cop-main]"), r = document.querySelector("[data-cop-rails]");
       return { inDet: d ? d.querySelectorAll("[data-cop-deliv]").length : 0, inRail: r ? r.querySelectorAll("[data-cop-deliv], [data-cop-delivs]").length : -1, right: d && mn ? d.getBoundingClientRect().left >= mn.getBoundingClientRect().right - 1 : false, vis: d ? d.getBoundingClientRect().width > 100 : false }; });
     await shot("2-all-on");
-    check(/5 of 5 parts on Mobile’s plan/.test(m.line) && m.done, "§779 with every part on the plan, the start screen says so once", JSON.stringify(m));
+    check(/5 of 5 on Mobile’s plan/.test(m.line) && m.done, "§779 with every part on the plan, the start screen says so once", JSON.stringify(m));
     check(det.inDet >= 5 && det.inRail === 0 && det.right && det.vis, "§779 the deliverables are Details on the right of the chat box; the rail on the left holds the chats only", JSON.stringify(det));
     /* on a smaller window Details stay on the right, narrower — never under the chat (Islam) */
     const vp = page.viewportSize();
@@ -3163,6 +3167,33 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     const prow = (await asTenant(tenantId, (c) => c.query("select f.kind, f.name from copilot_files f order by f.at desc limit 1"))).rows[0];
     await shot("2b-pasted");
     check(pp.thumb && /^Pasted picture \d{4}-\d\d-\d\d/.test(pp.name) && /Picture/.test(pp.kind) && !!prow && prow.kind === "png", "§780 a screenshot pasted in the start box opens a chat with it waiting above the box, a thumbnail named for when it was pasted", JSON.stringify({ pp, prow }));
+    /* §782 — the chat's header is one line: its name, ⓘ, A− A+; a light line under it from one edge of the box to the other */
+    const hd = await page.evaluate(() => { const h = document.querySelector(".copheadone"), m = document.querySelector("[data-cop-main]"); if (!h || !m) return null;
+      const a = h.getBoundingClientRect(), b = m.getBoundingClientRect(), cs = getComputedStyle(h), t = h.querySelector(".coph"), z = h.querySelector(".copsize");
+      return { left: Math.round(a.left - b.left), right: Math.round(b.right - a.right), line: cs.borderBottomStyle === "solid" && parseFloat(cs.borderBottomWidth) >= 1, h: Math.round(a.height),
+        oneRow: !!(t && z) && Math.abs(t.getBoundingClientRect().top + t.getBoundingClientRect().height / 2 - (z.getBoundingClientRect().top + z.getBoundingClientRect().height / 2)) < 6,
+        ctxShown: !!Array.from(document.querySelectorAll(".copctx")).find((x) => x.offsetParent), info: !!h.querySelector("[data-cop-ctx]") }; });
+    check(!!hd && hd.left <= 2 && hd.right <= 2 && hd.line && hd.oneRow && hd.h <= 56 && !hd.ctxShown && hd.info,
+      "§782 the chat's header is one line — name, ⓘ, A− A+ — with a light line under it from one edge of the box to the other; what the Copilot can see is behind ⓘ", JSON.stringify(hd));
+    await page.click(".copheadone [data-cop-ctx]");
+    const tipT = await page.evaluate(() => { const t = document.querySelector(".copheadone [data-cop-ctxtip]"); return t && !t.hidden ? t.textContent : ""; });
+    check(/Mobile/.test(tipT) && /Pillar/i.test(tipT), "§782 …and ⓘ shows it when pressed", tipT);
+    /* §782 — the steps are one thin stepper line, the count at its end */
+    const sl = await page.evaluate(() => { const r = document.querySelector(".copsteps"); if (!r) return null; const st = Array.from(r.querySelectorAll("[data-cop-strip]"));
+      return { h: Math.round(r.getBoundingClientRect().height), n: st.length, adv: st.some((b) => b.getAttribute("data-cop-strip") === "advisory"), lines: r.querySelectorAll(".copstln").length, say: (r.querySelector("[data-cop-planline]") || {}).textContent || "", tops: new Set(st.map((b) => Math.round(b.getBoundingClientRect().top))).size }; });
+    check(!!sl && sl.h <= 44 && sl.n === 5 && !sl.adv && sl.lines === 4 && sl.tops === 1 && /\d of 5 on Mobile’s plan/.test(sl.say),
+      "§782 the steps are one thin stepper line — five numbered steps joined by a line, no Advisory among them, the plan's count at the end", JSON.stringify(sl));
+    /* §782 — Advisory is a tab of its own beside Builder */
+    await page.click('#subtabs [data-cop-to="advisory"]');
+    await page.waitForFunction(() => CURSEC.copilot === "advisory", null, { timeout: 8000 }).catch(() => {});
+    const av = await page.evaluate(() => ({ sec: CURSEC.copilot, sel: (document.querySelector('#subtabs [aria-selected="true"]') || {}).textContent || "", steps: document.querySelectorAll(".copsteps").length,
+      h: (document.querySelector(".copstarth") || {}).textContent || "", rail: Array.from(document.querySelectorAll("[data-cop-chats] [data-cop-chat]")).map((b) => b.getAttribute("data-cop-chat-sec")) }));
+    check(av.sec === "advisory" && /Advisory/.test(av.sel) && av.steps === 0 && /What decision are you weighing for Mobile\?/.test(av.h) && av.rail.every((x) => x === "advisory"),
+      "§782 Advisory is its own tab: no steps, its own question, its own chats only", JSON.stringify(av));
+    await page.click('#subtabs [data-cop-to="build"]');
+    await page.waitForFunction(() => CURSEC.copilot !== "advisory", null, { timeout: 8000 }).catch(() => {});
+    const bk = await page.evaluate(() => ({ sec: CURSEC.copilot, steps: document.querySelectorAll(".copsteps").length, rail: Array.from(document.querySelectorAll("[data-cop-chats] [data-cop-chat]")).map((b) => b.getAttribute("data-cop-chat-sec")) }));
+    check(bk.sec !== "advisory" && bk.steps === 1 && !bk.rail.includes("advisory"), "§782 …and ✦ Builder brings the steps back, its rail without Advisory's chats", JSON.stringify(bk));
     await asTenant(tenantId, (c) => c.query("delete from copilot_deliverables"));
     /* B — ✦ Copilot on a part the plan does not hold: build it in the Copilot */
     await open("/raya-trade/strategy/mobile/strategy/swot");

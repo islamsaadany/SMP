@@ -619,6 +619,12 @@ try {
     check("§780 ...and goes to the model as itself, an image on the question, named in the corpus as a picture to read",
       sP.st === 200 && !!ltP && ltP.parts.some((p) => p.inlineData && p.inlineData.mimeType === "image/png" && Buffer.from(p.inlineData.data, "base64").equals(PNG)) && /Pasted picture 2026-11-17 10\.00\.00\.png === \(a picture/.test(sysP) && /blurred, cut off or unreadable/.test(sysP),
       JSON.stringify(ltP && ltP.parts.map((p) => p.inlineData ? p.inlineData.mimeType : "text")));
+    /* §782 — a free chat is named from its first words */
+    const fc = (await call("POST", "api", { act: "newChat", place: "mobile", section: "compete", free: true, title: "Free chat — Mobile" }, NORAN)).j.chat;
+    const fs1 = await call("POST", "api", { act: "say", id: fc.id, text: "Can you sharpen our value proposition for vendors, please?", context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const fs2 = await call("POST", "api", { act: "say", id: fc.id, text: "And the measures too", context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const fcRow = (await asTenant(A, (c) => c.query("select title from copilot_chats where id = $1", [fc.id]))).rows[0];
+    check("§782 a free chat is named from its first words, never \"Free chat\", and keeps that name", fs1.j.title === "Mobile — Sharpen our value proposition for vendors, please" && fcRow.title === fs1.j.title && fs2.j.title === fs1.j.title, JSON.stringify([fs1.j.title, fs2.j.title, fcRow.title]));
     const picFile = await call("GET", "file", null, NORAN, "?id=" + pic.j.file.id);
     check("§780 ...and comes back as a picture of its own type, to the office", picFile.st === 200, String(picFile.st));
     const me = s1.j && s1.j.messages[s1.j.messages.length - 2];

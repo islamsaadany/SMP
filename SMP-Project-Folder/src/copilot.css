@@ -1111,7 +1111,7 @@ body.copB-open #mainwrap { margin-right:560px; }
 .copopt.copgap { border-style:dashed; }
 .copachips { align-items:center; }
 
-/* §773 — the strip in the pane: over the chat box on the right, the rail
+/* §777 — the strip in the pane: over the chat box on the right, the rail
    (or its slim strip) running the full height beside both. An empty strip
    (Refine, the panel on the plan) takes no room. */
 .coppane { grid-template-rows:auto minmax(0, 1fr); row-gap:0; }

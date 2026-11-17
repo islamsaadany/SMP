@@ -71513,7 +71513,7 @@ Islam, of the three layouts (§753): *"the option on the plan shouldn't appear i
 
 **§772 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had taken §754–§771 meanwhile — merged in first, ours numbered §772 from the start, the shell version past main's (v7.81); on the merged tree both suites, and main's own §754 red in section 4 carried and fixed here (above) — then `b27f979b..328fae20`. No migrations; nobody signed out.
 
-## §773 — Build, not Builder; no "All chats" link; the strip over the chat box (2026-11-17)
+## §777 — Build, not Builder; no "All chats" link; the strip over the chat box (2026-11-17; §773 on the branch, renumbered at the merge: main took §773–§776)
 
 Islam, on the working mockup of §772: *"make the first button Build not Builder; remove the button all chats on this client; can you move the cards of the builder to be over the right chat box not over the left chat panel?"*
 

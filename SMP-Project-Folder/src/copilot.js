@@ -209,7 +209,7 @@ var COPILOT = (function(){
   function renderPane(){
     setTimeout(function(){ loadList(false); }, 0);
     var shut = railFolded();
-    /* §773 — the strip sits in the pane, over the chat box on the right, not across the rail (Islam: "move the cards of the builder to be over the right chat box") */
+    /* §777 — the strip sits in the pane, over the chat box on the right, not across the rail (Islam: "move the cards of the builder to be over the right chat box") */
     return (PANEL.rendering ? '' : '<div data-cop-modebar>' + layoutBar() + '</div>') +
       '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
@@ -2751,7 +2751,7 @@ var COPILOT = (function(){
     return s ? '<a class="copall" data-cop-all href="/' + E(s) + '/copilot">All chats on this client &rsaquo;</a>' : '';
   }
   function railsInner(){
-    /* §773 — the rail no longer carries "All chats on this client" (Islam: "remove the button") */
+    /* §777 — the rail no longer carries "All chats on this client" (Islam: "remove the button") */
     return '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
         chipsHtml() + '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
         '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +

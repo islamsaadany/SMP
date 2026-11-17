@@ -71672,3 +71672,9 @@ The full run: `checks/copilot.mjs` **378 passed, 0 failed**; `checks/shell.mjs` 
 
 **§780 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §779, so the merge is a fast-forward: no renumbering, no second record to join — `c111125e..8ddabc26`. **Migration 038** widens the Copilot's two file-kind fences; it is additive and idempotent, and runs with the deploy's migrations. Nobody signed out.
 
+## §781 — The working word at the left (2026-11-17)
+
+Islam: *"for the words appearing like thinking and fetching, make them aligned to the left, not the middle"*. The one word and three dots the Copilot shows while it works (§472) stood centred, as the product's own lines do. It now stands at the left of the conversation, where the answer will start — in every chat, the step-by-step ones included, since they share the one class. The product's other lines (a chat saved, a version on the plan) stay centred.
+
+**Checked**: `checks/shell.mjs` 3f — the working word's left edge is within 24px of the conversation's (**69 ok, 4 failed**, the known zoom four).
+

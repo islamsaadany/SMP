@@ -1179,3 +1179,7 @@ body.copB-wide #copPanel .copPgrip { display:none; }
   .coppane.copwithdet.copdetshut, :root[data-cop-page] .coppane.copwithdet.copdetshut { grid-template-columns:180px minmax(0, 1fr) 24px; }
   .coppane.copwithdet.copdetshut.copshut, :root[data-cop-page] .coppane.copwithdet.copdetshut.copshut { grid-template-columns:24px minmax(0, 1fr) 24px; }
 }
+
+/* §781 — the working word (Thinking, Fetching…) sits at the left, where the Copilot's answer will start, not in the middle (Islam) */
+.copmsg.product.copworking { align-self:flex-start; max-width:100%; }
+.copmsg.product.copworking .copbody { text-align:left; padding-left:0; }

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-17 — The working word at the left (§781).** "Thinking…", "Fetching…" stand at the left of the conversation, where the answer will start, not centred.
+
 **2026-11-17 — Pictures in the Copilot; Details stay right and fold (§780).** Paste a screenshot (or drop or attach a PNG, JPEG or WebP) in any Copilot box, the step-by-step chats included; the AI reads the figures in it and cites it, and says so when a figure can't be read. Migration 038. The deliverables stay on the right on a smaller window and fold to a strip like the chats rail.
 
 **2026-11-17 — Build only; Details on the right; the plan panel sends empty parts to Build (§779).** The Copilot tab is Build only and reads the plan itself (a plan made on the platform counts); only the step in focus shows its cards, under "Or choose another way to start"; deliverables sit on the right below the to-do; ✦ Copilot on an empty part sends you to build it, on a built part it opens on the box to say what to change; the panel is resized from its left edge.

@@ -1033,7 +1033,10 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     await page.waitForSelector("[data-cop-msgs] .copworking", { timeout: 5000 }).catch(() => {});
     const w1 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] .copworking");
       window.__copW = el && el.querySelector("[data-cop-wword]");
-      return el ? { word: window.__copW ? window.__copW.textContent : "", dots: el.querySelectorAll(".copdots i").length, role: el.getAttribute("role"), all: el.textContent } : null; });
+      const ms = document.querySelector("[data-cop-msgs] .copzoom") || document.querySelector("[data-cop-msgs]");
+      return el ? { word: window.__copW ? window.__copW.textContent : "", dots: el.querySelectorAll(".copdots i").length, role: el.getAttribute("role"), all: el.textContent,
+        leftGap: window.__copW && ms ? Math.round(window.__copW.getBoundingClientRect().left - ms.getBoundingClientRect().left) : -1 } : null; });
+    check(w1 && w1.leftGap >= 0 && w1.leftGap <= 24, "§781 the working word stands at the left of the conversation, where the answer will start — not in the middle", JSON.stringify(w1 && w1.leftGap));
     await page.waitForTimeout(2900);
     const w2 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] [data-cop-wword]"); return { word: el ? el.textContent : "", same: el === window.__copW }; });
     const words = await page.evaluate(() => window.__copWork && window.__copWork.words);

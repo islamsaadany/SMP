@@ -43,7 +43,7 @@ import {
   failedLine,
 } from "../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, asParts } from "../lib/copilot-files.ts";
-import { isPasted, shapeAnswer, corpusOf, askCopilot, planOf } from "../lib/copilot-ask.ts";
+import { isPasted, shapeAnswer, corpusOf, askCopilot, planOf, SCHEMA as ASK_SCHEMA, PLAN_SCHEMAS, optionalCount } from "../lib/copilot-ask.ts";
 import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
@@ -161,6 +161,10 @@ const ps = planOf("analysis", { swot: { s: [{ title: "Reach", description: "300 
 const pf = planOf("foundation", { foundation: [{ key: "asp", text: "First choice\nfor vendors" }, { key: "asp", text: "again" }, { key: "nope", text: "x" }] });
 check("§784 a SWOT keeps its four boxes; a Foundation its known parts, once each, its lines kept",
   !!ps && ps.swot.s.length === 1 && ps.swot.t.length === 0 && !!pf && pf.foundation.length === 1 && pf.foundation[0].text === "First choice\nfor vendors", JSON.stringify([ps, pf]));
+/* §786 — Claude's structured output refuses a schema with too many optional fields; §784's `plan` in the answer took it to 49 and every free chat failed */
+check("§786 the answer's schema stays small — no plan shape in it — and each part's plan shape leaves nothing optional",
+  optionalCount(ASK_SCHEMA) <= 16 && !("plan" in ASK_SCHEMA.properties) && Object.keys(PLAN_SCHEMAS).length === 5 && Object.values(PLAN_SCHEMAS).every((x) => optionalCount(x) === 0),
+  JSON.stringify({ main: optionalCount(ASK_SCHEMA), plans: Object.fromEntries(Object.entries(PLAN_SCHEMAS).map(([k, v]) => [k, optionalCount(v)])) }));
 /* §785 — Pillars/Directions and Tactical Plans */
 const pd = planOf("directions", { directions: [{ title: "Grow Tier 2", urgency: 4, importance: 3, ease: 9 }, { title: "grow tier 2", urgency: 1 }, { title: "Digital ops", urgency: 2, importance: 2, ease: 2, why: "SWOT" }] });
 check("§785 Pillars/Directions keep their scores 1–4 — one out of range left unscored, never moved — and a name once",
@@ -646,11 +650,18 @@ try {
     const fcRow = (await asTenant(A, (c) => c.query("select title from copilot_chats where id = $1", [fc.id]))).rows[0];
     check("§782 a free chat is named from its first words, never \"Free chat\", and keeps that name", fs1.j.title === "Mobile — Sharpen our value proposition for vendors, please" && fcRow.title === fs1.j.title && fs2.j.title === fs1.j.title, JSON.stringify([fs1.j.title, fs2.j.title, fcRow.title]));
     /* §784 — a free chat's draft in the plan's shape is saved as that part, for the plan */
-    NEXT = { answer: { reply: "Here it is, laid out as your plan shows it.", draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ text: "Vendor Growth Partner" }] }] }, plan: PL } };
+    /* §786 — the answer comes as it always did; a second, small ask lays its draft out in the part's shape */
+    const nPl = seen.length;
+    NEXT = [{ answer: { reply: "Here it is.", draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ text: "Vendor Growth Partner" }] }] } } }, { answer: { plan: PL } }];
     const fcp = await call("POST", "api", { act: "say", id: fc.id, text: "Lay it out as the plan", context: "Mobile", placeWord: "Mobile" }, NORAN);
-    const wPl = seen[seen.length - 1], sysPl = wPl && wPl.body && wPl.body.systemInstruction ? wPl.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    const w1Pl = seen[nPl], w2Pl = seen[nPl + 1];
+    const sysP1 = w1Pl && w1Pl.body && w1Pl.body.systemInstruction ? w1Pl.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    const sysP2 = w2Pl && w2Pl.body && w2Pl.body.systemInstruction ? w2Pl.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    const schP1 = JSON.stringify(w1Pl && w1Pl.body && w1Pl.body.generationConfig || {}), schP2 = JSON.stringify(w2Pl && w2Pl.body && w2Pl.body.generationConfig || {});
     const amsg = fcp.j.messages[fcp.j.messages.length - 1];
-    check("§784 a free chat in Competitive Discipline is told the plan's shape, and its draft keeps it", /THE PLAN'S SHAPE/.test(sysPl) && /plan\.discipline/.test(sysPl) && amsg.part.plan && amsg.part.plan.section === "compete", sysPl.slice(-400));
+    check("§786 a free chat's draft in Competitive Discipline is asked as before, then laid out in the plan's shape by a second, small ask — and the draft keeps it",
+      seen.length === nPl + 2 && !/\"plan\"/.test(schP1) && /\"plan\"/.test(schP2) && !/THE PLAN'S SHAPE/.test(sysP1) && /THE PLAN'S SHAPE/.test(sysP2) && /discipline/.test(sysP2) &&
+      JSON.stringify(w2Pl.body.contents).includes("Vendor Growth Partner") && amsg.part.plan && amsg.part.plan.section === "compete", JSON.stringify({ calls: seen.length - nPl, sysP2: sysP2.slice(0, 200) }));
     const sdp = await call("POST", "api", { act: "saveDraft", id: fc.id, messageId: amsg.id }, NORAN);
     const drow = (await asTenant(A, (c) => c.query("select d.type, d.kind, v.body from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.id = $1", [sdp.j.saved.deliverableId]))).rows[0];
     check("§784 ...saved, it is a Competitive Discipline the plan can take: the step-by-step chat's own body, no longer copilot-only text",

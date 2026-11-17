@@ -71733,3 +71733,11 @@ The full run on §785 and §785.1: `checks/copilot.mjs` **387 passed, 0 failed**
 
 **§785 AND §785.1 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"* — held until the full run above came back with the known ten only. `main` had not moved since §784, so the merge is a fast-forward — `24c1004c..e1720bd1`. No migrations; nobody signed out.
 
+## §786 — The plan's shape is asked for on its own; free chats answer on Claude again (2026-11-17)
+
+Islam, with a screenshot of a free chat: *"The Copilot could not answer just now (the assistant refused the request (400: Schemas contains too many optional parameters (49), which would make grammar compilation inefficient…"*. **My fault, from §784**: the `plan` field put every part's shape into the free chat's answer schema; on Claude, whose structured output caps the optional fields a schema may carry, that schema carried 49 and was refused — so on main every free chat failed, not only the one asking for a layout. The checks' stand-in model accepts any schema, which is why nothing went red; a check now counts.
+
+- **The answer's schema is as it was before §784** (14 optional fields), with no plan shape in it.
+- **A second, small ask lays the draft out.** When a free chat in Foundation, SWOT, Competitive Discipline, Pillars/Directions or Tactical Plans answers with a draft, the Copilot asks once more, with that part's shape alone as the schema — every field required, an unknown score 0 and an unknown evidence "" — and the draft's own words as the question (`askPlanShape`). The shape comes back cut by the same `planOf`; if the second ask fails, the draft stands and offers *Lay it out for the plan*, as an older draft does. This also makes the layout the product's, not left to the model choosing to add it (what Islam was offered before the screenshot came).
+- **Checked**: `checks/copilot.mjs` **388 passed, 0 failed** — the answer's schema has at most 16 optional fields and no plan in it, each part's shape none; a free chat's draft in Competitive Discipline asked as before, then laid out by a second ask told the shape alone, the draft keeping it. `checks/shell.mjs` 3q **12 ok, 0 failed**, 3j2 **12 ok, 0 failed**, 3f the known four.
+

@@ -11,7 +11,7 @@
    empty bubble (§124). */
 import { createRequire } from "node:module";
 import { SECTIONS, type Section } from "./copilot.ts";
-import { guidanceFor } from "./copilot-guidance.ts";
+import { guidanceFor, planShapeWords } from "./copilot-guidance.ts";
 import { asParts, isImage } from "./copilot-files.ts";
 
 const need = createRequire(import.meta.url);
@@ -70,21 +70,6 @@ export const SCHEMA = {
         },
       },
     },
-    /* §784 — the draft in the plan's own shape, for the parts the plan draws that way */
-    plan: {
-      type: "OBJECT",
-      properties: {
-        discipline: { type: "STRING", enum: ["btc", "bts", "bp"] },
-        values: { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, how: { type: "ARRAY", items: { type: "STRING" } }, measure: { type: "ARRAY", items: { type: "STRING" } }, evidence: { type: "STRING" } }, required: ["title"] } },
-        swot: { type: "OBJECT", properties: Object.fromEntries(["s", "w", "o", "t"].map((L) => [L, { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, description: { type: "STRING" }, evidence: { type: "STRING" } }, required: ["title"] } }])) },
-        foundation: { type: "ARRAY", items: { type: "OBJECT", properties: { key: { type: "STRING", enum: ["who", "asp", "eim", "pur", "obj", "val"] }, text: { type: "STRING" } }, required: ["key", "text"] } },
-        directions: { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, urgency: { type: "INTEGER" }, importance: { type: "INTEGER" }, ease: { type: "INTEGER" }, why: { type: "STRING" } }, required: ["title"] } },
-        period: { type: "OBJECT", properties: { year: { type: "INTEGER" }, fromQuarter: { type: "INTEGER" }, toQuarter: { type: "INTEGER" } } },
-        items: { type: "ARRAY", items: { type: "OBJECT", properties: { direction: { type: "STRING" },
-          measures: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, target: { type: "STRING" } }, required: ["name"] } },
-          tactics: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, owner: { type: "STRING" }, quarters: { type: "ARRAY", items: { type: "INTEGER" } } }, required: ["name"] } } }, required: ["direction"] } },
-      },
-    },
     pastedBelongsTo: { type: "STRING", enum: [...SECTIONS] },
     following: { type: "STRING" },
   },
@@ -103,6 +88,32 @@ export type Answer = {
   /* §784 — the draft in the plan's own shape (Foundation, SWOT, Competitive Discipline), when it gave one */
   plan?: PlanShape | null;
 };
+/* §786 — THE PLAN'S SHAPE IS ASKED FOR ON ITS OWN. §784 put `plan` into the
+   answer's schema; with every part's shape in it the schema carried 49
+   optional fields, and Claude's structured output refuses a schema with that
+   many ("too many optional parameters") — every free chat failed. So the main
+   answer is as it was, and when a free chat in one of the five parts drafts,
+   a second, small ask lays the draft out in that part's shape alone, every
+   field required (an unknown score is 0, an unknown evidence ""). */
+const O = (props: Record<string, unknown>) => ({ type: "OBJECT", properties: props, required: Object.keys(props) });
+const ARR = (items: unknown) => ({ type: "ARRAY", items });
+const STR = { type: "STRING" }, INT = { type: "INTEGER" };
+const LINE = O({ title: STR, description: STR, evidence: STR });
+export const PLAN_SCHEMAS: Record<string, unknown> = {
+  compete: O({ discipline: { type: "STRING", enum: ["btc", "bts", "bp"] }, values: ARR(O({ title: STR, how: ARR(STR), measure: ARR(STR), evidence: STR })) }),
+  analysis: O({ swot: O({ s: ARR(LINE), w: ARR(LINE), o: ARR(LINE), t: ARR(LINE) }) }),
+  foundation: O({ foundation: ARR(O({ key: { type: "STRING", enum: ["who", "asp", "eim", "pur", "obj", "val"] }, text: STR })) }),
+  directions: O({ directions: ARR(O({ title: STR, urgency: INT, importance: INT, ease: INT, why: STR })) }),
+  execution: O({ period: O({ year: INT, fromQuarter: INT, toQuarter: INT }), items: ARR(O({ direction: STR, measures: ARR(O({ name: STR, target: STR })), tactics: ARR(O({ name: STR, owner: STR, quarters: ARR(INT) })) })) }),
+};
+/* how many fields a schema leaves optional, everywhere in it — the number Claude's structured output caps */
+export function optionalCount(sc: any): number {
+  if (!sc || typeof sc !== "object") return 0;
+  let n = 0;
+  if (sc.properties) { const req = new Set(sc.required || []); for (const k of Object.keys(sc.properties)) { if (!req.has(k)) n++; n += optionalCount(sc.properties[k]); } }
+  if (sc.items) n += optionalCount(sc.items);
+  return n;
+}
 export type PlanShape =
   | { section: "compete"; compete: { discipline: "btc" | "bts" | "bp"; values: { title: string; how: string[]; measure: string[]; evidence?: string }[] } }
   | { section: "analysis"; swot: Record<"s" | "w" | "o" | "t", { title: string; description: string; evidence?: string }[]> }
@@ -245,6 +256,19 @@ export function corpusOf(a: AskInput): string {
   return out.join("\n");
 }
 
+export async function askPlanShape(a: AskInput, draft: NonNullable<Answer["draft"]>): Promise<PlanShape | null> {
+  const sch = PLAN_SCHEMAS[a.section]; if (!sch || !A.configured()) return null;
+  const draftWords = [draft.title].concat(draft.groups.map((g) => g.title + ":\n" + g.items.map((it) => "- " + (it.title ? it.title + ": " : "") + it.text + (it.evidence ? " (evidence: " + it.evidence + ")" : "") + (it.score ? " [score " + it.score + "]" : "")).join("\n"))).join("\n\n");
+  const call = (model?: string) => A.askJson({
+    question: "Lay this draft out in the plan's shape. Use only what it says; leave a field empty (\"\" or 0) where it says nothing, never invent a measure or a figure.\n\nTHE DRAFT:\n" + draftWords,
+    history: [], maxTurns: 0, schema: { type: "OBJECT", properties: { plan: sch }, required: ["plan"] }, needsCorpus: false,
+    instruction: "You lay a strategy draft out in the shape the plan holds it. " + planShapeWords(a.section),
+    corpusName: "THIS CHAT'S MATERIAL", corpusText: corpusOf(a), parts: [], think: false, maxOutput: 4096, timeoutMs: 45_000, ...(model ? { model } : {}),
+  });
+  const r = await withRetry(call);
+  if (!r.ok) { console.error("copilot: plan shape:", r.why); return null; }
+  return planOf(a.section, (r.json || {}).plan);
+}
 export type AskResult = { ok: true; reply: string; part: Answer } | { ok: false; why: string; noKey?: boolean };
 
 /* The one call. A PDF rides as a document on the question; everything else
@@ -291,6 +315,10 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
   if (!r.ok) return { ok: false, why: r.why || "no answer" };
   const shaped = shapeAnswer(r.json, a.files.map((f) => f.name), a.free != null ? a.section : "");
   if (!shaped) return { ok: false, why: "the answer had nothing in it" };
+  /* §786 — a free chat's draft in one of the five parts is laid out in the plan's shape by a second, small ask; failing that, the draft stands and offers to be laid out */
+  if (a.free != null && shaped.part.draft && !shaped.part.plan && PLAN_SCHEMAS[a.section] && process.env.SMP_BREAK !== "no-plan-shape") {
+    const plan = await askPlanShape(a, shaped.part.draft); if (plan) shaped.part.plan = plan;
+  }
   return { ok: true, reply: shaped.reply, part: shaped.part };
 }
 

@@ -706,7 +706,8 @@
 /* v7.95-details-toggle — §783: the deliverables column's hide button in its own header. */
 /* v7.96-put-on-plan — §784: a chat's work laid out as the plan, and put on it. */
 /* v7.97-all-parts — §785: every part laid out as the plan and put on it; rename from the header; an older draft laid out for the plan. */
-const SHELL = "smp-shell-v7.97-all-parts";
+/* v7.98-plan-shape-ask — §786: the plan's shape asked on its own; free chats answer on Claude again. */
+const SHELL = "smp-shell-v7.98-plan-shape-ask";
 const ASSETS = [
   "/",
   "/index.html",

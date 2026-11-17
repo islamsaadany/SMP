@@ -1231,8 +1231,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
        client). Pressed and read, never only found (§96). */
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     const all = await page.evaluate(() => { const a = document.querySelector("a[data-cop-all]"); return a ? { href: a.getAttribute("href"), text: a.textContent.trim() } : null; });
-    check(!!all && all.href === "/raya-trade/copilot" && /All chats on this client/.test(all.text),
-      "the chats rail carries 'All chats on this client' to the client's Copilot page (§501)", JSON.stringify(all));
+    /* §773 — the link came off the rail (Islam: "remove the button all chats on this client") */
+    check(!all, "§773 the chats rail no longer carries 'All chats on this client'", JSON.stringify(all));
     const mm = await page.evaluate(() => Array.from(document.querySelectorAll(".modsw a, [data-modules] a, .tbmod a")).map((a) => a.textContent.trim()));
     check(!mm.some((t) => /Copilot/.test(t)), "...and no module menu on the page offers the Copilot (§501)", JSON.stringify(mm));
     await page.goto(BASE + "/raya-trade/copilot/settings?section=analysis", { waitUntil: "networkidle" });
@@ -3055,6 +3055,10 @@ await section("3o · the Copilot in one window: the strip, one rail of every are
       "§752 one rail holds the chats of every area, each tagged with its area", JSON.stringify(w.rail));
     check(/Mobile’s strategy/.test(w.h) && /Foundation/.test(w.focus) && w.more.length >= 4 && !w.more.includes("foundation"),
       "§752 one start screen: the place's strategy, the area in focus named, the other areas folded under its cards", JSON.stringify({ h: w.h, focus: w.focus, more: w.more }));
+    /* §773 — the strip over the chat box on the right, clear of the rail */
+    const geo = await page.evaluate(() => { const s = document.querySelector("[data-cop-stripbar]"), m = document.querySelector("[data-cop-main]"), r = document.querySelector("[data-cop-rails]");
+      const a = s.getBoundingClientRect(), b = m.getBoundingClientRect(), c = r.getBoundingClientRect(); return { sl: Math.round(a.left), ml: Math.round(b.left), sr: Math.round(a.right), mr: Math.round(b.right), above: a.bottom <= b.top + 1, railRight: Math.round(c.right) }; });
+    check(Math.abs(geo.sl - geo.ml) <= 2 && Math.abs(geo.sr - geo.mr) <= 2 && geo.above && geo.sl > geo.railRight, "§773 the strip stands over the chat box on the right, its edges the box's, clear of the chats rail", JSON.stringify(geo));
     /* §772 — no chips: the strip narrows the rail, a line undoes it */
     check(w.chips.length === 0, "§772 no area chips in the rail — the strip above does that", JSON.stringify(w.chips));
     await page.click('[data-cop-strip="directions"]'); await page.waitForTimeout(400);
@@ -3100,8 +3104,8 @@ await section("3p · Builder until the five parts are on the plan, then Refine; 
     await page.waitForFunction(() => !!document.querySelector(".coplayout .copm") && /not on the plan|on the plan/.test(document.querySelector(".coplayout .copm").textContent), null, { timeout: 15000 }).catch(() => {});
     let m = await mode();
     await shot("builder");
-    check(m.on === "Builder" && m.bOnTab.join("|") === "Builder|Refine" && /5 of 5 parts not on the plan yet/.test(m.note) && m.strip >= 5 && !/Layout to compare/.test(await page.evaluate(() => document.body.textContent)),
-      "§772 a place with parts missing opens in Builder — a two-way toggle, Builder · Refine, saying how many of the five parts are not on the plan; no “layout to compare”, no B on the tab", JSON.stringify(m));
+    check(m.on === "Build" && m.bOnTab.join("|") === "Build|Refine" && /5 of 5 parts not on the plan yet/.test(m.note) && m.strip >= 5 && !/Layout to compare/.test(await page.evaluate(() => document.body.textContent)),
+      "§772 a place with parts missing opens in Build — a two-way toggle, Build · Refine (§773: Build, not Builder), saying how many of the five parts are not on the plan; no “layout to compare”, no B on the tab", JSON.stringify(m));
     /* Refine, by hand */
     await page.click('[data-cop-layout="chat"]');
     await page.waitForSelector("[data-cop-suggestions]", { timeout: 10000 });
@@ -3127,7 +3131,7 @@ await section("3p · Builder until the five parts are on the plan, then Refine; 
     await page.click('[data-cop-layout="auto"]');
     await page.waitForFunction(() => !!document.querySelector('[data-cop-layout="window"][aria-pressed="true"]'), null, { timeout: 10000 }).catch(() => {});
     m = await mode();
-    check(m.on === "Builder" && m.stored === null, "§772 …“open as the plan stands” clears the choice: Builder again, as Mobile's plan stands", JSON.stringify(m));
+    check(m.on === "Build" && m.stored === null, "§772 …“open as the plan stands” clears the choice: Build again, as Mobile's plan stands", JSON.stringify(m));
     /* every part on the plan: Refine, of itself */
     await asTenant(tenantId, (c) => c.query("insert into copilot_deliverables (place, section, type, kind, title, approach, created_by, extra) select 'mobile', s, s, 'promotable', s || ' — Mobile', '', 'office', jsonb_build_object('applied', jsonb_build_object('n', 1, 'at', now(), 'by', 'office')) from unnest(array['foundation','analysis','compete','directions','execution']) s"));
     await open("/raya-trade/strategy/mobile/copilot/foundation");
@@ -3140,7 +3144,7 @@ await section("3p · Builder until the five parts are on the plan, then Refine; 
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     await page.waitForFunction(() => !!document.querySelector('[data-cop-layout="window"][aria-pressed="true"]') && /1 of 5/.test((document.querySelector(".coplayout .copm") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
     m = await mode();
-    check(m.on === "Builder" && /1 of 5 parts not on the plan yet/.test(m.note), "§772 …and with one part gone (Tactical Plans) it opens in Builder again", JSON.stringify(m));
+    check(m.on === "Build" && /1 of 5 parts not on the plan yet/.test(m.note), "§772 …and with one part gone (Tactical Plans) it opens in Build again", JSON.stringify(m));
     /* B: ✦ Copilot on the plan, in Builder */
     await open("/raya-trade/strategy/mobile/strategy/swot");
     await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});

@@ -202,19 +202,21 @@ var COPILOT = (function(){
     if (inPanel()) return "";
     var L = layout(), chosen = modeChosen(), missing = modeParts().filter(function(k){ return !onPlan(k); });
     var b = function(k, w){ return '<button type="button" data-cop-layout="' + k + '" aria-pressed="' + (L === k) + '">' + w + '</button>'; };
-    return '<div class="coplayout"><span class="copmodeseg">' + b("window", "Builder") + b("chat", "Refine") + '</span>' +
+    return '<div class="coplayout"><span class="copmodeseg">' + b("window", "Build") + b("chat", "Refine") + '</span>' +
       (chosen ? '<span class="copm">Chosen by hand · <button type="button" class="linkbu" data-cop-layout="auto">open as the plan stands</button></span>'
         : '<span class="copm">' + (missing.length ? missing.length + ' of ' + modeParts().length + ' parts not on the plan yet' : 'Every part is on the plan') + '</span>') + '</div>';
   }
   function renderPane(){
     setTimeout(function(){ loadList(false); }, 0);
     var shut = railFolded();
-    return (PANEL.rendering ? '' : '<div data-cop-modebar>' + layoutBar() + '</div>') + '<div class="copstrip" data-cop-stripbar>' + stripHtml() + '</div>' +
+    /* §773 — the strip sits in the pane, over the chat box on the right, not across the rail (Islam: "move the cards of the builder to be over the right chat box") */
+    return (PANEL.rendering ? '' : '<div data-cop-modebar>' + layoutBar() + '</div>') +
       '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-home aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
       '<aside class="coprails" data-cop-rails>' + railsInner() +
       '</aside>' +
+      '<div class="copstrip" data-cop-stripbar>' + stripHtml() + '</div>' +
       '<div class="copmain" data-cop-main>' + mainHtml() + '</div>' +
     '</div>';
   }
@@ -2749,7 +2751,8 @@ var COPILOT = (function(){
     return s ? '<a class="copall" data-cop-all href="/' + E(s) + '/copilot">All chats on this client &rsaquo;</a>' : '';
   }
   function railsInner(){
-    return allChatsLink() + '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
+    /* §773 — the rail no longer carries "All chats on this client" (Islam: "remove the button") */
+    return '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
         chipsHtml() + '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
         '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
       '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh"><span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +

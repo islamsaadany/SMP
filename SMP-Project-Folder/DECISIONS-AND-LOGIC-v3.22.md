@@ -71689,3 +71689,5 @@ Islam, of a free chat: *"the word free chat I'm not sure if it's useful, and the
 
 **Checked**: `checks/copilot.mjs` — a free chat is named from its first words and keeps that name. `checks/shell.mjs` 3p — the header is one line, its line reaching both edges of the box, ⓘ showing what the Copilot sees; the steps one row of five joined by four lines, no Advisory, the count at the end; Advisory's tab with no steps, its own question and chats, and Builder bringing the steps back. 3f — ✦ Builder and Advisory are the last two tabs, set apart at the far right; the areas a strip without Advisory. 3o, 3n green.
 
+The full run: `checks/copilot.mjs` **379 passed, 0 failed**; `checks/shell.mjs` **608 ok, 11 failed** — the known ten, and 3j2's §640 "a file the Copilot cannot read… no chat is made", which counted one chat more than before (`{"chats":1,"say":""}`) in the full run only; 3j2 alone ran **12 ok, 0 failed** three times, the count now printed with it so a second sighting says what it counted from. `tsc`, `generated-in-step` and `release-stamp` clear.
+

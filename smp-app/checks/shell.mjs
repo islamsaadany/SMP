@@ -2476,7 +2476,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     await page.setInputFiles("[data-cop-startfile]", { name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("x") });
     await page.waitForTimeout(400);
     const refused = { chats: await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_chats")).then((r) => r.rows[0].n), say: await page.evaluate(() => (document.querySelector(".copsay") || {}).textContent || "") };
-    check(refused.chats === chats0 && /Word \(\.docx\), PDF and Excel/.test(refused.say), "§640 a file the Copilot cannot read is refused in words on the start screen, and no chat is made", JSON.stringify(refused));
+    check(refused.chats === chats0 && /Word \(\.docx\), PDF and Excel/.test(refused.say), "§640 a file the Copilot cannot read is refused in words on the start screen, and no chat is made", JSON.stringify({ chats0, ...refused }));
     await page.fill("[data-cop-starttext]", "Here are my notes");
     await page.setInputFiles("[data-cop-startfile]", { name: "notes.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", buffer: readFileSync(join(import.meta.dirname, "fixtures", "copilot-notes.docx")) });
     await page.waitForSelector(".coppend .copfile", { timeout: 10000 }).catch(() => {});

@@ -1462,11 +1462,21 @@ try {
        arrow keys walk the list. Every claim read back from Postgres (§96). */
     await pg.goto(base + "?view=check"); await settle(); await pg.evaluate("window.__stay = 1");
     if (process.env.SMP_SHOT3) await pg.screenshot({ path: process.env.SMP_SHOT3, fullPage: true });
-    const mIds = await pg.locator(".mlist .mi[data-id]").evaluateAll((els) => els.map((e) => e.getAttribute("data-id")));
+    /* THE MEETING'S ORDER IS THIS WEEK'S (§787): the rail holds last week's
+       and next week's tasks too, folded under their topic, but Save and next,
+       Skip and the arrows go from one task of this week to the next and never
+       into a fold (Islam: "the next week is a hidden list ... only manually
+       if someone open it"). Each rail item is read with its week, and the
+       neighbour expected is worked out the way the page must: the nearest
+       task of this week after (or before) the one open, in rail order. */
+    const rail = await pg.locator(".mlist .mi[data-id]").evaluateAll((els) => els.map((e) => ({ id: e.getAttribute("data-id"), now: e.classList.contains("now") })));
+    const mIds = rail.map((r) => r.id), nowIds = rail.filter((r) => r.now).map((r) => r.id);
+    const nowAfter = (id) => { const i = rail.findIndex((r) => r.id === id); return (rail.slice(i + 1).find((r) => r.now) || {}).id || null; };
+    const nowBefore = (id) => { const i = rail.findIndex((r) => r.id === id); return (rail.slice(0, i < 0 ? rail.length : i).reverse().find((r) => r.now) || {}).id || null; };
     const firstOpen = (await pg.locator(".mopen").count()) ? await pg.locator(".mopen").getAttribute("data-id") : "";
-    check("the check opens as a meeting: the tasks down the left, the first one open on the right", mIds.length >= 3 && firstOpen === mIds[0] && mIds.indexOf(born.id) > 0 && mIds.indexOf(born.id) < mIds.length - 1, JSON.stringify({ mIds, firstOpen, born: born.id }));
+    check("the check opens as a meeting: the tasks down the left, the first one of this week open on the right", mIds.length >= 3 && nowIds.length >= 2 && firstOpen === nowIds[0] && nowIds.indexOf(born.id) > 0 && nowAfter(born.id) !== null, JSON.stringify({ mIds, nowIds, firstOpen, born: born.id }));
     /* the action this run made, which the person pressing may change (§42) */
-    const mTask = born.id, mAt = mIds.indexOf(mTask), mSt0 = (await asTenant(A, (c) => oneAction(c, mTask))).status, mDue0 = (await asTenant(A, (c) => oneAction(c, mTask))).due;
+    const mTask = born.id, mNext = nowAfter(mTask), mSt0 = (await asTenant(A, (c) => oneAction(c, mTask))).status, mDue0 = (await asTenant(A, (c) => oneAction(c, mTask))).due;
     let asked734 = 0; const c734 = (rq) => { if (["fetch", "xhr", "document"].includes(rq.resourceType())) asked734++; };
     pg.on("request", c734);
     await pg.locator('.mlist .mi[data-id="' + mTask + '"]').click(); await settle();
@@ -1482,9 +1492,9 @@ try {
     await pg.locator(".mopen .pnew").fill("Talked through at the check.");
     await pg.locator(".mopen [data-act=step][data-dir='1']").click(); await settle();
     const saidM = await asTenant(A, (c) => progressOf(c, mTask));
-    check("Save and next writes what was typed on that task and opens the next one",
-      saidM.some((e) => e.body === "Talked through at the check.") && (await pg.locator(".mopen").getAttribute("data-id")) === mIds[mAt + 1] && await stayed(),
-      JSON.stringify(saidM.map((e) => e.body)) + " now on " + (await pg.locator(".mopen").getAttribute("data-id")));
+    check("Save and next writes what was typed on that task and opens the next one OF THIS WEEK, past any fold (§787)",
+      saidM.some((e) => e.body === "Talked through at the check.") && (await pg.locator(".mopen").getAttribute("data-id")) === mNext && await stayed(),
+      JSON.stringify(saidM.map((e) => e.body)) + " now on " + (await pg.locator(".mopen").getAttribute("data-id")) + " expected " + mNext);
     check("...and counts the task left as gone through, ticked on the left",
       /^1 of \d+ gone through$/.test(await pg.locator(".walk .wn").innerText()) && (await pg.locator('.mlist .mi.rev[data-id="' + mTask + '"]').count()) === 1,
       await pg.locator(".walk .wn").innerText());
@@ -1493,10 +1503,14 @@ try {
     const mDue1 = (await asTenant(A, (c) => oneAction(c, mTask))).due;
     check("...and carried it to next week with the save, the Carry button gone (§732)",
       mDue1 === nextWeekDay(todayIn()) && mDue1 !== mDue0 && (await pg.locator(".mopen [data-act=carry]").count()) === 0, JSON.stringify({ mDue0, mDue1 }));
-    const order731 = await pg.locator(".mlist .mi[data-id]").evaluateAll((els) => els.map((e) => e.getAttribute("data-id")));
-    const at731 = order731.indexOf(await pg.locator(".mopen").getAttribute("data-id"));
+    /* the rail was drawn again by the carry: read it afresh, then the task
+       before the open one among THIS WEEK'S — the one just carried sits in
+       its fold now and is stepped over (§787) */
+    const rail731 = await pg.locator(".mlist .mi[data-id]").evaluateAll((els) => els.map((e) => ({ id: e.getAttribute("data-id"), now: e.classList.contains("now") })));
+    const on731 = await pg.locator(".mopen").getAttribute("data-id"), i731 = rail731.findIndex((r) => r.id === on731);
+    const before731 = (rail731.slice(0, i731 < 0 ? rail731.length : i731).reverse().find((r) => r.now) || {}).id || null;
     await pg.locator(".mopen .mph").click(); await pg.keyboard.press("ArrowUp"); await settle();
-    check("the arrow keys walk the list", at731 > 0 && (await pg.locator(".mopen").getAttribute("data-id")) === order731[at731 - 1] && await stayed(), JSON.stringify({ at731, order731 }));
+    check("the arrow keys walk this week's list, past the folds", before731 !== null && before731 !== mTask && (await pg.locator(".mopen").getAttribute("data-id")) === before731 && await stayed(), JSON.stringify({ on731, before731, rail731 }));
     /* §733: THIS WEEK'S NOTE STANDS WHERE THE EMPTY BOX WOULD — back on the
        task just written to, the note is in the box's place, the box shut
        behind "+ Add to this week", which opens it */

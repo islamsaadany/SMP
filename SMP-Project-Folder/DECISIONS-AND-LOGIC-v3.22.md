@@ -71745,3 +71745,11 @@ The full browser run on §786: `checks/shell.mjs` **621 ok, 10 failed**, the kno
 
 **§786 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §785, so the merge is a fast-forward. No migrations; nobody signed out.
 
+
+## §787 — Save and next goes through this week's tasks only; the folds are reached by hand (2026-11-17)
+
+Islam: *"when I press save and next it shows me the next week actions which is wrong the save and next should take me to the next this week action the next week is a hidden list as it is without tackling automatically only manually if someone open it"*. **My fault, from §732**: the rail lists each topic's tasks of this week, then last week's finished ones and next week's folded under it, and the stepper walked the rail top to bottom — so after a topic's last task of this week it stepped into the folds (opening one) before reaching the next topic.
+
+- **The meeting's order is this week's tasks alone.** Save and next, Skip, Ctrl+Enter and the arrow keys go from one task of this week to the next (or back) in rail order and never into a fold. Last week's and next week's tasks are reached only by hand: a press on the fold, then on the task; from a task inside a fold the step goes on to the next task of this week.
+- **"N of M gone through"** counts this week's tasks only, above and in each topic's own count (already this week's since §732).
+- **Checked**: `checks/tracker.mjs` — the meeting's claims now read each rail item with its week and expect the nearest task of this week after (Save and next) or before (ArrowUp) the one open, past any fold; `node --check` on the served script, and the stepping functions pressed on a stub rail in Chromium (a topic's last task of this week → the next topic's first, over its own folds and over a topic holding only next week's). The database-backed run could not be made here (no database in this session).

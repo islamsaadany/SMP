@@ -43,7 +43,7 @@ import {
   failedLine,
 } from "../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, asParts } from "../lib/copilot-files.ts";
-import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.ts";
+import { isPasted, shapeAnswer, corpusOf, askCopilot, planOf } from "../lib/copilot-ask.ts";
 import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
@@ -152,6 +152,17 @@ check("...and no option is ever marked recommended, whatever the model sends (§
 check("...a source naming a file nobody attached is read as assumed, never drawn as a file (§96.2)",
   sh && sh.part.draft.groups[0].items.map((x) => x.source).join("|") === "Q3 deck.pdf|assumed|platform", sh && JSON.stringify(sh.part.draft.groups[0].items));
 check("...and a section that is not a section is not an offer", sh && sh.part.pastedBelongsTo === null);
+/* §784 — the plan's shape, cut to the section it belongs to */
+const PL = { discipline: "bts", values: [{ title: "Vendor Growth Partner", how: ["Joint business planning"], measure: ["Tier 2 revenue growth ≥ 100% (today 60%)"], evidence: "MB02" }, { title: "  ", how: [] }] };
+const pc = planOf("compete", PL), pbad = planOf("compete", { discipline: "cheap", values: PL.values }), pdir = planOf("directions", PL);
+check("§784 a Competitive Discipline in the plan's shape is kept — its discipline one of the three, a value without a title dropped; another section's or an unknown discipline is not",
+  !!pc && pc.compete.discipline === "bts" && pc.compete.values.length === 1 && pc.compete.values[0].measure[0].includes("today 60%") && pbad === null && pdir === null, JSON.stringify(pc));
+const ps = planOf("analysis", { swot: { s: [{ title: "Reach", description: "300 stores" }], w: [], o: [], t: [{ title: "" }] } });
+const pf = planOf("foundation", { foundation: [{ key: "asp", text: "First choice\nfor vendors" }, { key: "asp", text: "again" }, { key: "nope", text: "x" }] });
+check("§784 a SWOT keeps its four boxes; a Foundation its known parts, once each, its lines kept",
+  !!ps && ps.swot.s.length === 1 && ps.swot.t.length === 0 && !!pf && pf.foundation.length === 1 && pf.foundation[0].text === "First choice\nfor vendors", JSON.stringify([ps, pf]));
+const shp = shapeAnswer({ reply: "Here.", draft: { title: "T", groups: [{ title: "G", items: [{ text: "x" }] }] }, plan: PL }, [], "compete"), shp0 = shapeAnswer({ reply: "Here.", plan: PL }, [], "compete");
+check("§784 the shape rides with a draft only", !!shp && !!shp.part.plan && shp.part.plan.section === "compete" && !!shp0 && !shp0.part.plan);
 check("an answer with nothing in it is a failure, not an empty bubble (§124)", shapeAnswer({ reply: "  ", options: [{ label: "x" }] }, []) === null);
 check("each section's guidance carries the house rules; the roads only where the record defines them",
   /WHERE THE WORK STARTS/.test(guidanceFor("analysis")) && /Never invent a figure/.test(guidanceFor("analysis")) && /Guided questions/.test(guidanceFor("analysis")) && /There is no template for this section/.test(guidanceFor("foundation")) &&
@@ -625,6 +636,18 @@ try {
     const fs2 = await call("POST", "api", { act: "say", id: fc.id, text: "And the measures too", context: "Mobile", placeWord: "Mobile" }, NORAN);
     const fcRow = (await asTenant(A, (c) => c.query("select title from copilot_chats where id = $1", [fc.id]))).rows[0];
     check("§782 a free chat is named from its first words, never \"Free chat\", and keeps that name", fs1.j.title === "Mobile — Sharpen our value proposition for vendors, please" && fcRow.title === fs1.j.title && fs2.j.title === fs1.j.title, JSON.stringify([fs1.j.title, fs2.j.title, fcRow.title]));
+    /* §784 — a free chat's draft in the plan's shape is saved as that part, for the plan */
+    NEXT = { answer: { reply: "Here it is, laid out as your plan shows it.", draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ text: "Vendor Growth Partner" }] }] }, plan: PL } };
+    const fcp = await call("POST", "api", { act: "say", id: fc.id, text: "Lay it out as the plan", context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const wPl = seen[seen.length - 1], sysPl = wPl && wPl.body && wPl.body.systemInstruction ? wPl.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    const amsg = fcp.j.messages[fcp.j.messages.length - 1];
+    check("§784 a free chat in Competitive Discipline is told the plan's shape, and its draft keeps it", /THE PLAN'S SHAPE/.test(sysPl) && /plan\.discipline/.test(sysPl) && amsg.part.plan && amsg.part.plan.section === "compete", sysPl.slice(-400));
+    const sdp = await call("POST", "api", { act: "saveDraft", id: fc.id, messageId: amsg.id }, NORAN);
+    const drow = (await asTenant(A, (c) => c.query("select d.type, d.kind, v.body from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.id = $1", [sdp.j.saved.deliverableId]))).rows[0];
+    check("§784 ...saved, it is a Competitive Discipline the plan can take: the step-by-step chat's own body, no longer copilot-only text",
+      sdp.st === 200 && drow.type === "compete" && drow.kind === "promotable" && drow.body.compete.discipline === "bts" && drow.body.compete.values[0].title === "Vendor Growth Partner" && /Vendor Growth Partner/.test(drow.body.text), JSON.stringify(drow).slice(0, 300));
+    const pap = await call("POST", "api", { act: "planApplied", id: sdp.j.saved.deliverableId, n: 1 }, NORAN);
+    check("§784 ...and its Apply is recorded as any Discipline's is", pap.st === 200 && pap.j.applied.n === 1, JSON.stringify(pap.j));
     const picFile = await call("GET", "file", null, NORAN, "?id=" + pic.j.file.id);
     check("§780 ...and comes back as a picture of its own type, to the office", picFile.st === 200, String(picFile.st));
     const me = s1.j && s1.j.messages[s1.j.messages.length - 2];

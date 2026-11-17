@@ -1221,3 +1221,20 @@ body.copB-wide #copPanel .copPgrip { display:none; }
 .tabs #subtabs .coptab.copadv { border-style:dashed; }
 .tabs #subtabs .coptab:hover { border-color:var(--gold); color:var(--ink); }
 .tabs #subtabs .coptab[aria-selected="true"] { background:var(--panel, var(--ink)); border-color:var(--panel, var(--ink)); border-style:solid; color:var(--panel-ink, var(--surface)); }
+
+/* §784 — Competitive Discipline drawn as the plan shows it: the discipline, then a card per value */
+.copdcomp { display:flex; flex-direction:column; gap:10px; }
+.copdlab { font:700 10.5px/1.4 var(--sans, inherit); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+.copdisc { border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:8px; padding:9px 12px; background:var(--surface); }
+.copdisc h4 { margin:2px 0 0; font-size:15px; }
+.copvals { display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:10px; }
+.copval { border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface); display:flex; flex-direction:column; gap:5px; font-size:var(--fs-small, 12.5px); }
+.copval h5 { margin:0; font-size:13.5px; text-transform:none; letter-spacing:0; color:var(--ink); font-weight:700; }
+.copval .copdul { margin:0; padding-left:16px; }
+.copval.copgap { border-color:var(--attn, #B45309); }
+.copgapw { margin:0; color:var(--attn-tx, #B45309); font-size:12px; }
+.copmrow { display:flex; justify-content:space-between; gap:8px; border-top:1px dashed var(--line); padding-top:3px; }
+.copmrow .copm { white-space:nowrap; }
+.copev { color:var(--ink-3); font-size:12px; }
+.copev summary { cursor:pointer; }
+.copdplan { padding:2px 0; }

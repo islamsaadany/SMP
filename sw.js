@@ -704,7 +704,8 @@
 /* v7.93-working-left — §781: the working word stands at the left of the conversation. */
 /* v7.94-builder-advisory — §782: one-line chat header; the stepper line; Builder and Advisory at the far right of the tabs. */
 /* v7.95-details-toggle — §783: the deliverables column's hide button in its own header. */
-const SHELL = "smp-shell-v7.95-details-toggle";
+/* v7.96-put-on-plan — §784: a chat's work laid out as the plan, and put on it. */
+const SHELL = "smp-shell-v7.96-put-on-plan";
 const ASSETS = [
   "/",
   "/index.html",

@@ -466,6 +466,15 @@ export function draftText(d: any): string {
   }
   return out.join("\n").trim();
 }
+const PART_NAME: Record<string, string> = { who: "Who We Are", asp: "Winning Aspiration", eim: "End in Mind", pur: "Purpose", obj: "Key Objectives", val: "Core Values" };
+export function typedFromPlan(plan: any): { type: string; body: Record<string, unknown> } | null {
+  if (!plan || typeof plan !== "object") return null;
+  if (plan.section === "compete" && plan.compete) return { type: "compete", body: { compete: plan.compete } };
+  if (plan.section === "analysis" && plan.swot) return { type: "swot", body: { swot: plan.swot } };
+  if (plan.section === "foundation" && Array.isArray(plan.foundation))
+    return { type: "foundation", body: { foundation: plan.foundation.map((x: any) => ({ key: x.key, name: PART_NAME[x.key] || x.key, text: x.text })), years: [null, null] } };
+  return null;
+}
 export type SavedDraft = { deliverableId: string; n: number; title: string; isNew: boolean };
 export async function saveDraftFrom(c: Q, chat: { id: string; place: string; section: Section; title: string }, messageId: string, by: string): Promise<SavedDraft | "notDraft" | "already"> {
   const m = await oneMessage(c, chat.id, messageId);
@@ -473,15 +482,21 @@ export async function saveDraftFrom(c: Q, chat: { id: string; place: string; sec
   if (!m || m.who !== "ai" || !p || p.kind !== "answer" || !p.draft || !Array.isArray(p.draft.groups) || !p.draft.groups.length) return "notDraft";
   if (p.saved && p.saved.deliverableId) return "already";
   const title = (oneLine(p.draft.title) || (SECTION_WORD[chat.section] + " draft")).slice(0, MAX_TITLE);
-  const body = { text: draftText(p.draft), draft: p.draft };
+  /* §784 — A DRAFT IN THE PLAN'S OWN SHAPE IS SAVED AS THAT PART: a Foundation,
+     a SWOT or a Competitive Discipline, the same body its step-by-step chat
+     saves, so the deliverable's page draws it as the plan does and its Apply
+     writes it (§654 B2). Any other draft stays in the Copilot, as before. */
+  const typed = typedFromPlan(p.plan);
+  const body: any = { text: draftText(p.draft), draft: p.draft, ...(typed ? typed.body : {}) };
   const note = "Saved from “" + chat.title + "”";
+  const type = typed ? typed.type : "free";
   const hit = await c.query(
-    "SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) ORDER BY created_at DESC LIMIT 1",
-    [chat.place, chat.section, title]);
+    "SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) AND type = $4 ORDER BY created_at DESC LIMIT 1",
+    [chat.place, chat.section, title, type]);
   let id: string, n: number, isNew: boolean;
   if (hit.rows[0]) { id = str(hit.rows[0].id); n = await addVersion(c, id, { body, note, by }); isNew = false; }
   else {
-    id = await newDeliverable(c, { place: chat.place, section: chat.section, title, type: "free", kind: "copilot-only",
+    id = await newDeliverable(c, { place: chat.place, section: chat.section, title, type, kind: typed ? "promotable" : "copilot-only",
       approach: "", body, note, by, chatId: chat.id, chatTitle: chat.title });
     n = 1; isNew = true;
   }

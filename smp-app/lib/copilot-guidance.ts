@@ -107,6 +107,12 @@ export const GUIDE: Record<Section, Guide> = {
    So a free chat is told the Free chat part of Copilot settings IN PLACE OF
    where the work starts and the ways to start — those are what made it
    draft on the first turn — and the section's method stays, as a reference. */
+/* §784 — a free chat's draft, in the plan's own shape, for the parts the plan draws that way */
+const PLAN_SHAPE: Partial<Record<string, string>> = {
+  compete: "`plan.discipline` — btc (Best Total Cost), bts (Best Total Solution) or bp (Best Product); `plan.values` — each value proposition with its `title`, `how` (the actions, one per line), `measure` (each measure with its target and today's figure when known, e.g. \"Vendor retention rate ≥ 80% (today 72%)\") and `evidence`.",
+  analysis: "`plan.swot` — `s`, `w`, `o`, `t`, each line with a short `title`, its `description` and its `evidence`.",
+  foundation: "`plan.foundation` — one entry per part you drafted, `key` who (Who we are), asp (Winning Aspiration), eim (End in Mind), pur (Purpose), obj (Key Objectives, one per line) or val (Core Values, one per line), and its `text`.",
+};
 export function guidanceFor(section: Section, method = "", templates: string[] = [], free: string | null = null): string {
   const g = GUIDE[section];
   const roads = g.roads.length
@@ -121,6 +127,7 @@ export function guidanceFor(section: Section, method = "", templates: string[] =
     const ref = m ? "\n\nFOREFRONT'S METHOD FOR THIS SECTION, as your reference (the free chat rules below decide how the conversation goes):\n\n" + m : "";
     return VOICE + "\n\nTHIS SECTION PRODUCES: " + g.produces + ref +
       "\n\nTHIS IS A FREE CHAT. These rules decide how you talk and when you draft; in a free chat `missing` stays empty and a question goes in `reply`:\n\n" + (free.trim() || "Talk first; draft only when the person agrees or asks.") +
+      (PLAN_SHAPE[section] ? "\n\nTHE PLAN'S SHAPE. Whenever you give a `draft` here, also give the same work in `plan`, in the shape the plan holds it, so it can be laid out as the plan and put on it: " + PLAN_SHAPE[section] + " Leave out of `plan` what the draft does not say; never invent a measure or a figure to fill it." : "") +
       "\n\nLIMITS FOR YOUR ANSWER (these do not bend):\n" + HOUSE;
   }
   /* The checks' breaks: the starting point taken out, and the method back

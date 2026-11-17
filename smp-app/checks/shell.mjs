@@ -3265,6 +3265,59 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
   }
 });
 
+await section("3q · a chat's work laid out as the plan, and put on it (§784)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/putplan-" + n + ".png" }); };
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  let before = null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/compete");
+    await page.waitForSelector("[data-cop-starttext]", { timeout: 15000 });
+    before = await page.evaluate(() => JSON.stringify(competeHolder("mobile").compete || null));
+    const today = await page.evaluate(() => { const h = competeHolder("mobile"), w = h && h.compete; return w && w.discipline ? w.discipline + "|" + (w.values || []).length : ""; });
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, { reply: "Here it is, laid out as your plan shows it.", draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ text: "Vendor Growth Partner" }, { text: "Tech Driven Operation" }] }] },
+      plan: { discipline: "bts", values: [{ title: "Vendor Growth Partner", how: ["Joint business planning with key retailers", "24h delivery"], measure: ["Tier 2 revenue growth ≥ 100% (today 60%)"], evidence: "Answers vendors going direct. MB02." },
+        { title: "Tech Driven Operation", how: ["Relaunch the distribution app"], measure: [] }] } });
+    await page.fill("[data-cop-starttext]", "Sharpen our value proposition for vendors");
+    await page.press("[data-cop-starttext]", "Enter");
+    /* the first answer on a part the plan holds asks what to change (§471); the draft comes with the next */
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
+    await page.fill("[data-cop-text]", "Lay it out with the four values we discussed");
+    await page.press("[data-cop-text]", "Enter");
+    await page.waitForSelector("[data-cop-dplan] [data-cop-val]", { timeout: 15000 }).catch(() => {});
+    const dp = await page.evaluate(() => { const d = document.querySelector("[data-cop-dplan]"); if (!d) return null;
+      return { disc: (d.querySelector(".copdisc h4") || {}).textContent || "", vals: Array.from(d.querySelectorAll("[data-cop-val] h5")).map((h) => h.textContent), gap: d.querySelectorAll("[data-cop-gap]").length,
+        today: Array.from(d.querySelectorAll(".copmrow .copm")).map((x) => x.textContent).join("|"), ev: !!d.querySelector("details.copev"), put: (document.querySelector("[data-cop-putplan]") || {}).textContent || "", stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }; });
+    await shot("1-draft");
+    check(!!dp && dp.disc === "Best Total Solution" && dp.vals.join("|") === "Vendor Growth Partner|Tech Driven Operation" && dp.gap === 1 && /today 60%/.test(dp.today) && dp.ev && /Put on Mobile’s plan/.test(dp.put) && /Laid out as the plan’s Competitive Discipline/.test(dp.stay) && /1 value has no measure/.test(dp.stay),
+      "§784 a free chat's draft is drawn as the plan draws Competitive Discipline — the discipline, a card per value, measures with today, evidence folded — a value without a measure said so, and Put on Mobile's plan offered", JSON.stringify(dp));
+    await page.click("[data-cop-putplan]");
+    await page.waitForSelector("#modal-b .copgo, #modal-b [data-cop-planapply-yes]", { timeout: 15000 }).catch(() => {});
+    const md = await page.evaluate(() => ({ t: (document.getElementById("modal-b") || {}).textContent || "", deliv: !!document.querySelector("[data-cop-planrow]") }));
+    await shot("2-ask");
+    const row = (await asTenant(tenantId, (c) => c.query("select type, kind from copilot_deliverables order by created_at desc limit 1"))).rows[0];
+    check(md.deliv && !!row && row.type === "compete" && row.kind === "promotable" && /Best Total Solution and 2 values/.test(md.t) && /1 value goes on without a measure/.test(md.t) && (today ? /Today the plan holds/.test(md.t) : /holds nothing here today/.test(md.t)) && /archived first/.test(md.t),
+      "§784 Put on the plan saves it as a Competitive Discipline, opens it, and asks first — saying what the plan holds today, what goes on, the value without a measure, and that today's is archived", JSON.stringify({ md, row, today }));
+    await page.click("#modal-b [data-cop-planapply-yes]");
+    await page.waitForFunction(() => { const h = competeHolder("mobile"); return !!(h && h.compete && h.compete.discipline === "bts"); }, null, { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction(() => /On the plan as v1/.test((document.querySelector("[data-cop-planrow]") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const ap = await page.evaluate(() => { const w = competeHolder("mobile").compete; return { disc: w && w.discipline, vals: ((w && w.values) || []).map((v) => v.title), on: true, row: (document.querySelector("[data-cop-planrow]") || {}).textContent || "" }; });
+    await shot("3-applied");
+    check(ap.disc === "bts" && ap.vals.join("|") === "Vendor Growth Partner|Tech Driven Operation" && ap.on && /On the plan as v1/.test(ap.row), "§784 ...Apply writes it to Mobile's plan, and the version says it is on the plan", JSON.stringify(ap));
+    check(!errs.length, "no page errors", errs.join(" | "));
+  } finally {
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, keep);
+    if (before !== null) { try { await page.evaluate(async (b) => { const hold = competeHolder("mobile"); if (hold) hold.compete = JSON.parse(b); await new Promise((r) => (typeof SYNC !== "undefined" && SYNC.saveNow ? SYNC.saveNow(() => r()) : r())); }, before); } catch (e) {} }
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
 await section("3n · the Advisory chat: one question at a time, counted, proceed, the brief, the save (§496)", async () => {
   const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/adv-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off mockup

@@ -70,6 +70,16 @@ export const SCHEMA = {
         },
       },
     },
+    /* §784 — the draft in the plan's own shape, for the parts the plan draws that way */
+    plan: {
+      type: "OBJECT",
+      properties: {
+        discipline: { type: "STRING", enum: ["btc", "bts", "bp"] },
+        values: { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, how: { type: "ARRAY", items: { type: "STRING" } }, measure: { type: "ARRAY", items: { type: "STRING" } }, evidence: { type: "STRING" } }, required: ["title"] } },
+        swot: { type: "OBJECT", properties: Object.fromEntries(["s", "w", "o", "t"].map((L) => [L, { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, description: { type: "STRING" }, evidence: { type: "STRING" } }, required: ["title"] } }])) },
+        foundation: { type: "ARRAY", items: { type: "OBJECT", properties: { key: { type: "STRING", enum: ["who", "asp", "eim", "pur", "obj", "val"] }, text: { type: "STRING" } }, required: ["key", "text"] } },
+      },
+    },
     pastedBelongsTo: { type: "STRING", enum: [...SECTIONS] },
     following: { type: "STRING" },
   },
@@ -85,7 +95,39 @@ export type Answer = {
   pastedBelongsTo: Section | null;
   /* The method part this turn works through (§460), "" when none. */
   following: string;
+  /* §784 — the draft in the plan's own shape (Foundation, SWOT, Competitive Discipline), when it gave one */
+  plan?: PlanShape | null;
 };
+export type PlanShape =
+  | { section: "compete"; compete: { discipline: "btc" | "bts" | "bp"; values: { title: string; how: string[]; measure: string[]; evidence?: string }[] } }
+  | { section: "analysis"; swot: Record<"s" | "w" | "o" | "t", { title: string; description: string; evidence?: string }[]> }
+  | { section: "foundation"; foundation: { key: string; text: string }[] };
+const PARTS = ["who", "asp", "eim", "pur", "obj", "val"];
+/* §784 — the plan's shape, cut to size and to the section it belongs to; anything else is dropped, never guessed */
+export function planOf(section: string, raw: unknown): PlanShape | null {
+  const j: any = raw && typeof raw === "object" ? raw : null; if (!j) return null;
+  const lines = (v: unknown, n: number, m: number) => (Array.isArray(v) ? v : []).map((x) => clip(x, m)).filter(Boolean).slice(0, n);
+  if (section === "compete") {
+    if (!["btc", "bts", "bp"].includes(String(j.discipline))) return null;
+    const values = (Array.isArray(j.values) ? j.values : []).map((v: any) => {
+      const o: any = { title: clip(v && v.title, 120), how: lines(v && v.how, 5, 300), measure: lines(v && v.measure, 5, 300) };
+      const e = clip(v && v.evidence, 400); if (e) o.evidence = e; return o; }).filter((v: any) => v.title).slice(0, 5);
+    return values.length ? { section: "compete", compete: { discipline: j.discipline, values } } : null;
+  }
+  if (section === "analysis") {
+    const w = j.swot && typeof j.swot === "object" ? j.swot : null; if (!w) return null;
+    const out: any = {}; let n = 0;
+    for (const L of ["s", "w", "o", "t"]) { out[L] = (Array.isArray(w[L]) ? w[L] : []).map((x: any) => { const o: any = { title: clip(x && x.title, 160), description: clip(x && x.description, 400) }; const e = clip(x && x.evidence, 300); if (e) o.evidence = e; return o; }).filter((x: any) => x.title).slice(0, 10); n += out[L].length; }
+    return n ? { section: "analysis", swot: out } : null;
+  }
+  if (section === "foundation") {
+    const seen = new Set<string>();
+    const parts = (Array.isArray(j.foundation) ? j.foundation : []).map((x: any) => ({ key: String(x && x.key), text: unleak(str(x && x.text)).replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim().slice(0, 2000) }))
+      .filter((x: any) => PARTS.includes(x.key) && x.text && !seen.has(x.key) && seen.add(x.key));
+    return parts.length ? { section: "foundation", foundation: parts } : null;
+  }
+  return null;
+}
 /* An item in the method's own shape (§460): title, description, evidence
    and score are optional, because a method that asks for none of them is
    answered by `text` alone. */
@@ -93,7 +135,7 @@ export type DraftItem = { text: string; source: string; title?: string; evidence
 
 /* The model's JSON into the screen's shape, with the files that were really
    attached as the only names a source may carry. */
-export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string; part: Answer } | null {
+export function shapeAnswer(raw: unknown, fileNames: string[], section = ""): { reply: string; part: Answer } | null {
   const j: any = raw && typeof raw === "object" ? raw : {};
   const reply = unleak(str(j.reply).trim()).slice(0, 8000);
   const list = (v: unknown, n: number, m: number) => (Array.isArray(v) ? v : []).map((x) => clip(x, m)).filter(Boolean).slice(0, n);
@@ -135,6 +177,8 @@ export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string;
     assumptions: list(j.assumptions, 10, 300), draft, pastedBelongsTo,
     following: clip(j.following, 120),
   };
+  const plan = draft && section ? planOf(section, j.plan) : null;
+  if (plan) part.plan = plan;
   if (!reply && !draft) return null;
   return { reply, part };
 }
@@ -216,7 +260,7 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
      whole ladder stays well inside one request's life. */
   const r = await withRetry(call);
   if (!r.ok) return { ok: false, why: r.why || "no answer" };
-  const shaped = shapeAnswer(r.json, a.files.map((f) => f.name));
+  const shaped = shapeAnswer(r.json, a.files.map((f) => f.name), a.free != null ? a.section : "");
   if (!shaped) return { ok: false, why: "the answer had nothing in it" };
   return { ok: true, reply: shaped.reply, part: shaped.part };
 }

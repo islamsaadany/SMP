@@ -1,0 +1,342 @@
+<title>Strip Year Filter</title>
+<style>
+  /* The squeezed strip of directions on the Plan page, as it ships (§609, §618,
+     §627), with a way to show only the directions that run in one year.
+     Four placings of the same control, each pressable; then the wide
+     window's side list; then what stays pinned while the plan scrolls. */
+  :root {
+    --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --green:#1E7F5C; --r:10px;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531;
+    --line:#2C3644; --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3;
+    --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A;
+    --green:#3FA381; color-scheme:dark; } }
+  :root[data-theme="dark"] {
+    --ground:#0E131B; --surface:#161C26; --surface-2:#1D2531;
+    --line:#2C3644; --ink:#E8EDF5; --ink-2:#C3CBD8; --ink-3:#98A3B3;
+    --panel:#0B1A33; --panel-ink:#E8EDF5; --gold:#D4B468; --gold-deep:#E2C98A;
+    --green:#3FA381; color-scheme:dark; }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45; }
+  .wrap { max-width:1180px; margin:0 auto; padding:28px 16px 60px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .lede { color:var(--ink-3); margin:0 0 22px; max-width:78ch; }
+  h2.part { font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:36px 0 8px; }
+  .say { color:var(--ink-2); margin:0 0 12px; max-width:82ch; }
+  .opt { margin:0 0 30px; }
+  .opt h3 { font-size:15px; margin:0 0 8px; }
+  .opt h3 span { color:var(--ink-3); font-weight:400; }
+
+  /* the chrome, shortened */
+  .chrome { background:var(--surface); border:1px solid var(--line); border-radius:var(--r) var(--r) 0 0; padding:10px 14px; display:flex; align-items:center; gap:10px; }
+  .chrome .tab { color:var(--ink-3); padding:4px 2px; }
+  .chrome .tab.on { color:var(--ink); border-bottom:2px solid var(--green); }
+  .secseg { display:inline-flex; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:3px; gap:2px; margin-left:8px; }
+  .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none; color:var(--ink-2); font:inherit; font-weight:500; cursor:pointer; }
+  .secseg button[aria-selected="true"] { background:var(--ink-2); color:var(--surface); font-weight:600; }
+  .done { margin-left:auto; background:var(--green); color:#fff; border:0; border-radius:8px; padding:7px 14px; font:inherit; font-weight:600; }
+
+  /* the strip, as it ships */
+  .ground { background:var(--ground); padding:14px 0 0; }
+  .strip { display:flex; align-items:stretch; border:1px solid var(--ink-2); border-radius:var(--r); background:var(--surface); min-width:0; }
+  .strip .items { display:flex; flex:1 1 auto; min-width:0; overflow-x:auto; }
+  .ritem { display:flex; align-items:center; gap:8px; flex:1 1 auto; min-height:42px; padding:7px 14px 4px;
+    border:0; border-bottom:3px solid transparent; background:none; font:inherit; cursor:pointer; position:relative; color:var(--ink-3); text-align:left; }
+  .ritem + .ritem::before { content:""; position:absolute; left:0; top:9px; bottom:9px; width:1px; background:var(--line); }
+  .ritem.on, .ritem.on + .ritem { } .ritem.on::before, .ritem.on + .ritem::before { display:none; }
+  .ritem .grip { width:12px; display:grid; gap:2px; } .ritem .grip i { display:block; height:2px; background:var(--ink-3); border-radius:1px; }
+  .ritem .rcode { font:600 12px/1 var(--mono); letter-spacing:.05em; white-space:nowrap; }
+  .ritem b { font-weight:500; font-size:13px; line-height:1.3; min-width:0; overflow-wrap:anywhere; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; }
+  .yrtag { display:inline-block; font:600 10.5px/1 var(--mono); color:var(--ink-3); border:1px solid var(--line); border-radius:4px; padding:2px 4px; white-space:nowrap; }
+  .ritem.later { background:var(--surface-2); }
+  .ritem.on { background:var(--ink-2); border-bottom-color:var(--gold); color:var(--surface); border-radius:var(--r) 0 0 var(--r); }
+  .ritem.on .grip i { background:var(--surface); }
+  .ritem.on .yrtag { background:var(--surface); }
+  .ritem:not(.on):hover { color:var(--ink); }
+  .ritem[hidden] { display:none; }
+  .railadd { flex:none; align-self:center; padding:0 14px; white-space:nowrap; }
+  .linkbu { background:none; border:0; font:inherit; color:var(--ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; padding:0; }
+
+  /* THE CONTROL: the section switch's own shape (§627 made the open item and
+     the switch one grey), four buttons: All · Y1 · Y2 · Y3 */
+  .yrs { display:inline-flex; align-items:center; gap:8px; }
+  .yrs .yk { font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+  .yrs .seg { display:inline-flex; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:2px; gap:2px; }
+  .yrs .seg button { border:0; border-radius:4px; padding:4px 10px; background:none; color:var(--ink-2); font:inherit; font-size:12.5px; font-weight:500; cursor:pointer; white-space:nowrap; }
+  .yrs .seg button:hover { background:var(--surface-2); color:var(--ink); }
+  .yrs .seg button[aria-pressed="true"] { background:var(--ink-2); color:var(--surface); font-weight:600; }
+  .yrs .seg button[aria-pressed="true"].yr { background:var(--green); }
+  .yrs .n { font-size:12px; color:var(--ink-3); white-space:nowrap; }
+  .strip > .yrs { flex:none; padding:0 12px; border-right:1px solid var(--line); }
+  .strip > .yrs.end { border-right:0; border-left:1px solid var(--line); }
+  select.yrsel { font:inherit; font-size:12.5px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink); padding:4px 8px; }
+
+  /* E: the options button and its menu */
+  .rhead { position:relative; }
+  .opts { width:26px; height:26px; border:1px solid transparent; border-radius:6px; background:none; color:var(--ink-3); cursor:pointer; display:inline-grid; place-items:center; position:relative; padding:0; }
+  .opts svg { width:16px; height:16px; }
+  .opts:hover, .opts[aria-expanded="true"] { background:var(--surface-2); color:var(--ink); border-color:var(--line); }
+  .opts.filtered::after { content:""; position:absolute; top:3px; right:3px; width:6px; height:6px; border-radius:50%; background:var(--green); }
+  .of { font-size:11px; color:var(--ink-3); font-weight:400; letter-spacing:0; text-transform:none; margin-left:4px; }
+  .menu { position:absolute; top:calc(100% + 4px); right:8px; z-index:20; min-width:220px; background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.12); padding:6px; font-size:13px; letter-spacing:0; text-transform:none; font-weight:400; color:var(--ink); text-align:left; }
+  .menu label { display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:6px; cursor:pointer; }
+  .menu label:hover { background:var(--surface-2); }
+  .menu input { accent-color:var(--green); width:15px; height:15px; margin:0; }
+  .menu .sep { height:1px; background:var(--line); margin:5px 2px; }
+  .menu .mh { font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); padding:6px 8px 2px; }
+  .menu label.sub { padding-left:18px; }
+  .menu label.sub small { margin-left:auto; color:var(--ink-3); font-size:11.5px; }
+  .optcell { flex:none; display:flex; align-items:center; gap:4px; padding:0 8px 0 10px; border-right:1px solid var(--line); position:relative; }
+  .optcell .menu, .rail .menu { left:8px; right:auto; }
+
+  /* the side list, above 1200 */
+  .side { display:grid; grid-template-columns:196px 1fr; gap:16px; align-items:start; }
+  .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+  .rhead { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; border-bottom:1px solid var(--line); font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+  .rhead span span { color:var(--ink); margin-left:4px; }
+  .rail .yrs { padding:8px 10px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .rail .yrs .yk { display:none; }
+  .rail .yrs .n { width:100%; text-align:right; }
+  .rail .yrs .seg { width:100%; } .rail .yrs .seg button { flex:1; padding:4px 0; font-size:12px; }
+  .card { display:block; width:calc(100% - 16px); margin:8px 8px 0; min-height:72px; border:1px solid var(--line); border-radius:var(--r); padding:10px 12px; background:none; font:inherit; text-align:left; cursor:pointer; color:var(--ink); }
+  .card:last-of-type { margin-bottom:8px; }
+  .card .rcode { font:600 12px/1 var(--mono); color:var(--ink-3); letter-spacing:.05em; display:block; margin-bottom:5px; }
+  .card .rsub { display:block; font-size:11px; color:var(--ink-3); margin-top:4px; }
+  .card b { font-weight:500; font-size:13px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .card.on { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+  .card.later { background:var(--surface-2); color:var(--ink-3); }
+  .card[hidden] { display:none; }
+  .pane { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); min-height:220px; padding:16px; color:var(--ink-3); }
+
+  /* what stays pinned: a scroll box standing in for the window */
+  .win { height:420px; overflow:auto; border:1px solid var(--line); border-radius:var(--r); background:var(--ground); position:relative; }
+  .win .chrome { position:sticky; top:0; z-index:8; border-radius:0; border-left:0; border-right:0; border-top:0; }
+  .win .strip { position:sticky; top:52px; z-index:6; margin:14px 14px 0; }
+  .win .plan { margin:16px 14px 0; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); }
+  .band { display:flex; align-items:center; gap:11px; padding:10px 16px; background:var(--surface-2); border-bottom:1px solid var(--line); border-radius:var(--r) var(--r) 0 0; }
+  .band .rcode { font:600 13px/1 var(--mono); color:var(--panel); letter-spacing:.05em; }
+  .band .nm { font:650 17px/1.3 var(--sans); }
+  .band .pill { margin-left:auto; font-size:11px; border:1px solid var(--line); border-radius:999px; padding:2px 8px; background:var(--surface); }
+  .win.pinband .band { position:sticky; top:111px; z-index:5; }
+  .frow { display:grid; grid-template-columns:110px 1fr; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); font-size:13px; }
+  .frow .k { font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); align-self:center; }
+  .frow .v { border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  table { width:100%; border-collapse:collapse; margin:0; }
+  th { background:var(--panel); color:var(--panel-ink); text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:10px 12px; }
+  td { padding:9px 12px; border-bottom:1px solid var(--line); font-size:13px; }
+  .win.pinhead th { position:sticky; top:111px; z-index:4; }
+  .win.pinband.pinhead th { top:160px; }
+  .kmh { padding:14px 16px 6px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+  .tools { display:flex; gap:18px; flex-wrap:wrap; margin:0 0 12px; font-size:13px; color:var(--ink-2); }
+  .tools label { display:inline-flex; gap:7px; align-items:center; cursor:pointer; }
+  .tools input { accent-color:var(--panel); width:15px; height:15px; margin:0; }
+</style>
+<div class="wrap">
+  <h1>Directions by Year</h1>
+  <p class="lede">Islam, of the Plan page: <em>“where the directions span over different years we need a way to filter which directions to see from the directions left pan.”</em> The nine directions are the ones on his screen (three run all three years, four run Year 1 only, two run Years 2–3). Every control below is pressable, and the strip answers.</p>
+
+  <h2 class="part">E — the options button beside the word Directions</h2>
+  <p class="say">Islam: <em>“in the vertical view it can be part of the options beside the word directions where we make the button an options drop down that shows details or set which years to show in a sub list with checks. and we can have the same options button somehow in the horizontal view.”</em> The ≡ button the list already has (today it only switches the detail under each name) opens a small menu: the detail switch, then <b>Years to show</b> with a tick per year. A direction shows while it runs in any ticked year; the last tick cannot be removed. With a year unticked the head reads <b>5 of 9</b> and the button wears a dot, so a short list is never mistaken for a short plan. Both menus below open.</p>
+  <div class="side">
+    <div class="rail"><div class="rhead"><span>Directions <span data-count="E">9</span><span class="of" data-of="E"></span></span><button class="opts" data-opts="E" title="Options" aria-haspopup="menu"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></button><div class="menu" data-menu="E" hidden></div></div><div class="items" data-strip="E" data-cards="1"></div></div>
+    <div class="pane">The open direction's plan, as today.</div>
+  </div>
+  <p class="say" style="margin-top:18px">And on a squeezed window, where the list is a strip and its head is hidden, the same button stands at the strip's left end and opens the same menu. The count beside it only appears while a year is unticked.</p>
+  <div class="chrome"><span class="tab on">Strategy</span><span class="tab">Performance</span><span class="tab">Reporting</span>
+    <span class="secseg"><button>Foundation</button><button>SWOT</button><button aria-selected="true">Plan</button></span><button class="done">Done editing</button></div>
+  <div class="ground"><div class="strip" data-strip="H"><div class="optcell"><button class="opts" data-opts="H" title="Options" aria-haspopup="menu"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></button><span class="of" data-of="H"></span><div class="menu" data-menu="H" hidden></div></div><div class="items"></div><div class="railadd"><button class="linkbu">+ Add a Direction</button></div></div></div>
+
+  <h2 class="part">The earlier placings, for comparison</h2>
+  <p class="say">One control in four places. It reads <b>All · Y1 · Y2 · Y3</b>; the one lit is the year shown, in the section switch's grey, or green for a year since that is the colour <i>Runs in</i> already wears in the pen. The count beside it says how many of the nine are showing. If the open direction is filtered out, the first one left opens. The choice is remembered until the page is left.</p>
+
+  <div class="opt" id="A">
+    <h3>A <span>— at the strip's left end, before the first direction</span></h3>
+    <div class="chrome"><span class="tab on">Strategy</span><span class="tab">Performance</span><span class="tab">Reporting</span>
+      <span class="secseg"><button>Foundation</button><button>SWOT</button><button aria-selected="true">Plan</button></span><button class="done">Done editing</button></div>
+    <div class="ground"><div class="strip" data-strip="A"><div class="yrs" data-yrs="A"></div><div class="items"></div><div class="railadd"><button class="linkbu">+ Add a Direction</button></div></div></div>
+  </div>
+
+  <div class="opt" id="B">
+    <h3>B <span>— at the strip's right end, beside Add a Direction</span></h3>
+    <div class="chrome"><span class="tab on">Strategy</span><span class="tab">Performance</span><span class="tab">Reporting</span>
+      <span class="secseg"><button>Foundation</button><button>SWOT</button><button aria-selected="true">Plan</button></span><button class="done">Done editing</button></div>
+    <div class="ground"><div class="strip" data-strip="B"><div class="items"></div><div class="railadd"><button class="linkbu">+ Add a Direction</button></div><div class="yrs end" data-yrs="B"></div></div></div>
+  </div>
+
+  <div class="opt" id="C">
+    <h3>C <span>— in the chrome's section row, beside Foundation | SWOT | Plan</span></h3>
+    <div class="chrome"><span class="tab on">Strategy</span><span class="tab">Performance</span><span class="tab">Reporting</span>
+      <span class="secseg"><button>Foundation</button><button>SWOT</button><button aria-selected="true">Plan</button></span><span class="yrs" data-yrs="C" style="margin-left:14px"></span><button class="done">Done editing</button></div>
+    <div class="ground"><div class="strip" data-strip="C"><div class="items"></div><div class="railadd"><button class="linkbu">+ Add a Direction</button></div></div></div>
+  </div>
+
+  <div class="opt" id="D">
+    <h3>D <span>— a small dropdown at the strip's left end</span></h3>
+    <div class="chrome"><span class="tab on">Strategy</span><span class="tab">Performance</span><span class="tab">Reporting</span>
+      <span class="secseg"><button>Foundation</button><button>SWOT</button><button aria-selected="true">Plan</button></span><button class="done">Done editing</button></div>
+    <div class="ground"><div class="strip" data-strip="D"><div class="yrs" data-yrs="D" data-select="1"></div><div class="items"></div><div class="railadd"><button class="linkbu">+ Add a Direction</button></div></div></div>
+  </div>
+
+  <h2 class="part">The same four buttons on a wide window</h2>
+  <p class="say">Under the list's own head, as a row rather than a menu.</p>
+  <div class="side">
+    <div class="rail"><div class="rhead"><span>Directions <span data-count="S">9</span></span></div><div class="yrs" data-yrs="S"></div><div class="items" data-strip="S" data-cards="1"></div></div>
+    <div class="pane">The open direction's plan, as today.</div>
+  </div>
+
+  <h2 class="part">What stays pinned while the plan scrolls</h2>
+  <p class="say">Islam: <em>“for the pan the header needs to stay freezed on scrolling down.”</em> The strip already pins under the chrome. Two readings of “the header” are switchable here; the box scrolls like the window.</p>
+  <div class="tools">
+    <label><input type="checkbox" id="pinband"> the open direction's title band pins under the strip</label>
+    <label><input type="checkbox" id="pinhead"> the Key measures table's head pins while its rows scroll</label>
+  </div>
+  <div class="win" id="win">
+    <div class="chrome"><span class="tab on">Strategy</span><span class="tab">Performance</span><span class="tab">Reporting</span>
+      <span class="secseg"><button>Foundation</button><button>SWOT</button><button aria-selected="true">Plan</button></span><button class="done">Done editing</button></div>
+    <div class="strip" data-strip="W"><div class="yrs" data-yrs="W"></div><div class="items"></div><div class="railadd"><button class="linkbu">+ Add a Direction</button></div></div>
+    <div class="plan">
+      <div class="band"><span class="rcode">D001</span><span class="nm">Commercial excellence and brand differentiation</span><span class="pill">Direction</span></div>
+      <div class="frow"><span class="k">Direction</span><span class="v">Commercial excellence and brand differentiation</span></div>
+      <div class="frow"><span class="k">Custodian</span><span class="v">Mohamed Salah</span></div>
+      <div class="frow"><span class="k">Kind</span><span class="v">Direction</span></div>
+      <div class="frow"><span class="k">Runs in</span><span class="v">1 · 2 · 3</span></div>
+      <div class="frow"><span class="k">Overview</span><span class="v">Counter high buyer power and competitive rivalry by translating RHI’s trusted legacy into tangible brand differentiation, justifying premium pricing and protecting against talent and client loss through structured commercial processes.</span></div>
+      <div class="kmh">Key measures 4</div>
+      <table><thead><tr><th>#</th><th>Key measure</th><th>Dir.</th><th>Unit</th><th>Target</th><th>Compiled</th></tr></thead><tbody>
+        <tr><td>1</td><td>Revenue from premium-priced engagements</td><td>↑</td><td>%</td><td>35</td><td>Quarterly</td></tr>
+        <tr><td>2</td><td>Client retention rate</td><td>↑</td><td>%</td><td>90</td><td>Quarterly</td></tr>
+        <tr><td>3</td><td>Senior staff voluntary attrition</td><td>↓</td><td>%</td><td>8</td><td>Half-yearly</td></tr>
+        <tr><td>4</td><td>Proposals won on value, not price</td><td>↑</td><td>#</td><td>12</td><td>Quarterly</td></tr>
+      </tbody></table>
+      <div class="kmh">Tactics 6</div>
+      <table><thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Due</th></tr></thead><tbody>
+        <tr><td>1</td><td>Brand differentiation playbook</td><td>Mohamed Salah</td><td>Q2</td></tr>
+        <tr><td>2</td><td>Value-based pricing framework</td><td>Mohamed Salah</td><td>Q2</td></tr>
+        <tr><td>3</td><td>Key-client coverage model</td><td>Sara Adel</td><td>Q3</td></tr>
+        <tr><td>4</td><td>Talent retention plan for senior staff</td><td>Nour Hassan</td><td>Q3</td></tr>
+        <tr><td>5</td><td>Proposal quality gate</td><td>Sara Adel</td><td>Q4</td></tr>
+        <tr><td>6</td><td>Commercial process handbook</td><td>Mohamed Salah</td><td>Q4</td></tr>
+      </tbody></table>
+      <div style="height:420px"></div>
+    </div>
+  </div>
+</div>
+<script>
+  var DIRS = [
+    ["D001","Commercial excellence and brand differentiation",[1,2,3]],
+    ["D002","Integrated service lines and cross-selling",[1,2,3]],
+    ["D003","Leadership in advisory quality",[1,2,3]],
+    ["D004","Expand the Gulf footprint",[1]],
+    ["D005","Strengthen the talent pipeline",[1]],
+    ["D006","Embed digital delivery tools",[1]],
+    ["D007","Optimise the cost base",[1]],
+    ["D008","Enter public-sector advisory",[2,3]],
+    ["D009","Build the data and analytics practice",[2,3]]
+  ];
+  var NOW = 1;
+  function tag(ys){ return ys.length === 1 ? "Y" + ys[0] : "Y" + ys[0] + "–" + ys[ys.length-1]; }
+  function draw(key){
+    var box = document.querySelector('[data-strip="' + key + '"]');
+    var items = box.classList.contains("items") ? box : box.querySelector(".items");
+    var cards = !!box.dataset.cards;
+    items.innerHTML = DIRS.map(function(d, i){
+      var later = d[2].indexOf(NOW) < 0;
+      if (cards) return '<button class="card' + (i === 0 ? " on" : "") + (later ? " later" : "") + '" data-ys="' + d[2].join("") + '"><span class="rcode">' + d[0] + ' <span class="yrtag">' + tag(d[2]) + '</span></span><b>' + d[1] + '</b></button>';
+      return '<button class="ritem' + (i === 0 ? " on" : "") + (later ? " later" : "") + '" data-ys="' + d[2].join("") + '">' +
+        '<span class="grip"><i></i><i></i><i></i></span><span class="rcode">' + d[0] + '</span><b>' + d[1] + '</b><span class="yrtag">' + tag(d[2]) + '</span></button>';
+    }).join("");
+    items.addEventListener("click", function(e){
+      var b = e.target.closest("button"); if (!b) return;
+      items.querySelectorAll(".on").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+    });
+    var ctl = document.querySelector('[data-yrs="' + key + '"]');
+    if (ctl.dataset.select) {
+      ctl.innerHTML = '<span class="yk">Years</span><select class="yrsel"><option value="0">All</option><option value="1">Year 1</option><option value="2">Year 2</option><option value="3">Year 3</option></select><span class="n"></span>';
+      ctl.querySelector("select").addEventListener("change", function(){ apply(+this.value); });
+    } else {
+      ctl.innerHTML = '<span class="yk">Years</span><span class="seg">' +
+        [0,1,2,3].map(function(y){ return '<button class="' + (y ? "yr" : "") + '" data-y="' + y + '" aria-pressed="' + (y ? "false" : "true") + '">' + (y ? "Y" + y : "All") + '</button>'; }).join("") +
+        '</span><span class="n"></span>';
+      ctl.addEventListener("click", function(e){
+        var b = e.target.closest("button[data-y]"); if (!b) return;
+        ctl.querySelectorAll("button[data-y]").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+        apply(+b.dataset.y);
+      });
+    }
+    function apply(y){
+      var n = 0, open = null, first = null;
+      items.querySelectorAll("button").forEach(function(b){
+        var show = !y || b.dataset.ys.indexOf(String(y)) >= 0;
+        b.hidden = !show; if (show) { n++; first = first || b; if (b.classList.contains("on")) open = b; }
+        else b.classList.remove("on");
+      });
+      if (!open && first) first.classList.add("on");
+      ctl.querySelector(".n").textContent = y ? n + " of " + DIRS.length : "";
+      var c = document.querySelector('[data-count="' + key + '"]'); if (c) c.textContent = n;
+    }
+  }
+  ["A","B","C","D","S","W"].forEach(draw);
+
+  /* E: the options menu */
+  function menu(key){
+    var box = document.querySelector('[data-strip="' + key + '"]');
+    var items = box.classList.contains("items") ? box : box.querySelector(".items");
+    var cards = !!box.dataset.cards, terse = true, years = {1:true,2:true,3:true};
+    function paint(){
+      items.innerHTML = DIRS.map(function(d, i){
+        var later = d[2].indexOf(NOW) < 0;
+        if (cards) return '<button class="card' + (i === 0 ? " on" : "") + (later ? " later" : "") + '" data-ys="' + d[2].join("") + '"><span class="rcode">' + d[0] + ' <span class="yrtag">' + tag(d[2]) + '</span></span><b>' + d[1] + '</b>' + (terse ? '' : '<span class="rsub">' + (later ? (d[2][0] > NOW ? 'Starts in Year ' + d[2][0] : 'Ended in Year ' + d[2][d[2].length-1]) : (3 + i % 3) + ' Key measures · ' + (4 + i % 4) + ' Tactics') + '</span>') + '</button>';
+        return '<button class="ritem' + (i === 0 ? " on" : "") + (later ? " later" : "") + '" data-ys="' + d[2].join("") + '">' +
+          '<span class="grip"><i></i><i></i><i></i></span><span class="rcode">' + d[0] + '</span><b>' + d[1] + '</b><span class="yrtag">' + tag(d[2]) + '</span></button>';
+      }).join("");
+      apply();
+    }
+    items.addEventListener("click", function(e){
+      var b = e.target.closest("button"); if (!b) return;
+      items.querySelectorAll(".on").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+    });
+    var btn = document.querySelector('[data-opts="' + key + '"]'), m = document.querySelector('[data-menu="' + key + '"]');
+    function draw(){
+      var all = years[1] && years[2] && years[3];
+      m.innerHTML = (cards ? '<label><input type="checkbox" id="det' + key + '"' + (terse ? '' : ' checked') + '> Show the detail under each name</label><div class="sep"></div>' : '') +
+        '<div class="mh">Years to show</div>' +
+        [1,2,3].map(function(y){ var n = DIRS.filter(function(d){ return d[2].indexOf(y) >= 0; }).length;
+          return '<label class="sub"><input type="checkbox" id="y' + key + y + '" data-y="' + y + '"' + (years[y] ? ' checked' : '') + '> Year ' + y + (y === NOW ? ' (this year)' : '') + '<small>' + n + '</small></label>'; }).join("");
+      btn.classList.toggle("filtered", !all);
+    }
+    btn.addEventListener("click", function(e){ e.stopPropagation(); var open = m.hidden; document.querySelectorAll(".menu").forEach(function(x){ x.hidden = true; }); document.querySelectorAll(".opts").forEach(function(x){ x.setAttribute("aria-expanded","false"); }); m.hidden = !open; btn.setAttribute("aria-expanded", open ? "true" : "false"); });
+    m.addEventListener("click", function(e){ e.stopPropagation(); });
+    m.addEventListener("change", function(e){
+      var t = e.target;
+      if (t.dataset.y) { years[t.dataset.y] = t.checked; if (!years[1] && !years[2] && !years[3]) { years[t.dataset.y] = true; t.checked = true; } draw(); apply(); }
+      else { terse = !t.checked; paint(); }
+    });
+    document.addEventListener("click", function(){ m.hidden = true; btn.setAttribute("aria-expanded","false"); });
+    function apply(){
+      var n = 0, open = null, first = null;
+      items.querySelectorAll("button").forEach(function(b){
+        var show = b.dataset.ys.split("").some(function(y){ return years[y]; });
+        b.hidden = !show; if (show) { n++; first = first || b; if (b.classList.contains("on")) open = b; } else b.classList.remove("on");
+      });
+      if (!open && first) first.classList.add("on");
+      var all = years[1] && years[2] && years[3];
+      var c = document.querySelector('[data-count="' + key + '"]'); if (c) c.textContent = n;
+      var of = document.querySelector('[data-of="' + key + '"]'); if (of) of.textContent = all ? "" : (c ? "of " + DIRS.length : n + " of " + DIRS.length);
+      btn.classList.toggle("filtered", !all);
+    }
+    draw(); paint();
+  }
+  ["E","H"].forEach(menu);
+  var win = document.getElementById("win");
+  document.getElementById("pinband").addEventListener("change", function(){ win.classList.toggle("pinband", this.checked); });
+  document.getElementById("pinhead").addEventListener("change", function(){ win.classList.toggle("pinhead", this.checked); });
+</script>

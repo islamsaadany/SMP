@@ -156,7 +156,10 @@ var READING = (function () {
      under every row, its header the only title — no label over it saying
      the same word — and the columns kept to the width the figures need
      rather than spread to the card's edge. */
-  function measureRows(list) {
+  /* §767: `p` is the pillar, for the tags of the tactics behind a measure and
+     of the measures a tactic supports — the same numbers the Plan page prints,
+     and the legend under the tactics says which is which. */
+  function measureRows(list, p) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No measures yet.</p>';
     return '<table class="rtable rmeas"><thead><tr><th>Measure</th><th class="num">Target</th><th class="num">Actual</th><th>Standing</th></tr></thead><tbody>' +
@@ -164,16 +167,16 @@ var READING = (function () {
         var sc = measureScore(m);
         /* a measure not yet given a target or a figure shows a dash, never a bare direction sign over nothing (El Abd, 2026-10-29) */
         var tgt = String(m.target == null ? "" : m.target).trim(), fig = String(figShown(m) || "").trim();
-        return '<tr><td>' + esc(m.name || "") + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
+        return '<tr><td>' + esc(m.name || "") + supportedLine(m, p) + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
           '<td class="num">' + (fig ? fig : '\u2014') + '</td><td class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></td></tr>';
       }).join("") + '</tbody></table>';
   }
-  function tacticRows(list) {
+  function tacticRows(list, p) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No tactics yet.</p>';
     return '<table class="rtable rtacs"><thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Status</th></tr></thead><tbody>' +
       rows.map(function (t) {
-        return '<tr><td>' + esc(t.name || "") + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
+        return '<tr><td>' + esc(t.name || "") + supportsLine(t, p) + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
           '<td><span class="rq">' + [t.q1, t.q2, t.q3, t.q4].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span></td>' +
           '<td><span class="rsts">' + esc(t.status || "\u2014") + '</span></td></tr>';
       }).join("") + '</tbody></table>';
@@ -271,7 +274,7 @@ var READING = (function () {
           '<span class="rsum"><b>' + ms + '</b> measure' + (ms === 1 ? "" : "s") + ' · <b>' + ts + '</b> tactic' + (ts === 1 ? "" : "s") +
           ' · <b style="color:' + bandInk(sc) + '">' + pct(sc) + '</b></span>' + stand(sc) +
           '<span class="rchev" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></span></div>' +
-          '<div class="rmore">' + measureRows(it.measures) + tacticRows(it.tactics) + '</div></div>';
+          '<div class="rmore">' + measureRows(it.measures, it) + tacticRows(it.tactics, it) + supportsLegend(it) + '</div></div>';
       }).join("") + '</div>';
   }
 

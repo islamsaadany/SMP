@@ -2012,6 +2012,40 @@ html[data-client-settings] .viewer { display:none; }
   .railterse.on { color:var(--gold); }
   /* The panel's own quiet ink. --none on the panel is 2.6:1 (§38.5). */
   .rail .rhead span { color:var(--panel-quiet); font-weight:600; }
+  /* ── §771 · THE HEAD'S BUTTON OPENS THE RAIL'S OPTIONS ──────────────
+     The ≡ that WAS the terse switch (§60) opens a menu that holds it, and
+     on a list whose years are marked, a tick per year (group-render.js,
+     railHead). The panel is `.hmenu-panel` (config.css) anchored to the
+     button's LEFT, because the head is 196px wide and the panel is not.
+     A gold dot on the button says a year is unticked — the same lit-gold
+     the terse switch wears, ringed in the head's own panel colour so it
+     reads on a lit button too. The count "5 of 9" sits in the head's own
+     line here, and beside the button on the strip (below). */
+  .rail .rhead .railopts { position:relative; display:inline-flex; align-items:center; gap:6px; }
+  .rail .rhead .rof { font-weight:400; font-style:normal; font-size:10.5px; letter-spacing:0;
+    text-transform:none; color:var(--panel-quiet); }
+  .rail .rhead .rof.strip { display:none; }
+  .railterse { position:relative; }
+  .railterse.filtered::after { content:""; position:absolute; top:-2px; right:-2px;
+    width:6px; height:6px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 0 1.5px var(--panel); }
+  .rail .railopts .hmenu-panel { left:0; right:auto; width:238px; transform-origin:top left;
+    letter-spacing:0; text-transform:none; font-weight:400; }
+  /* The panel is wider than the rail and the pane comes later in the
+     document, so while the menu is open the rail rises above the pane's
+     own layer (its corner acts sit at 5) and stays under the chrome's 9. */
+  .rail:has(.railopts.open) { z-index:7; }
+  .railopt { display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:var(--r-sm);
+    cursor:pointer; font:400 12.5px/1.35 var(--sans); color:var(--ink); }
+  .railopt:hover { background:var(--surface-2); }
+  .railopt input { accent-color:var(--good); width:14px; height:14px; margin:0; flex:none; }
+  .railopt i { font-style:normal; color:var(--ink-3); margin-left:4px; }
+  .railopt small { margin-left:auto; color:var(--ink-3); font-size:11px;
+    font-variant-numeric:tabular-nums; }
+  .railopt.held { cursor:not-allowed; }
+  .railopt.held input { opacity:.45; }
+  .railopt-h { padding:6px 8px 2px; font:700 10px/1 var(--sans); letter-spacing:.13em;
+    text-transform:uppercase; color:var(--ink-3); }
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
@@ -2115,6 +2149,20 @@ html[data-client-settings] .viewer { display:none; }
   .pane > .pband::before {
     content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
+  /* ── §771 · A TABLE'S HEAD PINS UNDER THE BAND ──────────────────────
+     Islam: *"freeze both headers"* — the band above and the plan tables'
+     own navy heads. `--band-h` is the band's measured height (shell.html,
+     stickWatch), because a wrapped name makes it taller; the rest of the
+     offset is the band's own. z-index 3: under the band's 4, over the rows.
+
+     ONLY WHILE THE TABLE FITS (`fits`, set by the shell): a `.scroll` is an
+     `overflow:auto` box, and a sticky head inside one pins to the box, not
+     the window (§273.1). So a table that needs no sideways scroll has its
+     wrapper opened and its head pinned; one wider than its pane keeps its
+     scroll box and its head scrolls away with it, as it always did. */
+  #panel .pane .scroll.fits, #panel .pane .tblscroll.fits { overflow-x:visible; }
+  #panel .pane .tblscroll.fits thead th { position:sticky; z-index:3;
+    top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px + var(--band-h, 0px)); }
   /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§130.3) ─────────────
      Islam: "the title has round corners so the scrolled up appears in the
      right and left top corners." Measured before touching it: 13px² of the
@@ -2473,7 +2521,29 @@ html[data-client-settings] .viewer { display:none; }
         radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px),
           var(--ground) var(--r)) right 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
         linear-gradient(var(--ground), var(--ground)) left bottom / 100% var(--split-gap, 16px) no-repeat; }
-    .rail:not(.setuprail) .rhead, .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
+    .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
+    /* §771: THE HEAD KEEPS ITS BUTTON ON THE STRIP. The word and the count
+       stay hidden as §609 left them; the ≡ stands in its own cell at the
+       strip's left end, in the strip's quiet ink rather than the panel's,
+       and "5 of 9" beside it only while a year is unticked. The detail
+       switch is left out of the menu here: a strip has no detail line to
+       switch (`.rsub` is hidden two rules down). */
+    .rail:not(.setuprail) .rhead { flex:none; display:flex; align-items:center; gap:4px;
+      padding:0 8px 0 10px; background:none; color:var(--ink-3);
+      border-right:1px solid var(--line); letter-spacing:0; text-transform:none; }
+    .rail:not(.setuprail) .rhead .rhl { display:none; }
+    .rail:not(.setuprail) .rhead span { color:var(--ink-3); }
+    .rail:not(.setuprail) .rhead .rof.strip { display:inline; white-space:nowrap; }
+    .rail:not(.setuprail) .railterse { color:var(--ink-3); margin:0; padding:4px;
+      border:1px solid transparent; }
+    .rail:not(.setuprail) .railterse.on { color:var(--ink-3); }
+    .rail:not(.setuprail) .railterse:hover,
+    .rail:not(.setuprail) .railopts.open .railterse { color:var(--ink); background:var(--surface-2);
+      border-color:var(--line); }
+    .rail:not(.setuprail) .railterse.filtered::after { box-shadow:0 0 0 1.5px var(--surface); }
+    .rail:not(.setuprail) .railopts .hmenu-panel { top:calc(100% + 9px); }
+    .rail:not(.setuprail) .railopt:has([data-railterse]),
+    .rail:not(.setuprail) .railopt:has([data-railterse]) + .hmenu-sep { display:none; }
     /* ONE ROW, AND THE NAMES WRAP RATHER THAN RUN OFF THE END (§609). Islam:
        *"the text needs to wrap"*. A flex row of the item's own parts in their
        own order — handle, code, name, years, Missing, score — so every rail
@@ -2572,10 +2642,26 @@ html[data-client-settings] .viewer { display:none; }
        editing — the band §53.7 pinned and the head §194 pinned in its place.
        Not sticky means it never leaves its flow position, so `pinWatch()`
        never marks it and its corner fill (§130.6) never paints. */
+    /* §771 UNDOES THAT, ON ISLAM'S WORD: *"the header needs to stay freezed
+       on scrolling down"* — *"freeze both headers"*. The band and the
+       editing head pin again, UNDER the strip: the strip's own offset, plus
+       its measured height (`--strip-h`, shell.html — the names wrap to one,
+       two or three lines), plus the gutter §618 keeps under it, plus the
+       pane's border, exactly as the wide rule adds its 1px. The ground
+       above the band is the gutter's depth now rather than the rail gap's,
+       so pinned, the plan slides into page ground under the strip and
+       nothing shows through the seam. The table heads take the same
+       offset, plus the band's. */
     .split:not(.setupsplit) > .pane > .pband,
-    .split:not(.setupsplit) > .pane > .ptitle.edhead { position:relative; top:auto; }
+    .split:not(.setupsplit) > .pane > .ptitle.edhead {
+      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + var(--strip-h, 0px) +
+               var(--split-gap, 16px) + 1px); }
     .split:not(.setupsplit) > .pane > .pband::before,
-    .split:not(.setupsplit) > .pane > .ptitle.edhead::before { display:none; }
+    .split:not(.setupsplit) > .pane > .ptitle.edhead::before {
+      height:calc(var(--split-gap, 16px) + 2px); }
+    #panel .split:not(.setupsplit) > .pane .tblscroll.fits thead th {
+      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + var(--strip-h, 0px) +
+               var(--split-gap, 16px) + 1px + var(--band-h, 0px)); }
   }
 
   /* The Report section in the third row. Gold while a cycle is asking for
@@ -6042,6 +6128,81 @@ tr.acoffice td { background:var(--surface-2); }
 .acland-opt:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 .cfg.acgrid.acgrid-ladder td.acmeans b { display:inline; }
 
+/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§754, tablecols.js) ════
+   The table keeps every rule it had — the tenant's heading, the grid, the
+   zebra, the frozen pair. These add the edge you drag, the ghost of a column
+   being moved, the line where it lands, the pixel label, the row heights and
+   the status line under the table. Nothing here changes a table nobody has
+   touched. */
+  .tc-host { position:relative; }
+  /* A positioned heading, for the edge inside it. The frozen pair is sticky
+     by more specific rules (`.tblscroll th.idx + th`, `.peoplecfg thead
+     th.namecell`) and sticky is positioned, so those keep theirs. */
+  th.tcth { position:relative; }
+  th.tcmove { cursor:grab; }
+  .tcgrip { position:absolute; top:0; right:-5px; width:11px; height:100%; cursor:col-resize;
+            z-index:3; touch-action:none; }
+  .tcgrip::after { content:""; position:absolute; top:6px; bottom:6px; left:4px; width:2px;
+                   border-radius:2px; background:transparent; }
+  .tcgrip:hover::after, .tcgrip.on::after { background:var(--gold); }
+  thead th.tcth:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .tc-hidden { display:none !important; }
+  /* While a column is being moved: the original dims, a ghost follows the
+     pointer, a line marks the drop. The ghost is the column itself — its
+     heading and its cells at their own heights — so it reads as the thing
+     being carried rather than a label of it. */
+  .tc-dragging, .tc-dragging th.tcmove { cursor:grabbing; user-select:none; }
+  .tc-lifted { opacity:.35; }
+  .tcghost { position:absolute; left:0; z-index:40; pointer-events:none; background:var(--surface);
+             box-shadow:0 12px 30px rgba(0,0,0,.18); border-radius:var(--r-sm); overflow:hidden; opacity:.96; }
+  .tcghost table { width:100%; min-width:0; table-layout:fixed; }
+  .tcghost td, .tcghost th { position:static !important; }
+  .tcdrop { position:absolute; left:0; width:2px; z-index:41; background:var(--gold-deep); pointer-events:none; display:none; border-radius:2px; }
+  .tcdrop::before { content:""; position:absolute; top:-1px; left:-3px; width:8px; height:8px; border-radius:50%; background:var(--gold-deep); }
+  .tctip { position:absolute; z-index:42; transform:translateX(-50%); font:600 11px/1 var(--mono);
+           color:var(--on-accent); background:var(--gold); padding:4px 7px; border-radius:5px;
+           pointer-events:none; white-space:nowrap; }
+  /* The measuring copy a fit reads: laid out at its own width, never seen. */
+  .tcmeasure { position:absolute; left:0; top:0; visibility:hidden; width:max-content; white-space:nowrap;
+               display:inline-block; pointer-events:none; }
+  .tcmeasure b, .tcmeasure .why, .tcmeasure .val { display:block; width:max-content; max-width:none; overflow:visible; }
+  /* Row height. Comfortable and Compact are steps either side of each table's
+     own padding (6px on the units, 5px on the register), written at a
+     specificity that beats both without naming either. */
+  .cfg table.tc-comfortable td { padding-top:12px; padding-bottom:12px; }
+  .cfg table.tc-compact td { padding-top:3px; padding-bottom:3px; }
+  .cfg table.tc-compact td .why { margin-top:1px; }
+  /* The table laid out from stored widths: the sum is its width, so a column
+     made narrower is seen narrower (the spare room goes to the name column). */
+  .cfg table.tc-sized { min-width:0; }
+  /* The menu's own rows: the width beside a column, the row-height switch, the way back. */
+  /* Wider than the register's chooser was: the row-height switch needs the room. */
+  .hmenu-panel.cols.tcpanel { width:272px; }
+  .tcpanel .colrow .lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tcpanel .colrow .px { font:400 11px/1 var(--mono); color:var(--ink-3); }
+  .tcpanel .colrow.locked { cursor:default; color:var(--ink-3); }
+  .tcpanel .colrow.locked:hover { background:none; }
+  .tcmenu .hmenu-btn { position:relative; }
+  .tccount { position:absolute; top:-7px; right:-7px; font:600 9.5px/1 var(--mono); color:var(--ink-2);
+             background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:2px 4px; }
+  .hmenu.open .tccount { background:var(--surface); border-color:var(--gold); color:var(--gold-deep); }
+  .tcrows { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 9px; }
+  .tcrows-l { font:700 10px/1 var(--sans); letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); }
+  .tcrows .segsw .seg { padding:5px 9px; font-size:11.5px; }
+  .tcback { display:flex; flex-direction:column; gap:6px; padding:4px 9px 6px; }
+  .tcback .linkbu { align-self:flex-start; font-size:11.5px; }
+  .tcback .linkbu[disabled] { color:var(--ink-3); cursor:default; text-decoration:none; opacity:.7; }
+  .tcback .hmenu-note { padding:0; }
+  /* The line under the table: what is shown, and the keys. */
+  .tcfoot { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px 16px;
+            font-size:11.5px; color:var(--ink-3); padding:8px 2px 0; }
+  .tcfoot b { color:var(--ink); font-weight:700; }
+  .tcchanged { color:var(--gold-deep); }
+  .tckeys { display:flex; flex-wrap:wrap; gap:3px 9px; align-items:center; }
+  .tckeys kbd { font:600 10px/1 var(--mono); color:var(--ink-2); background:var(--surface);
+                border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:2px 4px; margin-right:1px; }
+  @media (max-width:900px) { .tckeys { display:none; } }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -7110,6 +7271,13 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
                  align-items:baseline; padding:5px 0; font-size:13.5px; }
   .swot-n { font-family:var(--mono); font-size:11.5px; color:var(--none);
             font-variant-numeric:tabular-nums; }
+  /* §757: a line's title bold, its points one under the other. §757.1: a
+     point is a block with the bullet in a column of its own, so a point that
+     wraps continues under its first word, not under the dash. */
+  .swot-t b { font-weight:700; }
+  .swot-p { display:block; position:relative; padding-left:14px; margin-top:3px; }
+  .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
+  .swot-t b + .swot-p { margin-top:5px; }
 
   /* Temple editing: tables, with the statements in labelled rows above them. */
   .templeedit h4.mini:first-child { margin-top:0; }
@@ -8663,6 +8831,51 @@ td .reqbox { display:block; margin-top:8px; }
 td .reqbox .repkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
 td .reqbox textarea.reqfld { width:100%; box-sizing:border-box; margin-top:3px; font-size:12.5px; resize:none; }
 
+/* ── §767: A TACTIC'S KEY MEASURES, BY NUMBER ──────────────────────────────
+   The A2 mockup's shapes (design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html):
+   the number tag, the Supports line under a tactic, the count under a
+   measure, the folded legend and the pen's tick list. Tokens only, so the
+   dark theme and a tenant's palette carry it (§38.4). The tag's hover is
+   the panel colour so the full name on `title` has something to hang on. */
+.kmtag { display:inline-block; font-family:var(--mono); font-size:10.5px; line-height:1; padding:4px 6px;
+  border-radius:5px; background:var(--surface-2); color:var(--stone); border:1px solid var(--line);
+  white-space:nowrap; cursor:default; font-weight:600; }
+.kmtag:hover, .kmtag:focus-visible { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); outline:0; }
+/* §767.1: the tag's name, shown at once (the browser's own tooltip waits a second). */
+.kmtip { position:fixed; z-index:9999; display:none; max-width:380px; padding:7px 11px; border-radius:var(--r);
+  background:var(--panel); color:var(--panel-ink); font-size:12.5px; line-height:1.4; box-shadow:var(--shadow-md);
+  pointer-events:none; white-space:normal; }
+.kmtip.on { display:block; }
+td .kmnums { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:6px; }
+td .kmcount { display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:4px; font-size:11px; color:var(--ink-3); }
+td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
+.kmlegend { margin:8px 0 0; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface-2);
+  font-size:12px; color:var(--ink-2); }
+.kmlegend summary { cursor:pointer; padding:8px 14px; list-style:none; }
+.kmlegend summary::-webkit-details-marker { display:none; }
+.kmlegend summary::before { content:"\25B8"; color:var(--ink-3); font-size:11px; margin-right:8px; }
+.kmlegend[open] summary::before { content:"\25BE"; }
+.kmlegend .kmrows { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; padding:2px 14px 12px; }
+.kmlegend .kmrows .kmtag { align-self:start; }
+td .kmpick { display:block; margin-top:8px; }
+/* §767.2: the closed box, one line; the ticks open under it in the flow. */
+td .kmdrop { display:block; border:1px solid var(--field-line); border-radius:var(--r); background:var(--surface); }
+td .kmdrop summary { display:flex; align-items:center; gap:6px; padding:6px 8px; cursor:pointer; list-style:none; min-height:32px; }
+td .kmdrop summary::-webkit-details-marker { display:none; }
+td .kmdrop .kmsum { display:flex; flex-wrap:wrap; gap:4px; flex:1 1 auto; min-width:0; }
+td .kmdrop .kmnone { color:var(--ink-3); font-size:12.5px; }
+td .kmdrop .kmchev { flex:none; width:8px; height:8px; border-right:1.5px solid var(--ink-3); border-bottom:1.5px solid var(--ink-3);
+  transform:rotate(45deg); margin:-3px 4px 0 0; }
+td .kmdrop[open] .kmchev { transform:rotate(-135deg); margin-top:3px; }
+td .kmdrop[open] summary { border-bottom:1px solid var(--line-soft); }
+td .kmlist { display:block; background:var(--surface); }
+td .kmlist label { display:flex; gap:8px; align-items:flex-start; padding:6px 8px; border-bottom:1px solid var(--line-soft);
+  cursor:pointer; font-size:12.5px; line-height:1.35; font-weight:400; color:var(--ink); }
+td .kmlist label:last-child { border-bottom:0; }
+td .kmlist label:hover { background:var(--surface-2); }
+td .kmlist input { width:14px; height:14px; margin:2px 0 0; flex:none; accent-color:var(--panel); }
+td .kmlist .kmname { min-width:0; }
+
 /* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
    boxes should be the same size and squeeze them where their hz size should
    match the compile cell ... so we can give space for the other columns").
@@ -9480,6 +9693,12 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
                 padding:22px 0; font-size:29px; line-height:1.35; break-inside:avoid;
                 border-bottom:1px solid var(--line-soft); }
   ol.dswot .n { font-family:var(--mono); font-size:18px; color:var(--none); }
+  /* §757: the same shape on the slide — title bold, points under it.
+     §757.1: bullets with a hanging indent; the gaps scale with the slide's
+     type (Islam: the points "looks too tight together in the presentation"). */
+  ol.dswot .swot-p { display:block; position:relative; padding-left:1.1em; margin-top:.45em; line-height:1.35; }
+  ol.dswot .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
+  ol.dswot .swot-t b + .swot-p { margin-top:.55em; }
   .d-swot h2 { padding-left:18px; }
   .d-swot.t-good h2 { border-left:5px solid var(--good); }
   .d-swot.t-bad h2 { border-left:5px solid var(--bad); }

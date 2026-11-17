@@ -71713,3 +71713,5 @@ Islam, of a free chat's deliverable drawn as one block of text: *"the deliverabl
 
 The full run on §783 and §784 together: `checks/copilot.mjs` **385 passed, 0 failed**; `checks/shell.mjs` **613 ok, 10 failed**, the known ten; `tsc`, `generated-in-step` and `release-stamp` clear.
 
+**§783 AND §784 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §782, so the merge is a fast-forward carrying both — `47308021..c1e026a6`. No migrations; nobody signed out.
+

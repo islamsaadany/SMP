@@ -71670,3 +71670,5 @@ Islam: *"in the builder or refiner allow me to paste pictures as well with data 
 
 The full run: `checks/copilot.mjs` **378 passed, 0 failed**; `checks/shell.mjs` **602 ok, 11 failed** — the known ten and that §670 red, since fixed (3i **100 ok, 1 failed**, the known slim strip; 3p **18 ok, 0 failed**); `tsc`, `generated-in-step` and `release-stamp` clear.
 
+**§780 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §779, so the merge is a fast-forward: no renumbering, no second record to join — `c111125e..8ddabc26`. **Migration 038** widens the Copilot's two file-kind fences; it is additive and idempotent, and runs with the deploy's migrations. Nobody signed out.
+

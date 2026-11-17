@@ -122,6 +122,8 @@ def fresh(browser, port):
     pg = ctx.new_page()
     pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
     pg.goto("http://127.0.0.1:%d/raya-trade" % port)
+    pg.wait_for_selector("#units [data-welcomego]", timeout=15000)
+    pg.click("#units [data-welcomego]")   # §775: the screen is asked for, never offered
     pg.wait_for_selector(".welcomeover", timeout=15000)
     return ctx, pg
 

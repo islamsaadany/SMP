@@ -66249,14 +66249,30 @@ var WELCOME = (function(){
     catch(e){ return false; }
   }
 
+  /* ── §775 · IT NO LONGER OFFERS ITSELF ─────────────────────────────
+     Islam, opening a client and meeting the screen over Strategy: *"why is
+     the client opening on the welcome window? didn't we make it open on the
+     strategy earlier as a default?"* — and, of the three ways put to him,
+     *"go with the first option, stop it showing on its own."*
+
+     So the greeting is never drawn unasked: the platform lands on the
+     module's page and nothing stands over it. The screen itself is whole
+     and the house mark is its one door (`open()`, §185) — what is waiting
+     on you, your pages and the cycle are a press away rather than in front
+     of every sign-in. `offer()` stays as the one place land() asks, and it
+     declines; the silences it used to weigh are kept beside it as a record
+     of what the screen once did, and `seenThisSession` / `markDone` keep
+     their meaning for the checks and the door's memory. With the greeting
+     declining, the intro round offers itself to a first-timer exactly as it
+     already did on a reload (land(): the tour is offered where the welcome
+     declined), and the office is never offered it (§118). */
   function offer(person){
     if (!person) return false;
     if (location.protocol === "file:") return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
     if (deepAddress()) return false;
     if (seenThisSession()) return false;
-    try { build(person); } catch(e){ box = null; return false; }
-    return true;
+    return false;   /* §775: asked for, never offered */
   }
 
   /* ── ASKING FOR IT BACK (§185) ──────────────────────────────────────

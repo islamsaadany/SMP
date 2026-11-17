@@ -71745,7 +71745,7 @@ The full browser run on §786: `checks/shell.mjs` **621 ok, 10 failed**, the kno
 
 **§786 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §785, so the merge is a fast-forward. No migrations; nobody signed out.
 
-## §787 — The whole strategy on paper, from the reading window, the office's alone (2026-11-17)
+## §789 — The whole strategy on paper, from the reading window, the office's alone (2026-11-17)
 
 Islam: *"can we have printing options from the reading option as a printing option. to print the strategy in a good format."* Two shapes drawn in chat — the whole strategy as one document, or the open tab alone — and his word: *"go ahead with option 1, the whole strategy"*. Then, asked whether it should print or download a PDF and whether only the SMO should have it: *"smo only"*. The print-or-PDF question answered itself the way §305 answered it for the deck: the browser's print dialog has Save as PDF in it, so one control gives both, and a PDF builder of its own would be a second copy of every table in the window to keep in step.
 
@@ -71756,12 +71756,12 @@ Islam: *"can we have printing options from the reading option as a printing opti
 - **Checked**: `checks/reading-print.py` **28/0** on this build, **red on the build before** (the readers, the control, the gate); both ends of the gate, the press, nothing shown on screen, the paper's shape, the Foundation section the tab's own markup character for character, the put-back, the key, the company's paper. Rendered to PDF here and read page by page for the company and for Mobile.
 - **On the branch, not merged.**
 
-### §787.1 — A company that plans its own strategy (El Abd's shape), 2026-11-17
+### §789.1 — A company that plans its own strategy (El Abd's shape), 2026-11-17
 
 Islam: *"Same for a company planned strategy like elabd"*. The paper already took that shape — the sections are the window's own tabs, and a company holding its own directions (§447, the units' layer off) reads Foundation · Analysis · Directions · Overall performance with its own D-coded directions — but two things were wrong in it, found by making the shape here (a unit's directions copied onto the company, the units off) and rendering it:
 
 - **It was named "Strategy".** The subject's name came from the top button's word, which §570 makes *Strategy* when there are no units, so the cover read *Strategy* over *Strategy · H1 2026* and the title *Strategy · Raya Trade · Strategy*. With no units the subject is the company, by its name; the cover's small client line is left out where it would repeat the title, and the title is *Strategy · <client>*.
-- **A direction's line could sit alone at the foot of a page**, its tables on the next, once §787 took the keep-with-next off the line (which pushed whole directions). On paper the line and the FIRST table are wrapped together (`.rpkeep`, built on the press, never on the screen) and that wrapper does not split — a far smaller thing to move than a direction, so pages fill and no heading is orphaned. Measured on the company's and on Mobile's paper.
+- **A direction's line could sit alone at the foot of a page**, its tables on the next, once §789 took the keep-with-next off the line (which pushed whole directions). On paper the line and the FIRST table are wrapped together (`.rpkeep`, built on the press, never on the screen) and that wrapper does not split — a far smaller thing to move than a direction, so pages fill and no heading is orphaned. Measured on the company's and on Mobile's paper.
 - **Checked**: `checks/reading-print.py` **32/0** — §10 makes the shape, prints it, and asserts the name once on the cover and in the title, the company's own directions open with each line kept with its first table, the tabs in order.
 - **On the branch, not merged.**
 

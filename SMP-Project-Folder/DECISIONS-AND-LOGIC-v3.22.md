@@ -71741,3 +71741,7 @@ Islam, with a screenshot of a free chat: *"The Copilot could not answer just now
 - **A second, small ask lays the draft out.** When a free chat in Foundation, SWOT, Competitive Discipline, Pillars/Directions or Tactical Plans answers with a draft, the Copilot asks once more, with that part's shape alone as the schema — every field required, an unknown score 0 and an unknown evidence "" — and the draft's own words as the question (`askPlanShape`). The shape comes back cut by the same `planOf`; if the second ask fails, the draft stands and offers *Lay it out for the plan*, as an older draft does. This also makes the layout the product's, not left to the model choosing to add it (what Islam was offered before the screenshot came).
 - **Checked**: `checks/copilot.mjs` **388 passed, 0 failed** — the answer's schema has at most 16 optional fields and no plan in it, each part's shape none; a free chat's draft in Competitive Discipline asked as before, then laid out by a second ask told the shape alone, the draft keeping it. `checks/shell.mjs` 3q **12 ok, 0 failed**, 3j2 **12 ok, 0 failed**, 3f the known four.
 
+The full browser run on §786: `checks/shell.mjs` **621 ok, 10 failed**, the known ten.
+
+**§786 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §785, so the merge is a fast-forward. No migrations; nobody signed out.
+

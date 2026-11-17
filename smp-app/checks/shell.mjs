@@ -223,8 +223,21 @@ await section("2 · the address names the page, and the page names the address",
      the MODULE'S HOME SCREEN — offered where the address names no page, and
      never over one it does. Both ends in one session, or a build that lost
      the overlay altogether passes the half that matters here (§113.8). */
+  /* the tour's first-visit card is the tour's (its own checks); this line is
+     about the welcome, so the session has said "later" to the tour */
+  await page.evaluate(() => { try { sessionStorage.setItem("smp.tour.later", "1"); } catch (e) {} });
   await open("/raya-trade/strategy");
-  check(await page.evaluate(() => !!document.querySelector(".welcomeover")), "the shell's own welcome overlay is offered at the module's home — Strategy's welcome is the welcome (§360, §360.9)");
+  /* §777 (carried for main's §776): THE WELCOME IS ASKED FOR, NEVER OFFERED —
+     the module's home lands bare and the house mark opens it; both ends, as
+     main's door-landing check now has it. A first visit is offered the tour's
+     card over the page (the tour's own, §776 left it); it is closed first, as
+     a person would, and the house pressed. */
+  await page.waitForTimeout(1200);
+  const bare = await page.evaluate(() => !document.querySelector(".welcomeover"));
+  const ce = await page.click("#units [data-welcomego]", { timeout: 5000 }).then(() => "", (e) => String(e.message).replace(/\u001b\[[0-9;]*m/g, "").split("\n").filter((l) => /intercept|visible|stable|outside/.test(l)).slice(0, 2).join(" | ").replace(/"/g, "'"));
+  await page.waitForSelector(".welcomeover", { timeout: 8000 }).catch(() => {});
+  const st = await page.evaluate(() => ({ over: !!document.querySelector(".welcomeover"), tour: (document.getElementById("tourdock") || {}).hidden, showing: typeof WELCOME !== "undefined" && WELCOME.showing ? WELCOME.showing() : null, cls: Array.from(document.body.children).map((x) => x.className).filter((c) => /welc/.test(String(c))) }));
+  check(bare && st.over, "the module's home lands bare and the house mark opens the shell's own welcome — Strategy's welcome is the welcome (§360, §360.9, §776)", JSON.stringify({ bare, st, ce }));
   /* REWRITTEN, NEVER LOOSENED (§218, §400). Home stopped being an overlay
      with a Continue bar: it is a page inside the chrome, the house is lit
      while it is open, and the way out is the navigation itself. So the claim

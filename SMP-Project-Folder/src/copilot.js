@@ -375,7 +375,7 @@ var COPILOT = (function(){
   /* §779 — words said in the panel on a part the plan holds: the part's own
      "start from existing" opens, and the words are its first change, sent as
      soon as the chat can take one; until then they wait in its box. */
-  var PENDSAY = null, PENDAPPLY = "";
+  var PENDSAY = null, PENDAPPLY = "", PENDLAY = "";
   function sayToPlan(text, file){
     var c = document.querySelector("[data-cop-hiddencards] .copplan"); if (!c) return false;
     PENDSAY = { sec: section(), text: text, file: file || null, at: Date.now() }; delete STARTTEXT[key()]; c.click(); return true;
@@ -414,7 +414,7 @@ var COPILOT = (function(){
       if (ASKDEL === c.id) return '<div class="coprow ask" data-cop-row="' + E(c.id) + '"><span class="copt">' + E(c.title) + '</span>' +
         '<span class="copaskrow">Delete? <button type="button" class="copbtn quiet" data-cop-delete-no>Cancel</button>' +
         '<button type="button" class="copbtn danger solid" data-cop-delete-yes="' + E(c.id) + '">Delete</button></span></div>';
-      if (RENAME === c.id) return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
+      if (RENAME === c.id && !RENAMEHEAD) return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
         '<input class="fld copren" data-cop-rename-box="' + E(c.id) + '" value="' + E(c.title) + '" aria-label="Chat name" maxlength="160"></div>';
       var menu = MENU === c.id ? '<div class="copmenu" role="menu">' + (arch
           ? '<button type="button" role="menuitem" data-cop-restore-chat="' + E(c.id) + '">Restore</button>' +
@@ -907,13 +907,25 @@ var COPILOT = (function(){
   window.__copSize = { steps: ZOOMS, index: function(){ return ZOOMS[zi()]; } };
 
   /* §784 — a draft in the plan's shape is drawn as the plan draws that part, and can be put on it from here */
-  var PLAN_TYPE = { compete: "compete", analysis: "swot", foundation: "foundation" };
+  var PLAN_TYPE = { compete: "compete", analysis: "swot", foundation: "foundation", directions: "directions", execution: "execution" };
   function planDraftHtml(plan){
     if (!plan) return "";
     if (plan.section === "foundation") { var words = partWords(); return '<div class="copfcards">' + plan.foundation.map(function(x){ return '<div class="copfcard"><h5>' + E(words[x.key] || x.key) + '</h5>' + cardBody(x.text || "", x.key) + '</div>'; }).join("") + '</div>'; }
     return typedBodyHtml({ type: PLAN_TYPE[plan.section] }, plan);
   }
-  function planGaps(plan){ return plan && plan.section === "compete" ? plan.compete.values.filter(function(v){ return !(v.measure || []).length; }).length : 0; }
+  /* what the plan needs and the draft does not say: a value without a measure; a Direction not fully scored; an item without a measure */
+  function planGaps(plan){
+    if (!plan) return 0;
+    if (plan.section === "compete") return plan.compete.values.filter(function(v){ return !(v.measure || []).length; }).length;
+    if (plan.section === "directions") return plan.directions.filter(function(o){ return !(o.urgency && o.importance && o.ease); }).length;
+    if (plan.section === "execution") return plan.items.filter(function(it){ return !(it.measures || []).length; }).length;
+    return 0;
+  }
+  var GAPWORD = { compete: [" value has no measure yet.", " values have no measure yet."], directions: [" Direction is not fully scored yet.", " Directions are not fully scored yet."], execution: [" item has no measure yet.", " items have no measure yet."] };
+  function gapLine(plan){ var n = planGaps(plan), w = GAPWORD[plan && plan.section]; return n && w ? " " + n + w[n === 1 ? 0 : 1] : ""; }
+  /* §785 — A DRAFT MADE BEFORE THE PLAN'S SHAPE (Islam: "I still have a chat with a deliverable with no add to plan"): one press asks the Copilot to lay the latest draft out in the plan's shape, in the same chat, so it can be put on the plan */
+  var LAYTEXT = "Lay the latest draft out in the plan’s shape, ready to put on the plan.";
+  function canLay(sec){ return !!PLAN_TYPE[sec]; }
   function draftPanelHtml(m){
     var p = m.part, latest = true;
     for (var i = PANE.messages.length - 1; i >= 0; i--) if (hasDraft(PANE.messages[i])) { latest = PANE.messages[i] === m; break; }
@@ -924,9 +936,11 @@ var COPILOT = (function(){
          Copilot; what goes on the plan is built step by step. §784 — unless
          it came in the plan's own shape: then it can go on from here. */
       (p.plan ? (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-putplan="' + E(m.id) + '">Put on ' + E(placeWord()) + '’s plan</button>' : '') +
-          '<span class="copm copdstay" data-cop-draftstay>Laid out as the plan’s ' + E(stripWord(PANE.chat.section || section())) + '.' + (planGaps(p.plan) ? ' ' + planGaps(p.plan) + (planGaps(p.plan) === 1 ? ' value has' : ' values have') + ' no measure yet.' : '') + '</span>'
-        : '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
-          (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : ''));
+          '<span class="copm copdstay" data-cop-draftstay>Laid out as the plan’s ' + E(stripWord(PANE.chat.section || section())) + '.' + gapLine(p.plan) + '</span>'
+        : canLay(PANE.chat.section || section()) && canEdit() && !PANE.chat.archived
+          ? '<button type="button" class="copopt rec" data-cop-layout-plan>Lay it out for the plan</button><span class="copm copdstay" data-cop-draftstay>This draft is not in the plan’s shape yet, so it cannot go on the plan as it is.</span>'
+          : '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
+            (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : ''));
     return '<section class="copout" data-cop-out aria-label="Draft">' +
       '<div class="copouth"><b>' + E(p.draft.title || "Draft") + '</b><span class="copm">' + (latest ? 'Latest draft' : 'An earlier draft') + '</span>' +
         '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close the draft" title="Close">×</button></div>' +
@@ -946,7 +960,9 @@ var COPILOT = (function(){
   function sheetBtn(k, label){ return '<button type="button" class="copbtn quiet copsheetb copsheetb-' + k + '" data-cop-sheet="' + k + '" aria-expanded="' + (SHEET === k) + '">' + label + '</button>'; }
   function chatHtml(){
     var c = PANE.chat;
-    var head = '<h3 class="coph">' + E(c.title) + '</h3>' + (c.archived ? '<span class="copchip">Archived</span>' : '');
+    /* §785 — the chat's name is renamed where it stands, in its header (Islam: "allow me to change the chat name"); the rail's ⋯ › Rename does the same */
+    var head = (RENAME === c.id && RENAMEHEAD ? '<input class="fld copren coprenhead" data-cop-rename-box="' + E(c.id) + '" value="' + E(c.title) + '" aria-label="Chat name" maxlength="160">'
+      : canEdit() && !c.archived ? '<h3 class="coph"><button type="button" class="copnamebtn" data-cop-renamehead="' + E(c.id) + '" title="Rename this chat">' + E(c.title) + '</button></h3>' : '<h3 class="coph">' + E(c.title) + '</h3>') + (c.archived ? '<span class="copchip">Archived</span>' : '');
     var n = PANE.messages.length;
     var msgs = PANE.messages.map(function(m, i){
       if (m.who === "ai") {
@@ -2013,6 +2029,8 @@ var COPILOT = (function(){
        Foundation's page, §524, as the pattern): the rail is a library only
        if what it holds can be read and applied from here. */
     var typed = !editing && cur && cur.body && typeof cur.body === "object" ? typedBodyHtml(d, cur.body) : "";
+    if (!typed && !editing && d.type === "free" && fchat && canLay(d.section) && canEdit())
+      body += '<div class="copplanrow" data-cop-planrow><span class="copsvst warn">Not in the plan’s shape, so it cannot go on the plan as it is</span><button type="button" class="copbtn solid" data-cop-layfromdeliv="' + E(fchat) + '" data-cop-laysec="' + E(d.section) + '">Lay it out for the plan</button></div>';
     if (typed) {
       var onN = d.applied ? d.applied.n : 0;
       body = typed + '<div class="copplanrow" data-cop-planrow>' + (onN
@@ -2107,14 +2125,17 @@ var COPILOT = (function(){
     } else if (d.type === "directions" || d.type === "capabilities") {
       var st = { mode: d.type, withCaps: (b.capabilities || []).length > 0, options: (b.directions || []).map(function(o){ var x = JSON.parse(JSON.stringify(o)); x.go = true; return x; }), caps: (b.capabilities || []).map(function(x){ var y = JSON.parse(JSON.stringify(x)); y.keep = true; return y; }) };
       capIds = st.caps.map(function(x){ return x.planId; }).filter(Boolean);
-      what = vword + " — " + st.options.length + " Directions and " + st.caps.length + " Capabilities onto the plan."; replaces = "A Direction with the same name is updated, a new one is added; nothing is removed. " + arch;
+      what = vword + " — " + st.options.length + " Directions and " + st.caps.length + " Capabilities onto the plan."; replaces = todayWord("directions") + "A Direction with the same name is updated, a new one is added; nothing is removed. " + arch;
       can = function(){ var h = dvHolder(); return d.type === "capabilities" ? typeof addCapability === "function" : !!(h && Array.isArray(h.items) && typeof addPillar === "function"); };
       write = function(){ return dvWritePlan(st); };
     } else if (d.type === "execution") {
-      var ex = { period: b.period, items: b.items || [] };
+      var ex = { period: b.period, items: JSON.parse(JSON.stringify(b.items || [])) };
+      /* §785 — an item from a chat names its Direction; it is tied to the plan's row of that name, and one the plan has not is left out, said */
+      var plRows = (dvHolder() || {}).items || [], unnamed = [];
+      ex.items.forEach(function(it){ if (it.kind === "direction" && !it.planId) { var hit2 = plRows.filter(function(x){ return x && String(x.name || "").trim().toLowerCase() === String(it.title || "").trim().toLowerCase(); })[0]; if (hit2) it.planId = hit2.id; else { it.out = true; unnamed.push(it.title); } } });
       capIds = ex.items.filter(function(it){ return it.kind !== "direction"; }).map(function(it){ return it.planId; }).filter(Boolean);
       var exIns = ex.items.filter(function(it){ return !it.out && !it.gone; });
-      what = vword + " — the measures and tactics of " + exIns.length + " items, and the plan period, onto the plan." + (ex.items.length > exIns.length ? " " + (ex.items.length - exIns.length) + " left out, untouched." : ""); replaces = "What each item showed replaces what the plan holds for it: a line with the same name is updated, a new one is added, a line dropped is dropped. " + arch;
+      what = vword + " — the measures and tactics of " + exIns.length + (exIns.length === 1 ? " item" : " items") + ", and the plan period, onto the plan." + (ex.items.length > exIns.length ? " " + (ex.items.length - exIns.length) + " left out, untouched." : "") + (unnamed.length ? " Not on the plan’s Pillars/Directions, so left out: " + E(unnamed.join(", ")) + "." : ""); replaces = todayWord("execution") + "What each item showed replaces what the plan holds for it: a line with the same name is updated, a new one is added, a line dropped is dropped. " + arch;
       can = function(){ return !!ex.period; };
       write = function(){ return exWritePlan(ex); };
     } else if (d.type === "swot") {
@@ -2164,6 +2185,7 @@ var COPILOT = (function(){
     fitPane(); fitBox();
     applyRoad(); applyStart();
     if (PENDSAY) setTimeout(pendingSay, 0);
+    if (PENDLAY && PANE && PANE.chat && PANE.chat.id === PENDLAY && PANE.messages && !THINKING) { PENDLAY = ""; setTimeout(function(){ send(LAYTEXT); }, 0); }
     if (PENDAPPLY && PANE && PANE.deliverable && PANE.deliverable.id === PENDAPPLY && PANE.versions && PANE.versions.length) {
       PENDAPPLY = ""; setTimeout(function(){ var ab = document.querySelector("[data-cop-dapply], [data-cop-fapply]"); if (ab) ab.click(); }, 0); }
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
@@ -3994,6 +4016,8 @@ var COPILOT = (function(){
       if (!h || !Array.isArray(h.items) || typeof addPillar !== "function") return { ok:false };
       s.options.filter(function(o){ return o.go; }).forEach(function(o){
         var p = o.planId ? h.items.filter(function(x){ return x && x.id === o.planId; })[0] : null;
+        /* §785 — a Direction from a chat comes by its name: the plan's own row of that name is updated, as the ask says */
+        if (!p) { var byName = idOf[String(o.title || "").trim().toLowerCase()]; if (byName) p = h.items.filter(function(x){ return x && x.id === byName; })[0] || null; }
         if (!p) p = addPillar(h);
         if (!p) return;
         p.name = o.title; p.urgency = o.urgency; p.importance = o.importance; p.ease = o.ease;
@@ -4591,7 +4615,7 @@ var COPILOT = (function(){
       if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); penSave(); return; }
     }
     if (ev.key === "Enter" && hit(ev, "[data-cop-rename-box]")) { ev.preventDefault(); rename(); }
-    if (ev.key === "Escape" && hit(ev, "[data-cop-rename-box]")) { RENAME = null; draw(); }
+    if (ev.key === "Escape" && hit(ev, "[data-cop-rename-box]")) { RENAME = null; RENAMEHEAD = false; draw(); }
     if (ev.key === "Escape" && (MENU || ASKDEL)) { MENU = null; ASKDEL = null; draw(); }
     if (ev.key === "Escape" && SHEET && !MENU) { SHEET = ""; draw(); }
     var g = hit(ev, "[data-cop-grip]");
@@ -4821,10 +4845,11 @@ var COPILOT = (function(){
   });
   /* Rename happens in the rail: Enter or leaving the box saves, Escape
      cancels, and an empty name keeps the old one rather than refusing. */
+  var RENAMEHEAD = false;
   function rename(){
     var b = document.querySelector("[data-cop-rename-box]"); if (!b || !RENAME) return;
     var id = RENAME, title = b.value.replace(/\s+/g, " ").trim();
-    RENAME = null;
+    RENAME = null; RENAMEHEAD = false;
     if (!title) { draw(); return; }
     act({ act:"rename", id:id, title:title }, function(){
       if (PANE && PANE.chat && PANE.chat.id === id) PANE.chat.title = title;
@@ -5006,6 +5031,8 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-notnow]"))) { NOTNOW[b.getAttribute("data-cop-notnow")] = true; draw(); return; }
+    if ((b = hit(ev, "[data-cop-layout-plan]"))) { if (PANE && PANE.chat && !THINKING) send(LAYTEXT); return; }
+    if ((b = hit(ev, "[data-cop-layfromdeliv]"))) { var lc = b.getAttribute("data-cop-layfromdeliv"), ls = b.getAttribute("data-cop-laysec"); PENDLAY = lc; openIn(ls, "chat", lc); return; }
     if ((b = hit(ev, "[data-cop-putplan]"))) {
       if (!PANE || !PANE.chat) return;
       var cid5 = PANE.chat.id, mid5 = b.getAttribute("data-cop-putplan"), msg5 = (PANE.messages || []).filter(function(x){ return String(x.id) === String(mid5); })[0];
@@ -5034,7 +5061,8 @@ var COPILOT = (function(){
     }
     if ((b = hit(ev, "[data-cop-menu]"))) { var mid2 = b.getAttribute("data-cop-menu"); MENU = MENU === mid2 ? null : mid2; ASKDEL = null; draw(); return; }
     if ((b = hit(ev, "[data-cop-archview]"))) { ARCH[place()] = !archView(); MENU = null; ASKDEL = null; RENAME = null; draw(); return; }
-    if ((b = hit(ev, "[data-cop-rename]"))) { MENU = null; RENAME = b.getAttribute("data-cop-rename"); draw(); return; }
+    if ((b = hit(ev, "[data-cop-rename]"))) { MENU = null; RENAMEHEAD = false; RENAME = b.getAttribute("data-cop-rename"); draw(); return; }
+    if ((b = hit(ev, "[data-cop-renamehead]"))) { MENU = null; RENAMEHEAD = true; RENAME = b.getAttribute("data-cop-renamehead"); draw(); return; }
     if ((b = hit(ev, "[data-cop-archive]"))) {
       var aid = b.getAttribute("data-cop-archive"); MENU = null;
       act({ act:"archiveChat", id:aid }, function(){

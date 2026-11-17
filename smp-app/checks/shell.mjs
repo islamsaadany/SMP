@@ -3269,7 +3269,7 @@ await section("3q · a chat's work laid out as the plan, and put on it (§784)",
   const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/putplan-" + n + ".png" }); };
   const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
   const keep = { ...MODEL_ANSWER };
-  let before = null;
+  let before = null, itemsBefore = null, periodBefore = null;
   try {
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
@@ -3286,9 +3286,26 @@ await section("3q · a chat's work laid out as the plan, and put on it (§784)",
     await page.press("[data-cop-starttext]", "Enter");
     /* the first answer on a part the plan holds asks what to change (§471); the draft comes with the next */
     await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
+    /* §785 — the chat renamed where it stands, in its header */
+    await page.click("[data-cop-renamehead]");
+    await page.fill(".coprenhead", "Vendor value proposition");
+    await page.press(".coprenhead", "Enter");
+    await page.waitForFunction(() => /Vendor value proposition/.test((document.querySelector(".copheadone .coph") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
+    const rn = (await asTenant(tenantId, (c) => c.query("select title from copilot_chats order by created_at desc limit 1"))).rows[0];
+    check(!!rn && rn.title === "Vendor value proposition" && /Vendor value proposition/.test(await page.evaluate(() => (document.querySelector(".copheadone .coph") || {}).textContent || "")), "§785 a chat is renamed from its header — its name pressed becomes a box, Enter keeps it", JSON.stringify(rn));
+    /* §785 — a draft not in the plan's shape (made before §784) is laid out for the plan with one press */
+    const shapedAns = JSON.parse(JSON.stringify(MODEL_ANSWER));
+    delete MODEL_ANSWER.plan;
     await page.fill("[data-cop-text]", "Lay it out with the four values we discussed");
     await page.press("[data-cop-text]", "Enter");
+    await page.waitForSelector("[data-cop-layout-plan]", { timeout: 15000 }).catch(() => {});
+    const ly = await page.evaluate(() => ({ btn: !!document.querySelector("[data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-putplan]"), stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }));
+    check(ly.btn && !ly.put && /not in the plan’s shape yet/.test(ly.stay), "§785 a draft not in the plan's shape says so and offers Lay it out for the plan", JSON.stringify(ly));
+    Object.assign(MODEL_ANSWER, shapedAns);
+    const nL = MODEL_SEEN.length;
+    await page.click("[data-cop-layout-plan]");
     await page.waitForSelector("[data-cop-dplan] [data-cop-val]", { timeout: 15000 }).catch(() => {});
+    check(JSON.stringify(MODEL_SEEN.slice(nL)).includes("Lay the latest draft out in the plan"), "§785 ...pressed, it asks the Copilot to lay the latest draft out in the plan's shape");
     const dp = await page.evaluate(() => { const d = document.querySelector("[data-cop-dplan]"); if (!d) return null;
       return { disc: (d.querySelector(".copdisc h4") || {}).textContent || "", vals: Array.from(d.querySelectorAll("[data-cop-val] h5")).map((h) => h.textContent), gap: d.querySelectorAll("[data-cop-gap]").length,
         today: Array.from(d.querySelectorAll(".copmrow .copm")).map((x) => x.textContent).join("|"), ev: !!d.querySelector("details.copev"), put: (document.querySelector("[data-cop-putplan]") || {}).textContent || "", stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }; });
@@ -3308,11 +3325,60 @@ await section("3q · a chat's work laid out as the plan, and put on it (§784)",
     const ap = await page.evaluate(() => { const w = competeHolder("mobile").compete; return { disc: w && w.discipline, vals: ((w && w.values) || []).map((v) => v.title), on: true, row: (document.querySelector("[data-cop-planrow]") || {}).textContent || "" }; });
     await shot("3-applied");
     check(ap.disc === "bts" && ap.vals.join("|") === "Vendor Growth Partner|Tech Driven Operation" && ap.on && /On the plan as v1/.test(ap.row), "§784 ...Apply writes it to Mobile's plan, and the version says it is on the plan", JSON.stringify(ap));
+    /* §785 — Pillars/Directions from a free chat, put on the plan by name: the plan's own row updated, not a second one */
+    await open("/raya-trade/strategy/mobile/copilot/directions");
+    await page.waitForSelector("[data-cop-starttext]", { timeout: 15000 });
+    itemsBefore = await page.evaluate(() => JSON.stringify(unitLike("mobile").items));
+    const d0 = await page.evaluate(() => { const it = unitLike("mobile").items.filter((p) => p && p.name); return { n: it.length, name: it[0].name }; });
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, { reply: "Here they are, scored.", draft: { title: "Mobile · Pillars/Directions", groups: [{ title: "Directions", items: [{ text: d0.name }, { text: "Vendor data services" }] }] },
+      plan: { directions: [{ title: d0.name, urgency: 4, importance: 4, ease: 3 }, { title: "Vendor data services", urgency: 3, importance: 2 }] } });
+    await page.fill("[data-cop-starttext]", "Score our directions again");
+    await page.press("[data-cop-starttext]", "Enter");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
+    if (!(await page.$("[data-cop-dplan]"))) { await page.fill("[data-cop-text]", "Lay them out"); await page.press("[data-cop-text]", "Enter"); }
+    await page.waitForSelector("[data-cop-dplan] .copdtyped", { timeout: 15000 }).catch(() => {});
+    const dd = await page.evaluate(() => ({ stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "", put: !!document.querySelector("[data-cop-putplan]"), txt: (document.querySelector("[data-cop-dplan]") || {}).textContent || "" }));
+    await shot("4-directions");
+    check(dd.put && /Pillars\/Directions/.test(dd.stay) && /1 Direction is not fully scored yet/.test(dd.stay) && /48 of 64/.test(dd.txt), "§785 a free chat's Pillars/Directions are drawn as the plan's, scored, the unscored one said, and can be put on the plan", JSON.stringify(dd));
+    await page.click("[data-cop-putplan]");
+    await page.waitForSelector("#modal-b [data-cop-planapply-yes]", { timeout: 15000 }).catch(() => {});
+    const dm = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
+    check(/Today the plan holds \d+ Directions/.test(dm) && /same name is updated/.test(dm), "§785 ...asked with what the plan holds today", dm.slice(0, 300));
+    await page.click("#modal-b [data-cop-planapply-yes]");
+    await page.waitForFunction(() => /On the plan as v1/.test((document.querySelector("[data-cop-planrow]") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const d1 = await page.evaluate((nm) => { const it = unitLike("mobile").items.filter((p) => p && p.name); const same = it.filter((p) => p.name === nm); return { n: it.length, same: same.length, sc: same[0] ? [same[0].urgency, same[0].importance, same[0].ease].join() : "", added: it.some((p) => p.name === "Vendor data services") }; }, d0.name);
+    check(d1.same === 1 && d1.sc === "4,4,3" && d1.added && d1.n === d0.n + 1, "§785 ...Apply updates the plan's Direction of that name — not a second one — and adds the new one", JSON.stringify({ d0, d1 }));
+    /* §785 — Tactical Plans from a free chat: each item tied to the plan's Direction of its name; one the plan has not is left out, said */
+    await open("/raya-trade/strategy/mobile/copilot/execution");
+    await page.waitForSelector("[data-cop-starttext]", { timeout: 15000 });
+    periodBefore = await page.evaluate(() => JSON.stringify({ f: GROUP[(SMPRules.PLAN_FROM || "planFrom")], t: GROUP[(SMPRules.PLAN_TO || "planTo")] }));
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, { reply: "Here are the tactical plans.", draft: { title: "Mobile · Tactical Plans", groups: [{ title: d0.name, items: [{ text: "Tier 2 revenue ≥ 100%" }] }] },
+      plan: { period: { year: 2027, fromQuarter: 1, toQuarter: 4 }, items: [{ direction: d0.name, measures: [{ name: "Tier 2 revenue growth", target: "≥ 100%" }], tactics: [{ name: "Sary merchant push", owner: "Hend", quarters: [1, 2] }] },
+        { direction: "Nowhere on the plan", measures: [{ name: "x", target: "1" }], tactics: [] }] } });
+    await page.fill("[data-cop-starttext]", "Draft the tactical plans");
+    await page.press("[data-cop-starttext]", "Enter");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
+    if (!(await page.$("[data-cop-dplan]"))) { await page.fill("[data-cop-text]", "Lay them out"); await page.press("[data-cop-text]", "Enter"); }
+    await page.waitForSelector("[data-cop-putplan]", { timeout: 15000 }).catch(() => {});
+    await page.click("[data-cop-putplan]");
+    await page.waitForSelector("#modal-b [data-cop-planapply-yes]", { timeout: 15000 }).catch(() => {});
+    const em = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
+    await shot("5-tactical-ask");
+    check(/measures and tactics of 1 item,/.test(em) && /so left out: Nowhere on the plan/.test(em), "§785 Tactical Plans from a chat are tied to the plan's Directions by name; one the plan has not is left out and said so before Apply", em.slice(0, 400));
+    await page.click("#modal-b [data-cop-planapply-yes]");
+    await page.waitForFunction(() => /On the plan as v1/.test((document.querySelector("[data-cop-planrow]") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const e1 = await page.evaluate((nm) => { const p = unitLike("mobile").items.filter((x) => x && x.name === nm)[0] || {}; return { m: (p.measures || []).map((x) => x.name + " " + x.target), t: (p.tactics || []).map((x) => x.name + " q1=" + x.q1 + " q3=" + x.q3) }; }, d0.name);
+    check(e1.m.includes("Tier 2 revenue growth ≥ 100%") && e1.t.includes("Sary merchant push q1=1 q3=0"), "§785 ...Apply writes the measures and tactics onto that Direction", JSON.stringify(e1));
     check(!errs.length, "no page errors", errs.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
-    if (before !== null) { try { await page.evaluate(async (b) => { const hold = competeHolder("mobile"); if (hold) hold.compete = JSON.parse(b); await new Promise((r) => (typeof SYNC !== "undefined" && SYNC.saveNow ? SYNC.saveNow(() => r()) : r())); }, before); } catch (e) {} }
+    if (before !== null || itemsBefore !== null || periodBefore !== null) { try { await page.evaluate(async (a) => { if (a.b !== null) { const hold = competeHolder("mobile"); if (hold) hold.compete = JSON.parse(a.b); }
+      if (a.i !== null) unitLike("mobile").items = JSON.parse(a.i);
+      if (a.p !== null) { const pp = JSON.parse(a.p); GROUP[(SMPRules.PLAN_FROM || "planFrom")] = pp.f; GROUP[(SMPRules.PLAN_TO || "planTo")] = pp.t; }
+      await new Promise((r) => (typeof SYNC !== "undefined" && SYNC.saveNow ? SYNC.saveNow(() => r()) : r())); }, { b: before, i: itemsBefore, p: periodBefore }); } catch (e) {} }
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
   }

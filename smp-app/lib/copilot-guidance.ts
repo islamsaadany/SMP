@@ -111,6 +111,8 @@ export const GUIDE: Record<Section, Guide> = {
 const PLAN_SHAPE: Partial<Record<string, string>> = {
   compete: "`plan.discipline` — btc (Best Total Cost), bts (Best Total Solution) or bp (Best Product); `plan.values` — each value proposition with its `title`, `how` (the actions, one per line), `measure` (each measure with its target and today's figure when known, e.g. \"Vendor retention rate ≥ 80% (today 72%)\") and `evidence`.",
   analysis: "`plan.swot` — `s`, `w`, `o`, `t`, each line with a short `title`, its `description` and its `evidence`.",
+  directions: "`plan.directions` — each Pillar/Direction with its `title`, its `urgency`, `importance` and `ease`, each 1 to 4 as Forefront's method scores them (leave a score out when it was not agreed), and `why` in a line.",
+  execution: "`plan.period` — the `year` and the quarters it runs, `fromQuarter` to `toQuarter` (1–4); `plan.items` — one entry per Pillar/Direction, its `direction` named exactly as the plan names it, with its `measures` (each `name` and `target`) and its `tactics` (each `name`, its `owner`, and the `quarters` it runs in).",
   foundation: "`plan.foundation` — one entry per part you drafted, `key` who (Who we are), asp (Winning Aspiration), eim (End in Mind), pur (Purpose), obj (Key Objectives, one per line) or val (Core Values, one per line), and its `text`.",
 };
 export function guidanceFor(section: Section, method = "", templates: string[] = [], free: string | null = null): string {

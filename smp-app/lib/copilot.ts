@@ -471,6 +471,8 @@ export function typedFromPlan(plan: any): { type: string; body: Record<string, u
   if (!plan || typeof plan !== "object") return null;
   if (plan.section === "compete" && plan.compete) return { type: "compete", body: { compete: plan.compete } };
   if (plan.section === "analysis" && plan.swot) return { type: "swot", body: { swot: plan.swot } };
+  if (plan.section === "directions" && Array.isArray(plan.directions)) return { type: "directions", body: { directions: plan.directions, capabilities: [] } };
+  if (plan.section === "execution" && Array.isArray(plan.items) && plan.period) return { type: "execution", body: { period: plan.period, items: plan.items } };
   if (plan.section === "foundation" && Array.isArray(plan.foundation))
     return { type: "foundation", body: { foundation: plan.foundation.map((x: any) => ({ key: x.key, name: PART_NAME[x.key] || x.key, text: x.text })), years: [null, null] } };
   return null;

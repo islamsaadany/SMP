@@ -161,6 +161,15 @@ const ps = planOf("analysis", { swot: { s: [{ title: "Reach", description: "300 
 const pf = planOf("foundation", { foundation: [{ key: "asp", text: "First choice\nfor vendors" }, { key: "asp", text: "again" }, { key: "nope", text: "x" }] });
 check("§784 a SWOT keeps its four boxes; a Foundation its known parts, once each, its lines kept",
   !!ps && ps.swot.s.length === 1 && ps.swot.t.length === 0 && !!pf && pf.foundation.length === 1 && pf.foundation[0].text === "First choice\nfor vendors", JSON.stringify([ps, pf]));
+/* §785 — Pillars/Directions and Tactical Plans */
+const pd = planOf("directions", { directions: [{ title: "Grow Tier 2", urgency: 4, importance: 3, ease: 9 }, { title: "grow tier 2", urgency: 1 }, { title: "Digital ops", urgency: 2, importance: 2, ease: 2, why: "SWOT" }] });
+check("§785 Pillars/Directions keep their scores 1–4 — one out of range left unscored, never moved — and a name once",
+  !!pd && pd.directions.length === 2 && pd.directions[0].ease === null && pd.directions[0].urgency === 4 && pd.directions[1].why === "SWOT" && pd.capabilities.length === 0, JSON.stringify(pd));
+const pe = planOf("execution", { period: { year: 2027, fromQuarter: 2, toQuarter: 3 }, items: [{ direction: "Grow Tier 2", measures: [{ name: "Tier 2 revenue", target: "≥ 100%" }], tactics: [{ name: "Sary push", owner: "Hend", quarters: [1, 2, 3, 3] }] }, { direction: "Empty", measures: [], tactics: [] }] });
+const pe0 = planOf("execution", { items: [{ direction: "X", tactics: [{ name: "t" }] }] });
+check("§785 Tactical Plans keep the period as months, each Direction by name with its measures and tactics (quarters inside the period, once), an empty one dropped; no period given is this year",
+  !!pe && pe.period.y === 2027 && pe.period.m1 === 4 && pe.period.m2 === 9 && pe.items.length === 1 && pe.items[0].kind === "direction" && pe.items[0].planId === "" && pe.items[0].tactics[0].quarters.join() === "2,3" &&
+  !!pe0 && pe0.period.y === new Date().getFullYear() && pe0.period.m1 === 1 && pe0.period.m2 === 12, JSON.stringify([pe, pe0 && pe0.period]));
 const shp = shapeAnswer({ reply: "Here.", draft: { title: "T", groups: [{ title: "G", items: [{ text: "x" }] }] }, plan: PL }, [], "compete"), shp0 = shapeAnswer({ reply: "Here.", plan: PL }, [], "compete");
 check("§784 the shape rides with a draft only", !!shp && !!shp.part.plan && shp.part.plan.section === "compete" && !!shp0 && !shp0.part.plan);
 check("an answer with nothing in it is a failure, not an empty bubble (§124)", shapeAnswer({ reply: "  ", options: [{ label: "x" }] }, []) === null);

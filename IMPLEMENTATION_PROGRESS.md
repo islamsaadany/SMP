@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-17 — Every part laid out as the plan; rename from the header (§785).** Pillars/Directions and Tactical Plans now draft in the plan's shape too and go on the plan by name (a Direction updated, not added twice; an item tied to its Direction, one the plan lacks left out and said). An older draft offers Lay it out for the plan. A chat's name is renamed by pressing it in its header.
+
 **2026-11-17 — A chat's work laid out as the plan, and put on it (§784).** A free chat in Foundation, SWOT or Competitive Discipline drafts in the plan's own shape, drawn as the plan draws it (Discipline as value cards with measures and today's figure), gaps said; Save keeps it as that part, and Put on the plan asks with what the plan holds today, then writes it and archives the old.
 
 **2026-11-17 — The deliverables' hide button in their header (§783).** As the Chats header has its own, first.

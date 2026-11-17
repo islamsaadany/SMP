@@ -78,6 +78,11 @@ export const SCHEMA = {
         values: { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, how: { type: "ARRAY", items: { type: "STRING" } }, measure: { type: "ARRAY", items: { type: "STRING" } }, evidence: { type: "STRING" } }, required: ["title"] } },
         swot: { type: "OBJECT", properties: Object.fromEntries(["s", "w", "o", "t"].map((L) => [L, { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, description: { type: "STRING" }, evidence: { type: "STRING" } }, required: ["title"] } }])) },
         foundation: { type: "ARRAY", items: { type: "OBJECT", properties: { key: { type: "STRING", enum: ["who", "asp", "eim", "pur", "obj", "val"] }, text: { type: "STRING" } }, required: ["key", "text"] } },
+        directions: { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, urgency: { type: "INTEGER" }, importance: { type: "INTEGER" }, ease: { type: "INTEGER" }, why: { type: "STRING" } }, required: ["title"] } },
+        period: { type: "OBJECT", properties: { year: { type: "INTEGER" }, fromQuarter: { type: "INTEGER" }, toQuarter: { type: "INTEGER" } } },
+        items: { type: "ARRAY", items: { type: "OBJECT", properties: { direction: { type: "STRING" },
+          measures: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, target: { type: "STRING" } }, required: ["name"] } },
+          tactics: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, owner: { type: "STRING" }, quarters: { type: "ARRAY", items: { type: "INTEGER" } } }, required: ["name"] } } }, required: ["direction"] } },
       },
     },
     pastedBelongsTo: { type: "STRING", enum: [...SECTIONS] },
@@ -101,7 +106,9 @@ export type Answer = {
 export type PlanShape =
   | { section: "compete"; compete: { discipline: "btc" | "bts" | "bp"; values: { title: string; how: string[]; measure: string[]; evidence?: string }[] } }
   | { section: "analysis"; swot: Record<"s" | "w" | "o" | "t", { title: string; description: string; evidence?: string }[]> }
-  | { section: "foundation"; foundation: { key: string; text: string }[] };
+  | { section: "foundation"; foundation: { key: string; text: string }[] }
+  | { section: "directions"; directions: { title: string; urgency: number | null; importance: number | null; ease: number | null; ownedBy: string; why?: string }[]; capabilities: [] }
+  | { section: "execution"; period: { y: number; m1: number; m2: number }; items: { kind: "direction"; planId: string; title: string; measures: { name: string; target: string; compile: string }[]; tactics: { name: string; owner: string; quarters: number[] }[] }[] };
 const PARTS = ["who", "asp", "eim", "pur", "obj", "val"];
 /* §784 — the plan's shape, cut to size and to the section it belongs to; anything else is dropped, never guessed */
 export function planOf(section: string, raw: unknown): PlanShape | null {
@@ -119,6 +126,28 @@ export function planOf(section: string, raw: unknown): PlanShape | null {
     const out: any = {}; let n = 0;
     for (const L of ["s", "w", "o", "t"]) { out[L] = (Array.isArray(w[L]) ? w[L] : []).map((x: any) => { const o: any = { title: clip(x && x.title, 160), description: clip(x && x.description, 400) }; const e = clip(x && x.evidence, 300); if (e) o.evidence = e; return o; }).filter((x: any) => x.title).slice(0, 10); n += out[L].length; }
     return n ? { section: "analysis", swot: out } : null;
+  }
+  /* §785 — Pillars/Directions: each with its Urgency × Importance × Ease, 1–4 each (a score out of range is left unscored, never moved) */
+  if (section === "directions") {
+    const sc = (v: unknown) => { const n = Number(v); return Number.isInteger(n) && n >= 1 && n <= 4 ? n : null; };
+    const seen = new Set<string>();
+    const directions = (Array.isArray(j.directions) ? j.directions : []).map((x: any) => {
+      const o: any = { title: clip(x && x.title, 160), urgency: sc(x && x.urgency), importance: sc(x && x.importance), ease: sc(x && x.ease), ownedBy: "" };
+      const w = clip(x && x.why, 400); if (w) o.why = w; return o; })
+      .filter((x: any) => x.title && !seen.has(x.title.toLowerCase()) && seen.add(x.title.toLowerCase())).slice(0, 12);
+    return directions.length ? { section: "directions", directions, capabilities: [] } : null;
+  }
+  /* §785 — Tactical Plans: the period, and each of the plan's Directions by its name with its measures and tactics; the browser ties a name to the plan's own row */
+  if (section === "execution") {
+    const p = j.period && typeof j.period === "object" ? j.period : {};
+    const now = new Date().getFullYear(), y = Number.isInteger(Number(p.year)) && Number(p.year) >= 2000 && Number(p.year) <= 2100 ? Number(p.year) : now;
+    const q1 = Math.min(4, Math.max(1, Number(p.fromQuarter) || 1)), q2 = Math.min(4, Math.max(q1, Number(p.toQuarter) || 4));
+    const items = (Array.isArray(j.items) ? j.items : []).map((x: any) => ({ kind: "direction" as const, planId: "", title: clip(x && x.direction, 160),
+      measures: (Array.isArray(x && x.measures) ? x.measures : []).map((m: any) => ({ name: clip(m && m.name, 200), target: clip(m && m.target, 60), compile: "" })).filter((m: any) => m.name).slice(0, 8),
+      tactics: (Array.isArray(x && x.tactics) ? x.tactics : []).map((t: any) => ({ name: clip(t && t.name, 200), owner: clip(t && t.owner, 80),
+        quarters: Array.from(new Set((Array.isArray(t && t.quarters) ? t.quarters : []).map(Number).filter((q: number) => Number.isInteger(q) && q >= q1 && q <= q2))).sort() as number[] })).filter((t: any) => t.name).slice(0, 10) }))
+      .filter((x: any) => x.title && (x.measures.length || x.tactics.length)).slice(0, 12);
+    return items.length ? { section: "execution", period: { y, m1: (q1 - 1) * 3 + 1, m2: q2 * 3 }, items } : null;
   }
   if (section === "foundation") {
     const seen = new Set<string>();

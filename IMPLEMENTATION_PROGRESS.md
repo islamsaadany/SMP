@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-17 — ✦ Build, ✦ Advise and ✦ Refine (§789).** The Copilot's three doors named for what each does and dressed alike: ✦ Build and ✦ Advise at the right of the tab row, ✦ Refine beside Edit on the plan (it was ✦ Copilot, plain text).
+
 **2026-11-17 — An older draft lays itself out (§788).** No *Lay it out for the plan* button: a draft made before the plan's shape lays itself out as the plan when its panel shows it, once, with nothing said in the chat.
 
 **2026-11-17 — Save and next goes through this week only (§787).** In the weekly check, Save and next, Skip and the arrows go from one task of this week to the next and never into a topic's folded last-week or next-week lists; those open only by hand.

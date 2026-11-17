@@ -364,7 +364,7 @@ var COPILOT = (function(){
     /* §779 — only the step in focus shows its ways in; the strip moves between steps (Islam: "keep the steps of the next step only") */
     var says = areaState(s).says || "";
     var focus = '<div class="copfocus"><span class="copfocusk">' + (s === nx ? "Next step · " : "") + E(stripWord(s)) + '</span><span class="copm">' + E(says) + '</span></div>';
-    var done = nx ? '' : '<div class="copalldone" data-cop-alldone><b>Every part is on the plan.</b> Refine any part from ✦ Copilot on the Strategy tab — or work on a step here.</div>';
+    var done = nx ? '' : '<div class="copalldone" data-cop-alldone><b>Every part is on the plan.</b> Refine any part with ✦ Refine on the Strategy tab — or work on a step here.</div>';
     return '<div class="copstart" data-cop-startscreen>' +
       '<h2 class="copstarth">' + (s === "advisory" ? 'What decision are you weighing for ' + E(placeWord()) + '?' : 'What would you like to do with ' + E(placeWord()) + '’s strategy?') + '</h2>' +
       box(s === "advisory" ? "Say the decision, attach the papers behind it…" : "Ask anything, attach your notes, or paste " + (BOXWORK[s] || "finished work") + "…") + (s === "advisory" ? '' : done) +
@@ -3038,7 +3038,7 @@ var COPILOT = (function(){
     var tail = document.querySelector("#secrow-in .secttail") || document.getElementById("secrow-in");
     if (tail && !tail.querySelector("[data-cop-panelbtn]")) {
       var b = document.createElement("button"); b.type = "button"; b.className = "copBbtn"; b.setAttribute("data-cop-panelbtn", "");
-      b.setAttribute("aria-pressed", String(PANEL.open)); b.title = "Work on this part with the Copilot"; b.textContent = "✦ Copilot";
+      b.setAttribute("aria-pressed", String(PANEL.open)); b.title = "Refine this part with the Copilot"; b.textContent = "✦ Refine";
       tail.insertBefore(b, tail.firstChild);
     }
     if (!PANEL.open) { closePanelDom(); return; }
@@ -3050,7 +3050,7 @@ var COPILOT = (function(){
     if (a !== PANEL.area || !el.querySelector("[data-cop-pane], [data-cop-panelnone]")) {
       PANEL.area = a;
       var partWord = { found: "Foundation", swot: "SWOT", plan: "Plan", drivers: "Drivers" }[CURSEC.strategy] || "This part";
-      var head = '<div class="copPhead"><div><b>✦ Copilot</b><small>' + E(partWord) + ' · ' + E(placeWord()) + '</small></div>' +
+      var head = '<div class="copPhead"><div><b>✦ Refine</b><small>' + E(partWord) + ' · ' + E(placeWord()) + '</small></div>' +
         (CURSEC.strategy === "plan" ? '<span class="copPseg">' + [["directions", "Pillars/Directions"], ["execution", "Tactical Plans"]].map(function(x){ return '<button type="button" data-cop-panelarea="' + x[0] + '" aria-pressed="' + (PANEL.planArea === x[0]) + '">' + x[1] + '</button>'; }).join("") + '</span>' : '') +
         /* §778 — expand to take over the page, as the Copilot tab does, and minimize back to the side (Islam) */
         '<button type="button" class="copPexp" data-cop-panelexpand aria-pressed="' + !!PANEL.wide + '" aria-label="' + (PANEL.wide ? "Minimize the Copilot" : "Expand the Copilot") + '" title="' + (PANEL.wide ? "Minimize" : "Expand") + '">' + (PANEL.wide ? MINMARK : EXPMARK) + '</button>' +

@@ -899,8 +899,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s + ":" + (b.dataset.copTo || "") + ":" + b.textContent.trim()));
     const tg = await page.evaluate(() => { const row = document.getElementById("subtabs").getBoundingClientRect(), bl = document.querySelector('#subtabs [data-cop-to="build"]'), ins = Array.from(document.querySelectorAll("#subtabs button[data-s]")).filter((b) => !b.dataset.copTo).pop();
       return bl && ins ? { gap: Math.round(bl.getBoundingClientRect().left - ins.getBoundingClientRect().right), rightGap: Math.round(row.right - document.querySelector("#subtabs .coptabs").getBoundingClientRect().right) } : null; });
-    check(tabs.length >= 2 && /^copilot:build:✦ Builder$/.test(tabs[tabs.length - 2]) && /^copilot:advisory:Advisory$/.test(tabs[tabs.length - 1]) && !!tg && tg.gap > 80 && tg.rightGap < 40,
-      "§782 ✦ Builder and Advisory are the last two tabs, set apart at the far right of the row (Islam)", JSON.stringify({ tabs, tg }));
+    check(tabs.length >= 2 && /^copilot:build:✦ Build$/.test(tabs[tabs.length - 2]) && /^copilot:advisory:✦ Advise$/.test(tabs[tabs.length - 1]) && !!tg && tg.gap > 80 && tg.rightGap < 40,
+      "§782, §789 ✦ Build and ✦ Advise are the last two tabs, set apart at the far right of the row (Islam)", JSON.stringify({ tabs, tg }));
     /* §752 — ONE WINDOW: no row of area tabs; the method is the Copilot's own strip */
     const secs = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-strip] b")).map((b) => b.textContent.trim()));
     const row = await page.evaluate(() => Array.from(document.querySelectorAll("[data-sub2]")).filter((b) => b.offsetParent).map((b) => b.textContent.trim()));
@@ -3189,7 +3189,7 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     await page.waitForTimeout(1500);   /* the lists come in after the press; the method's next step must not pull the window off Advisory (§785) */
     const av = await page.evaluate(() => ({ sec: CURSEC.copilot, sel: (document.querySelector('#subtabs [aria-selected="true"]') || {}).textContent || "", steps: document.querySelectorAll(".copsteps").length,
       h: (document.querySelector(".copstarth") || {}).textContent || "", rail: Array.from(document.querySelectorAll("[data-cop-chats] [data-cop-chat]")).map((b) => b.getAttribute("data-cop-chat-sec")) }));
-    check(av.sec === "advisory" && /Advisory/.test(av.sel) && av.steps === 0 && /What decision are you weighing for Mobile\?/.test(av.h) && av.rail.every((x) => x === "advisory"),
+    check(av.sec === "advisory" && /✦ Advise/.test(av.sel) && av.steps === 0 && /What decision are you weighing for Mobile\?/.test(av.h) && av.rail.every((x) => x === "advisory"),
       "§782 Advisory is its own tab: no steps, its own question, its own chats only", JSON.stringify(av));
     await page.click('#subtabs [data-cop-to="build"]');
     await page.waitForFunction(() => CURSEC.copilot !== "advisory", null, { timeout: 8000 }).catch(() => {});
@@ -3199,6 +3199,9 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     /* B — ✦ Copilot on a part the plan does not hold: build it in the Copilot */
     await open("/raya-trade/strategy/mobile/strategy/swot");
     await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});
+    const rb = await page.evaluate(() => { const b = document.querySelector("[data-cop-panelbtn]"), cs = b ? getComputedStyle(b) : null;
+      return b ? { t: b.textContent.trim(), bw: parseFloat(cs.borderTopWidth), br: parseFloat(cs.borderTopLeftRadius) } : null; });
+    check(!!rb && rb.t === "✦ Refine" && rb.bw >= 1 && rb.br >= 10, "§789 the Copilot on the plan is ✦ Refine, drawn as the same pill as ✦ Build and ✦ Advise", JSON.stringify(rb));
     /* emptied, read and put back in one synchronous step — the panel draws at once — so no paint or save ever sees it */
     const nbAll = await page.evaluate(() => { const u = unitLike("mobile"), was = u.swot; let nb = null, b = null;
       u.swot = { s: [], w: [], o: [], t: [] };
@@ -3227,6 +3230,9 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     await shot("4-panel-built");
     check(!!sy && sy.say && /What would you like to change in Mobile’s SWOT\?/.test(sy.h) && sy.boxFirst && sy.cards === 0 && sy.sug === 0 && sy.again,
       "§779 B: on a part the plan holds, the panel opens on the box at the top — no cards, no suggestions — with “Build it again step by step” below", JSON.stringify(sy));
+    check(await page.evaluate(() => ((document.querySelector("#copPanel .copPhead b") || {}).textContent || "").trim() === "✦ Refine"), "§789 …and its panel is headed ✦ Refine");
+    const pr = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("[data-cop-panelbtn]")); return { bg: c.backgroundColor, ink: c.color }; });
+    check(pr.bg === "rgb(22, 50, 92)" && pr.ink === "rgb(255, 255, 255)", "§789 …and pressed, ✦ Refine is the client's navy with white ink at once — never caught in a fade, read as greyed out", JSON.stringify(pr));
     await page.fill("#copPanel [data-cop-starttext]", "Add vendors selling direct to retailers as a threat");
     await page.press("#copPanel [data-cop-starttext]", "Enter");
     await page.waitForFunction(() => !!document.querySelector("#copPanel [data-cop-pane]") && !document.querySelector("#copPanel [data-cop-startscreen]"), null, { timeout: 15000 }).catch(() => {});

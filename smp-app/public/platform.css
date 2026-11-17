@@ -14328,3 +14328,10 @@ body.copB-wide #copPanel .copPgrip { display:none; }
 .copdlaying { font-style:italic; animation:copfade 1.4s ease-in-out infinite alternate; }
 @keyframes copfade { from { opacity:.55; } to { opacity:1; } }
 @media (prefers-reduced-motion: reduce) { .copdlaying { animation:none; } }
+
+/* §789 — ✦ Build, ✦ Advise and ✦ Refine: one family — the gold edge marks the Copilot wherever it is; ✦ Refine wears the same pill beside Edit */
+.tabs #subtabs .coptab { border-color:var(--gold); color:var(--gold-deep, var(--gold)); }
+.tabs #subtabs .coptab.copadv { border-style:dashed; }
+.copBbtn { border:1px solid var(--gold) !important; border-radius:16px !important; padding:3px 12px !important; font-weight:600; color:var(--gold-deep, var(--gold)) !important; background:var(--surface) !important; white-space:nowrap; transition:none !important; }
+.copBbtn:hover { color:var(--ink) !important; }
+.copBbtn[aria-pressed="true"] { background:var(--panel, var(--ink)) !important; border-color:var(--panel, var(--ink)) !important; color:var(--panel-ink, var(--surface)) !important; }

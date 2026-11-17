@@ -38,29 +38,21 @@ export const FULL_SCENES: SceneDef[] = [
   { id: "close", el: <S9Close />, dark: true },
 ];
 
-/* The short cut: foundation and plan share one scene, the function is left out. */
 /* The crossfade between scenes, in frames. The timeline shortens by one
    per cut; each scene's narration sits inside its own sequence, so nothing
    drifts, and the tail silence of every scene covers the overlap. */
 export const XFADE = 14;
 
-const S23Short: React.FC = () => (
-  <TransitionSeries>
-    <TransitionSeries.Sequence durationInFrames={Math.round(SHORT[3] * 0.42 * 30) + XFADE} name="Foundation"><S2Foundation short /></TransitionSeries.Sequence>
-    <TransitionSeries.Transition presentation={fade()} timing={linearTiming({ durationInFrames: XFADE })} />
-    <TransitionSeries.Sequence durationInFrames={Math.round(SHORT[3] * 0.58 * 30)} name="Plan"><S3Plan short /></TransitionSeries.Sequence>
-  </TransitionSeries>
-);
-
+/* The one-minute cut: the opening, then one sentence on each of the plan,
+   the reporting, the performance, the group page and the deck. */
 export const SHORT_SCENES: SceneDef[] = [
   { id: "strategy", el: <S0Strategy marks={SHORT_MARKS[0]} />, dark: true },
   { id: "solution", el: <S0Solution marks={SHORT_MARKS[1]} />, dark: true },
-  { id: "company", el: <S1Company short /> },
-  { id: "foundation-plan", el: <S23Short /> },
-  { id: "reporting", el: <S5Reporting short /> },
+  { id: "plan", el: <S3Plan short marks={SHORT_MARKS[2]} /> },
+  { id: "reporting", el: <S5Reporting short marks={SHORT_MARKS[3]} /> },
   { id: "performance", el: <S6Performance short /> },
-  { id: "group", el: <S7Group short marks={SHORT_MARKS[7]} /> },
-  { id: "deck", el: <S8Deck short /> },
+  { id: "group", el: <S7Group short marks={SHORT_MARKS[5]} /> },
+  { id: "deck", el: <S8Deck short marks={SHORT_MARKS[6]} /> },
   { id: "close", el: <S9Close />, dark: true },
 ];
 

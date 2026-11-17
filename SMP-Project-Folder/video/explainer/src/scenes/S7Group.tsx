@@ -25,7 +25,7 @@ export const S7Group: React.FC<{ short?: boolean; marks?: Marks }> = ({ short, m
   const k = short ? 0.75 : 1;
   /* the page turns on the voice's own words where they are known */
   const belowAt = marks?.below !== undefined ? marks.below - 0.3 : 6.6 * k;
-  const cardsAt = marks?.click !== undefined ? marks.click - 0.2 : short ? 8.5 : 12.0;
+  const cardsAt = marks ? (marks.click !== undefined ? marks.click - 0.2 : 999) : short ? 8.5 : 12.0;
   const view = tr < cardsAt ? "overall" : "cards";
   const cardP = (i: number) => ease(t, 1.6 + i * 0.3, 2.2 + i * 0.3);
   const countP = ease(t, 2.2 * k, 5.6 * k);

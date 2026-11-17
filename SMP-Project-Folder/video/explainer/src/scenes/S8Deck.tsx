@@ -1,6 +1,7 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import { ease, useClock, enter } from "../anim";
+import { ease, useClock, useRealClock, enter } from "../anim";
+import type { Marks } from "./S0Strategy";
 import { bandOf, bandText, C, FONT, MONO } from "../theme";
 import { Label, Mark, Chip } from "../ui";
 import { DECK_SLIDES, FOUNDATION, GROUP, TEMPLE } from "../data";
@@ -76,13 +77,14 @@ const Temple: React.FC<{ t: number; from: number }> = ({ t, from }) => {
   );
 };
 
-export const S8Deck: React.FC<{ short?: boolean }> = ({ short }) => {
+export const S8Deck: React.FC<{ short?: boolean; marks?: Marks }> = ({ short, marks }) => {
   const { t } = useClock();
+  const { t: tr } = useRealClock();
   const k = short ? 0.6 : 1;
   const dealt = (t - 0.4) / (0.32 * k);
   const count = Math.min(28, Math.max(1, Math.floor(dealt)));
-  const presentAt = short ? 4.6 : 8.4;
-  const present = ease(t, presentAt, presentAt + 0.6);
+  const presentAt = marks?.present !== undefined ? marks.present - 0.3 : short ? 4.6 : 8.4;
+  const present = marks?.present !== undefined ? ease(tr, presentAt, presentAt + 0.6) : ease(t, presentAt, presentAt + 0.6);
   const pdfP = short ? 0 : ease(t, 12.4, 12.9) * (1 - ease(t, 13.6, 14.0));
   const templeAt = short ? 99 : 14.2;
   const temple = ease(t, templeAt, templeAt + 0.5);

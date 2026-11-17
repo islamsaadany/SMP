@@ -15,6 +15,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 LEAD, TAIL = 0.5, 1.1   # silence before the first word and after the last, per scene
+TAILS = {"full": 1.1, "short": 0.7}   # the one-minute cut breathes less
 
 def read_lines(name):
     """The caption lines from src/script.ts — the narration is its join."""
@@ -72,7 +73,7 @@ async def build(cut, name, voice):
         mp3 = os.path.join(outdir, f"{i}.mp3")
         bounds = await synth(text, mp3, voice)
         d = duration(mp3)
-        secs.append(round(LEAD + d + TAIL, 3))
+        secs.append(round(LEAD + d + TAILS.get(cut, TAIL), 3))
         # group the word boundaries into the caption lines
         scene_cues, wi = [], 0
         for line in scene:

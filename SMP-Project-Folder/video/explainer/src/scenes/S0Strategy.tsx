@@ -23,13 +23,15 @@ export const S0Strategy: React.FC<{ marks?: Marks; end?: EndTreatment }> = ({ ma
   const word = ease(t, 0.3, 1.2);
   const stages: [string, string, number][] = [["workshop", "agreed in a workshop", 2.2], ["board", "presented to the board", 3.6], ["meets", "then it meets the year", 5.2]];
   const shown = stages.filter(([w]) => !marks || marks[w] !== undefined);
-  const artAt = ARTEFACTS.map((a) => at(marks, a.key, 6.8 + ARTEFACTS.indexOf(a) * 1.2));
+  const arts = marks ? ARTEFACTS.filter((a) => marks[a.key] !== undefined) : ARTEFACTS;
+  const artAt = arts.map((a) => at(marks, a.key, 6.8 + ARTEFACTS.indexOf(a) * 1.2));
   const first = Math.min(...artAt), last = Math.max(...artAt);
   const spread = ease(t, first, last + 2.0, (x) => x);
   const dim = ease(t, first - 0.2, first + 1.2);
   const rightAt = at(marks, "right", last + 3.0);
   const hardAt = at(marks, "keeping", last + 4.5);
-  const rightP = ease(t, rightAt - 0.2, rightAt + 0.5);
+  const rightP = marks && marks.right === undefined ? ease(t, hardAt - 0.4, hardAt + 0.3) : ease(t, rightAt - 0.2, rightAt + 0.5);
+  const sayRight = !(marks && marks.right === undefined);
   const hardP = ease(t, hardAt - 0.1, hardAt + 0.6);
   const out = 1 - ease(t, length - 0.5, length);
   return (
@@ -47,7 +49,7 @@ export const S0Strategy: React.FC<{ marks?: Marks; end?: EndTreatment }> = ({ ma
           );
         })}
       </div>
-      {ARTEFACTS.map((a, i) => {
+      {arts.map((a, i) => {
         const p = ease(t, artAt[i] - 0.1, artAt[i] + 0.5);
         return (
           <div key={a.title} style={{ position: "absolute", left: 960 - 190, top: 540 - 50, width: 380, background: C.dark2, border: `1px solid rgba(255,255,255,.14)`, borderRadius: 12, padding: "16px 20px", display: "flex", gap: 14, alignItems: "center", opacity: p * (end === "clear" ? 1 - rightP : end === "box" ? 1 - 0.6 * rightP : end === "under" ? 1 - 0.5 * rightP : 1 - 0.35 * hardP), translate: `${a.dx * (0.55 + 0.45 * spread + (end === "clear" || end === "under" ? 0.5 * rightP : 0)) * p}px ${a.dy * (0.55 + 0.45 * spread + (end === "under" ? 0.9 * rightP : 0)) * p}px`, rotate: `${a.rot * spread}deg`, scale: String((0.7 + 0.3 * p) * (end === "box" ? 1 - 0.15 * rightP : 1)), boxShadow: "0 20px 50px rgba(0,0,0,.4)", filter: end === "box" ? `blur(${3 * rightP}px)` : undefined }}>
@@ -84,7 +86,7 @@ export const S0Strategy: React.FC<{ marks?: Marks; end?: EndTreatment }> = ({ ma
         /* D: the cards sink away; the lines take the stage chips' place under the word */
         <div style={{ position: "absolute", top: 470, textAlign: "center", opacity: rightP }}>
           <div style={{ width: 90, height: 4, background: C.amber, margin: "0 auto 26px", scale: String(rightP) }} />
-          <div style={{ fontSize: 40, fontWeight: 400, color: C.darkQuiet, ...enter(rightP, 12) }}>The strategy is right.</div>
+          {sayRight ? <div style={{ fontSize: 40, fontWeight: 400, color: C.darkQuiet, ...enter(rightP, 12) }}>The strategy is right.</div> : null}
           <div style={{ fontSize: 64, fontWeight: 700, color: C.darkInk, marginTop: 10, ...enter(hardP, 12) }}>Keeping it alive is <span style={{ color: C.amber }}>the hard part.</span></div>
         </div>
       )}

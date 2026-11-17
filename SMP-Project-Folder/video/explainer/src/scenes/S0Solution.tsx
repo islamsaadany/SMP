@@ -33,7 +33,8 @@ export const S0Solution: React.FC<{ marks?: Marks }> = ({ marks }) => {
         <div style={{ marginTop: 44, fontSize: 64, fontWeight: 700, letterSpacing: "-0.01em", ...enter(title, 16) }}>Strategy Management Platform</div>
         <div style={{ marginTop: 22, display: "flex", gap: 28, fontSize: 32, color: C.darkQuiet }}>
           {words.map(([w, label], i) => {
-            const from = at(marks, w, named + 3 + i * 0.8) - 0.1;
+            // said one by one in the full cut; in the one-minute cut they follow the name quickly
+            const from = at(marks, w, named + 1.6 + i * 0.5) - 0.1;
             const p = ease(t, from, from + 0.5);
             return (
               <React.Fragment key={w}>

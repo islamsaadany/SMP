@@ -9,19 +9,21 @@ import { FUNCTIONS, KEY_MEASURES, PILLARS, SEAT, TACTICS, UNIT, UNITS } from "..
 export const PlanPage: React.FC<{ t: number; k: number; readAt?: number; marks?: Marks; tr: number }> = ({ t, k, readAt = 99, marks, tr }) => {
   /* the page moves on the voice's own words where they are known */
   const m = (w: string, fb: number) => (marks && marks[w] !== undefined ? marks[w] : fb);
+  /* a callout fires only on a word the cut actually says */
+  const c = (w: string, fb: number, alt?: string) => (marks ? (marks[w] ?? (alt ? marks[alt] : undefined) ?? 999) : fb);
   const railShown = (t - 0.4 * k) / (0.35 * k);
   const headP = ease(t, 2.0 * k, 2.6 * k);
   const kmAt = m("key", 2.8 * k), tacAt = m("tactics", 8.6 * k);
-  const dirAt = m("direction", 5.2 * k), tgtAt = m("target", 7.0 * k), ownAt = m("owns", 11.2 * k), qAt = m("quarters", 12.6 * k);
-  const doneAt = m("done", 9.2 * k), outAt = m("outcome", 10.2 * k);
+  const dirAt = c("direction", 5.2 * k), tgtAt = c("target", 7.0 * k), ownAt = c("owns", 11.2 * k, "owner"), qAt = c("quarters", 12.6 * k, "quarter");
+  const doneAt = c("done", 9.2 * k), outAt = c("outcome", 10.2 * k);
   const kmShown = marks ? (tr - kmAt + 0.3) / 0.35 : (t - 2.8 * k) / (0.6 * k);
   const tacShown = marks ? (tr - tacAt + 0.2) / 0.35 : (t - 8.6 * k) / (0.7 * k);
   const litQ = tr < qAt ? 4 : Math.min(4, Math.floor((tr - qAt) / 0.35) + 1);
   const dirP = hold(tr, dirAt - 0.25, tgtAt - 0.05, 0.3);
   const tgtP = hold(tr, tgtAt - 0.15, tgtAt + 1.8, 0.3);
-  const tacP = hold(tr, doneAt - 0.3, outAt - 0.05, 0.3);
-  const outP = hold(tr, outAt - 0.15, ownAt - 0.05, 0.3);
-  const ownP = hold(tr, ownAt - 0.3, qAt - 0.05, 0.3);
+  const tacP = hold(tr, doneAt - 0.3, Math.min(outAt, doneAt + 2) - 0.05, 0.3);
+  const outP = hold(tr, outAt - 0.15, Math.min(ownAt, outAt + 2) - 0.05, 0.3);
+  const ownP = hold(tr, ownAt - 0.3, Math.min(qAt, ownAt + 2) - 0.05, 0.3);
   const qP = hold(tr, qAt - 0.15, qAt + 2.2, 0.3);
   const readReal = m("reader", readAt);
   const readP = readAt > 90 ? 0 : ease(tr, readReal - 0.6, readReal + 0.1);

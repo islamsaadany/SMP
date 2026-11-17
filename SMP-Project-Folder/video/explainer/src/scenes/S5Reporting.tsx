@@ -16,16 +16,20 @@ export const S5Reporting: React.FC<{ short?: boolean; marks?: Marks }> = ({ shor
   const { t: tr } = useRealClock();
   const k = short ? 0.72 : 1;
   const m = (w: string, fb: number) => (marks && marks[w] !== undefined ? marks[w] : fb);
+  const c = (w: string, fb: number) => (marks ? marks[w] ?? 999 : fb); // only on a word the cut says
   // the beats, in real seconds
   const litAt = m("orange", 2.0 * k);
-  const entersAt = m("enters", 5.0 * k);
+  const entersAt = m("enters", m("enter", 5.0 * k));
   const noteAt = m("note", 10.4 * k);
-  const pillarAt = m("pillar", 14.0 * k);
-  const kmAt = m("measures", pillarAt + 1.2);
-  const tacAt = m("tactics", kmAt + 1.6);
-  const countAt = m("count", tacAt + 3.0);
-  const heldAt = m("held", countAt + 3.0);
-  const completeAt = m("complete", heldAt + 5.0);
+  const pillarAt = c("pillar", 14.0 * k);
+  const kmAt = c("measures", pillarAt + 1.2);
+  const tacAt = c("tactics", kmAt + 1.6);
+  // the one-minute cut has no pillar pass: the count climbs straight after the objectives and Submit lands on "submitted"
+  const quick = marks !== undefined && marks.pillar === undefined;
+  const submittedAt = m("submitted", 999);
+  const countAt = quick ? noteAt + 1.0 : m("count", tacAt + 3.0);
+  const heldAt = quick ? submittedAt - 1.6 : m("held", countAt + 3.0);
+  const completeAt = quick ? submittedAt - 0.4 : m("complete", heldAt + 5.0);
   const lit = ease(tr, litAt - 0.3, litAt + 0.4);
   const onTab = tr >= litAt + 0.5;
   const pageP = ease(tr, litAt + 0.6, litAt + 1.2);
@@ -34,10 +38,10 @@ export const S5Reporting: React.FC<{ short?: boolean; marks?: Marks }> = ({ shor
   // the pillar pass: RT01's rows fill on screen, the other pillars off screen
   const kmFillAt = KEY_MEASURES.map((_, i) => kmAt + 0.1 + i * 0.3);
   const tacFillAt = TACTICS.map((_, i) => tacAt + 0.1 + i * 0.3);
-  const rt01 = kmFillAt.filter((x) => tr >= x).length + tacFillAt.filter((x) => tr >= x).length;
   // 25 of the other pillars' 29 are in by the time Submit is said to be held; the last 4 land on "complete"
-  const others = countTo(tr, 25, tacAt + 1.2, heldAt - 0.4) + countTo(tr, 4, completeAt - 0.8, completeAt);
-  const entered = Math.min(ASKED, koEntered + rt01 + Math.min(29, others));
+  const others = quick ? countTo(tr, 29, countAt, completeAt) : countTo(tr, 25, tacAt + 1.2, heldAt - 0.4) + countTo(tr, 4, completeAt - 0.8, completeAt);
+  const rt01 = quick ? Math.min(8, others) : kmFillAt.filter((x) => tr >= x).length + tacFillAt.filter((x) => tr >= x).length;
+  const entered = Math.min(ASKED, koEntered + (quick ? Math.min(37, others) : rt01 + Math.min(29, others)));
   const ready = entered >= ASKED;
   const pressed = tr >= completeAt + 0.9;
   const toastP = ease(tr, completeAt + 1.2, completeAt + 1.8);

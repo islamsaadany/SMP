@@ -13,14 +13,14 @@ export const FULL_LINES: string[][] = [
   ["One platform.", "The plan, the report and the result,", "for everyone who carries them."],
 ];
 
+/* The one-minute cut: a glimpse, features and what people get from them. */
 export const SHORT_LINES: string[][] = [
-  ["Every company has a strategy.", "Then it meets the year:", "the plan in a deck, the targets in a spreadsheet,", "the figures in emails.", "Keeping it alive is the hard part."],
-  ["The Strategy Management Platform is one place", "for the plans, the reporting and the results."],
-  ["The platform is shaped like the company:", "the group, its business units,", "and the supporting functions,", "each with a plan of its own."],
-  ["A plan reads the same way everywhere.", "The foundation: who we are,", "the winning aspiration and the key objectives.", "Then each pillar, with its key measures", "and its tactics: what will be done,", "the outcome, the owner and the quarters."],
-  ["When a reporting cycle opens,", "the Reporting tab turns orange.", "The owner enters this cycle's figure", "against every objective, measure and tactic,", "with a note where one is needed,", "and submits to the Strategy Management Office", "once everything is in."],
-  ["The moment figures are in,", "performance is derived, never typed.", "Key objectives, pillars and execution", "each carry a figure, coloured by band,", "with every target prorated to today."],
-  ["At the group it rolls up:", "every unit and every function,", "and where to look next."],
-  ["And for the review, the deck assembles itself", "from the live plan, ready to present."],
-  ["One platform.", "The plan, the report and the result."],
+  ["Every company has a strategy.", "Then it meets the year:", "a deck, a spreadsheet, a thread of emails.", "Keeping it alive is the hard part."],
+  ["The Strategy Management Platform", "keeps it in one place."],
+  ["Everyone reads the same plan:", "pillars, key measures and tactics,", "with an owner and a quarter on each."],
+  ["When a cycle opens, owners enter their figures in minutes,", "with a note where one is needed,", "and nothing is submitted half done."],
+  ["The moment figures are in, performance is there:", "scored, coloured, never typed."],
+  ["At the group it all rolls up:", "every unit and function on one page,", "and below, where to look next."],
+  ["For the review, the deck builds itself", "from the live plan, ready to present."],
+  ["One platform.", "Plan, report, result."],
 ];

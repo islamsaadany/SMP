@@ -511,7 +511,7 @@ async function planShapeFlow(tenantId: string, b: any, _who: Who): Promise<Out> 
     return { chat, p, skip: false as const };
   });
   if (!got) return refused(404, "That chat is not here any more.");
-  if (got.skip || !PLAN_SCHEMAS[got.chat.section] || !configured()) return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)) });
+  if (got.skip || !got.chat.free || !PLAN_SCHEMAS[got.chat.section] || !configured()) return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)) });
   const plan = await askPlanShape({ section: got.chat.section, place: got.chat.place, placeWord: oneLine(b.placeWord).slice(0, 120), context: String(b.context ?? "").slice(0, MAX_CONTEXT),
     question: "", pasted: false, history: [], assumptions: [], files: [] }, got.p.draft);
   return withTenant(tenantId, async (c) => {

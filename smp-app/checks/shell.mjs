@@ -1006,7 +1006,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line, and the box is as wide as the conversation", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");
     const stay = await page.evaluate(() => ({ note: (document.querySelector("[data-cop-out] [data-cop-draftstay]") || {}).textContent || "", lay: !!document.querySelector("[data-cop-out] [data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-out] [data-cop-putplan]") }));
-    check(/not in the plan’s shape yet/.test(stay.note) && stay.lay && !stay.put, "§654 B3, §785 a free chat's draft that is not in the plan's shape says so, and offers to lay it out for the plan — it cannot go on as it is", JSON.stringify(stay));
+    check(!stay.lay && !stay.put && /Laying it out as the plan|Stays in the Copilot/.test(stay.note), "§654 B3, §787 a free chat's draft not in the plan's shape lays itself out — no button — and one that cannot be stays in the Copilot; it cannot go on as it is", JSON.stringify(stay));
     await page.locator("[data-cop-out] [data-cop-savedraft]").click();
     await page.waitForFunction(() => document.querySelector("[data-cop-out] .copsaved"), null, { timeout: 10000 }).catch(() => {});
     await page.waitForFunction(() => /Mobile foundation/.test([...document.querySelectorAll(".coprail [data-cop-deliv]")].map((x) => x.textContent).join("|")), null, { timeout: 8000 }).catch(() => {});

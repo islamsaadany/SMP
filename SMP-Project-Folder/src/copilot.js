@@ -928,6 +928,7 @@ var COPILOT = (function(){
   var LAYING = {};
   function layDraft(){
     if (!PANE || !PANE.chat) return;
+    if (!PANE.chat.free) return;
     var m = draftMsg(); if (!m || !m.part || m.part.plan || m.part.planTried || LAYING[m.id]) return;
     var cid = PANE.chat.id, mid = m.id; LAYING[mid] = true;
     post({ act:"planShape", id: cid, messageId: mid, placeWord: placeWord(), context: (contextOf() || {}).line || "" }, WAIT_MS).then(function(x){
@@ -945,7 +946,7 @@ var COPILOT = (function(){
          it came in the plan's own shape: then it can go on from here. */
       (p.plan ? (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-putplan="' + E(m.id) + '">Put on ' + E(placeWord()) + '’s plan</button>' : '') +
           '<span class="copm copdstay" data-cop-draftstay>Laid out as the plan’s ' + E(stripWord(PANE.chat.section || section())) + '.' + gapLine(p.plan) + '</span>'
-        : canLay(PANE.chat.section || section()) && !p.planTried
+        : PANE.chat.free && canLay(PANE.chat.section || section()) && !p.planTried
           ? '<span class="copm copdstay copdlaying" data-cop-draftstay data-cop-laying>Laying it out as the plan…</span>'
           : '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
             (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : ''));

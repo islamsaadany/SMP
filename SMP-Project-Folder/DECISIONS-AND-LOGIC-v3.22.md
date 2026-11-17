@@ -71756,3 +71756,5 @@ Islam, of the *Lay it out for the plan* button (§785) on a draft made before th
 
 **Checked**: `checks/copilot.mjs` **389 passed, 0 failed** — a draft without the shape laid out once when asked, kept on its message, the chat's messages unchanged, a second ask not made. `checks/shell.mjs` 3q (**11 ok, 0 failed**) — an older draft put into a chat lays itself out as the plan when the chat opens, no button, nothing said, the shape stored, Put on the plan offered; 3j2 **12 ok, 0 failed**.
 
+**§787.1 — free chats only.** The full run caught the automatic layout firing on a plain (pre-§633) chat's draft in the Foundation as well: an extra ask the quick-reply check counted, and a redraw mid-typing that cut the Shift + Enter check's second line. It lays out a free chat's draft only, on the page and on the server, as §786's second ask does. The §654 B3 check is rewritten to §787 as it stands (§218): no button, and a draft that cannot be laid out stays in the Copilot. 3f the known four, 3j2 **12 ok**, 3q **11 ok**, `checks/copilot.mjs` **389 passed, 0 failed**.
+

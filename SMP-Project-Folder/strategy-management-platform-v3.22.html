@@ -11568,10 +11568,12 @@ body.reading { overflow:hidden; }
   .readroot .rpsec + .rpsec { break-before:page; }
   .readroot .rpsec > h2 { margin:0 0 16px; padding-bottom:8px; font-size:21px; font-weight:700; border-bottom:3px solid var(--gold); }
   .readroot .rpsec > * + * { margin-top:16px; }
-  /* a card, a figure, a value, a row and a direction's own line never split; a direction as a whole
-     may flow over a page, or every direction would stand alone on a page of its own */
+  /* a card, a figure, a value, a row and a direction's own line never split — AND A DIRECTION OR A
+     CAPABILITY IS NEVER SPLIT OVER TWO PAGES (§789.2, Islam: "if it breaks start a new page so it's
+     connected"): one that does not fit in what is left of a page starts a new one, whole; only one
+     longer than a page is split, and then its line stays with its first table (.rpkeep) */
   .readroot .rprintdoc .rcard, .readroot .rprintdoc .rfig, .readroot .rprintdoc .rval, .readroot .rprintdoc .rfold,
-  .readroot .rprintdoc .rtable tr, .readroot .rprintdoc .rswot > * { break-inside:avoid; }
+  .readroot .rprintdoc .rdir, .readroot .rprintdoc .rtable tr, .readroot .rprintdoc .rswot > * { break-inside:avoid; }
   /* a label stays with what it names — and ONLY the label: the browser answers a keep-with-next on
      a direction's own line by moving the whole direction to the next page where it would fit, which
      left every Directions page holding one direction over half a page of nothing (measured, §789) */

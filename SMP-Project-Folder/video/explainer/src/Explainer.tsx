@@ -1,5 +1,7 @@
 import React from "react";
-import { AbsoluteFill, Series, staticFile, useVideoConfig } from "remotion";
+import { AbsoluteFill, staticFile, useVideoConfig } from "remotion";
+import { TransitionSeries, linearTiming } from "@remotion/transitions";
+import { fade } from "@remotion/transitions/fade";
 import { Audio } from "@remotion/media";
 import { Captions, Cue } from "./captions";
 import { SceneTime } from "./anim";
@@ -35,11 +37,17 @@ export const FULL_SCENES: SceneDef[] = [
 ];
 
 /* The short cut: foundation and plan share one scene, the function is left out. */
+/* The crossfade between scenes, in frames. The timeline shortens by one
+   per cut; each scene's narration sits inside its own sequence, so nothing
+   drifts, and the tail silence of every scene covers the overlap. */
+export const XFADE = 14;
+
 const S23Short: React.FC = () => (
-  <Series>
-    <Series.Sequence durationInFrames={Math.round(SHORT[2] * 0.42 * 30)} name="Foundation"><S2Foundation short /></Series.Sequence>
-    <Series.Sequence durationInFrames={Math.round(SHORT[2] * 0.58 * 30)} name="Plan"><S3Plan short /></Series.Sequence>
-  </Series>
+  <TransitionSeries>
+    <TransitionSeries.Sequence durationInFrames={Math.round(SHORT[2] * 0.42 * 30) + XFADE} name="Foundation"><S2Foundation short /></TransitionSeries.Sequence>
+    <TransitionSeries.Transition presentation={fade()} timing={linearTiming({ durationInFrames: XFADE })} />
+    <TransitionSeries.Sequence durationInFrames={Math.round(SHORT[2] * 0.58 * 30)} name="Plan"><S3Plan short /></TransitionSeries.Sequence>
+  </TransitionSeries>
 );
 
 export const SHORT_SCENES: SceneDef[] = [
@@ -53,21 +61,25 @@ export const SHORT_SCENES: SceneDef[] = [
   { id: "close", el: <S9Close />, dark: true },
 ];
 
-export const totalFrames = (secs: number[], fps = 30) => secs.reduce((s, d) => s + Math.round(d * fps), 0);
+export const totalFrames = (secs: number[], fps = 30) => secs.reduce((s, d) => s + Math.round(d * fps), 0) - XFADE * (secs.length - 1);
 
 export const Explainer: React.FC<{ scenes: SceneDef[]; secs: number[]; planned: number[]; lines: string[][]; cues?: Cue[][]; audio: string | null }> = ({ scenes, secs, planned, lines, cues, audio }) => {
   const { fps } = useVideoConfig();
   return (
     <AbsoluteFill style={{ background: C.dark }}>
-      <Series>
-        {scenes.map((s, i) => (
-          <Series.Sequence key={s.id} durationInFrames={Math.round(secs[i] * fps)} name={s.id}>
-            <SceneTime.Provider value={{ k: secs[i] / planned[i] }}>{s.el}</SceneTime.Provider>
-            {audio ? <Audio src={staticFile(`${audio}/${i}.mp3`)} from={Math.round(LEAD * fps)} /> : null}
-            <Captions lines={lines[i]} cues={cues?.[i]} dark={s.dark} />
-          </Series.Sequence>
-        ))}
-      </Series>
+      <TransitionSeries>
+        {scenes.flatMap((s, i) => {
+          const seq = (
+            <TransitionSeries.Sequence key={s.id} durationInFrames={Math.round(secs[i] * fps)} name={s.id}>
+              <SceneTime.Provider value={{ k: secs[i] / planned[i] }}>{s.el}</SceneTime.Provider>
+              {audio ? <Audio src={staticFile(`${audio}/${i}.mp3`)} from={Math.round(LEAD * fps)} /> : null}
+              <Captions lines={lines[i]} cues={cues?.[i]} dark={s.dark} />
+            </TransitionSeries.Sequence>
+          );
+          if (i === 0) return [seq];
+          return [<TransitionSeries.Transition key={s.id + "-x"} presentation={fade()} timing={linearTiming({ durationInFrames: XFADE })} />, seq];
+        })}
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };

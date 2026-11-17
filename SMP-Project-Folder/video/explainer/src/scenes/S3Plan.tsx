@@ -28,7 +28,7 @@ export const PlanPage: React.FC<{ t: number; k: number; readAt?: number }> = ({ 
           </div>
           <div style={{ padding: "16px 24px 8px" }}>
             <Label style={{ marginBottom: 10 }}>Key measures <span style={{ fontFamily: MONO, marginLeft: 6, fontWeight: 400 }}>4</span></Label>
-            <Table cols={[{ label: "#", width: 50, mono: true }, { label: "Key measure" }, { label: "Dir.", width: 110, align: "center", mono: true }, { label: "Target", width: 190, align: "right", mono: true }, { label: "Compiled", width: 150, align: "center" }]} rows={KEY_MEASURES.map((m, i) => [i + 1, <b key="n">{m.name}</b>, <u key="d" style={{ textDecorationStyle: "dotted", color: C.ink2 }}>{m.dir}</u>, m.target, <span key="c" style={{ color: C.ink3 }}>{m.compile}</span>])} shown={kmShown} rowH={48} />
+            <Table cols={[{ label: "#", width: 50, mono: true }, { label: "Key measure" }, { label: "Dir.", width: 110, align: "center", mono: true }, { label: "Target", width: 190, align: "right", mono: true }, { label: "Compiled", width: 150, align: "center" }]} rows={KEY_MEASURES.map((m, i) => [i + 1, <b key="n">{m.name}</b>, <span key="d" style={{ color: C.ink, fontSize: 22 }}>{m.dir}</span>, m.target, <span key="c" style={{ color: C.ink3 }}>{m.compile}</span>])} shown={kmShown} rowH={48} />
           </div>
           <div style={{ padding: "16px 24px 20px", opacity: ease(t, 8.4 * k, 8.8 * k) }}>
             <Label style={{ marginBottom: 10 }}>Tactics <span style={{ fontFamily: MONO, marginLeft: 6, fontWeight: 400 }}>4</span></Label>
@@ -37,10 +37,10 @@ export const PlanPage: React.FC<{ t: number; k: number; readAt?: number }> = ({ 
         </div>
       </div>
       {/* callouts, measured against the layout above */}
-      <Callout x={1468} y={197} w={110} h={48 * 4 + 8} label="Direction: more or less is better" p={dirP} below />
-      <Callout x={1578} y={197} w={190} h={48 * 4 + 8} label="Target, with its unit" p={tgtP} below />
-      <Callout x={1395} y={536} w={190} h={48 * 4 + 8} label="Who owns it" p={ownP} />
-      <Callout x={1618} y={536} w={150} h={48 * 4 + 8} label="Which quarters it runs in" p={qP} />
+      <Callout x={1432} y={158} w={94} h={48 * 4} label="Direction: more or less is better" p={dirP} below />
+      <Callout x={1542} y={158} w={176} h={48 * 4} label="Target, with its unit" p={tgtP} below right />
+      <Callout x={1430} y={437} w={178} h={48 * 4} label="Who owns it" p={ownP} />
+      <Callout x={1730} y={437} w={138} h={48 * 4} label="Which quarters it runs in" p={qP} right />
       {/* the reading window */}
       <div style={{ position: "absolute", inset: 0, background: `rgba(15,23,42,${0.6 * readP})`, opacity: readP > 0 ? 1 : 0 }} />
       <div style={{ position: "absolute", left: 160, right: 160, top: 60, bottom: 60, borderRadius: 14, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,.4)", background: C.ground, opacity: readP, translate: `0px ${(1 - readP) * 60}px` }}>

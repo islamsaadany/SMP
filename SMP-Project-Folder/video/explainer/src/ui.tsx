@@ -252,8 +252,8 @@ export const Rail: React.FC<{ title: string; items: { id: string; name: string; 
 );
 
 /* ── A callout ring with a label ────────────────────────── */
-export const Callout: React.FC<{ x: number; y: number; w: number; h: number; label?: string; p?: number; below?: boolean }> = ({ x, y, w, h, label, p = 1, below }) => (
-  <div style={{ position: "absolute", left: x - 6, top: y - 6, width: w + 12, height: h + 12, borderRadius: 10, border: `3px solid ${C.cta}`, opacity: p, scale: String(0.92 + 0.08 * p), pointerEvents: "none", boxShadow: "0 0 0 4px rgba(194,65,12,.15)" }}>
-    {label ? <div style={{ position: "absolute", left: 0, [below ? "top" : "bottom"]: "calc(100% + 8px)", background: C.cta, color: "#fff", fontSize: 16, fontWeight: 700, padding: "4px 12px", borderRadius: 6, whiteSpace: "nowrap" }}>{label}</div> : null}
+export const Callout: React.FC<{ x: number; y: number; w: number; h: number; label?: string; p?: number; below?: boolean; right?: boolean }> = ({ x, y, w, h, label, p = 1, below, right }) => (
+  <div style={{ position: "absolute", left: x - 6, top: y - 6, width: w + 12, height: h + 12, borderRadius: 10, border: `3px solid ${C.cta}`, opacity: p, scale: String(0.94 + 0.06 * p), pointerEvents: "none", boxShadow: "0 0 0 4px rgba(194,65,12,.15)", zIndex: 5 }}>
+    {label ? <div style={{ position: "absolute", [right ? "right" : "left"]: 0, [below ? "top" : "bottom"]: "calc(100% + 8px)", background: C.cta, color: "#fff", fontSize: 16, fontWeight: 700, padding: "4px 12px", borderRadius: 6, whiteSpace: "nowrap" }}>{label}</div> : null}
   </div>
 );

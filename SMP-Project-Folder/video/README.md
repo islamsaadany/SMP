@@ -2,23 +2,50 @@
 
 A motion explanatory video for clients: what their people see as a plan, how
 they report, and the performance, dashboards and review deck that follow. The
-office's own pages are left out on purpose.
+office's own pages are left out on purpose. Everything on screen is an
+invented demo company, Meridian Group, with invented figures.
 
-| File | What it is |
+| Path | What it is |
 |---|---|
-| `2026-11-17_explainer-storyboard-v1.html` | Storyboard and narration, scene by scene, with the real screen each is drawn from. Published as an artifact for sign-off (A1, A17). |
-| `reference-screens/` | The screens the storyboard cites, captured from the built platform at 1600×900 on `file://`, as a unit head and as the group CEO. |
-| `capture-screens.js` | The Playwright script that took them (edit the output path; it dismisses the reading window with Escape). |
+| `renders/SMP-explainer-3min.mp4` | The full cut, 1920×1080, AI voice with captions. Shown in meetings. |
+| `renders/SMP-explainer-90s.mp4` | The 90-second cut, same voice and look. |
+| `explainer/` | The Remotion project the two cuts render from (below). |
+| `2026-11-17_explainer-storyboard-v1.html` | Storyboard v1 and the narration, scene by scene, with the real screen each was drawn from. Published as an artifact; Islam's five decisions (2026-11-17) are what the project builds: demo company, AI voice with captions, English, both cuts, 16:9. |
+| `reference-screens/` | The real platform screens the storyboard cites, captured at 1600×900 from the built file. |
+| `capture-screens.js` | The Playwright script that took them. |
 
-## Status
+## The Remotion project (`explainer/`)
 
-Storyboard v1 awaits Islam's five decisions (whose company is on screen, voice,
-language, length, where it is shown). Nothing is built until they are given.
+```bash
+cd explainer && npm install
+npx remotion studio                    # preview and scrub every scene
+npx remotion render Full  ../renders/SMP-explainer-3min.mp4
+npx remotion render Short ../renders/SMP-explainer-90s.mp4
+```
 
-## Production path, once agreed
+- `src/data.ts` — the demo company. Change a name or a figure here and every scene follows.
+- `src/script.ts` — the narration, split into caption lines. The voice reads the join of each scene's lines.
+- `src/scenes/` — one file per scene, drawn with the platform's own tokens and type (`src/theme.ts`, `src/ui.tsx`).
+- `src/planned.ts` — the pace each scene was drawn for; `src/timings.ts` and `src/cues.ts` are **generated** from the measured voice and never edited by hand. Story time stretches each scene to its narration (`src/anim.ts`).
+- `public/voice/` — one MP3 per scene per cut, with a `.json` cache beside each (the word timings the captions are cut to).
 
-Remotion renders in the cloud session: `remotion@4.0.544` installs from npm and
-a 1080p test clip rendered in about twenty seconds with the pre-installed
-Chromium. One composition per scene, the platform's own type (Source Sans 3)
-and tokens, output 1920×1080 MP4. The project source will live beside this
-file so the video can be re-rendered when the product changes.
+### The voice
+
+`scripts/make-voice.py` synthesises the narration with a free neural voice
+(Microsoft Edge, `en-US-AndrewNeural`, through the `edge-tts` package),
+measures every scene, and writes `timings.ts` and `cues.ts`. Changing the
+words in `script.ts` and running it again re-does only the scenes that
+changed. The service refuses a request now and then; the script retries and
+resumes. To try another voice: `--voice en-GB-SoniaNeural` (`edge-tts
+--list-voices` lists them). A recorded human voice can replace it: drop the
+per-scene MP3s into `public/voice/<cut>/` and write their durations into
+`timings.ts` (word cues then fall back to the lines spread by word count).
+
+Descript's agent could not generate speech from the session (2026-11-17), so
+it was not used; the project does not depend on it.
+
+### Behind the session proxy
+
+`edge-tts` pins its own certificate list, so append the proxy's bundle to it
+once: `cat /root/.ccr/ca-bundle.crt >> <venv>/lib/python3.*/site-packages/certifi/cacert.pem`.
+The render itself needs no network: the font is the platform's own file.

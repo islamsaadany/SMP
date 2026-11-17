@@ -25,11 +25,20 @@ def read_lines(name):
 def words(s):
     return re.findall(r"[A-Za-z0-9'’%.,;:-]+", s)
 
-async def synth(text, out, voice, attempts=4):
-    import edge_tts
+async def synth(text, out, voice, attempts=8):
+    """Synthesise one scene. A finished scene is cached beside its audio (a
+    .json with the text, the voice and the word bounds), so a run that dies
+    halfway picks up where it stopped and an unchanged scene is never redone."""
+    import edge_tts, hashlib
+    cache = out[:-4] + ".json"
+    key = hashlib.sha1((voice + "|" + text).encode()).hexdigest()
+    if os.path.exists(cache) and os.path.exists(out) and os.path.getsize(out) > 0:
+        c = json.load(open(cache))
+        if c.get("key") == key:
+            return [tuple(b) for b in c["bounds"]]
     for attempt in range(attempts):
         try:
-            com = edge_tts.Communicate(text, voice, rate="-4%")
+            com = edge_tts.Communicate(text, voice, rate="-4%", boundary="WordBoundary")
             bounds = []
             with open(out, "wb") as f:
                 async for chunk in com.stream():
@@ -38,10 +47,11 @@ async def synth(text, out, voice, attempts=4):
                     elif chunk["type"] == "WordBoundary":
                         # offset and duration in 100-ns ticks
                         bounds.append((chunk["offset"] / 1e7, (chunk["offset"] + chunk["duration"]) / 1e7, chunk["text"]))
+            json.dump({"key": key, "voice": voice, "text": text, "bounds": bounds}, open(cache, "w"))
             return bounds
         except Exception as e:  # the service sometimes closes the stream early; try again
             print(f"  attempt {attempt + 1} failed: {e}")
-            await asyncio.sleep(2 + attempt * 2)
+            await asyncio.sleep(5 + attempt * 5)
     raise RuntimeError(f"no audio for: {text[:40]}")
 
 def duration(path):

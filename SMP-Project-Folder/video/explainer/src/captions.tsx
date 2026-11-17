@@ -9,7 +9,7 @@ export type Cue = { text: string; start: number; end: number };
 export const Captions: React.FC<{ lines?: string[]; cues?: Cue[]; speech?: number; dark?: boolean }> = ({ lines, cues, speech, dark }) => {
   const { t, length } = useRealClock();
   let list: Cue[] = cues ?? [];
-  if (!cues && lines) {
+  if (!(cues && cues.length) && lines) {
     const total = lines.reduce((s, l) => s + l.split(" ").length, 0);
     const span = speech ?? length - 1.0;
     let acc = 0;

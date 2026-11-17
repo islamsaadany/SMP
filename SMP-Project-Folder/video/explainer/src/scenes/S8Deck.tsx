@@ -122,7 +122,7 @@ export const S8Deck: React.FC<{ short?: boolean }> = ({ short }) => {
       </AbsoluteFill>
       {/* presenting */}
       <AbsoluteFill style={{ background: "#000", opacity: present, justifyContent: "center", alignItems: "center" }}>
-        <div style={{ scale: String(1.2 - 0.0 * present), transformOrigin: "center" }}><Slide scale={1.2} /></div>
+        <Slide scale={1.2} />
       </AbsoluteFill>
       {temple > 0 ? <AbsoluteFill style={{ opacity: temple }}><Temple t={t} from={templeAt + 0.3} /></AbsoluteFill> : null}
     </AbsoluteFill>

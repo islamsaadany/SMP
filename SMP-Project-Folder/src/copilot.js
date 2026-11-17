@@ -2790,8 +2790,9 @@ var COPILOT = (function(){
      the left and the right is details"). The deliverables (and a SWOT's
      sources) stand below the open chat's to-do; where there is no to-do —
      the start screen, a free chat, a deliverable — in a column of their own. */
-  function detailsInner(){
-    return '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh"><span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +
+  function detailsInner(tog){
+    /* §783 — the column's own hide button sits in its header, first, as the chats rail's does (Islam) */
+    return '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh">' + (tog ? '<button type="button" class="coptog cophtog" data-cop-dettog aria-expanded="true" aria-label="Hide deliverables" title="Hide deliverables">' + DETMARK + '</button>' : '') + '<span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +
         '<div class="coplist" data-cop-delivs>' + delivsHtml() + '</div></section>' +
       (section() === "analysis" ? '<section class="coprail' + (folded("sources") ? " copfolded" : "") + '" data-cop-sources-rail><div class="coprh"><span class="coprhl">Sources</span>' + foldBtn("sources", "sources") + '</div>' +
         '<div class="coplist" data-cop-sources>' + sourcesHtml() + '</div></section>' : '');
@@ -2810,7 +2811,7 @@ var COPILOT = (function(){
     else {
       var shut = detShut();
       det.innerHTML = shut ? '<button type="button" class="coptog" data-cop-dettog aria-expanded="false" aria-label="Show deliverables" title="Show deliverables">' + DETMARK + '</button>'
-        : '<button type="button" class="coptog copdettog" data-cop-dettog aria-expanded="true" aria-label="Hide deliverables" title="Hide deliverables">' + DETMARK + '</button>' + detailsInner();
+        : detailsInner(true);
       pane.classList.toggle("copdetshut", shut);
     }
     pane.classList.toggle("copwithdet", !td);

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-17 — The deliverables' hide button in their header (§783).** As the Chats header has its own, first.
+
 **2026-11-17 — One-line chat header; the stepper line; Builder and Advisory at the right (§782).** A chat's header is its name, ⓘ and A− A+ over a light line edge to edge; no "Free chat" — a chat is named from its first words. The steps are one thin stepper line ending with the plan's count. ✦ Builder and Advisory sit at the far right of the tabs; Advisory is its own tab, no longer a step.
 
 **2026-11-17 — The working word at the left (§781).** "Thinking…", "Fetching…" stand at the left of the conversation, where the answer will start, not centred.

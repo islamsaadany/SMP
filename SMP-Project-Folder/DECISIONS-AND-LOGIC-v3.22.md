@@ -71693,3 +71693,9 @@ The full run: `checks/copilot.mjs` **379 passed, 0 failed**; `checks/shell.mjs` 
 
 **§781 AND §782 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §780, so the merge is a fast-forward carrying both — `294b0485..dde9b322`. No migrations; nobody signed out.
 
+## §783 — The deliverables column's hide button in its own header (2026-11-17)
+
+Islam, with a screenshot of the button floating above the Deliverables box: *"make the collapse button on the panel itself like we did in the chat panel"*. The button that folds the Details column (§780) moves into the Deliverables header, first, as the chats rail's sits first in its Chats header; folded, the column is the same 24px strip with the button to open it.
+
+**Checked**: `checks/shell.mjs` 3p (**23 ok, 0 failed**) — the column folds from its header button and opens again, the fold kept.
+

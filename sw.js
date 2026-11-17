@@ -703,7 +703,8 @@
 /* v7.92-pictures — §780: pictures in the Copilot (paste, drop, attach), read by the model as themselves; Details stay on the right on a smaller window and fold. */
 /* v7.93-working-left — §781: the working word stands at the left of the conversation. */
 /* v7.94-builder-advisory — §782: one-line chat header; the stepper line; Builder and Advisory at the far right of the tabs. */
-const SHELL = "smp-shell-v7.94-builder-advisory";
+/* v7.95-details-toggle — §783: the deliverables column's hide button in its own header. */
+const SHELL = "smp-shell-v7.95-details-toggle";
 const ASSETS = [
   "/",
   "/index.html",

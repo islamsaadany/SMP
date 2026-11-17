@@ -1,0 +1,211 @@
+<title>Put on the Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: demo control (which part the chat is about; a value missing its measures), then the platform as it stands after §782 — tabs with ✦ Builder · Advisory at the right, the stepper line, chats left, the chat and its draft in the middle, Details right. */
+:root{--ground:#F3F5F8;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-2:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--attn:#B45309;--attnbg:#FDF3E2;--rep:#A6512A;--demo:#5B3E8F;--demobg:#F2EEFA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--line-2:#2A3039;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2614;--demo:#C7B3F0;--demobg:#251E33;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--line-2:#2A3039;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--attnbg:#2E2614;--demo:#C7B3F0;--demobg:#251E33;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+h1{font-size:17px;margin:0}
+.hint{color:var(--ink-3);font-size:13px}
+.pick{border:1px dashed var(--demo);background:var(--demobg);border-radius:10px;padding:8px 12px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px}
+.pick b{color:var(--demo)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:3px 12px;font-size:12.5px;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--demo);color:#fff;font-weight:600}
+.pick label{display:inline-flex;gap:5px;align-items:center}
+.app{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;height:760px}
+.bar{display:flex;gap:14px;align-items:center;background:var(--nav);color:var(--navink);padding:8px 14px;font-size:13px}
+.bar b{border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.bar span{opacity:.85}
+.tabs{display:flex;gap:18px;align-items:center;padding:6px 14px;border-bottom:1px solid var(--line);font-size:13.5px}
+.tabs .t{color:var(--ink-2)}
+.tabs .rep{background:var(--rep);color:#fff;border-radius:6px;padding:2px 10px}
+.tabs .sp{flex:1}
+.tabs .side{display:inline-flex;gap:6px;border-left:1px solid var(--line);padding-left:12px}
+.pill{border:1px solid var(--line);border-radius:16px;padding:2px 12px;font-weight:600;color:var(--ink-2);background:var(--surface);font-size:13px}
+.pill.on{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.pill.adv{border-style:dashed}
+.pane{flex:1;min-height:0;display:grid;grid-template-columns:180px minmax(0,1fr) 190px;grid-template-rows:auto minmax(0,1fr);gap:0 8px;padding:10px}
+@media (max-width:900px){.pane{grid-template-columns:150px minmax(0,1fr)}.det{display:none}}
+.rail{grid-column:1;grid-row:1/3;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;font-size:12.5px;display:flex;flex-direction:column}
+.rh{display:flex;align-items:center;gap:6px;padding:8px;font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.rh .sp{flex:1}
+.newc{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:1px 7px;font:600 11.5px/1.5 var(--sans);text-transform:none;letter-spacing:0;color:var(--ink)}
+.row{background:var(--surface);border-top:1px solid var(--line);padding:6px 8px;display:flex;flex-direction:column;gap:1px}
+.row.on{box-shadow:inset 3px 0 0 var(--goldfill)}
+.atag{align-self:flex-start;font:700 9.5px/1.6 var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:0 5px;border-radius:4px;background:var(--surface-2);color:var(--ink-2)}
+.row small{color:var(--ink-3);font-size:11.5px}
+.steps{grid-column:2/4;display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;padding:5px 8px;margin-bottom:8px;font-size:12.5px;flex-wrap:wrap;row-gap:4px}
+@media (max-width:900px){.steps{grid-column:2}}
+.st{display:inline-flex;align-items:center;gap:6px;padding:2px 7px;border-radius:6px;white-space:nowrap;color:var(--ink-2)}
+.st.cur{background:var(--surface-2);color:var(--ink);font-weight:700}
+.n{width:19px;height:19px;border-radius:50%;display:inline-grid;place-items:center;font-size:10.5px;font-weight:700;border:1.5px solid var(--line);color:var(--ink-3)}
+.st.on .n{background:var(--good);border-color:var(--good);color:#fff}
+.st.nx .n{border-color:var(--nav);color:var(--ink)}
+.ln{flex:1 1 10px;min-width:10px;max-width:48px;height:2px;background:var(--line)}.ln.on{background:var(--good)}
+.say{margin-left:auto;padding-left:12px;color:var(--ink-3);font-size:12px}.say b{color:var(--ink)}
+.main{grid-column:2;grid-row:2;border:1px solid var(--line);border-radius:8px;min-width:0;min-height:0;display:flex;overflow:hidden}
+.chat{flex:1 1 50%;min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
+.hd{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line-2)}
+.hd b{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hd .sp{flex:1}
+.zz{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
+.zz span{padding:1px 8px;font-size:12px;color:var(--ink-2)}.zz span+span{border-left:1px solid var(--line)}
+.i{color:var(--ink-3);font-size:13px}
+.msgs{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.ai{border-left:3px solid var(--goldfill);padding:2px 10px}
+.ai p{margin:0 0 5px}
+.who{font-size:11px;color:var(--ink-3);margin-bottom:2px}
+.me{align-self:flex-end;max-width:80%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.box{margin:0 14px 12px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink-3);font-size:13px}
+.draft{flex:1 1 50%;min-width:0;display:flex;flex-direction:column;background:var(--surface-2)}
+.dh{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line-2);background:var(--surface)}
+.dh b{font-size:14px}.dh .sp{flex:1}
+.chip{font:600 11px/1.6 var(--sans);padding:0 8px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.chip.on{background:var(--goodbg);color:var(--good)}
+.chip.warn{background:var(--attnbg);color:var(--attn)}
+.db{flex:1;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.df{border-top:1px solid var(--line);padding:9px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+.df small{color:var(--ink-3);font-size:12px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 12px;font-weight:600;font-size:12.5px}
+.btn.solid{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.lab{font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.disc{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--goldfill);border-radius:8px;padding:9px 11px}
+.disc h3{margin:2px 0 3px;font-size:15px}
+.disc p{margin:0;font-size:12.5px;color:var(--ink-2)}
+.vals{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.val{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:5px;font-size:12.5px}
+.val.miss{border-color:var(--attn)}
+.val h4{margin:0;font-size:13px}
+.val ul{margin:0;padding-left:16px}
+.mrow{display:flex;justify-content:space-between;gap:8px;border-top:1px dashed var(--line);padding-top:3px}
+.mrow span:last-child{color:var(--ink-3);white-space:nowrap}
+.gap{color:var(--attn);font-size:12px}
+.ev{color:var(--ink-3);font-size:12px}.ev summary{cursor:pointer}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.q{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--good);border-radius:8px;padding:8px 10px;font-size:12.5px}
+.q ol{margin:4px 0 0;padding-left:16px}
+.part{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px}
+.part p{margin:3px 0 0;color:var(--ink-2)}
+.review{background:var(--surface);border:1.5px solid var(--goldfill);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.cmp div{border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12.5px}
+.cmp .was{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line)}
+.cmp .now{border-color:var(--good)}
+.ok{background:var(--goodbg);color:var(--good);border-radius:8px;padding:8px 10px;font-size:13px}
+.det{grid-column:3;grid-row:2;font-size:12.5px}
+.dbox{border:1px solid var(--line);border-radius:8px;background:var(--surface-2);overflow:hidden}
+.dbox h4{margin:0;padding:8px 10px;font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.dl{padding:7px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px;background:var(--surface);border-left:0;border-right:0;border-top:0;text-align:left;width:100%}
+.dl.cur{box-shadow:inset 3px 0 0 var(--goldfill);background:var(--surface-2)}
+.dl small{color:var(--ink-3)}
+.notes{font-size:13px;color:var(--ink-2);max-width:92ch;margin:0;padding-left:18px}
+.notes li{margin:3px 0}.notes b{color:var(--ink)}
+</style>
+
+<div><h1>Copilot — a chat's work, laid out as the plan, and put on it</h1><span class="hint">working mockup · drawn on the layout as it stands (§782) · press through it</span></div>
+<div class="pick" id="pick"></div>
+<div class="app">
+  <div class="bar"><span>Group</span><b>Mobile</b><span>Retail</span><span>CE</span><span>Logistics</span></div>
+  <div class="tabs"><span class="t">Strategy</span><span class="t">Performance</span><span class="rep">Reporting</span><span class="t">Insights</span><span class="sp"></span><span class="side"><span class="pill on">✦ Builder</span><span class="pill adv">Advisory</span></span></div>
+  <div class="pane" id="pane"></div>
+</div>
+<ul class="notes">
+  <li><b>The draft beside the chat is drawn as the plan draws that part</b>: Competitive Discipline as the discipline and a card per value (How, measures with target and today, evidence folded); a SWOT as its four boxes; the Foundation as its parts. The Copilot shapes the chat's work into the part when it drafts — a free chat's draft is no longer loose text.</li>
+  <li><b>Anything the plan needs and the draft lacks is said on it</b> — tick “a value without measures” above: the value is marked, the chip says “1 gap”, and you can say it in the chat or put it on the plan as it is.</li>
+  <li><b>Save</b> keeps it as a version under Deliverables, laid out the same. <b>Put on Mobile's plan</b> (in the draft or on the deliverable) first shows what it replaces — today's against this — then <b>Apply</b> writes it; the plan's old version is archived, as every Apply does.</li>
+  <li>Only a chat's work in one of the five parts can go on the plan. A question answered, or a brief, stays in the Copilot.</li>
+</ul>
+
+<script>
+(function(){
+  var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); };
+  var init = function(){ return { part:"compete", gap:false, view:"chat", saved:false, review:false, applied:false }; };
+  var S = init();
+  var VALS = [
+    ["Diversified Portfolio", ["New areas in, under-performers out", "Acquire new brands and categories"], [["Biggest brand's share of revenue", "≤ 50%", "today 59%"]], "SWOT: diversified portfolio; opportunity to acquire brands."],
+    ["Best Customer Experience", ["A more efficient order cycle", "A Raya loyalty programme"], [["Vendor retention rate", "≥ 80%", "no baseline"]], "Best Total Solution is judged on loyalty."],
+    ["Tech Driven Operation", ["Relaunch the distribution app", "A daily KPI dashboard per rep"], [["Accounts on the platform", "1,000", "no baseline"]], "SWOT: under-used automation. MB01."],
+    ["Vendor Growth Partner", ["Joint business planning with key retailers", "24h delivery; shared market insights"], [["Tier 2 revenue growth", "≥ 100%", "today 60%"], ["Average delivery time", "≤ 24h", "today 24h"]], "Answers vendors going direct-to-market. MB02, MB03."]];
+  var PART = {
+    compete: { tag:"Discipline", chat:"Mobile — value proposition", step:2, title:"Mobile · How we compete", today:"Best Total Cost · 5 values", now:"Best Total Solution · 4 values · 6 measures" },
+    analysis: { tag:"SWOT", chat:"Mobile — the SWOT after the vendor meeting", step:1, title:"Mobile · SWOT", today:"23 lines", now:"21 lines · 3 new, 5 gone" },
+    foundation: { tag:"Foundation", chat:"Mobile — sharper aspiration", step:0, title:"Mobile · Foundation", today:"4 parts", now:"4 parts · Ambition and End in mind reworded" }
+  };
+  function pick(){
+    var b = function(k, w){ return '<button data-part="' + k + '" aria-pressed="' + (S.part === k) + '">' + w + '</button>'; };
+    document.getElementById("pick").innerHTML = '<b>Demo · the chat is about</b><span class="seg">' + b("compete", "Competitive Discipline") + b("analysis", "SWOT") + b("foundation", "Foundation") + '</span>' +
+      (S.part === "compete" ? '<label><input type="checkbox" data-gap' + (S.gap ? " checked" : "") + '> a value without measures</label>' : '') + '<button class="btn" data-reset style="margin-left:auto">Start over</button>';
+  }
+  function steps(){
+    var P = [["Foundation",1],["SWOT",1],["Competitive Discipline",1],["Pillars/Directions",1],["Tactical Plans",0]], cur = PART[S.part].step;
+    return '<div class="steps">' + P.map(function(p, i){ return (i ? '<span class="ln' + (P[i - 1][1] ? " on" : "") + '"></span>' : '') + '<span class="st' + (p[1] ? " on" : " nx") + (i === cur ? " cur" : "") + '"><span class="n">' + (p[1] ? "✓" : i + 1) + '</span>' + p[0] + '</span>'; }).join("") + '<span class="say"><b>4 of 5</b> on Mobile’s plan</span></div>';
+  }
+  function shaped(){
+    if (S.part === "analysis") return '<div class="quad">' + [["Strengths",["Nationwide reach","Brand partnerships","On-ground sell-through"]],["Weaknesses",["Low margin on devices","Many systems, little automation"]],["Opportunities",["Accessories market","Vendors' data needs"]],["Threats",["Grey market","Vendors selling direct to retailers"]]].map(function(q){ return '<div class="q"><span class="lab">' + q[0] + '</span><ol>' + q[1].map(function(l){ return '<li>' + esc(l) + '</li>'; }).join("") + '</ol></div>'; }).join("") + '</div>';
+    if (S.part === "foundation") return [["Who we are","We bring the brands Egyptians trust to every town, through 300 stores and the partners who sell beside us."],["Ambition","The partner every vendor chooses first in Egypt by 2028."],["End in mind","Twice the Tier 2 revenue; every vendor on One Raya."],["Key Objectives","Grow Tier 2 · Keep vendors · Digital operation"]].map(function(p){ return '<div class="part"><span class="lab">' + p[0] + '</span><p>' + esc(p[1]) + '</p></div>'; }).join("");
+    return '<div class="disc"><span class="lab">Value discipline</span><h3>Best Total Solution <span class="hint" style="font-size:12px">(Customer Intimacy)</span></h3><p>A complete, tailored distribution offer for vendors and channels.</p><details class="ev"><summary>Why</summary>Chosen in this chat; fits the SWOT strengths: brand partnerships, nationwide reach.</details></div>' +
+      '<span class="lab">Value proposition · 4 values</span><div class="vals">' + VALS.map(function(v, i){ var miss = S.gap && i === 2;
+        return '<div class="val' + (miss ? " miss" : "") + '"><h4>' + esc(v[0]) + '</h4><span class="lab">How</span><ul>' + v[1].map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul><span class="lab">Measures</span>' +
+          (miss ? '<span class="gap">No measure yet — the plan needs one per value. Say it in the chat, or put it on the plan as it is.</span>' : v[2].map(function(m){ return '<div class="mrow"><span>' + esc(m[0]) + ' <b>' + esc(m[1]) + '</b></span><span>' + esc(m[2]) + '</span></div>'; }).join("")) +
+          '<details class="ev"><summary>Evidence</summary>' + esc(v[3]) + '</details></div>'; }).join("") + '</div>';
+  }
+  function review(){
+    var p = PART[S.part];
+    if (S.applied) return '<div class="ok">✓ v1 is on Mobile’s plan. The plan’s old version is archived under Import &amp; storage › Archived plans.</div>';
+    if (!S.review) return '';
+    return '<div class="review"><b>Before it goes on Mobile’s plan</b><div class="cmp"><div class="was">Today · ' + esc(p.today) + '</div><span>→</span><div class="now">This · ' + esc(p.now) + '</div></div>' +
+      (S.gap && S.part === "compete" ? '<span class="gap">Tech Driven Operation goes on without a measure.</span>' : '') +
+      '<span class="hint">The plan moves only on Apply; its old version is archived.</span><span><button class="btn solid" data-apply>Apply to plan</button> <button class="btn" data-notnow>Not now</button></span></div>';
+  }
+  function chip(){ var gaps = S.gap && S.part === "compete"; return S.applied ? '<span class="chip on">v1 on Mobile’s plan</span>' : S.saved ? '<span class="chip">v1 saved · not on the plan</span>' : gaps ? '<span class="chip warn">1 gap</span>' : '<span class="chip">Draft</span>'; }
+  function draftPane(){
+    var p = PART[S.part];
+    return '<section class="draft"><div class="dh"><b>' + esc(p.title) + '</b>' + chip() + '<span class="sp"></span></div><div class="db">' + review() + shaped() + '</div>' +
+      '<div class="df">' + (S.applied ? '<small>On the plan. Open Strategy › ' + (S.part === "compete" ? "Plan" : S.part === "analysis" ? "SWOT" : "Foundation") + ' to see it.</small>'
+        : (!S.saved ? '<button class="btn" data-save>Save</button>' : '<small>Saved as v1</small>') + '<button class="btn solid" data-put' + (S.review ? " disabled" : "") + '>Put on Mobile’s plan</button>') + '</div></section>';
+  }
+  function chat(){
+    var p = PART[S.part];
+    var ask = S.part === "analysis" ? "Update our SWOT from today's vendor meeting notes" : S.part === "foundation" ? "Our aspiration reads weak, sharpen it" : "Sharpen our value proposition for vendors";
+    return '<div class="chat"><div class="hd"><b>' + esc(p.chat) + '</b><span class="sp"></span><span class="i">ⓘ</span><span class="zz"><span>A−</span><span>A+</span></span></div>' +
+      '<div class="msgs"><div class="me">' + esc(ask) + '</div><div class="ai"><div class="who">Copilot</div><p>Here it is, laid out as your plan shows it — on the right.' + (S.gap && S.part === "compete" ? ' One value has no measure yet; say one, or leave it for now.' : '') + '</p><p>Save it, or put it on Mobile’s plan when it reads right.</p></div></div>' +
+      '<div class="box">Say what to change…</div></div>';
+  }
+  function delivPage(){
+    var p = PART[S.part];
+    return '<section class="draft" style="flex:1"><div class="dh"><b>' + esc(p.title) + '</b>' + chip() + '<span class="sp"></span>' + (S.applied ? '' : '<button class="btn solid" data-put' + (S.review ? " disabled" : "") + '>Put on Mobile’s plan</button>') + '<button class="btn">Edit</button></div>' +
+      '<div class="db"><span class="hint" style="font-size:12px">Made by Islam Saadany in “' + esc(p.chat) + '” · 17 Nov 26 · v1</span>' + review() + shaped() + '</div></section>';
+  }
+  function draw(){
+    pick();
+    var p = PART[S.part];
+    document.getElementById("pane").innerHTML = '<aside class="rail"><div class="rh">▤ Chats<span class="sp"></span><span class="newc">+ New chat</span></div>' +
+      '<div class="row on"><span class="atag">' + p.tag + '</span><b>' + esc(p.chat) + '</b><small>Islam Saadany · 17 Nov 26</small></div><div class="row"><span class="atag">SWOT</span><b>SWOT — Mobile</b><small>The office · 15 Nov 26</small></div></aside>' +
+      steps() + '<div class="main">' + (S.view === "deliv" ? delivPage() : chat() + draftPane()) + '</div>' +
+      '<aside class="det"><div class="dbox"><h4>Deliverables</h4>' + (S.saved || S.applied ? '<button class="dl' + (S.view === "deliv" ? " cur" : "") + '" data-open><b>' + esc(p.title) + '</b><small>' + (S.applied ? "v1 · on the plan" : "v1 · not on the plan yet") + '</small></button>' : '') +
+      '<div class="dl"><b>SWOT — Mobile</b><small>v2 · on the plan</small></div><div class="dl"><b>Foundation — Mobile</b><small>v1 · on the plan</small></div></div>' +
+      (S.view === "deliv" ? '<p class="hint" style="font-size:12px;margin:8px 2px"><button class="btn" data-back>‹ Back to the chat</button></p>' : '') + '</aside>';
+  }
+  document.addEventListener("change", function(e){ if (e.target.matches("[data-gap]")) { S.gap = e.target.checked; draw(); } });
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b || b.disabled) return;
+    if (b.hasAttribute("data-reset")) { S = init(); draw(); return; }
+    if (b.hasAttribute("data-part")) { var g = S.gap; S = init(); S.part = b.getAttribute("data-part"); S.gap = g; draw(); return; }
+    if (b.hasAttribute("data-save")) { S.saved = true; draw(); return; }
+    if (b.hasAttribute("data-put")) { S.review = true; draw(); return; }
+    if (b.hasAttribute("data-notnow")) { S.review = false; draw(); return; }
+    if (b.hasAttribute("data-apply")) { S.review = false; S.applied = true; S.saved = true; draw(); return; }
+    if (b.hasAttribute("data-open")) { S.view = "deliv"; draw(); return; }
+    if (b.hasAttribute("data-back")) { S.view = "chat"; draw(); return; }
+  });
+  draw();
+})();
+</script>

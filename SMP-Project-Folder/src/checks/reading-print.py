@@ -45,6 +45,14 @@ WHAT IS ASSERTED, and why each one can fail:
       for a reader.
 
   9 · AND THE COMPANY PRINTS TOO, its tabs in order.
+
+ 10 · A COMPANY THAT PLANS ITS OWN STRATEGY (El Abd's shape, §447/§570:
+      the units' layer off, the directions the company's own): named by
+      its name on the cover and in the title — §570 calls its button
+      Strategy, and "Strategy · Strategy" is not a name — its Directions
+      section holding its own directions, each direction's line kept on a
+      page with its first table (a direction's heading alone at the foot of
+      a page was measured, §787).
 """
 import os
 from playwright.sync_api import sync_playwright
@@ -265,6 +273,36 @@ with sync_playwright() as p:
         js(pg, "()=>window.dispatchEvent(new Event('afterprint'))")
     else:
         ok("the company can be read by the office", False, opened)
+
+    print("\n── 10 · a company that plans its own strategy")
+    made = js(pg, """()=>{ var k = activeKeys()[0];
+      GROUP.items = JSON.parse(JSON.stringify(UNITS[k].items));
+      var s = GROUP.structure || {}; s.bu = Object.assign({}, s.bu || {}, { exists: false }); GROUP.structure = s;
+      try { paint(); } catch (e) {}
+      try { READING.close(); } catch (e) {}
+      return { own: topHasPlan(), noUnits: !buExists(), opened: READING.open('group') && READING.state().target }; }""")
+    ok("made: the company holds its own directions and no units", isinstance(made, dict) and made.get("own") is True and made.get("noUnits") is True and made.get("opened") == "group", made)
+    pg.wait_for_timeout(400)
+    js(pg, "()=>{ window.__printed = 0; }")
+    pg.click("#readroot [data-rprint]")
+    pg.wait_for_timeout(300)
+    pg.emulate_media(media="print")
+    pp = js(pg, PAPER)
+    one = js(pg, """()=>{ const d = document.querySelector('#readroot .rprintdoc');
+      const sec = d && d.querySelector('.rpsec[data-rptab=dir]');
+      const dirs = sec ? [...sec.querySelectorAll('.rdir')] : [];
+      const shown = e => !!e && getComputedStyle(e).display !== 'none';
+      return { title: document.title, h1: d ? d.querySelector('.rpcover h1').textContent.trim() : null,
+               orgLine: !!(d && d.querySelector('.rpcover .rporg')),
+               dirs: dirs.length, want: (GROUP.items || []).length,
+               kept: dirs.filter(x => { const k = x.querySelector('.rpkeep'); return k && k.querySelector('.rfold') && k.querySelector('.rtable') && getComputedStyle(k).breakInside === 'avoid'; }).length,
+               tablesShown: dirs.every(x => [...x.querySelectorAll('.rtable')].every(shown)) }; }""")
+    ok("the cover names the company by its name, once, and so does the title", isinstance(one, dict) and one.get("h1") == org and one.get("orgLine") is False and one.get("title") == "Strategy · " + org, one)
+    ok("its Directions section holds the company's own directions, open, each line kept with its first table",
+       isinstance(one, dict) and one.get("dirs") == one.get("want") and (one.get("dirs") or 0) >= 2 and one.get("kept") == one.get("dirs") and one.get("tablesShown") is True, one)
+    ok("…the tabs in order, as on screen", isinstance(pp, dict) and pp.get("sections") == pp.get("tabs"), pp)
+    pg.emulate_media(media="screen")
+    js(pg, "()=>window.dispatchEvent(new Event('afterprint'))")
 
     ok("no page errors", not errs, errs)
     b.close()

@@ -576,13 +576,15 @@ var READING = (function () {
     if (kind === "unit") return String((UNITS[key] || {}).name || "");
     if (kind === "fn") return String((FUNCTIONS[fnKey(key)] || {}).name || "");
     if (kind === "co") return String((COMPANIES[key.slice(3)] || {}).name || "");
-    try { return String(topNavWord() || ""); } catch (e) { return String(GROUP.org || ""); }
+    /* the top layer: the client's own word for it where it holds units; a company that plans
+       its own strategy with no units (§570 names its button Strategy) is named by its name */
+    try { if (!buExists()) return String(GROUP.org || ""); return String(topNavWord() || GROUP.org || ""); } catch (e) { return String(GROUP.org || ""); }
   }
   function printDoc(key) {
     var org = String(GROUP.org || "").trim(), subj = subjectName(key);
     var cover = '<div class="rpcover">' +
       '<span class="rpmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span>' +
-      (org ? '<p class="rporg">' + esc(org) + '</p>' : '') +
+      (org && org !== subj ? '<p class="rporg">' + esc(org) + '</p>' : '') +
       '<h1>' + esc(subj || "Strategy") + '</h1>' +
       '<p class="rpline">Strategy' + (REVIEW && REVIEW.name ? ' · ' + esc(REVIEW.name) : '') + '</p>' +
       '<p class="rpday">Printed ' + esc(dateDay(new Date())) + '</p></div>';
@@ -599,12 +601,17 @@ var READING = (function () {
     doc.querySelectorAll(".rdir").forEach(function (d) {
       d.classList.add("open");
       var f = d.querySelector(".rfold"); if (f) { f.setAttribute("aria-expanded", "true"); f.removeAttribute("role"); f.removeAttribute("tabindex"); }
+      /* a direction's line and its first table are kept on one page together (.rpkeep): a
+         keep-with-next on the line alone made the browser move the whole direction (measured) */
+      var more = d.querySelector(".rmore"), first = more && more.firstElementChild;
+      if (f && first) { var keep = document.createElement("div"); keep.className = "rpkeep"; d.insertBefore(keep, f); keep.appendChild(f); keep.appendChild(first); }
     });
     doc.querySelectorAll(".rtools").forEach(function (x) { x.parentNode.removeChild(x); });
     r.appendChild(doc);
     var html = document.documentElement, wasTheme = html.getAttribute("data-theme"), wasTitle = document.title;
     if (wasTheme === "dark") html.setAttribute("data-theme", "light");
-    document.title = ["Strategy", String(GROUP.org || "").trim(), subjectName(key)].filter(Boolean).join(" · ");
+    var org = String(GROUP.org || "").trim(), subj = subjectName(key);
+    document.title = ["Strategy", org, subj === org ? "" : subj].filter(Boolean).join(" · ");
     document.body.classList.add("rprinting");
     var done = function () {
       window.removeEventListener("afterprint", done);

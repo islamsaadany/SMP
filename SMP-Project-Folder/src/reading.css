@@ -240,6 +240,10 @@ body.reading { overflow:hidden; }
   .readroot .rprintdoc .rchev { display:none; }
   .readroot .rprintdoc .rfold { grid-template-columns:auto 1fr auto 130px; }
   .readroot .rprintdoc .rmore { display:grid; gap:10px; }
+  .readroot .rprintdoc .rpkeep { break-inside:avoid; }
+  .readroot .rprintdoc .rpkeep > .rtable { margin:0 18px; width:calc(100% - 36px); }
+  .readroot .rprintdoc .rpkeep + .rmore { padding-top:10px; border-top:0; }
+  .readroot .rprintdoc .rmore:empty { display:none; }
   .readroot .rprintdoc .rtable { min-width:0; width:100%; }
   .readroot .rprintdoc .rtable td:first-child { min-width:0; }
   .readroot .rprintdoc .rdirs { gap:10px; }

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-17 — The welcome check green (§775.1).** Its three reds and its death were main's: the ladder made the plan the office's (no gaps row for a custodian), the underline was read mid-transition, the group CEO lands in the reading window, and the sign-in's last read raced a redirect. Each rewritten to the rule as it stands, never loosened. welcome: OK, twice.
+
 **2026-11-17 — The welcome screen no longer opens on its own (§775).** Islam: the client opened on the welcome window; chosen: stop it showing on its own. The screen is asked for through the house mark and is otherwise untouched. welcome.py, role-chip-own-thing and door-landing.mjs rewritten to press the house; welcome.py's three reds and its death at the group CEO are main's own. On the branch, not merged.
 
 **2026-11-16 — Panel head in place, rail menu whole, squeezed panel under the chrome (§774.3).** Islam: the Outcome/Target head floated in the panel and the directions' filter menu was hidden. The panel's tables are left out of the head pinning; the rail is overflow-visible again with only its list scrolling; the squeezed panel starts under the chrome and strip. All strip, panel and rail checks pass. On the branch, not merged.

@@ -71711,3 +71711,5 @@ Islam, of a free chat's deliverable drawn as one block of text: *"the deliverabl
 
 **Checked**: `checks/copilot.mjs` — the shape kept and cut per section, dropped when it does not fit or rides without a draft; a free chat in Competitive Discipline told the shape, its draft keeping it; saved as a promotable `compete` with the step-by-step body; its Apply recorded. `checks/shell.mjs` 3q, pressed end to end (**4 ok, 0 failed**) — the draft drawn as the discipline and value cards, the value without a measure said, Put on Mobile's plan offered; pressed, saved as a Competitive Discipline and asked with today, what goes on and the gap; Apply writing Mobile's plan and the version saying it is on the plan. Mobile's plan put back after.
 
+The full run on §783 and §784 together: `checks/copilot.mjs` **385 passed, 0 failed**; `checks/shell.mjs` **613 ok, 10 failed**, the known ten; `tsc`, `generated-in-step` and `release-stamp` clear.
+

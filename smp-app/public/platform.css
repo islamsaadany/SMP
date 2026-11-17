@@ -14216,7 +14216,7 @@ body.copB-wide #copPanel { left:0; width:auto; box-shadow:none; border-left:0; }
 .coppane.copwithdet > .copstrip { grid-column:2 / span 2; }
 .coppane.copwithdet, :root[data-cop-page] .coppane.copwithdet { grid-template-columns:minmax(200px, 240px) minmax(0, 1fr) 230px; }
 .coppane.copwithdet.copshut, :root[data-cop-page] .coppane.copwithdet.copshut { grid-template-columns:24px minmax(0, 1fr) 230px; }
-.copdelbox { flex:0 1 auto; min-height:0; max-height:45%; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+.copdelbox { flex:none; min-height:0; max-height:40%; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
 .copftodo > .copdelbox { border-top:1px solid var(--line); padding-top:8px; }
 @media (max-width:1020px){
   .coppane.copwithdet, :root[data-cop-page] .coppane.copwithdet { grid-template-columns:200px minmax(0, 1fr); }

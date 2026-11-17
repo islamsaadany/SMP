@@ -3063,16 +3063,17 @@ await section("3o · the Copilot in one window: the strip, one rail of every are
       more: Array.from(document.querySelectorAll("[data-cop-area-card], [data-cop-areas]")).map((b) => b.getAttribute("data-cop-area-card")),
       or: ((document.querySelector(".copstart .copor") || {}).textContent || "").trim() }));
     await shot("1-start");
-    check(w.row === 0 && w.steps.length >= 5 && w.steps.some((s) => s[1] === "Tactical Plans") && w.steps.some((s) => s[1] === "Pillars/Directions") && w.steps.filter((s) => s[3]).length === 1,
-      "§752 no row of area tabs; the method stands as a strip, each step saying where Mobile stands, one marked as the next", JSON.stringify(w.steps));
+    check(w.row === 0 && w.steps.length >= 5 && w.steps.some((s) => s[1] === "Tactical Plans") && w.steps.some((s) => s[1] === "Pillars/Directions") && w.steps.filter((s) => s[3]).length <= 1 && w.steps.every((s) => !!s[2]),
+      "§752 no row of area tabs; the method stands as a strip, each step saying where Mobile stands (§779: read off the plan), the first one missing marked as the next", JSON.stringify(w.steps));
     check(w.rail.length === 2 && w.rail.some((r) => r[0] === "compete" && r[1] === "Discipline") && w.rail.some((r) => r[0] === "directions" && r[1] === "Pillars"),
       "§752 one rail holds the chats of every area, each tagged with its area", JSON.stringify(w.rail));
     check(/Mobile’s strategy/.test(w.h) && /Foundation/.test(w.focus) && w.more.length === 0 && w.or === "Or choose another way to start",
       "§779 one start screen: the place's strategy, only the step in focus with its cards — no Other areas — under “Or choose another way to start”", JSON.stringify({ h: w.h, focus: w.focus, more: w.more, or: w.or }));
     /* §777 — the strip over the chat box on the right, clear of the rail */
-    const geo = await page.evaluate(() => { const s = document.querySelector("[data-cop-stripbar]"), m = document.querySelector("[data-cop-main]"), r = document.querySelector("[data-cop-rails]");
-      const a = s.getBoundingClientRect(), b = m.getBoundingClientRect(), c = r.getBoundingClientRect(); return { sl: Math.round(a.left), ml: Math.round(b.left), sr: Math.round(a.right), mr: Math.round(b.right), above: a.bottom <= b.top + 1, railRight: Math.round(c.right) }; });
-    check(Math.abs(geo.sl - geo.ml) <= 2 && Math.abs(geo.sr - geo.mr) <= 2 && geo.above && geo.sl > geo.railRight, "§777 the strip stands over the chat box on the right, its edges the box's, clear of the chats rail", JSON.stringify(geo));
+    const geo = await page.evaluate(() => { const s = document.querySelector("[data-cop-stripbar]"), m = document.querySelector("[data-cop-main]"), r = document.querySelector("[data-cop-rails]"), d = document.querySelector("[data-cop-details]");
+      const a = s.getBoundingClientRect(), b = m.getBoundingClientRect(), c = r.getBoundingClientRect(), e = d && d.getBoundingClientRect().width ? d.getBoundingClientRect() : b;
+      return { sl: Math.round(a.left), ml: Math.round(b.left), sr: Math.round(a.right), mr: Math.round(Math.max(b.right, e.right)), above: a.bottom <= b.top + 1, railRight: Math.round(c.right) }; });
+    check(Math.abs(geo.sl - geo.ml) <= 2 && Math.abs(geo.sr - geo.mr) <= 2 && geo.above && geo.sl > geo.railRight, "§777 the strip stands over the chat box and Details on the right, its edges theirs, clear of the chats rail", JSON.stringify(geo));
     /* §772 — no chips: the strip narrows the rail, a line undoes it */
     check(w.chips.length === 0, "§772 no area chips in the rail — the strip above does that", JSON.stringify(w.chips));
     await page.click('[data-cop-strip="directions"]'); await page.waitForTimeout(400);

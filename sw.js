@@ -695,7 +695,9 @@
 /* v7.85-open-row-tinted — §775.2: the open row is tinted whole, one bar. */
 /* v7.86-panel-head-and-rail-menu — §775.3: the panel head stays in its flow, the rail menu shows whole. */
 /* v7.87-welcome-asked-for — §776: the welcome no longer opens on its own; the house mark opens it. */
-const SHELL = "smp-shell-v7.87-welcome-asked-for";
+/* v7.81-builder-refine — main's §772: Builder until the five parts are on the plan, then Refine. */
+/* v7.88-merged-main — §773–§776.1 merged over main's §772; past main's v7.81. */
+const SHELL = "smp-shell-v7.88-merged-main";
 const ASSETS = [
   "/",
   "/index.html",

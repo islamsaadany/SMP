@@ -174,23 +174,42 @@ var COPILOT = (function(){
      opens the work when it is asked for — and B — the Copilot on the plan,
      opened from the part in view on the Strategy tab. Chosen per browser;
      nothing on the server knows which. */
-  var LAYOUTS = ["window", "chat", "plan"];
-  function layout(){ try { var v = localStorage.getItem("smp.copilot.layout"); return LAYOUTS.indexOf(v) >= 0 ? v : "window"; } catch (e) { return "window"; } }
+  /* §772 — BUILDER AND REFINE (Islam: "for a new project the people go step
+     by step… once there is a plan in place and we are refining, the one chat
+     is working better"; "the builder should be always there if an element is
+     not there… the foundation, the SWOT, the competitive discipline, the
+     pillars and directions, tactical plans — 5 important steps"). The tab
+     opens in BUILDER (the one window, §752) until every one of the five is on
+     the plan, then in REFINE (the one chat, §753 A). A choice by hand
+     overrides it, per browser; choosing what the place would open on clears
+     the choice. B is not a layout of the tab: ✦ Copilot stands beside Edit
+     on the plan's parts in either mode. */
+  /* on the plan: a version of it applied, whatever chat is open on it now */
+  function onPlan(k){ var l = LISTS[place() + "|" + k]; return !!(l && !l.failed && (l.deliverables || []).some(function(d){ return d.applied && d.applied.n; })); }
+  function modeParts(){ return here().map(function(s){ return s.k; }).filter(function(k){ return k !== "advisory" && k !== "capabilities"; }); }
+  function autoMode(){
+    var p = place(), ks = modeParts();
+    if (!ks.every(function(k){ return LISTS[p + "|" + k] && !LISTS[p + "|" + k].failed; })) return "window";
+    return ks.every(onPlan) ? "chat" : "window";
+  }
+  function modeChosen(){ try { var v = localStorage.getItem("smp.copilot.mode"); return v === "build" ? "window" : v === "refine" ? "chat" : ""; } catch (e) { return ""; } }
+  function layout(){ return modeChosen() || autoMode(); }
   function setLayout(v){
-    try { localStorage.setItem("smp.copilot.layout", v); } catch (e) {}
-    PANEL.open = false; closePanelDom(); SAY = "";
-    if (typeof paint === "function") paint(); else draw();
+    try { if (v === "auto" || v === autoMode()) localStorage.removeItem("smp.copilot.mode"); else localStorage.setItem("smp.copilot.mode", v === "chat" ? "refine" : "build"); } catch (e) {}
+    SAY = ""; if (typeof paint === "function") paint(); else draw();
   }
   function layoutBar(){
-    var L = layout(), b = function(k, w){ return '<button type="button" class="copchoice" data-cop-layout="' + k + '" aria-pressed="' + (L === k) + '">' + w + '</button>'; };
-    return '<div class="coplayout" data-cop-layoutbar><span class="coplayoutk">Layout to compare</span>' + b("window", "One window") + b("chat", "A · One chat") + b("plan", "B · On the plan") +
-      (L === "plan" ? '<span class="copm">In B the Copilot opens from <b>✦ Copilot</b> beside Edit on the Strategy tab. This tab keeps the history and an Ask anything box.</span>'
-        : L === "chat" ? '<span class="copm">Say what to work on; the Copilot opens that work.</span>' : '') + '</div>';
+    if (inPanel()) return "";
+    var L = layout(), chosen = modeChosen(), missing = modeParts().filter(function(k){ return !onPlan(k); });
+    var b = function(k, w){ return '<button type="button" data-cop-layout="' + k + '" aria-pressed="' + (L === k) + '">' + w + '</button>'; };
+    return '<div class="coplayout"><span class="copmodeseg">' + b("window", "Builder") + b("chat", "Refine") + '</span>' +
+      (chosen ? '<span class="copm">Chosen by hand · <button type="button" class="linkbu" data-cop-layout="auto">open as the plan stands</button></span>'
+        : '<span class="copm">' + (missing.length ? missing.length + ' of ' + modeParts().length + ' parts not on the plan yet' : 'Every part is on the plan') + '</span>') + '</div>';
   }
   function renderPane(){
     setTimeout(function(){ loadList(false); }, 0);
     var shut = railFolded();
-    return (PANEL.rendering ? '' : layoutBar()) + '<div class="copstrip" data-cop-stripbar>' + stripHtml() + '</div>' +
+    return (PANEL.rendering ? '' : '<div data-cop-modebar>' + layoutBar() + '</div>') + '<div class="copstrip" data-cop-stripbar>' + stripHtml() + '</div>' +
       '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-home aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
@@ -326,8 +345,11 @@ var COPILOT = (function(){
     var l = allList(), prog = (l && l.swotProgress) || {}, open = l ? l.chats.filter(function(c){ var sp = prog[c.id]; return sp && sp.of > 0 && sp.done < sp.of; })[0] : null;
     var sug = [];
     if (open) sug.push('<button type="button" class="copopt rec" data-cop-chat="' + E(open.id) + '" data-cop-chat-sec="' + E(open._sec) + '">Continue ' + E(open.title) + '</button>');
-    var order = (nx ? [nx] : []).concat(here().map(function(x){ return x.k; }).filter(function(k){ return k !== nx; }));
-    order.forEach(function(k, i){ if (!SUGGEST[k] || (open && open._sec === k)) return; sug.push('<button type="button" class="copopt' + (!open && i === 0 ? ' rec' : '') + '" data-cop-suggest="' + k + '">' + E(SUGGEST[k]) + '</button>'); });
+    /* §772 — a part not on the plan comes first, said so */
+    var miss = modeParts().filter(function(k){ return !onPlan(k); });
+    var order = miss.concat(here().map(function(x){ return x.k; }).filter(function(k){ return miss.indexOf(k) < 0; }));
+    order.forEach(function(k, i){ if (!SUGGEST[k] || (open && open._sec === k)) return; var gap = miss.indexOf(k) >= 0;
+      sug.push('<button type="button" class="copopt' + (!open && i === 0 ? ' rec' : '') + (gap ? ' copgap' : '') + '" data-cop-suggest="' + k + '">' + (gap ? 'Build the ' + E(stripWord(k)) + ' — not on the plan yet' : E(SUGGEST[k])) + '</button>'); });
     return '<div class="copstart copstartchat" data-cop-startscreen>' +
       '<h2 class="copstarth">What would you like to do with ' + E(placeWord()) + '’s strategy?</h2>' +
       '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything, or say what to work on — “let’s do the SWOT”, “update the Directions”…" aria-label="Ask the Copilot, or say what to work on">' + E(STARTTEXT[key()] || "") + '</textarea>' +
@@ -2081,6 +2103,7 @@ var COPILOT = (function(){
        it was; the text itself is CARDPEN's. */
     var ae = document.activeElement, penAt = ae && ae.matches && ae.matches("[data-cop-pentext]") ? [ae.selectionStart, ae.selectionEnd] : null;
     var st = document.querySelector("[data-cop-stripbar]"); if (st) st.innerHTML = stripHtml();
+    var mb = document.querySelector("[data-cop-modebar]"); if (mb) mb.innerHTML = layoutBar();
     var rl = document.querySelector("[data-cop-rails]"); if (rl) rl.innerHTML = railsInner();
     var m = document.querySelector("[data-cop-main]"); if (m) m.innerHTML = mainHtml();
     syncRail();
@@ -2833,7 +2856,7 @@ var COPILOT = (function(){
     return "";
   }
   function stripHtml(){
-    if (!shown() || layout() !== "window") return "";
+    if (!shown() || layout() !== "window" || inPanel()) return "";
     var nx = nextStep(), cur = section(), n = 0;
     return here().map(function(s){
       var a = areaState(s.k), side = s.k === "advisory"; if (!side) n++;
@@ -2865,7 +2888,7 @@ var COPILOT = (function(){
     var z = typeof pageZoom === "function" ? pageZoom() : 1; el.style.top = Math.max(60, Math.round(((top || 150) + 8) / z)) + "px";
   }
   function afterPaint(){
-    if (layout() !== "plan" || !shown() || !onStrategy()) { if (PANEL.open && !onStrategy()) PANEL.open = false; closePanelDom(); return; }
+    if (!shown() || !onStrategy()) { if (PANEL.open && !onStrategy()) PANEL.open = false; closePanelDom(); return; }
     var tail = document.querySelector("#secrow-in .secttail") || document.getElementById("secrow-in");
     if (tail && !tail.querySelector("[data-cop-panelbtn]")) {
       var b = document.createElement("button"); b.type = "button"; b.className = "copBbtn"; b.setAttribute("data-cop-panelbtn", "");
@@ -2894,7 +2917,9 @@ var COPILOT = (function(){
   var RAILF = {};
   function railF(){ return RAILF[place()] || ""; }
   function chipsHtml(){
-    if (archView() || layout() !== "window") return "";
+    /* §772 — no chips: the strip above narrows the rail (Islam: "no need to have it again in the chat"); a line says so and undoes it */
+    if (archView() || layout() !== "window" || inPanel() || !railF()) return "";
+    return '<div class="copachips" data-cop-chips><span class="copm">Showing ' + E(stripWord(railF())) + '</span><button type="button" class="linkbu" data-cop-chip="">Show all</button></div>';
     return '<div class="copachips" data-cop-chips><button type="button" class="copachip" data-cop-chip="" aria-pressed="' + !railF() + '">All</button>' +
       here().map(function(s){ return '<button type="button" class="copachip" data-cop-chip="' + s.k + '" aria-pressed="' + (railF() === s.k) + '" title="' + E(stripWord(s.k)) + '">' + E(shortWord(s.k)) + '</button>'; }).join("") + '</div>';
   }

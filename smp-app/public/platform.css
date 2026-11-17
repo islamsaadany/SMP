@@ -344,7 +344,7 @@
      below the fold — and it is exactly what made the page run 60px past the
      window and slide the rail, with its pinned head, under the chrome. */
   .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
-  /* §773.1: and under ANY rail beside a pane, for the reason written at
+  /* §774.1: and under ANY rail beside a pane, for the reason written at
      --page-foot (group-extra.css): the rail is capped against --pane-foot, so
      a page foot of 80 is 60px the pane scrolls past the rail — which pushed
      the pinned rail up under the chrome at the page's end (Islam: *"on
@@ -1927,7 +1927,7 @@ html[data-client-settings] .viewer { display:none; }
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
     position:sticky; top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px));
     align-self:start; }
-  /* §773: THE RAIL IS NEVER TALLER THAN THE WINDOW. Islam, from the built
+  /* §774: THE RAIL IS NEVER TALLER THAN THE WINDOW. Islam, from the built
      page: *"there shouldn't be a scrolled down area like this, the page
      should be well contained, even for the left pane of the directions"* —
      with the pen on, a short tactics list left the rail of fifteen
@@ -1939,7 +1939,7 @@ html[data-client-settings] .viewer { display:none; }
      list contains its own overscroll, so reaching its end never moves the
      page (the wireframe's second point). */
   @media (min-width:1201px) {   /* the rail beside the pane; squeezed, it is the strip across the top (§162) and keeps its own rules */
-    .rail:not(.setuprail) { display:flex; flex-direction:column; overflow:visible;   /* visible, not hidden: the rail's filter menu pops out past its edge and was cut off (§774.3); the list below is the one that scrolls */
+    .rail:not(.setuprail) { display:flex; flex-direction:column; overflow:visible;   /* visible, not hidden: the rail's filter menu pops out past its edge and was cut off (§775.3); the list below is the one that scrolls */
       max-height:calc(var(--wind) - var(--chrome-h, 118px) - var(--rail-gap, 12px) - var(--pane-foot, 20px));
       min-height:260px; }
     .rail:not(.setuprail) > .rhead, .rail:not(.setuprail) > .railadd { flex:none; }
@@ -2156,7 +2156,7 @@ html[data-client-settings] .viewer { display:none; }
     margin:calc(var(--pane-pad) * -1) -18px 15px;
     border-radius:var(--r) var(--r) 0 0;
     box-shadow:inset 3px 0 0 var(--gold), 0 1px 0 var(--line);
-    /* §773: a clear line on the band's top edge (Islam: "why not a clear
+    /* §774: a clear line on the band's top edge (Islam: "why not a clear
        line?") — the pane's own hairline was all that marked it. */
     border-top:1px solid var(--field-line);
     padding-left:18px; }
@@ -2192,8 +2192,8 @@ html[data-client-settings] .viewer { display:none; }
   #panel .pane .scroll.fits, #panel .pane .tblscroll.fits { overflow-x:visible; }
   #panel .pane .tblscroll.fits thead th { position:sticky; z-index:3;
     top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px + var(--band-h, 0px)); }
-  /* Not inside the tactic panel (§772): it is pinned itself and scrolls
-     inside, so its tables' heads stay in their flow (§774.3). */
+  /* Not inside the tactic panel (§773): it is pinned itself and scrolls
+     inside, so its tables' heads stay in their flow (§775.3). */
   #panel .pane .tacpanel .tblscroll thead th { position:static; top:auto; }
   /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§130.3) ─────────────
      Islam: "the title has round corners so the scrolled up appears in the
@@ -2369,7 +2369,7 @@ html[data-client-settings] .viewer { display:none; }
   .pane .ptitle.edhead {
     position:sticky; z-index:4;
     top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px);
-    border-top:1px solid var(--field-line);   /* §773: the same clear line as the band's */
+    border-top:1px solid var(--field-line);   /* §774: the same clear line as the band's */
     background:var(--surface-2);
     margin:calc(var(--pane-pad) * -1) -18px 14px;
     padding:11px 18px 11px 18px;
@@ -8909,13 +8909,13 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .tpsec .kmlist input, td .kmlist input { width:14px; height:14px; margin:2px 0 0; flex:none; accent-color:var(--panel); }
 .tpsec .kmlist .kmname, td .kmlist .kmname { min-width:0; }
 
-/* ── §772: THE TACTIC PANEL AND THE PEN'S LIST ──────────────────────────
+/* ── §773: THE TACTIC PANEL AND THE PEN'S LIST ──────────────────────────
    From the working mockup Islam tried (design-mockups/tactic-edit-panel/
    2026-11-16_full-page.html). Beside the pillar on a wide window; over the
    page from the right on a narrow one. Tokens only (§38.4). */
 .penwrap { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:14px; align-items:start; }
 .penmain { min-width:0; }
-/* §773: pinned UNDER the direction's banner, which is itself pinned under the
+/* §774: pinned UNDER the direction's banner, which is itself pinned under the
    chrome; `--band-h` is the banner's measured height (shell.html, after each
    paint). Never taller than what is left of the window: a long tactic scrolls
    inside the panel, its head and its Done editing always in view, and its
@@ -8947,7 +8947,7 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .tpfoot { padding:10px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
 .tpdone { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:var(--r); font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
 
-/* ── §774: THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL ──────────
+/* ── §775: THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL ──────────
    The pen's list as Islam settled it on the working mockup (design-mockups/
    tactic-edit-panel/2026-11-16_table-and-panel.html): the name, the outcome
    names, the owner and the quarters typed in the row; a ringed × on the name
@@ -8986,9 +8986,9 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 /* the list */
 .penlist tbody tr[data-tacopen] { cursor:pointer; }
 .penlist tbody tr[data-tacopen]:hover td { background:var(--surface-2); }
-/* (the first mark — a grey tint and a bar on every cell — gave way to §774's, above:
+/* (the first mark — a grey tint and a bar on every cell — gave way to §775's, above:
    it came later in this file and won, which is why the tenant saw bars at every
-   column edge and no tint; §774.2) */
+   column edge and no tint; §775.2) */
 .penlist .tacopenb { background:none; border:0; padding:0; margin:0; font:inherit; text-align:left; cursor:pointer; color:inherit; display:block; }
 .penlist .tacopenb:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:4px; }
 .penlist .tacopenb .tacname { display:block; }
@@ -9000,7 +9000,7 @@ td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
 .penlist td.collabs { white-space:normal; }
 @media (max-width:1180px) {
   .penwrap { display:block; }
-  /* Under the chrome and the strip, not over them (§774.3): a panel from the
+  /* Under the chrome and the strip, not over them (§775.3): a panel from the
      window's top covered the Done editing button and the strip's right half,
      and a wheel over it moved nothing — the panel keeps its own scroll. It
      starts where the pane does once pinned (the band's own offset, group-extra.css §771). */
@@ -14182,3 +14182,11 @@ body.copB-open #mainwrap { margin-right:560px; }
 #copPanel .copstrip:empty { display:none; }
 #copPanel .coppane { height:auto !important; flex:1 1 auto; min-height:0; }
 #copPanel .copnone { padding:16px; color:var(--ink-2); }
+
+/* §772 — Builder · Refine, a two-way toggle; a part not on the plan, first among Refine's suggestions */
+.copmodeseg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.copmodeseg button { border:0; background:var(--surface); padding:3px 12px; font:inherit; font-size:12.5px; color:var(--ink-2); cursor:pointer; }
+.copmodeseg button + button { border-left:1px solid var(--line); }
+.copmodeseg button[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); font-weight:600; }
+.copopt.copgap { border-style:dashed; }
+.copachips { align-items:center; }

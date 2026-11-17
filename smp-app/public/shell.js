@@ -29088,7 +29088,7 @@ function kmTag(n, name, kind){
     var t = e.target;
     return t && t.closest ? t.closest(".kmtag[data-name]") : null;
   }
-  /* §773.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
+  /* §774.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
      hovering should appear close to the mouse, not in the top like that"*).
      With a pointer, the label sits just below and right of it and follows
      it across the tag; flipped to the left or above only where the window
@@ -29153,7 +29153,7 @@ function supportedLine(m, p){
 /* The legend — which number is which measure — folded, so the page costs one
    line until it is asked. Drawn only while the mapping is in use. */
 function supportsLegend(p){
-  /* §773.2: GONE (Islam: *"remove this part of which number is key
+  /* §774.2: GONE (Islam: *"remove this part of which number is key
      measures"*). The tags' own hover names the measure; the folded list
      under the tactics was a second telling. Kept as a function that draws
      nothing, so the three places that called it need no edit and the
@@ -29222,7 +29222,7 @@ function supportsEdit(t, p){
   });
 })();
 
-/* ── §772: THE TACTIC PANEL ─────────────────────────────────────────────
+/* ── §773: THE TACTIC PANEL ─────────────────────────────────────────────
    Islam, with a picture of the pen: *"can we work on a cleaner approach to
    edit the tactic. as it became very complex."* One tactic's row held its
    name, description, key measures, requirements, four outcomes with four
@@ -29258,7 +29258,7 @@ var PEN_TACTIC = null;
     var f = e.target;
     if (!f || !f.classList) return;
     var v = String(f.value || "").trim(), word = "New " + L1("tactic").toLowerCase();
-    /* §774: the name is typed in the ROW; the panel's head follows it */
+    /* §775: the name is typed in the ROW; the panel's head follows it */
     if (f.classList.contains("tacpn")) {
       var tr = f.closest("[data-tacrow]"), hd = document.querySelector(".tacpanel .tpname");
       if (tr && hd && String(PEN_TACTIC) === tr.dataset.tacrow) hd.textContent = v || word;
@@ -39250,7 +39250,7 @@ function unitPlanBody(it, u, railed, bare){
   /* §267: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
      row's span and every row have to agree about how many columns there are. */
 
-  /* ── §772: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
+  /* ── §773: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
   var penOpen = null;
   if (ed) {
     if (PEN_TACTIC === null && it.tactics.length) PEN_TACTIC = it.tactics[0].id;
@@ -39260,15 +39260,15 @@ function unitPlanBody(it, u, railed, bare){
       if (!penOpen && it.tactics.length) { PEN_TACTIC = it.tactics[0].id; penOpen = it.tactics[0]; }
     }
   } else PEN_TACTIC = null;
-  /* §774 — THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL. Islam, on
-     the §772 list: *"how about we make the tactic main info editable in the
+  /* §775 — THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL. Islam, on
+     the §773 list: *"how about we make the tactic main info editable in the
      main table and the extra details in the left pane to make the table on
      the left usable and the pan for extras"*, then eleven rounds on the
      working mockup (design-mockups/tactic-edit-panel/2026-11-16_table-and-
      panel.html) and *"go ahead and build it"*. One line per tactic, typed in:
      the NAME, each OUTCOME's name (and + Add an outcome), the OWNER (the
      register-fed picker, §130.1) and the QUARTERS; a ringed × on the name box
-     and on each outcome box that ASKS before anything goes (§774.1 in
+     and on each outcome box that ASKS before anything goes (§775.1 in
      shell.html). The description reads under the name and is typed in the
      panel. The panel holds the extras: the description, each outcome's
      target, unit, direction, rule and months, the collaborators (the
@@ -39360,7 +39360,7 @@ function unitPlanBody(it, u, railed, bare){
   };
   var fold = ed && tailFolds();
   var tRows = it.tactics.map(function(t, i){
-    /* §772: with the pen on, one line; the fields are in the panel. */
+    /* §773: with the pen on, one line; the fields are in the panel. */
     if (ed) return penTacticRow(t, i);
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
        predicting it. `.tgtcell` is what stops the Target column folding below
@@ -39721,11 +39721,11 @@ function unitPlanBody(it, u, railed, bare){
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
     /* …and a rule above it, so the two blocks read as two blocks of one card. */
-    /* §772.1: the panel stands beside the TACTICS alone (Islam: it should not
+    /* §773.1: the panel stands beside the TACTICS alone (Islam: it should not
        push the direction's head, nor sit beside the measures), so the wrap
        opens here, at the tactics' heading, and closes after their legend. */
     '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
-    /* §773: and opens UNDER the heading, so the panel's top edge is the
+    /* §774: and opens UNDER the heading, so the panel's top edge is the
        table's own top line (the wireframe's fifth point). */
     (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     /* §248: Description and Outcome are stored on every tactic and the upload
@@ -39743,7 +39743,7 @@ function unitPlanBody(it, u, railed, bare){
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
     (ed
-      /* §772: the list — one line per tactic — and the panel beside it. */
+      /* §773: the list — one line per tactic — and the panel beside it. */
       ? miniTable(["#", L1("tactic"), DW("outcomes", "one", it), "Owner", "Quarters"],
           tRows + addRow(4, "tactic", "Add a " + L1("tactic")),
           sortAttr("tactics"), "tactable penlist")
@@ -39884,7 +39884,7 @@ function renderUnitPlanBody(u){
     /* §540: the count and the rail are of the list AS DRAWN — on a split box
        this tab holds one half of it, and a hint reading "15 Directions" over
        a rail of five is the kind of disagreement §116.2 exists to stop. */
-    /* §773.1: the hint that stood here while arranging — "15 Directions ·
+    /* §774.1: the hint that stood here while arranging — "15 Directions ·
        drag by the handle to reorder, here and inside each Direction" — is
        gone (Islam: *"the statement 15 directions … should be removed"*). The
        handles say it; the rail's head carries the count. */
@@ -41043,6 +41043,8 @@ var TABLECOLS = (function(){
   }
 
   /* ── Bound once, on the document: the headings are rebuilt by every paint ── */
+  /* §772 (carried for main's §754) — the server reads this file too, to build a client (lib/frozen.cjs), and has no document to listen on */
+  if (typeof document !== "undefined") {
   document.addEventListener("pointerdown", function(e){
     var grip = e.target.closest && e.target.closest(".tcgrip");
     if (grip) { startResize(e, grip); return; }
@@ -41093,6 +41095,7 @@ var TABLECOLS = (function(){
     var th = e.target && e.target.closest && e.target.closest("th.tcth");
     if (th && !e.ctrlKey && !e.metaKey) onKey(e, th);
   });
+  }
 
   return { define:define, spec:spec, shown:shown, setShown:setShown, tools:tools, foot:foot,
            apply:apply, reset:reset, shut:function(){ MENU = null; }, isOpen:function(){ return MENU; } };
@@ -66249,7 +66252,7 @@ var WELCOME = (function(){
     catch(e){ return false; }
   }
 
-  /* ── §775 · IT NO LONGER OFFERS ITSELF ─────────────────────────────
+  /* ── §776 · IT NO LONGER OFFERS ITSELF ─────────────────────────────
      Islam, opening a client and meeting the screen over Strategy: *"why is
      the client opening on the welcome window? didn't we make it open on the
      strategy earlier as a default?"* — and, of the three ways put to him,
@@ -66272,7 +66275,7 @@ var WELCOME = (function(){
     if (document.body && document.body.classList.contains("presenting")) return false;
     if (deepAddress()) return false;
     if (seenThisSession()) return false;
-    return false;   /* §775: asked for, never offered */
+    return false;   /* §776: asked for, never offered */
   }
 
   /* ── ASKING FOR IT BACK (§185) ──────────────────────────────────────
@@ -67786,23 +67789,42 @@ var COPILOT = (function(){
      opens the work when it is asked for — and B — the Copilot on the plan,
      opened from the part in view on the Strategy tab. Chosen per browser;
      nothing on the server knows which. */
-  var LAYOUTS = ["window", "chat", "plan"];
-  function layout(){ try { var v = localStorage.getItem("smp.copilot.layout"); return LAYOUTS.indexOf(v) >= 0 ? v : "window"; } catch (e) { return "window"; } }
+  /* §772 — BUILDER AND REFINE (Islam: "for a new project the people go step
+     by step… once there is a plan in place and we are refining, the one chat
+     is working better"; "the builder should be always there if an element is
+     not there… the foundation, the SWOT, the competitive discipline, the
+     pillars and directions, tactical plans — 5 important steps"). The tab
+     opens in BUILDER (the one window, §752) until every one of the five is on
+     the plan, then in REFINE (the one chat, §753 A). A choice by hand
+     overrides it, per browser; choosing what the place would open on clears
+     the choice. B is not a layout of the tab: ✦ Copilot stands beside Edit
+     on the plan's parts in either mode. */
+  /* on the plan: a version of it applied, whatever chat is open on it now */
+  function onPlan(k){ var l = LISTS[place() + "|" + k]; return !!(l && !l.failed && (l.deliverables || []).some(function(d){ return d.applied && d.applied.n; })); }
+  function modeParts(){ return here().map(function(s){ return s.k; }).filter(function(k){ return k !== "advisory" && k !== "capabilities"; }); }
+  function autoMode(){
+    var p = place(), ks = modeParts();
+    if (!ks.every(function(k){ return LISTS[p + "|" + k] && !LISTS[p + "|" + k].failed; })) return "window";
+    return ks.every(onPlan) ? "chat" : "window";
+  }
+  function modeChosen(){ try { var v = localStorage.getItem("smp.copilot.mode"); return v === "build" ? "window" : v === "refine" ? "chat" : ""; } catch (e) { return ""; } }
+  function layout(){ return modeChosen() || autoMode(); }
   function setLayout(v){
-    try { localStorage.setItem("smp.copilot.layout", v); } catch (e) {}
-    PANEL.open = false; closePanelDom(); SAY = "";
-    if (typeof paint === "function") paint(); else draw();
+    try { if (v === "auto" || v === autoMode()) localStorage.removeItem("smp.copilot.mode"); else localStorage.setItem("smp.copilot.mode", v === "chat" ? "refine" : "build"); } catch (e) {}
+    SAY = ""; if (typeof paint === "function") paint(); else draw();
   }
   function layoutBar(){
-    var L = layout(), b = function(k, w){ return '<button type="button" class="copchoice" data-cop-layout="' + k + '" aria-pressed="' + (L === k) + '">' + w + '</button>'; };
-    return '<div class="coplayout" data-cop-layoutbar><span class="coplayoutk">Layout to compare</span>' + b("window", "One window") + b("chat", "A · One chat") + b("plan", "B · On the plan") +
-      (L === "plan" ? '<span class="copm">In B the Copilot opens from <b>✦ Copilot</b> beside Edit on the Strategy tab. This tab keeps the history and an Ask anything box.</span>'
-        : L === "chat" ? '<span class="copm">Say what to work on; the Copilot opens that work.</span>' : '') + '</div>';
+    if (inPanel()) return "";
+    var L = layout(), chosen = modeChosen(), missing = modeParts().filter(function(k){ return !onPlan(k); });
+    var b = function(k, w){ return '<button type="button" data-cop-layout="' + k + '" aria-pressed="' + (L === k) + '">' + w + '</button>'; };
+    return '<div class="coplayout"><span class="copmodeseg">' + b("window", "Builder") + b("chat", "Refine") + '</span>' +
+      (chosen ? '<span class="copm">Chosen by hand · <button type="button" class="linkbu" data-cop-layout="auto">open as the plan stands</button></span>'
+        : '<span class="copm">' + (missing.length ? missing.length + ' of ' + modeParts().length + ' parts not on the plan yet' : 'Every part is on the plan') + '</span>') + '</div>';
   }
   function renderPane(){
     setTimeout(function(){ loadList(false); }, 0);
     var shut = railFolded();
-    return (PANEL.rendering ? '' : layoutBar()) + '<div class="copstrip" data-cop-stripbar>' + stripHtml() + '</div>' +
+    return (PANEL.rendering ? '' : '<div data-cop-modebar>' + layoutBar() + '</div>') + '<div class="copstrip" data-cop-stripbar>' + stripHtml() + '</div>' +
       '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-home aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
@@ -67938,8 +67960,11 @@ var COPILOT = (function(){
     var l = allList(), prog = (l && l.swotProgress) || {}, open = l ? l.chats.filter(function(c){ var sp = prog[c.id]; return sp && sp.of > 0 && sp.done < sp.of; })[0] : null;
     var sug = [];
     if (open) sug.push('<button type="button" class="copopt rec" data-cop-chat="' + E(open.id) + '" data-cop-chat-sec="' + E(open._sec) + '">Continue ' + E(open.title) + '</button>');
-    var order = (nx ? [nx] : []).concat(here().map(function(x){ return x.k; }).filter(function(k){ return k !== nx; }));
-    order.forEach(function(k, i){ if (!SUGGEST[k] || (open && open._sec === k)) return; sug.push('<button type="button" class="copopt' + (!open && i === 0 ? ' rec' : '') + '" data-cop-suggest="' + k + '">' + E(SUGGEST[k]) + '</button>'); });
+    /* §772 — a part not on the plan comes first, said so */
+    var miss = modeParts().filter(function(k){ return !onPlan(k); });
+    var order = miss.concat(here().map(function(x){ return x.k; }).filter(function(k){ return miss.indexOf(k) < 0; }));
+    order.forEach(function(k, i){ if (!SUGGEST[k] || (open && open._sec === k)) return; var gap = miss.indexOf(k) >= 0;
+      sug.push('<button type="button" class="copopt' + (!open && i === 0 ? ' rec' : '') + (gap ? ' copgap' : '') + '" data-cop-suggest="' + k + '">' + (gap ? 'Build the ' + E(stripWord(k)) + ' — not on the plan yet' : E(SUGGEST[k])) + '</button>'); });
     return '<div class="copstart copstartchat" data-cop-startscreen>' +
       '<h2 class="copstarth">What would you like to do with ' + E(placeWord()) + '’s strategy?</h2>' +
       '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything, or say what to work on — “let’s do the SWOT”, “update the Directions”…" aria-label="Ask the Copilot, or say what to work on">' + E(STARTTEXT[key()] || "") + '</textarea>' +
@@ -69693,6 +69718,7 @@ var COPILOT = (function(){
        it was; the text itself is CARDPEN's. */
     var ae = document.activeElement, penAt = ae && ae.matches && ae.matches("[data-cop-pentext]") ? [ae.selectionStart, ae.selectionEnd] : null;
     var st = document.querySelector("[data-cop-stripbar]"); if (st) st.innerHTML = stripHtml();
+    var mb = document.querySelector("[data-cop-modebar]"); if (mb) mb.innerHTML = layoutBar();
     var rl = document.querySelector("[data-cop-rails]"); if (rl) rl.innerHTML = railsInner();
     var m = document.querySelector("[data-cop-main]"); if (m) m.innerHTML = mainHtml();
     syncRail();
@@ -70445,7 +70471,7 @@ var COPILOT = (function(){
     return "";
   }
   function stripHtml(){
-    if (!shown() || layout() !== "window") return "";
+    if (!shown() || layout() !== "window" || inPanel()) return "";
     var nx = nextStep(), cur = section(), n = 0;
     return here().map(function(s){
       var a = areaState(s.k), side = s.k === "advisory"; if (!side) n++;
@@ -70477,7 +70503,7 @@ var COPILOT = (function(){
     var z = typeof pageZoom === "function" ? pageZoom() : 1; el.style.top = Math.max(60, Math.round(((top || 150) + 8) / z)) + "px";
   }
   function afterPaint(){
-    if (layout() !== "plan" || !shown() || !onStrategy()) { if (PANEL.open && !onStrategy()) PANEL.open = false; closePanelDom(); return; }
+    if (!shown() || !onStrategy()) { if (PANEL.open && !onStrategy()) PANEL.open = false; closePanelDom(); return; }
     var tail = document.querySelector("#secrow-in .secttail") || document.getElementById("secrow-in");
     if (tail && !tail.querySelector("[data-cop-panelbtn]")) {
       var b = document.createElement("button"); b.type = "button"; b.className = "copBbtn"; b.setAttribute("data-cop-panelbtn", "");
@@ -70506,7 +70532,9 @@ var COPILOT = (function(){
   var RAILF = {};
   function railF(){ return RAILF[place()] || ""; }
   function chipsHtml(){
-    if (archView() || layout() !== "window") return "";
+    /* §772 — no chips: the strip above narrows the rail (Islam: "no need to have it again in the chat"); a line says so and undoes it */
+    if (archView() || layout() !== "window" || inPanel() || !railF()) return "";
+    return '<div class="copachips" data-cop-chips><span class="copm">Showing ' + E(stripWord(railF())) + '</span><button type="button" class="linkbu" data-cop-chip="">Show all</button></div>';
     return '<div class="copachips" data-cop-chips><button type="button" class="copachip" data-cop-chip="" aria-pressed="' + !railF() + '">All</button>' +
       here().map(function(s){ return '<button type="button" class="copachip" data-cop-chip="' + s.k + '" aria-pressed="' + (railF() === s.k) + '" title="' + E(stripWord(s.k)) + '">' + E(shortWord(s.k)) + '</button>'; }).join("") + '</div>';
   }
@@ -83722,9 +83750,9 @@ var SYNC = (function () {
        only once neither is a scroll box. */
     Array.prototype.forEach.call(document.querySelectorAll("#panel .pane:not(.setuppane) .scroll, #panel .pane:not(.setuppane) .tblscroll"), function(b){
       /* a confirmation's own list (`.rmconfirm`) pins its head to its box on
-         purpose; the tactic panel (§772) is a pinned box that scrolls inside
+         purpose; the tactic panel (§773) is a pinned box that scrolls inside
          itself, so a head pinned to the window would float mid-list — Islam:
-         "the outcome and target title is floating" (§774.3). */
+         "the outcome and target title is floating" (§775.3). */
       if (b.closest(".rmconfirm, .tacpanel")) { b.classList.remove("fits"); return; }
       b.classList.toggle("fits", b.scrollWidth <= b.clientWidth + 1);
     });
@@ -89730,7 +89758,7 @@ var SYNC = (function () {
           var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
           if (what === "measure") addMeasure(it);
-          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §772: the new one opens in the panel */
+          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §773: the new one opens in the panel */
         }
         else if (what === "project") {
           /* §326: holderByIdWritable, not capById — a project may be added to
@@ -89886,10 +89914,10 @@ var SYNC = (function () {
       b.addEventListener("click", gapWalk);
     });
 
-    /* §773 read the banner's height here for the panel to pin under; main's
+    /* §774 read the banner's height here for the panel to pin under; main's
        §771 (stickWatch) publishes `--band-h` for the table heads, so the
        panel reads that one and this measurement is gone — one writer. */
-    /* §772: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
+    /* §773: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
     document.querySelectorAll("[data-tacopen]").forEach(function(b){
       b.addEventListener("click", function(e){
         if (b.tagName === "TR" && e.target.closest("select, input, textarea, button, a, .grip, .ssbtn, label, .eyebtn, .xbtn, .rm, [data-rowoff], [data-hiderow], [data-rmrow], [data-rmout], [data-outadd]")) return;
@@ -89897,7 +89925,7 @@ var SYNC = (function () {
         PEN_TACTIC = b.dataset.tacopen; paint();
       });
     });
-    /* §774: THE PANEL FOLLOWS THE ROW YOU WORK IN. The focus landing in a box
+    /* §775: THE PANEL FOLLOWS THE ROW YOU WORK IN. The focus landing in a box
        of another tactic's row moves the panel there — a paint, since the panel
        is drawn by the page — and the focus is put back in the same box of the
        same row afterwards, so typing goes on where it was. Buttons and the
@@ -89975,7 +90003,7 @@ var SYNC = (function () {
         }, 0);
       });
     });
-    /* §774.1: an outcome's ringed × in the row asks before it goes — the first
+    /* §775.1: an outcome's ringed × in the row asks before it goes — the first
        outcome included (Islam: "why am I able to remove the new outcome but not
        the old one?"); when the first goes, the next moves up into its place. */
     document.querySelectorAll("[data-rmout]").forEach(function(b){
@@ -90048,7 +90076,7 @@ var SYNC = (function () {
         if (!mayEditPlan()) return;
         var a = this.dataset.rmrow.split("|");
         if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
-        else if (a[0] === "tactic") confirmRemoveTactic(a[1], a[2]);   /* §774.1 */
+        else if (a[0] === "tactic") confirmRemoveTactic(a[1], a[2]);   /* §775.1 */
         else confirmRemoveProject(a[1]);
       });
     });
@@ -92442,7 +92470,7 @@ var SYNC = (function () {
     if (RAIL[key]) delete RAIL[key];
     paint();
   }
-  /* §774.1: A TACTIC ASKS BEFORE IT GOES, the pillar's own way: what it holds,
+  /* §775.1: A TACTIC ASKS BEFORE IT GOES, the pillar's own way: what it holds,
      what was reported against it, the archive taken first. Islam: *"the
      removal of a tactic or outcome should prompt me with a message"*. */
   function confirmRemoveTactic(ukey, id){

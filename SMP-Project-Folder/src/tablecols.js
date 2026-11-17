@@ -536,6 +536,8 @@ var TABLECOLS = (function(){
   }
 
   /* ── Bound once, on the document: the headings are rebuilt by every paint ── */
+  /* §772 (carried for main's §754) — the server reads this file too, to build a client (lib/frozen.cjs), and has no document to listen on */
+  if (typeof document !== "undefined") {
   document.addEventListener("pointerdown", function(e){
     var grip = e.target.closest && e.target.closest(".tcgrip");
     if (grip) { startResize(e, grip); return; }
@@ -586,6 +588,7 @@ var TABLECOLS = (function(){
     var th = e.target && e.target.closest && e.target.closest("th.tcth");
     if (th && !e.ctrlKey && !e.metaKey) onKey(e, th);
   });
+  }
 
   return { define:define, spec:spec, shown:shown, setShown:setShown, tools:tools, foot:foot,
            apply:apply, reset:reset, shut:function(){ MENU = null; }, isOpen:function(){ return MENU; } };

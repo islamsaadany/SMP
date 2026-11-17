@@ -7,10 +7,10 @@ invented demo company, Meridian Group, with invented figures.
 
 | Path | What it is |
 |---|---|
-| `renders/SMP-explainer-3min.mp4` | The full cut, 1920×1080, AI voice with captions. Shown in meetings. |
-| `renders/SMP-explainer-90s.mp4` | The 90-second cut, same voice and look. |
+| `renders/SMP-explainer-3min.mp4` | The full cut (about 3:30 with the two-beat opening), 1920×1080, AI voice with captions. Shown in meetings. |
+| `renders/SMP-explainer-90s.mp4` | The short cut (about 1:35), same voice and look. |
 | `explainer/` | The Remotion project the two cuts render from (below). |
-| `2026-11-17_explainer-storyboard-v1.html` | Storyboard v1 and the narration, scene by scene, with the real screen each was drawn from. Published as an artifact; Islam's five decisions (2026-11-17) are what the project builds: demo company, AI voice with captions, English, both cuts, 16:9. |
+| `2026-11-17_explainer-storyboard-v1.html` | Storyboard v1 and the narration, scene by scene, with the real screen each was drawn from. Published as an artifact; Islam's five decisions (2026-11-17) are what the project builds: demo company, AI voice with captions, English, both cuts, 16:9. Changed after the first renders, on Islam's word: crossfades between scenes, and the opening is two beats, the strategy and what it meets after the workshop, then the platform as the answer (`src/script.ts` is the narration as built). |
 | `reference-screens/` | The real platform screens the storyboard cites, captured at 1600×900 from the built file. |
 | `capture-screens.js` | The Playwright script that took them. |
 
@@ -27,7 +27,7 @@ npx remotion render Short ../renders/SMP-explainer-90s.mp4
 - `src/script.ts` — the narration, split into caption lines. The voice reads the join of each scene's lines.
 - `src/scenes/` — one file per scene, drawn with the platform's own tokens and type (`src/theme.ts`, `src/ui.tsx`).
 - `src/planned.ts` — the pace each scene was drawn for; `src/timings.ts` and `src/cues.ts` are **generated** from the measured voice and never edited by hand. Story time stretches each scene to its narration (`src/anim.ts`).
-- `public/voice/` — one MP3 per scene per cut, with a `.json` cache beside each (the word timings the captions are cut to).
+- `public/voice/` — one MP3 per scene per cut, copied from `voice/cache/`, where every finished scene is kept under the hash of its words and voice with its word timings in a `.json`. A changed or inserted scene re-does only itself.
 
 ### The voice
 

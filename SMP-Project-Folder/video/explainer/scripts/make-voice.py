@@ -26,33 +26,38 @@ def words(s):
     return re.findall(r"[A-Za-z0-9'’%.,;:-]+", s)
 
 async def synth(text, out, voice, attempts=8):
-    """Synthesise one scene. A finished scene is cached beside its audio (a
-    .json with the text, the voice and the word bounds), so a run that dies
-    halfway picks up where it stopped and an unchanged scene is never redone."""
-    import edge_tts, hashlib
-    cache = out[:-4] + ".json"
+    """Synthesise one scene. Every finished scene is kept content-addressed
+    in voice/cache/<sha1 of voice+text>.mp3 with its word bounds in a .json
+    beside it, and the numbered file is a copy. So a run that dies halfway
+    resumes, an unchanged scene is never redone, and a scene inserted before
+    the others re-does only itself."""
+    import edge_tts, hashlib, shutil
     key = hashlib.sha1((voice + "|" + text).encode()).hexdigest()
-    if os.path.exists(cache) and os.path.exists(out) and os.path.getsize(out) > 0:
-        c = json.load(open(cache))
-        if c.get("key") == key:
-            return [tuple(b) for b in c["bounds"]]
-    for attempt in range(attempts):
-        try:
-            com = edge_tts.Communicate(text, voice, rate="-4%", boundary="WordBoundary")
-            bounds = []
-            with open(out, "wb") as f:
-                async for chunk in com.stream():
-                    if chunk["type"] == "audio":
-                        f.write(chunk["data"])
-                    elif chunk["type"] == "WordBoundary":
-                        # offset and duration in 100-ns ticks
-                        bounds.append((chunk["offset"] / 1e7, (chunk["offset"] + chunk["duration"]) / 1e7, chunk["text"]))
-            json.dump({"key": key, "voice": voice, "text": text, "bounds": bounds}, open(cache, "w"))
-            return bounds
-        except Exception as e:  # the service sometimes closes the stream early; try again
-            print(f"  attempt {attempt + 1} failed: {e}")
-            await asyncio.sleep(5 + attempt * 5)
-    raise RuntimeError(f"no audio for: {text[:40]}")
+    cdir = os.path.join(ROOT, "public", "voice", "cache")
+    os.makedirs(cdir, exist_ok=True)
+    cmp3, cjson = os.path.join(cdir, key + ".mp3"), os.path.join(cdir, key + ".json")
+    if not (os.path.exists(cmp3) and os.path.getsize(cmp3) > 0 and os.path.exists(cjson)):
+        for attempt in range(attempts):
+            try:
+                com = edge_tts.Communicate(text, voice, rate="-4%", boundary="WordBoundary")
+                bounds = []
+                with open(cmp3 + ".tmp", "wb") as f:
+                    async for chunk in com.stream():
+                        if chunk["type"] == "audio":
+                            f.write(chunk["data"])
+                        elif chunk["type"] == "WordBoundary":
+                            # offset and duration in 100-ns ticks
+                            bounds.append((chunk["offset"] / 1e7, (chunk["offset"] + chunk["duration"]) / 1e7, chunk["text"]))
+                os.replace(cmp3 + ".tmp", cmp3)
+                json.dump({"key": key, "voice": voice, "text": text, "bounds": bounds}, open(cjson, "w"))
+                break
+            except Exception as e:  # the service sometimes closes the stream early; try again
+                print(f"  attempt {attempt + 1} failed: {e}")
+                await asyncio.sleep(5 + attempt * 5)
+        else:
+            raise RuntimeError(f"no audio for: {text[:40]}")
+    shutil.copyfile(cmp3, out)
+    return [tuple(b) for b in json.load(open(cjson))["bounds"]]
 
 def duration(path):
     return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path]).decode().strip())

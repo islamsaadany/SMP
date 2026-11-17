@@ -1,6 +1,7 @@
 /* The narration, scene by scene, split into caption lines. */
 export const FULL_LINES: string[][] = [
-  ["Every company has a strategy.", "The hard part is keeping it alive:", "the plans, the reporting and the results,", "in one place that everyone can see."],
+  ["Every company has a strategy.", "It is agreed in a workshop, presented to the board,", "and then it meets the year.", "The plan lives in a deck, the targets in a spreadsheet,", "the figures in emails,", "and every review starts from scratch.", "The strategy is right.", "Keeping it alive is the hard part."],
+  ["That is what the Strategy Management Platform is for:", "one place for the plans, the reporting and the results,", "for everyone who carries them.", "This is how it works."],
   ["The platform is shaped like the company.", "The group at the top.", "Under it, the business units,", "each with a plan of its own.", "Beside them, the supporting functions:", "finance, HR, marketing, IT.", "One row to move between them,", "and every person lands on what is theirs."],
   ["A plan starts with its foundation.", "Who we are, what we provide, and for whom.", "The winning aspiration, and the key objectives", "that say what success looks like,", "this year and by the horizon.", "Beside it, the SWOT: strengths, weaknesses,", "opportunities and threats, four quiet lists."],
   ["Then the plan itself.", "Each pillar carries its key measures,", "with a direction and a target.", "Under them, the tactics: what will be done,", "the outcome it is meant to produce,", "who owns it, and which quarters it runs in.", "Everything a team needs to read the plan", "is on one screen, and a reader sees all of it", "without being able to change any of it."],
@@ -13,7 +14,8 @@ export const FULL_LINES: string[][] = [
 ];
 
 export const SHORT_LINES: string[][] = [
-  ["Every company has a strategy.", "The hard part is keeping it alive:", "the plans, the reporting and the results,", "in one place that everyone can see."],
+  ["Every company has a strategy.", "Then it meets the year:", "the plan in a deck, the targets in a spreadsheet,", "the figures in emails.", "Keeping it alive is the hard part."],
+  ["The Strategy Management Platform is one place", "for the plans, the reporting and the results."],
   ["The platform is shaped like the company:", "the group, its business units,", "and the supporting functions,", "each with a plan of its own."],
   ["A plan reads the same way everywhere.", "The foundation: who we are,", "the winning aspiration and the key objectives.", "Then each pillar, with its key measures", "and its tactics: what will be done,", "the outcome, the owner and the quarters."],
   ["When a reporting cycle opens,", "the Reporting tab turns orange.", "The owner enters this cycle's figure", "against every objective, measure and tactic,", "with a note where one is needed,", "and submits to the Strategy Management Office", "once everything is in."],

@@ -9,7 +9,8 @@ import { FULL_CUES, SHORT_CUES } from "./cues";
 import { PLANNED_FULL, PLANNED_SHORT } from "./planned";
 import { FULL, SHORT, FULL_AUDIO, SHORT_AUDIO, LEAD } from "./timings";
 import { FULL_LINES, SHORT_LINES } from "./script";
-import { S0Open } from "./scenes/S0Open";
+import { S0Strategy } from "./scenes/S0Strategy";
+import { S0Solution } from "./scenes/S0Solution";
 import { S1Company } from "./scenes/S1Company";
 import { S2Foundation } from "./scenes/S2Foundation";
 import { S3Plan } from "./scenes/S3Plan";
@@ -24,7 +25,8 @@ import { C } from "./theme";
 export type SceneDef = { id: string; el: React.ReactNode; dark?: boolean };
 
 export const FULL_SCENES: SceneDef[] = [
-  { id: "open", el: <S0Open />, dark: true },
+  { id: "strategy", el: <S0Strategy />, dark: true },
+  { id: "solution", el: <S0Solution />, dark: true },
   { id: "company", el: <S1Company /> },
   { id: "foundation", el: <S2Foundation /> },
   { id: "plan", el: <S3Plan /> },
@@ -44,14 +46,15 @@ export const XFADE = 14;
 
 const S23Short: React.FC = () => (
   <TransitionSeries>
-    <TransitionSeries.Sequence durationInFrames={Math.round(SHORT[2] * 0.42 * 30) + XFADE} name="Foundation"><S2Foundation short /></TransitionSeries.Sequence>
+    <TransitionSeries.Sequence durationInFrames={Math.round(SHORT[3] * 0.42 * 30) + XFADE} name="Foundation"><S2Foundation short /></TransitionSeries.Sequence>
     <TransitionSeries.Transition presentation={fade()} timing={linearTiming({ durationInFrames: XFADE })} />
-    <TransitionSeries.Sequence durationInFrames={Math.round(SHORT[2] * 0.58 * 30)} name="Plan"><S3Plan short /></TransitionSeries.Sequence>
+    <TransitionSeries.Sequence durationInFrames={Math.round(SHORT[3] * 0.58 * 30)} name="Plan"><S3Plan short /></TransitionSeries.Sequence>
   </TransitionSeries>
 );
 
 export const SHORT_SCENES: SceneDef[] = [
-  { id: "open", el: <S0Open />, dark: true },
+  { id: "strategy", el: <S0Strategy short />, dark: true },
+  { id: "solution", el: <S0Solution short />, dark: true },
   { id: "company", el: <S1Company short /> },
   { id: "foundation-plan", el: <S23Short /> },
   { id: "reporting", el: <S5Reporting short /> },

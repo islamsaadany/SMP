@@ -121,7 +121,7 @@ body.reading { overflow:hidden; }
 .readbtn:hover { color:var(--ink); border-color:var(--gold-deep); }
 .readbtn svg { width:12px; height:12px; }
 
-/* screen alone (§787): an A4 page is narrower than 760px, and the paper keeps its columns */
+/* screen alone (§789): an A4 page is narrower than 760px, and the paper keeps its columns */
 @media screen and (max-width:760px) {
   .readroot .rtwo, .readroot .rswot, .readroot .rthree { grid-template-columns:1fr; }
   .readroot .rfold { grid-template-columns:auto 1fr 22px; }
@@ -191,7 +191,7 @@ body.reading { overflow:hidden; }
 .readroot .rtable .lateval { color:var(--bad); } .readroot .rtable .latenote { font-size:11px; margin-left:6px; color:var(--bad); }
 .readroot .rtable .soonval { color:var(--ink-3); } .readroot .rtable .missing { color:var(--ink-3); font-style:italic; }
 
-/* ── THE WHOLE STRATEGY ON PAPER (§787, reading.js printAll) ───────────────
+/* ── THE WHOLE STRATEGY ON PAPER (§789, reading.js printAll) ───────────────
    The Print control sits in the strip beside Exit, drawn for the office
    alone. The document the press builds lives inside the window and is never
    shown on a screen; while the dialog is up (body.rprinting) it is the only
@@ -231,7 +231,7 @@ body.reading { overflow:hidden; }
   .readroot .rprintdoc .rtable tr, .readroot .rprintdoc .rswot > * { break-inside:avoid; }
   /* a label stays with what it names — and ONLY the label: the browser answers a keep-with-next on
      a direction's own line by moving the whole direction to the next page where it would fit, which
-     left every Directions page holding one direction over half a page of nothing (measured, §787) */
+     left every Directions page holding one direction over half a page of nothing (measured, §789) */
   .readroot .rprintdoc .rk { break-after:avoid; }
   .readroot .rprintdoc .rtable thead { display:table-header-group; }
   /* a direction is open, its fold a heading and not a press */

@@ -143,7 +143,7 @@ var READING = (function () {
   ];
   function tabsFor(key) { return TABS.filter(function (t) { return !t.when || t.when(key); }); }
   /* what a tab holds — asked by the window for the open tab and by the paper
-     for every tab (§787), so the two can never say different things */
+     for every tab (§789), so the two can never say different things */
   function tabBody(key, k) {
     return k === "found" ? foundation(key) : k === "swot" ? analysis(key) : k === "dir" ? directions(key, false)
       : k === "cap" ? directions(key, true) : k === "proj" ? projects(key) : k === "obj" ? objectives(key) : performance(key);
@@ -465,7 +465,7 @@ var READING = (function () {
       '<span class="rco">' + esc(GROUP.org || "") + '</span>' +
       '<span class="rsp"></span>' +
       (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
-      /* §787: the whole strategy on paper, the office's alone */
+      /* §789: the whole strategy on paper, the office's alone */
       (mayPrint() ? '<button type="button" class="rexit rprint" data-rprint title="Print or save as PDF">Print</button>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
     r.querySelector(".rwnav").innerHTML = rowHTML(key);
@@ -534,7 +534,7 @@ var READING = (function () {
     paint();
   }
 
-  /* ── THE WHOLE STRATEGY ON PAPER (§787) ────────────────────────────────
+  /* ── THE WHOLE STRATEGY ON PAPER (§789) ────────────────────────────────
      Islam, 2026-11-17: *"can we have printing options from the reading
      option as a printing option. to print the strategy in a good format"*;
      of two shapes drawn, *"option 1, the whole strategy"*; of who may,

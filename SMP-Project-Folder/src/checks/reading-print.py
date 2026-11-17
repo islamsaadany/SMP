@@ -1,4 +1,4 @@
-"""THE WHOLE STRATEGY ON PAPER, THE OFFICE'S ALONE (§787).
+"""THE WHOLE STRATEGY ON PAPER, THE OFFICE'S ALONE (§789).
 
 Islam, 2026-11-17: *"can we have printing options from the reading option
 as a printing option. to print the strategy in a good format"*; of the two
@@ -52,7 +52,7 @@ WHAT IS ASSERTED, and why each one can fail:
       Strategy, and "Strategy · Strategy" is not a name — its Directions
       section holding its own directions, each direction's line kept on a
       page with its first table (a direction's heading alone at the foot of
-      a page was measured, §787).
+      a page was measured, §789).
 """
 import os
 from playwright.sync_api import sync_playwright

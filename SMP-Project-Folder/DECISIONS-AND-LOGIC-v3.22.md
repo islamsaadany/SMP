@@ -71691,3 +71691,5 @@ Islam, of a free chat: *"the word free chat I'm not sure if it's useful, and the
 
 The full run: `checks/copilot.mjs` **379 passed, 0 failed**; `checks/shell.mjs` **608 ok, 11 failed** — the known ten, and 3j2's §640 "a file the Copilot cannot read… no chat is made", which counted one chat more than before (`{"chats":1,"say":""}`) in the full run only; 3j2 alone ran **12 ok, 0 failed** three times, the count now printed with it so a second sighting says what it counted from. `tsc`, `generated-in-step` and `release-stamp` clear.
 
+**§781 AND §782 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §780, so the merge is a fast-forward carrying both — `294b0485..dde9b322`. No migrations; nobody signed out.
+

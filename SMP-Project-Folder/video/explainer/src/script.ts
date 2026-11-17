@@ -15,8 +15,8 @@ export const FULL_LINES: string[][] = [
 
 /* The one-minute cut: a glimpse, features and what people get from them. */
 export const SHORT_LINES: string[][] = [
-  ["Every company has a strategy.", "Then it meets the year:", "a deck, a spreadsheet, a thread of emails.", "Keeping it alive is the hard part."],
-  ["The Strategy Management Platform", "keeps it in one place."],
+  FULL_LINES[0], // the opening is the long video's, whole
+  FULL_LINES[1],
   ["Everyone reads the same plan:", "pillars, key measures and tactics,", "with an owner and a quarter on each."],
   ["When a cycle opens, owners enter their figures in minutes,", "with a note where one is needed,", "and nothing is submitted half done."],
   ["The moment figures are in, performance is there:", "scored, coloured, never typed."],

@@ -2,6 +2,6 @@
 export const VOICE = "en-US-AndrewNeural";
 export const LEAD = 0.5;
 export const FULL: number[] = [19.72, 11.488, 19.264, 20.992, 22.984, 15.736, 33.808, 25.72, 22.288, 19.552, 7.408];
-export const SHORT: number[] = [10.056, 4.776, 8.544, 9.72, 6.912, 7.824, 6.264, 4.608];
+export const SHORT: number[] = [19.32, 11.088, 8.544, 9.72, 6.912, 7.824, 6.264, 4.608];
 export const FULL_AUDIO: string | null = "voice/full";
 export const SHORT_AUDIO: string | null = "voice/short";

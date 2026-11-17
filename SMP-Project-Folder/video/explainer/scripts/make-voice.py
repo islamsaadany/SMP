@@ -21,7 +21,9 @@ def read_lines(name):
     """The caption lines from src/script.ts — the narration is its join."""
     src = open(os.path.join(ROOT, "src", "script.ts")).read()
     m = re.search(name + r"[^=]*=\s*(\[[\s\S]*?\n\]);", src)
-    return json.loads(re.sub(r",\s*([\]}])", r"\1", m.group(1).replace("\n", "")))
+    body = re.sub(r"//[^\n]*", "", m.group(1))          # comments
+    body = re.sub(r"FULL_LINES\[(\d+)\]", lambda x: json.dumps(read_lines("FULL_LINES")[int(x.group(1))]), body) if name != "FULL_LINES" else body
+    return json.loads(re.sub(r",\s*([\]}])", r"\1", body.replace("\n", "")))
 
 def words(s):
     return re.findall(r"[A-Za-z0-9'’%.,;:-]+", s)

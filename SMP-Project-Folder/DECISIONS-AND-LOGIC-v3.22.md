@@ -71793,4 +71793,12 @@ Islam: *"Same for a company planned strategy like elabd"*. The paper already too
 - **On the branch, not merged.**
 
 **§789 AND §789.1 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had moved — another session's §787 and §788 (this week's tasks; the draft that lays itself out) — so this work was renumbered from §787 to §789 first, the branch merged onto `main` with a merge commit `main` alone holds (§91), the built file REBUILT from the merged sources rather than taken from git's splice, and the app's generated files (shell.js, platform.css, sw.js, asset-stamps.json) regenerated after it. `checks/reading-print.py` **32/0** on the merged build. The shell is v8.00. No migrations; nobody signed out.
+### §789.2 — A direction or a capability is never split over two pages, 2026-11-17
+
+Islam, of the merged paper: *"dont allow the break of a direction or a capability on 2 pages. if it breaks start a new page so it's connected"*. §789 had let a direction flow over a page so pages would fill; his call is the other way — a direction read whole is worth the white space under the one before it. So on paper a direction's box (`.rdir`, which is a capability's and a project's box too) does not split: one that does not fit in what is left of a page starts a new one, whole. Only one longer than a page is split at all, and then its line stays with its first table as before (`.rpkeep`). Measured on Mobile: two directions share the first Directions page, the third and the fourth each start a page.
+
+- **Checked**: `checks/reading-print.py` **33/0** — §10 asserts the rule on every direction's box; the page count is the data's.
+- **On the branch, not merged.**
+
+**§789.2 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §789; merged with a merge commit `main` alone holds (§91), the built file rebuilt from the merged sources, the app's generated files regenerated. `checks/reading-print.py` **33/0** on the merged build. No migrations; nobody signed out.
 

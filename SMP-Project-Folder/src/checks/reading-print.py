@@ -52,7 +52,10 @@ WHAT IS ASSERTED, and why each one can fail:
       Strategy, and "Strategy · Strategy" is not a name — its Directions
       section holding its own directions, each direction's line kept on a
       page with its first table (a direction's heading alone at the foot of
-      a page was measured, §789).
+      a page was measured, §789); and NO DIRECTION OR CAPABILITY SPLIT OVER
+      TWO PAGES (§789.2, Islam: "if it breaks start a new page so it's
+      connected") — asserted as the rule on the box, since the page count
+      is the data's.
 """
 import os
 from playwright.sync_api import sync_playwright
@@ -296,10 +299,13 @@ with sync_playwright() as p:
                orgLine: !!(d && d.querySelector('.rpcover .rporg')),
                dirs: dirs.length, want: (GROUP.items || []).length,
                kept: dirs.filter(x => { const k = x.querySelector('.rpkeep'); return k && k.querySelector('.rfold') && k.querySelector('.rtable') && getComputedStyle(k).breakInside === 'avoid'; }).length,
+               whole: dirs.filter(x => getComputedStyle(x).breakInside === 'avoid').length,
                tablesShown: dirs.every(x => [...x.querySelectorAll('.rtable')].every(shown)) }; }""")
     ok("the cover names the company by its name, once, and so does the title", isinstance(one, dict) and one.get("h1") == org and one.get("orgLine") is False and one.get("title") == "Strategy · " + org, one)
     ok("its Directions section holds the company's own directions, open, each line kept with its first table",
        isinstance(one, dict) and one.get("dirs") == one.get("want") and (one.get("dirs") or 0) >= 2 and one.get("kept") == one.get("dirs") and one.get("tablesShown") is True, one)
+    ok("…and no direction is split over two pages: one that does not fit starts a new page (§789.2)",
+       isinstance(one, dict) and one.get("whole") == one.get("dirs"), one)
     ok("…the tabs in order, as on screen", isinstance(pp, dict) and pp.get("sections") == pp.get("tabs"), pp)
     pg.emulate_media(media="screen")
     js(pg, "()=>window.dispatchEvent(new Event('afterprint'))")

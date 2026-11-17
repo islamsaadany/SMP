@@ -67837,6 +67837,7 @@ var COPILOT = (function(){
   function modeParts(){ return here().map(function(s){ return s.k; }).filter(function(k){ return k !== "advisory" && k !== "capabilities"; }); }
   function layout(){ return "window"; }
   function layoutBar(){
+    return "";   /* §782 — the count ends the stepper line now */
     if (inPanel()) return "";
     var ks = modeParts(), have = ks.filter(onPlan).length;
     return '<div class="coplayout" data-cop-planline><span class="copm"><b>' + have + ' of ' + ks.length + '</b> parts on ' + E(placeWord()) + '’s plan</span></div>';
@@ -67980,8 +67981,8 @@ var COPILOT = (function(){
     var focus = '<div class="copfocus"><span class="copfocusk">' + (s === nx ? "Next step · " : "") + E(stripWord(s)) + '</span><span class="copm">' + E(says) + '</span></div>';
     var done = nx ? '' : '<div class="copalldone" data-cop-alldone><b>Every part is on the plan.</b> Refine any part from ✦ Copilot on the Strategy tab — or work on a step here.</div>';
     return '<div class="copstart" data-cop-startscreen>' +
-      '<h2 class="copstarth">What would you like to do with ' + E(placeWord()) + '’s strategy?</h2>' +
-      box("Ask anything, attach your notes, or paste " + (BOXWORK[s] || "finished work") + "…") + done +
+      '<h2 class="copstarth">' + (s === "advisory" ? 'What decision are you weighing for ' + E(placeWord()) + '?' : 'What would you like to do with ' + E(placeWord()) + '’s strategy?') + '</h2>' +
+      box(s === "advisory" ? "Say the decision, attach the papers behind it…" : "Ask anything, attach your notes, or paste " + (BOXWORK[s] || "finished work") + "…") + (s === "advisory" ? '' : done) +
       /* §779 — the box and the attachment are ways in too, so the cards are "another way" (Islam) */
       '<div class="copor">Or choose another way to start</div>' + unfinishedHtml() + focus +
       '<div class="coppaths copstartcards">' + cards + '</div></div>';
@@ -68038,7 +68039,7 @@ var COPILOT = (function(){
       return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
         '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '" data-cop-chat-sec="' + E(c._sec) + '"' + (on ? ' aria-current="true"' : '') + '>' +
           areaTag(c._sec) + '<span class="copt">' + E(c.title) + '</span>' +
-          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + (c.guided ? ' · Guided' : '') + (c.free ? ' · Free chat' : '') + (function(){ var sp = (l.swotProgress || {})[c.id]; return sp ? ' · ' + sp.done + ' of ' + sp.of + ' done' : ''; })() + '</span></button>' +
+          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + (c.guided ? ' · Guided' : '') + '' + (function(){ var sp = (l.swotProgress || {})[c.id]; return sp ? ' · ' + sp.done + ' of ' + sp.of + ' done' : ''; })() + '</span></button>' +
         (!canEdit() ? '' : '<button type="button" class="copdots" data-cop-menu="' + E(c.id) + '" aria-haspopup="menu" aria-expanded="' + (MENU === c.id) +
           '" aria-label="Actions for ' + E(c.title) + '" title="Rename, archive…">' + DOTS + '</button>' + menu) + '</div>';
     }).join("");
@@ -68563,8 +68564,13 @@ var COPILOT = (function(){
     var pend = canEdit() ? (PANE.pending || []).map(function(f){ return fileChip(f, true); }).join("") : "";
     var dm = draftMsg();
     var chat = '<div class="copchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
-      '<div class="copctx" title="' + E(ctx.detail || ctx.line) + '">' + INFO + '<span>' + E(ctx.line) + '</span></div>' +
-      '<div class="copheadrow">' + head + (dm ? sheetBtn("draft", "View draft") : '') + sizeHtml() + '</div>' +
+      /* §782 — ONE LINE AT THE TOP, as in Claude (Islam): the chat's name, then
+         what the Copilot can see behind ⓘ, then A− A+; a light line under it
+         from one edge of the box to the other. */
+      '<div class="copheadrow copheadone">' + head + '<span class="copheadsp"></span>' +
+        '<button type="button" class="copctxi" data-cop-ctx aria-expanded="false" aria-label="What the Copilot can see" title="' + E(ctx.line + (ctx.detail ? " — " + ctx.detail : "")) + '">' + INFO + '</button>' +
+        '<span class="copctx" data-cop-ctxtip hidden>' + E(ctx.line) + '</span>' +
+        (dm ? sheetBtn("draft", "View draft") : '') + sizeHtml() + '</div>' +
       (PANE.flow ? roadLine() : '') +
       '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div></div>' +
       (pend ? '<div class="coppend" data-cop-pending>' + pend + '</div>' : '') +
@@ -70469,7 +70475,10 @@ var COPILOT = (function(){
   function allList(){
     var p = place(), cur = LISTS[key()], out = { chats: [], archived: [], deliverables: [], swotProgress: {}, mayDelete: !!(cur && cur.mayDelete), failed: !!(cur && cur.failed) };
     if (!cur) return null;
+    /* §782 — Advisory is a tab of its own: its chats there, and only there */
+    var adv = section() === "advisory";
     here().forEach(function(s){
+      if ((s.k === "advisory") !== adv) return;
       var l = LISTS[p + "|" + s.k]; if (!l || l.failed) return;
       (l.chats || []).forEach(function(c){ out.chats.push(Object.assign({ _sec: s.k }, c)); });
       (l.archived || []).forEach(function(c){ out.archived.push(Object.assign({ _sec: s.k }, c)); });
@@ -70524,15 +70533,23 @@ var COPILOT = (function(){
     for (var i = 0; i < hs.length; i++) if (areaState(hs[i]).st !== "on") return hs[i];
     return "";
   }
+  /* §782 — THE STEPS AS ONE STEPPER LINE (Islam chose B of design-mockups/
+     copilot-layout/2026-11-17_header-strip-tabs.html: "they are taking a big
+     part of the page"). Numbered steps joined by a line, ✓ on a part the
+     plan holds, the next one ringed; where each stands is the step's tip and
+     is read aloud; the count of the plan's parts ends the line. Advisory is
+     no step: it has its own tab beside Builder. */
   function stripHtml(){
-    if (!shown() || layout() !== "window" || inPanel()) return "";
-    var nx = nextStep(), cur = section(), n = 0;
-    return here().map(function(s){
-      var a = areaState(s.k), side = s.k === "advisory"; if (!side) n++;
-      var k = side ? "Beside the plan" : (s.k === nx ? "Next · step " : "Step ") + n;
-      return '<button type="button" class="copstep' + (a.st ? " " + a.st : "") + (s.k === nx ? " next" : "") + (side ? " side" : "") + '" data-cop-strip="' + s.k + '"' + (s.k === cur ? ' aria-current="true"' : '') + '>' +
-        '<span class="copstepk">' + E(k) + '</span><b>' + E(stripWord(s.k)) + '</b><small>' + E(a.says || "…") + '</small></button>';
+    if (!shown() || layout() !== "window" || inPanel() || section() === "advisory") return "";
+    var nx = nextStep(), cur = section(), ks = modeParts(), have = ks.filter(onPlan).length, prev = null, n = 0;
+    var steps = here().filter(function(s){ return s.k !== "advisory"; }).map(function(s){
+      var a = areaState(s.k); n++;
+      var line = prev === null ? '' : '<span class="copstln' + (prev ? " on" : "") + '" aria-hidden="true"></span>';
+      prev = a.st === "on";
+      return line + '<button type="button" class="copstep' + (a.st ? " " + a.st : "") + (s.k === nx ? " next" : "") + '" data-cop-strip="' + s.k + '"' + (s.k === cur ? ' aria-current="true"' : '') + ' title="' + E((s.k === nx ? "Next · " : "") + (a.says || "")) + '">' +
+        '<span class="copstn" aria-hidden="true">' + (a.st === "on" ? "✓" : n) + '</span><b>' + E(stripWord(s.k)) + '</b><small class="copvh">' + E((s.k === nx ? "Next · " : "") + (a.says || "…")) + '</small></button>';
     }).join("");
+    return '<div class="copsteps">' + steps + '<span class="copstsay" data-cop-planline><b>' + have + ' of ' + ks.length + '</b> on ' + E(placeWord()) + '’s plan</span></div>';
   }
   /* §753 B — THE COPILOT ON THE PLAN. On the Strategy tab, ✦ Copilot beside
      Edit opens the Copilot's own pane in a panel on the right, on the part in
@@ -72215,7 +72232,7 @@ var COPILOT = (function(){
     if ((!text.trim() && !file) || THINKING || !canEdit()) { if (t) t.focus(); return; }
     /* §779 — in the panel on a part the plan holds, the words are a change to it */
     if (inPanel() && document.querySelector("[data-cop-sayto]") && sayToPlan(text, file)) { if (t) t.value = ""; return; }
-    act({ act:"newChat", place: place(), section: section(), free: true, title: "Free chat — " + placeWord() }, function(j){
+    act({ act:"newChat", place: place(), section: section(), free: true, title: "New chat — " + placeWord() }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       delete STARTTEXT[k];
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
@@ -72271,7 +72288,7 @@ var COPILOT = (function(){
            context: ctx.line + (ctx.detail ? "\n" + ctx.detail : "") + (ctx.text ? "\n\nTHE PLAN AS WRITTEN:\n" + ctx.text : ""), placeWord: placeWord() }, WAIT_MS).then(function(x){
       THINKING = null;
       if (x.st === 200 && x.j && x.j.ok) {
-        if (PANE && PANE.chat && PANE.chat.id === id) { PANE.messages = x.j.messages || PANE.messages; PANE.assumptions = x.j.assumptions || []; }
+        if (PANE && PANE.chat && PANE.chat.id === id) { PANE.messages = x.j.messages || PANE.messages; PANE.assumptions = x.j.assumptions || []; if (x.j.title) PANE.chat.title = x.j.title; }
         loadList(true); draw(); return;
       }
       SAY = (x.j && x.j.why) || "That did not send. Nothing was lost — try again.";
@@ -72488,6 +72505,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled && b.getAttribute("aria-disabled") !== "true")
       applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
       { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
+    if ((b = hit(ev, "[data-cop-ctx]"))) { var tip = b.parentNode.querySelector("[data-cop-ctxtip]"); if (tip) { tip.hidden = !tip.hidden; b.setAttribute("aria-expanded", String(!tip.hidden)); } return; }
     if ((b = hit(ev, "[data-cop-home]"))) {
       MENU = null; ASKDEL = null; SAY = ""; SHEET = ""; delete OPEN[key()]; PANE = null;
       if (hit(ev, ".copslim")) { RAILKEPT = true; setRail(false); }
@@ -79711,6 +79729,7 @@ var SYNC = (function () {
   /* §752 — `oneWindow`: the Copilot's areas still route the address
      (…/copilot/directions), but their row is not drawn; the Copilot draws
      the method as its own strip (Islam: "they need 1 window"). */
+  var COP_LASTBUILD = "";
   var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true, oneWindow:true,
                   when: function(){ return COPILOT.shown(); },
                   sections: function(){ return COPILOT.sections(); } };
@@ -83192,7 +83211,21 @@ var SYNC = (function () {
     /* \u00a7132.14: the Strategy tab wears NO number (Islam: "remove the number
        from the strategy word") \u2014 the missing bar in the section row below
        carries the total, the places and the action, through missBar(). */
+    /* §782 — BUILDER AND ADVISORY AT THE FAR RIGHT (Islam: "the builder should
+       be on the far right of the tabs as it's not something similar, and it
+       matches the placement of the copilot when we get in the plan on the
+       right"; "the advisory should be something different… it's a general
+       thing" → its own tab). One tab underneath, the Copilot's: Builder is
+       its method, Advisory its advisory area, each pressed by itself. */
+    if (currentSub === COP_TAB.k && CURSEC.copilot && CURSEC.copilot !== "advisory") COP_LASTBUILD = CURSEC.copilot;
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
+      if (d.k === COP_TAB.k) {
+        var advOn = false; try { advOn = (allowed(d.sections(arg), TARGET) || []).some(function(x){ return x.k === "advisory"; }); } catch (e) { advOn = false; }
+        var onAdv = currentSub === d.k && CURSEC.copilot === "advisory";
+        return '<span class="tabgap" aria-hidden="true"></span><span class="coptabs">' +
+          '<button role="tab" data-s="' + d.k + '" data-cop-to="build" class="coptab" aria-selected="' + (currentSub === d.k && !onAdv) + '">✦ Builder</button>' +
+          (advOn ? '<button role="tab" data-s="' + d.k + '" data-cop-to="advisory" class="coptab copadv" aria-selected="' + onAdv + '">Advisory</button>' : '') + '</span>';
+      }
       var cls = (d.primary ? "primary" : "") + (d.cta ? " cta" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
@@ -84766,7 +84799,11 @@ var SYNC = (function () {
            handles on (§63.3), it would have carried the handles onto
            Performance with no control there to turn them off. */
         if (currentSub !== b.dataset.s) leaveModes();
-        currentSub = b.dataset.s; paint(); window.scrollTo(0,0);
+        currentSub = b.dataset.s;
+        /* §782 — Builder and Advisory are the one Copilot tab, each opening its own part of it */
+        if (b.dataset.copTo === "advisory") CURSEC.copilot = "advisory";
+        else if (b.dataset.copTo === "build" && CURSEC.copilot === "advisory") CURSEC.copilot = COP_LASTBUILD || "foundation";
+        paint(); window.scrollTo(0,0);
       });
     });
     document.querySelectorAll("[data-sub2]").forEach(function(b){

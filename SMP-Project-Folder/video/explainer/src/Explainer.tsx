@@ -35,7 +35,7 @@ export const FULL_SCENES: SceneDef[] = [
   { id: "performance", el: <S6Performance /> },
   { id: "group", el: <S7Group marks={FULL_MARKS[8]} /> },
   { id: "deck", el: <S8Deck /> },
-  { id: "close", el: <S9Close />, dark: true },
+  { id: "close", el: <S9Close marks={FULL_MARKS[10]} />, dark: true },
 ];
 
 /* The crossfade between scenes, in frames. The timeline shortens by one
@@ -53,7 +53,7 @@ export const SHORT_SCENES: SceneDef[] = [
   { id: "performance", el: <S6Performance short /> },
   { id: "group", el: <S7Group short marks={SHORT_MARKS[5]} /> },
   { id: "deck", el: <S8Deck short marks={SHORT_MARKS[6]} /> },
-  { id: "close", el: <S9Close />, dark: true },
+  { id: "close", el: <S9Close marks={SHORT_MARKS[7]} />, dark: true },
 ];
 
 export const totalFrames = (secs: number[], fps = 30) => secs.reduce((s, d) => s + Math.round(d * fps), 0) - XFADE * (secs.length - 1);

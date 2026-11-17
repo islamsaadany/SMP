@@ -1,28 +1,38 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import { ease, useClock, enter } from "../anim";
+import { ease, useRealClock, enter } from "../anim";
 import { C, FONT } from "../theme";
 import { Mark } from "../ui";
+import type { Marks } from "./S0Strategy";
 
-export const S9Close: React.FC = () => {
-  const { t, length } = useClock();
-  const words: [string, string][] = [["Plan", C.darkInk], ["Report", "#FDBA74"], ["Result", "#6EE7B7"]];
-  const resolveAt = Math.min(3.4, length - 2.6);
-  const resolve = ease(t, resolveAt, resolveAt + 0.8);
+/* The close: the mark and the name stand first; Plan, Report and Result
+   appear under them on the words themselves. */
+export const S9Close: React.FC<{ marks?: Marks }> = ({ marks }) => {
+  const { t, length } = useRealClock();
+  const at = (w: string, fb: number) => (marks && marks[w] !== undefined ? marks[w] : fb);
+  const inP = ease(t, 0.2, 1.0);
+  const words: [string, string, string][] = [["plan", "Plan", C.darkInk], ["report", "Report", "#FDBA74"], ["result", "Result", "#6EE7B7"]];
+  const wordAt = words.map(([w], i) => at(w, 1.8 + i * 0.8));
+  const byAt = at("everyone", wordAt[2] + 1.3);
+  const byP = ease(t, byAt - 0.2, byAt + 0.5);
   const fade = 1 - ease(t, length - 1.0, length - 0.1);
   return (
     <AbsoluteFill style={{ background: C.dark, fontFamily: FONT, color: C.darkInk, justifyContent: "center", alignItems: "center", opacity: fade }}>
-      <div style={{ display: "flex", gap: 36, fontSize: 72, fontWeight: 700, position: "absolute", opacity: 1 - resolve, scale: String(1 - 0.3 * resolve) }}>
-        {words.map(([w, c], i) => {
-          const step = Math.min(0.8, (resolveAt - 0.9) / 3);
-          const p = ease(t, 0.6 + i * step, 1.0 + i * step);
-          return <React.Fragment key={w}>{i > 0 ? <span style={{ opacity: p * 0.4 }}>·</span> : null}<span style={{ color: c, ...enter(p, 20) }}>{w}</span></React.Fragment>;
-        })}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: resolve, scale: String(0.9 + 0.1 * resolve) }}>
-        <Mark size={160} />
-        <div style={{ marginTop: 36, fontSize: 54, fontWeight: 700 }}>Strategy Management Platform</div>
-        <div style={{ marginTop: 14, fontSize: 26, color: C.darkQuiet, ...enter(ease(t, resolveAt + 1.0, resolveAt + 1.6), 8) }}>by Forefront Consulting</div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", translate: "0px -30px" }}>
+        <div style={{ ...enter(inP, 16) }}><Mark size={160} /></div>
+        <div style={{ marginTop: 36, fontSize: 54, fontWeight: 700, ...enter(ease(t, 0.5, 1.3), 12) }}>Strategy Management Platform</div>
+        <div style={{ marginTop: 30, display: "flex", gap: 30, fontSize: 44, fontWeight: 700, height: 60, alignItems: "center" }}>
+          {words.map(([w, label, color], i) => {
+            const p = ease(t, wordAt[i] - 0.1, wordAt[i] + 0.45);
+            return (
+              <React.Fragment key={w}>
+                {i > 0 ? <span style={{ color: C.darkQuiet, opacity: p * 0.5, fontWeight: 400 }}>·</span> : null}
+                <span style={{ color, ...enter(p, 14), scale: String(0.9 + 0.1 * p) }}>{label}</span>
+              </React.Fragment>
+            );
+          })}
+        </div>
+        <div style={{ marginTop: 28, fontSize: 26, color: C.darkQuiet, ...enter(byP, 8) }}>by Forefront Consulting</div>
       </div>
     </AbsoluteFill>
   );

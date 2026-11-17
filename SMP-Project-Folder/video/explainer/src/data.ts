@@ -67,10 +67,10 @@ export const PERF = { ko: 85, pillars: 79, execution: 62, koDelta: 6 };
 export const GROUP_PERF = {
   cards: [
     { title: "Group key objectives", value: 83, sub: "The group's own 5 objectives, each scored against its target." },
-    { title: "Business units — performance", value: 81, sub: "All 5 business units' own key objectives, weighted by size.", delta: 4 },
-    { title: "Business units — execution", value: 64, sub: "All 5 business units, each on its own execution, weighted by size." },
-    { title: "Supporting functions — performance", value: 78, sub: "All 4 supporting functions' own headline, counted equally." },
-    { title: "Supporting functions — execution", value: 90, sub: "All 4 supporting functions, each on its own execution, counted equally." },
+    { title: "Business units — performance", value: 81, sub: "All 5 business units' own key objectives.", delta: 4 },
+    { title: "Business units — execution", value: 64, sub: "All 5 business units, each on its own execution." },
+    { title: "Supporting functions — performance", value: 78, sub: "All 4 supporting functions' own key objectives." },
+    { title: "Supporting functions — execution", value: 90, sub: "All 4 supporting functions, each on its own execution." },
   ],
   units: [
     { name: "Logistics", value: 63, exec: 58 },
@@ -99,8 +99,8 @@ export const FOCUS = [
 export const FN = {
   name: "Marketing",
   objectives: [
-    { name: "Marketing-qualified leads", thisYear: "12,000", weight: "60%" },
-    { name: "Cost per acquisition", thisYear: "85 EGP", weight: "40%" },
+    { name: "Marketing-qualified leads", thisYear: "12,000", horizon: "20,000" },
+    { name: "Cost per acquisition", thisYear: "85 EGP", horizon: "60 EGP" },
   ],
   project: {
     id: "MKT01",

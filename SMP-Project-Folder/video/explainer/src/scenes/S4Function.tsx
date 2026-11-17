@@ -24,7 +24,7 @@ export const S4Function: React.FC = () => {
                 <div style={{ fontSize: 22, fontWeight: 700 }}>Key Objectives</div>
                 <Chip border={C.gold} bg="transparent" color={C.ink2} size={13}>Horizon · 2028</Chip>
               </div>
-              <Table cols={[{ label: "Objective" }, { label: "This year", width: 170, align: "right", mono: true }, { label: "Weight", width: 130, align: "right", mono: true }]} rows={FN.objectives.map((o) => [o.name, o.thisYear, <span key="w" style={{ color: C.ink3 }}>{o.weight}</span>])} shown={koShown} rowH={50} />
+              <Table cols={[{ label: "Objective" }, { label: "By 2028", width: 170, align: "right", mono: true }, { label: "This year", width: 170, align: "right", mono: true }]} rows={FN.objectives.map((o) => [o.name, <span key="h" style={{ color: C.gold }}>{o.horizon}</span>, <b key="t">{o.thisYear}</b>])} shown={koShown} rowH={50} />
             </Card>
           </div>
         ) : (

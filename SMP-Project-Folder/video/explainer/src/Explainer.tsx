@@ -5,7 +5,7 @@ import { fade } from "@remotion/transitions/fade";
 import { Audio } from "@remotion/media";
 import { Captions, Cue } from "./captions";
 import { SceneTime } from "./anim";
-import { FULL_CUES, SHORT_CUES } from "./cues";
+import { FULL_CUES, SHORT_CUES, FULL_MARKS, SHORT_MARKS } from "./cues";
 import { PLANNED_FULL, PLANNED_SHORT } from "./planned";
 import { FULL, SHORT, FULL_AUDIO, SHORT_AUDIO, LEAD } from "./timings";
 import { FULL_LINES, SHORT_LINES } from "./script";
@@ -25,15 +25,15 @@ import { C } from "./theme";
 export type SceneDef = { id: string; el: React.ReactNode; dark?: boolean };
 
 export const FULL_SCENES: SceneDef[] = [
-  { id: "strategy", el: <S0Strategy />, dark: true },
-  { id: "solution", el: <S0Solution />, dark: true },
+  { id: "strategy", el: <S0Strategy marks={FULL_MARKS[0]} />, dark: true },
+  { id: "solution", el: <S0Solution marks={FULL_MARKS[1]} />, dark: true },
   { id: "company", el: <S1Company /> },
   { id: "foundation", el: <S2Foundation /> },
   { id: "plan", el: <S3Plan /> },
   { id: "function", el: <S4Function /> },
   { id: "reporting", el: <S5Reporting /> },
   { id: "performance", el: <S6Performance /> },
-  { id: "group", el: <S7Group /> },
+  { id: "group", el: <S7Group marks={FULL_MARKS[8]} /> },
   { id: "deck", el: <S8Deck /> },
   { id: "close", el: <S9Close />, dark: true },
 ];
@@ -53,13 +53,13 @@ const S23Short: React.FC = () => (
 );
 
 export const SHORT_SCENES: SceneDef[] = [
-  { id: "strategy", el: <S0Strategy short />, dark: true },
-  { id: "solution", el: <S0Solution short />, dark: true },
+  { id: "strategy", el: <S0Strategy marks={SHORT_MARKS[0]} />, dark: true },
+  { id: "solution", el: <S0Solution marks={SHORT_MARKS[1]} />, dark: true },
   { id: "company", el: <S1Company short /> },
   { id: "foundation-plan", el: <S23Short /> },
   { id: "reporting", el: <S5Reporting short /> },
   { id: "performance", el: <S6Performance short /> },
-  { id: "group", el: <S7Group short /> },
+  { id: "group", el: <S7Group short marks={SHORT_MARKS[7]} /> },
   { id: "deck", el: <S8Deck short /> },
   { id: "close", el: <S9Close />, dark: true },
 ];

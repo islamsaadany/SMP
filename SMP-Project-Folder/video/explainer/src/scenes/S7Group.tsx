@@ -1,9 +1,10 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import { ease, useClock, enter } from "../anim";
+import { ease, useClock, useRealClock, enter } from "../anim";
+import type { Marks } from "./S0Strategy";
 import { bandOf, bandText, C, FONT, MONO } from "../theme";
-import { Chrome, HeadlineCard, Label, Ring, Table, Chip } from "../ui";
-import { CEO, FOCUS, FUNCTIONS, GROUP_PERF, UNITS } from "../data";
+import { Chrome, HeadlineCard, Label, Ring, Chip } from "../ui";
+import { CEO, FUNCTIONS, GROUP_PERF, UNITS } from "../data";
 
 const Where: React.FC<{ title: string; items: { name: string; value: number }[]; p: number; lit?: string }> = ({ title, items, p, lit }) => (
   <div style={{ marginTop: 18, ...enter(p, 10) }}>
@@ -18,22 +19,23 @@ const Where: React.FC<{ title: string; items: { name: string; value: number }[];
   </div>
 );
 
-export const S7Group: React.FC<{ short?: boolean }> = ({ short }) => {
+export const S7Group: React.FC<{ short?: boolean; marks?: Marks }> = ({ short, marks }) => {
   const { t } = useClock();
+  const { t: tr } = useRealClock();
   const k = short ? 0.75 : 1;
   const fly = ease(t, 0.2, 1.6);
-  const view = short ? (t < 8.5 ? "overall" : "cards") : t < 12.0 ? "overall" : t < 17.0 ? "cards" : "focus";
+  /* the page turns on the voice's own words where they are known */
+  const belowAt = marks?.below !== undefined ? marks.below - 0.3 : 6.6 * k;
+  const cardsAt = marks?.click !== undefined ? marks.click - 0.2 : short ? 8.5 : 12.0;
+  const view = tr < cardsAt ? "overall" : "cards";
   const cardP = (i: number) => ease(t, 1.6 + i * 0.3, 2.2 + i * 0.3);
   const countP = ease(t, 2.2 * k, 5.6 * k);
-  const whereP = ease(t, 6.6 * k, 7.3 * k);
-  const where2P = ease(t, 8.6 * k, 9.3 * k);
-  const cardsAt = short ? 8.5 : 12.0;
-  const ringP = ease(t, cardsAt + 0.4, cardsAt + 2.6);
-  const focusAt = 17.0;
-  const chipP = (i: number) => ease(t, focusAt + 0.6 + i * 0.3, focusAt + 1.0 + i * 0.3);
+  const whereP = ease(tr, belowAt, belowAt + 0.7);
+  const where2P = ease(tr, belowAt + 1.4, belowAt + 2.1);
+  const ringP = ease(tr, cardsAt + 0.4, cardsAt + 2.6);
   return (
     <AbsoluteFill style={{ fontFamily: FONT }}>
-      <Chrome place="Group" units={UNITS} fns={FUNCTIONS} seat={CEO} tabs={["Strategy", "Performance", "Focus", "Temple"]} tab={view === "focus" ? "Focus" : "Performance"} rightTab={<Chip border={C.line} bg="transparent" color={C.ink} size={13}>Bands ▾</Chip>} secs={view !== "focus" ? ["Overall performance", "Business units", "Group Themes", "Capabilities"] : undefined} sec={view === "overall" ? "Overall performance" : view === "cards" ? "Business units" : undefined}>
+      <Chrome place="Group" units={UNITS} fns={FUNCTIONS} seat={CEO} tabs={["Strategy", "Performance", "Temple"]} tab="Performance" rightTab={<Chip border={C.line} bg="transparent" color={C.ink} size={13}>Bands ▾</Chip>} secs={["Overall performance", "Business units", "Group Themes", "Capabilities"]} sec={view === "overall" ? "Overall performance" : "Business units"}>
         {view === "overall" ? (
           <div style={{ position: "absolute", inset: "20px 24px", opacity: ease(t, 1.2, 1.8) }}>
             <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 14 }}>Overall performance</div>
@@ -71,19 +73,7 @@ export const S7Group: React.FC<{ short?: boolean }> = ({ short }) => {
               ))}
             </div>
           </div>
-        ) : (
-          <div style={{ position: "absolute", inset: "20px 24px", opacity: ease(t, focusAt, focusAt + 0.5) }}>
-            <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 18px", display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-              <Label>◆ Cycle 2026</Label><span style={{ color: C.ink3 }}>reward begins at 100% of target · open for marking</span>
-            </div>
-            <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 18px", display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
-              <span style={{ fontSize: 30, fontWeight: 700, color: C.goodTx }}>4</span><span style={{ fontSize: 18, color: C.ink2 }}>of 6</span><Label>Earning</Label>
-              <Chip bg={C.goodBg} color={C.goodTx} size={12}>4 earning</Chip><Chip bg={C.badBg} color={C.badTx} size={12}>2 short</Chip>
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 700, margin: "18px 0 10px" }}>Focus measures</div>
-            <Table cols={[{ label: "Where", width: 200 }, { label: "Focus measure" }, { label: "Source", width: 170, align: "center" }, { label: "Target", width: 150, align: "center", mono: true }, { label: "Actual", width: 150, align: "center", mono: true }, { label: "Progress", width: 150, align: "center" }, { label: "Standing", width: 180, align: "center" }]} rows={FOCUS.map((f, i) => [<b key="w">{f.where}</b>, f.name, <span key="s" style={{ fontSize: 13, color: C.ink3 }}>{f.source}</span>, f.target, f.actual, <b key="p">{f.progress}%</b>, <div key="c" style={{ opacity: chipP(i), scale: String(0.8 + 0.2 * chipP(i)) }}><Chip bg={f.earning ? C.goodBg : C.badBg} color={f.earning ? C.goodTx : C.badTx} border={f.earning ? C.good : C.bad} size={12}>{f.earning ? "EARNING" : "SHORT"}</Chip></div>])} rowH={50} />
-          </div>
-        )}
+        ) : null}
         {/* the unit's figure flying up into the group */}
         <div style={{ position: "absolute", left: 760, top: 120 + (1 - fly) * 420, scale: String(1.3 - 0.5 * fly), opacity: fly < 1 ? 1 : 0, background: C.surface, border: `2px solid ${C.amber}`, borderRadius: 10, padding: "10px 20px", fontSize: 24, fontWeight: 700, boxShadow: "0 12px 30px rgba(15,23,42,.25)" }}>Retail <span style={{ color: C.attnTx, fontFamily: MONO }}>79%</span></div>
       </Chrome>

@@ -1,20 +1,24 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import { ease, useClock, enter } from "../anim";
+import { ease, useRealClock, enter } from "../anim";
 import { C, FONT, MONO } from "../theme";
 import { Mark } from "../ui";
-import { ARTEFACTS } from "./S0Strategy";
+import { ARTEFACTS, Marks } from "./S0Strategy";
 
-/* The scattered pieces pull into one mark: the platform. */
-export const S0Solution: React.FC<{ short?: boolean }> = ({ short }) => {
-  const { t, length } = useClock();
-  const k = short ? 0.7 : 1;
-  const gather = ease(t, 0.2, 1.6 * k);
-  const draw = ease(t, 1.2 * k, 2.3 * k);
-  const tile = ease(t, 1.9 * k, 2.6 * k);
-  const title = ease(t, 2.8 * k, 3.6 * k);
-  const words = ["Plans", "Reporting", "Results"];
-  const howP = short ? 0 : ease(t, 9.4, 10.0);
+const at = (marks: Marks | undefined, word: string, fallback: number) => (marks && marks[word] !== undefined ? marks[word] : fallback);
+
+/* The scattered pieces pull into one mark: the platform. The three words
+   land as the voice says them. */
+export const S0Solution: React.FC<{ marks?: Marks }> = ({ marks }) => {
+  const { t, length } = useRealClock();
+  const named = at(marks, "strategy", 1.4); // "...the Strategy Management Platform..."
+  const gather = ease(t, 0.2, named + 0.2);
+  const draw = ease(t, named - 0.4, named + 0.7);
+  const tile = ease(t, named + 0.2, named + 0.9);
+  const title = ease(t, named + 0.4, named + 1.2);
+  const words: [string, string][] = [["plans", "Plans"], ["reporting", "Reporting"], ["results", "Results"]];
+  const howAt = marks && marks["how"] !== undefined ? marks["how"] - 0.6 : 99;
+  const howP = ease(t, howAt, howAt + 0.6);
   const out = 1 - ease(t, length - 0.5, length);
   return (
     <AbsoluteFill style={{ background: C.dark, fontFamily: FONT, color: C.darkInk, justifyContent: "center", alignItems: "center", opacity: out }}>
@@ -28,12 +32,13 @@ export const S0Solution: React.FC<{ short?: boolean }> = ({ short }) => {
         <Mark size={200} draw={draw} tile={tile} />
         <div style={{ marginTop: 44, fontSize: 64, fontWeight: 700, letterSpacing: "-0.01em", ...enter(title, 16) }}>Strategy Management Platform</div>
         <div style={{ marginTop: 22, display: "flex", gap: 28, fontSize: 32, color: C.darkQuiet }}>
-          {words.map((w, i) => {
-            const p = ease(t, (5.0 + i * 0.8) * k, (5.5 + i * 0.8) * k);
+          {words.map(([w, label], i) => {
+            const from = at(marks, w, named + 3 + i * 0.8) - 0.1;
+            const p = ease(t, from, from + 0.5);
             return (
               <React.Fragment key={w}>
                 {i > 0 ? <span style={{ opacity: p * 0.5 }}>·</span> : null}
-                <span style={{ ...enter(p, 10), color: i === 1 ? "#FDBA74" : i === 2 ? "#6EE7B7" : C.darkInk }}>{w}</span>
+                <span style={{ ...enter(p, 10), color: i === 1 ? "#FDBA74" : i === 2 ? "#6EE7B7" : C.darkInk }}>{label}</span>
               </React.Fragment>
             );
           })}

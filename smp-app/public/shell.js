@@ -67990,7 +67990,7 @@ var COPILOT = (function(){
   /* §779 — words said in the panel on a part the plan holds: the part's own
      "start from existing" opens, and the words are its first change, sent as
      soon as the chat can take one; until then they wait in its box. */
-  var PENDSAY = null;
+  var PENDSAY = null, PENDAPPLY = "";
   function sayToPlan(text, file){
     var c = document.querySelector("[data-cop-hiddencards] .copplan"); if (!c) return false;
     PENDSAY = { sec: section(), text: text, file: file || null, at: Date.now() }; delete STARTTEXT[key()]; c.click(); return true;
@@ -68521,6 +68521,14 @@ var COPILOT = (function(){
   }
   window.__copSize = { steps: ZOOMS, index: function(){ return ZOOMS[zi()]; } };
 
+  /* §784 — a draft in the plan's shape is drawn as the plan draws that part, and can be put on it from here */
+  var PLAN_TYPE = { compete: "compete", analysis: "swot", foundation: "foundation" };
+  function planDraftHtml(plan){
+    if (!plan) return "";
+    if (plan.section === "foundation") { var words = partWords(); return '<div class="copfcards">' + plan.foundation.map(function(x){ return '<div class="copfcard"><h5>' + E(words[x.key] || x.key) + '</h5>' + cardBody(x.text || "", x.key) + '</div>'; }).join("") + '</div>'; }
+    return typedBodyHtml({ type: PLAN_TYPE[plan.section] }, plan);
+  }
+  function planGaps(plan){ return plan && plan.section === "compete" ? plan.compete.values.filter(function(v){ return !(v.measure || []).length; }).length : 0; }
   function draftPanelHtml(m){
     var p = m.part, latest = true;
     for (var i = PANE.messages.length - 1; i >= 0; i--) if (hasDraft(PANE.messages[i])) { latest = PANE.messages[i] === m; break; }
@@ -68528,15 +68536,18 @@ var COPILOT = (function(){
       ? '<span class="copsaved">&#10003; Saved as v' + E(String(p.saved.n || 1)) + '</span><button type="button" class="copopt" data-cop-deliv="' + E(p.saved.deliverableId) + '">Open it</button>'
       : (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-savedraft="' + E(m.id) + '">Save to ' + E(secLabel()) + ' deliverables</button>' : '')) +
       /* §654 B3 — said where it stands: a free chat's draft stays in the
-         Copilot; what goes on the plan is built step by step. */
-      '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
-      (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : '');
+         Copilot; what goes on the plan is built step by step. §784 — unless
+         it came in the plan's own shape: then it can go on from here. */
+      (p.plan ? (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-putplan="' + E(m.id) + '">Put on ' + E(placeWord()) + '’s plan</button>' : '') +
+          '<span class="copm copdstay" data-cop-draftstay>Laid out as the plan’s ' + E(stripWord(PANE.chat.section || section())) + '.' + (planGaps(p.plan) ? ' ' + planGaps(p.plan) + (planGaps(p.plan) === 1 ? ' value has' : ' values have') + ' no measure yet.' : '') + '</span>'
+        : '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
+          (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : ''));
     return '<section class="copout" data-cop-out aria-label="Draft">' +
       '<div class="copouth"><b>' + E(p.draft.title || "Draft") + '</b><span class="copm">' + (latest ? 'Latest draft' : 'An earlier draft') + '</span>' +
         '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close the draft" title="Close">×</button></div>' +
-      '<div class="copoutb"><div class="copdraft"><div class="copdg">' + p.draft.groups.map(function(g){
+      '<div class="copoutb"><div class="copdraft">' + (p.plan ? '<div class="copdplan" data-cop-dplan>' + planDraftHtml(p.plan) + '</div>' : '<div class="copdg">' + p.draft.groups.map(function(g){
           return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' + g.items.map(itemHtml).join("") + '</ul></div>';
-        }).join("") + '</div></div></div>' +
+        }).join("") + '</div>') + '</div></div>' +
       (foot ? '<div class="copoutf">' + foot + '</div>' : '') + '</section>';
   }
   /* THE HANDLE BETWEEN THE CHAT AND WHAT IT BUILDS (§638): drag to widen or
@@ -69498,7 +69509,7 @@ var COPILOT = (function(){
     openModalHtml("Apply to the plan?", "",
       '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
       '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — ' + partsWord + ' onto the Foundation page.</span></div>' + again +
-      '<div class="kv"><span class="k">What it replaces</span><span>The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
+      '<div class="kv"><span class="k">What it replaces</span><span>' + todayWord("foundation") + 'The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
       /* §525.1 — APPLY IS NOT A RED BUTTON. Red in this product is the
          colour of an act with no way back, and the row above this button
          says in its own words that the Foundation the plan holds is archived
@@ -69663,10 +69674,17 @@ var COPILOT = (function(){
   /* §654 B2 — a version's body, drawn as its type (read only; the chat edits). */
   function typedBodyHtml(d, b){
     var li = function(a, f){ return (a || []).length ? '<ul class="copdul">' + a.map(function(x){ return '<li>' + f(x) + '</li>'; }).join("") + '</ul>' : '<p class="copnone">Nothing here.</p>'; };
+    /* §784 — COMPETITIVE DISCIPLINE AS THE PLAN SHOWS IT (Islam: "it needs to appear well formatted, or even like the actual plan deliverable, to be well reviewed before saving to plan"): the discipline on top, a card per value with How, its measures (the target, and today's figure at the right when said) and the evidence folded; a value with no measure says so. */
     if (d.type === "compete" && b.compete && Array.isArray(b.compete.values)) {
       var t = b.compete;
-      return '<div class="copdtyped"><p class="copdline"><b>Discipline</b> ' + E(cpWord(t.discipline)) + '</p><div class="tblscroll"><table class="cmptab"><thead><tr><th>Value</th><th>How</th><th>Measure</th></tr></thead><tbody>' +
-        t.values.map(function(v){ return '<tr><td><b>' + E(v.title) + '</b></td><td>' + E((v.how || []).join(" · ")) + '</td><td>' + E((v.measure || []).join(" · ")) + '</td></tr>'; }).join("") + '</tbody></table></div></div>';
+      var mline = function(m){ var mt = String(m).match(/^(.*?)\s*\((today[^)]*|no baseline[^)]*)\)\s*$/i); return '<div class="copmrow"><span>' + E(mt ? mt[1] : m) + '</span>' + (mt ? '<span class="copm">' + E(mt[2]) + '</span>' : '') + '</div>'; };
+      return '<div class="copdtyped copdcomp"><div class="copdisc"><span class="copdlab">Value discipline</span><h4>' + E(cpWord(t.discipline)) + '</h4></div>' +
+        '<span class="copdlab">Value proposition · ' + t.values.length + (t.values.length === 1 ? ' value' : ' values') + '</span><div class="copvals">' +
+        t.values.map(function(v){ var nom = !(v.measure || []).length;
+          return '<div class="copval' + (nom ? ' copgap' : '') + '" data-cop-val' + (nom ? ' data-cop-gap' : '') + '><h5>' + E(v.title) + '</h5>' +
+            ((v.how || []).length ? '<span class="copdlab">How</span><ul class="copdul">' + v.how.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul>' : '') +
+            '<span class="copdlab">Measures</span>' + (nom ? '<p class="copgapw">No measure yet — the plan holds one or more per value. Say it in the chat, or put it on the plan as it is.</p>' : v.measure.map(mline).join("")) +
+            (v.evidence ? '<details class="copev"><summary>Evidence</summary>' + E(v.evidence) + '</details>' : '') + '</div>'; }).join("") + '</div></div>';
     }
     if ((d.type === "directions" || d.type === "capabilities") && (Array.isArray(b.directions) || Array.isArray(b.capabilities))) {
       var sc = function(o){ return o.urgency && o.importance && o.ease ? o.urgency * o.importance * o.ease : null; };
@@ -69690,12 +69708,15 @@ var COPILOT = (function(){
   /* §654 B2 — APPLY FROM THE VERSION'S PAGE: the same ask, the same archive
      of the part, the same write its chat makes; the note written once the
      plan's save lands, then the page read again. */
+  /* §784 — what the plan holds today, said before it is replaced */
+  function todayWord(k){ var h = planHeld(k); return h ? "Today the plan holds " + E(h) + ". " : "The plan holds nothing here today. "; }
   function delivApplyAsk(){
     var d = PANE.deliverable, cur = PANE.versions && PANE.versions[0], b = cur && cur.body; if (!d || !b) return;
     var kind = d.type === "capabilities" ? "directions" : d.type, capIds = [], write, can, what, replaces;
     var vword = E(d.title) + " v" + E(cur.n), arch = "What the plan holds is archived first, under Import &amp; storage › Archived plans, and can be put back from there.";
     if (d.type === "compete") {
-      what = vword + " — " + E(cpWord((b.compete || {}).discipline)) + " and " + ((b.compete || {}).values || []).length + " values onto the plan’s Competitive Discipline."; replaces = arch;
+      var noM = ((b.compete || {}).values || []).filter(function(v){ return !(v.measure || []).length; }).length;
+      what = vword + " — " + E(cpWord((b.compete || {}).discipline)) + " and " + ((b.compete || {}).values || []).length + " values onto the plan’s Competitive Discipline." + (noM ? " " + noM + (noM === 1 ? " value goes" : " values go") + " on without a measure." : ""); replaces = todayWord("compete") + arch;
       can = function(){ try { return !!(typeof competeWritable === "function" && competeWritable(place())); } catch (e) { return false; } };
       write = function(){ return { ok: cpWritePlan(b.compete) }; };
     } else if (d.type === "directions" || d.type === "capabilities") {
@@ -69713,7 +69734,7 @@ var COPILOT = (function(){
       write = function(){ return exWritePlan(ex); };
     } else if (d.type === "swot") {
       var n = LETTERS.reduce(function(k, L){ return k + ((b.swot || {})[L] || []).length; }, 0);
-      what = vword + " — its " + n + " lines onto the plan’s SWOT."; replaces = arch;
+      what = vword + " — its " + n + " lines onto the plan’s SWOT."; replaces = todayWord("analysis") + arch;
       can = function(){ try { return !!(typeof swotWritable === "function" && swotWritable(place())); } catch (e) { return false; } };
       write = function(){ swWritePlan(b.swot); return { ok: true }; };
     } else return;
@@ -69758,6 +69779,8 @@ var COPILOT = (function(){
     fitPane(); fitBox();
     applyRoad(); applyStart();
     if (PENDSAY) setTimeout(pendingSay, 0);
+    if (PENDAPPLY && PANE && PANE.deliverable && PANE.deliverable.id === PENDAPPLY && PANE.versions && PANE.versions.length) {
+      PENDAPPLY = ""; setTimeout(function(){ var ab = document.querySelector("[data-cop-dapply], [data-cop-fapply]"); if (ab) ab.click(); }, 0); }
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
   }
   /* THE PANE FILLS THE WINDOW (§453): it ends at the bottom of the screen,
@@ -72598,6 +72621,14 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-notnow]"))) { NOTNOW[b.getAttribute("data-cop-notnow")] = true; draw(); return; }
+    if ((b = hit(ev, "[data-cop-putplan]"))) {
+      if (!PANE || !PANE.chat) return;
+      var cid5 = PANE.chat.id, mid5 = b.getAttribute("data-cop-putplan"), msg5 = (PANE.messages || []).filter(function(x){ return String(x.id) === String(mid5); })[0];
+      var go5 = function(did){ PENDAPPLY = did; openIn(PANE.chat.section || section(), "deliv", did); };
+      if (msg5 && msg5.part && msg5.part.saved && msg5.part.saved.deliverableId) { go5(msg5.part.saved.deliverableId); return; }
+      act({ act:"saveDraft", id:cid5, messageId:mid5 }, function(j){ LISTS[key()] = null; loadList(true); if (j.saved) go5(j.saved.deliverableId); else draw(); });
+      return;
+    }
     if ((b = hit(ev, "[data-cop-savedraft]"))) {
       if (!PANE || !PANE.chat) return;
       var cid4 = PANE.chat.id;

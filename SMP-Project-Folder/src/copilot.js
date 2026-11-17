@@ -144,7 +144,15 @@ var COPILOT = (function(){
      slow answer left the page on "working" for as long as it took, which
      read as broken. */
   var WAIT_MS = (window.__copWaitMs || 120000);
+  /* §780 — a step-by-step chat's ask takes the files waiting above its box (lib/copilot.ts waitingFiles) */
+  var TAKES = /^(advisory(Turn|Revise)|compete(Score|Values|Refine)|dir(Suggest|More)|capSuggest|execDraft|swot(Answer|Analysis|Draft|Change|Check)|flow(Draft|Refine|Check))$/;
   function post(body, waitMs){
+    return post0(body, waitMs).then(function(x){
+      if (x && x.st === 200 && x.j && x.j.ok && TAKES.test(String(body.act || "")) && PANE && PANE.chat && PANE.chat.id === body.id && (PANE.pending || []).length) { PANE.pending = []; setTimeout(draw, 0); }
+      return x;
+    });
+  }
+  function post0(body, waitMs){
     var ctrl = (waitMs && typeof AbortController !== "undefined") ? new AbortController() : null, timedOut = false;
     var tm = ctrl ? setTimeout(function(){ timedOut = true; ctrl.abort(); }, waitMs) : null;
     return fetch(url("api"), { method:"POST", cache:"no-store", credentials:"same-origin",
@@ -332,8 +340,8 @@ var COPILOT = (function(){
            the parts"). */
         '<button type="button" class="copsend" data-cop-startsend aria-label="Send" title="Send"' + (String(STARTTEXT[key()] || "").trim() ? '' : ' hidden') + '>' + SENDMARK + '</button></div>' +
       '<div class="copunder copstartunder"><button type="button" class="copclip copstartclip" data-cop-startattach aria-label="Attach notes — a Word, PDF or Excel file" title="Attach notes — a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '<span>Attach notes</span></button>' +
-        '<input type="file" hidden data-cop-startfile accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
-        '<span class="cophint">Word, PDF or Excel · or paste · Enter sends</span></div>'; };
+        '<input type="file" hidden data-cop-startfile accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp">' +
+        '<span class="cophint">Word, PDF, Excel or a picture · paste a screenshot · Enter sends</span></div>'; };
     /* §779 — ON THE PLAN, ✦ Copilot on a part: a part the plan does not hold
        yet is built in the Copilot, where the steps and the to-do are (Islam:
        "shall it direct me to build the empty part in the copilot panel rather
@@ -367,14 +375,17 @@ var COPILOT = (function(){
      "start from existing" opens, and the words are its first change, sent as
      soon as the chat can take one; until then they wait in its box. */
   var PENDSAY = null;
-  function sayToPlan(text){
+  function sayToPlan(text, file){
     var c = document.querySelector("[data-cop-hiddencards] .copplan"); if (!c) return false;
-    PENDSAY = { sec: section(), text: text, at: Date.now() }; delete STARTTEXT[key()]; c.click(); return true;
+    PENDSAY = { sec: section(), text: text, file: file || null, at: Date.now() }; delete STARTTEXT[key()]; c.click(); return true;
   }
   function pendingSay(){
     var p = PENDSAY; if (!p || section() !== p.sec || !PANE || !PANE.chat || THINKING) return;
     if (Date.now() - p.at > 60000) { PENDSAY = null; return; }
     var id = PANE.chat.id;
+    /* §780 — a picture said with it waits above the chat's box, and goes with the change */
+    if (p.file) { var pf = p.file; p.file = null; attach(pf); }
+    if (!p.text.trim()) { PENDSAY = null; return; }
     if (!DRAFT[id]) DRAFT[id] = p.text;
     var ready = swotOn() ? swCanChange() : competeOn() ? cpCanType() : dirsOn() ? dvCanType() : execOn() ? exCanType() : advOn() ? false
       : flowOn() ? !!(PANE.flow && (PANE.flow.phase === "loaded" || PANE.flow.phase === "draft" || PANE.flow.phase === "check")) : !!PANE.messages;
@@ -740,10 +751,13 @@ var COPILOT = (function(){
   }
 
   function sizeWord(n){ return n >= 1048576 ? (Math.round(n / 104857.6) / 10) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
-  var KINDW = { pdf:"PDF", docx:"Word", xlsx:"Excel" };
+  var KINDW = { pdf:"PDF", docx:"Word", xlsx:"Excel", png:"Picture", jpg:"Picture", webp:"Picture" };
+  var THUMBS = {};                /* §780 — file id → a picture's thumbnail, as the browser read it (this visit only) */
+  function isPic(k){ return k === "png" || k === "jpg" || k === "webp"; }
   function fileChip(f, pending){
     var name = '<b>' + E(f.name) + '</b> · ' + (KINDW[f.kind] || "") + ' · ' + sizeWord(f.size);
-    return '<span class="copfile">' + FILEMARK +
+    var th = isPic(f.kind) ? ('<img class="copthumb" src="' + E(THUMBS[f.id] || url("file", ["id=" + encodeURIComponent(f.id)])) + '" alt="" loading="lazy">') : FILEMARK;
+    return '<span class="copfile' + (isPic(f.kind) ? ' coppic' : '') + '">' + th +
       (pending ? name + ' <button type="button" class="copx" data-cop-detach="' + E(f.id) + '" aria-label="Remove ' + E(f.name) + '">&times;</button>'
                : '<a href="' + E(url("file", ["id=" + encodeURIComponent(f.id)])) + '" download>' + name + '</a>') + '</span>';
   }
@@ -974,12 +988,15 @@ var COPILOT = (function(){
         : ph === "draft" ? "Say what to change in this draft…"
         : ph === "loaded" || ph === "check" || ph === "saved" ? "Name a part and say what to change, or ask anything…" : "Type a message…";
     }
-    return pend ? "Say what this file is for…" : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
+    return pend ? ((PANE.pending || []).some(function(f){ return isPic(f.kind); }) ? "Say what to take from this picture…" : "Say what this file is for…") : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
   }
   var VIEWONLY = '<div class="copviewonly" data-cop-viewonly><span>View only</span></div>';
   function composerHtml(c, pend){
     var text = DRAFT[c.id] || "";
-    return '<div class="copcompose">' +
+    /* §780 — a step-by-step chat draws its waiting files here: they go with its next ask */
+    var waiting = !pend && canEdit() && (PANE.pending || []).length ? '<div class="coppend" data-cop-pending>' + PANE.pending.map(function(f){ return fileChip(f, true); }).join("") +
+      '<span class="cophint">Goes with your next message or step</span></div>' : '';
+    return waiting + '<div class="copcompose">' +
       '<div class="copbox">' +
         '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow() && !swCanChange()) || (competeOn() && !cpCanType()) || (dirsOn() && !dvCanType()) || (execOn() && !exCanType()) || (advOn() && !adCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
         /* §652 — Send appears only once there is something to send (Islam:
@@ -988,9 +1005,9 @@ var COPILOT = (function(){
         (function(){ var w = THINKING === c.id ? BUSY : "", none = !text.trim() && !pend;
         return '<button type="button" class="copsend' + heldCls(w) + '" data-cop-send aria-label="Send"' + (none ? ' hidden' : '') + (w ? held(w) : ' title="Send"') + '>' + SENDMARK + '</button>'; })() +
       '</div>' +
-      '<div class="copunder">' + (flowView() || swotOn() || competeOn() || dirsOn() || execOn() || advOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
-        '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
-        '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
+      '<div class="copunder">' + (
+        '<button type="button" class="copclip" data-cop-attach aria-label="Attach a file or a picture" title="Attach a Word, PDF or Excel file or a picture — or paste a picture in the box (up to 3 MB)">' + CLIP + '</button>' +
+        '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp">' +
         '<span class="cophint">Enter sends · Shift + Enter for a new line</span>' +
       '</div></div>');
   }
@@ -2497,7 +2514,7 @@ var COPILOT = (function(){
       (ed ? '<div class="copsw-add">' +
         '<label class="copsw-where">Keep it for <select class="fld" data-cop-sw-for><option value="unit"' + (SWALL ? '' : ' selected') + '>This unit</option><option value="all"' + (SWALL ? ' selected' : '') + '>All units</option></select></label>' +
         '<div class="copbtns"><button type="button" class="copbtn" data-cop-sw-upload>Upload a file</button>' +
-          '<input type="file" hidden data-cop-sw-file accept=".docx,.pdf,.xlsx,.txt,.md"></div>' +
+          '<input type="file" hidden data-cop-sw-file accept=".docx,.pdf,.xlsx,.txt,.md,.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"></div>' +
         (method !== "template" ? '<textarea class="fld" rows="4" data-cop-sw-paste placeholder="Or paste the text here">' + E(SWPASTE) + '</textarea>' +
           '<div class="copbtns"><button type="button" class="copbtn" data-cop-sw-keep>Keep the pasted text</button></div>' : '') +
         (pick.length ? '<div class="copsw-pick"><b>Or pick one already kept</b>' + pick.map(function(r){
@@ -2773,6 +2790,10 @@ var COPILOT = (function(){
       (section() === "analysis" ? '<section class="coprail' + (folded("sources") ? " copfolded" : "") + '" data-cop-sources-rail><div class="coprh"><span class="coprhl">Sources</span>' + foldBtn("sources", "sources") + '</div>' +
         '<div class="coplist" data-cop-sources>' + sourcesHtml() + '</div></section>' : '');
   }
+  /* §780 — Details fold to a slim strip on the right, as the chats rail does on the left (Islam: "the deliverables need to be collapsible as well, like the chat panel"); kept per browser */
+  var DETMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="2"/><path d="M10 2.5v11"/></svg>';
+  function detShut(){ try { return localStorage.getItem("smp.copilot.details") === "shut"; } catch (e) { return false; } }
+  function setDetShut(v){ try { if (v) localStorage.setItem("smp.copilot.details", "shut"); else localStorage.removeItem("smp.copilot.details"); } catch (e) {} placeDetails(); }
   function placeDetails(){
     var pane = document.querySelector("[data-cop-pane]"), m = document.querySelector("[data-cop-main]"); if (!pane || !m) return;
     var det = pane.querySelector(":scope > [data-cop-details]"); if (!det) return;
@@ -2781,7 +2802,12 @@ var COPILOT = (function(){
     /* a to-do folded into a sheet (a narrow window) would hide them: then they keep their own column */
     if (td && getComputedStyle(td).display === "none") td = null;
     if (td) { var bx = document.createElement("div"); bx.className = "copdelbox"; bx.setAttribute("data-cop-delbox", ""); bx.innerHTML = detailsInner(); td.appendChild(bx); det.innerHTML = ""; }
-    else det.innerHTML = detailsInner();
+    else {
+      var shut = detShut();
+      det.innerHTML = shut ? '<button type="button" class="coptog" data-cop-dettog aria-expanded="false" aria-label="Show deliverables" title="Show deliverables">' + DETMARK + '</button>'
+        : '<button type="button" class="coptog copdettog" data-cop-dettog aria-expanded="true" aria-label="Hide deliverables" title="Hide deliverables">' + DETMARK + '</button>' + detailsInner();
+      pane.classList.toggle("copdetshut", shut);
+    }
     pane.classList.toggle("copwithdet", !td);
   }
 
@@ -4574,7 +4600,7 @@ var COPILOT = (function(){
     var t = document.querySelector("[data-cop-starttext]"), text = t ? t.value : "", k = key();
     if ((!text.trim() && !file) || THINKING || !canEdit()) { if (t) t.focus(); return; }
     /* §779 — in the panel on a part the plan holds, the words are a change to it */
-    if (inPanel() && !file && document.querySelector("[data-cop-sayto]") && sayToPlan(text)) { if (t) t.value = ""; return; }
+    if (inPanel() && document.querySelector("[data-cop-sayto]") && sayToPlan(text, file)) { if (t) t.value = ""; return; }
     act({ act:"newChat", place: place(), section: section(), free: true, title: "Free chat — " + placeWord() }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       delete STARTTEXT[k];
@@ -4681,10 +4707,54 @@ var COPILOT = (function(){
   /* A FILE, read in the browser only as far as its size and name; the server
      decides whether it can be read at all and says so in words. */
   function fileProblem(file){
-    if (!/\.(docx|pdf|xlsx)$/i.test(file.name)) return "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files. Save it as one of those and attach it again.";
+    if (!/\.(docx|pdf|xlsx|png|jpe?g|webp)$/i.test(file.name) && !/^image\/(png|jpeg|webp)$/.test(file.type || "")) return "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files and pictures (PNG, JPEG, WebP). Save it as one of those and attach it again.";
     if (file.size > MAX_FILE) return "That file is larger than 3 MB, so it was not attached. Split it, or paste the part that matters.";
     return "";
   }
+  /* a pasted screenshot comes as "image.png": it is named for when it was pasted */
+  function picName(file){
+    var n = String(file.name || ""), t = String(file.type || "");
+    if (/^image\//.test(t) && (!n || /^image\.(png|jpe?g|webp)$/i.test(n))) { var d = new Date(), p2 = function(x){ return (x < 10 ? "0" : "") + x; };
+      return "Pasted picture " + d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()) + " " + p2(d.getHours()) + "." + p2(d.getMinutes()) + "." + p2(d.getSeconds()) + (t === "image/jpeg" ? ".jpg" : t === "image/webp" ? ".webp" : ".png"); }
+    return n;
+  }
+  /* §780 — PASTE OR DROP A PICTURE (Islam: "allow me to paste pictures as
+     well with data where the AI can analyze and get data from"). Into a
+     chat's box it waits above the box like an attached file; into the start
+     screen's box it starts the chat, as attaching there does. Text pasted is
+     left to the box. */
+  function pastedFiles(dt){
+    var out = []; if (!dt) return out;
+    Array.prototype.forEach.call(dt.files || [], function(f){ out.push(f); });
+    if (!out.length) Array.prototype.forEach.call(dt.items || [], function(it){ if (it.kind === "file") { var f = it.getAsFile(); if (f) out.push(f); } });
+    return out.filter(function(f){ return /^image\//.test(f.type || "") || /\.(docx|pdf|xlsx|png|jpe?g|webp)$/i.test(f.name || ""); });
+  }
+  function takeIn(ev, files){
+    if (!files.length || !canEdit()) return false;
+    if (hit(ev, "[data-cop-starttext], [data-cop-startscreen]")) {
+      var sbad = fileProblem(files[0]); if (sbad) { SAY = sbad; draw(); return true; }
+      startFree(files[0]); return true;
+    }
+    if (!PANE || !PANE.chat || PANE.chat.archived) return false;
+    files.slice(0, 3).forEach(function(f, i){ setTimeout(function(){ attach(f); }, i * 400); });
+    return true;
+  }
+  document.addEventListener("paste", function(ev){
+    if (!hit(ev, "[data-cop-text], [data-cop-starttext]")) return;
+    var fs = pastedFiles(ev.clipboardData); if (!fs.length) return;
+    ev.preventDefault(); takeIn(ev, fs);
+  });
+  document.addEventListener("dragover", function(ev){
+    if (!hit(ev, "[data-cop-pane], #copPanel")) return;
+    if (ev.dataTransfer && Array.prototype.indexOf.call(ev.dataTransfer.types || [], "Files") >= 0) { ev.preventDefault(); var bx = ev.target.closest && ev.target.closest(".copbox"); document.querySelectorAll(".copbox.copdrop").forEach(function(x){ if (x !== bx) x.classList.remove("copdrop"); }); if (bx) bx.classList.add("copdrop"); }
+  });
+  document.addEventListener("dragleave", function(ev){ var bx = ev.target && ev.target.closest && ev.target.closest(".copbox"); if (bx && !bx.contains(ev.relatedTarget)) bx.classList.remove("copdrop"); });
+  document.addEventListener("drop", function(ev){
+    if (!hit(ev, "[data-cop-pane], #copPanel")) return;
+    document.querySelectorAll(".copbox.copdrop").forEach(function(x){ x.classList.remove("copdrop"); });
+    var fs = pastedFiles(ev.dataTransfer); if (!fs.length) return;
+    ev.preventDefault(); takeIn(ev, fs);
+  });
   function attach(file){
     if (!file || !PANE || !PANE.chat) return;
     var id = PANE.chat.id, bad = fileProblem(file);
@@ -4692,7 +4762,8 @@ var COPILOT = (function(){
     var r = new FileReader();
     r.onload = function(){
       var data = String(r.result || "").replace(/^data:[^,]*,/, "");
-      act({ act:"attach", id:id, name:file.name, type:file.type || "", data:data }, function(j){
+      act({ act:"attach", id:id, name:picName(file), type:file.type || "", data:data }, function(j){
+        if (j.file && /^image\//.test(file.type || "")) THUMBS[j.file.id] = String(r.result || "");
         if (PANE && PANE.chat && PANE.chat.id === id) PANE.pending = j.pending || [];
         draw(); var t = document.querySelector("[data-cop-text]"); if (t) t.focus();
       });
@@ -4775,6 +4846,7 @@ var COPILOT = (function(){
     if (dvClick(ev)) return;
     if (exClick(ev)) return;
     if (swClick(ev)) return;
+    if ((b = hit(ev, "[data-cop-dettog]"))) { setDetShut(!detShut()); return; }
     if ((b = hit(ev, "[data-cop-railtog]"))) { var sh = !railFolded(); RAILKEPT = !sh; setRail(sh); return; }
     if ((b = hit(ev, "[data-cop-sheet]"))) { var k = b.getAttribute("data-cop-sheet"); SHEET = SHEET === k ? "" : k; draw(); return; }
     if ((b = hit(ev, "[data-cop-showdraft]"))) { if (PANE && PANE.chat) PANELPICK[PANE.chat.id] = b.getAttribute("data-cop-showdraft"); SHEET = "draft"; draw(); return; }

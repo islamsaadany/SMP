@@ -6,11 +6,12 @@
    this file only carries them to the page. The page never sends the state:
    it names what the person did. */
 import { withTenant } from "../../lib/tenant.ts";
-import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine } from "../../lib/copilot.ts";
+import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine, waitingFiles, takeFiles, waitingWords } from "../../lib/copilot.ts";
 import { askFlowJson, configured } from "../../lib/copilot-ask.ts";
 import { methodFor } from "../../lib/copilot-settings.ts";
 import { doorPool } from "../../lib/auth.ts";
 import { sourcesFor, sourcesMaterial } from "../../lib/copilot-sources.ts";
+import { asParts } from "../../lib/copilot-files.ts";
 import {
   type Advisory, newAdvisory, storedAdvisory, advisoryOf, writeAdvisory, applyReply, todoOf, doneCount, countView, briefOwed, pending,
   advisoryInstruction, TURN_SCHEMA, BRIEF_SCHEMA, REVISE_SCHEMA, turnQuestion, briefQuestion, reviseQuestion, takeTurn, cleanBrief, saveAdvisory,
@@ -130,19 +131,21 @@ export async function advisoryAsk(tenantId: string, b: any, _who: Who): Promise<
 
   let filesText = "";
   for (const m of mats) { if (m.text && filesText.length < MAX_FILES_TEXT) filesText += "\n\n### " + m.name + "\n" + m.text.slice(0, MAX_FILES_TEXT - filesText.length); }
-  const parts = mats.filter((m) => m.bytes && m.fileKind === "pdf").slice(0, 3)
-    .map((m) => ({ inlineData: { mimeType: "application/pdf", data: (m.bytes as Buffer).toString("base64") } }));
+  const parts = asParts(mats.map((m) => ({ kind: m.fileKind || "", bytes: m.bytes as Buffer | null }))).slice(0, 3);
   const owed = briefOwed(s);
   const method = await methodText();
   const question = kind === "advisoryRevise" ? reviseQuestion(s, ask) : owed ? briefQuestion(s) : turnQuestion(s);
   const schema = kind === "advisoryRevise" ? REVISE_SCHEMA : owed ? BRIEF_SCHEMA : TURN_SCHEMA;
+  /* §780 — a picture or file waiting above the box goes with this ask */
+  const pics = await withTenant(tenantId, (c) => waitingFiles(c, id));
   const r = await askFlowJson({ instruction: advisoryInstruction(method),
     corpus: "PLACE: " + (placeWord || chat.place) + "\n\nTHE PLATFORM'S PLAN AND FIGURES:\n" + context + (filesText ? "\n\nFILES:" + filesText : ""),
-    corpusName: "WHAT THE COPILOT CAN SEE", parts, question, schema, maxOutput: 8192 });
+    corpusName: "WHAT THE COPILOT CAN SEE", parts: parts.concat(asParts(pics)), question: question + waitingWords(pics), schema, maxOutput: 8192 });
   if (!r.ok) {
     if (!(r as any).noKey) console.error("copilot: advisory ask:", r.why);
     return refused(503, (r as any).noKey ? NO_KEY : failedLine(r.why));
-  }
+  }  if (pics.length) await withTenant(tenantId, (c) => takeFiles(c, id, pics.map((f) => f.id)));
+
   const j: any = r.json || {};
   return withTenant(tenantId, async (c) => {
     const now = await advisoryOf(c, id);

@@ -4,7 +4,8 @@
    (§289); a failure said in words (§171). The rules live in
    lib/copilot-execution.ts. */
 import { withTenant } from "../../lib/tenant.ts";
-import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine } from "../../lib/copilot.ts";
+import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine, waitingFiles, takeFiles, waitingWords } from "../../lib/copilot.ts";
+import { asParts } from "../../lib/copilot-files.ts";
 import { askFlowJson, configured } from "../../lib/copilot-ask.ts";
 import { partsOf } from "../../lib/copilot-settings.ts";
 import { doorPool } from "../../lib/auth.ts";
@@ -158,13 +159,16 @@ export async function execAsk(tenantId: string, b: any, _who: Who): Promise<Out>
   if ("status" in step1) return step1;
   const { chat, s } = step1;
   const it = s.items[s.cursor];
+  /* §780 — a picture or file waiting above the box goes with this ask */
+  const pics = await withTenant(tenantId, (c) => waitingFiles(c, id));
   const r = await askFlowJson({ instruction: execInstruction(await partText(["part9", "part10"])),
-    corpus: "PLACE: " + (placeWord || chat.place) + "\n\n" + context, corpusName: "THE PLAN AS IT STANDS", parts: [],
-    question: draftQuestion(s, it, ask), schema: DRAFT_SCHEMA, maxOutput: 8192 });
+    corpus: "PLACE: " + (placeWord || chat.place) + "\n\n" + context, corpusName: "THE PLAN AS IT STANDS", parts: asParts(pics),
+    question: draftQuestion(s, it, ask) + waitingWords(pics), schema: DRAFT_SCHEMA, maxOutput: 8192 });
   if (!r.ok) {
     if (!(r as any).noKey) console.error("copilot: execution ask:", r.why);
     return refused(503, (r as any).noKey ? NO_KEY : failedLine(r.why));
-  }
+  }  if (pics.length) await withTenant(tenantId, (c) => takeFiles(c, id, pics.map((f) => f.id)));
+
   const j: any = r.json || {};
   return withTenant(tenantId, async (c) => {
     const now = await execOf(c, id);

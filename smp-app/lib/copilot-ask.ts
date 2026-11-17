@@ -12,6 +12,7 @@
 import { createRequire } from "node:module";
 import { SECTIONS, type Section } from "./copilot.ts";
 import { guidanceFor } from "./copilot-guidance.ts";
+import { asParts, isImage } from "./copilot-files.ts";
 
 const need = createRequire(import.meta.url);
 const A = need("./assistant.cjs") as {
@@ -161,11 +162,11 @@ export function corpusOf(a: AskInput): string {
   out.push("\nASSUMPTIONS ALREADY MADE ON THIS CHAT (never ask about these again):\n" +
     (a.assumptions.length ? a.assumptions.map((x) => "- " + x).join("\n") : "None yet."));
   const readable = a.files.filter((f) => f.text);
-  const pdfs = a.files.filter((f) => f.kind === "pdf");
+  const pdfs = a.files.filter((f) => f.kind === "pdf" || isImage(f.kind));
   if (a.files.length) {
     out.push("\nFILES IN THIS CHAT (cite each by its exact name as `source`):");
     for (const f of readable) out.push("\n=== FILE: " + f.name + " ===\n" + f.text);
-    for (const f of pdfs) out.push("\n=== FILE: " + f.name + " === (a PDF, attached to the question itself)");
+    for (const f of pdfs) out.push("\n=== FILE: " + f.name + " === (" + (f.kind === "pdf" ? "a PDF" : "a picture — read the figures, tables and charts in it; say so if one cannot be read") + ", attached to the question itself)");
   }
   if (a.pasted) out.push("\nThe person's latest message is PASTED material (source \"pasted\").");
   return out.join("\n");
@@ -190,8 +191,7 @@ const fallbackModel = () => A.provider() === "anthropic"
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export async function askCopilot(a: AskInput): Promise<AskResult> {
   if (!A.configured()) return { ok: false, noKey: true, why: "no key is set" };
-  const pdfParts = a.files.filter((f) => f.kind === "pdf" && f.bytes && f.bytes.length)
-    .map((f) => ({ inlineData: { mimeType: "application/pdf", data: f.bytes!.toString("base64") } }));
+  const pdfParts = asParts(a.files);
   const call = (model?: string) => A.askJson({
     question: a.question,
     history: a.history,

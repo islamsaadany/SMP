@@ -28,8 +28,9 @@ import {
   NO_KEY, failedLine, recordSaid, materialOf, recordAnswer, assumptionsOf,
   attachFile, detachFile, pendingFiles, pendingCount, fileBytes, oneMessage, copilotGrant, storedCopilotGrant,
   saveDraftFrom, latestDraftId, isSaveAsk, isBareEnhance, claimsDraft, NO_DRAFT,
+  waitingFiles, takeFiles, waitingWords,
 } from "../../lib/copilot.ts";
-import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
+import { kindOf, mimeOf, asParts, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
 import {
   FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, addTalk, withQa, sanitizeFlow, flowOf, writeFlow,
@@ -152,9 +153,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
       if (!UUID.test(id)) return no(400, "Which file?");
       const f = await withTenant(a.tenantId, (c) => fileBytes(c, id));
       if (!f) return no(404, "That file is not here any more.");
-      const type = f.kind === "pdf" ? "application/pdf"
-        : f.kind === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      const type = mimeOf(String(f.kind));
       return new Response(new Uint8Array(f.bytes), { status: 200, headers: {
         "Content-Type": type, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
         "Content-Disposition": "attachment; filename*=UTF-8''" + encodeURIComponent(f.name) } });
@@ -639,12 +638,15 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
 
   const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), "foundation").catch(() => "") : "";
   const question = kind === "flowDraft" ? draftQuestion(f, el) : kind === "flowRefine" ? refineQuestion(f, el, how) : checkQuestion(f);
+  /* §780 — a picture or file waiting above the box goes with this ask */
+  const pics = await withTenant(tenantId, (c) => waitingFiles(c, id));
   const r = await askFlowJson({ instruction: flowInstruction(method), corpus: flowCorpus(f, placeWord || chat.place, context, kind === "flowCheck" ? undefined : el),
-    question, schema: kind === "flowCheck" ? CHECK_SCHEMA : TEXT_SCHEMA });
+    parts: asParts(pics), question: question + waitingWords(pics), schema: kind === "flowCheck" ? CHECK_SCHEMA : TEXT_SCHEMA });
   if (!r.ok) {
     if (!(r as any).noKey) console.error("copilot: flow ask:", r.why);
     return refused(503, (r as any).noKey ? NO_KEY : failedLine(r.why));
-  }
+  }  if (pics.length) await withTenant(tenantId, (c) => takeFiles(c, id, pics.map((f) => f.id)));
+
   if (kind === "flowCheck") {
     const j = r.json || {};
     const agree = (Array.isArray(j.agree) ? j.agree : []).map((x: unknown) => oneLine(x).slice(0, 400)).filter(Boolean).slice(0, 8);

@@ -42,7 +42,7 @@ import {
   partMemo,
   failedLine,
 } from "../lib/copilot.ts";
-import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
+import { kindOf, readFile, MAX_FILE_BYTES, asParts } from "../lib/copilot-files.ts";
 import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.ts";
 import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { mayDeleteSource } from "../lib/copilot-sources.ts";
@@ -132,6 +132,14 @@ const xr = readFile("xlsx", XLSX);
 check("an Excel file reads as its sheet by name, rows tab-separated, shared strings resolved",
   xr.ok && xr.text === "## Sheet: Q3 figures\nRevenue\t96\nUnits\t1200", JSON.stringify(xr));
 check("a PDF is not read here — it goes to the model as itself", (() => { const r = readFile("pdf", Buffer.from("%PDF-1.7 x")); return r.ok && r.text === ""; })());
+/* §780 — pictures */
+const PNG = Buffer.from("89504e470d0a1a0a0000000d4948445200000001000000010806000000", "hex"), JPG = Buffer.from("ffd8ffe000104a464946", "hex");
+check("§780 a picture is known by name or by type — PNG, JPEG, WebP — and an SVG or a GIF is not",
+  kindOf("chart.PNG", "") === "png" && kindOf("x", "image/jpeg") === "jpg" && kindOf("s.jpeg", "") === "jpg" && kindOf("w.webp", "") === "webp" && kindOf("i.svg", "image/svg+xml") === null && kindOf("a.gif", "image/gif") === null);
+check("§780 a picture is not read here — it goes to the model as itself", (() => { const a = readFile("png", PNG), b = readFile("jpg", JPG); return a.ok && a.text === "" && b.ok && b.text === ""; })());
+check("§780 a file that says it is a picture and is not one is refused in words", (() => { const r = readFile("png", Buffer.from("<svg onload=x>")); return !r.ok && /is not one/.test(r.why); })());
+check("§780 a picture rides as an image part of its own type; a Word file does not",
+  (() => { const p = asParts([{ kind: "png", bytes: PNG }, { kind: "jpg", bytes: JPG }, { kind: "docx", bytes: Buffer.from("x") }]); return p.length === 2 && p[0].inlineData.mimeType === "image/png" && p[1].inlineData.mimeType === "image/jpeg" && Buffer.from(p[0].inlineData.data, "base64").equals(PNG); })());
 check("a file that says PDF and is not one is refused in words", (() => { const r = readFile("pdf", Buffer.from("hello")); return !r.ok && /is not one/.test(r.why); })());
 check("a Word file that will not open is refused in words, never read as empty", (() => { const r = readFile("docx", Buffer.from("not a zip at all")); return !r.ok && /could not be opened/.test(r.why); })());
 check("a paste is long, or long with paragraphs; a sentence is not",
@@ -602,6 +610,17 @@ try {
       JSON.stringify(ans).slice(0, 300));
     check("...a source naming a file nobody attached reads as assumed", ans && ans.part.draft.groups[0].items[1].source === "assumed");
     check("...and the files it read are named on it", ans && (ans.part.read || []).join(",") === "Q3 deck.pdf,notes.docx");
+    /* §780 — a pasted screenshot in a chat goes to the model as a picture */
+    const pic = await call("POST", "api", { act: "attach", id: ch.id, name: "Pasted picture 2026-11-17 10.00.00.png", type: "image/png", data: b64(PNG) }, NORAN);
+    const fakePic = await call("POST", "api", { act: "attach", id: ch.id, name: "x.png", type: "image/png", data: b64(Buffer.from("<svg onload=alert(1)>")) }, NORAN);
+    check("§780 a picture attaches to a chat as a Picture; a file that only says it is one is refused", pic.st === 200 && pic.j.file.kind === "png" && fakePic.st === 400 && /is not one/.test(fakePic.j.why), JSON.stringify([pic.st, pic.j, fakePic.j]));
+    const sP = await call("POST", "api", { act: "say", id: ch.id, text: "Take the figures from this screenshot", fileIds: [pic.j.file.id], context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const wP = seen[seen.length - 1], ltP = wP && wP.body ? wP.body.contents[wP.body.contents.length - 1] : null, sysP = wP && wP.body && wP.body.systemInstruction ? wP.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    check("§780 ...and goes to the model as itself, an image on the question, named in the corpus as a picture to read",
+      sP.st === 200 && !!ltP && ltP.parts.some((p) => p.inlineData && p.inlineData.mimeType === "image/png" && Buffer.from(p.inlineData.data, "base64").equals(PNG)) && /Pasted picture 2026-11-17 10\.00\.00\.png === \(a picture/.test(sysP) && /blurred, cut off or unreadable/.test(sysP),
+      JSON.stringify(ltP && ltP.parts.map((p) => p.inlineData ? p.inlineData.mimeType : "text")));
+    const picFile = await call("GET", "file", null, NORAN, "?id=" + pic.j.file.id);
+    check("§780 ...and comes back as a picture of its own type, to the office", picFile.st === 200, String(picFile.st));
     const me = s1.j && s1.j.messages[s1.j.messages.length - 2];
     check("what was said carries its files, which are no longer waiting",
       me && me.part.files.map((f) => f.name).join(",") === "Q3 deck.pdf,notes.docx" && (await call("GET", "chat", null, NORAN, "?id=" + ch.id)).j.pending.length === 0);
@@ -832,11 +851,17 @@ try {
     check("a part with no answer is not drafted", noAns.st === 400 && /Answer at least one/.test(noAns.j.why));
     F.ans[0][0] = "Connect every Egyptian to the people and services they rely on"; F.phase = "review";
     const before6 = seen.length;
+    /* §780 — a picture waiting above a step-by-step chat's box goes with its next ask, and is taken only when the answer comes */
+    const fpic = await call("POST", "api", { act: "attach", id: fid, name: "org chart.png", type: "image/png", data: b64(PNG) }, NORAN);
+    check("§780 a picture waits above a guided Foundation chat's box", fpic.st === 200 && fpic.j.pending.length === 1, JSON.stringify(fpic.j).slice(0, 200));
     NEXT = { answer: { text: "Connect every Egyptian to what matters, by " + "{Y}" + "." } };
     const d1 = await call("POST", "api", { act: "flowDraft", id: fid, el: 0, flow: F, placeWord: "Mobile", context: "Mobile · 4 pillars" }, NORAN);
     const wq = seen[seen.length - 1];
     const sysF = wq && wq.body && wq.body.systemInstruction ? wq.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     const qText = wq && wq.body ? JSON.stringify(wq.body.contents) : "";
+    const fPend = (await asTenant(A, (c) => c.query("select count(*)::int n from copilot_files where chat_id = $1 and message_id is null", [fid]))).rows[0].n;
+    check("§780 ...the guided Foundation's draft is asked with the picture as itself and its name, and the picture is then taken",
+      !!wq && JSON.stringify(wq.body.contents).includes("image/png") && qText.includes("org chart.png") && fPend === 0, JSON.stringify({ fPend, has: qText.includes("org chart.png") }));
     check("drafting asks the model once, with the answers given as they stand on the page",
       seen.length === before6 + 1 && (sysF + qText).includes("Connect every Egyptian to the people and services they rely on"), (sysF + qText).slice(0, 200));
     /* §643 — REWRITTEN, NOT LOOSENED (§218): a draft is a PROPOSAL in the

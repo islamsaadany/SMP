@@ -5,7 +5,8 @@
    (§289); a failure is said in words (§171). The rules live in
    lib/copilot-directions.ts — this file only carries them to the page. */
 import { withTenant } from "../../lib/tenant.ts";
-import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine } from "../../lib/copilot.ts";
+import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine, waitingFiles, takeFiles, waitingWords } from "../../lib/copilot.ts";
+import { asParts } from "../../lib/copilot-files.ts";
 import { askFlowJson, configured } from "../../lib/copilot-ask.ts";
 import { partsOf } from "../../lib/copilot-settings.ts";
 import { doorPool } from "../../lib/auth.ts";
@@ -183,13 +184,16 @@ export async function dirsAsk(tenantId: string, b: any, _who: Who): Promise<Out>
   const question = kind === "dirSuggest" ? suggestQuestion(s, fns)
     : kind === "dirMore" ? moreQuestion(s, fns, own, ask)
     : capsQuestion(dirs, fns, s.caps, own, ask);
+  /* §780 — a picture or file waiting above the box goes with this ask */
+  const pics = await withTenant(tenantId, (c) => waitingFiles(c, id));
   const r = await askFlowJson({ instruction: dirsInstruction(method),
-    corpus: "PLACE: " + (placeWord || chat.place) + "\n\n" + context, corpusName: "THE PLAN AS IT STANDS", parts: [],
-    question, schema: kind === "capSuggest" ? CAPS_SCHEMA : OPTIONS_SCHEMA, maxOutput: 8192 });
+    corpus: "PLACE: " + (placeWord || chat.place) + "\n\n" + context, corpusName: "THE PLAN AS IT STANDS", parts: asParts(pics),
+    question: question + waitingWords(pics), schema: kind === "capSuggest" ? CAPS_SCHEMA : OPTIONS_SCHEMA, maxOutput: 8192 });
   if (!r.ok) {
     if (!(r as any).noKey) console.error("copilot: directions ask:", r.why);
     return refused(503, (r as any).noKey ? NO_KEY : failedLine(r.why));
-  }
+  }  if (pics.length) await withTenant(tenantId, (c) => takeFiles(c, id, pics.map((f) => f.id)));
+
   const j: any = r.json || {};
   const reply = String(j.reply ?? "").trim().slice(0, 1200);
   return withTenant(tenantId, async (c) => {

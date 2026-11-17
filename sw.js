@@ -700,7 +700,8 @@
 /* v7.89-build-strip — §777: Build · Refine, no All chats link, the strip over the chat box; past main's v7.88. */
 /* v7.90-start-from-existing — §778: Start from existing; the plan's Copilot panel expands and minimizes. */
 /* v7.91-build-only — §779: Build only, read off the plan; Details on the right; the plan panel sends an empty part to Build and is resized from its edge. */
-const SHELL = "smp-shell-v7.91-build-only";
+/* v7.92-pictures — §780: pictures in the Copilot (paste, drop, attach), read by the model as themselves; Details stay on the right on a smaller window and fold. */
+const SHELL = "smp-shell-v7.92-pictures";
 const ASSETS = [
   "/",
   "/index.html",

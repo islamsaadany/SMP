@@ -3137,6 +3137,29 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     await shot("2-all-on");
     check(/5 of 5 parts on Mobile’s plan/.test(m.line) && m.done, "§779 with every part on the plan, the start screen says so once", JSON.stringify(m));
     check(det.inDet >= 5 && det.inRail === 0 && det.right && det.vis, "§779 the deliverables are Details on the right of the chat box; the rail on the left holds the chats only", JSON.stringify(det));
+    /* on a smaller window Details stay on the right, narrower — never under the chat (Islam) */
+    const vp = page.viewportSize();
+    for (const w of [960, 900]) {
+      await page.setViewportSize({ width: w, height: vp.height }); await page.waitForTimeout(300);
+      const nd = await page.evaluate(() => { const d = document.querySelector("[data-cop-details]"), mn = document.querySelector("[data-cop-main]"); if (!d || !mn) return null; const a = d.getBoundingClientRect(), b = mn.getBoundingClientRect(); return { right: a.left >= b.right - 1, beside: a.top < b.bottom - 50, w: Math.round(a.width), main: Math.round(b.width), over: document.documentElement.scrollWidth - innerWidth }; });
+      check(!!nd && nd.right && nd.beside && nd.w >= 120 && nd.main >= 400 && nd.over <= 1, "§779 at a " + w + "px window the deliverables stay on the right of the chat, not under it, with no sideways scroll", JSON.stringify(nd));
+    }
+    await page.setViewportSize(vp); await page.waitForTimeout(200);
+    /* Details fold to a slim strip, as the chats rail does, and the fold is kept */
+    await page.click("[data-cop-details] [data-cop-dettog]"); await page.waitForTimeout(200);
+    const fd = await page.evaluate(() => { const d = document.querySelector("[data-cop-details]"), mn = document.querySelector("[data-cop-main]"); return { w: Math.round(d.getBoundingClientRect().width), items: d.querySelectorAll("[data-cop-deliv]").length, kept: localStorage.getItem("smp.copilot.details"), main: Math.round(mn.getBoundingClientRect().width) }; });
+    await page.click("[data-cop-details] [data-cop-dettog]"); await page.waitForTimeout(200);
+    const fo = await page.evaluate(() => ({ w: Math.round(document.querySelector("[data-cop-details]").getBoundingClientRect().width), items: document.querySelectorAll("[data-cop-details] [data-cop-deliv]").length, kept: localStorage.getItem("smp.copilot.details") }));
+    check(fd.w <= 30 && fd.items === 0 && fd.kept === "shut" && fo.w > 120 && fo.items >= 5 && fo.kept === null, "§780 the deliverables column folds to a slim strip, the chat taking the room, and opens again; the fold is kept", JSON.stringify({ fd, fo }));
+    /* §780 — a screenshot pasted into the start box starts a chat with the picture waiting above its box, shown as a thumbnail */
+    await page.evaluate(() => { const b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+      const bin = Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)), f = new File([bin], "image.png", { type: "image/png" }), dt = new DataTransfer(); dt.items.add(f);
+      const t = document.querySelector("[data-cop-starttext]"); t.focus(); t.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true })); });
+    await page.waitForSelector("[data-cop-pending] .copthumb", { timeout: 15000 }).catch(() => {});
+    const pp = await page.evaluate(() => ({ thumb: !!document.querySelector("[data-cop-pending] img.copthumb"), name: (document.querySelector("[data-cop-pending] .copfile b") || {}).textContent || "", kind: (document.querySelector("[data-cop-pending] .copfile") || {}).textContent || "" }));
+    const prow = (await asTenant(tenantId, (c) => c.query("select f.kind, f.name from copilot_files f order by f.at desc limit 1"))).rows[0];
+    await shot("2b-pasted");
+    check(pp.thumb && /^Pasted picture \d{4}-\d\d-\d\d/.test(pp.name) && /Picture/.test(pp.kind) && !!prow && prow.kind === "png", "§780 a screenshot pasted in the start box opens a chat with it waiting above the box, a thumbnail named for when it was pasted", JSON.stringify({ pp, prow }));
     await asTenant(tenantId, (c) => c.query("delete from copilot_deliverables"));
     /* B — ✦ Copilot on a part the plan does not hold: build it in the Copilot */
     await open("/raya-trade/strategy/mobile/strategy/swot");

@@ -29,18 +29,37 @@ export const MAX_FILES_PER_MESSAGE = 3;
    the paste limit (plan §7.2), so a file cannot carry more than a paste can. */
 export const MAX_FILE_TEXT = 120_000;
 
-export type FileKind = "pdf" | "docx" | "xlsx";
-export const KIND_WORD: Record<FileKind, string> = { pdf: "PDF", docx: "Word", xlsx: "Excel" };
+/* §780 — PICTURES (Islam: "allow me to paste pictures as well with data
+   where the AI can analyze and get data from"). A PNG, JPEG or WebP goes to
+   the model as itself, as a PDF does: it reads the table, the chart or the
+   slide in it. Read off the file's own first bytes, never its name alone. */
+export type FileKind = "pdf" | "docx" | "xlsx" | "png" | "jpg" | "webp";
+export const KIND_WORD: Record<FileKind, string> = { pdf: "PDF", docx: "Word", xlsx: "Excel", png: "Picture", jpg: "Picture", webp: "Picture" };
+export const IMAGE_KINDS: FileKind[] = ["png", "jpg", "webp"];
+export const isImage = (k: string) => (IMAGE_KINDS as string[]).includes(k);
+/* the type a kind the model reads as itself is sent as */
+export function mimeOf(k: string): string {
+  return k === "pdf" ? "application/pdf" : k === "png" ? "image/png" : k === "jpg" ? "image/jpeg" : k === "webp" ? "image/webp"
+    : k === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+}
+/* the files the model reads as themselves — PDFs and pictures — as parts of the question */
+export function asParts(files: { kind: string; bytes?: Buffer | null }[]): { inlineData: { mimeType: string; data: string } }[] {
+  return files.filter((f) => (f.kind === "pdf" || isImage(f.kind)) && f.bytes && f.bytes.length)
+    .map((f) => ({ inlineData: { mimeType: mimeOf(f.kind), data: (f.bytes as Buffer).toString("base64") } }));
+}
 
 export function kindOf(name: string, type: string): FileKind | null {
   const n = name.toLowerCase(), t = type.toLowerCase();
+  if (n.endsWith(".png") || t === "image/png") return "png";
+  if (/\.jpe?g$/.test(n) || t === "image/jpeg") return "jpg";
+  if (n.endsWith(".webp") || t === "image/webp") return "webp";
   if (n.endsWith(".pdf") || t === "application/pdf") return "pdf";
   if (n.endsWith(".docx") || t.includes("wordprocessingml")) return "docx";
   if (n.endsWith(".xlsx") || t.includes("spreadsheetml")) return "xlsx";
   return null;
 }
 
-export const REFUSE_KIND = "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files. Save it as one of those and attach it again.";
+export const REFUSE_KIND = "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files and pictures (PNG, JPEG, WebP). Save it as one of those and attach it again.";
 export const REFUSE_SIZE = "That file is larger than 3 MB, so it was not attached. Split it, or paste the part that matters.";
 
 /* ── the zip ─────────────────────────────────────────────────────────── */
@@ -140,6 +159,12 @@ export function xlsxText(buf: Buffer): string {
 export function readFile(kind: FileKind, buf: Buffer): { ok: true; text: string } | { ok: false; why: string } {
   if (kind === "pdf") {
     if (buf.subarray(0, 5).toString("latin1") !== "%PDF-") return { ok: false, why: "That file says it is a PDF and is not one." };
+    return { ok: true, text: "" };
+  }
+  if (isImage(kind)) {
+    const png = buf.length > 8 && buf.readUInt32BE(0) === 0x89504e47, jpg = buf.length > 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff,
+      webp = buf.length > 12 && buf.toString("latin1", 0, 4) === "RIFF" && buf.toString("latin1", 8, 12) === "WEBP";
+    if (!(kind === "png" ? png : kind === "jpg" ? jpg : webp)) return { ok: false, why: "That file says it is a picture and is not one the Copilot can read. Save it as PNG or JPEG and attach it again." };
     return { ok: true, text: "" };
   }
   try {

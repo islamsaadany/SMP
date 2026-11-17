@@ -43,6 +43,8 @@ export const START = [
 export const HOUSE = [
   "Never invent a figure. Numbers come from WHAT THE PLATFORM SHOWS, from a file, or from something the person typed. If a number you need is not there, say so in `reply` and list it in `missing` rather than guessing it.",
   "Every item you draft carries its `source`: the file's exact name, \"pasted\", \"platform\", or \"assumed\". Never leave it empty.",
+  /* §780 — a picture is read as a picture */
+  "A picture (a screenshot of a table, a chart, a slide) is a file like any other: read the figures in it and cite its name as `source`. If a figure is blurred, cut off or unreadable, say so and ask for it rather than reading a guess into it.",
   "`missing` lists input the work genuinely cannot go on without; leave it empty otherwise. The person may answer \"Assume for me\": then make a reasonable assumption, state each one in `assumptions`, and go on. Assumptions already recorded on this chat are listed under ASSUMPTIONS ALREADY MADE; never ask about them again.",
   "`options` are short quick replies (under six words each), only when you ask the person to choose between distinct answers, or to go on with the next part (see ONE PART PER ANSWER). Never mark any of them as recommended. Otherwise leave `options` empty.",
   /* §744 — Islam's "assume all for me and go ahead with all pillars" asked for

@@ -250,10 +250,12 @@ export async function materialOf(c: Q, chatId: string, beforeId: string): Promis
   const ch = await c.query("SELECT assumptions FROM copilot_chats WHERE id = $1", [chatId]);
   const assumptions = Array.isArray(ch.rows[0]?.assumptions) ? ch.rows[0].assumptions.map(str) : [];
   const f = await c.query(
-    "SELECT name, kind, text, CASE WHEN kind = 'pdf' THEN bytes END AS bytes, at FROM copilot_files " +
+    "SELECT name, kind, text, CASE WHEN kind IN ('pdf','png','jpg','webp') THEN bytes END AS bytes, at FROM copilot_files " +
     "WHERE chat_id = $1 AND message_id IS NOT NULL ORDER BY at", [chatId]);
-  const pdfKeep = new Set(f.rows.filter((x: any) => x.kind === "pdf").slice(-3).map((x: any) => x.name + "|" + iso(x.at)));
-  const files = f.rows.filter((x: any) => x.kind !== "pdf" || pdfKeep.has(x.name + "|" + iso(x.at)))
+  /* §780 — pictures ride as themselves too, so they share the PDFs' cap: the last three */
+  const self = (k: string) => k === "pdf" || k === "png" || k === "jpg" || k === "webp";
+  const pdfKeep = new Set(f.rows.filter((x: any) => self(x.kind)).slice(-3).map((x: any) => x.name + "|" + iso(x.at)));
+  const files = f.rows.filter((x: any) => !self(x.kind) || pdfKeep.has(x.name + "|" + iso(x.at)))
     .map((x: any) => ({ name: str(x.name), kind: str(x.kind), text: str(x.text), bytes: x.bytes ?? null }));
   return { history, assumptions, files };
 }
@@ -298,6 +300,26 @@ export async function pendingFiles(c: Q, chatId: string): Promise<FileMeta[]> {
 export async function pendingCount(c: Q, chatId: string): Promise<number> {
   const r = await c.query("SELECT count(*) AS n FROM copilot_files WHERE chat_id = $1 AND message_id IS NULL", [chatId]);
   return Number(r.rows[0].n) || 0;
+}
+/* §780 — WHAT WAITS ABOVE A STEP-BY-STEP CHAT'S BOX GOES WITH ITS NEXT ASK.
+   The SWOT, Discipline, Directions, Tactical Plans, Advisory and Foundation
+   chats keep their conversation in their own state, not as messages, so a
+   picture (or a PDF, Word or Excel file) pasted or attached there is read
+   with the next thing asked and marked taken (message_id 0) only once the
+   answer has come back — a failed ask leaves it waiting, never lost. */
+export type Waiting = { id: string; name: string; kind: string; text: string; bytes: Buffer | null };
+export async function waitingFiles(c: Q, chatId: string): Promise<Waiting[]> {
+  const r = await c.query("SELECT id, name, kind, text, bytes FROM copilot_files WHERE chat_id = $1 AND message_id IS NULL ORDER BY at LIMIT 3", [chatId]);
+  return r.rows.map((x: any) => ({ id: str(x.id), name: str(x.name), kind: str(x.kind), text: str(x.text), bytes: x.bytes ?? null }));
+}
+export async function takeFiles(c: Q, chatId: string, ids: string[]): Promise<void> {
+  if (ids.length) await c.query("UPDATE copilot_files SET message_id = 0 WHERE chat_id = $1 AND message_id IS NULL AND id = ANY($2::uuid[])", [chatId, ids]);
+}
+/* the words the corpus carries for them: a file read as text is written out; a PDF or a picture rides as itself */
+export function waitingWords(w: Waiting[]): string {
+  if (!w.length) return "";
+  return "\n\nFILES THE PERSON ADDED WITH THIS ASK (use what is in them; cite each by its exact name as `source`; if a figure in a picture cannot be read, say so rather than guess):" +
+    w.map((f) => "\n=== FILE: " + f.name + " === " + (f.text ? "\n" + f.text.slice(0, 60000) : "(" + (f.kind === "pdf" ? "a PDF" : "a picture") + ", attached to the question itself)")).join("");
 }
 export async function fileBytes(c: Q, fileId: string): Promise<{ name: string; kind: string; bytes: Buffer } | null> {
   const r = await c.query("SELECT name, kind, bytes FROM copilot_files WHERE id = $1", [fileId]);

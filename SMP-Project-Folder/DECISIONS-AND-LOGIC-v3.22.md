@@ -71729,3 +71729,5 @@ Islam, of §784: *"do the same for all phases"*; and while it was built, *"allow
 
 **§785.1 — Advisory is never pulled off by the method's next step.** The full run caught it: pressing Advisory set the window to Advisory, but the area was not marked chosen, so once the chat lists came in, the window's opening rule (§752, open on the first part not on the plan) moved it to that part — the tab still pressed, Builder's steps back. It showed only where the plan lacked a part, so the 3p run alone, on a plan holding all five, was green. The opening rule now leaves Advisory where it is, and 3p waits for the lists before reading. The §654 B3 check is rewritten to the rule as it stands (§218): a free chat's draft that is not in the plan's shape says so and offers Lay it out for the plan, and Put on the plan is not there.
 
+The full run on §785 and §785.1: `checks/copilot.mjs` **387 passed, 0 failed**; `checks/shell.mjs` **621 ok, 10 failed**, the known ten — the Advisory tab and §654 B3 green in it; `generated-in-step` and `release-stamp` clear.
+

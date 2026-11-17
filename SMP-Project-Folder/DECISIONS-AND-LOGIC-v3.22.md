@@ -71773,7 +71773,7 @@ Islam, of the *Lay it out for the plan* button (§785) on a draft made before th
 
 The full browser run of §788.1 (begun before the renumber, on the same code): `checks/shell.mjs` **620 ok, 10 failed**, the known ten.
 
-## §789 — ✦ Build, ✦ Advise and ✦ Refine, one family (2026-11-17)
+## §790 — ✦ Build, ✦ Advise and ✦ Refine, one family (2026-11-17)
 
 Islam, with a screenshot of the plan's top — ✦ Builder and Advisory at the right of the tab row, ✦ Copilot as plain text beside Edit: *"what do you suggest as a better placement?"*. The places were right (the tab row for where you go, beside Edit for what acts on the part in view); the names and the dress were not. Drawn as design-mockups/copilot-layout/2026-11-17_refine-button.html; Islam: *"agreed for naming change to refine"*, *"all three, but small changes: builder to be build and advisory to be advise, like refine"*.
 

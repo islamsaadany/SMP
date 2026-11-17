@@ -1,0 +1,331 @@
+<title>SMP Explainer Storyboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: a timeline strip, then one band per scene — frame on the left, script on the right. The page wears the platform's own tokens. */
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --ink:#0F172A; --ink-2:#475569; --ink-3:#6B7A90;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --navy:#0F2C69; --navy-ink:#FFFFFF; --navy-quiet:#C7D2FE;
+  --amber:#F5A623; --amber-ink:#0F2C69;
+  --cta:#C2410C; --cta-bg:#FFF7ED;
+  --good:#047857; --good-bg:#ECFDF5; --attn:#B45309; --attn-bg:#FFFBEB;
+  --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
+  --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
+  --line:#2B3852; --line-soft:#212C42;
+  --navy:#16325C; --navy-ink:#FFFFFF; --navy-quiet:#A5B4FC;
+  --amber:#F5A623; --amber-ink:#0B1120;
+  --cta:#FB923C; --cta-bg:#2E1D10;
+  --good:#6EE7B7; --good-bg:#0A2E22; --attn:#FCD34D; --attn-bg:#2E2510;
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
+  --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
+  --line:#2B3852; --line-soft:#212C42;
+  --navy:#16325C; --navy-ink:#FFFFFF; --navy-quiet:#A5B4FC;
+  --amber:#F5A623; --amber-ink:#0B1120;
+  --cta:#FB923C; --cta-bg:#2E1D10;
+  --good:#6EE7B7; --good-bg:#0A2E22; --attn:#FCD34D; --attn-bg:#2E2510;
+  color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:0 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{text-wrap:balance;margin:0}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--ink-3)}
+/* head */
+.head{display:flex;gap:16px;align-items:center;padding-block:28px 8px}
+.mark{width:40px;height:40px;border-radius:11px;background:var(--amber);display:grid;place-items:center;flex:none}
+.mark svg{width:26px;height:26px;stroke:#0F2C69;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.head h1{font-size:30px;font-weight:700;line-height:1.15}
+.head .sub{color:var(--ink-2);margin-top:2px}
+.lead{max-width:68ch;color:var(--ink-2);margin:12px 0 0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin:18px 0 0;font-size:14px;color:var(--ink-2)}
+.meta b{color:var(--ink);font-weight:600}
+/* decisions box */
+.ask{margin-top:24px;border:1px solid var(--line);border-left:4px solid var(--amber);background:var(--surface);border-radius:8px;padding:16px 20px}
+.ask h2{font-size:18px;margin-bottom:6px}
+.ask ol{margin:8px 0 0;padding-left:22px}
+.ask li{margin:8px 0}
+.ask li b{font-weight:700}
+.rec{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--good);background:var(--good-bg);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+/* timeline */
+.tl{margin-top:32px}
+.tl h2{font-size:18px;margin-bottom:10px}
+.bar{display:flex;width:100%;height:46px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.bar a{display:flex;flex-direction:column;justify-content:center;padding:0 8px;min-width:0;color:var(--navy-ink);background:var(--navy);text-decoration:none;border-right:1px solid rgba(255,255,255,.18);font-size:12px;line-height:1.2}
+.bar a:nth-child(even){background:color-mix(in srgb,var(--navy) 85%,#000)}
+.bar a.cta{background:var(--cta)}
+.bar a.ends{background:var(--amber);color:var(--amber-ink)}
+.bar a b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.bar a span{font-family:var(--mono);font-size:10px;opacity:.85}
+.bar a:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+.tl .note{font-size:13px;color:var(--ink-3);margin-top:8px}
+/* scenes */
+.scene{margin-top:36px;border-top:1px solid var(--line);padding-top:22px;scroll-margin-top:12px}
+.scene header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:14px}
+.scene header .num{font-family:var(--mono);font-size:13px;color:var(--ink-3)}
+.scene header h2{font-size:22px}
+.scene header .t{font-family:var(--mono);font-size:13px;color:var(--ink-2);background:var(--surface-2);border-radius:6px;padding:2px 8px}
+.grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.frame{min-width:0}
+.frame figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px}
+.frame img{display:block;width:100%;max-width:100%;height:auto;border-radius:6px;border:1px solid var(--line-soft)}
+.frame figcaption{font-size:13px;color:var(--ink-3);padding:8px 4px 2px}
+.frame figure + figure{margin-top:12px}
+.script{min-width:0;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card .eyebrow{display:block;margin-bottom:6px}
+.vo{font-size:17px;line-height:1.55}
+.vo .words{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin-top:6px}
+.onscreen ul,.motion ul{margin:0;padding-left:18px}
+.onscreen li,.motion li{margin:4px 0;font-size:15px}
+.onscreen .big{font-weight:700;color:var(--ink)}
+/* close */
+.plan{margin-top:40px;border-top:1px solid var(--line);padding-top:22px}
+.plan h2{font-size:22px;margin-bottom:10px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:12px}
+.cols .card h3{font-size:16px;margin-bottom:6px}
+.cols .card ul,.cols .card ol{margin:0;padding-left:18px}
+.cols .card li{margin:4px 0;font-size:15px}
+.fulltext{margin-top:32px}
+.fulltext h2{font-size:20px;margin-bottom:8px}
+.fulltext p{max-width:72ch;margin:0 0 12px;font-size:16px}
+.fulltext p b{font-family:var(--mono);font-weight:400;font-size:12px;color:var(--ink-3);margin-right:6px}
+.out{margin-top:28px;font-size:14px;color:var(--ink-2);max-width:72ch}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+  <div class="head">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></div>
+    <div>
+      <h1>SMP explainer — storyboard and script, v1</h1>
+      <div class="sub">A three-minute motion video for clients: the plan, the reporting, and the result</div>
+    </div>
+  </div>
+  <p class="lead">What a client sees, from their own seat: the shape of the company, a plan and how it reads, a reporting cycle, the performance it produces, the group's dashboards, and the review deck. The office's own pages (setup, the register, access, gap-filling, the chat, history, import) are deliberately left out. Each scene below carries the real screen it is drawn from, the narration, what appears on screen, and how it moves.</p>
+  <div class="meta">
+    <span><b>Length</b> about 3:05</span>
+    <span><b>Format</b> 16:9 · 1920×1080 · MP4</span>
+    <span><b>Scenes</b> 10</span>
+    <span><b>Narration</b> about 470 words, at a calm pace</span>
+    <span><b>Built with</b> Remotion, rendered in this session</span>
+  </div>
+
+  <section class="ask" id="decisions">
+    <h2>Five decisions before anything is built</h2>
+    <ol>
+      <li><b>Whose company is on screen.</b> Every screen below shows Raya Trade: the name, the Raya logo on the deck, Mobile's real plan and real figures. A video shown to other clients should not. Options: <b>A</b> — rebuild the screens as clean motion-graphic recreations of the platform's own layouts, with an invented group and invented figures<span class="rec">Recommended</span>; <b>B</b> — animate the real screenshots as they are, with Raya's consent; <b>C</b> — real screenshots with the tenant's name and mark swapped before capture (the plan content would still be Mobile's).</li>
+      <li><b>Voice.</b> A recorded voice (yours or a colleague's), an AI voice (Descript is connected to this session and can read the script), or no voice with on-screen captions only.</li>
+      <li><b>Language.</b> English only, Arabic only, or English with Arabic subtitles.</li>
+      <li><b>Length.</b> The full cut below (about 3 minutes), or also a 90-second cut that drops the function's plan and the deck.</li>
+      <li><b>Where it will be shown.</b> Shared as a file and shown in meetings (16:9 is enough), or also posted on LinkedIn (then a square cut is worth adding).</li>
+    </ol>
+  </section>
+
+  <section class="tl">
+    <h2>Timeline</h2>
+    <div class="bar" role="list">
+      <a href="#s0" style="flex:10" class="ends"><b>Open</b><span>0:00</span></a>
+      <a href="#s1" style="flex:18"><b>The company</b><span>0:10</span></a>
+      <a href="#s2" style="flex:20"><b>Foundation &amp; SWOT</b><span>0:28</span></a>
+      <a href="#s3" style="flex:24"><b>The plan</b><span>0:48</span></a>
+      <a href="#s4" style="flex:16"><b>A function</b><span>1:12</span></a>
+      <a href="#s5" style="flex:30" class="cta"><b>Reporting</b><span>1:28</span></a>
+      <a href="#s6" style="flex:22"><b>Performance</b><span>1:58</span></a>
+      <a href="#s7" style="flex:22"><b>The group</b><span>2:20</span></a>
+      <a href="#s8" style="flex:18"><b>Deck &amp; Temple</b><span>2:42</span></a>
+      <a href="#s9" style="flex:7" class="ends"><b>Close</b><span>3:00</span></a>
+    </div>
+    <div class="note">Widths are to scale. Reporting is the longest scene on purpose: it is the one thing every person on the platform does.</div>
+  </section>
+
+  <!-- SCENE 0 -->
+  <section class="scene" id="s0">
+    <header><span class="num">Scene 0</span><h2>Open</h2><span class="t">0:00 – 0:10 · 10 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/00-mark.svg" alt="The SMP mark: a navy north star on an amber tile" style="background:#0B1120;padding:80px 0"><figcaption>No screenshot: the platform's own mark, drawn large on a dark ground. The same mark is on the sign-in door and every client's platform.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>Every company has a strategy. The hard part is keeping it alive: the plans, the reporting and the results, in one place that everyone can see.<div class="words">26 words · about 10 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li class="big">Strategy Management Platform</li><li>Plans · Reporting · Results</li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>Dark ground. The star draws itself in one stroke, then the amber tile fades up behind it.</li><li>The title sets in a single line; the three words arrive one at a time on the beats of the narration.</li><li>Cut to white on the last word.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 1 -->
+  <section class="scene" id="s1">
+    <header><span class="num">Scene 1</span><h2>The shape of the company</h2><span class="t">0:10 – 0:28 · 18 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/21-group-performance.png" alt="The platform's navigation row: Group, then a Units / Functions switch, then the business units" loading="lazy"><figcaption>Reference: the navigation row as the group CEO sees it. Group at the left, the Units / Functions switch, then one word per business unit.</figcaption></figure>
+        <figure><img src="reference-screens/31-finance-overview.png" alt="The same row switched to Functions: Finance, HR, Treasury, Marketing, IT, Care, SMO, Merchandising" loading="lazy"><figcaption>Reference: the row switched to Functions.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>The platform is shaped like the company. The group at the top. Under it, the business units, each with a plan of its own. Beside them, the supporting functions: finance, HR, marketing, IT. One row to move between them, and every person lands on what is theirs.<div class="words">50 words · about 18 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li class="big">Group → Business units → Supporting functions</li><li>The navigation row, isolated on a clean ground</li><li>A seat label: "Signed in as the head of a unit"</li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>A single navy row grows from the left: "Group" first, then the unit names slide in one by one.</li><li>On "supporting functions" the Units / Functions switch flips and the names swap.</li><li>On the last sentence the row shrinks to one word, the unit's name, and the page below it fades in.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 2 -->
+  <section class="scene" id="s2">
+    <header><span class="num">Scene 2</span><h2>A plan starts with its foundation</h2><span class="t">0:28 – 0:48 · 20 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/12-mobile-sec-foundation.png" alt="The Foundation page: Who we are on the left, the Winning Aspiration and the key objectives on the right" loading="lazy"><figcaption>Reference: Strategy › Foundation for a business unit, as its head sees it.</figcaption></figure>
+        <figure><img src="reference-screens/13-mobile-swot.png" alt="The SWOT page: four lists, strengths, weaknesses, opportunities, threats" loading="lazy"><figcaption>Reference: Strategy › SWOT.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>A plan starts with its foundation. Who we are, what we provide, and for whom. The winning aspiration, and the key objectives that say what success looks like, this year and by the horizon. Beside it, the SWOT: strengths, weaknesses, opportunities and threats, four quiet lists.<div class="words">48 words · about 20 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li>The tabs: Foundation · SWOT · Drivers · Plan</li><li>"Who we are" card, then "Winning Aspiration" with the objectives table</li><li>Two columns of the objectives: <span class="big">This year</span> and <span class="big">By 2027</span></li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>The Foundation card's rows type in line by line as the narration names them.</li><li>The objectives table's two number columns count up; the horizon column is drawn in amber.</li><li>A horizontal wipe to the SWOT: the four cards land in a 2×2 grid, each with its own coloured top edge, items ticking in.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 3 -->
+  <section class="scene" id="s3">
+    <header><span class="num">Scene 3</span><h2>The plan: pillars, key measures, tactics</h2><span class="t">0:48 – 1:12 · 24 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/12-mobile-sec-plan.png" alt="The Plan page: a rail of four pillars on the left, the open pillar's key measures and tactics tables on the right" loading="lazy"><figcaption>Reference: Strategy › Plan. The pillar rail, then the open pillar's key measures (direction, target, compile rule) and tactics (outcome, target, owner, collaborators, quarters).</figcaption></figure>
+        <figure><img src="reference-screens/20-ceo-reading.png" alt="The reading window: the same plan in a full-window read-only view with Foundation, Analysis, Directions and Overall performance tabs" loading="lazy"><figcaption>Reference: the reading window, what a reader (someone with no edit rights) gets: the whole plan, nothing to change.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>Then the plan itself. Each pillar carries its key measures, with a direction and a target. Under them, the tactics: what will be done, the outcome it is meant to produce, who owns it, and which quarters it runs in. Everything a team needs to read the plan is on one screen, and a reader sees all of it without being able to change any of it.<div class="words">66 words · about 24 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li>The pillar rail: four cards, the first one open</li><li class="big">Key measures · direction · target</li><li class="big">Tactics · outcome · owner · quarters</li><li>Labels pointing at the ≥ / ≤ sign, the target's unit, the quarter chips</li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>The rail builds first; the open pillar's header slides in from the right.</li><li>The key measures table draws row by row; a callout pulses on the direction column, then on a target.</li><li>The tactics table follows; the quarter chips light up 1-2-3-4 across one row on "which quarters".</li><li>On the last sentence the chrome dims and the reading window's frame slides over it, tabs across the top.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 4 -->
+  <section class="scene" id="s4">
+    <header><span class="num">Scene 4</span><h2>A supporting function plans in projects</h2><span class="t">1:12 – 1:28 · 16 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/33-marketing-strategy.png" alt="A function's Projects page: the project's owner, dates and brief, then deliverables and outcomes, then milestones" loading="lazy"><figcaption>Reference: Strategy › Projects for a supporting function. Owner, start and end, the brief; deliverables and outcomes; milestones with owner and due date.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>A supporting function plans in its own shape. Its key objectives at the top, weighted. Then its projects: the deliverables it hands over, the outcomes they are meant to change, and the milestones along the way, each with an owner and a date.<div class="words">43 words · about 16 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li>The row switched to Functions, one function lit</li><li class="big">Key objectives · weight</li><li class="big">Projects · deliverables · outcomes · milestones</li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>The navigation row flips to Functions (echo of scene 1), one name highlights.</li><li>Two weighted objectives slide in with their percentages.</li><li>The project card unfolds downward in three bands: header, deliverables and outcomes, milestones. The due dates land last.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 5 -->
+  <section class="scene" id="s5">
+    <header><span class="num">Scene 5</span><h2>Reporting: a cycle opens, figures go in</h2><span class="t">1:28 – 1:58 · 30 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/11-mobile-reporting.png" alt="The Reporting tab, orange: key objectives with YTD target, a reported figure box and a note; the count 41 of 41 and Submit to the SMO at the top" loading="lazy"><figcaption>Reference: the Reporting tab for a unit's head. The orange tab, the count "41 of 41", Submit to the SMO, Save draft. Each row: the year-to-date target, the box for this cycle's figure, a note.</figcaption></figure>
+        <figure><img src="reference-screens/11b-mobile-reporting-pillars.png" alt="Further down the Reporting page: the pillar rail with an entered-of-asked tally on each pillar, and the tactics with YTD targets" loading="lazy"><figcaption>Reference: further down, the pillars, each with its tally of entered against asked.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>When a reporting cycle opens, the Reporting tab turns orange. The owner enters this cycle's figure against every key objective, key measure and tactic, and a note where a figure needs one. The count at the top says how much is in. Submit to the Strategy Management Office stays held until everything is entered, so nothing goes forward half done. Save a draft and come back; submit when it is complete.<div class="words">72 words · about 30 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li>The three tabs; Reporting fills orange with its dot</li><li>One row at a time: YTD target → the figure box → the note</li><li class="big">17 of 41 → 41 of 41</li><li>The Submit button: held (quiet) → ready (solid orange)</li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>Start on the Strategy tab; the Reporting tab fills orange and a dot appears, like a light coming on.</li><li>The page scrolls slowly. Figures type themselves into the boxes, each box turning green as it is filled; one note is typed in full.</li><li>The count at the top ticks up with each figure; the progress bar grows.</li><li>Submit stays dimmed with a "still to enter" hint until the count reaches 41 of 41, then goes solid orange and is pressed. A short confirmation: "Submitted to the SMO".</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 6 -->
+  <section class="scene" id="s6">
+    <header><span class="num">Scene 6</span><h2>Performance is derived, never typed</h2><span class="t">1:58 – 2:20 · 22 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/11-mobile-performance.png" alt="The Performance tab: three headline cards (Key Objectives 78%, Pillars 67%, Execution 54%) each with a band label, the focus strip, then the open pillar's key measures with YTD actual against due and a progress figure" loading="lazy"><figcaption>Reference: Performance for the same unit, the moment after reporting. Three headline figures with their bands; the pillar rail with a figure per pillar; each key measure with its actual, what was due by now, and its progress.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>The moment figures are in, performance is derived. Nothing is typed into a score. Key objectives, pillars and execution each carry a figure, coloured by band: on track, needs attention, off track. Every target is prorated to today, so a half-year figure is measured against half the year. Open a pillar, and every measure explains its own number.<div class="words">58 words · about 22 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li class="big">78% · 67% · 54%</li><li>The bands: On track 90%+ · Needs attention 70–89% · Off track below 70%</li><li>One measure row: actual <b>2.7B</b>, due <b>3.1B</b> of 6.2B → <b>87%</b></li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>Cut from the Submit confirmation straight to the Performance tab: the three cards count up from 0 and their band chips land.</li><li>A small legend of the three bands slides in under the cards.</li><li>One key-measure row is lifted out and enlarged: the annual target, a bracket showing "due by now" as a share of it, the actual, then the progress figure, so the proration is seen rather than explained.</li><li>The rail's four pillar figures fill in.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 7 -->
+  <section class="scene" id="s7">
+    <header><span class="num">Scene 7</span><h2>At the group, it rolls up</h2><span class="t">2:20 – 2:42 · 22 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/21-group-performance.png" alt="Group › Performance › Overall performance: five cards (group objectives 82%, business units performance 81% and execution 52%, functions performance 74% and execution 92%) and two 'where to look next' rows of units and functions with their figures" loading="lazy"><figcaption>Reference: the group's overall performance. Five figures, each saying how it is calculated; below, every unit and function with its figure, worst first.</figcaption></figure>
+        <figure><img src="reference-screens/22-group-perf-bus.png" alt="Business units as cards: one ring per unit with its objectives figure and its execution breakdown" loading="lazy"><figcaption>Reference: the business units as cards. One ring each, with delivered, planned and variance.</figcaption></figure>
+        <figure><img src="reference-screens/24-group-focus.png" alt="Focus measures: the few measures that earn a reward, each with target, actual, progress and an Earning or Short standing" loading="lazy"><figcaption>Reference: Focus measures. The few measures that earn a reward, each marked Earning or Short.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>At the group, it all rolls up. The group's own objectives; the business units, weighted by size; the supporting functions, counted equally. Below, where to look next: every unit and function, ranked by its figure. One click opens the cards, one per unit. And beside it all, the focus measures: the few numbers that earn a reward, marked earning or short.<div class="words">62 words · about 22 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li class="big">82% · 81% · 52% · 74% · 92%</li><li>"Where to look next" chips, lowest first</li><li>Ten rings, one per unit</li><li>Focus: <b>6 of 9 earning</b></li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>The unit's three cards from scene 6 shrink into one chip and fly up into the group's "where to look next" row, which fills with the other units.</li><li>The five group cards count up; their bars grow to their figure.</li><li>Cut to the cards view: ten rings draw clockwise at once, each stopping at its figure, in its band colour.</li><li>A quick cut to Focus: the Earning / Short chips land down the standing column.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 8 -->
+  <section class="scene" id="s8">
+    <header><span class="num">Scene 8</span><h2>The review deck and the Temple</h2><span class="t">2:42 – 3:00 · 18 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/15-mobile-deck-4.png" alt="The slides editor: a rail of thumbnails on the left, the slide 'Key Objectives — where we stand' large on the right, Present and Done at the top" loading="lazy"><figcaption>Reference: the deck, assembled from the live plan. Thumbnails, the slide, Present.</figcaption></figure>
+        <figure><img src="reference-screens/15-mobile-present-fullscreen.png" alt="A slide in full-screen presentation: a pillar's key measures with annual target, actual, progress and notes" loading="lazy"><figcaption>Reference: presenting, full screen.</figcaption></figure>
+        <figure><img src="reference-screens/25-group-temple.png" alt="The Temple: the vision as a roof, the key objectives by 2027, three theme pillars, the capabilities as the base" loading="lazy"><figcaption>Reference: the Temple, the whole strategy on one page.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>For the review, the deck assembles itself from the live plan: foundation, SWOT, each pillar's measures and tactics, with this cycle's figures already on them. Present it on the projector, or download it as a PDF. And the Temple holds the whole strategy on one page.<div class="words">46 words · about 18 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li>Thumbnails stacking: 1 / 33 … 33 / 33</li><li class="big">Present · Download as PDF</li><li>The Temple: roof, objectives, pillars, base</li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>Slides deal themselves out from the plan's pages: foundation, SWOT, a pillar; the counter runs to 33.</li><li>Press Present: the chrome drops away and one slide fills the frame, figures in their band colours.</li><li>A PDF icon slides out of the Download button, then the frame cuts to the Temple drawing itself from the roof down.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 9 -->
+  <section class="scene" id="s9">
+    <header><span class="num">Scene 9</span><h2>Close</h2><span class="t">3:00 – 3:08 · 8 s</span></header>
+    <div class="grid">
+      <div class="frame">
+        <figure><img src="reference-screens/00-mark.svg" alt="The SMP mark" style="background:#0B1120;padding:80px 0"><figcaption>The mark again, with the closing line and Forefront Consulting's name.</figcaption></figure>
+      </div>
+      <div class="script">
+        <div class="card vo"><span class="eyebrow">Narration</span>One platform. The plan, the report and the result, for everyone who carries them.<div class="words">15 words · about 7 s</div></div>
+        <div class="card onscreen"><span class="eyebrow">On screen</span><ul><li class="big">Strategy Management Platform</li><li>by Forefront Consulting</li><li>A contact line, if you want one</li></ul></div>
+        <div class="card motion"><span class="eyebrow">Motion</span><ul><li>Three words land in sequence, in the navy, orange and amber of their tabs: Plan · Report · Result.</li><li>They resolve into the mark; Forefront's name fades up beneath. Hold two seconds, fade to black.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTION -->
+  <section class="plan" id="production">
+    <h2>How it gets made</h2>
+    <div class="cols">
+      <div class="card"><h3>1 · Sign-off on this page</h3><ul><li>The five decisions above, and any change to a scene's words or order.</li><li>Comments on this page reach me directly.</li></ul></div>
+      <div class="card"><h3>2 · Build in this session</h3><ul><li>Remotion (React), one composition per scene, in the platform's own type and colours.</li><li>Option A rebuilds each screen as motion graphics with invented data; option B animates the screenshots with pan, zoom and callouts.</li><li>A first full cut, silent with captions, for you to review as a video.</li></ul></div>
+      <div class="card"><h3>3 · Voice and finish</h3><ul><li>Your recorded voice is dropped in and the scenes are retimed to it, or Descript reads the script with an AI voice.</li><li>Final render: 1920×1080 MP4, plus a square cut if wanted.</li><li>The project source is committed to the repository so the video can be re-rendered when the product changes.</li></ul></div>
+    </div>
+    <p class="out">Left out on purpose, because it is the office's work rather than what a client's people see: the sign-in door, the welcome screen, Setup (the register, roles and access, scoring bands, the cycle), gap-filling, the office chat and notifications, History, import and export, and the master presentation. Any of these can be a second, shorter video for the office.</p>
+  </section>
+
+  <section class="fulltext" id="script">
+    <h2>The narration in one piece</h2>
+    <p><b>0:00</b>Every company has a strategy. The hard part is keeping it alive: the plans, the reporting and the results, in one place that everyone can see.</p>
+    <p><b>0:10</b>The platform is shaped like the company. The group at the top. Under it, the business units, each with a plan of its own. Beside them, the supporting functions: finance, HR, marketing, IT. One row to move between them, and every person lands on what is theirs.</p>
+    <p><b>0:28</b>A plan starts with its foundation. Who we are, what we provide, and for whom. The winning aspiration, and the key objectives that say what success looks like, this year and by the horizon. Beside it, the SWOT: strengths, weaknesses, opportunities and threats, four quiet lists.</p>
+    <p><b>0:48</b>Then the plan itself. Each pillar carries its key measures, with a direction and a target. Under them, the tactics: what will be done, the outcome it is meant to produce, who owns it, and which quarters it runs in. Everything a team needs to read the plan is on one screen, and a reader sees all of it without being able to change any of it.</p>
+    <p><b>1:12</b>A supporting function plans in its own shape. Its key objectives at the top, weighted. Then its projects: the deliverables it hands over, the outcomes they are meant to change, and the milestones along the way, each with an owner and a date.</p>
+    <p><b>1:28</b>When a reporting cycle opens, the Reporting tab turns orange. The owner enters this cycle's figure against every key objective, key measure and tactic, and a note where a figure needs one. The count at the top says how much is in. Submit to the Strategy Management Office stays held until everything is entered, so nothing goes forward half done. Save a draft and come back; submit when it is complete.</p>
+    <p><b>1:58</b>The moment figures are in, performance is derived. Nothing is typed into a score. Key objectives, pillars and execution each carry a figure, coloured by band: on track, needs attention, off track. Every target is prorated to today, so a half-year figure is measured against half the year. Open a pillar, and every measure explains its own number.</p>
+    <p><b>2:20</b>At the group, it all rolls up. The group's own objectives; the business units, weighted by size; the supporting functions, counted equally. Below, where to look next: every unit and function, ranked by its figure. One click opens the cards, one per unit. And beside it all, the focus measures: the few numbers that earn a reward, marked earning or short.</p>
+    <p><b>2:42</b>For the review, the deck assembles itself from the live plan: foundation, SWOT, each pillar's measures and tactics, with this cycle's figures already on them. Present it on the projector, or download it as a PDF. And the Temple holds the whole strategy on one page.</p>
+    <p><b>3:00</b>One platform. The plan, the report and the result, for everyone who carries them.</p>
+  </section>
+</div>

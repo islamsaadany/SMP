@@ -70688,6 +70688,8 @@ var COPILOT = (function(){
   function autoFocus(){
     var p = place();
     if (layout() !== "window" || inPanel()) return;
+    /* §785 — Advisory is a tab of its own (§782): the next step of the method never moves you off it */
+    if (section() === "advisory") { AREA_CHOSEN[p] = true; return; }
     if (AREA_FROM_URL) { AREA_CHOSEN[p] = true; AREA_FROM_URL = false; }
     if (AREA_CHOSEN[p]) return;
     var ready = here().every(function(s){ return LISTS[p + "|" + s.k]; }); if (!ready) return;

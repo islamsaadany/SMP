@@ -23,7 +23,6 @@ export const S7Group: React.FC<{ short?: boolean; marks?: Marks }> = ({ short, m
   const { t } = useClock();
   const { t: tr } = useRealClock();
   const k = short ? 0.75 : 1;
-  const fly = ease(t, 0.2, 1.6);
   /* the page turns on the voice's own words where they are known */
   const belowAt = marks?.below !== undefined ? marks.below - 0.3 : 6.6 * k;
   const cardsAt = marks?.click !== undefined ? marks.click - 0.2 : short ? 8.5 : 12.0;
@@ -74,8 +73,6 @@ export const S7Group: React.FC<{ short?: boolean; marks?: Marks }> = ({ short, m
             </div>
           </div>
         ) : null}
-        {/* the unit's figure flying up into the group */}
-        <div style={{ position: "absolute", left: 760, top: 120 + (1 - fly) * 420, scale: String(1.3 - 0.5 * fly), opacity: fly < 1 ? 1 : 0, background: C.surface, border: `2px solid ${C.amber}`, borderRadius: 10, padding: "10px 20px", fontSize: 24, fontWeight: 700, boxShadow: "0 12px 30px rgba(15,23,42,.25)" }}>Retail <span style={{ color: C.attnTx, fontFamily: MONO }}>79%</span></div>
       </Chrome>
     </AbsoluteFill>
   );

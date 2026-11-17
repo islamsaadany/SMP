@@ -1,21 +1,27 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import { ease, useClock, enter, hold } from "../anim";
+import { ease, useClock, useRealClock, enter, hold } from "../anim";
+import type { Marks } from "./S0Strategy";
 import { C, FONT, MONO } from "../theme";
 import { Callout, Chrome, Label, Quarters, Rail, Table, Chip } from "../ui";
 import { FUNCTIONS, KEY_MEASURES, PILLARS, SEAT, TACTICS, UNIT, UNITS } from "../data";
 
-export const PlanPage: React.FC<{ t: number; k: number; readAt?: number }> = ({ t, k, readAt = 99 }) => {
+export const PlanPage: React.FC<{ t: number; k: number; readAt?: number; marks?: Marks; tr: number }> = ({ t, k, readAt = 99, marks, tr }) => {
+  /* the page moves on the voice's own words where they are known */
+  const m = (w: string, fb: number) => (marks && marks[w] !== undefined ? marks[w] : fb);
   const railShown = (t - 0.4 * k) / (0.35 * k);
   const headP = ease(t, 2.0 * k, 2.6 * k);
-  const kmShown = (t - 2.8 * k) / (0.6 * k);
-  const tacShown = (t - 8.6 * k) / (0.7 * k);
-  const litQ = t < 12.6 * k ? 4 : Math.min(4, Math.floor((t - 12.6 * k) / (0.35 * k)) + 1);
-  const dirP = hold(t, 5.2 * k, 7.0 * k);
-  const tgtP = hold(t, 7.0 * k, 8.6 * k);
-  const ownP = hold(t, 11.2 * k, 12.6 * k);
-  const qP = hold(t, 12.6 * k, 14.6 * k);
-  const readP = ease(t, readAt, readAt + 0.7);
+  const kmAt = m("key", 2.8 * k), tacAt = m("tactics", 8.6 * k);
+  const dirAt = m("direction", 5.2 * k), tgtAt = m("target", 7.0 * k), ownAt = m("owns", 11.2 * k), qAt = m("quarters", 12.6 * k);
+  const kmShown = marks ? (tr - kmAt + 0.3) / 0.35 : (t - 2.8 * k) / (0.6 * k);
+  const tacShown = marks ? (tr - tacAt + 0.2) / 0.35 : (t - 8.6 * k) / (0.7 * k);
+  const litQ = tr < qAt ? 4 : Math.min(4, Math.floor((tr - qAt) / 0.35) + 1);
+  const dirP = hold(tr, dirAt - 0.25, tgtAt - 0.05, 0.3);
+  const tgtP = hold(tr, tgtAt - 0.15, tgtAt + 1.8, 0.3);
+  const ownP = hold(tr, ownAt - 0.3, qAt - 0.05, 0.3);
+  const qP = hold(tr, qAt - 0.15, qAt + 2.2, 0.3);
+  const readReal = m("reader", readAt);
+  const readP = readAt > 90 ? 0 : ease(tr, readReal - 0.6, readReal + 0.1);
   return (
     <>
       <div style={{ position: "absolute", inset: 24, display: "flex", gap: 20, alignItems: "flex-start" }}>
@@ -37,10 +43,10 @@ export const PlanPage: React.FC<{ t: number; k: number; readAt?: number }> = ({ 
         </div>
       </div>
       {/* callouts, measured against the layout above */}
-      <Callout x={1432} y={158} w={94} h={48 * 4} label="Direction: more or less is better" p={dirP} below />
-      <Callout x={1542} y={158} w={176} h={48 * 4} label="Target, with its unit" p={tgtP} below right />
-      <Callout x={1430} y={437} w={178} h={48 * 4} label="Who owns it" p={ownP} />
-      <Callout x={1730} y={437} w={138} h={48 * 4} label="Which quarters it runs in" p={qP} right />
+      <Callout x={1432} y={136} w={94} h={37 + 48 * 4} label="Direction: more or less is better" p={dirP} below />
+      <Callout x={1542} y={136} w={176} h={37 + 48 * 4} label="Target, with its unit" p={tgtP} below right />
+      <Callout x={1430} y={419} w={178} h={37 + 48 * 4} label="Who owns it" p={ownP} />
+      <Callout x={1730} y={419} w={138} h={37 + 48 * 4} label="Which quarters it runs in" p={qP} right />
       {/* the reading window */}
       <div style={{ position: "absolute", inset: 0, background: `rgba(15,23,42,${0.6 * readP})`, opacity: readP > 0 ? 1 : 0 }} />
       <div style={{ position: "absolute", left: 160, right: 160, top: 60, bottom: 60, borderRadius: 14, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,.4)", background: C.ground, opacity: readP, translate: `0px ${(1 - readP) * 60}px` }}>
@@ -71,13 +77,14 @@ export const PlanPage: React.FC<{ t: number; k: number; readAt?: number }> = ({ 
   );
 };
 
-export const S3Plan: React.FC<{ short?: boolean }> = ({ short }) => {
+export const S3Plan: React.FC<{ short?: boolean; marks?: Marks }> = ({ short, marks }) => {
   const { t } = useClock();
+  const { t: tr } = useRealClock();
   const k = short ? 0.7 : 1;
   return (
     <AbsoluteFill style={{ fontFamily: FONT }}>
       <Chrome place={UNIT} units={UNITS} fns={FUNCTIONS} seat={SEAT} tab="Strategy" secs={["Foundation", "SWOT", "Drivers", "Plan"]} sec="Plan">
-        <PlanPage t={t} k={k} readAt={short ? 99 : 17.6} />
+        <PlanPage t={t} k={k} tr={tr} marks={marks} readAt={short ? 99 : 17.6} />
       </Chrome>
     </AbsoluteFill>
   );

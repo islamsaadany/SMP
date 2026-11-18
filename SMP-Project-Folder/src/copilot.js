@@ -2999,8 +2999,10 @@ var COPILOT = (function(){
   var PANEL = { open: false, planArea: "directions", rendering: false, area: "", wide: false };
   var EXPMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9.5 2.5h4v4M13.5 2.5l-5 5M6.5 13.5h-4v-4M2.5 13.5l5-5"/></svg>';
   var MINMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13.5 6.5h-4v-4M9.5 6.5l4.5-4.5M2.5 9.5h4v4M6.5 9.5L2 14"/></svg>';
-  var STRAT_AREA = { found: "foundation", swot: "analysis" };
-  var AREA_STRAT = { foundation: "found", analysis: "swot", directions: "plan", execution: "plan", capabilities: "plan" };
+  /* §791 — the Competitive Discipline tab is a part of its own (Islam, with the panel saying "This part":
+     "I can't see the chats button nor the chat box to start like the other areas of the plan") */
+  var STRAT_AREA = { found: "foundation", swot: "analysis", compete: "compete" };
+  var AREA_STRAT = { foundation: "found", analysis: "swot", compete: "compete", directions: "plan", execution: "plan", capabilities: "plan" };
   function inPanel(){ return !!(PANEL.rendering || (PANEL.open && document.querySelector("#copPanel [data-cop-pane]"))); }
   function onStrategy(){ return typeof currentSub !== "undefined" && currentSub === "strategy" && typeof current !== "undefined" && current !== "setup"; }
   function panelArea(){
@@ -3049,14 +3051,14 @@ var COPILOT = (function(){
     var a = panelArea();
     if (a !== PANEL.area || !el.querySelector("[data-cop-pane], [data-cop-panelnone]")) {
       PANEL.area = a;
-      var partWord = { found: "Foundation", swot: "SWOT", plan: "Plan", drivers: "Drivers" }[CURSEC.strategy] || "This part";
+      var partWord = { found: "Foundation", swot: "SWOT", compete: "Competitive Discipline", plan: "Plan", drivers: "Drivers" }[CURSEC.strategy] || "This part";
       var head = '<div class="copPhead"><div><b>✦ Refine</b><small>' + E(partWord) + ' · ' + E(placeWord()) + '</small></div>' +
         (CURSEC.strategy === "plan" ? '<span class="copPseg">' + [["directions", "Pillars/Directions"], ["execution", "Tactical Plans"]].map(function(x){ return '<button type="button" data-cop-panelarea="' + x[0] + '" aria-pressed="' + (PANEL.planArea === x[0]) + '">' + x[1] + '</button>'; }).join("") + '</span>' : '') +
         /* §778 — expand to take over the page, as the Copilot tab does, and minimize back to the side (Islam) */
         '<button type="button" class="copPexp" data-cop-panelexpand aria-pressed="' + !!PANEL.wide + '" aria-label="' + (PANEL.wide ? "Minimize the Copilot" : "Expand the Copilot") + '" title="' + (PANEL.wide ? "Minimize" : "Expand") + '">' + (PANEL.wide ? MINMARK : EXPMARK) + '</button>' +
         '<button type="button" class="copPx" data-cop-panelclose aria-label="Close the Copilot" title="Close">×</button></div>';
       head = '<div class="copPgrip" data-cop-panelgrip title="Drag to resize · double-click to reset" aria-hidden="true"></div>' + head;
-      if (!a) { el.innerHTML = head + '<div class="copnone" data-cop-panelnone>The Copilot works on the Foundation, the SWOT and the Plan here. For anything else, ask on the Copilot tab.</div>'; return; }
+      if (!a) { el.innerHTML = head + '<div class="copnone" data-cop-panelnone>The Copilot works on the Foundation, the SWOT, the Competitive Discipline and the Plan here. For anything else, ask on the Copilot tab.</div>'; return; }
       if (CURSEC.copilot !== a) { CURSEC.copilot = a; PANE = null; }
       PANEL.rendering = true;
       try { el.innerHTML = head + '<div class="copPbody">' + renderPane() + '</div>'; } finally { PANEL.rendering = false; }

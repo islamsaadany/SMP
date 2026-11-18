@@ -71825,3 +71825,5 @@ Islam, with a screenshot of the panel on Mobile's Competitive Discipline reading
 - **Checked**: `checks/copilot-panel-compete.py` **10/0**, **5 red on the build before**. The live gate is stubbed (the panel is drawn only live, and this is the file), never the panel; the section is switched on for the unit by Structure's own per-target override, and a discipline written on its plan, so the panel is measured in the screenshot's state. Both ends: the SWOT's pane unchanged; Drivers still refused. The shell is v8.02.
 - **On the branch, not merged.**
 
+**§791 MERGED TO `main`** 2026-11-18, Islam: *"merge to main"*. `main` had not moved since §790; merged with a merge commit `main` alone holds (§91); the built file matches a fresh build of the merged sources. `checks/copilot-panel-compete.py` **10/0**. No migrations; nobody signed out.
+

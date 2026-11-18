@@ -71816,3 +71816,12 @@ Islam, with a screenshot of the plan's top — ✦ Builder and Advisory at the r
 
 The clean full run on the merged tree (main at §790): `checks/copilot.mjs` **389 passed, 0 failed**; `checks/shell.mjs` **623 ok, 10 failed**, the known ten.
 
+## §791 — ✦ Refine opens on the Competitive Discipline tab as it does on the SWOT (2026-11-18)
+
+Islam, with a screenshot of the panel on Mobile's Competitive Discipline reading *This part · Mobile* over *The Copilot works on the Foundation, the SWOT and the Plan here*: *"in the refine in the competitive discipline I can't see the chats button nor the chat box to start like the other areas of the plan"*. Aligned first — the cause and the fix said in plain words, *"go ahead"*.
+
+- **The cause was one missing entry.** The panel reads the open Strategy tab into the Copilot's area through a small map (`STRAT_AREA`, copilot.js), and the map named Foundation, SWOT and the Plan — not Competitive Discipline, whose area the Copilot tab has had since §492 (`compete`). So the tab fell to "no area": the header's fallback word *This part*, and the refusal in place of the pane. The reverse map (`AREA_STRAT`, which sends a rail's area back to its tab) lacked it too.
+- **Now**: `compete` ↔ `compete` in both maps; the header names the part, *Competitive Discipline · Mobile*; the pane is the SWOT's own — the chats rail, *What would you like to change in Mobile's Competitive Discipline?*, the box, *Build it again step by step* — or, on a unit whose discipline is not written yet, the §779 start (*isn't built yet — Build it step by step*). The refusal, where a tab still has no area (Drivers), names the four parts.
+- **Checked**: `checks/copilot-panel-compete.py` **10/0**, **5 red on the build before**. The live gate is stubbed (the panel is drawn only live, and this is the file), never the panel; the section is switched on for the unit by Structure's own per-target override, and a discipline written on its plan, so the panel is measured in the screenshot's state. Both ends: the SWOT's pane unchanged; Drivers still refused. The shell is v8.02.
+- **On the branch, not merged.**
+

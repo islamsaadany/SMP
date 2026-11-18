@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-18 — ✦ Refine opens on the Competitive Discipline tab (§791).** The side panel on a unit's Competitive Discipline tab now opens as it does on the SWOT — the chats rail, the question and the box — instead of saying it only works on the Foundation, the SWOT and the Plan. One missing entry in the panel's map of tabs to areas.
+
 **2026-11-17 — ✦ Build, ✦ Advise and ✦ Refine (§790).** The Copilot's three doors named for what each does and dressed alike: ✦ Build and ✦ Advise at the right of the tab row, ✦ Refine beside Edit on the plan (it was ✦ Copilot, plain text).
 
 **2026-11-17 — The whole strategy on paper, from the reading window (§789).** A Print control in the reading window's strip, for the SMO alone, prints the subject being read as one document — cover, then every tab in order, every direction opened — through the browser's print dialog, so paper or Save as PDF. The paper is built from the same code as the tabs, so it cannot differ from the screen. §789.1: a company that plans its own strategy (El Abd's shape) is named by its name on the cover, and a direction's title is never left alone at the foot of a page. §789.2: a direction or a capability is never split over two pages; one that does not fit starts a new page, whole.

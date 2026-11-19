@@ -9624,14 +9624,97 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
        is the same band on Strategy and Performance (§53.5), so it behaves
        the same there. */
 @media (max-width:520px){
-  .top-in { flex-wrap:wrap; row-gap:4px; padding-block:6px; }
-  .top-in::after { content:""; order:1; flex-basis:100%; height:0; }
-  .top-in .viewer { order:2; flex:1 1 0; min-width:0; }
-  .top-in .topacts { order:3; }
-  .viewer .ssbtn { min-width:0; }
-  .viewer-note { display:none; }
   .pane > .pband { position:static; }
 }
+/* ── THE TOP BAR ON A NARROWED OR ZOOMED-IN WINDOW (§792) ───────────────
+   Islam, zoomed in on Strategy: *"in a zoomed state the top bar elements are
+   interfering with each other."* Measured on the bar's own markup with the
+   trail, the viewer and Jump to on it: from 999px down to 521px the trail's
+   steps were drawn over "Viewing as" and its picker, and under 700px over
+   Jump to and Read as well. Two causes. The trail could be squeezed
+   (`min-width:0`) but its steps could not, so it kept its full width and
+   spilt over its neighbour; and nothing on the line gave way until the
+   phone's 520px, while Jump to's box (§701) alone holds 190px of it.
+
+   WHAT GIVES WAY, IN ORDER, and nothing is lost that is not said another way:
+     · under 1000px Jump to is its magnifying glass alone, as it already is in
+       the console's folded column (§710) — the hover and Ctrl K still say it;
+     · under 880px the words "Viewing as" go from sight (the picker keeps them
+       as its name for a screen reader, so they are clipped, not removed);
+     · under 1000px the role line beside the picker goes too, as it already
+       did on the phone: it was being cut to "Super user, t…", which says
+       nothing, and the picker beside it names the person;
+     · and at ANY width a client's name that still does not fit shortens
+       with an ellipsis instead of being drawn over what is beside it. */
+/* It is the CLIENT's name that shortens; the step you are ON keeps every
+   letter (given even a thousandth of the squeeze it lost its last two to an
+   ellipsis, measured). */
+nav.trail details.trclient { min-width:0; flex:0 1 auto; }
+nav.trail details.trclient > summary { display:flex; }
+/* THE VIEWER GIVES WAY BEFORE THE TRAIL DOES, down to a floor it is never
+   squeezed past: the picker at its own 120px minimum, with its key while the
+   key is drawn. Without the floor it was the viewer's turn to be drawn over
+   its neighbour; without the order, the client's name shortened while the
+   picker still had room to give. */
+.top .viewer { flex-shrink:1000; min-width:222px; }
+@media (max-width:999px){
+  .top .sjbtn { min-width:0; }
+  .top .sjbtn .sjl, .top .sjbtn .sjk { display:none; }
+  .top .viewer-note { display:none; }
+  /* a client's long name shortens rather than push Sign out off the bar
+     (measured at 820px, a client's own person); the product's name stays */
+  .top .brand { flex:0 1 auto; min-width:0; }
+  .top .orgname { flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+}
+@media (max-width:880px){
+  .top .viewer { min-width:138px; }
+  .top .viewer label { position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+                       overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+}
+/* ONE LINE, ALWAYS (§792.2). Islam, shown the bar on two lines at 760px:
+   *"the top bar should not take 2 lines by any means."* So the two-line bar
+   is gone at every width — the one drawn here a round earlier, and the
+   phone's own from §410 with it — and the room is found by what each thing
+   can lose without losing what it does:
+     · at 760px and under Read is its open book alone and the "?" goes (the
+       ? key still opens the sheet; there is no such key on a phone); the
+       picker may narrow further; and for a client's own people, who have the
+       product's name where the office has the trail, the name goes and its
+       mark stands for it, the client's name shortening after it. §410's rule
+       that the names never give way was written for 1100px, where it still
+       holds; here the choice is a second line or the words, and he has
+       refused the line;
+     · at 520px and under the trail is the mark and the module you are on —
+       the mark is the way to the console and to every other client — and
+       Sign out is its door-and-arrow alone, still named for a screen reader. */
+@media (max-width:760px){
+  .top-in { gap:10px; padding-inline:16px; }
+  .top .viewer { min-width:91px; padding-right:10px; }
+  .top .viewer .ssbtn { min-width:80px; }
+  .top .readbtn { font-size:0; gap:0; padding:5px 8px; }
+  .top .readbtn svg { width:14px; height:14px; }
+  .top .keysbtn { display:none; }
+  .top .brand h1 { display:none; }
+}
+@media (max-width:520px){
+  .top-in { gap:8px; padding-inline:12px; }
+  .top .topacts { gap:6px; }
+  nav.trail details.trclient, nav.trail .trsep, nav.trail .trbar { display:none; }
+  .top .viewer { min-width:68px; padding-right:8px; }
+  .top .viewer .ssbtn { min-width:60px; }
+  .top .outbtn { font-size:0; padding:0; width:28px; height:26px; display:inline-grid; place-items:center; }
+  .top .outbtn::before { content:""; width:14px; height:14px; background:currentColor;
+    -webkit-mask:var(--out-mark) center/contain no-repeat; mask:var(--out-mark) center/contain no-repeat; }
+  /* what is left of the trail is two things that cannot narrow, so it is the
+     viewer that takes the squeeze, never the trail drawn over it */
+  nav.trail { flex:none; }
+}
+@media (max-width:400px){
+  .top-in { gap:6px; padding-inline:10px; }
+  .top .viewer { min-width:61px; }
+  .top .viewer .ssbtn { min-width:52px; }
+}
+.top { --out-mark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpath d='M16 17l5-5-5-5'/%3E%3Cpath d='M21 12H9'/%3E%3C/svg%3E"); }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -14231,7 +14314,13 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copBbtn:hover { border-color:var(--gold-deep, var(--gold)); }
 .copBbtn[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); }
 body.copB-open #mainwrap { margin-right:calc(var(--copPw, 550px) + 10px); }
-#copPanel { position:fixed; right:0; bottom:0; width:var(--copPw, 550px); z-index:40; display:flex; flex-direction:column; background:var(--surface); border-left:1px solid var(--line); box-shadow:-6px 0 18px rgba(16,24,40,.08); }
+/* §792 — ITS TOP IS THE CHROME'S BOTTOM, READ, NOT MEASURED ONCE. The chrome
+   is one pinned block at the top of the window and its height is already
+   observed and published as `--chrome-h` (shell.html), in the page's own
+   pixels whatever the zoom — so the panel sits under it from the first paint
+   and follows it when the window narrows, the bar takes two lines or the
+   page is zoomed. */
+#copPanel { position:fixed; right:0; bottom:0; top:var(--chrome-h, 150px); width:var(--copPw, 550px); z-index:40; display:flex; flex-direction:column; background:var(--surface); border-left:1px solid var(--line); box-shadow:-6px 0 18px rgba(16,24,40,.08); }
 #copPanel .copPhead { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
 #copPanel .copPhead small { display:block; color:var(--ink-3); font-size:12px; }
 #copPanel .copPseg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-left:auto; }

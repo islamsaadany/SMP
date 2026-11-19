@@ -1368,8 +1368,9 @@ var SYNC = (function () {
       box.insertBefore(nm, sel);
     }
     var out = document.createElement("button");
-    out.className = "infobtn";
+    out.className = "infobtn outbtn";   /* its own name: under 520px it is drawn as its mark alone (arrange.css §792.2) */
     out.textContent = "Sign out";
+    out.title = "Sign out";
     out.addEventListener("click", function () {
       cacheWipe();
       keepWipe();

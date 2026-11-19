@@ -71827,3 +71827,28 @@ Islam, with a screenshot of the panel on Mobile's Competitive Discipline reading
 
 **§791 MERGED TO `main`** 2026-11-18, Islam: *"merge to main"*. `main` had not moved since §790; merged with a merge commit `main` alone holds (§91); the built file matches a fresh build of the merged sources. `checks/copilot-panel-compete.py` **10/0**. No migrations; nobody signed out.
 
+## §792 — the top bar on a narrowed window, and the Refine panel under the chrome (2026-11-19)
+
+Islam, zoomed in on Mobile's SWOT, with two screenshots: *"in a zoomed state the top bar elements are interfering with each other"* (the trail's *Strategy* drawn over *Viewing as*), then *"the copilot panel is slightly below the placement where there is space above it which shouldn't be there"* and *"when I zoom out and in again the panel issue is fixed but it doesn't need to happen from the start."*
+
+**THE BAR.** Measured on the bar's own markup (the shell's body, route.js's trail, the Jump to script's box): from 999px down to 521px the trail's steps were drawn over the viewer, and under 700px over Jump to and Read. Under 1000px the page is not scaled to 80% (§631's `zoom`), so everything on the line is a quarter wider at the moment the window is narrowest. Two causes: the trail could be squeezed (`min-width:0`) but its steps could not, so it spilt over its neighbour; and nothing gave way until the phone's 520px while Jump to's box (§701) alone holds 190px.
+
+- **What gives way, in order**: under 1000px Jump to is its glass alone (as in the console's folded column, §710) and the role line beside the picker goes (it was being cut to *"Super user, t…"*); under 880px the words *Viewing as* are clipped from sight, kept as the picker's name for a screen reader; (the first build also put the bar on two lines at 760px and under — refused, §792.2 below); and at any width the viewer gives way before the trail, never past a floor (the picker's own 120px), after which the CLIENT's name shortens with an ellipsis. The step you are on keeps every letter.
+- **Both bars (§53.5)**: Strategy's (arrange.css) and the modules' (lib/topbar.ts), which measured the same overlap from 999px to 761px on Insights.
+- **1000px and wider is untouched**: the screenshots at 1440, 1280, 1100 and 1000 are byte-identical before and after, on both bars.
+
+**THE PANEL.** `placePanel()` measured the section row's buttons once, when the panel opened, and wrote the answer as an inline `top`; nothing ran it again on a resize, a zoom or a bar that changed height, so the panel kept whatever that moment gave it. Its top is now the stylesheet's — `top:var(--chrome-h)`, the chrome's height that shell.html already observes and publishes in the page's own pixels whatever the zoom — and `placePanel()` is deleted (§24). The panel meets the chrome's bottom edge (it sat a pixel or two either side before).
+
+- **Not reproduced as he saw it**: in Chromium the old measurement landed within 2px at every width tried, opened wide or narrow, expanded or not; the gap in his screenshot was not drawn here. What was measured is that the old top was a number frozen at one moment and the new one cannot be — so the fix does not depend on which moment went wrong. To be confirmed on his screen.
+
+**Checked**: `smp-app/checks/bar-narrow.mjs` **42 ok, 0 failed** — both bars at nineteen widths from 1440 to 360, for the office and for a client's own person, a short and a long client name: drawn, ONE LINE, no two things overlapping, nothing leaving the bar, the current step uncut; the panel's top on the chrome's bottom opened wide, expanded, with the window at 900, 700 and 1300 and nothing pressed, and opened on a 700px window. Red four ways: `no-give`, `tb-no-give`, `two-lines`, `panel-fixed`. `checks/viewing-as-bar.mjs` **54 ok, 0 failed**. `checks/jump.mjs` and `checks/shell.mjs` need a database this session did not have, and were not run. The shell is v8.03.
+
+### §792.2 — one line, always
+
+Islam, shown the bar on two lines at 760px: *"the top bar should not take 2 lines by any means."* The two-line bar is gone at every width — the one §792 drew, and the phone's own from §410 with it (the modules' bar wrapped at 760px too, and no longer does). The room is found by what each thing can lose without losing what it does:
+
+- **760px and under**: Read is its open book alone; the "?" goes (the ? key still opens the sheet); the picker may narrow further. For a client's own people, who have the product's name where the office has the trail, the name goes and its mark stands for it. **This narrows §410's rule** (*"the product's and the client's names are never the thing that gives way"*): it holds at 1000px and wider; under 1000px a client's long name shortens rather than push Sign out off the bar (measured at 820px), and at 760px and under the product's name is its mark. The choice there is a second line or the words, and he has refused the line.
+- **520px and under**: the trail is the mark and the module you are on — the client's step goes; the mark is the way to the console and every other client — and Sign out is a door-and-arrow, still named *Sign out* for a screen reader and on hover. `sync.js` gives the button its own class (`outbtn`) for this.
+- **Down to 360px**, measured, on both bars.
+
+- **On the branch, not merged.**

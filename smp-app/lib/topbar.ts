@@ -226,7 +226,32 @@ a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
 .tbout{font-family:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);background:none;border:1px solid var(--tb-line);border-radius:99px;padding:5px 14px;cursor:pointer}
 .tbtheme:hover,.tbout:hover{border-color:var(--tb-soft);color:var(--tb-ink)}
 .tb a:focus-visible,.tb button:focus-visible,.tb summary:focus-visible,.tb select:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
-@media (max-width:760px){.tbin{flex-wrap:wrap;padding:6px 16px;gap:8px}.tbviewer{border-right:0;padding-right:0}}
+/* §792: A NARROWED OR ZOOMED-IN WINDOW, as arrange.css's own note of the same
+   number says for Strategy's bar (§53.5: one decision, two bars). Measured
+   here with Jump to mounted: from 999px to 761px the module's step was drawn
+   over "Viewing as". The same order of giving way — Jump to to its glass and
+   the role line gone under 1000px, the words "Viewing as" clipped from sight
+   under 880px, the viewer before the trail and never past its floor, and of
+   the trail only the client's name shortens. */
+.tbclient{min-width:0;flex:0 1 auto}
+.tbclient>summary{display:flex}
+.tbviewer{flex:0 1000 auto;min-width:222px;justify-content:flex-end}
+.tbviewer select{min-width:0;flex:0 1 auto}
+@media (max-width:999px){.tb .sjbtn{min-width:0}.tb .sjbtn .sjl,.tb .sjbtn .sjk{display:none}.tbnote{display:none}}
+@media (max-width:880px){.tbviewer{min-width:138px}.tbviewer label{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}}
+/* §792.2: ONE LINE, ALWAYS — Islam: "the top bar should not take 2 lines by
+   any means", so this bar's own wrap at 760px is gone with Strategy's. At
+   760px and under a client's own people read the mark for the product's name
+   (still the link's name for a screen reader) and the client's name shortens;
+   at 520px and under the trail is the mark and the module, and Sign out is
+   its door-and-arrow alone. */
+.tborg{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbbrand,.tbread,.tbacts{flex:none}
+.tb{--tb-out:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpath d='M16 17l5-5-5-5'/%3E%3Cpath d='M21 12H9'/%3E%3C/svg%3E")}
+@media (max-width:760px){.tbin{padding:0 16px;gap:10px}.tbviewer{min-width:91px;padding-right:10px}.tbbrand{font-size:0;gap:0}}
+@media (max-width:520px){.tbin{padding:0 12px;gap:8px}.tbacts{gap:6px}.tbclient,.tbsep,.tbbar{display:none}.tbtrail{flex:none}.tbviewer{min-width:68px;padding-right:8px}
+.tbout{font-size:0;padding:0;width:28px;height:26px;display:inline-grid;place-items:center}
+.tbout::before{content:"";width:14px;height:14px;background:currentColor;-webkit-mask:var(--tb-out) center/contain no-repeat;mask:var(--tb-out) center/contain no-repeat}}
 `;
 
 /* ── THE COLOUR SWEEP'S BREAK (§484's own audit, constitution XVI) ─────────

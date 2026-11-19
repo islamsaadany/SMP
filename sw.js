@@ -711,7 +711,8 @@
 /* v8.00-reading-print — §789: the whole strategy on paper from the reading window, the office's alone. */
 /* v8.01-build-advise-refine — §790: ✦ Build, ✦ Advise and ✦ Refine, one family. */
 /* v8.02-refine-compete — §791: ✦ Refine opens on the Competitive Discipline tab as on the SWOT. */
-const SHELL = "smp-shell-v8.02-refine-compete";
+/* v8.03-bar-narrow — §792: the top bar on a narrowed window; the Refine panel sits under the chrome. */
+const SHELL = "smp-shell-v8.03-bar-narrow";
 const ASSETS = [
   "/",
   "/index.html",

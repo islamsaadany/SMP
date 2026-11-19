@@ -1090,7 +1090,13 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copBbtn:hover { border-color:var(--gold-deep, var(--gold)); }
 .copBbtn[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); }
 body.copB-open #mainwrap { margin-right:calc(var(--copPw, 550px) + 10px); }
-#copPanel { position:fixed; right:0; bottom:0; width:var(--copPw, 550px); z-index:40; display:flex; flex-direction:column; background:var(--surface); border-left:1px solid var(--line); box-shadow:-6px 0 18px rgba(16,24,40,.08); }
+/* §792 — ITS TOP IS THE CHROME'S BOTTOM, READ, NOT MEASURED ONCE. The chrome
+   is one pinned block at the top of the window and its height is already
+   observed and published as `--chrome-h` (shell.html), in the page's own
+   pixels whatever the zoom — so the panel sits under it from the first paint
+   and follows it when the window narrows, the bar takes two lines or the
+   page is zoomed. */
+#copPanel { position:fixed; right:0; bottom:0; top:var(--chrome-h, 150px); width:var(--copPw, 550px); z-index:40; display:flex; flex-direction:column; background:var(--surface); border-left:1px solid var(--line); box-shadow:-6px 0 18px rgba(16,24,40,.08); }
 #copPanel .copPhead { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
 #copPanel .copPhead small { display:block; color:var(--ink-3); font-size:12px; }
 #copPanel .copPseg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-left:auto; }

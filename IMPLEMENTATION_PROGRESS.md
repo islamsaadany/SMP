@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-19 — The top bar on a zoomed-in window, and the Refine panel's place (§792).** Zoomed in or on a narrow window, the top bar's parts no longer run over each other: under 1000px Jump to shows as its magnifying glass and the role line goes, under 880px the words "Viewing as" go, at 760px and under the bar takes two lines, and a long client name shortens with "…". The same on Insights, the Tracker and Meeting Notes. The ✦ Refine panel now sits directly under the bar from the moment it opens and stays there when the window changes. On the branch, not merged.
+
 **2026-11-18 — ✦ Refine opens on the Competitive Discipline tab (§791).** The side panel on a unit's Competitive Discipline tab now opens as it does on the SWOT — the chats rail, the question and the box — instead of saying it only works on the Foundation, the SWOT and the Plan. One missing entry in the panel's map of tabs to areas.
 
 **2026-11-17 — ✦ Build, ✦ Advise and ✦ Refine (§790).** The Copilot's three doors named for what each does and dressed alike: ✦ Build and ✦ Advise at the right of the tab row, ✦ Refine beside Edit on the plan (it was ✦ Copilot, plain text).

@@ -226,7 +226,20 @@ a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
 .tbout{font-family:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);background:none;border:1px solid var(--tb-line);border-radius:99px;padding:5px 14px;cursor:pointer}
 .tbtheme:hover,.tbout:hover{border-color:var(--tb-soft);color:var(--tb-ink)}
 .tb a:focus-visible,.tb button:focus-visible,.tb summary:focus-visible,.tb select:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
-@media (max-width:760px){.tbin{flex-wrap:wrap;padding:6px 16px;gap:8px}.tbviewer{border-right:0;padding-right:0}}
+/* §792: A NARROWED OR ZOOMED-IN WINDOW, as arrange.css's own note of the same
+   number says for Strategy's bar (§53.5: one decision, two bars). Measured
+   here with Jump to mounted: from 999px to 761px the module's step was drawn
+   over "Viewing as". The same order of giving way — Jump to to its glass and
+   the role line gone under 1000px, the words "Viewing as" clipped from sight
+   under 880px, the viewer before the trail and never past its floor, and of
+   the trail only the client's name shortens. */
+.tbclient{min-width:0;flex:0 1 auto}
+.tbclient>summary{display:flex}
+.tbviewer{flex:0 1000 auto;min-width:222px;justify-content:flex-end}
+.tbviewer select{min-width:0;flex:0 1 auto}
+@media (max-width:999px){.tb .sjbtn{min-width:0}.tb .sjbtn .sjl,.tb .sjbtn .sjk{display:none}.tbnote{display:none}}
+@media (max-width:880px){.tbviewer{min-width:138px}.tbviewer label{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}}
+@media (max-width:760px){.tbin{flex-wrap:wrap;padding:6px 16px;gap:8px}.tbviewer{border-right:0;padding-right:0;min-width:0}}
 `;
 
 /* ── THE COLOUR SWEEP'S BREAK (§484's own audit, constitution XVI) ─────────

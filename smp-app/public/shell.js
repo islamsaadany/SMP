@@ -70746,10 +70746,10 @@ var COPILOT = (function(){
     document.addEventListener("dblclick", function(ev){ if (ev.target && ev.target.closest && ev.target.closest("[data-cop-panelgrip]")) setPanelW(0, true); });
   }
   function closePanelDom(){ var el = document.getElementById("copPanel"); if (el) el.remove(); document.body.classList.remove("copB-open"); document.body.classList.remove("copB-wide"); PANEL.wide = false; }
-  function placePanel(el){
-    var top = 0; document.querySelectorAll("#secrow-in button, #secrow-in .secseg").forEach(function(x){ var r = x.getBoundingClientRect(); if (r.height) top = Math.max(top, r.bottom); });
-    var z = typeof pageZoom === "function" ? pageZoom() : 1; el.style.top = Math.max(60, Math.round(((top || 150) + 8) / z)) + "px";
-  }
+  /* §792 — the panel's top is the stylesheet's, off the chrome's own observed
+     height (`--chrome-h`); it was measured here once, when the panel opened,
+     and kept whatever that moment gave it (Islam: a space above the panel
+     until he zoomed out and in again). */
   function afterPaint(){
     if (!shown() || !onStrategy()) { if (PANEL.open && !onStrategy()) PANEL.open = false; closePanelDom(); return; }
     var tail = document.querySelector("#secrow-in .secttail") || document.getElementById("secrow-in");
@@ -70761,7 +70761,7 @@ var COPILOT = (function(){
     if (!PANEL.open) { closePanelDom(); return; }
     var el = document.getElementById("copPanel");
     if (!el) { el = document.createElement("aside"); el.id = "copPanel"; el.setAttribute("aria-label", "Copilot"); document.body.appendChild(el); PANEL.area = ""; }
-    document.body.classList.add("copB-open"); document.body.classList.toggle("copB-wide", !!PANEL.wide); placePanel(el);
+    document.body.classList.add("copB-open"); document.body.classList.toggle("copB-wide", !!PANEL.wide);
     wireGrip(); if (!document.body.style.getPropertyValue("--copPw") && panelW()) setPanelW(panelW(), false);
     var a = panelArea();
     if (a !== PANEL.area || !el.querySelector("[data-cop-pane], [data-cop-panelnone]")) {

@@ -11,8 +11,10 @@
      1 · STRATEGY'S BAR — the shell's body, its stylesheet, its route.js (which
          mounts the trail) and the Jump to script (which mounts its box), with
          the viewer's picker, the role line and the bar's buttons put in as
-         sync.js and searchsel.js draw them. At every width from 1440 to 521:
-         no two things on the bar overlap, nothing leaves the bar, and the
+         sync.js and searchsel.js draw them, for the office and for a
+         client's own person. At every width from 1440 to 360: THE BAR IS ONE
+         LINE (§792.2, Islam: "the top bar should not take 2 lines by any
+         means"), no two things on it overlap, nothing leaves it, and the
          step you are on keeps every letter.
      2 · THE MODULES' BAR (lib/topbar.ts) — `topBarHtml()` and `TOPBAR_CSS`,
          with the same Jump to script. The same assertions (§53.5).
@@ -28,6 +30,7 @@
      SMP_BREAK=no-give      node checks/bar-narrow.mjs   # must go red (§1)
      SMP_BREAK=tb-no-give   node checks/bar-narrow.mjs   # must go red (§2)
      SMP_BREAK=panel-fixed  node checks/bar-narrow.mjs   # must go red (§3)
+     SMP_BREAK=two-lines    node checks/bar-narrow.mjs   # must go red (§1, §2)
 
    SMP_BUILT points §3 at another build (§276). It needs a browser; with none
    it FAILS rather than skips (§54.5). */
@@ -73,12 +76,16 @@ if (BREAK === "no-give") {
   /* the bar as it was: Jump to keeping its 190px box, the viewer no floor */
   TBCSS = bend(TBCSS, "@media (max-width:999px){.tb .sjbtn{min-width:0}.tb .sjbtn .sjl,.tb .sjbtn .sjk{display:none}.tbnote{display:none}}", "", "tb-no-give");
   TBCSS = bend(TBCSS, ".tbviewer{flex:0 1000 auto;min-width:222px;justify-content:flex-end}", "", "tb-no-give floor");
+} else if (BREAK === "two-lines") {
+  /* the bars as they were: allowed to wrap */
+  CSS = CSS + "\n@media (max-width:760px){ .top-in { flex-wrap:wrap; } .top-in .viewer { flex:1 1 100%; } }\n";
+  TBCSS = TBCSS + "\n@media (max-width:760px){.tbin{flex-wrap:wrap}.tbviewer{flex:1 1 100%}}\n";
 } else if (BREAK === "panel-fixed") {
   /* a top that is a number kept from one moment, which is what it was */
   BUILTSRC = bend(BUILTSRC, "top:var(--chrome-h, 150px); width:var(--copPw, 550px)", "top:260px; width:var(--copPw, 550px)", "panel-fixed");
 }
 
-const WIDTHS = [1440, 1280, 1100, 1000, 999, 960, 900, 881, 880, 820, 761, 760, 680, 600, 521];
+const WIDTHS = [1440, 1280, 1100, 1000, 999, 960, 900, 881, 880, 820, 761, 760, 680, 600, 521, 520, 430, 390, 360];
 const LONG = "Al Mansour International Holding Group";
 
 /* Every thing a reader can see on the bar, and which pairs share area. A
@@ -100,22 +107,26 @@ const MEASURE = (sel) => {
   }
   const out = L.filter((x) => x.l < br.left - 0.5 || x.r > br.right + 0.5).map((x) => x.n);
   const on = bar.querySelector(sel.on), sp = on ? on.querySelector("span") : null;
-  return { clash, out, things: L.length, cut: sp ? sp.scrollWidth > sp.clientWidth + 1 : null,
+  const rows = L.filter((x) => x.t > L[0].b - 1 || x.b < L[0].t + 1).map((x) => x.n);
+  return { clash, out, rows, tall: Math.round(br.height), things: L.length, cut: sp ? sp.scrollWidth > sp.clientWidth + 1 : null,
            sideways: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1 };
 };
 
 /* ── the two documents ──────────────────────────────────────────────── */
 const MENU = [{ key: "strategy", label: "Strategy", href: "/x/strategy" }, { key: "insights", label: "Insights", href: "/x/insights" }];
-const shellDoc = (client) =>
-  "<!doctype html>\n<html lang='en' data-module='strategy' data-console='1' data-console-client='" + esc(client) + "'" +
+const shellDoc = (client, own) =>
+  "<!doctype html>\n<html lang='en' data-module='strategy'" + (own ? "" : " data-console='1' data-console-client='" + esc(client) + "'") +
   " data-palette='forefront' data-theme='light' data-modules='" + esc(JSON.stringify(MENU)) + "'>" +
   "<head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>" +
   "<link rel='stylesheet' href='/platform.css'></head><body class='ready'>" + BODY +
   "<script>window.SYNC={actingAs:function(){return null},markViewing:function(){}};window.paint=function(){};</script>" +
   "<script src='/route.js'></script><script>paint();</script><script>" + JUMP_SCRIPT + "</script></body></html>";
 /* what sync.js, searchsel.js, theme.js and keysheet.js hang on the bar */
-const DRESS = () => {
+const DRESS = (own) => {
   const v = document.querySelector(".viewer");
+  /* a client's own person: the product's name and the client's where the
+     office has the trail, and no viewer (sync.js hides it) */
+  if (own) { v.hidden = true; document.getElementById("orgname").textContent = own; }
   v.querySelector("select").outerHTML = '<button type="button" class="ssbtn"><span class="sslabel">Islam Saadany — the group</span><span>▾</span></button>';
   document.getElementById("viewerNote").textContent = "Super user, the group";
   const ta = document.getElementById("topacts");
@@ -123,14 +134,14 @@ const DRESS = () => {
   const th = document.getElementById("themebtn"); th.hidden = false;
   th.innerHTML = '<svg class="themesvg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
   const k = document.createElement("button"); k.className = "infobtn keysbtn"; k.textContent = "?"; ta.appendChild(k);
-  const o = document.createElement("button"); o.className = "infobtn"; o.textContent = "Sign out"; ta.appendChild(o);
+  const o = document.createElement("button"); o.className = "infobtn outbtn"; o.textContent = "Sign out"; ta.appendChild(o);
 };
 const PEOPLE = [{ key: "islam", name: "Islam Saadany — the group", note: "Super user · the group" }, { key: "amr", name: "Amr Hassan", note: "Contributor" }];
-const tbDoc = (client) =>
+const tbDoc = (client, own) =>
   "<!doctype html>\n<html lang='en' data-theme='light'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>" +
   "<style>" + TBCSS + "</style></head><body>" +
-  topBarHtml({ slug: "raya-trade", tenantName: client, module: "insights", have: ["strategy", "insights"], consultant: true,
-               viewer: { current: "islam", self: "islam", people: PEOPLE }, reading: null }) +
+  topBarHtml({ slug: "raya-trade", tenantName: client, module: "insights", have: ["strategy", "insights"], consultant: !own,
+               viewer: own ? null : { current: "islam", self: "islam", people: PEOPLE }, reading: null }) +
   "<script>" + JUMP_SCRIPT + "</script></body></html>";
 
 /* THE BUILT FILE IS OPENED AS A FILE, which is what it is: served from an
@@ -150,7 +161,8 @@ const srv = createServer((req, res) => {
   if (p === "/route.js") { res.writeHead(200, { "Content-Type": "application/javascript" }); return res.end(ROUTE); }
   if (p.startsWith("/api/")) { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ ok: true, clients: [], items: [] })); }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-  res.end(p.startsWith("/tb") ? tbDoc(client) : shellDoc(client));
+  const own = u.searchParams.get("own") === "1";
+  res.end(p.startsWith("/tb") ? tbDoc(client, own) : shellDoc(client, own));
 });
 await new Promise((r) => srv.listen(0, "127.0.0.1", r));
 const base = "http://127.0.0.1:" + srv.address().port;
@@ -160,37 +172,39 @@ try { browser = await chromium.launch({ executablePath: process.env.SMP_CHROME |
 catch (e) { check("a browser to drive the bars in", false, e.message.split("\n")[0] + " — set SMP_CHROME"); }
 
 const sweep = async (title, path, sel, dress) => {
-  for (const client of ["Raya Trade", LONG]) {
-    const worst = { clash: [], out: [], cut: [], side: [], thin: [] };
+  for (const own of [false, true]) for (const client of ["Raya Trade", LONG]) {
+    const worst = { clash: [], out: [], cut: [], side: [], thin: [], rows: [] };
     for (const w of WIDTHS) {
       const page = await browser.newPage({ viewport: { width: w, height: 400 } });
-      await page.goto(base + path + "?c=" + encodeURIComponent(client));
+      await page.goto(base + path + "?c=" + encodeURIComponent(client) + (own ? "&own=1" : ""));
       await page.waitForSelector("[data-jump]", { timeout: 5000 }).catch(() => {});
-      if (dress) await page.evaluate(dress);
+      if (dress) await page.evaluate(dress, own ? client : "");
       const m = await page.evaluate(MEASURE, sel);
       if (m.clash.length) worst.clash.push(w + ": " + m.clash[0]);
       if (m.out.length) worst.out.push(w + ": " + m.out[0]);
       if (m.cut) worst.cut.push(w);
       if (m.sideways) worst.side.push(w);
-      if (m.things < 8) worst.thin.push(w + " (" + m.things + ")");
+      if (m.rows.length || m.tall > 48) worst.rows.push(w + " (" + m.tall + "px" + (m.rows[0] ? ", " + m.rows[0] : "") + ")");
+      if (m.things < (own ? 4 : 6)) worst.thin.push(w + " (" + m.things + ")");
       await page.close();
     }
-    const who = title + ", " + (client === LONG ? "a long client name" : client);
-    check(who + ": the bar is drawn whole at all " + WIDTHS.length + " widths (trail, viewer, Jump to, buttons)", !worst.thin.length, worst.thin.join(", "));
-    check(who + ": no two things on the bar overlap, 1440 down to 521", !worst.clash.length, worst.clash.slice(0, 3).join(" · "));
+    const who = title + ", " + (own ? "a client's own person" : "the office") + ", " + (client === LONG ? "a long client name" : client);
+    check(who + ": the bar is drawn at all " + WIDTHS.length + " widths", !worst.thin.length, worst.thin.join(", "));
+    check(who + ": ONE LINE at every width, 1440 down to 360", !worst.rows.length, worst.rows.slice(0, 4).join(" · "));
+    check(who + ": no two things on the bar overlap", !worst.clash.length, worst.clash.slice(0, 3).join(" · "));
     check(who + ": nothing leaves the bar, and the page does not scroll sideways", !worst.out.length && !worst.side.length, worst.out.concat(worst.side).slice(0, 3).join(" · "));
-    check(who + ": the step you are on keeps every letter", !worst.cut.length, "cut at " + worst.cut.join(", "));
+    if (!own) check(who + ": the step you are on keeps every letter", !worst.cut.length, "cut at " + worst.cut.join(", "));
   }
 };
 
 if (browser) {
   console.log("1 · Strategy's bar, narrowed (driven)");
   await sweep("Strategy", "/raya-trade/strategy/mobile/swot",
-    { bar: ".top-in", things: "a,summary,label,button,.viewer-note,.trsep", skip: ".menu", on: "nav.trail details.trstep:not(.trclient) > summary" }, DRESS);
+    { bar: ".top-in", things: "a,summary,label,button,.viewer-note,.trsep,.brandmark,.orgname,h1", skip: ".menu", on: "nav.trail details.trstep:not(.trclient) > summary" }, DRESS);
 
   console.log("2 · the modules' bar, narrowed (driven)");
   await sweep("Insights", "/tb",
-    { bar: "header.tb", things: "a,summary,label,button,select,.tbnote,.tbsep", skip: ".tbmenu", on: ".tbmod > summary" }, null);
+    { bar: "header.tb", things: "a,summary,label,button,select,.tbnote,.tbsep,.tborg", skip: ".tbmenu", on: ".tbmod > summary" }, null);
 
   console.log("3 · the Refine panel sits under the chrome (driven, the built file)");
   const page = await browser.newPage({ viewport: { width: 1300, height: 800 } });

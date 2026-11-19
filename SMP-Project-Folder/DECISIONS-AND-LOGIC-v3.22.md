@@ -71851,4 +71851,4 @@ Islam, shown the bar on two lines at 760px: *"the top bar should not take 2 line
 - **520px and under**: the trail is the mark and the module you are on — the client's step goes; the mark is the way to the console and every other client — and Sign out is a door-and-arrow, still named *Sign out* for a screen reader and on hover. `sync.js` gives the button its own class (`outbtn`) for this.
 - **Down to 360px**, measured, on both bars.
 
-- **On the branch, not merged.**
+**§792 MERGED TO `main`** 2026-11-19, Islam: *"merge to main"*. `main` had not moved since §791; merged with a merge commit `main` alone holds (§91); the built file matches a fresh build of the merged sources. `checks/bar-narrow.mjs` **42 ok, 0 failed** on the merged tree. `checks/shell.mjs` and `checks/jump.mjs` were not run (no database in the session). The Refine panel's gap was not reproduced before the fix, so it stands to be confirmed on his screen. No migrations; nobody signed out.

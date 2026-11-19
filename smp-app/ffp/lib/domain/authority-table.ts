@@ -250,11 +250,9 @@ export function describeAuthorityRule(rule: AuthorityRuleData, whoName: string |
   }
 
   if (rule.days === null) return `${tail.charAt(0).toUpperCase()}${tail.slice(1)}.`;
+  // A time rule is the task's SLA: the days it should take. Past it, the consequence lands on whoever is named.
   const days = `${rule.days} day${rule.days === 1 ? "" : "s"}`;
-  // "without a decision" only reads correctly on the escalation branch; a time
-  // rule that demands approval is just a deadline for signing.
-  const clause = rule.consequence === "ESCALATION" ? `${days} without a decision` : days;
-  return `${label} ${clause} ${tail}.`;
+  return `SLA ${days}; past it the task ${tail}.`;
 }
 
 /**

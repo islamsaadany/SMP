@@ -1,6 +1,7 @@
 "use server";
 
 import { resetIfInForce } from "@/ffp/lib/data/process-lifecycle-reset";
+import { moveOwnerResponsible, unhideRaciRoles } from "@/ffp/lib/data/raci-owner-sync";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/ffp/lib/db/client";
@@ -779,7 +780,7 @@ export async function addProcessStep(
     return newStep;
   });
 
-  if (created.assignedRoleId) await makeOwnerResponsible(processId, created.id, created.assignedRoleId);
+  if (created.assignedRoleId) await moveOwnerResponsible(processId, created.id, null, created.assignedRoleId);
   await resetIfInForce(processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/map`);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/raci`);
@@ -853,25 +854,6 @@ export async function addProcessStepsBulk(
   return ok({ ids });
 }
 
-/**
- * A role given to a step on the Map is that step's Responsible in the RACI too, so the RACI does not have to be
- * filled in again by hand. The same rule as the RACI page's "Fill from step owners": only into a cell nobody has
- * filled (a letter someone set is never changed), never on a skipped row, and an old owner's letter is left as it
- * is. A step with no RACI row yet gets one, named as the step, like the first letter set on it would.
- */
-async function makeOwnerResponsible(processId: string, stepId: string, roleId: string): Promise<void> {
-  const step = await prisma.processStep.findUnique({ where: { id: stepId }, select: { raciSkipped: true, label: true } });
-  if (!step || step.raciSkipped) return;
-  let rows = await prisma.activity.findMany({ where: { relatedStepId: stepId }, select: { id: true } });
-  if (rows.length === 0) {
-    const count = await prisma.activity.count({ where: { processId } });
-    rows = [await prisma.activity.create({ data: { processId, name: step.label, relatedStepId: stepId, order: count }, select: { id: true } })];
-  }
-  for (const row of rows) {
-    const held = await prisma.raciAssignment.findUnique({ where: { activityId_roleId: { activityId: row.id, roleId } }, select: { id: true } });
-    if (!held) await prisma.raciAssignment.create({ data: { activityId: row.id, roleId, code: "RESPONSIBLE" } });
-  }
-}
 
 const updateStepSchema = z.object({
   workspaceId: z.string().min(1),
@@ -987,9 +969,10 @@ export async function updateProcessStep(
   // recomputed rather than just this step's.
   await realignSwimlanes(parsed.data.processId);
 
-  // A role newly given to the step is its Responsible in the RACI (empty cells only; see makeOwnerResponsible).
-  if (parsed.data.assignedRoleId && parsed.data.assignedRoleId !== step.assignedRoleId) {
-    await makeOwnerResponsible(parsed.data.processId, parsed.data.stepId, parsed.data.assignedRoleId);
+  // The step's role and the RACI's Responsible move together (see raci-owner-sync.ts).
+  await unhideRaciRoles(parsed.data.processId, [parsed.data.assignedRoleId, parsed.data.swimlaneRoleId]);
+  if ((parsed.data.assignedRoleId || null) !== step.assignedRoleId) {
+    await moveOwnerResponsible(parsed.data.processId, parsed.data.stepId, step.assignedRoleId, parsed.data.assignedRoleId || null);
     revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/raci`);
   }
 

@@ -107,13 +107,16 @@ export function computeVisibleRoleIds(
   allRoleIds: string[],
   rows: RaciTableRow[],
   pinnedRoleIds: string[],
-  mentionedRoleIds: string[] = []
+  mentionedRoleIds: string[] = [],
+  /** Titles the office removed from this table: they stay out unless a letter is on them. */
+  hiddenRoleIds: string[] = []
 ): string[] {
   const usedRoleIds = new Set<string>();
   for (const row of rows) {
     for (const roleId of Object.keys(row.assignments)) usedRoleIds.add(roleId);
   }
-  for (const roleId of mentionedRoleIds) usedRoleIds.add(roleId);
+  const hidden = new Set(hiddenRoleIds);
+  for (const roleId of mentionedRoleIds) if (!hidden.has(roleId)) usedRoleIds.add(roleId);
 
   const visible = new Set([...usedRoleIds, ...pinnedRoleIds]);
   if (visible.size === 0) return allRoleIds;

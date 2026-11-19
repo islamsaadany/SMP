@@ -6,6 +6,7 @@ import { useCanEdit } from "../../../workspace-access";
 import {
   addAuthorityRule,
   deleteAuthorityRule,
+  setStepAuthorityNotes,
   skipAuthorityRow,
   unskipAuthorityRow,
   updateAuthorityRule,
@@ -69,6 +70,7 @@ export function AuthorityTable({
   people,
   initialRows,
   initialIssues,
+  stepNotes,
 }: {
   workspaceId: string;
   processId: string;
@@ -76,6 +78,8 @@ export function AuthorityTable({
   people: PersonT[];
   initialRows: AuthorityTableRow[];
   initialIssues: AuthorityIssue[];
+  /** Each step's Escalation and Notes as written on the Map. */
+  stepNotes: Record<string, { escalation: string; note: string }>;
 }) {
   // Read straight from props rather than seeded into state. Every mutation
   // here ends in router.refresh(), which re-renders the server component and
@@ -198,6 +202,14 @@ export function AuthorityTable({
                 flagged={flaggedRowIds.has(row.id)}
                 flaggedRuleIds={flaggedRuleIds}
                 whoName={whoName}
+                notes={row.stepId ? (stepNotes[row.stepId] ?? { escalation: "", note: "" }) : null}
+                saveNotes={(changes) => {
+                  if (!row.stepId) return;
+                  startTransition(async () => {
+                    await setStepAuthorityNotes({ workspaceId, processId, stepId: row.stepId!, ...changes });
+                    router.refresh();
+                  });
+                }}
                 onSave={save}
                 onAdd={() => addRule(row)}
                 onRemove={removeRule}
@@ -245,6 +257,8 @@ function TaskRules({
   flagged,
   flaggedRuleIds,
   whoName,
+  notes,
+  saveNotes,
   onSave,
   onAdd,
   onRemove,
@@ -258,6 +272,8 @@ function TaskRules({
   flagged: boolean;
   flaggedRuleIds: Set<string>;
   whoName: (rule: AuthorityRuleData) => string | null;
+  notes: { escalation: string; note: string } | null;
+  saveNotes: (changes: { escalationNote?: string; stepNote?: string }) => void;
   onSave: (rule: AuthorityRuleData, changes: Partial<AuthorityRuleData>) => void;
   onAdd: () => void;
   onRemove: (ruleId: string) => void;
@@ -316,6 +332,15 @@ function TaskRules({
         </td>
       </tr>
 
+      {notes && (canEdit || notes.escalation || notes.note) && (
+        <tr className="bg-slate-50/30">
+          <td className="sticky start-0 z-10 bg-white" />
+          <td colSpan={columns - 1} className="px-3 pb-2 pt-1">
+            <NotesFields key={`${notes.escalation}|${notes.note}`} notes={notes} canEdit={canEdit} pending={pending} label={row.label} onSave={saveNotes} />
+          </td>
+        </tr>
+      )}
+
       {row.rules.map((rule) => (
         <RuleRow
           key={rule.id}
@@ -332,6 +357,62 @@ function TaskRules({
         />
       ))}
     </>
+  );
+}
+
+/** The task's escalation rule and note: the same two boxes the Map's step form has, so writing either place fills the other. */
+function NotesFields({
+  notes,
+  canEdit,
+  pending,
+  label,
+  onSave,
+}: {
+  notes: { escalation: string; note: string };
+  canEdit: boolean;
+  pending: boolean;
+  label: string;
+  onSave: (changes: { escalationNote?: string; stepNote?: string }) => void;
+}) {
+  const [esc, setEsc] = useState(notes.escalation);
+  const [note, setNote] = useState(notes.note);
+  const box = "w-full rounded-lg border border-slate-300 px-2 py-1 text-xs";
+  if (!canEdit)
+    return (
+      <div className="grid gap-1 text-xs text-slate-700">
+        {notes.escalation && <p><b className="text-slate-500">Escalation:</b> {notes.escalation}</p>}
+        {notes.note && <p><b className="text-slate-500">Note:</b> {notes.note}</p>}
+      </div>
+    );
+  return (
+    <div className="grid gap-2 sm:grid-cols-2">
+      <label className="grid gap-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+        Escalation (from the Map)
+        <textarea
+          aria-label={`Escalation for ${label}`}
+          className={`${box} min-h-[40px] font-normal normal-case tracking-normal text-slate-800`}
+          disabled={pending}
+          maxLength={2000}
+          value={esc}
+          placeholder="Who it goes to, and when"
+          onChange={(e) => setEsc(e.target.value)}
+          onBlur={() => esc.trim() !== notes.escalation.trim() && onSave({ escalationNote: esc })}
+        />
+      </label>
+      <label className="grid gap-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+        Note
+        <textarea
+          aria-label={`Note for ${label}`}
+          className={`${box} min-h-[40px] font-normal normal-case tracking-normal text-slate-800`}
+          disabled={pending}
+          maxLength={2000}
+          value={note}
+          placeholder="Anything to remember about this task's authority"
+          onChange={(e) => setNote(e.target.value)}
+          onBlur={() => note.trim() !== notes.note.trim() && onSave({ stepNote: note })}
+        />
+      </label>
+    </div>
   );
 }
 
@@ -417,7 +498,7 @@ function RuleRow({
         {/* 1 — what the rule turns on */}
         <td className="px-3 py-2">
           {canEdit ? (
-            <span className="inline-flex gap-1" role="group" aria-label="What this rule turns on">
+            <span className="inline-flex gap-1" role="group" aria-label="What this rule turns on: an amount, or the task's SLA">
               <ToggleButton
                 pressed={rule.measure === "MONEY"}
                 disabled={pending}
@@ -432,7 +513,7 @@ function RuleRow({
                 tone="time"
                 onClick={() => onSave(rule, { measure: "TIME", amount: null, direction: nonNullDirection(rule) })}
               >
-                Time
+                SLA
               </ToggleButton>
             </span>
           ) : (
@@ -461,7 +542,9 @@ function RuleRow({
 
         {/* 3 — which side of it */}
         <td className="px-3 py-2">
-          {canEdit ? (
+          {rule.measure === "TIME" ? (
+            <span className="text-xs text-slate-700">Past the SLA</span>
+          ) : canEdit ? (
             <select
               aria-label="Direction"
               value={rule.direction}
@@ -642,7 +725,7 @@ function FigureInput({
       <input
         type="text"
         inputMode="numeric"
-        aria-label={rule.measure === "MONEY" ? "Amount" : "Turnaround in days"}
+        aria-label={rule.measure === "MONEY" ? "Amount" : "SLA in days"}
         value={text}
         disabled={pending}
         onChange={(e) => setText(e.target.value)}
@@ -667,7 +750,7 @@ function MeasureChip({ measure }: { measure: AuthorityRuleData["measure"] }) {
       : measure === "TIME"
         ? "bg-amber-50 text-amber-700"
         : "bg-slate-100 text-slate-500";
-  const label = measure === "MONEY" ? "Money" : measure === "TIME" ? "Time" : "None";
+  const label = measure === "MONEY" ? "Money" : measure === "TIME" ? "SLA" : "None";
   return (
     <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ${style}`}>
       {label}

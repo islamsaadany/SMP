@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/ffp/lib/db/client";
 import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
+import { resetIfInForce } from "@/ffp/lib/data/process-lifecycle-reset";
 import { ok, notFound, validationError, type ActionResult } from "@/ffp/lib/actions/errors";
 
 /** Verifies processId actually belongs to workspaceId, not just that the caller can access workspaceId. */
@@ -279,4 +280,38 @@ export async function clearAuthorityRow(input: z.infer<typeof rowRefSchema>): Pr
 
   revalidatePath(`/${workspaceId}/processes/processes/${processId}/authority`);
   return ok({ rowId });
+}
+
+
+const stepNotesSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  stepId: z.string().min(1),
+  /** Undefined leaves a note alone. These are the step's own Escalation and Notes boxes on the Map, shown here and kept as one. */
+  escalationNote: z.string().trim().max(2000).optional(),
+  stepNote: z.string().trim().max(2000).optional(),
+});
+
+/** Saves a task's escalation rule text and note from the Authority Matrix, onto the same step fields the Map edits. */
+export async function setStepAuthorityNotes(input: z.infer<typeof stepNotesSchema>): Promise<ActionResult<{ id: string }>> {
+  const parsed = stepNotesSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const d = parsed.data;
+  const access = await requireWorkspaceAccess(d.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const process = await loadProcessInWorkspace(d.workspaceId, d.processId);
+  if (!process) return notFound();
+  const step = await prisma.processStep.findUnique({ where: { id: d.stepId }, select: { processId: true } });
+  if (!step || step.processId !== d.processId) return notFound();
+  await prisma.processStep.update({
+    where: { id: d.stepId },
+    data: {
+      ...(d.escalationNote !== undefined ? { escalationNote: d.escalationNote || null } : {}),
+      ...(d.stepNote !== undefined ? { stepNote: d.stepNote || null } : {}),
+    },
+  });
+  await resetIfInForce(d.processId);
+  revalidatePath(`/${d.workspaceId}/processes/processes/${d.processId}/authority`);
+  revalidatePath(`/${d.workspaceId}/processes/processes/${d.processId}/map`);
+  return ok({ id: d.stepId });
 }

@@ -10768,3 +10768,8 @@ In the process library, clicking a heading (name, owner, where it is, ready, gap
 ## §766 — Processes and sub-processes arranged separately (2026-11-24)
 
 The library's Arrange bar now has two choices: "Processes" (the mains) and "Sub-processes" (everything under a main), each with its own key and direction (address: arrange/adir and sarrange/sdir; left alone, the sub-processes follow the processes as before). "My order" move buttons appear on the mains when Processes is My order and on the subs when Sub-processes is My order. Pure test 24 passed; processes e2e 240 ok. NOT MERGED yet.
+
+## §767 — RACI follows the Map both ways, titles can be removed; Authority Matrix gets escalation, notes and SLA (2026-11-25)
+
+RACI: a step's role on the Map and the row's Responsible are now one fact kept from both sides. Map -> RACI: changing a step's role gives the new role R and removes the OLD role's R (other letters are never touched; a letter already on the new role is not overwritten). RACI -> Map: when a row is left with exactly one Responsible that is not the step's role, the step's role (and lane) moves to it; with two Responsibles the Map is left alone. A title (column) can be removed from the table with a ✕: nothing under it goes at once; with letters under it a warning says how many and nothing is deleted until confirmed (additive column processes.raciHiddenRoleIds keeps a removed title out until a step or letter names it again).
+Authority Matrix: each task shows its Escalation and Note (the Map's own boxes, so either place fills the other; editable); the "Time" rule is now the task's SLA (days), its sentence reads "SLA N days; past it the task escalates to X" and its direction reads "Past the SLA". Processes e2e 251 ok.

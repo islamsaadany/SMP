@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-20 — The trail's menus open in a new tab (§794).** The client and module entries in the Strategy shell's top bar are links now, so a ⌘-click or a right click opens one in a new tab; a plain press works as before. §793's My tasks rename is put at its source, the repo's platform.html.
+
 **2026-11-20 — The Internal Tracker is now the Task Tracker (§793).** The module's label, its refusals and My tasks' lines say Task Tracker; the key, address and tables are unchanged.
 
 **2026-11-19 — The top bar on a zoomed-in window, and the Refine panel's place (§792), merged to `main` 2026-11-19 on Islam's word.** Zoomed in or on a narrow window, the top bar's parts no longer run over each other: under 1000px Jump to shows as its magnifying glass and the role line goes, under 880px the words "Viewing as" go, and a long client name shortens with "…". **The bar is one line at every width** (Islam: *"the top bar should not take 2 lines by any means"*), the phone included: at 760px and under Read is its icon and the "?" goes; at 520px and under the trail is the mark and the module, and Sign out is its icon. The same on Insights, the Tracker and Meeting Notes. The ✦ Refine panel now sits directly under the bar from the moment it opens and stays there when the window changes.

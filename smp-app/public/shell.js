@@ -93579,13 +93579,27 @@ var SYNC = (function () {
     return document.documentElement.hasAttribute("data-client-settings");
   }
   var trailSaid = null;
+  /* §794 EVERY ENTRY IS A LINK (Islam: "I want to open it in a new tab either
+     by clicking command and click on it or right click to open in a new
+     tab"). The entries were buttons that set the address from a script, so
+     the browser had nothing to open in a new tab and no menu to offer on a
+     right click. Each is an <a href> now, the address the press would have
+     gone to (a crossing's is that settings page's own); the one listener
+     below still does the press's own work — a paint instead of a load where
+     the page is one document (§432, §433) — and stands aside for a modifier
+     key or any button but the left, which are the browser's. `data-trgo` is
+     kept on the link: the checks press by it. */
+  function menuHref(go) {
+    var cross = /^cross:/.test(go) ? go.slice(6) : null;
+    return cross ? (cross === "client" ? "/" + SLUG + "/setup" : "/" + SLUG + "/" + cross + "/setup") : go;
+  }
   function menuHTML(items) {
     return '<div class="menu" role="menu">' + items.map(function (it) {
       if (it.rule) return '<div class="trrule" role="separator"></div>';
       if (it.quiet) return '<div class="trquiet">' + esc(it.label) + "</div>";
-      return '<button type="button" role="menuitem" data-trgo="' + esc(it.go) + '"' +
+      return '<a role="menuitem" href="' + esc(menuHref(it.go)) + '" data-trgo="' + esc(it.go) + '"' +
         (it.here ? ' aria-current="true"' : "") + ">" + esc(it.label) +
-        (it.note ? '<span class="dlsub">' + esc(it.note) + "</span>" : "") + "</button>";
+        (it.note ? '<span class="dlsub">' + esc(it.note) + "</span>" : "") + "</a>";
     }).join("") + "</div>";
   }
   /* THE STAFF READING LINK (spec: Processes lifecycle, §542). A client's own
@@ -93642,6 +93656,11 @@ var SYNC = (function () {
       nav.addEventListener("click", function (ev) {
         var b = ev.target.closest ? ev.target.closest("[data-trgo]") : null;
         if (!b) return;
+        /* §794: a modifier key, or a button that is not the left one, is the
+           browser's own press on the link — a new tab or window — and the
+           menu is left to the browser */
+        if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+        ev.preventDefault();
         var go = b.dataset.trgo;
         if (b.getAttribute("aria-current") === "true") { Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; }); return; }
         Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; });
@@ -93699,7 +93718,7 @@ var SYNC = (function () {
             return;
           }
         }
-        var href = cross ? (cross === "client" ? "/" + SLUG + "/setup" : "/" + SLUG + "/" + cross + "/setup") : go;
+        var href = menuHref(go);
         if (href === location.pathname) return;
         location.assign(href);
       });

@@ -872,7 +872,7 @@ if (browser) {
   check("no client mark on the bar (§401)", (await page.locator("nav.trail img").count()) === 0);
   await page.locator("nav.trail .trmod > summary").click();
   await page.waitForTimeout(200);
-  const items = await page.locator("nav.trail .trmod .menu button").allInnerTexts();
+  const items = await page.locator("nav.trail .trmod .menu [role=menuitem]").allInnerTexts();
   /* §425 REWRITTEN, NEVER LOOSENED (§218): the module step is ONE full list
      everywhere — every module this client has (the one you are in included,
      bold), a rule, every module's settings, then Client settings. */
@@ -893,7 +893,7 @@ if (browser) {
   /* the client step is the server's list less the client you are on (§401) */
   await page.locator("nav.trail .trclient > summary").click();
   await page.waitForTimeout(200);
-  const cl = await page.locator("nav.trail .trclient .menu button").allInnerTexts();
+  const cl = await page.locator("nav.trail .trclient .menu [role=menuitem]").allInnerTexts();
   const wantCl = CLIENTS.filter((c) => c.key !== "raya-trade").map((c) => c.name);
   check("the client step lists the OTHER clients the server says this person may open",
     wantCl.length > 0 && wantCl.every((n, i) => cl[i] === n) && !cl.includes("Raya Trade"), cl.join(" | "));

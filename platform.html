@@ -4762,7 +4762,7 @@
     name.appendChild(el("h1", null, "My tasks"));
     left.appendChild(wk);
     left.appendChild(name);
-    left.appendChild(el("p", "pgsub", "Your actions across every client's Internal Tracker."));
+    left.appendChild(el("p", "pgsub", "Your actions across every client's Task Tracker."));
     var strip = el("div", "mwstrip");
     top.appendChild(left);
     top.appendChild(strip);
@@ -5589,7 +5589,7 @@
         sh.appendChild(el("span", "meta"));
         if (client) {
           sh.appendChild(el("span", "sp"));
-          var to = el("a", "holink", "Internal Tracker →");
+          var to = el("a", "holink", "Task Tracker →");
           to.href = "/" + client + "/tracker";
           sh.appendChild(to);
         }

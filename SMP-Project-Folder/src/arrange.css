@@ -779,7 +779,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   nav.trail details.trstep[open] > summary { background:var(--surface-2); color:var(--ink); }
   nav.trail details.trstep > summary > span { overflow:hidden; text-overflow:ellipsis; max-width:220px; }
   nav.trail details.trstep > summary > svg { width:10px; height:10px; flex:none; color:var(--ink-3); }
-  nav.trail .menu button[aria-current="true"] { font-weight:700; }
+  nav.trail .menu button[aria-current="true"], nav.trail .menu a[aria-current="true"] { font-weight:700; }
   /* a line in a menu that is not a door ("Reading your clients…", "No other
      clients"), §401 — said, never a button that goes nowhere (§94.15) */
   nav.trail .trquiet { padding:9px 14px; font-size:13.5px; color:var(--ink-2); font-style:italic; }
@@ -858,7 +858,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      happened until the popup is noticed. */
   details.dlmenu.topsel[open] > summary { color:var(--panel-ink); }
   details.dlmenu.topsel > .menu { min-width:230px; top:calc(100% + 2px); }
-  details.dlmenu.topsel > .menu button[aria-current="true"] { font-weight:700; }
+  details.dlmenu.topsel > .menu button[aria-current="true"], details.dlmenu.topsel > .menu a[aria-current="true"] { font-weight:700; }
   details.dlmenu > .menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0;
                            min-width:290px; background:var(--surface);
                            border:1px solid var(--line); border-radius:var(--r);
@@ -875,11 +875,15 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   @media (prefers-reduced-motion:reduce) {
     details.dlmenu[open] > .menu, details.dlmenu[open] > .menu.closing, .iconwrap .menu { animation:none; }
   }
-  details.dlmenu > .menu button { display:block; width:100%; text-align:left; font:inherit;
-                                  font-size:13.5px; color:var(--ink); background:none;
+  /* §794: a menu's entry is a button or, in the trail, a link (an <a href>,
+     so it opens in a new tab on a modifier key or a right click); both wear
+     the same clothes */
+  details.dlmenu > .menu button, details.dlmenu > .menu a[role="menuitem"] {
+                                  display:block; width:100%; box-sizing:border-box; text-align:left; font:inherit;
+                                  font-size:13.5px; color:var(--ink); background:none; text-decoration:none;
                                   border:0; padding:9px 14px; cursor:pointer; }
-  details.dlmenu > .menu button:hover { background:var(--surface-2); }
-  details.dlmenu > .menu button:focus-visible { outline:2px solid var(--gold);
+  details.dlmenu > .menu button:hover, details.dlmenu > .menu a[role="menuitem"]:hover { background:var(--surface-2); }
+  details.dlmenu > .menu button:focus-visible, details.dlmenu > .menu a[role="menuitem"]:focus-visible { outline:2px solid var(--gold);
                                                 outline-offset:-2px; }
   /* The line under each entry says which subjects keep that plan, because
      "pillars" and "projects" are the platform's words and the person choosing

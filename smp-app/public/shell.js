@@ -41977,17 +41977,18 @@ var ICON_WINDOW = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h6
 var ICON_BENCH = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 7.5h14M8 7.5v9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
 function accLanding(editable, ROWS){
   var rdOn = SMPRules.readersOpen(GROUP);
+  /* §799: the office rows too — the SMO lands in the window under this same switch */
   var who = ROWS.filter(function(r){
     var info = LADDER_ROW[r.key] || {};
-    return !(r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])) && (info.held == null || !SMPRules.penOn(world(), r.of[0]));
+    return (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])) || (info.held == null || !SMPRules.penOn(world(), r.of[0]));
   }).map(accTitle);
   var opt = function(on, key, icon, word){
     return '<button type="button" class="acland-opt' + (on ? ' on' : '') + '"' + (editable && !on ? ' data-readers="' + key + '"' : (editable ? '' : ' disabled')) +
       ' aria-pressed="' + on + '">' + icon + '<span>' + word + '</span></button>';
   };
-  return '<div class="acland"><div class="acland-txt"><b>First screen for people who can change nothing</b>' +
+  return '<div class="acland"><div class="acland-txt"><b>First screen for the office and for people who can change nothing</b>' +
       '<span>Today: ' + esc(who.join(", ") || "nobody") + '. This decides where they open on sign-in, never what they can see.</span></div>' +
-    '<div class="acland-sw" role="group" aria-label="First screen for people who can change nothing">' +
+    '<div class="acland-sw" role="group" aria-label="First screen for the office and for people who can change nothing">' +
       opt(rdOn, "window", ICON_WINDOW, "Reading window") + opt(!rdOn, "workbench", ICON_BENCH, "Workbench") + '</div></div>';
 }
 function renderAccess(){
@@ -58689,10 +58690,18 @@ var READING = (function () {
     }
     return true;
   }
+  /* §799 — AND THE OFFICE LANDS THERE TOO, under the same switch. Islam: *"make this view the
+     default for the smo as well"*, then *"same switch"*: the SMO team and the Super user open
+     in the window on the Overview as a reader does, with the workbench a press of Exit away;
+     Roles & access's one first-screen switch covers them (its wording says so now). */
+  function officeSeat(person) {
+    if (!person) return false;
+    try { return !!SMPRules.isOffice(world(), person); } catch (e) { return false; }
+  }
   function offer(person, viewAs) {
     /* the client's own switch first (Structure step, SMPRules.readersOpen) */
     if (!SMPRules.readersOpen(GROUP)) return false;
-    if (!readerSeat(person)) return false;
+    if (!readerSeat(person) && !officeSeat(person)) return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
     /* a deep address is the sign-in's own page; Viewing as somebody is a
        sign-in as them (§237), so it lands where theirs would (§743) */
@@ -58702,7 +58711,7 @@ var READING = (function () {
     return !!open(null);
   }
 
-  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen, print: printAll, mayPrint: mayPrint };
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, officeSeat: officeSeat, state: state, isOpen: isOpen, print: printAll, mayPrint: mayPrint };
 })();
 
 /* ── slides.js ── */

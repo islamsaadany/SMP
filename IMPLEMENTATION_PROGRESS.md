@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-20 — The SMO lands on the Overview too (§799).** The SMO team and the Super user open in the reading window on the Overview when they sign in, the workbench a press of Exit away. Roles & access's first-screen switch covers them, and says so.
+
 **2026-11-20 — The reading window opens on an Overview (§798).** A board member, or anyone opening the reading window, lands on an Overview before the tabs: where we stand (the three figures), the directions and capabilities with their standing, the business units, the supporting functions with their headline, and the plan as formed — every line a door to the tab or the subject behind it. The cards follow the client's structure; the tabs stay; the paper leaves the Overview out.
 
 **2026-11-20 — A project moves from one function to another (§797).** On a function's plan page with the pen on, the SMO can move a project to another function that plans in projects: *Move to another function* beside Remove, the floating box asking first with where it goes and what changes (its code, who reports it), the project travelling whole with its deliverables, outcomes, milestones, owner and figures, and the page following it.

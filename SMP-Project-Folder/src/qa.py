@@ -206,6 +206,9 @@ with sync_playwright() as p:
     for v in people:
         # over HTTP a switch rebases the tab on the server's graph (§237), one fetch
         pg.select_option("#asWho", v); pg.wait_for_timeout(700 if BASE else 200)
+        # §687/§799: a reader's seat and the office land in the reading window; this sweep
+        # walks the WORKBENCH, so the window is closed first (Exit, as a person would press)
+        pg.evaluate("()=>{ try { if (READING.isOpen()) READING.close(); } catch (e) {} }")
         # Destinations only. #units also holds the fold buttons, which go
         # nowhere, and — since 2.9 — the Manage menu's entries, which are not
         # visible until it is opened. Each is walked in its own way.

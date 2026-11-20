@@ -35,6 +35,9 @@ HTML_PATH = pathlib.Path(os.environ.get("SMP_WELCOME_HTML") or
                          (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"))
 HTML = HTML_PATH.read_bytes()
 BASE = json.loads((ROOT / "db/seed-state.json").read_text())
+# §799: the office lands in the reading window under the client's first-screen switch; this
+# file measures the WORKBENCH's welcome, so the switch is off in its state — made, not assumed
+BASE["group"].setdefault("structure", {})["readers"] = "workbench"
 
 # Mutable per-section: who is signed in, what state is served, what the chat
 # stub answers. A new browser context per section keeps sessionStorage clean.

@@ -71925,3 +71925,13 @@ Islam, of the readers: *"currently the reader users need to have better view tha
 - **Checked**: `checks/reading-overview.py` **18/0**, **6 red on the build before**: the first tab and the address, the figures character for character with Overall performance, the directions door agreeing with the Directions tab line for line and opening it on the pressed direction, the functions door by name with each line's figure its own Overall performance headline, the plan door, a reader's seat on the Overview with no Print, the three shapes. `checks/reading-print.py` **32/0** (the window opened on Foundation where the tab's markup is compared; the paper's sections the tabs after Overview). The shell is v8.08.
 - **On the branch, not merged.**
 
+## §799 — The office lands in the reading window too, under the same switch (2026-11-20)
+
+Islam: *"make this view the default for the smo as well"*; asked whether the SMO should follow Roles & access's one first-screen switch or always land there, *"same switch"*.
+
+- **The SMO team and the Super user open in the reading window on the Overview** when they sign in (`READING.offer`: a reader's seat OR the office, `officeSeat` = `SMPRules.isOffice`), the workbench a press of Exit away and untouched; a deep address still opens the page it names (§148); Viewing as somebody follows (§743). A seat that holds a piece — a head, an owner, a custodian — opens on the workbench as before: the gate widened by the office alone.
+- **One switch.** Roles & access's *First screen* switch (§704, `readersOpen`) covers the office now; its heading reads *First screen for the office and for people who can change nothing*, and its *Today:* list names the office rows too. Off sends everybody to the workbench.
+- **The sweeps measure the workbench, and say so.** `qa.py` closes the window after every viewer switch (it walks the workbench's destinations; the window over them intercepted its clicks — the failure it had on a reader's seat since §687, now on the office too, and fixed at its cause); `checks/welcome.py` makes its state with the switch off (§94.2), as its §10 already did for the CEO.
+- **Checked**: `checks/reading-office-landing.py` **8/0**, **3 red on the build before**: the Super user and a reader open in the window on the Overview; a function head on the workbench; with the switch off, both on the workbench; the heading and the Today list name the office. (The worked example has no SMO team member apart from the Super user, so that seat is read through the rule it shares, `isOffice`.) `checks/reading-overview.py` 18/0, `checks/reading-print.py` 32/0. The shell is v8.09.
+- **On the branch, not merged.**
+

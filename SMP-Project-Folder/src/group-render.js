@@ -9623,6 +9623,10 @@ function projPlanBody(p, subject){
            address — holderOfProjectId() resolves the holder at press time. */
         '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
           '">Remove this ' + L1("project") + '</button>' +
+        /* §793: and, for the office, the way to another function — drawn only where there is one
+           to go to; a capability's project stays in its box (functions only, Islam) */
+        (!isCapTarget(fk) && typeof inOffice === "function" && inOffice() && projMoveTargets(fnKeyOf(fk)).length
+          ? '<button class="rmplan mvplan" data-mvrow="project|' + esc(p.id) + '">Move to another ' + esc(L1("fnword")).toLowerCase() + '</button>' : '') +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill

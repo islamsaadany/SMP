@@ -697,7 +697,8 @@
 /* v7.87-welcome-asked-for — §776: the welcome no longer opens on its own; the house mark opens it. */
 /* v7.81-builder-refine — main's §772: Builder until the five parts are on the plan, then Refine. */
 /* v7.88-merged-main — §773–§776.1 merged over main's §772; past main's v7.81. */
-const SHELL = "smp-shell-v7.88-merged-main";
+/* v7.89-link-optional — §777: a key measure no tactic names carries no red line. */
+const SHELL = "smp-shell-v7.89-link-optional";
 const ASSETS = [
   "/",
   "/index.html",

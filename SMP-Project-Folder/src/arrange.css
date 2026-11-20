@@ -1073,7 +1073,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .swot-p { display:block; position:relative; padding-left:14px; margin-top:3px; }
   .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
   .swot-t b + .swot-p { margin-top:5px; }
-  /* §793 — THE POINTS FOLD UNDER THE TITLE (group-render.js swotLine). The
+  /* §795 — THE POINTS FOLD UNDER THE TITLE (group-render.js swotLine). The
      title is a button that reads as the title it was: the page's own type,
      no ground, no edge; a gold underline on hover says it can be pressed. The
      arrow and, while folded, the count sit after it in the quiet ink. */
@@ -1991,7 +1991,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
     border-radius:8px; font-size:12px; font-weight:700; padding:4px 13px;
     cursor:pointer; font-family:inherit; white-space:nowrap; }
-  /* §793 — Expand all / Collapse all, the pen's quieter neighbour: the same
+  /* §795 — Expand all / Collapse all, the pen's quieter neighbour: the same
      box at the regular weight, its mark before the word. The second selector
      for §145.14's reason, as on the pen. */
   .swfoldall, .tabs .secttail button.swfoldall {

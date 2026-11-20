@@ -4164,7 +4164,7 @@
        of the row with the pen at the end — drawn, looked at, and thrown away
        (§41.9). The tail takes the auto and the bar gives its up. */
     var penHTML = (stratTab && typeof secActs === "function") ? secActs() : "";
-    /* §793: Expand all / Collapse all for a SWOT's folding points, before the
+    /* §795: Expand all / Collapse all for a SWOT's folding points, before the
        pen. Drawn hidden; `swotFoldSync()` at the end of the paint shows it
        where the page has a line with points on it. On the strategy tabs for
        everybody, the pen or no pen — folding is reading. */
@@ -4418,7 +4418,7 @@
     rememberWhere();
     /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
        panel follow every paint, as the page's own parts do. */
-    if (typeof swotFoldSync === "function") swotFoldSync();   /* §793 */
+    if (typeof swotFoldSync === "function") swotFoldSync();   /* §795 */
     if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
     /* §755: a figure corrected on a closed cycle re-takes its closing
        record before the save leaves (closeRecordFollow, config-data.js). */

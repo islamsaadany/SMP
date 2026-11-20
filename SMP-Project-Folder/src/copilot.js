@@ -3041,7 +3041,7 @@ var COPILOT = (function(){
     if (tail && !tail.querySelector("[data-cop-panelbtn]")) {
       var b = document.createElement("button"); b.type = "button"; b.className = "copBbtn"; b.setAttribute("data-cop-panelbtn", "");
       b.setAttribute("aria-pressed", String(PANEL.open)); b.title = "Refine this part with the Copilot"; b.textContent = "✦ Refine";
-      /* §793: after the SWOT's Expand all / Collapse all where the row has it, so the three read fold · ✦ Refine · Edit as drawn */
+      /* §795: after the SWOT's Expand all / Collapse all where the row has it, so the three read fold · ✦ Refine · Edit as drawn */
       var fold = tail.querySelector("[data-swfoldall]");
       tail.insertBefore(b, fold ? fold.nextSibling : tail.firstChild);
     }

@@ -58,7 +58,7 @@ function swotText(x){
       return '<span class="swot-p">' + esc(l.replace(/^[-\u2013\u2014\u2022*\u00b7]+\s*/, "")) + '</span>';
     }).join("") + '</span>';
 }
-/* ── A SWOT LINE'S POINTS FOLD UNDER ITS TITLE (§793) ──────────────────────
+/* ── A SWOT LINE'S POINTS FOLD UNDER ITS TITLE (§795) ──────────────────────
    Islam: *"can we have an option where the items under the title is collapsed
    and expanded by clicking on the main title? or expand all or collapse
    all?"* Settled on a working mockup he pressed himself

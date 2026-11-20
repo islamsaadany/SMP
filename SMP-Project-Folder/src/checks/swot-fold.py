@@ -1,4 +1,4 @@
-"""A SWOT LINE'S POINTS FOLD UNDER ITS TITLE (§793).
+"""A SWOT LINE'S POINTS FOLD UNDER ITS TITLE (§795).
 
 Islam: *"can we have an option where the items under the title is collapsed
 and expanded by clicking on the main title? or expand all or collapse all?"*
@@ -19,7 +19,7 @@ WHAT IS ASSERTED, on the built file, written through the pen itself:
       shows every point whatever is folded.
   5 · A function's S&W is the same boxes and folds the same way.
 
-SMP_BUILT points it at another build (§276) — on the build before §793 it is
+SMP_BUILT points it at another build (§276) — on the build before §795 it is
 red. SMP_CHROME names the browser.
 """
 import os

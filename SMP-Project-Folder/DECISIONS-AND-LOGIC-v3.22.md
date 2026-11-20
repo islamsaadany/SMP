@@ -71853,7 +71853,7 @@ Islam, shown the bar on two lines at 760px: *"the top bar should not take 2 line
 
 **§792 MERGED TO `main`** 2026-11-19, Islam: *"merge to main"*. `main` had not moved since §791; merged with a merge commit `main` alone holds (§91); the built file matches a fresh build of the merged sources. `checks/bar-narrow.mjs` **42 ok, 0 failed** on the merged tree. `checks/shell.mjs` and `checks/jump.mjs` were not run (no database in the session). The Refine panel's gap was not reproduced before the fix, so it stands to be confirmed on his screen. No migrations; nobody signed out.
 
-## §793 — A SWOT line's points fold under its title (2026-11-20)
+## §795 — A SWOT line's points fold under its title (2026-11-20; §793 on the branch, renumbered at the merge: main took §793–§794)
 
 Islam: *"for the swot can we have an option where we can create multiple points under each main point? we already did this with having the title in bold. but can we have an option where the items under the title is collapsed and expanded by clicking on the main title? or expand all or collapse all?"*
 
@@ -71873,6 +71873,6 @@ Islam: *"for the swot can we have an option where we can create multiple points 
 - **Paper and slides always show every point.** Print opens every folded line and drops the arrow and count (arrange.css `@media print`); the deck, the workbooks and the PowerPoint read `swotText()` or the raw text and never hear of a fold. The reading window draws its own SWOT and is untouched.
 - **A function's S&W** is the same boxes (§399) and folds the same way.
 
-**Checked**: `checks/swot-fold.py` **17 ok, 0 failed** on the rebuilt file — written through the pen, folded by its title and by the page button, kept across a tab and back, nothing in the plan changed, print whole, a function's S&W the same — and red on the build before (its first assertion that needs a fold fails, and the run stops there for want of anything to press). `checks/function-sw.py`, `checks/fn-sw-default.py` and `checks/copilot-panel-compete.py` green. `smp-app/checks/bar-narrow.mjs` **42 ok, 0 failed**. `checks/shell.mjs` was not run (no database in the session). The shell is v8.04.
+**Checked**: `checks/swot-fold.py` **17 ok, 0 failed** on the rebuilt file — written through the pen, folded by its title and by the page button, kept across a tab and back, nothing in the plan changed, print whole, a function's S&W the same — and red on the build before (its first assertion that needs a fold fails, and the run stops there for want of anything to press). `checks/function-sw.py`, `checks/fn-sw-default.py` and `checks/copilot-panel-compete.py` green. `smp-app/checks/bar-narrow.mjs` **42 ok, 0 failed**. `checks/shell.mjs` was not run (no database in the session). The shell is v8.05 (v8.04 on the branch; main took v8.04).
 
 - **On the branch, not merged.**

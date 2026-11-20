@@ -71926,4 +71926,17 @@ Islam, of the readers: *"currently the reader users need to have better view tha
 - **On the branch, not merged.**
 
 **§798 MERGED TO `main`** 2026-11-20, Islam: *"merge to main"*. `main` had not moved since §797; merged with a merge commit `main` alone holds (§91); the built file matches a fresh build of the merged sources. `checks/reading-overview.py` **18/0**. No migrations; nobody signed out.
+## §799 — The office lands in the reading window too, under the same switch (2026-11-20)
+
+Islam: *"make this view the default for the smo as well"*; asked whether the SMO should follow Roles & access's one first-screen switch or always land there, *"same switch"*.
+
+- **The SMO team and the Super user open in the reading window on the Overview** when they sign in (`READING.offer`: a reader's seat OR the office, `officeSeat` = `SMPRules.isOffice`), the workbench a press of Exit away and untouched; a deep address still opens the page it names (§148); Viewing as somebody follows (§743). A seat that holds a piece — a head, an owner, a custodian — opens on the workbench as before: the gate widened by the office alone.
+- **One switch.** Roles & access's *First screen* switch (§704, `readersOpen`) covers the office now; its heading reads *First screen for the office and for people who can change nothing*, and its *Today:* list names the office rows too. Off sends everybody to the workbench.
+- **The sweeps measure the workbench, and say so.** `qa.py` closes the window after every viewer switch (it walks the workbench's destinations; the window over them intercepted its clicks — the failure it had on a reader's seat since §687, now on the office too, and fixed at its cause); `checks/welcome.py` makes its state with the switch off (§94.2), as its §10 already did for the CEO.
+- **Checked**: `checks/reading-office-landing.py` **8/0**, **3 red on the build before**: the Super user and a reader open in the window on the Overview; a function head on the workbench; with the switch off, both on the workbench; the heading and the Today list name the office. (The worked example has no SMO team member apart from the Super user, so that seat is read through the rule it shares, `isOffice`.) `checks/reading-overview.py` 18/0, `checks/reading-print.py` 32/0. The shell is v8.09.
+- **On the branch, not merged.**
+
+**§799.1 — The sweep runs to its end again.** `qa.py` closes the reading window after every viewer pick, wrapped where the pick is made (eleven picks in the file; the close written at the walk's one carried it past 33 viewers and stopped it at Setup). On this build the sweep walks all 33 viewers and every section through to the workbook checks, for the first time since §687 sent a reader's seat into the window under it, and ends on TWO FINDINGS THAT PREDATE THIS WORK, left for a session of their own: *the people workbook has 3 sheet-backed dropdowns, wanted 2 (Unit and Official BU)* — a third list, `Lists!$C$2:$C$34`, exists now — and *the Lists sheet holds 33 rows for 21 places and 3 BUs*; the sweep's expectation (qa.py ~1590) is older than the workbook's third list.
+
+**§799 AND §799.1 MERGED TO `main`** 2026-11-20, Islam: *"merge to main"*. `main` held only §798's merge record beyond the branch's base; merged with a merge commit `main` alone holds (§91), the record joined; the built file matches a fresh build of the merged sources. `checks/reading-office-landing.py` **8/0**. No migrations; nobody signed out.
 

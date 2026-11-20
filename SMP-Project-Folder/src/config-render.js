@@ -731,17 +731,18 @@ var ICON_WINDOW = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h6
 var ICON_BENCH = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 7.5h14M8 7.5v9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
 function accLanding(editable, ROWS){
   var rdOn = SMPRules.readersOpen(GROUP);
+  /* §799: the office rows too — the SMO lands in the window under this same switch */
   var who = ROWS.filter(function(r){
     var info = LADDER_ROW[r.key] || {};
-    return !(r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])) && (info.held == null || !SMPRules.penOn(world(), r.of[0]));
+    return (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])) || (info.held == null || !SMPRules.penOn(world(), r.of[0]));
   }).map(accTitle);
   var opt = function(on, key, icon, word){
     return '<button type="button" class="acland-opt' + (on ? ' on' : '') + '"' + (editable && !on ? ' data-readers="' + key + '"' : (editable ? '' : ' disabled')) +
       ' aria-pressed="' + on + '">' + icon + '<span>' + word + '</span></button>';
   };
-  return '<div class="acland"><div class="acland-txt"><b>First screen for people who can change nothing</b>' +
+  return '<div class="acland"><div class="acland-txt"><b>First screen for the office and for people who can change nothing</b>' +
       '<span>Today: ' + esc(who.join(", ") || "nobody") + '. This decides where they open on sign-in, never what they can see.</span></div>' +
-    '<div class="acland-sw" role="group" aria-label="First screen for people who can change nothing">' +
+    '<div class="acland-sw" role="group" aria-label="First screen for the office and for people who can change nothing">' +
       opt(rdOn, "window", ICON_WINDOW, "Reading window") + opt(!rdOn, "workbench", ICON_BENCH, "Workbench") + '</div></div>';
 }
 function renderAccess(){

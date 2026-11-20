@@ -717,7 +717,8 @@
 /* v8.06-trail-links — §796: the trail's menu entries are links, so a ⌘-click or a right click opens one in a new tab; past main's v8.05 at the merge. */
 /* v8.07-project-move — §797: a project moves from one function to another, the office's, asked first. */
 /* v8.08-reading-overview — §798: the reading window opens on an Overview — where we stand, the doors to the directions, the capabilities, the units, the functions, the plan. */
-const SHELL = "smp-shell-v8.08-reading-overview";
+/* v8.09-office-lands-reading — §799: the office lands in the reading window too, under the same switch. */
+const SHELL = "smp-shell-v8.09-office-lands-reading";
 const ASSETS = [
   "/",
   "/index.html",

@@ -845,10 +845,18 @@ var READING = (function () {
     }
     return true;
   }
+  /* §799 — AND THE OFFICE LANDS THERE TOO, under the same switch. Islam: *"make this view the
+     default for the smo as well"*, then *"same switch"*: the SMO team and the Super user open
+     in the window on the Overview as a reader does, with the workbench a press of Exit away;
+     Roles & access's one first-screen switch covers them (its wording says so now). */
+  function officeSeat(person) {
+    if (!person) return false;
+    try { return !!SMPRules.isOffice(world(), person); } catch (e) { return false; }
+  }
   function offer(person, viewAs) {
     /* the client's own switch first (Structure step, SMPRules.readersOpen) */
     if (!SMPRules.readersOpen(GROUP)) return false;
-    if (!readerSeat(person)) return false;
+    if (!readerSeat(person) && !officeSeat(person)) return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
     /* a deep address is the sign-in's own page; Viewing as somebody is a
        sign-in as them (§237), so it lands where theirs would (§743) */
@@ -858,5 +866,5 @@ var READING = (function () {
     return !!open(null);
   }
 
-  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen, print: printAll, mayPrint: mayPrint };
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, officeSeat: officeSeat, state: state, isOpen: isOpen, print: printAll, mayPrint: mayPrint };
 })();

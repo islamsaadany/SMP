@@ -201,6 +201,18 @@ with sync_playwright() as p:
                 pg.wait_for_timeout(200)
             return r
         pg.select_option = _pick
+    # §687/§799: A READER'S SEAT AND THE OFFICE LAND IN THE READING WINDOW, and this sweep
+    # walks the WORKBENCH — so every pick of a viewer closes the window after it (Exit, as a
+    # person would press). ONE PLACE, wrapped where the pick is made, for the same reason
+    # §362.8's wrapper above is: there are eleven picks in this file, and a close written at
+    # the one that failed first walked 33 viewers and stopped at the next (§53.5).
+    _sel_land = pg.select_option
+    def _pick_land(selector, value, *a, **k):
+        r = _sel_land(selector, value, *a, **k)
+        if selector == "#asWho":
+            pg.evaluate("()=>{ try { if (READING.isOpen()) READING.close(); } catch (e) {} }")
+        return r
+    pg.select_option = _pick_land
     open_platform(pg)
     people = pg.eval_on_selector_all("#asWho option","els=>els.map(e=>e.value)")
     for v in people:

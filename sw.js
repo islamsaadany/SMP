@@ -712,8 +712,8 @@
 /* v8.01-build-advise-refine — §790: ✦ Build, ✦ Advise and ✦ Refine, one family. */
 /* v8.02-refine-compete — §791: ✦ Refine opens on the Competitive Discipline tab as on the SWOT. */
 /* v8.03-bar-narrow — §792: the top bar on a narrowed window; the Refine panel sits under the chrome. */
-/* v8.04-project-move — §793: a project moves from one function to another, the office's, asked first. */
-const SHELL = "smp-shell-v8.04-project-move";
+/* v8.07-project-move — §797: a project moves from one function to another, the office's, asked first. */
+const SHELL = "smp-shell-v8.07-project-move";
 const ASSETS = [
   "/",
   "/index.html",

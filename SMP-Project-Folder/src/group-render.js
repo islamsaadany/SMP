@@ -9623,7 +9623,7 @@ function projPlanBody(p, subject){
            address — holderOfProjectId() resolves the holder at press time. */
         '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
           '">Remove this ' + L1("project") + '</button>' +
-        /* §793: and, for the office, the way to another function — drawn only where there is one
+        /* §797: and, for the office, the way to another function — drawn only where there is one
            to go to; a capability's project stays in its box (functions only, Islam) */
         (!isCapTarget(fk) && typeof inOffice === "function" && inOffice() && projMoveTargets(fnKeyOf(fk)).length
           ? '<button class="rmplan mvplan" data-mvrow="project|' + esc(p.id) + '">Move to another ' + esc(L1("fnword")).toLowerCase() + '</button>' : '') +

@@ -12041,7 +12041,7 @@ function moveCapProjects(from, to){
   from.projects = [];
   return list.length;
 }
-/* ── A PROJECT MOVES FROM ONE FUNCTION TO ANOTHER (§793) ──────────────────
+/* ── A PROJECT MOVES FROM ONE FUNCTION TO ANOTHER (§797) ──────────────────
    Islam: *"I want to be able to move a project from a function to another
    function"*; of two shapes offered, *"option 1, functions only"*. The
    destinations are the OTHER functions that plan in projects and are shown —
@@ -12049,7 +12049,7 @@ function moveCapProjects(from, to){
    that changed its way of planning since the page was drawn is not offered
    (§48.2). The office's alone: moving a project changes what each function
    holds, which is Setup's kind of change, and the server judges it so (a
-   function's head is refused on both sides — scripts/test-authorize.js §793).
+   function's head is refused on both sides — scripts/test-authorize.js §797).
 
    THE PROJECT TRAVELS WHOLE AND IN PLACE (§326's rule): spliced out of the
    source function's own array and pushed onto the destination's — the holder

@@ -6434,7 +6434,7 @@ console.log("\n§545 · a bounded reporter enters a category figure (§343)");
   check("§545 REFUSED: …nor its target", !v.ok, "was ALLOWED");
 })();
 
-/* ── §793: A PROJECT MOVED FROM ONE FUNCTION TO ANOTHER ──────────────────
+/* ── §797: A PROJECT MOVED FROM ONE FUNCTION TO ANOTHER ──────────────────
    Islam: "I want to be able to move a project from a function to another
    function" — the office's, functions only. The fixture is the product's own
    shape: both functions' own projects (the seed wraps them into boxes above,
@@ -6442,14 +6442,14 @@ console.log("\n§545 · a bounded reporter enters a category figure (§343)");
    first and pushed onto the second with its capId following. The office may;
    either function's head is refused — on both sides, since what each holds
    is Setup's kind of change. */
-console.log("\n§793 · a project moved from one function to another");
+console.log("\n§797 · a project moved from one function to another");
 (function () {
   const R = require("../lib/rules.js");
   const fks = Object.keys(SEED.functions || {}).filter(function (k) {
     return String(SEED.functions[k].format) !== "pillars" &&
       (SEED.group.capabilities || []).some(function (c) { return c.fn === k && (c.projects || []).length; });
   });
-  check("§793: the seed holds two functions that plan in projects", fks.length >= 2, fks.join(","));
+  check("§797: the seed holds two functions that plan in projects", fks.length >= 2, fks.join(","));
   if (fks.length < 2) return;
   const F1 = fks[0], F2 = fks[1];
   const base = clone(SEED);
@@ -6463,7 +6463,7 @@ console.log("\n§793 · a project moved from one function to another");
     });
     base.group.capabilities = (base.group.capabilities || []).filter(function (c) { return c.fn !== fk; });
   });
-  check("§793: both functions hold their own projects after the dissolve",
+  check("§797: both functions hold their own projects after the dissolve",
         base.functions[F1].projects.length > 0 && base.functions[F2].projects.length > 0,
         base.functions[F1].projects.length + "/" + base.functions[F2].projects.length);
   const moved = function () {
@@ -6472,15 +6472,15 @@ console.log("\n§793 · a project moved from one function to another");
     return inc;
   };
   const vo = A.authorize(base, moved(), personOf(base, "smo"));
-  check("§793: the SMO moves a project from " + F1 + " to " + F2, vo.ok, vo.refusals.join(" / "));
-  check("§793: ...and the change is the plan's on both functions, nothing unknown",
+  check("§797: the SMO moves a project from " + F1 + " to " + F2, vo.ok, vo.refusals.join(" / "));
+  check("§797: ...and the change is the plan's on both functions, nothing unknown",
         vo.changes.length >= 2 && vo.changes.every(function (c) { return c.kind !== "unknown"; }),
         JSON.stringify(vo.changes.map(function (c) { return c.kind + ":" + c.what; })));
   [F1, F2].forEach(function (fk) {
     const h = base.functions[fk].head;
     if (!h) return;
     const v = A.authorize(base, moved(), personOf(base, h));
-    check("§793 REFUSED: the head of " + fk + " may not move it", !v.ok, "was ALLOWED");
+    check("§797 REFUSED: the head of " + fk + " may not move it", !v.ok, "was ALLOWED");
   });
 })();
 

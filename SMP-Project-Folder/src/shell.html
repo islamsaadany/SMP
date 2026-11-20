@@ -10883,7 +10883,7 @@
         else confirmRemoveProject(a[1]);
       });
     });
-    /* §793: a project to another function — the office's, asked first in the floating box */
+    /* §797: a project to another function — the office's, asked first in the floating box */
     document.querySelectorAll("[data-mvrow]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan() || !inOffice()) return;
@@ -13508,7 +13508,7 @@
       if (!(typeof ROWDLG !== "undefined" && ROWDLG)) closeModal();
       apply(); });
   }
-  /* §793 — MOVE A PROJECT TO ANOTHER FUNCTION, ASKED FIRST (§621): the box sits beside the
+  /* §797 — MOVE A PROJECT TO ANOTHER FUNCTION, ASKED FIRST (§621): the box sits beside the
      control, names the project, offers the other functions that plan in projects, and says
      the two things that change — its code where it lands, and who reports it from now;
      Keep is the safe default. On Move the page follows the project to its new function, so

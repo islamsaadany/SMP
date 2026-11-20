@@ -1,4 +1,4 @@
-"""A PROJECT MOVES FROM ONE FUNCTION TO ANOTHER (§793).
+"""A PROJECT MOVES FROM ONE FUNCTION TO ANOTHER (§797).
 
 Islam: *"I want to be able to move a project from a function to another
 function"*; of the two shapes offered, *"option 1, functions only"*.

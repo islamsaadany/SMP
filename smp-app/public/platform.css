@@ -2425,7 +2425,7 @@ html[data-client-settings] .viewer { display:none; }
     padding:8px 10px; cursor:pointer; letter-spacing:.01em; }
   .pane .ptitle.edhead .rmplan:hover, .pane .pband.edband .rmplan:hover {
     background:var(--bad-bg); border-color:var(--bad-bg); }
-  /* §793: Move beside Remove, in the quiet ink — a move is not a removal */
+  /* §797: Move beside Remove, in the quiet ink — a move is not a removal */
   .pane .pband.edband .rmplan.mvplan { color:var(--ink-2); }
   .pane .pband.edband .rmplan.mvplan:hover { background:var(--surface-2); border-color:var(--line); }
   .askbox .asklab { display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:8px; }

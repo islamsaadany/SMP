@@ -20501,7 +20501,7 @@ function moveCapProjects(from, to){
   from.projects = [];
   return list.length;
 }
-/* ── A PROJECT MOVES FROM ONE FUNCTION TO ANOTHER (§793) ──────────────────
+/* ── A PROJECT MOVES FROM ONE FUNCTION TO ANOTHER (§797) ──────────────────
    Islam: *"I want to be able to move a project from a function to another
    function"*; of two shapes offered, *"option 1, functions only"*. The
    destinations are the OTHER functions that plan in projects and are shown —
@@ -20509,7 +20509,7 @@ function moveCapProjects(from, to){
    that changed its way of planning since the page was drawn is not offered
    (§48.2). The office's alone: moving a project changes what each function
    holds, which is Setup's kind of change, and the server judges it so (a
-   function's head is refused on both sides — scripts/test-authorize.js §793).
+   function's head is refused on both sides — scripts/test-authorize.js §797).
 
    THE PROJECT TRAVELS WHOLE AND IN PLACE (§326's rule): spliced out of the
    source function's own array and pushed onto the destination's — the holder
@@ -37995,7 +37995,7 @@ function projPlanBody(p, subject){
            address — holderOfProjectId() resolves the holder at press time. */
         '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
           '">Remove this ' + L1("project") + '</button>' +
-        /* §793: and, for the office, the way to another function — drawn only where there is one
+        /* §797: and, for the office, the way to another function — drawn only where there is one
            to go to; a capability's project stays in its box (functions only, Islam) */
         (!isCapTarget(fk) && typeof inOffice === "function" && inOffice() && projMoveTargets(fnKeyOf(fk)).length
           ? '<button class="rmplan mvplan" data-mvrow="project|' + esc(p.id) + '">Move to another ' + esc(L1("fnword")).toLowerCase() + '</button>' : '') +
@@ -90459,7 +90459,7 @@ var SYNC = (function () {
         else confirmRemoveProject(a[1]);
       });
     });
-    /* §793: a project to another function — the office's, asked first in the floating box */
+    /* §797: a project to another function — the office's, asked first in the floating box */
     document.querySelectorAll("[data-mvrow]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan() || !inOffice()) return;
@@ -93084,7 +93084,7 @@ var SYNC = (function () {
       if (!(typeof ROWDLG !== "undefined" && ROWDLG)) closeModal();
       apply(); });
   }
-  /* §793 — MOVE A PROJECT TO ANOTHER FUNCTION, ASKED FIRST (§621): the box sits beside the
+  /* §797 — MOVE A PROJECT TO ANOTHER FUNCTION, ASKED FIRST (§621): the box sits beside the
      control, names the project, offers the other functions that plan in projects, and says
      the two things that change — its code where it lands, and who reports it from now;
      Keep is the safe default. On Move the page follows the project to its new function, so

@@ -708,18 +708,18 @@ try {
   };
   const ISLAM = { personKey: "islam", seat: "super" }, NORAN = { personKey: "noran", seat: "smoteam" }, HEND = { personKey: "hend", seat: "none" };
   const page = await call(A, NORAN, [], null);
-  check("the office opens the list", page.status === 200 && /<title>Raya Trade &mdash; Internal Tracker<\/title>/.test(page.text), page.status + " " + (page.text.match(/<title>[^<]*/) || [""])[0]);
+  check("the office opens the list", page.status === 200 && /<title>Raya Trade &mdash; Task Tracker<\/title>/.test(page.text), page.status + " " + (page.text.match(/<title>[^<]*/) || [""])[0]);
   check("the page ends in the next empty line — a note under it, this week's number, the person's own first name, a plain pill",
     /id="add" class="new"/.test(page.text) && /id="addnote" class="nt"/.test(page.text) && /<span class="who pick"[^>]*><span class="wn">Noran<\/span>/.test(page.text) &&
     new RegExp('class="addrow" data-due="' + thursdayOf(todayIn()) + '" data-owner="noran"').test(page.text) && /<span class="st">Not started<\/span>/.test(page.text));
   check("the views row carries the two settings behind the dots, Owner and Weeks in force, and the body says which list it is",
     !/class="gby"/.test(page.text) && /data-act="settings"/.test(page.text) && /data-act="set-group" data-value="owner" class="on"/.test(page.text) && /data-act="set-dates" data-value="weeks" class="on"/.test(page.text) &&
     /data-group="owner"/.test(page.text) && /data-dates="weeks"/.test(page.text) && /data-list="[^"]*\/tracker\/list"/.test(page.text));
-  check("there is no way back on the page — the top bar's trail is the way back (§497) — and the title is the module's, under this week's line", !/class="back"/.test(page.text) && /<div class="wkof">[^<]+<\/div><h2 class="pt">Internal Tracker<\/h2>/.test(page.text));
+  check("there is no way back on the page — the top bar's trail is the way back (§497) — and the title is the module's, under this week's line", !/class="back"/.test(page.text) && /<div class="wkof">[^<]+<\/div><h2 class="pt">Task Tracker<\/h2>/.test(page.text));
   check("no font shorthand ends in 'inherit' — a browser drops such a line, which is the pill at two sizes (§356.14)", !/font:[^;}]*\binherit\b/.test(page.text), (page.text.match(/font:[^;}]*\binherit\b/) || [""])[0]);
   check("nothing on it is inline script — the policy would silence it", !/<script>|onclick=/i.test(page.text) && /app\.js"><\/script>/.test(page.text));
   const client = await call(A, HEND, [], null);
-  check("the client's own person is turned away with a sentence, not a page", client.status === 403 && /The Internal Tracker is the office/.test(client.text) && !/id="add"/.test(client.text), String(client.status));
+  check("the client's own person is turned away with a sentence, not a page", client.status === 403 && /The Task Tracker is the office/.test(client.text) && !/id="add"/.test(client.text), String(client.status));
   check("...and at the api too, not only on the page (§42)", (await call(A, HEND, ["api"], { act: "add", title: "sneak" })).status === 403);
   /* TOPICS ARE THE OFFICE'S, NOT THE SUPER USER'S ALONE (§497, Islam's third
      answer): the SMO team makes one and deletes it, and a client's own person

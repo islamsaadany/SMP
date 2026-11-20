@@ -80,7 +80,7 @@ try {
   const L = await listed(page);
   const names = L.map((x) => x.n + " | " + x.w);
   check(await page.evaluate(() => !!document.getElementById("sjscrim") && !document.getElementById("sjscrim").hidden), "Ctrl K opens the window");
-  check(names.includes("Strategy | Module") && names.includes("Internal Tracker | Module"), "…listing the modules, Strategy as one entry", names.slice(0, 6).join("; "));
+  check(names.includes("Strategy | Module") && names.includes("Task Tracker | Module"), "…listing the modules, Strategy as one entry", names.slice(0, 6).join("; "));
   check(names.includes("Roles & access | Setup · Strategy") && names.includes("Client register | Setup · Client"), "…Setup's pages");
   check(["Home", "My tasks", "Clients", "Track Record", "Frameworks", "Who sees what"].every((n) => names.includes(n + " | Console")),
         "…and the console's sections, each an entry (§703)", names.filter((n) => /Console$/.test(n)).join("; "));
@@ -88,7 +88,7 @@ try {
         "…and nothing inside a module (Islam's rule)", names.join("; "));
   await page.keyboard.type("tracker");
   const narrowed = await listed(page);
-  check(narrowed.length === 1 && narrowed[0].n === "Internal Tracker", "typing narrows it", JSON.stringify(narrowed));
+  check(narrowed.length === 1 && narrowed[0].n === "Task Tracker", "typing narrows it", JSON.stringify(narrowed));
   await Promise.all([page.waitForURL(/\/raya-trade\/tracker$/, { timeout: 10000 }).catch(() => {}), page.keyboard.press("Enter")]);
   check(/\/raya-trade\/tracker$/.test(page.url()), "…and Enter opens what it names", page.url());
   await page.waitForLoadState("networkidle");
@@ -134,7 +134,7 @@ try {
   const C = await listed(page);
   check(C.some((x) => x.n === "Strategy"), "a client's own person is offered Strategy", JSON.stringify(C));
   check(!C.some((x) => /^Setup/.test(x.w) || x.w === "Console"), "…and neither Setup nor the console", C.map((x) => x.n + " | " + x.w).join("; "));
-  check(!C.some((x) => x.n === "Internal Tracker" || x.n === "Meeting Notes"), "…nor the office's Tracker and Notes, which would only turn them away");
+  check(!C.some((x) => x.n === "Task Tracker" || x.n === "Meeting Notes"), "…nor the office's Tracker and Notes, which would only turn them away");
   await ctx.close();
 
   check(errs.length === 0, "no script error on any page", errs.slice(0, 3).join(" | "));

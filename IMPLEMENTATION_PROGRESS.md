@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-20 — The Internal Tracker is now the Task Tracker (§788).** The module's label, its refusals and My tasks' lines say Task Tracker; the key, address and tables are unchanged.
+
 **2026-11-17 — Save and next goes through this week only (§787).** In the weekly check, Save and next, Skip and the arrows go from one task of this week to the next and never into a topic's folded last-week or next-week lists; those open only by hand.
 
 **2026-11-17 — Free chats answer on Claude again (§786).** §784 had put the plan's shape into the answer's schema, which Claude refuses past its optional-field cap, so every free chat failed on main. The shape is now asked for in a second, small request of its own.

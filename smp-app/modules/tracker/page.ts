@@ -1063,7 +1063,7 @@ function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, at
 export async function refusedDocument(slug: string, tenantId: string, tenantName: string, have: ModuleKey[], consultant = false): Promise<string> {
   const bar = await trackerBar(tenantId);
   return skeleton(slug, tenantName, { slug, tenantName, module: "tracker", have, consultant }, bar, null,
-    '<main class="pg"><div class="none"><b>The Internal Tracker is the office\'s.</b>' +
+    '<main class="pg"><div class="none"><b>The Task Tracker is the office\'s.</b>' +
     'It is where Forefront keeps its own weekly actions about ' + esc(tenantName) + '. ' +
     '<a href="' + esc(clientHref(slug, null, "")) + '">Back to ' + esc(tenantName) + "</a></div></main>\n");
 }

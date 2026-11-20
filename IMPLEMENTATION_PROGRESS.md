@@ -6,6 +6,16 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **2026-11-20 — The Internal Tracker is now the Task Tracker (§793).** The module's label, its refusals and My tasks' lines say Task Tracker; the key, address and tables are unchanged.
 
+**2026-11-19 — The top bar on a zoomed-in window, and the Refine panel's place (§792), merged to `main` 2026-11-19 on Islam's word.** Zoomed in or on a narrow window, the top bar's parts no longer run over each other: under 1000px Jump to shows as its magnifying glass and the role line goes, under 880px the words "Viewing as" go, and a long client name shortens with "…". **The bar is one line at every width** (Islam: *"the top bar should not take 2 lines by any means"*), the phone included: at 760px and under Read is its icon and the "?" goes; at 520px and under the trail is the mark and the module, and Sign out is its icon. The same on Insights, the Tracker and Meeting Notes. The ✦ Refine panel now sits directly under the bar from the moment it opens and stays there when the window changes.
+
+**2026-11-18 — ✦ Refine opens on the Competitive Discipline tab (§791).** The side panel on a unit's Competitive Discipline tab now opens as it does on the SWOT — the chats rail, the question and the box — instead of saying it only works on the Foundation, the SWOT and the Plan. One missing entry in the panel's map of tabs to areas.
+
+**2026-11-17 — ✦ Build, ✦ Advise and ✦ Refine (§790).** The Copilot's three doors named for what each does and dressed alike: ✦ Build and ✦ Advise at the right of the tab row, ✦ Refine beside Edit on the plan (it was ✦ Copilot, plain text).
+
+**2026-11-17 — The whole strategy on paper, from the reading window (§789).** A Print control in the reading window's strip, for the SMO alone, prints the subject being read as one document — cover, then every tab in order, every direction opened — through the browser's print dialog, so paper or Save as PDF. The paper is built from the same code as the tabs, so it cannot differ from the screen. §789.1: a company that plans its own strategy (El Abd's shape) is named by its name on the cover, and a direction's title is never left alone at the foot of a page. §789.2: a direction or a capability is never split over two pages; one that does not fit starts a new page, whole.
+
+**2026-11-17 — An older draft lays itself out (§788).** No *Lay it out for the plan* button: a draft made before the plan's shape lays itself out as the plan when its panel shows it, once, with nothing said in the chat.
+
 **2026-11-17 — Save and next goes through this week only (§787).** In the weekly check, Save and next, Skip and the arrows go from one task of this week to the next and never into a topic's folded last-week or next-week lists; those open only by hand.
 
 **2026-11-17 — Free chats answer on Claude again (§786).** §784 had put the plan's shape into the answer's schema, which Claude refuses past its optional-field cap, so every free chat failed on main. The shape is now asked for in a second, small request of its own.

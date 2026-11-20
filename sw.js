@@ -707,7 +707,12 @@
 /* v7.96-put-on-plan — §784: a chat's work laid out as the plan, and put on it. */
 /* v7.97-all-parts — §785: every part laid out as the plan and put on it; rename from the header; an older draft laid out for the plan. */
 /* v7.98-plan-shape-ask — §786: the plan's shape asked on its own; free chats answer on Claude again. */
-const SHELL = "smp-shell-v7.98-plan-shape-ask";
+/* v7.99-draft-lays-out — §788: an older draft lays itself out as the plan; no button. */
+/* v8.00-reading-print — §789: the whole strategy on paper from the reading window, the office's alone. */
+/* v8.01-build-advise-refine — §790: ✦ Build, ✦ Advise and ✦ Refine, one family. */
+/* v8.02-refine-compete — §791: ✦ Refine opens on the Competitive Discipline tab as on the SWOT. */
+/* v8.03-bar-narrow — §792: the top bar on a narrowed window; the Refine panel sits under the chrome. */
+const SHELL = "smp-shell-v8.03-bar-narrow";
 const ASSETS = [
   "/",
   "/index.html",

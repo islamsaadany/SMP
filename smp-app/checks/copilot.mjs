@@ -662,6 +662,17 @@ try {
     check("§786 a free chat's draft in Competitive Discipline is asked as before, then laid out in the plan's shape by a second, small ask — and the draft keeps it",
       seen.length === nPl + 2 && !/\"plan\"/.test(schP1) && /\"plan\"/.test(schP2) && !/THE PLAN'S SHAPE/.test(sysP1) && /THE PLAN'S SHAPE/.test(sysP2) && /discipline/.test(sysP2) &&
       JSON.stringify(w2Pl.body.contents).includes("Vendor Growth Partner") && amsg.part.plan && amsg.part.plan.section === "compete", JSON.stringify({ calls: seen.length - nPl, sysP2: sysP2.slice(0, 200) }));
+    /* §788 — a draft without the shape (the second ask came back empty, or it was made before §784) lays itself out once when shown */
+    NEXT = [{ answer: { reply: "Another.", draft: { title: "Mobile · How we compete", groups: [{ title: "Values", items: [{ text: "Vendor Growth Partner" }] }] } } }, { answer: { reply: "no shape" } }];
+    const fq = await call("POST", "api", { act: "say", id: fc.id, text: "Once more", context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const qm = fq.j.messages[fq.j.messages.length - 1], nQ = seen.length;
+    NEXT = { answer: { plan: PL } };
+    const ps1 = await call("POST", "api", { act: "planShape", id: fc.id, messageId: qm.id, placeWord: "Mobile" }, NORAN);
+    const qm1 = ps1.j.messages.find((m) => m.id === qm.id);
+    const ps2 = await call("POST", "api", { act: "planShape", id: fc.id, messageId: qm.id, placeWord: "Mobile" }, NORAN);
+    check("§788 a draft without the shape is laid out once when shown — kept on the message, nothing said in the chat, never asked twice",
+      !qm.part.plan && ps1.st === 200 && ps1.j.laid === true && qm1 && qm1.part.plan && qm1.part.plan.section === "compete" && ps1.j.messages.length === fq.j.messages.length && ps2.st === 200 && seen.length === nQ + 1,
+      JSON.stringify({ laid: ps1.j.laid, calls: seen.length - nQ }));
     const sdp = await call("POST", "api", { act: "saveDraft", id: fc.id, messageId: amsg.id }, NORAN);
     const drow = (await asTenant(A, (c) => c.query("select d.type, d.kind, v.body from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.id = $1", [sdp.j.saved.deliverableId]))).rows[0];
     check("§784 ...saved, it is a Competitive Discipline the plan can take: the step-by-step chat's own body, no longer copilot-only text",

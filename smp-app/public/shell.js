@@ -57844,6 +57844,12 @@ var READING = (function () {
     { k: "perf", label: function () { return "Overall performance"; } }
   ];
   function tabsFor(key) { return TABS.filter(function (t) { return !t.when || t.when(key); }); }
+  /* what a tab holds — asked by the window for the open tab and by the paper
+     for every tab (§789), so the two can never say different things */
+  function tabBody(key, k) {
+    return k === "found" ? foundation(key) : k === "swot" ? analysis(key) : k === "dir" ? directions(key, false)
+      : k === "cap" ? directions(key, true) : k === "proj" ? projects(key) : k === "obj" ? objectives(key) : performance(key);
+  }
 
   /* ── the pieces ── */
   function stand(v) {
@@ -58161,14 +58167,14 @@ var READING = (function () {
       '<span class="rco">' + esc(GROUP.org || "") + '</span>' +
       '<span class="rsp"></span>' +
       (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
+      /* §789: the whole strategy on paper, the office's alone */
+      (mayPrint() ? '<button type="button" class="rexit rprint" data-rprint title="Print or save as PDF">Print</button>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
     r.querySelector(".rwnav").innerHTML = rowHTML(key);
     r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
     }).join("");
-    var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false)
-      : tab.k === "cap" ? directions(key, true) : tab.k === "proj" ? projects(key) : tab.k === "obj" ? objectives(key) : performance(key);
-    r.querySelector(".rwbody").innerHTML = body;
+    r.querySelector(".rwbody").innerHTML = tabBody(key, tab.k);
     r.querySelector(".rwbody").scrollTop = 0;
     ST.tab = tab.k;
     rowSettle();
@@ -58230,6 +58236,98 @@ var READING = (function () {
     paint();
   }
 
+  /* ── THE WHOLE STRATEGY ON PAPER (§789) ────────────────────────────────
+     Islam, 2026-11-17: *"can we have printing options from the reading
+     option as a printing option. to print the strategy in a good format"*;
+     of two shapes drawn, *"option 1, the whole strategy"*; of who may,
+     *"smo only"*.
+
+     IT PRINTS WHAT THE WINDOW SHOWS, WHICH IS THE WHOLE ARGUMENT (§305's,
+     for the deck): every section is the same builder the tab calls
+     (tabBody), so the paper cannot disagree with the screen. One document
+     for the subject being read — a cover with the client's name, the
+     subject, the review period and the day it was printed; then every tab
+     the subject offers, in the tabs' own order, each on a page of its own,
+     every direction and project opened and the fold's own controls gone,
+     since paper has no press. The way out is the browser's print dialog,
+     paper and Save as PDF alike: the platform never holds PDF bytes (§305),
+     and a builder of its own would be a second answer to "what is in this
+     tab" that drifts at the next change. The browser's own header and
+     footer, where the reader keeps them on, carry the page number and the
+     document's name — so the title is set for the dialog's lifetime,
+     "Strategy · <client> · <subject>", and put back.
+
+     THE OFFICE'S ALONE (*"smo only"*): the button is drawn for a seat the
+     rules call the office (SMPRules.isOffice — the Super user and the SMO
+     team) and for nobody else; a reader reads on the screen, and what
+     leaves on paper is the SMO's to send. The gate is the button and the
+     key (Ctrl/⌘+P in the window); the browser's own print of the screen is
+     not refused, since a screenshot never was.
+
+     THE THEME IS SET TO LIGHT FOR THE DIALOG AND PUT BACK, as the deck
+     turns fit-to-window off and puts it back (deckPrint): the window's
+     colours are tokens that follow the theme, and a dark page printed is a
+     dark page. The document is built on the press and removed when the
+     dialog closes — `afterprint` fires on Save and on Cancel alike — so
+     nothing of it is on the screen before or after. */
+  function mayPrint() {
+    try { return !!SMPRules.isOffice(world(), viewer()); } catch (e) { return false; }
+  }
+  function subjectName(key) {
+    var kind = kindOf(key);
+    if (kind === "unit") return String((UNITS[key] || {}).name || "");
+    if (kind === "fn") return String((FUNCTIONS[fnKey(key)] || {}).name || "");
+    if (kind === "co") return String((COMPANIES[key.slice(3)] || {}).name || "");
+    /* the top layer: the client's own word for it where it holds units; a company that plans
+       its own strategy with no units (§570 names its button Strategy) is named by its name */
+    try { if (!buExists()) return String(GROUP.org || ""); return String(topNavWord() || GROUP.org || ""); } catch (e) { return String(GROUP.org || ""); }
+  }
+  function printDoc(key) {
+    var org = String(GROUP.org || "").trim(), subj = subjectName(key);
+    var cover = '<div class="rpcover">' +
+      '<span class="rpmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span>' +
+      (org && org !== subj ? '<p class="rporg">' + esc(org) + '</p>' : '') +
+      '<h1>' + esc(subj || "Strategy") + '</h1>' +
+      '<p class="rpline">Strategy' + (REVIEW && REVIEW.name ? ' · ' + esc(REVIEW.name) : '') + '</p>' +
+      '<p class="rpday">Printed ' + esc(dateDay(new Date())) + '</p></div>';
+    return cover + tabsFor(key).map(function (t) {
+      return '<section class="rpsec" data-rptab="' + t.k + '"><h2>' + esc(t.label(key)) + '</h2>' + tabBody(key, t.k) + '</section>';
+    }).join("");
+  }
+  function printAll() {
+    var r = root(); if (!r || !isOpen() || !mayPrint()) return false;
+    var key = norm(ST.target); if (!key) return false;
+    var doc = document.createElement("div");
+    doc.className = "rprintdoc";
+    doc.innerHTML = printDoc(key);
+    doc.querySelectorAll(".rdir").forEach(function (d) {
+      d.classList.add("open");
+      var f = d.querySelector(".rfold"); if (f) { f.setAttribute("aria-expanded", "true"); f.removeAttribute("role"); f.removeAttribute("tabindex"); }
+      /* a direction's line and its first table are kept on one page together (.rpkeep): a
+         keep-with-next on the line alone made the browser move the whole direction (measured) */
+      var more = d.querySelector(".rmore"), first = more && more.firstElementChild;
+      if (f && first) { var keep = document.createElement("div"); keep.className = "rpkeep"; d.insertBefore(keep, f); keep.appendChild(f); keep.appendChild(first); }
+    });
+    doc.querySelectorAll(".rtools").forEach(function (x) { x.parentNode.removeChild(x); });
+    r.appendChild(doc);
+    var html = document.documentElement, wasTheme = html.getAttribute("data-theme"), wasTitle = document.title;
+    if (wasTheme === "dark") html.setAttribute("data-theme", "light");
+    var org = String(GROUP.org || "").trim(), subj = subjectName(key);
+    document.title = ["Strategy", org, subj === org ? "" : subj].filter(Boolean).join(" · ");
+    document.body.classList.add("rprinting");
+    var done = function () {
+      window.removeEventListener("afterprint", done);
+      if (doc.parentNode) doc.parentNode.removeChild(doc);
+      if (wasTheme) html.setAttribute("data-theme", wasTheme);
+      document.title = wasTitle;
+      document.body.classList.remove("rprinting");
+    };
+    window.addEventListener("afterprint", done);
+    /* one tick, so the document is laid out before the browser is asked to lay it out for paper (deckPrint) */
+    setTimeout(function () { window.print(); }, 50);
+    return true;
+  }
+
   /* WHAT THE WINDOW SHOWS, SAID TO WHOEVER LISTENS (§689): shell/route.js
      writes it into the address and reads an address back into it. */
   function state() { return { open: isOpen(), target: ST.target, tab: TAB_WORD[ST.tab] || "foundation" }; }
@@ -58269,6 +58367,7 @@ var READING = (function () {
       var t = e.target.closest ? e.target : null; if (!t) return;
       var tab = t.closest("[data-rtab]"); if (tab) { ST.tab = tab.getAttribute("data-rtab"); paint(); return; }
       if (t.closest("[data-rexit]")) { close(); return; }
+      if (t.closest("[data-rprint]")) { printAll(); return; }
       /* the row (§692): a name or a top goes there; a side opens its list,
          and a side that carries a division opens that division's page too
          (§464), where the viewer reaches it */
@@ -58302,6 +58401,7 @@ var READING = (function () {
     document.addEventListener("keydown", function (e) {
       if (!r.classList.contains("on")) return;
       if (e.key === "Escape") { e.preventDefault(); close(); }
+      else if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P") && mayPrint()) { e.preventDefault(); printAll(); }
       else if (e.key === "Enter" || e.key === " ") { var el = e.target; if (el instanceof HTMLElement && el.classList.contains("rfold")) { e.preventDefault(); el.click(); } }
       e.stopPropagation();
     }, true);
@@ -58360,7 +58460,7 @@ var READING = (function () {
     return !!open(null);
   }
 
-  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen };
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen, print: printAll, mayPrint: mayPrint };
 })();
 
 /* ── slides.js ── */
@@ -67979,7 +68079,7 @@ var COPILOT = (function(){
     /* §779 — only the step in focus shows its ways in; the strip moves between steps (Islam: "keep the steps of the next step only") */
     var says = areaState(s).says || "";
     var focus = '<div class="copfocus"><span class="copfocusk">' + (s === nx ? "Next step · " : "") + E(stripWord(s)) + '</span><span class="copm">' + E(says) + '</span></div>';
-    var done = nx ? '' : '<div class="copalldone" data-cop-alldone><b>Every part is on the plan.</b> Refine any part from ✦ Copilot on the Strategy tab — or work on a step here.</div>';
+    var done = nx ? '' : '<div class="copalldone" data-cop-alldone><b>Every part is on the plan.</b> Refine any part with ✦ Refine on the Strategy tab — or work on a step here.</div>';
     return '<div class="copstart" data-cop-startscreen>' +
       '<h2 class="copstarth">' + (s === "advisory" ? 'What decision are you weighing for ' + E(placeWord()) + '?' : 'What would you like to do with ' + E(placeWord()) + '’s strategy?') + '</h2>' +
       box(s === "advisory" ? "Say the decision, attach the papers behind it…" : "Ask anything, attach your notes, or paste " + (BOXWORK[s] || "finished work") + "…") + (s === "advisory" ? '' : done) +
@@ -67990,7 +68090,7 @@ var COPILOT = (function(){
   /* §779 — words said in the panel on a part the plan holds: the part's own
      "start from existing" opens, and the words are its first change, sent as
      soon as the chat can take one; until then they wait in its box. */
-  var PENDSAY = null, PENDAPPLY = "", PENDLAY = "";
+  var PENDSAY = null, PENDAPPLY = "";
   function sayToPlan(text, file){
     var c = document.querySelector("[data-cop-hiddencards] .copplan"); if (!c) return false;
     PENDSAY = { sec: section(), text: text, file: file || null, at: Date.now() }; delete STARTTEXT[key()]; c.click(); return true;
@@ -68538,9 +68638,18 @@ var COPILOT = (function(){
   }
   var GAPWORD = { compete: [" value has no measure yet.", " values have no measure yet."], directions: [" Direction is not fully scored yet.", " Directions are not fully scored yet."], execution: [" item has no measure yet.", " items have no measure yet."] };
   function gapLine(plan){ var n = planGaps(plan), w = GAPWORD[plan && plan.section]; return n && w ? " " + n + w[n === 1 ? 0 : 1] : ""; }
-  /* §785 — A DRAFT MADE BEFORE THE PLAN'S SHAPE (Islam: "I still have a chat with a deliverable with no add to plan"): one press asks the Copilot to lay the latest draft out in the plan's shape, in the same chat, so it can be put on the plan */
-  var LAYTEXT = "Lay the latest draft out in the plan’s shape, ready to put on the plan.";
+  /* §788 — A DRAFT MADE BEFORE THE PLAN'S SHAPE LAYS ITSELF OUT when its panel shows it (Islam: "isn't that a view change? why are we adding a feature for an exceptional case?"): one quiet ask, kept on the message, nothing said in the chat */
   function canLay(sec){ return !!PLAN_TYPE[sec]; }
+  var LAYING = {};
+  function layDraft(){
+    if (!PANE || !PANE.chat) return;
+    if (!PANE.chat.free) return;
+    var m = draftMsg(); if (!m || !m.part || m.part.plan || m.part.planTried || LAYING[m.id]) return;
+    var cid = PANE.chat.id, mid = m.id; LAYING[mid] = true;
+    post({ act:"planShape", id: cid, messageId: mid, placeWord: placeWord(), context: (contextOf() || {}).line || "" }, WAIT_MS).then(function(x){
+      if (x.st === 200 && x.j && x.j.ok && PANE && PANE.chat && PANE.chat.id === cid) { PANE.messages = x.j.messages || PANE.messages; if (x.j.laid) loadList(true); draw(); }
+    }, function(){});
+  }
   function draftPanelHtml(m){
     var p = m.part, latest = true;
     for (var i = PANE.messages.length - 1; i >= 0; i--) if (hasDraft(PANE.messages[i])) { latest = PANE.messages[i] === m; break; }
@@ -68552,8 +68661,8 @@ var COPILOT = (function(){
          it came in the plan's own shape: then it can go on from here. */
       (p.plan ? (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-putplan="' + E(m.id) + '">Put on ' + E(placeWord()) + '’s plan</button>' : '') +
           '<span class="copm copdstay" data-cop-draftstay>Laid out as the plan’s ' + E(stripWord(PANE.chat.section || section())) + '.' + gapLine(p.plan) + '</span>'
-        : canLay(PANE.chat.section || section()) && canEdit() && !PANE.chat.archived
-          ? '<button type="button" class="copopt rec" data-cop-layout-plan>Lay it out for the plan</button><span class="copm copdstay" data-cop-draftstay>This draft is not in the plan’s shape yet, so it cannot go on the plan as it is.</span>'
+        : PANE.chat.free && canLay(PANE.chat.section || section()) && !p.planTried
+          ? '<span class="copm copdstay copdlaying" data-cop-draftstay data-cop-laying>Laying it out as the plan…</span>'
           : '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
             (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : ''));
     return '<section class="copout" data-cop-out aria-label="Draft">' +
@@ -69644,8 +69753,6 @@ var COPILOT = (function(){
        Foundation's page, §524, as the pattern): the rail is a library only
        if what it holds can be read and applied from here. */
     var typed = !editing && cur && cur.body && typeof cur.body === "object" ? typedBodyHtml(d, cur.body) : "";
-    if (!typed && !editing && d.type === "free" && fchat && canLay(d.section) && canEdit())
-      body += '<div class="copplanrow" data-cop-planrow><span class="copsvst warn">Not in the plan’s shape, so it cannot go on the plan as it is</span><button type="button" class="copbtn solid" data-cop-layfromdeliv="' + E(fchat) + '" data-cop-laysec="' + E(d.section) + '">Lay it out for the plan</button></div>';
     if (typed) {
       var onN = d.applied ? d.applied.n : 0;
       body = typed + '<div class="copplanrow" data-cop-planrow>' + (onN
@@ -69800,7 +69907,7 @@ var COPILOT = (function(){
     fitPane(); fitBox();
     applyRoad(); applyStart();
     if (PENDSAY) setTimeout(pendingSay, 0);
-    if (PENDLAY && PANE && PANE.chat && PANE.chat.id === PENDLAY && PANE.messages && !THINKING) { PENDLAY = ""; setTimeout(function(){ send(LAYTEXT); }, 0); }
+    var lay = document.querySelector("[data-cop-out] [data-cop-laying]"); if (lay) layDraft();
     if (PENDAPPLY && PANE && PANE.deliverable && PANE.deliverable.id === PENDAPPLY && PANE.versions && PANE.versions.length) {
       PENDAPPLY = ""; setTimeout(function(){ var ab = document.querySelector("[data-cop-dapply], [data-cop-fapply]"); if (ab) ab.click(); }, 0); }
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
@@ -70607,8 +70714,10 @@ var COPILOT = (function(){
   var PANEL = { open: false, planArea: "directions", rendering: false, area: "", wide: false };
   var EXPMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9.5 2.5h4v4M13.5 2.5l-5 5M6.5 13.5h-4v-4M2.5 13.5l5-5"/></svg>';
   var MINMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13.5 6.5h-4v-4M9.5 6.5l4.5-4.5M2.5 9.5h4v4M6.5 9.5L2 14"/></svg>';
-  var STRAT_AREA = { found: "foundation", swot: "analysis" };
-  var AREA_STRAT = { foundation: "found", analysis: "swot", directions: "plan", execution: "plan", capabilities: "plan" };
+  /* §791 — the Competitive Discipline tab is a part of its own (Islam, with the panel saying "This part":
+     "I can't see the chats button nor the chat box to start like the other areas of the plan") */
+  var STRAT_AREA = { found: "foundation", swot: "analysis", compete: "compete" };
+  var AREA_STRAT = { foundation: "found", analysis: "swot", compete: "compete", directions: "plan", execution: "plan", capabilities: "plan" };
   function inPanel(){ return !!(PANEL.rendering || (PANEL.open && document.querySelector("#copPanel [data-cop-pane]"))); }
   function onStrategy(){ return typeof currentSub !== "undefined" && currentSub === "strategy" && typeof current !== "undefined" && current !== "setup"; }
   function panelArea(){
@@ -70637,34 +70746,34 @@ var COPILOT = (function(){
     document.addEventListener("dblclick", function(ev){ if (ev.target && ev.target.closest && ev.target.closest("[data-cop-panelgrip]")) setPanelW(0, true); });
   }
   function closePanelDom(){ var el = document.getElementById("copPanel"); if (el) el.remove(); document.body.classList.remove("copB-open"); document.body.classList.remove("copB-wide"); PANEL.wide = false; }
-  function placePanel(el){
-    var top = 0; document.querySelectorAll("#secrow-in button, #secrow-in .secseg").forEach(function(x){ var r = x.getBoundingClientRect(); if (r.height) top = Math.max(top, r.bottom); });
-    var z = typeof pageZoom === "function" ? pageZoom() : 1; el.style.top = Math.max(60, Math.round(((top || 150) + 8) / z)) + "px";
-  }
+  /* §792 — the panel's top is the stylesheet's, off the chrome's own observed
+     height (`--chrome-h`); it was measured here once, when the panel opened,
+     and kept whatever that moment gave it (Islam: a space above the panel
+     until he zoomed out and in again). */
   function afterPaint(){
     if (!shown() || !onStrategy()) { if (PANEL.open && !onStrategy()) PANEL.open = false; closePanelDom(); return; }
     var tail = document.querySelector("#secrow-in .secttail") || document.getElementById("secrow-in");
     if (tail && !tail.querySelector("[data-cop-panelbtn]")) {
       var b = document.createElement("button"); b.type = "button"; b.className = "copBbtn"; b.setAttribute("data-cop-panelbtn", "");
-      b.setAttribute("aria-pressed", String(PANEL.open)); b.title = "Work on this part with the Copilot"; b.textContent = "✦ Copilot";
+      b.setAttribute("aria-pressed", String(PANEL.open)); b.title = "Refine this part with the Copilot"; b.textContent = "✦ Refine";
       tail.insertBefore(b, tail.firstChild);
     }
     if (!PANEL.open) { closePanelDom(); return; }
     var el = document.getElementById("copPanel");
     if (!el) { el = document.createElement("aside"); el.id = "copPanel"; el.setAttribute("aria-label", "Copilot"); document.body.appendChild(el); PANEL.area = ""; }
-    document.body.classList.add("copB-open"); document.body.classList.toggle("copB-wide", !!PANEL.wide); placePanel(el);
+    document.body.classList.add("copB-open"); document.body.classList.toggle("copB-wide", !!PANEL.wide);
     wireGrip(); if (!document.body.style.getPropertyValue("--copPw") && panelW()) setPanelW(panelW(), false);
     var a = panelArea();
     if (a !== PANEL.area || !el.querySelector("[data-cop-pane], [data-cop-panelnone]")) {
       PANEL.area = a;
-      var partWord = { found: "Foundation", swot: "SWOT", plan: "Plan", drivers: "Drivers" }[CURSEC.strategy] || "This part";
-      var head = '<div class="copPhead"><div><b>✦ Copilot</b><small>' + E(partWord) + ' · ' + E(placeWord()) + '</small></div>' +
+      var partWord = { found: "Foundation", swot: "SWOT", compete: "Competitive Discipline", plan: "Plan", drivers: "Drivers" }[CURSEC.strategy] || "This part";
+      var head = '<div class="copPhead"><div><b>✦ Refine</b><small>' + E(partWord) + ' · ' + E(placeWord()) + '</small></div>' +
         (CURSEC.strategy === "plan" ? '<span class="copPseg">' + [["directions", "Pillars/Directions"], ["execution", "Tactical Plans"]].map(function(x){ return '<button type="button" data-cop-panelarea="' + x[0] + '" aria-pressed="' + (PANEL.planArea === x[0]) + '">' + x[1] + '</button>'; }).join("") + '</span>' : '') +
         /* §778 — expand to take over the page, as the Copilot tab does, and minimize back to the side (Islam) */
         '<button type="button" class="copPexp" data-cop-panelexpand aria-pressed="' + !!PANEL.wide + '" aria-label="' + (PANEL.wide ? "Minimize the Copilot" : "Expand the Copilot") + '" title="' + (PANEL.wide ? "Minimize" : "Expand") + '">' + (PANEL.wide ? MINMARK : EXPMARK) + '</button>' +
         '<button type="button" class="copPx" data-cop-panelclose aria-label="Close the Copilot" title="Close">×</button></div>';
       head = '<div class="copPgrip" data-cop-panelgrip title="Drag to resize · double-click to reset" aria-hidden="true"></div>' + head;
-      if (!a) { el.innerHTML = head + '<div class="copnone" data-cop-panelnone>The Copilot works on the Foundation, the SWOT and the Plan here. For anything else, ask on the Copilot tab.</div>'; return; }
+      if (!a) { el.innerHTML = head + '<div class="copnone" data-cop-panelnone>The Copilot works on the Foundation, the SWOT, the Competitive Discipline and the Plan here. For anything else, ask on the Copilot tab.</div>'; return; }
       if (CURSEC.copilot !== a) { CURSEC.copilot = a; PANE = null; }
       PANEL.rendering = true;
       try { el.innerHTML = head + '<div class="copPbody">' + renderPane() + '</div>'; } finally { PANEL.rendering = false; }
@@ -72648,8 +72757,6 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-notnow]"))) { NOTNOW[b.getAttribute("data-cop-notnow")] = true; draw(); return; }
-    if ((b = hit(ev, "[data-cop-layout-plan]"))) { if (PANE && PANE.chat && !THINKING) send(LAYTEXT); return; }
-    if ((b = hit(ev, "[data-cop-layfromdeliv]"))) { var lc = b.getAttribute("data-cop-layfromdeliv"), ls = b.getAttribute("data-cop-laysec"); PENDLAY = lc; openIn(ls, "chat", lc); return; }
     if ((b = hit(ev, "[data-cop-putplan]"))) {
       if (!PANE || !PANE.chat) return;
       var cid5 = PANE.chat.id, mid5 = b.getAttribute("data-cop-putplan"), msg5 = (PANE.messages || []).filter(function(x){ return String(x.id) === String(mid5); })[0];
@@ -78858,8 +78965,9 @@ var SYNC = (function () {
       box.insertBefore(nm, sel);
     }
     var out = document.createElement("button");
-    out.className = "infobtn";
+    out.className = "infobtn outbtn";   /* its own name: under 520px it is drawn as its mark alone (arrange.css §792.2) */
     out.textContent = "Sign out";
+    out.title = "Sign out";
     out.addEventListener("click", function () {
       cacheWipe();
       keepWipe();
@@ -83273,6 +83381,7 @@ var SYNC = (function () {
     /* \u00a7132.14: the Strategy tab wears NO number (Islam: "remove the number
        from the strategy word") \u2014 the missing bar in the section row below
        carries the total, the places and the action, through missBar(). */
+    /* §790 — named for what each does, as ✦ Refine on the plan is (Islam: "builder to be build and advisory to be advise like refine"). */
     /* §782 — BUILDER AND ADVISORY AT THE FAR RIGHT (Islam: "the builder should
        be on the far right of the tabs as it's not something similar, and it
        matches the placement of the copilot when we get in the plan on the
@@ -83285,8 +83394,8 @@ var SYNC = (function () {
         var advOn = false; try { advOn = (allowed(d.sections(arg), TARGET) || []).some(function(x){ return x.k === "advisory"; }); } catch (e) { advOn = false; }
         var onAdv = currentSub === d.k && CURSEC.copilot === "advisory";
         return '<span class="tabgap" aria-hidden="true"></span><span class="coptabs">' +
-          '<button role="tab" data-s="' + d.k + '" data-cop-to="build" class="coptab" aria-selected="' + (currentSub === d.k && !onAdv) + '">✦ Builder</button>' +
-          (advOn ? '<button role="tab" data-s="' + d.k + '" data-cop-to="advisory" class="coptab copadv" aria-selected="' + onAdv + '">Advisory</button>' : '') + '</span>';
+          '<button role="tab" data-s="' + d.k + '" data-cop-to="build" class="coptab" aria-selected="' + (currentSub === d.k && !onAdv) + '">✦ Build</button>' +
+          (advOn ? '<button role="tab" data-s="' + d.k + '" data-cop-to="advisory" class="coptab copadv" aria-selected="' + onAdv + '">✦ Advise</button>' : '') + '</span>';
       }
       var cls = (d.primary ? "primary" : "") + (d.cta ? " cta" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");

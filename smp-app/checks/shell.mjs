@@ -899,8 +899,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s + ":" + (b.dataset.copTo || "") + ":" + b.textContent.trim()));
     const tg = await page.evaluate(() => { const row = document.getElementById("subtabs").getBoundingClientRect(), bl = document.querySelector('#subtabs [data-cop-to="build"]'), ins = Array.from(document.querySelectorAll("#subtabs button[data-s]")).filter((b) => !b.dataset.copTo).pop();
       return bl && ins ? { gap: Math.round(bl.getBoundingClientRect().left - ins.getBoundingClientRect().right), rightGap: Math.round(row.right - document.querySelector("#subtabs .coptabs").getBoundingClientRect().right) } : null; });
-    check(tabs.length >= 2 && /^copilot:build:✦ Builder$/.test(tabs[tabs.length - 2]) && /^copilot:advisory:Advisory$/.test(tabs[tabs.length - 1]) && !!tg && tg.gap > 80 && tg.rightGap < 40,
-      "§782 ✦ Builder and Advisory are the last two tabs, set apart at the far right of the row (Islam)", JSON.stringify({ tabs, tg }));
+    check(tabs.length >= 2 && /^copilot:build:✦ Build$/.test(tabs[tabs.length - 2]) && /^copilot:advisory:✦ Advise$/.test(tabs[tabs.length - 1]) && !!tg && tg.gap > 80 && tg.rightGap < 40,
+      "§782, §790 ✦ Build and ✦ Advise are the last two tabs, set apart at the far right of the row (Islam)", JSON.stringify({ tabs, tg }));
     /* §752 — ONE WINDOW: no row of area tabs; the method is the Copilot's own strip */
     const secs = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-strip] b")).map((b) => b.textContent.trim()));
     const row = await page.evaluate(() => Array.from(document.querySelectorAll("[data-sub2]")).filter((b) => b.offsetParent).map((b) => b.textContent.trim()));
@@ -1006,7 +1006,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line, and the box is as wide as the conversation", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");
     const stay = await page.evaluate(() => ({ note: (document.querySelector("[data-cop-out] [data-cop-draftstay]") || {}).textContent || "", lay: !!document.querySelector("[data-cop-out] [data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-out] [data-cop-putplan]") }));
-    check(/not in the plan’s shape yet/.test(stay.note) && stay.lay && !stay.put, "§654 B3, §785 a free chat's draft that is not in the plan's shape says so, and offers to lay it out for the plan — it cannot go on as it is", JSON.stringify(stay));
+    check(!stay.lay && !stay.put && /Laying it out as the plan|Stays in the Copilot/.test(stay.note), "§654 B3, §788 a free chat's draft not in the plan's shape lays itself out — no button — and one that cannot be stays in the Copilot; it cannot go on as it is", JSON.stringify(stay));
     await page.locator("[data-cop-out] [data-cop-savedraft]").click();
     await page.waitForFunction(() => document.querySelector("[data-cop-out] .copsaved"), null, { timeout: 10000 }).catch(() => {});
     await page.waitForFunction(() => /Mobile foundation/.test([...document.querySelectorAll(".coprail [data-cop-deliv]")].map((x) => x.textContent).join("|")), null, { timeout: 8000 }).catch(() => {});
@@ -3189,7 +3189,7 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     await page.waitForTimeout(1500);   /* the lists come in after the press; the method's next step must not pull the window off Advisory (§785) */
     const av = await page.evaluate(() => ({ sec: CURSEC.copilot, sel: (document.querySelector('#subtabs [aria-selected="true"]') || {}).textContent || "", steps: document.querySelectorAll(".copsteps").length,
       h: (document.querySelector(".copstarth") || {}).textContent || "", rail: Array.from(document.querySelectorAll("[data-cop-chats] [data-cop-chat]")).map((b) => b.getAttribute("data-cop-chat-sec")) }));
-    check(av.sec === "advisory" && /Advisory/.test(av.sel) && av.steps === 0 && /What decision are you weighing for Mobile\?/.test(av.h) && av.rail.every((x) => x === "advisory"),
+    check(av.sec === "advisory" && /✦ Advise/.test(av.sel) && av.steps === 0 && /What decision are you weighing for Mobile\?/.test(av.h) && av.rail.every((x) => x === "advisory"),
       "§782 Advisory is its own tab: no steps, its own question, its own chats only", JSON.stringify(av));
     await page.click('#subtabs [data-cop-to="build"]');
     await page.waitForFunction(() => CURSEC.copilot !== "advisory", null, { timeout: 8000 }).catch(() => {});
@@ -3199,6 +3199,9 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     /* B — ✦ Copilot on a part the plan does not hold: build it in the Copilot */
     await open("/raya-trade/strategy/mobile/strategy/swot");
     await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});
+    const rb = await page.evaluate(() => { const b = document.querySelector("[data-cop-panelbtn]"), cs = b ? getComputedStyle(b) : null;
+      return b ? { t: b.textContent.trim(), bw: parseFloat(cs.borderTopWidth), br: parseFloat(cs.borderTopLeftRadius) } : null; });
+    check(!!rb && rb.t === "✦ Refine" && rb.bw >= 1 && rb.br >= 10, "§790 the Copilot on the plan is ✦ Refine, drawn as the same pill as ✦ Build and ✦ Advise", JSON.stringify(rb));
     /* emptied, read and put back in one synchronous step — the panel draws at once — so no paint or save ever sees it */
     const nbAll = await page.evaluate(() => { const u = unitLike("mobile"), was = u.swot; let nb = null, b = null;
       u.swot = { s: [], w: [], o: [], t: [] };
@@ -3227,6 +3230,9 @@ await section("3p · Build only, read off the plan; Details on the right; ✦ Co
     await shot("4-panel-built");
     check(!!sy && sy.say && /What would you like to change in Mobile’s SWOT\?/.test(sy.h) && sy.boxFirst && sy.cards === 0 && sy.sug === 0 && sy.again,
       "§779 B: on a part the plan holds, the panel opens on the box at the top — no cards, no suggestions — with “Build it again step by step” below", JSON.stringify(sy));
+    check(await page.evaluate(() => ((document.querySelector("#copPanel .copPhead b") || {}).textContent || "").trim() === "✦ Refine"), "§790 …and its panel is headed ✦ Refine");
+    const pr = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("[data-cop-panelbtn]")); return { bg: c.backgroundColor, ink: c.color }; });
+    check(pr.bg === "rgb(22, 50, 92)" && pr.ink === "rgb(255, 255, 255)", "§790 …and pressed, ✦ Refine is the client's navy with white ink at once — never caught in a fade, read as greyed out", JSON.stringify(pr));
     await page.fill("#copPanel [data-cop-starttext]", "Add vendors selling direct to retailers as a threat");
     await page.press("#copPanel [data-cop-starttext]", "Enter");
     await page.waitForFunction(() => !!document.querySelector("#copPanel [data-cop-pane]") && !document.querySelector("#copPanel [data-cop-startscreen]"), null, { timeout: 15000 }).catch(() => {});
@@ -3294,19 +3300,18 @@ await section("3q · a chat's work laid out as the plan, and put on it (§784)",
     await page.waitForFunction(() => /Vendor value proposition/.test((document.querySelector(".copheadone .coph") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
     const rn = (await asTenant(tenantId, (c) => c.query("select title from copilot_chats order by created_at desc limit 1"))).rows[0];
     check(!!rn && rn.title === "Vendor value proposition" && /Vendor value proposition/.test(await page.evaluate(() => (document.querySelector(".copheadone .coph") || {}).textContent || "")), "§785 a chat is renamed from its header — its name pressed becomes a box, Enter keeps it", JSON.stringify(rn));
-    /* §785 — a draft not in the plan's shape (made before §784) is laid out for the plan with one press */
-    const shapedAns = JSON.parse(JSON.stringify(MODEL_ANSWER));
-    delete MODEL_ANSWER.plan;
-    await page.fill("[data-cop-text]", "Lay it out with the four values we discussed");
-    await page.press("[data-cop-text]", "Enter");
-    await page.waitForSelector("[data-cop-layout-plan]", { timeout: 15000 }).catch(() => {});
-    const ly = await page.evaluate(() => ({ btn: !!document.querySelector("[data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-putplan]"), stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }));
-    check(ly.btn && !ly.put && /not in the plan’s shape yet/.test(ly.stay), "§785 a draft not in the plan's shape says so and offers Lay it out for the plan", JSON.stringify(ly));
-    Object.assign(MODEL_ANSWER, shapedAns);
-    const nL = MODEL_SEEN.length;
-    await page.click("[data-cop-layout-plan]");
-    await page.waitForSelector("[data-cop-dplan] [data-cop-val]", { timeout: 15000 }).catch(() => {});
-    check(JSON.stringify(MODEL_SEEN.slice(nL)).includes("Lay the latest draft out in the plan"), "§785 ...pressed, it asks the Copilot to lay the latest draft out in the plan's shape");
+    /* §788 — a draft made before the plan's shape (§784) lays itself out when its panel shows it: nothing to press, nothing said in the chat */
+    const cid = (await asTenant(tenantId, (c) => c.query("select id from copilot_chats order by created_at desc limit 1"))).rows[0].id;
+    await asTenant(tenantId, (c) => c.query("insert into copilot_messages (chat_id, who, body, part) values ($1, 'ai', 'Here is the table.', $2)", [cid, JSON.stringify({ kind: "answer", missing: [], options: [], assumptions: [], pastedBelongsTo: null, following: "",
+      draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ title: "Vendor Growth Partner", text: "How: joint planning. Measure: Tier 2 revenue growth ≥ 100% (today 60%)." }] }] } })]));
+    const nMsg = (await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_messages where chat_id = $1", [cid]))).rows[0].n;
+    await page.goto("about:blank");
+    await open("/raya-trade/strategy/mobile/copilot/compete#cop=chat-" + cid);
+    await page.waitForSelector("[data-cop-dplan] [data-cop-val]", { timeout: 20000 }).catch(() => {});
+    const ly = await page.evaluate(() => ({ cards: document.querySelectorAll("[data-cop-dplan] [data-cop-val]").length, btn: !!document.querySelector("[data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-putplan]") }));
+    const after = await asTenant(tenantId, (c) => c.query("select count(*)::int n, bool_or(part ? 'plan') laid from copilot_messages where chat_id = $1", [cid]));
+    check(ly.cards >= 1 && !ly.btn && ly.put && after.rows[0].n === nMsg && after.rows[0].laid === true,
+      "§788 an older draft lays itself out as the plan when it is shown — no button, nothing said in the chat, the shape kept on it — and can be put on the plan", JSON.stringify({ ly, nMsg, after: after.rows[0] }));
     const dp = await page.evaluate(() => { const d = document.querySelector("[data-cop-dplan]"); if (!d) return null;
       return { disc: (d.querySelector(".copdisc h4") || {}).textContent || "", vals: Array.from(d.querySelectorAll("[data-cop-val] h5")).map((h) => h.textContent), gap: d.querySelectorAll("[data-cop-gap]").length,
         today: Array.from(d.querySelectorAll(".copmrow .copm")).map((x) => x.textContent).join("|"), ev: !!d.querySelector("details.copev"), put: (document.querySelector("[data-cop-putplan]") || {}).textContent || "", stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }; });

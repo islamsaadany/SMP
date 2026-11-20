@@ -71859,12 +71859,12 @@ Islam: *"let's make the name of the module Task Tracker not internal tracker"*, 
 
 **§793 MERGED TO `main`** 2026-11-20, Islam: *"merge to main"*. `main` had moved under the branch — §788 to §792 from other sessions — so this was written as §788 here and renumbered §793, and main was merged into the branch first (only the two records needed joining; none of the renamed files had moved). No migrations; nobody signed out. The browser runs are owed from a session with a database.
 
-## §794 — The trail's menu entries are links: a ⌘-click or a right click opens one in a new tab (2026-11-20)
+## §796 — The trail's menu entries are links: a ⌘-click or a right click opens one in a new tab (2026-11-20)
 
 Islam: *"when I open the navigation list at the top I want to open it in a new tab either by clicking command and click on it or right click to open in a new tab"*. Measured first: the module pages' bar (`lib/topbar.ts`, §444) already drew its menus as `<a href>` and `lib/navskel.ts` already stands aside for a modifier key, so there a ⌘-click worked. The Strategy shell's trail (`shell/route.js`, §401) drew every entry as a `<button data-trgo>` and set the address from its listener, so the browser had nothing to open in a new tab and no menu to offer on a right click.
 
 - **Every trail entry is an `<a href>`** at the address the press would have gone to; a crossing's (`cross:client`, `cross:<module>`) is that settings page's own, from the one `menuHref`. `data-trgo` stays on the link, so the checks press as before.
 - **The one listener does the press's own work** — the paint instead of a load where the page is one document (§432, §433), the closing of the menu, nothing on the entry you are on — after `preventDefault`, and **stands aside for a modifier key or any button but the left**: those are the browser's own press on a link, a new tab or window, and a right click gets the browser's menu.
 - **The menu's clothes** (`SMP-Project-Folder/src/arrange.css`) are worn by a button or a link alike; a link loses its underline and keeps the button's padding.
-- **Shell v8.04-trail-links.** `checks/modules.mjs` reads the entries by role, not by tag.
+- **Shell v8.06-trail-links** (v8.04 on the branch; main took v8.04 and v8.05 meanwhile). `checks/modules.mjs` reads the entries by role, not by tag.
 - **§793's rename, put at its source.** `public/platform-page.js` is GENERATED from the repo's `platform.html` by `scripts/build-shell.mjs`; §793 renamed the two My tasks lines in the generated copy alone, which this rebuild undid. The source now says Task Tracker and the generated file matches it again. The checks on the trail (`checks/shell.mjs`, `checks/modules.mjs`, `checks/instant-nav.mjs`) are owed from a session with a database.

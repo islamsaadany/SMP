@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-20 — The trail's menus open in a new tab (§794).** The client and module entries in the Strategy shell's top bar are links now, so a ⌘-click or a right click opens one in a new tab; a plain press works as before. §793's My tasks rename is put at its source, the repo's platform.html.
+**2026-11-20 — The trail's menus open in a new tab (§796).** The client and module entries in the Strategy shell's top bar are links now, so a ⌘-click or a right click opens one in a new tab; a plain press works as before. §793's My tasks rename is put at its source, the repo's platform.html.
 
 **2026-11-20 — The Internal Tracker is now the Task Tracker (§793).** The module's label, its refusals and My tasks' lines say Task Tracker; the key, address and tables are unchanged.
 

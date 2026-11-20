@@ -875,7 +875,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   @media (prefers-reduced-motion:reduce) {
     details.dlmenu[open] > .menu, details.dlmenu[open] > .menu.closing, .iconwrap .menu { animation:none; }
   }
-  /* §794: a menu's entry is a button or, in the trail, a link (an <a href>,
+  /* §796: a menu's entry is a button or, in the trail, a link (an <a href>,
      so it opens in a new tab on a modifier key or a right click); both wear
      the same clothes */
   details.dlmenu > .menu button, details.dlmenu > .menu a[role="menuitem"] {

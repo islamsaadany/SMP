@@ -218,7 +218,7 @@
     return document.documentElement.hasAttribute("data-client-settings");
   }
   var trailSaid = null;
-  /* §794 EVERY ENTRY IS A LINK (Islam: "I want to open it in a new tab either
+  /* §796 EVERY ENTRY IS A LINK (Islam: "I want to open it in a new tab either
      by clicking command and click on it or right click to open in a new
      tab"). The entries were buttons that set the address from a script, so
      the browser had nothing to open in a new tab and no menu to offer on a
@@ -295,7 +295,7 @@
       nav.addEventListener("click", function (ev) {
         var b = ev.target.closest ? ev.target.closest("[data-trgo]") : null;
         if (!b) return;
-        /* §794: a modifier key, or a button that is not the left one, is the
+        /* §796: a modifier key, or a button that is not the left one, is the
            browser's own press on the link — a new tab or window — and the
            menu is left to the browser */
         if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;

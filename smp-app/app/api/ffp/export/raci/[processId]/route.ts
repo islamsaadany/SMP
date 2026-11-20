@@ -75,7 +75,8 @@ export async function GET(
     roles.map((r) => r.id),
     rows,
     process.raciVisibleRoleIds,
-    mentionedRoleIds
+    mentionedRoleIds,
+    process.raciHiddenRoleIds
   );
   const visibleRoles = roles.filter((r) => visibleRoleIds.includes(r.id));
 

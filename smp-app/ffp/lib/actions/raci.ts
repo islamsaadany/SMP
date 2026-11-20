@@ -6,6 +6,7 @@ import { prisma } from "@/ffp/lib/db/client";
 import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { validateRaciMatrix, type RaciActivity, type RaciIssue } from "@/ffp/lib/domain/raci-validation";
 import { buildRaciTableRows } from "@/ffp/lib/domain/raci-table";
+import { syncOwnerFromRaci, unhideRaciRoles } from "@/ffp/lib/data/raci-owner-sync";
 import { ok, notFound, validationError, type ActionResult } from "@/ffp/lib/actions/errors";
 
 /** Verifies processId actually belongs to workspaceId, not just that the caller can access workspaceId. */
@@ -46,6 +47,11 @@ export async function setRaciAssignment(
     });
   }
 
+  if (code !== null) await unhideRaciRoles(activity.processId, [roleId]);
+  /* the Map's owner of this step follows the row's Responsible */
+  if (activity.relatedStepId && (await syncOwnerFromRaci(activity.processId, activity.relatedStepId))) {
+    revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${activity.processId}/map`);
+  }
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${activity.processId}/raci`);
   return ok({ cleared: code === null });
 }
@@ -109,6 +115,9 @@ export async function setStepRaciCell(
     return activity;
   });
 
+  if (code !== null) await unhideRaciRoles(processId, [roleId]);
+  /* the Map's owner of this step follows the row's Responsible */
+  if (await syncOwnerFromRaci(processId, stepId)) revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/map`);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/raci`);
   return ok({ activityId: activity.id });
 }
@@ -260,9 +269,55 @@ export async function pinRaciRole(
       data: { raciVisibleRoleIds: { push: role.id } },
     });
   }
+  await unhideRaciRoles(process.id, [role.id]);
 
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${process.id}/raci`);
   return ok({ processId: process.id });
+}
+
+const removeRaciRoleSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  roleId: z.string().min(1),
+  /** Set once the person has seen the warning about what is already entered under the title. */
+  confirm: z.boolean().optional(),
+});
+
+/**
+ * Takes a title (a column) out of this process's RACI table. A title with nothing under it goes at once. A title
+ * with letters under it is NOT removed until the person has confirmed: the first call answers `needsConfirm` with how
+ * many letters would go, and only a call with `confirm` deletes them. The title stays on the Map where a step names
+ * it (this is the table's own list), and comes back by itself if a step or a letter names it again.
+ */
+export async function removeRaciRole(
+  input: z.infer<typeof removeRaciRoleSchema>
+): Promise<ActionResult<{ removed: boolean; needsConfirm: boolean; letters: number }>> {
+  const parsed = removeRaciRoleSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+  const { processId, roleId } = parsed.data;
+  const process = await loadProcessInWorkspace(parsed.data.workspaceId, processId);
+  if (!process) return notFound();
+  const role = await prisma.role.findUnique({ where: { id: roleId } });
+  if (!role || role.workspaceId !== parsed.data.workspaceId) return notFound();
+
+  const letters = await prisma.raciAssignment.count({ where: { roleId, activity: { processId } } });
+  if (letters > 0 && !parsed.data.confirm) return ok({ removed: false, needsConfirm: true, letters });
+
+  await prisma.$transaction([
+    prisma.raciAssignment.deleteMany({ where: { roleId, activity: { processId } } }),
+    prisma.process.update({
+      where: { id: processId },
+      data: {
+        raciVisibleRoleIds: process.raciVisibleRoleIds.filter((id) => id !== roleId),
+        raciHiddenRoleIds: process.raciHiddenRoleIds.includes(roleId) ? process.raciHiddenRoleIds : [...process.raciHiddenRoleIds, roleId],
+      },
+    }),
+  ]);
+  revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/raci`);
+  revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/authority`);
+  return ok({ removed: true, needsConfirm: false, letters });
 }
 
 /**

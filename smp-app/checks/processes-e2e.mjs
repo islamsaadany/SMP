@@ -912,12 +912,65 @@ check(rr.some((x) => x.r === target.id && x.c === "RESPONSIBLE"), "a role set as
 await A.page.locator("label:has-text('Who does it') select").first().selectOption(other.id);
 await A.page.waitForTimeout(2200);
 const rr2 = await q(ffp, `select ra."roleId" r, ra.code c from raci_assignments ra join activities a on a.id=ra."activityId" where a."relatedStepId"=$1`, [s6[2].id]);
-check(rr2.some((x) => x.r === other.id && x.c === "RESPONSIBLE") && rr2.some((x) => x.r === target.id), "…changing it adds the new role and leaves the old letter as it was", JSON.stringify(rr2));
+check(rr2.some((x) => x.r === other.id && x.c === "RESPONSIBLE") && !rr2.some((x) => x.r === target.id && x.c === "RESPONSIBLE"), "…changing it moves the Responsible: the new role gets it and the old role's R goes", JSON.stringify(rr2));
 const actId = (await q(ffp, 'select id from activities where "relatedStepId"=$1 limit 1', [s6[2].id]))[0].id;
-await q(ffp, `update raci_assignments set code='CONSULTED' where "activityId"=$1 and "roleId"=$2`, [actId, target.id]);
+await q(ffp, `insert into raci_assignments (id, "activityId", "roleId", code) values (gen_random_uuid()::text, $1, $2, 'CONSULTED') on conflict do nothing`, [actId, target.id]);
 await A.page.locator("label:has-text('Who does it') select").first().selectOption(target.id);
 await A.page.waitForTimeout(2200);
 check((await q(ffp, `select code from raci_assignments where "activityId"=$1 and "roleId"=$2`, [actId, target.id]))[0].code === "CONSULTED", "…and a letter somebody set is never overwritten");
+
+/* ── RACI -> Map: the row's Responsible moves the step's role; and a title can be removed from the table, with a warning when it holds letters ── */
+await q(ffp, `delete from raci_assignments where "activityId"=$1`, [actId]);
+await q(ffp, `insert into raci_assignments (id, "activityId", "roleId", code) values (gen_random_uuid()::text, $1, $2, 'RESPONSIBLE')`, [actId, other.id]);
+await q(ffp, `update process_steps set "assignedRoleId"=$2, "swimlaneRoleId"=$2 where id=$1`, [s6[2].id, other.id]);
+await q(ffp, `update processes set "raciVisibleRoleIds" = array_append("raciVisibleRoleIds", $2) where id=$1 and not ($2 = any("raciVisibleRoleIds"))`, [P6, target.id]);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/raci", { waitUntil: "networkidle" });
+const rowLbl = (await q(ffp, 'select name from activities where id=$1', [actId]))[0].name;
+await A.page.locator(`[aria-label="${rowLbl}, ${target.name}: not assigned"]`).first().click();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, 'select "assignedRoleId" r from process_steps where id=$1', [s6[2].id]))[0].r === other.id, "two Responsibles on a row (a shared task): the Map's role is left alone");
+await A.page.locator(`[aria-label="${rowLbl}, ${other.name}: Responsible"]`).first().click();
+await A.page.waitForTimeout(2000);
+const own2 = (await q(ffp, 'select "assignedRoleId" r, "swimlaneRoleId" l from process_steps where id=$1', [s6[2].id]))[0];
+check(own2.r === target.id && own2.l === target.id, "when one role is left as the row's Responsible, the step on the Map moves to that role", JSON.stringify(own2));
+
+await q(ffp, `delete from raci_assignments where "activityId"=$1`, [actId]);
+await q(ffp, `insert into raci_assignments (id, "activityId", "roleId", code) values (gen_random_uuid()::text, $1, $2, 'ACCOUNTABLE'), (gen_random_uuid()::text, $1, $3, 'RESPONSIBLE')`, [actId, other.id, target.id]);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/raci", { waitUntil: "networkidle" });
+const rm = A.page.getByRole("button", { name: `Remove ${other.name} from the RACI table` });
+check(await rm.count() === 1, "every title in the RACI table has a remove button");
+await rm.click();
+await A.page.waitForSelector("[data-raci-remove-warning]", { timeout: 10000 });
+check(/1 letter/.test(await A.page.locator("[data-raci-remove-warning]").innerText()) && (await q(ffp, 'select count(*)::int n from raci_assignments where "activityId"=$1 and "roleId"=$2', [actId, other.id]))[0].n === 1, "a title with letters under it warns first, and nothing is deleted yet");
+await A.page.getByRole("button", { name: "Keep it" }).click();
+await rm.click();
+await A.page.waitForSelector("[data-raci-remove-warning]", { timeout: 10000 });
+await A.page.getByRole("button", { name: "Remove title and its letters" }).click();
+await A.page.waitForTimeout(2200);
+check((await q(ffp, 'select count(*)::int n from raci_assignments where "activityId"=$1 and "roleId"=$2', [actId, other.id]))[0].n === 0 && await A.page.getByRole("button", { name: `Remove ${other.name} from the RACI table` }).count() === 0, "…confirming removes the title and its letters from the table");
+check((await q(ffp, `select 1 from processes where id=$1 and $2 = any("raciHiddenRoleIds")`, [P6, other.id])).length === 1, "…and it stays out of the table");
+
+/* ── the Authority Matrix: escalation and notes shared with the Map, and the SLA ── */
+await q(ffp, `update process_steps set "escalationNote"='Head of Finance; over 50,000' where id=$1`, [s6[2].id]);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/authority", { waitUntil: "networkidle" });
+check(await A.page.locator("textarea[aria-label^='Escalation for']").evaluateAll((els) => els.some((e) => e.value.includes("Head of Finance; over 50,000"))), "the escalation written on the Map shows in the Authority Matrix by itself");
+const noteBox = A.page.locator("textarea[aria-label^='Note for']").first();
+await noteBox.fill("Checked monthly by the CFO");
+await noteBox.blur();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, `select count(*)::int n from process_steps where "processId"=$1 and "stepNote"='Checked monthly by the CFO'`, [P6]))[0].n === 1, "a note written in the Authority Matrix is saved on the step (and so shows on the Map)");
+const escBox = A.page.locator("textarea[aria-label^='Escalation for']").first();
+await escBox.fill("Escalate to the CFO after two days");
+await escBox.blur();
+await A.page.waitForTimeout(1800);
+check((await q(ffp, `select count(*)::int n from process_steps where "processId"=$1 and "escalationNote"='Escalate to the CFO after two days'`, [P6]))[0].n === 1, "…and so is an escalation edited there");
+await A.page.getByRole("button", { name: /^Add another rule to/ }).first().click();
+await A.page.waitForTimeout(1500);
+const slaBtn = A.page.getByRole("button", { name: "SLA", exact: true }).first();
+check(await slaBtn.isVisible() && (await A.page.getByRole("button", { name: "Time", exact: true }).count()) === 0, "the authority level in days is the task's SLA");
+await slaBtn.click();
+await A.page.waitForTimeout(1200);
+check(await A.page.getByLabel("SLA in days").first().isVisible(), "…an SLA rule takes the days as its figure");
 
 /* ── Download picture gives the WHOLE map, even when it is wider than the screen ── */
 await A.page.setViewportSize({ width: 520, height: 900 });
@@ -974,9 +1027,12 @@ if (outsBefore.length === 1) {
   if (process.env.SHOT) await A.page.locator("[data-lane-grid]").screenshot({ path: process.env.SHOT });
   check(dh <= 96 && await A.page.locator("[data-lane-grid] svg path[marker-end], [data-lane-grid] svg path").count() >= 2, "…it fits its lane and its arrows are still drawn", dh);
 }
-await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
-await A.page.waitForTimeout(2500);
-if ((await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type !== "TASK") await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+await A.page.waitForTimeout(1500);
+for (let t = 0; t < 3; t++) {
+  await A.page.locator("label:has-text('Step type') select").first().selectOption("TASK");
+  await A.page.waitForTimeout(2500);
+  if ((await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type === "TASK") break;
+}
 await A.page.waitForFunction((id) => !document.querySelector(`[data-lane-grid] [data-step='${id}'][data-shape]`), s6[0].id, { timeout: 8000 }).catch(() => {});
 await A.page.waitForTimeout(1500);
 check(await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") === null, "a task goes back to the plain box", await A.page.locator(`[data-lane-grid] [data-step='${s6[0].id}']`).getAttribute("data-shape") + " / " + (await q(ffp, 'select type from process_steps where id=$1', [s6[0].id]))[0].type);

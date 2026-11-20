@@ -23,7 +23,7 @@ export default async function AuthorityMatrixPage(
     prisma.activity.findMany({ where: { processId }, orderBy: { order: "asc" } }),
     prisma.processStep.findMany({
       where: { processId },
-      select: { id: true, type: true, label: true },
+      select: { id: true, type: true, label: true, escalationNote: true, stepNote: true },
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     }),
     prisma.authorityAssignment.findMany({ where: { processId }, include: AUTHORITY_ASSIGNMENT_INCLUDE }),
@@ -56,8 +56,9 @@ export default async function AuthorityMatrixPage(
         </div>
       </div>
       <p className="mt-1 mb-4 text-sm text-slate-500">
-        Each task carries as many rules as it needs. A rule turns on an amount of money or an elapsed time, and says
-        what happens then — the task needs approval, or it escalates.
+        Each task carries as many rules as it needs. A rule turns on an amount of money or on the task's SLA (the days it
+        should take), and says what happens then — the task needs approval, or it escalates. A task's escalation rule and
+        notes are the same ones written on the Map, shown and editable here.
       </p>
 
       <AuthorityTable
@@ -66,6 +67,7 @@ export default async function AuthorityMatrixPage(
         roles={roles.map((r) => ({ id: r.id, name: r.name }))}
         people={people.map((p) => ({ id: p.id, name: p.name }))}
         initialRows={rows}
+        stepNotes={Object.fromEntries(steps.map((s) => [s.id, { escalation: s.escalationNote ?? "", note: s.stepNote ?? "" }]))}
         initialIssues={issues}
       />
     </main>

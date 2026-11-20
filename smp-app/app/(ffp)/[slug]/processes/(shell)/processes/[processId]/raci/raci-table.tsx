@@ -12,6 +12,7 @@ import {
   updateActivity,
   deleteActivity,
   pinRaciRole,
+  removeRaciRole,
   finalizeRaciMatrix,
   reopenRaciMatrix,
 } from "@/ffp/lib/actions/raci";
@@ -92,6 +93,8 @@ export function RaciTable({
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  /* a title the person is removing that still has letters under it, waiting for their word */
+  const [removingTitle, setRemovingTitle] = useState<{ id: string; name: string; letters: number } | null>(null);
   const [addingTitle, setAddingTitle] = useState(false);
   const [pickRoleId, setPickRoleId] = useState("");
   const router = useRouter();
@@ -306,6 +309,23 @@ export function RaciTable({
     });
   }
 
+  function removeTitle(role: { id: string; name: string }, confirm = false) {
+    startTransition(async () => {
+      const res = await removeRaciRole({ workspaceId, processId, roleId: role.id, confirm });
+      if (res.ok && res.data.needsConfirm) {
+        setRemovingTitle({ id: role.id, name: role.name, letters: res.data.letters });
+        return;
+      }
+      if (res.ok && res.data.removed) {
+        setVisibleRoles((prev) => prev.filter((r) => r.id !== role.id));
+        /* the letters under it are gone from this table too */
+        setRows((prev) => prev.map((row) => { const next = { ...row.assignments }; delete next[role.id]; return { ...row, assignments: next }; }));
+      }
+      setRemovingTitle(null);
+      router.refresh();
+    });
+  }
+
   function addExistingTitle() {
     if (!pickRoleId) return;
     const role = hiddenRoles.find((r) => r.id === pickRoleId);
@@ -451,6 +471,20 @@ export function RaciTable({
         </div>
       </div>
 
+      {removingTitle && (
+        <div role="alert" className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-800" data-raci-remove-warning="">
+          <span>
+            {removingTitle.name} has {removingTitle.letters} letter{removingTitle.letters === 1 ? "" : "s"} entered in this table. Removing the title deletes {removingTitle.letters === 1 ? "it" : "them"}. It stays on the Map where a step names it.
+          </span>
+          <button type="button" disabled={pending} onClick={() => removeTitle(removingTitle, true)} className="rounded-md border border-red-300 bg-white px-2.5 py-1 text-xs font-bold text-red-700">
+            Remove title and its letters
+          </button>
+          <button type="button" onClick={() => setRemovingTitle(null)} className="rounded-md px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-white">
+            Keep it
+          </button>
+        </div>
+      )}
+
       {issues.length === 0 ? (
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-800">
           Ready to finalize — every task has exactly one Accountable and at least one Responsible.
@@ -485,6 +519,18 @@ export function RaciTable({
               {roles.map((r) => (
                 <th key={r.id} scope="col" className="sticky top-0 z-20 bg-slate-50 px-3 py-2 text-center">
                   {r.name}
+                  {canEdit && (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => removeTitle(r)}
+                      aria-label={`Remove ${r.name} from the RACI table`}
+                      title="Remove this title from the table"
+                      className="ms-1 rounded px-1 text-[11px] font-semibold text-slate-400 hover:bg-red-50 hover:text-red-600"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </th>
               ))}
               {canEdit && (

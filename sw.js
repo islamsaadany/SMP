@@ -712,6 +712,8 @@
 /* v8.01-build-advise-refine — §790: ✦ Build, ✦ Advise and ✦ Refine, one family. */
 /* v8.02-refine-compete — §791: ✦ Refine opens on the Competitive Discipline tab as on the SWOT. */
 /* v8.03-bar-narrow — §792: the top bar on a narrowed window; the Refine panel sits under the chrome. */
+/* v8.04-link-optional — §794: a key measure no tactic names carries no red line; past main's v8.03 at the merge. */
+/* v8.05-swot-fold — §795: a SWOT line's points fold under its title; Expand all / Collapse all. */
 /* v8.06-trail-links — §796: the trail's menu entries are links, so a ⌘-click or a right click opens one in a new tab; past main's v8.05 at the merge. */
 const SHELL = "smp-shell-v8.06-trail-links";
 const ASSETS = [

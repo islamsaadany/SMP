@@ -7113,7 +7113,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   @media (prefers-reduced-motion:reduce) {
     details.dlmenu[open] > .menu, details.dlmenu[open] > .menu.closing, .iconwrap .menu { animation:none; }
   }
-  /* §794: a menu's entry is a button or, in the trail, a link (an <a href>,
+  /* §796: a menu's entry is a button or, in the trail, a link (an <a href>,
      so it opens in a new tab on a modifier key or a right click); both wear
      the same clothes */
   details.dlmenu > .menu button, details.dlmenu > .menu a[role="menuitem"] {
@@ -7315,6 +7315,29 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .swot-p { display:block; position:relative; padding-left:14px; margin-top:3px; }
   .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
   .swot-t b + .swot-p { margin-top:5px; }
+  /* §795 — THE POINTS FOLD UNDER THE TITLE (group-render.js swotLine). The
+     title is a button that reads as the title it was: the page's own type,
+     no ground, no edge; a gold underline on hover says it can be pressed. The
+     arrow and, while folded, the count sit after it in the quiet ink. */
+  .swfold { font:inherit; color:inherit; background:none; border:0; padding:0; margin:0;
+            text-align:left; cursor:pointer; display:inline; border-radius:3px; }
+  .swfold b { font-weight:700; }
+  .swfold:hover b { text-decoration:underline; text-decoration-color:var(--gold); text-underline-offset:3px; }
+  .swfold:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .swfold .swcar { display:inline-block; width:9px; height:9px; margin-left:7px; color:var(--ink-3);
+                   transition:transform .12s; vertical-align:1px; }
+  .swfold[aria-expanded="true"] .swcar { transform:rotate(180deg); }
+  .swfold .swcnt { font-weight:400; font-size:12px; color:var(--ink-3); margin-left:7px; white-space:nowrap; }
+  .swfold[aria-expanded="true"] .swcnt { display:none; }
+  .swpts { display:block; margin-top:2px; }
+  .swpts[hidden] { display:none; }
+  @media (prefers-reduced-motion:reduce) { .swfold .swcar { transition:none; } }
+  /* PAPER SHOWS EVERY POINT: a fold is how one reader left their screen, and
+     a page that has been printed cannot be pressed. */
+  @media print {
+    .swpts[hidden] { display:block !important; }
+    .swfold .swcar, .swfold .swcnt { display:none !important; }
+  }
 
   /* Temple editing: tables, with the statements in labelled rows above them. */
   .templeedit h4.mini:first-child { margin-top:0; }
@@ -8210,6 +8233,18 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
     border-radius:8px; font-size:12px; font-weight:700; padding:4px 13px;
     cursor:pointer; font-family:inherit; white-space:nowrap; }
+  /* §795 — Expand all / Collapse all, the pen's quieter neighbour: the same
+     box at the regular weight, its mark before the word. The second selector
+     for §145.14's reason, as on the pen. */
+  .swfoldall, .tabs .secttail button.swfoldall {
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; font-size:12px; font-weight:600; padding:4px 10px;
+    cursor:pointer; font-family:inherit; white-space:nowrap;
+    display:inline-flex; align-items:center; gap:6px; }
+  .swfoldall svg { width:12px; height:12px; flex:none; }
+  .swfoldall[hidden], .tabs .secttail button.swfoldall[hidden] { display:none; }
+  .tabs .secttail button.swfoldall:hover { border-color:var(--gold); color:var(--ink); background:var(--surface); }
+  .tabs .secttail button.swfoldall:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   .tabs .secttail button.secpen:hover { border-color:var(--gold);
     color:var(--gold-deep); background:var(--surface); }
   /* Lit while the mode is open — the pen's own pair (`--gold` under
@@ -8885,7 +8920,7 @@ td .reqbox, .tpsec .reqbox { display:block; margin-top:8px; }
 .kmtip.on { display:block; }
 td .kmnums { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:6px; }
 td .kmcount { display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:4px; font-size:11px; color:var(--ink-3); }
-td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
+/* `td .kmcount.none` (the red 'No tactic supports it yet'): gone, §794 — the link is optional and a measure without one says nothing. */
 .kmlegend { margin:8px 0 0; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface-2);
   font-size:12px; color:var(--ink-2); }
 .kmlegend summary { cursor:pointer; padding:8px 14px; list-style:none; }

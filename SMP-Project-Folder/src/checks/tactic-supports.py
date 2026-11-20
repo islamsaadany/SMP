@@ -14,7 +14,7 @@ scored, never counted as missing.
       every tactic, none ticked.
   2 · STORED, READ MODE: the line under the tactic carries the numbers, each
       tag's hover is the measure's name; the count under a measure names its
-      tactics; a measure with none says so; the legend lists every measure;
+      tactics; a measure with none says nothing (§794); the legend lists every measure;
       no column moves.
   3 · THE PEN: the ticks read the stored list; a tick stores the id; the last
       untick DELETES the key (§50.6).
@@ -111,10 +111,15 @@ with sync_playwright() as p:
     ok("no browser tooltip is left on the tag to appear late", safe(pg, "()=>[...document.querySelectorAll('#panel .kmtag')].every(t=>!t.hasAttribute('title'))") is True)
     ct = safe(pg, """()=>[...document.querySelectorAll('#panel .kmcount')].map(x=>({none:x.classList.contains('none'), text:x.textContent.trim(),
       tags:[...x.querySelectorAll('.kmtag')].map(t=>t.textContent)}))""")
-    ok("every measure of the pillar carries a count line", ct and len(ct) == 4, ct)
+    ok("only the two named measures carry a tag line (§794: a measure no tactic names has none)", ct and len(ct) == 2, ct)
     ok("measure 1 names T1, measure 2 names T1 and T2, and no count is written before them",
        ct and ct[0]["tags"] == ["T1"] and ct[1]["tags"] == ["T1", "T2"] and ct[1]["text"] == "T1T2", ct)
-    ok("measures 3 and 4 say no tactic supports them yet", ct and ct[2]["none"] and ct[3]["none"] and "supports it yet" in ct[2]["text"], ct)
+    # REWRITTEN, NEVER LOOSENED (§218, §794): the link is optional, so a
+    # measure no tactic names carries NO line — not a red one. Asserted as
+    # the count of lines (two, under the two named measures) and that no
+    # "supports it yet" text is anywhere on the page.
+    ok("measures 3 and 4 carry no line at all (§794: the link is optional)",
+       ct and not any(x["none"] for x in ct) and safe(pg, "()=>!document.querySelector('#panel').textContent.includes('supports it yet') && document.querySelectorAll('#panel .kmcount.none').length===0"), ct)
     lg = safe(pg, """()=>{var l=document.querySelector('#panel .kmlegend'); return l?{open:l.open, rows:[...l.querySelectorAll('.kmrows > span:nth-child(even)')].map(x=>x.textContent)}:null}""")
     ok("no legend any more (§774.2: the tags' hover names the measure)", lg is None and count(".kmlegend") == 0, [lg, count(".kmlegend")])
     ok("no column moves", w0 and cols() == w0, [w0, cols()])

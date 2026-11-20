@@ -28387,6 +28387,96 @@ function swotText(x){
       return '<span class="swot-p">' + esc(l.replace(/^[-\u2013\u2014\u2022*\u00b7]+\s*/, "")) + '</span>';
     }).join("") + '</span>';
 }
+/* ── A SWOT LINE'S POINTS FOLD UNDER ITS TITLE (§795) ──────────────────────
+   Islam: *"can we have an option where the items under the title is collapsed
+   and expanded by clicking on the main title? or expand all or collapse
+   all?"* Settled on a working mockup he pressed himself
+   (design-mockups/swot-fold/2026-11-20_fold-points-chosen.html), with his
+   three answers: the page opens AS YOU LEFT IT, there is ONE Expand all /
+   Collapse all for the page, and the pen stays one box with a row per point.
+
+   THE TITLE IS THE CONTROL, and only where there is something under it: a
+   line of one row has nothing to fold, so it gets no arrow and is drawn by
+   `swotText()` exactly as before. A folded line says how many points it
+   holds, so folding never hides that there IS more.
+
+   A FOLD IS THE READER'S, NEVER THE PLAN'S. It is kept in this browser
+   (`smp.swot.fold`) and nowhere else: nothing is saved, nobody else's page
+   moves, and the deck, the workbooks and the PowerPoint — which read
+   `swotText()` or the raw text — never hear of it. Paper is the same page
+   printed, so print opens every line (arrange.css).
+
+   KEYED BY THE TITLE, NOT THE ROW NUMBER: client | unit | box | title. Lines
+   have no id of their own, and a number moves when a line above is removed —
+   the fold would jump to its neighbour. A title that is rewritten is a new
+   line as far as this goes and opens, which is the safe way to be wrong.
+
+   THE PEN OPENS EVERYTHING by construction: with Edit on the box draws
+   fields, not this, so there is no fold to be inside of. */
+var SWOT_FOLD_KEY = "smp.swot.fold";
+function swotFolds(){
+  try { var j = JSON.parse(localStorage.getItem(SWOT_FOLD_KEY) || "{}"); return j && typeof j === "object" ? j : {}; }
+  catch (e) { return {}; }
+}
+function swotFoldsKeep(m){ try { localStorage.setItem(SWOT_FOLD_KEY, JSON.stringify(m)); } catch (e) {} }
+function swotFoldId(ukey, quad, title){
+  /* the client's own address segment when served; the file has none */
+  var m = (typeof location !== "undefined" && /^https?:$/.test(location.protocol)) ? /^\/([a-z0-9][a-z0-9-]*)\//.exec(location.pathname || "") : null;
+  return (m ? m[1] : "") + "|" + ukey + "|" + quad + "|" + String(title).trim().toLowerCase();
+}
+var SWOT_CARET = '<svg class="swcar" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3.5l3 3 3-3"/></svg>';
+var SWOT_ALLMARK = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5l3-3 3 3M3 7l3 3 3-3"/></svg>';
+function swotLine(x, ukey, quad, i){
+  var ls = String(x == null ? "" : x).split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+  if (ls.length < 2) return swotText(x);
+  var id = swotFoldId(ukey, quad, ls[0]), open = !swotFolds()[id], n = ls.length - 1;
+  var dom = "swp-" + quad + "-" + i;
+  return '<span class="swot-t"><button type="button" class="swfold" data-swfold="' + esc(id) +
+    '" aria-expanded="' + open + '" aria-controls="' + dom + '"><b>' + esc(ls[0]) + '</b>' +
+    '<span class="swcnt">' + n + (n === 1 ? ' point' : ' points') + '</span>' + SWOT_CARET + '</button>' +
+    '<span class="swpts" id="' + dom + '"' + (open ? '' : ' hidden') + '>' +
+    ls.slice(1).map(function(l){
+      return '<span class="swot-p">' + esc(l.replace(/^[-\u2013\u2014\u2022*\u00b7]+\s*/, "")) + '</span>';
+    }).join("") + '</span></span>';
+}
+/* ONE BUTTON FOR THE PAGE, on the section row beside the pen. Drawn hidden
+   with the row and shown by `swotFoldSync()` once the page under it is
+   painted — the row cannot know on its own whether the page has a line with
+   points on it, and a button that folds nothing is a control that goes
+   nowhere (§94.15). Its word is what the press will do. */
+function swotFoldBtn(){ return '<button type="button" class="swfoldall" data-swfoldall hidden></button>'; }
+function swotFoldSync(){
+  if (typeof document === "undefined") return;
+  var b = document.querySelector("[data-swfoldall]");
+  if (!b) return;
+  var fs = document.querySelectorAll("[data-swfold]");
+  if (!fs.length) { b.hidden = true; return; }
+  var anyOpen = Array.prototype.some.call(fs, function(f){ return f.getAttribute("aria-expanded") === "true"; });
+  b.hidden = false;
+  b.setAttribute("data-open", anyOpen ? "1" : "");
+  b.innerHTML = SWOT_ALLMARK + (anyOpen ? "Collapse all" : "Expand all");
+}
+function swotFoldSet(f, open, m){
+  f.setAttribute("aria-expanded", String(open));
+  var pts = document.getElementById(f.getAttribute("aria-controls"));
+  if (pts) pts.hidden = !open;
+  var id = f.getAttribute("data-swfold");
+  if (open) delete m[id]; else m[id] = 1;
+}
+/* Wired once, on the document: the boxes are redrawn on every paint and this
+   survives it (§24, §47.2). A fold moves two attributes in place — no paint,
+   so the page does not jump and nothing is marked as changed. */
+if (typeof document !== "undefined") document.addEventListener("click", function(ev){
+  var t = ev.target && ev.target.closest ? ev.target.closest("[data-swfold], [data-swfoldall]") : null;
+  if (!t) return;
+  var m = swotFolds();
+  if (t.hasAttribute("data-swfoldall")) {
+    var open = !t.getAttribute("data-open");
+    Array.prototype.forEach.call(document.querySelectorAll("[data-swfold]"), function(f){ swotFoldSet(f, open, m); });
+  } else swotFoldSet(t, t.getAttribute("aria-expanded") !== "true", m);
+  swotFoldsKeep(m);
+  swotFoldSync();
+});
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
@@ -29146,7 +29236,12 @@ function supportsLine(t, p){
 function supportedLine(m, p){
   if (!p || !mappingOn(p)) return '';
   var s = supportedBy(m, p);
-  if (!s.length) return '<span class="kmcount none">No ' + L1("tactic").toLowerCase() + ' supports it yet</span>';
+  /* §794: THE LINK IS OPTIONAL, SO A MEASURE WITHOUT ONE SAYS NOTHING.
+     Islam, on RHI's page: *"this should be optional so the no connection
+     doesn't show missing connection."* The red "No tactic supports it yet"
+     read as a gap to close; a key measure a tactic does not name is simply
+     a key measure. Nothing is drawn under it. */
+  if (!s.length) return '';
   /* Islam, on the built page: the tags alone, no "2 tactics" before them. */
   return '<span class="kmcount">' + s.map(function(x){ return kmTag(x.n, x.t.name, "t"); }).join('') + '</span>';
 }
@@ -35124,7 +35219,7 @@ function swotBoxes(u, quads, page, ac){
               '<button class="xbtn" data-swrm="' + esc(swt) +
               '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
               rmStrip("swrm", swt, RMASK ? RMASK.say : "")
-            : swotText(x)) + '</li>';
+            : swotLine(x, u.ukey, key, i)) + '</li>';
       }).join("") + '</ol>' +
       (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
         '">+ Add</button></div>' : '') + '</section>';
@@ -70756,7 +70851,9 @@ var COPILOT = (function(){
     if (tail && !tail.querySelector("[data-cop-panelbtn]")) {
       var b = document.createElement("button"); b.type = "button"; b.className = "copBbtn"; b.setAttribute("data-cop-panelbtn", "");
       b.setAttribute("aria-pressed", String(PANEL.open)); b.title = "Refine this part with the Copilot"; b.textContent = "✦ Refine";
-      tail.insertBefore(b, tail.firstChild);
+      /* §795: after the SWOT's Expand all / Collapse all where the row has it, so the three read fold · ✦ Refine · Edit as drawn */
+      var fold = tail.querySelector("[data-swfoldall]");
+      tail.insertBefore(b, fold ? fold.nextSibling : tail.firstChild);
     }
     if (!PANEL.open) { closePanelDom(); return; }
     var el = document.getElementById("copPanel");
@@ -83693,10 +83790,15 @@ var SYNC = (function () {
        of the row with the pen at the end — drawn, looked at, and thrown away
        (§41.9). The tail takes the auto and the bar gives its up. */
     var penHTML = (stratTab && typeof secActs === "function") ? secActs() : "";
-    var tailHTML = (missHTML || penHTML)
+    /* §795: Expand all / Collapse all for a SWOT's folding points, before the
+       pen. Drawn hidden; `swotFoldSync()` at the end of the paint shows it
+       where the page has a line with points on it. On the strategy tabs for
+       everybody, the pen or no pen — folding is reading. */
+    var foldHTML = (stratTab && typeof swotFoldBtn === "function") ? swotFoldBtn() : "";
+    var tailHTML = (missHTML || penHTML || foldHTML)
       ? '<span class="secttail">' + missHTML +
           ((missHTML && penHTML) ? '<span class="sectsep" aria-hidden="true"></span>' : '') +
-          penHTML + '</span>'
+          foldHTML + penHTML + '</span>'
       : "";
     /* THE ROW IS NOT ONLY FOR SECTIONS, AND §211.2 IS WHAT PROVED IT. That
        section left a pillars function with ONE section — and `> 1` took the
@@ -83942,6 +84044,7 @@ var SYNC = (function () {
     rememberWhere();
     /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
        panel follow every paint, as the page's own parts do. */
+    if (typeof swotFoldSync === "function") swotFoldSync();   /* §795 */
     if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
     /* §755: a figure corrected on a closed cycle re-takes its closing
        record before the save leaves (closeRecordFollow, config-data.js). */
@@ -93579,7 +93682,7 @@ var SYNC = (function () {
     return document.documentElement.hasAttribute("data-client-settings");
   }
   var trailSaid = null;
-  /* §794 EVERY ENTRY IS A LINK (Islam: "I want to open it in a new tab either
+  /* §796 EVERY ENTRY IS A LINK (Islam: "I want to open it in a new tab either
      by clicking command and click on it or right click to open in a new
      tab"). The entries were buttons that set the address from a script, so
      the browser had nothing to open in a new tab and no menu to offer on a
@@ -93656,7 +93759,7 @@ var SYNC = (function () {
       nav.addEventListener("click", function (ev) {
         var b = ev.target.closest ? ev.target.closest("[data-trgo]") : null;
         if (!b) return;
-        /* §794: a modifier key, or a button that is not the left one, is the
+        /* §796: a modifier key, or a button that is not the left one, is the
            browser's own press on the link — a new tab or window — and the
            menu is left to the browser */
         if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;

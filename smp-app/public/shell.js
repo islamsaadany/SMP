@@ -29146,7 +29146,12 @@ function supportsLine(t, p){
 function supportedLine(m, p){
   if (!p || !mappingOn(p)) return '';
   var s = supportedBy(m, p);
-  if (!s.length) return '<span class="kmcount none">No ' + L1("tactic").toLowerCase() + ' supports it yet</span>';
+  /* §777: THE LINK IS OPTIONAL, SO A MEASURE WITHOUT ONE SAYS NOTHING.
+     Islam, on RHI's page: *"this should be optional so the no connection
+     doesn't show missing connection."* The red "No tactic supports it yet"
+     read as a gap to close; a key measure a tactic does not name is simply
+     a key measure. Nothing is drawn under it. */
+  if (!s.length) return '';
   /* Islam, on the built page: the tags alone, no "2 tactics" before them. */
   return '<span class="kmcount">' + s.map(function(x){ return kmTag(x.n, x.t.name, "t"); }).join('') + '</span>';
 }

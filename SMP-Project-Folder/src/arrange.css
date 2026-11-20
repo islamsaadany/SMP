@@ -2643,7 +2643,7 @@ td .reqbox, .tpsec .reqbox { display:block; margin-top:8px; }
 .kmtip.on { display:block; }
 td .kmnums { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:6px; }
 td .kmcount { display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:4px; font-size:11px; color:var(--ink-3); }
-td .kmcount.none { display:block; color:var(--bad-tx); font-style:italic; }
+/* `td .kmcount.none` (the red 'No tactic supports it yet'): gone, §777 — the link is optional and a measure without one says nothing. */
 .kmlegend { margin:8px 0 0; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface-2);
   font-size:12px; color:var(--ink-2); }
 .kmlegend summary { cursor:pointer; padding:8px 14px; list-style:none; }

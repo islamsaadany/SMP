@@ -71756,6 +71756,6 @@ Islam: *"when I press save and next it shows me the next week actions which is w
 
 **§787 MERGED TO `main`** 2026-11-17, Islam: *"merge to main"*. `main` had not moved since §786, so the merge is a fast-forward. No migrations; nobody signed out. The database-backed `checks/tracker.mjs` run is still owed from a session with a database.
 
-## §788 — The Internal Tracker is named the Task Tracker (2026-11-20)
+## §793 — The Internal Tracker is named the Task Tracker (2026-11-20)
 
 Islam: *"let's make the name of the module Task Tracker not internal tracker"*, then *"or shall we name Tasks Tracker"* — Task Tracker, the singular as the modifier, the way "issue tracker" is said. The module's label in `lib/modules.ts` (which names the page's title, its heading, the module list, the jump list and the console's record), the five refusals that name it (`lib/my-work.ts`, `modules/tracker/index.ts`, `modules/tracker/page.ts`) and My tasks' two lines (`public/platform-page.js`) now say Task Tracker. The key `tracker`, the address `/<client>/tracker` and the tables are unchanged, so nothing moves and nobody signs out; the record's older entries keep the old name as history. Checks that spelled the name (`checks/tracker.mjs`, `checks/jump.mjs`, `checks/console-record.mjs`) spell the new one; the browser runs are owed from a session with a database.

@@ -713,7 +713,8 @@
 /* v8.02-refine-compete — §791: ✦ Refine opens on the Competitive Discipline tab as on the SWOT. */
 /* v8.03-bar-narrow — §792: the top bar on a narrowed window; the Refine panel sits under the chrome. */
 /* v8.04-link-optional — §794: a key measure no tactic names carries no red line; past main's v8.03 at the merge. */
-const SHELL = "smp-shell-v8.04-link-optional";
+/* v8.05-swot-fold — §795: a SWOT line's points fold under its title; Expand all / Collapse all. */
+const SHELL = "smp-shell-v8.05-swot-fold";
 const ASSETS = [
   "/",
   "/index.html",

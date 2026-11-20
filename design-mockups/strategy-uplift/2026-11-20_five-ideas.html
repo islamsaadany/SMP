@@ -1,0 +1,456 @@
+<title>Strategy module uplift</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<!-- Islam, 2026-11-20: "have an overview on the strategy module ... give me your
+     uplifting comments or notes to the design ... show me different mock-ups,
+     different ideas of how can we uplift the module for the users."
+     Five ideas, drawn in the product's own palette and type. NOTHING IS BUILT.
+     Mobile's plan content is the demo's real content; every score, status and
+     cross-module line is invented for the drawing and says so on the page. -->
+<style>
+/* layout: a review sheet — notes first, then five framed screens, each one idea */
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-2:#0F2546;--navy-ink:#FFFFFF;--navy-quiet:#B7C4D8;--navy-rule:rgba(255,255,255,.16);--navy-lit:rgba(255,255,255,.16);--gold:#C9A24D;--gold-deep:#8A6B22;--over-bg:#FBF6E9;--cta:#A4512C;--good:#2E7D5B;--good-bg:#E4F0EA;--attn:#8F6B0B;--attn-bg:#F7EFD6;--bad:#B04434;--bad-bg:#F7E3E0;--zebra:#F5F7FA;--bar:#E3E8EF;--sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#101622;--navy-2:#0A0E16;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--navy-rule:rgba(255,255,255,.12);--navy-lit:rgba(255,255,255,.14);--gold:#D9B665;--gold-deep:#D9B665;--over-bg:#2C2718;--cta:#E1935F;--good:#5FB68C;--good-bg:#1F3A2E;--attn:#D9B23C;--attn-bg:#3A3216;--bad:#E07F75;--bad-bg:#3F2522;--zebra:#20252D;--bar:#2F3641;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#101622;--navy-2:#0A0E16;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--navy-rule:rgba(255,255,255,.12);--navy-lit:rgba(255,255,255,.14);--gold:#D9B665;--gold-deep:#D9B665;--over-bg:#2C2718;--cta:#E1935F;--good:#5FB68C;--good-bg:#1F3A2E;--attn:#D9B23C;--attn-bg:#3A3216;--bad:#E07F75;--bad-bg:#3F2522;--zebra:#20252D;--bar:#2F3641;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 70px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:34px}
+.wrap>*{min-width:0}
+h1{margin:0;font-size:24px;font-weight:700;text-wrap:balance}
+h2{margin:0;font-size:17px;font-weight:700}
+h3{margin:0;font-size:14.5px;font-weight:700}
+p{margin:0}
+.lede{margin-top:6px;color:var(--ink-2);max-width:78ch}
+.notbuilt{display:inline-block;margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);border:1px solid var(--gold);border-radius:999px;padding:4px 12px;background:var(--over-bg)}
+.k{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+/* notes */
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:10px;align-content:start}
+.note ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.note li{font-size:14px;color:var(--ink-2);padding-left:14px;position:relative}
+.note li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--ink-3)}
+.note li b{color:var(--ink);font-weight:600}
+.note li em{font-style:normal;color:var(--gold-deep);font-weight:600;white-space:nowrap}
+.jump{display:flex;flex-wrap:wrap;gap:8px}
+.jump a{font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px}
+.jump a:hover{border-color:var(--gold-deep)}
+.jump a:focus-visible,.seg button:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+.jump a i{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--gold-deep);margin-right:6px}
+/* an idea */
+section.idea{display:grid;gap:12px;scroll-margin-top:16px}
+.ih{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ih .n{font:700 12px/1 var(--mono);color:var(--gold-deep);letter-spacing:.1em}
+.cap{font-size:14.5px;color:var(--ink-2);max-width:86ch}.cap b{color:var(--ink);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow-x:auto;background:var(--ground)}
+.canvas{min-width:1000px}
+.under{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.under>div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.under ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px;color:var(--ink-2)}
+.under .agree .k{color:var(--gold-deep)}
+.inv{font-size:12.5px;color:var(--ink-3)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+/* ── the product's own chrome, as built ── */
+.top{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;height:34px;font-size:12.5px}
+.top .mark{width:20px;height:20px;border-radius:5px;background:#F2A71B;display:grid;place-items:center;color:#16325C;font-size:13px;font-weight:700;line-height:1}
+.top b{font-weight:600}.top .cl{color:var(--ink-3);border-left:1px solid var(--line);padding-left:12px}
+.top .sp{flex:1}.top .who{color:var(--ink-3)}
+.top .read{font-size:10.5px;font-weight:700;letter-spacing:.08em;border:1px solid var(--gold);border-radius:999px;padding:3px 10px;color:var(--ink)}
+.row{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:4px;padding:0 14px;height:38px;font-size:12.5px;white-space:nowrap}
+.row .g{font-weight:700;padding:0 10px}.row .g i{font-style:normal;font-size:9px;color:var(--navy-quiet);margin-left:4px}
+.row .sw{display:inline-flex;background:var(--navy-lit);border-radius:6px;padding:2px;margin:0 6px;font-weight:700}
+.row .sw span{padding:4px 9px;border-radius:5px}.row .sw span.on{background:rgba(255,255,255,.22)}
+.row .u{padding:0 8px;height:38px;display:inline-flex;align-items:center;color:var(--navy-ink);opacity:.9}
+.row .u.on{font-weight:700;opacity:1;box-shadow:inset 0 -2px 0 var(--gold)}
+.tabs{background:var(--surface-2);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 20px;height:38px;font-size:13px;color:var(--ink-2)}
+.tabs span.on{color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--gold);height:38px;display:inline-flex;align-items:center}
+.tabs .rep{background:var(--cta);color:#fff;border-radius:5px;padding:4px 12px;font-weight:600}
+.tabs .sp{flex:1}
+.secs{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:6px 20px;gap:10px}
+.pill{display:inline-flex;border:1px solid var(--line);border-radius:6px;padding:2px;font-size:12px;font-weight:600;color:var(--ink-2);background:var(--surface)}
+.pill span{padding:4px 11px;border-radius:4px;white-space:nowrap}.pill span.on{background:var(--ink-2);color:var(--surface)}
+.secs .sp{flex:1}.btn{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:6px;padding:5px 12px;background:var(--surface);color:var(--ink);white-space:nowrap}
+.body{padding:18px 20px 22px;display:grid;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+/* the modules' panel head (Tracker / Insights / My tasks) */
+.panel{background:var(--navy);color:var(--navy-ink);border-radius:10px;border-bottom:3px solid var(--gold);padding:16px 22px;display:flex;align-items:flex-end;gap:26px}
+.panel .ey{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.panel .t{font-size:22px;font-weight:700;line-height:1.2}
+.panel .s{font-size:13px;color:var(--navy-quiet)}
+.panel .sp{flex:1}
+.panel .ct{text-align:right}.panel .ct b{display:block;font-size:22px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.panel .ct span{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--navy-quiet)}
+.panel .ct b.r{color:#F2A08F}
+/* tables, as built */
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--navy);color:var(--navy-ink);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:9px 12px;border-right:1px solid var(--navy-rule);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td b{font-weight:600}
+.code{font:700 11.5px/1 var(--mono);color:var(--ink-2);letter-spacing:.04em}
+.pct{font:700 13.5px/1 var(--mono)}
+.good{color:var(--good)}.attn{color:var(--attn)}.bad{color:var(--bad)}.quiet{color:var(--ink-3)}
+.st{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.st::before{content:"";width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink-3);flex:none}
+.st.done::before{background:var(--good);border-color:var(--good)}
+.st.part::before{border-color:var(--attn);background:linear-gradient(90deg,var(--attn) 50%,transparent 50%)}
+.st.late{color:var(--bad);font-weight:600}.st.late::before{border-color:var(--bad)}
+.band{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.band.good{background:var(--good-bg)}.band.attn{background:var(--attn-bg)}.band.bad{background:var(--bad-bg)}
+.meter{height:6px;border-radius:3px;background:var(--bar);overflow:hidden;min-width:70px}.meter i{display:block;height:100%;border-radius:3px;background:currentColor}
+.miss{display:grid;gap:0}
+.miss div{display:flex;gap:12px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--line-soft);font-size:13.5px}
+.miss div:first-child{border-top:0}
+.miss b{font-weight:600;min-width:120px}.miss span{color:var(--ink-2);flex:1}.miss a{color:var(--gold-deep);font-weight:600;white-space:nowrap}
+.ch{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:10px}
+.ch span{font-size:12.5px;color:var(--ink-3)}
+/* idea 2 */
+.los{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;align-items:start}
+.asp{padding:14px 16px;border-left:3px solid var(--gold);font-size:14px}
+.asp .k{display:block;margin-bottom:4px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--navy)}
+:root[data-theme="dark"] .dot{background:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dot{background:var(--gold)}}
+td.c,th.c{text-align:center}
+th.wrapth{white-space:normal;line-height:1.25;width:17%}
+.sw4{display:grid;gap:0}
+.swg{padding:10px 16px 4px}.swg .k{display:block;margin-bottom:2px}
+.swl{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-top:1px solid var(--line-soft);font-size:13.5px}
+.swl:first-of-type{border-top:0}
+.swl span{flex:1;color:var(--ink)}
+.chip{font:700 11px/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--ink-2);background:var(--surface-2);white-space:nowrap}
+.nochip{font-size:12px;font-weight:600;color:var(--bad);white-space:nowrap}
+/* idea 3 */
+.phead{display:grid;grid-template-columns:1fr auto;gap:18px;padding:16px 18px;border-left:3px solid var(--gold);align-items:start}
+.phead .nm{font-size:18px;font-weight:700;display:flex;gap:10px;align-items:baseline}
+.phead .intent{margin-top:6px;font-size:14px;color:var(--ink-3);border:1px dashed var(--line);border-radius:6px;padding:7px 10px;max-width:62ch}
+.phead .meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--ink-2);align-items:center}
+.phead .meta .k{margin-right:6px}
+.two{display:flex;gap:22px}
+.two div{text-align:right}.two b{display:block;font:700 26px/1 var(--sans)}.two span{font-size:11px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.road{display:grid;grid-template-columns:minmax(260px,1.3fr) 130px repeat(4,1fr) 96px;font-size:13px}
+.road>div{padding:9px 12px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;min-height:42px}
+.road .h{background:var(--navy);color:var(--navy-ink);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;min-height:0;border-right:1px solid var(--navy-rule)}
+.road .q{border-left:1px solid var(--line-soft);padding:9px 0;position:relative}
+.road .q.now{background:var(--over-bg)}
+.barr{height:14px;width:100%;background:currentColor;opacity:.9}
+.barr.s{border-radius:7px 0 0 7px;margin-left:8px}.barr.e{border-radius:0 7px 7px 0;margin-right:8px}.barr.se{border-radius:7px;margin:0 8px}
+.barr.plan{background:none;border:1.5px dashed var(--ink-3);opacity:1}
+.today{position:absolute;top:0;bottom:0;left:55%;width:2px;background:var(--cta)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 16px;font-size:12.5px;color:var(--ink-3);align-items:center}
+.legend i{display:inline-block;width:22px;height:10px;border-radius:5px;background:currentColor;vertical-align:-1px;margin-right:6px}
+.legend i.pl{background:none;border:1.5px dashed var(--ink-3)}.legend i.td{width:2px;border-radius:0;background:var(--cta);height:14px}
+/* idea 4 */
+.split{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start}
+.rail{display:grid;gap:0}
+.rg{padding:12px 16px;border-top:1px solid var(--line)}
+.rg:first-of-type{border-top:0}
+.rgh{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.rgh b{font-size:13.5px;font-weight:700}.rgh span{font-size:12px;color:var(--ink-3);flex:1}.rgh a{font-size:12px;font-weight:600;color:var(--gold-deep)}
+.ri{padding:7px 0;border-top:1px solid var(--line-soft);font-size:13px}
+.ri:first-of-type{border-top:0}
+.ri small{display:block;font-size:12px;color:var(--ink-3)}
+.ask{margin:4px 16px 14px;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--ink-3);display:flex;gap:8px;align-items:center}
+.ask i{font-style:normal;color:var(--gold-deep);font-weight:700}
+/* idea 5 */
+.cmp{display:grid;gap:14px;padding:18px 20px 22px}
+.cmp .lab{display:flex;gap:10px;align-items:baseline}
+.cmp .lab span{font-size:12.5px;color:var(--ink-3)}
+.mini{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--ground)}
+.one{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:6px;padding:0 14px;height:44px;font-size:13px;white-space:nowrap}
+.crumb{display:inline-flex;align-items:center;gap:8px;background:var(--navy-lit);border-radius:7px;padding:6px 12px;font-weight:600}
+.crumb em{font-style:normal;color:var(--navy-quiet);font-weight:400}.crumb i{font-style:normal;font-size:9px;color:var(--navy-quiet)}
+.one .vt{padding:0 11px;height:44px;display:inline-flex;align-items:center;color:var(--navy-ink);opacity:.88}
+.one .vt.on{opacity:1;font-weight:700;box-shadow:inset 0 -3px 0 var(--gold)}
+.one .sp{flex:1}.one .sep{width:1px;height:22px;background:var(--navy-rule);margin:0 8px}
+.one .rep{background:var(--cta);color:#fff;border-radius:5px;padding:5px 12px;font-weight:600}
+.pick{margin:0 14px 16px;width:430px;background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 10px 10px;box-shadow:0 10px 24px rgba(15,37,70,.16)}
+.pick .find{margin:10px 12px 6px;border-bottom:1.5px solid var(--ink-2);padding:6px 2px;font-size:13px;color:var(--ink-3)}
+.pick .grp{padding:8px 14px 2px}
+.pl{display:flex;align-items:center;gap:10px;padding:7px 14px;font-size:13.5px}
+.pl.on{background:var(--over-bg);font-weight:600}
+.pl span{flex:1}.pl small{font-size:12px;color:var(--ink-3)}
+.pl .pct{font-size:12.5px}
+.pl.in{padding-left:28px}
+@media (max-width:520px){h1{font-size:21px}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <h1>Strategy module — notes and five ideas to lift it</h1>
+  <p class="lede">I walked the built module as the Strategy Office sees it: the group, a business unit (Mobile), and every tab under each. Then I read it beside the Internal Tracker, My tasks, Insights, Portfolio, Meeting Notes and the Copilot. Notes first, then five screens, each one idea that stands on its own.</p>
+  <span class="notbuilt">Mockups only · nothing here is built</span>
+</header>
+
+<div class="notes">
+  <div class="note">
+    <span class="k">What already works — keep it</span>
+    <ul>
+      <li><b>The tables.</b> Navy header, zebra rows, codes in the mono face. They are consistent across Plan, Performance and Focus, and they read well.</li>
+      <li><b>The three performance cards.</b> Key Objectives, Pillars, Execution, each with a band and a way in. A reader gets the answer before the detail.</li>
+      <li><b>The Temple.</b> The one screen that shows the strategy as a shape instead of a list.</li>
+      <li><b>Reporting as a button, not a tab.</b> It is the only thing on the row that asks for action, and it looks like it.</li>
+      <li><b>Empty states that explain.</b> “Mobile has no revenue tree yet” says what a tree is for before it asks for one.</li>
+    </ul>
+  </div>
+  <div class="note">
+    <span class="k">What holds it back</span>
+    <ul>
+      <li><b>There is no front page.</b> The module opens on a table (the group’s one capability). Nobody is told where the strategy stands or what needs them. <em>→ idea 1</em></li>
+      <li><b>It looks like a different product from its neighbours.</b> Tracker, My tasks and Insights all open on the navy panel with a title and counts. Strategy was left for the end of that round and still has none. <em>→ idea 1</em></li>
+      <li><b>The story is cut into tabs with no thread.</b> Foundation, SWOT, Drivers and Plan sit side by side, but nothing shows which pillar serves which objective, or which weakness a pillar answers. A strategy’s logic is its links, and the links are not on screen. <em>→ idea 2</em></li>
+      <li><b>A pillar is a title over two tables.</b> No owner, no line of intent, no standing, and the timing of five tactics is twenty tiny circles. <em>→ idea 3</em></li>
+      <li><b>The other modules are invisible from here.</b> A report in Insights that backs a pillar, a task in the Tracker chasing a late tactic, a decision in a meeting note: all one module-switch away and none linked. <em>→ idea 4</em></li>
+      <li><b>Four rows of navigation before any content.</b> About 150px of every screen, and the unit row has no room left at ten units. <em>→ idea 5</em></li>
+      <li><b>What is missing is scattered.</b> “Not in the register” sits inside a table cell; “15 places have nothing marked” sits at the foot of Focus. There is no one place that lists what the plan still lacks. <em>→ idea 1</em></li>
+    </ul>
+  </div>
+</div>
+
+<nav class="jump" aria-label="The five ideas">
+  <a href="#idea-1"><i>01</i>A front page for Strategy</a>
+  <a href="#idea-2"><i>02</i>Line of sight</a>
+  <a href="#idea-3"><i>03</i>The pillar as a page</a>
+  <a href="#idea-4"><i>04</i>Around this pillar</a>
+  <a href="#idea-5"><i>05</i>Two rows instead of four</a>
+</nav>
+
+<!-- ═════════ 1 ═════════ -->
+<section class="idea" id="idea-1">
+  <div class="ih"><span class="n">IDEA 01</span><h2>A front page for Strategy</h2></div>
+  <p class="cap">The group opens on an <b>Overview</b> tab: the modules’ navy panel on top, then one board with a row per unit showing how far its strategy is formed and how it is performing, then a single list of what is still missing. The Strategy Office sees ten units at once; a group CEO sees who is behind without opening anything.</p>
+  <div class="frame"><div class="canvas">
+    <div class="top"><span class="mark">✦</span><b>Strategy Management Platform</b><span class="cl">Raya Trade</span><span class="sp"></span><span class="who">Viewing as Mohamed Essam — the group</span><span class="read">READ</span></div>
+    <div class="row"><span class="g">Group <i>▼</i></span><span class="sw"><span class="on">Units</span><span>Functions</span></span><span class="u">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span><span class="u">Consumer Electronics</span><span class="u">Online Shop</span><span class="u">Corporate</span><span class="u">Care</span><span class="u">IT Dist.</span><span class="u">Logistics</span><span class="u">Nigeria</span></div>
+    <div class="tabs"><span class="on flag">Overview</span><span>Strategy</span><span>Performance</span><span>Focus</span><span>Temple</span></div>
+    <div class="body">
+      <div class="panel">
+        <div><div class="ey">Raya Trade · Cycle 2026</div><div class="t">Strategy</div><div class="s">Ten business units, one group plan.</div></div>
+        <span class="sp"></span>
+        <div class="ct"><b>7 / 10</b><span>Plans formed</span></div>
+        <div class="ct"><b>4 / 10</b><span>Reported</span></div>
+        <div class="ct"><b>78%</b><span>Key objectives</span></div>
+        <div class="ct"><b class="r">3</b><span>Off track</span></div>
+      </div>
+      <div class="card" style="overflow:hidden">
+        <table>
+          <thead><tr><th>Business unit</th><th>Foundation</th><th>SWOT</th><th>Drivers</th><th>Plan</th><th>This cycle’s report</th><th class="num">Key measures</th><th class="num">Execution</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><b>Mobile</b></td><td><span class="st done">Written</span></td><td><span class="st done">23 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st part">4 pillars · 2 owners missing</span></td><td><span class="st late">Not submitted</span></td><td class="num"><span class="pct attn">67%</span></td><td class="num"><span class="pct bad">54%</span></td><td><span class="band bad">Off track</span></td></tr>
+            <tr><td><b>Retail Stores</b></td><td><span class="st done">Written</span></td><td><span class="st done">19 points</span></td><td><span class="st done">Tree built</span></td><td><span class="st done">3 pillars</span></td><td><span class="st done">Submitted</span></td><td class="num"><span class="pct good">91%</span></td><td class="num"><span class="pct good">88%</span></td><td><span class="band good">On track</span></td></tr>
+            <tr><td><b>B2B Ecomm</b></td><td><span class="st done">Written</span></td><td><span class="st part">Strengths only</span></td><td><span class="st">No tree yet</span></td><td><span class="st">Not started</span></td><td><span class="st">Nothing to report</span></td><td class="num quiet">—</td><td class="num quiet">—</td><td></td></tr>
+            <tr><td><b>Care</b></td><td><span class="st done">Written</span></td><td><span class="st done">21 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">3 pillars</span></td><td><span class="st done">Submitted</span></td><td class="num"><span class="pct good">86%</span></td><td class="num"><span class="pct attn">74%</span></td><td><span class="band attn">Needs attention</span></td></tr>
+            <tr><td><b>Logistics</b></td><td><span class="st done">Written</span></td><td><span class="st done">18 points</span></td><td><span class="st done">Tree built</span></td><td><span class="st done">4 pillars</span></td><td><span class="st part">Draft saved</span></td><td class="num"><span class="pct attn">71%</span></td><td class="num"><span class="pct bad">49%</span></td><td><span class="band bad">Off track</span></td></tr>
+            <tr><td colspan="9" class="quiet" style="font-size:12.5px">…and five more units, one row each. A row opens the unit where its first gap is.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="ch"><h3>Still missing</h3><span>the gaps the platform already knows about, gathered in one place</span></div>
+        <div class="miss">
+          <div><b>Mobile · Plan</b><span>Two tactic owners are not in the people register: Mohamed Rizk, Abdelhamid.</span><a>Open the plan ›</a></div>
+          <div><b>Mobile · Drivers</b><span>No revenue tree yet.</span><a>Start the tree ›</a></div>
+          <div><b>Mobile · Report</b><span>This cycle’s report is not submitted.</span><a>Open reporting ›</a></div>
+          <div><b>Focus</b><span>15 places have nothing marked.</span><a>Setup › Focus measures ›</a></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="inv">Mobile’s gaps are the ones the demo shows today. Every other unit’s status and score is invented for the drawing.</p>
+  <div class="under">
+    <div><span class="k">What changes for the user</span><ul><li>Strategy opens on the same navy panel as Tracker, My tasks and Insights.</li><li>One row per unit replaces opening ten units in turn.</li><li>Gaps that today sit inside table cells and page footers are listed once, each with its way in.</li><li>A unit gets the same tab, on its own shape: its pillars instead of units.</li></ul></div>
+    <div class="agree"><span class="k">To agree</span><ul><li>Does everybody land here, or only the Strategy Office and the CEOs? A unit head could land on their own unit’s overview instead.</li><li>The reading window is getting its own Overview this week. Should this be the same page with editing ways-in added, or a separate working board?</li></ul></div>
+  </div>
+</section>
+
+<!-- ═════════ 2 ═════════ -->
+<section class="idea" id="idea-2">
+  <div class="ih"><span class="n">IDEA 02</span><h2>Line of sight</h2></div>
+  <p class="cap">A fifth section beside Foundation, SWOT, Drivers and Plan that shows the <b>links</b>: which pillar serves which key objective, and which pillar answers each weakness, threat and opportunity. An objective no pillar serves, or a threat nothing answers, shows as a gap. This is the question a consultant asks first in a strategy review, and today the screen cannot answer it.</p>
+  <div class="frame"><div class="canvas">
+    <div class="row"><span class="g" style="font-weight:400">Group <i>▼</i></span><span class="sw"><span class="on">Units</span><span>Functions</span></span><span class="u on">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span><span class="u">Consumer Electronics</span><span class="u">Online Shop</span><span class="u">Corporate</span><span class="u">Care</span></div>
+    <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting ●</span></div>
+    <div class="secs"><span class="pill"><span>Foundation</span><span>SWOT</span><span>Drivers</span><span>Plan</span><span class="on flag">Line of sight</span></span><span class="sp"></span><span class="btn">Edit</span></div>
+    <div class="body">
+      <div class="card asp"><span class="k">Winning aspiration · horizon 2027</span>To be the biggest and most diversified distributor in local market through the most developed and advanced tech systems — positioned as one of the recognized regional distributors for consumer electronics.</div>
+      <div class="los">
+        <div class="card" style="overflow:hidden">
+          <div class="ch"><h3>Pillars against key objectives</h3><span>a dot where the pillar serves the objective</span></div>
+          <table>
+            <thead><tr><th>Pillar</th><th class="c wrapth">Distribution revenue</th><th class="c wrapth">Mobile market share</th><th class="c wrapth">Active merchant reach</th><th class="c wrapth">App coverage rate</th></tr></thead>
+            <tbody>
+              <tr><td><span class="code">MB01</span>&nbsp; Digital &amp; Data-Driven Operations</td><td class="c"></td><td class="c"></td><td class="c"><span class="dot"></span></td><td class="c"><span class="dot"></span></td></tr>
+              <tr><td><span class="code">MB02</span>&nbsp; Channel Preference &amp; Development</td><td class="c"></td><td class="c"><span class="dot"></span></td><td class="c"><span class="dot"></span></td><td class="c"></td></tr>
+              <tr><td><span class="code">MB03</span>&nbsp; Portfolio &amp; Value Chain Expansion</td><td class="c"><span class="dot"></span></td><td class="c"><span class="dot"></span></td><td class="c"></td><td class="c"></td></tr>
+              <tr><td><span class="code">MB04</span>&nbsp; Asset-Light Model Regional Expansion</td><td class="c"><span class="dot"></span></td><td class="c"></td><td class="c"></td><td class="c"></td></tr>
+              <tr><td class="quiet" style="font-size:12.5px">Target by 2027</td><td class="c quiet" style="font-family:var(--mono);font-size:12px">9.0B EGP</td><td class="c quiet" style="font-family:var(--mono);font-size:12px">38%</td><td class="c quiet" style="font-family:var(--mono);font-size:12px">6,500</td><td class="c quiet" style="font-family:var(--mono);font-size:12px">75%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card sw4">
+          <div class="ch"><h3>What the plan answers</h3><span>9 of 12 shown · 3 unanswered</span></div>
+          <div class="swg"><span class="k">Weaknesses</span>
+            <div class="swl"><span>Multiple systems across Raya Trade business units</span><i class="chip">MB01</i></div>
+            <div class="swl"><span>Underdeveloped presence in accessories market</span><i class="chip">MB03</i></div>
+            <div class="swl"><span>Low margin on devices</span><i class="chip">MB03</i></div>
+          </div>
+          <div class="swg"><span class="k">Threats</span>
+            <div class="swl"><span>Direct-to-market strategies by vendors</span><i class="chip">MB02</i></div>
+            <div class="swl"><span>Grey market competition on accessories</span><i class="nochip">No pillar answers this</i></div>
+            <div class="swl"><span>Global supply chain disruption</span><i class="nochip">No pillar answers this</i></div>
+          </div>
+          <div class="swg" style="padding-bottom:10px"><span class="k">Opportunities</span>
+            <div class="swl"><span>Regional expansion using a scalable proven model</span><i class="chip">MB04</i></div>
+            <div class="swl"><span>Unlocking value through AI &amp; data</span><i class="chip">MB01</i></div>
+            <div class="swl"><span>Migration of 3G user base</span><i class="nochip">No pillar takes this up</i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="inv">The aspiration, objectives, pillars and SWOT points are Mobile’s own. The links between them are drawn for illustration; on the real page the unit’s people choose them and the page starts empty.</p>
+  <div class="under">
+    <div><span class="k">What changes for the user</span><ul><li>A SWOT point and a pillar can be tied together; an objective and a pillar likewise.</li><li>The gaps show without anyone counting: a threat nothing answers, a pillar that serves no objective.</li><li>The Copilot’s SWOT-to-directions flow already reasons this way. Its suggestions could land here as proposed links to accept or drop.</li></ul></div>
+    <div class="agree"><span class="k">To agree</span><ul><li>Is tying a SWOT point to a pillar something your clients would actually maintain, or should the Copilot propose the links and a person only confirm?</li><li>Its own section, as drawn, or folded into the Temple so the Temple becomes the map?</li></ul></div>
+  </div>
+</section>
+
+<!-- ═════════ 3 ═════════ -->
+<section class="idea" id="idea-3">
+  <div class="ih"><span class="n">IDEA 03</span><h2>The pillar as a page</h2></div>
+  <p class="cap">The pillar gets a proper head: its owner, a line of intent, the objectives it serves, and its two scores, visible on the Plan and not only on Performance. Under it, the tactics can be read as a <b>roadmap</b> across the four quarters as well as a table, with today marked. The table stays one press away and does not change.</p>
+  <div class="frame"><div class="canvas">
+    <div class="secs"><span class="pill"><span>Foundation</span><span>SWOT</span><span>Drivers</span><span class="on">Plan</span></span><span class="sp"></span><span class="btn">Edit</span></div>
+    <div class="body">
+      <div class="card phead flag">
+        <div>
+          <div class="nm"><span class="code">MB01</span>Digital &amp; Data-Driven Operations</div>
+          <div class="intent">What winning looks like for this pillar — one line its owner writes. Empty until they do.</div>
+          <div class="meta"><span><span class="k">Owner</span>—</span><span><span class="k">Serves</span><i class="chip">Active merchant reach</i> <i class="chip">App coverage rate</i></span><span><span class="k">Holds</span>4 key measures · 5 tactics</span></div>
+        </div>
+        <div class="two"><div><b class="bad">58%</b><span>Key measures</span></div><div><b class="bad">57%</b><span>Execution</span></div></div>
+      </div>
+      <div class="card" style="overflow:hidden">
+        <div class="ch" style="align-items:center"><h3>Tactics</h3><span style="flex:1">5</span><span class="pill flag"><span>Table</span><span class="on">Roadmap</span></span></div>
+        <div class="road">
+          <div class="h">Tactic</div><div class="h">Owner</div><div class="h">Q1 2026</div><div class="h">Q2</div><div class="h">Q3</div><div class="h">Q4</div><div class="h">Progress</div>
+
+          <div><b>Clean and standardize customer and SKU base</b></div><div>Ramy Behairy</div>
+          <div class="q"></div><div class="q good"><i class="barr s"></i></div><div class="q good"><i class="barr e"></i></div><div class="q now"><i class="today"></i></div><div><span class="pct good">90%</span></div>
+
+          <div><b>End-to-end order-to-cash digitization</b></div><div>Mohamed Rizk</div>
+          <div class="q"></div><div class="q attn"><i class="barr s"></i></div><div class="q attn"><i class="barr e"></i></div><div class="q now"><i class="today"></i></div><div><span class="pct attn">62%</span></div>
+
+          <div><b>Digitize sales reporting via Power BI</b></div><div>Ramy Behairy</div>
+          <div class="q"></div><div class="q attn"><i class="barr s"></i></div><div class="q attn"><i class="barr e"></i></div><div class="q now"><i class="today"></i></div><div><span class="pct attn">70%</span></div>
+
+          <div><b>Scale Mobile Digital App across merchants</b></div><div>Ashraf Laithy</div>
+          <div class="q"></div><div class="q bad"><i class="barr s"></i></div><div class="q bad"><i class="barr"></i></div><div class="q now bad"><i class="barr e"></i><i class="today"></i></div><div><span class="pct bad">44%</span></div>
+
+          <div><b>Data integration across business units</b></div><div>Abdelhamid</div>
+          <div class="q"></div><div class="q"></div><div class="q bad"><i class="barr s"></i></div><div class="q now bad"><i class="barr e"></i><i class="today"></i></div><div><span class="pct bad">20%</span></div>
+        </div>
+        <div class="legend"><span class="good"><i></i>on track</span><span class="attn"><i></i>needs attention</span><span class="bad"><i></i>off track</span><span><i class="td"></i>today</span><span>A bar opens the tactic, as its row does in the table.</span></div>
+      </div>
+    </div>
+  </div></div>
+  <p class="inv">The pillar, tactics, owners and the two scores are the demo’s. The quarters each bar spans and the per-tactic progress are invented for the drawing.</p>
+  <div class="under">
+    <div><span class="k">What changes for the user</span><ul><li>The pillar says who owns it and how it stands before any table starts.</li><li>Timing is read as a picture across the year in place of four small circles per row.</li><li>Late work is visible by position: a bar that ends left of today and is not finished.</li><li>The same head and switch on a function’s projects and on a capability, so the three stay one product.</li></ul></div>
+    <div class="agree"><span class="k">To agree</span><ul><li>Does a pillar have an owner of its own? Today only its tactics do. If not, that field goes.</li><li>Is the line of intent wanted, or is the pillar’s name enough?</li><li>Should the roadmap also be a slide in the presentation?</li></ul></div>
+  </div>
+</section>
+
+<!-- ═════════ 4 ═════════ -->
+<section class="idea" id="idea-4">
+  <div class="ih"><span class="n">IDEA 04</span><h2>Around this pillar</h2></div>
+  <p class="cap">A rail on the pillar that gathers what the <b>other modules</b> already hold about it: open actions from the Tracker, reports in Insights, projects in Portfolio, decisions from Meeting Notes, and a line to ask the Copilot with this pillar already in view. Strategy becomes the place the rest of the platform hangs from, which is what the client bought it as.</p>
+  <div class="frame"><div class="canvas">
+    <div class="body">
+      <div class="split">
+        <div class="card" style="overflow:hidden">
+          <div class="ch"><span class="code">MB01</span><h3>Digital &amp; Data-Driven Operations</h3></div>
+          <table>
+            <thead><tr><th>#</th><th>Key measure</th><th class="num">Target</th><th class="num">YTD actual</th><th class="num">Progress</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><b>Data duplicate rate</b></td><td class="num">1%</td><td class="num">1.4%</td><td class="num"><span class="pct attn">71%</span></td></tr>
+              <tr><td>2</td><td><b>Orders processed digitally</b></td><td class="num">90%</td><td class="num">48%</td><td class="num"><span class="pct bad">53%</span></td></tr>
+              <tr><td>3</td><td><b>App coverage rate</b></td><td class="num">50%</td><td class="num">22%</td><td class="num"><span class="pct bad">44%</span></td></tr>
+              <tr><td>4</td><td><b>Dependency on automated reports</b></td><td class="num">90%</td><td class="num">58%</td><td class="num"><span class="pct attn">64%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card rail flag">
+          <div class="rg"><div class="rgh"><b>Actions</b><span>Tracker · 2 open</span><a>Add ›</a></div>
+            <div class="ri">Chase the ERP cutover date with the principal<small><span class="bad">1 w late</span> · In progress</small></div>
+            <div class="ri">Agree the merchant rollout restart plan<small>This week · Not started</small></div>
+          </div>
+          <div class="rg"><div class="rgh"><b>Evidence</b><span>Insights · 2 reports</span><a>Attach ›</a></div>
+            <div class="ri">Competitor moves: e-commerce entrants<small>Analysis · 2 Oct 2026</small></div>
+            <div class="ri">Consumer electronics price index<small>Market · 18 Sep 2026</small></div>
+          </div>
+          <div class="rg"><div class="rgh"><b>Projects</b><span>Portfolio · 1</span></div>
+            <div class="ri">Shared data model<small>3 of 7 milestones</small></div>
+          </div>
+          <div class="rg"><div class="rgh"><b>Decisions</b><span>Meeting notes · 1</span></div>
+            <div class="ri">Merchant rollout paused until the ERP cutover lands<small>Half-yearly review · 14 Jul 2026</small></div>
+          </div>
+          <div class="ask"><i>✦</i>Ask the Copilot about this pillar…</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="inv">The measures are the demo’s. Every line in the rail is invented for the drawing. A group shows only for a module the client has and the viewer may open; the Internal Tracker’s is the office’s alone.</p>
+  <div class="under">
+    <div><span class="k">What changes for the user</span><ul><li>An off-track measure sits beside the action chasing it and the decision that explains it.</li><li>A consultant preparing a review has the supporting reports to hand without leaving the pillar.</li><li>From the other side, a task, report or note can be tagged to a pillar where it is written.</li></ul></div>
+    <div class="agree"><span class="k">To agree</span><ul><li>Which of the four are worth linking first? My pick is Actions and Decisions, since they explain a number, which is what a review needs.</li><li>Tagged by a person, or suggested by the Copilot and confirmed?</li><li>Does the client’s own staff ever see the Actions group, or only the office?</li></ul></div>
+  </div>
+</section>
+
+<!-- ═════════ 5 ═════════ -->
+<section class="idea" id="idea-5">
+  <div class="ih"><span class="n">IDEA 05</span><h2>Two rows instead of four</h2></div>
+  <p class="cap">Today the place (group, company, unit or function) is chosen on one row, the view on a second, and the section on a third, under the top bar. Proposed: <b>the place becomes one control</b> that says where you are and opens a searchable list with each place’s standing, and the views sit beside it. One navy row and the section row remain.</p>
+  <div class="frame"><div class="canvas cmp">
+    <div class="lab"><h3>Today</h3><span>four rows · about 150px before content · the unit row is full at ten units</span></div>
+    <div class="mini">
+      <div class="top"><span class="mark">✦</span><b>Strategy Management Platform</b><span class="cl">Raya Trade</span><span class="sp"></span><span class="read">READ</span></div>
+      <div class="row"><span class="g" style="font-weight:400">Group <i>▼</i></span><span class="sw"><span class="on">Units</span><span>Functions</span></span><span class="u on">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span><span class="u">Consumer Electronics</span><span class="u">Online Shop</span><span class="u">Corporate</span><span class="u">Care</span><span class="u">IT Dist.</span><span class="u">Logistics</span><span class="u">Nigeria</span></div>
+      <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting ●</span></div>
+      <div class="secs"><span class="pill"><span>Foundation</span><span>SWOT</span><span>Drivers</span><span class="on">Plan</span></span><span class="sp"></span><span class="btn">Edit</span></div>
+    </div>
+    <div class="lab"><h3>Proposed</h3><span>the place picker shown open</span></div>
+    <div class="mini">
+      <div class="top"><span class="mark">✦</span><b>Strategy Management Platform</b><span class="cl">Raya Trade</span><span class="sp"></span><span class="read">READ</span></div>
+      <div class="one"><span class="crumb flag"><em>Raya Trade ›</em><em>Distribution ›</em>Mobile <i>▼</i></span><span class="sep"></span><span class="vt on">Strategy</span><span class="vt">Performance</span><span class="sp"></span><span class="rep">Reporting ●</span></div>
+      <div class="pick">
+        <div class="find">Find a unit or function…</div>
+        <div class="pl"><span>Raya Trade <small>the group</small></span><i class="pct attn">78%</i></div>
+        <div class="grp"><span class="k">Distribution</span></div>
+        <div class="pl in on"><span>Mobile</span><i class="pct attn">67%</i></div>
+        <div class="pl in"><span>Consumer Electronics</span><i class="pct good">84%</i></div>
+        <div class="pl in"><span>IT Dist.</span><i class="pct attn">72%</i></div>
+        <div class="grp"><span class="k">B2C</span></div>
+        <div class="pl in"><span>Retail Stores</span><i class="pct good">91%</i></div>
+        <div class="pl in"><span>Online Shop</span><i class="pct bad">48%</i></div>
+        <div class="grp"><span class="k">Functions</span></div>
+        <div class="pl in"><span>Finance</span><i class="pct good">88%</i></div>
+        <div class="pl in" style="padding-bottom:12px"><span>HR</span><i class="pct attn">70%</i></div>
+      </div>
+      <div class="secs"><span class="pill"><span>Foundation</span><span>SWOT</span><span>Drivers</span><span class="on">Plan</span></span><span class="sp"></span><span class="btn">Edit</span></div>
+    </div>
+  </div></div>
+  <p class="inv">Which unit sits under which company, and every score in the list, is invented for the drawing.</p>
+  <div class="under">
+    <div><span class="k">What changes for the user</span><ul><li>About 40px of every screen goes back to content.</li><li>The control always says where you are, company included; today the company is not shown once you are inside a unit.</li><li>Twenty units fit as well as ten, and typing finds one.</li><li>Alt+G (go to a place) already exists and would open this same list.</li></ul></div>
+    <div class="agree"><span class="k">To agree</span><ul><li>This costs a press: moving between sibling units is one click today and two here. For the Strategy Office, who hop between units all day, that may matter more than the space. A middle path keeps the unit row and only moves the views up beside it.</li><li>The reading window’s navigator row was settled in round 6. This should follow whatever was agreed there, not compete with it.</li></ul></div>
+  </div>
+</section>
+
+<section class="idea">
+  <div class="ih"><h2>If only one is built</h2></div>
+  <p class="cap"><b>Idea 1</b>, because it fixes three of the notes at once (no front page, the odd one out among the modules, scattered gaps) and uses only what the platform already knows. <b>Idea 2</b> is the one that would most change what a client thinks the product is: it turns a well-kept record of a strategy into something that checks the strategy’s logic. Ideas 3 and 4 make a strong second round together. Idea 5 I would test with the Strategy Office before drawing it further.</p>
+</section>
+
+</div>

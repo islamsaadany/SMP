@@ -11577,6 +11577,35 @@ body.reading { overflow:hidden; }
 .readroot .rband.attn, .readroot .rband.warn { background:var(--attn-bg); color:var(--attn-tx, var(--attn)); }
 .readroot .rband.bad { background:var(--bad-bg); color:var(--bad-tx, var(--bad)); }
 
+/* ── THE OVERVIEW (§798): the doors ────────────────────────────────────────
+   Two cards a row, the units' and the functions' across; a line per item in
+   the window's own code, name, bar and figure; the plan's door under the gold
+   edge. Every line and title is a button, so the keyboard reaches it. */
+.readroot .rdoors { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.readroot .rdoor { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px 10px; display:grid; gap:8px; align-content:start; }
+.readroot .rdoor.wide, .readroot .rplan { grid-column:1 / -1; }
+.readroot .rdoor h3 { margin:0; font-size:13.5px; font-weight:700; display:flex; align-items:baseline; gap:10px; }
+.readroot .rdoor h3 small { font-weight:600; color:var(--ink-3); font-size:12px; }
+.readroot .rdoor h3 .rgo { margin-left:auto; font:700 12px/1 inherit; font-family:inherit; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; white-space:nowrap; }
+.readroot .rdoor h3 .rgo:hover { text-decoration:underline; }
+.readroot .rovrows { display:grid; }
+.readroot .rovrows .rnone { padding:6px 8px; }
+.readroot .rovrow { display:grid; grid-template-columns:44px 1fr 120px 44px; gap:12px; align-items:center; width:100%; padding:7px 8px; margin:0;
+  border:0; border-top:1px solid var(--line-soft); border-radius:6px; background:none; font:inherit; font-size:13.5px; color:var(--ink); text-align:left; cursor:pointer; }
+.readroot .rovrow.nocode { grid-template-columns:1fr 120px 44px 150px; }
+.readroot .rovrow:hover { background:var(--zebra); }
+.readroot .rovrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.readroot .rovrow .rbar { width:100%; }
+.readroot .rovrow b { text-align:right; font-size:12.5px; }
+.readroot .rovrow .rway { font-size:12px; color:var(--ink-3); white-space:nowrap; }
+.readroot .rdoor .rfoot { font-size:12.5px; color:var(--ink-3); padding:4px 8px 0; }
+.readroot .rplan { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center; background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:10px; padding:14px 16px; }
+.readroot .rplan b { font-size:13.5px; }
+.readroot .rplan span { display:block; font-size:12.5px; color:var(--ink-3); margin-top:3px; }
+.readroot .racts { display:flex; gap:8px; }
+.readroot .racts button { font:700 12px/1 inherit; font-family:inherit; color:var(--gold-deep); border:1px solid var(--line); border-radius:999px; padding:7px 12px; background:var(--surface); cursor:pointer; }
+.readroot .racts button:hover { border-color:var(--gold-deep); }
+
 /* the door on the bar: the one filled-looking control beside the ring */
 .readbtn { display:inline-flex; align-items:center; gap:6px; color:var(--stone); border-color:var(--gold); background:var(--over-bg); }
 .readbtn:hover { color:var(--ink); border-color:var(--gold-deep); }
@@ -11584,7 +11613,8 @@ body.reading { overflow:hidden; }
 
 /* screen alone (§789): an A4 page is narrower than 760px, and the paper keeps its columns */
 @media screen and (max-width:760px) {
-  .readroot .rtwo, .readroot .rswot, .readroot .rthree { grid-template-columns:1fr; }
+  .readroot .rtwo, .readroot .rswot, .readroot .rthree, .readroot .rdoors { grid-template-columns:1fr; }
+  .readroot .rovrow .rway { display:none; }
   .readroot .rfold { grid-template-columns:auto 1fr 22px; }
   .readroot .rfold .rsum, .readroot .rfold .rbar { display:none; }
   .readroot .rtable { min-width:0; width:100%; }

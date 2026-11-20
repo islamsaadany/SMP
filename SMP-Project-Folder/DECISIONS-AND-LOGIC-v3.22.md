@@ -71925,3 +71925,5 @@ Islam, of the readers: *"currently the reader users need to have better view tha
 - **Checked**: `checks/reading-overview.py` **18/0**, **6 red on the build before**: the first tab and the address, the figures character for character with Overall performance, the directions door agreeing with the Directions tab line for line and opening it on the pressed direction, the functions door by name with each line's figure its own Overall performance headline, the plan door, a reader's seat on the Overview with no Print, the three shapes. `checks/reading-print.py` **32/0** (the window opened on Foundation where the tab's markup is compared; the paper's sections the tabs after Overview). The shell is v8.08.
 - **On the branch, not merged.**
 
+**§798 MERGED TO `main`** 2026-11-20, Islam: *"merge to main"*. `main` had not moved since §797; merged with a merge commit `main` alone holds (§91); the built file matches a fresh build of the merged sources. `checks/reading-overview.py` **18/0**. No migrations; nobody signed out.
+

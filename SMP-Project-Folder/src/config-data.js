@@ -12041,6 +12041,49 @@ function moveCapProjects(from, to){
   from.projects = [];
   return list.length;
 }
+/* ── A PROJECT MOVES FROM ONE FUNCTION TO ANOTHER (§797) ──────────────────
+   Islam: *"I want to be able to move a project from a function to another
+   function"*; of two shapes offered, *"option 1, functions only"*. The
+   destinations are the OTHER functions that plan in projects and are shown —
+   never a capability's box, never a unit — read at press time, so a function
+   that changed its way of planning since the page was drawn is not offered
+   (§48.2). The office's alone: moving a project changes what each function
+   holds, which is Setup's kind of change, and the server judges it so (a
+   function's head is refused on both sides — scripts/test-authorize.js §797).
+
+   THE PROJECT TRAVELS WHOLE AND IN PLACE (§326's rule): spliced out of the
+   source function's own array and pushed onto the destination's — the holder
+   wrappers hand over the functions' own arrays, so a reassignment would land
+   on an object thrown away a line later. `capId` follows the row because the
+   builders address a project's holder by it (the stored column is derived
+   from the parent on the way back). Its deliverables, outcomes, milestones,
+   owner and figures are the row's own and go with it; its CODE is its place
+   in the holder, so it is renumbered where it lands — said in the asking
+   box before the press. The source holder's grouping is archived first, as
+   a removal's is (§49.2): it is the one thing the move genuinely loses. */
+function projMoveTargets(fromKey){
+  var from = fnKeyOf(String(fromKey || "").replace(/^fn:/, ""));
+  return FUNCTION_KEYS.filter(function(k){
+    var f = FUNCTIONS[k];
+    return k !== from && !!f && fnShows(k) && fnPlansInProjects(f);
+  });
+}
+function moveProjectToFn(id, destKey){
+  var from = holderOfProjectId(id), p = projById(id), dest = fnKeyOf(destKey);
+  if (!from || !p || !from.own || !from.fn || from.fn === dest) return null;
+  if (projMoveTargets(from.fn).indexOf(dest) < 0) return null;
+  var to = fnOwnHolderWritable(dest);
+  if (!to || !Array.isArray(to.projects) || !Array.isArray(from.projects)) return null;
+  var i = -1;
+  from.projects.forEach(function(x, xi){ if (x && x.id === id) i = xi; });
+  if (i < 0) return null;
+  var was = projCode(holderCodeOwner(from), p);
+  archiveCapPlan(from, "before " + (was || p.name || "a project") + " moved to " + ((FUNCTIONS[dest] || {}).name || dest));
+  from.projects.splice(i, 1);
+  p.capId = to.id;
+  to.projects.push(p);
+  return { from: from.fn, to: dest, was: was, now: projCode(dest, p) };
+}
 /* ONE DOOR FOR BOTH ANSWERS (§53.5): `moveToId` null removes everything, a
    sibling's id moves the projects there first. THE ARCHIVE IS TAKEN BEFORE
    THE MOVE EITHER WAY — it is the record of the grouping, which is the one

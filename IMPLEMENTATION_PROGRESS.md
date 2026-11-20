@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-11-20 — A project moves from one function to another (§797).** On a function's plan page with the pen on, the SMO can move a project to another function that plans in projects: *Move to another function* beside Remove, the floating box asking first with where it goes and what changes (its code, who reports it), the project travelling whole with its deliverables, outcomes, milestones, owner and figures, and the page following it.
+
 **2026-11-20 — The trail's menus open in a new tab (§796).** The client and module entries in the Strategy shell's top bar are links now, so a ⌘-click or a right click opens one in a new tab; a plain press works as before. §793's My tasks rename is put at its source, the repo's platform.html.
 
 **2026-11-20 — A SWOT line's points fold under its title (§795), merged to `main` 2026-11-20 on Islam's word.** On a SWOT, and on a function's S&W, a bold title with points under it can be pressed: its points fold away and a count stands in for them; pressed again they open. One **Collapse all / Expand all** sits beside Edit. The page opens as each person left it (kept in their own browser). A line with no points looks as before; with Edit on every line is open; the deck, print, the workbooks and the PowerPoint always show every point. Writing is unchanged: one box, the title on the first row and a point on each row under it.

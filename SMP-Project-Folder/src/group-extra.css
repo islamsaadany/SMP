@@ -1361,6 +1361,12 @@
     padding:8px 10px; cursor:pointer; letter-spacing:.01em; }
   .pane .ptitle.edhead .rmplan:hover, .pane .pband.edband .rmplan:hover {
     background:var(--bad-bg); border-color:var(--bad-bg); }
+  /* §797: Move beside Remove, in the quiet ink — a move is not a removal */
+  .pane .pband.edband .rmplan.mvplan { color:var(--ink-2); }
+  .pane .pband.edband .rmplan.mvplan:hover { background:var(--surface-2); border-color:var(--line); }
+  .askbox .asklab { display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:8px; }
+  .askbox .askpick { font:inherit; font-size:13px; padding:5px 8px; border:1px solid var(--line); border-radius:7px; background:var(--surface); color:var(--ink); }
+  .askbox .askimpact { margin:0; font-size:12.5px; line-height:1.45; color:var(--ink-2); }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;

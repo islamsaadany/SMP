@@ -20501,6 +20501,49 @@ function moveCapProjects(from, to){
   from.projects = [];
   return list.length;
 }
+/* ── A PROJECT MOVES FROM ONE FUNCTION TO ANOTHER (§797) ──────────────────
+   Islam: *"I want to be able to move a project from a function to another
+   function"*; of two shapes offered, *"option 1, functions only"*. The
+   destinations are the OTHER functions that plan in projects and are shown —
+   never a capability's box, never a unit — read at press time, so a function
+   that changed its way of planning since the page was drawn is not offered
+   (§48.2). The office's alone: moving a project changes what each function
+   holds, which is Setup's kind of change, and the server judges it so (a
+   function's head is refused on both sides — scripts/test-authorize.js §797).
+
+   THE PROJECT TRAVELS WHOLE AND IN PLACE (§326's rule): spliced out of the
+   source function's own array and pushed onto the destination's — the holder
+   wrappers hand over the functions' own arrays, so a reassignment would land
+   on an object thrown away a line later. `capId` follows the row because the
+   builders address a project's holder by it (the stored column is derived
+   from the parent on the way back). Its deliverables, outcomes, milestones,
+   owner and figures are the row's own and go with it; its CODE is its place
+   in the holder, so it is renumbered where it lands — said in the asking
+   box before the press. The source holder's grouping is archived first, as
+   a removal's is (§49.2): it is the one thing the move genuinely loses. */
+function projMoveTargets(fromKey){
+  var from = fnKeyOf(String(fromKey || "").replace(/^fn:/, ""));
+  return FUNCTION_KEYS.filter(function(k){
+    var f = FUNCTIONS[k];
+    return k !== from && !!f && fnShows(k) && fnPlansInProjects(f);
+  });
+}
+function moveProjectToFn(id, destKey){
+  var from = holderOfProjectId(id), p = projById(id), dest = fnKeyOf(destKey);
+  if (!from || !p || !from.own || !from.fn || from.fn === dest) return null;
+  if (projMoveTargets(from.fn).indexOf(dest) < 0) return null;
+  var to = fnOwnHolderWritable(dest);
+  if (!to || !Array.isArray(to.projects) || !Array.isArray(from.projects)) return null;
+  var i = -1;
+  from.projects.forEach(function(x, xi){ if (x && x.id === id) i = xi; });
+  if (i < 0) return null;
+  var was = projCode(holderCodeOwner(from), p);
+  archiveCapPlan(from, "before " + (was || p.name || "a project") + " moved to " + ((FUNCTIONS[dest] || {}).name || dest));
+  from.projects.splice(i, 1);
+  p.capId = to.id;
+  to.projects.push(p);
+  return { from: from.fn, to: dest, was: was, now: projCode(dest, p) };
+}
 /* ONE DOOR FOR BOTH ANSWERS (§53.5): `moveToId` null removes everything, a
    sibling's id moves the projects there first. THE ARCHIVE IS TAKEN BEFORE
    THE MOVE EITHER WAY — it is the record of the grouping, which is the one
@@ -38047,6 +38090,10 @@ function projPlanBody(p, subject){
            address — holderOfProjectId() resolves the holder at press time. */
         '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
           '">Remove this ' + L1("project") + '</button>' +
+        /* §797: and, for the office, the way to another function — drawn only where there is one
+           to go to; a capability's project stays in its box (functions only, Islam) */
+        (!isCapTarget(fk) && typeof inOffice === "function" && inOffice() && projMoveTargets(fnKeyOf(fk)).length
+          ? '<button class="rmplan mvplan" data-mvrow="project|' + esc(p.id) + '">Move to another ' + esc(L1("fnword")).toLowerCase() + '</button>' : '') +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
@@ -90515,6 +90562,14 @@ var SYNC = (function () {
         else confirmRemoveProject(a[1]);
       });
     });
+    /* §797: a project to another function — the office's, asked first in the floating box */
+    document.querySelectorAll("[data-mvrow]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan() || !inOffice()) return;
+        var a = this.dataset.mvrow.split("|");
+        if (a[0] === "project") confirmMoveProject(a[1], this);
+      });
+    });
     /* ── FIRST ROWS FOR THE SURFACES THAT NEVER HAD ONE (§129's audit) ──
        The SWOT, the “Who we are” lines and a capability's objectives could
        be EDITED and never STARTED — the editors were built for correcting an
@@ -93131,6 +93186,48 @@ var SYNC = (function () {
     if (yes) yes.addEventListener("click", function(){
       if (!(typeof ROWDLG !== "undefined" && ROWDLG)) closeModal();
       apply(); });
+  }
+  /* §797 — MOVE A PROJECT TO ANOTHER FUNCTION, ASKED FIRST (§621): the box sits beside the
+     control, names the project, offers the other functions that plan in projects, and says
+     the two things that change — its code where it lands, and who reports it from now;
+     Keep is the safe default. On Move the page follows the project to its new function, so
+     what was pressed can be seen to have happened (§96). */
+  function confirmMoveProject(id, anchor){
+    var c = holderOfProjectId(id), p = projById(id);
+    if (!c || !p || !c.own || !c.fn) return;
+    var targets = projMoveTargets(c.fn);
+    if (!targets.length) return;
+    var code = projCode(holderCodeOwner(c), p), fnw = L1("fnword").toLowerCase();
+    var pick = targets[0];
+    var impact = function(k){
+      var f = FUNCTIONS[k] || {}, n = (fnOwnProjects(k) || []).length + 1;
+      return '<b>' + esc(p.name || "This " + L1("project")) + '</b> goes to <b>' + esc(f.name || k) + '</b> with its ' +
+        plural((p.deliverables || []).length, "deliverable") + ', ' + plural((p.outcomes || []).length, "outcome") + ' and ' +
+        plural((p.milestones || []).length, "milestone") + '. Its code ' + (code ? '<b>' + esc(code) + '</b> ' : '') +
+        'becomes the ' + esc(f.name || k) + ' ' + esc(fnw) + '’s ' + n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th') + '. ' +
+        (p.owner ? esc(p.owner) + ' keeps it' : 'Its owner keeps it') + ', and it is reported under ' + esc(f.name || k) + ' from now.';
+    };
+    askFirst(anchor, {
+      title: "Move this " + L1("project") + " to another " + fnw,
+      body: '<label class="asklab">To <select class="askpick" data-mvto>' + targets.map(function(k){
+          return '<option value="' + esc(k) + '">' + esc((FUNCTIONS[k] || {}).name || k) + '</option>'; }).join("") + '</select></label>' +
+        '<p class="askimpact" data-mvimpact>' + impact(pick) + '</p>',
+      yes: "Move it", no: "Keep it here",
+      go: function(){
+        var r = moveProjectToFn(id, pick);
+        if (!r) return;
+        /* the rail follows the project (§48.2's stale pointer, the other way round: pointed on purpose) */
+        if (RAIL[railKeyFor(c)] === id) delete RAIL[railKeyFor(c)];
+        var to = fnOwnHolder(r.to); if (to) RAIL[railKeyFor(to)] = id;
+        current = "fn:" + r.to;
+        fieldSaved(); paint();
+      }
+    });
+    var sel = ASK && ASK.box && ASK.box.querySelector("[data-mvto]");
+    if (sel) sel.addEventListener("change", function(){
+      pick = sel.value;
+      var im = ASK.box.querySelector("[data-mvimpact]"); if (im) im.innerHTML = impact(pick);
+    });
   }
   function confirmRemoveProject(id){
     var c = holderOfProjectId(id), p = projById(id);

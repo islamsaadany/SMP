@@ -715,7 +715,8 @@
 /* v8.04-link-optional — §794: a key measure no tactic names carries no red line; past main's v8.03 at the merge. */
 /* v8.05-swot-fold — §795: a SWOT line's points fold under its title; Expand all / Collapse all. */
 /* v8.06-trail-links — §796: the trail's menu entries are links, so a ⌘-click or a right click opens one in a new tab; past main's v8.05 at the merge. */
-const SHELL = "smp-shell-v8.06-trail-links";
+/* v8.07-project-move — §797: a project moves from one function to another, the office's, asked first. */
+const SHELL = "smp-shell-v8.07-project-move";
 const ASSETS = [
   "/",
   "/index.html",

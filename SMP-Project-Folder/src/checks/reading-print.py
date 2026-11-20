@@ -44,6 +44,11 @@ WHAT IS ASSERTED, and why each one can fail:
   8 · THE KEY: Ctrl+P in the window prints for the office and does nothing
       for a reader.
 
+      (§798: the window opens on the Overview now, which is doors to the
+      tabs and not the strategy, so the paper leaves it out — the sections
+      are the tabs after it — and the window is opened on Foundation where
+      the tab's own markup is compared.)
+
   9 · AND THE COMPANY PRINTS TOO, its tabs in order.
 
  10 · A COMPANY THAT PLANS ITS OWN STRATEGY (El Abd's shape, §447/§570:
@@ -124,7 +129,8 @@ PAPER = """()=>{
     coverShown: shown(cover),
     sections: secs.map(s => s.querySelector('h2').textContent.trim()),
     sectionsShown: secs.every(shown),
-    tabs: [...r.querySelectorAll('.rwtabs button')].map(b => b.textContent.trim()),
+    /* §798: the Overview is doors, not the strategy — the paper holds the tabs after it */
+    tabs: [...r.querySelectorAll('.rwtabs button')].map(b => b.textContent.trim()).filter(t => t !== 'Overview'),
     dirs: dirs.length,
     dirsOpen: dirs.filter(x => x.classList.contains('open') && shown(x.querySelector('.rmore'))).length,
     dirsWithTables: dirs.filter(x => x.querySelectorAll('.rmore .rtable').length >= 1).length,
@@ -171,7 +177,7 @@ with sync_playwright() as p:
     print("\n── 2 · the gate, both ends")
     js(pg, "(k)=>{ switchViewer(k); }", reader)
     pg.wait_for_timeout(400)
-    js(pg, "(u)=>{ try{READING.close()}catch(e){}; READING.open(u); }", unit)
+    js(pg, "(u)=>{ try{READING.close()}catch(e){}; READING.open(u, 'foundation'); }", unit)
     pg.wait_for_timeout(400)
     s = js(pg, STRIP)
     ok("a reader's seat opens the window with no Print in the strip", isinstance(s, dict) and s.get("print") is False, s)
@@ -179,7 +185,7 @@ with sync_playwright() as p:
     js(pg, "()=>READING.close()")
     js(pg, "(k)=>{ switchViewer(k); }", office)
     pg.wait_for_timeout(400)
-    js(pg, "(u)=>{ try{READING.close()}catch(e){}; READING.open(u); }", unit)
+    js(pg, "(u)=>{ try{READING.close()}catch(e){}; READING.open(u, 'foundation'); }", unit)
     pg.wait_for_timeout(400)
     s = js(pg, STRIP)
     ok("the office opens the window with Print in the strip", isinstance(s, dict) and s.get("print") is True and s.get("shown") is True, s)

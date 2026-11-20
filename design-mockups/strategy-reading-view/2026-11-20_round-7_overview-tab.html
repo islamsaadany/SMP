@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The reading window's Overview tab — El Abd's board</title>
+<!-- Islam, 2026-11-20: a reader "might need to see only strategy performance
+     or functional performance, and that might be their home page in the
+     reading view"; of El Abd's board: "make it an overview page where people
+     can see a dashboard with the general performance and access to the plan
+     and the directions perform, capabilities perform and functional
+     performance" — then "they land on the overview and keep the tabs, draw
+     the mockup". Drawn on El Abd's shape: one company, its own directions and
+     capabilities, its supporting functions, no business units. -->
+<style>
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-2:#0F2546;--navy-ink:#FFFFFF;--navy-quiet:#B7C4D8;--navy-rule:rgba(255,255,255,.14);--navy-lit:rgba(255,255,255,.16);--gold:#C9A24D;--gold-deep:#8A6B22;--good:#2E7D5B;--good-bg:#E4F3EB;--attn:#B8860B;--attn-bg:#FBF1D6;--bad:#B04434;--bad-bg:#F8E3DF;--sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#0E1014;--navy-2:#090B0E;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--navy-rule:rgba(255,255,255,.12);--navy-lit:rgba(255,255,255,.14);--gold:#D9B665;--gold-deep:#C9A24D;--good:#5FB68C;--good-bg:#1F3A2E;--attn:#D9B23C;--attn-bg:#3A3216;--bad:#D97066;--bad-bg:#3F2522;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 70px;display:grid;gap:30px}
+.head{display:flex;align-items:flex-start;gap:16px}.head>div{flex:1}
+h1{margin:0;font-size:22px;font-weight:700;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:80ch}
+.rules{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}.rules b{color:var(--ink);font-weight:600}
+.pgtheme{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--surface);color:var(--ink-2);font:600 12.5px/1 var(--sans);cursor:pointer}
+section{display:grid;gap:10px}
+.ph2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ph2 .n{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep);letter-spacing:.1em}
+h2{margin:0;font-size:16px;font-weight:700}.ph2 p{margin:0;color:var(--ink-3);font-size:13.5px}
+.cap{font-size:13.5px;color:var(--ink-2);margin:0;max-width:84ch}.cap b{color:var(--ink);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+/* the window's own chrome, as built (reading.css) */
+.rwtop{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:14px;padding:0 22px;min-height:52px}
+.rwtop .mark{width:26px;height:26px;border-radius:7px;background:var(--gold);color:#16325C;display:grid;place-items:center;flex:none}.rwtop .mark svg{width:18px;height:18px}
+.rwtop .co{font-size:14px;font-weight:600;white-space:nowrap}
+.rwtop .sp{flex:1}.rwtop .asof{font-size:12px;color:var(--navy-quiet)}
+.rwtop .ex{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--navy-quiet);border:1px solid var(--navy-rule);border-radius:999px;padding:4px 12px}
+.nav{background:var(--navy-2);color:var(--navy-quiet);display:flex;align-items:center;gap:6px;padding:0 14px;min-height:46px;font-size:14px;font-weight:600}
+.nav .top{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:7px;color:var(--navy-ink);white-space:nowrap}.nav .top i{font-style:normal;font-size:10px;color:var(--navy-quiet)}
+.nav .sep{width:1px;height:24px;background:var(--navy-rule);margin:0 6px}
+.nav .sw{display:inline-flex;background:var(--navy-lit);border-radius:8px;padding:3px;gap:2px}
+.nav .sw span{padding:5px 12px;border-radius:6px;color:var(--navy-ink);white-space:nowrap}.nav .sw span.on{background:rgba(255,255,255,.22)}
+.nav .scroll{display:flex;gap:2px;white-space:nowrap;padding:0 4px}
+.nav .scroll span{padding:7px 12px;border-radius:7px;color:var(--navy-ink);opacity:.86}
+.rwtabs{display:flex;gap:2px;padding:0 22px;background:var(--navy);border-bottom:3px solid var(--gold)}
+.rwtabs span{padding:10px 14px 9px;font-size:13.5px;font-weight:600;color:var(--navy-quiet);border-radius:8px 8px 0 0;white-space:nowrap}.rwtabs span.on{background:var(--ground);color:var(--ink)}
+.rwbody{padding:22px 26px 34px;display:grid;gap:18px}
+.rwbody>*{max-width:1040px}
+/* ── the Overview, as the mockup proposes it ── */
+.rk{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.fig b{display:block;font-size:30px;line-height:1;font-weight:700}
+.fig span{display:block;font-size:12.5px;color:var(--ink-3);margin-top:6px}
+.band{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:2px 7px}
+.band.good{background:var(--good-bg);color:var(--good)}.band.attn{background:var(--attn-bg);color:var(--attn)}.band.bad{background:var(--bad-bg);color:var(--bad)}
+.doors{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.door{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 10px;display:grid;gap:8px;align-content:start}
+.door h3{margin:0;font-size:13.5px;font-weight:700;display:flex;align-items:baseline;gap:10px}
+.door h3 small{font-weight:600;color:var(--ink-3);font-size:12px}
+.door h3 .go{margin-left:auto;font-size:12px;font-weight:700;color:var(--gold-deep);white-space:nowrap}
+.rows{display:grid;gap:0}
+.row{display:grid;grid-template-columns:44px 1fr 120px 44px;gap:12px;align-items:center;padding:7px 8px;border-top:1px solid var(--line-soft);border-radius:6px;font-size:13.5px}
+.row:hover{background:var(--surface-2)}
+.row .code{font:700 12px/1 ui-monospace,Menlo,monospace;color:var(--gold-deep)}
+.row .pct{text-align:right;font-weight:700;font-size:12.5px}
+.bar{display:inline-block;width:100%;height:7px;border-radius:4px;background:var(--surface-2);position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--good)}
+.bar.attn i{background:var(--attn)}.bar.bad i{background:var(--bad)}
+.door .foot{font-size:12.5px;color:var(--ink-3);padding:4px 8px 0}
+.plan{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:14px 16px}
+.plan b{font-size:13.5px}.plan span{display:block;font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.plan .acts{display:flex;gap:8px}
+.plan .acts span{display:inline-block;margin:0;font:700 12px/1 var(--sans);color:var(--gold-deep);border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:var(--surface)}
+.wide{grid-column:1/-1}
+.row.fn{grid-template-columns:1fr 120px 44px 110px}
+.row.fn .way{font-size:12px;color:var(--ink-3);white-space:nowrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.three,.doors,.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <h1>The reading window's Overview tab — El Abd's board</h1>
+      <p class="lede">The window as it is — the strip, the subject row, the tabs, Exit, the SMO's Print — with one tab before Foundation: <b>Overview</b>. A reader lands on it. It is a dashboard of the figures the other tabs hold, and every card is a door to the tab that holds the full picture.</p>
+      <ul class="rules">
+        <li><b>Nothing new is computed.</b> Every figure is the one its tab draws: the three readings are Overall performance's, a direction's standing is the Directions tab's, a function's headline is its own window's.</li>
+        <li><b>Every card is a door.</b> The title opens the tab; a line opens the tab on that direction, that capability, that function.</li>
+        <li><b>The tabs stay.</b> Foundation, Analysis, Directions, Capabilities, Overall performance are a press away, as today; the window opens on Overview instead of Foundation for a reader.</li>
+        <li><b>El Abd's shape.</b> No business units, so no units card. On Raya the same tab would show the units' line, and no capabilities card where the box is not split — the cards follow the Structure, as the tabs do.</li>
+      </ul>
+    </div>
+    <button class="pgtheme" type="button" onclick="var r=document.documentElement;r.setAttribute('data-theme',r.getAttribute('data-theme')==='dark'?'light':'dark')">Light · Dark</button>
+  </div>
+
+  <section>
+    <div class="ph2"><span class="n">1</span><h2>The window, opened by a board member</h2><p>Overview lit; the figures are made up to look like a real half-year.</p></div>
+    <div class="frame">
+      <div class="rwtop">
+        <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span>
+        <span class="co">El Abd</span><span class="sp"></span><span class="asof">H2 2026</span><span class="ex">Exit</span>
+      </div>
+      <div class="nav"><span class="top">Strategy <i>▾</i></span><span class="sep"></span><span class="sw one"><span class="on">Functions</span></span><span class="sep"></span><div class="scroll"><span>Finance</span><span>HR</span><span>Supply Chain</span><span>Marketing</span><span>IT</span></div></div>
+      <div class="rwtabs"><span class="on flag">Overview</span><span>Foundation</span><span>Analysis</span><span>Directions</span><span>Capabilities</span><span>Overall performance</span></div>
+      <div class="rwbody">
+        <div>
+          <p class="rk">Where we stand · H2 2026</p>
+          <div class="three">
+            <div class="fig"><b style="color:var(--good)">81%</b><span>Measures — the company’s headline measures against their targets</span><i class="band good">On track</i></div>
+            <div class="fig"><b style="color:var(--attn)">68%</b><span>Directions — each direction’s measures, averaged per direction</span><i class="band attn">Needs attention</i></div>
+            <div class="fig"><b style="color:var(--bad)">54%</b><span>Execution — delivered against what should have been by now; 100% is on plan, not finished</span><i class="band bad">Off track</i></div>
+          </div>
+        </div>
+        <div class="doors">
+          <div class="door">
+            <h3>Directions <small>4 · 68%</small><span class="go">Open the Directions ›</span></h3>
+            <div class="rows">
+              <div class="row"><span class="code">D001</span><span>Grow the retail network in Upper Egypt</span><span class="bar"><i style="width:84%"></i></span><span class="pct" style="color:var(--good)">84%</span></div>
+              <div class="row"><span class="code">D002</span><span>Lead the premium gifting segment</span><span class="bar attn"><i style="width:71%"></i></span><span class="pct" style="color:var(--attn)">71%</span></div>
+              <div class="row"><span class="code">D003</span><span>Export to the Gulf through partners</span><span class="bar bad"><i style="width:49%"></i></span><span class="pct" style="color:var(--bad)">49%</span></div>
+              <div class="row"><span class="code">D004</span><span>One digital front door for every customer</span><span class="bar attn"><i style="width:66%"></i></span><span class="pct" style="color:var(--attn)">66%</span></div>
+            </div>
+            <div class="foot">A line opens the Directions tab on that direction — its measures and its tactics.</div>
+          </div>
+          <div class="door">
+            <h3>Capabilities <small>2 · 73%</small><span class="go">Open the Capabilities ›</span></h3>
+            <div class="rows">
+              <div class="row"><span class="code">C001</span><span>Cold-chain logistics across all branches</span><span class="bar"><i style="width:82%"></i></span><span class="pct" style="color:var(--good)">82%</span></div>
+              <div class="row"><span class="code">C002</span><span>Data-driven demand planning</span><span class="bar attn"><i style="width:64%"></i></span><span class="pct" style="color:var(--attn)">64%</span></div>
+            </div>
+            <div class="foot">Drawn only where the plan keeps capabilities apart from directions, as the tab is.</div>
+          </div>
+          <div class="door wide">
+            <h3>Functions <small>5</small><span class="go">Each opens the function ›</span></h3>
+            <div class="rows">
+              <div class="row fn"><span>Finance</span><span class="bar"><i style="width:88%"></i></span><span class="pct" style="color:var(--good)">88%</span><span class="way">plans in projects</span></div>
+              <div class="row fn"><span>HR</span><span class="bar attn"><i style="width:70%"></i></span><span class="pct" style="color:var(--attn)">70%</span><span class="way">plans in projects</span></div>
+              <div class="row fn"><span>Supply Chain</span><span class="bar"><i style="width:79%"></i></span><span class="pct" style="color:var(--good)">79%</span><span class="way">directions</span></div>
+              <div class="row fn"><span>Marketing</span><span class="bar bad"><i style="width:52%"></i></span><span class="pct" style="color:var(--bad)">52%</span><span class="way">objectives and actions</span></div>
+              <div class="row fn"><span>IT</span><span class="bar attn"><i style="width:63%"></i></span><span class="pct" style="color:var(--attn)">63%</span><span class="way">plans in projects</span></div>
+            </div>
+            <div class="foot">A function’s headline is the figure its own Overall performance shows; pressing it opens the window on that function, where its plan and performance are.</div>
+          </div>
+          <div class="plan wide">
+            <div><b>The plan as formed</b><span>Foundation, Analysis, the Directions opened with their measures and tactics, and the Capabilities — the whole strategy, read in order.</span></div>
+            <div class="acts"><span>Read the plan ›</span><span>Print</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="cap"><b>Print</b> is on the plan door and in the strip as today, for the SMO only; a board member sees <b>Read the plan</b> alone.</p>
+  </section>
+
+  <section>
+    <div class="ph2"><span class="n">2</span><h2>What the three questions settle</h2></div>
+    <div class="two">
+      <div class="door">
+        <h3>Who lands here</h3>
+        <div class="foot" style="padding:0 8px">A reader’s seat (§687) opens the window on Overview instead of Foundation. The SMO and anybody opening the window from the workbench see the tab too, and open on Overview as well — one first screen, not two.</div>
+      </div>
+      <div class="door">
+        <h3>Where the key measures table is</h3>
+        <div class="foot" style="padding:0 8px">Behind the first card: “Measures” opens Overall performance, where the headline measures table already is. The Overview stays one screen tall for a board.</div>
+      </div>
+      <div class="door wide">
+        <h3>The same tab on another client</h3>
+        <div class="foot" style="padding:0 8px">On Raya the Directions door becomes <b>Business units</b> (each unit’s headline, at its weight), the Capabilities door is absent where the box is not split, and Functions is as here. Nothing is configured: the cards follow the client’s Structure, exactly as the tabs do.</div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

@@ -1621,7 +1621,7 @@ CREATE TABLE copilot_files (
   at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (tenant_id, id),
   FOREIGN KEY (tenant_id, chat_id) REFERENCES copilot_chats (tenant_id, id) ON DELETE CASCADE,
-  CONSTRAINT copilot_file_kind CHECK (kind IN ('pdf','docx','xlsx')),
+  CONSTRAINT copilot_file_kind CHECK (kind IN ('pdf','docx','xlsx','png','jpg','webp')),
   CONSTRAINT copilot_file_size CHECK (size > 0 AND size <= 3145728)
 );
 CREATE INDEX copilot_files_chat ON copilot_files (tenant_id, chat_id);
@@ -1644,7 +1644,7 @@ CREATE TABLE copilot_sources (
   extra jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (tenant_id, id),
   CONSTRAINT copilot_source_kind CHECK (kind IN ('guided','template','report','research')),
-  CONSTRAINT copilot_source_file_kind CHECK (file_kind IS NULL OR file_kind IN ('pdf','docx','xlsx')),
+  CONSTRAINT copilot_source_file_kind CHECK (file_kind IS NULL OR file_kind IN ('pdf','docx','xlsx','png','jpg','webp')),
   CONSTRAINT copilot_source_size CHECK (size >= 0 AND size <= 3145728),
   CONSTRAINT copilot_source_name CHECK (btrim(name) <> '')
 );

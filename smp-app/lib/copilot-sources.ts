@@ -70,5 +70,5 @@ export async function sourcesMaterial(c: Q, ids: string[]): Promise<{ id: string
   if (!ids.length) return [];
   const r = await c.query("SELECT id, name, kind, file_kind, bytes, text FROM copilot_sources WHERE id = ANY($1::uuid[])", [ids]);
   return r.rows.map((x: any) => ({ id: str(x.id), name: str(x.name), kind: str(x.kind), text: str(x.text), fileKind: x.file_kind == null ? null : str(x.file_kind),
-    bytes: x.file_kind === "pdf" ? x.bytes : null }));
+    bytes: ["pdf", "png", "jpg", "webp"].includes(x.file_kind) ? x.bytes : null }));
 }

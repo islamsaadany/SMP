@@ -43,6 +43,8 @@ export const START = [
 export const HOUSE = [
   "Never invent a figure. Numbers come from WHAT THE PLATFORM SHOWS, from a file, or from something the person typed. If a number you need is not there, say so in `reply` and list it in `missing` rather than guessing it.",
   "Every item you draft carries its `source`: the file's exact name, \"pasted\", \"platform\", or \"assumed\". Never leave it empty.",
+  /* §780 — a picture is read as a picture */
+  "A picture (a screenshot of a table, a chart, a slide) is a file like any other: read the figures in it and cite its name as `source`. If a figure is blurred, cut off or unreadable, say so and ask for it rather than reading a guess into it.",
   "`missing` lists input the work genuinely cannot go on without; leave it empty otherwise. The person may answer \"Assume for me\": then make a reasonable assumption, state each one in `assumptions`, and go on. Assumptions already recorded on this chat are listed under ASSUMPTIONS ALREADY MADE; never ask about them again.",
   "`options` are short quick replies (under six words each), only when you ask the person to choose between distinct answers, or to go on with the next part (see ONE PART PER ANSWER). Never mark any of them as recommended. Otherwise leave `options` empty.",
   /* §744 — Islam's "assume all for me and go ahead with all pillars" asked for
@@ -105,6 +107,18 @@ export const GUIDE: Record<Section, Guide> = {
    So a free chat is told the Free chat part of Copilot settings IN PLACE OF
    where the work starts and the ways to start — those are what made it
    draft on the first turn — and the section's method stays, as a reference. */
+/* §784 — a free chat's draft, in the plan's own shape, for the parts the plan draws that way */
+const PLAN_SHAPE: Partial<Record<string, string>> = {
+  compete: "`plan.discipline` — btc (Best Total Cost), bts (Best Total Solution) or bp (Best Product); `plan.values` — each value proposition with its `title`, `how` (the actions, one per line), `measure` (each measure with its target and today's figure when known, e.g. \"Vendor retention rate ≥ 80% (today 72%)\") and `evidence`.",
+  analysis: "`plan.swot` — `s`, `w`, `o`, `t`, each line with a short `title`, its `description` and its `evidence`.",
+  directions: "`plan.directions` — each Pillar/Direction with its `title`, its `urgency`, `importance` and `ease`, each 1 to 4 as Forefront's method scores them (leave a score out when it was not agreed), and `why` in a line.",
+  execution: "`plan.period` — the `year` and the quarters it runs, `fromQuarter` to `toQuarter` (1–4); `plan.items` — one entry per Pillar/Direction, its `direction` named exactly as the plan names it, with its `measures` (each `name` and `target`) and its `tactics` (each `name`, its `owner`, and the `quarters` it runs in).",
+  foundation: "`plan.foundation` — one entry per part you drafted, `key` who (Who we are), asp (Winning Aspiration), eim (End in Mind), pur (Purpose), obj (Key Objectives, one per line) or val (Core Values, one per line), and its `text`.",
+};
+/* §786 — said to the second, small ask that lays a free chat's draft out in its part's shape (lib/copilot-ask.ts askPlanShape) */
+export function planShapeWords(section: string): string {
+  return PLAN_SHAPE[section] ? "THE PLAN'S SHAPE for this part — fill `plan` this way: " + PLAN_SHAPE[section].replace(/`plan\./g, "`") + " Leave out what the draft does not say; never invent a measure or a figure to fill it. A score that was not agreed is 0." : "";
+}
 export function guidanceFor(section: Section, method = "", templates: string[] = [], free: string | null = null): string {
   const g = GUIDE[section];
   const roads = g.roads.length

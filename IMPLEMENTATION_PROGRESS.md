@@ -6,6 +6,39 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **2026-11-20 — The tactic-to-key-measure link is optional (§794).** Islam: the no-connection line should not show as missing. The red "No tactic supports it yet" under an unlinked key measure is gone everywhere; a named measure keeps its tags. tactic-supports rewritten, all good. On the branch, not merged.
 
+**2026-11-20 — The Internal Tracker is now the Task Tracker (§793).** The module's label, its refusals and My tasks' lines say Task Tracker; the key, address and tables are unchanged.
+
+**2026-11-19 — The top bar on a zoomed-in window, and the Refine panel's place (§792), merged to `main` 2026-11-19 on Islam's word.** Zoomed in or on a narrow window, the top bar's parts no longer run over each other: under 1000px Jump to shows as its magnifying glass and the role line goes, under 880px the words "Viewing as" go, and a long client name shortens with "…". **The bar is one line at every width** (Islam: *"the top bar should not take 2 lines by any means"*), the phone included: at 760px and under Read is its icon and the "?" goes; at 520px and under the trail is the mark and the module, and Sign out is its icon. The same on Insights, the Tracker and Meeting Notes. The ✦ Refine panel now sits directly under the bar from the moment it opens and stays there when the window changes.
+
+**2026-11-18 — ✦ Refine opens on the Competitive Discipline tab (§791).** The side panel on a unit's Competitive Discipline tab now opens as it does on the SWOT — the chats rail, the question and the box — instead of saying it only works on the Foundation, the SWOT and the Plan. One missing entry in the panel's map of tabs to areas.
+
+**2026-11-17 — ✦ Build, ✦ Advise and ✦ Refine (§790).** The Copilot's three doors named for what each does and dressed alike: ✦ Build and ✦ Advise at the right of the tab row, ✦ Refine beside Edit on the plan (it was ✦ Copilot, plain text).
+
+**2026-11-17 — The whole strategy on paper, from the reading window (§789).** A Print control in the reading window's strip, for the SMO alone, prints the subject being read as one document — cover, then every tab in order, every direction opened — through the browser's print dialog, so paper or Save as PDF. The paper is built from the same code as the tabs, so it cannot differ from the screen. §789.1: a company that plans its own strategy (El Abd's shape) is named by its name on the cover, and a direction's title is never left alone at the foot of a page. §789.2: a direction or a capability is never split over two pages; one that does not fit starts a new page, whole.
+
+**2026-11-17 — An older draft lays itself out (§788).** No *Lay it out for the plan* button: a draft made before the plan's shape lays itself out as the plan when its panel shows it, once, with nothing said in the chat.
+
+**2026-11-17 — Save and next goes through this week only (§787).** In the weekly check, Save and next, Skip and the arrows go from one task of this week to the next and never into a topic's folded last-week or next-week lists; those open only by hand.
+
+**2026-11-17 — Free chats answer on Claude again (§786).** §784 had put the plan's shape into the answer's schema, which Claude refuses past its optional-field cap, so every free chat failed on main. The shape is now asked for in a second, small request of its own.
+
+**2026-11-17 — Every part laid out as the plan; rename from the header (§785).** Pillars/Directions and Tactical Plans now draft in the plan's shape too and go on the plan by name (a Direction updated, not added twice; an item tied to its Direction, one the plan lacks left out and said). An older draft offers Lay it out for the plan. A chat's name is renamed by pressing it in its header.
+
+**2026-11-17 — A chat's work laid out as the plan, and put on it (§784).** A free chat in Foundation, SWOT or Competitive Discipline drafts in the plan's own shape, drawn as the plan draws it (Discipline as value cards with measures and today's figure), gaps said; Save keeps it as that part, and Put on the plan asks with what the plan holds today, then writes it and archives the old.
+
+**2026-11-17 — The deliverables' hide button in their header (§783).** As the Chats header has its own, first.
+
+**2026-11-17 — One-line chat header; the stepper line; Builder and Advisory at the right (§782).** A chat's header is its name, ⓘ and A− A+ over a light line edge to edge; no "Free chat" — a chat is named from its first words. The steps are one thin stepper line ending with the plan's count. ✦ Builder and Advisory sit at the far right of the tabs; Advisory is its own tab, no longer a step.
+
+**2026-11-17 — The working word at the left (§781).** "Thinking…", "Fetching…" stand at the left of the conversation, where the answer will start, not centred.
+
+**2026-11-17 — Pictures in the Copilot; Details stay right and fold (§780).** Paste a screenshot (or drop or attach a PNG, JPEG or WebP) in any Copilot box, the step-by-step chats included; the AI reads the figures in it and cites it, and says so when a figure can't be read. Migration 038. The deliverables stay on the right on a smaller window and fold to a strip like the chats rail.
+
+**2026-11-17 — Build only; Details on the right; the plan panel sends empty parts to Build (§779).** The Copilot tab is Build only and reads the plan itself (a plan made on the platform counts); only the step in focus shows its cards, under "Or choose another way to start"; deliverables sit on the right below the to-do; ✦ Copilot on an empty part sends you to build it, on a built part it opens on the box to say what to change; the panel is resized from its left edge.
+
+**2026-11-17 — Start from existing; the plan's Copilot panel expands (§778).** The plan card reads "Start from existing"; the Copilot panel on the Strategy tab has an expand button that makes it take over the page, and minimize puts it back at the side.
+
+**2026-11-17 — Build, not Builder; the strip over the chat box (§777).** The toggle reads Build · Refine; "All chats on this client" is off the rail; the method's strip sits over the chat box on the right, the chats rail running the full height beside it.
 **2026-11-17 — The welcome check green (§776.1).** Its three reds and its death were main's: the ladder made the plan the office's (no gaps row for a custodian), the underline was read mid-transition, the group CEO lands in the reading window, and the sign-in's last read raced a redirect. Each rewritten to the rule as it stands, never loosened. welcome: OK, twice.
 
 **2026-11-17 — The welcome screen no longer opens on its own (§776).** Islam: the client opened on the welcome window; chosen: stop it showing on its own. The screen is asked for through the house mark and is otherwise untouched. welcome.py, role-chip-own-thing and door-landing.mjs rewritten to press the house; welcome.py's three reds and its death at the group CEO are main's own. On the branch, not merged.

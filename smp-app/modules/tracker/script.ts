@@ -260,11 +260,24 @@ export const APP_JS = `(function () {
     request("GET", LIST + "?view=" + encodeURIComponent(a.view) + "&q=" + encodeURIComponent(a.q) +
       "&group=" + encodeURIComponent(a.group) + "&dates=" + encodeURIComponent(a.dates) + (a.open ? "&open=" + encodeURIComponent(a.open) : ""), null, k || keep(), null, quiet);
   }
-  /* THE MEETING'S ORDER is the list on the left, top to bottom. Save and next
-     writes what is in the progress box (if anything) and opens the next
-     task in the same answer; the task left is counted as gone through — on
-     this browser, for today, which is the meeting's length. */
-  function meetIds() { return Array.prototype.map.call(document.querySelectorAll(".mlist .mi[data-id]"), function (x) { return x.getAttribute("data-id"); }); }
+  /* THE MEETING'S ORDER is THIS WEEK'S tasks on the left, top to bottom.
+     Save and next writes what is in the progress box (if anything) and
+     opens the next task of this week in the same answer; the task left is
+     counted as gone through — on this browser, for today, which is the
+     meeting's length. Last week's and next week's tasks sit folded under
+     their topic (§732) and are only ever reached by hand: a press on the
+     fold, then on the task. Save and next, Skip and the arrow keys never
+     step into a fold (Islam: "the next week is a hidden list ... only
+     manually if someone open it"); from a task inside a fold they go on to
+     the next (or back to the previous) task of this week. */
+  function meetIds() { return Array.prototype.map.call(document.querySelectorAll(".mlist .mi.now[data-id]"), function (x) { return x.getAttribute("data-id"); }); }
+  function meetNext(cur, dir) {
+    var all = Array.prototype.slice.call(document.querySelectorAll(".mlist .mi[data-id]")), i = -1, k;
+    for (k = 0; k < all.length; k++) if (all[k].getAttribute("data-id") === cur) { i = k; break; }
+    if (dir > 0) { for (k = i + 1; k < all.length; k++) if (all[k].classList.contains("now")) return all[k].getAttribute("data-id"); }
+    else { for (k = (i < 0 ? all.length : i) - 1; k >= 0; k--) if (all[k].classList.contains("now")) return all[k].getAttribute("data-id"); }
+    return null;
+  }
   var WALK = "smp.tracker.walk";
   function walked() {
     try { var j = JSON.parse(sessionStorage.getItem(WALK) || "{}"); return j.day === new Date().toDateString() ? j.ids || [] : []; } catch (x) { return []; }
@@ -276,7 +289,7 @@ export const APP_JS = `(function () {
   function drawWalk() {
     var w = document.querySelector(".walk"); if (!w) return;
     var ids = meetIds(), done = walked(), n = 0;
-    document.querySelectorAll(".mlist .mi[data-id]").forEach(function (x) { var on = done.indexOf(x.getAttribute("data-id")) >= 0; x.classList.toggle("rev", on); if (on) n++; });
+    document.querySelectorAll(".mlist .mi[data-id]").forEach(function (x) { var on = done.indexOf(x.getAttribute("data-id")) >= 0; x.classList.toggle("rev", on); if (on && x.classList.contains("now")) n++; });
     var wn = w.querySelector(".wn"), i = w.querySelector(".bar i");
     if (wn) wn.textContent = n + " of " + ids.length + " gone through";
     if (i) i.style.width = (ids.length ? Math.round(100 * n / ids.length) : 0) + "%";
@@ -307,8 +320,8 @@ export const APP_JS = `(function () {
     return true;
   }
   function stepTask(dir, save) {
-    var ids = meetIds(), panel = document.querySelector(".mopen"), cur = panel ? panel.getAttribute("data-id") : openId();
-    var i = ids.indexOf(cur), nx = ids[Math.max(0, Math.min(ids.length - 1, (i < 0 ? 0 : i) + dir))];
+    var panel = document.querySelector(".mopen"), cur = panel ? panel.getAttribute("data-id") : openId();
+    var nx = meetNext(cur, dir);
     if (save && dir > 0 && cur) walk(cur);
     var pn = save && dir > 0 && panel ? panel.querySelector(".pnew") : null;
     var carry = save && dir > 0 && panel && panel.getAttribute("data-carry") === "1";

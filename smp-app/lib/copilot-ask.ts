@@ -11,7 +11,8 @@
    empty bubble (§124). */
 import { createRequire } from "node:module";
 import { SECTIONS, type Section } from "./copilot.ts";
-import { guidanceFor } from "./copilot-guidance.ts";
+import { guidanceFor, planShapeWords } from "./copilot-guidance.ts";
+import { asParts, isImage } from "./copilot-files.ts";
 
 const need = createRequire(import.meta.url);
 const A = need("./assistant.cjs") as {
@@ -84,7 +85,89 @@ export type Answer = {
   pastedBelongsTo: Section | null;
   /* The method part this turn works through (§460), "" when none. */
   following: string;
+  /* §784 — the draft in the plan's own shape (Foundation, SWOT, Competitive Discipline), when it gave one */
+  plan?: PlanShape | null;
 };
+/* §786 — THE PLAN'S SHAPE IS ASKED FOR ON ITS OWN. §784 put `plan` into the
+   answer's schema; with every part's shape in it the schema carried 49
+   optional fields, and Claude's structured output refuses a schema with that
+   many ("too many optional parameters") — every free chat failed. So the main
+   answer is as it was, and when a free chat in one of the five parts drafts,
+   a second, small ask lays the draft out in that part's shape alone, every
+   field required (an unknown score is 0, an unknown evidence ""). */
+const O = (props: Record<string, unknown>) => ({ type: "OBJECT", properties: props, required: Object.keys(props) });
+const ARR = (items: unknown) => ({ type: "ARRAY", items });
+const STR = { type: "STRING" }, INT = { type: "INTEGER" };
+const LINE = O({ title: STR, description: STR, evidence: STR });
+export const PLAN_SCHEMAS: Record<string, unknown> = {
+  compete: O({ discipline: { type: "STRING", enum: ["btc", "bts", "bp"] }, values: ARR(O({ title: STR, how: ARR(STR), measure: ARR(STR), evidence: STR })) }),
+  analysis: O({ swot: O({ s: ARR(LINE), w: ARR(LINE), o: ARR(LINE), t: ARR(LINE) }) }),
+  foundation: O({ foundation: ARR(O({ key: { type: "STRING", enum: ["who", "asp", "eim", "pur", "obj", "val"] }, text: STR })) }),
+  directions: O({ directions: ARR(O({ title: STR, urgency: INT, importance: INT, ease: INT, why: STR })) }),
+  execution: O({ period: O({ year: INT, fromQuarter: INT, toQuarter: INT }), items: ARR(O({ direction: STR, measures: ARR(O({ name: STR, target: STR })), tactics: ARR(O({ name: STR, owner: STR, quarters: ARR(INT) })) })) }),
+};
+/* how many fields a schema leaves optional, everywhere in it — the number Claude's structured output caps */
+export function optionalCount(sc: any): number {
+  if (!sc || typeof sc !== "object") return 0;
+  let n = 0;
+  if (sc.properties) { const req = new Set(sc.required || []); for (const k of Object.keys(sc.properties)) { if (!req.has(k)) n++; n += optionalCount(sc.properties[k]); } }
+  if (sc.items) n += optionalCount(sc.items);
+  return n;
+}
+export type PlanShape =
+  | { section: "compete"; compete: { discipline: "btc" | "bts" | "bp"; values: { title: string; how: string[]; measure: string[]; evidence?: string }[] } }
+  | { section: "analysis"; swot: Record<"s" | "w" | "o" | "t", { title: string; description: string; evidence?: string }[]> }
+  | { section: "foundation"; foundation: { key: string; text: string }[] }
+  | { section: "directions"; directions: { title: string; urgency: number | null; importance: number | null; ease: number | null; ownedBy: string; why?: string }[]; capabilities: [] }
+  | { section: "execution"; period: { y: number; m1: number; m2: number }; items: { kind: "direction"; planId: string; title: string; measures: { name: string; target: string; compile: string }[]; tactics: { name: string; owner: string; quarters: number[] }[] }[] };
+const PARTS = ["who", "asp", "eim", "pur", "obj", "val"];
+/* §784 — the plan's shape, cut to size and to the section it belongs to; anything else is dropped, never guessed */
+export function planOf(section: string, raw: unknown): PlanShape | null {
+  const j: any = raw && typeof raw === "object" ? raw : null; if (!j) return null;
+  const lines = (v: unknown, n: number, m: number) => (Array.isArray(v) ? v : []).map((x) => clip(x, m)).filter(Boolean).slice(0, n);
+  if (section === "compete") {
+    if (!["btc", "bts", "bp"].includes(String(j.discipline))) return null;
+    const values = (Array.isArray(j.values) ? j.values : []).map((v: any) => {
+      const o: any = { title: clip(v && v.title, 120), how: lines(v && v.how, 5, 300), measure: lines(v && v.measure, 5, 300) };
+      const e = clip(v && v.evidence, 400); if (e) o.evidence = e; return o; }).filter((v: any) => v.title).slice(0, 5);
+    return values.length ? { section: "compete", compete: { discipline: j.discipline, values } } : null;
+  }
+  if (section === "analysis") {
+    const w = j.swot && typeof j.swot === "object" ? j.swot : null; if (!w) return null;
+    const out: any = {}; let n = 0;
+    for (const L of ["s", "w", "o", "t"]) { out[L] = (Array.isArray(w[L]) ? w[L] : []).map((x: any) => { const o: any = { title: clip(x && x.title, 160), description: clip(x && x.description, 400) }; const e = clip(x && x.evidence, 300); if (e) o.evidence = e; return o; }).filter((x: any) => x.title).slice(0, 10); n += out[L].length; }
+    return n ? { section: "analysis", swot: out } : null;
+  }
+  /* §785 — Pillars/Directions: each with its Urgency × Importance × Ease, 1–4 each (a score out of range is left unscored, never moved) */
+  if (section === "directions") {
+    const sc = (v: unknown) => { const n = Number(v); return Number.isInteger(n) && n >= 1 && n <= 4 ? n : null; };
+    const seen = new Set<string>();
+    const directions = (Array.isArray(j.directions) ? j.directions : []).map((x: any) => {
+      const o: any = { title: clip(x && x.title, 160), urgency: sc(x && x.urgency), importance: sc(x && x.importance), ease: sc(x && x.ease), ownedBy: "" };
+      const w = clip(x && x.why, 400); if (w) o.why = w; return o; })
+      .filter((x: any) => x.title && !seen.has(x.title.toLowerCase()) && seen.add(x.title.toLowerCase())).slice(0, 12);
+    return directions.length ? { section: "directions", directions, capabilities: [] } : null;
+  }
+  /* §785 — Tactical Plans: the period, and each of the plan's Directions by its name with its measures and tactics; the browser ties a name to the plan's own row */
+  if (section === "execution") {
+    const p = j.period && typeof j.period === "object" ? j.period : {};
+    const now = new Date().getFullYear(), y = Number.isInteger(Number(p.year)) && Number(p.year) >= 2000 && Number(p.year) <= 2100 ? Number(p.year) : now;
+    const q1 = Math.min(4, Math.max(1, Number(p.fromQuarter) || 1)), q2 = Math.min(4, Math.max(q1, Number(p.toQuarter) || 4));
+    const items = (Array.isArray(j.items) ? j.items : []).map((x: any) => ({ kind: "direction" as const, planId: "", title: clip(x && x.direction, 160),
+      measures: (Array.isArray(x && x.measures) ? x.measures : []).map((m: any) => ({ name: clip(m && m.name, 200), target: clip(m && m.target, 60), compile: "" })).filter((m: any) => m.name).slice(0, 8),
+      tactics: (Array.isArray(x && x.tactics) ? x.tactics : []).map((t: any) => ({ name: clip(t && t.name, 200), owner: clip(t && t.owner, 80),
+        quarters: Array.from(new Set((Array.isArray(t && t.quarters) ? t.quarters : []).map(Number).filter((q: number) => Number.isInteger(q) && q >= q1 && q <= q2))).sort() as number[] })).filter((t: any) => t.name).slice(0, 10) }))
+      .filter((x: any) => x.title && (x.measures.length || x.tactics.length)).slice(0, 12);
+    return items.length ? { section: "execution", period: { y, m1: (q1 - 1) * 3 + 1, m2: q2 * 3 }, items } : null;
+  }
+  if (section === "foundation") {
+    const seen = new Set<string>();
+    const parts = (Array.isArray(j.foundation) ? j.foundation : []).map((x: any) => ({ key: String(x && x.key), text: unleak(str(x && x.text)).replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim().slice(0, 2000) }))
+      .filter((x: any) => PARTS.includes(x.key) && x.text && !seen.has(x.key) && seen.add(x.key));
+    return parts.length ? { section: "foundation", foundation: parts } : null;
+  }
+  return null;
+}
 /* An item in the method's own shape (§460): title, description, evidence
    and score are optional, because a method that asks for none of them is
    answered by `text` alone. */
@@ -92,7 +175,7 @@ export type DraftItem = { text: string; source: string; title?: string; evidence
 
 /* The model's JSON into the screen's shape, with the files that were really
    attached as the only names a source may carry. */
-export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string; part: Answer } | null {
+export function shapeAnswer(raw: unknown, fileNames: string[], section = ""): { reply: string; part: Answer } | null {
   const j: any = raw && typeof raw === "object" ? raw : {};
   const reply = unleak(str(j.reply).trim()).slice(0, 8000);
   const list = (v: unknown, n: number, m: number) => (Array.isArray(v) ? v : []).map((x) => clip(x, m)).filter(Boolean).slice(0, n);
@@ -134,6 +217,8 @@ export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string;
     assumptions: list(j.assumptions, 10, 300), draft, pastedBelongsTo,
     following: clip(j.following, 120),
   };
+  const plan = draft && section ? planOf(section, j.plan) : null;
+  if (plan) part.plan = plan;
   if (!reply && !draft) return null;
   return { reply, part };
 }
@@ -161,16 +246,29 @@ export function corpusOf(a: AskInput): string {
   out.push("\nASSUMPTIONS ALREADY MADE ON THIS CHAT (never ask about these again):\n" +
     (a.assumptions.length ? a.assumptions.map((x) => "- " + x).join("\n") : "None yet."));
   const readable = a.files.filter((f) => f.text);
-  const pdfs = a.files.filter((f) => f.kind === "pdf");
+  const pdfs = a.files.filter((f) => f.kind === "pdf" || isImage(f.kind));
   if (a.files.length) {
     out.push("\nFILES IN THIS CHAT (cite each by its exact name as `source`):");
     for (const f of readable) out.push("\n=== FILE: " + f.name + " ===\n" + f.text);
-    for (const f of pdfs) out.push("\n=== FILE: " + f.name + " === (a PDF, attached to the question itself)");
+    for (const f of pdfs) out.push("\n=== FILE: " + f.name + " === (" + (f.kind === "pdf" ? "a PDF" : "a picture — read the figures, tables and charts in it; say so if one cannot be read") + ", attached to the question itself)");
   }
   if (a.pasted) out.push("\nThe person's latest message is PASTED material (source \"pasted\").");
   return out.join("\n");
 }
 
+export async function askPlanShape(a: AskInput, draft: NonNullable<Answer["draft"]>): Promise<PlanShape | null> {
+  const sch = PLAN_SCHEMAS[a.section]; if (!sch || !A.configured()) return null;
+  const draftWords = [draft.title].concat(draft.groups.map((g) => g.title + ":\n" + g.items.map((it) => "- " + (it.title ? it.title + ": " : "") + it.text + (it.evidence ? " (evidence: " + it.evidence + ")" : "") + (it.score ? " [score " + it.score + "]" : "")).join("\n"))).join("\n\n");
+  const call = (model?: string) => A.askJson({
+    question: "Lay this draft out in the plan's shape. Use only what it says; leave a field empty (\"\" or 0) where it says nothing, never invent a measure or a figure.\n\nTHE DRAFT:\n" + draftWords,
+    history: [], maxTurns: 0, schema: { type: "OBJECT", properties: { plan: sch }, required: ["plan"] }, needsCorpus: false,
+    instruction: "You lay a strategy draft out in the shape the plan holds it. " + planShapeWords(a.section),
+    corpusName: "THIS CHAT'S MATERIAL", corpusText: corpusOf(a), parts: [], think: false, maxOutput: 4096, timeoutMs: 45_000, ...(model ? { model } : {}),
+  });
+  const r = await withRetry(call);
+  if (!r.ok) { console.error("copilot: plan shape:", r.why); return null; }
+  return planOf(a.section, (r.json || {}).plan);
+}
 export type AskResult = { ok: true; reply: string; part: Answer } | { ok: false; why: string; noKey?: boolean };
 
 /* The one call. A PDF rides as a document on the question; everything else
@@ -190,8 +288,7 @@ const fallbackModel = () => A.provider() === "anthropic"
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export async function askCopilot(a: AskInput): Promise<AskResult> {
   if (!A.configured()) return { ok: false, noKey: true, why: "no key is set" };
-  const pdfParts = a.files.filter((f) => f.kind === "pdf" && f.bytes && f.bytes.length)
-    .map((f) => ({ inlineData: { mimeType: "application/pdf", data: f.bytes!.toString("base64") } }));
+  const pdfParts = asParts(a.files);
   const call = (model?: string) => A.askJson({
     question: a.question,
     history: a.history,
@@ -216,8 +313,12 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
      whole ladder stays well inside one request's life. */
   const r = await withRetry(call);
   if (!r.ok) return { ok: false, why: r.why || "no answer" };
-  const shaped = shapeAnswer(r.json, a.files.map((f) => f.name));
+  const shaped = shapeAnswer(r.json, a.files.map((f) => f.name), a.free != null ? a.section : "");
   if (!shaped) return { ok: false, why: "the answer had nothing in it" };
+  /* §786 — a free chat's draft in one of the five parts is laid out in the plan's shape by a second, small ask; failing that, the draft stands and offers to be laid out */
+  if (a.free != null && shaped.part.draft && !shaped.part.plan && PLAN_SCHEMAS[a.section] && process.env.SMP_BREAK !== "no-plan-shape") {
+    const plan = await askPlanShape(a, shaped.part.draft); if (plan) shaped.part.plan = plan;
+  }
   return { ok: true, reply: shaped.reply, part: shaped.part };
 }
 

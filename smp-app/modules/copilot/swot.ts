@@ -7,8 +7,8 @@
    lib/copilot-sources.ts — this file only carries them to the page. */
 import { helpFor } from "../../lib/copilot-swot-help.ts";
 import { withTenant } from "../../lib/tenant.ts";
-import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine } from "../../lib/copilot.ts";
-import { kindOf, readFile, MAX_FILE_BYTES, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
+import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine, waitingFiles, takeFiles, waitingWords } from "../../lib/copilot.ts";
+import { kindOf, mimeOf, asParts, readFile, MAX_FILE_BYTES, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askFlowJson, configured } from "../../lib/copilot-ask.ts";
 import { partsOf } from "../../lib/copilot-settings.ts";
 import { doorPool } from "../../lib/auth.ts";
@@ -74,9 +74,7 @@ export async function sourceFile(tenantId: string, id: string): Promise<Response
   if (!UUID.test(id)) return null;
   const f = await withTenant(tenantId, (c) => sourceBytes(c, id));
   if (!f) return null;
-  const type = f.kind === "pdf" ? "application/pdf"
-    : f.kind === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    : f.kind === "xlsx" ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "text/plain; charset=utf-8";
+  const type = f.kind ? mimeOf(f.kind) : "text/plain; charset=utf-8";
   const bytes = f.bytes ? new Uint8Array(f.bytes) : new TextEncoder().encode(f.text);
   return new Response(bytes, { status: 200, headers: { "Content-Type": type, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
     "Content-Disposition": "attachment; filename*=UTF-8''" + encodeURIComponent(f.name + (f.bytes ? "" : f.name.endsWith(".txt") ? "" : ".txt")) } });
@@ -304,12 +302,15 @@ export async function swotAsk(tenantId: string, b: any, who: Who): Promise<Out> 
   const question = kind === "swotAnswer" ? answerForQuestion(area, Number(b.i))
     : kind === "swotAnalysis" ? analysisQuestion(area) : kind === "swotDraft" ? draftQuestion(s) : kind === "swotChange" ? changeQuestion(s, ask) : checkQuestion(s);
   const schema = kind === "swotAnswer" ? ANSWER_SCHEMA : kind === "swotAnalysis" ? ANALYSIS_SCHEMA(area) : kind === "swotDraft" ? DRAFT_SCHEMA : kind === "swotChange" ? CHANGE_SCHEMA : CHECK_SCHEMA;
+  /* §780 — a picture or file waiting above the box goes with this ask */
+  const pics = await withTenant(tenantId, (c) => waitingFiles(c, id));
   const r = await askFlowJson({ instruction: swotInstruction(method), corpus: swotCorpus(s, placeWord || chat.place, context, areas, material),
-    corpusName: "THIS SWOT'S MATERIAL", parts: pdfPartsOf(material), question, schema, maxOutput: kind === "swotAnswer" ? 1024 : 8192 });
+    corpusName: "THIS SWOT'S MATERIAL", parts: pdfPartsOf(material).concat(asParts(pics)), question: question + waitingWords(pics), schema, maxOutput: kind === "swotAnswer" ? 1024 : 8192 });
   if (!r.ok) {
     if (!(r as any).noKey) console.error("copilot: swot ask:", r.why);
     return refused(503, (r as any).noKey ? NO_KEY : failedLine(r.why));
-  }
+  }  if (pics.length) await withTenant(tenantId, (c) => takeFiles(c, id, pics.map((f) => f.id)));
+
   const j = r.json || {};
   if (kind === "swotAnswer") {
     /* An answer for the client is a SUGGESTION in the box, never stored by

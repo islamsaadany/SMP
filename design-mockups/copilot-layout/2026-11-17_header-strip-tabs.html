@@ -1,0 +1,259 @@
+<title>Copilot Header, Steps and Tabs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: choices on top (steps A/B/C, Advisory 1/2), then the platform — tab row (Builder far right), the strip in the chosen style, chats left, the chat with its one-line header, Details right. */
+:root{--ground:#F3F5F8;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-2:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--rep:#A6512A;--demo:#5B3E8F;--demobg:#F2EEFA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--line-2:#2A3039;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--demo:#C7B3F0;--demobg:#251E33;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--line-2:#2A3039;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--demo:#C7B3F0;--demobg:#251E33;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+h1{font-size:17px;margin:0}
+.hint{color:var(--ink-3);font-size:13px}
+.pick{border:1px dashed var(--demo);background:var(--demobg);border-radius:10px;padding:8px 12px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.pick .prow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pick b{color:var(--demo);min-width:150px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:3px 12px;font-size:12.5px;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--demo);color:#fff;font-weight:600}
+.pick small{color:var(--ink-3)}
+.app{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;height:700px}
+.bar{display:flex;gap:14px;align-items:center;background:var(--nav);color:var(--navink);padding:8px 14px;font-size:13px;flex-wrap:wrap}
+.bar b{border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.bar span{opacity:.85}
+.tabs{display:flex;gap:18px;align-items:center;padding:6px 14px;border-bottom:1px solid var(--line);font-size:13.5px;flex-wrap:wrap}
+.tabs button{border:0;background:none;padding:2px 0;color:var(--ink-2)}
+.tabs button[aria-current="true"]{color:var(--ink);font-weight:700;border-bottom:2px solid var(--goldfill)}
+.tabs .rep{background:var(--rep);color:#fff;border-radius:6px;padding:2px 10px}
+.tabs .sp{flex:1}
+.tabs .side{display:inline-flex;gap:6px;align-items:center;border-left:1px solid var(--line);padding-left:14px}
+.tabs .tool{border:1px solid var(--line);border-radius:16px;padding:2px 12px;font-weight:600;color:var(--ink-2);background:var(--surface)}
+.tabs .tool[aria-current="true"]{background:var(--nav);color:var(--navink);border-color:var(--nav);border-bottom:1px solid var(--nav)}
+.tabs .tool.adv{border-style:dashed}
+.cop{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px}
+.status{font-size:12.5px;color:var(--ink-3)}
+.status b{color:var(--ink)}
+.grid{flex:1;min-height:0;display:grid;grid-template-columns:180px minmax(0,1fr) 180px;grid-template-rows:auto minmax(0,1fr);gap:0 8px}
+@media (max-width:860px){.grid{grid-template-columns:140px minmax(0,1fr)}.details{display:none}}
+.rail{grid-row:1/3;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;font-size:12.5px;min-height:0}
+.rh{padding:8px;font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.row{background:var(--surface);border:0;border-top:1px solid var(--line);padding:6px 8px;text-align:left;display:flex;flex-direction:column;gap:1px;width:100%}
+.row[aria-current="true"]{box-shadow:inset 3px 0 0 var(--goldfill)}
+.atag{align-self:flex-start;font:700 9.5px/1.6 var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:0 5px;border-radius:4px;background:var(--surface-2);color:var(--ink-2)}
+.row small{color:var(--ink-3);font-size:11.5px}
+.strip{grid-column:2/4;margin-bottom:8px;min-width:0}
+@media (max-width:860px){.strip{grid-column:2}}
+/* today */
+.sA{display:flex;gap:6px}
+.sA .st{flex:1 1 0;min-width:0;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);display:flex;flex-direction:column;gap:2px}
+.sA .k{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.sA b{font-size:13px}.sA small{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sA .on{border-left:3px solid var(--good)}.sA .on small{color:var(--good)}
+.sA .nx{box-shadow:0 0 0 2px var(--nav)}
+/* A: slim cards */
+.s1{display:flex;gap:6px}
+.s1 .st{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);text-align:left;font-size:12.5px}
+.s1 .n{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:700;background:var(--surface-2);color:var(--ink-2);flex:none}
+.s1 .on .n{background:var(--good);color:#fff}
+.s1 .nx{box-shadow:0 0 0 2px var(--nav)}.s1 .nx .n{background:var(--nav);color:#fff}
+.s1 .t{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.s1 .t b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s1 .t small{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s1 .on small{color:var(--good)}
+.s1 [aria-current="true"]{background:var(--surface-2)}
+/* B: a stepper line */
+.s2{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:var(--surface);flex-wrap:wrap;row-gap:4px}
+.s2 .st{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:2px 6px;border-radius:6px;font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.s2 .st[aria-current="true"]{background:var(--surface-2);color:var(--ink);font-weight:600}
+.s2 .n{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;font-size:10.5px;font-weight:700;border:1.5px solid var(--line);color:var(--ink-3);flex:none}
+.s2 .on .n{background:var(--good);border-color:var(--good);color:#fff}
+.s2 .nx .n{border-color:var(--nav);color:var(--nav)}
+.s2 .nx{color:var(--ink);font-weight:700}
+.s2 .ln{flex:1 1 12px;min-width:12px;max-width:40px;height:2px;background:var(--line)}
+.s2 .ln.on{background:var(--good)}
+.s2 .say{margin-left:auto;font-size:12px;color:var(--ink-3);padding-left:10px}
+.s2 .say b{color:var(--ink)}
+/* C: a meter and the next step */
+.s3{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--surface);flex-wrap:wrap}
+.s3 .segs{display:flex;gap:3px;flex:0 0 auto}
+.s3 .segs i{width:28px;height:6px;border-radius:3px;background:var(--line)}
+.s3 .segs i.on{background:var(--good)}.s3 .segs i.nx{background:var(--nav)}
+.s3 .txt{font-size:12.5px;color:var(--ink-2)}
+.s3 .txt b{color:var(--ink)}
+.s3 .go{border:1px solid var(--nav);background:var(--nav);color:var(--navink);border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600}
+.s3 .all{border:0;background:none;color:var(--ink-2);text-decoration:underline;font-size:12px;margin-left:auto}
+.s3 .menu{display:flex;gap:6px;flex-wrap:wrap;width:100%}
+.s3 .menu button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12px}
+.main{border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.col{width:min(600px,100%);margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column}
+.rh{display:flex;align-items:center;gap:6px}.rh .sp{flex:1}
+.tg{border:1px solid var(--line);background:var(--surface);border-radius:5px;width:22px;height:20px;font-size:11px;line-height:1;color:var(--ink-2);padding:0}
+.newc{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:1px 7px;font:600 11.5px/1.5 var(--sans);text-transform:none;letter-spacing:0;color:var(--ink)}
+.dtg{display:flex;justify-content:flex-end;padding:0 0 6px}
+.details{background:none!important;border:0!important;grid-column:3;grid-row:2}
+.grid > .main{grid-column:2;grid-row:2}
+.dbox{border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+/* the chat header */
+.chold{padding:6px 2px;display:flex;flex-direction:column;gap:6px}
+.chold .ctx{font-size:12px;color:var(--ink-3);border-bottom:1px solid var(--line);padding-bottom:6px}
+.chold .r{display:flex;align-items:center}
+.chold .r b{font-size:15px}
+.chnew{display:flex;align-items:center;gap:8px;padding:10px 2px 8px;border-bottom:1px solid var(--line-2)}
+.chnew b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.chnew .sp{flex:1}
+.zz{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
+.zz button{border:0;background:var(--surface);padding:1px 8px;font-size:12px;color:var(--ink-2)}
+.zz button+button{border-left:1px solid var(--line)}
+.info{border:0;background:none;color:var(--ink-3);font-size:13px;padding:0 4px;position:relative}
+.tip{position:absolute;right:0;top:22px;width:260px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;color:var(--ink-2);box-shadow:0 6px 18px rgba(16,24,40,.12);text-align:left;z-index:3}
+.msgs{flex:1;overflow:auto;padding:12px 2px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.ai{border-left:3px solid var(--goldfill);padding:2px 10px}
+.ai p{margin:0 0 6px}
+.me{align-self:flex-end;max-width:80%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.who{font-size:11px;color:var(--ink-3);margin-bottom:2px}
+.fol{font-size:11.5px;color:var(--ink-3)}
+.box{margin:0 0 12px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink-3)}
+.details{grid-row:2;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:12.5px;overflow:auto}
+.details h4{margin:0;padding:8px 10px;font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.dl{padding:7px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column}
+.dl small{color:var(--ink-3)}
+/* Advisory, as its own place */
+.advw{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center}
+.advw h2{margin:0;font-size:18px}
+.advw .ask{width:min(520px,100%);border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--ink-3);text-align:left;min-height:60px}
+.advw .past{width:min(520px,100%);text-align:left;font-size:12.5px;color:var(--ink-2)}
+/* a deliverable, laid out as the plan shows it */
+.dv{flex:1;overflow:auto;padding:12px 2px;display:flex;flex-direction:column;gap:12px}
+.dvh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dvh b{font-size:15px}.dvh .sp{flex:1}
+.chip{font:600 11px/1.6 var(--sans);padding:0 8px;border-radius:10px;background:var(--surface-2);color:var(--ink-2)}
+.chip.on{background:var(--goodbg);color:var(--good)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 12px;font-weight:600;font-size:12.5px}
+.btn.solid{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.meta{font-size:12px;color:var(--ink-3)}
+.disc{border:1px solid var(--line);border-left:4px solid var(--goldfill);border-radius:8px;padding:10px 12px}
+.disc .k{font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.disc h3{margin:2px 0 4px;font-size:16px}
+.disc p{margin:0;font-size:13px;color:var(--ink-2)}
+.vals{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.val{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.val h4{margin:0;font-size:13.5px}
+.val .lab{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.val ul{margin:0;padding-left:16px}
+.val li{margin:1px 0}
+.mrow{display:flex;justify-content:space-between;gap:8px;border-top:1px dashed var(--line);padding-top:3px}
+.mrow span:last-child{color:var(--ink-3);white-space:nowrap}
+.ev{color:var(--ink-3);font-size:12px}
+.ev summary{cursor:pointer}
+.steps{border:1px solid var(--goldfill);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.notes{font-size:13px;color:var(--ink-2);max-width:90ch;margin:0;padding-left:18px}
+.notes li{margin:3px 0}.notes b{color:var(--ink)}
+</style>
+
+<div><h1>Copilot — the chat's header, compact steps, Builder and Advisory</h1><span class="hint">working mockup · drawn before building · press the choices</span></div>
+<div class="pick" id="pick"></div>
+<div class="app">
+  <div class="bar"><span>Group</span><b>Mobile</b><span>Retail</span><span>CE</span><span>Logistics</span></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="view" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
+</div>
+<ul class="notes">
+  <li><b>The chat's header is one line</b>, as in Claude: the chat's name on the left, A− A+ on the right, a light line under it. The unit line goes into an ⓘ beside A− A+ (press it). The name says what the chat is about — “Mobile — value proposition” — and “Free chat” goes; the rail's tag already says the area.</li>
+  <li><b>The steps</b>: <b>A</b> slim cards (one row, about half today's height) · <b>B</b> a stepper line, one row of numbered steps with the count at the end · <b>C</b> a progress meter and the next step only, with “All steps” to open the rest. Today's is there to compare.</li>
+  <li><b>Builder at the far right</b>, set apart from Strategy · Performance · Reporting · Insights, where ✦ Copilot sits on the plan.</li>
+  <li><b>A deliverable, laid out as the plan shows it</b> (press <i>Mobile · How we compete</i> under Deliverables): the discipline on top, each value a card with How, its measures (target and today) and the evidence folded. <b>Put on Mobile’s plan</b> says what it replaces before anything moves; Apply writes it and the old version is archived, as every Apply does.</li>
+  <li><b>Advisory leaves the steps</b>: <b>1</b> a tab of its own beside Builder — the strategy's question box, any time · <b>2</b> inside Builder as a second mode (“Build · Advise”). My suggestion is <b>1</b>: it is not a step, and anyone with a decision to make should find it without going through the build.</li>
+</ul>
+
+<script>
+(function(){
+  var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); };
+  var S = { view:"", put:0, applied:false, strip:"A", adv:"1", head:"new", tab:"builder", info:false, cur:"compete", menu:false };
+  var P = [["foundation","Foundation","On the plan · 4 parts",1],["analysis","SWOT","On the plan · 23 lines",1],["compete","Competitive Discipline","Not started",0],["directions","Pillars/Directions","On the plan · 4 Directions",1],["execution","Tactical Plans","On the plan · 4 items",1]];
+  var NX = "compete";
+  function seg(key, opts){ return '<span class="seg">' + opts.map(function(o){ return '<button data-set="' + key + '" data-v="' + o[0] + '" aria-pressed="' + (S[key] === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</span>'; }
+  function pick(){
+    document.getElementById("pick").innerHTML =
+      '<div class="prow"><b>Chat header</b>' + seg("head", [["old","Today"],["new","One line"]]) + '</div>' +
+      '<div class="prow"><b>Steps</b>' + seg("strip", [["T","Today"],["A","A · Slim cards"],["B","B · Stepper line"],["C","C · Meter + next"]]) + '</div>' +
+      '<div class="prow"><b>Advisory</b>' + seg("adv", [["1","1 · Its own tab"],["2","2 · A mode in Builder"]]) + '<small>suggested: 1</small></div>';
+  }
+  function tabs(){
+    var t = function(k, w){ return '<button data-tab="' + k + '" aria-current="' + (S.tab === k) + '">' + w + '</button>'; };
+    document.getElementById("tabs").innerHTML = '<button>Strategy</button><button>Performance</button><span class="rep">Reporting</span><button>Insights</button><span class="sp"></span>' +
+      '<span class="side"><button class="tool" data-tab="builder" aria-current="' + (S.tab === "builder") + '">✦ Builder</button>' + (S.adv === "1" ? '<button class="tool adv" data-tab="advisory" aria-current="' + (S.tab === "advisory") + '">Advisory</button>' : '') + '</span>';
+  }
+  function strip(){
+    var have = P.filter(function(p){ return p[3]; }).length;
+    if (S.strip === "T") return '<div class="sA">' + P.map(function(p, i){ return '<button class="st' + (p[3] ? " on" : "") + (p[0] === NX ? " nx" : "") + '" data-cur="' + p[0] + '"><span class="k">' + (p[0] === NX ? "Next · step " : "Step ") + (i + 1) + '</span><b>' + p[1] + '</b><small>' + p[2] + '</small></button>'; }).join("") +
+      (S.adv === "2" ? '' : '') + '<button class="st" style="border-style:dashed"><span class="k">Beside the plan</span><b>Advisory</b><small>No briefs yet</small></button></div>';
+    if (S.strip === "A") return '<div class="s1">' + P.map(function(p, i){ return '<button class="st' + (p[3] ? " on" : "") + (p[0] === NX ? " nx" : "") + '" data-cur="' + p[0] + '"' + (S.cur === p[0] ? ' aria-current="true"' : '') + ' title="' + esc(p[2]) + '"><span class="n">' + (p[3] ? "✓" : i + 1) + '</span><span class="t"><b>' + p[1] + '</b><small>' + (p[0] === NX ? "Next · " : "") + p[2] + '</small></span></button>'; }).join("") + '</div>';
+    if (S.strip === "B") return '<div class="s2">' + P.map(function(p, i){ return (i ? '<span class="ln' + (P[i - 1][3] ? " on" : "") + '"></span>' : '') + '<button class="st' + (p[3] ? " on" : "") + (p[0] === NX ? " nx" : "") + '" data-cur="' + p[0] + '"' + (S.cur === p[0] ? ' aria-current="true"' : '') + ' title="' + esc(p[2]) + '"><span class="n">' + (p[3] ? "✓" : i + 1) + '</span>' + p[1] + '</button>'; }).join("") +
+      '<span class="say"><b>' + have + ' of 5</b> on Mobile’s plan</span></div>';
+    var nx = P.filter(function(p){ return p[0] === NX; })[0];
+    return '<div class="s3"><span class="segs">' + P.map(function(p){ return '<i class="' + (p[3] ? "on" : p[0] === NX ? "nx" : "") + '"></i>'; }).join("") + '</span>' +
+      '<span class="txt"><b>' + have + ' of 5</b> on Mobile’s plan · next: <b>' + nx[1] + '</b></span><button class="go" data-cur="' + NX + '">Start it</button>' +
+      '<button class="all" data-menu>' + (S.menu ? "Hide steps" : "All steps") + '</button>' +
+      (S.menu ? '<div class="menu">' + P.map(function(p, i){ return '<button data-cur="' + p[0] + '">' + (i + 1) + ' · ' + p[1] + ' — ' + p[2] + '</button>'; }).join("") + '</div>' : '') + '</div>';
+  }
+  function head(){
+    if (S.head === "old") return '<div class="chold"><div class="ctx">ⓘ Mobile · 4 Pillars · 15 Key measures · 2 Key Objectives · Cycle 2: 32 of 32 reported · 5 measures off track · the plan’s own text</div><div class="r"><b>Free chat — Mobile</b><span style="flex:1"></span><span class="zz"><button>A−</button><button>A+</button></span></div></div>';
+    return '<div class="chnew"><b>Mobile — value proposition</b><span class="sp"></span>' +
+      '<button class="info" data-info aria-expanded="' + S.info + '" title="What the Copilot can see">ⓘ' + (S.info ? '<span class="tip">The Copilot sees: Mobile · 4 Pillars · 15 Key measures · 2 Key Objectives · Cycle 2: 32 of 32 reported · 5 measures off track · the plan’s own text</span>' : '') + '</button>' +
+      '<span class="zz"><button>A−</button><button>A+</button></span></div>';
+  }
+  function chat(){
+    return '<div class="main"><div class="col">' + head() + '<div class="msgs"><div class="ai"><div class="who">Copilot</div><p>Measures, all already in your plan:</p><p>- Tier 2 segment revenue growth ≥ 100% (today 60%)<br>- Active Sary merchants ≥ 800 (today 700)<br>- Average delivery time ≤ 24h (today 24h)</p><p>I left out regional expansion. It is about where you grow, not why vendors choose you.</p><p>Shall I add this as the fourth value?</p></div>' +
+      '<div class="fol">Following: Compete · Value proposition</div><div class="me">Add it as proposed</div></div><div class="box">Ask about Mobile’s competitive discipline…</div></div></div>';
+  }
+  var VALS = [
+    ["Diversified Portfolio", ["Revise the portfolio: new areas in, under-performers out", "Acquire new brands and categories"], [["Biggest brand's share of revenue", "≤ 50%", "today 59%"]], "SWOT: diversified brand portfolio; opportunity to acquire new brands; Key Objective on biggest brand contribution."],
+    ["Best Customer Experience", ["A more efficient order cycle", "A Raya loyalty programme", "The team set up by channel and brand"], [["Satisfaction survey carried out", "done", "not yet"], ["Vendor retention rate", "≥ 80%", "no baseline"]], "Best Total Solution is judged on loyalty; the retention target was set in this chat."],
+    ["Tech Driven Operation", ["Relaunch the distribution app", "Pre-ordering app and customer dashboard", "A daily KPI dashboard per sales rep"], [["Sales team on the dashboard", "100%", "—"], ["Accounts on the platform", "1,000", "no baseline"]], "SWOT: under-used automation (weakness); value through AI and data. MB01."],
+    ["Vendor Growth Partner", ["Joint business planning with key retailers", "Tier 2 programme and Sary merchants", "24h delivery; shared market insights"], [["Tier 2 revenue growth", "≥ 100%", "today 60%"], ["Active Sary merchants", "≥ 800", "today 700"], ["Average delivery time", "≤ 24h", "today 24h"]], "Answers vendors going direct-to-market. MB02, MB03."]];
+  function deliv(){
+    var ap = S.applied;
+    return '<div class="main"><div class="col" style="width:min(820px,100%)"><div class="chnew"><b>Mobile · How we compete</b><span class="chip' + (ap ? " on" : "") + '">' + (ap ? "v1 on Mobile’s plan" : "Not on the plan yet") + '</span><span class="sp"></span>' +
+      (ap ? '' : '<button class="btn solid" data-put>Put on Mobile’s plan</button>') + '<button class="btn">Edit</button></div>' +
+      '<div class="dv"><span class="meta">Made by Islam Saadany in a chat · 17 Nov 26 · v1 — laid out as the plan’s Competitive Discipline shows it</span>' +
+      (S.put === 1 ? '<div class="steps"><b>Check before it goes on the plan</b><span>Mobile’s plan holds <b>Best Total Cost · 5 values</b> today. This replaces it with <b>Best Total Solution · 4 values</b>, 9 measures.</span><span class="meta">The plan’s old version is kept under Import &amp; storage › Archived plans.</span><span><button class="btn solid" data-apply>Apply to plan</button> <button class="btn" data-cancel>Not now</button></span></div>' : '') +
+      (ap ? '<div class="steps" style="border-color:var(--good)">✓ v1 is on Mobile’s plan. <span class="meta">Open Strategy › Plan to see it.</span></div>' : '') +
+      '<div class="disc"><span class="k">Value discipline</span><h3>Best Total Solution <span class="meta">(Customer Intimacy)</span></h3><p>A complete, tailored distribution offer for vendors and channels. Threshold competence kept in Best Total Cost and Best Product.</p>' +
+      '<details class="ev" style="margin-top:4px"><summary>Why</summary>Chosen by the strategy office in this chat. Fits the values (portfolio breadth, customer experience) and the SWOT strengths: brand partnerships, nationwide reach, the Raya Trade ecosystem.</details></div>' +
+      '<div class="lab" style="font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Value proposition · 4 values</div><div class="vals">' +
+      VALS.map(function(v){ return '<div class="val"><h4>' + esc(v[0]) + '</h4><span class="lab">How</span><ul>' + v[1].map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' +
+        '<span class="lab">Measures</span>' + v[2].map(function(m){ return '<div class="mrow"><span>' + esc(m[0]) + ' <b>' + esc(m[1]) + '</b></span><span>' + esc(m[2]) + '</span></div>'; }).join("") +
+        '<details class="ev"><summary>Evidence</summary>' + esc(v[3]) + '</details></div>'; }).join("") + '</div></div></div></div>';
+  }
+  function builder(){
+    var have = P.filter(function(p){ return p[3]; }).length;
+    return '<div class="cop">' + (S.strip === "B" || S.strip === "C" ? '' : '<div class="status"><b>' + have + ' of 5</b> parts on Mobile’s plan</div>') +
+      (S.adv === "2" ? '<div>' + '<span class="seg"><button aria-pressed="true">Build</button><button data-tab="advisory">Advise</button></span></div>' : '') +
+      '<div class="grid"><aside class="rail"><div class="rh"><button class="tg" title="Hide chats">▤</button>Chats<span class="sp"></span><button class="newc">+ New chat</button></div><button class="row" aria-current="true"><span class="atag">Discipline</span><b>Mobile — value proposition</b><small>The office · 17 Nov 26</small></button><button class="row"><span class="atag">SWOT</span><b>SWOT — Mobile</b><small>The office · 15 Nov 26</small></button></aside>' +
+      '<div class="strip">' + strip() + '</div>' + (S.view === "deliv" ? deliv() : chat()) +
+      '<aside class="details"><div class="dtg"><button class="tg" title="Hide deliverables">▥</button></div><div class="dbox"><h4>Deliverables</h4><button class="dl" data-deliv style="border:0;border-bottom:1px solid var(--line);background:' + (S.view === "deliv" ? 'var(--surface-2)' : 'none') + ';text-align:left;width:100%"><b>Mobile · How we compete</b><small>' + (S.applied ? 'v1 · on the plan' : 'v1 · not on the plan yet') + '</small></button><div class="dl"><b>SWOT — Mobile</b><small>v2 · on the plan</small></div><div class="dl"><b>Foundation — Mobile</b><small>v1 · on the plan</small></div></div></aside></div></div>';
+  }
+  function advisory(){
+    return (S.adv === "2" ? '<div style="padding:10px 10px 0"><span class="seg"><button data-tab="builder">Build</button><button aria-pressed="true">Advise</button></span></div>' : '') +
+      '<div class="advw"><h2>What decision are you weighing for Mobile?</h2><div class="ask">Say the decision, attach the papers behind it…</div>' +
+      '<div class="past"><b>Earlier briefs</b><br>Pricing decision · 12 Nov 26<br>Open a second warehouse? · 2 Nov 26</div><span class="hint">A few questions, then a decision brief. It reads the plan; it doesn’t change it.</span></div>';
+  }
+  function draw(){ pick(); tabs(); document.getElementById("view").innerHTML = S.tab === "advisory" ? advisory() : builder(); }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-set")) { S[b.getAttribute("data-set")] = b.getAttribute("data-v"); if (S.adv === "2" && S.tab === "advisory" && b.getAttribute("data-set") === "adv") {} if (S.adv !== "1" && S.tab === "advisory" && b.getAttribute("data-set") === "adv") S.tab = "builder"; draw(); return; }
+    if (b.hasAttribute("data-tab")) { S.tab = b.getAttribute("data-tab"); draw(); return; }
+    if (b.hasAttribute("data-deliv")) { S.view = S.view === "deliv" ? "" : "deliv"; draw(); return; }
+    if (b.hasAttribute("data-put")) { S.put = 1; draw(); return; }
+    if (b.hasAttribute("data-cancel")) { S.put = 0; draw(); return; }
+    if (b.hasAttribute("data-apply")) { S.put = 0; S.applied = true; draw(); return; }
+    if (b.hasAttribute("data-info")) { S.info = !S.info; draw(); return; }
+    if (b.hasAttribute("data-menu")) { S.menu = !S.menu; draw(); return; }
+    if (b.hasAttribute("data-cur")) { S.cur = b.getAttribute("data-cur"); S.menu = false; draw(); return; }
+  });
+  draw();
+})();
+</script>

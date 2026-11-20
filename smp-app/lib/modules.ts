@@ -229,7 +229,7 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
      cell nobody should fill (§61). The day a client person needs in is the
      day this gains one. Two words on the switcher, Islam's, because the
      second says who it is for. */
-  tracker:   { label: "Internal Tracker", note: "The office's weekly actions about this client", built: true, areas: [], lines: [NOTHING] },
+  tracker:   { label: "Task Tracker", note: "The office's weekly actions about this client", built: true, areas: [], lines: [NOTHING] },
   /* ONE MEETING, ONE NOTE, AND THE MINUTES AS AN EMAIL (spec 055). Built,
      and NO AREA for the tracker's reason: it is the office's own record of
      this client, opened by the seat. The attendees get an email and never

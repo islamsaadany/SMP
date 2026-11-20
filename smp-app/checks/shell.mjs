@@ -223,8 +223,21 @@ await section("2 · the address names the page, and the page names the address",
      the MODULE'S HOME SCREEN — offered where the address names no page, and
      never over one it does. Both ends in one session, or a build that lost
      the overlay altogether passes the half that matters here (§113.8). */
+  /* the tour's first-visit card is the tour's (its own checks); this line is
+     about the welcome, so the session has said "later" to the tour */
+  await page.evaluate(() => { try { sessionStorage.setItem("smp.tour.later", "1"); } catch (e) {} });
   await open("/raya-trade/strategy");
-  check(await page.evaluate(() => !!document.querySelector(".welcomeover")), "the shell's own welcome overlay is offered at the module's home — Strategy's welcome is the welcome (§360, §360.9)");
+  /* §777 (carried for main's §776): THE WELCOME IS ASKED FOR, NEVER OFFERED —
+     the module's home lands bare and the house mark opens it; both ends, as
+     main's door-landing check now has it. A first visit is offered the tour's
+     card over the page (the tour's own, §776 left it); it is closed first, as
+     a person would, and the house pressed. */
+  await page.waitForTimeout(1200);
+  const bare = await page.evaluate(() => !document.querySelector(".welcomeover"));
+  const ce = await page.click("#units [data-welcomego]", { timeout: 5000 }).then(() => "", (e) => String(e.message).replace(/\u001b\[[0-9;]*m/g, "").split("\n").filter((l) => /intercept|visible|stable|outside/.test(l)).slice(0, 2).join(" | ").replace(/"/g, "'"));
+  await page.waitForSelector(".welcomeover", { timeout: 8000 }).catch(() => {});
+  const st = await page.evaluate(() => ({ over: !!document.querySelector(".welcomeover"), tour: (document.getElementById("tourdock") || {}).hidden, showing: typeof WELCOME !== "undefined" && WELCOME.showing ? WELCOME.showing() : null, cls: Array.from(document.body.children).map((x) => x.className).filter((c) => /welc/.test(String(c))) }));
+  check(bare && st.over, "the module's home lands bare and the house mark opens the shell's own welcome — Strategy's welcome is the welcome (§360, §360.9, §776)", JSON.stringify({ bare, st, ce }));
   /* REWRITTEN, NEVER LOOSENED (§218, §400). Home stopped being an overlay
      with a Continue bar: it is a page inside the chrome, the house is lit
      while it is open, and the way out is the navigation itself. So the claim
@@ -883,14 +896,16 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     const p = await place();
     check(p[0] === "mobile" && p[1] === "copilot" && p[2] === "foundation", "the address opens Mobile's Copilot, Foundation section", JSON.stringify(p));
-    const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s));
-    const ci = tabs.indexOf("copilot");
-    check(ci >= 0 && ci === tabs.length - 1, "the Copilot tab is the last tab, after Reporting and Insights (Islam, 2026-10-01)", tabs.join("|"));
+    const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s + ":" + (b.dataset.copTo || "") + ":" + b.textContent.trim()));
+    const tg = await page.evaluate(() => { const row = document.getElementById("subtabs").getBoundingClientRect(), bl = document.querySelector('#subtabs [data-cop-to="build"]'), ins = Array.from(document.querySelectorAll("#subtabs button[data-s]")).filter((b) => !b.dataset.copTo).pop();
+      return bl && ins ? { gap: Math.round(bl.getBoundingClientRect().left - ins.getBoundingClientRect().right), rightGap: Math.round(row.right - document.querySelector("#subtabs .coptabs").getBoundingClientRect().right) } : null; });
+    check(tabs.length >= 2 && /^copilot:build:✦ Build$/.test(tabs[tabs.length - 2]) && /^copilot:advisory:✦ Advise$/.test(tabs[tabs.length - 1]) && !!tg && tg.gap > 80 && tg.rightGap < 40,
+      "§782, §790 ✦ Build and ✦ Advise are the last two tabs, set apart at the far right of the row (Islam)", JSON.stringify({ tabs, tg }));
     /* §752 — ONE WINDOW: no row of area tabs; the method is the Copilot's own strip */
     const secs = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-strip] b")).map((b) => b.textContent.trim()));
     const row = await page.evaluate(() => Array.from(document.querySelectorAll("[data-sub2]")).filter((b) => b.offsetParent).map((b) => b.textContent.trim()));
-    check(["Foundation", "SWOT", "Pillars/Directions", "Tactical Plans", "Advisory"].every((w) => secs.includes(w)) && !row.some((w) => /Foundation|Tactical Plans|Advisory/.test(w)),
-      "§752 …with its areas as a strip in one window, no row of area tabs", JSON.stringify({ secs, row }));
+    check(["Foundation", "SWOT", "Pillars/Directions", "Tactical Plans"].every((w) => secs.includes(w)) && !secs.includes("Advisory") && !row.some((w) => /Foundation|Tactical Plans|Advisory/.test(w)),
+      "§752 …with its areas as a strip in one window, no row of area tabs (§782: Advisory is a tab of its own, not a step)", JSON.stringify({ secs, row }));
     const rails = await page.evaluate(() => Array.from(document.querySelectorAll(".coprail")).map((r) => ({ t: r.getBoundingClientRect().top, h: r.querySelector("h3,.coprh,header") ? r.textContent.slice(0, 40) : r.textContent.slice(0, 40) })));
     check(rails.length === 2 && rails[0].t < rails[1].t && /Chats/i.test(rails[0].h) && /Deliverables/i.test(rails[1].h),
       "two rails, Chats above Deliverables", JSON.stringify(rails));
@@ -990,8 +1005,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(lay.lines === 2 && lay.inBubble === 0 && lay.panel.length === 1 && lay.panel[0] === "Save to Foundation deliverables" && lay.side === true && lay.boxes !== null && lay.boxes <= 2,
       "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line, and the box is as wide as the conversation", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");
-    const stay = await page.evaluate(() => ({ note: (document.querySelector("[data-cop-out] [data-cop-draftstay]") || {}).textContent || "", go: !!document.querySelector("[data-cop-out] [data-cop-home]") }));
-    check(/Stays in the Copilot/.test(stay.note) && /step by step/.test(stay.note) && stay.go, "§654 B3 a free chat's draft says it stays in the Copilot, and offers to start step by step", JSON.stringify(stay));
+    const stay = await page.evaluate(() => ({ note: (document.querySelector("[data-cop-out] [data-cop-draftstay]") || {}).textContent || "", lay: !!document.querySelector("[data-cop-out] [data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-out] [data-cop-putplan]") }));
+    check(!stay.lay && !stay.put && /Laying it out as the plan|Stays in the Copilot/.test(stay.note), "§654 B3, §788 a free chat's draft not in the plan's shape lays itself out — no button — and one that cannot be stays in the Copilot; it cannot go on as it is", JSON.stringify(stay));
     await page.locator("[data-cop-out] [data-cop-savedraft]").click();
     await page.waitForFunction(() => document.querySelector("[data-cop-out] .copsaved"), null, { timeout: 10000 }).catch(() => {});
     await page.waitForFunction(() => /Mobile foundation/.test([...document.querySelectorAll(".coprail [data-cop-deliv]")].map((x) => x.textContent).join("|")), null, { timeout: 8000 }).catch(() => {});
@@ -1010,7 +1025,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "pressing Save keeps the draft as a deliverable, v1, written out as text", JSON.stringify(savedRow));
     check(sv.saved.length === 1 && /Saved as v1/.test(sv.saved[0]) && sv.open === 1 && sv.marks === 1 && sv.left === 1 && sv.earlier,
       "…the panel now says Saved as v1 with a way to open it, its bubble is marked, and the earlier draft, shown again, keeps its button", JSON.stringify(sv));
-    check(/Mobile foundation/.test(sv.rail), "…and it is on the left under Deliverables", sv.rail);
+    check(/Mobile foundation/.test(sv.rail), "…and it is under Deliverables, in Details on the right", sv.rail);
 
     /* §490: the word turns at 2s and the page re-reads it every 0.5s, so a look
        at 2.2s raced the tick; it looks at 2.9s, inside a 4s answer. */
@@ -1020,7 +1035,10 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     await page.waitForSelector("[data-cop-msgs] .copworking", { timeout: 5000 }).catch(() => {});
     const w1 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] .copworking");
       window.__copW = el && el.querySelector("[data-cop-wword]");
-      return el ? { word: window.__copW ? window.__copW.textContent : "", dots: el.querySelectorAll(".copdots i").length, role: el.getAttribute("role"), all: el.textContent } : null; });
+      const ms = document.querySelector("[data-cop-msgs] .copzoom") || document.querySelector("[data-cop-msgs]");
+      return el ? { word: window.__copW ? window.__copW.textContent : "", dots: el.querySelectorAll(".copdots i").length, role: el.getAttribute("role"), all: el.textContent,
+        leftGap: window.__copW && ms ? Math.round(window.__copW.getBoundingClientRect().left - ms.getBoundingClientRect().left) : -1 } : null; });
+    check(w1 && w1.leftGap >= 0 && w1.leftGap <= 24, "§781 the working word stands at the left of the conversation, where the answer will start — not in the middle", JSON.stringify(w1 && w1.leftGap));
     await page.waitForTimeout(2900);
     const w2 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] [data-cop-wword]"); return { word: el ? el.textContent : "", same: el === window.__copW }; });
     const words = await page.evaluate(() => window.__copWork && window.__copWork.words);
@@ -1231,8 +1249,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
        client). Pressed and read, never only found (§96). */
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     const all = await page.evaluate(() => { const a = document.querySelector("a[data-cop-all]"); return a ? { href: a.getAttribute("href"), text: a.textContent.trim() } : null; });
-    check(!!all && all.href === "/raya-trade/copilot" && /All chats on this client/.test(all.text),
-      "the chats rail carries 'All chats on this client' to the client's Copilot page (§501)", JSON.stringify(all));
+    /* §777 — the link came off the rail (Islam: "remove the button all chats on this client") */
+    check(!all, "§777 the chats rail no longer carries 'All chats on this client'", JSON.stringify(all));
     const mm = await page.evaluate(() => Array.from(document.querySelectorAll(".modsw a, [data-modules] a, .tbmod a")).map((a) => a.textContent.trim()));
     check(!mm.some((t) => /Copilot/.test(t)), "...and no module menu on the page offers the Copilot (§501)", JSON.stringify(mm));
     await page.goto(BASE + "/raya-trade/copilot/settings?section=analysis", { waitUntil: "networkidle" });
@@ -1385,8 +1403,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector('.copstart [data-cop-road="plan"]', { timeout: 10000 });
     const pc = await page.evaluate(() => { const c = document.querySelector('.copstart [data-cop-road="plan"]'); const all = Array.from(document.querySelectorAll(".copstart > .copstartcards .coppcard"));
       return { first: all[0] === c, t: c.querySelector(".coppt").textContent, meta: (c.querySelector(".copmeta") || {}).textContent || "", tag: (c.querySelector(".coptag") || {}).textContent || "", n: all.length }; });
-    check(pc.first && /Start from the existing plan/.test(pc.t) && /On the plan today/.test(pc.tag) && /Foundation · \d+ parts/.test(pc.meta) && pc.n === 3,
-      "§653 Start from the existing plan is the start screen's first card of three, marked On the plan today, saying what it holds", JSON.stringify(pc));
+    check(pc.first && /Start from existing/.test(pc.t) && /On the plan today/.test(pc.tag) && /Foundation · \d+ parts/.test(pc.meta) && pc.n === 3,
+      "§653 Start from existing (§778) is the start screen's first card of three, marked On the plan today, saying what it holds", JSON.stringify(pc));
     await page.click('.copstart [data-cop-road="plan"]');
     /* the first chat's own cards are still on screen, so wait for the NEW
        chat to be the current one before reading its id (§222). */
@@ -2397,7 +2415,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     /* §653: Mobile's plan holds a SWOT, so Start from the existing plan is
        the first card, then the workflow's. */
     /* §752 — one window: the heading names the place's strategy; the area is the focus line's */
-    check(/Mobile/.test(st.head) && /strategy/.test(st.head) && st.cards.length === 2 && /Start from the existing plan/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
+    check(/Mobile/.test(st.head) && /strategy/.test(st.head) && st.cards.length === 2 && /Start from existing/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
       "§639, §653 the area opens on its start screen: a box to just ask, the plan card first and the SWOT workflow as a card under it, no menu, at the reading width", JSON.stringify(st));
     /* §691 — the SWOT's four ways in, said on its card as chips that are words, not buttons */
     const ways = await page.evaluate(() => ({ chips: Array.from(document.querySelectorAll(".copstart [data-cop-newchat] .copway")).map((x) => x.textContent), btns: document.querySelectorAll(".copstart [data-cop-newchat] button").length,
@@ -2425,9 +2443,11 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(300);
     const v = await page.evaluate(() => ({ sw: !!document.querySelector(".copsw-grid, [data-cop-sw-start]"),
-      tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || ""), start: !!document.querySelector("[data-cop-startscreen]") }));
+      tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || ""), title: ((document.querySelector(".copitem[aria-current] .copt") || {}).textContent || ""), start: !!document.querySelector("[data-cop-startscreen]") }));
     await shot("1-open");
-    check(!v.sw && !v.start && /Free chat/.test(v.tag), "§639 typing there and pressing Enter opens a free chat, a plain conversation the rail calls Free chat", JSON.stringify(v));
+    const fr1 = (await asTenant(tenantId, (c) => c.query("select extra, title from copilot_chats order by created_at desc limit 1"))).rows[0];
+    check(!v.sw && !v.start && !!fr1 && fr1.extra && fr1.extra.free === true && /^Mobile — Which weakness hurts us most$/.test(fr1.title) && !/Free chat/.test(v.tag + v.title),
+      "§639 typing there and pressing Enter opens a free chat, a plain conversation — §782: named from its first words, never called Free chat", JSON.stringify({ v, title: fr1 && fr1.title }));
     const row = (await asTenant(tenantId, (c) => c.query("select c.section, c.extra, (select string_agg(m.body, '|' order by m.id) from copilot_messages m where m.chat_id = c.id and m.who = 'person') said from copilot_chats c order by c.created_at desc limit 1"))).rows[0];
     check(row && row.section === "analysis" && row.extra && row.extra.free === true && row.said === "Which weakness hurts us most?",
       "…kept in its area, marked free, with what was typed as its first message, said once", JSON.stringify(row));
@@ -2456,14 +2476,14 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     await page.setInputFiles("[data-cop-startfile]", { name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("x") });
     await page.waitForTimeout(400);
     const refused = { chats: await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_chats")).then((r) => r.rows[0].n), say: await page.evaluate(() => (document.querySelector(".copsay") || {}).textContent || "") };
-    check(refused.chats === chats0 && /Word \(\.docx\), PDF and Excel/.test(refused.say), "§640 a file the Copilot cannot read is refused in words on the start screen, and no chat is made", JSON.stringify(refused));
+    check(refused.chats === chats0 && /Word \(\.docx\), PDF and Excel/.test(refused.say), "§640 a file the Copilot cannot read is refused in words on the start screen, and no chat is made", JSON.stringify({ chats0, ...refused }));
     await page.fill("[data-cop-starttext]", "Here are my notes");
     await page.setInputFiles("[data-cop-startfile]", { name: "notes.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", buffer: readFileSync(join(import.meta.dirname, "fixtures", "copilot-notes.docx")) });
     await page.waitForSelector(".coppend .copfile", { timeout: 10000 }).catch(() => {});
     const att = await page.evaluate(() => ({ chip: ((document.querySelector(".coppend") || {}).textContent || ""), kept: (document.querySelector("[data-cop-text]") || {}).value || "",
       tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || "") }));
     const frow = (await asTenant(tenantId, (c) => c.query("select c.extra, (select count(*)::int from copilot_files f where f.chat_id = c.id) files from copilot_chats c order by c.created_at desc limit 1"))).rows[0];
-    check(/notes\.docx/.test(att.chip) && att.kept === "Here are my notes" && /Free chat/.test(att.tag) && frow && frow.extra && frow.extra.free === true && frow.files === 1,
+    check(/notes\.docx/.test(att.chip) && att.kept === "Here are my notes" && frow && frow.extra && frow.extra.free === true && frow.files === 1,
       "§640 notes attached on the start screen open a free chat with the file waiting above its box and the typed words kept", JSON.stringify({ att, frow }));
     const sent = MODEL_SEEN.slice(n0).find(Boolean);
     const sys = sent ? JSON.stringify(sent.systemInstruction || sent.system || "") : "";
@@ -2503,7 +2523,7 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await page.waitForSelector(".copstart [data-cop-newchat]", { timeout: 15000 });
     const cps = await page.evaluate(() => { let w = null; try { w = (typeof UNITS !== "undefined" && UNITS.mobile && UNITS.mobile.compete) || (typeof competeWritable === "function" ? competeWritable("mobile") : null); } catch (e) {} const held = !!(w && w.discipline && (w.values || []).some((v) => v && v.title));
       const c = document.querySelector('.copstart [data-cop-newplan="compete"]'); return { held, card: !!c, t: c ? c.textContent : "" }; });
-    check(cps.card === cps.held && (!cps.held || /Start from the existing plan/.test(cps.t) && /values/.test(cps.t)), "§697 Competitive Discipline's start screen offers Start from the existing plan exactly when the plan holds a discipline and values", JSON.stringify(cps));
+    check(cps.card === cps.held && (!cps.held || /Start from existing/.test(cps.t) && /values/.test(cps.t)), "§697 Competitive Discipline's start screen offers Start from the existing plan exactly when the plan holds a discipline and values", JSON.stringify(cps));
     if (cps.held) {
       await page.click('.copstart [data-cop-newplan="compete"]');
       await page.waitForSelector("[data-cop-cppane] table.cmptab", { timeout: 15000 });
@@ -3047,14 +3067,20 @@ await section("3o · the Copilot in one window: the strip, one rail of every are
       rail: Array.from(document.querySelectorAll("[data-cop-chats] [data-cop-chat]")).map((b) => [b.getAttribute("data-cop-chat-sec"), (b.querySelector(".copatag") || {}).textContent]),
       chips: Array.from(document.querySelectorAll("[data-cop-chip]")).map((b) => b.textContent),
       h: (document.querySelector(".copstarth") || {}).textContent || "", focus: (document.querySelector(".copfocus") || {}).textContent || "",
-      more: Array.from(document.querySelectorAll("[data-cop-area-card]")).map((b) => b.getAttribute("data-cop-area-card")) }));
+      more: Array.from(document.querySelectorAll("[data-cop-area-card], [data-cop-areas]")).map((b) => b.getAttribute("data-cop-area-card")),
+      or: ((document.querySelector(".copstart .copor") || {}).textContent || "").trim() }));
     await shot("1-start");
-    check(w.row === 0 && w.steps.length >= 5 && w.steps.some((s) => s[1] === "Tactical Plans") && w.steps.some((s) => s[1] === "Pillars/Directions") && w.steps.filter((s) => s[3]).length === 1,
-      "§752 no row of area tabs; the method stands as a strip, each step saying where Mobile stands, one marked as the next", JSON.stringify(w.steps));
+    check(w.row === 0 && w.steps.length >= 5 && w.steps.some((s) => s[1] === "Tactical Plans") && w.steps.some((s) => s[1] === "Pillars/Directions") && w.steps.filter((s) => s[3]).length <= 1 && w.steps.every((s) => !!s[2]),
+      "§752 no row of area tabs; the method stands as a strip, each step saying where Mobile stands (§779: read off the plan), the first one missing marked as the next", JSON.stringify(w.steps));
     check(w.rail.length === 2 && w.rail.some((r) => r[0] === "compete" && r[1] === "Discipline") && w.rail.some((r) => r[0] === "directions" && r[1] === "Pillars"),
       "§752 one rail holds the chats of every area, each tagged with its area", JSON.stringify(w.rail));
-    check(/Mobile’s strategy/.test(w.h) && /Foundation/.test(w.focus) && w.more.length >= 4 && !w.more.includes("foundation"),
-      "§752 one start screen: the place's strategy, the area in focus named, the other areas folded under its cards", JSON.stringify({ h: w.h, focus: w.focus, more: w.more }));
+    check(/Mobile’s strategy/.test(w.h) && /Foundation/.test(w.focus) && w.more.length === 0 && w.or === "Or choose another way to start",
+      "§779 one start screen: the place's strategy, only the step in focus with its cards — no Other areas — under “Or choose another way to start”", JSON.stringify({ h: w.h, focus: w.focus, more: w.more, or: w.or }));
+    /* §777 — the strip over the chat box on the right, clear of the rail */
+    const geo = await page.evaluate(() => { const s = document.querySelector("[data-cop-stripbar]"), m = document.querySelector("[data-cop-main]"), r = document.querySelector("[data-cop-rails]"), d = document.querySelector("[data-cop-details]");
+      const a = s.getBoundingClientRect(), b = m.getBoundingClientRect(), c = r.getBoundingClientRect(), e = d && d.getBoundingClientRect().width ? d.getBoundingClientRect() : b;
+      return { sl: Math.round(a.left), ml: Math.round(b.left), sr: Math.round(a.right), mr: Math.round(Math.max(b.right, e.right)), above: a.bottom <= b.top + 1, railRight: Math.round(c.right) }; });
+    check(Math.abs(geo.sl - geo.ml) <= 2 && Math.abs(geo.sr - geo.mr) <= 2 && geo.above && geo.sl > geo.railRight, "§777 the strip stands over the chat box and Details on the right, its edges theirs, clear of the chats rail", JSON.stringify(geo));
     /* §772 — no chips: the strip narrows the rail, a line undoes it */
     check(w.chips.length === 0, "§772 no area chips in the rail — the strip above does that", JSON.stringify(w.chips));
     await page.click('[data-cop-strip="directions"]'); await page.waitForTimeout(400);
@@ -3073,11 +3099,11 @@ await section("3o · the Copilot in one window: the strip, one rail of every are
     await page.waitForSelector("[data-cop-startscreen]", { timeout: 10000 }).catch(() => {});
     const st = await page.evaluate(() => ({ sec: CURSEC.copilot, focus: (document.querySelector(".copfocus") || {}).textContent || "", card: (document.querySelector(".copstart [data-cop-newchat]") || {}).textContent || "" }));
     check(st.sec === "execution" && /Tactical Plans/.test(st.focus) && /Build from the Directions/.test(st.card), "§752 a step of the strip opens that area's start screen, its own cards first", JSON.stringify(st));
-    /* an area card under Other areas moves the focus there */
-    await page.click('[data-cop-area-card="analysis"]');
+    /* §779 — the strip moves between steps: the SWOT's own cards come up, no other area's */
+    await page.click('[data-cop-strip="analysis"]');
     await page.waitForFunction(() => CURSEC.copilot === "analysis" && /SWOT/.test((document.querySelector(".copfocus") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
-    const ac = await page.evaluate(() => ({ sec: CURSEC.copilot, focus: (document.querySelector(".copfocus") || {}).textContent || "", ways: !!document.querySelector(".copstart [data-cop-ways]") }));
-    check(ac.sec === "analysis" && /SWOT/.test(ac.focus) && ac.ways, "§752 …and an area's card under Other areas brings that area's own cards up", JSON.stringify(ac));
+    const ac = await page.evaluate(() => ({ sec: CURSEC.copilot, focus: (document.querySelector(".copfocus") || {}).textContent || "", ways: !!document.querySelector(".copstart [data-cop-ways]"), cards: document.querySelectorAll(".copstartcards .coppcard").length }));
+    check(ac.sec === "analysis" && /SWOT/.test(ac.focus) && ac.ways && ac.cards <= 2, "§779 …a step of the strip brings that step's own cards up, and only them", JSON.stringify(ac));
     check(!errs.length, "no page errors", errs.join(" | "));
   } finally {
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
@@ -3085,87 +3111,280 @@ await section("3o · the Copilot in one window: the strip, one rail of every are
   }
 });
 
-await section("3p · Builder until the five parts are on the plan, then Refine; ✦ Copilot on the plan in either (§753, §772)", async () => {
-  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/modes-" + n + ".png" }); };
+await section("3p · Build only, read off the plan; Details on the right; ✦ Copilot on the plan sends an empty part to Build and takes a change to a built one; resized from its edge (§779)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/build-" + n + ".png" }); };
   const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
-  const keep = { ...MODEL_ANSWER };
-  const mode = () => page.evaluate(() => ({ on: (document.querySelector('[data-cop-layout][aria-pressed="true"]') || {}).textContent || "", note: (document.querySelector(".coplayout .copm") || {}).textContent || "",
-    strip: document.querySelectorAll("[data-cop-strip]").length, sug: Array.from(document.querySelectorAll("[data-cop-suggest]")).map((b) => b.textContent), bOnTab: Array.from(document.querySelectorAll("[data-cop-layout]")).map((b) => b.textContent), stored: localStorage.getItem("smp.copilot.mode") }));
+  const read = () => page.evaluate(() => { const u = unitLike("mobile") || {}, step = (k) => ((document.querySelector('[data-cop-strip="' + k + '"] small') || {}).textContent || "");
+    return { line: (document.querySelector("[data-cop-planline]") || {}).textContent || "", toggle: document.querySelectorAll("[data-cop-layout]").length, sug: document.querySelectorAll("[data-cop-suggest], [data-cop-suggestions]").length,
+      dirs: step("directions"), swot: step("analysis"), items: (u.items || []).filter((p) => p && String(p.name || "").trim()).length, done: !!document.querySelector("[data-cop-alldone]") }; });
   try {
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
-    await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.mode"); } catch (e) {} });
     await open("/raya-trade/strategy/mobile/copilot/foundation");
-    await page.waitForFunction(() => !!document.querySelector(".coplayout .copm") && /not on the plan|on the plan/.test(document.querySelector(".coplayout .copm").textContent), null, { timeout: 15000 }).catch(() => {});
-    let m = await mode();
-    await shot("builder");
-    check(m.on === "Builder" && m.bOnTab.join("|") === "Builder|Refine" && /5 of 5 parts not on the plan yet/.test(m.note) && m.strip >= 5 && !/Layout to compare/.test(await page.evaluate(() => document.body.textContent)),
-      "§772 a place with parts missing opens in Builder — a two-way toggle, Builder · Refine, saying how many of the five parts are not on the plan; no “layout to compare”, no B on the tab", JSON.stringify(m));
-    /* Refine, by hand */
-    await page.click('[data-cop-layout="chat"]');
-    await page.waitForSelector("[data-cop-suggestions]", { timeout: 10000 });
-    m = await mode();
-    await shot("refine-by-hand");
-    check(m.on === "Refine" && m.strip === 0 && m.stored === "refine" && /Build the Foundation — not on the plan yet/.test(m.sug[0] || "") && m.sug.filter((x) => /not on the plan yet/.test(x)).length === 5 && /Chosen by hand/.test(m.note),
-      "§772 Refine chosen by hand: one box, the parts not on the plan first among the suggestions, said so; the choice kept and said chosen by hand", JSON.stringify(m));
-    await page.fill("[data-cop-starttext]", "Let's do the SWOT");
-    await page.press("[data-cop-starttext]", "Enter");
-    await page.waitForFunction(() => CURSEC.copilot === "analysis" && !!document.querySelector(".copswchat, .copswpane, [data-cop-sw-start]"), null, { timeout: 15000 }).catch(() => {});
-    const swRow = (await asTenant(tenantId, (c) => c.query("select section, extra ? 'swot' as swot from copilot_chats order by created_at desc limit 1"))).rows[0];
-    check(!!swRow && swRow.section === "analysis" && swRow.swot === true, "§753 Refine: saying “let's do the SWOT” opens the SWOT's own work", JSON.stringify(swRow));
-    await page.locator("[data-cop-home]:visible").first().click();
-    await page.waitForSelector("[data-cop-suggestions]", { timeout: 10000 });
-    await page.fill("[data-cop-starttext]", "Which of our pillars matters most next year?");
-    await page.press("[data-cop-starttext]", "Enter");
-    await page.waitForSelector("[data-cop-text]", { timeout: 15000 }).catch(() => {});
-    const fr = (await asTenant(tenantId, (c) => c.query("select section, extra->>'free' as free from copilot_chats order by created_at desc limit 1"))).rows[0];
-    check(!!fr && fr.section === "directions" && fr.free === "true", "§753 Refine: a question about an area is a conversation kept in that area", JSON.stringify(fr));
-    /* back to as the plan stands */
-    await page.locator("[data-cop-home]:visible").first().click();
-    await page.waitForSelector('[data-cop-layout="auto"]', { timeout: 10000 });
-    await page.click('[data-cop-layout="auto"]');
-    await page.waitForFunction(() => !!document.querySelector('[data-cop-layout="window"][aria-pressed="true"]'), null, { timeout: 10000 }).catch(() => {});
-    m = await mode();
-    check(m.on === "Builder" && m.stored === null, "§772 …“open as the plan stands” clears the choice: Builder again, as Mobile's plan stands", JSON.stringify(m));
-    /* every part on the plan: Refine, of itself */
+    await page.waitForFunction(() => /parts on/.test((document.querySelector("[data-cop-planline]") || {}).textContent || "") && document.querySelectorAll("[data-cop-strip]").length >= 5, null, { timeout: 15000 }).catch(() => {});
+    let m = await read();
+    await shot("1-tab");
+    check(m.toggle === 0 && m.sug === 0 && /\d of 5 on Mobile’s plan/.test(m.line) && !/Refine/.test(await page.evaluate(() => (document.querySelector("[data-cop-modebar]") || {}).textContent || "")),
+      "§779 the Copilot tab is Build only: no Build · Refine toggle, no suggestions; one line says how many of the five parts are on the plan", JSON.stringify(m));
+    check(m.items ? /On the plan · \d+ Directions?/.test(m.dirs) : /Not started/.test(m.dirs), "§779 the strip reads the plan itself: Pillars/Directions says what the plan holds", JSON.stringify(m));
+    /* §779 — the Copilot's tables are empty here, so what the strip says is on the plan was read off the plan itself (typed on the platform) */
+    const m2 = await page.evaluate(() => { const on = Array.from(document.querySelectorAll("[data-cop-strip]")).filter((b) => b.getAttribute("data-cop-strip") !== "advisory" && /^On the plan/.test((b.querySelector("small") || {}).textContent || ""));
+      return { on: on.map((b) => b.getAttribute("data-cop-strip")), line: (document.querySelector("[data-cop-planline]") || {}).textContent || "" }; });
+    const cop = +(await asTenant(tenantId, (c) => c.query("select count(*) n from copilot_deliverables"))).rows[0].n;
+    check(cop === 0 && m2.on.length >= 3 && +(m2.line.match(/(\d) of 5/) || [])[1] === m2.on.length, "§779 …a plan made on the platform, with nothing from the Copilot, shows its parts on the plan, and the line counts them", JSON.stringify({ cop, m2 }));
+    /* all five on the plan: said once, the cards still there for a step chosen */
     await asTenant(tenantId, (c) => c.query("insert into copilot_deliverables (place, section, type, kind, title, approach, created_by, extra) select 'mobile', s, s, 'promotable', s || ' — Mobile', '', 'office', jsonb_build_object('applied', jsonb_build_object('n', 1, 'at', now(), 'by', 'office')) from unnest(array['foundation','analysis','compete','directions','execution']) s"));
     await open("/raya-trade/strategy/mobile/copilot/foundation");
-    await page.waitForFunction(() => !!document.querySelector('[data-cop-layout="chat"][aria-pressed="true"]'), null, { timeout: 15000 }).catch(() => {});
-    m = await mode();
-    await shot("refine-auto");
-    check(m.on === "Refine" && /Every part is on the plan/.test(m.note) && m.strip === 0 && m.sug.length >= 4 && !m.sug.some((x) => /not on the plan yet/.test(x)) && m.stored === null,
-      "§772 with all five parts on the plan the Copilot opens in Refine of itself, nothing said missing", JSON.stringify(m));
-    await asTenant(tenantId, (c) => c.query("delete from copilot_deliverables where section = 'execution'"));
-    await open("/raya-trade/strategy/mobile/copilot/foundation");
-    await page.waitForFunction(() => !!document.querySelector('[data-cop-layout="window"][aria-pressed="true"]') && /1 of 5/.test((document.querySelector(".coplayout .copm") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
-    m = await mode();
-    check(m.on === "Builder" && /1 of 5 parts not on the plan yet/.test(m.note), "§772 …and with one part gone (Tactical Plans) it opens in Builder again", JSON.stringify(m));
-    /* B: ✦ Copilot on the plan, in Builder */
+    await page.waitForFunction(() => /5 of 5/.test((document.querySelector("[data-cop-planline]") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-details] [data-cop-deliv]").length >= 5, null, { timeout: 15000 }).catch(() => {});
+    m = await read();
+    const det = await page.evaluate(() => { const d = document.querySelector("[data-cop-details]"), mn = document.querySelector("[data-cop-main]"), r = document.querySelector("[data-cop-rails]");
+      return { inDet: d ? d.querySelectorAll("[data-cop-deliv]").length : 0, inRail: r ? r.querySelectorAll("[data-cop-deliv], [data-cop-delivs]").length : -1, right: d && mn ? d.getBoundingClientRect().left >= mn.getBoundingClientRect().right - 1 : false, vis: d ? d.getBoundingClientRect().width > 100 : false }; });
+    await shot("2-all-on");
+    check(/5 of 5 on Mobile’s plan/.test(m.line) && m.done, "§779 with every part on the plan, the start screen says so once", JSON.stringify(m));
+    check(det.inDet >= 5 && det.inRail === 0 && det.right && det.vis, "§779 the deliverables are Details on the right of the chat box; the rail on the left holds the chats only", JSON.stringify(det));
+    /* on a smaller window Details stay on the right, narrower — never under the chat (Islam) */
+    const vp = page.viewportSize();
+    for (const w of [960, 900]) {
+      await page.setViewportSize({ width: w, height: vp.height }); await page.waitForTimeout(300);
+      const nd = await page.evaluate(() => { const d = document.querySelector("[data-cop-details]"), mn = document.querySelector("[data-cop-main]"); if (!d || !mn) return null; const a = d.getBoundingClientRect(), b = mn.getBoundingClientRect(); return { right: a.left >= b.right - 1, beside: a.top < b.bottom - 50, w: Math.round(a.width), main: Math.round(b.width), over: document.documentElement.scrollWidth - innerWidth }; });
+      check(!!nd && nd.right && nd.beside && nd.w >= 120 && nd.main >= 400 && nd.over <= 1, "§779 at a " + w + "px window the deliverables stay on the right of the chat, not under it, with no sideways scroll", JSON.stringify(nd));
+    }
+    await page.setViewportSize(vp); await page.waitForTimeout(200);
+    /* Details fold to a slim strip, as the chats rail does, and the fold is kept */
+    await page.click("[data-cop-details] [data-cop-dettog]"); await page.waitForTimeout(200);
+    const fd = await page.evaluate(() => { const d = document.querySelector("[data-cop-details]"), mn = document.querySelector("[data-cop-main]"); return { w: Math.round(d.getBoundingClientRect().width), items: d.querySelectorAll("[data-cop-deliv]").length, kept: localStorage.getItem("smp.copilot.details"), main: Math.round(mn.getBoundingClientRect().width) }; });
+    await page.click("[data-cop-details] [data-cop-dettog]"); await page.waitForTimeout(200);
+    const fo = await page.evaluate(() => ({ w: Math.round(document.querySelector("[data-cop-details]").getBoundingClientRect().width), items: document.querySelectorAll("[data-cop-details] [data-cop-deliv]").length, kept: localStorage.getItem("smp.copilot.details") }));
+    check(fd.w <= 30 && fd.items === 0 && fd.kept === "shut" && fo.w > 120 && fo.items >= 5 && fo.kept === null, "§780 the deliverables column folds to a slim strip, the chat taking the room, and opens again; the fold is kept", JSON.stringify({ fd, fo }));
+    /* §780 — a screenshot pasted into the start box starts a chat with the picture waiting above its box, shown as a thumbnail */
+    await page.evaluate(() => { const b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+      const bin = Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)), f = new File([bin], "image.png", { type: "image/png" }), dt = new DataTransfer(); dt.items.add(f);
+      const t = document.querySelector("[data-cop-starttext]"); t.focus(); t.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true })); });
+    await page.waitForSelector("[data-cop-pending] .copthumb", { timeout: 15000 }).catch(() => {});
+    const pp = await page.evaluate(() => ({ thumb: !!document.querySelector("[data-cop-pending] img.copthumb"), name: (document.querySelector("[data-cop-pending] .copfile b") || {}).textContent || "", kind: (document.querySelector("[data-cop-pending] .copfile") || {}).textContent || "" }));
+    const prow = (await asTenant(tenantId, (c) => c.query("select f.kind, f.name from copilot_files f order by f.at desc limit 1"))).rows[0];
+    await shot("2b-pasted");
+    check(pp.thumb && /^Pasted picture \d{4}-\d\d-\d\d/.test(pp.name) && /Picture/.test(pp.kind) && !!prow && prow.kind === "png", "§780 a screenshot pasted in the start box opens a chat with it waiting above the box, a thumbnail named for when it was pasted", JSON.stringify({ pp, prow }));
+    /* §782 — the chat's header is one line: its name, ⓘ, A− A+; a light line under it from one edge of the box to the other */
+    const hd = await page.evaluate(() => { const h = document.querySelector(".copheadone"), m = document.querySelector("[data-cop-main]"); if (!h || !m) return null;
+      const a = h.getBoundingClientRect(), b = m.getBoundingClientRect(), cs = getComputedStyle(h), t = h.querySelector(".coph"), z = h.querySelector(".copsize");
+      return { left: Math.round(a.left - b.left), right: Math.round(b.right - a.right), line: cs.borderBottomStyle === "solid" && parseFloat(cs.borderBottomWidth) >= 1, h: Math.round(a.height),
+        oneRow: !!(t && z) && Math.abs(t.getBoundingClientRect().top + t.getBoundingClientRect().height / 2 - (z.getBoundingClientRect().top + z.getBoundingClientRect().height / 2)) < 6,
+        ctxShown: !!Array.from(document.querySelectorAll(".copctx")).find((x) => x.offsetParent), info: !!h.querySelector("[data-cop-ctx]") }; });
+    check(!!hd && hd.left <= 2 && hd.right <= 2 && hd.line && hd.oneRow && hd.h <= 56 && !hd.ctxShown && hd.info,
+      "§782 the chat's header is one line — name, ⓘ, A− A+ — with a light line under it from one edge of the box to the other; what the Copilot can see is behind ⓘ", JSON.stringify(hd));
+    await page.click(".copheadone [data-cop-ctx]");
+    const tipT = await page.evaluate(() => { const t = document.querySelector(".copheadone [data-cop-ctxtip]"); return t && !t.hidden ? t.textContent : ""; });
+    check(/Mobile/.test(tipT) && /Pillar/i.test(tipT), "§782 …and ⓘ shows it when pressed", tipT);
+    /* §782 — the steps are one thin stepper line, the count at its end */
+    const sl = await page.evaluate(() => { const r = document.querySelector(".copsteps"); if (!r) return null; const st = Array.from(r.querySelectorAll("[data-cop-strip]"));
+      return { h: Math.round(r.getBoundingClientRect().height), n: st.length, adv: st.some((b) => b.getAttribute("data-cop-strip") === "advisory"), lines: r.querySelectorAll(".copstln").length, say: (r.querySelector("[data-cop-planline]") || {}).textContent || "", tops: new Set(st.map((b) => Math.round(b.getBoundingClientRect().top))).size }; });
+    check(!!sl && sl.h <= 44 && sl.n === 5 && !sl.adv && sl.lines === 4 && sl.tops === 1 && /\d of 5 on Mobile’s plan/.test(sl.say),
+      "§782 the steps are one thin stepper line — five numbered steps joined by a line, no Advisory among them, the plan's count at the end", JSON.stringify(sl));
+    /* §782 — Advisory is a tab of its own beside Builder */
+    await page.click('#subtabs [data-cop-to="advisory"]');
+    await page.waitForFunction(() => CURSEC.copilot === "advisory", null, { timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1500);   /* the lists come in after the press; the method's next step must not pull the window off Advisory (§785) */
+    const av = await page.evaluate(() => ({ sec: CURSEC.copilot, sel: (document.querySelector('#subtabs [aria-selected="true"]') || {}).textContent || "", steps: document.querySelectorAll(".copsteps").length,
+      h: (document.querySelector(".copstarth") || {}).textContent || "", rail: Array.from(document.querySelectorAll("[data-cop-chats] [data-cop-chat]")).map((b) => b.getAttribute("data-cop-chat-sec")) }));
+    check(av.sec === "advisory" && /✦ Advise/.test(av.sel) && av.steps === 0 && /What decision are you weighing for Mobile\?/.test(av.h) && av.rail.every((x) => x === "advisory"),
+      "§782 Advisory is its own tab: no steps, its own question, its own chats only", JSON.stringify(av));
+    await page.click('#subtabs [data-cop-to="build"]');
+    await page.waitForFunction(() => CURSEC.copilot !== "advisory", null, { timeout: 8000 }).catch(() => {});
+    const bk = await page.evaluate(() => ({ sec: CURSEC.copilot, steps: document.querySelectorAll(".copsteps").length, rail: Array.from(document.querySelectorAll("[data-cop-chats] [data-cop-chat]")).map((b) => b.getAttribute("data-cop-chat-sec")) }));
+    check(bk.sec !== "advisory" && bk.steps === 1 && !bk.rail.includes("advisory"), "§782 …and ✦ Builder brings the steps back, its rail without Advisory's chats", JSON.stringify(bk));
+    await asTenant(tenantId, (c) => c.query("delete from copilot_deliverables"));
+    /* B — ✦ Copilot on a part the plan does not hold: build it in the Copilot */
     await open("/raya-trade/strategy/mobile/strategy/swot");
     await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});
-    const bb = await page.evaluate(() => { const b = document.querySelector("[data-cop-panelbtn]"); return b ? { t: b.textContent, inRow: !!b.closest("#secrow-in") } : null; });
-    check(!!bb && /Copilot/.test(bb.t) && bb.inRow, "§772 ✦ Copilot stands beside Edit on the plan whatever the tab's mode", JSON.stringify(bb));
+    const rb = await page.evaluate(() => { const b = document.querySelector("[data-cop-panelbtn]"), cs = b ? getComputedStyle(b) : null;
+      return b ? { t: b.textContent.trim(), bw: parseFloat(cs.borderTopWidth), br: parseFloat(cs.borderTopLeftRadius) } : null; });
+    check(!!rb && rb.t === "✦ Refine" && rb.bw >= 1 && rb.br >= 10, "§790 the Copilot on the plan is ✦ Refine, drawn as the same pill as ✦ Build and ✦ Advise", JSON.stringify(rb));
+    /* emptied, read and put back in one synchronous step — the panel draws at once — so no paint or save ever sees it */
+    const nbAll = await page.evaluate(() => { const u = unitLike("mobile"), was = u.swot; let nb = null, b = null;
+      u.swot = { s: [], w: [], o: [], t: [] };
+      try {
+        document.querySelector("[data-cop-panelbtn]").click();
+        const p = document.getElementById("copPanel");
+        nb = p ? { sec: CURSEC.copilot, nb: !!p.querySelector("[data-cop-notbuilt]"), h: (p.querySelector(".copstarth") || {}).textContent || "", box: !!p.querySelector("[data-cop-starttext]"), btn: (p.querySelector("[data-cop-buildin]") || {}).textContent || "", strip: p.querySelectorAll("[data-cop-strip]").length } : null;
+        b = p && p.querySelector("[data-cop-buildin]");
+      } finally { u.swot = was; }
+      if (b) b.click();
+      return nb; });
+    const nb = nbAll;
+    await shot("3-panel-empty");
+    check(!!nb && nb.sec === "analysis" && nb.nb && /Mobile’s SWOT isn’t built yet/.test(nb.h) && !nb.box && /Build it in the Copilot/.test(nb.btn) && nb.strip === 0,
+      "§779 B: on a part the plan does not hold, the panel says it isn't built yet and sends you to Build — no building in the panel", JSON.stringify(nb));
+    await page.waitForFunction(() => currentSub === "copilot" && !document.getElementById("copPanel"), null, { timeout: 10000 }).catch(() => {});
+    const bi = await page.evaluate(() => ({ sub: currentSub, sec: CURSEC.copilot, panel: !!document.getElementById("copPanel"), focus: (document.querySelector(".copfocus") || {}).textContent || "", cur: (document.querySelector('[data-cop-strip][aria-current="true"]') || { getAttribute: () => "" }).getAttribute("data-cop-strip") }));
+    check(bi.sub === "copilot" && bi.sec === "analysis" && !bi.panel && /SWOT/.test(bi.focus) && bi.cur === "analysis", "§779 …“Build it in the Copilot” opens the Copilot tab on that step", JSON.stringify(bi));
+    /* B — on a part the plan holds: the box at the top, no cards; what is said starts from the plan */
+    await open("/raya-trade/strategy/mobile/strategy/swot");
+    await page.waitForSelector("[data-cop-panelbtn]", { timeout: 15000 }).catch(() => {});
     await page.click("[data-cop-panelbtn]");
-    await page.waitForSelector("#copPanel [data-cop-pane]", { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(800);
-    const bp = await page.evaluate(() => { const p = document.getElementById("copPanel"), mw = document.getElementById("mainwrap"); return p ? { sec: CURSEC.copilot, start: !!p.querySelector("[data-cop-startscreen]"), head: (p.querySelector(".copstarth") || {}).textContent || "",
-      strip: p.querySelectorAll("[data-cop-strip]").length, mode: p.querySelectorAll("[data-cop-layout]").length, beside: mw ? mw.getBoundingClientRect().right <= p.getBoundingClientRect().left + 2 : false } : null; });
-    await shot("b-swot-open");
-    check(!!bp && bp.sec === "analysis" && bp.start && /Mobile’s SWOT/.test(bp.head) && bp.strip === 0 && bp.mode === 0 && bp.beside, "§753 B: the panel opens on the SWOT beside the page, about the SWOT only — no strip, no toggle in it", JSON.stringify(bp));
+    await page.waitForSelector("#copPanel [data-cop-sayto]", { timeout: 15000 }).catch(() => {});
+    const sy = await page.evaluate(() => { const p = document.getElementById("copPanel"); if (!p) return null; const st = p.querySelector("[data-cop-startscreen]"), box = p.querySelector("[data-cop-starttext]"), cards = Array.from(p.querySelectorAll(".coppcard")).filter((c) => c.offsetParent);
+      return { say: !!p.querySelector("[data-cop-sayto]"), h: (p.querySelector(".copstarth") || {}).textContent || "", boxFirst: !!(box && st && st.firstElementChild && st.querySelector(".copstartbox") === st.children[1]), cards: cards.length, again: !!p.querySelector(".copagain[data-cop-buildin]"), sug: p.querySelectorAll("[data-cop-suggest]").length }; });
+    await shot("4-panel-built");
+    check(!!sy && sy.say && /What would you like to change in Mobile’s SWOT\?/.test(sy.h) && sy.boxFirst && sy.cards === 0 && sy.sug === 0 && sy.again,
+      "§779 B: on a part the plan holds, the panel opens on the box at the top — no cards, no suggestions — with “Build it again step by step” below", JSON.stringify(sy));
+    check(await page.evaluate(() => ((document.querySelector("#copPanel .copPhead b") || {}).textContent || "").trim() === "✦ Refine"), "§790 …and its panel is headed ✦ Refine");
+    const pr = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("[data-cop-panelbtn]")); return { bg: c.backgroundColor, ink: c.color }; });
+    check(pr.bg === "rgb(22, 50, 92)" && pr.ink === "rgb(255, 255, 255)", "§790 …and pressed, ✦ Refine is the client's navy with white ink at once — never caught in a fade, read as greyed out", JSON.stringify(pr));
+    await page.fill("#copPanel [data-cop-starttext]", "Add vendors selling direct to retailers as a threat");
+    await page.press("#copPanel [data-cop-starttext]", "Enter");
+    await page.waitForFunction(() => !!document.querySelector("#copPanel [data-cop-pane]") && !document.querySelector("#copPanel [data-cop-startscreen]"), null, { timeout: 15000 }).catch(() => {});
+    const row = (await asTenant(tenantId, (c) => c.query("select section, extra ? 'swot' as swot, coalesce(extra->'swot'->>'start', '') as start from copilot_chats order by created_at desc limit 1"))).rows[0];
+    const kept = await page.evaluate(() => { const t = document.querySelector("#copPanel [data-cop-text]"); return { open: !document.querySelector("#copPanel [data-cop-startscreen]"), box: t ? t.value : null }; });
+    check(!!row && row.section === "analysis" && row.swot === true && kept.open, "§779 …what is said there opens the SWOT from the plan's own lines, in the panel; the words are its first change", JSON.stringify({ row, kept }));
+    /* resized from the left edge, kept per browser; a double-click resets it */
+    const g = await page.evaluate(() => { const r = document.querySelector("#copPanel [data-cop-panelgrip]").getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: document.getElementById("copPanel").getBoundingClientRect().width }; });
+    await page.mouse.move(g.x, g.y); await page.mouse.down(); await page.mouse.move(g.x - 60, g.y, { steps: 4 }); await page.mouse.move(g.x - 120, g.y, { steps: 4 }); await page.mouse.up();
+    await page.waitForTimeout(200);
+    const rz = await page.evaluate(() => { const p = document.getElementById("copPanel").getBoundingClientRect(), mw = document.getElementById("mainwrap").getBoundingClientRect(); return { w: p.width, kept: localStorage.getItem("smp.copilot.panelw"), beside: mw.right <= p.left + 2 }; });
+    await shot("5-resized");
+    await page.dblclick("#copPanel [data-cop-panelgrip]"); await page.waitForTimeout(200);
+    const rs = await page.evaluate(() => ({ w: document.getElementById("copPanel").getBoundingClientRect().width, kept: localStorage.getItem("smp.copilot.panelw") }));
+    check(rz.w >= g.w + 90 && !!rz.kept && rz.beside && Math.abs(rs.w - g.w) <= 3 && rs.kept === null, "§779 B: the panel is resized from its left edge, the page beside it, the width kept; a double-click resets it", JSON.stringify({ g0: g.w, rz, rs }));
+    /* §778 — expand: the panel takes over the page; minimize: back to the side */
+    const w0 = await page.evaluate(() => Math.round(document.getElementById("copPanel").getBoundingClientRect().width));
+    await page.click("#copPanel [data-cop-panelexpand]"); await page.waitForTimeout(300);
+    const wx = await page.evaluate(() => { const r = document.getElementById("copPanel").getBoundingClientRect(), b = document.querySelector("#copPanel [data-cop-panelexpand]"); return { left: Math.round(r.left), w: Math.round(r.width), vw: innerWidth, label: b.getAttribute("aria-label"), pane: !!document.querySelector("#copPanel [data-cop-pane]") }; });
+    await page.click("#copPanel [data-cop-panelexpand]"); await page.waitForTimeout(300);
+    const w1 = await page.evaluate(() => ({ w: Math.round(document.getElementById("copPanel").getBoundingClientRect().width), label: document.querySelector("#copPanel [data-cop-panelexpand]").getAttribute("aria-label") }));
+    check(wx.left <= 1 && wx.w >= wx.vw - 20 && wx.w > w0 + 300 && /Minimize/.test(wx.label) && wx.pane && Math.abs(w1.w - w0) <= 2 && /Expand/.test(w1.label),
+      "§778 B: expand makes the panel take over the page, the Copilot still in it; minimize puts it back to the side", JSON.stringify({ w0, wx, w1 }));
     await page.click('[data-sub2="plan"]');
     await page.waitForFunction(() => CURSEC.copilot === "directions" && !!document.querySelector("#copPanel [data-cop-pane]"), null, { timeout: 10000 }).catch(() => {});
     await page.click('#copPanel [data-cop-panelarea="execution"]');
     await page.waitForFunction(() => CURSEC.copilot === "execution", null, { timeout: 8000 }).catch(() => {});
-    const be = await page.evaluate(() => ({ sec: CURSEC.copilot, card: (document.querySelector("#copPanel .copstart [data-cop-newchat]") || {}).textContent || "" }));
-    check(be.sec === "execution" && /Build from the Directions/.test(be.card), "§753 B: on Plan the panel follows, and Tactical Plans is one press away", JSON.stringify(be));
+    const be = await page.evaluate(() => ({ sec: CURSEC.copilot, screen: !!document.querySelector("#copPanel [data-cop-notbuilt], #copPanel [data-cop-sayto]") }));
+    check(be.sec === "execution" && be.screen, "§753 B: on Plan the panel follows, and Tactical Plans is one press away", JSON.stringify(be));
     await page.click("[data-cop-panelclose]"); await page.waitForTimeout(300);
     check(!(await page.$("#copPanel")), "§753 B: × closes the panel");
     check(!errs.length, "no page errors", errs.join(" | "));
   } finally {
+    try { await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.panelw"); } catch (e) {} }); } catch (e) {}
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3q · a chat's work laid out as the plan, and put on it (§784)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/putplan-" + n + ".png" }); };
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  let before = null, itemsBefore = null, periodBefore = null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/compete");
+    await page.waitForSelector("[data-cop-starttext]", { timeout: 15000 });
+    before = await page.evaluate(() => JSON.stringify(competeHolder("mobile").compete || null));
+    const today = await page.evaluate(() => { const h = competeHolder("mobile"), w = h && h.compete; return w && w.discipline ? w.discipline + "|" + (w.values || []).length : ""; });
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, { reply: "Here it is, laid out as your plan shows it.", draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ text: "Vendor Growth Partner" }, { text: "Tech Driven Operation" }] }] },
+      plan: { discipline: "bts", values: [{ title: "Vendor Growth Partner", how: ["Joint business planning with key retailers", "24h delivery"], measure: ["Tier 2 revenue growth ≥ 100% (today 60%)"], evidence: "Answers vendors going direct. MB02." },
+        { title: "Tech Driven Operation", how: ["Relaunch the distribution app"], measure: [] }] } });
+    await page.fill("[data-cop-starttext]", "Sharpen our value proposition for vendors");
+    await page.press("[data-cop-starttext]", "Enter");
+    /* the first answer on a part the plan holds asks what to change (§471); the draft comes with the next */
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
+    /* §785 — the chat renamed where it stands, in its header */
+    await page.click("[data-cop-renamehead]");
+    await page.fill(".coprenhead", "Vendor value proposition");
+    await page.press(".coprenhead", "Enter");
+    await page.waitForFunction(() => /Vendor value proposition/.test((document.querySelector(".copheadone .coph") || {}).textContent || ""), null, { timeout: 8000 }).catch(() => {});
+    const rn = (await asTenant(tenantId, (c) => c.query("select title from copilot_chats order by created_at desc limit 1"))).rows[0];
+    check(!!rn && rn.title === "Vendor value proposition" && /Vendor value proposition/.test(await page.evaluate(() => (document.querySelector(".copheadone .coph") || {}).textContent || "")), "§785 a chat is renamed from its header — its name pressed becomes a box, Enter keeps it", JSON.stringify(rn));
+    /* §788 — a draft made before the plan's shape (§784) lays itself out when its panel shows it: nothing to press, nothing said in the chat */
+    const cid = (await asTenant(tenantId, (c) => c.query("select id from copilot_chats order by created_at desc limit 1"))).rows[0].id;
+    await asTenant(tenantId, (c) => c.query("insert into copilot_messages (chat_id, who, body, part) values ($1, 'ai', 'Here is the table.', $2)", [cid, JSON.stringify({ kind: "answer", missing: [], options: [], assumptions: [], pastedBelongsTo: null, following: "",
+      draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ title: "Vendor Growth Partner", text: "How: joint planning. Measure: Tier 2 revenue growth ≥ 100% (today 60%)." }] }] } })]));
+    const nMsg = (await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_messages where chat_id = $1", [cid]))).rows[0].n;
+    await page.goto("about:blank");
+    await open("/raya-trade/strategy/mobile/copilot/compete#cop=chat-" + cid);
+    await page.waitForSelector("[data-cop-dplan] [data-cop-val]", { timeout: 20000 }).catch(() => {});
+    const ly = await page.evaluate(() => ({ cards: document.querySelectorAll("[data-cop-dplan] [data-cop-val]").length, btn: !!document.querySelector("[data-cop-layout-plan]"), put: !!document.querySelector("[data-cop-putplan]") }));
+    const after = await asTenant(tenantId, (c) => c.query("select count(*)::int n, bool_or(part ? 'plan') laid from copilot_messages where chat_id = $1", [cid]));
+    check(ly.cards >= 1 && !ly.btn && ly.put && after.rows[0].n === nMsg && after.rows[0].laid === true,
+      "§788 an older draft lays itself out as the plan when it is shown — no button, nothing said in the chat, the shape kept on it — and can be put on the plan", JSON.stringify({ ly, nMsg, after: after.rows[0] }));
+    const dp = await page.evaluate(() => { const d = document.querySelector("[data-cop-dplan]"); if (!d) return null;
+      return { disc: (d.querySelector(".copdisc h4") || {}).textContent || "", vals: Array.from(d.querySelectorAll("[data-cop-val] h5")).map((h) => h.textContent), gap: d.querySelectorAll("[data-cop-gap]").length,
+        today: Array.from(d.querySelectorAll(".copmrow .copm")).map((x) => x.textContent).join("|"), ev: !!d.querySelector("details.copev"), put: (document.querySelector("[data-cop-putplan]") || {}).textContent || "", stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "" }; });
+    await shot("1-draft");
+    check(!!dp && dp.disc === "Best Total Solution" && dp.vals.join("|") === "Vendor Growth Partner|Tech Driven Operation" && dp.gap === 1 && /today 60%/.test(dp.today) && dp.ev && /Put on Mobile’s plan/.test(dp.put) && /Laid out as the plan’s Competitive Discipline/.test(dp.stay) && /1 value has no measure/.test(dp.stay),
+      "§784 a free chat's draft is drawn as the plan draws Competitive Discipline — the discipline, a card per value, measures with today, evidence folded — a value without a measure said so, and Put on Mobile's plan offered", JSON.stringify(dp));
+    await page.click("[data-cop-putplan]");
+    await page.waitForSelector("#modal-b .copgo, #modal-b [data-cop-planapply-yes]", { timeout: 15000 }).catch(() => {});
+    const md = await page.evaluate(() => ({ t: (document.getElementById("modal-b") || {}).textContent || "", deliv: !!document.querySelector("[data-cop-planrow]") }));
+    await shot("2-ask");
+    const row = (await asTenant(tenantId, (c) => c.query("select type, kind from copilot_deliverables order by created_at desc limit 1"))).rows[0];
+    check(md.deliv && !!row && row.type === "compete" && row.kind === "promotable" && /Best Total Solution and 2 values/.test(md.t) && /1 value goes on without a measure/.test(md.t) && (today ? /Today the plan holds/.test(md.t) : /holds nothing here today/.test(md.t)) && /archived first/.test(md.t),
+      "§784 Put on the plan saves it as a Competitive Discipline, opens it, and asks first — saying what the plan holds today, what goes on, the value without a measure, and that today's is archived", JSON.stringify({ md, row, today }));
+    await page.click("#modal-b [data-cop-planapply-yes]");
+    await page.waitForFunction(() => { const h = competeHolder("mobile"); return !!(h && h.compete && h.compete.discipline === "bts"); }, null, { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction(() => /On the plan as v1/.test((document.querySelector("[data-cop-planrow]") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const ap = await page.evaluate(() => { const w = competeHolder("mobile").compete; return { disc: w && w.discipline, vals: ((w && w.values) || []).map((v) => v.title), on: true, row: (document.querySelector("[data-cop-planrow]") || {}).textContent || "" }; });
+    await shot("3-applied");
+    check(ap.disc === "bts" && ap.vals.join("|") === "Vendor Growth Partner|Tech Driven Operation" && ap.on && /On the plan as v1/.test(ap.row), "§784 ...Apply writes it to Mobile's plan, and the version says it is on the plan", JSON.stringify(ap));
+    /* §785 — Pillars/Directions from a free chat, put on the plan by name: the plan's own row updated, not a second one */
+    await open("/raya-trade/strategy/mobile/copilot/directions");
+    await page.waitForSelector("[data-cop-starttext]", { timeout: 15000 });
+    itemsBefore = await page.evaluate(() => JSON.stringify(unitLike("mobile").items));
+    const d0 = await page.evaluate(() => { const it = unitLike("mobile").items.filter((p) => p && p.name); return { n: it.length, name: it[0].name }; });
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, { reply: "Here they are, scored.", draft: { title: "Mobile · Pillars/Directions", groups: [{ title: "Directions", items: [{ text: d0.name }, { text: "Vendor data services" }] }] },
+      plan: { directions: [{ title: d0.name, urgency: 4, importance: 4, ease: 3 }, { title: "Vendor data services", urgency: 3, importance: 2 }] } });
+    await page.fill("[data-cop-starttext]", "Score our directions again");
+    await page.press("[data-cop-starttext]", "Enter");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
+    if (!(await page.$("[data-cop-dplan]"))) { await page.fill("[data-cop-text]", "Lay them out"); await page.press("[data-cop-text]", "Enter"); }
+    await page.waitForSelector("[data-cop-dplan] .copdtyped", { timeout: 15000 }).catch(() => {});
+    const dd = await page.evaluate(() => ({ stay: (document.querySelector("[data-cop-draftstay]") || {}).textContent || "", put: !!document.querySelector("[data-cop-putplan]"), txt: (document.querySelector("[data-cop-dplan]") || {}).textContent || "" }));
+    await shot("4-directions");
+    check(dd.put && /Pillars\/Directions/.test(dd.stay) && /1 Direction is not fully scored yet/.test(dd.stay) && /48 of 64/.test(dd.txt), "§785 a free chat's Pillars/Directions are drawn as the plan's, scored, the unscored one said, and can be put on the plan", JSON.stringify(dd));
+    await page.click("[data-cop-putplan]");
+    await page.waitForSelector("#modal-b [data-cop-planapply-yes]", { timeout: 15000 }).catch(() => {});
+    const dm = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
+    check(/Today the plan holds \d+ Directions/.test(dm) && /same name is updated/.test(dm), "§785 ...asked with what the plan holds today", dm.slice(0, 300));
+    await page.click("#modal-b [data-cop-planapply-yes]");
+    await page.waitForFunction(() => /On the plan as v1/.test((document.querySelector("[data-cop-planrow]") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const d1 = await page.evaluate((nm) => { const it = unitLike("mobile").items.filter((p) => p && p.name); const same = it.filter((p) => p.name === nm); return { n: it.length, same: same.length, sc: same[0] ? [same[0].urgency, same[0].importance, same[0].ease].join() : "", added: it.some((p) => p.name === "Vendor data services") }; }, d0.name);
+    check(d1.same === 1 && d1.sc === "4,4,3" && d1.added && d1.n === d0.n + 1, "§785 ...Apply updates the plan's Direction of that name — not a second one — and adds the new one", JSON.stringify({ d0, d1 }));
+    /* §785 — Tactical Plans from a free chat: each item tied to the plan's Direction of its name; one the plan has not is left out, said */
+    await open("/raya-trade/strategy/mobile/copilot/execution");
+    await page.waitForSelector("[data-cop-starttext]", { timeout: 15000 });
+    periodBefore = await page.evaluate(() => JSON.stringify({ f: GROUP[(SMPRules.PLAN_FROM || "planFrom")], t: GROUP[(SMPRules.PLAN_TO || "planTo")] }));
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, { reply: "Here are the tactical plans.", draft: { title: "Mobile · Tactical Plans", groups: [{ title: d0.name, items: [{ text: "Tier 2 revenue ≥ 100%" }] }] },
+      plan: { period: { year: 2027, fromQuarter: 1, toQuarter: 4 }, items: [{ direction: d0.name, measures: [{ name: "Tier 2 revenue growth", target: "≥ 100%" }], tactics: [{ name: "Sary merchant push", owner: "Hend", quarters: [1, 2] }] },
+        { direction: "Nowhere on the plan", measures: [{ name: "x", target: "1" }], tactics: [] }] } });
+    await page.fill("[data-cop-starttext]", "Draft the tactical plans");
+    await page.press("[data-cop-starttext]", "Enter");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 1, null, { timeout: 15000 }).catch(() => {});
+    if (!(await page.$("[data-cop-dplan]"))) { await page.fill("[data-cop-text]", "Lay them out"); await page.press("[data-cop-text]", "Enter"); }
+    await page.waitForSelector("[data-cop-putplan]", { timeout: 15000 }).catch(() => {});
+    await page.click("[data-cop-putplan]");
+    await page.waitForSelector("#modal-b [data-cop-planapply-yes]", { timeout: 15000 }).catch(() => {});
+    const em = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
+    await shot("5-tactical-ask");
+    check(/measures and tactics of 1 item,/.test(em) && /so left out: Nowhere on the plan/.test(em), "§785 Tactical Plans from a chat are tied to the plan's Directions by name; one the plan has not is left out and said so before Apply", em.slice(0, 400));
+    await page.click("#modal-b [data-cop-planapply-yes]");
+    await page.waitForFunction(() => /On the plan as v1/.test((document.querySelector("[data-cop-planrow]") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    const e1 = await page.evaluate((nm) => { const p = unitLike("mobile").items.filter((x) => x && x.name === nm)[0] || {}; return { m: (p.measures || []).map((x) => x.name + " " + x.target), t: (p.tactics || []).map((x) => x.name + " q1=" + x.q1 + " q3=" + x.q3) }; }, d0.name);
+    check(e1.m.includes("Tier 2 revenue growth ≥ 100%") && e1.t.includes("Sary merchant push q1=1 q3=0"), "§785 ...Apply writes the measures and tactics onto that Direction", JSON.stringify(e1));
+    check(!errs.length, "no page errors", errs.join(" | "));
+  } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
-    try { await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.mode"); } catch (e) {} }); } catch (e) {}
+    if (before !== null || itemsBefore !== null || periodBefore !== null) { try { await page.evaluate(async (a) => { if (a.b !== null) { const hold = competeHolder("mobile"); if (hold) hold.compete = JSON.parse(a.b); }
+      if (a.i !== null) unitLike("mobile").items = JSON.parse(a.i);
+      if (a.p !== null) { const pp = JSON.parse(a.p); GROUP[(SMPRules.PLAN_FROM || "planFrom")] = pp.f; GROUP[(SMPRules.PLAN_TO || "planTo")] = pp.t; }
+      await new Promise((r) => (typeof SYNC !== "undefined" && SYNC.saveNow ? SYNC.saveNow(() => r()) : r())); }, { b: before, i: itemsBefore, p: periodBefore }); } catch (e) {} }
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
   }

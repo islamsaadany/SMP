@@ -370,6 +370,7 @@
   /* §752 — `oneWindow`: the Copilot's areas still route the address
      (…/copilot/directions), but their row is not drawn; the Copilot draws
      the method as its own strip (Islam: "they need 1 window"). */
+  var COP_LASTBUILD = "";
   var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true, oneWindow:true,
                   when: function(){ return COPILOT.shown(); },
                   sections: function(){ return COPILOT.sections(); } };
@@ -3851,7 +3852,22 @@
     /* \u00a7132.14: the Strategy tab wears NO number (Islam: "remove the number
        from the strategy word") \u2014 the missing bar in the section row below
        carries the total, the places and the action, through missBar(). */
+    /* §790 — named for what each does, as ✦ Refine on the plan is (Islam: "builder to be build and advisory to be advise like refine"). */
+    /* §782 — BUILDER AND ADVISORY AT THE FAR RIGHT (Islam: "the builder should
+       be on the far right of the tabs as it's not something similar, and it
+       matches the placement of the copilot when we get in the plan on the
+       right"; "the advisory should be something different… it's a general
+       thing" → its own tab). One tab underneath, the Copilot's: Builder is
+       its method, Advisory its advisory area, each pressed by itself. */
+    if (currentSub === COP_TAB.k && CURSEC.copilot && CURSEC.copilot !== "advisory") COP_LASTBUILD = CURSEC.copilot;
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
+      if (d.k === COP_TAB.k) {
+        var advOn = false; try { advOn = (allowed(d.sections(arg), TARGET) || []).some(function(x){ return x.k === "advisory"; }); } catch (e) { advOn = false; }
+        var onAdv = currentSub === d.k && CURSEC.copilot === "advisory";
+        return '<span class="tabgap" aria-hidden="true"></span><span class="coptabs">' +
+          '<button role="tab" data-s="' + d.k + '" data-cop-to="build" class="coptab" aria-selected="' + (currentSub === d.k && !onAdv) + '">✦ Build</button>' +
+          (advOn ? '<button role="tab" data-s="' + d.k + '" data-cop-to="advisory" class="coptab copadv" aria-selected="' + onAdv + '">✦ Advise</button>' : '') + '</span>';
+      }
       var cls = (d.primary ? "primary" : "") + (d.cta ? " cta" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
@@ -5425,7 +5441,11 @@
            handles on (§63.3), it would have carried the handles onto
            Performance with no control there to turn them off. */
         if (currentSub !== b.dataset.s) leaveModes();
-        currentSub = b.dataset.s; paint(); window.scrollTo(0,0);
+        currentSub = b.dataset.s;
+        /* §782 — Builder and Advisory are the one Copilot tab, each opening its own part of it */
+        if (b.dataset.copTo === "advisory") CURSEC.copilot = "advisory";
+        else if (b.dataset.copTo === "build" && CURSEC.copilot === "advisory") CURSEC.copilot = COP_LASTBUILD || "foundation";
+        paint(); window.scrollTo(0,0);
       });
     });
     document.querySelectorAll("[data-sub2]").forEach(function(b){

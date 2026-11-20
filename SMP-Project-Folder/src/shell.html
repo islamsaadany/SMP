@@ -4164,10 +4164,15 @@
        of the row with the pen at the end — drawn, looked at, and thrown away
        (§41.9). The tail takes the auto and the bar gives its up. */
     var penHTML = (stratTab && typeof secActs === "function") ? secActs() : "";
-    var tailHTML = (missHTML || penHTML)
+    /* §793: Expand all / Collapse all for a SWOT's folding points, before the
+       pen. Drawn hidden; `swotFoldSync()` at the end of the paint shows it
+       where the page has a line with points on it. On the strategy tabs for
+       everybody, the pen or no pen — folding is reading. */
+    var foldHTML = (stratTab && typeof swotFoldBtn === "function") ? swotFoldBtn() : "";
+    var tailHTML = (missHTML || penHTML || foldHTML)
       ? '<span class="secttail">' + missHTML +
           ((missHTML && penHTML) ? '<span class="sectsep" aria-hidden="true"></span>' : '') +
-          penHTML + '</span>'
+          foldHTML + penHTML + '</span>'
       : "";
     /* THE ROW IS NOT ONLY FOR SECTIONS, AND §211.2 IS WHAT PROVED IT. That
        section left a pillars function with ONE section — and `> 1` took the
@@ -4413,6 +4418,7 @@
     rememberWhere();
     /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
        panel follow every paint, as the page's own parts do. */
+    if (typeof swotFoldSync === "function") swotFoldSync();   /* §793 */
     if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
     /* §755: a figure corrected on a closed cycle re-takes its closing
        record before the save leaves (closeRecordFollow, config-data.js). */

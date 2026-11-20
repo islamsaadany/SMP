@@ -71852,3 +71852,27 @@ Islam, shown the bar on two lines at 760px: *"the top bar should not take 2 line
 - **Down to 360px**, measured, on both bars.
 
 **§792 MERGED TO `main`** 2026-11-19, Islam: *"merge to main"*. `main` had not moved since §791; merged with a merge commit `main` alone holds (§91); the built file matches a fresh build of the merged sources. `checks/bar-narrow.mjs` **42 ok, 0 failed** on the merged tree. `checks/shell.mjs` and `checks/jump.mjs` were not run (no database in the session). The Refine panel's gap was not reproduced before the fix, so it stands to be confirmed on his screen. No migrations; nobody signed out.
+
+## §793 — A SWOT line's points fold under its title (2026-11-20)
+
+Islam: *"for the swot can we have an option where we can create multiple points under each main point? we already did this with having the title in bold. but can we have an option where the items under the title is collapsed and expanded by clicking on the main title? or expand all or collapse all?"*
+
+**Mockup first, three rounds.** The proposal with three open choices drawn (`design-mockups/swot-fold/2026-11-20_fold-points.html`); then, at his asking — *"show me a working mockup where I can edit and add and remove and test everything"* — a working SWOT with the three choices as switches (`…_fold-points-working.html`); then his answers — *"as you left it, one for the page, one box a row per point"* — built into a third (`…_fold-points-chosen.html`). Islam: *"apply it to the platform."*
+
+**His three answers.**
+- **The page opens as you left it.** Open the first time; after that each person's own browser remembers which lines they folded. Refused: always open, always folded.
+- **One Expand all / Collapse all for the page**, on the section row before the pen. Refused: one in each box.
+- **The pen is unchanged**: one box per line, the title on the first row and a point on each row under it (§757). Refused: a field for the title and one per point.
+
+**What is built.**
+- **The title is the control, and only where there is something under it.** A line with points is drawn by `swotLine()` (group-render.js): its bold title is a button with a small arrow after it; pressed, the points go and a count stands in (*2 points*), so folding never hides that there is more. A line of one row has nothing to fold and is drawn by `swotText()` exactly as before.
+- **The button's word is what the press will do**: *Collapse all* while any line is open, *Expand all* when every line is folded. It is drawn hidden with the row and shown at the end of the paint only where the page has a line with points — not on a tab with nothing to fold, and not while Edit is on. With the Copilot's button on the row the three read fold · ✦ Refine · Edit, as drawn.
+- **A fold is the reader's, never the plan's.** Kept in the browser (`smp.swot.fold`) and nowhere else: nothing is saved, nobody else's page moves. A fold moves two attributes in place — no paint, so the page does not jump.
+- **Keyed by the title, not the row number** (client | unit | box | title): lines have no id, and a number moves when a line above is removed, which would hand the fold to a neighbour. A rewritten title opens — the safe way to be wrong.
+- **The pen opens everything by construction**: with Edit on the box draws fields, so there is no fold to be inside of.
+- **Paper and slides always show every point.** Print opens every folded line and drops the arrow and count (arrange.css `@media print`); the deck, the workbooks and the PowerPoint read `swotText()` or the raw text and never hear of a fold. The reading window draws its own SWOT and is untouched.
+- **A function's S&W** is the same boxes (§399) and folds the same way.
+
+**Checked**: `checks/swot-fold.py` **17 ok, 0 failed** on the rebuilt file — written through the pen, folded by its title and by the page button, kept across a tab and back, nothing in the plan changed, print whole, a function's S&W the same — and red on the build before (its first assertion that needs a fold fails, and the run stops there for want of anything to press). `checks/function-sw.py`, `checks/fn-sw-default.py` and `checks/copilot-panel-compete.py` green. `smp-app/checks/bar-narrow.mjs` **42 ok, 0 failed**. `checks/shell.mjs` was not run (no database in the session). The shell is v8.04.
+
+- **On the branch, not merged.**

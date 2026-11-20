@@ -337,7 +337,7 @@ function unitSwotSlides(u){
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+        return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
       }).join("");
       /* The LAST category keeps the old key "swot", which stored slides
          already name (§236.3). */
@@ -1406,7 +1406,7 @@ function pillarSlidesOf(u, p, pi, named){
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + hidChip(t) + '</td>' +
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + deckSupports(t, p) + hidChip(t) + '</td>' +
       '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
       (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
@@ -1572,7 +1572,7 @@ function companyAnalysisSlides(u){
       var items = has(q);
       return '<div class="dswcol t-' + hues[q] + '"><h3>' + esc(LTraw("group", SMPRules.QUAD_KEYS[q])) + '</h3>' +
         (items.length ? '<ol class="dswot">' + items.map(function(t, i){
-          return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+          return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
         }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
     }).join("") + '</div></section>'];
 }
@@ -1729,6 +1729,13 @@ function planReqs(t){
   return rq.length ? '<span class="dsub">' + esc(detailWord("requirements", "many", t)) + ': ' +
     esc(rq.join("  \u00b7  ")) + '</span>' : '';
 }
+/* §767: the key measures a tactic supports, by number, as the page says it —
+   the measures table on the slide before carries the same numbers. */
+function deckSupports(t, p){
+  var s = supportsOf(t, p);
+  return s.length ? '<span class="dsub">' +
+    s.map(function(x){ return 'KM ' + x.n; }).join('  \u00b7  ') + '</span>' : '';
+}
 function deckPillarHead(u, p, pi, which){
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
     esc(p.name) + '<span class="dwhich">' + which + '</span></h2></div>';
@@ -1756,7 +1763,7 @@ function fnSWSlide(f){
     var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
     return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
       (items.length ? '<ol class="dswot">' + items.map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+        return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
       }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
   };
   var any = quads.some(function(k){

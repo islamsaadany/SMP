@@ -597,6 +597,7 @@
    * @property {Object<string, Company>} companies
    * @property {Object<string, Object<string, Grant>>} access
    * @property {boolean} focusOff
+   * @property {boolean} weightingOn
    * @property {boolean} naming
    * @property {boolean} lineOwners
    * @property {Capability[]} capabilities
@@ -621,6 +622,9 @@
          the default, which for a switch means "on". Found by driving the real
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
+      /* §769: the Weighting page's own switch — the drivers' shape: only an
+         explicit true is on. */
+      weightingOn: o.weightingOn === true,
       naming: !!o.naming,
       /* §382: REPORTING FOLLOWS THE OWNER COLUMN, and it is a switch because
          turning it on MOVES who enters a figure — 26 tactics change hands on
@@ -667,6 +671,7 @@
                   sees undefined and answers the default. Add the key here in
                   the same edit as the rule that reads it. */
                focusOff: (state.group || {}).focusOff,
+               weightingOn: (state.group || {}).weightingOn,
                naming: (state.group || {}).naming,
                lineOwners: (state.group || {}).lineOwners,
                capabilities: (state.group || {}).capabilities,
@@ -2717,6 +2722,21 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      — a CEO who may mark a measure must not be able to turn the whole feature
      off for the tenant, and a switch anybody could flip would be no switch. */
   function focusOn(w) { return !w || w.focusOff !== true; }
+  /* §759, §768, §769: WHETHER THE WEIGHTING IS USED AT ALL, per client, OFF
+     UNTIL THE OFFICE TURNS IT ON (Islam, 2026-11-16: *"keep it in the
+     settings but turn it off by default"*, closing §768's everywhere-off
+     constant). The revenue drivers' shape (§DRIVERS_ON): `GROUP.weightingOn`
+     exists only while a client uses it, only an explicit `true` is on, and
+     Off deletes the key (§50.6) — so a client nobody asked and one switched
+     on and off again are byte-identical, and every client today reads OFF.
+     Read by everything the feature draws — the Weighting tab, the Weight
+     column on Setup › Business units, the weight lines on the cards and the
+     drills — and by the compile, which counts every unit equally while it
+     is off (`computeWeights`). Off HIDES AND KEEPS: the factors, the rows
+     and the weights stay stored. The switch itself is on Setup › Business
+     units, the SMO's alone, classified `setup` (authorize.cjs). */
+  var WEIGHTING_ON = "weightingOn";
+  function weightingOn(w) { return !!w && w.weightingOn === true; }
 
   /* ── IS THERE ANYTHING TO TOUR (spec 042 §6.2) ───────────────────
      §107's onboarding tour walked a FILLED platform by switching the page to
@@ -6109,7 +6129,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
     reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
-    focusOn: focusOn, tourReady: tourReady, unitLikeOf: unitLikeOf,
+    focusOn: focusOn, weightingOn: weightingOn, WEIGHTING_ON: WEIGHTING_ON, tourReady: tourReady, unitLikeOf: unitLikeOf,
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_FILLABLE: GAP_FILLABLE,
     isGapField: isGapField,
@@ -9039,8 +9059,7 @@ function cyclePastPlan(){
   var to = reviewAsOf(), fr = monthsOf(REVIEW.from);
   return (to != null && to > planTo()) || (fr != null && fr < planFrom());
 }
-var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
-var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
+var PWMENU = false, PFILEMENU = false;   /* the Columns menu is tablecols.js's own (§754) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
    other header menu: two open panels on one row cover each other. */
 var PICKING = null, PICKQ = "";
@@ -12697,6 +12716,13 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
 }
+/* §759, §769: THE WEIGHTING, ON OR OFF FOR THE CLIENT, off by default — the
+   drivers' reader and writer: the rule is the shared module's, On writes
+   `true`, Off deletes the key (§50.6), and nothing stored moves. */
+function weightingOn(){ return SMPRules.weightingOn(world()); }
+function setWeightingOn(on){
+  if (on) GROUP[SMPRules.WEIGHTING_ON] = true; else delete GROUP[SMPRules.WEIGHTING_ON];
+}
 /* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 063, 2026-09-23). The rule
    is the shared module's (only an explicit true is on); this reads it off the
    group and writes it, deleting the key for Off (§50.6) so a client that
@@ -13946,6 +13972,28 @@ var HISTORY = [
             corporate:71, care:66, it:63, logistics:69, nigeria:44 } }
 ];
 function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null; }
+/* §755: THE CLOSING RECORD FOLLOWS THE FIGURES. Closing files a score
+   snapshot (shell.html, the close press) and leaves every figure live; the
+   office may now correct a figure on the closed cycle (cycleTakesFigures),
+   so the snapshot taken at the press would say what the cycle scored BEFORE
+   the correction — and the next cycle's "what it was last time" (deltaFor)
+   and the Closed cycles chips would read the stale number. Reopen · correct
+   · close again re-took it; this is that, collapsed: while the cycle stands
+   closed and its record is the last one filed, every paint re-takes the
+   record from the live figures before the save leaves (paint() calls this
+   ahead of SYNC.afterPaint()). Opening the next cycle replaces REVIEW, so
+   from then on the record is fixed. Matched by NAME, as reopening matches
+   it (§273.2), never the last entry blind. Unchanged figures re-take an
+   identical record, so nothing is saved for nothing. The server already lets
+   the office change the record (a `cycle` change, a_cycle). */
+function closeRecordFollow(){
+  if (!REVIEW || REVIEW.state !== "closed" || !HISTORY || !HISTORY.length) return;
+  var h = HISTORY[HISTORY.length - 1];
+  if (!h || h.name !== REVIEW.name) return;
+  h.group = groupUnitsObjectives();
+  h.units = {};
+  activeKeys().forEach(function(k){ h.units[k] = unitObjectives(UNITS[k]); });
+}
 /* A TARGET IS A UNIT KEY OR "fn:<key>", and everything that takes one has to
    resolve it the same way (§59). `UNITS[key]` alone was right until spec 010
    let a function be drawn by the unit's pages: `UNITS["fn:merchandising"]` is
@@ -13995,13 +14043,36 @@ function planEditable(){
    contributor row of the access page could not do anything even when the SMO
    set it to edit — a control that changes nothing is worse than no control.
    It also means the screen and the server answer from the same function. */
+/* ── §755: A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE ──────────
+   Islam: *"we agreed that the SMO can report even if the cycle is closed."*
+   §690 kept the Reporting tab for the office on a closed cycle, and the page
+   it opened onto said the figures were a record and could not be changed
+   here — a door onto a wall, for the one hand that runs the cycle. Closed
+   now shuts everybody BUT the office, exactly as the lock has since spec 006
+   §7.1: ONE reading of "does this cycle take figures from this person",
+   asked by every gate below it (canReport, canReportFn, canSpeakForDir, the
+   two My reporting pages, the what's-left bar), so the figure box, the note
+   box, Submit and the bar cannot disagree about it (§53.5). The server has
+   never refused a figure for the cycle being closed — authorize.js asks the
+   lock alone, which the office passes — so the screen was the one saying no
+   (§61's trap, from the other side). The closing record is kept true by
+   `closeRecordFollow()`. The dot on Performance (`reportPending`) and the
+   tab's Submitted badge (`reportSectionState`) still follow an OPEN cycle:
+   a closed cycle owes nobody a submission. */
+function cycleTakesFigures(){
+  if (!REVIEW) return false;
+  if (REVIEW.state !== "open" && !inOffice()) return false;
+  /* A locked cycle takes no more figures, from anyone but the SMO — the
+     server refuses them, so the screen must not offer them (spec 006 §7.1). */
+  if (CYCLE.locked && !inOffice()) return false;
+  return true;
+}
 function canReport(unitKey){
-  if (REVIEW.state !== "open") return false;
+  if (!cycleTakesFigures()) return false;   /* §755 */
   /* §428: the top layer's own plan is reported by the office and the group's
      CEO — a rule, the same one the server asks. */
   if (unitKey === "group") {
     if (!topHasPlan() || !planOn("group")) return false;
-    if (CYCLE.locked && !inOffice()) return false;
     /* §447: with the units off each direction's owner reports their own
        direction here; canReportRow narrows them to it. */
     /* §595: whoever reports all of it, or holds a seat on any part of it —
@@ -14009,9 +14080,7 @@ function canReport(unitKey){
        one rule the server asks; which rows they type on is each part's. */
     return SMPRules.mayReportTopOrPart(world(), viewer());
   }
-  /* A locked cycle takes no more figures, from anyone but the SMO — the
-     server refuses them, so the screen must not offer them (spec 006 §7.1). */
-  if (CYCLE.locked && !inOffice()) return false;
+  /* The lock is asked by cycleTakesFigures() above (spec 006 §7.1, §755). */
   /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
      This asked `u_report` for every target, and u_report's area is "unit" —
      so for an fn: target the screen read the own-UNIT cell while the server
@@ -14091,8 +14160,7 @@ function canReportFn(target){
   /* §405: a unit's own holder reports on the UNIT's column, through the gate
      a unit's own page already asks — never the function's. */
   if (isUnitHolderId(target)) return canReport(subjKey(target));
-  if (REVIEW.state !== "open") return false;
-  if (CYCLE.locked && !inOffice()) return false;
+  if (!cycleTakesFigures()) return false;   /* §755 */
   return grantAt("k_report", holderTarget(target)) === "edit";
 }
 function canReportFnRow(target, project, rowObj){
@@ -14170,8 +14238,7 @@ function dirPillar(t){
    (ownsTopPillar with the stored pillar's own two seats). */
 function canSpeakForDir(t){
   var d = dirPillar(t);
-  if (!d || REVIEW.state !== "open" || !planOn("group")) return false;
-  if (CYCLE.locked && !inOffice()) return false;
+  if (!d || !cycleTakesFigures() || !planOn("group")) return false;   /* §755 */
   return SMPRules.mayReportTop(world(), viewer()) ||
          SMPRules.ownsTopPillar(world(), viewer(), d.p.owner || "", d.p.custodian || "");
 }
@@ -16505,6 +16572,93 @@ function setReqs(t, v){
   var a = reqsParse(v);
   if (a.length) t.reqs = a; else delete t.reqs;
 }
+
+/* §767 — A TACTIC NAMES THE KEY MEASURES IT SUPPORTS. Islam: the tactics
+   should be linked to the key measures "regardless of the outcomes", as a
+   mapping. Stored on the tactic as `supports`, a list of its pillar's own
+   measure IDS riding `tactics.extra` (no migration), DELETED when emptied
+   (§50.6). A plan fact and never a figure: it is not in REPORT.tactic, so it
+   falls to the plan on the server and only the pen writes it. Never scored,
+   never asked for, never counted as missing (Islam chose not, to start).
+
+   EVERY SURFACE SHOWS THE MEASURE'S NUMBER, not its name (mockup A2,
+   design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html): a client's
+   measure names run to eighty letters and written out under a tactic they
+   buried the reported note. The number is the measure's PLACE in its own
+   table, read at draw time, so a measure moved up or down carries its
+   tactics' lines with it; the id is what is stored because a position
+   changes and a name can be retyped. */
+function supportsIds(t){
+  return t && Array.isArray(t.supports)
+    ? t.supports.map(function(x){ return String(x == null ? "" : x).trim(); }).filter(Boolean)
+    : [];
+}
+function setSupports(t, ids){
+  var seen = {}, a = [];
+  (ids || []).forEach(function(x){
+    x = String(x == null ? "" : x).trim();
+    if (x && !seen[x]) { seen[x] = 1; a.push(x); }
+  });
+  if (a.length) t.supports = a; else delete t.supports;
+}
+/* The pillar's measures this tactic supports, in the table's order, each with
+   the number the table prints. A stored id naming no measure of the pillar is
+   simply not drawn, which is what makes removing a measure safe. */
+function supportsOf(t, p){
+  var ids = supportsIds(t), out = [];
+  if (!ids.length || !p) return out;
+  (p.measures || []).forEach(function(m, i){
+    if (m && m.id != null && ids.indexOf(String(m.id)) >= 0) out.push({ m:m, n:i + 1 });
+  });
+  return out;
+}
+function supportedBy(m, p){
+  var out = [];
+  if (!m || m.id == null || !p) return out;
+  (p.tactics || []).forEach(function(t, i){
+    if (supportsIds(t).indexOf(String(m.id)) >= 0) out.push({ t:t, n:i + 1 });
+  });
+  return out;
+}
+/* Whether the mapping is IN USE on this pillar: some tactic names a measure
+   it has. The count under a measure is drawn only then, so a plan nobody has
+   mapped is pixel-identical to what it was (§113.8) rather than red under
+   every measure the day this shipped. */
+function mappingOn(p){
+  return !!(p && (p.tactics || []).some(function(t){ return supportsOf(t, p).length; }));
+}
+/* The pillar holding a row, by identity — the row objects on every page are
+   the stored ones (§384's note on pctx), so no id walk is needed. */
+function pillarHolding(u, row){
+  var hit = null;
+  (u && u.items || []).forEach(function(p){
+    if (!hit && p && ((p.tactics || []).indexOf(row) >= 0 || (p.measures || []).indexOf(row) >= 0)) hit = p;
+  });
+  return hit;
+}
+/* When a measure's id changes — renumbering, a fold onto the company plan —
+   every tactic pointing at the old id points at the new one. */
+function remapSupports(p, oldToNew){
+  (p && p.tactics || []).forEach(function(t){
+    var ids = supportsIds(t);
+    if (!ids.length) return;
+    setSupports(t, ids.map(function(x){ return oldToNew[x] || x; }));
+  });
+}
+/* A measure removed with the pen leaves no tactic pointing at it (§50.6): a
+   tactic that supported it and one that never did must be byte-identical. */
+function forgetSupport(id){
+  if (!id) return;
+  pillarHolderTargets().forEach(function(tg){
+    var u = unitLike(tg);
+    (u && u.items || []).forEach(function(p){
+      (p.tactics || []).forEach(function(t){
+        var ids = supportsIds(t);
+        if (ids.indexOf(String(id)) >= 0) setSupports(t, ids.filter(function(x){ return x !== String(id); }));
+      });
+    });
+  });
+}
 /* §416 — YEARS 1 · 2 · 3 (RHI step 6). A direction marks the years it runs
    in (`p.years`, riding `pillars.extra`, no migration; absent or all three is
    every year and is stored as an ABSENCE, §50.6). The plan stands in one year
@@ -17921,8 +18075,15 @@ function buFoldIntoTop(){
       c.id = mintRowId(GROUP.items, "group-P");
       c.fromUnit = k; c.fromId = p.id;
       if (!c.owner && head) c.owner = head.name;
-      (c.measures || []).forEach(function(m, i){ m.id = c.id + "-M" + (i + 1); });
+      /* §767: the copy's tactics point at the copy's measures. */
+      var fMap = {};
+      (c.measures || []).forEach(function(m, i){
+        var nid = c.id + "-M" + (i + 1);
+        if (m.id != null) fMap[String(m.id)] = nid;
+        m.id = nid;
+      });
       (c.tactics || []).forEach(function(t, i){ t.id = c.id + "-T" + (i + 1); });
+      remapSupports(c, fMap);
       /* §541: coded after the push, so a folded pillar marked Capability
          takes a C and not the next D (see the fold above). */
       GROUP.items.push(c);
@@ -18564,8 +18725,15 @@ function renumberUnit(u){
        An existing code is left alone: nine units carry hand-set ones and
        renumbering them would rewrite codes that are already in decks. */
     if (!p.code) p.code = pillarCode(u, pi);
-    p.measures.forEach(function(m, mi){ m.id = p.id + "-M" + (mi + 1); });
+    /* §767: the tactics' pointers at their measures follow the new ids. */
+    var mMap = {};
+    p.measures.forEach(function(m, mi){
+      var nid = p.id + "-M" + (mi + 1);
+      if (m.id != null && String(m.id) !== nid) mMap[String(m.id)] = nid;
+      m.id = nid;
+    });
     p.tactics.forEach(function(t, ti){ t.id = p.id + "-T" + (ti + 1); });
+    remapSupports(p, mMap);
   });
 }
 UNIT_KEYS.forEach(function(k){ UNITS[k].ukey = k; renumberUnit(UNITS[k]); });
@@ -22652,7 +22820,9 @@ if (typeof module !== "undefined" && module.exports) {
 var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","outcome",
                  "outcome_direction","outcome_target","outcome_compiled",
                  "owner","collaborators","direction","value","value_3y","unit","horizon",
-                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly","quarterly"];
+                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly","quarterly",
+                 /* §767: the key measures a tactic supports, by name, "|"-separated. */
+                 "key_measures"];
 
 /* ── THE TWELVE, ON THE WAY IN (§278) ──────────────────────────────────
    The workbook writes twelve columns and the reader joins them into one
@@ -22852,6 +23022,7 @@ function planTemplate(u){
         outcome_compiled:t.outCompile, owner:t.owner,
         collaborators:(t.collaborators || []).join("|"),
         q1:t.q1 ? 1 : 0, q2:t.q2 ? 1 : 0, q3:t.q3 ? 1 : 0, q4:t.q4 ? 1 : 0,
+        key_measures:supportsOf(t, p).map(function(x){ return x.m.name; }).join("|"),
         source_slide:t.slide, notes:t.notes }));
     });
   });
@@ -23066,6 +23237,26 @@ function ownerProblems(rows){
   });
   return out;
 }
+/* §767: the key measures a tactic's cell names, read against the measures the
+   SAME file puts under the same pillar — a name (case and spacing aside) or
+   the measure's number in that list. Answers the matched measures' indexes
+   (0-based) and the tokens that matched nothing, so the reader can say which
+   (§96.2: said, never dropped). */
+function kmTokens(v){
+  return String(v == null ? "" : v).split(/[|\r\n]/)
+    .map(function(x){ return x.trim(); }).filter(Boolean);
+}
+function kmMatch(v, names){
+  var hit = [], miss = [];
+  var norm = function(s){ return String(s == null ? "" : s).replace(/\s+/g, " ").trim().toLowerCase(); };
+  var keys = (names || []).map(norm);
+  kmTokens(v).forEach(function(tok){
+    var i = /^(?:km\s*)?(\d+)$/i.test(tok) ? +(/(\d+)$/.exec(tok)[1]) - 1 : keys.indexOf(norm(tok));
+    if (i >= 0 && i < keys.length) { if (hit.indexOf(i) < 0) hit.push(i); }
+    else miss.push(tok);
+  });
+  return { hit:hit, miss:miss };
+}
 function validatePlan(u, rows){
   var problems = [], notices = [], themes = GROUP.themes.map(function(x){ return x.ab; });
   var pillars = rows.filter(function(r){ return r.type === "PILLAR"; });
@@ -23099,6 +23290,17 @@ function validatePlan(u, rows){
     if (r.type === "OUTORPHAN")
       problems.push({ at:at, msg:"an outcome on the Outcomes sheet whose tactic could not be matched \u2014 name a tactic from the Tactics sheet, under its pillar" });
     if (r.type === "TACTIC") {
+      /* §767: a key measure named that the file does not put under the
+         same pillar is said, never dropped (§96.2). */
+      var kmv = r.kms || r.key_measures;
+      if (kmv) {
+        var kmNames = rows.filter(function(m){ return m.type === "MEASURE" && m.parent_id === r.parent_id; })
+          .map(function(m){ return m.name; });
+        kmMatch(kmv, kmNames).miss.forEach(function(tok){
+          problems.push({ at:at, msg:'key measure "' + tok + '" is not on the Measures sheet under this pillar \u2014 ' +
+            'write the measure\'s name as that sheet has it, or its number there' });
+        });
+      }
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "" && r[q] != null && ["0","1"].indexOf(String(r[q])) < 0)
           problems.push({ at:at, msg:q + ' is "' + r[q] + '", not 0 or 1' });
@@ -23366,6 +23568,16 @@ function createFromPlan(u, d){
       if (x.outs && x.outs.length) tRow.outs = x.outs.map(function(o){ return Object.assign({}, o); });
       /* §415: requirements only where the file carried some (§50.6). */
       if (x.reqs && reqsParse(x.reqs).length) tRow.reqs = reqsParse(x.reqs);
+      /* §767: the key measures it supports, by name or number against the
+         measures already under this pillar (measures arrive before tactics:
+         the sort above puts both at 2 and keeps the sheets' order). Set only
+         where the file named some (§50.6). */
+      var kmv2 = x.kms || x.key_measures;
+      if (kmv2) {
+        var kmHit = kmMatch(kmv2, p2.measures.map(function(m){ return m.name; })).hit
+          .map(function(i){ return p2.measures[i] && p2.measures[i].id; }).filter(Boolean);
+        if (kmHit.length) tRow.supports = kmHit.map(String);
+      }
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {
@@ -25063,16 +25275,23 @@ function planWorkbook(u){
        client's file is byte-for-byte what it was. */
     var rq = (typeof requirementsOn === "function" && requirementsOn(u)) ||
       u.items.some(function(p){ return (p.tactics || []).some(function(t){ return reqsOf(t).length; }); });
+    /* §767: the key measures a tactic supports, BY NAME — a sheet is read by
+       name (§22: no ids in a file) and the Measures sheet beside it carries
+       the names. Several are "|"-separated, never by comma, which a measure's
+       own name may hold. The column exists only once some tactic names a
+       measure, for §415's reason: every other client's file is byte-for-byte
+       what it was. */
+    var km = u.items.some(function(p){ return (p.tactics || []).some(function(t){ return supportsOf(t, p).length; }); });
     return { name:"Tactics",
       widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
-        .concat(planWidths(9)).concat(rq ? [40] : []),
+        .concat(planWidths(9)).concat(km ? [40] : []).concat(rq ? [40] : []),
       /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
          already says so of the outcome's other three columns — a bare "Jan"
          beside a tactic's own quarters would read as the tactic's month. */
       head:["Pillar", "Tactic", "Description", "Outcome",
             "Outcome direction", "Outcome target", "Outcome compiled",
             "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
-        .concat(planHead("Outcome ")).concat(rq ? ["Requirements"] : []),
+        .concat(planHead("Outcome ")).concat(km ? ["Key measures"] : []).concat(rq ? ["Requirements"] : []),
       numCols:planNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
@@ -25087,6 +25306,7 @@ function planWorkbook(u){
             t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
             SMPRules.isHidden(t) ? "Yes" : ""].concat(planCells(t, "outMonthly", "outQuarterly"))
+            .concat(km ? [supportsOf(t, p).map(function(x){ return x.m.name; }).join(" | ")] : [])
             .concat(rq ? [reqsOf(t).join("\n")] : []));
         });
         return acc;
@@ -25525,7 +25745,11 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "",
       /* §415: a line per item; blank says nothing (a file written before
          this existed carries no such column). */
-      reqs:r["Requirements"] || "" });
+      reqs:r["Requirements"] || "",
+      /* §767: the key measures it supports, as the cell says them — names,
+         or the measure's number on the Measures sheet under the same pillar;
+         resolved against the plan's own measures when the plan is made. */
+      kms:r["Key measures"] || "" });
   });
 
   /* §414: a tactic's extra outcomes ride ON the tactic's row, minted O2,
@@ -28130,6 +28354,129 @@ function buildReviewPptx(target){
    are; every other "&" is still escaped. Still safe: those five decode to
    text, never to markup, so nothing written through here can open a tag. */
 function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+/* §757: A SWOT LINE IS A TITLE AND ITS POINTS. Islam writes each line in
+   the box as a title on the first line and the points under it, one per
+   line ("TRUSTED BRAND LEGACY" and then three dashes). The box kept the
+   line breaks — a textarea does — but the page printed the line through
+   `esc()` inside one span, which folds every break into a space, so once
+   the pen closed the title and its points ran together as one paragraph
+   (Islam: "when done editing they get merged"). This prints what was
+   typed: the first line bold, each line after it on its own line, blank
+   lines dropped. A line typed as ONE line is printed exactly as before —
+   plain — so the lists already written do not change their look; only a
+   line that carries points under its title gets the title in bold.
+
+   §757.1 — THE POINTS ARE BULLETS, EACH IN LINE WITH ITSELF. Islam, of the
+   first cut: *"the points under the main title should act like bullet
+   points with proper alignment of the lines"*. A point that wrapped ran its
+   second line back under the dash. So a point is its own block with two
+   columns — the bullet in a narrow column, the words in their own — and a
+   wrapped point continues under its first word (`.swot-p`, arrange.css and
+   present.css). The dash Islam typed is taken off the front of the line and
+   the stylesheet draws the bullet, so a point typed without one gets the
+   same bullet and a box reads the same however its lines were typed. A
+   leading -, –, —, •, * or · is the marker; anything else is the words.
+   Mockup: design-mockups/swot-title-points/2026-11-16_title-and-points.html.
+   Used by the SWOT page, a function's S&W (the same boxes), and the three
+   deck slides; the workbooks and the PPTX keep the raw text. */
+function swotText(x){
+  var ls = String(x == null ? "" : x).split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+  if (ls.length < 2) return '<span class="swot-t">' + esc(ls[0] || "") + '</span>';
+  return '<span class="swot-t"><b>' + esc(ls[0]) + '</b>' +
+    ls.slice(1).map(function(l){
+      return '<span class="swot-p">' + esc(l.replace(/^[-\u2013\u2014\u2022*\u00b7]+\s*/, "")) + '</span>';
+    }).join("") + '</span>';
+}
+/* ── A SWOT LINE'S POINTS FOLD UNDER ITS TITLE (§795) ──────────────────────
+   Islam: *"can we have an option where the items under the title is collapsed
+   and expanded by clicking on the main title? or expand all or collapse
+   all?"* Settled on a working mockup he pressed himself
+   (design-mockups/swot-fold/2026-11-20_fold-points-chosen.html), with his
+   three answers: the page opens AS YOU LEFT IT, there is ONE Expand all /
+   Collapse all for the page, and the pen stays one box with a row per point.
+
+   THE TITLE IS THE CONTROL, and only where there is something under it: a
+   line of one row has nothing to fold, so it gets no arrow and is drawn by
+   `swotText()` exactly as before. A folded line says how many points it
+   holds, so folding never hides that there IS more.
+
+   A FOLD IS THE READER'S, NEVER THE PLAN'S. It is kept in this browser
+   (`smp.swot.fold`) and nowhere else: nothing is saved, nobody else's page
+   moves, and the deck, the workbooks and the PowerPoint — which read
+   `swotText()` or the raw text — never hear of it. Paper is the same page
+   printed, so print opens every line (arrange.css).
+
+   KEYED BY THE TITLE, NOT THE ROW NUMBER: client | unit | box | title. Lines
+   have no id of their own, and a number moves when a line above is removed —
+   the fold would jump to its neighbour. A title that is rewritten is a new
+   line as far as this goes and opens, which is the safe way to be wrong.
+
+   THE PEN OPENS EVERYTHING by construction: with Edit on the box draws
+   fields, not this, so there is no fold to be inside of. */
+var SWOT_FOLD_KEY = "smp.swot.fold";
+function swotFolds(){
+  try { var j = JSON.parse(localStorage.getItem(SWOT_FOLD_KEY) || "{}"); return j && typeof j === "object" ? j : {}; }
+  catch (e) { return {}; }
+}
+function swotFoldsKeep(m){ try { localStorage.setItem(SWOT_FOLD_KEY, JSON.stringify(m)); } catch (e) {} }
+function swotFoldId(ukey, quad, title){
+  /* the client's own address segment when served; the file has none */
+  var m = (typeof location !== "undefined" && /^https?:$/.test(location.protocol)) ? /^\/([a-z0-9][a-z0-9-]*)\//.exec(location.pathname || "") : null;
+  return (m ? m[1] : "") + "|" + ukey + "|" + quad + "|" + String(title).trim().toLowerCase();
+}
+var SWOT_CARET = '<svg class="swcar" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3.5l3 3 3-3"/></svg>';
+var SWOT_ALLMARK = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5l3-3 3 3M3 7l3 3 3-3"/></svg>';
+function swotLine(x, ukey, quad, i){
+  var ls = String(x == null ? "" : x).split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+  if (ls.length < 2) return swotText(x);
+  var id = swotFoldId(ukey, quad, ls[0]), open = !swotFolds()[id], n = ls.length - 1;
+  var dom = "swp-" + quad + "-" + i;
+  return '<span class="swot-t"><button type="button" class="swfold" data-swfold="' + esc(id) +
+    '" aria-expanded="' + open + '" aria-controls="' + dom + '"><b>' + esc(ls[0]) + '</b>' +
+    '<span class="swcnt">' + n + (n === 1 ? ' point' : ' points') + '</span>' + SWOT_CARET + '</button>' +
+    '<span class="swpts" id="' + dom + '"' + (open ? '' : ' hidden') + '>' +
+    ls.slice(1).map(function(l){
+      return '<span class="swot-p">' + esc(l.replace(/^[-\u2013\u2014\u2022*\u00b7]+\s*/, "")) + '</span>';
+    }).join("") + '</span></span>';
+}
+/* ONE BUTTON FOR THE PAGE, on the section row beside the pen. Drawn hidden
+   with the row and shown by `swotFoldSync()` once the page under it is
+   painted — the row cannot know on its own whether the page has a line with
+   points on it, and a button that folds nothing is a control that goes
+   nowhere (§94.15). Its word is what the press will do. */
+function swotFoldBtn(){ return '<button type="button" class="swfoldall" data-swfoldall hidden></button>'; }
+function swotFoldSync(){
+  if (typeof document === "undefined") return;
+  var b = document.querySelector("[data-swfoldall]");
+  if (!b) return;
+  var fs = document.querySelectorAll("[data-swfold]");
+  if (!fs.length) { b.hidden = true; return; }
+  var anyOpen = Array.prototype.some.call(fs, function(f){ return f.getAttribute("aria-expanded") === "true"; });
+  b.hidden = false;
+  b.setAttribute("data-open", anyOpen ? "1" : "");
+  b.innerHTML = SWOT_ALLMARK + (anyOpen ? "Collapse all" : "Expand all");
+}
+function swotFoldSet(f, open, m){
+  f.setAttribute("aria-expanded", String(open));
+  var pts = document.getElementById(f.getAttribute("aria-controls"));
+  if (pts) pts.hidden = !open;
+  var id = f.getAttribute("data-swfold");
+  if (open) delete m[id]; else m[id] = 1;
+}
+/* Wired once, on the document: the boxes are redrawn on every paint and this
+   survives it (§24, §47.2). A fold moves two attributes in place — no paint,
+   so the page does not jump and nothing is marked as changed. */
+if (typeof document !== "undefined") document.addEventListener("click", function(ev){
+  var t = ev.target && ev.target.closest ? ev.target.closest("[data-swfold], [data-swfoldall]") : null;
+  if (!t) return;
+  var m = swotFolds();
+  if (t.hasAttribute("data-swfoldall")) {
+    var open = !t.getAttribute("data-open");
+    Array.prototype.forEach.call(document.querySelectorAll("[data-swfold]"), function(f){ swotFoldSet(f, open, m); });
+  } else swotFoldSet(t, t.getAttribute("aria-expanded") !== "true", m);
+  swotFoldsKeep(m);
+  swotFoldSync();
+});
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
@@ -28703,6 +29050,8 @@ function measureRows(ms, opts){
                '<span class="idx-n">' + (i+1) + '</span></td><td>' +
                (opts.unscored ? esc(m.name) : '<b class="mname">' + esc(m.name) + '</b>') + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
+               /* §767: the tactics behind it, while the pillar's mapping is in use. */
+               supportedLine(m, opts.pillar) +
                /* THE MERGE NEEDED BOTH SIDES, and git could not know it: this
                   branch names the reported note (§255) and main reads the
                   target at its own scale (§254's `tgtShown`). Taking either
@@ -28797,6 +29146,235 @@ function setOr(row, field, v){
   v = (v == null ? "" : String(v)).trim();
   if (v) row[field] = v; else delete row[field];
 }
+
+/* ── §767: A TACTIC'S KEY MEASURES, BY NUMBER ──────────────────────────
+   The mapping Islam asked for, drawn the way the A2 mockup was signed off
+   (design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html): under the
+   tactic's name one line of tags, "KM 1 KM 2"; under the measure's name
+   "T1 T5" (Islam, on the built page: no word and no count before the tags);
+   the full name on hover; a folded legend under the
+   tactics table saying which number is which. ONE LINE WHATEVER THE NAMES
+   ARE — the whole reason for the number: a client's measure names run to
+   eighty letters, and written out they buried the reported note. The data
+   helpers sit in config-data.js beside the requirements' (§415). */
+function kmTag(n, name, kind){
+  return '<span class="kmtag ' + (kind === "t" ? "t" : "m") + '" data-name="' + esc(name || "") +
+    '" aria-label="' + esc(name || "") + '" tabindex="0">' +
+    (kind === "t" ? "T" + n : "KM " + n) + '</span>';
+}
+/* §767.1: THE NAME SHOWS THE MOMENT THE POINTER TOUCHES THE TAG. Islam: *"the
+   message appear slowly on hovering it needs to appear quicker"* — it was the
+   browser's own `title` tooltip, which waits about a second by a rule no page
+   can change. So the tag carries the name in `data-name` and ONE floating
+   label, made once and moved, is shown on mouseover and on keyboard focus,
+   below the tag (above it when the tag sits near the foot of the window),
+   fixed to the viewport so the table's own scroll box cannot clip it. One
+   listener on the document, so a tag drawn by any surface — the Plan page,
+   Performance, the readers' view — is covered without a wire per paint. */
+(function(){
+  if (typeof document === "undefined") return;
+  var tip = null;
+  function tagOf(e){
+    var t = e.target;
+    return t && t.closest ? t.closest(".kmtag[data-name]") : null;
+  }
+  /* §774.2: BESIDE THE POINTER, not over the tag (Islam: *"the box on
+     hovering should appear close to the mouse, not in the top like that"*).
+     With a pointer, the label sits just below and right of it and follows
+     it across the tag; flipped to the left or above only where the window
+     ends. From the keyboard there is no pointer, so it sits under the tag. */
+  function show(el, e){
+    var name = el.getAttribute("data-name");
+    if (!name) return;
+    if (!tip) {
+      tip = document.createElement("div");
+      tip.className = "kmtip"; tip.setAttribute("role", "tooltip");
+      document.body.appendChild(tip);
+    }
+    tip.textContent = name;
+    tip.classList.add("on");
+    place(el, e);
+  }
+  /* THE PAGE IS ZOOMED (`html { zoom:.8 }`, _shared.css), so the pointer,
+     the rects and the window are in the screen's pixels while a fixed box's
+     `left`/`top` and its offsetWidth are in the page's: worked in the
+     screen's and divided by the zoom on the way into the style, or the label
+     lands four fifths of the way to the pointer (measured: asked for 278,
+     drawn at 222). */
+  function place(el, e){
+    if (!tip) return;
+    var z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    var w = tip.offsetWidth * z, h = tip.offsetHeight * z, left, top;
+    if (e && typeof e.clientX === "number") {
+      left = e.clientX + 14; top = e.clientY + 16;
+      if (left + w > window.innerWidth - 8) left = e.clientX - 14 - w;
+      if (top + h > window.innerHeight - 8) top = e.clientY - 12 - h;
+    } else {
+      var r = el.getBoundingClientRect();
+      left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+      top = r.bottom + 6;
+      if (top + h > window.innerHeight - 8) top = r.top - 6 - h;
+    }
+    tip.style.left = (Math.max(8, left) / z) + "px"; tip.style.top = (Math.max(8, top) / z) + "px";
+  }
+  function hide(){ if (tip) tip.classList.remove("on"); }
+  document.addEventListener("mouseover", function(e){ var t = tagOf(e); if (t) show(t, e); });
+  document.addEventListener("mousemove", function(e){ if (tip && tip.classList.contains("on") && tagOf(e)) place(null, e); });
+  document.addEventListener("mouseout",  function(e){ if (tagOf(e)) hide(); });
+  document.addEventListener("focusin",   function(e){ var t = tagOf(e); if (t) show(t); });
+  document.addEventListener("focusout",  function(e){ if (tagOf(e)) hide(); });
+  document.addEventListener("scroll", hide, true);
+})();
+function supportsLine(t, p){
+  var s = supportsOf(t, p);
+  if (!s.length) return '';
+  /* Islam, on the built page: no word before the tags — the tags are the line. */
+  return '<span class="kmnums">' + s.map(function(x){ return kmTag(x.n, x.m.name, "m"); }).join('') + '</span>';
+}
+/* The count under a measure, only while the mapping is in use on its pillar
+   (`mappingOn`); a measure nobody is working on says so (Islam's mockup). */
+function supportedLine(m, p){
+  if (!p || !mappingOn(p)) return '';
+  var s = supportedBy(m, p);
+  /* §794: THE LINK IS OPTIONAL, SO A MEASURE WITHOUT ONE SAYS NOTHING.
+     Islam, on RHI's page: *"this should be optional so the no connection
+     doesn't show missing connection."* The red "No tactic supports it yet"
+     read as a gap to close; a key measure a tactic does not name is simply
+     a key measure. Nothing is drawn under it. */
+  if (!s.length) return '';
+  /* Islam, on the built page: the tags alone, no "2 tactics" before them. */
+  return '<span class="kmcount">' + s.map(function(x){ return kmTag(x.n, x.t.name, "t"); }).join('') + '</span>';
+}
+/* The legend — which number is which measure — folded, so the page costs one
+   line until it is asked. Drawn only while the mapping is in use. */
+function supportsLegend(p){
+  /* §774.2: GONE (Islam: *"remove this part of which number is key
+     measures"*). The tags' own hover names the measure; the folded list
+     under the tactics was a second telling. Kept as a function that draws
+     nothing, so the three places that called it need no edit and the
+     check that counts it reads zero. */
+  return '';
+  if (!p || !mappingOn(p)) return '';
+  return '<details class="kmlegend"><summary>Which number is which ' + L1("measure").toLowerCase() + '</summary><div class="kmrows">' +
+    (p.measures || []).map(function(m, i){
+      return '<span class="kmtag m">KM ' + (i + 1) + '</span><span>' + esc(m.name || "") + '</span>';
+    }).join('') + '</div></details>';
+}
+/* THE PEN: a tick list of the pillar's own measures in the tactic's cell,
+   under its description. Each tick is its own `data-fld`, bound to a setter
+   that TOGGLES the id — the shell's one handler fires the setter on change,
+   and on a checkbox a change is exactly one toggle (§71.2: written and
+   saved, not repainted). Emptied, the key is deleted (§50.6). A pillar with
+   no measure yet has nothing to offer and says so. */
+/* §767.2: A CLOSED BOX THAT OPENS TO THE TICKS. Islam: *"the boxes with the
+   list of key measures is taking a lot of space for the row. shall we make it
+   a checkbox drop down?"* The list is now inside a `<details>`: closed, one
+   line showing the chosen tags (or "Pick key measures"); open, the same tick
+   list, in the flow of the row rather than floating over it, so the table's
+   scroll box can never clip the last tactic's list. The summary's tags are
+   redrawn on each tick by the document listener below (§71.2: the pen does
+   not repaint on a change), and an open box closes on a click elsewhere. */
+function supportsSummary(t, p){
+  var s = supportsOf(t, p);
+  return s.length ? s.map(function(x){ return '<span class="kmtag m">KM ' + x.n + '</span>'; }).join('')
+                  : '<span class="kmnone">Pick ' + L("measure").toLowerCase() + '</span>';
+}
+function supportsEdit(t, p){
+  var ms = (p && p.measures) || [], have = supportsIds(t);
+  return '<span class="kmpick">' + bxkey(L("measure")) +
+    (ms.length
+      ? '<details class="kmdrop"><summary><span class="kmsum">' + supportsSummary(t, p) + '</span><span class="kmchev" aria-hidden="true"></span></summary>' +
+        '<span class="kmlist" role="group" aria-label="' + L("measure") + ' this ' + L1("tactic").toLowerCase() + ' supports">' +
+        ms.map(function(m, i){
+          var i2 = FIELDS.push(function(){
+            var ids = supportsIds(t), id = String(m.id);
+            setSupports(t, ids.indexOf(id) >= 0 ? ids.filter(function(x){ return x !== id; }) : ids.concat([id]));
+          }) - 1;
+          return '<label><input type="checkbox" data-fld="' + i2 + '"' +
+            (m.id == null ? ' disabled' : '') +
+            (m.id != null && have.indexOf(String(m.id)) >= 0 ? ' checked' : '') + '>' +
+            '<span class="kmtag m">KM ' + (i + 1) + '</span><span class="kmname">' + esc(m.name || "") + '</span></label>';
+        }).join('') + '</span></details>'
+      : '<span class="why">No ' + L("measure").toLowerCase() + ' on this ' + L1("pillar").toLowerCase() + ' yet</span>') +
+    '</span>';
+}
+/* §767.2: the closed line follows the ticks, and a box left open closes when
+   the click lands anywhere else (one listener, every pen). */
+(function(){
+  if (typeof document === "undefined") return;
+  document.addEventListener("change", function(e){
+    var d = e.target && e.target.closest ? e.target.closest(".kmdrop") : null;
+    if (!d) return;
+    var on = Array.prototype.filter.call(d.querySelectorAll(".kmlist input"), function(i){ return i.checked; })
+      .map(function(i){ return i.closest("label").querySelector(".kmtag").outerHTML; });
+    var sum = d.querySelector(".kmsum");
+    if (sum) sum.innerHTML = on.length ? on.join("") : '<span class="kmnone">Pick ' + L("measure").toLowerCase() + '</span>';
+  });
+  document.addEventListener("click", function(e){
+    document.querySelectorAll("details.kmdrop[open]").forEach(function(d){
+      if (!d.contains(e.target)) d.removeAttribute("open");
+    });
+  });
+})();
+
+/* ── §773: THE TACTIC PANEL ─────────────────────────────────────────────
+   Islam, with a picture of the pen: *"can we work on a cleaner approach to
+   edit the tactic. as it became very complex."* One tactic's row held its
+   name, description, key measures, requirements, four outcomes with four
+   controls each, owner, collaborators and quarters in one cell, taller than
+   the screen. From the working mockup he tried (design-mockups/
+   tactic-edit-panel/2026-11-16_full-page.html): with the pen on, the tactics
+   table is a plain LIST — one line per tactic — and the tactic being edited
+   opens in a PANEL beside the table, in short sections. The one Edit button
+   at the top turns the pen on and opens the panel on the first tactic;
+   pressing any row moves it; Done editing, at the top or at the foot of the
+   panel, turns the pen off. The owner and the collaborators are the same
+   register-fed pickers (§130.1); the key measures the dropdown (§767.2).
+
+   WHICH TACTIC IS OPEN: `null` is "not chosen yet" (the pen opens on the
+   first of the pillar drawn), `false` is "closed by hand" (× on the panel —
+   the pen stays on, the list stays), else the tactic's id. Reset to null
+   whenever the pen is drawn off, so the next Edit opens on the first again.
+
+   THE ROW FOLLOWS THE PANEL AS YOU TYPE — name and description only, by a
+   direct patch of the row's own text (§71.2: the pen never repaints on a
+   keystroke, and a repaint would take the cursor, §35). Everything else on
+   the row (owner, quarters, tags, the outcome count) is read on the next
+   paint, which every row press and every close causes. */
+var PEN_TACTIC = null;
+(function(){
+  if (typeof document === "undefined") return;
+  function rowOf(){
+    if (!PEN_TACTIC) return null;
+    var id = String(PEN_TACTIC).replace(/"/g, '\\"');
+    return document.querySelector('[data-tacrow="' + id + '"]');
+  }
+  document.addEventListener("input", function(e){
+    var f = e.target;
+    if (!f || !f.classList) return;
+    var v = String(f.value || "").trim(), word = "New " + L1("tactic").toLowerCase();
+    /* §775: the name is typed in the ROW; the panel's head follows it */
+    if (f.classList.contains("tacpn")) {
+      var tr = f.closest("[data-tacrow]"), hd = document.querySelector(".tacpanel .tpname");
+      if (tr && hd && String(PEN_TACTIC) === tr.dataset.tacrow) hd.textContent = v || word;
+    /* an outcome's name is typed in the ROW; the panel reads it over the target */
+    } else if (f.classList.contains("outpn")) {
+      var ln = f.closest(".outline"), tr2 = f.closest("[data-tacrow]");
+      if (ln && tr2 && String(PEN_TACTIC) === tr2.dataset.tacrow) {
+        var nm = document.querySelector('.tacpanel .oname[data-oname="' + ln.dataset.oid.replace(/"/g, '\\"') + '"]');
+        if (nm) nm.textContent = v || "Not named yet — type it in the table";
+      }
+    /* the description is typed in the PANEL; the grey line under the row's name follows */
+    } else if (f.classList.contains("tacpd") && f.closest(".tacpanel")) {
+      var row = rowOf(), cell = row && row.querySelector(".namerow") && row.querySelector(".namerow").closest("td");
+      if (!cell) return;
+      var why = cell.querySelector(".tacwhy");
+      if (!why && v) { why = document.createElement("span"); why.className = "why tacwhy"; cell.appendChild(why); }
+      if (why) { why.textContent = v; if (!v) why.remove(); }
+    }
+  });
+})();
+
 /* The outcome's four controls, in ONE cell and ONE grid (Islam: "the 4 boxes
    should be the same size ... so we can give space for the other columns").
    Equal boxes sized by what the compile select needs for its longest word, so
@@ -29058,7 +29636,7 @@ function planOutRows(t, ed, tdCls){
 /* Tactic, owner and quarters read left; the rest centres. A tactic whose
    quarters have not begun is not behind \u2014 it is not yet due, and scoring it
    would say otherwise. */
-function tacticRows(ts, unitKey){
+function tacticRows(ts, unitKey, p){
   var on = arranging("unit", unitKey);
   return ts.map(function(t, i){
     var pl = tacticPlanned(t), due = tacticDue(t);
@@ -29129,6 +29707,8 @@ function tacticRows(ts, unitKey){
       /* §255: the description stays a plain grey — it is the plan's, and the
          name above it is what it belongs to. The NOTE is the one line in this
          cell that was written this cycle, so it is the one that says so. */
+      /* §767: the key measures it supports, by number, above the note. */
+      supportsLine(t, p) +
       repNote(t) + '</td>' +
       '<td class="outc">' + (nEx ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       '<td' + rs + '>' + esc(t.owner) + '</td><td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
@@ -29419,7 +29999,7 @@ function pillarBody(it, u){
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
-      measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+      measureRows(it.measures, { unit: uk, pillar: it }) + '</tbody></table></div>' +
     /* §343: and the breakdown, where there is one — between the measures it
        is part of and the tactics it is not. A pillar without one adds nothing
        at all: no heading, no empty section (Islam, on the mockup). */
@@ -29429,7 +30009,7 @@ function pillarBody(it, u){
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
-      tacticRows(it.tactics, uk) + '</tbody></table></div>' +
+      tacticRows(it.tactics, uk, it) + '</tbody></table></div>' + supportsLegend(it) +
   '</div>';
 }
 
@@ -29856,7 +30436,7 @@ function unitsTable(keys){
     var u = UNITS[k], ko = unitObjectives(u), r = unitRatio(u);
     return '<tr><td><button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>' +
       (u.real ? '' : '<span class="why">illustrative</span>') + '</td>' +
-      '<td class="num">' + u.weight + '%</td>' +
+      (weightingOn() ? '<td class="num">' + u.weight + '%</td>' : '') +
       /* §405: a unit that plans otherwise counts no pillars. */
       '<td class="num">' + (unitOwnWay(u) ? '&mdash;' : u.items.length) + '</td>' +
       '<td class="num">' + pct(r) + '</td>' +
@@ -29864,7 +30444,7 @@ function unitsTable(keys){
       '<td class="num final" style="color:' + bandInk(ko) + '">' + pct(ko) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
-    '<th style="width:30%">' + L1("unitword") + '</th><th class="num">Weight</th>' +
+    '<th style="width:30%">' + L1("unitword") + '</th>' + (weightingOn() ? '<th class="num">Weight</th>' : '') +
     '<th class="num">' + L("pillar","bu") + '</th><th class="num">Execution of plan</th>' +
     '<th class="num">Var.</th><th class="num">Objectives</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -30239,7 +30819,9 @@ function computeWeights(){
   var anySet = us.some(function(u){
     return w.factors.some(function(f){ return num(u[f.key]) != null; });
   });
-  if (!anySet) {
+  /* §768: and the same answer while the feature is off — every unit counts
+     the same, whatever the stored rows say; they are kept, not read. */
+  if (!anySet || !weightingOn()) {
     var even = us.map(function(){ return Math.floor(100 / (us.length || 1)); });
     return { shares: sh, composite: settle(even), entered: false };
   }
@@ -30393,8 +30975,8 @@ function unitCards(keys){
           '<td class="num">' + tgtShown(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + pct(measureScore(m)) + '</td></tr>';
       }).join("")) +
-      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its ' + L("keyobj") + '. Contributes at <b>' +
-      u.weight + '%</b> weight to the group.</p>' +
+      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its ' + L("keyobj") + '.' +
+      (weightingOn() ? ' Contributes at <b>' + u.weight + '%</b> weight to the group.' : '') + '</p>' +
       (unitOwnWay(u)
         /* §405: its pillars are hidden and kept; what explains its number is
            the way it plans, said in one line rather than an empty table. */
@@ -30423,7 +31005,7 @@ function unitCards(keys){
       unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
     return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
       splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
-        u.weight + "% weight &middot; " + unitPlanCountWord(k) + (u.real ? "" : " &middot; illustrative"),
+        (weightingOn() ? u.weight + "% weight &middot; " : "") + unitPlanCountWord(k) + (u.real ? "" : " &middot; illustrative"),
         unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name,
         arranging("group") ? handle("Reorder " + u.name) : '',
         /* §405: its execution is already a reading against what was due, so
@@ -30518,38 +31100,43 @@ function renderCompanyPerformance(coKey){
       pl = companyPlan(ck), r = companyRatio(ck);
   var share = companyWeight(ck);
 
-  var perfDrill = miniTable([L1("unitword"), "Objectives performance", "Weight in " + esc(co.name), "Weighted contribution"],
+  /* §768: the weight column, its footer and its sentence go while the
+     feature is off; the contribution column stays, every unit counting equally. */
+  var wOn = weightingOn(), wCol = function(v){ return wOn ? '<td class="num">' + v + '</td>' : ''; };
+  var perfDrill = miniTable([L1("unitword"), "Objectives performance"].concat(wOn ? ["Weight in " + esc(co.name)] : []).concat(["Weighted contribution"]),
     keys.map(function(k){
       var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
         '<td class="num">' + pct(unitObjectives(u)) + '</td>' +
-        '<td class="num">' + w + '%</td>' +
+        wCol(w + '%') +
         '<td class="num">' + (unitObjectives(u) == null ? "&mdash;"
           : (Math.round(unitObjectives(u) * w) / 100).toFixed(1)) + '</td></tr>';
     }).join("") +
     '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td>' +
-    '<td class="num">100%</td><td class="num"><b>' + pct(perf) + '</b></td></tr>') +
-    '<p class="sub">Each unit\u2019s own ' + L("keyobj","bu") + ', weighted by the weight it ' +
+    wCol('100%') + '<td class="num"><b>' + pct(perf) + '</b></td></tr>') +
+    (wOn ? '' : '<p class="sub">Each unit\u2019s own ' + L("keyobj","bu") + ', every unit counting equally.</p>') +
+    (!wOn ? '' : '<p class="sub">Each unit\u2019s own ' + L("keyobj","bu") + ', weighted by the weight it ' +
     'already carries at group level and <b>re-normalised</b> so this company\u2019s units sum ' +
     'to 100%. Nothing is weighted twice and nothing is set here \u2014 the weights are composed ' +
-    'on the group\u2019s <b>Weighting</b> tab.</p>';
+    'on the group\u2019s <b>Weighting</b> tab.</p>');
 
-  var execDrill = miniTable([L1("unitword"), "Of plan", "Weight in " + esc(co.name), "Delivered", "Planned", "Var."],
+  var execDrill = miniTable([L1("unitword"), "Of plan"].concat(wOn ? ["Weight in " + esc(co.name)] : []).concat(["Delivered", "Planned", "Var."]),
     keys.map(function(k){
       var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
         '<td class="num">' + pct(unitRatio(u)) + '</td>' +
-        '<td class="num">' + w + '%</td>' +
+        wCol(w + '%') +
         '<td class="num">' + pct(unitExec(u)) + '</td>' +
         '<td class="num">' + pct(unitPlan(u)) + '</td>' +
         '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td></tr>';
     }).join("") +
     '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td>' +
-    '<td class="num"><b>' + pct(r) + '</b></td><td class="num">100%</td>' +
+    '<td class="num"><b>' + pct(r) + '</b></td>' + wCol('100%') +
     '<td class="num"><b>' + pct(ex) + '</b></td><td class="num"><b>' + pct(pl) + '</b></td>' +
     '<td class="num"><b>' + varCell(ex, pl) + '</b></td></tr>') +
-    '<p class="sub">' + L1("tactic") + ' completion under every ' + L1("pillar") + ' in these units, weighted identically ' +
-    'to performance; the company\u2019s figure is the weighted average of the <b>Of plan</b> column. ' +
+    '<p class="sub">' + L1("tactic") + ' completion under every ' + L1("pillar") + ' in these units' +
+    (wOn ? ', weighted identically to performance; the company\u2019s figure is the weighted average of the <b>Of plan</b> column. '
+         : '; the company\u2019s figure is the average of the <b>Of plan</b> column, every unit counting equally. ') +
     'The planned line is derived from each ' + L1("tactic") + '\u2019s quarter span, never ' +
     'entered.</p>';
 
@@ -30631,34 +31218,37 @@ function renderGroupPerformance(){
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
       pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
 
-  var perfDrill = miniTable([L1("unitword"),"Objectives performance","Weight","Weighted contribution"],
+  /* §768: as on a company's drills — no weight column while the feature is off. */
+  var wOn = weightingOn(), wCol = function(v){ return wOn ? '<td class="num">' + v + '</td>' : ''; };
+  var perfDrill = miniTable([L1("unitword"),"Objectives performance"].concat(wOn ? ["Weight"] : []).concat(["Weighted contribution"]),
     keys.map(function(k){
       var u = UNITS[k];
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
         '<td class="num">' + unitObjectives(u) + '%</td>' +
-        '<td class="num">' + u.weight + '%</td>' +
+        wCol(u.weight + '%') +
         '<td class="num">' + (Math.round(unitObjectives(u) * u.weight) / 100).toFixed(1) + '</td></tr>';
     }).join("") +
-    '<tr style="background:var(--surface-2)"><td><b>Group</b></td><td></td><td class="num">100%</td>' +
+    '<tr style="background:var(--surface-2)"><td><b>Group</b></td><td></td>' + wCol('100%') +
     '<td class="num"><b>' + groupUnitsObjectives() + '%</b></td></tr>') +
-    '<p class="sub">Each unit\'s own ' + L("keyobj") + ' &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>';
+    (wOn ? '<p class="sub">Each unit\'s own ' + L("keyobj") + ' &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>'
+         : '<p class="sub">Each unit\'s own ' + L("keyobj") + ', every unit counting equally.</p>');
 
-  var execDrill = miniTable([L1("unitword"),"Of plan","Weight","Delivered","Planned","Variance"],
+  var execDrill = miniTable([L1("unitword"),"Of plan"].concat(wOn ? ["Weight"] : []).concat(["Delivered","Planned","Variance"]),
     keys.map(function(k){
       var u = UNITS[k];
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
         '<td class="num">' + unitRatio(u) + '%</td>' +
-        '<td class="num">' + u.weight + '%</td>' +
+        wCol(u.weight + '%') +
         '<td class="num">' + unitExec(u) + '%</td>' +
         '<td class="num">' + unitPlan(u) + '%</td>' +
         '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td></tr>';
     }).join("") +
     '<tr style="background:var(--surface-2)"><td><b>Group</b></td>' +
-    '<td class="num"><b>' + groupRatio() + '%</b></td><td class="num">100%</td>' +
+    '<td class="num"><b>' + groupRatio() + '%</b></td>' + wCol('100%') +
     '<td class="num"><b>' + groupExec() + '%</b></td>' +
     '<td class="num"><b>' + groupPlan() + '%</b></td>' +
     '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
-    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + ', weighted identically to performance. The group\'s figure is the weighted average of the <b>Of plan</b> column. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
+    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + (wOn ? ', weighted identically to performance. The group\'s figure is the weighted average of the <b>Of plan</b> column.' : '. The group\'s figure is the average of the <b>Of plan</b> column, every unit counting equally.') + ' The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var units = unitCards(keys);
 
@@ -31629,7 +32219,7 @@ function renderUnitPerformance(u){
     '<p class="sub">' + (ws
       ? 'Weighted mean across <b>' + u.keyObjectives.length + '</b> objectives: <b>' + ko + '%</b>. Weights are set on the unit\'s Foundation.'
       : 'Mean across <b>' + u.keyObjectives.length + '</b> objectives, equally weighted: <b>' + ko + '%</b>.') +
-    ' This unit contributes at <b>' + u.weight + '%</b> weight to the group figure.</p>';
+    (weightingOn() ? ' This unit contributes at <b>' + u.weight + '%</b> weight to the group figure.' : '') + '</p>';
 
   /* ── THE THIRD NUMBER (§64) ────────────────────────────────────────
      Islam: "add to the 2 main numbers of the objectives and the execution a
@@ -34629,7 +35219,7 @@ function swotBoxes(u, quads, page, ac){
               '<button class="xbtn" data-swrm="' + esc(swt) +
               '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
               rmStrip("swrm", swt, RMASK ? RMASK.say : "")
-            : '<span>' + esc(x) + '</span>') + '</li>';
+            : swotLine(x, u.ukey, key, i)) + '</li>';
       }).join("") + '</ol>' +
       (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
         '">+ Add</button></div>' : '') + '</section>';
@@ -35210,7 +35800,7 @@ function renderFocusBoard(){
       totals[st.key]++; totals.total++;
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
         (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
-                   (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
+                   (u ? (weightingOn() ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>' : '')
                       : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
                         (boxRef(sub.key).kind === "cap"
@@ -35304,7 +35894,7 @@ function renderFocusBoard(){
 function reportBar(target){
   var t = String(target || "");
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
-  if (!REVIEW || REVIEW.state !== "open" || reportClosed(t)) return "";
+  if (!REVIEW || !cycleTakesFigures() || reportClosed(t)) return "";   /* §755 */
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
   if (!places.length) return "";
   var total = 0, walk = 0;
@@ -35457,6 +36047,22 @@ function repOutTarget(t, x){
    a pillars function already report through, with every gate below asking
    `u.ukey` = "cap:<id>" (§53.5, §59). A second body for the same tables is how
    the Plan page came to know both shapes while this page knew one. */
+/* §755: THE CLOSED NOTE, IN TWO VOICES. To everybody the cycle shuts out it
+   says the figures are a record and names the way back; to the office, who
+   can still type on the page under it (cycleTakesFigures), it says the cycle
+   is closed and what a figure entered now does to the record
+   (closeRecordFollow). One function, so the unit's, the objectives
+   function's and the capability function's pages say it alike (A15). Empty
+   on an open cycle, so a caller can prefix it blind. */
+function cycleClosedNote(){
+  if (!REVIEW || REVIEW.state === "open") return "";
+  if (inOffice()) {
+    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record. ' +
+      'The office can still correct them here, and the closing record follows what is entered.</div>';
+  }
+  return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
+    'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
+}
 function renderReport(u, opt){
   /* §520.8: the PANE alone — a capability drawn inside the company's report
      has its own rail there, so this hands back only what sits in the pane. */
@@ -35472,12 +36078,11 @@ function renderReport(u, opt){
   var subd = !!REVIEW.submitted[u.ukey];
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
 
-  if (REVIEW.state !== "open") {
-    /* §520.7: inside the company's page the closed note is already above. */
-    if (paneOnly) return "";
-    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
-      'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
-  }
+  /* §755: closed, the page stands for the office with the note above it;
+     for everybody else the note IS the page. §520.7: inside the company's
+     page the closed note is already above, so the pane carries none. */
+  var shut = paneOnly ? "" : cycleClosedNote();
+  if (REVIEW.state !== "open" && !inOffice()) return shut;
 
   /* One cell shape for every reportable row, so a measure and a tactic are
      entered the same way even though they mean different things. */
@@ -35633,6 +36238,8 @@ function renderReport(u, opt){
             var xs = scoredExtras(x.obj), nEx = xs.length, rs = outRowspan(nEx);
             var nameCell = '<td' + rs + '><b class="tacname">' + esc(x.obj.name) + '</b>' +
               (x.obj.description ? '<span class="why">' + esc(x.obj.description) + '</span>' : '') +
+              /* §767: the key measures it supports, as the Plan page says it. */
+              supportsLine(x.obj, pillarHolding(u, x.obj)) +
               '</td><td>' + (nEx ? otag("O1") : '') + outcomeCell(x.obj) + '</td>';
             var subs = function(asked){
               return xs.map(function(ex){
@@ -35800,6 +36407,8 @@ function renderReport(u, opt){
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
     var rpf = partFilter(u);          /* §517: skipped, never renumbered */
+    var ryf = railYearsFilter(u);     /* §771: the years unticked, the same way */
+    var rshows = function(p){ return (!rpf || rpf(p)) && (!ryf || ryf(p)); };
     var railRow = function(p, pi){
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
@@ -35827,7 +36436,7 @@ function renderReport(u, opt){
     };
     var rowsOf = function(keep){
       return u.items.map(function(p, pi){
-        return (rpf && !rpf(p)) || (keep && !keep(p)) ? "" : railRow(p, pi);
+        return !rshows(p) || (keep && !keep(p)) ? "" : railRow(p, pi);
       }).join("");
     };
     var railRows = !one ? rowsOf(null) : ["dir", "cap"].map(function(h){
@@ -35835,7 +36444,10 @@ function renderReport(u, opt){
         ' <span class="rgn">' + order.filter(inHalf(h)).length + '</span></div>' + rowsOf(inHalf(h));
     }).join("");
     var rail = '<div class="rail">' +
-      railHead(one ? L("pillar","bu") + " &amp; " + L("capability","bu") : halfWord(u), partItems(u).length) +
+      railHead(one ? L("pillar","bu") + " &amp; " + L("capability","bu") : halfWord(u),
+        partItems(u).filter(rshows).length,
+        { key: unitRailKey(u), of: rpf ? partItems(u).filter(rpf).length : partItems(u).length,
+          u: railYearsOn(u) ? u : null }) +
       railRows + '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
@@ -35972,7 +36584,7 @@ function renderReport(u, opt){
      place, and it was the only one of Submit's four blockers that said
      anything at all — a report short of three figures said nothing here.
      reportBar() counts all four and says where each one is. */
-  return waitingNote + reportBar(u.ukey) +
+  return shut + waitingNote + reportBar(u.ukey) +
     bar +
     /* §428: the top layer's own report asks its pillars alone — its key
        objectives are the group's Foundation, not figures entered here.
@@ -36342,14 +36954,103 @@ function railName(code, name, kind){
 var RAIL_TERSE = (function(){
   try { return localStorage.getItem("smp.rail.terse") !== "0"; } catch(e){ return true; }
 })();
-function railHead(label, n){
-  return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n + '</span></span>' +
-    '<button class="railterse' + (RAIL_TERSE ? " on" : "") + '" data-railterse="1" ' +
-    'title="' + (RAIL_TERSE ? "Show the detail under each name" : "Just the names") + '" ' +
-    'aria-pressed="' + (RAIL_TERSE ? "true" : "false") + '">' +
+/* ── §771 · THE RAIL'S BUTTON IS AN OPTIONS MENU, AND IT CAN HIDE YEARS ──
+   Islam, of a plan whose directions run in different years: *"we need a way
+   to filter which directions to see from the directions left pan"*, and of
+   the shape, *"part of the options beside the word directions where we make
+   the button an options drop down that shows details or set which years to
+   show in a sub list with checks. and we can have the same options button
+   somehow in the horizontal view"* (design-mockups/strip-years, E).
+
+   The ≡ button §60 gave the head keeps its place and opens a menu: the
+   detail switch it used to BE, then — on a list whose years are marked —
+   "Years to show", one tick a year with how many directions run in it. A
+   direction shows while it runs in ANY ticked year; a tick whose removal
+   would leave the list empty is held, so the rail can never show nothing.
+   With a year unticked the head reads "5 of 9" and the button wears a dot,
+   because a short list must never read as a short plan (§60's own rule: a
+   control that hides something has to say so).
+
+   THE TICKS ARE A MOMENT'S CHOICE, NOT A PREFERENCE: kept in memory by the
+   box's key for as long as the page is open, never in localStorage beside
+   the terse switch (§25) and never in the graph. The three rails onto one
+   list — the plan's, the performance's and the report's — read the same
+   key, so a year hidden on one is hidden on all (§324's rule, §53.5).
+
+   ON THE SQUEEZED STRIP the head's word is hidden (§609) and the button
+   stands alone at the strip's left end, the "5 of 9" beside it only while
+   a year is unticked — the same button, the same menu (group-extra.css). */
+var RAILMENU = null;      /* the rail key whose options menu is open */
+var RAIL_YEARS = {};      /* box key → the years ticked; absent means all */
+function railYears(ukey){
+  var ys = RAIL_YEARS[ukey];
+  return Array.isArray(ys) && ys.length ? ys : [1, 2, 3];
+}
+/* Whether this box's list marks years at all — asked of a row, the path
+   every years tag already takes (`yearsTagHtml`), so the menu and the tags
+   can never disagree about whether years are on. */
+function railYearsOn(u){
+  var items = u ? partItems(u) : [];
+  return !!items.length && yearsOn(items[0]);
+}
+/* The filter, or null where nothing is hidden. */
+function railYearsFilter(u){
+  if (!railYearsOn(u)) return null;
+  var ys = railYears(u.ukey);
+  if (ys.length === 3) return null;
+  return function(p){ return pillarYears(p).some(function(y){ return ys.indexOf(y) >= 0; }); };
+}
+function railYearSet(ukey, y, on){
+  var ys = railYears(ukey).slice(), i = ys.indexOf(y);
+  if (on && i < 0) ys.push(y);
+  if (!on && i >= 0) ys.splice(i, 1);
+  ys.sort();
+  if (ys.length === 3 || !ys.length) delete RAIL_YEARS[ukey]; else RAIL_YEARS[ukey] = ys;
+}
+/* `o.key` names the rail (which menu is open); `o.of` is how many the list
+   holds before the years filter, so the head can say "5 of 9"; `o.u` is
+   the box whose years the menu offers, or null for a rail without them. */
+function railHead(label, n, o){
+  o = o || {};
+  var key = o.key || label, open = RAILMENU === key;
+  var filtered = o.of != null && o.of !== n;
+  var panel = "";
+  if (open) {
+    panel = '<div class="hmenu-panel railopts-panel">' +
+      '<label class="railopt"><input type="checkbox" data-railterse="1"' +
+        (RAIL_TERSE ? '' : ' checked') + '> Show the detail under each name</label>';
+    if (o.u) {
+      var ys = railYears(o.u.ukey), items = partItems(o.u), now = planYear();
+      panel += '<div class="hmenu-sep"></div><div class="railopt-h">Years to show</div>' +
+        [1, 2, 3].map(function(y){
+          var inY = function(p){ return pillarYears(p).indexOf(y) >= 0; };
+          var cnt = items.filter(inY).length, on = ys.indexOf(y) >= 0;
+          /* Held while it is the only tick, or while the others leave no
+             direction showing: the rail never shows nothing. */
+          var left = items.filter(function(p){
+            return pillarYears(p).some(function(z){ return z !== y && ys.indexOf(z) >= 0; }); }).length;
+          var held = on && !left;
+          return '<label class="railopt' + (held ? ' held' : '') + '"' +
+            (held ? ' title="The last year showing cannot be unticked"' : '') + '>' +
+            '<input type="checkbox" data-railyear="' + esc(o.u.ukey) + '|' + y + '"' +
+            (on ? ' checked' : '') + (held ? ' disabled' : '') + '> ' +
+            esc(planYearLabel(y)) + (y === now ? ' <i>this year</i>' : '') +
+            '<small>' + cnt + '</small></label>';
+        }).join("");
+    }
+    panel += '</div>';
+  }
+  return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n +
+    (filtered ? ' <i class="rof">of ' + o.of + '</i>' : '') + '</span></span>' +
+    '<span class="hmenu railopts' + (open ? " open" : "") + '">' +
+    '<button class="railterse' + (RAIL_TERSE ? " on" : "") + (filtered ? " filtered" : "") +
+    '" data-railopts="' + esc(key) + '" title="Options" aria-haspopup="true" ' +
+    'aria-expanded="' + (open ? "true" : "false") + '">' +
     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h7" ' +
     'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>' +
-    '</button></div>';
+    '</button>' +
+    (filtered ? '<span class="rof strip">' + n + ' of ' + o.of + '</span>' : '') +
+    panel + '</span></div>';
 }
 function railSub(html, alarm){
   /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§119). Collapsed is the default
@@ -37599,10 +38300,7 @@ function renderFnObjReport(fk){
   /* §405: REVIEW, the chrome and Submit are keyed by the SUBJECT — the bare
      unit key for a unit, `fn:<key>` for a function (§48). */
   var target = subjKey(holderTarget(fk));
-  if (REVIEW.state !== "open") {
-    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
-      'Its figures are a record now.</div>';
-  }
+  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §755 */
   var c = fnObjReported(fk);
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
   var mayAll = canSpeakFor(target);
@@ -37613,7 +38311,7 @@ function renderFnObjReport(fk){
      shut. */
   REPORT_CHROME = repChrome(target, c.done, c.total, pctDone, mayAll, subd, parked,
                             submitWhyShort(target), ownStateChip(target));
-  return '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
+  return cycleClosedNote() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
 /* §598.1: a function's projects or objectives page shows the plan as it
@@ -37938,10 +38636,7 @@ function renderFnReport(fnKey){
   if (plansInPillars(target)) return renderReport(unitLike(target));
   if (plansInObjectives(target)) return renderFnObjReport(fk);
   if (!caps.length) return fnNothingBehind(target);
-  if (REVIEW.state !== "open") {
-    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
-      'Its figures are a record now.</div>';
-  }
+  if (REVIEW.state !== "open" && !inOffice()) return cycleClosedNote();   /* §755 */
   var done = 0, total = 0;
   caps.forEach(function(c){ var r = capReported(c); done += r.done; total += r.total; });
   var pctDone = total ? Math.round(done / total * 100) : 0;
@@ -38004,7 +38699,7 @@ function renderFnReport(fnKey){
      section would have caught, because §301's own checks ask about the CHIP
      and §279's run on the unit. */
   var bar = reportBar(fnKeyTarget);
-  return bar + caps.map(function(c){
+  return cycleClosedNote() + bar + caps.map(function(c){
     return '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");
 }
@@ -38071,6 +38766,10 @@ function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
    stored order — so the page opens on the rail's first row, not the plan's. */
 function unitRailPick(u, order){
   var k = unitRailKey(u), want = RAIL[k], list = order || partItems(u);
+  /* §771: a direction hidden by the years ticks is not opened — the page
+     opens on the first one showing, exactly as the rail draws it. */
+  var yf = railYearsFilter(u);
+  if (yf) { var shown = list.filter(yf); if (shown.length) list = shown; }
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
@@ -38095,8 +38794,11 @@ function unitRailFor(u, sel){
      skipped here rather than filtered out of the list, so `i` stays the
      pillar's real position and its code does not change. */
   var pf = partFilter(u);
+  /* §771: and the years unticked in the head's menu, skipped the same way. */
+  var yf = railYearsFilter(u);
+  var shows = function(it){ return (!pf || pf(it)) && (!yf || yf(it)); };
   var rows = list.map(function(it, i){
-    if (pf && !pf(it)) return "";
+    if (!shows(it)) return "";
     /* THE CODE SHOWN IS DERIVED; THE CODE STORED IS AN IDENTIFIER, and they
        are not the same thing (found 2026-08-22, §46.3). `it.code` is what the
        plan arrived with — "01" for Mobile, because its pillars predate the
@@ -38162,7 +38864,8 @@ function unitRailFor(u, sel){
      in the first place: nothing here has been reported. */
   return '<div class="rail' + (on ? ' arranging' : '') + '">' +
     /* §542: the half's own word over the half's own count. */
-    railHead(halfWord(u), pf ? list.filter(pf).length : list.length) +
+    railHead(halfWord(u), list.filter(shows).length,
+      { key: unitRailKey(u), of: pf ? list.filter(pf).length : list.length, u: railYearsOn(u) ? u : null }) +
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
       esc(u.ukey) + '">' + rows + '</div>' +
     /* ADD, in the rail that holds them (§69.13). The same place the projects
@@ -38564,7 +39267,9 @@ function unitPlanBody(it, u, railed, bare){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         (ed ? eyeBtn(m, "plan", "u_plan") : hidChip(m)) +
-        xb("measures", m.id) + '</td>' +
+        xb("measures", m.id) +
+        /* §767: the tactics behind it, while the pillar's mapping is in use. */
+        supportedLine(m, it) + '</td>' +
       /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
          direction and the compile rule because "they change what a figure
          MEANS" — the right worry while the pen could fall to the person being
@@ -38639,8 +39344,119 @@ function unitPlanBody(it, u, railed, bare){
   }).join("");
   /* §267: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
      row's span and every row have to agree about how many columns there are. */
+
+  /* ── §773: THE PEN'S LIST AND THE PANEL (see PEN_TACTIC above) ──────── */
+  var penOpen = null;
+  if (ed) {
+    if (PEN_TACTIC === null && it.tactics.length) PEN_TACTIC = it.tactics[0].id;
+    if (PEN_TACTIC) {
+      penOpen = it.tactics.filter(function(t){ return t.id === PEN_TACTIC; })[0] || null;
+      /* another pillar's tactic was open: this pillar opens on its first */
+      if (!penOpen && it.tactics.length) { PEN_TACTIC = it.tactics[0].id; penOpen = it.tactics[0]; }
+    }
+  } else PEN_TACTIC = null;
+  /* §775 — THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL. Islam, on
+     the §773 list: *"how about we make the tactic main info editable in the
+     main table and the extra details in the left pane to make the table on
+     the left usable and the pan for extras"*, then eleven rounds on the
+     working mockup (design-mockups/tactic-edit-panel/2026-11-16_table-and-
+     panel.html) and *"go ahead and build it"*. One line per tactic, typed in:
+     the NAME, each OUTCOME's name (and + Add an outcome), the OWNER (the
+     register-fed picker, §130.1) and the QUARTERS; a ringed × on the name box
+     and on each outcome box that ASKS before anything goes (§775.1 in
+     shell.html). The description reads under the name and is typed in the
+     panel. The panel holds the extras: the description, each outcome's
+     target, unit, direction, rule and months, the collaborators (the
+     searchable tick list), the key measures and the requirements. The open
+     row is tinted and runs out of the table's edge to meet the panel (his
+     pick, D). The panel's head is the tactic's name and the arrows; no close
+     and no Done — the top's Done editing is the one. */
+  var RM_X = '<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  var outLine = function(t, x, inner, oid, extra){
+    return '<span class="outline" data-oid="' + esc(oid) + '">' + inner +
+      '<button type="button" class="rm" data-rmout="' + esc(t.id) + '|' + esc(oid) + '" title="Remove this ' +
+      esc(detailWord("outcomes", "one", t).toLowerCase()) + '">' + RM_X + '</button>' + (extra || '') + '</span>';
+  };
+  var penTacticRow = function(t, i){
+    var open = penOpen === t;
+    /* the first outcome's name, through gapCell (its lifecycle, red word and walk mark) */
+    var first = gapCell("plan", "u_plan", t, "outcome", {
+      ctx: pctx(t), del: true, fillKind: "tactic",
+      read: function(v){ return '<b>' + esc(v) + '</b>'; },
+      control: function(set, pendCls){ return textOr("plan", t.outcome || "", "outpn " + (pendCls || ""), set); } });
+    var extras = tacticExtras(t).map(function(x){
+      var emptyName = !x.outcome || !String(x.outcome).trim();
+      return outLine(t, x, textOr("plan", x.outcome || "", "outpn" + (emptyName ? " gapwalk" : ""),
+        function(v){ setOr(x, "outcome", v); }), x.id);
+    }).join('');
+    /* the target lives in the panel: a tactic not open says so where the walk can land */
+    var tgtGap = !open && t.outcome && SMPRules.gapEmpty("outTarget", t)
+      ? '<span class="missing tacgap gapwalk" data-tacopen="' + esc(t.id) + '" tabindex="0">Target missing — set it in the panel</span>' : '';
+    return '<tr data-oi="' + i + '" data-tacrow="' + esc(t.id) + '" data-tacopen="' + esc(t.id) + '"' +
+      hidCls(t, open ? " penon" : "") + '><td class="idx">' +
+      (on ? handle("Reorder " + t.name) : '') + '<span class="idx-n">' + (i + 1) + '</span></td>' +
+      '<td><span class="namerow">' + textOr("plan", t.name, "tacpn", function(v){ t.name = v; }) +
+        '<button type="button" class="rm" data-rmrow="tactic|' + esc(u.ukey) + '|' + esc(t.id) + '" title="Remove this ' +
+        esc(L1("tactic").toLowerCase()) + '">' + RM_X + '</button></span>' +
+        (t.description ? '<span class="why tacwhy">' + esc(t.description) + '</span>' : '') + '</td>' +
+      '<td class="outc">' + outLine(t, t, first, "first") + extras +
+        '<span class="addout">' + outAddBtn(t) + '</span>' + tgtGap + '</td>' +
+      '<td>' + gapCell("plan", "u_plan", t, "owner", {
+        ctx: pctx(t), readEmpty: '<span class="missing">Missing</span>', read: ownerShown,
+        control: function(set, pendCls){
+          return selectOr("plan", t.owner == null ? "" : t.owner, ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set); } }) + '</td>' +
+      '<td><span role="group" aria-label="Quarters this ' + esc(L1("tactic").toLowerCase()) + ' runs in">' + qsEdit(t) + '</span></td></tr>';
+  };
+  var tacticPanel = function(t){
+    var i = it.tactics.indexOf(t), n = it.tactics.length;
+    var prev = it.tactics[(i - 1 + n) % n], next = it.tactics[(i + 1) % n];
+    var word = L1("tactic");
+    var sec = function(title, body){ return '<div class="tpsec">' + (title ? '<h4>' + title + '</h4>' : '') + body + '</div>'; };
+    var tgtOpen = false;
+    var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
+      ctx: pctx(t), del: true, fillKind: "tactic", read: tgtShown,
+      control: function(set, pendCls){ tgtOpen = true; return outcomeEdit(t, set, pendCls, false); } });
+    var tdCls = tgtOpen ? 'tgtcell' : 'tgtcol num';
+    var named = function(v, oid){
+      return '<b class="oname" data-oname="' + esc(oid) + '">' + (v && String(v).trim() ? esc(v)
+        : '<span class="nobody">Not named yet — type it in the table</span>') + '</b>'; };
+    var outRows = '<tr><td>' + (tacticExtras(t).length ? otag("O1") : '') + named(t.outcome, "first") + '</td>' +
+      monthlyTgtCell(tdCls, t, "outMonthly", tgtCell, !SMPRules.isYesNo(t.outTarget), true) + '</tr>' +
+      tacticExtras(t).map(function(x){
+        var emptyTgt = SMPRules.gapEmpty("outTarget", x);
+        return '<tr class="' + outSubCls(t) + '"><td>' + otag(x.id) + named(x.outcome, x.id) + '</td>' +
+          '<td class="tgtcell">' + outcomeEdit(x, null, emptyTgt ? "gapwalk" : "", false) + '</td></tr>';
+      }).join('') + outPad(tacticExtras(t).length) +
+      (!SMPRules.isYesNo(t.outTarget) ? monthlyRowFor(t, "outMonthly", "outTarget", 2, t.outcome || t.name) : "");
+    var collabs = gapCell("plan", "u_plan", t, "collaborators", {
+      ctx: pctx(t), text: collabText,
+      parse: function(v){ return Array.isArray(v) ? v.map(function(x){ return String(x).trim(); }).filter(Boolean) : collabParse(v); },
+      del: true, readEmpty: '<span class="nobody">&mdash;</span>', read: collabShown,
+      control: function(set, pendCls){
+        return selectManyOr("plan", collabNames(t), ownerChoices(collabNames(t), false), "collabsel " + (pendCls || ""), set,
+          "Collaborators on this " + word); } });
+    return '<aside class="tacpanel" aria-label="' + esc(word) + ' being edited">' +
+      '<div class="tph"><b class="tpname">' + (t.name ? esc(t.name) : 'New ' + esc(word.toLowerCase())) + '</b>' +
+        '<span class="tpnav">' + eyeBtn(t, "plan", "u_plan") + (n > 1
+          ? '<button type="button" class="tpbtn" data-tacopen="' + esc(prev.id) + '" title="Previous ' + esc(word.toLowerCase()) + '">&uarr;</button>' +
+            '<button type="button" class="tpbtn" data-tacopen="' + esc(next.id) + '" title="Next ' + esc(word.toLowerCase()) + '">&darr;</button>' : '') +
+        '</span></div>' +
+      '<div class="tpbody">' +
+        sec('Description', textOr("plan", t.description || "", "tacdesc tacpd", function(v){ setOr(t, "description", v); })) +
+        sec(DW("outcomes", "many", t),
+          '<div class="scroll tpout"><table><thead><tr><th>' + DW("outcomes", "one", t) + '</th><th class="cc">Target</th></tr></thead>' +
+          '<tbody>' + outRows + '</tbody></table></div>') +
+        sec('Collaborators', '<div class="tpfield collabs">' + collabs + '</div>') +
+        sec('', supportsEdit(t, it)) +
+        (requirementsOn(t) ? sec('', reqsCell(t, true)) : '') +
+      '</div>' +
+      '<div class="tpfoot"><span>Saves as you leave each box.</span></div>' +
+      '</aside>';
+  };
   var fold = ed && tailFolds();
   var tRows = it.tactics.map(function(t, i){
+    /* §773: with the pen on, one line; the fields are in the panel. */
+    if (ed) return penTacticRow(t, i);
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
        predicting it. `.tgtcell` is what stops the Target column folding below
        880 (arrange.css) and the fold must never take the only way to SET a
@@ -38730,6 +39546,9 @@ function unitPlanBody(it, u, railed, bare){
         (ed ? bxkey("Description") + textOr("plan", t.description || "", "tacdesc",
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
+        /* §767: the key measures it supports — the tick list in the pen, the
+           numbers otherwise. */
+        (ed ? supportsEdit(t, it) : supportsLine(t, it)) +
         /* §415: what the tactic needs, under the description. */
         reqsCell(t, ed) +
         /* §267: AND THE TAIL, when the window is too narrow for it to be two
@@ -38997,7 +39816,13 @@ function unitPlanBody(it, u, railed, bare){
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
     /* …and a rule above it, so the two blocks read as two blocks of one card. */
+    /* §773.1: the panel stands beside the TACTICS alone (Islam: it should not
+       push the direction's head, nor sit beside the measures), so the wrap
+       opens here, at the tactics' heading, and closes after their legend. */
     '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
+    /* §774: and opens UNDER the heading, so the panel's top edge is the
+       table's own top line (the wireframe's fifth point). */
+    (penOpen ? '<div class="penwrap"><div class="penmain">' : '') +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
        displayed on NO screen at all and the outcome only as a grey line under
@@ -39012,10 +39837,18 @@ function unitPlanBody(it, u, railed, bare){
        haeders"*. `fold` is read here, where the row builder read it, so the
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
-    miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
+    (ed
+      /* §773: the list — one line per tactic — and the panel beside it. */
+      ? miniTable(["#", L1("tactic"), DW("outcomes", "one", it), "Owner", "Quarters"],
+          tRows + addRow(4, "tactic", "Add a " + L1("tactic")),
+          sortAttr("tactics"), "tactable penlist")
+      : miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
                 .concat(fold ? [] : ["Collabs.","Quarters"]),
       tRows + addRow(fold ? 4 : 6, "tactic", "Add a " + L1("tactic")),
-      sortAttr("tactics"), "tactable");
+      sortAttr("tactics"), "tactable")) +
+    /* §767: which number is which measure, folded under the tactics. */
+    supportsLegend(it) +
+    (penOpen ? '</div>' + tacticPanel(penOpen) + '</div>' : '');
 }
 /* §405: the way a real business unit plans when it is not pillars, or null.
    Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
@@ -39146,10 +39979,10 @@ function renderUnitPlanBody(u){
     /* §540: the count and the rail are of the list AS DRAWN — on a split box
        this tab holds one half of it, and a hint reading "15 Directions" over
        a rail of five is the kind of disagreement §116.2 exists to stop. */
-    (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + partItems(u).length + ' ' + halfWord(u) +
-        ' &middot; drag by the handle to reorder, here and inside each ' +
-        halfWord1(u) + '</p>' : '') +
+    /* §774.1: the hint that stood here while arranging — "15 Directions ·
+       drag by the handle to reorder, here and inside each Direction" — is
+       gone (Islam: *"the statement 15 directions … should be removed"*). The
+       handles say it; the rail's head carries the count. */
     (railWorthIt(partItems(u))
       ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
@@ -39661,8 +40494,10 @@ function unitPerfRail(u){
   if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
   var pf = partFilter(u);            /* §517: skipped, never renumbered */
+  var yf = railYearsFilter(u);       /* §771: the years unticked, the same way */
+  var shows = function(it){ return (!pf || pf(it)) && (!yf || yf(it)); };
   var rows = u.items.map(function(it, i){
-    if (pf && !pf(it)) return "";
+    if (!shows(it)) return "";
     /* §416: a direction that does not run this year is not scored, so its
        rail row reads a dash and says when it runs rather than a figure. */
     var now = runsNow(it);
@@ -39683,7 +40518,8 @@ function unitPerfRail(u){
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(halfWord(u), partItems(u).length) +
+    railHead(halfWord(u), partItems(u).filter(shows).length,
+      { key: unitRailKey(u), of: pf ? partItems(u).filter(pf).length : partItems(u).length, u: railYearsOn(u) ? u : null }) +
     /* `.ritem`, NOT `.prow-wrap` (§63.5). The rail's four grips rendered and
        were bound to NOTHING: the shell chose the item selector from `data-kind`
        and "pillars" meant the accordion's `.prow-wrap`, which does not exist
@@ -39750,7 +40586,7 @@ function unitPerfPane(it, u, railed){
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
-      measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+      measureRows(it.measures, { unit: uk, pillar: it }) + '</tbody></table></div>' +
     /* §343: and the breakdown, where there is one — between the measures it
        is part of and the tactics it is not. A pillar without one adds nothing
        at all: no heading, no empty section (Islam, on the mockup). */
@@ -39760,8 +40596,605 @@ function unitPerfPane(it, u, railed){
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
-      tacticRows(it.tactics, uk) + '</tbody></table></div>';
+      tacticRows(it.tactics, uk, it) + '</tbody></table></div>' + supportsLegend(it);
 }
+
+/* ── tablecols.js ── */
+/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§754) ═══════════════════
+   Islam, 2026-11-06, with a reel of a table whose columns the viewer shapes:
+   "have a look so we can see what we can do with our settings tables"; then
+   "Do all make them all personal"; then, of the mockup
+   (mockups/mock-tablecols.html), "go ahead with as today look, build it into
+   the setup tables".
+
+   FOUR THINGS A READER MAY DO TO A SETUP TABLE, AND ONE WAY BACK:
+     show or hide a column   — the Columns menu the register has had since §47.2,
+                               now on every list table;
+     set a column's width    — drag a heading's edge; the pixels show while it
+                               moves; a double-click on the edge, or F on the
+                               focused heading, fits the column to its content,
+                               narrower or wider;
+     move a column           — drag a heading; the column lifts as a ghost and a
+                               line marks where it lands;
+     set the row height      — Comfortable · Normal · Compact, under Rows in
+                               the same menu;
+     Reset                   — the table as it ships, lit only while something
+                               differs.
+   Every act also works from the keyboard on a focused heading (the hints under
+   the table), because a drag is not a thing everybody can do.
+
+   PERSONAL, PER BROWSER, NEVER THE TENANT'S (his decision): localStorage under
+   `smp.table.<id>`, merged over the shipped defaults the way the register's
+   chooser always was (§30.2) — a column added later appears, a saved choice
+   wins, anything unreadable falls back to the shipped table. The register's
+   and the functions page's own stores (`smp.people.columns`, `smp.fns.columns`)
+   are read once as the starting point and then superseded, so nobody who had
+   set their columns loses them.
+
+   ONE MECHANISM FOR SEVEN TABLES (§53.5). The renderers draw their table as
+   they always did, in the shipped order; this file reads the drawn table after
+   each paint and bends it to the reader's shape — moves the cells, hides the
+   hidden, sets the widths, classes the density — and draws the menu and the
+   status line. A renderer that wants it declares its columns once (`define`)
+   and places `tools(id)` in its header line and `foot(id)` under its table.
+   Nothing about what a cell holds or how a row is edited changes.
+
+   TWO WAYS A HIDDEN COLUMN IS NOT DRAWN, AND BOTH READ ONE STORE. The register
+   and Functions OMIT a hidden column at render (`showCol`, `fnShowCol`): their
+   add row, their frozen pair and their sort index were built around that and
+   are left as they are. The other five draw every column and this file hides
+   the cell. The menu, the store and the count are the same either way.
+
+   WHAT NEVER MOVES OR HIDES: the row number and the ⋮ (the two ends — `fixed`),
+   and the name column (`lock`), because `.tblscroll` freezes # and the name
+   on every Setup table (§151, §631) and a frozen column has to be where the
+   freeze expects it. A `keep` column (Status on Functions) stays shown but may
+   move. The name column may still be made wider or narrower.
+
+   THE SORT STILL READS THE SHIPPED ORDER. `tkSort` reorders rows by
+   `cells[st.col]` inside wire(), which runs BEFORE this file moves anything,
+   and every repaint rebuilds the table in shipped order first — so a column
+   index baked into `data-tksort` at render stays true. This is why `apply()`
+   is called after wire() and never before.
+
+   WIDTHS ARE TAKEN AS A SET. The first time a width is set by hand, every
+   visible column's width as drawn is written down with it, and from then on
+   the table is laid out from those numbers (fixed layout, the sum as its
+   width). Taken one at a time, a stored width beside columns still sized by
+   content would jump with the data. Spare room, where the columns are
+   narrower than the box, goes to the name column alone, so a column made
+   narrower is seen to be narrower (the mockup's finding, 2026-11-16).
+   ═══════════════════════════════════════════════════════════════════════════ */
+var TABLECOLS = (function(){
+  "use strict";
+
+  var SPECS = {};          /* id → array of columns, or a function(variant) returning one */
+  var OMIT = {};           /* id → true where the renderer omits a hidden column itself */
+  var STATE = {};          /* id → the saved shape, loaded once */
+  var MENU = null;         /* the table whose Columns menu is open */
+  var DENSITIES = ["comfortable", "normal", "compact"];
+  var DENSITY_WORD = { comfortable:"comfortable rows", normal:"normal rows", compact:"compact rows" };
+  var MINW = 56, MAXW = 900, STEP = 8;
+  var OLD_STORES = { people:"smp.people.columns", fns:"smp.fns.columns" };
+  var LASTGRIP = null;     /* the last edge pressed, for the double-click (see startResize) */
+  var SWALLOW = false;     /* the click that follows a drag must not sort the column */
+
+  function storeKey(id){ return "smp.table." + id; }
+  function html(s){
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+    });
+  }
+  function repaint(){ if (typeof paint === "function") paint(); }
+  /* THE PAGE IS ZOOMED (_shared.css §601: `html { zoom:.8 }` under 1000px and
+     wherever the console's rule applies), so a rectangle is in screen pixels
+     and a width set in CSS is not. Widths are read and written in layout
+     pixels (`offsetWidth`), and a pointer's movement is divided by the zoom
+     before it becomes one. Measured, not assumed: the first run wrote every
+     column back four fifths as wide. */
+  function zoomOf(el){
+    var r = el.getBoundingClientRect().width, w = el.offsetWidth;
+    return (r && w) ? r / w : 1;
+  }
+
+  /* ── The declaration ───────────────────────────────────────────────────── */
+  function define(id, cols, opts){
+    SPECS[id] = cols;
+    OMIT[id] = !!(opts && opts.omit);
+  }
+  /* The columns on offer right now: a column with an `offered` function that
+     answers no (Caps on Functions, Password when not served) is neither drawn
+     nor listed — the renderer and this file ask the same question. */
+  function spec(id, variant){
+    var cols = typeof SPECS[id] === "function" ? SPECS[id](variant) : SPECS[id];
+    return (cols || []).filter(function(c){ return !c.offered || c.offered(); });
+  }
+  function labelOf(c){ return typeof c.label === "function" ? c.label() : (c.label || ""); }
+  function pinned(c){ return !!(c.fixed || c.lock); }
+  function hideable(c){ return !(c.fixed || c.lock || c.keep); }
+
+  /* ── The store ─────────────────────────────────────────────────────────── */
+  function load(id){
+    if (STATE[id]) return STATE[id];
+    var raw = null, migrated = false;
+    try { raw = JSON.parse(localStorage.getItem(storeKey(id)) || "null"); } catch (e) { raw = null; }
+    if ((!raw || typeof raw !== "object") && OLD_STORES[id]) {
+      /* The chooser this replaces kept {key: shown}; this keeps {key: hidden}. */
+      var old = null;
+      try { old = JSON.parse(localStorage.getItem(OLD_STORES[id]) || "null"); } catch (e) { old = null; }
+      if (old && typeof old === "object") {
+        raw = { hidden:{} };
+        Object.keys(old).forEach(function(k){ if (typeof old[k] === "boolean") raw.hidden[k] = !old[k]; });
+        migrated = true;
+      }
+    }
+    if (!raw || typeof raw !== "object") raw = {};
+    STATE[id] = {
+      order: Array.isArray(raw.order) ? raw.order.filter(function(k){ return typeof k === "string"; }) : [],
+      hidden: (raw.hidden && typeof raw.hidden === "object") ? raw.hidden : {},
+      widths: (raw.widths && typeof raw.widths === "object") ? raw.widths : {},
+      density: DENSITIES.indexOf(raw.density) >= 0 ? raw.density : "normal"
+    };
+    if (migrated) save(id);
+    return STATE[id];
+  }
+  function save(id){
+    try { localStorage.setItem(storeKey(id), JSON.stringify(STATE[id])); } catch (e) {}
+  }
+  function reset(id){
+    delete STATE[id];
+    try { localStorage.removeItem(storeKey(id)); } catch (e) {}
+    if (OLD_STORES[id]) { try { localStorage.removeItem(OLD_STORES[id]); } catch (e) {} }
+  }
+
+  /* The saved shape read against the columns on offer: hidden answers for every
+     column (saved, else the shipped default), widths only where set by hand. */
+  function hiddenOf(id, c){
+    var st = load(id), v = st.hidden[c.k];
+    if (!hideable(c)) return false;
+    return typeof v === "boolean" ? v : !!c.off;
+  }
+  function widthOf(id, c){
+    var w = +load(id).widths[c.k];
+    return (!c.fixed && w >= MINW && w <= MAXW) ? Math.round(w) : 0;
+  }
+  function shown(id, k, variant){
+    var c = spec(id, variant).filter(function(x){ return x.k === k; })[0];
+    return c ? !hiddenOf(id, c) : true;
+  }
+  function setShown(id, k, on){
+    load(id).hidden[k] = !on; save(id);
+  }
+  /* The order the columns are shown in: the leading pinned ones as shipped,
+     the movable ones as saved (a movable column the store has never seen
+     takes its shipped place), the trailing fixed ones as shipped. */
+  function displayOrder(id, cols){
+    var first = 0, last = cols.length - 1;
+    while (first < cols.length && pinned(cols[first])) first++;
+    while (last >= 0 && pinned(cols[last])) last--;
+    var lead = cols.slice(0, first), mid = cols.slice(first, last + 1), tail = cols.slice(last + 1);
+    var saved = load(id).order, byKey = {};
+    mid.forEach(function(c){ byKey[c.k] = c; });
+    var out = saved.filter(function(k){ return byKey[k]; }).map(function(k){ return byKey[k]; });
+    mid.forEach(function(c, i){
+      if (out.indexOf(c) >= 0) return;
+      /* its shipped neighbour on the left, if that one is placed; else the front */
+      var at = 0;
+      for (var j = i - 1; j >= 0; j--) { var p = out.indexOf(mid[j]); if (p >= 0) { at = p + 1; break; } }
+      out.splice(at, 0, c);
+    });
+    return lead.concat(out, tail);
+  }
+  function isDefault(id, cols){
+    var st = load(id);
+    if (st.density !== "normal") return false;
+    if (cols.some(function(c){ return widthOf(id, c) > 0; })) return false;
+    if (cols.some(function(c){ return hiddenOf(id, c) !== !!c.off; })) return false;
+    var shipped = cols.filter(function(c){ return !pinned(c); }).map(function(c){ return c.k; });
+    var now = displayOrder(id, cols).filter(function(c){ return !pinned(c); }).map(function(c){ return c.k; });
+    return shipped.join("|") === now.join("|");
+  }
+  function counts(id, cols){
+    var all = cols.filter(function(c){ return !c.fixed; });
+    var on = all.filter(function(c){ return !hiddenOf(id, c); });
+    return { shown: on.length, of: all.length };
+  }
+
+  /* ── What the renderers place: the menu in the header line, the status line under the table ── */
+  function tools(id, variant){
+    var cols = spec(id, variant), n = counts(id, cols), open = MENU === id, st = load(id);
+    var out = '<span class="hmenu tcmenu' + (open ? " open" : "") + '">' +
+      '<button class="hmenu-btn" data-colmenu="' + html(id) + '" aria-haspopup="true" aria-expanded="' + open + '" ' +
+        'title="Columns, row height, and the table as it ships">Columns <span class="hcar">&#9662;</span>' +
+        /* The count rides the button's corner and takes no width: the register's
+           header line is full (§135, checks/identity-merge.py measures every
+           menu as reachable), and a button that grew by a chip pushed itself
+           under the pane's edge. Shown only while something is hidden — when
+           every column is there, there is nothing to count. */
+        (n.shown < n.of ? '<span class="tccount">' + n.shown + '/' + n.of + '</span>' : '') + '</button>';
+    if (open) {
+      out += '<div class="hmenu-panel cols tcpanel">' +
+        '<div class="hmenu-h"><span>Show columns</span><span>' +
+          '<button class="linkbu" data-tcall="' + html(id) + '">All</button> &middot; ' +
+          '<button class="linkbu" data-tcnone="' + html(id) + '">None</button></span></div>' +
+        cols.filter(function(c){ return !c.fixed; }).map(function(c){
+          var on = !hiddenOf(id, c), w = widthOf(id, c), can = hideable(c);
+          return '<label class="colrow' + (can ? "" : " locked") + '">' +
+            '<input type="checkbox" data-col="' + html(c.k) + '" data-coltable="' + html(id) + '"' +
+              (on ? " checked" : "") + (can ? "" : " disabled") + '>' +
+            '<span class="lbl">' + html(labelOf(c)) + '</span>' +
+            '<span class="px">' + (!can ? "always" : on ? (w ? w + " px" : "") : "hidden") + '</span></label>';
+        }).join("") +
+        '<div class="hmenu-sep"></div>' +
+        '<div class="tcrows"><span class="tcrows-l">Rows</span><span class="segsw">' +
+          DENSITIES.map(function(d){
+            return '<button class="seg' + (st.density === d ? " on" : "") + '" data-tcdens="' + html(id + "|" + d) + '">' +
+              d.charAt(0).toUpperCase() + d.slice(1) + '</button>';
+          }).join("") + '</span></div>' +
+        '<div class="hmenu-sep"></div>' +
+        '<div class="tcback"><button class="linkbu" data-tcreset="' + html(id) + '"' +
+          (isDefault(id, cols) ? " disabled" : "") + '>Reset the table</button>' +
+          '<span class="hmenu-note">Drag a heading to move its column, its edge to set the width; ' +
+          'double-click the edge to fit. Yours on this browser only.</span></div>' +
+      '</div>';
+    }
+    return out + '</span>';
+  }
+  function foot(id){
+    return '<div class="tcfoot" data-tcfoot="' + html(id) + '"><span class="tcstate"></span>' +
+      '<span class="tckeys" aria-label="Keyboard, on a focused heading">' +
+        '<span>Heading focused:</span>' +
+        '<span><kbd>&larr;</kbd><kbd>&rarr;</kbd> next</span>' +
+        '<span><kbd>Alt</kbd>+<kbd>&larr;</kbd><kbd>&rarr;</kbd> move</span>' +
+        '<span><kbd>Shift</kbd>+<kbd>&larr;</kbd><kbd>&rarr;</kbd> width</span>' +
+        '<span><kbd>F</kbd> fit</span><span><kbd>H</kbd> hide</span>' +
+      '</span></div>';
+  }
+
+  /* ── After each paint: bend every declared table to its reader's shape ──── */
+  function headCells(t){ return t.tHead && t.tHead.rows[0] ? [].slice.call(t.tHead.rows[0].cells) : []; }
+  function hostOf(t){ return t.closest(".tblscroll, .cfg") || t.parentNode; }
+  function plainRow(tr, n){
+    if (tr.cells.length !== n) return false;
+    for (var i = 0; i < tr.cells.length; i++) if (tr.cells[i].colSpan > 1) return false;
+    return true;
+  }
+  function apply(root){
+    (root || document).querySelectorAll("table[data-tktable]").forEach(function(t){
+      if (SPECS[t.dataset.tktable]) applyOne(t);
+    });
+  }
+  function applyOne(t){
+    var id = t.dataset.tktable, cols = spec(id, t.dataset.tcvariant);
+    var rendered = OMIT[id] ? cols.filter(function(c){ return !hiddenOf(id, c); }) : cols;
+    var ths = headCells(t);
+    /* A renderer and its declaration that disagree on how many columns there
+       are leave the table exactly as drawn: bending the wrong cells is worse
+       than bending none, and the count under the table says nothing. */
+    if (!ths.length || ths.length !== rendered.length) return;
+    var host = hostOf(t); if (host) host.classList.add("tc-host");
+
+    ths.forEach(function(th, i){
+      var c = rendered[i];
+      th.setAttribute("data-col", c.k);
+      if (c.fixed) return;
+      th.classList.add("tcth");
+      /* The edge is positioned inside its heading. A Setup heading is pinned
+         `position:static` by a rule more specific than any class here
+         (config.css §130.2), so the heading is made relative INLINE — and only
+         where it is static: a frozen heading is sticky, which is positioned
+         already and must stay so. */
+      if (getComputedStyle(th).position === "static") {
+        /* ...and its offsets with it: the freeze rule leaves a `left` on the
+           name heading that static ignores and relative would obey — measured
+           as the heading sliding 38px over its neighbour. */
+        th.style.position = "relative"; th.style.left = "auto"; th.style.top = "auto";
+      }
+      if (!th.hasAttribute("tabindex")) th.setAttribute("tabindex", "0");
+      if (!pinned(c)) th.classList.add("tcmove");
+      th.insertAdjacentHTML("beforeend",
+        '<span class="tcgrip" data-tcgrip="' + html(c.k) + '" title="Drag to set the width · double-click to fit"></span>');
+    });
+
+    /* Hidden (where the renderer drew it anyway) and moved, row by row. */
+    var hide = {};
+    rendered.forEach(function(c){ if (!OMIT[id] && hideable(c) && hiddenOf(id, c)) hide[c.k] = true; });
+    var order = displayOrder(id, rendered);
+    [].slice.call(t.rows).forEach(function(tr){
+      if (!plainRow(tr, rendered.length)) return;
+      var byKey = {};
+      rendered.forEach(function(c, i){ byKey[c.k] = tr.cells[i]; });
+      order.forEach(function(c){
+        var cell = byKey[c.k];
+        if (hide[c.k]) cell.classList.add("tc-hidden");
+        tr.appendChild(cell);
+      });
+    });
+
+    if (cols.some(function(c){ return widthOf(id, c) > 0; })) sizeTable(t, id, cols);
+
+    var d = load(id).density;
+    t.classList.remove("tc-comfortable", "tc-compact");
+    if (d !== "normal") t.classList.add("tc-" + d);
+
+    var n = counts(id, cols), dflt = isDefault(id, cols);
+    var f = document.querySelector('[data-tcfoot="' + id + '"] .tcstate');
+    if (f) f.innerHTML = '<b>' + n.shown + '</b> of ' + n.of + ' columns · ' + DENSITY_WORD[d] +
+      (dflt ? '' : ' · <span class="tcchanged">changed from the shipped table</span>');
+  }
+
+  /* Lay the table out from the stored widths. Measured first, set second: a
+     column the store has no number for keeps the width it was drawn at. */
+  function sizeTable(t, id, cols){
+    var ths = headCells(t), byKey = {}, natural = {};
+    cols.forEach(function(c){ byKey[c.k] = c; });
+    ths.forEach(function(th){ natural[th.dataset.col] = th.offsetWidth; });
+    t.classList.add("tc-sized");
+    t.style.tableLayout = "fixed"; t.style.minWidth = "0";
+    var sum = 0, lockTh = null;
+    ths.forEach(function(th){
+      var k = th.dataset.col, c = byKey[k];
+      /* Border-box, so the number set is the number measured: a cell's own
+         `width` is its content and leaves out 16px of padding, and twelve
+         of those summed into the table's width scaled every column by four
+         fifths (found on the first run). */
+      th.style.boxSizing = "border-box";
+      if (th.classList.contains("tc-hidden")) { th.style.width = ""; return; }
+      var w = Math.round((c && widthOf(id, c)) || natural[k]);
+      th.style.width = w + "px"; sum += w;
+      if (c && c.lock && !lockTh) lockTh = th;
+    });
+    var host = hostOf(t), room = host ? host.clientWidth : 0;
+    if (room > sum && lockTh) {
+      lockTh.style.width = (parseInt(lockTh.style.width, 10) + room - sum) + "px";
+      sum = room;
+    }
+    t.style.width = sum + "px";
+  }
+  /* The first width set by hand writes every visible column down with it. */
+  function takeWidths(t, id, cols){
+    if (cols.some(function(c){ return widthOf(id, c) > 0; })) return;
+    var st = load(id), byKey = {};
+    cols.forEach(function(c){ byKey[c.k] = c; });
+    headCells(t).forEach(function(th){
+      var c = byKey[th.dataset.col];
+      if (!c || c.fixed || th.classList.contains("tc-hidden")) return;
+      st.widths[c.k] = Math.max(MINW, Math.min(MAXW, th.offsetWidth));
+    });
+  }
+  function setWidth(t, id, cols, k, w){
+    takeWidths(t, id, cols);
+    load(id).widths[k] = Math.max(MINW, Math.min(MAXW, Math.round(w)));
+    sizeTable(t, id, cols);
+  }
+
+  /* ── The pixel label beside a moving edge ───────────────────────────────── */
+  var TIP = null, TIP_T = null;
+  function tipAt(host, th, text){
+    if (!TIP) { TIP = document.createElement("div"); TIP.className = "tctip"; }
+    if (TIP.parentNode !== host) host.appendChild(TIP);
+    var hr = host.getBoundingClientRect(), r = th.getBoundingClientRect(), z = zoomOf(host);
+    TIP.textContent = text;
+    TIP.style.left = ((r.right - hr.left) / z + host.scrollLeft) + "px";
+    TIP.style.top = ((r.bottom - hr.top) / z + host.scrollTop + 4) + "px";
+  }
+  function tipGone(){ if (TIP && TIP.parentNode) TIP.parentNode.removeChild(TIP); }
+
+  /* ── Width: drag the edge; a second press on it within 400ms fits ─────────
+     The double-click is counted here rather than left to the browser: the
+     repaint after the first release puts a NEW edge under the pointer, so the
+     browser never sees a second click on the same element (the mockup's
+     finding). */
+  function startResize(e, grip){
+    var th = grip.parentNode, t = th.closest("table"), id = t.dataset.tktable, k = grip.dataset.tcgrip;
+    var cols = spec(id, t.dataset.tcvariant), host = hostOf(t);
+    e.preventDefault(); e.stopPropagation();
+    var now = Date.now();
+    if (LASTGRIP && LASTGRIP.id === id && LASTGRIP.k === k && now - LASTGRIP.t < 400) {
+      LASTGRIP = null; fit(t, id, cols, k); return;
+    }
+    LASTGRIP = { id:id, k:k, t:now };
+    takeWidths(t, id, cols); sizeTable(t, id, cols);
+    var w0 = parseInt(th.style.width, 10) || th.offsetWidth, x0 = e.clientX, z = zoomOf(host);
+    grip.classList.add("on");
+    try { grip.setPointerCapture(e.pointerId); } catch (x) {}
+    tipAt(host, th, w0 + " px");
+    function move(ev){
+      var w = Math.max(MINW, Math.min(MAXW, Math.round(w0 + (ev.clientX - x0) / z)));
+      load(id).widths[k] = w; sizeTable(t, id, cols); tipAt(host, th, w + " px");
+    }
+    function up(){
+      grip.removeEventListener("pointermove", move); grip.removeEventListener("pointerup", up); grip.removeEventListener("pointercancel", up);
+      grip.classList.remove("on"); tipGone(); save(id); repaint(); refocus(id, k);
+    }
+    grip.addEventListener("pointermove", move); grip.addEventListener("pointerup", up); grip.addEventListener("pointercancel", up);
+  }
+  /* Fit = the widest thing in the column plus the cell's own padding, whether
+     that is wider or narrower than the column is now. Measured on a copy laid
+     out at its natural width, because a cell reports the width it was GIVEN. */
+  function contentWidth(cell){
+    var c = document.createElement("div"); c.className = "tcmeasure"; c.innerHTML = cell.innerHTML;
+    [].forEach.call(c.querySelectorAll(".tcgrip, .tk-arrow"), function(g){ g.parentNode.removeChild(g); });
+    cell.appendChild(c);
+    var w = c.offsetWidth, cs = getComputedStyle(cell);
+    cell.removeChild(c);
+    return w + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  }
+  function fit(t, id, cols, k){
+    var th = headCells(t).filter(function(h){ return h.dataset.col === k; })[0]; if (!th) return;
+    var i = th.cellIndex, w = contentWidth(th) + 14;
+    [].slice.call(t.tBodies[0] ? t.tBodies[0].rows : []).forEach(function(tr){
+      if (tr.hidden || tr.classList.contains("newrow") || !tr.cells[i] || tr.cells.length !== th.parentNode.cells.length) return;
+      w = Math.max(w, contentWidth(tr.cells[i]));
+    });
+    setWidth(t, id, cols, k, w + 2); save(id); repaint(); refocus(id, k);
+  }
+  function refocus(id, k){
+    var th = document.querySelector('table[data-tktable="' + id + '"] th[data-col="' + k + '"]');
+    if (th) { try { th.focus({ preventScroll:true }); } catch (e) { th.focus(); } }
+  }
+
+  /* ── Order: drag a heading; the column lifts and a line shows where it lands ── */
+  function startMove(e, th){
+    var t = th.closest("table"), id = t.dataset.tktable, k = th.dataset.col, host = hostOf(t);
+    var cols = spec(id, t.dataset.tcvariant);
+    var x0 = e.clientX, y0 = e.clientY, started = false, ghost = null, line = null, slots = [], target = null, grabX = 0, hr = null, z = 1;
+    try { th.setPointerCapture(e.pointerId); } catch (x) {}
+    function colCells(idx){
+      return [].slice.call(t.rows).filter(function(tr){ return plainRow(tr, th.parentNode.cells.length); })
+        .map(function(tr){ return tr.cells[idx]; });
+    }
+    function start(){
+      started = true; host.classList.add("tc-dragging");
+      hr = host.getBoundingClientRect(); z = zoomOf(host);
+      var r = th.getBoundingClientRect(), w = th.offsetWidth; grabX = (x0 - r.left) / z;
+      var idx = th.cellIndex, cells = colCells(idx);
+      ghost = document.createElement("div"); ghost.className = "tcghost"; ghost.style.width = w + "px";
+      var g = '<table class="' + html(t.className) + '" style="width:' + w + 'px"><thead><tr>' + th.outerHTML + '</tr></thead><tbody>';
+      cells.slice(1).forEach(function(td){
+        g += '<tr style="height:' + td.parentNode.offsetHeight + 'px">' + td.outerHTML + '</tr>';
+      });
+      ghost.innerHTML = g + '</tbody></table>';
+      [].forEach.call(ghost.querySelectorAll(".tcgrip"), function(x){ x.parentNode.removeChild(x); });
+      ghost.style.height = t.offsetHeight + "px";
+      ghost.style.top = ((t.getBoundingClientRect().top - hr.top) / z + host.scrollTop) + "px";
+      host.appendChild(ghost);
+      cells.forEach(function(c){ c.classList.add("tc-lifted"); });
+      line = document.createElement("div"); line.className = "tcdrop";
+      line.style.height = ghost.style.height; line.style.top = ghost.style.top;
+      host.appendChild(line);
+      /* where a column may land: before each movable heading, and after the last one */
+      var hs = [].slice.call(th.parentNode.cells).filter(function(h){ return !h.classList.contains("tc-hidden"); });
+      var movers = hs.filter(function(h){ return h.classList.contains("tcmove"); });
+      movers.forEach(function(h){ slots.push({ before:h.dataset.col, x:(h.getBoundingClientRect().left - hr.left) / z + host.scrollLeft }); });
+      var lastM = movers[movers.length - 1];
+      if (lastM) slots.push({ before:null, x:(lastM.getBoundingClientRect().right - hr.left) / z + host.scrollLeft });
+    }
+    function move(ev){
+      if (!started) { if (Math.abs(ev.clientX - x0) < 5 && Math.abs(ev.clientY - y0) < 5) return; start(); }
+      var px = (ev.clientX - hr.left) / z + host.scrollLeft;
+      ghost.style.left = (px - grabX) + "px";
+      var best = slots[0];
+      slots.forEach(function(s){ if (Math.abs(s.x - px) < Math.abs(best.x - px)) best = s; });
+      target = best; line.style.left = (best.x - 1) + "px"; line.style.display = "block";
+    }
+    function up(){
+      th.removeEventListener("pointermove", move); th.removeEventListener("pointerup", up); th.removeEventListener("pointercancel", up);
+      if (!started) return;              /* a plain press: the heading's own click sorts, as before */
+      SWALLOW = true;
+      host.classList.remove("tc-dragging");
+      if (ghost) ghost.parentNode.removeChild(ghost);
+      if (line) line.parentNode.removeChild(line);
+      [].forEach.call(t.querySelectorAll(".tc-lifted"), function(c){ c.classList.remove("tc-lifted"); });
+      if (target && target.before !== k) placeBefore(id, cols, k, target.before);
+      repaint(); refocus(id, k);
+    }
+    th.addEventListener("pointermove", move); th.addEventListener("pointerup", up); th.addEventListener("pointercancel", up);
+  }
+  /* The movable keys, in display order, with k taken out and put back before
+     `before` (null: at the end). Written as the whole movable order, so the
+     store never holds a half-list. */
+  function placeBefore(id, cols, k, before){
+    var mid = displayOrder(id, cols).filter(function(c){ return !pinned(c); }).map(function(c){ return c.k; });
+    mid.splice(mid.indexOf(k), 1);
+    var at = before == null ? mid.length : mid.indexOf(before);
+    if (at < 0) at = mid.length;
+    mid.splice(at, 0, k);
+    load(id).order = mid; save(id);
+  }
+
+  /* ── The keyboard, on a focused heading ─────────────────────────────────── */
+  function onKey(e, th){
+    var t = th.closest("table"), id = t.dataset.tktable, k = th.dataset.col;
+    var cols = spec(id, t.dataset.tcvariant), c = cols.filter(function(x){ return x.k === k; })[0];
+    if (!c) return;
+    var dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    var heads = [].slice.call(th.parentNode.cells).filter(function(h){
+      return h.classList.contains("tcth") && !h.classList.contains("tc-hidden"); });
+    if (dir && e.altKey) {
+      if (pinned(c)) return;
+      e.preventDefault();
+      var movers = heads.filter(function(h){ return h.classList.contains("tcmove"); });
+      var at = movers.indexOf(th), other = movers[at + dir];
+      if (!other) return;
+      placeBefore(id, cols, k, dir < 0 ? other.dataset.col : (movers[at + 2] ? movers[at + 2].dataset.col : null));
+      repaint(); refocus(id, k);
+    } else if (dir && e.shiftKey) {
+      e.preventDefault();
+      var w = (parseInt(th.style.width, 10) || th.offsetWidth) + dir * STEP;
+      setWidth(t, id, cols, k, w); save(id); repaint(); refocus(id, k);
+      var nt = document.querySelector('table[data-tktable="' + id + '"] th[data-col="' + k + '"]');
+      if (nt) { tipAt(hostOf(nt.closest("table")), nt, parseInt(nt.style.width, 10) + " px"); clearTimeout(TIP_T); TIP_T = setTimeout(tipGone, 900); }
+    } else if (dir) {
+      e.preventDefault();
+      var n = heads[heads.indexOf(th) + dir]; if (n) n.focus();
+    } else if (e.key === "f" || e.key === "F") {
+      e.preventDefault(); fit(t, id, cols, k);
+    } else if ((e.key === "h" || e.key === "H") && hideable(c)) {
+      e.preventDefault();
+      var next = heads[heads.indexOf(th) + 1] || heads[heads.indexOf(th) - 1];
+      setShown(id, k, false); repaint(); if (next) refocus(id, next.dataset.col);
+    }
+  }
+
+  /* ── Bound once, on the document: the headings are rebuilt by every paint ── */
+  /* §772 (carried for main's §754) — the server reads this file too, to build a client (lib/frozen.cjs), and has no document to listen on */
+  if (typeof document !== "undefined") {
+  document.addEventListener("pointerdown", function(e){
+    var grip = e.target.closest && e.target.closest(".tcgrip");
+    if (grip) { startResize(e, grip); return; }
+    var th = e.target.closest && e.target.closest("th.tcmove");
+    if (th && e.button === 0 && !e.target.closest("button, a, input, select")) startMove(e, th);
+  });
+  document.addEventListener("click", function(e){
+    if (SWALLOW) { SWALLOW = false; e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  document.addEventListener("click", function(e){
+    var el = e.target.closest ? e.target : null; if (!el) return;
+    var b;
+    if ((b = el.closest("[data-colmenu]"))) {
+      e.stopPropagation();
+      MENU = MENU === b.dataset.colmenu ? null : b.dataset.colmenu;
+      /* one header menu open at a time, the register's own rule (§90) */
+      if (typeof PWMENU !== "undefined") PWMENU = false;
+      if (typeof PFILEMENU !== "undefined") PFILEMENU = false;
+      repaint(); return;
+    }
+    if ((b = el.closest("[data-tcall],[data-tcnone]"))) {
+      e.stopPropagation();
+      var id = b.dataset.tcall || b.dataset.tcnone, on = b.hasAttribute("data-tcall");
+      var tbl = document.querySelector('table[data-tktable="' + id + '"]');
+      spec(id, tbl && tbl.dataset.tcvariant).forEach(function(c){ if (hideable(c)) setShown(id, c.k, on); });
+      repaint(); return;
+    }
+    if ((b = el.closest("[data-tcdens]"))) {
+      e.stopPropagation();
+      var bits = b.dataset.tcdens.split("|");
+      load(bits[0]).density = bits[1]; save(bits[0]); repaint(); return;
+    }
+    if ((b = el.closest("[data-tcreset]"))) {
+      e.stopPropagation(); reset(b.dataset.tcreset); repaint(); return;
+    }
+    if (MENU && !el.closest(".hmenu")) { MENU = null; repaint(); }
+  });
+  /* A tick repaints the table and keeps the menu open — you come here to set
+     several columns (§47.2). */
+  document.addEventListener("change", function(e){
+    var cb = e.target;
+    if (!cb || !cb.matches || !cb.matches("input[data-col][data-coltable]")) return;
+    e.stopPropagation();
+    setShown(cb.dataset.coltable, cb.dataset.col, cb.checked); repaint();
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && MENU) { MENU = null; repaint(); return; }
+    var th = e.target && e.target.closest && e.target.closest("th.tcth");
+    if (th && !e.ctrlKey && !e.metaKey) onKey(e, th);
+  });
+  }
+
+  return { define:define, spec:spec, shown:shown, setShown:setShown, tools:tools, foot:foot,
+           apply:apply, reset:reset, shut:function(){ MENU = null; }, isOpen:function(){ return MENU; } };
+})();
 
 /* ── config-render.js ── */
 /* ── CONFIGURATION SCREENS ───────────────────────────────────────────────
@@ -41295,6 +42728,53 @@ function unitCompanySelect(k, u){
   '</select>';
 }
 
+/* §759, §770: THE WEIGHTING'S SWITCH, on the pinned line of the Strategy
+   module's Setup › Weighting (it sat on the client's Business units for a
+   day; Islam: *"the weighting should be under strategy"* — it measures the
+   strategy, not the company). The page stays reachable while off, for
+   focus's reason (§102, §61): the Weighting tab on the company page goes
+   while the switch is off, so a switch on that tab could be turned off and
+   never back on. The pinned On|Off pair is focus's (§135.5); Off says what
+   On would bring, so it never looks like a delete. */
+function weightingSwitch(){
+  var on = weightingOn();
+  if (!inOffice()) return '';
+  PAGE_ACTS +=
+    '<span class="segsw" role="group" aria-label="Weighting page on or off">' +
+      '<button type="button" class="seg' + (on ? ' on' : '') + '" data-weightswitch="1" ' +
+        'aria-pressed="' + on + '">Weighting on</button>' +
+      '<button type="button" class="seg' + (on ? '' : ' on') + '" data-weightswitch="0" ' +
+        'aria-pressed="' + (!on) + '">Off</button>' +
+    '</span>';
+  /* §769: off is the default, so the note says what On would bring. */
+  return on ? '' : '<div class="note"><b>The weighting is off for this client.</b> Every ' +
+    L("unitword") + ' counts equally in the group figure. On brings the table here and the Weighting tab ' +
+    'to the company page; anything entered before is kept.</div>';
+}
+/* §770: Setup › Weighting — the switch, and while on, the same table the
+   company page's Weighting tab draws (one renderer, two doors, as Focus
+   measures are marked in Setup and read on the pages). */
+function renderWeightingSetup(){
+  return cfgHead("Weighting", [], null, inOffice()) + weightingSwitch() +
+    (weightingOn() ? renderWeighting() : '');
+}
+/* ── THE READER'S OWN SHAPE (§754): what each column is called in the Columns
+   menu, and which never move. # and the name are the frozen pair (§151) and
+   the ⋮ is the far end; the rest may be hidden, sized and moved. The words are
+   the client's where the heading's are (`labelWord`, never `L`: the menu
+   escapes what it draws). */
+TABLECOLS.define("units", [
+  { k:"idx", fixed:true },
+  { k:"name", lock:true, label:function(){ return labelWord("unitword", "bu"); } },
+  { k:"nav", label:"In navigation" }, { k:"code", label:"Code" }, { k:"plans", label:"Plans in" },
+  { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
+  /* §768, §769: the Weight column goes with the switch; `offered` is what
+     keeps the declaration and the drawing in step. */
+  { k:"weight", label:"Weight", offered:function(){ return weightingOn(); } },
+  { k:"division", label:function(){ return labelWord("division", "group"); } },
+  { k:"head", label:"BU head" }, { k:"custodian", label:"Strategy custodian" },
+  { k:"status", label:"Status" }, { k:"menu", fixed:true }
+]);
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -41322,7 +42802,7 @@ function renderUnits(){
       ocell("units", k, "nav", may,
         (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
                    : '<span class="why" style="margin:0">' + esc(u.name) + '</span>'),
-        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "Shown in the nav" }); }) +
+        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "In navigation" }); }) +
       ocell("units", k, "code", may, '<span class="mono">' + esc(u.codePrefix) + '</span>',
         function(){ return ocellBox("data-upx", k, u.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") +
       /* §405: WHAT THE UNIT PLANS IN, AND HOW MANY OF THEM — the column that
@@ -41331,7 +42811,7 @@ function renderUnits(){
       ocell("units", k, "plans", may, unitPlansInCell(k, u),
         function(){ return unitFormatSelect(k, u); }, "cc plansin") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
-      '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
+      (weightingOn() ? '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' : '') +
       /* A unit belongs to a company or is its own — never neither. "Its own"
          is an explicit choice rather than an empty cell, because an empty cell
          reads as somebody having forgotten and standing alone is a decision. */
@@ -41356,7 +42836,7 @@ function renderUnits(){
   }).join("");
 
   return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
-      ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit)) +
+      ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit) + TABLECOLS.tools("units")) +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
        the units appear in the navigation and on the group page — somebody
@@ -41380,15 +42860,16 @@ function renderUnits(){
            30px into its neighbour at 1440 (46px at 1280) while Key Objectives'
            heading ran into Weight — measured. The short name gives up the
            room: it holds a short name. */
-        '<th style="width:11%">Shown in the nav</th>' +
+        '<th style="width:11%">In navigation</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
-        '<th class="cc" style="width:7%">Weight</th>' +
+        (weightingOn() ? '<th class="cc" style="width:7%">Weight</th>' : '') +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:7%">Status</th>' +
         '<th class="cc kebcell" style="width:44px"></th>' +
       '</tr></thead>' + setArrangeBody("units", "units") + rows + '</tbody></table></div>' +
+      TABLECOLS.foot("units") +
       /* ADD IS THE PAGE'S, NOT A ROW'S — and it is not drawn while arranging,
          because a row minted mid-drag lands at the end of a list somebody is in
          the middle of ordering. */
@@ -41472,7 +42953,7 @@ var ROWDLG_SPECS = {
       return pdSect("What it is") +
         pdField("Name", '<input class="fld tk-firstfield" value="' + esc(u.name) +
                         '" data-uname="' + esc(k) + '">') +
-        pdField("Shown in the nav", '<input class="fld" value="' + esc(u.navName || "") +
+        pdField("In navigation", '<input class="fld" value="' + esc(u.navName || "") +
                         '" data-unav="' + esc(k) + '" placeholder="' + esc(u.name) + '">') +
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
@@ -41957,7 +43438,8 @@ function saidWhereCount(){
    `Person` is not in the list. A register with the names hidden is not a
    register, and HR_ERP reaches the same answer by marking `name` non-hideable
    rather than by trusting nobody to untick it. */
-var PCOLS_KEY = "smp.people.columns";
+/* `smp.people.columns`, the store this chooser kept, is read ONCE by tablecols.js
+   as the starting point of `smp.table.people` and then superseded (§754). */
 /* RENAMED TWICE IN ONE VERSION, and both are Islam's words (§54.1).
    `belongs` → `bu`: "belongs to is not good naming" — a strategy platform's
    word for a part of the business is BU, and the column says which one the
@@ -42042,27 +43524,23 @@ var PEOPLE_COLS = [
   { k:"status",   label:"Status" },
   { k:"password", label:"Password", live:true }
 ];
-var PCOLS = null;      /* {key:bool}, loaded once */
-
-function peopleCols(){
-  if (PCOLS) return PCOLS;
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(PCOLS_KEY) || "null"); } catch (e) { saved = null; }
-  PCOLS = {};
-  /* MERGED, not replaced. A column added later is not in a map written before
-     it existed, and reading a missing key as `false` would hide every new
-     column from everybody who had ever opened the chooser — §30.2's lesson
-     about the access map, one surface further out. */
-  PEOPLE_COLS.forEach(function(c){
-    PCOLS[c.k] = (saved && typeof saved[c.k] === "boolean") ? saved[c.k] : !c.off;
-  });
-  return PCOLS;
-}
-function setPeopleCol(k, on){
-  peopleCols()[k] = on;
-  try { localStorage.setItem(PCOLS_KEY, JSON.stringify(PCOLS)); } catch (e) {}
-}
-function showCol(k){ return peopleCols()[k] !== false; }
+/* ── THE CHOOSER IS TABLECOLS's NOW (§754) ─────────────────────────────
+   `PEOPLE_COLS` stays the list — the keys, the labels, which are off until
+   asked for — and tablecols.js keeps the answer, draws the menu and takes
+   the same three questions the register asked of its own store: shown or
+   not, merged over the defaults, a saved choice winning. Name is the frozen
+   column and never hides; Password is on offer only where the platform is
+   served (the same `live` the head and the row read). */
+TABLECOLS.define("people", function(){
+  return [{ k:"idx", fixed:true }, { k:"name", lock:true, label:"Name" }].concat(
+    PEOPLE_COLS.map(function(c){
+      return { k:c.k, off:!!c.off,
+               label: c.k === "bu" ? sitsInWord : c.label,
+               offered: c.live ? function(){ return typeof SYNC !== "undefined" && SYNC.isLive() && inOffice(); } : null };
+    }),
+    [{ k:"menu", fixed:true }]);
+}, { omit:true });
+function showCol(k){ return TABLECOLS.shown("people", k); }
 
 /* The mark itself, and it NAMES THE OTHER ROWS rather than saying "duplicate".
    "Emp ID 10154 is on two rows" is a fact somebody can act on; a red dot is a
@@ -43612,27 +45090,9 @@ function renderPeople(){
         : '') +
     '</span>';
 
-  var colMenu =
-    '<span class="hmenu' + (PCOLMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-colmenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + PCOLMENU + '">Columns <span class="hcar">&#9662;</span></button>' +
-      (PCOLMENU
-        ? '<div class="hmenu-panel cols">' +
-            '<div class="hmenu-h"><span>Show columns</span>' +
-              '<span><button class="linkbu" data-colall="1">All</button> &middot; ' +
-              '<button class="linkbu" data-colnone="1">None</button></span></div>' +
-            PEOPLE_COLS.filter(function(c){ return !c.live || live; }).map(function(c){
-              /* The Unit column's name is the client's (§563), so the chooser
-                 asks the same word its heading does. */
-              return '<label class="colrow"><input type="checkbox" data-col="' + c.k + '"' +
-                (showCol(c.k) ? " checked" : "") + '><span>' +
-                esc(c.k === "bu" ? sitsInWord() : c.label) + '</span></label>';
-            }).join("") +
-            '<div class="hmenu-note">Person is always shown &mdash; a register ' +
-            'with the names hidden is not a register.</div>' +
-          '</div>'
-        : '') +
-    '</span>';
+  /* The Columns menu is the shared one (§754): the same button, in the same
+     place in the cluster, now also carrying the row height and Reset. */
+  var colMenu = TABLECOLS.tools("people");
 
   var pwMenu = !live ? "" :
     '<span class="hmenu' + (PWMENU ? " open" : "") + '">' +
@@ -43901,7 +45361,7 @@ function renderPeople(){
         (showCol("status")   ? th("Status", "cc") : '') +
         (live && showCol("password") ? th("Password", "cc", false) : '') +
         th("", "cc kebcell") +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>';
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' + TABLECOLS.foot("people");
       })() +
 
       "") +
@@ -44348,6 +45808,10 @@ function renderPeopleFile(mayEdit){
    same person maintains both, and inventing a fourteenth access key for a
    ten-row table would be a switch nobody ever moves.
    ══════════════════════════════════════════════════════════════════ */
+TABLECOLS.define("mainbu", [
+  { k:"idx", fixed:true }, { k:"name", lock:true, label:"Official BU" },
+  { k:"points", label:"Points at" }, { k:"people", label:"People" }, { k:"menu", fixed:true }
+]);
 function renderMainbus(){
   /* §85. A name has two editable things — what it is called and what it points
      at — and the second is chips with their own × plus a dropdown, which is
@@ -44468,7 +45932,7 @@ function renderMainbus(){
         mbth("Points at") +
         mbth("People", "cc") +
         mbth("", "cc", false) +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>'
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' + TABLECOLS.foot("mainbu")
     : '<div class="note"><b>Empty.</b> Names arrive by themselves the first time an employee ' +
       'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
       'nothing, for you to map. Or type them in with Edit.</div>';
@@ -44480,7 +45944,7 @@ function renderMainbus(){
   return cfgHead("Official BU list",
       strays.length ? ['<span class="pill warn">' + plural(strays.length, "name") +
                        ' on people and not on this list</span>'] : [],
-      "people", mayEdit) +
+      "people", mayEdit, null, null, TABLECOLS.tools("mainbu")) +
 
     section("", "Your names, and what they point at",
       null,
@@ -44571,6 +46035,12 @@ function coFlagSelect(ck, field, val){
     '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
     '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
 }
+TABLECOLS.define("companies", [
+  { k:"idx", fixed:true },
+  { k:"name", lock:true, label:function(){ return labelWord("division", "group"); } },
+  { k:"units", label:"Units" }, { k:"others", label:"Sees other companies" },
+  { k:"group", label:"Sees the group" }, { k:"status", label:"Status" }, { k:"menu", fixed:true }
+]);
 function renderCompanies(){
   /* §85's pen per row became a dialog per row (§261): what a company is called
      and what its CEO sees are three fields, and they are opened from the row's
@@ -44578,7 +46048,7 @@ function renderCompanies(){
      anything on this page at all. */
   var mayEdit = grant("c_units") === "edit";
   var live = activeCompanyKeys().length;
-  return cfgHead(L("division"), [], null, mayEdit) +
+  return cfgHead(L("division"), [], null, mayEdit, null, null, TABLECOLS.tools("companies")) +
     section("", L("division"), null,
       /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
          nothing and costs a header — the threshold is in the spec (§2.2) and
@@ -44622,7 +46092,7 @@ function renderCompanies(){
           '<td class="cc"><span class="pill ' + (on ? "good" : "none") + '">' +
             (on ? "Active" : "Retired") + '</span></td>' +
           coKebab(ck, co, on, mayEdit) + '</tr>';
-      }).join("") + '</tbody></table></div>' +
+      }).join("") + '</tbody></table></div>' + TABLECOLS.foot("companies") +
       (mayEdit ? '<div class="addrow"><button class="editbtn" id="addcompany">+ Add a company</button></div>' : '') +
       '<div class="note"><b>A ' + L1("division") + ' groups ' + L("unitword") + ' so its CEO sees their own.</b> ' +
       'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
@@ -45941,6 +47411,11 @@ function lineOwnersSwitch(mayEdit, editing){
     '</span></div>';
 }
 
+TABLECOLS.define("sets", [
+  { k:"idx", fixed:true }, { k:"name", lock:true, label:"Set" },
+  { k:"team", label:"Team" }, { k:"owner", label:"Owner" }, { k:"picks", label:"Who picks its figures" },
+  { k:"figures", label:"Figures" }, { k:"menu", fixed:true }
+]);
 function renderSetsSetup(){
   var mayEdit = grant("c_sets") === "edit";
   var editing = mayEdit && EDITING.sets;
@@ -46025,7 +47500,7 @@ function renderSetsSetup(){
 
   var claimed = SMPRules.sourceRows(world()).length;
 
-  return cfgHead("Figure sets", [], "sets", mayEdit, null, null) +
+  return cfgHead("Figure sets", [], "sets", mayEdit, null, null, TABLECOLS.tools("sets")) +
     /* §84. NO SEARCH, NO SORT, and both are the spec (§2.2, §6.2) rather than
        an omission. One set today: a search box above one row is furniture. And
        the order of the sets is the order somebody put them in — the same
@@ -46042,7 +47517,7 @@ function renderSetsSetup(){
     '</tr></thead><tbody>' + (rows || (mayEdit ? "" :
       '<tr><td colspan="7" class="why">No sets yet. A set is how a number that ' +
       'belongs to Finance stops being typed by every ' + L1("unitword") + '.</td></tr>')) +
-      addRow + '</tbody></table></div>' +
+      addRow + '</tbody></table></div>' + TABLECOLS.foot("sets") +
     namingSwitch(mayEdit, editing) +
     '<div class="note"><b>Who picks is a security setting, not a convenience.</b> ' +
       'Ticking from the full list means reading every number in the group \u2014 which ' +
@@ -46263,7 +47738,7 @@ function renderMyLines(){
     return '<div class="note">No line is yours to report. A ' + L1("tactic") + ' is yours when the plan ' +
       'names you as its <b>Owner</b> \u2014 the SMO sets that on the unit\u2019s plan.</div>';
   }
-  var open = REVIEW.state === "open" && !(CYCLE.locked && !inOffice());
+  var open = cycleTakesFigures();   /* §755 */
   var byT = {}, order = [];
   rows.forEach(function(r){
     if (!byT[r.target]) { byT[r.target] = []; order.push(r.target); }
@@ -46382,7 +47857,7 @@ function renderMySources(){
       '<b>sets</b>, and a set\u2019s owner enters everything in it \u2014 the SMO creates ' +
       'them on <b>Setup &rsaquo; Figure sets</b>.</div>';
   }
-  var open = REVIEW.state === "open" && !(CYCLE.locked && !inOffice());
+  var open = cycleTakesFigures();   /* §755 */
   var byUnit = {};
   rows.forEach(function(r){ (byUnit[r.unit] = byUnit[r.unit] || []).push(r); });
 
@@ -46669,10 +48144,13 @@ function impPicked(){
    `REVIEW.name`), so this list is read rather than invented.
 
    Uploading has no such list, deliberately: *"the upload only makes sense for
-   new cycles not closed ones"*. A closed cycle takes no figures from anyone,
-   office included — `canReport()` and `canReportFn()` both open with
-   `REVIEW.state !== "open"` — and reopening one is its own deliberate control
-   on Setup › Reporting cycle (§273.2). So the Upload tab STATES its cycle. */
+   new cycles not closed ones"*. A closed cycle takes no figures from anyone
+   but the office (§755 — before it, nobody: `canReport()` and `canReportFn()`
+   both opened with `REVIEW.state !== "open"`), and reopening one is its own
+   deliberate control on Setup › Reporting cycle (§273.2). A progress FILE
+   still lands on the open cycle alone, on Islam's word above; the office's
+   correction to a closed one is typed on the Reporting page. So the Upload
+   tab STATES its cycle. */
 function impCycles(){
   var out = [{ v:"", label:(REVIEW.name || "This cycle") + " — open" }];
   (ARCHIVES || []).forEach(function(a){
@@ -48231,7 +49709,8 @@ function planUnderCell(fk, f, editable){
    substituted — a column added later is absent from a map written before it
    existed, and reading absent as `false` would hide every new column from
    everybody who had ever opened the control (§30.2). */
-var FNCOLS_KEY = "smp.fns.columns";
+/* `smp.fns.columns`, the store this chooser kept, is read ONCE by tablecols.js
+   as the starting point of `smp.table.fns` and then superseded (§754). */
 var FN_COLS = [
   { k:"key",     label:"Key", off:true },
   { k:"nav",     label:"Nav name" },
@@ -48242,21 +49721,6 @@ var FN_COLS = [
   { k:"head",    label:"Head" },
   { k:"cust",    label:"Custodian" }
 ];
-var FNCOLS = null;
-function fnCols(){
-  if (FNCOLS) return FNCOLS;
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(FNCOLS_KEY) || "null"); } catch (e) { saved = null; }
-  FNCOLS = {};
-  FN_COLS.forEach(function(c){
-    FNCOLS[c.k] = (saved && typeof saved[c.k] === "boolean") ? saved[c.k] : !c.off;
-  });
-  return FNCOLS;
-}
-function setFnCol(k, on){
-  fnCols()[k] = on;
-  try { localStorage.setItem(FNCOLS_KEY, JSON.stringify(FNCOLS)); } catch (e) {}
-}
 /* §624: THE CAPS COLUMN ONLY WHERE A FUNCTION HOLDS ONE. It counts the
    capabilities filed under a function, and since §544.13 nothing files one
    there — a capability is the company's — so on every live client it was a
@@ -48266,7 +49730,19 @@ function fnCapsHeld(){
   return (FUNCTION_KEYS || []).some(function(fk){ return capsOfFunction(fk).length > 0; });
 }
 function fnColOffered(k){ return k !== "caps" || fnCapsHeld(); }
-function fnShowCol(k){ return fnColOffered(k) && fnCols()[k] !== false; }
+/* THE CHOOSER IS TABLECOLS's NOW (§754), the register's rule word for word:
+   Function is the frozen column and never hides; Status stays shown but may
+   move; the company column is headed with the client's own word. */
+TABLECOLS.define("fns", function(){
+  return [{ k:"idx", fixed:true }, { k:"name", lock:true, label:"Function" }].concat(
+    FN_COLS.map(function(c){
+      return { k:c.k, off:!!c.off,
+               label: c.k === "company" ? function(){ return labelWord("division", "group"); } : c.label,
+               offered: c.k === "caps" ? fnCapsHeld : null };
+    }),
+    [{ k:"status", keep:true, label:"Status" }, { k:"menu", fixed:true }]);
+}, { omit:true });
+function fnShowCol(k){ return fnColOffered(k) && TABLECOLS.shown("fns", k); }
 
 /* ── THE ROW'S ACTIONS, IN ONE MENU (§93.14) ──────────────────────────
    The register's kebab, on the table §69.22's argument had not reached. The
@@ -48475,25 +49951,9 @@ function renderFunctions(){
      say at the foot and in which column can never be hidden, and a helper
      taking two lists and two sentences is longer than the thing it replaces.
      If a third table wants one, that is when it becomes a function. */
-  var fnColMenu = !mayEdit ? "" :
-    '<span class="hmenu' + (FNCOLMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-fncolmenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + FNCOLMENU + '">Columns <span class="hcar">&#9662;</span></button>' +
-      (FNCOLMENU
-        ? '<div class="hmenu-panel cols">' +
-            '<div class="hmenu-h"><span>Show columns</span>' +
-              '<span><button class="linkbu" data-fncolall="1">All</button> &middot; ' +
-              '<button class="linkbu" data-fncolnone="1">None</button></span></div>' +
-            FN_COLS.filter(function(c){ return fnColOffered(c.k); }).map(function(c){
-              return '<label class="colrow"><input type="checkbox" data-fncol="' + c.k + '"' +
-                (fnShowCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
-            }).join("") +
-            '<div class="hmenu-note">Function and Status are always shown. ' +
-            '<b>Key</b> is the identifier written into a project code and a person\u2019s ' +
-            'row \u2014 turn it on when something does not line up.</div>' +
-          '</div>'
-        : '') +
-    '</span>';
+  /* The Columns menu is the shared one (§754): the register's shape, the same
+     place in the cluster, now also carrying the row height and Reset. */
+  var fnColMenu = TABLECOLS.tools("fns");
 
   return cfgHead(navWord("fnword", "Functions"), [], null, mayEdit, "fnall",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("fns", mayEdit) + fnColMenu) +
@@ -48535,7 +49995,7 @@ function renderFunctions(){
                     rule, which the register applies to Roles and Password). */
                  h("", "cc kebcell", false); })() +
         '</tr></thead>' +
-        setArrangeBody("fns", "fns") + rows + '</tbody></table></div>' +
+        setArrangeBody("fns", "fns") + rows + '</tbody></table></div>' + TABLECOLS.foot("fns") +
       /* The three notes that sat here are in the knowledge base now (§30). A
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
@@ -48608,6 +50068,21 @@ function capSeatSelect(id, seat, v){
     optionsHtml(ownerChoices(v, true), function(x){ return String(v == null ? "" : v) === x; }) +
   '</select>';
 }
+/* Two renderers share `data-tktable="caps"` and never both draw for one
+   tenant: the table carries `data-tcvariant` and the declaration answers by it. */
+TABLECOLS.define("caps", function(variant){
+  return variant === "pillars"
+    ? [{ k:"idx", fixed:true }, { k:"code", lock:true, label:"Code" },
+       { k:"name", label:function(){ return labelWord("capability", "group"); } },
+       { k:"owner", label:"Owner" }, { k:"custodian", label:"Custodian" },
+       { k:"measures", label:function(){ return labelWord("measure", "bu"); } },
+       { k:"tactics", label:function(){ return labelWord("tactic", "bu"); } }, { k:"menu", fixed:true }]
+    : [{ k:"idx", fixed:true }, { k:"name", lock:true, label:function(){ return labelWord("capability", "group"); } },
+       { k:"owner", label:"Owner" }, { k:"custodian", label:"Custodian" }, { k:"plansin", label:"Plans in" },
+       { k:"kobj", label:function(){ return labelWord("keyobj", "bu"); } },
+       { k:"proj", label:function(){ return labelWord("project", "bu") + " / " + labelWord("pillar", "bu"); } },
+       { k:"menu", fixed:true }];
+});
 function renderCapPillars(){
   var u = topAsUnit();
   var may = mayEditCapPillars();
@@ -48632,14 +50107,14 @@ function renderCapPillars(){
         "", p.name || code, 'data-cpmenu="' + esc(id) + '"') +
     '</tr>';
   }).join("");
-  return cfgHead(L("capability"), [], null, false) +
+  return cfgHead(L("capability"), [], null, false, null, null, TABLECOLS.tools("caps", "pillars")) +
     section("", L("capability"), null,
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
-      '<div class="cfg"><table class="cappcfg" data-tktable="caps"><thead><tr>' +
+      '<div class="cfg"><table class="cappcfg" data-tktable="caps" data-tcvariant="pillars"><thead><tr>' +
         (function(){ var h = tkHead("caps");
           return h("#", "idx", false) + h("Code") + h(L1("capability")) + h("Owner") + h("Custodian") +
                  h(L("measure","bu"), "cc") + h(L("tactic","bu"), "cc") + h("", "cc kebcell", false); })() +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + TABLECOLS.foot("caps") +
       (may ? '<div class="addrow"><button class="editbtn" id="addcappillar">+ Add a ' +
         L1("capability") + '</button></div>' : ''));
 }
@@ -48709,7 +50184,7 @@ function renderCaps(){
      mark. What is left is drawn only when there IS an orphan. */
   return cfgHead(L("capability"),
       orphan ? ['<span class="pill none">' + orphan + ' with no owner</span>'] : [],
-      null, false) +
+      null, false, null, null, TABLECOLS.tools("caps")) +
     section("", L("capability"), null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
          wrap and leave one row taller than the rest, which reads as broken
@@ -48724,7 +50199,7 @@ function renderCaps(){
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div>' +
+        '<tbody>' + rows + '</tbody></table></div>' + TABLECOLS.foot("caps") +
       (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
@@ -51413,7 +52888,7 @@ function unitSwotSlides(u){
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+        return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
       }).join("");
       /* The LAST category keeps the old key "swot", which stored slides
          already name (§236.3). */
@@ -52482,7 +53957,7 @@ function pillarSlidesOf(u, p, pi, named){
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + hidChip(t) + '</td>' +
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + deckSupports(t, p) + hidChip(t) + '</td>' +
       '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
       (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
@@ -52648,7 +54123,7 @@ function companyAnalysisSlides(u){
       var items = has(q);
       return '<div class="dswcol t-' + hues[q] + '"><h3>' + esc(LTraw("group", SMPRules.QUAD_KEYS[q])) + '</h3>' +
         (items.length ? '<ol class="dswot">' + items.map(function(t, i){
-          return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+          return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
         }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
     }).join("") + '</div></section>'];
 }
@@ -52805,6 +54280,13 @@ function planReqs(t){
   return rq.length ? '<span class="dsub">' + esc(detailWord("requirements", "many", t)) + ': ' +
     esc(rq.join("  \u00b7  ")) + '</span>' : '';
 }
+/* §767: the key measures a tactic supports, by number, as the page says it —
+   the measures table on the slide before carries the same numbers. */
+function deckSupports(t, p){
+  var s = supportsOf(t, p);
+  return s.length ? '<span class="dsub">' +
+    s.map(function(x){ return 'KM ' + x.n; }).join('  \u00b7  ') + '</span>' : '';
+}
 function deckPillarHead(u, p, pi, which){
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
     esc(p.name) + '<span class="dwhich">' + which + '</span></h2></div>';
@@ -52832,7 +54314,7 @@ function fnSWSlide(f){
     var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
     return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
       (items.length ? '<ol class="dswot">' + items.map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+        return '<li><span class="n">' + (i+1) + '</span>' + swotText(t) + '</li>';
       }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
   };
   var any = quads.some(function(k){
@@ -56457,6 +57939,12 @@ var READING = (function () {
     { k: "perf", label: function () { return "Overall performance"; } }
   ];
   function tabsFor(key) { return TABS.filter(function (t) { return !t.when || t.when(key); }); }
+  /* what a tab holds — asked by the window for the open tab and by the paper
+     for every tab (§789), so the two can never say different things */
+  function tabBody(key, k) {
+    return k === "found" ? foundation(key) : k === "swot" ? analysis(key) : k === "dir" ? directions(key, false)
+      : k === "cap" ? directions(key, true) : k === "proj" ? projects(key) : k === "obj" ? objectives(key) : performance(key);
+  }
 
   /* ── the pieces ── */
   function stand(v) {
@@ -56471,7 +57959,10 @@ var READING = (function () {
      under every row, its header the only title — no label over it saying
      the same word — and the columns kept to the width the figures need
      rather than spread to the card's edge. */
-  function measureRows(list) {
+  /* §767: `p` is the pillar, for the tags of the tactics behind a measure and
+     of the measures a tactic supports — the same numbers the Plan page prints,
+     and the legend under the tactics says which is which. */
+  function measureRows(list, p) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No measures yet.</p>';
     return '<table class="rtable rmeas"><thead><tr><th>Measure</th><th class="num">Target</th><th class="num">Actual</th><th>Standing</th></tr></thead><tbody>' +
@@ -56479,16 +57970,16 @@ var READING = (function () {
         var sc = measureScore(m);
         /* a measure not yet given a target or a figure shows a dash, never a bare direction sign over nothing (El Abd, 2026-10-29) */
         var tgt = String(m.target == null ? "" : m.target).trim(), fig = String(figShown(m) || "").trim();
-        return '<tr><td>' + esc(m.name || "") + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
+        return '<tr><td>' + esc(m.name || "") + supportedLine(m, p) + '</td><td class="num">' + (tgt ? (m.dir ? esc(m.dir) + ' ' : '') + tgtShown(m.target) : '\u2014') + '</td>' +
           '<td class="num">' + (fig ? fig : '\u2014') + '</td><td class="rst">' + stand(sc) + '<i style="color:' + bandInk(sc) + '">' + pct(sc) + '</i></td></tr>';
       }).join("") + '</tbody></table>';
   }
-  function tacticRows(list) {
+  function tacticRows(list, p) {
     var rows = SMPRules.shown(list || []);
     if (!rows.length) return '<p class="rnone">No tactics yet.</p>';
     return '<table class="rtable rtacs"><thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Status</th></tr></thead><tbody>' +
       rows.map(function (t) {
-        return '<tr><td>' + esc(t.name || "") + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
+        return '<tr><td>' + esc(t.name || "") + supportsLine(t, p) + '</td><td class="row">' + esc(t.owner || "\u2014") + '</td>' +
           '<td><span class="rq">' + [t.q1, t.q2, t.q3, t.q4].map(function (q) { return '<span class="' + (q ? "on" : "") + '"></span>'; }).join("") + '</span></td>' +
           '<td><span class="rsts">' + esc(t.status || "\u2014") + '</span></td></tr>';
       }).join("") + '</tbody></table>';
@@ -56586,7 +58077,7 @@ var READING = (function () {
           '<span class="rsum"><b>' + ms + '</b> measure' + (ms === 1 ? "" : "s") + ' · <b>' + ts + '</b> tactic' + (ts === 1 ? "" : "s") +
           ' · <b style="color:' + bandInk(sc) + '">' + pct(sc) + '</b></span>' + stand(sc) +
           '<span class="rchev" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg></span></div>' +
-          '<div class="rmore">' + measureRows(it.measures) + tacticRows(it.tactics) + '</div></div>';
+          '<div class="rmore">' + measureRows(it.measures, it) + tacticRows(it.tactics, it) + supportsLegend(it) + '</div></div>';
       }).join("") + '</div>';
   }
 
@@ -56771,14 +58262,14 @@ var READING = (function () {
       '<span class="rco">' + esc(GROUP.org || "") + '</span>' +
       '<span class="rsp"></span>' +
       (REVIEW && REVIEW.name ? '<span class="rasof">' + esc(REVIEW.name) + '</span>' : '') +
+      /* §789: the whole strategy on paper, the office's alone */
+      (mayPrint() ? '<button type="button" class="rexit rprint" data-rprint title="Print or save as PDF">Print</button>' : '') +
       '<button type="button" class="rexit" data-rexit title="Exit (Esc)">Exit</button>';
     r.querySelector(".rwnav").innerHTML = rowHTML(key);
     r.querySelector(".rwtabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-rtab="' + t.k + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '>' + esc(t.label(key)) + '</button>';
     }).join("");
-    var body = tab.k === "found" ? foundation(key) : tab.k === "swot" ? analysis(key) : tab.k === "dir" ? directions(key, false)
-      : tab.k === "cap" ? directions(key, true) : tab.k === "proj" ? projects(key) : tab.k === "obj" ? objectives(key) : performance(key);
-    r.querySelector(".rwbody").innerHTML = body;
+    r.querySelector(".rwbody").innerHTML = tabBody(key, tab.k);
     r.querySelector(".rwbody").scrollTop = 0;
     ST.tab = tab.k;
     rowSettle();
@@ -56840,6 +58331,98 @@ var READING = (function () {
     paint();
   }
 
+  /* ── THE WHOLE STRATEGY ON PAPER (§789) ────────────────────────────────
+     Islam, 2026-11-17: *"can we have printing options from the reading
+     option as a printing option. to print the strategy in a good format"*;
+     of two shapes drawn, *"option 1, the whole strategy"*; of who may,
+     *"smo only"*.
+
+     IT PRINTS WHAT THE WINDOW SHOWS, WHICH IS THE WHOLE ARGUMENT (§305's,
+     for the deck): every section is the same builder the tab calls
+     (tabBody), so the paper cannot disagree with the screen. One document
+     for the subject being read — a cover with the client's name, the
+     subject, the review period and the day it was printed; then every tab
+     the subject offers, in the tabs' own order, each on a page of its own,
+     every direction and project opened and the fold's own controls gone,
+     since paper has no press. The way out is the browser's print dialog,
+     paper and Save as PDF alike: the platform never holds PDF bytes (§305),
+     and a builder of its own would be a second answer to "what is in this
+     tab" that drifts at the next change. The browser's own header and
+     footer, where the reader keeps them on, carry the page number and the
+     document's name — so the title is set for the dialog's lifetime,
+     "Strategy · <client> · <subject>", and put back.
+
+     THE OFFICE'S ALONE (*"smo only"*): the button is drawn for a seat the
+     rules call the office (SMPRules.isOffice — the Super user and the SMO
+     team) and for nobody else; a reader reads on the screen, and what
+     leaves on paper is the SMO's to send. The gate is the button and the
+     key (Ctrl/⌘+P in the window); the browser's own print of the screen is
+     not refused, since a screenshot never was.
+
+     THE THEME IS SET TO LIGHT FOR THE DIALOG AND PUT BACK, as the deck
+     turns fit-to-window off and puts it back (deckPrint): the window's
+     colours are tokens that follow the theme, and a dark page printed is a
+     dark page. The document is built on the press and removed when the
+     dialog closes — `afterprint` fires on Save and on Cancel alike — so
+     nothing of it is on the screen before or after. */
+  function mayPrint() {
+    try { return !!SMPRules.isOffice(world(), viewer()); } catch (e) { return false; }
+  }
+  function subjectName(key) {
+    var kind = kindOf(key);
+    if (kind === "unit") return String((UNITS[key] || {}).name || "");
+    if (kind === "fn") return String((FUNCTIONS[fnKey(key)] || {}).name || "");
+    if (kind === "co") return String((COMPANIES[key.slice(3)] || {}).name || "");
+    /* the top layer: the client's own word for it where it holds units; a company that plans
+       its own strategy with no units (§570 names its button Strategy) is named by its name */
+    try { if (!buExists()) return String(GROUP.org || ""); return String(topNavWord() || GROUP.org || ""); } catch (e) { return String(GROUP.org || ""); }
+  }
+  function printDoc(key) {
+    var org = String(GROUP.org || "").trim(), subj = subjectName(key);
+    var cover = '<div class="rpcover">' +
+      '<span class="rpmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/></svg></span>' +
+      (org && org !== subj ? '<p class="rporg">' + esc(org) + '</p>' : '') +
+      '<h1>' + esc(subj || "Strategy") + '</h1>' +
+      '<p class="rpline">Strategy' + (REVIEW && REVIEW.name ? ' · ' + esc(REVIEW.name) : '') + '</p>' +
+      '<p class="rpday">Printed ' + esc(dateDay(new Date())) + '</p></div>';
+    return cover + tabsFor(key).map(function (t) {
+      return '<section class="rpsec" data-rptab="' + t.k + '"><h2>' + esc(t.label(key)) + '</h2>' + tabBody(key, t.k) + '</section>';
+    }).join("");
+  }
+  function printAll() {
+    var r = root(); if (!r || !isOpen() || !mayPrint()) return false;
+    var key = norm(ST.target); if (!key) return false;
+    var doc = document.createElement("div");
+    doc.className = "rprintdoc";
+    doc.innerHTML = printDoc(key);
+    doc.querySelectorAll(".rdir").forEach(function (d) {
+      d.classList.add("open");
+      var f = d.querySelector(".rfold"); if (f) { f.setAttribute("aria-expanded", "true"); f.removeAttribute("role"); f.removeAttribute("tabindex"); }
+      /* a direction's line and its first table are kept on one page together (.rpkeep): a
+         keep-with-next on the line alone made the browser move the whole direction (measured) */
+      var more = d.querySelector(".rmore"), first = more && more.firstElementChild;
+      if (f && first) { var keep = document.createElement("div"); keep.className = "rpkeep"; d.insertBefore(keep, f); keep.appendChild(f); keep.appendChild(first); }
+    });
+    doc.querySelectorAll(".rtools").forEach(function (x) { x.parentNode.removeChild(x); });
+    r.appendChild(doc);
+    var html = document.documentElement, wasTheme = html.getAttribute("data-theme"), wasTitle = document.title;
+    if (wasTheme === "dark") html.setAttribute("data-theme", "light");
+    var org = String(GROUP.org || "").trim(), subj = subjectName(key);
+    document.title = ["Strategy", org, subj === org ? "" : subj].filter(Boolean).join(" · ");
+    document.body.classList.add("rprinting");
+    var done = function () {
+      window.removeEventListener("afterprint", done);
+      if (doc.parentNode) doc.parentNode.removeChild(doc);
+      if (wasTheme) html.setAttribute("data-theme", wasTheme);
+      document.title = wasTitle;
+      document.body.classList.remove("rprinting");
+    };
+    window.addEventListener("afterprint", done);
+    /* one tick, so the document is laid out before the browser is asked to lay it out for paper (deckPrint) */
+    setTimeout(function () { window.print(); }, 50);
+    return true;
+  }
+
   /* WHAT THE WINDOW SHOWS, SAID TO WHOEVER LISTENS (§689): shell/route.js
      writes it into the address and reads an address back into it. */
   function state() { return { open: isOpen(), target: ST.target, tab: TAB_WORD[ST.tab] || "foundation" }; }
@@ -56879,6 +58462,7 @@ var READING = (function () {
       var t = e.target.closest ? e.target : null; if (!t) return;
       var tab = t.closest("[data-rtab]"); if (tab) { ST.tab = tab.getAttribute("data-rtab"); paint(); return; }
       if (t.closest("[data-rexit]")) { close(); return; }
+      if (t.closest("[data-rprint]")) { printAll(); return; }
       /* the row (§692): a name or a top goes there; a side opens its list,
          and a side that carries a division opens that division's page too
          (§464), where the viewer reaches it */
@@ -56912,6 +58496,7 @@ var READING = (function () {
     document.addEventListener("keydown", function (e) {
       if (!r.classList.contains("on")) return;
       if (e.key === "Escape") { e.preventDefault(); close(); }
+      else if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P") && mayPrint()) { e.preventDefault(); printAll(); }
       else if (e.key === "Enter" || e.key === " ") { var el = e.target; if (el instanceof HTMLElement && el.classList.contains("rfold")) { e.preventDefault(); el.click(); } }
       e.stopPropagation();
     }, true);
@@ -56970,7 +58555,7 @@ var READING = (function () {
     return !!open(null);
   }
 
-  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen };
+  return { wire: wire, open: open, close: close, offer: offer, readerSeat: readerSeat, state: state, isOpen: isOpen, print: printAll, mayPrint: mayPrint };
 })();
 
 /* ── slides.js ── */
@@ -64862,14 +66447,30 @@ var WELCOME = (function(){
     catch(e){ return false; }
   }
 
+  /* ── §776 · IT NO LONGER OFFERS ITSELF ─────────────────────────────
+     Islam, opening a client and meeting the screen over Strategy: *"why is
+     the client opening on the welcome window? didn't we make it open on the
+     strategy earlier as a default?"* — and, of the three ways put to him,
+     *"go with the first option, stop it showing on its own."*
+
+     So the greeting is never drawn unasked: the platform lands on the
+     module's page and nothing stands over it. The screen itself is whole
+     and the house mark is its one door (`open()`, §185) — what is waiting
+     on you, your pages and the cycle are a press away rather than in front
+     of every sign-in. `offer()` stays as the one place land() asks, and it
+     declines; the silences it used to weigh are kept beside it as a record
+     of what the screen once did, and `seenThisSession` / `markDone` keep
+     their meaning for the checks and the door's memory. With the greeting
+     declining, the intro round offers itself to a first-timer exactly as it
+     already did on a reload (land(): the tour is offered where the welcome
+     declined), and the office is never offered it (§118). */
   function offer(person){
     if (!person) return false;
     if (location.protocol === "file:") return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
     if (deepAddress()) return false;
     if (seenThisSession()) return false;
-    try { build(person); } catch(e){ box = null; return false; }
-    return true;
+    return false;   /* §776: asked for, never offered */
   }
 
   /* ── ASKING FOR IT BACK (§185) ──────────────────────────────────────
@@ -64998,6 +66599,7 @@ var TRAIL = (function(){
                 outTarget:"Outcome target", outcome:"Outcome", note:"Note", pct:"% complete",
                 status:"Status", compile:"Compile rule", dir:"Direction", quarters:"Quarters",
                 owner:"Owner", collaborators:"Collaborators", name:"Name", description:"Description",
+                supports:"Key measures supported",
                 weight:"Weight", finish:"Due date", start:"Start", end:"End", def:"Definition",
                 aspiration:"Aspiration", progress:"Progress", measureAt:"Measure date",
                 horizon:"Horizon", kind:"Measured as", hide:"Hidden", endInMind:"End in mind",
@@ -66246,9 +67848,9 @@ var COPILOT = (function(){
     { k:"foundation", label:"Foundation" },
     { k:"analysis",   label:"Analysis" },
     { k:"compete",    label:"Competitive Discipline" },
-    { k:"directions", label:"Directions" },
+    { k:"directions", label:"Pillars/Directions" },
     { k:"capabilities", label:"Capabilities" },
-    { k:"execution",  label:"Execution" },
+    { k:"execution",  label:"Tactical Plans" },
     { k:"advisory",   label:"Advisory" }
   ];
   /* What is open, per place and section, so walking to another section and
@@ -66352,7 +67954,15 @@ var COPILOT = (function(){
      slow answer left the page on "working" for as long as it took, which
      read as broken. */
   var WAIT_MS = (window.__copWaitMs || 120000);
+  /* §780 — a step-by-step chat's ask takes the files waiting above its box (lib/copilot.ts waitingFiles) */
+  var TAKES = /^(advisory(Turn|Revise)|compete(Score|Values|Refine)|dir(Suggest|More)|capSuggest|execDraft|swot(Answer|Analysis|Draft|Change|Check)|flow(Draft|Refine|Check))$/;
   function post(body, waitMs){
+    return post0(body, waitMs).then(function(x){
+      if (x && x.st === 200 && x.j && x.j.ok && TAKES.test(String(body.act || "")) && PANE && PANE.chat && PANE.chat.id === body.id && (PANE.pending || []).length) { PANE.pending = []; setTimeout(draw, 0); }
+      return x;
+    });
+  }
+  function post0(body, waitMs){
     var ctrl = (waitMs && typeof AbortController !== "undefined") ? new AbortController() : null, timedOut = false;
     var tm = ctrl ? setTimeout(function(){ timedOut = true; ctrl.abort(); }, waitMs) : null;
     return fetch(url("api"), { method:"POST", cache:"no-store", credentials:"same-origin",
@@ -66377,15 +67987,69 @@ var COPILOT = (function(){
   function when(iso){ return dateDay(iso); }
 
   /* ── THE PANE ────────────────────────────────────────────────────────── */
+  /* §753 — THREE LAYOUTS, TO COMPARE LIVE (Islam: "let's build B & A as well,
+     keep both so I can compare live"). One window (§752), A — one chat that
+     opens the work when it is asked for — and B — the Copilot on the plan,
+     opened from the part in view on the Strategy tab. Chosen per browser;
+     nothing on the server knows which. */
+  /* §772 — BUILDER AND REFINE (Islam: "for a new project the people go step
+     by step… once there is a plan in place and we are refining, the one chat
+     is working better"; "the builder should be always there if an element is
+     not there… the foundation, the SWOT, the competitive discipline, the
+     pillars and directions, tactical plans — 5 important steps"). The tab
+     opens in BUILDER (the one window, §752) until every one of the five is on
+     the plan, then in REFINE (the one chat, §753 A). A choice by hand
+     overrides it, per browser; choosing what the place would open on clears
+     the choice. B is not a layout of the tab: ✦ Copilot stands beside Edit
+     on the plan's parts in either mode. */
+  /* §779 — BUILD ONLY, AND THE PLAN ITSELF SAYS WHAT IS ON IT (Islam:
+     "remove the refine sub tab… keep the copilot for the build only, as the
+     refine is already inside the plan"; "it needs to check if something is
+     already there… I'm in a plan that is already complete and it says not
+     started in all of them"; design-mockups/copilot-layout/
+     2026-11-17_build-only.html). A part counts as on the plan when the plan
+     holds it, however it got there — typed on the platform or applied from
+     the Copilot. The Refine layout (§753 A, §772) is gone: the tab is the
+     one window, and refining is ✦ Copilot on the plan's part. */
+  function planHeld(k){
+    try {
+      if (k === "foundation") { var pp = planParts(), off = skipNow(), n = Object.keys(pp).filter(function(x){ return pp[x] && (!Array.isArray(pp[x]) || pp[x].length) && off.indexOf(x) < 0; }).length; return n ? n + (n === 1 ? " part" : " parts") : ""; }
+      if (k === "analysis") { var sw = planSwot(), ln = LETTERS.reduce(function(t, L){ return t + ((sw[L] || []).length); }, 0); return ln ? ln + (ln === 1 ? " line" : " lines") : ""; }
+      if (k === "compete") { var cw = cpPlanHeld(); return cw ? cpWord(cw.discipline) + " · " + cw.values.length + (cw.values.length === 1 ? " value" : " values") : ""; }
+      /* read, never written: dvHolder's writable would add empty lists to the plan on every draw */
+      var t = place(), o = t === "group" && typeof GROUP !== "undefined" ? GROUP : (typeof unitLike === "function" ? unitLike(t) : null);
+      var its = (o && Array.isArray(o.items) ? o.items : []).filter(function(p){ return p && String(p.name || "").trim(); });
+      if (k === "directions") { var nd = its.length; return nd ? nd + (nd === 1 ? " Direction" : " Directions") : ""; }
+      if (k === "execution") { var ei = its.filter(function(p){ var ln = exPlanLines(p, null); return ln.measures.length || ln.tactics.length; }).length; return ei ? ei + (ei === 1 ? " item" : " items") + " with tactics" : ""; }
+    } catch (e) {}
+    return "";
+  }
+  /* on the plan: the plan holds it, or a version of it was applied */
+  function onPlan(k){
+    if (planHeld(k)) return true;
+    var l = LISTS[place() + "|" + k]; return !!(l && !l.failed && (l.deliverables || []).some(function(d){ return d.applied && d.applied.n; }));
+  }
+  function modeParts(){ return here().map(function(s){ return s.k; }).filter(function(k){ return k !== "advisory" && k !== "capabilities"; }); }
+  function layout(){ return "window"; }
+  function layoutBar(){
+    return "";   /* §782 — the count ends the stepper line now */
+    if (inPanel()) return "";
+    var ks = modeParts(), have = ks.filter(onPlan).length;
+    return '<div class="coplayout" data-cop-planline><span class="copm"><b>' + have + ' of ' + ks.length + '</b> parts on ' + E(placeWord()) + '’s plan</span></div>';
+  }
   function renderPane(){
     setTimeout(function(){ loadList(false); }, 0);
     var shut = railFolded();
-    return '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
+    /* §777 — the strip sits in the pane, over the chat box on the right, not across the rail (Islam: "move the cards of the builder to be over the right chat box") */
+    return (PANEL.rendering ? '' : '<div data-cop-modebar>' + layoutBar() + '</div>') +
+      '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-home aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
       '<aside class="coprails" data-cop-rails>' + railsInner() +
       '</aside>' +
+      '<div class="copstrip" data-cop-stripbar>' + stripHtml() + '</div>' +
       '<div class="copmain" data-cop-main>' + mainHtml() + '</div>' +
+      (PANEL.rendering ? '' : '<aside class="copdetails" data-cop-details aria-label="Details"></aside>') +
     '</div>';
   }
   function list(){ return LISTS[key()] || null; }
@@ -66400,7 +68064,7 @@ var COPILOT = (function(){
      foot, where anyone may Restore and only the Super user may Delete, and
      Delete asks once more in its row (§62 — never a browser dialog, §95). */
   var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>';
-  function archView(){ return !!ARCH[key()]; }
+  function archView(){ return !!ARCH[place()]; }
   /* §475 option A (Islam, 2 Oct: "A ok"): the hide control sits at the
      start of the Chats header rather than on a row of its own above the
      rails, so an open rail spends no line on it. */
@@ -66419,7 +68083,7 @@ var COPILOT = (function(){
      every other area's is its workflow, whose own ways (a SWOT's notes and
      templates) live inside it. */
   var WORKFLOW_WORD = { foundation:"Foundation workflow", analysis:"SWOT workflow", compete:"Competitive Discipline workflow",
-    directions:"Directions workflow", capabilities:"Capabilities workflow", execution:"Execution workflow", advisory:"Advisory workflow" };
+    directions:"Pillars/Directions workflow", capabilities:"Capabilities workflow", execution:"Tactical Plans workflow", advisory:"Advisory workflow" };
   var STARTS = {
     analysis: ["SWOT, step by step", "The internal, micro and macro analyses, then the SWOT."],
     compete: ["Score the value disciplines", "Market and internal factors, then the value proposition."],
@@ -66455,7 +68119,7 @@ var COPILOT = (function(){
        reads "Refine the existing execution": the measures and tactics the
        plan holds, on each card, drafts adding to them. */
     else if (s === "compete") { var cw = cpPlanHeld(); if (!cw) return ""; attr = 'data-cop-newplan="compete"'; meta = cpWord(cw.discipline) + " · " + cw.values.length + (cw.values.length === 1 ? " value" : " values");
-      return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) + '<span class="coppt"><span class="coptag">On the plan today</span>Start from the existing plan</span>' +
+      return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) + '<span class="coppt"><span class="coptag">On the plan today</span>Start from existing</span>' +
         '<span class="coppd">Load the discipline and the values the plan holds as the table, and change any part. Score the disciplines anew to check the choice. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>'; }
     else if (s === "execution") { var ei = exItems(), withL = ei.filter(function(it){ return it.measures.length || it.tactics.length; }).length; if (!withL) return ""; attr = 'data-cop-newplan="execution"';
       meta = withL + (withL === 1 ? " item" : " items") + " with measures · " + (ei.length - withL) + " without";
@@ -66463,7 +68127,7 @@ var COPILOT = (function(){
         '<span class="coppd">Load the measures and tactics the plan holds, on each Direction’s and Capability’s card, and change any part; a draft adds to them. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>'; }
     else return "";
     return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) +
-      '<span class="coppt"><span class="coptag">On the plan today</span>Start from the existing plan</span>' +
+      '<span class="coppt"><span class="coptag">On the plan today</span>Start from existing</span>' +
       '<span class="coppd">Load what is on the plan and change any part. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>';
   }
   function startHtml(){
@@ -66480,19 +68144,64 @@ var COPILOT = (function(){
              the card is pressed as one, and the grid opens as before. */
           (s === "analysis" ? '<span class="copways" data-cop-ways>' + ["Guided questions", "Template", "Ready reports", "Deep research"].map(function(w){ return '<span class="copway">' + w + '</span>'; }).join("") + '</span>' +
             '<span class="copwaysk">Pick one or more per area at the next step.</span>' : '') + '</button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]));
-    return '<div class="copstart" data-cop-startscreen>' +
-      '<h2 class="copstarth">What would you like to do with ' + E(area) + '?</h2>' +
-      '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything, attach your notes, or paste ' + E(BOXWORK[s] || "finished work") + '…" aria-label="Ask the Copilot, attach notes or paste work — this starts a free chat">' + E(STARTTEXT[key()] || "") + '</textarea>' +
+    var nx = nextStep(), bare = inPanel(), held = s !== "advisory" && onPlan(s);
+    var box = function(ph){ return '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="' + E(ph) + '" aria-label="Ask the Copilot, attach notes or paste work">' + E(STARTTEXT[key()] || "") + '</textarea>' +
         /* §683 — Send is not there until something is typed, on the start
            screen as in every chat (§652; Islam: "as we agreed, across all
            the parts"). */
-        '<button type="button" class="copsend" data-cop-startsend aria-label="Start a free chat" title="Send"' + (String(STARTTEXT[key()] || "").trim() ? '' : ' hidden') + '>' + SENDMARK + '</button></div>' +
+        '<button type="button" class="copsend" data-cop-startsend aria-label="Send" title="Send"' + (String(STARTTEXT[key()] || "").trim() ? '' : ' hidden') + '>' + SENDMARK + '</button></div>' +
       '<div class="copunder copstartunder"><button type="button" class="copclip copstartclip" data-cop-startattach aria-label="Attach notes — a Word, PDF or Excel file" title="Attach notes — a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '<span>Attach notes</span></button>' +
-        '<input type="file" hidden data-cop-startfile accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
-        '<span class="cophint">Word, PDF or Excel · or paste · Enter sends</span></div>' +
-      '<p class="copstartk">Typing, attaching or pasting here starts a free chat.</p>' +
-      '<div class="copor">or start step by step</div>' + unfinishedHtml() +
+        '<input type="file" hidden data-cop-startfile accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp">' +
+        '<span class="cophint">Word, PDF, Excel or a picture · paste a screenshot · Enter sends</span></div>'; };
+    /* §779 — ON THE PLAN, ✦ Copilot on a part: a part the plan does not hold
+       yet is built in the Copilot, where the steps and the to-do are (Islam:
+       "shall it direct me to build the empty part in the copilot panel rather
+       than building in the same place"); a part it holds opens on the box at
+       the top and no cards — what is said there starts from the plan's own
+       version and is the first change asked for. */
+    if (bare) {
+      if (!held && s !== "advisory") return '<div class="copstart copnotbuilt" data-cop-startscreen data-cop-notbuilt>' +
+        '<h2 class="copstarth">' + E(placeWord()) + '’s ' + E(stripWord(s)) + ' isn’t built yet</h2>' +
+        '<p class="copstartk">Build it step by step in the Copilot — the steps, the to-do and the order are there.</p>' +
+        '<button type="button" class="copbtn solid" data-cop-buildin="' + E(s) + '">Build it in the Copilot</button></div>';
+      return '<div class="copstart" data-cop-startscreen data-cop-sayto>' +
+        '<h2 class="copstarth">What would you like to change in ' + E(placeWord()) + '’s ' + E(stripWord(s)) + '?</h2>' +
+        box("Say what to change…") +
+        '<p class="copstartk">Works on what is on the plan · the plan moves only on Apply.</p>' +
+        '<div hidden data-cop-hiddencards>' + cards + '</div>' +
+        '<button type="button" class="linkbu copagain" data-cop-buildin="' + E(s) + '">Build it again step by step</button></div>';
+    }
+    /* §779 — only the step in focus shows its ways in; the strip moves between steps (Islam: "keep the steps of the next step only") */
+    var says = areaState(s).says || "";
+    var focus = '<div class="copfocus"><span class="copfocusk">' + (s === nx ? "Next step · " : "") + E(stripWord(s)) + '</span><span class="copm">' + E(says) + '</span></div>';
+    var done = nx ? '' : '<div class="copalldone" data-cop-alldone><b>Every part is on the plan.</b> Refine any part with ✦ Refine on the Strategy tab — or work on a step here.</div>';
+    return '<div class="copstart" data-cop-startscreen>' +
+      '<h2 class="copstarth">' + (s === "advisory" ? 'What decision are you weighing for ' + E(placeWord()) + '?' : 'What would you like to do with ' + E(placeWord()) + '’s strategy?') + '</h2>' +
+      box(s === "advisory" ? "Say the decision, attach the papers behind it…" : "Ask anything, attach your notes, or paste " + (BOXWORK[s] || "finished work") + "…") + (s === "advisory" ? '' : done) +
+      /* §779 — the box and the attachment are ways in too, so the cards are "another way" (Islam) */
+      '<div class="copor">Or choose another way to start</div>' + unfinishedHtml() + focus +
       '<div class="coppaths copstartcards">' + cards + '</div></div>';
+  }
+  /* §779 — words said in the panel on a part the plan holds: the part's own
+     "start from existing" opens, and the words are its first change, sent as
+     soon as the chat can take one; until then they wait in its box. */
+  var PENDSAY = null, PENDAPPLY = "";
+  function sayToPlan(text, file){
+    var c = document.querySelector("[data-cop-hiddencards] .copplan"); if (!c) return false;
+    PENDSAY = { sec: section(), text: text, file: file || null, at: Date.now() }; delete STARTTEXT[key()]; c.click(); return true;
+  }
+  function pendingSay(){
+    var p = PENDSAY; if (!p || section() !== p.sec || !PANE || !PANE.chat || THINKING) return;
+    if (Date.now() - p.at > 60000) { PENDSAY = null; return; }
+    var id = PANE.chat.id;
+    /* §780 — a picture said with it waits above the chat's box, and goes with the change */
+    if (p.file) { var pf = p.file; p.file = null; attach(pf); }
+    if (!p.text.trim()) { PENDSAY = null; return; }
+    if (!DRAFT[id]) DRAFT[id] = p.text;
+    var ready = swotOn() ? swCanChange() : competeOn() ? cpCanType() : dirsOn() ? dvCanType() : execOn() ? exCanType() : advOn() ? false
+      : flowOn() ? !!(PANE.flow && (PANE.flow.phase === "loaded" || PANE.flow.phase === "draft" || PANE.flow.phase === "check")) : !!PANE.messages;
+    if (!ready) { var t = document.querySelector("[data-cop-text]"); if (t && !t.value) t.value = p.text; return; }
+    PENDSAY = null; DRAFT[id] = ""; send(p.text);
   }
   function chatsFoot(){
     var l = list();
@@ -66501,21 +68210,21 @@ var COPILOT = (function(){
     return '<button type="button" class="coparch" data-cop-archview>Archived &middot; ' + (l.archived || []).length + '</button>';
   }
   function chatsHtml(){
-    var l = list();
+    var l = allList();
     if (!l) return '<div class="copnone">Asking…</div>';
     if (l.failed) return '<div class="copnone">The chats could not be read just now. Nothing has been lost. ' +
       '<button type="button" class="linkbu" data-cop-retry>Try again</button></div>';
-    var arch = archView(), rows = arch ? (l.archived || []) : l.chats;
+    var arch = archView(), rows = (arch ? (l.archived || []) : l.chats).filter(function(c){ return !railF() || c._sec === railF(); });
     var head = arch && canEdit() ? '<div class="copnote">' + (l.mayDelete ? "Restore brings a chat back. Delete removes it for good."
       : "Restore brings a chat back. Only the Super user can delete.") + '</div>' : '';
     var o = OPEN[key()] || {};
-    if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : "No chats here yet.") + '</div>';
+    if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : railF() ? "No " + stripWord(railF()) + " chats here yet." : "No chats here yet.") + '</div>';
     return head + rows.map(function(c){
       var on = o.kind === "chat" && o.id === c.id;
       if (ASKDEL === c.id) return '<div class="coprow ask" data-cop-row="' + E(c.id) + '"><span class="copt">' + E(c.title) + '</span>' +
         '<span class="copaskrow">Delete? <button type="button" class="copbtn quiet" data-cop-delete-no>Cancel</button>' +
         '<button type="button" class="copbtn danger solid" data-cop-delete-yes="' + E(c.id) + '">Delete</button></span></div>';
-      if (RENAME === c.id) return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
+      if (RENAME === c.id && !RENAMEHEAD) return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
         '<input class="fld copren" data-cop-rename-box="' + E(c.id) + '" value="' + E(c.title) + '" aria-label="Chat name" maxlength="160"></div>';
       var menu = MENU === c.id ? '<div class="copmenu" role="menu">' + (arch
           ? '<button type="button" role="menuitem" data-cop-restore-chat="' + E(c.id) + '">Restore</button>' +
@@ -66523,24 +68232,25 @@ var COPILOT = (function(){
           : '<button type="button" role="menuitem" data-cop-rename="' + E(c.id) + '">Rename</button>' +
             '<button type="button" role="menuitem" data-cop-archive="' + E(c.id) + '">Archive</button>') + '</div>' : '';
       return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
-        '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '"' + (on ? ' aria-current="true"' : '') + '>' +
-          '<span class="copt">' + E(c.title) + '</span>' +
-          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + (c.guided ? ' · Guided' : '') + (c.free ? ' · Free chat' : '') + (function(){ var sp = (l.swotProgress || {})[c.id]; return sp ? ' · ' + sp.done + ' of ' + sp.of + ' done' : ''; })() + '</span></button>' +
+        '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '" data-cop-chat-sec="' + E(c._sec) + '"' + (on ? ' aria-current="true"' : '') + '>' +
+          areaTag(c._sec) + '<span class="copt">' + E(c.title) + '</span>' +
+          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + (c.guided ? ' · Guided' : '') + '' + (function(){ var sp = (l.swotProgress || {})[c.id]; return sp ? ' · ' + sp.done + ' of ' + sp.of + ' done' : ''; })() + '</span></button>' +
         (!canEdit() ? '' : '<button type="button" class="copdots" data-cop-menu="' + E(c.id) + '" aria-haspopup="menu" aria-expanded="' + (MENU === c.id) +
           '" aria-label="Actions for ' + E(c.title) + '" title="Rename, archive…">' + DOTS + '</button>' + menu) + '</div>';
     }).join("");
   }
   function delivsHtml(){
-    var l = list();
+    var l = allList();
     if (!l) return '<div class="copnone">Asking…</div>';
     if (l.failed) return '<div class="copnone">—</div>';
-    if (!l.deliverables.length) return '<div class="copnone">Nothing saved here yet.</div>';
+    var dl = l.deliverables.filter(function(d){ return !railF() || d._sec === railF(); });
+    if (!dl.length) return '<div class="copnone">Nothing saved here yet.</div>';
     var o = OPEN[key()] || {};
-    return l.deliverables.map(function(d){
+    return dl.map(function(d){
       var on = o.kind === "deliv" && o.id === d.id;
-      return '<button type="button" class="copitem' + (on ? " on" : "") + '" data-cop-deliv="' + E(d.id) + '"' +
+      return '<button type="button" class="copitem' + (on ? " on" : "") + '" data-cop-deliv="' + E(d.id) + '" data-cop-deliv-sec="' + E(d._sec) + '"' +
         (on ? ' aria-current="true"' : '') + '>' +
-        '<span class="copt">' + E(d.title) + '</span>' +
+        areaTag(d._sec) + '<span class="copt">' + E(d.title) + '</span>' +
         '<span class="copm">' + kindWord(d.kind) + ' · v' + E(d.latest) + ' · ' + E(when(d.latestAt)) + '</span></button>';
     }).join("");
   }
@@ -66553,10 +68263,10 @@ var COPILOT = (function(){
      stepped over. The same line sits on a version's page under On the plan. */
   var NEXTOF = {
     analysis:   { k:"compete",    t:"Competitive Discipline — score the value disciplines from this SWOT." },
-    compete:    { k:"directions", t:"Directions — suggest and score them from the SWOT and this discipline." },
-    directions: { k:"execution",  t:"Execution — measures and tactics for each of them, by quarter." },
+    compete:    { k:"directions", t:"Pillars/Directions — suggest and score them from the SWOT and this discipline." },
+    directions: { k:"execution",  t:"Tactical Plans — measures and tactics for each of them, by quarter." },
     execution:  { k:"advisory",   t:"The plan is complete for the period; its tabs show it. Bring a decision to Advisory when one comes." },
-    advisory:   { k:"directions", t:"Put the decision to work in the plan’s Directions, or bring another decision." }
+    advisory:   { k:"directions", t:"Put the decision to work in the plan’s Pillars/Directions, or bring another decision." }
   };
   function nextOf(sec){
     var seen = {}, n = NEXTOF[sec];
@@ -66571,8 +68281,33 @@ var COPILOT = (function(){
   function sectionLabel(k){ for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === k) return SECTIONS[i].label; return k; }
   /* Walk to a section of the Copilot in this place: its start screen, or a
      deliverable of it (S10 opens the saved Directions version from Execution). */
+  /* open a chat or deliverable that lives in another area: the window moves there */
+  function openIn(sec, kind, id){
+    if (typeof CURSEC === "undefined") { openItem(kind, id); return; }
+    if (inPanel()) { OPEN[place() + "|" + sec] = { kind: kind, id: id }; panelGo(sec); return; }
+    AREA_CHOSEN[place()] = true; CURSEC.copilot = sec; SHEET = ""; MENU = null; ASKDEL = null;
+    OPEN[place() + "|" + sec] = { kind: kind, id: id }; PANE = null;
+    if (typeof paint === "function") paint(); else draw();
+  }
+  function panelGo(k){
+    var st = AREA_STRAT[k];
+    if (!st) { PANEL.open = false; closePanelDom(); currentSub = "copilot"; CURSEC.copilot = k; PANE = null; if (typeof paint === "function") paint(); return; }
+    if (k === "directions" || k === "execution") PANEL.planArea = k;
+    CURSEC.strategy = st; PANEL.area = ""; PANE = null; if (typeof paint === "function") paint();
+  }
+  /* §779 — from the panel on the plan to the Copilot tab, on that step's start screen */
+  function buildIn(k){
+    if (typeof CURSEC === "undefined") return;
+    PANEL.open = false; closePanelDom(); AREA_CHOSEN[place()] = true;
+    if (typeof leaveModes === "function") leaveModes();
+    currentSub = "copilot"; CURSEC.copilot = k; delete OPEN[place() + "|" + k]; PANE = null; SAY = "";
+    if (typeof paint === "function") paint(); else draw();
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
   function goSection(k, delivId){
     if (typeof CURSEC === "undefined") return;
+    if (inPanel()) { if (delivId) OPEN[place() + "|" + k] = { kind: "deliv", id: delivId }; else delete OPEN[place() + "|" + k]; panelGo(k); if (delivId) openItem("deliv", delivId); return; }
+    AREA_CHOSEN[place()] = true;
     CURSEC.copilot = k; SHEET = ""; MENU = null; ASKDEL = null; SAY = "";
     var kk = place() + "|" + k;
     if (delivId) OPEN[kk] = { kind: "deliv", id: delivId }; else delete OPEN[kk];
@@ -66827,10 +68562,13 @@ var COPILOT = (function(){
   }
 
   function sizeWord(n){ return n >= 1048576 ? (Math.round(n / 104857.6) / 10) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
-  var KINDW = { pdf:"PDF", docx:"Word", xlsx:"Excel" };
+  var KINDW = { pdf:"PDF", docx:"Word", xlsx:"Excel", png:"Picture", jpg:"Picture", webp:"Picture" };
+  var THUMBS = {};                /* §780 — file id → a picture's thumbnail, as the browser read it (this visit only) */
+  function isPic(k){ return k === "png" || k === "jpg" || k === "webp"; }
   function fileChip(f, pending){
     var name = '<b>' + E(f.name) + '</b> · ' + (KINDW[f.kind] || "") + ' · ' + sizeWord(f.size);
-    return '<span class="copfile">' + FILEMARK +
+    var th = isPic(f.kind) ? ('<img class="copthumb" src="' + E(THUMBS[f.id] || url("file", ["id=" + encodeURIComponent(f.id)])) + '" alt="" loading="lazy">') : FILEMARK;
+    return '<span class="copfile' + (isPic(f.kind) ? ' coppic' : '') + '">' + th +
       (pending ? name + ' <button type="button" class="copx" data-cop-detach="' + E(f.id) + '" aria-label="Remove ' + E(f.name) + '">&times;</button>'
                : '<a href="' + E(url("file", ["id=" + encodeURIComponent(f.id)])) + '" download>' + name + '</a>') + '</span>';
   }
@@ -66978,6 +68716,35 @@ var COPILOT = (function(){
   }
   window.__copSize = { steps: ZOOMS, index: function(){ return ZOOMS[zi()]; } };
 
+  /* §784 — a draft in the plan's shape is drawn as the plan draws that part, and can be put on it from here */
+  var PLAN_TYPE = { compete: "compete", analysis: "swot", foundation: "foundation", directions: "directions", execution: "execution" };
+  function planDraftHtml(plan){
+    if (!plan) return "";
+    if (plan.section === "foundation") { var words = partWords(); return '<div class="copfcards">' + plan.foundation.map(function(x){ return '<div class="copfcard"><h5>' + E(words[x.key] || x.key) + '</h5>' + cardBody(x.text || "", x.key) + '</div>'; }).join("") + '</div>'; }
+    return typedBodyHtml({ type: PLAN_TYPE[plan.section] }, plan);
+  }
+  /* what the plan needs and the draft does not say: a value without a measure; a Direction not fully scored; an item without a measure */
+  function planGaps(plan){
+    if (!plan) return 0;
+    if (plan.section === "compete") return plan.compete.values.filter(function(v){ return !(v.measure || []).length; }).length;
+    if (plan.section === "directions") return plan.directions.filter(function(o){ return !(o.urgency && o.importance && o.ease); }).length;
+    if (plan.section === "execution") return plan.items.filter(function(it){ return !(it.measures || []).length; }).length;
+    return 0;
+  }
+  var GAPWORD = { compete: [" value has no measure yet.", " values have no measure yet."], directions: [" Direction is not fully scored yet.", " Directions are not fully scored yet."], execution: [" item has no measure yet.", " items have no measure yet."] };
+  function gapLine(plan){ var n = planGaps(plan), w = GAPWORD[plan && plan.section]; return n && w ? " " + n + w[n === 1 ? 0 : 1] : ""; }
+  /* §788 — A DRAFT MADE BEFORE THE PLAN'S SHAPE LAYS ITSELF OUT when its panel shows it (Islam: "isn't that a view change? why are we adding a feature for an exceptional case?"): one quiet ask, kept on the message, nothing said in the chat */
+  function canLay(sec){ return !!PLAN_TYPE[sec]; }
+  var LAYING = {};
+  function layDraft(){
+    if (!PANE || !PANE.chat) return;
+    if (!PANE.chat.free) return;
+    var m = draftMsg(); if (!m || !m.part || m.part.plan || m.part.planTried || LAYING[m.id]) return;
+    var cid = PANE.chat.id, mid = m.id; LAYING[mid] = true;
+    post({ act:"planShape", id: cid, messageId: mid, placeWord: placeWord(), context: (contextOf() || {}).line || "" }, WAIT_MS).then(function(x){
+      if (x.st === 200 && x.j && x.j.ok && PANE && PANE.chat && PANE.chat.id === cid) { PANE.messages = x.j.messages || PANE.messages; if (x.j.laid) loadList(true); draw(); }
+    }, function(){});
+  }
   function draftPanelHtml(m){
     var p = m.part, latest = true;
     for (var i = PANE.messages.length - 1; i >= 0; i--) if (hasDraft(PANE.messages[i])) { latest = PANE.messages[i] === m; break; }
@@ -66985,15 +68752,20 @@ var COPILOT = (function(){
       ? '<span class="copsaved">&#10003; Saved as v' + E(String(p.saved.n || 1)) + '</span><button type="button" class="copopt" data-cop-deliv="' + E(p.saved.deliverableId) + '">Open it</button>'
       : (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-savedraft="' + E(m.id) + '">Save to ' + E(secLabel()) + ' deliverables</button>' : '')) +
       /* §654 B3 — said where it stands: a free chat's draft stays in the
-         Copilot; what goes on the plan is built step by step. */
-      '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
-      (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : '');
+         Copilot; what goes on the plan is built step by step. §784 — unless
+         it came in the plan's own shape: then it can go on from here. */
+      (p.plan ? (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-putplan="' + E(m.id) + '">Put on ' + E(placeWord()) + '’s plan</button>' : '') +
+          '<span class="copm copdstay" data-cop-draftstay>Laid out as the plan’s ' + E(stripWord(PANE.chat.section || section())) + '.' + gapLine(p.plan) + '</span>'
+        : PANE.chat.free && canLay(PANE.chat.section || section()) && !p.planTried
+          ? '<span class="copm copdstay copdlaying" data-cop-draftstay data-cop-laying>Laying it out as the plan…</span>'
+          : '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
+            (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : ''));
     return '<section class="copout" data-cop-out aria-label="Draft">' +
       '<div class="copouth"><b>' + E(p.draft.title || "Draft") + '</b><span class="copm">' + (latest ? 'Latest draft' : 'An earlier draft') + '</span>' +
         '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close the draft" title="Close">×</button></div>' +
-      '<div class="copoutb"><div class="copdraft"><div class="copdg">' + p.draft.groups.map(function(g){
+      '<div class="copoutb"><div class="copdraft">' + (p.plan ? '<div class="copdplan" data-cop-dplan>' + planDraftHtml(p.plan) + '</div>' : '<div class="copdg">' + p.draft.groups.map(function(g){
           return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' + g.items.map(itemHtml).join("") + '</ul></div>';
-        }).join("") + '</div></div></div>' +
+        }).join("") + '</div>') + '</div></div>' +
       (foot ? '<div class="copoutf">' + foot + '</div>' : '') + '</section>';
   }
   /* THE HANDLE BETWEEN THE CHAT AND WHAT IT BUILDS (§638): drag to widen or
@@ -67007,7 +68779,9 @@ var COPILOT = (function(){
   function sheetBtn(k, label){ return '<button type="button" class="copbtn quiet copsheetb copsheetb-' + k + '" data-cop-sheet="' + k + '" aria-expanded="' + (SHEET === k) + '">' + label + '</button>'; }
   function chatHtml(){
     var c = PANE.chat;
-    var head = '<h3 class="coph">' + E(c.title) + '</h3>' + (c.archived ? '<span class="copchip">Archived</span>' : '');
+    /* §785 — the chat's name is renamed where it stands, in its header (Islam: "allow me to change the chat name"); the rail's ⋯ › Rename does the same */
+    var head = (RENAME === c.id && RENAMEHEAD ? '<input class="fld copren coprenhead" data-cop-rename-box="' + E(c.id) + '" value="' + E(c.title) + '" aria-label="Chat name" maxlength="160">'
+      : canEdit() && !c.archived ? '<h3 class="coph"><button type="button" class="copnamebtn" data-cop-renamehead="' + E(c.id) + '" title="Rename this chat">' + E(c.title) + '</button></h3>' : '<h3 class="coph">' + E(c.title) + '</h3>') + (c.archived ? '<span class="copchip">Archived</span>' : '');
     var n = PANE.messages.length;
     var msgs = PANE.messages.map(function(m, i){
       if (m.who === "ai") {
@@ -67021,8 +68795,13 @@ var COPILOT = (function(){
     var pend = canEdit() ? (PANE.pending || []).map(function(f){ return fileChip(f, true); }).join("") : "";
     var dm = draftMsg();
     var chat = '<div class="copchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
-      '<div class="copctx" title="' + E(ctx.detail || ctx.line) + '">' + INFO + '<span>' + E(ctx.line) + '</span></div>' +
-      '<div class="copheadrow">' + head + (dm ? sheetBtn("draft", "View draft") : '') + sizeHtml() + '</div>' +
+      /* §782 — ONE LINE AT THE TOP, as in Claude (Islam): the chat's name, then
+         what the Copilot can see behind ⓘ, then A− A+; a light line under it
+         from one edge of the box to the other. */
+      '<div class="copheadrow copheadone">' + head + '<span class="copheadsp"></span>' +
+        '<button type="button" class="copctxi" data-cop-ctx aria-expanded="false" aria-label="What the Copilot can see" title="' + E(ctx.line + (ctx.detail ? " — " + ctx.detail : "")) + '">' + INFO + '</button>' +
+        '<span class="copctx" data-cop-ctxtip hidden>' + E(ctx.line) + '</span>' +
+        (dm ? sheetBtn("draft", "View draft") : '') + sizeHtml() + '</div>' +
       (PANE.flow ? roadLine() : '') +
       '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div></div>' +
       (pend ? '<div class="coppend" data-cop-pending>' + pend + '</div>' : '') +
@@ -67061,12 +68840,15 @@ var COPILOT = (function(){
         : ph === "draft" ? "Say what to change in this draft…"
         : ph === "loaded" || ph === "check" || ph === "saved" ? "Name a part and say what to change, or ask anything…" : "Type a message…";
     }
-    return pend ? "Say what this file is for…" : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
+    return pend ? ((PANE.pending || []).some(function(f){ return isPic(f.kind); }) ? "Say what to take from this picture…" : "Say what this file is for…") : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
   }
   var VIEWONLY = '<div class="copviewonly" data-cop-viewonly><span>View only</span></div>';
   function composerHtml(c, pend){
     var text = DRAFT[c.id] || "";
-    return '<div class="copcompose">' +
+    /* §780 — a step-by-step chat draws its waiting files here: they go with its next ask */
+    var waiting = !pend && canEdit() && (PANE.pending || []).length ? '<div class="coppend" data-cop-pending>' + PANE.pending.map(function(f){ return fileChip(f, true); }).join("") +
+      '<span class="cophint">Goes with your next message or step</span></div>' : '';
+    return waiting + '<div class="copcompose">' +
       '<div class="copbox">' +
         '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow() && !swCanChange()) || (competeOn() && !cpCanType()) || (dirsOn() && !dvCanType()) || (execOn() && !exCanType()) || (advOn() && !adCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
         /* §652 — Send appears only once there is something to send (Islam:
@@ -67075,9 +68857,9 @@ var COPILOT = (function(){
         (function(){ var w = THINKING === c.id ? BUSY : "", none = !text.trim() && !pend;
         return '<button type="button" class="copsend' + heldCls(w) + '" data-cop-send aria-label="Send"' + (none ? ' hidden' : '') + (w ? held(w) : ' title="Send"') + '>' + SENDMARK + '</button>'; })() +
       '</div>' +
-      '<div class="copunder">' + (flowView() || swotOn() || competeOn() || dirsOn() || execOn() || advOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
-        '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
-        '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
+      '<div class="copunder">' + (
+        '<button type="button" class="copclip" data-cop-attach aria-label="Attach a file or a picture" title="Attach a Word, PDF or Excel file or a picture — or paste a picture in the box (up to 3 MB)">' + CLIP + '</button>' +
+        '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp">' +
         '<span class="cophint">Enter sends · Shift + Enter for a new line</span>' +
       '</div></div>');
   }
@@ -67947,7 +69729,7 @@ var COPILOT = (function(){
     openModalHtml("Apply to the plan?", "",
       '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
       '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — ' + partsWord + ' onto the Foundation page.</span></div>' + again +
-      '<div class="kv"><span class="k">What it replaces</span><span>The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
+      '<div class="kv"><span class="k">What it replaces</span><span>' + todayWord("foundation") + 'The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
       /* §525.1 — APPLY IS NOT A RED BUTTON. Red in this product is the
          colour of an act with no way back, and the row above this button
          says in its own words that the Foundation the plan holds is archived
@@ -68029,7 +69811,7 @@ var COPILOT = (function(){
        the Copilot's own padding (16). */
     return p.getBoundingClientRect().width / (typeof pageZoom === "function" ? pageZoom() : 1) < 1344;
   }
-  function railFolded(){ return railShut() || (tight() && !RAILKEPT); }
+  function railFolded(){ if (inPanel()) return !RAILKEPT; return railShut() || (tight() && !RAILKEPT); }
   function syncRail(){
     var shut = railFolded();
     var p = document.querySelector("[data-cop-pane]"); if (p) p.classList.toggle("copshut", shut);
@@ -68112,10 +69894,17 @@ var COPILOT = (function(){
   /* §654 B2 — a version's body, drawn as its type (read only; the chat edits). */
   function typedBodyHtml(d, b){
     var li = function(a, f){ return (a || []).length ? '<ul class="copdul">' + a.map(function(x){ return '<li>' + f(x) + '</li>'; }).join("") + '</ul>' : '<p class="copnone">Nothing here.</p>'; };
+    /* §784 — COMPETITIVE DISCIPLINE AS THE PLAN SHOWS IT (Islam: "it needs to appear well formatted, or even like the actual plan deliverable, to be well reviewed before saving to plan"): the discipline on top, a card per value with How, its measures (the target, and today's figure at the right when said) and the evidence folded; a value with no measure says so. */
     if (d.type === "compete" && b.compete && Array.isArray(b.compete.values)) {
       var t = b.compete;
-      return '<div class="copdtyped"><p class="copdline"><b>Discipline</b> ' + E(cpWord(t.discipline)) + '</p><div class="tblscroll"><table class="cmptab"><thead><tr><th>Value</th><th>How</th><th>Measure</th></tr></thead><tbody>' +
-        t.values.map(function(v){ return '<tr><td><b>' + E(v.title) + '</b></td><td>' + E((v.how || []).join(" · ")) + '</td><td>' + E((v.measure || []).join(" · ")) + '</td></tr>'; }).join("") + '</tbody></table></div></div>';
+      var mline = function(m){ var mt = String(m).match(/^(.*?)\s*\((today[^)]*|no baseline[^)]*)\)\s*$/i); return '<div class="copmrow"><span>' + E(mt ? mt[1] : m) + '</span>' + (mt ? '<span class="copm">' + E(mt[2]) + '</span>' : '') + '</div>'; };
+      return '<div class="copdtyped copdcomp"><div class="copdisc"><span class="copdlab">Value discipline</span><h4>' + E(cpWord(t.discipline)) + '</h4></div>' +
+        '<span class="copdlab">Value proposition · ' + t.values.length + (t.values.length === 1 ? ' value' : ' values') + '</span><div class="copvals">' +
+        t.values.map(function(v){ var nom = !(v.measure || []).length;
+          return '<div class="copval' + (nom ? ' copgap' : '') + '" data-cop-val' + (nom ? ' data-cop-gap' : '') + '><h5>' + E(v.title) + '</h5>' +
+            ((v.how || []).length ? '<span class="copdlab">How</span><ul class="copdul">' + v.how.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul>' : '') +
+            '<span class="copdlab">Measures</span>' + (nom ? '<p class="copgapw">No measure yet — the plan holds one or more per value. Say it in the chat, or put it on the plan as it is.</p>' : v.measure.map(mline).join("")) +
+            (v.evidence ? '<details class="copev"><summary>Evidence</summary>' + E(v.evidence) + '</details>' : '') + '</div>'; }).join("") + '</div></div>';
     }
     if ((d.type === "directions" || d.type === "capabilities") && (Array.isArray(b.directions) || Array.isArray(b.capabilities))) {
       var sc = function(o){ return o.urgency && o.importance && o.ease ? o.urgency * o.importance * o.ease : null; };
@@ -68139,30 +69928,36 @@ var COPILOT = (function(){
   /* §654 B2 — APPLY FROM THE VERSION'S PAGE: the same ask, the same archive
      of the part, the same write its chat makes; the note written once the
      plan's save lands, then the page read again. */
+  /* §784 — what the plan holds today, said before it is replaced */
+  function todayWord(k){ var h = planHeld(k); return h ? "Today the plan holds " + E(h) + ". " : "The plan holds nothing here today. "; }
   function delivApplyAsk(){
     var d = PANE.deliverable, cur = PANE.versions && PANE.versions[0], b = cur && cur.body; if (!d || !b) return;
     var kind = d.type === "capabilities" ? "directions" : d.type, capIds = [], write, can, what, replaces;
     var vword = E(d.title) + " v" + E(cur.n), arch = "What the plan holds is archived first, under Import &amp; storage › Archived plans, and can be put back from there.";
     if (d.type === "compete") {
-      what = vword + " — " + E(cpWord((b.compete || {}).discipline)) + " and " + ((b.compete || {}).values || []).length + " values onto the plan’s Competitive Discipline."; replaces = arch;
+      var noM = ((b.compete || {}).values || []).filter(function(v){ return !(v.measure || []).length; }).length;
+      what = vword + " — " + E(cpWord((b.compete || {}).discipline)) + " and " + ((b.compete || {}).values || []).length + " values onto the plan’s Competitive Discipline." + (noM ? " " + noM + (noM === 1 ? " value goes" : " values go") + " on without a measure." : ""); replaces = todayWord("compete") + arch;
       can = function(){ try { return !!(typeof competeWritable === "function" && competeWritable(place())); } catch (e) { return false; } };
       write = function(){ return { ok: cpWritePlan(b.compete) }; };
     } else if (d.type === "directions" || d.type === "capabilities") {
       var st = { mode: d.type, withCaps: (b.capabilities || []).length > 0, options: (b.directions || []).map(function(o){ var x = JSON.parse(JSON.stringify(o)); x.go = true; return x; }), caps: (b.capabilities || []).map(function(x){ var y = JSON.parse(JSON.stringify(x)); y.keep = true; return y; }) };
       capIds = st.caps.map(function(x){ return x.planId; }).filter(Boolean);
-      what = vword + " — " + st.options.length + " Directions and " + st.caps.length + " Capabilities onto the plan."; replaces = "A Direction with the same name is updated, a new one is added; nothing is removed. " + arch;
+      what = vword + " — " + st.options.length + " Directions and " + st.caps.length + " Capabilities onto the plan."; replaces = todayWord("directions") + "A Direction with the same name is updated, a new one is added; nothing is removed. " + arch;
       can = function(){ var h = dvHolder(); return d.type === "capabilities" ? typeof addCapability === "function" : !!(h && Array.isArray(h.items) && typeof addPillar === "function"); };
       write = function(){ return dvWritePlan(st); };
     } else if (d.type === "execution") {
-      var ex = { period: b.period, items: b.items || [] };
+      var ex = { period: b.period, items: JSON.parse(JSON.stringify(b.items || [])) };
+      /* §785 — an item from a chat names its Direction; it is tied to the plan's row of that name, and one the plan has not is left out, said */
+      var plRows = (dvHolder() || {}).items || [], unnamed = [];
+      ex.items.forEach(function(it){ if (it.kind === "direction" && !it.planId) { var hit2 = plRows.filter(function(x){ return x && String(x.name || "").trim().toLowerCase() === String(it.title || "").trim().toLowerCase(); })[0]; if (hit2) it.planId = hit2.id; else { it.out = true; unnamed.push(it.title); } } });
       capIds = ex.items.filter(function(it){ return it.kind !== "direction"; }).map(function(it){ return it.planId; }).filter(Boolean);
       var exIns = ex.items.filter(function(it){ return !it.out && !it.gone; });
-      what = vword + " — the measures and tactics of " + exIns.length + " items, and the plan period, onto the plan." + (ex.items.length > exIns.length ? " " + (ex.items.length - exIns.length) + " left out, untouched." : ""); replaces = "What each item showed replaces what the plan holds for it: a line with the same name is updated, a new one is added, a line dropped is dropped. " + arch;
+      what = vword + " — the measures and tactics of " + exIns.length + (exIns.length === 1 ? " item" : " items") + ", and the plan period, onto the plan." + (ex.items.length > exIns.length ? " " + (ex.items.length - exIns.length) + " left out, untouched." : "") + (unnamed.length ? " Not on the plan’s Pillars/Directions, so left out: " + E(unnamed.join(", ")) + "." : ""); replaces = todayWord("execution") + "What each item showed replaces what the plan holds for it: a line with the same name is updated, a new one is added, a line dropped is dropped. " + arch;
       can = function(){ return !!ex.period; };
       write = function(){ return exWritePlan(ex); };
     } else if (d.type === "swot") {
       var n = LETTERS.reduce(function(k, L){ return k + ((b.swot || {})[L] || []).length; }, 0);
-      what = vword + " — its " + n + " lines onto the plan’s SWOT."; replaces = arch;
+      what = vword + " — its " + n + " lines onto the plan’s SWOT."; replaces = todayWord("analysis") + arch;
       can = function(){ try { return !!(typeof swotWritable === "function" && swotWritable(place())); } catch (e) { return false; } };
       write = function(){ swWritePlan(b.swot); return { ok: true }; };
     } else return;
@@ -68196,13 +69991,20 @@ var COPILOT = (function(){
     /* A redraw while a card is a text box (§513) puts the cursor back where
        it was; the text itself is CARDPEN's. */
     var ae = document.activeElement, penAt = ae && ae.matches && ae.matches("[data-cop-pentext]") ? [ae.selectionStart, ae.selectionEnd] : null;
+    var st = document.querySelector("[data-cop-stripbar]"); if (st) st.innerHTML = stripHtml();
+    var mb = document.querySelector("[data-cop-modebar]"); if (mb) mb.innerHTML = layoutBar();
     var rl = document.querySelector("[data-cop-rails]"); if (rl) rl.innerHTML = railsInner();
     var m = document.querySelector("[data-cop-main]"); if (m) m.innerHTML = mainHtml();
+    placeDetails();
     syncRail();
     if (penAt) { var pb = document.querySelector("[data-cop-pentext]"); if (pb) { pb.focus(); try { pb.setSelectionRange(penAt[0], penAt[1]); } catch (e) {} } }
     var msgs = document.querySelector("[data-cop-msgs]"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
     fitPane(); fitBox();
     applyRoad(); applyStart();
+    if (PENDSAY) setTimeout(pendingSay, 0);
+    var lay = document.querySelector("[data-cop-out] [data-cop-laying]"); if (lay) layDraft();
+    if (PENDAPPLY && PANE && PANE.deliverable && PANE.deliverable.id === PENDAPPLY && PANE.versions && PANE.versions.length) {
+      PENDAPPLY = ""; setTimeout(function(){ var ab = document.querySelector("[data-cop-dapply], [data-cop-fapply]"); if (ab) ab.click(); }, 0); }
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
   }
   /* THE PANE FILLS THE WINDOW (§453): it ends at the bottom of the screen,
@@ -68229,7 +70031,7 @@ var COPILOT = (function(){
     var b = document.querySelector("[data-cop-send]");
     if (b) { b.hidden = !t.value.trim() && !(PANE && PANE.pending && PANE.pending.length); setHeld(b, THINKING ? BUSY : ""); if (b.getAttribute("aria-disabled")) b.removeAttribute("title"); else b.setAttribute("title", "Send"); }
   }
-  window.addEventListener("resize", function(){ fitPane(); fitBox(); syncRail(); });
+  window.addEventListener("resize", function(){ fitPane(); fitBox(); syncRail(); placeDetails(); });
 
   /* ── THE SWOT FLOW (§490, Islam 4 Oct 2026, from the signed-off
      design-mockups/copilot-swot-flow/2026-10-04_v2.html) ──────────────
@@ -68580,7 +70382,7 @@ var COPILOT = (function(){
       (ed ? '<div class="copsw-add">' +
         '<label class="copsw-where">Keep it for <select class="fld" data-cop-sw-for><option value="unit"' + (SWALL ? '' : ' selected') + '>This unit</option><option value="all"' + (SWALL ? ' selected' : '') + '>All units</option></select></label>' +
         '<div class="copbtns"><button type="button" class="copbtn" data-cop-sw-upload>Upload a file</button>' +
-          '<input type="file" hidden data-cop-sw-file accept=".docx,.pdf,.xlsx,.txt,.md"></div>' +
+          '<input type="file" hidden data-cop-sw-file accept=".docx,.pdf,.xlsx,.txt,.md,.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"></div>' +
         (method !== "template" ? '<textarea class="fld" rows="4" data-cop-sw-paste placeholder="Or paste the text here">' + E(SWPASTE) + '</textarea>' +
           '<div class="copbtns"><button type="button" class="copbtn" data-cop-sw-keep>Keep the pasted text</button></div>' : '') +
         (pick.length ? '<div class="copsw-pick"><b>Or pick one already kept</b>' + pick.map(function(r){
@@ -68840,13 +70642,41 @@ var COPILOT = (function(){
     return s ? '<a class="copall" data-cop-all href="/' + E(s) + '/copilot">All chats on this client &rsaquo;</a>' : '';
   }
   function railsInner(){
-    return allChatsLink() + '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
-        '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
-        '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
-      '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh"><span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +
+    /* §777 — the rail no longer carries "All chats on this client" (Islam: "remove the button");
+       §779 — and holds the chats only: the deliverables and sources are Details, on the right */
+    return '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
+        chipsHtml() + '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
+        '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>';
+  }
+  /* §779 — DETAILS ON THE RIGHT (Islam: "like claude, we have the chats on
+     the left and the right is details"). The deliverables (and a SWOT's
+     sources) stand below the open chat's to-do; where there is no to-do —
+     the start screen, a free chat, a deliverable — in a column of their own. */
+  function detailsInner(tog){
+    /* §783 — the column's own hide button sits in its header, first, as the chats rail's does (Islam) */
+    return '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh">' + (tog ? '<button type="button" class="coptog cophtog" data-cop-dettog aria-expanded="true" aria-label="Hide deliverables" title="Hide deliverables">' + DETMARK + '</button>' : '') + '<span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +
         '<div class="coplist" data-cop-delivs>' + delivsHtml() + '</div></section>' +
       (section() === "analysis" ? '<section class="coprail' + (folded("sources") ? " copfolded" : "") + '" data-cop-sources-rail><div class="coprh"><span class="coprhl">Sources</span>' + foldBtn("sources", "sources") + '</div>' +
         '<div class="coplist" data-cop-sources>' + sourcesHtml() + '</div></section>' : '');
+  }
+  /* §780 — Details fold to a slim strip on the right, as the chats rail does on the left (Islam: "the deliverables need to be collapsible as well, like the chat panel"); kept per browser */
+  var DETMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="2"/><path d="M10 2.5v11"/></svg>';
+  function detShut(){ try { return localStorage.getItem("smp.copilot.details") === "shut"; } catch (e) { return false; } }
+  function setDetShut(v){ try { if (v) localStorage.setItem("smp.copilot.details", "shut"); else localStorage.removeItem("smp.copilot.details"); } catch (e) {} placeDetails(); }
+  function placeDetails(){
+    var pane = document.querySelector("[data-cop-pane]"), m = document.querySelector("[data-cop-main]"); if (!pane || !m) return;
+    var det = pane.querySelector(":scope > [data-cop-details]"); if (!det) return;
+    m.querySelectorAll("[data-cop-delbox]").forEach(function(x){ x.remove(); });
+    var td = m.querySelector(".copftodo");
+    /* a to-do folded into its sheet (a smaller window) carries them too, opened by its own button: a column of their own would squeeze the chat's work into a sheet as well */
+    if (td) { var bx = document.createElement("div"); bx.className = "copdelbox"; bx.setAttribute("data-cop-delbox", ""); bx.innerHTML = detailsInner(); td.appendChild(bx); det.innerHTML = ""; }
+    else {
+      var shut = detShut();
+      det.innerHTML = shut ? '<button type="button" class="coptog" data-cop-dettog aria-expanded="false" aria-label="Show deliverables" title="Show deliverables">' + DETMARK + '</button>'
+        : detailsInner(true);
+      pane.classList.toggle("copdetshut", shut);
+    }
+    pane.classList.toggle("copwithdet", !td);
   }
 
   /* ── THE ASKS ──────────────────────────────────────────────────────── */
@@ -68864,7 +70694,215 @@ var COPILOT = (function(){
         if (pool.some(function(r){ return r && String(r.id).toLowerCase() === DEEP.id; })) { OPEN[k] = { kind: DEEP.kind, id: DEEP.id }; DEEP = null; }
       }
       if (askedFor === k) { draw(); openIfNeeded(); }
+      loadAll(!!force);
     }, function(){ LISTS[k] = { failed: true }; if (askedFor === k) draw(); });
+  }
+  /* §752 — THE COPILOT IN ONE WINDOW (Islam: "the copilot with a split by
+     area is a bit confusing for the team, they need 1 window"; the signed-off
+     design-mockups/copilot-layout/2026-11-04_one-window.html, "build the one
+     window"). The area tabs go; every area's chats and deliverables stand in
+     one rail, tagged; the method is a strip above with where the place
+     stands. Each area's list is still its own ask, so nothing on the server
+     moves; the rail merges them. */
+  var ALLASK = {};
+  function loadAll(force){
+    var p = place(), want = here().map(function(s){ return s.k; }).filter(function(s){ return force || !LISTS[p + "|" + s] || LISTS[p + "|" + s].failed; });
+    if (!want.length) { autoFocus(); return; }
+    var left = want.length, tick = function(){ if (--left === 0) { deepAcross(); autoFocus(); draw(); } };
+    want.forEach(function(s){
+      var k = p + "|" + s; if (ALLASK[k] && !force) { tick(); return; } ALLASK[k] = true;
+      getJ("list", ["place=" + encodeURIComponent(p), "section=" + encodeURIComponent(s)]).then(function(x){
+        delete ALLASK[k];
+        if (x.st === 200 && x.j && x.j.ok) LISTS[k] = { chats: x.j.chats || [], archived: x.j.archived || [], mayDelete: !!x.j.mayDelete, deliverables: x.j.deliverables || [], swotProgress: x.j.swotProgress || {} };
+        else if (!LISTS[k]) LISTS[k] = { failed: true };
+        tick();
+      }, function(){ delete ALLASK[k]; tick(); });
+    });
+  }
+  /* the rail's view: every area's list of this place, each row marked with its area */
+  function allList(){
+    var p = place(), cur = LISTS[key()], out = { chats: [], archived: [], deliverables: [], swotProgress: {}, mayDelete: !!(cur && cur.mayDelete), failed: !!(cur && cur.failed) };
+    if (!cur) return null;
+    /* §782 — Advisory is a tab of its own: its chats there, and only there */
+    var adv = section() === "advisory";
+    here().forEach(function(s){
+      if ((s.k === "advisory") !== adv) return;
+      var l = LISTS[p + "|" + s.k]; if (!l || l.failed) return;
+      (l.chats || []).forEach(function(c){ out.chats.push(Object.assign({ _sec: s.k }, c)); });
+      (l.archived || []).forEach(function(c){ out.archived.push(Object.assign({ _sec: s.k }, c)); });
+      (l.deliverables || []).forEach(function(d){ out.deliverables.push(Object.assign({ _sec: s.k }, d)); });
+      Object.keys(l.swotProgress || {}).forEach(function(id){ out.swotProgress[id] = l.swotProgress[id]; });
+      if (l.mayDelete) out.mayDelete = true;
+    });
+    var at = function(x){ return String(x.last || x.latestAt || x.at || ""); };
+    out.chats.sort(function(a, b){ return at(b) < at(a) ? -1 : at(b) > at(a) ? 1 : 0; });
+    out.archived.sort(function(a, b){ return at(b) < at(a) ? -1 : at(b) > at(a) ? 1 : 0; });
+    out.deliverables.sort(function(a, b){ return at(b) < at(a) ? -1 : at(b) > at(a) ? 1 : 0; });
+    return out;
+  }
+  /* the area a chat or deliverable lives in, from the lists */
+  function secOf(id, kind){
+    var p = place(), hs = here();
+    for (var i = 0; i < hs.length; i++) { var l = LISTS[p + "|" + hs[i].k]; if (!l || l.failed) continue;
+      var pool = kind === "deliv" ? (l.deliverables || []) : (l.chats || []).concat(l.archived || []);
+      if (pool.some(function(r){ return r && String(r.id) === String(id); })) return hs[i].k; }
+    return "";
+  }
+  /* a deep link to a chat of another area than the address names */
+  function deepAcross(){
+    if (!DEEP) return;
+    var s = secOf(DEEP.id, DEEP.kind === "deliv" ? "deliv" : "chat"); if (!s) return;
+    OPEN[place() + "|" + s] = { kind: DEEP.kind, id: DEEP.id }; DEEP = null; AREA_CHOSEN[place()] = true;
+    if (s !== section()) { CURSEC.copilot = s; PANE = null; if (typeof paint === "function") paint(); }
+  }
+  /* WHERE THE PLACE STANDS, area by area, read off the lists: on the plan,
+     in progress, saved, or not started — and the next step, the first of the
+     method's areas not on the plan. Advisory stands beside the plan. */
+  var STRIPWORD = { analysis: "SWOT" };
+  function stripWord(k){ return STRIPWORD[k] || sectionLabel(k); }
+  /* the rail is narrow: its tags and chips use the short words */
+  var SHORTWORD = { analysis: "SWOT", compete: "Discipline", directions: "Pillars", execution: "Tactical Plans" };
+  function shortWord(k){ return SHORTWORD[k] || stripWord(k); }
+  function areaTag(k){ return k && layout() === "window" ? '<span class="copatag">' + E(shortWord(k)) + '</span>' : ''; }
+  function areaState(k){
+    /* §779 — the plan itself first: a part it holds is on it, however it got there */
+    var ph = k === "advisory" ? "" : planHeld(k); if (ph) return { st: "on", says: "On the plan · " + ph };
+    var l = LISTS[place() + "|" + k]; if (!l || l.failed) return { st: "", says: "" };
+    var prog = l.swotProgress || {}, open = (l.chats || []).filter(function(c){ var sp = prog[c.id]; return sp && sp.of > 0 && sp.done < sp.of; })[0];
+    if (k === "advisory") { var n = (l.deliverables || []).length; return { st: open ? "wip" : "", says: open ? "A question in progress" : n ? n + (n === 1 ? " brief" : " briefs") : "No briefs yet" }; }
+    var on = (l.deliverables || []).filter(function(d){ return d.applied && d.applied.n; })[0], saved = (l.deliverables || [])[0];
+    if (open) { var sp = prog[open.id]; return { st: "wip", says: "In progress · " + sp.done + " of " + sp.of + " done" }; }
+    if (on) return { st: "on", says: "v" + on.applied.n + " on the plan" };
+    if (saved) return { st: "saved", says: "v" + saved.latest + " saved · not on the plan" };
+    return { st: "", says: "Not started" };
+  }
+  function nextStep(){
+    var hs = here().map(function(s){ return s.k; }).filter(function(k){ return k !== "advisory"; });
+    for (var i = 0; i < hs.length; i++) if (areaState(hs[i]).st !== "on") return hs[i];
+    return "";
+  }
+  /* §782 — THE STEPS AS ONE STEPPER LINE (Islam chose B of design-mockups/
+     copilot-layout/2026-11-17_header-strip-tabs.html: "they are taking a big
+     part of the page"). Numbered steps joined by a line, ✓ on a part the
+     plan holds, the next one ringed; where each stands is the step's tip and
+     is read aloud; the count of the plan's parts ends the line. Advisory is
+     no step: it has its own tab beside Builder. */
+  function stripHtml(){
+    if (!shown() || layout() !== "window" || inPanel() || section() === "advisory") return "";
+    var nx = nextStep(), cur = section(), ks = modeParts(), have = ks.filter(onPlan).length, prev = null, n = 0;
+    var steps = here().filter(function(s){ return s.k !== "advisory"; }).map(function(s){
+      var a = areaState(s.k); n++;
+      var line = prev === null ? '' : '<span class="copstln' + (prev ? " on" : "") + '" aria-hidden="true"></span>';
+      prev = a.st === "on";
+      return line + '<button type="button" class="copstep' + (a.st ? " " + a.st : "") + (s.k === nx ? " next" : "") + '" data-cop-strip="' + s.k + '"' + (s.k === cur ? ' aria-current="true"' : '') + ' title="' + E((s.k === nx ? "Next · " : "") + (a.says || "")) + '">' +
+        '<span class="copstn" aria-hidden="true">' + (a.st === "on" ? "✓" : n) + '</span><b>' + E(stripWord(s.k)) + '</b><small class="copvh">' + E((s.k === nx ? "Next · " : "") + (a.says || "…")) + '</small></button>';
+    }).join("");
+    return '<div class="copsteps">' + steps + '<span class="copstsay" data-cop-planline><b>' + have + ' of ' + ks.length + '</b> on ' + E(placeWord()) + '’s plan</span></div>';
+  }
+  /* §753 B — THE COPILOT ON THE PLAN. On the Strategy tab, ✦ Copilot beside
+     Edit opens the Copilot's own pane in a panel on the right, on the part in
+     view: Foundation → the Foundation, SWOT → the SWOT, Plan → Pillars/
+     Directions or Tactical Plans (a switch in the panel's head). Apply writes
+     the plan and the page repaints beside it. The panel lives outside the
+     page the shell repaints; the shell calls afterPaint() at the end of every
+     paint, which puts the button back and follows the part. */
+  var PANEL = { open: false, planArea: "directions", rendering: false, area: "", wide: false };
+  var EXPMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9.5 2.5h4v4M13.5 2.5l-5 5M6.5 13.5h-4v-4M2.5 13.5l5-5"/></svg>';
+  var MINMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13.5 6.5h-4v-4M9.5 6.5l4.5-4.5M2.5 9.5h4v4M6.5 9.5L2 14"/></svg>';
+  /* §791 — the Competitive Discipline tab is a part of its own (Islam, with the panel saying "This part":
+     "I can't see the chats button nor the chat box to start like the other areas of the plan") */
+  var STRAT_AREA = { found: "foundation", swot: "analysis", compete: "compete" };
+  var AREA_STRAT = { foundation: "found", analysis: "swot", compete: "compete", directions: "plan", execution: "plan", capabilities: "plan" };
+  function inPanel(){ return !!(PANEL.rendering || (PANEL.open && document.querySelector("#copPanel [data-cop-pane]"))); }
+  function onStrategy(){ return typeof currentSub !== "undefined" && currentSub === "strategy" && typeof current !== "undefined" && current !== "setup"; }
+  function panelArea(){
+    var s = typeof CURSEC !== "undefined" ? CURSEC.strategy : "";
+    var a = s === "plan" ? PANEL.planArea : STRAT_AREA[s] || "";
+    return a && here().some(function(x){ return x.k === a; }) ? a : "";
+  }
+  /* §779 — the panel's width, dragged from its left edge, kept per browser */
+  var PANELW_DEF = 550;
+  function panelW(){ var w = 0; try { w = parseInt(localStorage.getItem("smp.copilot.panelw"), 10) || 0; } catch (e) {} return w; }
+  function setPanelW(w, keep){
+    var max = Math.max(360, window.innerWidth - 320); w = w ? Math.max(360, Math.min(max, Math.round(w))) : 0;
+    if (w) document.body.style.setProperty("--copPw", w + "px"); else document.body.style.removeProperty("--copPw");
+    if (keep) try { if (w) localStorage.setItem("smp.copilot.panelw", String(w)); else localStorage.removeItem("smp.copilot.panelw"); } catch (e) {}
+  }
+  function wireGrip(){
+    if (wireGrip.done || typeof document === "undefined") return; wireGrip.done = true;
+    document.addEventListener("pointerdown", function(ev){
+      var g = ev.target && ev.target.closest && ev.target.closest("[data-cop-panelgrip]"); if (!g || PANEL.wide) return;
+      ev.preventDefault(); g.classList.add("drag"); try { g.setPointerCapture(ev.pointerId); } catch (e) {}
+      var z = typeof pageZoom === "function" ? pageZoom() : 1, last = 0;
+      var move = function(e){ last = (window.innerWidth - e.clientX) / z; setPanelW(last, false); };
+      var up = function(){ g.classList.remove("drag"); g.removeEventListener("pointermove", move); g.removeEventListener("pointerup", up); g.removeEventListener("pointercancel", up); if (last) setPanelW(last, true); };
+      g.addEventListener("pointermove", move); g.addEventListener("pointerup", up); g.addEventListener("pointercancel", up);
+    });
+    document.addEventListener("dblclick", function(ev){ if (ev.target && ev.target.closest && ev.target.closest("[data-cop-panelgrip]")) setPanelW(0, true); });
+  }
+  function closePanelDom(){ var el = document.getElementById("copPanel"); if (el) el.remove(); document.body.classList.remove("copB-open"); document.body.classList.remove("copB-wide"); PANEL.wide = false; }
+  /* §792 — the panel's top is the stylesheet's, off the chrome's own observed
+     height (`--chrome-h`); it was measured here once, when the panel opened,
+     and kept whatever that moment gave it (Islam: a space above the panel
+     until he zoomed out and in again). */
+  function afterPaint(){
+    if (!shown() || !onStrategy()) { if (PANEL.open && !onStrategy()) PANEL.open = false; closePanelDom(); return; }
+    var tail = document.querySelector("#secrow-in .secttail") || document.getElementById("secrow-in");
+    if (tail && !tail.querySelector("[data-cop-panelbtn]")) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "copBbtn"; b.setAttribute("data-cop-panelbtn", "");
+      b.setAttribute("aria-pressed", String(PANEL.open)); b.title = "Refine this part with the Copilot"; b.textContent = "✦ Refine";
+      /* §795: after the SWOT's Expand all / Collapse all where the row has it, so the three read fold · ✦ Refine · Edit as drawn */
+      var fold = tail.querySelector("[data-swfoldall]");
+      tail.insertBefore(b, fold ? fold.nextSibling : tail.firstChild);
+    }
+    if (!PANEL.open) { closePanelDom(); return; }
+    var el = document.getElementById("copPanel");
+    if (!el) { el = document.createElement("aside"); el.id = "copPanel"; el.setAttribute("aria-label", "Copilot"); document.body.appendChild(el); PANEL.area = ""; }
+    document.body.classList.add("copB-open"); document.body.classList.toggle("copB-wide", !!PANEL.wide);
+    wireGrip(); if (!document.body.style.getPropertyValue("--copPw") && panelW()) setPanelW(panelW(), false);
+    var a = panelArea();
+    if (a !== PANEL.area || !el.querySelector("[data-cop-pane], [data-cop-panelnone]")) {
+      PANEL.area = a;
+      var partWord = { found: "Foundation", swot: "SWOT", compete: "Competitive Discipline", plan: "Plan", drivers: "Drivers" }[CURSEC.strategy] || "This part";
+      var head = '<div class="copPhead"><div><b>✦ Refine</b><small>' + E(partWord) + ' · ' + E(placeWord()) + '</small></div>' +
+        (CURSEC.strategy === "plan" ? '<span class="copPseg">' + [["directions", "Pillars/Directions"], ["execution", "Tactical Plans"]].map(function(x){ return '<button type="button" data-cop-panelarea="' + x[0] + '" aria-pressed="' + (PANEL.planArea === x[0]) + '">' + x[1] + '</button>'; }).join("") + '</span>' : '') +
+        /* §778 — expand to take over the page, as the Copilot tab does, and minimize back to the side (Islam) */
+        '<button type="button" class="copPexp" data-cop-panelexpand aria-pressed="' + !!PANEL.wide + '" aria-label="' + (PANEL.wide ? "Minimize the Copilot" : "Expand the Copilot") + '" title="' + (PANEL.wide ? "Minimize" : "Expand") + '">' + (PANEL.wide ? MINMARK : EXPMARK) + '</button>' +
+        '<button type="button" class="copPx" data-cop-panelclose aria-label="Close the Copilot" title="Close">×</button></div>';
+      head = '<div class="copPgrip" data-cop-panelgrip title="Drag to resize · double-click to reset" aria-hidden="true"></div>' + head;
+      if (!a) { el.innerHTML = head + '<div class="copnone" data-cop-panelnone>The Copilot works on the Foundation, the SWOT, the Competitive Discipline and the Plan here. For anything else, ask on the Copilot tab.</div>'; return; }
+      if (CURSEC.copilot !== a) { CURSEC.copilot = a; PANE = null; }
+      PANEL.rendering = true;
+      try { el.innerHTML = head + '<div class="copPbody">' + renderPane() + '</div>'; } finally { PANEL.rendering = false; }
+      draw();
+    } else if (el.querySelector("[data-cop-startscreen]")) draw();   /* §779 — the plan may have come in since: built or not is read again */
+  }
+  /* the rail's filter, per place: every area, or one */
+  var RAILF = {};
+  function railF(){ return RAILF[place()] || ""; }
+  function chipsHtml(){
+    /* §772 — no chips: the strip above narrows the rail (Islam: "no need to have it again in the chat"); a line says so and undoes it */
+    if (archView() || layout() !== "window" || inPanel() || !railF()) return "";
+    return '<div class="copachips" data-cop-chips><span class="copm">Showing ' + E(stripWord(railF())) + '</span><button type="button" class="linkbu" data-cop-chip="">Show all</button></div>';
+    return '<div class="copachips" data-cop-chips><button type="button" class="copachip" data-cop-chip="" aria-pressed="' + !railF() + '">All</button>' +
+      here().map(function(s){ return '<button type="button" class="copachip" data-cop-chip="' + s.k + '" aria-pressed="' + (railF() === s.k) + '" title="' + E(stripWord(s.k)) + '">' + E(shortWord(s.k)) + '</button>'; }).join("") + '</div>';
+  }
+  /* WHICH AREA THE WINDOW OPENS ON: the one the address names, or the one
+     the person chose this visit; otherwise, once the lists are in, the next
+     step. */
+  var AREA_CHOSEN = {}, AREA_FROM_URL = /\/copilot\/[a-z]/.test(String(location.pathname || ""));
+  function autoFocus(){
+    var p = place();
+    if (layout() !== "window" || inPanel()) return;
+    /* §785 — Advisory is a tab of its own (§782): the next step of the method never moves you off it */
+    if (section() === "advisory") { AREA_CHOSEN[p] = true; return; }
+    if (AREA_FROM_URL) { AREA_CHOSEN[p] = true; AREA_FROM_URL = false; }
+    if (AREA_CHOSEN[p]) return;
+    var ready = here().every(function(s){ return LISTS[p + "|" + s.k]; }); if (!ready) return;
+    AREA_CHOSEN[p] = true;
+    if (OPEN[key()] || DEEP) return;
+    var nx = nextStep();
+    if (nx && nx !== section() && typeof CURSEC !== "undefined") { CURSEC.copilot = nx; PANE = null; if (typeof paint === "function") paint(); else draw(); }
   }
   function openIfNeeded(){
     var o = OPEN[key()];
@@ -69406,7 +71444,7 @@ var COPILOT = (function(){
   function dvProgress(id){
     var l = list(); if (l && l.swotProgress && PANE && PANE.dirsTodo) l.swotProgress[id] = { done: PANE.dirsDone, of: PANE.dirsTodo.length };
   }
-  function dvTitle(mode){ return (mode === "capabilities" ? "Capabilities — " : "Directions — ") + placeWord(); }
+  function dvTitle(mode){ return (mode === "capabilities" ? "Capabilities — " : "Pillars/Directions — ") + placeWord(); }
   function dvFns(){
     var ks = []; try { ks = typeof activeFunctionKeys === "function" ? activeFunctionKeys() : []; } catch (e) { ks = []; }
     return ks.map(function(k){ return { key: k, name: (FUNCTIONS[k] && FUNCTIONS[k].name) || k, head: (FUNCTIONS[k] && FUNCTIONS[k].head) || "" }; });
@@ -69801,6 +71839,8 @@ var COPILOT = (function(){
       if (!h || !Array.isArray(h.items) || typeof addPillar !== "function") return { ok:false };
       s.options.filter(function(o){ return o.go; }).forEach(function(o){
         var p = o.planId ? h.items.filter(function(x){ return x && x.id === o.planId; })[0] : null;
+        /* §785 — a Direction from a chat comes by its name: the plan's own row of that name is updated, as the ask says */
+        if (!p) { var byName = idOf[String(o.title || "").trim().toLowerCase()]; if (byName) p = h.items.filter(function(x){ return x && x.id === byName; })[0] || null; }
         if (!p) p = addPillar(h);
         if (!p) return;
         p.name = o.title; p.urgency = o.urgency; p.importance = o.importance; p.ease = o.ease;
@@ -70122,7 +72162,7 @@ var COPILOT = (function(){
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
     var todo = PANE.execTodo || [], done = PANE.execDone || 0;
     var chat = '<div class="copchat copfchat copswchat copexchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
-      '<div class="copfhead"><b><span class="copfname">' + E(c.title || "Execution — " + placeWord()) + '</span><small> · ' + E(exStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the items") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
+      '<div class="copfhead"><b><span class="copfname">' + E(c.title || "Tactical Plans — " + placeWord()) + '</span><small> · ' + E(exStepWord(s)) + '</small></b>' + sheetBtn("cards", "View the items") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + '</div>' +
       '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + exMsgs(s, ed, busyHere) + work + '</div></div>' +
       (!canEdit() ? VIEWONLY
         : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
@@ -70136,10 +72176,10 @@ var COPILOT = (function(){
        Apply is named and opened, rather than sending the person to choose again. */
     if (!s.items.length) {
       var dsv = PANE.execDirsSaved;
-      return dsv ? aiMsg('<b>' + E(dsv.title) + ' v' + E(dsv.n) + '</b> is saved but not on the plan yet, so there is nothing here to plan for. Apply it to the plan first; then a new Execution chat reads the Directions and Capabilities from there.' +
+      return dsv ? aiMsg('<b>' + E(dsv.title) + ' v' + E(dsv.n) + '</b> is saved but not on the plan yet, so there is nothing here to plan for. Apply it to the plan first; then a new Tactical Plans chat reads the Directions and Capabilities from there.' +
           '<div class="copopts"><button type="button" class="copbtn solid" data-cop-go-deliv="' + E(dsv.id) + '" data-cop-go="directions">Open ' + E(dsv.title) + ' v' + E(dsv.n) + '</button><span class="copm">The version page, where Apply to plan is.</span></div>')
         : aiMsg('The plan has no Directions or Capabilities yet, and none are saved in the Copilot. Choose them first.' +
-          '<div class="copopts"><button type="button" class="copbtn solid" data-cop-go="directions">Open Directions</button><span class="copm">The Directions start screen, in this place.</span></div>');
+          '<div class="copopts"><button type="button" class="copbtn solid" data-cop-go="directions">Open Pillars/Directions</button><span class="copm">The Pillars/Directions start screen, in this place.</span></div>');
     }
     out.push(exPeriodAsk(ed && (!s.period || !!EXPICK[id])));
     if (!s.period) return out.join("");
@@ -70162,7 +72202,7 @@ var COPILOT = (function(){
   }
   function exPaneHtml(s, ed, busyHere){
     var w = PANE.execWords || {}, id = PANE.chat.id, vn = s.saved ? s.saved.n : (PANE.execNextVersion || 1);
-    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E("Execution — " + placeWord()) + ' v' + E(vn) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</span>' +
+    var head = '<div class="copsh copswph"><span class="copvline"><b>' + E("Tactical Plans — " + placeWord()) + ' v' + E(vn) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</span>' +
       '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
     var body;
     if (!s.items.length) body = '<p class="copnote">Nothing to draft — the plan holds no Directions or Capabilities' + (PANE.execDirsSaved ? '. ' + E(PANE.execDirsSaved.title) + ' v' + E(PANE.execDirsSaved.n) + ' is saved and waits for Apply.' : ', and none are saved.') + '</p>';
@@ -70306,7 +72346,7 @@ var COPILOT = (function(){
     return false;
   }
   function exNew(road){
-    act({ act:"newExecution", place: place(), title: "Execution — " + placeWord(), items: exItems(), road: road || "build" }, function(j){
+    act({ act:"newExecution", place: place(), title: "Tactical Plans — " + placeWord(), items: exItems(), road: road || "build" }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       exView(j);
@@ -70398,7 +72438,7 @@ var COPILOT = (function(){
       if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); penSave(); return; }
     }
     if (ev.key === "Enter" && hit(ev, "[data-cop-rename-box]")) { ev.preventDefault(); rename(); }
-    if (ev.key === "Escape" && hit(ev, "[data-cop-rename-box]")) { RENAME = null; draw(); }
+    if (ev.key === "Escape" && hit(ev, "[data-cop-rename-box]")) { RENAME = null; RENAMEHEAD = false; draw(); }
     if (ev.key === "Escape" && (MENU || ASKDEL)) { MENU = null; ASKDEL = null; draw(); }
     if (ev.key === "Escape" && SHEET && !MENU) { SHEET = ""; draw(); }
     var g = hit(ev, "[data-cop-grip]");
@@ -70446,7 +72486,9 @@ var COPILOT = (function(){
   function startFree(file){
     var t = document.querySelector("[data-cop-starttext]"), text = t ? t.value : "", k = key();
     if ((!text.trim() && !file) || THINKING || !canEdit()) { if (t) t.focus(); return; }
-    act({ act:"newChat", place: place(), section: section(), free: true, title: "Free chat — " + placeWord() }, function(j){
+    /* §779 — in the panel on a part the plan holds, the words are a change to it */
+    if (inPanel() && document.querySelector("[data-cop-sayto]") && sayToPlan(text, file)) { if (t) t.value = ""; return; }
+    act({ act:"newChat", place: place(), section: section(), free: true, title: "New chat — " + placeWord() }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       delete STARTTEXT[k];
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
@@ -70502,7 +72544,7 @@ var COPILOT = (function(){
            context: ctx.line + (ctx.detail ? "\n" + ctx.detail : "") + (ctx.text ? "\n\nTHE PLAN AS WRITTEN:\n" + ctx.text : ""), placeWord: placeWord() }, WAIT_MS).then(function(x){
       THINKING = null;
       if (x.st === 200 && x.j && x.j.ok) {
-        if (PANE && PANE.chat && PANE.chat.id === id) { PANE.messages = x.j.messages || PANE.messages; PANE.assumptions = x.j.assumptions || []; }
+        if (PANE && PANE.chat && PANE.chat.id === id) { PANE.messages = x.j.messages || PANE.messages; PANE.assumptions = x.j.assumptions || []; if (x.j.title) PANE.chat.title = x.j.title; }
         loadList(true); draw(); return;
       }
       SAY = (x.j && x.j.why) || "That did not send. Nothing was lost — try again.";
@@ -70552,10 +72594,54 @@ var COPILOT = (function(){
   /* A FILE, read in the browser only as far as its size and name; the server
      decides whether it can be read at all and says so in words. */
   function fileProblem(file){
-    if (!/\.(docx|pdf|xlsx)$/i.test(file.name)) return "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files. Save it as one of those and attach it again.";
+    if (!/\.(docx|pdf|xlsx|png|jpe?g|webp)$/i.test(file.name) && !/^image\/(png|jpeg|webp)$/.test(file.type || "")) return "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files and pictures (PNG, JPEG, WebP). Save it as one of those and attach it again.";
     if (file.size > MAX_FILE) return "That file is larger than 3 MB, so it was not attached. Split it, or paste the part that matters.";
     return "";
   }
+  /* a pasted screenshot comes as "image.png": it is named for when it was pasted */
+  function picName(file){
+    var n = String(file.name || ""), t = String(file.type || "");
+    if (/^image\//.test(t) && (!n || /^image\.(png|jpe?g|webp)$/i.test(n))) { var d = new Date(), p2 = function(x){ return (x < 10 ? "0" : "") + x; };
+      return "Pasted picture " + d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()) + " " + p2(d.getHours()) + "." + p2(d.getMinutes()) + "." + p2(d.getSeconds()) + (t === "image/jpeg" ? ".jpg" : t === "image/webp" ? ".webp" : ".png"); }
+    return n;
+  }
+  /* §780 — PASTE OR DROP A PICTURE (Islam: "allow me to paste pictures as
+     well with data where the AI can analyze and get data from"). Into a
+     chat's box it waits above the box like an attached file; into the start
+     screen's box it starts the chat, as attaching there does. Text pasted is
+     left to the box. */
+  function pastedFiles(dt){
+    var out = []; if (!dt) return out;
+    Array.prototype.forEach.call(dt.files || [], function(f){ out.push(f); });
+    if (!out.length) Array.prototype.forEach.call(dt.items || [], function(it){ if (it.kind === "file") { var f = it.getAsFile(); if (f) out.push(f); } });
+    return out.filter(function(f){ return /^image\//.test(f.type || "") || /\.(docx|pdf|xlsx|png|jpe?g|webp)$/i.test(f.name || ""); });
+  }
+  function takeIn(ev, files){
+    if (!files.length || !canEdit()) return false;
+    if (hit(ev, "[data-cop-starttext], [data-cop-startscreen]")) {
+      var sbad = fileProblem(files[0]); if (sbad) { SAY = sbad; draw(); return true; }
+      startFree(files[0]); return true;
+    }
+    if (!PANE || !PANE.chat || PANE.chat.archived) return false;
+    files.slice(0, 3).forEach(function(f, i){ setTimeout(function(){ attach(f); }, i * 400); });
+    return true;
+  }
+  document.addEventListener("paste", function(ev){
+    if (!hit(ev, "[data-cop-text], [data-cop-starttext]")) return;
+    var fs = pastedFiles(ev.clipboardData); if (!fs.length) return;
+    ev.preventDefault(); takeIn(ev, fs);
+  });
+  document.addEventListener("dragover", function(ev){
+    if (!hit(ev, "[data-cop-pane], #copPanel")) return;
+    if (ev.dataTransfer && Array.prototype.indexOf.call(ev.dataTransfer.types || [], "Files") >= 0) { ev.preventDefault(); var bx = ev.target.closest && ev.target.closest(".copbox"); document.querySelectorAll(".copbox.copdrop").forEach(function(x){ if (x !== bx) x.classList.remove("copdrop"); }); if (bx) bx.classList.add("copdrop"); }
+  });
+  document.addEventListener("dragleave", function(ev){ var bx = ev.target && ev.target.closest && ev.target.closest(".copbox"); if (bx && !bx.contains(ev.relatedTarget)) bx.classList.remove("copdrop"); });
+  document.addEventListener("drop", function(ev){
+    if (!hit(ev, "[data-cop-pane], #copPanel")) return;
+    document.querySelectorAll(".copbox.copdrop").forEach(function(x){ x.classList.remove("copdrop"); });
+    var fs = pastedFiles(ev.dataTransfer); if (!fs.length) return;
+    ev.preventDefault(); takeIn(ev, fs);
+  });
   function attach(file){
     if (!file || !PANE || !PANE.chat) return;
     var id = PANE.chat.id, bad = fileProblem(file);
@@ -70563,7 +72649,8 @@ var COPILOT = (function(){
     var r = new FileReader();
     r.onload = function(){
       var data = String(r.result || "").replace(/^data:[^,]*,/, "");
-      act({ act:"attach", id:id, name:file.name, type:file.type || "", data:data }, function(j){
+      act({ act:"attach", id:id, name:picName(file), type:file.type || "", data:data }, function(j){
+        if (j.file && /^image\//.test(file.type || "")) THUMBS[j.file.id] = String(r.result || "");
         if (PANE && PANE.chat && PANE.chat.id === id) PANE.pending = j.pending || [];
         draw(); var t = document.querySelector("[data-cop-text]"); if (t) t.focus();
       });
@@ -70581,10 +72668,11 @@ var COPILOT = (function(){
   });
   /* Rename happens in the rail: Enter or leaving the box saves, Escape
      cancels, and an empty name keeps the old one rather than refusing. */
+  var RENAMEHEAD = false;
   function rename(){
     var b = document.querySelector("[data-cop-rename-box]"); if (!b || !RENAME) return;
     var id = RENAME, title = b.value.replace(/\s+/g, " ").trim();
-    RENAME = null;
+    RENAME = null; RENAMEHEAD = false;
     if (!title) { draw(); return; }
     act({ act:"rename", id:id, title:title }, function(){
       if (PANE && PANE.chat && PANE.chat.id === id) PANE.chat.title = title;
@@ -70646,13 +72734,26 @@ var COPILOT = (function(){
     if (dvClick(ev)) return;
     if (exClick(ev)) return;
     if (swClick(ev)) return;
+    if ((b = hit(ev, "[data-cop-dettog]"))) { setDetShut(!detShut()); return; }
     if ((b = hit(ev, "[data-cop-railtog]"))) { var sh = !railFolded(); RAILKEPT = !sh; setRail(sh); return; }
     if ((b = hit(ev, "[data-cop-sheet]"))) { var k = b.getAttribute("data-cop-sheet"); SHEET = SHEET === k ? "" : k; draw(); return; }
     if ((b = hit(ev, "[data-cop-showdraft]"))) { if (PANE && PANE.chat) PANELPICK[PANE.chat.id] = b.getAttribute("data-cop-showdraft"); SHEET = "draft"; draw(); return; }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
-    if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
-    if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
+    if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; var cid = b.getAttribute("data-cop-chat"), cs = b.getAttribute("data-cop-chat-sec") || secOf(cid, "chat");
+      if (cs && cs !== section()) { openIn(cs, "chat", cid); return; } openItem("chat", cid); return; }
+    if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; var did1 = b.getAttribute("data-cop-deliv"), ds = b.getAttribute("data-cop-deliv-sec") || secOf(did1, "deliv");
+      if (ds && ds !== section()) { openIn(ds, "deliv", did1); return; } openItem("deliv", did1); return; }
+    if ((b = hit(ev, "[data-cop-panelbtn]"))) { PANEL.open = !PANEL.open; PANEL.area = ""; RAILKEPT = false; b.setAttribute("aria-pressed", String(PANEL.open)); afterPaint(); return; }
+    if ((b = hit(ev, "[data-cop-panelexpand]"))) {
+      PANEL.wide = !PANEL.wide; document.body.classList.toggle("copB-wide", PANEL.wide);
+      b.setAttribute("aria-pressed", String(PANEL.wide)); b.setAttribute("aria-label", PANEL.wide ? "Minimize the Copilot" : "Expand the Copilot"); b.title = PANEL.wide ? "Minimize" : "Expand"; b.innerHTML = PANEL.wide ? MINMARK : EXPMARK;
+      SHEET = ""; draw(); return;
+    }
+    if ((b = hit(ev, "[data-cop-panelclose]"))) { PANEL.open = false; closePanelDom(); var pb = document.querySelector("[data-cop-panelbtn]"); if (pb) pb.setAttribute("aria-pressed", "false"); return; }
+    if ((b = hit(ev, "[data-cop-panelarea]"))) { PANEL.planArea = b.getAttribute("data-cop-panelarea"); PANEL.area = ""; PANE = null; afterPaint(); return; }
+    if ((b = hit(ev, "[data-cop-strip]"))) { var sk = b.getAttribute("data-cop-strip"); RAILF[place()] = railF() === sk && section() === sk && !OPEN[key()] ? "" : sk; AREA_CHOSEN[place()] = true; goSection(sk); return; }
+    if ((b = hit(ev, "[data-cop-chip]"))) { RAILF[place()] = b.getAttribute("data-cop-chip"); draw(); return; }
     if ((b = hit(ev, "[data-cop-go]"))) { goSection(b.getAttribute("data-cop-go"), b.getAttribute("data-cop-go-deliv") || ""); return; }
     /* §538: the hold moved from `disabled` to `aria-disabled` so its reason
        could be read, and `b.disabled` goes false the moment it does — a guard
@@ -70661,12 +72762,14 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled && b.getAttribute("aria-disabled") !== "true")
       applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
       { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
+    if ((b = hit(ev, "[data-cop-ctx]"))) { var tip = b.parentNode.querySelector("[data-cop-ctxtip]"); if (tip) { tip.hidden = !tip.hidden; b.setAttribute("aria-expanded", String(!tip.hidden)); } return; }
     if ((b = hit(ev, "[data-cop-home]"))) {
       MENU = null; ASKDEL = null; SAY = ""; SHEET = ""; delete OPEN[key()]; PANE = null;
       if (hit(ev, ".copslim")) { RAILKEPT = true; setRail(false); }
       draw(); var st = document.querySelector("[data-cop-starttext]"); if (st) st.focus(); return;
     }
     if ((b = hit(ev, "[data-cop-startsend]"))) { startFree(); return; }
+    if ((b = hit(ev, "[data-cop-buildin]"))) { buildIn(b.getAttribute("data-cop-buildin")); return; }
     if ((b = hit(ev, "[data-cop-startattach]"))) { var sfi = document.querySelector("[data-cop-startfile]"); if (sfi) sfi.click(); return; }
     if ((b = hit(ev, "[data-cop-road]"))) { newFoundation(b.getAttribute("data-cop-road")); return; }
     if ((b = hit(ev, "[data-cop-newplan]"))) {
@@ -70751,6 +72854,14 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-notnow]"))) { NOTNOW[b.getAttribute("data-cop-notnow")] = true; draw(); return; }
+    if ((b = hit(ev, "[data-cop-putplan]"))) {
+      if (!PANE || !PANE.chat) return;
+      var cid5 = PANE.chat.id, mid5 = b.getAttribute("data-cop-putplan"), msg5 = (PANE.messages || []).filter(function(x){ return String(x.id) === String(mid5); })[0];
+      var go5 = function(did){ PENDAPPLY = did; openIn(PANE.chat.section || section(), "deliv", did); };
+      if (msg5 && msg5.part && msg5.part.saved && msg5.part.saved.deliverableId) { go5(msg5.part.saved.deliverableId); return; }
+      act({ act:"saveDraft", id:cid5, messageId:mid5 }, function(j){ LISTS[key()] = null; loadList(true); if (j.saved) go5(j.saved.deliverableId); else draw(); });
+      return;
+    }
     if ((b = hit(ev, "[data-cop-savedraft]"))) {
       if (!PANE || !PANE.chat) return;
       var cid4 = PANE.chat.id;
@@ -70770,8 +72881,9 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-menu]"))) { var mid2 = b.getAttribute("data-cop-menu"); MENU = MENU === mid2 ? null : mid2; ASKDEL = null; draw(); return; }
-    if ((b = hit(ev, "[data-cop-archview]"))) { ARCH[key()] = !archView(); MENU = null; ASKDEL = null; RENAME = null; draw(); return; }
-    if ((b = hit(ev, "[data-cop-rename]"))) { MENU = null; RENAME = b.getAttribute("data-cop-rename"); draw(); return; }
+    if ((b = hit(ev, "[data-cop-archview]"))) { ARCH[place()] = !archView(); MENU = null; ASKDEL = null; RENAME = null; draw(); return; }
+    if ((b = hit(ev, "[data-cop-rename]"))) { MENU = null; RENAMEHEAD = false; RENAME = b.getAttribute("data-cop-rename"); draw(); return; }
+    if ((b = hit(ev, "[data-cop-renamehead]"))) { MENU = null; RENAMEHEAD = true; RENAME = b.getAttribute("data-cop-renamehead"); draw(); return; }
     if ((b = hit(ev, "[data-cop-archive]"))) {
       var aid = b.getAttribute("data-cop-archive"); MENU = null;
       act({ act:"archiveChat", id:aid }, function(){
@@ -70782,7 +72894,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-restore-chat]"))) {
       var rcid = b.getAttribute("data-cop-restore-chat"); MENU = null;
       act({ act:"restoreChat", id:rcid }, function(){
-        SAY = "Restored to the chats."; ARCH[key()] = false;
+        SAY = "Restored to the chats."; ARCH[place()] = false;
         if (PANE && PANE.chat && PANE.chat.id === rcid) PANE.chat.archived = "";
         loadList(true); });
       return;
@@ -70820,7 +72932,7 @@ var COPILOT = (function(){
     }
   });
 
-  return { shown: shown, sections: sections, render: renderPane, grant: grant, canEdit: canEdit,
+  return { shown: shown, sections: sections, render: renderPane, grant: grant, canEdit: canEdit, afterPaint: afterPaint, layout: layout,
            /* for the checks */
            state: function(){ return { open: OPEN[key()] || null, list: list(), pane: PANE, say: SAY, thinking: THINKING }; },
            context: contextOf };
@@ -76950,8 +79062,9 @@ var SYNC = (function () {
       box.insertBefore(nm, sel);
     }
     var out = document.createElement("button");
-    out.className = "infobtn";
+    out.className = "infobtn outbtn";   /* its own name: under 520px it is drawn as its mark alone (arrange.css §792.2) */
     out.textContent = "Sign out";
+    out.title = "Sign out";
     out.addEventListener("click", function () {
       cacheWipe();
       keepWipe();
@@ -77880,7 +79993,11 @@ var SYNC = (function () {
      document (COPILOT.shown); `everywhere` because, like the reports, being
      able to open it is never a reason to be offered a destination (§383).
      Declared once and referenced four times, the file's own idiom. */
-  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true,
+  /* §752 — `oneWindow`: the Copilot's areas still route the address
+     (…/copilot/directions), but their row is not drawn; the Copilot draws
+     the method as its own strip (Islam: "they need 1 window"). */
+  var COP_LASTBUILD = "";
+  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true, oneWindow:true,
                   when: function(){ return COPILOT.shown(); },
                   sections: function(){ return COPILOT.sections(); } };
 
@@ -78204,7 +80321,9 @@ var SYNC = (function () {
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
         /* §520: and it is neither the owner's own part nor the Foundation,
            so it goes with the rest for a narrowed part owner. */
-        when: function(){ return buExists() && !partOnly(); } },
+        /* §759: and the office may switch the page off (Setup › Business
+           units); off means it disappears, as Focus does (§102). */
+        when: function(){ return buExists() && weightingOn() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
@@ -78421,7 +80540,7 @@ var SYNC = (function () {
          inside still asks the real grant it needs. */
       /* §435: Setup › Structure is gone — its per-item exceptions sit under
          each layer's card on Client set-up › Structure ("Except for"). */
-      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
@@ -78486,6 +80605,12 @@ var SYNC = (function () {
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
       { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
+      /* §770: THE WEIGHTING IS THE STRATEGY'S (Islam: *"it's a strategy
+         performance weighting"*), so its switch and its table sit in this
+         module's Setup, under Measurement, and not beside the units' creation
+         in the client's. The key is the company tab's (§30.2): the impact
+         buttons' repaint names "weighting" and lands on whichever is open. */
+      { k:"weighting", ac:"c_bands", grp:"meas", mod:"strategy", label:"Weighting", glyph:"⚖", find:"weighting weight weights units count group figure factors revenue profit impact growth on off switch", render:renderWeightingSetup },
       /* §621: TERMINOLOGY LEFT SETUP (Islam: *"yes remove terminology"*).
          Client set-up › The shape names every word, layer by layer — End in
          Mind, the one it did not, included — and an empty box there shows
@@ -81353,7 +83478,22 @@ var SYNC = (function () {
     /* \u00a7132.14: the Strategy tab wears NO number (Islam: "remove the number
        from the strategy word") \u2014 the missing bar in the section row below
        carries the total, the places and the action, through missBar(). */
+    /* §790 — named for what each does, as ✦ Refine on the plan is (Islam: "builder to be build and advisory to be advise like refine"). */
+    /* §782 — BUILDER AND ADVISORY AT THE FAR RIGHT (Islam: "the builder should
+       be on the far right of the tabs as it's not something similar, and it
+       matches the placement of the copilot when we get in the plan on the
+       right"; "the advisory should be something different… it's a general
+       thing" → its own tab). One tab underneath, the Copilot's: Builder is
+       its method, Advisory its advisory area, each pressed by itself. */
+    if (currentSub === COP_TAB.k && CURSEC.copilot && CURSEC.copilot !== "advisory") COP_LASTBUILD = CURSEC.copilot;
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
+      if (d.k === COP_TAB.k) {
+        var advOn = false; try { advOn = (allowed(d.sections(arg), TARGET) || []).some(function(x){ return x.k === "advisory"; }); } catch (e) { advOn = false; }
+        var onAdv = currentSub === d.k && CURSEC.copilot === "advisory";
+        return '<span class="tabgap" aria-hidden="true"></span><span class="coptabs">' +
+          '<button role="tab" data-s="' + d.k + '" data-cop-to="build" class="coptab" aria-selected="' + (currentSub === d.k && !onAdv) + '">✦ Build</button>' +
+          (advOn ? '<button role="tab" data-s="' + d.k + '" data-cop-to="advisory" class="coptab copadv" aria-selected="' + onAdv + '">✦ Advise</button>' : '') + '</span>';
+      }
       var cls = (d.primary ? "primary" : "") + (d.cta ? " cta" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
@@ -81366,6 +83506,9 @@ var SYNC = (function () {
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
+    /* §752 — the TAB, kept before `def` becomes a section (below): its
+       one-window flag decides whether its sections draw a row. */
+    var tabDef = def;
     /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§121.1). Twenty
        lines down, a page with sections reassigns `def` to whichever section is
        open — so reading the name after that gives the SECTION's: Figure sets
@@ -81647,10 +83790,15 @@ var SYNC = (function () {
        of the row with the pen at the end — drawn, looked at, and thrown away
        (§41.9). The tail takes the auto and the bar gives its up. */
     var penHTML = (stratTab && typeof secActs === "function") ? secActs() : "";
-    var tailHTML = (missHTML || penHTML)
+    /* §795: Expand all / Collapse all for a SWOT's folding points, before the
+       pen. Drawn hidden; `swotFoldSync()` at the end of the paint shows it
+       where the page has a line with points on it. On the strategy tabs for
+       everybody, the pen or no pen — folding is reading. */
+    var foldHTML = (stratTab && typeof swotFoldBtn === "function") ? swotFoldBtn() : "";
+    var tailHTML = (missHTML || penHTML || foldHTML)
       ? '<span class="secttail">' + missHTML +
           ((missHTML && penHTML) ? '<span class="sectsep" aria-hidden="true"></span>' : '') +
-          penHTML + '</span>'
+          foldHTML + penHTML + '</span>'
       : "";
     /* THE ROW IS NOT ONLY FOR SECTIONS, AND §211.2 IS WHAT PROVED IT. That
        section left a pillars function with ONE section — and `> 1` took the
@@ -81665,12 +83813,27 @@ var SYNC = (function () {
        Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length && (secs.length > 1 || tailHTML)) {
+    /* §752 — `allowed()` hands back copies of the tab definitions, so the
+       one-window flag is read off the Copilot's own definition by its key,
+       and off the TAB, not the section `def` has become by here. */
+    var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
+    /* §758: EXCEPT ON A UNIT'S OR A FUNCTION'S STRATEGY TAB, where one
+       section still names itself. Islam, with a layer's Plan section
+       switched off and its Foundation not counting (2026-11-16): *"the
+       choices of plan or SWOT disappeared despite I'm showing the swot"*.
+       The SWOT was drawn and nothing said so — a page whose only section
+       is unnamed reads as a page that lost its sections, not as a tab of
+       one. The company (§68) and every other tab keep the rule above:
+       Performance's single section is the tab's own reading and would
+       only repeat the tab's word. */
+    var lone = !!(tabDef && (tabDef.k === "strategy" || tabDef.k === "fnstrat") &&
+                  current !== "group" && !isCo(current));
+    if (!railed && !oneWin && secs && secs.length && (secs.length > 1 || tailHTML || lone)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
       document.getElementById("secrow-in").innerHTML =
-        (secs.length > 1 ? '<span class="secseg">' + secs.map(function(s){
+        (secs.length > 1 || lone ? '<span class="secseg">' + secs.map(function(s){
           return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
             ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
         }).join("") + '</span>' : "") + tailHTML;
@@ -81695,6 +83858,9 @@ var SYNC = (function () {
     /* The builder's band, once the navigation above has settled (§129). */
     paintBuildBand();
     wire();
+    /* §754: the reader's own shape of each Setup table — AFTER wire(), whose
+       sort reads the cells in the order the renderer drew them. */
+    TABLECOLS.apply();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
        searchable button in front of it once its list passes five options
        (searchsel.js) — the native control stays where it is, so nothing wire()
@@ -81840,6 +84006,7 @@ var SYNC = (function () {
        anyway — §327 says why that is the only question that can be asked
        here, and why the observer this used to be could not answer it. */
     pinWatch();
+    stickWatch();
     watchTailFold();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
@@ -81875,6 +84042,13 @@ var SYNC = (function () {
        (§173): every navigation ends in a paint, so one line covers a door
        added tomorrow and there is no list of handlers to keep up to date. */
     rememberWhere();
+    /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
+       panel follow every paint, as the page's own parts do. */
+    if (typeof swotFoldSync === "function") swotFoldSync();   /* §795 */
+    if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
+    /* §755: a figure corrected on a closed cycle re-takes its closing
+       record before the save leaves (closeRecordFollow, config-data.js). */
+    if (typeof closeRecordFollow === "function") closeRecordFollow();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }
@@ -81967,6 +84141,70 @@ var SYNC = (function () {
        position that does not move, so no scroll event is coming. Kept, and
        known to be unproven. */
     window.addEventListener("resize", pinSoon, { passive: true });
+  }
+  /* ── §771 · WHAT THE TWO FROZEN HEADS NEED MEASURED ─────────────────
+     Islam: *"the header needs to stay freezed on scrolling down"*, and asked
+     which, *"freeze both headers"*: the open direction's title band and the
+     plan tables' own heads. On the squeezed window (§609) the band scrolled
+     away on purpose; now it pins UNDER the strip, and a table head pins
+     under the band, reading or editing. Two heights nothing in CSS can
+     know are published the way `--chrome-h` is (§29.4's rule — observed,
+     never measured at chosen moments): the strip's, because its names wrap
+     to one, two or three lines, and the band's, because a name can too.
+     Both are re-observed after every paint, as the bands are; the observer
+     is one object, disconnected and pointed at the new nodes.
+
+     AND A TABLE HEAD CAN ONLY PIN TO THE WINDOW WHEN ITS BOX IS NOT A
+     SCROLL BOX (§273.1 records the fault the other way round: a page offset
+     inside an `overflow:auto` wrapper lands the head partway down its own
+     body). So each `.scroll` in a pane is marked `fits` while its table
+     needs no sideways scrolling, and only then does the wrapper let the
+     head out and the head pin. A table wider than its pane keeps its scroll
+     box and its head scrolls with it, exactly as before — reachable beats
+     pinned. Re-read on resize, because that is what changes the answer. */
+  var STICKRO = typeof ResizeObserver === "function" ? new ResizeObserver(function(){ stickPublish(); }) : null;
+  function stickNodes(){
+    return {
+      strip: document.querySelector("#panel .split:not(.setupsplit) > .rail:not(.setuprail)"),
+      band: document.querySelector("#panel .pane > .pband, #panel .pane > .ptitle.edhead")
+    };
+  }
+  function stickPublish(){
+    var n = stickNodes(), st = document.documentElement.style;
+    st.setProperty("--strip-h", (n.strip ? n.strip.offsetHeight : 0) + "px");
+    st.setProperty("--band-h", (n.band ? n.band.offsetHeight : 0) + "px");
+    fitPaint();
+  }
+  function fitPaint(){
+    /* BOTH boxes round a table: the renderer's `.scroll` and the `.tblscroll`
+       §151 wraps every table in after the paint — a head pins to the window
+       only once neither is a scroll box. */
+    Array.prototype.forEach.call(document.querySelectorAll("#panel .pane:not(.setuppane) .scroll, #panel .pane:not(.setuppane) .tblscroll"), function(b){
+      /* a confirmation's own list (`.rmconfirm`) pins its head to its box on
+         purpose; the tactic panel (§773) is a pinned box that scrolls inside
+         itself, so a head pinned to the window would float mid-list — Islam:
+         "the outcome and target title is floating" (§775.3). */
+      if (b.closest(".rmconfirm, .tacpanel")) { b.classList.remove("fits"); return; }
+      b.classList.toggle("fits", b.scrollWidth <= b.clientWidth + 1);
+    });
+  }
+  var FITSOON = 0;
+  function fitSoon(){
+    if (FITSOON || typeof requestAnimationFrame !== "function") return;
+    FITSOON = requestAnimationFrame(function(){ FITSOON = 0; fitPaint(); });
+  }
+  var STICKARMED = false;
+  function stickWatch(){
+    if (STICKRO) {
+      STICKRO.disconnect();
+      var n = stickNodes();
+      if (n.strip) STICKRO.observe(n.strip);
+      if (n.band) STICKRO.observe(n.band);
+    }
+    stickPublish();
+    if (STICKARMED || typeof window === "undefined") return;
+    STICKARMED = true;
+    window.addEventListener("resize", fitSoon, { passive: true });
   }
   /* ── AND A WINDOW THAT CHANGES SIZE HAS TO REACH THE FOLD (§267) ─────
      `tailFolds()` is read while the plan table is being BUILT, because what
@@ -82153,9 +84391,10 @@ var SYNC = (function () {
       }
       return;
     }
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu],[data-railopts]");
     if (btn) {
       MENURETURN = btn.dataset.pmenu ? '[data-pmenu="' + btn.dataset.pmenu + '"]'
+                : btn.dataset.railopts ? '[data-railopts="' + btn.dataset.railopts + '"]'
                 : btn.hasAttribute("data-colmenu") ? "[data-colmenu]" : "[data-pwmenu]";
     }
     /* Only when the menu has just appeared under the keyboard — a mouse user
@@ -82834,7 +85073,11 @@ var SYNC = (function () {
            handles on (§63.3), it would have carried the handles onto
            Performance with no control there to turn them off. */
         if (currentSub !== b.dataset.s) leaveModes();
-        currentSub = b.dataset.s; paint(); window.scrollTo(0,0);
+        currentSub = b.dataset.s;
+        /* §782 — Builder and Advisory are the one Copilot tab, each opening its own part of it */
+        if (b.dataset.copTo === "advisory") CURSEC.copilot = "advisory";
+        else if (b.dataset.copTo === "build" && CURSEC.copilot === "advisory") CURSEC.copilot = COP_LASTBUILD || "foundation";
+        paint(); window.scrollTo(0,0);
       });
     });
     document.querySelectorAll("[data-sub2]").forEach(function(b){
@@ -83272,6 +85515,12 @@ var SYNC = (function () {
         setFocusOn(this.dataset.focusswitch === "1"); paint();
       });
     });
+    /* §759: the Weighting page's switch, the same pair and the same shape. */
+    document.querySelectorAll("[data-weightswitch]").forEach(function(wsw){
+      wsw.addEventListener("click", function(){
+        setWeightingOn(this.dataset.weightswitch === "1"); paint();
+      });
+    });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
@@ -83464,10 +85713,28 @@ var SYNC = (function () {
         setKoThisYear(!SHOW_KO_THIS_YEAR); paint();
       });
     });
+    /* §771: the button opens the rail's options; the terse switch is a tick
+       inside it, and so are the years to show. The menu's state is the rail
+       key, so two rails on one page (§556's reporting halves) open one each.
+       The years are a moment's choice in memory; terse stays in localStorage. */
+    document.querySelectorAll("[data-railopts]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        RAILMENU = RAILMENU === b.dataset.railopts ? null : b.dataset.railopts;
+        paint();
+      });
+    });
     document.querySelectorAll("[data-railterse]").forEach(function(b){
-      b.addEventListener("click", function(){
-        RAIL_TERSE = !RAIL_TERSE;
+      b.addEventListener("change", function(){
+        RAIL_TERSE = !b.checked;
         try { localStorage.setItem("smp.rail.terse", RAIL_TERSE ? "1" : "0"); } catch(e){}
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-railyear]").forEach(function(b){
+      b.addEventListener("change", function(){
+        var p = b.dataset.railyear.split("|");
+        railYearSet(p[0], +p[1], b.checked);
         paint();
       });
     });
@@ -86146,17 +88413,12 @@ var SYNC = (function () {
        menus keep with a single PMENU key. */
     document.querySelectorAll("[data-filemenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PFILEMENU = !PFILEMENU; PCOLMENU = false; PWMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-colmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation(); PCOLMENU = !PCOLMENU; PWMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PFILEMENU = !PFILEMENU; TABLECOLS.shut(); PWMENU = false; paint();
       });
     });
     document.querySelectorAll("[data-pwmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PWMENU = !PWMENU; TABLECOLS.shut(); PFILEMENU = false; paint();
       });
     });
     /* §629: the Forefront switch. Kept on this device, repainted in place;
@@ -86167,22 +88429,8 @@ var SYNC = (function () {
         e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
       });
     });
-    /* A tick repaints the table but MUST NOT close the menu — you come here to
-       set several columns, and a chooser that shuts after each one is a chooser
-       you reopen six times. */
-    document.querySelectorAll("[data-col]").forEach(function(b){
-      b.addEventListener("change", function(e){
-        e.stopPropagation(); setPeopleCol(b.dataset.col, b.checked); paint();
-      });
-    });
-    document.querySelectorAll("[data-colall],[data-colnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-colall");
-        PEOPLE_COLS.forEach(function(c){ setPeopleCol(c.k, on); });
-        paint();
-      });
-    });
+    /* The Columns menu — a tick that keeps it open, All, None, the row height
+       and Reset — is tablecols.js's, bound once on the document (§754). */
     /* Edit the whole page, cursor in this person's name. The focus is applied
        AFTER the repaint that creates the input — focusing a node the paint is
        about to replace focuses nothing. */
@@ -86544,26 +88792,6 @@ var SYNC = (function () {
         e.stopPropagation();
         var bits = b.dataset.rowdlg.split("|");
         openRowDialog(bits[0], bits.slice(1).join("|"));
-      });
-    });
-    document.querySelectorAll("[data-fncolmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        FNCOLMENU = !FNCOLMENU; PCOLMENU = false; PWMENU = false; PFILEMENU = false;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fncol]").forEach(function(b){
-      b.addEventListener("change", function(){ setFnCol(this.dataset.fncol, this.checked); paint(); });
-    });
-    /* stopPropagation, or the document click-away above closes the panel
-       before the paint that would show the boxes changing (§47.2). */
-    document.querySelectorAll("[data-fncolall],[data-fncolnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-fncolall");
-        FN_COLS.forEach(function(c){ setFnCol(c.k, on); });
-        paint();
       });
     });
     /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
@@ -87964,7 +90192,8 @@ var SYNC = (function () {
              screen, written nowhere (§50.6's fault through a fresh door). */
           var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
-          if (what === "measure") addMeasure(it); else addTactic(it);
+          if (what === "measure") addMeasure(it);
+          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §773: the new one opens in the panel */
         }
         else if (what === "project") {
           /* §326: holderByIdWritable, not capById — a project may be added to
@@ -88120,12 +90349,65 @@ var SYNC = (function () {
       b.addEventListener("click", gapWalk);
     });
 
+    /* §774 read the banner's height here for the panel to pin under; main's
+       §771 (stickWatch) publishes `--band-h` for the table heads, so the
+       panel reads that one and this measurement is gone — one writer. */
+    /* §773: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
+    document.querySelectorAll("[data-tacopen]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        if (b.tagName === "TR" && e.target.closest("select, input, textarea, button, a, .grip, .ssbtn, label, .eyebtn, .xbtn, .rm, [data-rowoff], [data-hiderow], [data-rmrow], [data-rmout], [data-outadd]")) return;
+        if (String(PEN_TACTIC) === b.dataset.tacopen && b.tagName === "TR") return;
+        PEN_TACTIC = b.dataset.tacopen; paint();
+      });
+    });
+    /* §775: THE PANEL FOLLOWS THE ROW YOU WORK IN. The focus landing in a box
+       of another tactic's row moves the panel there — a paint, since the panel
+       is drawn by the page — and the focus is put back in the same box of the
+       same row afterwards, so typing goes on where it was. Buttons and the
+       pickers' own buttons are left out: a press on them is a click that a
+       paint under the pointer would swallow. */
+    /* ONLY A PRESS OR A TAB COUNTS. A paint puts the focus back in the box
+       that had it (§35), and that is a focusin too — measured: the panel's ↓
+       and Add a tactic each painted, the focus went back to the row being
+       typed in, and the panel sprang back to it. So the row is followed only
+       within a moment of a mousedown or a Tab, which is what a person moving
+       to another row does and a paint never does. */
+    if (!window.__penFollowWired) {
+      window.__penFollowWired = true; window.__penFollowAt = 0;
+      document.addEventListener("mousedown", function(){ window.__penFollowAt = Date.now(); }, true);
+      document.addEventListener("keydown", function(e){ if (e.key === "Tab") window.__penFollowAt = Date.now(); }, true);
+    }
+    document.querySelectorAll(".penlist tr[data-tacrow]").forEach(function(tr){
+      tr.addEventListener("focusin", function(e){
+        var f = e.target;
+        if (!f || !f.matches || !f.matches("input, textarea, select")) return;
+        if (String(PEN_TACTIC) === tr.dataset.tacrow) return;
+        if (Date.now() - (window.__penFollowAt || 0) > 150) return;   /* a press or a Tab lands its focus at once; a paint comes later */
+        var cell = f.closest("td"); if (!cell) return;
+        var cells = Array.prototype.slice.call(tr.children), ci = cells.indexOf(cell);
+        var ctrls = Array.prototype.slice.call(cell.querySelectorAll("input, textarea, select")), ki = ctrls.indexOf(f);
+        var id = tr.dataset.tacrow;
+        PEN_TACTIC = id; paint();
+        requestAnimationFrame(function(){
+          var row = document.querySelector('.penlist tr[data-tacrow="' + id.replace(/"/g, '\\"') + '"]');
+          var c2 = row && row.children[ci], k2 = c2 && c2.querySelectorAll("input, textarea, select")[ki];
+          if (!k2) return;
+          k2.focus({ preventScroll: true });
+          try { if (k2.setSelectionRange && k2.type !== "number") { var L = k2.value.length; k2.setSelectionRange(L, L); } } catch (x) {}
+        });
+      });
+    });
+    document.querySelectorAll("[data-tacclose]").forEach(function(b){
+      b.addEventListener("click", function(){ PEN_TACTIC = false; paint(); });
+    });
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
         var arr = listById(list, id);
         removeRowById(arr, id);
+        /* §767: a measure taken away is forgotten by the tactics that named it. */
+        if (list === "measures") forgetSupport(id);
         /* §343: and a breakdown with nothing left in it stops being one
            (§50.6) — a pillar that never had one and a pillar that had one
            removed must be byte-identical, or every save carries a change
@@ -88154,6 +90436,17 @@ var SYNC = (function () {
           var box = f && f.parentNode.querySelector("textarea, input");
           if (box) box.focus();
         }, 0);
+      });
+    });
+    /* §775.1: an outcome's ringed × in the row asks before it goes — the first
+       outcome included (Islam: "why am I able to remove the new outcome but not
+       the old one?"); when the first goes, the next moves up into its place. */
+    document.querySelectorAll("[data-rmout]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rmout.split("|");
+        confirmRemoveOutcome(a[0], a[1]);
       });
     });
     document.querySelectorAll("[data-outoff]").forEach(function(b){
@@ -88218,6 +90511,7 @@ var SYNC = (function () {
         if (!mayEditPlan()) return;
         var a = this.dataset.rmrow.split("|");
         if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
+        else if (a[0] === "tactic") confirmRemoveTactic(a[1], a[2]);   /* §775.1 */
         else confirmRemoveProject(a[1]);
       });
     });
@@ -90611,6 +92905,70 @@ var SYNC = (function () {
     if (RAIL[key]) delete RAIL[key];
     paint();
   }
+  /* §775.1: A TACTIC ASKS BEFORE IT GOES, the pillar's own way: what it holds,
+     what was reported against it, the archive taken first. Islam: *"the
+     removal of a tactic or outcome should prompt me with a message"*. */
+  function confirmRemoveTactic(ukey, id){
+    var u = unitLikeWritable(ukey), t = null;
+    (u && u.items || []).forEach(function(p){ (p.tactics || []).forEach(function(x){ if (x && x.id === id) t = x; }); });
+    if (!t) return;
+    var word = L1("tactic"), nOut = (t.outcome || t.outTarget ? 1 : 0) + tacticExtras(t).length;
+    var rep = (t.actual != null && t.actual !== "") || (t.outActual != null && t.outActual !== "") ? 1 : 0;
+    rmConfirmOpen("Remove this " + word + "?", t.name || "Untitled",
+      '<b>' + esc(t.name || "This " + word) + '</b>' + (nOut ? ' holds ' + plural(nOut, detailWord("outcomes", "one", t), detailWord("outcomes", "many", t)) : ' holds no outcome yet') + '.',
+      rep, boxRef(ukey).kind === "fn" ? "the function's scores" : "the unit's scores", "Remove the " + word,
+      function(){
+        var u2 = unitLikeWritable(ukey);
+        if (!u2) return;
+        var p2 = null;
+        (u2.items || []).forEach(function(p){ if ((p.tactics || []).some(function(x){ return x && x.id === id; })) p2 = p; });
+        if (!p2) return;
+        archiveUnitPlan(u2, "before " + (t.name || "a " + word.toLowerCase()) + " was removed");
+        removeRowById(p2.tactics, id);
+        if (String(PEN_TACTIC) === String(id)) PEN_TACTIC = null;   /* the pen opens on the first again */
+        paint();
+      });
+  }
+  /* The outcome: its name and target go; its figure with them. The FIRST
+     outcome is the tactic's own fields (§248) and the extras a list (§414),
+     so removing the first moves the first extra up into its place, figure
+     and all, and removing the last extra deletes the lists (§50.6). */
+  function confirmRemoveOutcome(tid, oid){
+    var t = hideableById(tid);
+    if (!t) return;
+    var isFirst = oid === "first";
+    var x = isFirst ? null : (t.outs || []).filter(function(o){ return o && o.id === oid; })[0];
+    if (!isFirst && !x) return;
+    var name = isFirst ? t.outcome : x.outcome, word = detailWord("outcomes", "one", t);
+    var rep = isFirst ? ((t.outActual != null && t.outActual !== "") ? 1 : 0)
+                      : ((t.outActs && t.outActs[oid] != null && t.outActs[oid] !== "") ? 1 : 0);
+    rmConfirmOpen("Remove this " + word.toLowerCase() + "?", name || "Unnamed",
+      '<b>' + esc(name || "This " + word.toLowerCase()) + '</b> and its target go with it.',
+      rep, "the unit's scores", "Remove the " + word.toLowerCase(),
+      function(){
+        var t2 = hideableById(tid); if (!t2) return;
+        if (isFirst) {
+          var ex = Array.isArray(t2.outs) ? t2.outs : [];
+          ["outcome", "outDir", "outTarget", "outCompile", "outActual", "outMonthly", "outQuarterly"].forEach(function(k){ delete t2[k]; });
+          if (ex.length) {
+            var up = ex[0];
+            if (up.outcome) t2.outcome = up.outcome;
+            if (up.outDir) t2.outDir = up.outDir;
+            if (up.outTarget) t2.outTarget = up.outTarget;
+            if (up.outCompile) t2.outCompile = up.outCompile;
+            if (t2.outActs && t2.outActs[up.id] != null && t2.outActs[up.id] !== "") t2.outActual = t2.outActs[up.id];
+            setExtraFigure(t2, up.id, "");
+            t2.outs = ex.slice(1);
+            if (!t2.outs.length) delete t2.outs;
+          }
+        } else {
+          t2.outs = t2.outs.filter(function(o){ return o.id !== oid; });
+          if (!t2.outs.length) delete t2.outs;
+          setExtraFigure(t2, oid, "");
+        }
+        paint();
+      });
+  }
   function confirmRemovePillar(ukey, id){
     var u = unitLikeWritable(ukey);
     var it = u && (u.items || []).filter(function(x){ return x && x.id === id; })[0];
@@ -90863,11 +93221,16 @@ var SYNC = (function () {
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU) &&
+    if (typeof PWMENU !== "undefined" &&
+        (PWMENU || PFILEMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+      PWMENU = false; PFILEMENU = false;
       paint();
+    }
+    /* §771: the rail's options menu closes on a click anywhere outside it. */
+    if (typeof RAILMENU !== "undefined" && RAILMENU !== null &&
+        !(e.target.closest && e.target.closest(".railopts"))) {
+      RAILMENU = null; paint();
     }
   });
   document.addEventListener("keydown", function(e){
@@ -90876,11 +93239,12 @@ var SYNC = (function () {
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
     if (typeof UMENU !== "undefined" && UMENU !== null) { UMENU = null; paint(); }
     if (typeof COMENU !== "undefined" && COMENU !== null) { COMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+    if (typeof PWMENU !== "undefined" &&
+        (PWMENU || PFILEMENU)) {
+      PWMENU = false; PFILEMENU = false;
       paint();
     }
+    if (typeof RAILMENU !== "undefined" && RAILMENU !== null) { RAILMENU = null; paint(); }
   });
 
   /* The switcher lists the people the platform actually has. It was filled

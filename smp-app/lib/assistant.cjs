@@ -529,6 +529,9 @@ async function callClaude(opts) {
     if (p && p.inlineData && p.inlineData.mimeType === "application/pdf") {
       last.push({ type: "document",
                   source: { type: "base64", media_type: "application/pdf", data: p.inlineData.data } });
+    } else if (p && p.inlineData && /^image\/(png|jpeg|webp|gif)$/.test(String(p.inlineData.mimeType))) {
+      /* §780 — a picture goes to Claude as an image, the same place as a PDF */
+      last.push({ type: "image", source: { type: "base64", media_type: p.inlineData.mimeType, data: p.inlineData.data } });
     } else if (p && p.text) {
       last.push({ type: "text", text: String(p.text) });
     }

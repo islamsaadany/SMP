@@ -28,9 +28,10 @@ import {
   NO_KEY, failedLine, recordSaid, materialOf, recordAnswer, assumptionsOf,
   attachFile, detachFile, pendingFiles, pendingCount, fileBytes, oneMessage, copilotGrant, storedCopilotGrant,
   saveDraftFrom, latestDraftId, isSaveAsk, isBareEnhance, claimsDraft, NO_DRAFT,
+  waitingFiles, takeFiles, waitingWords,
 } from "../../lib/copilot.ts";
-import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
-import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
+import { kindOf, mimeOf, asParts, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
+import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured, askPlanShape, PLAN_SCHEMAS } from "../../lib/copilot-ask.ts";
 import {
   FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, addTalk, withQa, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
@@ -152,9 +153,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
       if (!UUID.test(id)) return no(400, "Which file?");
       const f = await withTenant(a.tenantId, (c) => fileBytes(c, id));
       if (!f) return no(404, "That file is not here any more.");
-      const type = f.kind === "pdf" ? "application/pdf"
-        : f.kind === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      const type = mimeOf(String(f.kind));
       return new Response(new Uint8Array(f.bytes), { status: 200, headers: {
         "Content-Type": type, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
         "Content-Disposition": "attachment; filename*=UTF-8''" + encodeURIComponent(f.name) } });
@@ -175,6 +174,10 @@ export async function serve(a: ServeArgs): Promise<Response> {
     if (!body || typeof body !== "object") return no(400, "Nothing arrived.");
     if (body.act === "say") {
       const r = await sayFlow(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (body.act === "planShape") {
+      const r = await planShapeFlow(a.tenantId, body, who);
       return json(r.status, r.body);
     }
     if (body.act === "flowDraft" || body.act === "flowRefine" || body.act === "flowCheck") {
@@ -490,6 +493,37 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
    chat's section first, so a long plan loses the far sections and never the
    one being asked about. A whole unit's plan is ~8,000 characters. */
 const MAX_CONTEXT = 24_000;
+/* §788 — AN OLDER DRAFT LAYS ITSELF OUT, ONCE (Islam: "isn't that a view
+   change? why are we adding a feature for an exceptional case?"). A draft
+   made before the plan's shape (§784), in one of the five parts, is laid out
+   by the same small ask a new one gets (§786) when its panel first shows it,
+   and the shape is kept on the message — or `planTried`, so a draft that
+   cannot be laid out is not asked for again. Nothing is said in the chat. A
+   draft already saved as text is saved again, as its part, from here on: its
+   `saved` mark goes, so Save and Put on the plan make the part's deliverable. */
+async function planShapeFlow(tenantId: string, b: any, _who: Who): Promise<Out> {
+  const id = String(b.id || ""), mid = String(b.messageId || "").replace(/\D/g, "") || "0";
+  if (!UUID.test(id)) return refused(400, "Which chat?");
+  const got = await withTenant(tenantId, async (c) => {
+    const chat = await oneChat(c, id); if (!chat) return null;
+    const m = await oneMessage(c, id, mid); const p: any = m && m.part;
+    if (!m || m.who !== "ai" || !p || p.kind !== "answer" || !p.draft || p.plan || p.planTried) return { chat, skip: true as const };
+    return { chat, p, skip: false as const };
+  });
+  if (!got) return refused(404, "That chat is not here any more.");
+  if (got.skip || !got.chat.free || !PLAN_SCHEMAS[got.chat.section] || !configured()) return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)) });
+  const plan = await askPlanShape({ section: got.chat.section, place: got.chat.place, placeWord: oneLine(b.placeWord).slice(0, 120), context: String(b.context ?? "").slice(0, MAX_CONTEXT),
+    question: "", pasted: false, history: [], assumptions: [], files: [] }, got.p.draft);
+  return withTenant(tenantId, async (c) => {
+    const patch: any = plan ? { plan } : { planTried: true };
+    if (plan && got.p.saved && got.p.saved.deliverableId) {
+      const d = await c.query("SELECT type FROM copilot_deliverables WHERE id = $1", [got.p.saved.deliverableId]);
+      if (d.rows[0] && d.rows[0].type === "free") patch.saved = null;
+    }
+    await c.query("UPDATE copilot_messages SET part = part || $3::jsonb WHERE chat_id = $1 AND id = $2", [id, mid, JSON.stringify(patch)]);
+    return out(200, { ok: true, laid: !!plan, messages: await messagesOf(c, id) });
+  });
+}
 async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   const id = String(b.id || "");
   if (!UUID.test(id)) return refused(400, "Which chat?");
@@ -507,6 +541,12 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
     if (chat.archived) return "archived" as const;
     const said = await recordSaid(c, id, { body: text, by, fileIds, pasted });
     if (said === "badFile") return "badFile" as const;
+    /* §782 — a free chat is named for what it is about, from its first words, never "Free chat" (Islam) */
+    if (chat.free && /^(Free|New) chat\b/.test(chat.title) && text.trim()) {
+      const words = oneLine(text).replace(/^(hi|hello|please|can you|could you)\b[,!. ]*/i, "").split(" ").slice(0, 7).join(" ").replace(/[.,;:!?]+$/, "");
+      const place = chat.title.replace(/^(Free|New) chat\s*[—-]\s*/, "").trim();
+      if (words) { chat.title = (place ? place + " — " : "") + (words.charAt(0).toUpperCase() + words.slice(1)).slice(0, 70); await renameChat(c, id, chat.title); }
+    }
     return { chat, said, material: await materialOf(c, id, said.messageId) };
   });
   if (!step1) return refused(404, "That chat is not here any more.");
@@ -527,7 +567,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
         : "Saved: " + r.title + ", v" + r.n + ". It is on the left under Deliverables.";
       await recordAnswer(c, id, { body, part: { kind: "saved" } });
     });
-    return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
+    return out(200, { ok: true, title: step1.chat.title, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
       assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
   }
 
@@ -596,7 +636,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
       await recordAnswer(c, id, { body: failedLine(r.why), part: { kind: "failed" } });
     }
   });
-  return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
+  return out(200, { ok: true, title: step1.chat.title, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
     assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
 }
 
@@ -639,12 +679,15 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
 
   const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), "foundation").catch(() => "") : "";
   const question = kind === "flowDraft" ? draftQuestion(f, el) : kind === "flowRefine" ? refineQuestion(f, el, how) : checkQuestion(f);
+  /* §780 — a picture or file waiting above the box goes with this ask */
+  const pics = await withTenant(tenantId, (c) => waitingFiles(c, id));
   const r = await askFlowJson({ instruction: flowInstruction(method), corpus: flowCorpus(f, placeWord || chat.place, context, kind === "flowCheck" ? undefined : el),
-    question, schema: kind === "flowCheck" ? CHECK_SCHEMA : TEXT_SCHEMA });
+    parts: asParts(pics), question: question + waitingWords(pics), schema: kind === "flowCheck" ? CHECK_SCHEMA : TEXT_SCHEMA });
   if (!r.ok) {
     if (!(r as any).noKey) console.error("copilot: flow ask:", r.why);
     return refused(503, (r as any).noKey ? NO_KEY : failedLine(r.why));
-  }
+  }  if (pics.length) await withTenant(tenantId, (c) => takeFiles(c, id, pics.map((f) => f.id)));
+
   if (kind === "flowCheck") {
     const j = r.json || {};
     const agree = (Array.isArray(j.agree) ? j.agree : []).map((x: unknown) => oneLine(x).slice(0, 400)).filter(Boolean).slice(0, 8);

@@ -31,7 +31,9 @@ const RULES = path.join(process.cwd(), "lib", "rules.cjs");
    two files, and the set-up flow must call the PRODUCT'S, never a second
    copy of what a unit or a function is shaped like (§53.5). Proved to
    evaluate in this context before it was relied on, not assumed. */
-const FILES = ["group-data.js", "config-data.js", "group-render.js", "config-render.js",
+/* §772 (carried for main's §754) — config-render.js defines its tables through
+   TABLECOLS at load, so tablecols.js loads before it, as the page's build has it. */
+const FILES = ["group-data.js", "config-data.js", "group-render.js", "tablecols.js", "config-render.js",
                "builder.js", "client-setup.js"];
 
 /* sync.js's hydrate(), line for line, plus the landing's own builder — ES5,

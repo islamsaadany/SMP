@@ -677,7 +677,44 @@
    (option D), and the console's loading shape is the console as it is. */
 /* v7.27-held-says-why — §649: a Copilot button that cannot be pressed is
    held, never disabled, and says why in the platform's bubble. */
-const SHELL = "smp-shell-v7.68-motion";
+/* v7.74-tactic-supports — §767: a tactic names the key measures it
+   supports, by number; the built platform file changed. */
+/* v7.75-weighting-off — §768: the weighting is off for every client;
+   the built platform file changed. */
+/* v7.77-measures-dropdown — §767–§767.2: a tactic names the key measures
+   it supports, by number; past main's v7.75 at the merge. */
+/* v7.78-weighting-default-off — §769: the weighting stays in Setup, off by
+   default; past main's v7.77 at the merge. */
+/* v7.79-weighting-in-strategy-setup — §770: Setup › Weighting under
+   Measurement. */
+/* v7.80-strip-years — §771: the rail's button is an options menu that can
+   hide years, and the band and the table heads pin under the strip; the
+   built platform file changed. */
+/* v7.84-table-and-panel — §773–§775: the tactic panel, the page contained,
+   the main fields in the table; past main's v7.80 at the merge. */
+/* v7.85-open-row-tinted — §775.2: the open row is tinted whole, one bar. */
+/* v7.86-panel-head-and-rail-menu — §775.3: the panel head stays in its flow, the rail menu shows whole. */
+/* v7.87-welcome-asked-for — §776: the welcome no longer opens on its own; the house mark opens it. */
+/* v7.81-builder-refine — main's §772: Builder until the five parts are on the plan, then Refine. */
+/* v7.88-merged-main — §773–§776.1 merged over main's §772; past main's v7.81. */
+/* v7.89-build-strip — §777: Build · Refine, no All chats link, the strip over the chat box; past main's v7.88. */
+/* v7.90-start-from-existing — §778: Start from existing; the plan's Copilot panel expands and minimizes. */
+/* v7.91-build-only — §779: Build only, read off the plan; Details on the right; the plan panel sends an empty part to Build and is resized from its edge. */
+/* v7.92-pictures — §780: pictures in the Copilot (paste, drop, attach), read by the model as themselves; Details stay on the right on a smaller window and fold. */
+/* v7.93-working-left — §781: the working word stands at the left of the conversation. */
+/* v7.94-builder-advisory — §782: one-line chat header; the stepper line; Builder and Advisory at the far right of the tabs. */
+/* v7.95-details-toggle — §783: the deliverables column's hide button in its own header. */
+/* v7.96-put-on-plan — §784: a chat's work laid out as the plan, and put on it. */
+/* v7.97-all-parts — §785: every part laid out as the plan and put on it; rename from the header; an older draft laid out for the plan. */
+/* v7.98-plan-shape-ask — §786: the plan's shape asked on its own; free chats answer on Claude again. */
+/* v7.99-draft-lays-out — §788: an older draft lays itself out as the plan; no button. */
+/* v8.00-reading-print — §789: the whole strategy on paper from the reading window, the office's alone. */
+/* v8.01-build-advise-refine — §790: ✦ Build, ✦ Advise and ✦ Refine, one family. */
+/* v8.02-refine-compete — §791: ✦ Refine opens on the Competitive Discipline tab as on the SWOT. */
+/* v8.03-bar-narrow — §792: the top bar on a narrowed window; the Refine panel sits under the chrome. */
+/* v8.04-link-optional — §794: a key measure no tactic names carries no red line; past main's v8.03 at the merge. */
+/* v8.05-swot-fold — §795: a SWOT line's points fold under its title; Expand all / Collapse all. */
+const SHELL = "smp-shell-v8.05-swot-fold";
 const ASSETS = [
   "/",
   "/index.html",

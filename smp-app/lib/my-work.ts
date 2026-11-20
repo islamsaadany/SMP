@@ -219,8 +219,8 @@ export async function writeUps(c: { query: PoolClient["query"] }, userId: string
 export type WorkWrite = { ok: true; row: WorkRow } | { ok: false; status: number; why: string };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function setWorkStatus(t: Client, who: Who, id: string, status: unknown, now: Date = new Date()): Promise<WorkWrite> {
-  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Internal Tracker." };
-  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "The Internal Tracker is the office's." };
+  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Task Tracker." };
+  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "The Task Tracker is the office's." };
   if (!isStatus(status)) return { ok: false, status: 400, why: "Not a status this list knows." };
   const gone: WorkWrite = { ok: false, status: 404, why: "That action is not on this client's list any more." };
   if (!UUID.test(id)) return gone;
@@ -257,8 +257,8 @@ export type WorkDetail = { ok: true; detail: {
   weeks: { day: string; word: string; days: string; on: boolean }[];
 } } | { ok: false; status: number; why: string };
 function gate(t: Client, who: Who): { ok: false; status: number; why: string } | null {
-  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Internal Tracker." };
-  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "The Internal Tracker is the office's." };
+  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Task Tracker." };
+  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "The Task Tracker is the office's." };
   return null;
 }
 const GONE = { ok: false as const, status: 404, why: "That action is not on this client's list any more." };
@@ -410,8 +410,8 @@ export async function addFactsOn(t: Client, who: Who): Promise<AddFacts | null> 
   } catch (e) { console.error("addFacts", t.key, e); return null; }
 }
 export async function workAdd(t: Client, who: Who, body: Record<string, unknown>, now: Date = new Date()): Promise<{ ok: true; id: string } | { ok: false; status: number; why: string }> {
-  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Internal Tracker." };
-  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "Only the office adds to a client's Internal Tracker." };
+  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Task Tracker." };
+  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "Only the office adds to a client's Task Tracker." };
   const title = oneLine(body.title);
   if (!title) return { ok: false, status: 400, why: "A task needs a few words." };
   const today = todayIn(now);

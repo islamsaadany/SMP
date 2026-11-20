@@ -88,6 +88,7 @@ var TRAIL = (function(){
                 outTarget:"Outcome target", outcome:"Outcome", note:"Note", pct:"% complete",
                 status:"Status", compile:"Compile rule", dir:"Direction", quarters:"Quarters",
                 owner:"Owner", collaborators:"Collaborators", name:"Name", description:"Description",
+                supports:"Key measures supported",
                 weight:"Weight", finish:"Due date", start:"Start", end:"End", def:"Definition",
                 aspiration:"Aspiration", progress:"Progress", measureAt:"Measure date",
                 horizon:"Horizon", kind:"Measured as", hide:"Hidden", endInMind:"End in mind",

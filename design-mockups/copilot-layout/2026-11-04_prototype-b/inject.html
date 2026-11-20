@@ -1,0 +1,141 @@
+<style id="copB-style">
+/* PROTOTYPE B — the Copilot on the plan. Injected into a copy of the real platform build. */
+.copB-btn{display:inline-flex;align-items:center;gap:6px;margin-right:8px;border:1px solid var(--gold,#8A6720);background:var(--surface,#fff);color:var(--gold-deep,#6B4F14);border-radius:16px;padding:4px 12px;font:600 12.5px/1.2 var(--sans,"Source Sans 3",sans-serif);cursor:pointer}
+.copB-btn:hover{background:color-mix(in srgb,var(--goldfill,#C9A24D) 12%,var(--surface,#fff))}
+.copB-btn[aria-pressed="true"]{background:var(--panel,#16325C);color:#fff;border-color:var(--panel,#16325C)}
+body.copB-open #mainwrap{margin-right:480px;transition:margin-right .18s}
+#copB{position:fixed;right:0;bottom:0;width:470px;z-index:40;display:none;flex-direction:column;background:var(--surface,#fff);border-left:1px solid var(--line,#D6DCE5);box-shadow:-6px 0 18px rgba(16,24,40,.08);font:14px/1.45 var(--sans,"Source Sans 3",sans-serif);color:var(--ink,#171B22)}
+body.copB-open #copB{display:flex}
+#copB .h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line,#D6DCE5)}
+#copB .h b{font-size:14px}
+#copB .h small{color:var(--ink-3,#636C79)}
+#copB .h .sp{flex:1}
+#copB .x{border:0;background:none;font-size:20px;line-height:1;color:var(--ink-3,#636C79);cursor:pointer}
+#copB .hist{font-size:12px;color:var(--ink-3,#636C79);padding:6px 12px;border-bottom:1px solid var(--line,#D6DCE5);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+#copB .hist button{border:1px solid var(--line,#D6DCE5);background:var(--surface,#fff);border-radius:12px;padding:0 8px;font-size:11.5px;cursor:pointer;color:var(--ink-2,#414A58)}
+#copB .msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+#copB .who{font-size:11px;color:var(--ink-3,#636C79);margin-bottom:2px}
+#copB .ai{border-left:3px solid var(--goldfill,#C9A24D);padding:2px 10px;font-size:13.5px}
+#copB .me{align-self:flex-end;max-width:85%;background:var(--surface-2,#EFF2F6);border:1px solid var(--line,#D6DCE5);border-radius:8px;padding:5px 10px;font-size:13.5px}
+#copB .qs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#copB .q{border:1px solid var(--line,#D6DCE5);background:var(--surface,#fff);border-radius:14px;padding:3px 11px;font:600 12.5px/1.3 inherit;cursor:pointer;color:var(--ink,#171B22)}
+#copB .q.rec{background:var(--panel,#16325C);color:#fff;border-color:var(--panel,#16325C)}
+#copB .diff{margin-top:6px;font-size:12.5px;border:1px solid var(--line,#D6DCE5);border-radius:6px;padding:6px 8px;background:var(--surface-2,#F6F8FA)}
+#copB .diff div{margin:2px 0}
+#copB .add{color:#2E6B45;font-weight:600}
+#copB .del{color:#A23B2B;text-decoration:line-through}
+#copB .chg{color:#B45309;font-weight:600}
+#copB .apply{display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px;border:1px solid var(--goldfill,#C9A24D);border-radius:8px;background:color-mix(in srgb,var(--goldfill,#C9A24D) 8%,var(--surface,#fff));font-size:12.5px}
+#copB .apply .sp{flex:1}
+#copB .apply button{border:0;background:var(--panel,#16325C);color:#fff;border-radius:6px;padding:4px 12px;font:600 12.5px/1.3 inherit;cursor:pointer}
+#copB .done{color:#2E6B45;font-weight:600}
+#copB .box{margin:8px 12px 12px;border:1px solid var(--line,#D6DCE5);border-radius:8px;padding:9px 10px;color:var(--ink-3,#636C79);font-size:13px}
+.copB-new{background:color-mix(in srgb,#2E6B45 12%,transparent)!important;box-shadow:inset 3px 0 0 #2E6B45}
+#copB-note{position:fixed;left:12px;bottom:12px;z-index:41;max-width:360px;background:#171B22;color:#fff;border-radius:8px;padding:8px 12px;font:12.5px/1.4 var(--sans,"Source Sans 3",sans-serif);box-shadow:0 4px 14px rgba(0,0,0,.2)}
+#copB-note b{color:#F2D38A}
+#copB-note button{margin-left:6px;border:0;background:none;color:#aaa;cursor:pointer}
+</style>
+<div id="copB" role="complementary" aria-label="Copilot"></div>
+<div id="copB-note"><b>Prototype B</b> on the real platform. Press <b>✦ Copilot</b> beside Edit, on SWOT or on Plan. The Copilot's answers are scripted; Apply changes this page only.<button onclick="this.parentNode.remove()" aria-label="Hide">×</button></div>
+<script>
+(function(){
+  var E = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); };
+  var ST = { open: false, ctx: "", step: {}, applied: {} };
+  function u(){ return (typeof UNITS !== "undefined" && typeof current !== "undefined") ? UNITS[current] : null; }
+  function sec(){ return (typeof CURSEC !== "undefined" && typeof currentSub !== "undefined") ? CURSEC[currentSub] : ""; }
+  function placeName(){ var x = u(); return x ? x.name : ""; }
+  function pillar(){ var s = document.querySelector("#mainwrap .split[data-gplace]"); var id = s ? String(s.getAttribute("data-gplace")).split("|")[1] : ""; var x = u(); return x && x.items ? x.items.filter(function(it){ return it.id === id; })[0] : null; }
+  var WORD = { found: "Foundation", swot: "SWOT", drivers: "Drivers", plan: "Plan" };
+  function label(){ var s = sec(); if (s === "plan") { var p = pillar(); return p ? "Tactical plan — " + p.name : "Pillars/Directions"; } return WORD[s] || "this part"; }
+  /* the button, beside Edit, re-added after every paint */
+  function addBtn(){
+    if (typeof currentSub === "undefined" || currentSub !== "strategy") return;
+    var tail = document.querySelector("#secrow-in .secttail") || document.getElementById("secrow-in"); if (!tail || tail.querySelector(".copB-btn")) return;
+    var b = document.createElement("button"); b.type = "button"; b.className = "copB-btn"; b.setAttribute("aria-pressed", String(ST.open));
+    b.innerHTML = "✦ Copilot"; b.title = "Work on this with the Copilot";
+    b.addEventListener("click", function(){ ST.open = !ST.open; document.body.classList.toggle("copB-open", ST.open); draw(); b.setAttribute("aria-pressed", String(ST.open)); });
+    tail.insertBefore(b, tail.firstChild);
+  }
+  function place(){
+    /* below the section row's buttons (Foundation · SWOT · … and Edit), so they stay pressable */
+    var bs = document.querySelectorAll("#secrow-in button, #secrow-in .secseg"), top = 0;
+    bs.forEach(function(x){ var r = x.getBoundingClientRect(); if (r.height) top = Math.max(top, r.bottom); });
+    /* the platform runs at a page zoom (0.8 on a wide window): the panel's own units are zoomed, the measure is not */
+    var z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    document.getElementById("copB").style.top = Math.max(60, Math.round(((top || 150) + 8) / z)) + "px";
+  }
+  function ai(h){ return '<div class="ai"><div class="who">Copilot</div>' + h + '</div>'; }
+  function me(t){ return '<div class="me">' + E(t) + '</div>'; }
+  function q(lbl, act, rec){ return '<button class="q' + (rec ? " rec" : "") + '" data-copb="' + act + '">' + E(lbl) + '</button>'; }
+  function convo(){
+    var s = sec(), k = s === "plan" ? "plan:" + ((pillar() || {}).id || "") : s, st = ST.step[k] || 0, x = u(), name = placeName();
+    if (s === "swot") {
+      var n = x ? ["s","w","o","t"].reduce(function(a, L){ return a + (x.swot[L] || []).length; }, 0) : 0;
+      var h = ai(E(name) + "’s SWOT has <b>" + n + " lines</b> on the plan. What would you like to do with it?" + (st === 0 ? '<div class="qs">' + q("Say what to change", "sw1", true) + q("Run a fresh SWOT, step by step", "nop") + '</div>' : ''));
+      if (st >= 1) h += me("Add grey-market pressure on devices as a threat, and widen the margin weakness to accessories") +
+        ai("Here is what changes — nothing on the plan moves until you apply it:<div class=\"diff\"><div><b>Weaknesses</b></div><div class=\"chg\">~ Low margin on devices → Low margin on devices and accessories</div><div style=\"margin-top:4px\"><b>Threats</b></div><div class=\"add\">+ Grey-market pressure on device prices</div></div>" +
+          (st === 1 ? '<div class="apply"><span>1 changed · 1 added</span><span class="sp"></span><button data-copb="sw2">Apply to plan</button></div><div class="qs">' + q("Change something", "nop") + '</div>' : ''));
+      if (st >= 2) h += ai('<span class="done">✓ On the plan</span> — marked on the left. Saved in the history as SWOT — ' + E(name) + ' v3.<div class="qs">' + q("Next: Plan — Pillars/Directions", "toplan", true) + '</div>');
+      return h;
+    }
+    if (s === "plan") {
+      var p = pillar(); if (!p) return ai("Pick a pillar on the left, and I’ll work on it with you.");
+      var h2 = ai("<b>" + E(((x && x.codePrefix) || "") + p.code + " · " + p.name) + "</b> has " + p.measures.length + " measures and " + p.tactics.length + " tactics on the plan. What would you like to do?" +
+        (st === 0 ? '<div class="qs">' + q("Strengthen this pillar’s tactical plan", "pl1", true) + q("Review all Pillars/Directions", "nop") + '</div>' : ''));
+      if (st >= 1) h2 += me("Strengthen this pillar’s tactical plan") +
+        ai("Refine what is there, keeping the " + p.tactics.length + " tactics, or build the tactical plan anew?" + (st === 1 ? '<div class="qs">' + q("Refine what is there", "pl2", true) + q("Build anew", "pl2") + '</div>' : ''));
+      if (st >= 2) h2 += me("Refine what is there") +
+        ai("From the plan and the SWOT, I’d add one measure and two tactics, for 2027:<div class=\"diff\"><div><b>Key measures</b></div><div class=\"add\">+ Orders with no manual touch · ≥ 80% · Latest</div><div style=\"margin-top:4px\"><b>Tactics</b></div><div class=\"add\">+ Automate order-to-cash exceptions · Ramy Behairy · Q1–Q2</div><div class=\"add\">+ Self-service merchant onboarding · Ashraf Laithy · Q2–Q3</div></div>" +
+          (st === 2 ? '<div class="apply"><span>1 measure · 2 tactics added</span><span class="sp"></span><button data-copb="pl3">Apply to plan</button></div><div class="qs">' + q("Change something", "nop") + '</div>' : ''));
+      if (st >= 3) h2 += ai('<span class="done">✓ On the plan</span> — the new rows are marked on the left. Saved in the history as Tactical Plans — ' + E(name) + ' v1.<div class="qs">' + q("Next pillar", "nextp", true) + '</div>');
+      return h2;
+    }
+    if (s === "found") return ai(E(name) + "’s Foundation is on the plan — purpose, aspiration, values. Refine one part, or review it all?<div class=\"qs\">" + q("Refine one part", "nop", true) + q("Review it all", "nop") + "</div>");
+    return ai("The Copilot works here too: say what you want to do with " + E(WORD[s] || "this part") + ".");
+  }
+  function histFor(){
+    var s = sec(), n = E(placeName());
+    if (s === "swot") return '<button>SWOT — ' + n + ' v2 · last week</button>';
+    if (s === "plan") return '<button>Pillars/Directions — ' + n + ' v1 · 3 weeks ago</button>' + (ST.step["plan:" + ((pillar() || {}).id || "")] >= 3 ? '<button>Tactical Plans — ' + n + ' v1 · just now</button>' : '');
+    if (s === "found") return '<button>Foundation — ' + n + ' v3 · last month</button>';
+    return '<span>none yet</span>';
+  }
+  function draw(){
+    var el = document.getElementById("copB"); if (!el) return; place();
+    if (!ST.open) { el.innerHTML = ""; return; }
+    el.innerHTML = '<div class="h"><div><b>✦ Copilot</b><br><small>' + E(label()) + ' · ' + E(placeName()) + '</small></div><span class="sp"></span><button class="x" data-copb="close" aria-label="Close">×</button></div>' +
+      '<div class="hist">History on this part: ' + histFor() + '<button>All chats</button></div>' +
+      '<div class="msgs">' + convo() + '</div><div class="box">Ask about ' + E(label()) + '…</div>';
+    var m = el.querySelector(".msgs"); m.scrollTop = m.scrollHeight;
+  }
+  function mark(texts){ setTimeout(function(){ document.querySelectorAll("#mainwrap li, #mainwrap tr, #mainwrap td").forEach(function(n){ var t = n.textContent || ""; if (texts.some(function(x){ return t.indexOf(x) >= 0; }) && (n.tagName === "LI" || n.tagName === "TR")) n.classList.add("copB-new"); }); }, 60); }
+  var MARKS = [];
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-copb]"); if (!b) return;
+    var a = b.getAttribute("data-copb"), s = sec(), k = s === "plan" ? "plan:" + ((pillar() || {}).id || "") : s, x = u();
+    if (a === "close") { ST.open = false; document.body.classList.remove("copB-open"); var bt = document.querySelector(".copB-btn"); if (bt) bt.setAttribute("aria-pressed", "false"); draw(); return; }
+    if (a === "sw1") ST.step[k] = 1;
+    if (a === "sw2" && x) { var w = x.swot.w, i = w.indexOf("Low margin on devices"); if (i >= 0) w[i] = "Low margin on devices and accessories"; x.swot.t.push("Grey-market pressure on device prices"); ST.step[k] = 2; MARKS = ["Low margin on devices and accessories", "Grey-market pressure on device prices"]; paint(); }
+    if (a === "toplan") { CURSEC.strategy = "plan"; paint(); }
+    if (a === "pl1") ST.step[k] = 1;
+    if (a === "pl2") ST.step[k] = 2;
+    if (a === "pl3") { var p = pillar(); if (p) {
+      var m1 = typeof addMeasure === "function" ? addMeasure(p) : null; if (m1) { m1.name = "Orders with no manual touch"; m1.dir = "≥"; m1.target = "80%"; m1.compile = "Latest"; }
+      [["Automate order-to-cash exceptions", "Ramy Behairy", [1,2], "Exceptions handled without a manual touch", "80 %"], ["Self-service merchant onboarding", "Ashraf Laithy", [2,3], "Merchants onboarding themselves in the app", "600 #"]].forEach(function(r){
+        var t = typeof addTactic === "function" ? addTactic(p) : null; if (!t) return; t.name = r[0]; t.owner = r[1]; [1,2,3,4].forEach(function(qq){ t["q" + qq] = r[2].indexOf(qq) >= 0 ? 1 : 0; }); t.outcome = r[3]; t.outTarget = r[4]; t.outCompile = "Latest"; });
+      ST.step[k] = 3; MARKS = ["Orders with no manual touch", "Automate order-to-cash exceptions", "Self-service merchant onboarding"]; paint(); } }
+    if (a === "nextp") { var x2 = u(), cur = pillar(); if (x2 && cur) { var ix = x2.items.indexOf(cur), nx = x2.items[(ix + 1) % x2.items.length]; var rb = document.querySelector('.ritem[data-urail="' + current + "|" + nx.id + '"]'); if (rb) rb.click(); } }
+    draw(); if (MARKS.length) mark(MARKS);
+  });
+  function boot(){
+    var mo = new MutationObserver(function(){ addBtn(); place(); if (ST.open) { draw(); if (MARKS.length) mark(MARKS); } });
+    var w = document.getElementById("mainwrap"), r = document.getElementById("secrow");
+    if (w) mo.observe(w, { childList: true }); if (r) mo.observe(r, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
+    window.addEventListener("resize", place);
+    /* open on Mobile's Strategy › Plan, the part most people work on */
+    try { var mb = Array.from(document.querySelectorAll("button")).filter(function(x){ return x.offsetParent && x.textContent.trim() === "Mobile"; })[0]; if (mb) mb.click(); } catch (e) {}
+    setTimeout(function(){ addBtn(); place(); }, 300);
+  }
+  if (document.readyState === "complete") setTimeout(boot, 800); else window.addEventListener("load", function(){ setTimeout(boot, 800); });
+})();
+</script>

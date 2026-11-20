@@ -31,7 +31,7 @@
 .copnone { padding:12px; color:var(--ink-3); font-size:var(--fs-small, 12.5px); }
 
 .copmain { min-width:0; background:var(--surface); border:1px solid var(--line);
-           border-radius:var(--r-sm, 6px); padding:16px 18px; min-height:320px; }
+           border-radius:var(--r-sm, 6px); padding:16px 18px; min-height:320px; --copmp-t:16px; --copmp-x:18px; }
 .copempty { color:var(--ink-3); font-size:var(--fs-note, 13.5px); padding:40px 4px; max-width:60ch; }
 .copempty b { display:block; color:var(--ink); font-size:15.5px; margin-bottom:6px; }
 .copsay { background:var(--surface-2); border-left:3px solid var(--gold); padding:8px 12px;
@@ -548,7 +548,7 @@ span.copsw-lb { cursor:default; }
   :root[data-cop-page] .coppane { grid-template-columns:200px minmax(0,1fr); gap:8px; padding:0; }
   :root[data-cop-page] .coppane.copshut { grid-template-columns:24px minmax(0,1fr); }
   .coppane .copnew { padding:4px 7px; white-space:nowrap; }
-  .coppane .copmain { padding:8px; }
+  .coppane .copmain { padding:8px; --copmp-t:8px; --copmp-x:8px; }
   .copflow { gap:8px; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 200px; }
   .copflow.nocards { grid-template-columns:minmax(0,1fr) 200px; }
   .copftodo { display:flex; flex-direction:column; gap:8px; min-width:0; min-height:0; overflow-y:auto; align-self:stretch; }
@@ -1040,3 +1040,224 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 /* §698 S14 — a draft that failed, named, in the chat */
 .copmsg.ai.copbad .copbody { border-left-color:var(--bad); }
 .copmsg.ai.copbad .copbody > b:first-child { color:var(--bad-tx); }
+
+/* §752 — THE COPILOT IN ONE WINDOW. The method as a strip above the pane,
+   each step saying where the place stands, the next one outlined; the
+   rail's area tags and filter chips; the start screen's focus line and the
+   other areas folded under its cards. */
+.copstrip { display:flex; gap:6px; flex-wrap:wrap; align-items:stretch; margin:0 0 8px; }
+.copstep { flex:1 1 128px; min-width:0; display:flex; flex-direction:column; gap:1px; text-align:left; padding:6px 10px;
+  border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); cursor:pointer; font:inherit; }
+.copstep:hover { border-color:var(--gold); }
+.copstep:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+.copstep .copstepk { font:700 10px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+.copstep b { font-size:13px; font-weight:700; }
+.copstep small { font-size:11.5px; color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copstep.on { border-left:3px solid var(--good); }
+.copstep.on small { color:var(--good-tx); }
+.copstep.wip { border-left:3px solid var(--attn, var(--gold)); }
+.copstep.wip small { color:var(--attn-tx, var(--gold-deep)); }
+.copstep.saved { border-left:3px solid var(--line); }
+.copstep.next { box-shadow:0 0 0 2px var(--panel, var(--ink)); }
+.copstep.next .copstepk { color:var(--ink); }
+.copstep.side { flex:0 1 150px; border-style:dashed; }
+.copstep[aria-current="true"] { background:var(--surface-2); }
+.copatag { display:inline-block; width:max-content; align-self:flex-start; margin:0 0 2px; padding:0 5px; border-radius:4px; background:var(--surface-2);
+  font:700 9.5px/1.6 var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--ink-2); vertical-align:1px; }
+.copachips { display:flex; flex-wrap:wrap; gap:4px; padding:0 8px 6px; }
+.copachip { border:1px solid var(--line); background:var(--surface); border-radius:12px; padding:0 8px; font:inherit; font-size:11.5px; color:var(--ink-2); cursor:pointer; }
+.copachip[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); }
+.copfocus { display:flex; gap:8px; align-items:baseline; justify-content:center; flex-wrap:wrap; }
+.copfocusk { font:700 11px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink); }
+.copareas { width:100%; }
+.copareas > summary { cursor:pointer; color:var(--ink-2); font-size:var(--fs-small, 12.5px); text-align:center; }
+.copareacards { grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); margin-top:8px; }
+.copareacard .coppd { color:var(--ink-3); }
+.copachip { font-size:11px; line-height:1.6; }
+.copareacard .coptag { display:block; }
+
+/* §753 — THREE LAYOUTS TO COMPARE LIVE: the switch above the pane; A's
+   start screen (one box, suggestions); B's button beside Edit and its panel
+   on the right of the Strategy tab, the plan narrowing beside it. */
+.coplayout { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin:0 0 8px; font-size:12.5px; }
+.coplayoutk { font:700 10.5px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-right:2px; }
+.copchoice { border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:1px 10px; font:inherit; font-size:12px; color:var(--ink-2); cursor:pointer; }
+.copchoice[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); font-weight:600; }
+.coplayout .copm { color:var(--ink-3); }
+.copsuggest { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.copstartchat { margin-top:clamp(24px, 12vh, 110px); }
+.copBbtn { display:inline-flex; align-items:center; gap:6px; margin-right:8px; border:1px solid var(--gold); background:var(--surface); color:var(--gold-deep, var(--gold)); border-radius:16px; padding:4px 12px; font:600 12.5px/1.2 var(--sans); cursor:pointer; }
+.copBbtn:hover { border-color:var(--gold-deep, var(--gold)); }
+.copBbtn[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); }
+body.copB-open #mainwrap { margin-right:calc(var(--copPw, 550px) + 10px); }
+/* §792 — ITS TOP IS THE CHROME'S BOTTOM, READ, NOT MEASURED ONCE. The chrome
+   is one pinned block at the top of the window and its height is already
+   observed and published as `--chrome-h` (shell.html), in the page's own
+   pixels whatever the zoom — so the panel sits under it from the first paint
+   and follows it when the window narrows, the bar takes two lines or the
+   page is zoomed. */
+#copPanel { position:fixed; right:0; bottom:0; top:var(--chrome-h, 150px); width:var(--copPw, 550px); z-index:40; display:flex; flex-direction:column; background:var(--surface); border-left:1px solid var(--line); box-shadow:-6px 0 18px rgba(16,24,40,.08); }
+#copPanel .copPhead { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+#copPanel .copPhead small { display:block; color:var(--ink-3); font-size:12px; }
+#copPanel .copPseg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-left:auto; }
+#copPanel .copPseg button { border:0; background:var(--surface); padding:3px 10px; font:inherit; font-size:12px; color:var(--ink-2); cursor:pointer; }
+#copPanel .copPseg button[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); font-weight:600; }
+#copPanel .copPx { margin-left:auto; border:0; background:none; font-size:20px; line-height:1; color:var(--ink-3); cursor:pointer; }
+#copPanel .copPseg + .copPx { margin-left:4px; }
+#copPanel .copPbody { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; padding:8px; }
+#copPanel .copstrip:empty { display:none; }
+#copPanel .coppane { height:auto !important; flex:1 1 auto; min-height:0; }
+#copPanel .copnone { padding:16px; color:var(--ink-2); }
+
+/* §779 — the Copilot tab is Build only: one line, how many parts are on the plan */
+.coplayout[data-cop-planline] b { color:var(--ink); }
+.copachips { align-items:center; }
+
+/* §777 — the strip in the pane: over the chat box on the right, the rail
+   (or its slim strip) running the full height beside both. An empty strip
+   (Refine, the panel on the plan) takes no room. */
+.coppane { grid-template-rows:auto minmax(0, 1fr); row-gap:0; }
+.coppane > .copslim, .coppane > .coprails { grid-column:1; grid-row:1 / span 2; }
+.coppane > .copstrip { grid-column:2; grid-row:1; margin:0 0 8px; min-width:0; }
+.coppane > .copstrip:empty { display:none; }
+.coppane > .copmain { grid-column:2; grid-row:2; align-self:stretch; }
+/* one column below 821px — unless the rail is folded, which keeps its 24px strip beside the rest (.copshut) */
+@media (max-width:820px){ .coppane:not(.copshut) > .copslim, .coppane:not(.copshut) > .coprails, .coppane:not(.copshut) > .copstrip, .coppane:not(.copshut) > .copmain { grid-column:1; grid-row:auto; } }
+
+/* §778 — the panel on the plan expands to take over the page, as the
+   Copilot tab does (the chat, the work and the to-do side by side), and
+   minimizes back to the side. */
+#copPanel .copPexp { margin-left:auto; border:1px solid var(--line); background:var(--surface); border-radius:6px; width:28px; height:26px; display:inline-grid; place-items:center; color:var(--ink-2); cursor:pointer; }
+#copPanel .copPexp:hover { border-color:var(--gold); color:var(--ink); }
+#copPanel .copPexp svg { width:14px; height:14px; }
+#copPanel .copPseg + .copPexp { margin-left:6px; }
+#copPanel .copPexp + .copPx { margin-left:2px; }
+body.copB-wide #copPanel { left:0; width:auto; box-shadow:none; border-left:0; }
+
+/* §779 — DETAILS ON THE RIGHT: below the open chat's to-do, or a column of
+   their own where there is no to-do (the start screen, a free chat, a
+   deliverable). The strip then runs over both. */
+.copdetails { display:none; min-width:0; min-height:0; overflow-y:auto; flex-direction:column; gap:14px; }
+.coppane.copwithdet > .copdetails { display:flex; grid-column:3; grid-row:2; }
+.coppane.copwithdet > .copstrip { grid-column:2 / span 2; }
+.coppane.copwithdet, :root[data-cop-page] .coppane.copwithdet { grid-template-columns:minmax(200px, 240px) minmax(0, 1fr) 230px; }
+.coppane.copwithdet.copshut, :root[data-cop-page] .coppane.copwithdet.copshut { grid-template-columns:24px minmax(0, 1fr) 230px; }
+.copdelbox { flex:0 0 auto; min-height:0; max-height:42%; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+.copftodo > .copdelbox { border-top:1px solid var(--line); padding-top:8px; }
+/* the office chat button floats over the window's corner (§490.2): the foot of the column is left clear for it */
+.copftodo:has(> .copdelbox), .coppane.copwithdet > .copdetails { padding-bottom:56px; }
+/* the to-do gives up height for them and scrolls in its own box */
+.copftodo:has(> .copdelbox) > .copsw-box:first-child { flex:1 1 0; min-height:96px; overflow-y:auto; }
+/* a smaller window keeps Details on the right, narrower (Islam: "on a smaller view the deliverables fall down in the bottom, that's wrong"); only a phone's one column puts them under the chat */
+@media (max-width:1020px){
+  .coppane.copwithdet, :root[data-cop-page] .coppane.copwithdet { grid-template-columns:180px minmax(0, 1fr) 180px; }
+  .coppane.copwithdet.copshut, :root[data-cop-page] .coppane.copwithdet.copshut { grid-template-columns:24px minmax(0, 1fr) 180px; }
+}
+@media (max-width:820px){ .coppane.copwithdet:not(.copshut) > .copdetails, .coppane.copwithdet:not(.copshut) > .copstrip { grid-column:1; grid-row:auto; } }
+/* the start screen: the box first, then "Or choose another way to start"; every part on the plan, said once */
+.copalldone { width:min(640px, 100%); border:1px solid var(--line); border-left:3px solid var(--good, #2E6B45); border-radius:8px; padding:8px 12px; font-size:13px; text-align:left; }
+
+/* §779 — ON THE PLAN: a part not built yet sends you to Build; a built one
+   opens on the box. The panel is resized from its left edge (remembered per
+   browser, a double-click resets it) as well as expanded. */
+.copnotbuilt { align-items:flex-start; text-align:left; }
+.copnotbuilt .copstarth { text-align:left; }
+.copagain { align-self:center; font-size:12.5px; }
+#copPanel .copPgrip { position:absolute; left:-4px; top:0; bottom:0; width:8px; cursor:col-resize; z-index:3; touch-action:none; }
+#copPanel .copPgrip::after { content:""; position:absolute; left:3px; top:50%; width:2px; height:40px; margin-top:-20px; border-radius:2px; background:var(--line); }
+#copPanel .copPgrip:hover::after, #copPanel .copPgrip.drag::after { background:var(--gold); }
+body.copB-wide #copPanel .copPgrip { display:none; }
+
+/* §780 — PICTURES: a thumbnail in the file's chip; a box a file is dragged over says it will take it */
+.copfile.coppic { align-items:center; }
+.copthumb { width:40px; height:30px; object-fit:cover; border-radius:4px; border:1px solid var(--line); flex:none; background:var(--surface-2, #EFF2F6); }
+.copthumb0 { display:inline-block; }
+.copbox.copdrop { outline:2px dashed var(--gold); outline-offset:2px; }
+.coppend .cophint { align-self:center; }
+
+/* §780 — Details fold to a 24px strip on the right, as the chats rail folds on the left */
+.copdetails > .copdettog { align-self:flex-end; }
+.coppane.copwithdet.copdetshut > .copdetails { align-items:center; padding-bottom:0; }
+.coppane.copwithdet.copdetshut, :root[data-cop-page] .coppane.copwithdet.copdetshut { grid-template-columns:minmax(200px, 240px) minmax(0, 1fr) 24px; }
+.coppane.copwithdet.copdetshut.copshut, :root[data-cop-page] .coppane.copwithdet.copdetshut.copshut { grid-template-columns:24px minmax(0, 1fr) 24px; }
+.coppane.copdetshut > .copdetails .coptog { width:24px; height:26px; border-radius:5px; }
+@media (max-width:1020px){
+  .coppane.copwithdet.copdetshut, :root[data-cop-page] .coppane.copwithdet.copdetshut { grid-template-columns:180px minmax(0, 1fr) 24px; }
+  .coppane.copwithdet.copdetshut.copshut, :root[data-cop-page] .coppane.copwithdet.copdetshut.copshut { grid-template-columns:24px minmax(0, 1fr) 24px; }
+}
+
+/* §781 — the working word (Thinking, Fetching…) sits at the left, where the Copilot's answer will start, not in the middle (Islam) */
+.copmsg.product.copworking { align-self:flex-start; max-width:100%; }
+.copmsg.product.copworking .copbody { text-align:left; padding-left:0; }
+
+/* §782 — THE CHAT'S HEADER IS ONE LINE (Islam: "1 line at the top like in Claude, with the title of the chat and the + and − on the right… a light grey line below"; "the line below the name needs to be from the start till the end of the box"). The row runs the box's full width — out over the box's own padding — while its name and buttons keep to the reading column. */
+.copchat > .copheadrow.copheadone { max-width:none; width:auto; flex-wrap:nowrap; position:relative;
+  margin:calc(-1 * var(--copmp-t, 16px)) calc(-1 * var(--copmp-x, 18px)) 10px;
+  padding:8px max(var(--copmp-x, 18px), calc((100% - var(--cop-read, 740px)) / 2 + var(--copmp-x, 18px)));
+  border-bottom:1px solid var(--line-2, var(--line)); }
+.copheadone .coph { margin:0; font-size:15px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copheadone .copheadsp { flex:1; }
+.copctxi { border:0; background:none; padding:2px; color:var(--ink-3); cursor:pointer; display:inline-grid; place-items:center; }
+.copctxi svg { width:15px; height:15px; }
+.copheadone .copctx { position:absolute; right:var(--copmp-x, 18px); top:100%; z-index:4; max-width:min(420px, 90%); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:8px 10px; box-shadow:var(--shadow-md, 0 6px 18px rgba(16,24,40,.12)); font-size:12.5px; }
+.copheadone .copctx[hidden] { display:none; }
+
+/* §782 — THE STEPPER LINE (option B): one thin row of numbered steps joined by a line; ✓ on a part the plan holds, the next ringed; the count at the end. */
+.copsteps { display:flex; align-items:center; flex-wrap:wrap; row-gap:4px; width:100%; border:1px solid var(--line); border-radius:8px; padding:5px 8px; background:var(--surface); }
+.copsteps .copstep { flex:0 1 auto; flex-direction:row; align-items:center; gap:6px; padding:3px 7px; border:0; border-radius:6px; background:none; white-space:nowrap; }
+.copsteps .copstep.on, .copsteps .copstep.wip { border-left:0; }
+.copsteps .copstep b { font-size:12.5px; font-weight:600; color:var(--ink-2); }
+.copsteps .copstep[aria-current="true"] { background:var(--surface-2); }
+.copsteps .copstep[aria-current="true"] b, .copsteps .copstep.next b { color:var(--ink); font-weight:700; }
+.copsteps .copstep:hover { background:var(--surface-2); }
+.copstn { width:19px; height:19px; border-radius:50%; display:inline-grid; place-items:center; font-size:10.5px; font-weight:700; border:1.5px solid var(--line); color:var(--ink-3); flex:none; }
+.copstep.on .copstn { background:var(--good, #2E6B45); border-color:var(--good, #2E6B45); color:#fff; }
+.copstep.wip .copstn { border-color:var(--gold); color:var(--gold-deep, var(--gold)); }
+.copstep.next .copstn { border-color:var(--panel, var(--ink)); color:var(--ink); box-shadow:0 0 0 2px color-mix(in srgb, var(--panel, var(--ink)) 25%, transparent); }
+.copstln { flex:1 1 10px; min-width:10px; max-width:48px; height:2px; background:var(--line); }
+.copstln.on { background:var(--good, #2E6B45); }
+.copstsay { margin-left:auto; padding-left:12px; font-size:12px; color:var(--ink-3); white-space:nowrap; }
+.copstsay b { color:var(--ink); }
+.copvh { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+/* §782 — ✦ Builder and Advisory at the far right of the tab row, set apart from Strategy · Performance · Reporting · Insights, where ✦ Copilot opens on the plan */
+#subtabs .tabgap { flex:1 1 auto; min-width:12px; }
+#subtabs .coptabs { display:inline-flex; align-items:center; gap:6px; padding-left:12px; border-left:1px solid var(--line); flex:none; }
+.tabs #subtabs .coptab { border:1px solid var(--line); border-radius:16px; padding:3px 12px; font-weight:600; color:var(--ink-2); background:var(--surface); white-space:nowrap; }
+.tabs #subtabs .coptab.copadv { border-style:dashed; }
+.tabs #subtabs .coptab:hover { border-color:var(--gold); color:var(--ink); }
+.tabs #subtabs .coptab[aria-selected="true"] { background:var(--panel, var(--ink)); border-color:var(--panel, var(--ink)); border-style:solid; color:var(--panel-ink, var(--surface)); }
+
+/* §784 — Competitive Discipline drawn as the plan shows it: the discipline, then a card per value */
+.copdcomp { display:flex; flex-direction:column; gap:10px; }
+.copdlab { font:700 10.5px/1.4 var(--sans, inherit); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+.copdisc { border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:8px; padding:9px 12px; background:var(--surface); }
+.copdisc h4 { margin:2px 0 0; font-size:15px; }
+.copvals { display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:10px; }
+.copval { border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface); display:flex; flex-direction:column; gap:5px; font-size:var(--fs-small, 12.5px); }
+.copval h5 { margin:0; font-size:13.5px; text-transform:none; letter-spacing:0; color:var(--ink); font-weight:700; }
+.copval .copdul { margin:0; padding-left:16px; }
+.copval.copgap { border-color:var(--attn, #B45309); }
+.copgapw { margin:0; color:var(--attn-tx, #B45309); font-size:12px; }
+.copmrow { display:flex; justify-content:space-between; gap:8px; border-top:1px dashed var(--line); padding-top:3px; }
+.copmrow .copm { white-space:nowrap; }
+.copev { color:var(--ink-3); font-size:12px; }
+.copev summary { cursor:pointer; }
+.copdplan { padding:2px 0; }
+
+/* §785 — the chat's name is a button that turns into its box: renamed where it stands */
+.copnamebtn { border:0; background:none; padding:1px 4px; margin:0 -4px; font:inherit; color:inherit; cursor:text; border-radius:5px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+.copnamebtn:hover { background:var(--surface-2, #EFF2F6); }
+.copheadone .coprenhead { flex:1 1 auto; min-width:0; max-width:520px; font-size:15px; font-weight:600; padding:3px 6px; }
+
+/* §788 — an older draft laying itself out as the plan: said while it happens, nothing to press */
+.copdlaying { font-style:italic; animation:copfade 1.4s ease-in-out infinite alternate; }
+@keyframes copfade { from { opacity:.55; } to { opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .copdlaying { animation:none; } }
+
+/* §790 — ✦ Build, ✦ Advise and ✦ Refine: one family — the gold edge marks the Copilot wherever it is; ✦ Refine wears the same pill beside Edit */
+.tabs #subtabs .coptab { border-color:var(--gold); color:var(--gold-deep, var(--gold)); }
+.tabs #subtabs .coptab.copadv { border-style:dashed; }
+.copBbtn { border:1px solid var(--gold) !important; border-radius:16px !important; padding:3px 12px !important; font-weight:600; color:var(--gold-deep, var(--gold)) !important; background:var(--surface) !important; white-space:nowrap; transition:none !important; }
+.copBbtn:hover { color:var(--ink) !important; }
+.copBbtn[aria-pressed="true"] { background:var(--panel, var(--ink)) !important; border-color:var(--panel, var(--ink)) !important; color:var(--panel-ink, var(--surface)) !important; }

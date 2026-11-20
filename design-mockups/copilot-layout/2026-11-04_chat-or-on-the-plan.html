@@ -1,0 +1,234 @@
+<title>Copilot: One Chat or On the Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: two working options side by side — A, one chat that opens the work when needed; B, the Copilot as a panel on the plan's own parts. Stacked below 1200px. */
+:root{--ground:#F3F5F8;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--hi:#FFF8E6;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--hi:#2E2810;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--hi:#2E2810;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+h1{font-size:17px;margin:0}
+.hint{color:var(--ink-3);font-size:13px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:1200px){.pair{grid-template-columns:minmax(0,1fr)}}
+.opt{display:flex;flex-direction:column;gap:6px;min-width:0}
+.opt h2{margin:0;font-size:15px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.opt h2 .l{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--nav);color:var(--navink);font-size:12px}
+.opt h2 small{font-weight:400;color:var(--ink-3);font-size:12.5px}
+.reset{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:1px 8px;font-size:12px}
+.app{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:600px}
+.bar{display:flex;gap:14px;align-items:center;background:var(--nav);color:var(--navink);padding:7px 12px;font-size:12.5px;flex-wrap:wrap}
+.bar b{border-bottom:2px solid var(--goldfill)}
+.bar span{opacity:.85}
+.tabs{display:flex;gap:16px;padding:6px 12px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink-2);flex-wrap:wrap}
+.tabs button{border:0;background:none;padding:2px 0;color:var(--ink-2)}
+.tabs button[aria-current="true"]{color:var(--ink);font-weight:700;border-bottom:2px solid var(--goldfill)}
+.who{font-size:11px;color:var(--ink-3);margin-bottom:2px}
+.ai{border-left:3px solid var(--goldfill);padding:2px 10px;font-size:13px}
+.me{align-self:flex-end;max-width:85%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:13px}
+.qs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.q{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:2px 10px;font-size:12.5px}
+.q.rec{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 10px;font-weight:600;font-size:12.5px}
+.btn.solid{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.box{border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink-3);font-size:13px;background:var(--surface)}
+.dim{color:var(--ink-3)}
+/* ── A ── */
+.a-body{display:grid;grid-template-columns:150px minmax(0,1fr);flex:1;min-height:0}
+.a-body.work{grid-template-columns:150px minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:700px){.a-body,.a-body.work{grid-template-columns:minmax(0,1fr)}.a-list{display:none}}
+.a-list{border-right:1px solid var(--line);background:var(--surface-2);padding:8px;display:flex;flex-direction:column;gap:4px;font-size:12.5px}
+.a-list .h{font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.a-list .h button{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:0 6px;font:600 11.5px/1.5 var(--sans);text-transform:none;letter-spacing:0;color:var(--ink)}
+.a-row{border:0;background:none;text-align:left;padding:5px 6px;border-radius:4px}
+.a-row[aria-current="true"]{background:var(--surface)}
+.a-row small{display:block;color:var(--ink-3);font-size:11px}
+.a-chat{display:flex;flex-direction:column;min-width:0}
+.a-msgs{flex:1;padding:12px;display:flex;flex-direction:column;gap:10px}
+.a-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;text-align:center}
+.a-empty h3{margin:0;font-size:16px}
+.a-compose{padding:8px 10px;border-top:1px solid var(--line)}
+.a-work{border-left:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;min-width:0}
+.whead{padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface);font-size:12.5px;display:flex;gap:6px;align-items:center}
+.whead .x{margin-left:auto;border:0;background:none;font-size:16px;color:var(--ink-3)}
+.wbody{padding:8px;display:flex;flex-direction:column;gap:6px;flex:1}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.quad div{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12px}
+.quad b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+.wfoot{display:flex;gap:6px;align-items:center;padding:8px 10px;border-top:1px solid var(--line);background:var(--surface);font-size:12px;flex-wrap:wrap}
+.wfoot .sp{flex:1}
+/* ── B ── */
+.b-body{display:grid;grid-template-columns:minmax(0,1fr);flex:1;min-height:0}
+.b-body.side{grid-template-columns:minmax(0,1fr) minmax(260px,320px)}
+@media (max-width:700px){.b-body.side{grid-template-columns:minmax(0,1fr)}}
+.b-plan{padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.b-sec{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);transition:background .2s}
+.b-sec.on{background:var(--hi);border-color:var(--goldfill)}
+.b-sec h3{margin:0 0 4px;font-size:13.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.b-sec h3 .sp{flex:1}
+.b-sec ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--ink-2)}
+.b-sec li{margin:1px 0}
+.b-sec li.newl{color:var(--good);font-weight:600}
+.cop{border:1px solid var(--goldfill);background:var(--surface);color:var(--gold);border-radius:14px;padding:1px 10px;font-size:12px;font-weight:700}
+.b-side{border-left:1px solid var(--line);display:flex;flex-direction:column;min-width:0;background:var(--surface)}
+.b-side .msgs{flex:1;padding:10px;display:flex;flex-direction:column;gap:10px}
+.b-hist{padding:10px;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.b-hist .r{border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.b-hist .r small{display:block;color:var(--ink-3)}
+.notes{font-size:12.5px;color:var(--ink-2);margin:0;padding-left:16px}
+.notes li{margin:2px 0}
+.notes b{color:var(--ink)}
+.cmp{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;overflow-x:auto}
+.cmp table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+.cmp th,.cmp td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+</style>
+
+<div><h1>Copilot: one chat, or on the plan</h1><span class="hint">two working mockups side by side · press the buttons in each</span></div>
+
+<div class="pair">
+  <!-- ═══════ A ═══════ -->
+  <section class="opt">
+    <h2><span class="l">A</span>Just one chat <small>like ChatGPT — the work opens on the right when needed</small><button class="reset" data-a="reset">Start over</button></h2>
+    <div class="app">
+      <div class="bar"><span>Group</span><b>Mobile</b><span>Retail</span><span>Logistics</span></div>
+      <div class="tabs"><button>Strategy</button><button>Performance</button><button>Reporting</button><button aria-current="true">Copilot</button></div>
+      <div class="a-body" id="aBody">
+        <aside class="a-list">
+          <div class="h">Chats <button data-a="reset">+ New</button></div>
+          <div id="aRows"></div>
+        </aside>
+        <div class="a-chat" id="aChat"></div>
+        <div class="a-work" id="aWork" hidden></div>
+      </div>
+    </div>
+    <ul class="notes">
+      <li><b>One box.</b> You say what you want; the Copilot picks the area and opens its work on the right.</li>
+      <li><b>No strip, no tags, no area cards.</b> Past chats are a plain list.</li>
+      <li><b>Lost:</b> nobody sees at a glance where Mobile stands across the method.</li>
+    </ul>
+  </section>
+
+  <!-- ═══════ B ═══════ -->
+  <section class="opt">
+    <h2><span class="l">B</span>On the plan <small>each part of the Strategy tab has its Copilot button</small><button class="reset" data-b="reset">Start over</button></h2>
+    <div class="app">
+      <div class="bar"><span>Group</span><b>Mobile</b><span>Retail</span><span>Logistics</span></div>
+      <div class="tabs" id="bTabs"><button data-b="tab-strategy" aria-current="true">Strategy</button><button>Performance</button><button>Reporting</button><button data-b="tab-copilot">Copilot</button></div>
+      <div class="b-body" id="bBody">
+        <div class="b-plan" id="bPlan"></div>
+        <aside class="b-side" id="bSide" hidden></aside>
+      </div>
+    </div>
+    <ul class="notes">
+      <li><b>The Copilot comes to the part you are on.</b> The panel opens beside it; Apply changes the part right there.</li>
+      <li><b>The Copilot tab</b> becomes a history of chats and saved versions.</li>
+      <li><b>Kept:</b> where Mobile stands is the plan itself — the screens the team already knows.</li>
+    </ul>
+  </section>
+</div>
+
+<div class="cmp">
+  <table>
+    <thead><tr><th></th><th>A · one chat</th><th>B · on the plan</th></tr></thead>
+    <tbody>
+      <tr><td><b>Where you go</b></td><td>The Copilot tab, always</td><td>The part of the plan you are working on</td></tr>
+      <tr><td><b>Finding the right workflow</b></td><td>Say it; the Copilot picks</td><td>Press the button on that part</td></tr>
+      <tr><td><b>Seeing where Mobile stands</b></td><td>Not shown</td><td>The plan itself</td></tr>
+      <tr><td><b>Seeing what Apply changed</b></td><td>Go to the Strategy tab to check</td><td>It changes beside you</td></tr>
+      <tr><td><b>Open questions, ideas, Advisory</b></td><td>Natural: just ask</td><td>The Copilot tab's “Ask anything” box</td></tr>
+      <tr><td><b>What we build</b></td><td>The chat picks the area from what is said; one list</td><td>A panel on each part; the workflows move into it unchanged</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+(function(){
+  var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); };
+  /* ── A ─────────────────────────────────────────── */
+  var A = { step: 0, chats: [{ t:"Youth plan pricing", m:"2 days ago" }, { t:"Mobile’s Foundation", m:"3 weeks ago" }] };
+  function aDraw(){
+    var body = document.getElementById("aBody"), chat = document.getElementById("aChat"), work = document.getElementById("aWork");
+    document.getElementById("aRows").innerHTML = (A.step ? '<button class="a-row" aria-current="true">Mobile’s SWOT<small>just now</small></button>' : '') +
+      A.chats.map(function(c){ return '<button class="a-row">' + esc(c.t) + '<small>' + esc(c.m) + '</small></button>'; }).join("");
+    if (!A.step) {
+      chat.innerHTML = '<div class="a-empty"><h3>What would you like to do with Mobile’s strategy?</h3><div class="box" style="width:100%;max-width:440px;text-align:left">Ask anything, or say what to work on…</div>' +
+        '<div class="qs" style="justify-content:center"><button class="q rec" data-a="swot">Let’s do Mobile’s SWOT</button><button class="q" data-a="swot">Update the Directions</button><button class="q" data-a="swot">Plan next year’s tactics</button></div>' +
+        '<div class="dim" style="font-size:12px">Suggestions read where the plan stands; or type anything.</div></div>';
+      body.classList.remove("work"); work.hidden = true; return;
+    }
+    var m = '<div class="me">Let’s do Mobile’s SWOT</div>' +
+      '<div class="ai"><div class="who">Copilot</div>Mobile already has a SWOT on the plan — 15 lines. I’ve opened it on the right. Start from it, or start fresh?' +
+      (A.step === 1 ? '<div class="qs"><button class="q rec" data-a="from">Start from it</button><button class="q" data-a="from">Start fresh</button></div>' : '') + '</div>';
+    if (A.step >= 2) m += '<div class="me">Start from it</div><div class="ai"><div class="who">Copilot</div>Loaded. Say what to change — move a line, drop one, add one.</div>' +
+      '<div class="me">Add the new competitor’s price cut as a threat</div><div class="ai"><div class="who">Copilot</div>Added to Threats, marked new. <b>Apply to plan</b> on the right puts it on Mobile’s plan.</div>';
+    if (A.step === 3) m += '<div class="ai"><div class="who">Copilot</div><b>v3</b> is on the plan. Next: the Competitive Discipline, from this SWOT.<div class="qs"><button class="q">Go on</button></div></div>';
+    chat.innerHTML = '<div class="a-msgs">' + m + '</div><div class="a-compose"><div class="box">Ask here…</div></div>';
+    body.classList.add("work"); work.hidden = false;
+    work.innerHTML = '<div class="whead"><b>SWOT — Mobile</b><span class="dim">· ' + (A.step === 3 ? "v3 on the plan" : "v3 in progress") + '</span><button class="x" data-a="close" aria-label="Close the work">×</button></div>' +
+      '<div class="wbody"><div class="quad"><div><b>Strengths</b>Lowest cost per GB · Own towers</div><div><b>Weaknesses</b>Few data skills · Slow app</div><div><b>Opportunities</b>SME segment · Prepaid data</div><div><b>Threats</b>Regulator caps' + (A.step >= 2 ? '<br><span style="color:var(--good);font-weight:600">+ New competitor’s price cut</span>' : '') + '</div></div></div>' +
+      '<div class="wfoot"><span class="dim">' + (A.step === 3 ? "On the plan" : "Not on the plan yet") + '</span><span class="sp"></span>' + (A.step === 2 ? '<button class="btn solid" data-a="apply">Apply to plan</button>' : '<button class="btn">Apply to plan</button>') + '</div>';
+  }
+  /* ── B ─────────────────────────────────────────── */
+  var B = { tab: "strategy", open: "", step: 0 };
+  var PARTS = [
+    { k:"foundation", t:"Foundation", l:["Purpose: connect every Egyptian", "Values: customer first · plain dealing"] },
+    { k:"swot", t:"SWOT", l:["Strengths: lowest cost per GB · own towers", "Threats: regulator caps"] },
+    { k:"dirs", t:"Pillars/Directions", l:["Grow the SME segment · 48", "Rebuild the app’s onboarding · 45", "Enter the prepaid data market · 36"] },
+    { k:"tact", t:"Tactical Plans", l:["Grow the SME segment — 2 measures · 1 tactic", "Rebuild the app’s onboarding — nothing yet"] }
+  ];
+  function bDraw(){
+    var body = document.getElementById("bBody"), plan = document.getElementById("bPlan"), side = document.getElementById("bSide");
+    document.querySelectorAll("#bTabs button").forEach(function(b){ var k = b.getAttribute("data-b"); b.setAttribute("aria-current", String((k === "tab-strategy" && B.tab === "strategy") || (k === "tab-copilot" && B.tab === "copilot"))); });
+    if (B.tab === "copilot") {
+      body.classList.remove("side"); side.hidden = true;
+      plan.innerHTML = '<div class="b-hist"><div class="box">Ask anything about Mobile’s strategy — ideas, questions, a decision to think through…</div>' +
+        '<div style="font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-top:6px">History</div>' +
+        (B.step === 3 ? '<div class="r">Tactical Plans — Grow the SME segment<small>just now · v1 on the plan</small></div>' : '') +
+        '<div class="r">SWOT — Mobile<small>last week · v2 on the plan</small></div><div class="r">Youth plan pricing<small>2 days ago · a decision brief</small></div><div class="r">Foundation — Mobile<small>3 weeks ago · v3 on the plan</small></div>' +
+        '<div class="dim" style="font-size:12px">Every chat and saved version, newest first. A chat opens on its part of the plan.</div></div>';
+      return;
+    }
+    plan.innerHTML = PARTS.map(function(p){
+      var on = B.open === p.k, lines = p.l.slice();
+      if (p.k === "tact" && B.step === 3) lines[1] = "Rebuild the app’s onboarding — 2 measures · 3 tactics";
+      return '<div class="b-sec' + (on ? " on" : "") + '"><h3>' + esc(p.t) + '<span class="sp"></span><button class="cop" data-b="open-' + p.k + '">✦ ' + (on ? "Copilot is open" : "Work on this with the Copilot") + '</button></h3><ul>' +
+        lines.map(function(l, i){ return '<li' + (p.k === "tact" && B.step === 3 && i === 1 ? ' class="newl"' : '') + '>' + esc(l) + '</li>'; }).join("") + '</ul></div>';
+    }).join("");
+    if (!B.open) { body.classList.remove("side"); side.hidden = true; return; }
+    body.classList.add("side"); side.hidden = false;
+    var part = PARTS.filter(function(p){ return p.k === B.open; })[0];
+    var m;
+    if (B.open === "tact") {
+      m = '<div class="ai"><div class="who">Copilot</div>Tactical Plans for Mobile. <b>1 of 2</b> Directions already carries measures on the plan. Refine what is there, or build all of them anew?' +
+        (B.step === 1 ? '<div class="qs"><button class="q rec" data-b="refine">Refine what is there</button><button class="q" data-b="refine">Build anew</button></div>' : '') + '</div>';
+      if (B.step >= 2) m += '<div class="me">Refine what is there</div><div class="ai"><div class="who">Copilot</div><b>Rebuild the app’s onboarding</b> — drafted 2 measures and 3 tactics, for 2027 Q1–Q4.<div style="margin-top:6px;font-size:12px;color:var(--ink-2)">· App sign-ups completed — 60% → 85%<br>· Days to first top-up — 9 → 3<br>· Redesign the first-run screens · Product · Q1–Q2</div>' +
+        (B.step === 2 ? '<div class="qs"><button class="q rec" data-b="apply">Apply to plan</button><button class="q">Change something</button></div>' : '') + '</div>';
+      if (B.step === 3) m += '<div class="ai"><div class="who">Copilot</div>On the plan — see it on the left, marked. Saved in the history as v1.</div>';
+    } else {
+      m = '<div class="ai"><div class="who">Copilot</div>' + esc(part.t) + ' for Mobile — what would you like to do with it? I can start from what is on the plan.<div class="qs"><button class="q rec">Start from what is there</button><button class="q">Start fresh</button></div></div>';
+    }
+    side.innerHTML = '<div class="whead"><b>Copilot · ' + esc(part.t) + '</b><button class="x" data-b="close" aria-label="Close the Copilot">×</button></div><div class="msgs">' + m + '</div><div class="a-compose"><div class="box">Ask about ' + esc(part.t) + '…</div></div>';
+  }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    var a = b.getAttribute("data-a"), bb = b.getAttribute("data-b");
+    if (a === "reset") { A.step = 0; aDraw(); }
+    if (a === "swot") { A.step = 1; aDraw(); }
+    if (a === "from") { A.step = 2; aDraw(); }
+    if (a === "apply") { A.step = 3; aDraw(); }
+    if (a === "close") { document.getElementById("aWork").hidden = true; document.getElementById("aBody").classList.remove("work"); }
+    if (bb === "reset") { B = { tab: "strategy", open: "", step: 0 }; bDraw(); }
+    if (bb === "tab-strategy") { B.tab = "strategy"; bDraw(); }
+    if (bb === "tab-copilot") { B.tab = "copilot"; bDraw(); }
+    if (bb && bb.indexOf("open-") === 0) { var k = bb.slice(5); B.open = B.open === k ? "" : k; if (k === "tact" && B.step === 0) B.step = 1; bDraw(); }
+    if (bb === "refine") { B.step = 2; bDraw(); }
+    if (bb === "apply") { B.step = 3; bDraw(); }
+    if (bb === "close") { B.open = ""; bDraw(); }
+  });
+  aDraw(); bDraw();
+})();
+</script>

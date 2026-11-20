@@ -19,6 +19,7 @@
    per-letter count are WORKED OUT on every read, never stored, so they can
    never disagree with what is linked (§53.5). */
 import { oneLine, MAX_TITLE, newDeliverable, addVersion, type Section } from "./copilot.ts";
+import { asParts, isImage } from "./copilot-files.ts";
 
 type Q = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount: number | null }> };
 const str = (v: unknown) => (v == null ? "" : String(v));
@@ -302,12 +303,12 @@ export function swotCorpus(s: Swot, placeWord: string, context: string, areas: A
     const g = s.methods[a].includes("guided") ? guidedText(s, a) : "";
     if (g) out.push("\n" + AREA_WORD[a].toUpperCase() + " — GUIDED ANSWERS:\n" + g);
     for (const x of material.filter((y) => y.area === a))
-      out.push("\n" + AREA_WORD[a].toUpperCase() + " — SOURCE \"" + x.m.name + "\":\n" + (x.m.fileKind === "pdf" ? "(the PDF is attached as itself)" : x.m.text.slice(0, PER_SOURCE)));
+      out.push("\n" + AREA_WORD[a].toUpperCase() + " — SOURCE \"" + x.m.name + "\":\n" + (x.m.fileKind === "pdf" ? "(the PDF is attached as itself)" : isImage(x.m.fileKind || "") ? "(the picture is attached as itself — read the data in it; say so if a figure cannot be read)" : x.m.text.slice(0, PER_SOURCE)));
   }
   return out.join("\n");
 }
 export const pdfPartsOf = (material: { m: Material }[]) =>
-  material.filter((x) => x.m.fileKind === "pdf" && x.m.bytes).map((x) => ({ inlineData: { mimeType: "application/pdf", data: x.m.bytes!.toString("base64") } }));
+  asParts(material.map((x) => ({ kind: x.m.fileKind || "", bytes: x.m.bytes })));
 
 export function swotInstruction(method: string): string {
   return "You are Forefront Consulting's strategy consultant, building an organisation's situational analysis from what the client gave you." +

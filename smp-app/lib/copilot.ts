@@ -250,10 +250,12 @@ export async function materialOf(c: Q, chatId: string, beforeId: string): Promis
   const ch = await c.query("SELECT assumptions FROM copilot_chats WHERE id = $1", [chatId]);
   const assumptions = Array.isArray(ch.rows[0]?.assumptions) ? ch.rows[0].assumptions.map(str) : [];
   const f = await c.query(
-    "SELECT name, kind, text, CASE WHEN kind = 'pdf' THEN bytes END AS bytes, at FROM copilot_files " +
+    "SELECT name, kind, text, CASE WHEN kind IN ('pdf','png','jpg','webp') THEN bytes END AS bytes, at FROM copilot_files " +
     "WHERE chat_id = $1 AND message_id IS NOT NULL ORDER BY at", [chatId]);
-  const pdfKeep = new Set(f.rows.filter((x: any) => x.kind === "pdf").slice(-3).map((x: any) => x.name + "|" + iso(x.at)));
-  const files = f.rows.filter((x: any) => x.kind !== "pdf" || pdfKeep.has(x.name + "|" + iso(x.at)))
+  /* §780 — pictures ride as themselves too, so they share the PDFs' cap: the last three */
+  const self = (k: string) => k === "pdf" || k === "png" || k === "jpg" || k === "webp";
+  const pdfKeep = new Set(f.rows.filter((x: any) => self(x.kind)).slice(-3).map((x: any) => x.name + "|" + iso(x.at)));
+  const files = f.rows.filter((x: any) => !self(x.kind) || pdfKeep.has(x.name + "|" + iso(x.at)))
     .map((x: any) => ({ name: str(x.name), kind: str(x.kind), text: str(x.text), bytes: x.bytes ?? null }));
   return { history, assumptions, files };
 }
@@ -298,6 +300,26 @@ export async function pendingFiles(c: Q, chatId: string): Promise<FileMeta[]> {
 export async function pendingCount(c: Q, chatId: string): Promise<number> {
   const r = await c.query("SELECT count(*) AS n FROM copilot_files WHERE chat_id = $1 AND message_id IS NULL", [chatId]);
   return Number(r.rows[0].n) || 0;
+}
+/* §780 — WHAT WAITS ABOVE A STEP-BY-STEP CHAT'S BOX GOES WITH ITS NEXT ASK.
+   The SWOT, Discipline, Directions, Tactical Plans, Advisory and Foundation
+   chats keep their conversation in their own state, not as messages, so a
+   picture (or a PDF, Word or Excel file) pasted or attached there is read
+   with the next thing asked and marked taken (message_id 0) only once the
+   answer has come back — a failed ask leaves it waiting, never lost. */
+export type Waiting = { id: string; name: string; kind: string; text: string; bytes: Buffer | null };
+export async function waitingFiles(c: Q, chatId: string): Promise<Waiting[]> {
+  const r = await c.query("SELECT id, name, kind, text, bytes FROM copilot_files WHERE chat_id = $1 AND message_id IS NULL ORDER BY at LIMIT 3", [chatId]);
+  return r.rows.map((x: any) => ({ id: str(x.id), name: str(x.name), kind: str(x.kind), text: str(x.text), bytes: x.bytes ?? null }));
+}
+export async function takeFiles(c: Q, chatId: string, ids: string[]): Promise<void> {
+  if (ids.length) await c.query("UPDATE copilot_files SET message_id = 0 WHERE chat_id = $1 AND message_id IS NULL AND id = ANY($2::uuid[])", [chatId, ids]);
+}
+/* the words the corpus carries for them: a file read as text is written out; a PDF or a picture rides as itself */
+export function waitingWords(w: Waiting[]): string {
+  if (!w.length) return "";
+  return "\n\nFILES THE PERSON ADDED WITH THIS ASK (use what is in them; cite each by its exact name as `source`; if a figure in a picture cannot be read, say so rather than guess):" +
+    w.map((f) => "\n=== FILE: " + f.name + " === " + (f.text ? "\n" + f.text.slice(0, 60000) : "(" + (f.kind === "pdf" ? "a PDF" : "a picture") + ", attached to the question itself)")).join("");
 }
 export async function fileBytes(c: Q, fileId: string): Promise<{ name: string; kind: string; bytes: Buffer } | null> {
   const r = await c.query("SELECT name, kind, bytes FROM copilot_files WHERE id = $1", [fileId]);
@@ -444,6 +466,17 @@ export function draftText(d: any): string {
   }
   return out.join("\n").trim();
 }
+const PART_NAME: Record<string, string> = { who: "Who We Are", asp: "Winning Aspiration", eim: "End in Mind", pur: "Purpose", obj: "Key Objectives", val: "Core Values" };
+export function typedFromPlan(plan: any): { type: string; body: Record<string, unknown> } | null {
+  if (!plan || typeof plan !== "object") return null;
+  if (plan.section === "compete" && plan.compete) return { type: "compete", body: { compete: plan.compete } };
+  if (plan.section === "analysis" && plan.swot) return { type: "swot", body: { swot: plan.swot } };
+  if (plan.section === "directions" && Array.isArray(plan.directions)) return { type: "directions", body: { directions: plan.directions, capabilities: [] } };
+  if (plan.section === "execution" && Array.isArray(plan.items) && plan.period) return { type: "execution", body: { period: plan.period, items: plan.items } };
+  if (plan.section === "foundation" && Array.isArray(plan.foundation))
+    return { type: "foundation", body: { foundation: plan.foundation.map((x: any) => ({ key: x.key, name: PART_NAME[x.key] || x.key, text: x.text })), years: [null, null] } };
+  return null;
+}
 export type SavedDraft = { deliverableId: string; n: number; title: string; isNew: boolean };
 export async function saveDraftFrom(c: Q, chat: { id: string; place: string; section: Section; title: string }, messageId: string, by: string): Promise<SavedDraft | "notDraft" | "already"> {
   const m = await oneMessage(c, chat.id, messageId);
@@ -451,15 +484,21 @@ export async function saveDraftFrom(c: Q, chat: { id: string; place: string; sec
   if (!m || m.who !== "ai" || !p || p.kind !== "answer" || !p.draft || !Array.isArray(p.draft.groups) || !p.draft.groups.length) return "notDraft";
   if (p.saved && p.saved.deliverableId) return "already";
   const title = (oneLine(p.draft.title) || (SECTION_WORD[chat.section] + " draft")).slice(0, MAX_TITLE);
-  const body = { text: draftText(p.draft), draft: p.draft };
+  /* §784 — A DRAFT IN THE PLAN'S OWN SHAPE IS SAVED AS THAT PART: a Foundation,
+     a SWOT or a Competitive Discipline, the same body its step-by-step chat
+     saves, so the deliverable's page draws it as the plan does and its Apply
+     writes it (§654 B2). Any other draft stays in the Copilot, as before. */
+  const typed = typedFromPlan(p.plan);
+  const body: any = { text: draftText(p.draft), draft: p.draft, ...(typed ? typed.body : {}) };
   const note = "Saved from “" + chat.title + "”";
+  const type = typed ? typed.type : "free";
   const hit = await c.query(
-    "SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) ORDER BY created_at DESC LIMIT 1",
-    [chat.place, chat.section, title]);
+    "SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) AND type = $4 ORDER BY created_at DESC LIMIT 1",
+    [chat.place, chat.section, title, type]);
   let id: string, n: number, isNew: boolean;
   if (hit.rows[0]) { id = str(hit.rows[0].id); n = await addVersion(c, id, { body, note, by }); isNew = false; }
   else {
-    id = await newDeliverable(c, { place: chat.place, section: chat.section, title, type: "free", kind: "copilot-only",
+    id = await newDeliverable(c, { place: chat.place, section: chat.section, title, type, kind: typed ? "promotable" : "copilot-only",
       approach: "", body, note, by, chatId: chat.id, chatTitle: chat.title });
     n = 1; isNew = true;
   }

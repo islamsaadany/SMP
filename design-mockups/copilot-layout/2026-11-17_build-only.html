@@ -1,0 +1,267 @@
+<title>Copilot Build and Plan Panel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: a demo control (which parts CE's plan holds), then the platform — the Copilot tab (Build only: strip over the chat box, chats left, Details right) and the Strategy tab with ✦ Copilot opening a resizable panel. */
+:root{--ground:#F3F5F8;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--good:#2E6B45;--goodbg:#E6F2EA;--attn:#B45309;--demo:#5B3E8F;--demobg:#F2EEFA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--demo:#C7B3F0;--demobg:#251E33;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--good:#8FCBA4;--goodbg:#1C2E23;--attn:#FCD34D;--demo:#C7B3F0;--demobg:#251E33;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:8px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+h1{font-size:17px;margin:0}
+.hint{color:var(--ink-3);font-size:13px}
+.demo{border:1px dashed var(--demo);background:var(--demobg);border-radius:10px;padding:8px 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px}
+.demo b{color:var(--demo)}
+.demo label{display:inline-flex;gap:5px;align-items:center;cursor:pointer}
+.app{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;height:720px;position:relative}
+.bar{display:flex;gap:14px;align-items:center;background:var(--nav);color:var(--navink);padding:8px 14px;font-size:13px;flex-wrap:wrap}
+.bar b{border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.bar span{opacity:.85}
+.tabs{display:flex;gap:18px;align-items:center;padding:6px 14px;border-bottom:1px solid var(--line);font-size:13.5px;flex-wrap:wrap}
+.tabs button{border:0;background:none;padding:2px 0;color:var(--ink-2)}
+.tabs button[aria-current="true"]{color:var(--ink);font-weight:700;border-bottom:2px solid var(--goldfill)}
+.tabs .rep{background:#A6512A;color:#fff;border-radius:6px;padding:2px 10px}
+.view{flex:1;min-height:0;display:flex;flex-direction:column}
+/* Copilot tab */
+.cop{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px}
+.status{font-size:12.5px;color:var(--ink-3)}
+.status b{color:var(--ink)}
+.grid{flex:1;min-height:0;display:grid;grid-template-columns:170px minmax(0,1fr) 210px;grid-template-rows:auto minmax(0,1fr);gap:0 8px}
+@media (max-width:900px){.grid{grid-template-columns:150px minmax(0,1fr)}.details{display:none}}
+.rail{grid-row:1/3;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;font-size:12.5px;min-height:0}
+.rh{display:flex;align-items:center;gap:6px;padding:8px;font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.rh .sp{flex:1}
+.newc{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:1px 7px;font:600 12px/1.5 var(--sans);text-transform:none;letter-spacing:0;color:var(--ink)}
+.row{background:var(--surface);border:0;border-top:1px solid var(--line);padding:6px 8px;text-align:left;display:flex;flex-direction:column;gap:1px;width:100%}
+.row[aria-current="true"]{box-shadow:inset 3px 0 0 var(--goldfill)}
+.atag{align-self:flex-start;font:700 9.5px/1.6 var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:0 5px;border-radius:4px;background:var(--surface-2);color:var(--ink-2)}
+.row .t{font-weight:600}
+.row small{color:var(--ink-3);font-size:11.5px}
+.strip{grid-column:2/4;display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+@media (max-width:900px){.strip{grid-column:2}}
+.step{flex:1 1 110px;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.step .k{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.step b{font-size:13px}
+.step small{font-size:11.5px;color:var(--ink-3)}
+.step.on{border-left:3px solid var(--good)}.step.on small{color:var(--good)}
+.step.next{box-shadow:0 0 0 2px var(--nav)}.step.next .k{color:var(--ink)}
+.step.side{flex:0 1 120px;border-style:dashed}
+.step[aria-current="true"]{background:var(--surface-2)}
+.main{border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0;min-height:0;overflow:auto}
+.start{padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.start h2{margin:0;font-size:18px;text-wrap:balance}
+.ask{width:min(560px,100%);border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:left;color:var(--ink-3);font-size:13px;min-height:56px}
+.under{width:min(560px,100%);display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--ink-3)}
+.clip{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:1px 8px;font-size:12px;color:var(--ink)}
+.or{width:min(560px,100%);display:flex;align-items:center;gap:10px;color:var(--ink-3);font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.or::before,.or::after{content:"";flex:1;border-top:1px solid var(--line)}
+.or.new{color:var(--demo)}
+.focus{font:700 11px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.focus small{font:400 12px/1.4 var(--sans);letter-spacing:0;text-transform:none;color:var(--ink-3);margin-left:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;width:min(560px,100%)}
+.pcard{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.pcard:hover{border-color:var(--gold)}
+.pcard .tag{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.pcard b{font-size:13.5px}
+.pcard small{color:var(--ink-2);font-size:12.5px}
+.pcard .meta{color:var(--gold);font-size:11.5px}
+.pcard.plan{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.alldone{width:min(560px,100%);border:1px solid var(--line);border-left:3px solid var(--good);border-radius:8px;padding:8px 12px;background:var(--goodbg);font-size:13px;text-align:left}
+/* Details, on the right */
+.details{border:1px solid var(--line);border-radius:8px;background:var(--surface);display:flex;flex-direction:column;min-height:0;overflow:auto;font-size:12.5px}
+.details h4{margin:0;padding:8px 10px;font:700 10.5px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);display:flex;gap:6px}
+.details h4 span{font-weight:400;letter-spacing:0;text-transform:none}
+.todo{padding:6px 10px 10px;display:flex;flex-direction:column;gap:4px}
+.todo div{display:flex;gap:6px;align-items:flex-start}
+.dot{width:9px;height:9px;border-radius:50%;border:1px solid var(--line);margin-top:4px;flex:none}
+.dot.done{background:var(--good);border-color:var(--good)}
+.deliv{padding:7px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:1px}
+.deliv.this{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--goldfill)}
+.deliv small{color:var(--ink-3)}
+.chip{align-self:flex-start;font:600 10.5px/1.5 var(--sans);padding:0 6px;border-radius:8px;background:var(--goodbg);color:var(--good)}
+/* an open chat */
+.chatv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:100%}
+.conv{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0}
+.ch{padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px;display:flex;gap:6px;align-items:baseline}
+.ch small{color:var(--ink-3)}
+.msgs{flex:1;padding:10px;display:flex;flex-direction:column;gap:10px}
+.who{font-size:11px;color:var(--ink-3);margin-bottom:2px}
+.ai{border-left:3px solid var(--goldfill);padding:2px 10px;font-size:13px}
+.me{align-self:flex-end;max-width:85%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:13px}
+.box{margin:8px 10px 10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink-3);font-size:13px}
+.work{background:var(--surface-2);padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12.5px}
+.card h3{margin:0 0 4px;font-size:13px}
+/* Strategy tab + panel */
+.secrow{display:flex;gap:10px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.secseg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.secseg button{border:0;background:var(--surface);padding:4px 12px;font-size:12.5px;color:var(--ink-2)}
+.secseg button[aria-pressed="true"]{background:#3D4552;color:#fff;font-weight:600}
+.secrow .sp{flex:1}
+.copb{border:1px solid var(--gold);background:var(--surface);color:var(--gold);border-radius:16px;padding:3px 12px;font-weight:600;font-size:12.5px}
+.copb[aria-pressed="true"]{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.edit{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 12px;font-size:12.5px;font-weight:600}
+.splan{flex:1;min-height:0;position:relative;display:flex}
+.page{flex:1;min-width:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:24px;text-align:center;color:var(--ink-3)}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qbox{border:1px solid var(--line);border-top:3px solid var(--good);border-radius:8px;padding:8px 10px;font-size:12.5px}
+.qbox h5{margin:0 0 4px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.qbox li.new{background:var(--goodbg);font-weight:600}
+.panel{position:relative;flex:none;border-left:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-width:0}
+.panel.wide{position:absolute;inset:0;width:auto!important;z-index:5}
+.grip{position:absolute;left:-4px;top:0;bottom:0;width:8px;cursor:col-resize;z-index:6}
+.grip::after{content:"";position:absolute;left:3px;top:50%;width:2px;height:40px;margin-top:-20px;border-radius:2px;background:var(--line)}
+.grip:hover::after,.grip.drag::after{background:var(--gold)}
+.phd{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.phd small{display:block;color:var(--ink-3);font-size:12px}
+.phd .sp{flex:1}
+.ib{border:1px solid var(--line);background:var(--surface);border-radius:6px;width:28px;height:26px;display:inline-grid;place-items:center;color:var(--ink-2);font-size:13px}
+.x{border:0;background:none;font-size:20px;color:var(--ink-3)}
+.pbody{flex:1;min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.notbuilt{border:1px solid var(--line);border-radius:8px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:8px}
+.notbuilt b{font-size:14px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 12px;font-weight:600;font-size:12.5px;align-self:flex-start}
+.btn.solid{background:var(--nav);color:var(--navink);border-color:var(--nav)}
+.linkbu{border:0;background:none;color:var(--nav);text-decoration:underline;padding:0;font-size:12.5px}
+:root[data-theme="dark"] .linkbu{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .linkbu{color:var(--gold)}}
+.apply{display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px;border:1px solid var(--goldfill);border-radius:8px;font-size:12.5px}
+.apply .sp{flex:1}
+.wnote{font-size:11.5px;color:var(--ink-3)}
+.notes{font-size:13px;color:var(--ink-2);max-width:86ch;margin:0;padding-left:18px}
+.notes li{margin:3px 0}
+.notes b{color:var(--ink)}
+</style>
+
+<div><h1>Copilot — Build only, Details on the right, the plan panel</h1><span class="hint">working mockup · drawn before building · tick what CE’s plan holds</span></div>
+<div class="demo" id="demo"></div>
+<div class="app">
+  <div class="bar"><span>Group</span><span>Mobile</span><b>CE</b><span>Logistics</span></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="view" id="view"></div>
+</div>
+<ul class="notes">
+  <li><b>The strip reads the plan itself</b> — a plan made on the platform, not in the Copilot, counts (“On the plan · 4 parts”). Untick parts above: the next step is the first one missing.</li>
+  <li><b>Build only.</b> No Refine toggle; one line says how many parts are on the plan. Only the step in focus shows its cards — no “Other areas”; the strip moves between steps.</li>
+  <li><b>“Or choose another way to start”</b> over the cards, so the box and the attachment read as ways in too.</li>
+  <li><b>Details on the right:</b> the to-do (when a chat is open) and the deliverables, this chat’s marked. Chats only on the left.</li>
+  <li><b>On the plan:</b> ✦ Copilot on an empty part sends you to build it in the Copilot; on a full part it opens the “say what to change” chat. Drag the panel’s left edge to resize (double-click resets); ⤢ takes the page.</li>
+</ul>
+
+<script>
+(function(){
+  var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); };
+  var P = [
+    { k:"foundation", w:"Foundation", s:"Foundation", sec:"found", held:"4 parts", cards:[["Answer guided questions","I ask a few questions and draft your Foundation."],["Use a template","Download an interview template, fill it in, upload it back."]] },
+    { k:"analysis", w:"SWOT", s:"SWOT", sec:"swot", held:"23 lines", cards:[["SWOT, step by step","The internal, micro and macro analyses, then the SWOT."]] },
+    { k:"compete", w:"Competitive Discipline", s:"Discipline", sec:"", held:"Best Total Cost · 3 values", cards:[["Score the value disciplines","Market and internal factors, then the value proposition."]] },
+    { k:"directions", w:"Pillars/Directions", s:"Pillars", sec:"plan", held:"4 Directions", cards:[["Suggest and score Directions","Scored Urgency × Importance × Ease."]] },
+    { k:"execution", w:"Tactical Plans", s:"Tactical Plans", sec:"plan", held:"4 items with tactics", cards:[["Build from the Directions","The period, then measures and tactics for each Direction."]] }
+  ];
+  var init = function(){ return { has:{ foundation:true, analysis:true, compete:true, directions:true, execution:true }, tab:"copilot", focus:"", chat:"", strat:"found", panel:false, panelArea:"directions", width:380, wide:false, step:0, applied:false }; };
+  var S = init();
+  var by = function(k){ return P.filter(function(p){ return p.k === k; })[0]; };
+  var missing = function(){ return P.filter(function(p){ return !S.has[p.k]; }); };
+  var next = function(){ var m = missing(); return m.length ? m[0].k : ""; };
+  function demo(){
+    document.getElementById("demo").innerHTML = '<b>Demo — what CE’s plan holds (made on the platform, not in the Copilot):</b>' + P.map(function(p){ return '<label><input type="checkbox" data-has="' + p.k + '"' + (S.has[p.k] ? " checked" : "") + '> ' + esc(p.w) + '</label>'; }).join("") + '<button class="btn" data-reset style="margin-left:auto">Start over</button>';
+  }
+  function tabs(){ document.getElementById("tabs").innerHTML = '<button data-tab="strategy" aria-current="' + (S.tab === "strategy") + '">Strategy</button><button>Performance</button><span class="rep">Reporting</span><button>Insights</button><button data-tab="copilot" aria-current="' + (S.tab === "copilot") + '">Copilot</button>'; }
+  var DELIVS = [{ a:"analysis", t:"SWOT — CE", m:"v2 · on the plan" }, { a:"foundation", t:"Foundation — CE", m:"v1 · saved" }, { a:"advisory", t:"Pricing decision", m:"v1 · stays in the Copilot" }];
+  function details(withTodo){
+    var a = S.focus || next() || "foundation";
+    return '<aside class="details">' + (withTodo ? '<h4>To-do <span>2 of 5</span></h4><div class="todo">' + [["Methods",1],["Analyses",1],["The SWOT",0],["Check",0],["Save",0]].map(function(x){ return '<div><span class="dot' + (x[1] ? " done" : "") + '"></span>' + x[0] + '</div>'; }).join("") + '</div>' : '') +
+      '<h4>Deliverables</h4>' + DELIVS.map(function(d){ var mine = withTodo && d.a === "analysis";
+        return '<div class="deliv' + (mine ? " this" : "") + '"><span class="atag">' + esc(d.a === "advisory" ? "Advisory" : by(d.a).s) + '</span><b>' + esc(d.t) + '</b><small>' + esc(d.m) + (mine ? ' · this chat saves v3' : '') + '</small>' + (/on the plan/.test(d.m) ? '<span class="chip">On the plan</span>' : '') + '</div>'; }).join("") + '</aside>';
+  }
+  function strip(){
+    var n = next(), cur = S.focus || n, i = 0;
+    return '<div class="strip">' + P.map(function(p){ i++; var on = S.has[p.k];
+      return '<button class="step' + (on ? " on" : "") + (p.k === n ? " next" : "") + '" data-focus="' + p.k + '"' + (cur === p.k ? ' aria-current="true"' : '') + '><span class="k">' + (p.k === n ? "Next · step " : "Step ") + i + '</span><b>' + esc(p.w) + '</b><small>' + (on ? "On the plan · " + esc(p.held) : "Not started") + '</small></button>'; }).join("") +
+      '<button class="step side" data-focus="advisory"' + (cur === "advisory" ? ' aria-current="true"' : '') + '><span class="k">Beside the plan</span><b>Advisory</b><small>1 brief</small></button></div>';
+  }
+  function startScreen(){
+    var n = next(), a = S.focus || n, p = a === "advisory" ? { w:"Advisory", cards:[["Bring a decision","A few questions, then a decision brief."]] } : a ? by(a) : null;
+    var h = '<div class="start"><h2>What would you like to do with CE’s strategy?</h2><div class="ask">Ask anything, attach your notes, or paste finished work…</div><div class="under"><span class="clip">📎 Attach notes</span>Word, PDF or Excel · or paste · Enter sends</div>';
+    if (!p) return h + '<div class="alldone"><b>Every part is on the plan.</b> Refine any part from ✦ Copilot on the Strategy tab — or press a step above to work on it here.</div></div>';
+    var cards = (a !== "advisory" && S.has[a] ? '<button class="pcard plan" data-open="' + a + '"><span class="tag">On the plan today</span><b>Start from existing</b><small>Load what is on the plan and change any part. The plan moves only on Apply.</small><span class="meta">CE’s ' + esc(p.w) + ' · ' + esc(p.held) + '</span></button>' : '') +
+      p.cards.map(function(c){ return '<button class="pcard" data-open="' + a + '"><b>' + esc(c[0]) + '</b><small>' + esc(c[1]) + '</small></button>'; }).join("");
+    return h + '<div class="or new">Or choose another way to start</div><div class="focus">' + (a === n ? "Next step · " : "") + esc(p.w) + '<small>' + (a !== "advisory" && S.has[a] ? "On the plan · " + esc(p.held) : a === "advisory" ? "1 brief" : "Not started") + '</small></div><div class="cards">' + cards + '</div></div>';
+  }
+  function chatView(){
+    return '<div class="chatv"><div class="conv"><div class="ch"><b>SWOT — CE</b><small>· The SWOT</small></div><div class="msgs"><div class="me">Start from existing</div><div class="ai"><div class="who">Copilot</div>CE’s SWOT is loaded — 23 lines. Say what to change: move a line, drop one, reword one.</div></div><div class="box">Say what to change…</div></div>' +
+      '<div class="work"><div class="card"><h3>Strengths</h3>Local manufacturing · Nationwide reach · Brand portfolio</div><div class="card"><h3>Threats</h3>Grey market · Margin pressure · Vendor direct sales</div></div></div>';
+  }
+  function copilotTab(){
+    var have = P.length - missing().length;
+    return '<div class="cop"><div class="status"><b>' + have + ' of ' + P.length + '</b> parts on CE’s plan</div><div class="grid">' +
+      '<aside class="rail"><div class="rh">Chats <span class="sp"></span><button class="newc" data-home>+ New chat</button></div>' +
+        '<button class="row" data-chat="swot"' + (S.chat ? ' aria-current="true"' : '') + '><span class="atag">SWOT</span><span class="t">SWOT — CE</span><small>Islam · today · 2 of 5 done</small></button>' +
+        '<div class="row"><span class="atag">Foundation</span><span class="t">Foundation — CE</span><small>Islam · 17 Nov 26 · Guided</small></div></aside>' +
+      strip() + '<div class="main">' + (S.chat ? chatView() : startScreen()) + '</div>' + details(!!S.chat) + '</div></div>';
+  }
+  function strategyTab(){
+    var sec = S.strat, partOf = { found:"foundation", swot:"analysis", plan:S.panelArea, drivers:"" }[sec], has = partOf ? S.has[partOf] : false;
+    var page;
+    if (sec === "plan" && !S.has.directions) page = '<div class="empty">CE has no pillars yet.</div>';
+    else if (sec === "found" && !S.has.foundation) page = '<div class="empty">CE’s Foundation is empty.</div>';
+    else if (sec === "swot" && !S.has.analysis) page = '<div class="empty">CE has no SWOT yet.</div>';
+    else if (sec === "swot") page = '<div class="quad">' + [["Strengths",["Local manufacturing","Nationwide reach"]],["Weaknesses",["Low margin on devices"]],["Opportunities",["Accessories market"]],["Threats",["Grey market"].concat(S.applied ? ["Vendor direct sales to retailers"] : [])]].map(function(q){ return '<div class="qbox"><h5>' + q[0] + '</h5><ol style="margin:0;padding-left:16px">' + q[1].map(function(l){ return '<li' + (S.applied && /Vendor direct/.test(l) ? ' class="new"' : '') + '>' + esc(l) + '</li>'; }).join("") + '</ol></div>'; }).join("") + '</div>';
+    else if (sec === "plan") page = '<div class="card"><h3>CE01 · Grow the accessories business</h3>Key measures 3 · Tactics 4</div><div class="card"><h3>CE02 · Local manufacturing at scale</h3>Key measures 2 · Tactics 3</div>';
+    else if (sec === "found") page = '<div class="card"><h3>Purpose</h3>Technology every Egyptian home can afford.</div><div class="card"><h3>Values</h3>Customer first · Plain dealing · Own the outcome</div>';
+    else page = '<div class="empty">CE’s Drivers.</div>';
+    var panel = "";
+    if (S.panel) {
+      var word = { found:"Foundation", swot:"SWOT", plan:"Plan", drivers:"Drivers" }[sec], area = partOf ? by(partOf).w : "";
+      var body;
+      if (!partOf) body = '<div class="notbuilt">The Copilot works on the Foundation, the SWOT and the Plan here.</div>';
+      else if (!has) body = '<div class="notbuilt"><b>CE’s ' + esc(area) + ' isn’t built yet.</b><span>Build it step by step in the Copilot — the strip, the to-do and the order are there.</span><button class="btn solid" data-build="' + partOf + '">Build it in the Copilot</button></div>';
+      else body = '<div class="ai"><div class="who">Copilot</div>CE’s ' + esc(area) + ' is loaded — what it holds today. Say what to change.</div>' +
+        (S.step >= 1 ? '<div class="me">Add vendors selling direct to retailers as a threat</div><div class="ai"><div class="who">Copilot</div>+ Threats: Vendor direct sales to retailers' + (S.step === 1 ? '<div class="apply"><span>1 added</span><span class="sp"></span><button class="btn solid" data-apply>Apply to plan</button></div>' : '') + '</div>' : '') +
+        (S.step >= 2 ? '<div class="ai"><div class="who">Copilot</div><b>v3</b> is on the plan — marked on the left.</div>' : '') +
+        (S.step === 0 && sec === "swot" ? '<button class="btn" data-say>Try: “Add vendors selling direct as a threat”</button>' : '') +
+        '<button class="linkbu" data-build="' + partOf + '" style="align-self:flex-start">Build it again step by step</button>';
+      panel = '<aside class="panel' + (S.wide ? " wide" : "") + '" id="panel" style="width:' + S.width + 'px">' + (S.wide ? '' : '<div class="grip" id="grip" title="Drag to resize · double-click to reset"></div>') +
+        '<div class="phd"><div><b>✦ Copilot</b><small>' + esc(word) + ' · CE</small></div><span class="sp"></span>' +
+        (sec === "plan" ? '<span class="secseg">' + [["directions","Pillars/Directions"],["execution","Tactical Plans"]].map(function(x){ return '<button data-pa="' + x[0] + '" aria-pressed="' + (S.panelArea === x[0]) + '">' + x[1] + '</button>'; }).join("") + '</span>' : '') +
+        '<button class="ib" data-wide title="' + (S.wide ? "Minimize" : "Expand") + '">' + (S.wide ? "⤡" : "⤢") + '</button><button class="x" data-close aria-label="Close">×</button></div><div class="pbody">' + body + '</div>' +
+        (partOf && has ? '<div class="box">Say what to change…</div>' : '') + '</aside>';
+    }
+    return '<div class="secrow"><span class="secseg">' + [["found","Foundation"],["swot","SWOT"],["drivers","Drivers"],["plan","Plan"]].map(function(x){ return '<button data-strat="' + x[0] + '" aria-pressed="' + (sec === x[0]) + '">' + x[1] + '</button>'; }).join("") + '</span><span class="sp"></span><button class="copb" data-copb aria-pressed="' + S.panel + '">✦ Copilot</button><button class="edit">Edit</button></div>' +
+      '<div class="splan"><div class="page">' + page + '</div>' + panel + '</div>';
+  }
+  function draw(){ demo(); tabs(); document.getElementById("view").innerHTML = S.tab === "copilot" ? copilotTab() : strategyTab(); wireGrip(); }
+  function wireGrip(){
+    var g = document.getElementById("grip"), pn = document.getElementById("panel"); if (!g || !pn) return;
+    g.addEventListener("dblclick", function(){ S.width = 380; pn.style.width = "380px"; });
+    g.addEventListener("pointerdown", function(e){
+      e.preventDefault(); g.setPointerCapture(e.pointerId); g.classList.add("drag");
+      var host = pn.parentNode.getBoundingClientRect();
+      var move = function(ev){ var w = Math.round(host.right - ev.clientX); w = Math.max(300, Math.min(host.width - 160, w)); S.width = w; pn.style.width = w + "px"; };
+      var up = function(){ g.classList.remove("drag"); g.removeEventListener("pointermove", move); g.removeEventListener("pointerup", up); };
+      g.addEventListener("pointermove", move); g.addEventListener("pointerup", up);
+    });
+  }
+  document.addEventListener("change", function(e){ var c = e.target.closest("[data-has]"); if (c) { S.has[c.getAttribute("data-has")] = c.checked; S.focus = ""; draw(); } });
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-reset")) { S = init(); draw(); return; }
+    if (b.hasAttribute("data-tab")) { S.tab = b.getAttribute("data-tab"); draw(); return; }
+    if (b.hasAttribute("data-focus")) { S.focus = b.getAttribute("data-focus"); S.chat = ""; draw(); return; }
+    if (b.hasAttribute("data-home")) { S.chat = ""; draw(); return; }
+    if (b.hasAttribute("data-chat") || b.hasAttribute("data-open")) { S.chat = "swot"; draw(); return; }
+    if (b.hasAttribute("data-strat")) { S.strat = b.getAttribute("data-strat"); S.step = 0; S.applied = false; draw(); return; }
+    if (b.hasAttribute("data-copb")) { S.panel = !S.panel; S.wide = false; draw(); return; }
+    if (b.hasAttribute("data-close")) { S.panel = false; S.wide = false; draw(); return; }
+    if (b.hasAttribute("data-wide")) { S.wide = !S.wide; draw(); return; }
+    if (b.hasAttribute("data-pa")) { S.panelArea = b.getAttribute("data-pa"); draw(); return; }
+    if (b.hasAttribute("data-build")) { S.tab = "copilot"; S.focus = b.getAttribute("data-build"); S.chat = ""; S.panel = false; draw(); return; }
+    if (b.hasAttribute("data-say")) { S.step = 1; draw(); return; }
+    if (b.hasAttribute("data-apply")) { S.step = 2; S.applied = true; draw(); return; }
+  });
+  draw();
+})();
+</script>

@@ -344,6 +344,14 @@
      below the fold — and it is exactly what made the page run 60px past the
      window and slide the rail, with its pinned head, under the chrome. */
   .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
+  /* §774.1: and under ANY rail beside a pane, for the reason written at
+     --page-foot (group-extra.css): the rail is capped against --pane-foot, so
+     a page foot of 80 is 60px the pane scrolls past the rail — which pushed
+     the pinned rail up under the chrome at the page's end (Islam: *"on
+     scrolling in the direction box the left directions pane shouldn't
+     scroll"*) and left an empty band below the boxes (*"there is space in
+     the bottom of the page below the boxes"*). */
+  .wrap:has(.split) { padding-bottom:var(--pane-foot, 20px); }
 
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
@@ -1919,6 +1927,24 @@ html[data-client-settings] .viewer { display:none; }
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
     position:sticky; top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px));
     align-self:start; }
+  /* §774: THE RAIL IS NEVER TALLER THAN THE WINDOW. Islam, from the built
+     page: *"there shouldn't be a scrolled down area like this, the page
+     should be well contained, even for the left pane of the directions"* —
+     with the pen on, a short tactics list left the rail of fifteen
+     directions hanging below the direction's card, and the page ran on past
+     it with nothing beside. The head stays and the list scrolls, the Setup
+     rail's own shape (§108.5, config.css): the cap is safe for the reason
+     written there — `--chrome-h` is a constant since the condense went in
+     v3.3, so nothing above the rail moves when the rail gets shorter. The
+     list contains its own overscroll, so reaching its end never moves the
+     page (the wireframe's second point). */
+  @media (min-width:1201px) {   /* the rail beside the pane; squeezed, it is the strip across the top (§162) and keeps its own rules */
+    .rail:not(.setuprail) { display:flex; flex-direction:column; overflow:visible;   /* visible, not hidden: the rail's filter menu pops out past its edge and was cut off (§775.3); the list below is the one that scrolls */
+      max-height:calc(var(--wind) - var(--chrome-h, 118px) - var(--rail-gap, 12px) - var(--pane-foot, 20px));
+      min-height:260px; }
+    .rail:not(.setuprail) > .rhead, .rail:not(.setuprail) > .railadd { flex:none; }
+    .rail:not(.setuprail) > .sortable { overflow-y:auto; min-height:0; overscroll-behavior:contain; }
+  }
 
   /* ZERO TRAVEL. A sticky element sits where the flow puts it until scrolling
      carries it up to its offset, and only then pins - so if the flow puts it
@@ -2012,6 +2038,40 @@ html[data-client-settings] .viewer { display:none; }
   .railterse.on { color:var(--gold); }
   /* The panel's own quiet ink. --none on the panel is 2.6:1 (§38.5). */
   .rail .rhead span { color:var(--panel-quiet); font-weight:600; }
+  /* ── §771 · THE HEAD'S BUTTON OPENS THE RAIL'S OPTIONS ──────────────
+     The ≡ that WAS the terse switch (§60) opens a menu that holds it, and
+     on a list whose years are marked, a tick per year (group-render.js,
+     railHead). The panel is `.hmenu-panel` (config.css) anchored to the
+     button's LEFT, because the head is 196px wide and the panel is not.
+     A gold dot on the button says a year is unticked — the same lit-gold
+     the terse switch wears, ringed in the head's own panel colour so it
+     reads on a lit button too. The count "5 of 9" sits in the head's own
+     line here, and beside the button on the strip (below). */
+  .rail .rhead .railopts { position:relative; display:inline-flex; align-items:center; gap:6px; }
+  .rail .rhead .rof { font-weight:400; font-style:normal; font-size:10.5px; letter-spacing:0;
+    text-transform:none; color:var(--panel-quiet); }
+  .rail .rhead .rof.strip { display:none; }
+  .railterse { position:relative; }
+  .railterse.filtered::after { content:""; position:absolute; top:-2px; right:-2px;
+    width:6px; height:6px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 0 1.5px var(--panel); }
+  .rail .railopts .hmenu-panel { left:0; right:auto; width:238px; transform-origin:top left;
+    letter-spacing:0; text-transform:none; font-weight:400; }
+  /* The panel is wider than the rail and the pane comes later in the
+     document, so while the menu is open the rail rises above the pane's
+     own layer (its corner acts sit at 5) and stays under the chrome's 9. */
+  .rail:has(.railopts.open) { z-index:7; }
+  .railopt { display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:var(--r-sm);
+    cursor:pointer; font:400 12.5px/1.35 var(--sans); color:var(--ink); }
+  .railopt:hover { background:var(--surface-2); }
+  .railopt input { accent-color:var(--good); width:14px; height:14px; margin:0; flex:none; }
+  .railopt i { font-style:normal; color:var(--ink-3); margin-left:4px; }
+  .railopt small { margin-left:auto; color:var(--ink-3); font-size:11px;
+    font-variant-numeric:tabular-nums; }
+  .railopt.held { cursor:not-allowed; }
+  .railopt.held input { opacity:.45; }
+  .railopt-h { padding:6px 8px 2px; font:700 10px/1 var(--sans); letter-spacing:.13em;
+    text-transform:uppercase; color:var(--ink-3); }
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
@@ -2096,6 +2156,9 @@ html[data-client-settings] .viewer { display:none; }
     margin:calc(var(--pane-pad) * -1) -18px 15px;
     border-radius:var(--r) var(--r) 0 0;
     box-shadow:inset 3px 0 0 var(--gold), 0 1px 0 var(--line);
+    /* §774: a clear line on the band's top edge (Islam: "why not a clear
+       line?") — the pane's own hairline was all that marked it. */
+    border-top:1px solid var(--field-line);
     padding-left:18px; }
   /* THE GAP ABOVE A PINNED HEADER IS A WINDOW. The band pins `--rail-gap`
      below the chrome, so once the pane's own top has scrolled away there is a
@@ -2115,6 +2178,23 @@ html[data-client-settings] .viewer { display:none; }
   .pane > .pband::before {
     content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
+  /* ── §771 · A TABLE'S HEAD PINS UNDER THE BAND ──────────────────────
+     Islam: *"freeze both headers"* — the band above and the plan tables'
+     own navy heads. `--band-h` is the band's measured height (shell.html,
+     stickWatch), because a wrapped name makes it taller; the rest of the
+     offset is the band's own. z-index 3: under the band's 4, over the rows.
+
+     ONLY WHILE THE TABLE FITS (`fits`, set by the shell): a `.scroll` is an
+     `overflow:auto` box, and a sticky head inside one pins to the box, not
+     the window (§273.1). So a table that needs no sideways scroll has its
+     wrapper opened and its head pinned; one wider than its pane keeps its
+     scroll box and its head scrolls away with it, as it always did. */
+  #panel .pane .scroll.fits, #panel .pane .tblscroll.fits { overflow-x:visible; }
+  #panel .pane .tblscroll.fits thead th { position:sticky; z-index:3;
+    top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px + var(--band-h, 0px)); }
+  /* Not inside the tactic panel (§773): it is pinned itself and scrolls
+     inside, so its tables' heads stay in their flow (§775.3). */
+  #panel .pane .tacpanel .tblscroll thead th { position:static; top:auto; }
   /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§130.3) ─────────────
      Islam: "the title has round corners so the scrolled up appears in the
      right and left top corners." Measured before touching it: 13px² of the
@@ -2289,6 +2369,7 @@ html[data-client-settings] .viewer { display:none; }
   .pane .ptitle.edhead {
     position:sticky; z-index:4;
     top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px);
+    border-top:1px solid var(--field-line);   /* §774: the same clear line as the band's */
     background:var(--surface-2);
     margin:calc(var(--pane-pad) * -1) -18px 14px;
     padding:11px 18px 11px 18px;
@@ -2473,7 +2554,29 @@ html[data-client-settings] .viewer { display:none; }
         radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px),
           var(--ground) var(--r)) right 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
         linear-gradient(var(--ground), var(--ground)) left bottom / 100% var(--split-gap, 16px) no-repeat; }
-    .rail:not(.setuprail) .rhead, .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
+    .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
+    /* §771: THE HEAD KEEPS ITS BUTTON ON THE STRIP. The word and the count
+       stay hidden as §609 left them; the ≡ stands in its own cell at the
+       strip's left end, in the strip's quiet ink rather than the panel's,
+       and "5 of 9" beside it only while a year is unticked. The detail
+       switch is left out of the menu here: a strip has no detail line to
+       switch (`.rsub` is hidden two rules down). */
+    .rail:not(.setuprail) .rhead { flex:none; display:flex; align-items:center; gap:4px;
+      padding:0 8px 0 10px; background:none; color:var(--ink-3);
+      border-right:1px solid var(--line); letter-spacing:0; text-transform:none; }
+    .rail:not(.setuprail) .rhead .rhl { display:none; }
+    .rail:not(.setuprail) .rhead span { color:var(--ink-3); }
+    .rail:not(.setuprail) .rhead .rof.strip { display:inline; white-space:nowrap; }
+    .rail:not(.setuprail) .railterse { color:var(--ink-3); margin:0; padding:4px;
+      border:1px solid transparent; }
+    .rail:not(.setuprail) .railterse.on { color:var(--ink-3); }
+    .rail:not(.setuprail) .railterse:hover,
+    .rail:not(.setuprail) .railopts.open .railterse { color:var(--ink); background:var(--surface-2);
+      border-color:var(--line); }
+    .rail:not(.setuprail) .railterse.filtered::after { box-shadow:0 0 0 1.5px var(--surface); }
+    .rail:not(.setuprail) .railopts .hmenu-panel { top:calc(100% + 9px); }
+    .rail:not(.setuprail) .railopt:has([data-railterse]),
+    .rail:not(.setuprail) .railopt:has([data-railterse]) + .hmenu-sep { display:none; }
     /* ONE ROW, AND THE NAMES WRAP RATHER THAN RUN OFF THE END (§609). Islam:
        *"the text needs to wrap"*. A flex row of the item's own parts in their
        own order — handle, code, name, years, Missing, score — so every rail
@@ -2572,10 +2675,26 @@ html[data-client-settings] .viewer { display:none; }
        editing — the band §53.7 pinned and the head §194 pinned in its place.
        Not sticky means it never leaves its flow position, so `pinWatch()`
        never marks it and its corner fill (§130.6) never paints. */
+    /* §771 UNDOES THAT, ON ISLAM'S WORD: *"the header needs to stay freezed
+       on scrolling down"* — *"freeze both headers"*. The band and the
+       editing head pin again, UNDER the strip: the strip's own offset, plus
+       its measured height (`--strip-h`, shell.html — the names wrap to one,
+       two or three lines), plus the gutter §618 keeps under it, plus the
+       pane's border, exactly as the wide rule adds its 1px. The ground
+       above the band is the gutter's depth now rather than the rail gap's,
+       so pinned, the plan slides into page ground under the strip and
+       nothing shows through the seam. The table heads take the same
+       offset, plus the band's. */
     .split:not(.setupsplit) > .pane > .pband,
-    .split:not(.setupsplit) > .pane > .ptitle.edhead { position:relative; top:auto; }
+    .split:not(.setupsplit) > .pane > .ptitle.edhead {
+      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + var(--strip-h, 0px) +
+               var(--split-gap, 16px) + 1px); }
     .split:not(.setupsplit) > .pane > .pband::before,
-    .split:not(.setupsplit) > .pane > .ptitle.edhead::before { display:none; }
+    .split:not(.setupsplit) > .pane > .ptitle.edhead::before {
+      height:calc(var(--split-gap, 16px) + 2px); }
+    #panel .split:not(.setupsplit) > .pane .tblscroll.fits thead th {
+      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + var(--strip-h, 0px) +
+               var(--split-gap, 16px) + 1px + var(--band-h, 0px)); }
   }
 
   /* The Report section in the third row. Gold while a cycle is asking for
@@ -6042,6 +6161,81 @@ tr.acoffice td { background:var(--surface-2); }
 .acland-opt:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 .cfg.acgrid.acgrid-ladder td.acmeans b { display:inline; }
 
+/* ══ THE SHAPE OF A SETUP TABLE IS THE READER'S OWN (§754, tablecols.js) ════
+   The table keeps every rule it had — the tenant's heading, the grid, the
+   zebra, the frozen pair. These add the edge you drag, the ghost of a column
+   being moved, the line where it lands, the pixel label, the row heights and
+   the status line under the table. Nothing here changes a table nobody has
+   touched. */
+  .tc-host { position:relative; }
+  /* A positioned heading, for the edge inside it. The frozen pair is sticky
+     by more specific rules (`.tblscroll th.idx + th`, `.peoplecfg thead
+     th.namecell`) and sticky is positioned, so those keep theirs. */
+  th.tcth { position:relative; }
+  th.tcmove { cursor:grab; }
+  .tcgrip { position:absolute; top:0; right:-5px; width:11px; height:100%; cursor:col-resize;
+            z-index:3; touch-action:none; }
+  .tcgrip::after { content:""; position:absolute; top:6px; bottom:6px; left:4px; width:2px;
+                   border-radius:2px; background:transparent; }
+  .tcgrip:hover::after, .tcgrip.on::after { background:var(--gold); }
+  thead th.tcth:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .tc-hidden { display:none !important; }
+  /* While a column is being moved: the original dims, a ghost follows the
+     pointer, a line marks the drop. The ghost is the column itself — its
+     heading and its cells at their own heights — so it reads as the thing
+     being carried rather than a label of it. */
+  .tc-dragging, .tc-dragging th.tcmove { cursor:grabbing; user-select:none; }
+  .tc-lifted { opacity:.35; }
+  .tcghost { position:absolute; left:0; z-index:40; pointer-events:none; background:var(--surface);
+             box-shadow:0 12px 30px rgba(0,0,0,.18); border-radius:var(--r-sm); overflow:hidden; opacity:.96; }
+  .tcghost table { width:100%; min-width:0; table-layout:fixed; }
+  .tcghost td, .tcghost th { position:static !important; }
+  .tcdrop { position:absolute; left:0; width:2px; z-index:41; background:var(--gold-deep); pointer-events:none; display:none; border-radius:2px; }
+  .tcdrop::before { content:""; position:absolute; top:-1px; left:-3px; width:8px; height:8px; border-radius:50%; background:var(--gold-deep); }
+  .tctip { position:absolute; z-index:42; transform:translateX(-50%); font:600 11px/1 var(--mono);
+           color:var(--on-accent); background:var(--gold); padding:4px 7px; border-radius:5px;
+           pointer-events:none; white-space:nowrap; }
+  /* The measuring copy a fit reads: laid out at its own width, never seen. */
+  .tcmeasure { position:absolute; left:0; top:0; visibility:hidden; width:max-content; white-space:nowrap;
+               display:inline-block; pointer-events:none; }
+  .tcmeasure b, .tcmeasure .why, .tcmeasure .val { display:block; width:max-content; max-width:none; overflow:visible; }
+  /* Row height. Comfortable and Compact are steps either side of each table's
+     own padding (6px on the units, 5px on the register), written at a
+     specificity that beats both without naming either. */
+  .cfg table.tc-comfortable td { padding-top:12px; padding-bottom:12px; }
+  .cfg table.tc-compact td { padding-top:3px; padding-bottom:3px; }
+  .cfg table.tc-compact td .why { margin-top:1px; }
+  /* The table laid out from stored widths: the sum is its width, so a column
+     made narrower is seen narrower (the spare room goes to the name column). */
+  .cfg table.tc-sized { min-width:0; }
+  /* The menu's own rows: the width beside a column, the row-height switch, the way back. */
+  /* Wider than the register's chooser was: the row-height switch needs the room. */
+  .hmenu-panel.cols.tcpanel { width:272px; }
+  .tcpanel .colrow .lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tcpanel .colrow .px { font:400 11px/1 var(--mono); color:var(--ink-3); }
+  .tcpanel .colrow.locked { cursor:default; color:var(--ink-3); }
+  .tcpanel .colrow.locked:hover { background:none; }
+  .tcmenu .hmenu-btn { position:relative; }
+  .tccount { position:absolute; top:-7px; right:-7px; font:600 9.5px/1 var(--mono); color:var(--ink-2);
+             background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:2px 4px; }
+  .hmenu.open .tccount { background:var(--surface); border-color:var(--gold); color:var(--gold-deep); }
+  .tcrows { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 9px; }
+  .tcrows-l { font:700 10px/1 var(--sans); letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); }
+  .tcrows .segsw .seg { padding:5px 9px; font-size:11.5px; }
+  .tcback { display:flex; flex-direction:column; gap:6px; padding:4px 9px 6px; }
+  .tcback .linkbu { align-self:flex-start; font-size:11.5px; }
+  .tcback .linkbu[disabled] { color:var(--ink-3); cursor:default; text-decoration:none; opacity:.7; }
+  .tcback .hmenu-note { padding:0; }
+  /* The line under the table: what is shown, and the keys. */
+  .tcfoot { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px 16px;
+            font-size:11.5px; color:var(--ink-3); padding:8px 2px 0; }
+  .tcfoot b { color:var(--ink); font-weight:700; }
+  .tcchanged { color:var(--gold-deep); }
+  .tckeys { display:flex; flex-wrap:wrap; gap:3px 9px; align-items:center; }
+  .tckeys kbd { font:600 10px/1 var(--mono); color:var(--ink-2); background:var(--surface);
+                border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:2px 4px; margin-right:1px; }
+  @media (max-width:900px) { .tckeys { display:none; } }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -7110,6 +7304,36 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
                  align-items:baseline; padding:5px 0; font-size:13.5px; }
   .swot-n { font-family:var(--mono); font-size:11.5px; color:var(--none);
             font-variant-numeric:tabular-nums; }
+  /* §757: a line's title bold, its points one under the other. §757.1: a
+     point is a block with the bullet in a column of its own, so a point that
+     wraps continues under its first word, not under the dash. */
+  .swot-t b { font-weight:700; }
+  .swot-p { display:block; position:relative; padding-left:14px; margin-top:3px; }
+  .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
+  .swot-t b + .swot-p { margin-top:5px; }
+  /* §795 — THE POINTS FOLD UNDER THE TITLE (group-render.js swotLine). The
+     title is a button that reads as the title it was: the page's own type,
+     no ground, no edge; a gold underline on hover says it can be pressed. The
+     arrow and, while folded, the count sit after it in the quiet ink. */
+  .swfold { font:inherit; color:inherit; background:none; border:0; padding:0; margin:0;
+            text-align:left; cursor:pointer; display:inline; border-radius:3px; }
+  .swfold b { font-weight:700; }
+  .swfold:hover b { text-decoration:underline; text-decoration-color:var(--gold); text-underline-offset:3px; }
+  .swfold:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .swfold .swcar { display:inline-block; width:9px; height:9px; margin-left:7px; color:var(--ink-3);
+                   transition:transform .12s; vertical-align:1px; }
+  .swfold[aria-expanded="true"] .swcar { transform:rotate(180deg); }
+  .swfold .swcnt { font-weight:400; font-size:12px; color:var(--ink-3); margin-left:7px; white-space:nowrap; }
+  .swfold[aria-expanded="true"] .swcnt { display:none; }
+  .swpts { display:block; margin-top:2px; }
+  .swpts[hidden] { display:none; }
+  @media (prefers-reduced-motion:reduce) { .swfold .swcar { transition:none; } }
+  /* PAPER SHOWS EVERY POINT: a fold is how one reader left their screen, and
+     a page that has been printed cannot be pressed. */
+  @media print {
+    .swpts[hidden] { display:block !important; }
+    .swfold .swcar, .swfold .swcnt { display:none !important; }
+  }
 
   /* Temple editing: tables, with the statements in labelled rows above them. */
   .templeedit h4.mini:first-child { margin-top:0; }
@@ -8005,6 +8229,18 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
     border-radius:8px; font-size:12px; font-weight:700; padding:4px 13px;
     cursor:pointer; font-family:inherit; white-space:nowrap; }
+  /* §795 — Expand all / Collapse all, the pen's quieter neighbour: the same
+     box at the regular weight, its mark before the word. The second selector
+     for §145.14's reason, as on the pen. */
+  .swfoldall, .tabs .secttail button.swfoldall {
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; font-size:12px; font-weight:600; padding:4px 10px;
+    cursor:pointer; font-family:inherit; white-space:nowrap;
+    display:inline-flex; align-items:center; gap:6px; }
+  .swfoldall svg { width:12px; height:12px; flex:none; }
+  .swfoldall[hidden], .tabs .secttail button.swfoldall[hidden] { display:none; }
+  .tabs .secttail button.swfoldall:hover { border-color:var(--gold); color:var(--ink); background:var(--surface); }
+  .tabs .secttail button.swfoldall:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   .tabs .secttail button.secpen:hover { border-color:var(--gold);
     color:var(--gold-deep); background:var(--surface); }
   /* Lit while the mode is open — the pen's own pair (`--gold` under
@@ -8659,9 +8895,153 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
 /* §415: a tactic's requirements — the reported note's shape, holding a list. */
 td .reqnote ul.reqs { margin:3px 0 0; padding-left:16px; color:var(--ink-2); line-height:1.35; }
 td .reqnote ul.reqs li { margin:1px 0; }
-td .reqbox { display:block; margin-top:8px; }
-td .reqbox .repkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
-td .reqbox textarea.reqfld { width:100%; box-sizing:border-box; margin-top:3px; font-size:12.5px; resize:none; }
+td .reqbox, .tpsec .reqbox { display:block; margin-top:8px; }
+.tpsec .reqbox .repkey, td .reqbox .repkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+.tpsec .reqbox textarea.reqfld, td .reqbox textarea.reqfld { width:100%; box-sizing:border-box; margin-top:3px; font-size:12.5px; resize:none; }
+
+/* ── §767: A TACTIC'S KEY MEASURES, BY NUMBER ──────────────────────────────
+   The A2 mockup's shapes (design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html):
+   the number tag, the Supports line under a tactic, the count under a
+   measure, the folded legend and the pen's tick list. Tokens only, so the
+   dark theme and a tenant's palette carry it (§38.4). The tag's hover is
+   the panel colour so the full name on `title` has something to hang on. */
+.kmtag { display:inline-block; font-family:var(--mono); font-size:10.5px; line-height:1; padding:4px 6px;
+  border-radius:5px; background:var(--surface-2); color:var(--stone); border:1px solid var(--line);
+  white-space:nowrap; cursor:default; font-weight:600; }
+.kmtag:hover, .kmtag:focus-visible { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); outline:0; }
+/* §767.1: the tag's name, shown at once (the browser's own tooltip waits a second). */
+.kmtip { position:fixed; z-index:9999; display:none; max-width:380px; padding:7px 11px; border-radius:var(--r);
+  background:var(--panel); color:var(--panel-ink); font-size:12.5px; line-height:1.4; box-shadow:var(--shadow-md);
+  pointer-events:none; white-space:normal; }
+.kmtip.on { display:block; }
+td .kmnums { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:6px; }
+td .kmcount { display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:4px; font-size:11px; color:var(--ink-3); }
+/* `td .kmcount.none` (the red 'No tactic supports it yet'): gone, §794 — the link is optional and a measure without one says nothing. */
+.kmlegend { margin:8px 0 0; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface-2);
+  font-size:12px; color:var(--ink-2); }
+.kmlegend summary { cursor:pointer; padding:8px 14px; list-style:none; }
+.kmlegend summary::-webkit-details-marker { display:none; }
+.kmlegend summary::before { content:"\25B8"; color:var(--ink-3); font-size:11px; margin-right:8px; }
+.kmlegend[open] summary::before { content:"\25BE"; }
+.kmlegend .kmrows { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; padding:2px 14px 12px; }
+.kmlegend .kmrows .kmtag { align-self:start; }
+.tpsec .kmpick, td .kmpick { display:block; margin-top:8px; }
+/* §767.2: the closed box, one line; the ticks open under it in the flow. */
+.tpsec .kmdrop, td .kmdrop { display:block; border:1px solid var(--field-line); border-radius:var(--r); background:var(--surface); }
+.tpsec .kmdrop summary, td .kmdrop summary { display:flex; align-items:center; gap:6px; padding:6px 8px; cursor:pointer; list-style:none; min-height:32px; }
+.tpsec .kmdrop summary::-webkit-details-marker, td .kmdrop summary::-webkit-details-marker { display:none; }
+.tpsec .kmdrop .kmsum, td .kmdrop .kmsum { display:flex; flex-wrap:wrap; gap:4px; flex:1 1 auto; min-width:0; }
+.tpsec .kmdrop .kmnone, td .kmdrop .kmnone { color:var(--ink-3); font-size:12.5px; }
+.tpsec .kmdrop .kmchev, td .kmdrop .kmchev { flex:none; width:8px; height:8px; border-right:1.5px solid var(--ink-3); border-bottom:1.5px solid var(--ink-3);
+  transform:rotate(45deg); margin:-3px 4px 0 0; }
+.tpsec .kmdrop[open] .kmchev, td .kmdrop[open] .kmchev { transform:rotate(-135deg); margin-top:3px; }
+.tpsec .kmdrop[open] summary, td .kmdrop[open] summary { border-bottom:1px solid var(--line-soft); }
+.tpsec .kmlist, td .kmlist { display:block; background:var(--surface); }
+.tpsec .kmlist label, td .kmlist label { display:flex; gap:8px; align-items:flex-start; padding:6px 8px; border-bottom:1px solid var(--line-soft);
+  cursor:pointer; font-size:12.5px; line-height:1.35; font-weight:400; color:var(--ink); }
+.tpsec .kmlist label:last-child, td .kmlist label:last-child { border-bottom:0; }
+.tpsec .kmlist label:hover, td .kmlist label:hover { background:var(--surface-2); }
+.tpsec .kmlist input, td .kmlist input { width:14px; height:14px; margin:2px 0 0; flex:none; accent-color:var(--panel); }
+.tpsec .kmlist .kmname, td .kmlist .kmname { min-width:0; }
+
+/* ── §773: THE TACTIC PANEL AND THE PEN'S LIST ──────────────────────────
+   From the working mockup Islam tried (design-mockups/tactic-edit-panel/
+   2026-11-16_full-page.html). Beside the pillar on a wide window; over the
+   page from the right on a narrow one. Tokens only (§38.4). */
+.penwrap { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:14px; align-items:start; }
+.penmain { min-width:0; }
+/* §774: pinned UNDER the direction's banner, which is itself pinned under the
+   chrome; `--band-h` is the banner's measured height (shell.html, after each
+   paint). Never taller than what is left of the window: a long tactic scrolls
+   inside the panel, its head and its Done editing always in view, and its
+   scroll never moves the page. */
+.tacpanel { position:sticky; top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px + var(--band-h, 62px) + 10px);
+  max-height:calc(var(--wind) - var(--chrome-h, 118px) - var(--rail-gap, 22px) - var(--band-h, 62px) - 36px);
+  margin-top:0; display:flex; flex-direction:column; min-width:0;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow-md); }
+.tph { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--line); }
+.tpk { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-3); white-space:nowrap; }
+.tpname { font-size:13.5px; font-weight:650; min-width:0; flex:1; }
+.tpnav { display:flex; gap:4px; margin-left:auto; flex:none; }
+.tpbtn { font:inherit; font-size:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); border-radius:7px; padding:4px 9px; cursor:pointer; }
+.tpbtn:hover { background:var(--surface-2); }
+.tpbtn.tpx { font-size:16px; line-height:1; padding:3px 8px; }
+.tpbody { overflow:auto; overscroll-behavior:contain; padding:4px 14px 10px; }
+.tpsec { padding:12px 0; border-bottom:1px solid var(--line-soft); }
+.tpsec:last-child { border-bottom:0; }
+.tpsec > h4 { margin:0 0 8px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); }
+.tpsec .fld, .tpsec textarea.fld, .tpsec input.fld { width:100%; max-width:none; box-sizing:border-box; }
+.tpsec .bxkey { margin-top:8px; }
+.tpsec .bxkey:first-child { margin-top:0; }
+.tpfield { display:block; }
+.tpfield .ssbtn, .tpfield select { max-width:100%; }
+.tpout.scroll { margin:0; }
+.tpout table { min-width:0; width:100%; }
+.tpout td { vertical-align:top; }
+.tpout .kmpick { margin-top:0; }
+.tpfoot { padding:10px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
+.tpdone { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:var(--r); font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
+
+/* ── §775: THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL ──────────
+   The pen's list as Islam settled it on the working mockup (design-mockups/
+   tactic-edit-panel/2026-11-16_table-and-panel.html): the name, the outcome
+   names, the owner and the quarters typed in the row; a ringed × on the name
+   box and on each outcome box; the open row tinted and joined to the panel
+   (his pick, D). Tokens only (§38.4). */
+.penlist td .namerow, .penlist td .outline { display:flex; align-items:center; gap:6px; }
+.penlist td .outline + .outline { margin-top:4px; }
+.penlist td .namerow > .fld, .penlist td .outline > .fld, .penlist td .outline > .gapwrap,
+.penlist td .namerow > textarea, .penlist td .outline > textarea { flex:1 1 auto; min-width:0; width:auto; }
+.penlist td .rm { flex:none; display:inline-grid; place-items:center; width:22px; height:22px; border:1px solid var(--line);
+  border-radius:6px; background:transparent; color:var(--ink-3); cursor:pointer; padding:0; }
+.penlist td .rm:hover, .penlist td .rm:focus-visible { color:var(--bad-tx); border-color:var(--bad); background:var(--bad-bg); outline:0; }
+.penlist td .addout { display:block; margin-top:5px; }
+.penlist td .addout .linkbu { font-weight:400; font-size:12px; }
+.penlist td .tacgap { display:block; margin-top:5px; font-size:11.5px; cursor:pointer; }
+.penlist td .tacwhy { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:360px; }
+.penlist td.outc { min-width:220px; }
+/* D: the open row, tinted, with one bar, run out to the panel's gold edge */
+.penlist tbody tr.penon td { background:var(--attn-bg); box-shadow:none; }
+.penlist tbody tr.penon td:first-child { box-shadow:inset 4px 0 0 var(--gold); }
+@media (min-width:1181px) {
+  .penwrap .penmain > .scroll { overflow:visible; }
+  .penwrap .penmain table.tactable { min-width:0; }
+  .penlist tbody tr.penon td:last-child { position:relative; }
+  .penlist tbody tr.penon td:last-child::after { content:""; position:absolute; top:-1px; bottom:-1px; left:100%; width:15px;
+    background:var(--attn-bg); border-top:1px solid var(--gold); border-bottom:1px solid var(--gold); }
+  .penwrap .tacpanel { border-left:3px solid var(--gold); border-radius:0 var(--r-lg) var(--r-lg) 0; }
+}
+/* the panel: the name in the head, the outcomes read over their targets */
+.tph .tpname { font-size:14px; }
+.tpout .oname { font-weight:600; font-size:13px; display:block; }
+.tpout .oname .nobody { font-weight:400; font-style:italic; }
+/* read mode: the tactic and the outcome share the width (Islam: "why is the tactic column that wide?") */
+.tactable:not(.penlist) th:nth-child(2) { width:34%; }
+.tactable:not(.penlist) th:nth-child(3) { width:30%; }
+/* the list */
+.penlist tbody tr[data-tacopen] { cursor:pointer; }
+.penlist tbody tr[data-tacopen]:hover td { background:var(--surface-2); }
+/* (the first mark — a grey tint and a bar on every cell — gave way to §775's, above:
+   it came later in this file and won, which is why the tenant saw bars at every
+   column edge and no tint; §775.2) */
+.penlist .tacopenb { background:none; border:0; padding:0; margin:0; font:inherit; text-align:left; cursor:pointer; color:inherit; display:block; }
+.penlist .tacopenb:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:4px; }
+.penlist .tacopenb .tacname { display:block; }
+.penlist td .why { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:360px; }
+.penlist td.outn .why { max-width:none; }
+.penlist .tacgaps { display:block; margin-top:4px; font-size:11px; color:var(--bad-tx); font-style:italic; }
+.penlist td.tools { white-space:nowrap; }
+.penlist td.tools .xbtn { margin-left:6px; }
+.penlist td.collabs { white-space:normal; }
+@media (max-width:1180px) {
+  .penwrap { display:block; }
+  /* Under the chrome and the strip, not over them (§775.3): a panel from the
+     window's top covered the Done editing button and the strip's right half,
+     and a wheel over it moved nothing — the panel keeps its own scroll. It
+     starts where the pane does once pinned (the band's own offset, group-extra.css §771). */
+  .tacpanel { position:fixed; right:0; bottom:0; width:min(440px, 100%); max-height:none; border-radius:0; z-index:60; border:0; border-left:1px solid var(--line);
+    top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + var(--strip-h, 0px) + var(--split-gap, 16px) + 1px); }
+}
 
 /* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
    boxes should be the same size and squeeze them where their hz size should
@@ -9279,14 +9659,97 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
        is the same band on Strategy and Performance (§53.5), so it behaves
        the same there. */
 @media (max-width:520px){
-  .top-in { flex-wrap:wrap; row-gap:4px; padding-block:6px; }
-  .top-in::after { content:""; order:1; flex-basis:100%; height:0; }
-  .top-in .viewer { order:2; flex:1 1 0; min-width:0; }
-  .top-in .topacts { order:3; }
-  .viewer .ssbtn { min-width:0; }
-  .viewer-note { display:none; }
   .pane > .pband { position:static; }
 }
+/* ── THE TOP BAR ON A NARROWED OR ZOOMED-IN WINDOW (§792) ───────────────
+   Islam, zoomed in on Strategy: *"in a zoomed state the top bar elements are
+   interfering with each other."* Measured on the bar's own markup with the
+   trail, the viewer and Jump to on it: from 999px down to 521px the trail's
+   steps were drawn over "Viewing as" and its picker, and under 700px over
+   Jump to and Read as well. Two causes. The trail could be squeezed
+   (`min-width:0`) but its steps could not, so it kept its full width and
+   spilt over its neighbour; and nothing on the line gave way until the
+   phone's 520px, while Jump to's box (§701) alone holds 190px of it.
+
+   WHAT GIVES WAY, IN ORDER, and nothing is lost that is not said another way:
+     · under 1000px Jump to is its magnifying glass alone, as it already is in
+       the console's folded column (§710) — the hover and Ctrl K still say it;
+     · under 880px the words "Viewing as" go from sight (the picker keeps them
+       as its name for a screen reader, so they are clipped, not removed);
+     · under 1000px the role line beside the picker goes too, as it already
+       did on the phone: it was being cut to "Super user, t…", which says
+       nothing, and the picker beside it names the person;
+     · and at ANY width a client's name that still does not fit shortens
+       with an ellipsis instead of being drawn over what is beside it. */
+/* It is the CLIENT's name that shortens; the step you are ON keeps every
+   letter (given even a thousandth of the squeeze it lost its last two to an
+   ellipsis, measured). */
+nav.trail details.trclient { min-width:0; flex:0 1 auto; }
+nav.trail details.trclient > summary { display:flex; }
+/* THE VIEWER GIVES WAY BEFORE THE TRAIL DOES, down to a floor it is never
+   squeezed past: the picker at its own 120px minimum, with its key while the
+   key is drawn. Without the floor it was the viewer's turn to be drawn over
+   its neighbour; without the order, the client's name shortened while the
+   picker still had room to give. */
+.top .viewer { flex-shrink:1000; min-width:222px; }
+@media (max-width:999px){
+  .top .sjbtn { min-width:0; }
+  .top .sjbtn .sjl, .top .sjbtn .sjk { display:none; }
+  .top .viewer-note { display:none; }
+  /* a client's long name shortens rather than push Sign out off the bar
+     (measured at 820px, a client's own person); the product's name stays */
+  .top .brand { flex:0 1 auto; min-width:0; }
+  .top .orgname { flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+}
+@media (max-width:880px){
+  .top .viewer { min-width:138px; }
+  .top .viewer label { position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+                       overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+}
+/* ONE LINE, ALWAYS (§792.2). Islam, shown the bar on two lines at 760px:
+   *"the top bar should not take 2 lines by any means."* So the two-line bar
+   is gone at every width — the one drawn here a round earlier, and the
+   phone's own from §410 with it — and the room is found by what each thing
+   can lose without losing what it does:
+     · at 760px and under Read is its open book alone and the "?" goes (the
+       ? key still opens the sheet; there is no such key on a phone); the
+       picker may narrow further; and for a client's own people, who have the
+       product's name where the office has the trail, the name goes and its
+       mark stands for it, the client's name shortening after it. §410's rule
+       that the names never give way was written for 1100px, where it still
+       holds; here the choice is a second line or the words, and he has
+       refused the line;
+     · at 520px and under the trail is the mark and the module you are on —
+       the mark is the way to the console and to every other client — and
+       Sign out is its door-and-arrow alone, still named for a screen reader. */
+@media (max-width:760px){
+  .top-in { gap:10px; padding-inline:16px; }
+  .top .viewer { min-width:91px; padding-right:10px; }
+  .top .viewer .ssbtn { min-width:80px; }
+  .top .readbtn { font-size:0; gap:0; padding:5px 8px; }
+  .top .readbtn svg { width:14px; height:14px; }
+  .top .keysbtn { display:none; }
+  .top .brand h1 { display:none; }
+}
+@media (max-width:520px){
+  .top-in { gap:8px; padding-inline:12px; }
+  .top .topacts { gap:6px; }
+  nav.trail details.trclient, nav.trail .trsep, nav.trail .trbar { display:none; }
+  .top .viewer { min-width:68px; padding-right:8px; }
+  .top .viewer .ssbtn { min-width:60px; }
+  .top .outbtn { font-size:0; padding:0; width:28px; height:26px; display:inline-grid; place-items:center; }
+  .top .outbtn::before { content:""; width:14px; height:14px; background:currentColor;
+    -webkit-mask:var(--out-mark) center/contain no-repeat; mask:var(--out-mark) center/contain no-repeat; }
+  /* what is left of the trail is two things that cannot narrow, so it is the
+     viewer that takes the squeeze, never the trail drawn over it */
+  nav.trail { flex:none; }
+}
+@media (max-width:400px){
+  .top-in { gap:6px; padding-inline:10px; }
+  .top .viewer { min-width:61px; }
+  .top .viewer .ssbtn { min-width:52px; }
+}
+.top { --out-mark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpath d='M16 17l5-5-5-5'/%3E%3Cpath d='M21 12H9'/%3E%3C/svg%3E"); }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -9480,6 +9943,12 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
                 padding:22px 0; font-size:29px; line-height:1.35; break-inside:avoid;
                 border-bottom:1px solid var(--line-soft); }
   ol.dswot .n { font-family:var(--mono); font-size:18px; color:var(--none); }
+  /* §757: the same shape on the slide — title bold, points under it.
+     §757.1: bullets with a hanging indent; the gaps scale with the slide's
+     type (Islam: the points "looks too tight together in the presentation"). */
+  ol.dswot .swot-p { display:block; position:relative; padding-left:1.1em; margin-top:.45em; line-height:1.35; }
+  ol.dswot .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
+  ol.dswot .swot-t b + .swot-p { margin-top:.55em; }
   .d-swot h2 { padding-left:18px; }
   .d-swot.t-good h2 { border-left:5px solid var(--good); }
   .d-swot.t-bad h2 { border-left:5px solid var(--bad); }
@@ -11103,7 +11572,8 @@ body.reading { overflow:hidden; }
 .readbtn:hover { color:var(--ink); border-color:var(--gold-deep); }
 .readbtn svg { width:12px; height:12px; }
 
-@media (max-width:760px) {
+/* screen alone (§789): an A4 page is narrower than 760px, and the paper keeps its columns */
+@media screen and (max-width:760px) {
   .readroot .rtwo, .readroot .rswot, .readroot .rthree { grid-template-columns:1fr; }
   .readroot .rfold { grid-template-columns:auto 1fr 22px; }
   .readroot .rfold .rsum, .readroot .rfold .rbar { display:none; }
@@ -11171,6 +11641,66 @@ body.reading { overflow:hidden; }
 .readroot .rtable .pill.attn { background:var(--attn-bg); color:var(--attn-tx, var(--attn)); }
 .readroot .rtable .lateval { color:var(--bad); } .readroot .rtable .latenote { font-size:11px; margin-left:6px; color:var(--bad); }
 .readroot .rtable .soonval { color:var(--ink-3); } .readroot .rtable .missing { color:var(--ink-3); font-style:italic; }
+
+/* ── THE WHOLE STRATEGY ON PAPER (§789, reading.js printAll) ───────────────
+   The Print control sits in the strip beside Exit, drawn for the office
+   alone. The document the press builds lives inside the window and is never
+   shown on a screen; while the dialog is up (body.rprinting) it is the only
+   thing on paper. Portrait A4; the cover alone on the first page; every
+   section on a page of its own under the gold rule the tabs sit on; a
+   direction, a card, a figure and a row never split across pages where the
+   page can help it; the colours kept (print-color-adjust) — a standing bar
+   in outline is not a standing. Scoped to body.rprinting, so the browser's
+   own print of the window by anybody else is left exactly as it was. */
+.readroot .rprint { margin-right:-4px; }
+.readroot .rprintdoc { display:none; }
+@media print {
+  body.rprinting { overflow:visible !important; }
+  body.rprinting > *:not(#readroot) { display:none !important; }
+  body.rprinting { background:#fff !important; }
+  /* the window holds the focus (open() focuses it), and a focus ring on a box split over pages is a line at every page's edge */
+  body.rprinting #readroot.readroot { position:static; display:block; inset:auto; height:auto; overflow:visible; background:#fff; outline:none !important; }
+  body.rprinting #readroot .rwtop, body.rprinting #readroot .rwnav, body.rprinting #readroot .rwtabs, body.rprinting #readroot .rwbody { display:none !important; }
+  body.rprinting #readroot .rprintdoc { display:block; font-size:12.5px; }
+  body.rprinting #readroot .rprintdoc * { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  @page { size:A4 portrait; margin:14mm 13mm 16mm; }
+  /* the cover: the mark, the client, the subject large, the period and the day */
+  .readroot .rpcover { min-height:70vh; display:flex; flex-direction:column; justify-content:flex-end; break-after:page; }
+  .readroot .rpmark { width:40px; height:40px; border-radius:10px; background:var(--gold); color:#16325C; display:grid; place-items:center; margin-bottom:28px; }
+  .readroot .rpmark svg { width:26px; height:26px; }
+  .readroot .rporg { margin:0 0 10px; font-size:13px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); }
+  .readroot .rpcover h1 { margin:0; font-size:40px; line-height:1.08; font-weight:700; color:var(--ink); text-wrap:balance; }
+  .readroot .rpline { margin:14px 0 0; font-size:17px; color:var(--ink-2); }
+  .readroot .rpday { margin:6px 0 0; font-size:12.5px; color:var(--ink-3); }
+  /* every section on its own page, under the gold rule */
+  .readroot .rpsec + .rpsec { break-before:page; }
+  .readroot .rpsec > h2 { margin:0 0 16px; padding-bottom:8px; font-size:21px; font-weight:700; border-bottom:3px solid var(--gold); }
+  .readroot .rpsec > * + * { margin-top:16px; }
+  /* a card, a figure, a value, a row and a direction's own line never split — AND A DIRECTION OR A
+     CAPABILITY IS NEVER SPLIT OVER TWO PAGES (§789.2, Islam: "if it breaks start a new page so it's
+     connected"): one that does not fit in what is left of a page starts a new one, whole; only one
+     longer than a page is split, and then its line stays with its first table (.rpkeep) */
+  .readroot .rprintdoc .rcard, .readroot .rprintdoc .rfig, .readroot .rprintdoc .rval, .readroot .rprintdoc .rfold,
+  .readroot .rprintdoc .rdir, .readroot .rprintdoc .rtable tr, .readroot .rprintdoc .rswot > * { break-inside:avoid; }
+  /* a label stays with what it names — and ONLY the label: the browser answers a keep-with-next on
+     a direction's own line by moving the whole direction to the next page where it would fit, which
+     left every Directions page holding one direction over half a page of nothing (measured, §789) */
+  .readroot .rprintdoc .rk { break-after:avoid; }
+  .readroot .rprintdoc .rtable thead { display:table-header-group; }
+  /* a direction is open, its fold a heading and not a press */
+  .readroot .rprintdoc .rfold { cursor:default; }
+  .readroot .rprintdoc .rfold:hover { background:none; }
+  .readroot .rprintdoc .rchev { display:none; }
+  .readroot .rprintdoc .rfold { grid-template-columns:auto 1fr auto 130px; }
+  .readroot .rprintdoc .rmore { display:grid; gap:10px; }
+  .readroot .rprintdoc .rpkeep { break-inside:avoid; }
+  .readroot .rprintdoc .rpkeep > .rtable { margin:0 18px; width:calc(100% - 36px); }
+  .readroot .rprintdoc .rpkeep + .rmore { padding-top:10px; border-top:0; }
+  .readroot .rprintdoc .rmore:empty { display:none; }
+  .readroot .rprintdoc .rtable { min-width:0; width:100%; }
+  .readroot .rprintdoc .rtable td:first-child { min-width:0; }
+  .readroot .rprintdoc .rdirs { gap:10px; }
+}
 
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.
@@ -12760,7 +13290,7 @@ body.presenting #buildband { display:none; }
 .copnone { padding:12px; color:var(--ink-3); font-size:var(--fs-small, 12.5px); }
 
 .copmain { min-width:0; background:var(--surface); border:1px solid var(--line);
-           border-radius:var(--r-sm, 6px); padding:16px 18px; min-height:320px; }
+           border-radius:var(--r-sm, 6px); padding:16px 18px; min-height:320px; --copmp-t:16px; --copmp-x:18px; }
 .copempty { color:var(--ink-3); font-size:var(--fs-note, 13.5px); padding:40px 4px; max-width:60ch; }
 .copempty b { display:block; color:var(--ink); font-size:15.5px; margin-bottom:6px; }
 .copsay { background:var(--surface-2); border-left:3px solid var(--gold); padding:8px 12px;
@@ -13277,7 +13807,7 @@ span.copsw-lb { cursor:default; }
   :root[data-cop-page] .coppane { grid-template-columns:200px minmax(0,1fr); gap:8px; padding:0; }
   :root[data-cop-page] .coppane.copshut { grid-template-columns:24px minmax(0,1fr); }
   .coppane .copnew { padding:4px 7px; white-space:nowrap; }
-  .coppane .copmain { padding:8px; }
+  .coppane .copmain { padding:8px; --copmp-t:8px; --copmp-x:8px; }
   .copflow { gap:8px; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 200px; }
   .copflow.nocards { grid-template-columns:minmax(0,1fr) 200px; }
   .copftodo { display:flex; flex-direction:column; gap:8px; min-width:0; min-height:0; overflow-y:auto; align-self:stretch; }
@@ -13769,3 +14299,224 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 /* §698 S14 — a draft that failed, named, in the chat */
 .copmsg.ai.copbad .copbody { border-left-color:var(--bad); }
 .copmsg.ai.copbad .copbody > b:first-child { color:var(--bad-tx); }
+
+/* §752 — THE COPILOT IN ONE WINDOW. The method as a strip above the pane,
+   each step saying where the place stands, the next one outlined; the
+   rail's area tags and filter chips; the start screen's focus line and the
+   other areas folded under its cards. */
+.copstrip { display:flex; gap:6px; flex-wrap:wrap; align-items:stretch; margin:0 0 8px; }
+.copstep { flex:1 1 128px; min-width:0; display:flex; flex-direction:column; gap:1px; text-align:left; padding:6px 10px;
+  border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); cursor:pointer; font:inherit; }
+.copstep:hover { border-color:var(--gold); }
+.copstep:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+.copstep .copstepk { font:700 10px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+.copstep b { font-size:13px; font-weight:700; }
+.copstep small { font-size:11.5px; color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copstep.on { border-left:3px solid var(--good); }
+.copstep.on small { color:var(--good-tx); }
+.copstep.wip { border-left:3px solid var(--attn, var(--gold)); }
+.copstep.wip small { color:var(--attn-tx, var(--gold-deep)); }
+.copstep.saved { border-left:3px solid var(--line); }
+.copstep.next { box-shadow:0 0 0 2px var(--panel, var(--ink)); }
+.copstep.next .copstepk { color:var(--ink); }
+.copstep.side { flex:0 1 150px; border-style:dashed; }
+.copstep[aria-current="true"] { background:var(--surface-2); }
+.copatag { display:inline-block; width:max-content; align-self:flex-start; margin:0 0 2px; padding:0 5px; border-radius:4px; background:var(--surface-2);
+  font:700 9.5px/1.6 var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--ink-2); vertical-align:1px; }
+.copachips { display:flex; flex-wrap:wrap; gap:4px; padding:0 8px 6px; }
+.copachip { border:1px solid var(--line); background:var(--surface); border-radius:12px; padding:0 8px; font:inherit; font-size:11.5px; color:var(--ink-2); cursor:pointer; }
+.copachip[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); }
+.copfocus { display:flex; gap:8px; align-items:baseline; justify-content:center; flex-wrap:wrap; }
+.copfocusk { font:700 11px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink); }
+.copareas { width:100%; }
+.copareas > summary { cursor:pointer; color:var(--ink-2); font-size:var(--fs-small, 12.5px); text-align:center; }
+.copareacards { grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); margin-top:8px; }
+.copareacard .coppd { color:var(--ink-3); }
+.copachip { font-size:11px; line-height:1.6; }
+.copareacard .coptag { display:block; }
+
+/* §753 — THREE LAYOUTS TO COMPARE LIVE: the switch above the pane; A's
+   start screen (one box, suggestions); B's button beside Edit and its panel
+   on the right of the Strategy tab, the plan narrowing beside it. */
+.coplayout { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin:0 0 8px; font-size:12.5px; }
+.coplayoutk { font:700 10.5px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-right:2px; }
+.copchoice { border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:1px 10px; font:inherit; font-size:12px; color:var(--ink-2); cursor:pointer; }
+.copchoice[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); font-weight:600; }
+.coplayout .copm { color:var(--ink-3); }
+.copsuggest { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.copstartchat { margin-top:clamp(24px, 12vh, 110px); }
+.copBbtn { display:inline-flex; align-items:center; gap:6px; margin-right:8px; border:1px solid var(--gold); background:var(--surface); color:var(--gold-deep, var(--gold)); border-radius:16px; padding:4px 12px; font:600 12.5px/1.2 var(--sans); cursor:pointer; }
+.copBbtn:hover { border-color:var(--gold-deep, var(--gold)); }
+.copBbtn[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); border-color:var(--panel, var(--ink)); }
+body.copB-open #mainwrap { margin-right:calc(var(--copPw, 550px) + 10px); }
+/* §792 — ITS TOP IS THE CHROME'S BOTTOM, READ, NOT MEASURED ONCE. The chrome
+   is one pinned block at the top of the window and its height is already
+   observed and published as `--chrome-h` (shell.html), in the page's own
+   pixels whatever the zoom — so the panel sits under it from the first paint
+   and follows it when the window narrows, the bar takes two lines or the
+   page is zoomed. */
+#copPanel { position:fixed; right:0; bottom:0; top:var(--chrome-h, 150px); width:var(--copPw, 550px); z-index:40; display:flex; flex-direction:column; background:var(--surface); border-left:1px solid var(--line); box-shadow:-6px 0 18px rgba(16,24,40,.08); }
+#copPanel .copPhead { display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+#copPanel .copPhead small { display:block; color:var(--ink-3); font-size:12px; }
+#copPanel .copPseg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-left:auto; }
+#copPanel .copPseg button { border:0; background:var(--surface); padding:3px 10px; font:inherit; font-size:12px; color:var(--ink-2); cursor:pointer; }
+#copPanel .copPseg button[aria-pressed="true"] { background:var(--panel, var(--ink)); color:var(--panel-ink, var(--surface)); font-weight:600; }
+#copPanel .copPx { margin-left:auto; border:0; background:none; font-size:20px; line-height:1; color:var(--ink-3); cursor:pointer; }
+#copPanel .copPseg + .copPx { margin-left:4px; }
+#copPanel .copPbody { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; padding:8px; }
+#copPanel .copstrip:empty { display:none; }
+#copPanel .coppane { height:auto !important; flex:1 1 auto; min-height:0; }
+#copPanel .copnone { padding:16px; color:var(--ink-2); }
+
+/* §779 — the Copilot tab is Build only: one line, how many parts are on the plan */
+.coplayout[data-cop-planline] b { color:var(--ink); }
+.copachips { align-items:center; }
+
+/* §777 — the strip in the pane: over the chat box on the right, the rail
+   (or its slim strip) running the full height beside both. An empty strip
+   (Refine, the panel on the plan) takes no room. */
+.coppane { grid-template-rows:auto minmax(0, 1fr); row-gap:0; }
+.coppane > .copslim, .coppane > .coprails { grid-column:1; grid-row:1 / span 2; }
+.coppane > .copstrip { grid-column:2; grid-row:1; margin:0 0 8px; min-width:0; }
+.coppane > .copstrip:empty { display:none; }
+.coppane > .copmain { grid-column:2; grid-row:2; align-self:stretch; }
+/* one column below 821px — unless the rail is folded, which keeps its 24px strip beside the rest (.copshut) */
+@media (max-width:820px){ .coppane:not(.copshut) > .copslim, .coppane:not(.copshut) > .coprails, .coppane:not(.copshut) > .copstrip, .coppane:not(.copshut) > .copmain { grid-column:1; grid-row:auto; } }
+
+/* §778 — the panel on the plan expands to take over the page, as the
+   Copilot tab does (the chat, the work and the to-do side by side), and
+   minimizes back to the side. */
+#copPanel .copPexp { margin-left:auto; border:1px solid var(--line); background:var(--surface); border-radius:6px; width:28px; height:26px; display:inline-grid; place-items:center; color:var(--ink-2); cursor:pointer; }
+#copPanel .copPexp:hover { border-color:var(--gold); color:var(--ink); }
+#copPanel .copPexp svg { width:14px; height:14px; }
+#copPanel .copPseg + .copPexp { margin-left:6px; }
+#copPanel .copPexp + .copPx { margin-left:2px; }
+body.copB-wide #copPanel { left:0; width:auto; box-shadow:none; border-left:0; }
+
+/* §779 — DETAILS ON THE RIGHT: below the open chat's to-do, or a column of
+   their own where there is no to-do (the start screen, a free chat, a
+   deliverable). The strip then runs over both. */
+.copdetails { display:none; min-width:0; min-height:0; overflow-y:auto; flex-direction:column; gap:14px; }
+.coppane.copwithdet > .copdetails { display:flex; grid-column:3; grid-row:2; }
+.coppane.copwithdet > .copstrip { grid-column:2 / span 2; }
+.coppane.copwithdet, :root[data-cop-page] .coppane.copwithdet { grid-template-columns:minmax(200px, 240px) minmax(0, 1fr) 230px; }
+.coppane.copwithdet.copshut, :root[data-cop-page] .coppane.copwithdet.copshut { grid-template-columns:24px minmax(0, 1fr) 230px; }
+.copdelbox { flex:0 0 auto; min-height:0; max-height:42%; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+.copftodo > .copdelbox { border-top:1px solid var(--line); padding-top:8px; }
+/* the office chat button floats over the window's corner (§490.2): the foot of the column is left clear for it */
+.copftodo:has(> .copdelbox), .coppane.copwithdet > .copdetails { padding-bottom:56px; }
+/* the to-do gives up height for them and scrolls in its own box */
+.copftodo:has(> .copdelbox) > .copsw-box:first-child { flex:1 1 0; min-height:96px; overflow-y:auto; }
+/* a smaller window keeps Details on the right, narrower (Islam: "on a smaller view the deliverables fall down in the bottom, that's wrong"); only a phone's one column puts them under the chat */
+@media (max-width:1020px){
+  .coppane.copwithdet, :root[data-cop-page] .coppane.copwithdet { grid-template-columns:180px minmax(0, 1fr) 180px; }
+  .coppane.copwithdet.copshut, :root[data-cop-page] .coppane.copwithdet.copshut { grid-template-columns:24px minmax(0, 1fr) 180px; }
+}
+@media (max-width:820px){ .coppane.copwithdet:not(.copshut) > .copdetails, .coppane.copwithdet:not(.copshut) > .copstrip { grid-column:1; grid-row:auto; } }
+/* the start screen: the box first, then "Or choose another way to start"; every part on the plan, said once */
+.copalldone { width:min(640px, 100%); border:1px solid var(--line); border-left:3px solid var(--good, #2E6B45); border-radius:8px; padding:8px 12px; font-size:13px; text-align:left; }
+
+/* §779 — ON THE PLAN: a part not built yet sends you to Build; a built one
+   opens on the box. The panel is resized from its left edge (remembered per
+   browser, a double-click resets it) as well as expanded. */
+.copnotbuilt { align-items:flex-start; text-align:left; }
+.copnotbuilt .copstarth { text-align:left; }
+.copagain { align-self:center; font-size:12.5px; }
+#copPanel .copPgrip { position:absolute; left:-4px; top:0; bottom:0; width:8px; cursor:col-resize; z-index:3; touch-action:none; }
+#copPanel .copPgrip::after { content:""; position:absolute; left:3px; top:50%; width:2px; height:40px; margin-top:-20px; border-radius:2px; background:var(--line); }
+#copPanel .copPgrip:hover::after, #copPanel .copPgrip.drag::after { background:var(--gold); }
+body.copB-wide #copPanel .copPgrip { display:none; }
+
+/* §780 — PICTURES: a thumbnail in the file's chip; a box a file is dragged over says it will take it */
+.copfile.coppic { align-items:center; }
+.copthumb { width:40px; height:30px; object-fit:cover; border-radius:4px; border:1px solid var(--line); flex:none; background:var(--surface-2, #EFF2F6); }
+.copthumb0 { display:inline-block; }
+.copbox.copdrop { outline:2px dashed var(--gold); outline-offset:2px; }
+.coppend .cophint { align-self:center; }
+
+/* §780 — Details fold to a 24px strip on the right, as the chats rail folds on the left */
+.copdetails > .copdettog { align-self:flex-end; }
+.coppane.copwithdet.copdetshut > .copdetails { align-items:center; padding-bottom:0; }
+.coppane.copwithdet.copdetshut, :root[data-cop-page] .coppane.copwithdet.copdetshut { grid-template-columns:minmax(200px, 240px) minmax(0, 1fr) 24px; }
+.coppane.copwithdet.copdetshut.copshut, :root[data-cop-page] .coppane.copwithdet.copdetshut.copshut { grid-template-columns:24px minmax(0, 1fr) 24px; }
+.coppane.copdetshut > .copdetails .coptog { width:24px; height:26px; border-radius:5px; }
+@media (max-width:1020px){
+  .coppane.copwithdet.copdetshut, :root[data-cop-page] .coppane.copwithdet.copdetshut { grid-template-columns:180px minmax(0, 1fr) 24px; }
+  .coppane.copwithdet.copdetshut.copshut, :root[data-cop-page] .coppane.copwithdet.copdetshut.copshut { grid-template-columns:24px minmax(0, 1fr) 24px; }
+}
+
+/* §781 — the working word (Thinking, Fetching…) sits at the left, where the Copilot's answer will start, not in the middle (Islam) */
+.copmsg.product.copworking { align-self:flex-start; max-width:100%; }
+.copmsg.product.copworking .copbody { text-align:left; padding-left:0; }
+
+/* §782 — THE CHAT'S HEADER IS ONE LINE (Islam: "1 line at the top like in Claude, with the title of the chat and the + and − on the right… a light grey line below"; "the line below the name needs to be from the start till the end of the box"). The row runs the box's full width — out over the box's own padding — while its name and buttons keep to the reading column. */
+.copchat > .copheadrow.copheadone { max-width:none; width:auto; flex-wrap:nowrap; position:relative;
+  margin:calc(-1 * var(--copmp-t, 16px)) calc(-1 * var(--copmp-x, 18px)) 10px;
+  padding:8px max(var(--copmp-x, 18px), calc((100% - var(--cop-read, 740px)) / 2 + var(--copmp-x, 18px)));
+  border-bottom:1px solid var(--line-2, var(--line)); }
+.copheadone .coph { margin:0; font-size:15px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copheadone .copheadsp { flex:1; }
+.copctxi { border:0; background:none; padding:2px; color:var(--ink-3); cursor:pointer; display:inline-grid; place-items:center; }
+.copctxi svg { width:15px; height:15px; }
+.copheadone .copctx { position:absolute; right:var(--copmp-x, 18px); top:100%; z-index:4; max-width:min(420px, 90%); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:8px 10px; box-shadow:var(--shadow-md, 0 6px 18px rgba(16,24,40,.12)); font-size:12.5px; }
+.copheadone .copctx[hidden] { display:none; }
+
+/* §782 — THE STEPPER LINE (option B): one thin row of numbered steps joined by a line; ✓ on a part the plan holds, the next ringed; the count at the end. */
+.copsteps { display:flex; align-items:center; flex-wrap:wrap; row-gap:4px; width:100%; border:1px solid var(--line); border-radius:8px; padding:5px 8px; background:var(--surface); }
+.copsteps .copstep { flex:0 1 auto; flex-direction:row; align-items:center; gap:6px; padding:3px 7px; border:0; border-radius:6px; background:none; white-space:nowrap; }
+.copsteps .copstep.on, .copsteps .copstep.wip { border-left:0; }
+.copsteps .copstep b { font-size:12.5px; font-weight:600; color:var(--ink-2); }
+.copsteps .copstep[aria-current="true"] { background:var(--surface-2); }
+.copsteps .copstep[aria-current="true"] b, .copsteps .copstep.next b { color:var(--ink); font-weight:700; }
+.copsteps .copstep:hover { background:var(--surface-2); }
+.copstn { width:19px; height:19px; border-radius:50%; display:inline-grid; place-items:center; font-size:10.5px; font-weight:700; border:1.5px solid var(--line); color:var(--ink-3); flex:none; }
+.copstep.on .copstn { background:var(--good, #2E6B45); border-color:var(--good, #2E6B45); color:#fff; }
+.copstep.wip .copstn { border-color:var(--gold); color:var(--gold-deep, var(--gold)); }
+.copstep.next .copstn { border-color:var(--panel, var(--ink)); color:var(--ink); box-shadow:0 0 0 2px color-mix(in srgb, var(--panel, var(--ink)) 25%, transparent); }
+.copstln { flex:1 1 10px; min-width:10px; max-width:48px; height:2px; background:var(--line); }
+.copstln.on { background:var(--good, #2E6B45); }
+.copstsay { margin-left:auto; padding-left:12px; font-size:12px; color:var(--ink-3); white-space:nowrap; }
+.copstsay b { color:var(--ink); }
+.copvh { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+/* §782 — ✦ Builder and Advisory at the far right of the tab row, set apart from Strategy · Performance · Reporting · Insights, where ✦ Copilot opens on the plan */
+#subtabs .tabgap { flex:1 1 auto; min-width:12px; }
+#subtabs .coptabs { display:inline-flex; align-items:center; gap:6px; padding-left:12px; border-left:1px solid var(--line); flex:none; }
+.tabs #subtabs .coptab { border:1px solid var(--line); border-radius:16px; padding:3px 12px; font-weight:600; color:var(--ink-2); background:var(--surface); white-space:nowrap; }
+.tabs #subtabs .coptab.copadv { border-style:dashed; }
+.tabs #subtabs .coptab:hover { border-color:var(--gold); color:var(--ink); }
+.tabs #subtabs .coptab[aria-selected="true"] { background:var(--panel, var(--ink)); border-color:var(--panel, var(--ink)); border-style:solid; color:var(--panel-ink, var(--surface)); }
+
+/* §784 — Competitive Discipline drawn as the plan shows it: the discipline, then a card per value */
+.copdcomp { display:flex; flex-direction:column; gap:10px; }
+.copdlab { font:700 10.5px/1.4 var(--sans, inherit); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+.copdisc { border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:8px; padding:9px 12px; background:var(--surface); }
+.copdisc h4 { margin:2px 0 0; font-size:15px; }
+.copvals { display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:10px; }
+.copval { border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface); display:flex; flex-direction:column; gap:5px; font-size:var(--fs-small, 12.5px); }
+.copval h5 { margin:0; font-size:13.5px; text-transform:none; letter-spacing:0; color:var(--ink); font-weight:700; }
+.copval .copdul { margin:0; padding-left:16px; }
+.copval.copgap { border-color:var(--attn, #B45309); }
+.copgapw { margin:0; color:var(--attn-tx, #B45309); font-size:12px; }
+.copmrow { display:flex; justify-content:space-between; gap:8px; border-top:1px dashed var(--line); padding-top:3px; }
+.copmrow .copm { white-space:nowrap; }
+.copev { color:var(--ink-3); font-size:12px; }
+.copev summary { cursor:pointer; }
+.copdplan { padding:2px 0; }
+
+/* §785 — the chat's name is a button that turns into its box: renamed where it stands */
+.copnamebtn { border:0; background:none; padding:1px 4px; margin:0 -4px; font:inherit; color:inherit; cursor:text; border-radius:5px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+.copnamebtn:hover { background:var(--surface-2, #EFF2F6); }
+.copheadone .coprenhead { flex:1 1 auto; min-width:0; max-width:520px; font-size:15px; font-weight:600; padding:3px 6px; }
+
+/* §788 — an older draft laying itself out as the plan: said while it happens, nothing to press */
+.copdlaying { font-style:italic; animation:copfade 1.4s ease-in-out infinite alternate; }
+@keyframes copfade { from { opacity:.55; } to { opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .copdlaying { animation:none; } }
+
+/* §790 — ✦ Build, ✦ Advise and ✦ Refine: one family — the gold edge marks the Copilot wherever it is; ✦ Refine wears the same pill beside Edit */
+.tabs #subtabs .coptab { border-color:var(--gold); color:var(--gold-deep, var(--gold)); }
+.tabs #subtabs .coptab.copadv { border-style:dashed; }
+.copBbtn { border:1px solid var(--gold) !important; border-radius:16px !important; padding:3px 12px !important; font-weight:600; color:var(--gold-deep, var(--gold)) !important; background:var(--surface) !important; white-space:nowrap; transition:none !important; }
+.copBbtn:hover { color:var(--ink) !important; }
+.copBbtn[aria-pressed="true"] { background:var(--panel, var(--ink)) !important; border-color:var(--panel, var(--ink)) !important; color:var(--panel-ink, var(--surface)) !important; }

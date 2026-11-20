@@ -295,6 +295,7 @@
 <script src="PPTX"></script>
 <script src="MAIL"></script>
 <script src="RENDER"></script>
+<script src="TABLECOLS"></script>
 <script src="CONFIGRENDER"></script>
 <script src="BUILDER"></script>
 <script src="PRESENT"></script>
@@ -366,7 +367,11 @@
      document (COPILOT.shown); `everywhere` because, like the reports, being
      able to open it is never a reason to be offered a destination (§383).
      Declared once and referenced four times, the file's own idiom. */
-  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true,
+  /* §752 — `oneWindow`: the Copilot's areas still route the address
+     (…/copilot/directions), but their row is not drawn; the Copilot draws
+     the method as its own strip (Islam: "they need 1 window"). */
+  var COP_LASTBUILD = "";
+  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true, oneWindow:true,
                   when: function(){ return COPILOT.shown(); },
                   sections: function(){ return COPILOT.sections(); } };
 
@@ -690,7 +695,9 @@
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
         /* §520: and it is neither the owner's own part nor the Foundation,
            so it goes with the rest for a narrowed part owner. */
-        when: function(){ return buExists() && !partOnly(); } },
+        /* §759: and the office may switch the page off (Setup › Business
+           units); off means it disappears, as Focus does (§102). */
+        when: function(){ return buExists() && weightingOn() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
@@ -907,7 +914,7 @@
          inside still asks the real grant it needs. */
       /* §435: Setup › Structure is gone — its per-item exceptions sit under
          each layer's card on Client set-up › Structure ("Except for"). */
-      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
@@ -972,6 +979,12 @@
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
       { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
+      /* §770: THE WEIGHTING IS THE STRATEGY'S (Islam: *"it's a strategy
+         performance weighting"*), so its switch and its table sit in this
+         module's Setup, under Measurement, and not beside the units' creation
+         in the client's. The key is the company tab's (§30.2): the impact
+         buttons' repaint names "weighting" and lands on whichever is open. */
+      { k:"weighting", ac:"c_bands", grp:"meas", mod:"strategy", label:"Weighting", glyph:"⚖", find:"weighting weight weights units count group figure factors revenue profit impact growth on off switch", render:renderWeightingSetup },
       /* §621: TERMINOLOGY LEFT SETUP (Islam: *"yes remove terminology"*).
          Client set-up › The shape names every word, layer by layer — End in
          Mind, the one it did not, included — and an empty box there shows
@@ -3839,7 +3852,22 @@
     /* \u00a7132.14: the Strategy tab wears NO number (Islam: "remove the number
        from the strategy word") \u2014 the missing bar in the section row below
        carries the total, the places and the action, through missBar(). */
+    /* §790 — named for what each does, as ✦ Refine on the plan is (Islam: "builder to be build and advisory to be advise like refine"). */
+    /* §782 — BUILDER AND ADVISORY AT THE FAR RIGHT (Islam: "the builder should
+       be on the far right of the tabs as it's not something similar, and it
+       matches the placement of the copilot when we get in the plan on the
+       right"; "the advisory should be something different… it's a general
+       thing" → its own tab). One tab underneath, the Copilot's: Builder is
+       its method, Advisory its advisory area, each pressed by itself. */
+    if (currentSub === COP_TAB.k && CURSEC.copilot && CURSEC.copilot !== "advisory") COP_LASTBUILD = CURSEC.copilot;
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
+      if (d.k === COP_TAB.k) {
+        var advOn = false; try { advOn = (allowed(d.sections(arg), TARGET) || []).some(function(x){ return x.k === "advisory"; }); } catch (e) { advOn = false; }
+        var onAdv = currentSub === d.k && CURSEC.copilot === "advisory";
+        return '<span class="tabgap" aria-hidden="true"></span><span class="coptabs">' +
+          '<button role="tab" data-s="' + d.k + '" data-cop-to="build" class="coptab" aria-selected="' + (currentSub === d.k && !onAdv) + '">✦ Build</button>' +
+          (advOn ? '<button role="tab" data-s="' + d.k + '" data-cop-to="advisory" class="coptab copadv" aria-selected="' + onAdv + '">✦ Advise</button>' : '') + '</span>';
+      }
       var cls = (d.primary ? "primary" : "") + (d.cta ? " cta" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
@@ -3852,6 +3880,9 @@
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
+    /* §752 — the TAB, kept before `def` becomes a section (below): its
+       one-window flag decides whether its sections draw a row. */
+    var tabDef = def;
     /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§121.1). Twenty
        lines down, a page with sections reassigns `def` to whichever section is
        open — so reading the name after that gives the SECTION's: Figure sets
@@ -4133,10 +4164,15 @@
        of the row with the pen at the end — drawn, looked at, and thrown away
        (§41.9). The tail takes the auto and the bar gives its up. */
     var penHTML = (stratTab && typeof secActs === "function") ? secActs() : "";
-    var tailHTML = (missHTML || penHTML)
+    /* §795: Expand all / Collapse all for a SWOT's folding points, before the
+       pen. Drawn hidden; `swotFoldSync()` at the end of the paint shows it
+       where the page has a line with points on it. On the strategy tabs for
+       everybody, the pen or no pen — folding is reading. */
+    var foldHTML = (stratTab && typeof swotFoldBtn === "function") ? swotFoldBtn() : "";
+    var tailHTML = (missHTML || penHTML || foldHTML)
       ? '<span class="secttail">' + missHTML +
           ((missHTML && penHTML) ? '<span class="sectsep" aria-hidden="true"></span>' : '') +
-          penHTML + '</span>'
+          foldHTML + penHTML + '</span>'
       : "";
     /* THE ROW IS NOT ONLY FOR SECTIONS, AND §211.2 IS WHAT PROVED IT. That
        section left a pillars function with ONE section — and `> 1` took the
@@ -4151,12 +4187,27 @@
        Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length && (secs.length > 1 || tailHTML)) {
+    /* §752 — `allowed()` hands back copies of the tab definitions, so the
+       one-window flag is read off the Copilot's own definition by its key,
+       and off the TAB, not the section `def` has become by here. */
+    var oneWin = !!(tabDef && (tabDef.oneWindow || (COP_TAB.oneWindow && tabDef.k === COP_TAB.k)));
+    /* §758: EXCEPT ON A UNIT'S OR A FUNCTION'S STRATEGY TAB, where one
+       section still names itself. Islam, with a layer's Plan section
+       switched off and its Foundation not counting (2026-11-16): *"the
+       choices of plan or SWOT disappeared despite I'm showing the swot"*.
+       The SWOT was drawn and nothing said so — a page whose only section
+       is unnamed reads as a page that lost its sections, not as a tab of
+       one. The company (§68) and every other tab keep the rule above:
+       Performance's single section is the tab's own reading and would
+       only repeat the tab's word. */
+    var lone = !!(tabDef && (tabDef.k === "strategy" || tabDef.k === "fnstrat") &&
+                  current !== "group" && !isCo(current));
+    if (!railed && !oneWin && secs && secs.length && (secs.length > 1 || tailHTML || lone)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
       document.getElementById("secrow-in").innerHTML =
-        (secs.length > 1 ? '<span class="secseg">' + secs.map(function(s){
+        (secs.length > 1 || lone ? '<span class="secseg">' + secs.map(function(s){
           return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
             ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
         }).join("") + '</span>' : "") + tailHTML;
@@ -4181,6 +4232,9 @@
     /* The builder's band, once the navigation above has settled (§129). */
     paintBuildBand();
     wire();
+    /* §754: the reader's own shape of each Setup table — AFTER wire(), whose
+       sort reads the cells in the order the renderer drew them. */
+    TABLECOLS.apply();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
        searchable button in front of it once its list passes five options
        (searchsel.js) — the native control stays where it is, so nothing wire()
@@ -4326,6 +4380,7 @@
        anyway — §327 says why that is the only question that can be asked
        here, and why the observer this used to be could not answer it. */
     pinWatch();
+    stickWatch();
     watchTailFold();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
@@ -4361,6 +4416,13 @@
        (§173): every navigation ends in a paint, so one line covers a door
        added tomorrow and there is no list of handlers to keep up to date. */
     rememberWhere();
+    /* §753 — the Copilot on the plan (layout B): its button beside Edit and its
+       panel follow every paint, as the page's own parts do. */
+    if (typeof swotFoldSync === "function") swotFoldSync();   /* §795 */
+    if (typeof COPILOT !== "undefined" && COPILOT.afterPaint) { try { COPILOT.afterPaint(); } catch (e) { if (window.console) console.error(e); } }
+    /* §755: a figure corrected on a closed cycle re-takes its closing
+       record before the save leaves (closeRecordFollow, config-data.js). */
+    if (typeof closeRecordFollow === "function") closeRecordFollow();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }
@@ -4453,6 +4515,70 @@
        position that does not move, so no scroll event is coming. Kept, and
        known to be unproven. */
     window.addEventListener("resize", pinSoon, { passive: true });
+  }
+  /* ── §771 · WHAT THE TWO FROZEN HEADS NEED MEASURED ─────────────────
+     Islam: *"the header needs to stay freezed on scrolling down"*, and asked
+     which, *"freeze both headers"*: the open direction's title band and the
+     plan tables' own heads. On the squeezed window (§609) the band scrolled
+     away on purpose; now it pins UNDER the strip, and a table head pins
+     under the band, reading or editing. Two heights nothing in CSS can
+     know are published the way `--chrome-h` is (§29.4's rule — observed,
+     never measured at chosen moments): the strip's, because its names wrap
+     to one, two or three lines, and the band's, because a name can too.
+     Both are re-observed after every paint, as the bands are; the observer
+     is one object, disconnected and pointed at the new nodes.
+
+     AND A TABLE HEAD CAN ONLY PIN TO THE WINDOW WHEN ITS BOX IS NOT A
+     SCROLL BOX (§273.1 records the fault the other way round: a page offset
+     inside an `overflow:auto` wrapper lands the head partway down its own
+     body). So each `.scroll` in a pane is marked `fits` while its table
+     needs no sideways scrolling, and only then does the wrapper let the
+     head out and the head pin. A table wider than its pane keeps its scroll
+     box and its head scrolls with it, exactly as before — reachable beats
+     pinned. Re-read on resize, because that is what changes the answer. */
+  var STICKRO = typeof ResizeObserver === "function" ? new ResizeObserver(function(){ stickPublish(); }) : null;
+  function stickNodes(){
+    return {
+      strip: document.querySelector("#panel .split:not(.setupsplit) > .rail:not(.setuprail)"),
+      band: document.querySelector("#panel .pane > .pband, #panel .pane > .ptitle.edhead")
+    };
+  }
+  function stickPublish(){
+    var n = stickNodes(), st = document.documentElement.style;
+    st.setProperty("--strip-h", (n.strip ? n.strip.offsetHeight : 0) + "px");
+    st.setProperty("--band-h", (n.band ? n.band.offsetHeight : 0) + "px");
+    fitPaint();
+  }
+  function fitPaint(){
+    /* BOTH boxes round a table: the renderer's `.scroll` and the `.tblscroll`
+       §151 wraps every table in after the paint — a head pins to the window
+       only once neither is a scroll box. */
+    Array.prototype.forEach.call(document.querySelectorAll("#panel .pane:not(.setuppane) .scroll, #panel .pane:not(.setuppane) .tblscroll"), function(b){
+      /* a confirmation's own list (`.rmconfirm`) pins its head to its box on
+         purpose; the tactic panel (§773) is a pinned box that scrolls inside
+         itself, so a head pinned to the window would float mid-list — Islam:
+         "the outcome and target title is floating" (§775.3). */
+      if (b.closest(".rmconfirm, .tacpanel")) { b.classList.remove("fits"); return; }
+      b.classList.toggle("fits", b.scrollWidth <= b.clientWidth + 1);
+    });
+  }
+  var FITSOON = 0;
+  function fitSoon(){
+    if (FITSOON || typeof requestAnimationFrame !== "function") return;
+    FITSOON = requestAnimationFrame(function(){ FITSOON = 0; fitPaint(); });
+  }
+  var STICKARMED = false;
+  function stickWatch(){
+    if (STICKRO) {
+      STICKRO.disconnect();
+      var n = stickNodes();
+      if (n.strip) STICKRO.observe(n.strip);
+      if (n.band) STICKRO.observe(n.band);
+    }
+    stickPublish();
+    if (STICKARMED || typeof window === "undefined") return;
+    STICKARMED = true;
+    window.addEventListener("resize", fitSoon, { passive: true });
   }
   /* ── AND A WINDOW THAT CHANGES SIZE HAS TO REACH THE FOLD (§267) ─────
      `tailFolds()` is read while the plan table is being BUILT, because what
@@ -4639,9 +4765,10 @@
       }
       return;
     }
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu],[data-railopts]");
     if (btn) {
       MENURETURN = btn.dataset.pmenu ? '[data-pmenu="' + btn.dataset.pmenu + '"]'
+                : btn.dataset.railopts ? '[data-railopts="' + btn.dataset.railopts + '"]'
                 : btn.hasAttribute("data-colmenu") ? "[data-colmenu]" : "[data-pwmenu]";
     }
     /* Only when the menu has just appeared under the keyboard — a mouse user
@@ -5320,7 +5447,11 @@
            handles on (§63.3), it would have carried the handles onto
            Performance with no control there to turn them off. */
         if (currentSub !== b.dataset.s) leaveModes();
-        currentSub = b.dataset.s; paint(); window.scrollTo(0,0);
+        currentSub = b.dataset.s;
+        /* §782 — Builder and Advisory are the one Copilot tab, each opening its own part of it */
+        if (b.dataset.copTo === "advisory") CURSEC.copilot = "advisory";
+        else if (b.dataset.copTo === "build" && CURSEC.copilot === "advisory") CURSEC.copilot = COP_LASTBUILD || "foundation";
+        paint(); window.scrollTo(0,0);
       });
     });
     document.querySelectorAll("[data-sub2]").forEach(function(b){
@@ -5758,6 +5889,12 @@
         setFocusOn(this.dataset.focusswitch === "1"); paint();
       });
     });
+    /* §759: the Weighting page's switch, the same pair and the same shape. */
+    document.querySelectorAll("[data-weightswitch]").forEach(function(wsw){
+      wsw.addEventListener("click", function(){
+        setWeightingOn(this.dataset.weightswitch === "1"); paint();
+      });
+    });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
@@ -5950,10 +6087,28 @@
         setKoThisYear(!SHOW_KO_THIS_YEAR); paint();
       });
     });
+    /* §771: the button opens the rail's options; the terse switch is a tick
+       inside it, and so are the years to show. The menu's state is the rail
+       key, so two rails on one page (§556's reporting halves) open one each.
+       The years are a moment's choice in memory; terse stays in localStorage. */
+    document.querySelectorAll("[data-railopts]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        RAILMENU = RAILMENU === b.dataset.railopts ? null : b.dataset.railopts;
+        paint();
+      });
+    });
     document.querySelectorAll("[data-railterse]").forEach(function(b){
-      b.addEventListener("click", function(){
-        RAIL_TERSE = !RAIL_TERSE;
+      b.addEventListener("change", function(){
+        RAIL_TERSE = !b.checked;
         try { localStorage.setItem("smp.rail.terse", RAIL_TERSE ? "1" : "0"); } catch(e){}
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-railyear]").forEach(function(b){
+      b.addEventListener("change", function(){
+        var p = b.dataset.railyear.split("|");
+        railYearSet(p[0], +p[1], b.checked);
         paint();
       });
     });
@@ -8632,17 +8787,12 @@
        menus keep with a single PMENU key. */
     document.querySelectorAll("[data-filemenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PFILEMENU = !PFILEMENU; PCOLMENU = false; PWMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-colmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation(); PCOLMENU = !PCOLMENU; PWMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PFILEMENU = !PFILEMENU; TABLECOLS.shut(); PWMENU = false; paint();
       });
     });
     document.querySelectorAll("[data-pwmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PWMENU = !PWMENU; TABLECOLS.shut(); PFILEMENU = false; paint();
       });
     });
     /* §629: the Forefront switch. Kept on this device, repainted in place;
@@ -8653,22 +8803,8 @@
         e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
       });
     });
-    /* A tick repaints the table but MUST NOT close the menu — you come here to
-       set several columns, and a chooser that shuts after each one is a chooser
-       you reopen six times. */
-    document.querySelectorAll("[data-col]").forEach(function(b){
-      b.addEventListener("change", function(e){
-        e.stopPropagation(); setPeopleCol(b.dataset.col, b.checked); paint();
-      });
-    });
-    document.querySelectorAll("[data-colall],[data-colnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-colall");
-        PEOPLE_COLS.forEach(function(c){ setPeopleCol(c.k, on); });
-        paint();
-      });
-    });
+    /* The Columns menu — a tick that keeps it open, All, None, the row height
+       and Reset — is tablecols.js's, bound once on the document (§754). */
     /* Edit the whole page, cursor in this person's name. The focus is applied
        AFTER the repaint that creates the input — focusing a node the paint is
        about to replace focuses nothing. */
@@ -9030,26 +9166,6 @@
         e.stopPropagation();
         var bits = b.dataset.rowdlg.split("|");
         openRowDialog(bits[0], bits.slice(1).join("|"));
-      });
-    });
-    document.querySelectorAll("[data-fncolmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        FNCOLMENU = !FNCOLMENU; PCOLMENU = false; PWMENU = false; PFILEMENU = false;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fncol]").forEach(function(b){
-      b.addEventListener("change", function(){ setFnCol(this.dataset.fncol, this.checked); paint(); });
-    });
-    /* stopPropagation, or the document click-away above closes the panel
-       before the paint that would show the boxes changing (§47.2). */
-    document.querySelectorAll("[data-fncolall],[data-fncolnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-fncolall");
-        FN_COLS.forEach(function(c){ setFnCol(c.k, on); });
-        paint();
       });
     });
     /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
@@ -10450,7 +10566,8 @@
              screen, written nowhere (§50.6's fault through a fresh door). */
           var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
-          if (what === "measure") addMeasure(it); else addTactic(it);
+          if (what === "measure") addMeasure(it);
+          else { var nt = addTactic(it); if (nt && EDIT_PAGE.plan) PEN_TACTIC = nt.id; }  /* §773: the new one opens in the panel */
         }
         else if (what === "project") {
           /* §326: holderByIdWritable, not capById — a project may be added to
@@ -10606,12 +10723,65 @@
       b.addEventListener("click", gapWalk);
     });
 
+    /* §774 read the banner's height here for the panel to pin under; main's
+       §771 (stickWatch) publishes `--band-h` for the table heads, so the
+       panel reads that one and this measurement is gone — one writer. */
+    /* §773: a row press, the panel's arrows, opens a tactic in the panel; × closes it. */
+    document.querySelectorAll("[data-tacopen]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        if (b.tagName === "TR" && e.target.closest("select, input, textarea, button, a, .grip, .ssbtn, label, .eyebtn, .xbtn, .rm, [data-rowoff], [data-hiderow], [data-rmrow], [data-rmout], [data-outadd]")) return;
+        if (String(PEN_TACTIC) === b.dataset.tacopen && b.tagName === "TR") return;
+        PEN_TACTIC = b.dataset.tacopen; paint();
+      });
+    });
+    /* §775: THE PANEL FOLLOWS THE ROW YOU WORK IN. The focus landing in a box
+       of another tactic's row moves the panel there — a paint, since the panel
+       is drawn by the page — and the focus is put back in the same box of the
+       same row afterwards, so typing goes on where it was. Buttons and the
+       pickers' own buttons are left out: a press on them is a click that a
+       paint under the pointer would swallow. */
+    /* ONLY A PRESS OR A TAB COUNTS. A paint puts the focus back in the box
+       that had it (§35), and that is a focusin too — measured: the panel's ↓
+       and Add a tactic each painted, the focus went back to the row being
+       typed in, and the panel sprang back to it. So the row is followed only
+       within a moment of a mousedown or a Tab, which is what a person moving
+       to another row does and a paint never does. */
+    if (!window.__penFollowWired) {
+      window.__penFollowWired = true; window.__penFollowAt = 0;
+      document.addEventListener("mousedown", function(){ window.__penFollowAt = Date.now(); }, true);
+      document.addEventListener("keydown", function(e){ if (e.key === "Tab") window.__penFollowAt = Date.now(); }, true);
+    }
+    document.querySelectorAll(".penlist tr[data-tacrow]").forEach(function(tr){
+      tr.addEventListener("focusin", function(e){
+        var f = e.target;
+        if (!f || !f.matches || !f.matches("input, textarea, select")) return;
+        if (String(PEN_TACTIC) === tr.dataset.tacrow) return;
+        if (Date.now() - (window.__penFollowAt || 0) > 150) return;   /* a press or a Tab lands its focus at once; a paint comes later */
+        var cell = f.closest("td"); if (!cell) return;
+        var cells = Array.prototype.slice.call(tr.children), ci = cells.indexOf(cell);
+        var ctrls = Array.prototype.slice.call(cell.querySelectorAll("input, textarea, select")), ki = ctrls.indexOf(f);
+        var id = tr.dataset.tacrow;
+        PEN_TACTIC = id; paint();
+        requestAnimationFrame(function(){
+          var row = document.querySelector('.penlist tr[data-tacrow="' + id.replace(/"/g, '\\"') + '"]');
+          var c2 = row && row.children[ci], k2 = c2 && c2.querySelectorAll("input, textarea, select")[ki];
+          if (!k2) return;
+          k2.focus({ preventScroll: true });
+          try { if (k2.setSelectionRange && k2.type !== "number") { var L = k2.value.length; k2.setSelectionRange(L, L); } } catch (x) {}
+        });
+      });
+    });
+    document.querySelectorAll("[data-tacclose]").forEach(function(b){
+      b.addEventListener("click", function(){ PEN_TACTIC = false; paint(); });
+    });
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
         var arr = listById(list, id);
         removeRowById(arr, id);
+        /* §767: a measure taken away is forgotten by the tactics that named it. */
+        if (list === "measures") forgetSupport(id);
         /* §343: and a breakdown with nothing left in it stops being one
            (§50.6) — a pillar that never had one and a pillar that had one
            removed must be byte-identical, or every save carries a change
@@ -10640,6 +10810,17 @@
           var box = f && f.parentNode.querySelector("textarea, input");
           if (box) box.focus();
         }, 0);
+      });
+    });
+    /* §775.1: an outcome's ringed × in the row asks before it goes — the first
+       outcome included (Islam: "why am I able to remove the new outcome but not
+       the old one?"); when the first goes, the next moves up into its place. */
+    document.querySelectorAll("[data-rmout]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rmout.split("|");
+        confirmRemoveOutcome(a[0], a[1]);
       });
     });
     document.querySelectorAll("[data-outoff]").forEach(function(b){
@@ -10704,6 +10885,7 @@
         if (!mayEditPlan()) return;
         var a = this.dataset.rmrow.split("|");
         if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
+        else if (a[0] === "tactic") confirmRemoveTactic(a[1], a[2]);   /* §775.1 */
         else confirmRemoveProject(a[1]);
       });
     });
@@ -13097,6 +13279,70 @@
     if (RAIL[key]) delete RAIL[key];
     paint();
   }
+  /* §775.1: A TACTIC ASKS BEFORE IT GOES, the pillar's own way: what it holds,
+     what was reported against it, the archive taken first. Islam: *"the
+     removal of a tactic or outcome should prompt me with a message"*. */
+  function confirmRemoveTactic(ukey, id){
+    var u = unitLikeWritable(ukey), t = null;
+    (u && u.items || []).forEach(function(p){ (p.tactics || []).forEach(function(x){ if (x && x.id === id) t = x; }); });
+    if (!t) return;
+    var word = L1("tactic"), nOut = (t.outcome || t.outTarget ? 1 : 0) + tacticExtras(t).length;
+    var rep = (t.actual != null && t.actual !== "") || (t.outActual != null && t.outActual !== "") ? 1 : 0;
+    rmConfirmOpen("Remove this " + word + "?", t.name || "Untitled",
+      '<b>' + esc(t.name || "This " + word) + '</b>' + (nOut ? ' holds ' + plural(nOut, detailWord("outcomes", "one", t), detailWord("outcomes", "many", t)) : ' holds no outcome yet') + '.',
+      rep, boxRef(ukey).kind === "fn" ? "the function's scores" : "the unit's scores", "Remove the " + word,
+      function(){
+        var u2 = unitLikeWritable(ukey);
+        if (!u2) return;
+        var p2 = null;
+        (u2.items || []).forEach(function(p){ if ((p.tactics || []).some(function(x){ return x && x.id === id; })) p2 = p; });
+        if (!p2) return;
+        archiveUnitPlan(u2, "before " + (t.name || "a " + word.toLowerCase()) + " was removed");
+        removeRowById(p2.tactics, id);
+        if (String(PEN_TACTIC) === String(id)) PEN_TACTIC = null;   /* the pen opens on the first again */
+        paint();
+      });
+  }
+  /* The outcome: its name and target go; its figure with them. The FIRST
+     outcome is the tactic's own fields (§248) and the extras a list (§414),
+     so removing the first moves the first extra up into its place, figure
+     and all, and removing the last extra deletes the lists (§50.6). */
+  function confirmRemoveOutcome(tid, oid){
+    var t = hideableById(tid);
+    if (!t) return;
+    var isFirst = oid === "first";
+    var x = isFirst ? null : (t.outs || []).filter(function(o){ return o && o.id === oid; })[0];
+    if (!isFirst && !x) return;
+    var name = isFirst ? t.outcome : x.outcome, word = detailWord("outcomes", "one", t);
+    var rep = isFirst ? ((t.outActual != null && t.outActual !== "") ? 1 : 0)
+                      : ((t.outActs && t.outActs[oid] != null && t.outActs[oid] !== "") ? 1 : 0);
+    rmConfirmOpen("Remove this " + word.toLowerCase() + "?", name || "Unnamed",
+      '<b>' + esc(name || "This " + word.toLowerCase()) + '</b> and its target go with it.',
+      rep, "the unit's scores", "Remove the " + word.toLowerCase(),
+      function(){
+        var t2 = hideableById(tid); if (!t2) return;
+        if (isFirst) {
+          var ex = Array.isArray(t2.outs) ? t2.outs : [];
+          ["outcome", "outDir", "outTarget", "outCompile", "outActual", "outMonthly", "outQuarterly"].forEach(function(k){ delete t2[k]; });
+          if (ex.length) {
+            var up = ex[0];
+            if (up.outcome) t2.outcome = up.outcome;
+            if (up.outDir) t2.outDir = up.outDir;
+            if (up.outTarget) t2.outTarget = up.outTarget;
+            if (up.outCompile) t2.outCompile = up.outCompile;
+            if (t2.outActs && t2.outActs[up.id] != null && t2.outActs[up.id] !== "") t2.outActual = t2.outActs[up.id];
+            setExtraFigure(t2, up.id, "");
+            t2.outs = ex.slice(1);
+            if (!t2.outs.length) delete t2.outs;
+          }
+        } else {
+          t2.outs = t2.outs.filter(function(o){ return o.id !== oid; });
+          if (!t2.outs.length) delete t2.outs;
+          setExtraFigure(t2, oid, "");
+        }
+        paint();
+      });
+  }
   function confirmRemovePillar(ukey, id){
     var u = unitLikeWritable(ukey);
     var it = u && (u.items || []).filter(function(x){ return x && x.id === id; })[0];
@@ -13349,11 +13595,16 @@
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU) &&
+    if (typeof PWMENU !== "undefined" &&
+        (PWMENU || PFILEMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+      PWMENU = false; PFILEMENU = false;
       paint();
+    }
+    /* §771: the rail's options menu closes on a click anywhere outside it. */
+    if (typeof RAILMENU !== "undefined" && RAILMENU !== null &&
+        !(e.target.closest && e.target.closest(".railopts"))) {
+      RAILMENU = null; paint();
     }
   });
   document.addEventListener("keydown", function(e){
@@ -13362,11 +13613,12 @@
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
     if (typeof UMENU !== "undefined" && UMENU !== null) { UMENU = null; paint(); }
     if (typeof COMENU !== "undefined" && COMENU !== null) { COMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+    if (typeof PWMENU !== "undefined" &&
+        (PWMENU || PFILEMENU)) {
+      PWMENU = false; PFILEMENU = false;
       paint();
     }
+    if (typeof RAILMENU !== "undefined" && RAILMENU !== null) { RAILMENU = null; paint(); }
   });
 
   /* The switcher lists the people the platform actually has. It was filled

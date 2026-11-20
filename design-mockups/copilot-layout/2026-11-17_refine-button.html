@@ -1,0 +1,99 @@
+<title>Refine Button</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: a choice (today / suggested; ✦ on all three or two), then the plan page's top as it stands — unit bar, tab row with ✦ Builder · Advisory at the right, section row with the part's button beside Edit — and the panel it opens, its head named to match. */
+:root{--ground:#F3F5F8;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--navink:#FFFFFF;--rep:#A6512A;--demo:#5B3E8F;--demobg:#F2EEFA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--demo:#C7B3F0;--demobg:#251E33;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--navink:#EAF0FA;--demo:#C7B3F0;--demobg:#251E33;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.45 var(--sans);padding-block:12px 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+h1{font-size:17px;margin:0}
+.hint{color:var(--ink-3);font-size:13px}
+.pick{border:1px dashed var(--demo);background:var(--demobg);border-radius:10px;padding:8px 12px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px}
+.pick b{color:var(--demo)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:3px 12px;font-size:12.5px;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--demo);color:#fff;font-weight:600}
+.app{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:420px}
+.bar{display:flex;gap:14px;align-items:center;background:var(--nav);color:var(--navink);padding:8px 14px;font-size:13px;flex-wrap:wrap}
+.bar b{border-bottom:2px solid var(--goldfill);padding-bottom:2px}.bar span{opacity:.85}
+.tabs{display:flex;gap:16px;align-items:center;padding:7px 14px;border-bottom:1px solid var(--line);font-size:13.5px;flex-wrap:wrap}
+.tabs .t{color:var(--ink-2)}
+.tabs .t.on{color:var(--ink);font-weight:700;border-bottom:2px solid var(--goldfill)}
+.tabs .rep{background:var(--rep);color:#fff;border-radius:6px;padding:2px 10px}
+.tabs .sp{flex:1}
+.side{display:inline-flex;gap:6px;align-items:center;border-left:1px solid var(--line);padding-left:12px}
+.pill{border:1px solid var(--line);border-radius:16px;padding:2px 12px;font-weight:600;color:var(--ink-2);background:var(--surface);font-size:13px;white-space:nowrap}
+.pill.adv{border-style:dashed}
+.pill.ai{border-color:var(--goldfill);color:var(--gold)}
+.pill.on{background:var(--nav);color:var(--navink);border-color:var(--nav);border-style:solid}
+.secrow{display:flex;gap:10px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--ground)}
+.secseg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.secseg span{padding:3px 12px;font-size:12.5px;color:var(--ink-2);background:var(--surface)}
+.secseg span+span{border-left:1px solid var(--line)}
+.secseg .on{background:#3D4552;color:#fff;font-weight:600}
+.secrow .sp{flex:1}
+.plain{border:0;background:none;font-weight:600;font-size:13px;color:var(--ink-2);padding:3px 6px}
+.edit{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 12px;font-size:12.5px;font-weight:600}
+.body{display:flex;flex:1;min-height:0}
+.page{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px}
+.card b{display:block;margin-bottom:2px}
+.panel{flex:0 0 340px;border-left:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+@media (max-width:760px){.panel{flex-basis:220px}}
+.phd{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.phd small{display:block;color:var(--ink-3);font-size:12px}
+.phd .sp{flex:1}
+.phd .x{border:0;background:none;font-size:18px;color:var(--ink-3)}
+.pb{padding:14px 12px;display:flex;flex-direction:column;gap:10px;text-align:center}
+.pb h3{margin:0;font-size:15px}
+.ask{border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink-3);text-align:left;font-size:13px}
+.notes{font-size:13px;color:var(--ink-2);max-width:90ch;margin:0;padding-left:18px}
+.notes li{margin:3px 0}.notes b{color:var(--ink)}
+</style>
+
+<div><h1>The Copilot on the plan — named ✦ Refine, one family with Builder and Advisory</h1><span class="hint">working mockup · drawn on the plan page as it stands · press ✦ Refine to open its panel</span></div>
+<div class="pick" id="pick"></div>
+<div class="app">
+  <div class="bar"><span>Group</span><span>Mobile</span><b>CE</b><span>Logistics</span></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="secrow" id="secrow"></div>
+  <div class="body"><div class="page"><div class="card"><b>CE01 · Grow the accessories business</b>Key measures 3 · Tactics 4</div><div class="card"><b>CE02 · Local manufacturing at scale</b>Key measures 2 · Tactics 3</div></div><div id="panel" style="display:contents"></div></div>
+</div>
+<ul class="notes">
+  <li><b>Where they stay.</b> ✦ Builder and Advisory are places, so they stay in the tab row at the right. ✦ Refine works on the part in view, so it stays beside Edit, the part's other action.</li>
+  <li><b>One family.</b> ✦ Refine wears the same pill as ✦ Builder — the gold edge marks the Copilot wherever it is — and stands before Edit, which keeps its plain button. Today's “✦ Copilot” was plain text, quieter than Edit.</li>
+  <li><b>✦ on all three</b> (suggested): ✦ simply means “the Copilot is here”. Or on two, Advisory left plain as the one that is not about building the plan — press the choice above.</li>
+  <li><b>The panel's head says the same</b>: ✦ Refine · Plan · CE.</li>
+</ul>
+
+<script>
+(function(){
+  var S = { v:"new", star:"all", open:false };
+  function pick(){
+    var b = function(k, v, w){ return '<button data-k="' + k + '" data-v="' + v + '" aria-pressed="' + (S[k] === v) + '">' + w + '</button>'; };
+    document.getElementById("pick").innerHTML = '<b>Show</b><span class="seg">' + b("v", "old", "Today") + b("v", "new", "Suggested") + '</span>' +
+      (S.v === "new" ? '<b>✦ on</b><span class="seg">' + b("star", "all", "All three") + b("star", "two", "Builder and Refine") + '</span>' : '');
+  }
+  function draw(){
+    pick();
+    var nw = S.v === "new", advStar = nw && S.star === "all";
+    document.getElementById("tabs").innerHTML = '<span class="t on">Strategy</span><span class="t">Performance</span><span class="rep">Reporting</span><span class="t">Insights</span><span class="sp"></span>' +
+      '<span class="side"><span class="pill' + (nw ? " ai" : "") + '">✦ Builder</span><span class="pill adv' + (nw ? " ai" : "") + '">' + (advStar ? "✦ " : "") + 'Advisory</span></span>';
+    var btn = nw ? '<button class="pill ai' + (S.open ? " on" : "") + '" data-open>✦ Refine</button>' : '<button class="plain" data-open>✦ Copilot</button>';
+    document.getElementById("secrow").innerHTML = '<span class="secseg"><span>Foundation</span><span>SWOT</span><span>Drivers</span><span class="on">Plan</span></span><span class="sp"></span>' + btn + '<button class="edit">Edit</button>';
+    document.getElementById("panel").innerHTML = S.open ? '<aside class="panel"><div class="phd"><div><b>' + (nw ? "✦ Refine" : "✦ Copilot") + '</b><small>Plan · CE</small></div><span class="sp"></span><button class="x" data-open aria-label="Close">×</button></div>' +
+      '<div class="pb"><h3>What would you like to change in CE’s Pillars/Directions?</h3><div class="ask">Say what to change…</div><span class="hint">Works on what is on the plan · the plan moves only on Apply.</span></div></aside>' : '';
+  }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-k")) { S[b.getAttribute("data-k")] = b.getAttribute("data-v"); draw(); return; }
+    if (b.hasAttribute("data-open")) { S.open = !S.open; draw(); }
+  });
+  draw();
+})();
+</script>

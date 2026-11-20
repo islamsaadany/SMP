@@ -599,8 +599,7 @@ function cyclePastPlan(){
   var to = reviewAsOf(), fr = monthsOf(REVIEW.from);
   return (to != null && to > planTo()) || (fr != null && fr < planFrom());
 }
-var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
-var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
+var PWMENU = false, PFILEMENU = false;   /* the Columns menu is tablecols.js's own (§754) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
    other header menu: two open panels on one row cover each other. */
 var PICKING = null, PICKQ = "";
@@ -4257,6 +4256,13 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
 }
+/* §759, §769: THE WEIGHTING, ON OR OFF FOR THE CLIENT, off by default — the
+   drivers' reader and writer: the rule is the shared module's, On writes
+   `true`, Off deletes the key (§50.6), and nothing stored moves. */
+function weightingOn(){ return SMPRules.weightingOn(world()); }
+function setWeightingOn(on){
+  if (on) GROUP[SMPRules.WEIGHTING_ON] = true; else delete GROUP[SMPRules.WEIGHTING_ON];
+}
 /* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 063, 2026-09-23). The rule
    is the shared module's (only an explicit true is on); this reads it off the
    group and writes it, deleting the key for Off (§50.6) so a client that
@@ -5506,6 +5512,28 @@ var HISTORY = [
             corporate:71, care:66, it:63, logistics:69, nigeria:44 } }
 ];
 function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null; }
+/* §755: THE CLOSING RECORD FOLLOWS THE FIGURES. Closing files a score
+   snapshot (shell.html, the close press) and leaves every figure live; the
+   office may now correct a figure on the closed cycle (cycleTakesFigures),
+   so the snapshot taken at the press would say what the cycle scored BEFORE
+   the correction — and the next cycle's "what it was last time" (deltaFor)
+   and the Closed cycles chips would read the stale number. Reopen · correct
+   · close again re-took it; this is that, collapsed: while the cycle stands
+   closed and its record is the last one filed, every paint re-takes the
+   record from the live figures before the save leaves (paint() calls this
+   ahead of SYNC.afterPaint()). Opening the next cycle replaces REVIEW, so
+   from then on the record is fixed. Matched by NAME, as reopening matches
+   it (§273.2), never the last entry blind. Unchanged figures re-take an
+   identical record, so nothing is saved for nothing. The server already lets
+   the office change the record (a `cycle` change, a_cycle). */
+function closeRecordFollow(){
+  if (!REVIEW || REVIEW.state !== "closed" || !HISTORY || !HISTORY.length) return;
+  var h = HISTORY[HISTORY.length - 1];
+  if (!h || h.name !== REVIEW.name) return;
+  h.group = groupUnitsObjectives();
+  h.units = {};
+  activeKeys().forEach(function(k){ h.units[k] = unitObjectives(UNITS[k]); });
+}
 /* A TARGET IS A UNIT KEY OR "fn:<key>", and everything that takes one has to
    resolve it the same way (§59). `UNITS[key]` alone was right until spec 010
    let a function be drawn by the unit's pages: `UNITS["fn:merchandising"]` is
@@ -5555,13 +5583,36 @@ function planEditable(){
    contributor row of the access page could not do anything even when the SMO
    set it to edit — a control that changes nothing is worse than no control.
    It also means the screen and the server answer from the same function. */
+/* ── §755: A CLOSED CYCLE STILL TAKES FIGURES FROM THE OFFICE ──────────
+   Islam: *"we agreed that the SMO can report even if the cycle is closed."*
+   §690 kept the Reporting tab for the office on a closed cycle, and the page
+   it opened onto said the figures were a record and could not be changed
+   here — a door onto a wall, for the one hand that runs the cycle. Closed
+   now shuts everybody BUT the office, exactly as the lock has since spec 006
+   §7.1: ONE reading of "does this cycle take figures from this person",
+   asked by every gate below it (canReport, canReportFn, canSpeakForDir, the
+   two My reporting pages, the what's-left bar), so the figure box, the note
+   box, Submit and the bar cannot disagree about it (§53.5). The server has
+   never refused a figure for the cycle being closed — authorize.js asks the
+   lock alone, which the office passes — so the screen was the one saying no
+   (§61's trap, from the other side). The closing record is kept true by
+   `closeRecordFollow()`. The dot on Performance (`reportPending`) and the
+   tab's Submitted badge (`reportSectionState`) still follow an OPEN cycle:
+   a closed cycle owes nobody a submission. */
+function cycleTakesFigures(){
+  if (!REVIEW) return false;
+  if (REVIEW.state !== "open" && !inOffice()) return false;
+  /* A locked cycle takes no more figures, from anyone but the SMO — the
+     server refuses them, so the screen must not offer them (spec 006 §7.1). */
+  if (CYCLE.locked && !inOffice()) return false;
+  return true;
+}
 function canReport(unitKey){
-  if (REVIEW.state !== "open") return false;
+  if (!cycleTakesFigures()) return false;   /* §755 */
   /* §428: the top layer's own plan is reported by the office and the group's
      CEO — a rule, the same one the server asks. */
   if (unitKey === "group") {
     if (!topHasPlan() || !planOn("group")) return false;
-    if (CYCLE.locked && !inOffice()) return false;
     /* §447: with the units off each direction's owner reports their own
        direction here; canReportRow narrows them to it. */
     /* §595: whoever reports all of it, or holds a seat on any part of it —
@@ -5569,9 +5620,7 @@ function canReport(unitKey){
        one rule the server asks; which rows they type on is each part's. */
     return SMPRules.mayReportTopOrPart(world(), viewer());
   }
-  /* A locked cycle takes no more figures, from anyone but the SMO — the
-     server refuses them, so the screen must not offer them (spec 006 §7.1). */
-  if (CYCLE.locked && !inOffice()) return false;
+  /* The lock is asked by cycleTakesFigures() above (spec 006 §7.1, §755). */
   /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
      This asked `u_report` for every target, and u_report's area is "unit" —
      so for an fn: target the screen read the own-UNIT cell while the server
@@ -5651,8 +5700,7 @@ function canReportFn(target){
   /* §405: a unit's own holder reports on the UNIT's column, through the gate
      a unit's own page already asks — never the function's. */
   if (isUnitHolderId(target)) return canReport(subjKey(target));
-  if (REVIEW.state !== "open") return false;
-  if (CYCLE.locked && !inOffice()) return false;
+  if (!cycleTakesFigures()) return false;   /* §755 */
   return grantAt("k_report", holderTarget(target)) === "edit";
 }
 function canReportFnRow(target, project, rowObj){
@@ -5730,8 +5778,7 @@ function dirPillar(t){
    (ownsTopPillar with the stored pillar's own two seats). */
 function canSpeakForDir(t){
   var d = dirPillar(t);
-  if (!d || REVIEW.state !== "open" || !planOn("group")) return false;
-  if (CYCLE.locked && !inOffice()) return false;
+  if (!d || !cycleTakesFigures() || !planOn("group")) return false;   /* §755 */
   return SMPRules.mayReportTop(world(), viewer()) ||
          SMPRules.ownsTopPillar(world(), viewer(), d.p.owner || "", d.p.custodian || "");
 }
@@ -8065,6 +8112,93 @@ function setReqs(t, v){
   var a = reqsParse(v);
   if (a.length) t.reqs = a; else delete t.reqs;
 }
+
+/* §767 — A TACTIC NAMES THE KEY MEASURES IT SUPPORTS. Islam: the tactics
+   should be linked to the key measures "regardless of the outcomes", as a
+   mapping. Stored on the tactic as `supports`, a list of its pillar's own
+   measure IDS riding `tactics.extra` (no migration), DELETED when emptied
+   (§50.6). A plan fact and never a figure: it is not in REPORT.tactic, so it
+   falls to the plan on the server and only the pen writes it. Never scored,
+   never asked for, never counted as missing (Islam chose not, to start).
+
+   EVERY SURFACE SHOWS THE MEASURE'S NUMBER, not its name (mockup A2,
+   design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html): a client's
+   measure names run to eighty letters and written out under a tactic they
+   buried the reported note. The number is the measure's PLACE in its own
+   table, read at draw time, so a measure moved up or down carries its
+   tactics' lines with it; the id is what is stored because a position
+   changes and a name can be retyped. */
+function supportsIds(t){
+  return t && Array.isArray(t.supports)
+    ? t.supports.map(function(x){ return String(x == null ? "" : x).trim(); }).filter(Boolean)
+    : [];
+}
+function setSupports(t, ids){
+  var seen = {}, a = [];
+  (ids || []).forEach(function(x){
+    x = String(x == null ? "" : x).trim();
+    if (x && !seen[x]) { seen[x] = 1; a.push(x); }
+  });
+  if (a.length) t.supports = a; else delete t.supports;
+}
+/* The pillar's measures this tactic supports, in the table's order, each with
+   the number the table prints. A stored id naming no measure of the pillar is
+   simply not drawn, which is what makes removing a measure safe. */
+function supportsOf(t, p){
+  var ids = supportsIds(t), out = [];
+  if (!ids.length || !p) return out;
+  (p.measures || []).forEach(function(m, i){
+    if (m && m.id != null && ids.indexOf(String(m.id)) >= 0) out.push({ m:m, n:i + 1 });
+  });
+  return out;
+}
+function supportedBy(m, p){
+  var out = [];
+  if (!m || m.id == null || !p) return out;
+  (p.tactics || []).forEach(function(t, i){
+    if (supportsIds(t).indexOf(String(m.id)) >= 0) out.push({ t:t, n:i + 1 });
+  });
+  return out;
+}
+/* Whether the mapping is IN USE on this pillar: some tactic names a measure
+   it has. The count under a measure is drawn only then, so a plan nobody has
+   mapped is pixel-identical to what it was (§113.8) rather than red under
+   every measure the day this shipped. */
+function mappingOn(p){
+  return !!(p && (p.tactics || []).some(function(t){ return supportsOf(t, p).length; }));
+}
+/* The pillar holding a row, by identity — the row objects on every page are
+   the stored ones (§384's note on pctx), so no id walk is needed. */
+function pillarHolding(u, row){
+  var hit = null;
+  (u && u.items || []).forEach(function(p){
+    if (!hit && p && ((p.tactics || []).indexOf(row) >= 0 || (p.measures || []).indexOf(row) >= 0)) hit = p;
+  });
+  return hit;
+}
+/* When a measure's id changes — renumbering, a fold onto the company plan —
+   every tactic pointing at the old id points at the new one. */
+function remapSupports(p, oldToNew){
+  (p && p.tactics || []).forEach(function(t){
+    var ids = supportsIds(t);
+    if (!ids.length) return;
+    setSupports(t, ids.map(function(x){ return oldToNew[x] || x; }));
+  });
+}
+/* A measure removed with the pen leaves no tactic pointing at it (§50.6): a
+   tactic that supported it and one that never did must be byte-identical. */
+function forgetSupport(id){
+  if (!id) return;
+  pillarHolderTargets().forEach(function(tg){
+    var u = unitLike(tg);
+    (u && u.items || []).forEach(function(p){
+      (p.tactics || []).forEach(function(t){
+        var ids = supportsIds(t);
+        if (ids.indexOf(String(id)) >= 0) setSupports(t, ids.filter(function(x){ return x !== String(id); }));
+      });
+    });
+  });
+}
 /* §416 — YEARS 1 · 2 · 3 (RHI step 6). A direction marks the years it runs
    in (`p.years`, riding `pillars.extra`, no migration; absent or all three is
    every year and is stored as an ABSENCE, §50.6). The plan stands in one year
@@ -9481,8 +9615,15 @@ function buFoldIntoTop(){
       c.id = mintRowId(GROUP.items, "group-P");
       c.fromUnit = k; c.fromId = p.id;
       if (!c.owner && head) c.owner = head.name;
-      (c.measures || []).forEach(function(m, i){ m.id = c.id + "-M" + (i + 1); });
+      /* §767: the copy's tactics point at the copy's measures. */
+      var fMap = {};
+      (c.measures || []).forEach(function(m, i){
+        var nid = c.id + "-M" + (i + 1);
+        if (m.id != null) fMap[String(m.id)] = nid;
+        m.id = nid;
+      });
       (c.tactics || []).forEach(function(t, i){ t.id = c.id + "-T" + (i + 1); });
+      remapSupports(c, fMap);
       /* §541: coded after the push, so a folded pillar marked Capability
          takes a C and not the next D (see the fold above). */
       GROUP.items.push(c);
@@ -10124,8 +10265,15 @@ function renumberUnit(u){
        An existing code is left alone: nine units carry hand-set ones and
        renumbering them would rewrite codes that are already in decks. */
     if (!p.code) p.code = pillarCode(u, pi);
-    p.measures.forEach(function(m, mi){ m.id = p.id + "-M" + (mi + 1); });
+    /* §767: the tactics' pointers at their measures follow the new ids. */
+    var mMap = {};
+    p.measures.forEach(function(m, mi){
+      var nid = p.id + "-M" + (mi + 1);
+      if (m.id != null && String(m.id) !== nid) mMap[String(m.id)] = nid;
+      m.id = nid;
+    });
     p.tactics.forEach(function(t, ti){ t.id = p.id + "-T" + (ti + 1); });
+    remapSupports(p, mMap);
   });
 }
 UNIT_KEYS.forEach(function(k){ UNITS[k].ukey = k; renumberUnit(UNITS[k]); });

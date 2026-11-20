@@ -65,7 +65,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
      must turn checks/tracker.mjs red (§94.5). Never set on a deployment. */
   const office = brk() === "no-office-gate" ? a.seat != null : isOffice(a.seat);
   if (!office) {
-    if (first === "api") return no(403, "The Internal Tracker is the office's.");
+    if (first === "api") return no(403, "The Task Tracker is the office's.");
     return new Response(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have, !!a.consultant), { status: 403, headers: shellHeaders() });
   }
   const who: Who = { personKey: a.personKey ?? null, seat: a.seat ?? null, lead: !!a.lead };

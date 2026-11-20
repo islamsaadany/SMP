@@ -42,8 +42,8 @@ import {
   partMemo,
   failedLine,
 } from "../lib/copilot.ts";
-import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
-import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.ts";
+import { kindOf, readFile, MAX_FILE_BYTES, asParts } from "../lib/copilot-files.ts";
+import { isPasted, shapeAnswer, corpusOf, askCopilot, planOf, SCHEMA as ASK_SCHEMA, PLAN_SCHEMAS, optionalCount } from "../lib/copilot-ask.ts";
 import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
@@ -132,6 +132,14 @@ const xr = readFile("xlsx", XLSX);
 check("an Excel file reads as its sheet by name, rows tab-separated, shared strings resolved",
   xr.ok && xr.text === "## Sheet: Q3 figures\nRevenue\t96\nUnits\t1200", JSON.stringify(xr));
 check("a PDF is not read here — it goes to the model as itself", (() => { const r = readFile("pdf", Buffer.from("%PDF-1.7 x")); return r.ok && r.text === ""; })());
+/* §780 — pictures */
+const PNG = Buffer.from("89504e470d0a1a0a0000000d4948445200000001000000010806000000", "hex"), JPG = Buffer.from("ffd8ffe000104a464946", "hex");
+check("§780 a picture is known by name or by type — PNG, JPEG, WebP — and an SVG or a GIF is not",
+  kindOf("chart.PNG", "") === "png" && kindOf("x", "image/jpeg") === "jpg" && kindOf("s.jpeg", "") === "jpg" && kindOf("w.webp", "") === "webp" && kindOf("i.svg", "image/svg+xml") === null && kindOf("a.gif", "image/gif") === null);
+check("§780 a picture is not read here — it goes to the model as itself", (() => { const a = readFile("png", PNG), b = readFile("jpg", JPG); return a.ok && a.text === "" && b.ok && b.text === ""; })());
+check("§780 a file that says it is a picture and is not one is refused in words", (() => { const r = readFile("png", Buffer.from("<svg onload=x>")); return !r.ok && /is not one/.test(r.why); })());
+check("§780 a picture rides as an image part of its own type; a Word file does not",
+  (() => { const p = asParts([{ kind: "png", bytes: PNG }, { kind: "jpg", bytes: JPG }, { kind: "docx", bytes: Buffer.from("x") }]); return p.length === 2 && p[0].inlineData.mimeType === "image/png" && p[1].inlineData.mimeType === "image/jpeg" && Buffer.from(p[0].inlineData.data, "base64").equals(PNG); })());
 check("a file that says PDF and is not one is refused in words", (() => { const r = readFile("pdf", Buffer.from("hello")); return !r.ok && /is not one/.test(r.why); })());
 check("a Word file that will not open is refused in words, never read as empty", (() => { const r = readFile("docx", Buffer.from("not a zip at all")); return !r.ok && /could not be opened/.test(r.why); })());
 check("a paste is long, or long with paragraphs; a sentence is not",
@@ -144,6 +152,30 @@ check("...and no option is ever marked recommended, whatever the model sends (§
 check("...a source naming a file nobody attached is read as assumed, never drawn as a file (§96.2)",
   sh && sh.part.draft.groups[0].items.map((x) => x.source).join("|") === "Q3 deck.pdf|assumed|platform", sh && JSON.stringify(sh.part.draft.groups[0].items));
 check("...and a section that is not a section is not an offer", sh && sh.part.pastedBelongsTo === null);
+/* §784 — the plan's shape, cut to the section it belongs to */
+const PL = { discipline: "bts", values: [{ title: "Vendor Growth Partner", how: ["Joint business planning"], measure: ["Tier 2 revenue growth ≥ 100% (today 60%)"], evidence: "MB02" }, { title: "  ", how: [] }] };
+const pc = planOf("compete", PL), pbad = planOf("compete", { discipline: "cheap", values: PL.values }), pdir = planOf("directions", PL);
+check("§784 a Competitive Discipline in the plan's shape is kept — its discipline one of the three, a value without a title dropped; another section's or an unknown discipline is not",
+  !!pc && pc.compete.discipline === "bts" && pc.compete.values.length === 1 && pc.compete.values[0].measure[0].includes("today 60%") && pbad === null && pdir === null, JSON.stringify(pc));
+const ps = planOf("analysis", { swot: { s: [{ title: "Reach", description: "300 stores" }], w: [], o: [], t: [{ title: "" }] } });
+const pf = planOf("foundation", { foundation: [{ key: "asp", text: "First choice\nfor vendors" }, { key: "asp", text: "again" }, { key: "nope", text: "x" }] });
+check("§784 a SWOT keeps its four boxes; a Foundation its known parts, once each, its lines kept",
+  !!ps && ps.swot.s.length === 1 && ps.swot.t.length === 0 && !!pf && pf.foundation.length === 1 && pf.foundation[0].text === "First choice\nfor vendors", JSON.stringify([ps, pf]));
+/* §786 — Claude's structured output refuses a schema with too many optional fields; §784's `plan` in the answer took it to 49 and every free chat failed */
+check("§786 the answer's schema stays small — no plan shape in it — and each part's plan shape leaves nothing optional",
+  optionalCount(ASK_SCHEMA) <= 16 && !("plan" in ASK_SCHEMA.properties) && Object.keys(PLAN_SCHEMAS).length === 5 && Object.values(PLAN_SCHEMAS).every((x) => optionalCount(x) === 0),
+  JSON.stringify({ main: optionalCount(ASK_SCHEMA), plans: Object.fromEntries(Object.entries(PLAN_SCHEMAS).map(([k, v]) => [k, optionalCount(v)])) }));
+/* §785 — Pillars/Directions and Tactical Plans */
+const pd = planOf("directions", { directions: [{ title: "Grow Tier 2", urgency: 4, importance: 3, ease: 9 }, { title: "grow tier 2", urgency: 1 }, { title: "Digital ops", urgency: 2, importance: 2, ease: 2, why: "SWOT" }] });
+check("§785 Pillars/Directions keep their scores 1–4 — one out of range left unscored, never moved — and a name once",
+  !!pd && pd.directions.length === 2 && pd.directions[0].ease === null && pd.directions[0].urgency === 4 && pd.directions[1].why === "SWOT" && pd.capabilities.length === 0, JSON.stringify(pd));
+const pe = planOf("execution", { period: { year: 2027, fromQuarter: 2, toQuarter: 3 }, items: [{ direction: "Grow Tier 2", measures: [{ name: "Tier 2 revenue", target: "≥ 100%" }], tactics: [{ name: "Sary push", owner: "Hend", quarters: [1, 2, 3, 3] }] }, { direction: "Empty", measures: [], tactics: [] }] });
+const pe0 = planOf("execution", { items: [{ direction: "X", tactics: [{ name: "t" }] }] });
+check("§785 Tactical Plans keep the period as months, each Direction by name with its measures and tactics (quarters inside the period, once), an empty one dropped; no period given is this year",
+  !!pe && pe.period.y === 2027 && pe.period.m1 === 4 && pe.period.m2 === 9 && pe.items.length === 1 && pe.items[0].kind === "direction" && pe.items[0].planId === "" && pe.items[0].tactics[0].quarters.join() === "2,3" &&
+  !!pe0 && pe0.period.y === new Date().getFullYear() && pe0.period.m1 === 1 && pe0.period.m2 === 12, JSON.stringify([pe, pe0 && pe0.period]));
+const shp = shapeAnswer({ reply: "Here.", draft: { title: "T", groups: [{ title: "G", items: [{ text: "x" }] }] }, plan: PL }, [], "compete"), shp0 = shapeAnswer({ reply: "Here.", plan: PL }, [], "compete");
+check("§784 the shape rides with a draft only", !!shp && !!shp.part.plan && shp.part.plan.section === "compete" && !!shp0 && !shp0.part.plan);
 check("an answer with nothing in it is a failure, not an empty bubble (§124)", shapeAnswer({ reply: "  ", options: [{ label: "x" }] }, []) === null);
 check("each section's guidance carries the house rules; the roads only where the record defines them",
   /WHERE THE WORK STARTS/.test(guidanceFor("analysis")) && /Never invent a figure/.test(guidanceFor("analysis")) && /Guided questions/.test(guidanceFor("analysis")) && /There is no template for this section/.test(guidanceFor("foundation")) &&
@@ -602,6 +634,53 @@ try {
       JSON.stringify(ans).slice(0, 300));
     check("...a source naming a file nobody attached reads as assumed", ans && ans.part.draft.groups[0].items[1].source === "assumed");
     check("...and the files it read are named on it", ans && (ans.part.read || []).join(",") === "Q3 deck.pdf,notes.docx");
+    /* §780 — a pasted screenshot in a chat goes to the model as a picture */
+    const pic = await call("POST", "api", { act: "attach", id: ch.id, name: "Pasted picture 2026-11-17 10.00.00.png", type: "image/png", data: b64(PNG) }, NORAN);
+    const fakePic = await call("POST", "api", { act: "attach", id: ch.id, name: "x.png", type: "image/png", data: b64(Buffer.from("<svg onload=alert(1)>")) }, NORAN);
+    check("§780 a picture attaches to a chat as a Picture; a file that only says it is one is refused", pic.st === 200 && pic.j.file.kind === "png" && fakePic.st === 400 && /is not one/.test(fakePic.j.why), JSON.stringify([pic.st, pic.j, fakePic.j]));
+    const sP = await call("POST", "api", { act: "say", id: ch.id, text: "Take the figures from this screenshot", fileIds: [pic.j.file.id], context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const wP = seen[seen.length - 1], ltP = wP && wP.body ? wP.body.contents[wP.body.contents.length - 1] : null, sysP = wP && wP.body && wP.body.systemInstruction ? wP.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    check("§780 ...and goes to the model as itself, an image on the question, named in the corpus as a picture to read",
+      sP.st === 200 && !!ltP && ltP.parts.some((p) => p.inlineData && p.inlineData.mimeType === "image/png" && Buffer.from(p.inlineData.data, "base64").equals(PNG)) && /Pasted picture 2026-11-17 10\.00\.00\.png === \(a picture/.test(sysP) && /blurred, cut off or unreadable/.test(sysP),
+      JSON.stringify(ltP && ltP.parts.map((p) => p.inlineData ? p.inlineData.mimeType : "text")));
+    /* §782 — a free chat is named from its first words */
+    const fc = (await call("POST", "api", { act: "newChat", place: "mobile", section: "compete", free: true, title: "Free chat — Mobile" }, NORAN)).j.chat;
+    const fs1 = await call("POST", "api", { act: "say", id: fc.id, text: "Can you sharpen our value proposition for vendors, please?", context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const fs2 = await call("POST", "api", { act: "say", id: fc.id, text: "And the measures too", context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const fcRow = (await asTenant(A, (c) => c.query("select title from copilot_chats where id = $1", [fc.id]))).rows[0];
+    check("§782 a free chat is named from its first words, never \"Free chat\", and keeps that name", fs1.j.title === "Mobile — Sharpen our value proposition for vendors, please" && fcRow.title === fs1.j.title && fs2.j.title === fs1.j.title, JSON.stringify([fs1.j.title, fs2.j.title, fcRow.title]));
+    /* §784 — a free chat's draft in the plan's shape is saved as that part, for the plan */
+    /* §786 — the answer comes as it always did; a second, small ask lays its draft out in the part's shape */
+    const nPl = seen.length;
+    NEXT = [{ answer: { reply: "Here it is.", draft: { title: "Mobile · How we compete", groups: [{ title: "Value proposition", items: [{ text: "Vendor Growth Partner" }] }] } } }, { answer: { plan: PL } }];
+    const fcp = await call("POST", "api", { act: "say", id: fc.id, text: "Lay it out as the plan", context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const w1Pl = seen[nPl], w2Pl = seen[nPl + 1];
+    const sysP1 = w1Pl && w1Pl.body && w1Pl.body.systemInstruction ? w1Pl.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    const sysP2 = w2Pl && w2Pl.body && w2Pl.body.systemInstruction ? w2Pl.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    const schP1 = JSON.stringify(w1Pl && w1Pl.body && w1Pl.body.generationConfig || {}), schP2 = JSON.stringify(w2Pl && w2Pl.body && w2Pl.body.generationConfig || {});
+    const amsg = fcp.j.messages[fcp.j.messages.length - 1];
+    check("§786 a free chat's draft in Competitive Discipline is asked as before, then laid out in the plan's shape by a second, small ask — and the draft keeps it",
+      seen.length === nPl + 2 && !/\"plan\"/.test(schP1) && /\"plan\"/.test(schP2) && !/THE PLAN'S SHAPE/.test(sysP1) && /THE PLAN'S SHAPE/.test(sysP2) && /discipline/.test(sysP2) &&
+      JSON.stringify(w2Pl.body.contents).includes("Vendor Growth Partner") && amsg.part.plan && amsg.part.plan.section === "compete", JSON.stringify({ calls: seen.length - nPl, sysP2: sysP2.slice(0, 200) }));
+    /* §788 — a draft without the shape (the second ask came back empty, or it was made before §784) lays itself out once when shown */
+    NEXT = [{ answer: { reply: "Another.", draft: { title: "Mobile · How we compete", groups: [{ title: "Values", items: [{ text: "Vendor Growth Partner" }] }] } } }, { answer: { reply: "no shape" } }];
+    const fq = await call("POST", "api", { act: "say", id: fc.id, text: "Once more", context: "Mobile", placeWord: "Mobile" }, NORAN);
+    const qm = fq.j.messages[fq.j.messages.length - 1], nQ = seen.length;
+    NEXT = { answer: { plan: PL } };
+    const ps1 = await call("POST", "api", { act: "planShape", id: fc.id, messageId: qm.id, placeWord: "Mobile" }, NORAN);
+    const qm1 = ps1.j.messages.find((m) => m.id === qm.id);
+    const ps2 = await call("POST", "api", { act: "planShape", id: fc.id, messageId: qm.id, placeWord: "Mobile" }, NORAN);
+    check("§788 a draft without the shape is laid out once when shown — kept on the message, nothing said in the chat, never asked twice",
+      !qm.part.plan && ps1.st === 200 && ps1.j.laid === true && qm1 && qm1.part.plan && qm1.part.plan.section === "compete" && ps1.j.messages.length === fq.j.messages.length && ps2.st === 200 && seen.length === nQ + 1,
+      JSON.stringify({ laid: ps1.j.laid, calls: seen.length - nQ }));
+    const sdp = await call("POST", "api", { act: "saveDraft", id: fc.id, messageId: amsg.id }, NORAN);
+    const drow = (await asTenant(A, (c) => c.query("select d.type, d.kind, v.body from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.id = $1", [sdp.j.saved.deliverableId]))).rows[0];
+    check("§784 ...saved, it is a Competitive Discipline the plan can take: the step-by-step chat's own body, no longer copilot-only text",
+      sdp.st === 200 && drow.type === "compete" && drow.kind === "promotable" && drow.body.compete.discipline === "bts" && drow.body.compete.values[0].title === "Vendor Growth Partner" && /Vendor Growth Partner/.test(drow.body.text), JSON.stringify(drow).slice(0, 300));
+    const pap = await call("POST", "api", { act: "planApplied", id: sdp.j.saved.deliverableId, n: 1 }, NORAN);
+    check("§784 ...and its Apply is recorded as any Discipline's is", pap.st === 200 && pap.j.applied.n === 1, JSON.stringify(pap.j));
+    const picFile = await call("GET", "file", null, NORAN, "?id=" + pic.j.file.id);
+    check("§780 ...and comes back as a picture of its own type, to the office", picFile.st === 200, String(picFile.st));
     const me = s1.j && s1.j.messages[s1.j.messages.length - 2];
     check("what was said carries its files, which are no longer waiting",
       me && me.part.files.map((f) => f.name).join(",") === "Q3 deck.pdf,notes.docx" && (await call("GET", "chat", null, NORAN, "?id=" + ch.id)).j.pending.length === 0);
@@ -832,11 +911,17 @@ try {
     check("a part with no answer is not drafted", noAns.st === 400 && /Answer at least one/.test(noAns.j.why));
     F.ans[0][0] = "Connect every Egyptian to the people and services they rely on"; F.phase = "review";
     const before6 = seen.length;
+    /* §780 — a picture waiting above a step-by-step chat's box goes with its next ask, and is taken only when the answer comes */
+    const fpic = await call("POST", "api", { act: "attach", id: fid, name: "org chart.png", type: "image/png", data: b64(PNG) }, NORAN);
+    check("§780 a picture waits above a guided Foundation chat's box", fpic.st === 200 && fpic.j.pending.length === 1, JSON.stringify(fpic.j).slice(0, 200));
     NEXT = { answer: { text: "Connect every Egyptian to what matters, by " + "{Y}" + "." } };
     const d1 = await call("POST", "api", { act: "flowDraft", id: fid, el: 0, flow: F, placeWord: "Mobile", context: "Mobile · 4 pillars" }, NORAN);
     const wq = seen[seen.length - 1];
     const sysF = wq && wq.body && wq.body.systemInstruction ? wq.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     const qText = wq && wq.body ? JSON.stringify(wq.body.contents) : "";
+    const fPend = (await asTenant(A, (c) => c.query("select count(*)::int n from copilot_files where chat_id = $1 and message_id is null", [fid]))).rows[0].n;
+    check("§780 ...the guided Foundation's draft is asked with the picture as itself and its name, and the picture is then taken",
+      !!wq && JSON.stringify(wq.body.contents).includes("image/png") && qText.includes("org chart.png") && fPend === 0, JSON.stringify({ fPend, has: qText.includes("org chart.png") }));
     check("drafting asks the model once, with the answers given as they stand on the page",
       seen.length === before6 + 1 && (sysF + qText).includes("Connect every Egyptian to the people and services they rely on"), (sysF + qText).slice(0, 200));
     /* §643 — REWRITTEN, NOT LOOSENED (§218): a draft is a PROPOSAL in the
@@ -1143,7 +1228,7 @@ try {
     const hf = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, HEND);
     check("a client's own person cannot save it", hf.st === 403);
     const fin = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
-    check("saving makes version 1 of Directions — Mobile", fin.st === 200 && fin.j.saved?.n === 1 && fin.j.saved?.title === "Directions \u2014 Mobile" && fin.j.dirsDone === 4, String(JSON.stringify(fin.j)).slice(0, 200));
+    check("saving makes version 1 of Pillars/Directions — Mobile (§752)", fin.st === 200 && fin.j.saved?.n === 1 && fin.j.saved?.title === "Pillars/Directions \u2014 Mobile" && fin.j.dirsDone === 4, String(JSON.stringify(fin.j)).slice(0, 200));
     const vrow = fin.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [fin.j.saved.deliverableId]))).rows : [];
     check("...the version holds the chosen Directions and kept Capabilities, owners by name",
       vrow.length === 1 && vrow[0].body.directions.length === chosen.length && vrow[0].body.capabilities.length === 2 && /Commercial/.test(vrow[0].body.text) && /48\/64/.test(vrow[0].body.text),
@@ -1185,7 +1270,7 @@ try {
        rather than send the person to choose what they chose. */
     const x0 = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution, empty", items: [] }, NORAN);
     check("§694 an Execution chat with no items names the saved Directions version waiting for Apply",
-      x0.st === 200 && x0.j.exec?.items.length === 0 && x0.j.execDirsSaved && x0.j.execDirsSaved.title === "Directions \u2014 Mobile" && x0.j.execDirsSaved.n >= 1 && /^[0-9a-f-]{36}$/.test(x0.j.execDirsSaved.id),
+      x0.st === 200 && x0.j.exec?.items.length === 0 && x0.j.execDirsSaved && x0.j.execDirsSaved.title === "Pillars/Directions \u2014 Mobile" && x0.j.execDirsSaved.n >= 1 && /^[0-9a-f-]{36}$/.test(x0.j.execDirsSaved.id),
       String(JSON.stringify(x0.j.execDirsSaved)));
     check("§694 …and a chat with items carries none", xn.j.execDirsSaved === null);
     check("the office starts one: the plan's items, the period asked first, a to-do of period + items + save",
@@ -1213,7 +1298,7 @@ try {
     const xhf = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, HEND);
     check("a client's own person cannot save it", xhf.st === 403);
     const xf = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, NORAN);
-    check("saving makes version 1 of Execution — Mobile", xf.st === 200 && xf.j.saved?.n === 1 && xf.j.saved?.title === "Execution \u2014 Mobile" && xf.j.execDone === 4, String(JSON.stringify(xf.j)).slice(0, 200));
+    check("saving makes version 1 of Tactical Plans — Mobile (§752)", xf.st === 200 && xf.j.saved?.n === 1 && xf.j.saved?.title === "Tactical Plans \u2014 Mobile" && xf.j.execDone === 4, String(JSON.stringify(xf.j)).slice(0, 200));
     const xv = xf.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [xf.j.saved.deliverableId]))).rows : [];
     check("...the version holds the period and both items", xv.length === 1 && xv[0].body.period?.m1 === 7 && xv[0].body.items.length === 2 && /PLAN PERIOD: Jul\u2013Dec 2026/.test(xv[0].body.text), String(JSON.stringify(xv)).slice(0, 300));
     const xafter = await call("POST", "api", { act: "execPeriod", id: xid, choice: "full" }, NORAN);

@@ -218,7 +218,7 @@ try {
     "a module turned on and then off is two rows, the right way round",
     JSON.stringify(got.map((r) => r.what)));
   /* the module's own LABEL, read from MODULE_DEF rather than spelled here */
-  check(got.length === 2 && /Internal Tracker/.test(got[0].detail || ""),
+  check(got.length === 2 && /Task Tracker/.test(got[0].detail || ""),
     "named by the module's own label", got.length ? got[0].detail : "none");
 
   /* ── 4. the team: on, seat moved, off ── */

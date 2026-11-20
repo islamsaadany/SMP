@@ -127,6 +127,8 @@ declare namespace SMP {
     outCompile?: string;
     outActual?: any;
     note?: string;
+    /** §767: the ids of its pillar's key measures this tactic supports. */
+    supports?: string[];
   }
 
   /* ── THE COMPANY: its own plan, and every setting the client holds (§625) ── */
@@ -196,6 +198,8 @@ declare namespace SMP {
     naming?: boolean;
     /** true, or absent: focus marks are off. */
     focusOff?: boolean;
+    /** true: this client uses the weighting; absent: off (§769). */
+    weightingOn?: boolean;
     /** Hosts whose links play on a slide. Read by the deck; NOTHING WRITES
         IT YET — §261.1 left the storage page's control for later. */
     videoHosts?: string[];

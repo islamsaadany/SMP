@@ -1066,6 +1066,36 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
                  align-items:baseline; padding:5px 0; font-size:13.5px; }
   .swot-n { font-family:var(--mono); font-size:11.5px; color:var(--none);
             font-variant-numeric:tabular-nums; }
+  /* §757: a line's title bold, its points one under the other. §757.1: a
+     point is a block with the bullet in a column of its own, so a point that
+     wraps continues under its first word, not under the dash. */
+  .swot-t b { font-weight:700; }
+  .swot-p { display:block; position:relative; padding-left:14px; margin-top:3px; }
+  .swot-p::before { content:"\2013"; position:absolute; left:0; color:var(--ink-3); }
+  .swot-t b + .swot-p { margin-top:5px; }
+  /* §795 — THE POINTS FOLD UNDER THE TITLE (group-render.js swotLine). The
+     title is a button that reads as the title it was: the page's own type,
+     no ground, no edge; a gold underline on hover says it can be pressed. The
+     arrow and, while folded, the count sit after it in the quiet ink. */
+  .swfold { font:inherit; color:inherit; background:none; border:0; padding:0; margin:0;
+            text-align:left; cursor:pointer; display:inline; border-radius:3px; }
+  .swfold b { font-weight:700; }
+  .swfold:hover b { text-decoration:underline; text-decoration-color:var(--gold); text-underline-offset:3px; }
+  .swfold:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .swfold .swcar { display:inline-block; width:9px; height:9px; margin-left:7px; color:var(--ink-3);
+                   transition:transform .12s; vertical-align:1px; }
+  .swfold[aria-expanded="true"] .swcar { transform:rotate(180deg); }
+  .swfold .swcnt { font-weight:400; font-size:12px; color:var(--ink-3); margin-left:7px; white-space:nowrap; }
+  .swfold[aria-expanded="true"] .swcnt { display:none; }
+  .swpts { display:block; margin-top:2px; }
+  .swpts[hidden] { display:none; }
+  @media (prefers-reduced-motion:reduce) { .swfold .swcar { transition:none; } }
+  /* PAPER SHOWS EVERY POINT: a fold is how one reader left their screen, and
+     a page that has been printed cannot be pressed. */
+  @media print {
+    .swpts[hidden] { display:block !important; }
+    .swfold .swcar, .swfold .swcnt { display:none !important; }
+  }
 
   /* Temple editing: tables, with the statements in labelled rows above them. */
   .templeedit h4.mini:first-child { margin-top:0; }
@@ -1961,6 +1991,18 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
     border-radius:8px; font-size:12px; font-weight:700; padding:4px 13px;
     cursor:pointer; font-family:inherit; white-space:nowrap; }
+  /* §795 — Expand all / Collapse all, the pen's quieter neighbour: the same
+     box at the regular weight, its mark before the word. The second selector
+     for §145.14's reason, as on the pen. */
+  .swfoldall, .tabs .secttail button.swfoldall {
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; font-size:12px; font-weight:600; padding:4px 10px;
+    cursor:pointer; font-family:inherit; white-space:nowrap;
+    display:inline-flex; align-items:center; gap:6px; }
+  .swfoldall svg { width:12px; height:12px; flex:none; }
+  .swfoldall[hidden], .tabs .secttail button.swfoldall[hidden] { display:none; }
+  .tabs .secttail button.swfoldall:hover { border-color:var(--gold); color:var(--ink); background:var(--surface); }
+  .tabs .secttail button.swfoldall:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   .tabs .secttail button.secpen:hover { border-color:var(--gold);
     color:var(--gold-deep); background:var(--surface); }
   /* Lit while the mode is open — the pen's own pair (`--gold` under
@@ -2615,9 +2657,153 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
 /* §415: a tactic's requirements — the reported note's shape, holding a list. */
 td .reqnote ul.reqs { margin:3px 0 0; padding-left:16px; color:var(--ink-2); line-height:1.35; }
 td .reqnote ul.reqs li { margin:1px 0; }
-td .reqbox { display:block; margin-top:8px; }
-td .reqbox .repkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
-td .reqbox textarea.reqfld { width:100%; box-sizing:border-box; margin-top:3px; font-size:12.5px; resize:none; }
+td .reqbox, .tpsec .reqbox { display:block; margin-top:8px; }
+.tpsec .reqbox .repkey, td .reqbox .repkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+.tpsec .reqbox textarea.reqfld, td .reqbox textarea.reqfld { width:100%; box-sizing:border-box; margin-top:3px; font-size:12.5px; resize:none; }
+
+/* ── §767: A TACTIC'S KEY MEASURES, BY NUMBER ──────────────────────────────
+   The A2 mockup's shapes (design-mockups/tactic-key-measures/2026-11-16_a2-numbers.html):
+   the number tag, the Supports line under a tactic, the count under a
+   measure, the folded legend and the pen's tick list. Tokens only, so the
+   dark theme and a tenant's palette carry it (§38.4). The tag's hover is
+   the panel colour so the full name on `title` has something to hang on. */
+.kmtag { display:inline-block; font-family:var(--mono); font-size:10.5px; line-height:1; padding:4px 6px;
+  border-radius:5px; background:var(--surface-2); color:var(--stone); border:1px solid var(--line);
+  white-space:nowrap; cursor:default; font-weight:600; }
+.kmtag:hover, .kmtag:focus-visible { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); outline:0; }
+/* §767.1: the tag's name, shown at once (the browser's own tooltip waits a second). */
+.kmtip { position:fixed; z-index:9999; display:none; max-width:380px; padding:7px 11px; border-radius:var(--r);
+  background:var(--panel); color:var(--panel-ink); font-size:12.5px; line-height:1.4; box-shadow:var(--shadow-md);
+  pointer-events:none; white-space:normal; }
+.kmtip.on { display:block; }
+td .kmnums { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:6px; }
+td .kmcount { display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:4px; font-size:11px; color:var(--ink-3); }
+/* `td .kmcount.none` (the red 'No tactic supports it yet'): gone, §794 — the link is optional and a measure without one says nothing. */
+.kmlegend { margin:8px 0 0; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface-2);
+  font-size:12px; color:var(--ink-2); }
+.kmlegend summary { cursor:pointer; padding:8px 14px; list-style:none; }
+.kmlegend summary::-webkit-details-marker { display:none; }
+.kmlegend summary::before { content:"\25B8"; color:var(--ink-3); font-size:11px; margin-right:8px; }
+.kmlegend[open] summary::before { content:"\25BE"; }
+.kmlegend .kmrows { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; padding:2px 14px 12px; }
+.kmlegend .kmrows .kmtag { align-self:start; }
+.tpsec .kmpick, td .kmpick { display:block; margin-top:8px; }
+/* §767.2: the closed box, one line; the ticks open under it in the flow. */
+.tpsec .kmdrop, td .kmdrop { display:block; border:1px solid var(--field-line); border-radius:var(--r); background:var(--surface); }
+.tpsec .kmdrop summary, td .kmdrop summary { display:flex; align-items:center; gap:6px; padding:6px 8px; cursor:pointer; list-style:none; min-height:32px; }
+.tpsec .kmdrop summary::-webkit-details-marker, td .kmdrop summary::-webkit-details-marker { display:none; }
+.tpsec .kmdrop .kmsum, td .kmdrop .kmsum { display:flex; flex-wrap:wrap; gap:4px; flex:1 1 auto; min-width:0; }
+.tpsec .kmdrop .kmnone, td .kmdrop .kmnone { color:var(--ink-3); font-size:12.5px; }
+.tpsec .kmdrop .kmchev, td .kmdrop .kmchev { flex:none; width:8px; height:8px; border-right:1.5px solid var(--ink-3); border-bottom:1.5px solid var(--ink-3);
+  transform:rotate(45deg); margin:-3px 4px 0 0; }
+.tpsec .kmdrop[open] .kmchev, td .kmdrop[open] .kmchev { transform:rotate(-135deg); margin-top:3px; }
+.tpsec .kmdrop[open] summary, td .kmdrop[open] summary { border-bottom:1px solid var(--line-soft); }
+.tpsec .kmlist, td .kmlist { display:block; background:var(--surface); }
+.tpsec .kmlist label, td .kmlist label { display:flex; gap:8px; align-items:flex-start; padding:6px 8px; border-bottom:1px solid var(--line-soft);
+  cursor:pointer; font-size:12.5px; line-height:1.35; font-weight:400; color:var(--ink); }
+.tpsec .kmlist label:last-child, td .kmlist label:last-child { border-bottom:0; }
+.tpsec .kmlist label:hover, td .kmlist label:hover { background:var(--surface-2); }
+.tpsec .kmlist input, td .kmlist input { width:14px; height:14px; margin:2px 0 0; flex:none; accent-color:var(--panel); }
+.tpsec .kmlist .kmname, td .kmlist .kmname { min-width:0; }
+
+/* ── §773: THE TACTIC PANEL AND THE PEN'S LIST ──────────────────────────
+   From the working mockup Islam tried (design-mockups/tactic-edit-panel/
+   2026-11-16_full-page.html). Beside the pillar on a wide window; over the
+   page from the right on a narrow one. Tokens only (§38.4). */
+.penwrap { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:14px; align-items:start; }
+.penmain { min-width:0; }
+/* §774: pinned UNDER the direction's banner, which is itself pinned under the
+   chrome; `--band-h` is the banner's measured height (shell.html, after each
+   paint). Never taller than what is left of the window: a long tactic scrolls
+   inside the panel, its head and its Done editing always in view, and its
+   scroll never moves the page. */
+.tacpanel { position:sticky; top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px + var(--band-h, 62px) + 10px);
+  max-height:calc(var(--wind) - var(--chrome-h, 118px) - var(--rail-gap, 22px) - var(--band-h, 62px) - 36px);
+  margin-top:0; display:flex; flex-direction:column; min-width:0;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow-md); }
+.tph { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--line); }
+.tpk { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-3); white-space:nowrap; }
+.tpname { font-size:13.5px; font-weight:650; min-width:0; flex:1; }
+.tpnav { display:flex; gap:4px; margin-left:auto; flex:none; }
+.tpbtn { font:inherit; font-size:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); border-radius:7px; padding:4px 9px; cursor:pointer; }
+.tpbtn:hover { background:var(--surface-2); }
+.tpbtn.tpx { font-size:16px; line-height:1; padding:3px 8px; }
+.tpbody { overflow:auto; overscroll-behavior:contain; padding:4px 14px 10px; }
+.tpsec { padding:12px 0; border-bottom:1px solid var(--line-soft); }
+.tpsec:last-child { border-bottom:0; }
+.tpsec > h4 { margin:0 0 8px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ink-2); }
+.tpsec .fld, .tpsec textarea.fld, .tpsec input.fld { width:100%; max-width:none; box-sizing:border-box; }
+.tpsec .bxkey { margin-top:8px; }
+.tpsec .bxkey:first-child { margin-top:0; }
+.tpfield { display:block; }
+.tpfield .ssbtn, .tpfield select { max-width:100%; }
+.tpout.scroll { margin:0; }
+.tpout table { min-width:0; width:100%; }
+.tpout td { vertical-align:top; }
+.tpout .kmpick { margin-top:0; }
+.tpfoot { padding:10px 14px; border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; font-size:12px; color:var(--ink-3); }
+.tpdone { margin-left:auto; background:var(--panel); color:var(--panel-ink); border:0; border-radius:var(--r); font:inherit; font-weight:700; font-size:12.5px; padding:6px 14px; cursor:pointer; }
+
+/* ── §775: THE MAIN FIELDS IN THE TABLE, THE EXTRAS IN THE PANEL ──────────
+   The pen's list as Islam settled it on the working mockup (design-mockups/
+   tactic-edit-panel/2026-11-16_table-and-panel.html): the name, the outcome
+   names, the owner and the quarters typed in the row; a ringed × on the name
+   box and on each outcome box; the open row tinted and joined to the panel
+   (his pick, D). Tokens only (§38.4). */
+.penlist td .namerow, .penlist td .outline { display:flex; align-items:center; gap:6px; }
+.penlist td .outline + .outline { margin-top:4px; }
+.penlist td .namerow > .fld, .penlist td .outline > .fld, .penlist td .outline > .gapwrap,
+.penlist td .namerow > textarea, .penlist td .outline > textarea { flex:1 1 auto; min-width:0; width:auto; }
+.penlist td .rm { flex:none; display:inline-grid; place-items:center; width:22px; height:22px; border:1px solid var(--line);
+  border-radius:6px; background:transparent; color:var(--ink-3); cursor:pointer; padding:0; }
+.penlist td .rm:hover, .penlist td .rm:focus-visible { color:var(--bad-tx); border-color:var(--bad); background:var(--bad-bg); outline:0; }
+.penlist td .addout { display:block; margin-top:5px; }
+.penlist td .addout .linkbu { font-weight:400; font-size:12px; }
+.penlist td .tacgap { display:block; margin-top:5px; font-size:11.5px; cursor:pointer; }
+.penlist td .tacwhy { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:360px; }
+.penlist td.outc { min-width:220px; }
+/* D: the open row, tinted, with one bar, run out to the panel's gold edge */
+.penlist tbody tr.penon td { background:var(--attn-bg); box-shadow:none; }
+.penlist tbody tr.penon td:first-child { box-shadow:inset 4px 0 0 var(--gold); }
+@media (min-width:1181px) {
+  .penwrap .penmain > .scroll { overflow:visible; }
+  .penwrap .penmain table.tactable { min-width:0; }
+  .penlist tbody tr.penon td:last-child { position:relative; }
+  .penlist tbody tr.penon td:last-child::after { content:""; position:absolute; top:-1px; bottom:-1px; left:100%; width:15px;
+    background:var(--attn-bg); border-top:1px solid var(--gold); border-bottom:1px solid var(--gold); }
+  .penwrap .tacpanel { border-left:3px solid var(--gold); border-radius:0 var(--r-lg) var(--r-lg) 0; }
+}
+/* the panel: the name in the head, the outcomes read over their targets */
+.tph .tpname { font-size:14px; }
+.tpout .oname { font-weight:600; font-size:13px; display:block; }
+.tpout .oname .nobody { font-weight:400; font-style:italic; }
+/* read mode: the tactic and the outcome share the width (Islam: "why is the tactic column that wide?") */
+.tactable:not(.penlist) th:nth-child(2) { width:34%; }
+.tactable:not(.penlist) th:nth-child(3) { width:30%; }
+/* the list */
+.penlist tbody tr[data-tacopen] { cursor:pointer; }
+.penlist tbody tr[data-tacopen]:hover td { background:var(--surface-2); }
+/* (the first mark — a grey tint and a bar on every cell — gave way to §775's, above:
+   it came later in this file and won, which is why the tenant saw bars at every
+   column edge and no tint; §775.2) */
+.penlist .tacopenb { background:none; border:0; padding:0; margin:0; font:inherit; text-align:left; cursor:pointer; color:inherit; display:block; }
+.penlist .tacopenb:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:4px; }
+.penlist .tacopenb .tacname { display:block; }
+.penlist td .why { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:360px; }
+.penlist td.outn .why { max-width:none; }
+.penlist .tacgaps { display:block; margin-top:4px; font-size:11px; color:var(--bad-tx); font-style:italic; }
+.penlist td.tools { white-space:nowrap; }
+.penlist td.tools .xbtn { margin-left:6px; }
+.penlist td.collabs { white-space:normal; }
+@media (max-width:1180px) {
+  .penwrap { display:block; }
+  /* Under the chrome and the strip, not over them (§775.3): a panel from the
+     window's top covered the Done editing button and the strip's right half,
+     and a wheel over it moved nothing — the panel keeps its own scroll. It
+     starts where the pane does once pinned (the band's own offset, group-extra.css §771). */
+  .tacpanel { position:fixed; right:0; bottom:0; width:min(440px, 100%); max-height:none; border-radius:0; z-index:60; border:0; border-left:1px solid var(--line);
+    top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + var(--strip-h, 0px) + var(--split-gap, 16px) + 1px); }
+}
 
 /* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
    boxes should be the same size and squeeze them where their hz size should
@@ -3235,11 +3421,94 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
        is the same band on Strategy and Performance (§53.5), so it behaves
        the same there. */
 @media (max-width:520px){
-  .top-in { flex-wrap:wrap; row-gap:4px; padding-block:6px; }
-  .top-in::after { content:""; order:1; flex-basis:100%; height:0; }
-  .top-in .viewer { order:2; flex:1 1 0; min-width:0; }
-  .top-in .topacts { order:3; }
-  .viewer .ssbtn { min-width:0; }
-  .viewer-note { display:none; }
   .pane > .pband { position:static; }
 }
+/* ── THE TOP BAR ON A NARROWED OR ZOOMED-IN WINDOW (§792) ───────────────
+   Islam, zoomed in on Strategy: *"in a zoomed state the top bar elements are
+   interfering with each other."* Measured on the bar's own markup with the
+   trail, the viewer and Jump to on it: from 999px down to 521px the trail's
+   steps were drawn over "Viewing as" and its picker, and under 700px over
+   Jump to and Read as well. Two causes. The trail could be squeezed
+   (`min-width:0`) but its steps could not, so it kept its full width and
+   spilt over its neighbour; and nothing on the line gave way until the
+   phone's 520px, while Jump to's box (§701) alone holds 190px of it.
+
+   WHAT GIVES WAY, IN ORDER, and nothing is lost that is not said another way:
+     · under 1000px Jump to is its magnifying glass alone, as it already is in
+       the console's folded column (§710) — the hover and Ctrl K still say it;
+     · under 880px the words "Viewing as" go from sight (the picker keeps them
+       as its name for a screen reader, so they are clipped, not removed);
+     · under 1000px the role line beside the picker goes too, as it already
+       did on the phone: it was being cut to "Super user, t…", which says
+       nothing, and the picker beside it names the person;
+     · and at ANY width a client's name that still does not fit shortens
+       with an ellipsis instead of being drawn over what is beside it. */
+/* It is the CLIENT's name that shortens; the step you are ON keeps every
+   letter (given even a thousandth of the squeeze it lost its last two to an
+   ellipsis, measured). */
+nav.trail details.trclient { min-width:0; flex:0 1 auto; }
+nav.trail details.trclient > summary { display:flex; }
+/* THE VIEWER GIVES WAY BEFORE THE TRAIL DOES, down to a floor it is never
+   squeezed past: the picker at its own 120px minimum, with its key while the
+   key is drawn. Without the floor it was the viewer's turn to be drawn over
+   its neighbour; without the order, the client's name shortened while the
+   picker still had room to give. */
+.top .viewer { flex-shrink:1000; min-width:222px; }
+@media (max-width:999px){
+  .top .sjbtn { min-width:0; }
+  .top .sjbtn .sjl, .top .sjbtn .sjk { display:none; }
+  .top .viewer-note { display:none; }
+  /* a client's long name shortens rather than push Sign out off the bar
+     (measured at 820px, a client's own person); the product's name stays */
+  .top .brand { flex:0 1 auto; min-width:0; }
+  .top .orgname { flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+}
+@media (max-width:880px){
+  .top .viewer { min-width:138px; }
+  .top .viewer label { position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+                       overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+}
+/* ONE LINE, ALWAYS (§792.2). Islam, shown the bar on two lines at 760px:
+   *"the top bar should not take 2 lines by any means."* So the two-line bar
+   is gone at every width — the one drawn here a round earlier, and the
+   phone's own from §410 with it — and the room is found by what each thing
+   can lose without losing what it does:
+     · at 760px and under Read is its open book alone and the "?" goes (the
+       ? key still opens the sheet; there is no such key on a phone); the
+       picker may narrow further; and for a client's own people, who have the
+       product's name where the office has the trail, the name goes and its
+       mark stands for it, the client's name shortening after it. §410's rule
+       that the names never give way was written for 1100px, where it still
+       holds; here the choice is a second line or the words, and he has
+       refused the line;
+     · at 520px and under the trail is the mark and the module you are on —
+       the mark is the way to the console and to every other client — and
+       Sign out is its door-and-arrow alone, still named for a screen reader. */
+@media (max-width:760px){
+  .top-in { gap:10px; padding-inline:16px; }
+  .top .viewer { min-width:91px; padding-right:10px; }
+  .top .viewer .ssbtn { min-width:80px; }
+  .top .readbtn { font-size:0; gap:0; padding:5px 8px; }
+  .top .readbtn svg { width:14px; height:14px; }
+  .top .keysbtn { display:none; }
+  .top .brand h1 { display:none; }
+}
+@media (max-width:520px){
+  .top-in { gap:8px; padding-inline:12px; }
+  .top .topacts { gap:6px; }
+  nav.trail details.trclient, nav.trail .trsep, nav.trail .trbar { display:none; }
+  .top .viewer { min-width:68px; padding-right:8px; }
+  .top .viewer .ssbtn { min-width:60px; }
+  .top .outbtn { font-size:0; padding:0; width:28px; height:26px; display:inline-grid; place-items:center; }
+  .top .outbtn::before { content:""; width:14px; height:14px; background:currentColor;
+    -webkit-mask:var(--out-mark) center/contain no-repeat; mask:var(--out-mark) center/contain no-repeat; }
+  /* what is left of the trail is two things that cannot narrow, so it is the
+     viewer that takes the squeeze, never the trail drawn over it */
+  nav.trail { flex:none; }
+}
+@media (max-width:400px){
+  .top-in { gap:6px; padding-inline:10px; }
+  .top .viewer { min-width:61px; }
+  .top .viewer .ssbtn { min-width:52px; }
+}
+.top { --out-mark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpath d='M16 17l5-5-5-5'/%3E%3Cpath d='M21 12H9'/%3E%3C/svg%3E"); }

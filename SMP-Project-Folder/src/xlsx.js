@@ -787,16 +787,23 @@ function planWorkbook(u){
        client's file is byte-for-byte what it was. */
     var rq = (typeof requirementsOn === "function" && requirementsOn(u)) ||
       u.items.some(function(p){ return (p.tactics || []).some(function(t){ return reqsOf(t).length; }); });
+    /* §767: the key measures a tactic supports, BY NAME — a sheet is read by
+       name (§22: no ids in a file) and the Measures sheet beside it carries
+       the names. Several are "|"-separated, never by comma, which a measure's
+       own name may hold. The column exists only once some tactic names a
+       measure, for §415's reason: every other client's file is byte-for-byte
+       what it was. */
+    var km = u.items.some(function(p){ return (p.tactics || []).some(function(t){ return supportsOf(t, p).length; }); });
     return { name:"Tactics",
       widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
-        .concat(planWidths(9)).concat(rq ? [40] : []),
+        .concat(planWidths(9)).concat(km ? [40] : []).concat(rq ? [40] : []),
       /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
          already says so of the outcome's other three columns — a bare "Jan"
          beside a tactic's own quarters would read as the tactic's month. */
       head:["Pillar", "Tactic", "Description", "Outcome",
             "Outcome direction", "Outcome target", "Outcome compiled",
             "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
-        .concat(planHead("Outcome ")).concat(rq ? ["Requirements"] : []),
+        .concat(planHead("Outcome ")).concat(km ? ["Key measures"] : []).concat(rq ? ["Requirements"] : []),
       numCols:planNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
@@ -811,6 +818,7 @@ function planWorkbook(u){
             t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
             SMPRules.isHidden(t) ? "Yes" : ""].concat(planCells(t, "outMonthly", "outQuarterly"))
+            .concat(km ? [supportsOf(t, p).map(function(x){ return x.m.name; }).join(" | ")] : [])
             .concat(rq ? [reqsOf(t).join("\n")] : []));
         });
         return acc;
@@ -1249,7 +1257,11 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "",
       /* §415: a line per item; blank says nothing (a file written before
          this existed carries no such column). */
-      reqs:r["Requirements"] || "" });
+      reqs:r["Requirements"] || "",
+      /* §767: the key measures it supports, as the cell says them — names,
+         or the measure's number on the Measures sheet under the same pillar;
+         resolved against the plan's own measures when the plan is made. */
+      kms:r["Key measures"] || "" });
   });
 
   /* §414: a tactic's extra outcomes ride ON the tactic's row, minted O2,

@@ -12416,7 +12416,7 @@ not bumped. **On the branch, not merged.***
 
 *Earlier: 2026-09-29 — **§423.1: Raya keeps what it sees, and the Structure branch merges.** Islam: *"keep what raya sees today with the ticks and I will fix anything problematic when I check"*. Migration `smp-app/db/migrations/019` writes Raya Trade's functions' Structure level as it reads today (S&W on), only where never saved; every other level stays unsaid. The merge brings §412–§423 live with `main`'s two trail-menu rounds, renumbered §424/§425 because this branch held §412/§413 for RHI; `main`'s §425 menu replaces the branch's §417. Merged to `main` on his word.*
 
-*Earlier: 2026-11-20 — **§777: the link is optional.** `supportedLine` (group-render.js) returns '' for a measure no tactic names; `td .kmcount.none` deleted (arrange.css); `tactic-supports.py` counts two tag lines and no 'supports it yet' in `#panel`'s text (the body's text holds the scripts). **On the branch, not merged.***
+*Earlier: 2026-11-20 — **§794: the link is optional.** `supportedLine` (group-render.js) returns '' for a measure no tactic names; `td .kmcount.none` deleted (arrange.css); `tactic-supports.py` counts two tag lines and no 'supports it yet' in `#panel`'s text (the body's text holds the scripts). **On the branch, not merged.***
 
 *Earlier: 2026-11-17 — **§776.1: `welcome.py` green.** §1 asserts the ladder (§704): `gapTotalAll` ≥3, `gapTotal` 0, `seesGaps` false, no Fill row; §3 waits for the underline's 150ms transition; §10's CEO section seeds `structure.readers="workbench"` (§687 would land them in the reading window); §9's last read retried past the gate's redirect. OK twice. **On the branch, not merged.***
 

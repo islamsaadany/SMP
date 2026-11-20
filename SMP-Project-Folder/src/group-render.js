@@ -817,7 +817,7 @@ function supportsLine(t, p){
 function supportedLine(m, p){
   if (!p || !mappingOn(p)) return '';
   var s = supportedBy(m, p);
-  /* §777: THE LINK IS OPTIONAL, SO A MEASURE WITHOUT ONE SAYS NOTHING.
+  /* §794: THE LINK IS OPTIONAL, SO A MEASURE WITHOUT ONE SAYS NOTHING.
      Islam, on RHI's page: *"this should be optional so the no connection
      doesn't show missing connection."* The red "No tactic supports it yet"
      read as a gap to close; a key measure a tactic does not name is simply

@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-11-20 — The tactic-to-key-measure link is optional (§777).** Islam: the no-connection line should not show as missing. The red "No tactic supports it yet" under an unlinked key measure is gone everywhere; a named measure keeps its tags. tactic-supports rewritten, all good. On the branch, not merged.
+**2026-11-20 — The tactic-to-key-measure link is optional (§794).** Islam: the no-connection line should not show as missing. The red "No tactic supports it yet" under an unlinked key measure is gone everywhere; a named measure keeps its tags. tactic-supports rewritten, all good. On the branch, not merged.
 
 **2026-11-17 — The welcome check green (§776.1).** Its three reds and its death were main's: the ladder made the plan the office's (no gaps row for a custodian), the underline was read mid-transition, the group CEO lands in the reading window, and the sign-in's last read raced a redirect. Each rewritten to the rule as it stands, never loosened. welcome: OK, twice.
 

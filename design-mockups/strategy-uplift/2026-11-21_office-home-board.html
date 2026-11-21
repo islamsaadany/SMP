@@ -1,0 +1,329 @@
+<title>Strategy Office Home board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<!-- Islam, 2026-11-20: "have an overview on the strategy module ... give me your
+     uplifting comments or notes to the design ... show me different mock-ups,
+     different ideas of how can we uplift the module for the users."
+     Round 2 of idea 1 (2026-11-21): it replaces the office Home, one headline figure a row, Units and Functions switched, the greeting and the intro round kept. NOTHING IS BUILT.
+     Mobile's plan content is the demo's real content; every score, status and
+     cross-module line is invented for the drawing and says so on the page. -->
+<style>
+/* layout: a review sheet — notes first, then five framed screens, each one idea */
+:root{--ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-2:#0F2546;--navy-ink:#FFFFFF;--navy-quiet:#B7C4D8;--navy-rule:rgba(255,255,255,.16);--navy-lit:rgba(255,255,255,.16);--gold:#C9A24D;--gold-deep:#8A6B22;--over-bg:#FBF6E9;--cta:#A4512C;--good:#2E7D5B;--good-bg:#E4F0EA;--attn:#8F6B0B;--attn-bg:#F7EFD6;--bad:#B04434;--bad-bg:#F7E3E0;--zebra:#F5F7FA;--bar:#E3E8EF;--sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#101622;--navy-2:#0A0E16;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--navy-rule:rgba(255,255,255,.12);--navy-lit:rgba(255,255,255,.14);--gold:#D9B665;--gold-deep:#D9B665;--over-bg:#2C2718;--cta:#E1935F;--good:#5FB68C;--good-bg:#1F3A2E;--attn:#D9B23C;--attn-bg:#3A3216;--bad:#E07F75;--bad-bg:#3F2522;--zebra:#20252D;--bar:#2F3641;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--navy:#101622;--navy-2:#0A0E16;--navy-ink:#EAF0FA;--navy-quiet:#9AA6B8;--navy-rule:rgba(255,255,255,.12);--navy-lit:rgba(255,255,255,.14);--gold:#D9B665;--gold-deep:#D9B665;--over-bg:#2C2718;--cta:#E1935F;--good:#5FB68C;--good-bg:#1F3A2E;--attn:#D9B23C;--attn-bg:#3A3216;--bad:#E07F75;--bad-bg:#3F2522;--zebra:#20252D;--bar:#2F3641;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 70px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:34px}
+.wrap>*{min-width:0}
+h1{margin:0;font-size:24px;font-weight:700;text-wrap:balance}
+h2{margin:0;font-size:17px;font-weight:700}
+h3{margin:0;font-size:14.5px;font-weight:700}
+p{margin:0}
+.lede{margin-top:6px;color:var(--ink-2);max-width:78ch}
+.notbuilt{display:inline-block;margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);border:1px solid var(--gold);border-radius:999px;padding:4px 12px;background:var(--over-bg)}
+.k{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+/* notes */
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:10px;align-content:start}
+.note ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.note li{font-size:14px;color:var(--ink-2);padding-left:14px;position:relative}
+.note li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--ink-3)}
+.note li b{color:var(--ink);font-weight:600}
+.note li em{font-style:normal;color:var(--gold-deep);font-weight:600;white-space:nowrap}
+.jump{display:flex;flex-wrap:wrap;gap:8px}
+.jump a{font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px}
+.jump a:hover{border-color:var(--gold-deep)}
+.jump a:focus-visible,.seg button:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+.jump a i{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--gold-deep);margin-right:6px}
+/* an idea */
+section.idea{display:grid;gap:12px;scroll-margin-top:16px}
+.ih{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ih .n{font:700 12px/1 var(--mono);color:var(--gold-deep);letter-spacing:.1em}
+.cap{font-size:14.5px;color:var(--ink-2);max-width:86ch}.cap b{color:var(--ink);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow-x:auto;background:var(--ground)}
+.canvas{min-width:1000px}
+.under{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.under>div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.under ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px;color:var(--ink-2)}
+.under .agree .k{color:var(--gold-deep)}
+.inv{font-size:12.5px;color:var(--ink-3)}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+/* ── the product's own chrome, as built ── */
+.top{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;height:34px;font-size:12.5px}
+.top .mark{width:20px;height:20px;border-radius:5px;background:#F2A71B;display:grid;place-items:center;color:#16325C;font-size:13px;font-weight:700;line-height:1}
+.top b{font-weight:600}.top .cl{color:var(--ink-3);border-left:1px solid var(--line);padding-left:12px}
+.top .sp{flex:1}.top .who{color:var(--ink-3)}
+.top .read{font-size:10.5px;font-weight:700;letter-spacing:.08em;border:1px solid var(--gold);border-radius:999px;padding:3px 10px;color:var(--ink)}
+.row{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:4px;padding:0 14px;height:38px;font-size:12.5px;white-space:nowrap}
+.row .g{font-weight:700;padding:0 10px}.row .g i{font-style:normal;font-size:9px;color:var(--navy-quiet);margin-left:4px}
+.row .sw{display:inline-flex;background:var(--navy-lit);border-radius:6px;padding:2px;margin:0 6px;font-weight:700}
+.row .sw span{padding:4px 9px;border-radius:5px}.row .sw span.on{background:rgba(255,255,255,.22)}
+.row .u{padding:0 8px;height:38px;display:inline-flex;align-items:center;color:var(--navy-ink);opacity:.9}
+.row .u.on{font-weight:700;opacity:1;box-shadow:inset 0 -2px 0 var(--gold)}
+.tabs{background:var(--surface-2);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 20px;height:38px;font-size:13px;color:var(--ink-2)}
+.tabs span.on{color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--gold);height:38px;display:inline-flex;align-items:center}
+.tabs .rep{background:var(--cta);color:#fff;border-radius:5px;padding:4px 12px;font-weight:600}
+.tabs .sp{flex:1}
+.secs{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:6px 20px;gap:10px}
+.pill{display:inline-flex;border:1px solid var(--line);border-radius:6px;padding:2px;font-size:12px;font-weight:600;color:var(--ink-2);background:var(--surface)}
+.pill span{padding:4px 11px;border-radius:4px;white-space:nowrap}.pill span.on{background:var(--ink-2);color:var(--surface)}
+.secs .sp{flex:1}.btn{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:6px;padding:5px 12px;background:var(--surface);color:var(--ink);white-space:nowrap}
+.body{padding:18px 20px 22px;display:grid;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+/* the modules' panel head (Tracker / Insights / My tasks) */
+.panel{background:var(--navy);color:var(--navy-ink);border-radius:10px;border-bottom:3px solid var(--gold);padding:16px 22px;display:flex;align-items:flex-end;gap:26px}
+.panel .ey{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.panel .t{font-size:22px;font-weight:700;line-height:1.2}
+.panel .s{font-size:13px;color:var(--navy-quiet)}
+.panel .sp{flex:1}
+.panel .ct{text-align:right}.panel .ct b{display:block;font-size:22px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.panel .ct span{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--navy-quiet)}
+.panel .ct b.r{color:#F2A08F}
+/* tables, as built */
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--navy);color:var(--navy-ink);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:9px 12px;border-right:1px solid var(--navy-rule);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td b{font-weight:600}
+.code{font:700 11.5px/1 var(--mono);color:var(--ink-2);letter-spacing:.04em}
+.pct{font:700 13.5px/1 var(--mono)}
+.good{color:var(--good)}.attn{color:var(--attn)}.bad{color:var(--bad)}.quiet{color:var(--ink-3)}
+.st{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.st::before{content:"";width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink-3);flex:none}
+.st.done::before{background:var(--good);border-color:var(--good)}
+.st.part::before{border-color:var(--attn);background:linear-gradient(90deg,var(--attn) 50%,transparent 50%)}
+.st.late{color:var(--bad);font-weight:600}.st.late::before{border-color:var(--bad)}
+.band{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.band.good{background:var(--good-bg)}.band.attn{background:var(--attn-bg)}.band.bad{background:var(--bad-bg)}
+.meter{height:6px;border-radius:3px;background:var(--bar);overflow:hidden;min-width:70px}.meter i{display:block;height:100%;border-radius:3px;background:currentColor}
+.miss{display:grid;gap:0}
+.miss div{display:flex;gap:12px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--line-soft);font-size:13.5px}
+.miss div:first-child{border-top:0}
+.miss b{font-weight:600;min-width:120px}.miss span{color:var(--ink-2);flex:1}.miss a{color:var(--gold-deep);font-weight:600;white-space:nowrap}
+.ch{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:10px}
+.ch span{font-size:12.5px;color:var(--ink-3)}
+/* idea 2 */
+.los{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;align-items:start}
+.asp{padding:14px 16px;border-left:3px solid var(--gold);font-size:14px}
+.asp .k{display:block;margin-bottom:4px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--navy)}
+:root[data-theme="dark"] .dot{background:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dot{background:var(--gold)}}
+td.c,th.c{text-align:center}
+th.wrapth{white-space:normal;line-height:1.25;width:17%}
+.sw4{display:grid;gap:0}
+.swg{padding:10px 16px 4px}.swg .k{display:block;margin-bottom:2px}
+.swl{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-top:1px solid var(--line-soft);font-size:13.5px}
+.swl:first-of-type{border-top:0}
+.swl span{flex:1;color:var(--ink)}
+.chip{font:700 11px/1 var(--mono);border:1px solid var(--line);border-radius:4px;padding:3px 6px;color:var(--ink-2);background:var(--surface-2);white-space:nowrap}
+.nochip{font-size:12px;font-weight:600;color:var(--bad);white-space:nowrap}
+/* idea 3 */
+.phead{display:grid;grid-template-columns:1fr auto;gap:18px;padding:16px 18px;border-left:3px solid var(--gold);align-items:start}
+.phead .nm{font-size:18px;font-weight:700;display:flex;gap:10px;align-items:baseline}
+.phead .intent{margin-top:6px;font-size:14px;color:var(--ink-3);border:1px dashed var(--line);border-radius:6px;padding:7px 10px;max-width:62ch}
+.phead .meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--ink-2);align-items:center}
+.phead .meta .k{margin-right:6px}
+.two{display:flex;gap:22px}
+.two div{text-align:right}.two b{display:block;font:700 26px/1 var(--sans)}.two span{font-size:11px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.road{display:grid;grid-template-columns:minmax(260px,1.3fr) 130px repeat(4,1fr) 96px;font-size:13px}
+.road>div{padding:9px 12px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;min-height:42px}
+.road .h{background:var(--navy);color:var(--navy-ink);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;min-height:0;border-right:1px solid var(--navy-rule)}
+.road .q{border-left:1px solid var(--line-soft);padding:9px 0;position:relative}
+.road .q.now{background:var(--over-bg)}
+.barr{height:14px;width:100%;background:currentColor;opacity:.9}
+.barr.s{border-radius:7px 0 0 7px;margin-left:8px}.barr.e{border-radius:0 7px 7px 0;margin-right:8px}.barr.se{border-radius:7px;margin:0 8px}
+.barr.plan{background:none;border:1.5px dashed var(--ink-3);opacity:1}
+.today{position:absolute;top:0;bottom:0;left:55%;width:2px;background:var(--cta)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 16px;font-size:12.5px;color:var(--ink-3);align-items:center}
+.legend i{display:inline-block;width:22px;height:10px;border-radius:5px;background:currentColor;vertical-align:-1px;margin-right:6px}
+.legend i.pl{background:none;border:1.5px dashed var(--ink-3)}.legend i.td{width:2px;border-radius:0;background:var(--cta);height:14px}
+/* idea 4 */
+.split{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start}
+.rail{display:grid;gap:0}
+.rg{padding:12px 16px;border-top:1px solid var(--line)}
+.rg:first-of-type{border-top:0}
+.rgh{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.rgh b{font-size:13.5px;font-weight:700}.rgh span{font-size:12px;color:var(--ink-3);flex:1}.rgh a{font-size:12px;font-weight:600;color:var(--gold-deep)}
+.ri{padding:7px 0;border-top:1px solid var(--line-soft);font-size:13px}
+.ri:first-of-type{border-top:0}
+.ri small{display:block;font-size:12px;color:var(--ink-3)}
+.ask{margin:4px 16px 14px;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--ink-3);display:flex;gap:8px;align-items:center}
+.ask i{font-style:normal;color:var(--gold-deep);font-weight:700}
+/* idea 5 */
+.cmp{display:grid;gap:14px;padding:18px 20px 22px}
+.cmp .lab{display:flex;gap:10px;align-items:baseline}
+.cmp .lab span{font-size:12.5px;color:var(--ink-3)}
+.mini{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--ground)}
+.one{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:6px;padding:0 14px;height:44px;font-size:13px;white-space:nowrap}
+.crumb{display:inline-flex;align-items:center;gap:8px;background:var(--navy-lit);border-radius:7px;padding:6px 12px;font-weight:600}
+.crumb em{font-style:normal;color:var(--navy-quiet);font-weight:400}.crumb i{font-style:normal;font-size:9px;color:var(--navy-quiet)}
+.one .vt{padding:0 11px;height:44px;display:inline-flex;align-items:center;color:var(--navy-ink);opacity:.88}
+.one .vt.on{opacity:1;font-weight:700;box-shadow:inset 0 -3px 0 var(--gold)}
+.one .sp{flex:1}.one .sep{width:1px;height:22px;background:var(--navy-rule);margin:0 8px}
+.one .rep{background:var(--cta);color:#fff;border-radius:5px;padding:5px 12px;font-weight:600}
+.pick{margin:0 14px 16px;width:430px;background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 10px 10px;box-shadow:0 10px 24px rgba(15,37,70,.16)}
+.pick .find{margin:10px 12px 6px;border-bottom:1.5px solid var(--ink-2);padding:6px 2px;font-size:13px;color:var(--ink-3)}
+.pick .grp{padding:8px 14px 2px}
+.pl{display:flex;align-items:center;gap:10px;padding:7px 14px;font-size:13.5px}
+.pl.on{background:var(--over-bg);font-weight:600}
+.pl span{flex:1}.pl small{font-size:12px;color:var(--ink-3)}
+.pl .pct{font-size:12.5px}
+.pl.in{padding-left:28px}
+@media (max-width:520px){h1{font-size:21px}}
+</style>
+<style>
+/* round 2 additions: the greeting band as Home draws it, company bands in the board */
+.hello{background:var(--navy);color:var(--navy-ink);border-radius:10px;padding:22px 26px;display:flex;gap:26px;align-items:stretch}
+.hello .ey{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.hello .t{font-size:26px;font-weight:700;line-height:1.25;margin-top:4px}
+.hello .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hello .chips span{font-size:12px;font-weight:600;border:1px solid var(--navy-rule);border-radius:999px;padding:4px 12px;white-space:nowrap}
+.hello .chips span.cy{border-color:var(--gold);color:var(--gold)}
+.hello .sp{flex:1}
+.hello .cyc{border-left:1px solid var(--navy-rule);padding-left:24px;display:grid;gap:3px;align-content:center;min-width:250px;font-size:13.5px}
+.hello .cyc div{display:flex;justify-content:space-between;gap:20px;color:var(--navy-quiet)}
+.hello .cyc b{color:var(--navy-ink);font-weight:700;font-variant-numeric:tabular-nums}
+.hello .cyc b.r{color:#F2A08F}
+.hello .sig{border-left:1px solid var(--navy-rule);padding-left:24px;display:grid;gap:4px;align-content:center}
+.hello .sig i{font-style:normal;width:30px;height:30px;border-radius:6px;background:#fff;color:#16325C;display:grid;place-items:center;font-size:12px;font-weight:700}
+.hello .sig b{font-size:15px}.hello .sig span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--navy-quiet);font-weight:700}
+.bh{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.bh .sp{flex:1}.bh span.q{font-size:12.5px;color:var(--ink-3)}
+tr.co td{background:var(--surface-2)!important;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:6px 12px}
+td.go{color:var(--gold-deep);font-weight:700;text-align:right;width:28px}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:14px;align-items:start}
+.cols2 th,.cols2 td{padding-left:9px;padding-right:9px}
+.canvas{min-width:1120px}
+.tour{background:var(--over-bg);border:1px solid var(--gold);border-radius:8px;padding:14px 16px;display:grid;gap:6px}
+.tour p{font-size:13px;color:var(--ink-2)}
+.tour .b{display:flex;gap:14px;align-items:center;margin-top:4px;font-size:12.5px;color:var(--ink-3)}
+.tour .b span:first-child{border:1px solid var(--gold-deep);color:var(--gold-deep);border-radius:999px;padding:5px 14px;font-weight:600}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.pair>div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:8px;align-content:start}
+.pair p{font-size:14px;color:var(--ink-2)}.pair p b{color:var(--ink);font-weight:600}
+</style>
+
+<div class="wrap">
+
+<header>
+  <h1>The Strategy Office’s Home becomes the board</h1>
+  <p class="lede">Round 2 of idea 1, on your four answers: it replaces the office’s Home, each row ends with one headline figure, the rows follow the Units | Functions switch, and of today’s Home only the greeting and the intro round stay.</p>
+  <span class="notbuilt">Mockup only · nothing here is built</span>
+</header>
+
+<div class="pair">
+  <div><span class="k">On the two overview pages</span>
+    <p><b>They are two pages because they answer two questions.</b> The reading Overview answers <b>how are we performing</b>, for the people who read the strategy. The office’s Home answers <b>is the strategy written, is it reported, what is still missing</b>, for the people who run it.</p>
+    <p>The duplication to avoid is narrower: the same score worked out twice. So the board carries one figure per row, it is the same figure the reading Overview shows, and pressing it goes there. The board never draws its own performance cards.</p>
+    <p>And only one of them is called Overview. This one is Home.</p>
+  </div>
+  <div><span class="k">What changed from round 1</span>
+    <p><b>Not a new tab.</b> The group keeps Strategy, Performance, Focus, Temple. The board is what the office meets after sign-in and behind the mark at the top.</p>
+    <p><b>The greeting band stays</b> and takes the cycle’s own lines, so the separate cycle block goes.</p>
+    <p><b>Units sit under their company,</b> and Functions are the other side of the same switch.</p>
+    <p><b>Waiting on you and Your pages are gone,</b> as you chose. Each row is its own door.</p>
+  </div>
+</div>
+
+<section class="idea">
+  <div class="ih"><span class="n">A</span><h2>Home, as the office meets it — Units</h2></div>
+  <div class="frame"><div class="canvas">
+    <div class="top"><span class="mark">✦</span><b>Strategy Management Platform</b><span class="cl">Raya Trade</span><span class="sp"></span><span class="who">Viewing as Mohamed Essam — the group</span><span class="read">READ</span></div>
+    <div class="row"><span class="g" style="font-weight:400">Group <i>▼</i></span><span class="sw"><span class="on">Units</span><span>Functions</span></span><span class="u">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span><span class="u">Consumer Electronics</span><span class="u">Online Shop</span><span class="u">Corporate</span><span class="u">Care</span><span class="u">IT Dist.</span><span class="u">Logistics</span><span class="u">Nigeria</span></div>
+    <div class="body">
+      <div class="hello">
+        <div><div class="ey">Strategy Management Platform</div><div class="t">Welcome, Mohamed</div><div class="chips"><span>Strategy Management Office</span><span class="cy">● H1 2026 cycle is open</span></div></div>
+        <span class="sp"></span>
+        <div class="cyc flag">
+          <div><span>Figures reported</span><b>234 of 255</b></div>
+          <div><span>Reports submitted</span><b>6 of 19</b></div>
+          <div><span>In progress</span><b>12</b></div>
+          <div><span>Not started</span><b class="r">1</b></div>
+        </div>
+        <div class="sig"><i>RT</i><b>Raya Trade</b><span>Strategy Management Office</span></div>
+      </div>
+      <div class="cols2">
+        <div class="card flag" style="overflow:hidden">
+          <div class="bh"><h3>The strategy, place by place</h3><span class="sp"></span><span class="pill"><span class="on">Units</span><span>Functions</span></span></div>
+          <table>
+            <thead><tr><th>Business unit</th><th>Foundation</th><th>SWOT</th><th>Drivers</th><th>Plan</th><th>H1 2026 report</th><th class="num">Key objectives</th><th></th></tr></thead>
+            <tbody>
+              <tr class="co"><td colspan="8">Distribution</td></tr>
+              <tr><td><b>Mobile</b></td><td><span class="st done">Written</span></td><td><span class="st done">23 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st part">4 pillars · 2 owners not in the register</span></td><td><span class="st late">Not submitted</span></td><td class="num"><span class="pct attn">78%</span></td><td class="go">›</td></tr>
+              <tr><td><b>Consumer Electronics</b></td><td><span class="st done">Written</span></td><td><span class="st done">8 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">2 pillars</span></td><td><span class="st late">Not submitted</span></td><td class="num"><span class="pct good">84%</span></td><td class="go">›</td></tr>
+              <tr><td><b>IT Dist.</b></td><td><span class="st done">Written</span></td><td><span class="st done">8 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">2 pillars</span></td><td><span class="st done">Submitted</span></td><td class="num"><span class="pct attn">72%</span></td><td class="go">›</td></tr>
+              <tr class="co"><td colspan="8">B2C</td></tr>
+              <tr><td><b>Retail Stores</b></td><td><span class="st done">Written</span></td><td><span class="st done">13 points</span></td><td><span class="st done">Tree built</span></td><td><span class="st done">4 pillars</span></td><td><span class="st done">Submitted</span></td><td class="num"><span class="pct good">91%</span></td><td class="go">›</td></tr>
+              <tr><td><b>Online Shop</b></td><td><span class="st done">Written</span></td><td><span class="st done">8 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">2 pillars</span></td><td><span class="st done">Submitted</span></td><td class="num"><span class="pct bad">48%</span></td><td class="go">›</td></tr>
+              <tr><td><b>Care</b></td><td><span class="st done">Written</span></td><td><span class="st done">8 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">2 pillars</span></td><td><span class="st done">Submitted</span></td><td class="num"><span class="pct good">86%</span></td><td class="go">›</td></tr>
+              <tr class="co"><td colspan="8">Under the group</td></tr>
+              <tr><td><b>B2B Ecomm</b></td><td><span class="st done">Written</span></td><td><span class="st done">12 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">3 pillars</span></td><td><span class="st late">Not submitted</span></td><td class="num"><span class="pct attn">69%</span></td><td class="go">›</td></tr>
+              <tr><td><b>Corporate</b></td><td><span class="st done">Written</span></td><td><span class="st done">8 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">2 pillars</span></td><td><span class="st done">Submitted</span></td><td class="num"><span class="pct good">88%</span></td><td class="go">›</td></tr>
+              <tr><td><b>Logistics</b></td><td><span class="st done">Written</span></td><td><span class="st done">8 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">2 pillars</span></td><td><span class="st done">Submitted</span></td><td class="num"><span class="pct attn">71%</span></td><td class="go">›</td></tr>
+              <tr><td><b>Nigeria</b></td><td><span class="st done">Written</span></td><td><span class="st done">8 points</span></td><td><span class="st">No tree yet</span></td><td><span class="st done">2 pillars</span></td><td><span class="st late">Not submitted</span></td><td class="num"><span class="pct bad">52%</span></td><td class="go">›</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:grid;gap:14px">
+          <div class="card flag">
+            <div class="ch"><h3>Still missing</h3></div>
+            <div class="miss">
+              <div style="display:grid;gap:2px"><b>Reports</b><span>4 units and 8 functions have not submitted H1 2026.</span><a>Open the cycle ›</a></div>
+              <div style="display:grid;gap:2px"><b>Mobile · Plan</b><span>Two tactic owners are not in the people register.</span><a>Open the plan ›</a></div>
+              <div style="display:grid;gap:2px"><b>Drivers</b><span>9 of 10 units have no revenue tree.</span></div>
+              <div style="display:grid;gap:2px"><b>Focus</b><span>15 places have nothing marked.</span><a>Setup › Focus measures ›</a></div>
+            </div>
+          </div>
+          <div class="tour">
+            <h3>Take an intro round</h3>
+            <p>Eight stops on the worked example — about two minutes.</p>
+            <div class="b"><span>Start the round</span><span>Not now</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="inv">From the demo as it stands today: the cycle’s four lines, which units have submitted, each unit’s company, SWOT points, pillar count and revenue tree, Mobile’s 78%, and the four lines under Still missing. Invented for the drawing: every other unit’s Key objectives figure.</p>
+</section>
+
+<section class="idea">
+  <div class="ih"><span class="n">B</span><h2>The same board — Functions</h2></div>
+  <p class="cap">The switch changes the rows and the columns follow what a function has: its overview and its plan, in whichever of the three shapes the function plans in.</p>
+  <div class="frame"><div class="canvas"><div class="body">
+    <div class="card" style="overflow:hidden">
+      <div class="bh"><h3>The strategy, place by place</h3><span class="sp"></span><span class="pill"><span>Units</span><span class="on">Functions</span></span></div>
+      <table>
+        <thead><tr><th>Supporting function</th><th>Overview</th><th>Plan</th><th>Plans in</th><th>H1 2026 report</th><th class="num">Headline</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><b>Finance</b></td><td><span class="st done">Written</span></td><td><span class="st done">Projects written</span></td><td class="quiet">projects</td><td><span class="st late">Not submitted</span></td><td class="num"><span class="pct good">88%</span></td><td class="go">›</td></tr>
+          <tr><td><b>HR</b></td><td><span class="st done">Written</span></td><td><span class="st done">Projects written</span></td><td class="quiet">projects</td><td><span class="st late">Not submitted</span></td><td class="num"><span class="pct attn">70%</span></td><td class="go">›</td></tr>
+          <tr><td><b>Merchandising</b></td><td><span class="st done">Written</span></td><td><span class="st done">3 pillars</span></td><td class="quiet">pillars</td><td><span class="st late">Not submitted</span></td><td class="num"><span class="pct attn">66%</span></td><td class="go">›</td></tr>
+          <tr><td colspan="7" class="quiet" style="font-size:12.5px">…Treasury, Marketing, IT, Care and the Strategy Management Office, one row each.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div></div></div>
+  <p class="inv">Which functions exist, how each plans, and that none has submitted are the demo’s. The headline figures are invented.</p>
+</section>
+
+<section class="idea">
+  <div class="under">
+    <div><span class="k">How it behaves</span><ul>
+      <li>A row opens that place at its <b>first gap</b>: Mobile opens on Drivers, a unit with only its report owing opens on Reporting, a unit with nothing owing opens on its Plan.</li>
+      <li>The figure at the end of a row opens that place’s <b>Performance</b> page.</li>
+      <li>Every status is read from what the page behind it already knows. Nothing is counted a second time for the board.</li>
+      <li>Everybody who is not in the office keeps the Home they have today.</li>
+    </ul></div>
+    <div class="agree"><span class="k">To agree before building</span><ul>
+      <li><b>Which figure is the headline for a unit?</b> Drawn as Key objectives, the first card on its Performance page. The other candidate is Pillars (Mobile’s is 67%).</li>
+      <li><b>The intro round.</b> Today the office is never offered it; you asked to keep it. Should the office now see the card, or does it stay only for the people who see it today?</li>
+      <li><b>What used to wait on the office.</b> Today’s Home also tells the office about messages waiting in the inbox, passwords to issue, and units with no custodian. With “Waiting on you” gone, should those three move into Still missing, or leave Home altogether?</li>
+      <li><b>The group’s own line.</b> Should the group, the two companies and the capability (Product Mindset) each get a row above the units, or is the board for units and functions only?</li>
+    </ul></div>
+  </div>
+</section>
+
+</div>
